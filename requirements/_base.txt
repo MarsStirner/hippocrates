@@ -1,0 +1,18 @@
+Flask
+SQLAlchemy
+Flask-SQLAlchemy
+wtforms==1.0.5
+Flask-WTF==0.9.3
+Flask-Babel
+Flask-Admin
+pytz
+Flask-BabelEx
+Flask-Login
+Flask-Principal
+blinker
+selenium
+#dateutils
+beaker
+Flask-Beaker
+
+#-r ../pysimplelogs/requirements.txt

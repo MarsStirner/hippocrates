@@ -1,0 +1,6 @@
+-r ./_base.txt
+
+mysql-python
+fabric
+
+-r ../pysimplelogs/requirements.txt

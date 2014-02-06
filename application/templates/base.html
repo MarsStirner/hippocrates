@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+
+    {%- include '_header.html' -%}
+    {%- block modules_css %}{% endblock -%}
+
+  </head>
+  <body>
+  <div id="wrap">
+
+  {%- include '_top.html' -%}
+
+  <div id="container" class="container">
+
+    {%- block content %}{% endblock -%}
+
+   </div> <!-- /container -->
+   <div id="push"></div>
+  </div>
+
+  {%- include '_bottom.html' -%}
+  {%- include '_footer.html' -%}
+  {%- block modules_js %}{% endblock -%}
+
+  </body>
+</html>

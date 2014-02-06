@@ -1,0 +1,5 @@
+-r ../_base.txt
+
+mysql-python
+
+-r ../../pysimplelogs/requirements.txt
