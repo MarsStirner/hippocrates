@@ -13,8 +13,11 @@ WebMIS 2
 6. edit config_local.py (set db connect params)
  
 Run wsgi.py
+
 Login: admin
+
 Password: admin
+
 
 blueprints - blueprints directory
 blueprints/sample/ - Example of blueprint
