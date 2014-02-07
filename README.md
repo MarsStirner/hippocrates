@@ -94,3 +94,16 @@ render_template('sample/index.html')
 
 Тогда скрипт будет подключаться в конце страницы и не будет вносить задержку в первоначальную отрисовку html-элементов при загрузке страницы.
 
+Для подключения дополнительных стилей можно воспользоваться блоком **{% block modules_css %}**
+
+```
+{% block modules_css %}
+
+{{ super() }}
+
+<link href="{{ url_for('.static', filename='css/style.css') }}" media="screen" rel="stylesheet">
+<link href="{{ url_for('.static', filename='css/print.css') }}" media="print" rel="stylesheet">
+{% endblock %}
+```
+
+Тогда стили будут подключены в **<head></head>** страницы, что гарантирует отображение html-элементов в необходимом виде сразу же при первоначальной отрисовке страницы.
