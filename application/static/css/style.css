@@ -41,7 +41,7 @@ body.loading .loader {
     display: block;
 }
 
-.container > hr {
+.container-fluid > hr {
     margin: 10px 0;
 }
 
