@@ -15,6 +15,24 @@ from application.lib.utils import admin_permission, public_endpoint
 @public_endpoint
 def index():
     try:
-        return render_template('sample/index.html')
+        return render_template('schedule/index.html')
+    except TemplateNotFound:
+        abort(404)
+
+
+@module.route('/doctors/')
+@public_endpoint
+def doctors():
+    try:
+        return render_template('schedule/doctors.html')
+    except TemplateNotFound:
+        abort(404)
+
+
+@module.route('/patients/')
+@public_endpoint
+def patients():
+    try:
+        return render_template('schedule/patients.html')
     except TemplateNotFound:
         abort(404)

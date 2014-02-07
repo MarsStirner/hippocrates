@@ -1,0 +1,18 @@
+{% extends 'schedule/base.html' %}
+
+{% block title %}> {{ module_name }}{% endblock %}
+
+{% block main %}
+    <legend>График врача</legend>
+    <div class="">
+    {{ lipsum(5) }}
+    </div>
+{% endblock %}
+{% block modules_js %}
+    {{ super() }}
+    <script type="text/javascript">
+        $(function() {
+
+        });
+    </script>
+{% endblock %}

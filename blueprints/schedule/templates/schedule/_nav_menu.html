@@ -1,0 +1,8 @@
+<div class="panel panel-default">
+    <div class="panel-heading"><h3 class="panel-title">Доступные функции</h3></div>
+    <div class="list-group">
+      <a href="{{ url_for('.index') }}" class="list-group-item{% if request.path == url_for('.index') %} active{% endif %}">График врача</a>
+      <a href="{{ url_for('.doctors') }}" class="list-group-item{% if request.path == url_for('.doctors') %} active{% endif %}">Поиск врача</a>
+      <a href="{{ url_for('.patients') }}" class="list-group-item{% if request.path == url_for('.patients') %} active{% endif %}">Поиск пациента</a>
+    </div><!-- /.navbar -->
+</div>
