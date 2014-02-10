@@ -6,6 +6,7 @@
     <legend>График врача</legend>
     <div ng-controller="Schedule">
         <form class="form-inline" role="form">
+            <select class="form-control" ng-model="year" ng-options="y for y in years"></select>
             <select class="form-control" ng-model="month" ng-options="item.value as item.name for item in months"
                     onchange=""></select>
             <input class="form-control" type="text" ng-model="doctorInput" placeholder="ФИО врача">
@@ -17,16 +18,35 @@
         </ul>
         <span class="speciality">тута специальность</span>: <span class="doctor-name">Доктор И.О.</span>
         <ul class="nav nav-pills">
-            <li><a href="#">1/08 - 8/08</a></li>
-            <li><a href="#">9/08 - 18/08</a></li>
+            <li><a ng-click="loadSchedule('2014.02.5')" href="#">1/08 - 8/08</a></li>
+            <li><a ng-click="loadSchedule('2014.02.10')" href="#">9/08 - 18/08</a></li>
         </ul>
-        <pre>[[ month ]]</pre>
+        <table class="table">
+            <thead>
+            <tr>
+                <th ng-repeat="day in schedule">[[ day.date ]]</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="t_n in transposed">
+                <td ng-repeat="day in schedule">
+                    [[ transposed[$parent.index][$index]|json ]]nowork
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <pre>[[ transposed | json]]</pre>
     </div>
 {% endblock %}
 {% block modules_js %}
     {{ super() }}
     <script type="text/javascript">
-        WebMis20.controller('Schedule', ['$scope', function ($scope) {
+        WebMis20.controller('Schedule', ['$scope', '$http', function ($scope, $http) {
+            $scope.params = getQueryParams(document.location.search);
+            $scope.person_id = $scope.params.person_id;
+            var curDate = new Date();
+            var curYear = curDate.getUTCFullYear();
+            $scope.years = [curYear - 1, curYear, curYear + 1];
             $scope.months = [
                 {name: 'Пьянварь', value: 0},
                 {name: 'Фигвраль', value: 1},
@@ -41,8 +61,23 @@
                 {name: 'Гноябрь', value: 10},
                 {name: 'Дубабрь', value: 11}
             ];
-            $scope.month = new Date().getMonth();
+            $scope.month = curDate.getMonth();
+            $scope.year = curYear;
             $scope.doctorInput = '';
+            $scope.schedule = [];
+            $scope.max_tickets = 0;
+            $scope.loadSchedule = function (start_date) {
+                $http.get('{{ url_for('.api_schedule') }}', {
+                    params: {
+                        person_id: $scope.person_id,
+                        start_date: start_date
+                    }
+                }).success(function (data) {
+                    $scope.schedule = data.result;
+                    $scope.max_tickets = data.max_tickets;
+                    $scope.transposed = data.transposed;
+                })
+            }
         }]);
     </script>
 {% endblock %}

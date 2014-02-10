@@ -40,6 +40,10 @@ class Schedule(db.Model):
     reasonOfAbsence_id = db.Column(db.Integer, db.ForeignKey('rbReasonOfAbsence.id'))
     receptionType_id = db.Column(db.Integer, db.ForeignKey('rbReceptionType.id'))
 
+    person = db.relationship('Person')
+    reasonOfAbsence = db.relationship('rbReasonOfAbsence')
+    receptionType = db.relationship('rbReceptionType')
+
 
 class ScheduleTicket(db.Model):
     __tablename__ = 'ScheduleTicket'
@@ -49,6 +53,9 @@ class ScheduleTicket(db.Model):
     begDateTime = db.Column(db.DateTime)
     endDateTime = db.Column(db.DateTime)
     attendanceType_id = db.Column(db.Integer, db.ForeignKey('rbAttendanceType.id'), nullable=False)
+
+    schedule = db.relationship('Schedule', backref='tickets')
+    attendanceType = db.relationship('rbAttendanceType')
 
 
 class ScheduleClientTicket(db.Model):
@@ -62,6 +69,11 @@ class ScheduleClientTicket(db.Model):
     note = db.Column(db.Unicode(256))
     appointmentType_id = db.Column(db.Integer, db.ForeignKey('rbAppointmentType.id'))
     orgFrom_id = db.Column(db.Integer, db.ForeignKey('Organisation.id'))
+
+    client = db.relationship('Client')
+    appointmentType = db.relationship('rbAppointmentType')
+    orgFrom = db.relationship('Organisation')
+    ticket = db.relationship('ScheduleTicket', backref='client_tickets')
 
 
 
