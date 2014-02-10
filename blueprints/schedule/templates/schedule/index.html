@@ -4,15 +4,45 @@
 
 {% block main %}
     <legend>График врача</legend>
-    <div class="">
-    {{ lipsum(5) }}
+    <div ng-controller="Schedule">
+        <form class="form-inline" role="form">
+            <select class="form-control" ng-model="month" ng-options="item.value as item.name for item in months"
+                    onchange=""></select>
+            <input class="form-control" type="text" ng-model="doctorInput" placeholder="ФИО врача">
+        </form>
+
+        <ul class="nav nav-tabs">
+            <li class="active"><a href="#">Амбулаторный приём</a></li>
+            <li><a href="#">Приём на дому</a></li>
+        </ul>
+        <span class="speciality">тута специальность</span>: <span class="doctor-name">Доктор И.О.</span>
+        <ul class="nav nav-pills">
+            <li><a href="#">1/08 - 8/08</a></li>
+            <li><a href="#">9/08 - 18/08</a></li>
+        </ul>
+        <pre>[[ month ]]</pre>
     </div>
 {% endblock %}
 {% block modules_js %}
     {{ super() }}
     <script type="text/javascript">
-        $(function() {
-
-        });
+        WebMis20.controller('Schedule', ['$scope', function ($scope) {
+            $scope.months = [
+                {name: 'Пьянварь', value: 0},
+                {name: 'Фигвраль', value: 1},
+                {name: 'Кошмарт', value: 2},
+                {name: 'Сапрель', value: 3},
+                {name: 'Сымай', value: 4},
+                {name: 'Теплюнь', value: 5},
+                {name: 'Жарюль', value: 6},
+                {name: 'Авгрусть', value: 7},
+                {name: 'Свистябрь', value: 8},
+                {name: 'Моктябрь', value: 9},
+                {name: 'Гноябрь', value: 10},
+                {name: 'Дубабрь', value: 11}
+            ];
+            $scope.month = new Date().getMonth();
+            $scope.doctorInput = '';
+        }]);
     </script>
 {% endblock %}
