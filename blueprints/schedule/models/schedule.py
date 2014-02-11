@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from sqlalchemy.sql.elements import False_
 from application.database import db
 from exists import Person, Client, rbReasonOfAbsence, Organisation
 
@@ -39,11 +40,16 @@ class Schedule(db.Model):
     office = db.Column(db.Unicode(64))
     reasonOfAbsence_id = db.Column(db.Integer, db.ForeignKey('rbReasonOfAbsence.id'))
     receptionType_id = db.Column(db.Integer, db.ForeignKey('rbReceptionType.id'))
+    createDatetime = db.Column(db.DateTime, nullable=False)
+    createPerson_id = db.Column(db.Integer, db.ForeignKey('Person.id'), index=True)
+    modifyDatetime = db.Column(db.DateTime, nullable=False)
+    modifyPerson_id = db.Column(db.Integer, db.ForeignKey('Person.id'), index=True)
+    deleted = db.Column(db.SmallInteger, nullable=False, server_default='0')
 
     person = db.relationship('Person')
     reasonOfAbsence = db.relationship('rbReasonOfAbsence')
     receptionType = db.relationship('rbReceptionType')
-
+    
 
 class ScheduleTicket(db.Model):
     __tablename__ = 'ScheduleTicket'
@@ -53,6 +59,11 @@ class ScheduleTicket(db.Model):
     begDateTime = db.Column(db.DateTime)
     endDateTime = db.Column(db.DateTime)
     attendanceType_id = db.Column(db.Integer, db.ForeignKey('rbAttendanceType.id'), nullable=False)
+    createDatetime = db.Column(db.DateTime, nullable=False)
+    createPerson_id = db.Column(db.Integer, db.ForeignKey('Person.id'), index=True)
+    modifyDatetime = db.Column(db.DateTime, nullable=False)
+    modifyPerson_id = db.Column(db.Integer, db.ForeignKey('Person.id'), index=True)
+    deleted = db.Column(db.SmallInteger, nullable=False, server_default='0')
 
     schedule = db.relationship('Schedule', backref='tickets')
     attendanceType = db.relationship('rbAttendanceType')
@@ -64,16 +75,17 @@ class ScheduleClientTicket(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     client_id = db.Column(db.Integer, db.ForeignKey('Client.id'), nullable=False)
     ticket_id = db.Column(db.Integer, db.ForeignKey('ScheduleTicket.id'), nullable=False)
-    deleted = db.Column(db.Boolean)
     isUrgent = db.Column(db.Boolean)
     note = db.Column(db.Unicode(256))
     appointmentType_id = db.Column(db.Integer, db.ForeignKey('rbAppointmentType.id'))
     orgFrom_id = db.Column(db.Integer, db.ForeignKey('Organisation.id'))
-
+    createDatetime = db.Column(db.DateTime, nullable=False)
+    createPerson_id = db.Column(db.Integer, db.ForeignKey('Person.id'), index=True)
+    modifyDatetime = db.Column(db.DateTime, nullable=False)
+    modifyPerson_id = db.Column(db.Integer, db.ForeignKey('Person.id'), index=True)
+    deleted = db.Column(db.SmallInteger, nullable=False, server_default='0')
+    
     client = db.relationship('Client')
     appointmentType = db.relationship('rbAppointmentType')
     orgFrom = db.relationship('Organisation')
     ticket = db.relationship('ScheduleTicket', backref='client_tickets')
-
-
-
