@@ -18,3 +18,12 @@ function getQueryParams(qs) {
 
     return params;
 }
+function range(a, b, step){
+    var A = [];
+    A[0] = a;
+    step = step || 1;
+    while(a + step < b){
+        A[A.length]= a+= step;
+    }
+    return A;
+}

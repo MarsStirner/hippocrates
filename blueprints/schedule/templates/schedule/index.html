@@ -3,40 +3,37 @@
 {% block title %}> {{ module_name }}{% endblock %}
 
 {% block main %}
-    <legend>График врача</legend>
+    <legend xmlns="http://www.w3.org/1999/html">График врача</legend>
     <div ng-controller="Schedule">
         <form class="form-inline" role="form">
-            <select class="form-control" ng-model="year" ng-options="y for y in years"></select>
-            <select class="form-control" ng-model="month" ng-options="item.value as item.name for item in months"
-                    onchange=""></select>
+            <select class="form-control" ng-model="year" ng-options="y for y in years" ng-change="monthChanged()"></select>
+            <select class="form-control" ng-model="month" ng-options="item.value as item.name for item in months" ng-change="monthChanged()"></select>
             <input class="form-control" type="text" ng-model="doctorInput" placeholder="ФИО врача">
         </form>
-
-        <ul class="nav nav-tabs">
-            <li class="active"><a href="#">Амбулаторный приём</a></li>
-            <li><a href="#">Приём на дому</a></li>
+        <ul class="nav nav-tabs nav-tabs-justified" ng-model="attendance_type">
+            <li ng-class="{active: (at.code == attendance_type)}" ng-repeat="at in attendance_types" ng-click="changeAttendanceType(at.code)"><a href="#">[[ at.name ]]</a></li>
         </ul>
-        <span class="speciality">тута специальность</span>: <span class="doctor-name">Доктор И.О.</span>
+        <span ng-if="person"><span class="speciality">[[ person.speciality_name ]]</span>: <span class="doctor-name">[[ person.name ]]</span></span>
         <ul class="nav nav-pills">
-            <li><a ng-click="loadSchedule('2014.02.5')" href="#">1/08 - 8/08</a></li>
-            <li><a ng-click="loadSchedule('2014.02.10')" href="#">9/08 - 18/08</a></li>
+            <li ng-class="{active: ($index == page)}" ng-repeat="p in pages"><a ng-click="setDatePage($index)" href="#">[[ p[0] ]]</a></li>
         </ul>
-        <div id="scheduletable"></div>
-{#        <table class="table">#}
-{#            <thead>#}
-{#            <tr>#}
-{#                <th ng-repeat="day in schedule">[[ day.date ]]</th>#}
-{#            </tr>#}
-{#            </thead>#}
-{#            <tbody>#}
-{#            <tr ng-repeat="t_n in transposed">#}
-{#                <td ng-repeat="day in $parent.schedule">#}
-{#                    [[ $parent.transposed[$parent.$index][$index] ]]#}
-{#                </td>#}
-{#            </tr>#}
-{#            </tbody>#}
-{#        </table>#}
-        <pre>[[ transposed | json]]</pre>
+        <table class="table">
+            <thead>
+            <tr>
+                <th ng-repeat="day in schedule">[[day.date]]</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="ticket in schedule[0].tickets">
+                <td ng-repeat="day in schedule" ng-switch="day.tickets[$parent.$index].status">
+                    <button type="button" class="btn btn-block btn-danger" ng-switch-when="busy">[[ day.tickets[$parent.$parent.$index].begDateTime ]]</button>
+                    <button type="button" class="btn btn-block btn-success" ng-switch-when="free">[[ day.tickets[$parent.$parent.$index].begDateTime ]]</button>
+                    <button type="button" class="btn btn-block disabled" ng-switch-when="empty">&nbsp;</button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+{#        <pre>[[schedule|json]]</pre>#}
     </div>
 {% endblock %}
 {% block modules_js %}
@@ -48,6 +45,8 @@
             var curDate = new Date();
             var curYear = curDate.getUTCFullYear();
             $scope.years = [curYear - 1, curYear, curYear + 1];
+            $scope.year = curYear;
+
             $scope.months = [
                 {name: 'Пьянварь', value: 0},
                 {name: 'Фигвраль', value: 1},
@@ -63,32 +62,59 @@
                 {name: 'Дубабрь', value: 11}
             ];
             $scope.month = curDate.getMonth();
-            $scope.year = curYear;
-            $scope.doctorInput = '';
-            $scope.schedule = [];
-            $scope.max_tickets = 0;
-            $scope.loadSchedule = function (start_date) {
-                $http.get(
-                        '{{ url_for('.schedule_table') }}', {
+
+            $scope.reloadSchedule = function () {
+                if ($scope.person_id) {
+                    $http.get(
+                        '{{ url_for('.api_schedule') }}',
+                        {
                             params: {
                                 person_id: $scope.person_id,
-                                start_date: start_date
+                                start_date: $scope.pages[$scope.page][1]
                             }
                         }
-                ).success(function (data) {
-                    $('#scheduletable').html(data);
-                });
-                {#$http.get('{{ url_for('.api_schedule') }}', {
-                    params: {
-                        person_id: $scope.person_id,
-                        start_date: start_date
+                    ).success(function (data) {
+                        $scope.max_tickets = data.max_tickets;
+                        $scope.schedule = data.schedule;
+                    })
+                }
+            };
+
+            $scope.setDatePage = function(index) {
+                $scope.page = index;
+                $scope.reloadSchedule();
+            };
+
+            $scope.monthChanged = function () {
+                $http.get(
+                    '{{ url_for('.api_pages') }}',
+                    {
+                        params: {
+                            mid_date: $scope.year + '.' + ($scope.month + 1)
+                        }
                     }
-                }).success(function (data) {
-                    $scope.schedule = data.result;
-                    $scope.max_tickets = data.max_tickets;
-                    $scope.transposed = data.transposed;
-                })#}
-            }
+                ).success(function (data) {
+                    $scope.pages = data.pages;
+                    $scope.page = data.page;
+                    $scope.reloadSchedule();
+                })
+            };
+
+            $scope.changeAttendanceType = function (code) {
+                $scope.attendance_type = code;
+            };
+
+            $scope.monthChanged();
+
+            $scope.doctorInput = '';
+
+            $scope.attendance_types = [
+                {name: 'Амбулаторно', code: 'amb'},
+                {name: 'На дому', code: 'home'}
+            ];
+            $scope.attendance_type = 'amb';
+
+
         }]);
     </script>
 {% endblock %}

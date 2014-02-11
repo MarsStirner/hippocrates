@@ -46,7 +46,7 @@ class Schedule(db.Model):
     modifyPerson_id = db.Column(db.Integer, db.ForeignKey('Person.id'), index=True)
     deleted = db.Column(db.SmallInteger, nullable=False, server_default='0')
 
-    person = db.relationship('Person')
+    person = db.relationship('Person', foreign_keys=person_id)
     reasonOfAbsence = db.relationship('rbReasonOfAbsence')
     receptionType = db.relationship('rbReceptionType')
     

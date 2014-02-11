@@ -1,15 +1,15 @@
 <table class="table">
     <thead>
     <tr>
-        {% for day in days.result %}
+        {% for day in schedule.result %}
             <th>{{ day['date'].isoformat() }}</th>
         {% endfor %}
     </tr>
     </thead>
 <tbody>
-{% for row in range(days.max_tickets) %}
+{% for row in range(schedule.max_tickets) %}
 <tr>
-    {% for day in days.result %}
+    {% for day in schedule.result %}
     <td>{% set cell = day['tickets'][row] %}
     {% if cell %}
         {% if cell['client'] %}
