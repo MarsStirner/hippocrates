@@ -11,7 +11,7 @@ from flask.ext.wtf import Form
 from ..app import module
 from application.database import db
 from application.lib.utils import admin_permission, public_endpoint
-from blueprints.schedule.models.exists import Schedule
+from blueprints.schedule.models.schedule import Schedule
 from blueprints.schedule.views.jsonify import JsonSchedule
 
 
