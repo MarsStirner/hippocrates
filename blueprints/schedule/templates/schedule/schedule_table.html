@@ -1,0 +1,28 @@
+<table class="table">
+    <thead>
+    <tr>
+        {% for day in days.result %}
+            <th>{{ day['date'].isoformat() }}</th>
+        {% endfor %}
+    </tr>
+    </thead>
+<tbody>
+{% for row in range(days.max_tickets) %}
+<tr>
+    {% for day in days.result %}
+    <td>{% set cell = day['tickets'][row] %}
+    {% if cell %}
+        {% if cell['client'] %}
+            <button type="button" class="btn btn-block btn-danger">{{ cell['begDateTime'].strftime('%H:%M') }} - {{ cell['client'] }}</button>
+        {% else %}
+            <button type="button" class="btn btn-block btn-success">{{ cell['begDateTime'].strftime('%H:%M') }}</button>
+        {% endif %}
+    {% else %}
+        <button type="button" class="btn btn-block disabled">-</button>
+    {% endif %}
+    </td>
+    {% endfor %}
+</tr>
+{% endfor %}
+</tbody>
+</table>

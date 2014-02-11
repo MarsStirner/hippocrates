@@ -4,7 +4,7 @@ import datetime
 __author__ = 'mmalkov'
 
 
-class JsonSchedule(object):
+class ScheduleVisualizer(object):
     class EmptyDay(object):
         def __init__(self, date):
             self.date = date
@@ -13,33 +13,28 @@ class JsonSchedule(object):
         self.max_tickets = 0
         self.result = []
 
-    @staticmethod
-    def make_json_date(d):
-        return d.isoformat()
-
     def make_ticket(self, ticket):
         return {
             'id': ticket.id,
-            'begDateTime': self.make_json_date(ticket.begDateTime),
+            'begDateTime': ticket.begDateTime,
+            'client': None, #FIXME
+            # 'client': ticket.client.nameText if ticket.client else None,
         }
 
     def make_schedule(self, schedule):
         if isinstance(schedule, self.EmptyDay):
             return {
-                'date': self.make_json_date(schedule.date),
+                'date': schedule.date,
                 'tickets': [None] * self.max_tickets,
             }
         else:
             return {
                 'id': schedule.id,
-                'date': self.make_json_date(schedule.date),
+                'date': schedule.date,
                 'office': schedule.office,
                 'tickets': map(self.make_ticket, schedule.tickets) +
                            [None] * (self.max_tickets - len(schedule.tickets)),
             }
-
-    def __json__(self):
-        return self.result
 
     def push_all(self, schedules, month_f, month_l):
         result = []
@@ -63,4 +58,4 @@ class JsonSchedule(object):
         self.max_tickets = max_tickets
 
         self.result = [self.make_schedule(s) for s in result]
-        self.transposed = [[r['tickets'][i] for r in self.result] for i in xrange(self.max_tickets)]
+        # self.transposed = [[r['tickets'][i] for r in self.result] for i in xrange(self.max_tickets)]

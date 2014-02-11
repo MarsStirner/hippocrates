@@ -12,7 +12,7 @@ from ..app import module
 from application.database import db
 from application.lib.utils import admin_permission, public_endpoint
 from blueprints.schedule.models.schedule import Schedule
-from blueprints.schedule.views.jsonify import JsonSchedule
+from blueprints.schedule.views.jsonify import ScheduleVisualizer
 
 
 @module.route('/')
@@ -56,10 +56,31 @@ def api_schedule():
         filter(month_f <= Schedule.date).\
         filter(Schedule.date <= month_l).\
         order_by(Schedule.date)
-    context = JsonSchedule()
+    context = ScheduleVisualizer()
     context.push_all(schedules, month_f, month_l)
     return jsonify({
-        'result': context.__json__(),
+        'result': context.result,
         'max_tickets': context.max_tickets,
         'transposed': context.transposed
     })
+
+@module.route('/schedule/table/')
+@public_endpoint
+def schedule_table():
+    try:
+        person_id = int(request.args['person_id'])
+        month_f = datetime.datetime.strptime(request.args['start_date'], '%Y.%m.%d').date()
+        month_l = month_f + datetime.timedelta(weeks=1)
+    except KeyError or ValueError:
+        return abort(404)
+    schedules = Schedule.query.\
+        filter(Schedule.person_id == person_id).\
+        filter(month_f <= Schedule.date).\
+        filter(Schedule.date <= month_l).\
+        order_by(Schedule.date)
+    context = ScheduleVisualizer()
+    context.push_all(schedules, month_f, month_l)
+    return render_template(
+        'schedule/schedule_table.html',
+        days=context
+    )

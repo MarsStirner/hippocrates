@@ -21,20 +21,21 @@
             <li><a ng-click="loadSchedule('2014.02.5')" href="#">1/08 - 8/08</a></li>
             <li><a ng-click="loadSchedule('2014.02.10')" href="#">9/08 - 18/08</a></li>
         </ul>
-        <table class="table">
-            <thead>
-            <tr>
-                <th ng-repeat="day in schedule">[[ day.date ]]</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr ng-repeat="t_n in transposed">
-                <td ng-repeat="day in schedule">
-                    [[ transposed[$parent.index][$index]|json ]]nowork
-                </td>
-            </tr>
-            </tbody>
-        </table>
+        <div id="scheduletable"></div>
+{#        <table class="table">#}
+{#            <thead>#}
+{#            <tr>#}
+{#                <th ng-repeat="day in schedule">[[ day.date ]]</th>#}
+{#            </tr>#}
+{#            </thead>#}
+{#            <tbody>#}
+{#            <tr ng-repeat="t_n in transposed">#}
+{#                <td ng-repeat="day in $parent.schedule">#}
+{#                    [[ $parent.transposed[$parent.$index][$index] ]]#}
+{#                </td>#}
+{#            </tr>#}
+{#            </tbody>#}
+{#        </table>#}
         <pre>[[ transposed | json]]</pre>
     </div>
 {% endblock %}
@@ -67,7 +68,17 @@
             $scope.schedule = [];
             $scope.max_tickets = 0;
             $scope.loadSchedule = function (start_date) {
-                $http.get('{{ url_for('.api_schedule') }}', {
+                $http.get(
+                        '{{ url_for('.schedule_table') }}', {
+                            params: {
+                                person_id: $scope.person_id,
+                                start_date: start_date
+                            }
+                        }
+                ).success(function (data) {
+                    $('#scheduletable').html(data);
+                });
+                {#$http.get('{{ url_for('.api_schedule') }}', {
                     params: {
                         person_id: $scope.person_id,
                         start_date: start_date
@@ -76,7 +87,7 @@
                     $scope.schedule = data.result;
                     $scope.max_tickets = data.max_tickets;
                     $scope.transposed = data.transposed;
-                })
+                })#}
             }
         }]);
     </script>
