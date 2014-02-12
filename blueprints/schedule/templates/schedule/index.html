@@ -86,18 +86,34 @@
             };
 
             $scope.monthChanged = function () {
-                $http.get(
-                    '{{ url_for('.api_pages') }}',
-                    {
-                        params: {
-                            mid_date: $scope.year + '.' + ($scope.month + 1)
-                        }
+                var mid_date = moment({
+                    year: $scope.year,
+                    month: $scope.month,
+                    day: new Date().getDate()
+                });
+                var start_date = moment({
+                    year: $scope.year,
+                    month: $scope.month,
+                    day: 1
+                });
+                var end_date = moment(start_date).add(1, 'M').subtract(1, 'd');
+                var chosen_page = 0;
+                var current_page = 0;
+                var pages = [];
+                while (start_date <= end_date) {
+                    if (mid_date >= start_date) {
+                        chosen_page = current_page;
                     }
-                ).success(function (data) {
-                    $scope.pages = data.pages;
-                    $scope.page = data.page;
-                    $scope.reloadSchedule();
-                })
+                    pages.push([
+                        start_date.format('DD.MM') + ' - ' + moment(start_date).add(6, 'd').format('DD.MM'), // Это отображается пользователю
+                        start_date.format('YYYY-MM-DD') // Это уходит серверу
+                    ]);
+                    start_date = start_date.add(1, 'w');
+                    current_page += 1;
+                }
+                $scope.page = chosen_page;
+                $scope.pages = pages;
+                $scope.reloadSchedule();
             };
 
             $scope.changeAttendanceType = function (code) {

@@ -12,7 +12,7 @@ from flask.ext.wtf import Form
 from ..app import module
 from application.database import db
 from application.lib.utils import admin_permission, public_endpoint
-from blueprints.schedule.lib.utils import get_schedule, paginator_month
+from blueprints.schedule.lib.utils import get_schedule
 from blueprints.schedule.models.schedule import Schedule
 from blueprints.schedule.views.jsonify import ScheduleVisualizer, MyJsonEncoder
 
@@ -63,29 +63,6 @@ def api_schedule():
     return json.dumps({
         'schedule': context.schedule,
         'max_tickets': context.max_tickets,
-    }, cls=MyJsonEncoder)
-
-
-@module.route('/api/pages/')
-@public_endpoint
-def api_pages():
-    today = datetime.date.today()
-    try:
-        if 'mid_date' in request.args:
-            mid_date = datetime.datetime.strptime(request.args['mid_date'], '%Y.%m').date()
-            if mid_date.year == today.year and mid_date.month == today.month:
-                mid_date = today
-        else:
-            mid_date = today
-    except ValueError:
-        return abort(404)
-    page, pages = paginator_month(mid_date)
-    return json.dumps({
-        'page': page,
-        'pages': [
-            ('%02d.%02d - %02d.%02d' % (p[0].day, p[0].month, p[1].day, p[0].month), p[0].isoformat())
-            for p in pages
-        ],
     }, cls=MyJsonEncoder)
 
 
