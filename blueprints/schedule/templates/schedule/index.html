@@ -15,20 +15,21 @@
         </ul>
         <span ng-if="person"><span class="speciality">[[ person.speciality ]]</span>: <span class="doctor-name">[[ person.name ]]</span></span>
         <ul class="nav nav-pills">
-            <li ng-class="{active: ($index == page)}" ng-repeat="p in pages"><a ng-click="setDatePage($index)" href="#">[[ p[0] ]]</a></li>
+            <li ng-class="{active: ($index == page)}" ng-repeat="p in pages"><a ng-click="setDatePage($index)" href="#">[[ p.format('MM.DD') ]] - [[ aux.moment(p).add(6, 'd').format('MM.DD') ]]</a></li>
         </ul>
         <table class="table">
             <thead>
             <tr>
-                <th ng-repeat="day in schedule">[[day.date]]</th>
+                <th ng-repeat="day in schedule">[[ aux.moment(day.date).format('DD.MM.YYYY, dd') ]]</th>
             </tr>
             </thead>
             <tbody>
-            <tr ng-repeat="ticket in schedule[0].tickets">
-                <td ng-repeat="day in schedule" ng-switch="day.tickets[$parent.$index].status">
-                    <button type="button" class="btn btn-block btn-danger" ng-switch-when="busy">[[ day.tickets[$parent.$parent.$index].begDateTime ]] - [[ day.tickets[$parent.$parent.$index].client ]]</button>
-                    <button type="button" class="btn btn-block btn-success" ng-switch-when="free">[[ day.tickets[$parent.$parent.$index].begDateTime ]]</button>
-                    <button type="button" class="btn btn-block disabled" ng-switch-when="empty">&nbsp;</button>
+            <tr ng-repeat="row in aux.range(max_tickets)">
+                <td ng-repeat="day in schedule" ng-switch="day.tickets[row].status">
+                    <button type="button" class="btn btn-block btn-danger" ng-switch-when="busy" ng-if="day.tickets[row].attendance_type == attendance_type">[[ aux.moment(day.tickets[row].begDateTime).format('hh:mm') ]] - [[ day.tickets[row].client ]]</button>
+                    <button type="button" class="btn btn-block btn-success" ng-switch-when="free" ng-if="day.tickets[row].attendance_type == attendance_type">[[ aux.moment(day.tickets[row].begDateTime).format('hh:mm') ]]</button>
+                    <button type="button" class="btn btn-block disabled" ng-switch-when="empty" ng-if="day.tickets[row].attendance_type == attendance_type">&nbsp;</button>
+                    <button type="button" class="btn btn-block disabled" ng-if="day.tickets[row].attendance_type != attendance_type">&nbsp;</button>
                 </td>
             </tr>
             </tbody>
@@ -40,6 +41,13 @@
     {{ super() }}
     <script type="text/javascript">
         WebMis20.controller('Schedule', ['$scope', '$http', function ($scope, $http) {
+            $scope.max_tickets = 0;
+            $scope.aux = {
+                range: function (num) {
+                    return Array.apply(null, new Array(num)).map(function(_, i) {return i;})
+                },
+                moment: moment
+            };
             $scope.params = getQueryParams(document.location.search);
             $scope.person_id = $scope.params.person_id;
             var curDate = new Date();
@@ -63,6 +71,12 @@
             ];
             $scope.month = curDate.getMonth();
 
+            $scope.attendance_types = [
+                {name: 'Амбулаторно', code: 'amb'},
+                {name: 'На дому', code: 'home'}
+            ];
+            $scope.attendance_type = 'amb';
+
             $scope.reloadSchedule = function () {
                 if ($scope.person_id) {
                     $http.get(
@@ -70,7 +84,7 @@
                         {
                             params: {
                                 person_id: $scope.person_id,
-                                start_date: $scope.pages[$scope.page][1]
+                                start_date: $scope.pages[$scope.page].format('YYYY-MM-DD')
                             }
                         }
                     ).success(function (data) {
@@ -100,19 +114,14 @@
                     day: 1
                 });
                 var end_date = moment(start_date).add(1, 'M').subtract(1, 'd');
-                var chosen_page = 0;
-                var current_page = 0;
+                var chosen_page = -1;
                 var pages = [];
                 while (start_date <= end_date) {
                     if (mid_date >= start_date) {
-                        chosen_page = current_page;
+                        chosen_page += 1;
                     }
-                    pages.push([
-                        start_date.format('DD.MM') + ' - ' + moment(start_date).add(6, 'd').format('DD.MM'), // Это отображается пользователю
-                        start_date.format('YYYY-MM-DD') // Это уходит серверу
-                    ]);
+                    pages.push(moment(start_date));
                     start_date.add(1, 'w');
-                    current_page += 1;
                 }
                 $scope.page = chosen_page;
                 $scope.pages = pages;
@@ -121,17 +130,13 @@
 
             $scope.changeAttendanceType = function (code) {
                 $scope.attendance_type = code;
+{#                $scope.reloadSchedule();#}
             };
 
             $scope.monthChanged();
 
             $scope.doctorInput = '';
 
-            $scope.attendance_types = [
-                {name: 'Амбулаторно', code: 'amb'},
-                {name: 'На дому', code: 'home'}
-            ];
-            $scope.attendance_type = 'amb';
 
 
         }]);
