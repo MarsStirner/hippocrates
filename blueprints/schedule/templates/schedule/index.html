@@ -6,8 +6,8 @@
     <legend xmlns="http://www.w3.org/1999/html">График врача</legend>
     <div ng-controller="Schedule">
         <form class="form-inline" role="form">
-            <select class="form-control" ng-model="year" ng-options="y for y in years" ng-change="monthChanged()"></select>
-            <select class="form-control" ng-model="month" ng-options="item.value as item.name for item in months" ng-change="monthChanged()"></select>
+            <select class="form-control" name="year" ng-model="year" ng-options="y for y in years" ng-change="monthChanged()"></select>
+            <select class="form-control" name="month" ng-model="month" ng-options="item.value as item.name for item in months" ng-change="monthChanged()"></select>
             <input class="form-control" type="text" ng-model="doctorInput" placeholder="ФИО врача">
         </form>
         <ul class="nav nav-tabs nav-tabs-justified" ng-model="attendance_type">

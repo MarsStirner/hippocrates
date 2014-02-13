@@ -1,1 +1,1 @@
-__all__ = ['unit', 'selenium']
+__all__ = ['unit', 'selenium_tests']
