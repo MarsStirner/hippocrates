@@ -25,16 +25,14 @@ class ScheduleVisualizer(object):
         client = ticket.client
         return {
             'id': ticket.id,
-            'begDateTime': ticket.begDateTime.strftime('%H:%M'),
+            'begDateTime': ticket.begDateTime,
             'status': 'busy' if client else 'free',
             'client': client.shortNameText if client else None,
+            'attendance_type': ticket.attendanceType.code,
         }
 
     def make_empty_ticket(self):
         return {
-            # 'id': None,
-            # 'begDateTime': None,
-            # 'client': None,
             'status': 'empty',
         }
 
@@ -84,4 +82,3 @@ class ScheduleVisualizer(object):
         self.max_tickets = max_tickets
 
         self.schedule = [self.make_schedule(s) for s in result]
-        # self.transposed = [[r['tickets'][i] for r in self.result] for i in xrange(self.max_tickets)]

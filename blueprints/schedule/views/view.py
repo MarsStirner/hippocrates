@@ -53,6 +53,7 @@ def api_schedule():
         person = Person.query.get(person_id)
         month_f = datetime.datetime.strptime(request.args['start_date'], '%Y-%m-%d').date()
         month_l = month_f + datetime.timedelta(weeks=1)
+        attendance_type = request.args.get('attendance_type')
     except KeyError or ValueError:
         return abort(404)
     schedules = Schedule.query.\
