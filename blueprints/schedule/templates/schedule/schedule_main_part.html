@@ -1,0 +1,11 @@
+<ul class="nav nav-tabs">
+    <li class="active"><a href="#">Амбулаторный приём</a></li>
+    <li><a href="#">Приём на дому</a></li>
+</ul>
+<span class="speciality">тута специальность</span>: <span class="doctor-name">Доктор И.О.</span>
+<ul class="nav nav-pills">
+    {% for (start_date, end_date) in pages %}
+    <li><a ng-click="loadSchedule('{{ start_date.strftime('%Y.%m.%d') }}')" href="#">{{ start_date.day }} - {{ end_date.day }}</a></li>
+    {% endfor %}
+</ul>
+<div id="schedule-table">{% include "schedule/schedule_table.html" %}</div>

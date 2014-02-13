@@ -3,16 +3,137 @@
 {% block title %}> {{ module_name }}{% endblock %}
 
 {% block main %}
-    <legend>График врача</legend>
-    <div class="">
-    {{ lipsum(5) }}
+    <legend xmlns="http://www.w3.org/1999/html">График врача</legend>
+    <div ng-controller="Schedule">
+        <form class="form-inline" role="form">
+            <select class="form-control" ng-model="year" ng-options="y for y in years" ng-change="monthChanged()"></select>
+            <select class="form-control" ng-model="month" ng-options="item.value as item.name for item in months" ng-change="monthChanged()"></select>
+            <input class="form-control" type="text" ng-model="doctorInput" placeholder="ФИО врача">
+        </form>
+        <ul class="nav nav-tabs nav-tabs-justified" ng-model="attendance_type">
+            <li ng-class="{active: (at.code == attendance_type)}" ng-repeat="at in attendance_types" ng-click="changeAttendanceType(at.code)"><a href="#">[[ at.name ]]</a></li>
+        </ul>
+        <span ng-if="person"><span class="speciality">[[ person.speciality ]]</span>: <span class="doctor-name">[[ person.name ]]</span></span>
+        <ul class="nav nav-pills">
+            <li ng-class="{active: ($index == page)}" ng-repeat="p in pages"><a ng-click="setDatePage($index)" href="#">[[ p[0] ]]</a></li>
+        </ul>
+        <table class="table">
+            <thead>
+            <tr>
+                <th ng-repeat="day in schedule">[[day.date]]</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="ticket in schedule[0].tickets">
+                <td ng-repeat="day in schedule" ng-switch="day.tickets[$parent.$index].status">
+                    <button type="button" class="btn btn-block btn-danger" ng-switch-when="busy">[[ day.tickets[$parent.$parent.$index].begDateTime ]] - [[ day.tickets[$parent.$parent.$index].client ]]</button>
+                    <button type="button" class="btn btn-block btn-success" ng-switch-when="free">[[ day.tickets[$parent.$parent.$index].begDateTime ]]</button>
+                    <button type="button" class="btn btn-block disabled" ng-switch-when="empty">&nbsp;</button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+{#        <pre>[[schedule|json]]</pre>#}
     </div>
 {% endblock %}
 {% block modules_js %}
     {{ super() }}
     <script type="text/javascript">
-        $(function() {
+        WebMis20.controller('Schedule', ['$scope', '$http', function ($scope, $http) {
+            $scope.params = getQueryParams(document.location.search);
+            $scope.person_id = $scope.params.person_id;
+            var curDate = new Date();
+            var curYear = curDate.getUTCFullYear();
+            $scope.years = [curYear - 1, curYear, curYear + 1];
+            $scope.year = curYear;
 
-        });
+            $scope.months = [
+                {name: 'Январь', value: 0},
+                {name: 'Февраль', value: 1},
+                {name: 'Март', value: 2},
+                {name: 'Апрель', value: 3},
+                {name: 'Май', value: 4},
+                {name: 'Июнь', value: 5},
+                {name: 'Июль', value: 6},
+                {name: 'Август', value: 7},
+                {name: 'Сентябрь', value: 8},
+                {name: 'Октябрь', value: 9},
+                {name: 'Ноябрь', value: 10},
+                {name: 'Декабрь', value: 11}
+            ];
+            $scope.month = curDate.getMonth();
+
+            $scope.reloadSchedule = function () {
+                if ($scope.person_id) {
+                    $http.get(
+                        '{{ url_for('.api_schedule') }}',
+                        {
+                            params: {
+                                person_id: $scope.person_id,
+                                start_date: $scope.pages[$scope.page][1]
+                            }
+                        }
+                    ).success(function (data) {
+                        $scope.max_tickets = data.max_tickets;
+                        $scope.schedule = data.schedule;
+                        $scope.person = data.person;
+                    })
+                }
+            };
+
+            $scope.setDatePage = function(index) {
+                if (index != $scope.page) {
+                    $scope.page = index;
+                    $scope.reloadSchedule();
+                }
+            };
+
+            $scope.monthChanged = function () {
+                var mid_date = moment({
+                    year: $scope.year,
+                    month: $scope.month,
+                    day: new Date().getDate()
+                });
+                var start_date = moment({
+                    year: $scope.year,
+                    month: $scope.month,
+                    day: 1
+                });
+                var end_date = moment(start_date).add(1, 'M').subtract(1, 'd');
+                var chosen_page = 0;
+                var current_page = 0;
+                var pages = [];
+                while (start_date <= end_date) {
+                    if (mid_date >= start_date) {
+                        chosen_page = current_page;
+                    }
+                    pages.push([
+                        start_date.format('DD.MM') + ' - ' + moment(start_date).add(6, 'd').format('DD.MM'), // Это отображается пользователю
+                        start_date.format('YYYY-MM-DD') // Это уходит серверу
+                    ]);
+                    start_date.add(1, 'w');
+                    current_page += 1;
+                }
+                $scope.page = chosen_page;
+                $scope.pages = pages;
+                $scope.reloadSchedule();
+            };
+
+            $scope.changeAttendanceType = function (code) {
+                $scope.attendance_type = code;
+            };
+
+            $scope.monthChanged();
+
+            $scope.doctorInput = '';
+
+            $scope.attendance_types = [
+                {name: 'Амбулаторно', code: 'amb'},
+                {name: 'На дому', code: 'home'}
+            ];
+            $scope.attendance_type = 'amb';
+
+
+        }]);
     </script>
 {% endblock %}

@@ -46,6 +46,10 @@ class Schedule(db.Model):
     modifyPerson_id = db.Column(db.Integer, db.ForeignKey('Person.id'), index=True)
     deleted = db.Column(db.SmallInteger, nullable=False, server_default='0')
 
+    person = db.relationship('Person', foreign_keys=person_id)
+    reasonOfAbsence = db.relationship('rbReasonOfAbsence')
+    receptionType = db.relationship('rbReceptionType')
+    
 
 class ScheduleTicket(db.Model):
     __tablename__ = 'ScheduleTicket'
@@ -61,6 +65,13 @@ class ScheduleTicket(db.Model):
     modifyPerson_id = db.Column(db.Integer, db.ForeignKey('Person.id'), index=True)
     deleted = db.Column(db.SmallInteger, nullable=False, server_default='0')
 
+    schedule = db.relationship('Schedule', backref='tickets')
+    attendanceType = db.relationship('rbAttendanceType')
+
+    @property
+    def client(self):
+        ct = self.client_tickets.filter(ScheduleClientTicket.deleted == 0).first()
+        return ct.client if ct else None
 
 class ScheduleClientTicket(db.Model):
     __tablename__ = 'ScheduleClientTicket'
@@ -77,6 +88,8 @@ class ScheduleClientTicket(db.Model):
     modifyDatetime = db.Column(db.DateTime, nullable=False)
     modifyPerson_id = db.Column(db.Integer, db.ForeignKey('Person.id'), index=True)
     deleted = db.Column(db.SmallInteger, nullable=False, server_default='0')
-
-
-
+    
+    client = db.relationship('Client')
+    appointmentType = db.relationship('rbAppointmentType')
+    orgFrom = db.relationship('Organisation')
+    ticket = db.relationship('ScheduleTicket', backref=db.backref('client_tickets', lazy='dynamic'))
