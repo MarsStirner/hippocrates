@@ -13,7 +13,7 @@
         <ul class="nav nav-tabs nav-tabs-justified" ng-model="attendance_type">
             <li ng-class="{active: (at.code == attendance_type)}" ng-repeat="at in attendance_types" ng-click="changeAttendanceType(at.code)"><a href="#">[[ at.name ]]</a></li>
         </ul>
-        <span ng-if="person"><span class="speciality">[[ person.speciality_name ]]</span>: <span class="doctor-name">[[ person.name ]]</span></span>
+        <span ng-if="person"><span class="speciality">[[ person.speciality ]]</span>: <span class="doctor-name">[[ person.name ]]</span></span>
         <ul class="nav nav-pills">
             <li ng-class="{active: ($index == page)}" ng-repeat="p in pages"><a ng-click="setDatePage($index)" href="#">[[ p[0] ]]</a></li>
         </ul>
@@ -26,7 +26,7 @@
             <tbody>
             <tr ng-repeat="ticket in schedule[0].tickets">
                 <td ng-repeat="day in schedule" ng-switch="day.tickets[$parent.$index].status">
-                    <button type="button" class="btn btn-block btn-danger" ng-switch-when="busy">[[ day.tickets[$parent.$parent.$index].begDateTime ]]</button>
+                    <button type="button" class="btn btn-block btn-danger" ng-switch-when="busy">[[ day.tickets[$parent.$parent.$index].begDateTime ]] - [[ day.tickets[$parent.$parent.$index].client ]]</button>
                     <button type="button" class="btn btn-block btn-success" ng-switch-when="free">[[ day.tickets[$parent.$parent.$index].begDateTime ]]</button>
                     <button type="button" class="btn btn-block disabled" ng-switch-when="empty">&nbsp;</button>
                 </td>
@@ -76,13 +76,16 @@
                     ).success(function (data) {
                         $scope.max_tickets = data.max_tickets;
                         $scope.schedule = data.schedule;
+                        $scope.person = data.person;
                     })
                 }
             };
 
             $scope.setDatePage = function(index) {
-                $scope.page = index;
-                $scope.reloadSchedule();
+                if (index != $scope.page) {
+                    $scope.page = index;
+                    $scope.reloadSchedule();
+                }
             };
 
             $scope.monthChanged = function () {
@@ -108,7 +111,7 @@
                         start_date.format('DD.MM') + ' - ' + moment(start_date).add(6, 'd').format('DD.MM'), // Это отображается пользователю
                         start_date.format('YYYY-MM-DD') // Это уходит серверу
                     ]);
-                    start_date = start_date.add(1, 'w');
+                    start_date.add(1, 'w');
                     current_page += 1;
                 }
                 $scope.page = chosen_page;

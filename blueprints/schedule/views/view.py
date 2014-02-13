@@ -13,6 +13,7 @@ from ..app import module
 from application.database import db
 from application.lib.utils import admin_permission, public_endpoint
 from blueprints.schedule.lib.utils import get_schedule
+from blueprints.schedule.models.exists import Person
 from blueprints.schedule.models.schedule import Schedule
 from blueprints.schedule.views.jsonify import ScheduleVisualizer, MyJsonEncoder
 
@@ -49,6 +50,7 @@ def patients():
 def api_schedule():
     try:
         person_id = int(request.args['person_id'])
+        person = Person.query.get(person_id)
         month_f = datetime.datetime.strptime(request.args['start_date'], '%Y-%m-%d').date()
         month_l = month_f + datetime.timedelta(weeks=1)
     except KeyError or ValueError:
@@ -63,41 +65,6 @@ def api_schedule():
     return json.dumps({
         'schedule': context.schedule,
         'max_tickets': context.max_tickets,
+        'person': context.make_person(person),
     }, cls=MyJsonEncoder)
 
-
-@module.route('/schedule/table/')
-@public_endpoint
-def schedule_table():
-    try:
-        person_id = int(request.args['person_id'])
-        start_date = datetime.datetime.strptime(request.args['start_date'], '%Y.%m.%d').date()
-        end_date = start_date + datetime.timedelta(weeks=1)
-    except KeyError or ValueError:
-        return abort(404)
-    schedule = get_schedule(person_id, start_date, end_date)
-    return render_template(
-        'schedule/schedule_table.html',
-        schedule=schedule
-    )
-
-@module.route('/schedule/main/')
-@public_endpoint
-def schedule_main():
-    try:
-        person_id = int(request.args['person_id'])
-        if 'mid_date' in request.args:
-            mid_date = datetime.datetime.strptime(request.args['mid_date'], '%Y.%m').date()
-        else:
-            mid_date = datetime.date.today()
-    except KeyError or ValueError:
-        return abort(404)
-    page, pages = paginator_month(mid_date)
-    start_date, end_date = pages[page]
-    schedule = get_schedule(person_id, start_date, end_date)
-    return render_template(
-        'schedule/schedule_main_part.html',
-        schedule=schedule,
-        page=page,
-        pages=pages
-    )

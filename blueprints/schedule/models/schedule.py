@@ -68,6 +68,10 @@ class ScheduleTicket(db.Model):
     schedule = db.relationship('Schedule', backref='tickets')
     attendanceType = db.relationship('rbAttendanceType')
 
+    @property
+    def client(self):
+        ct = self.client_tickets.filter(ScheduleClientTicket.deleted == 0).first()
+        return ct.client if ct else None
 
 class ScheduleClientTicket(db.Model):
     __tablename__ = 'ScheduleClientTicket'
@@ -88,4 +92,4 @@ class ScheduleClientTicket(db.Model):
     client = db.relationship('Client')
     appointmentType = db.relationship('rbAppointmentType')
     orgFrom = db.relationship('Organisation')
-    ticket = db.relationship('ScheduleTicket', backref='client_tickets')
+    ticket = db.relationship('ScheduleTicket', backref=db.backref('client_tickets', lazy='dynamic'))

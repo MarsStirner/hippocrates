@@ -35,10 +35,15 @@ class Client(db.Model):
     documentsAll = db.relationship('ClientDocument')
     policies = db.relationship('ClientPolicy')
 
-
     @property
     def nameText(self):
         return u' '.join((u'%s %s %s' % (self.lastName, self.firstName, self.patrName)).split())
+
+    @property
+    def shortNameText(self):
+        words = self.firstName.split() + self.patrName.split()
+        initials = ['%s.' % word[0].upper() for word in words if word]
+        return u'%s %s' % (self.lastName, u' '.join(initials))
 
     @property
     def sex(self):
@@ -402,6 +407,10 @@ class Person(db.Model):
     academicDegree = db.relationship('rbAcademicDegree')
     academicTitle = db.relationship('rbAcademicTitle')
     tariffCategory = db.relationship('rbTariffCategory')
+
+    @property
+    def nameText(self):
+        return u' '.join((u'%s %s %s' % (self.lastName, self.firstName, self.patrName)).split())
 
 
 class rbAcademicDegree(db.Model):

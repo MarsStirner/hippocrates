@@ -22,12 +22,12 @@ class ScheduleVisualizer(object):
         self.schedule = []
 
     def make_ticket(self, ticket):
+        client = ticket.client
         return {
             'id': ticket.id,
             'begDateTime': ticket.begDateTime.strftime('%H:%M'),
-            'client': None, #FIXME
-            'status': 'free', #FIXME
-            # 'client': ticket.client.nameText if ticket.client else None,
+            'status': 'busy' if client else 'free',
+            'client': client.shortNameText if client else None,
         }
 
     def make_empty_ticket(self):
@@ -53,6 +53,14 @@ class ScheduleVisualizer(object):
                     self.make_empty_ticket()
                 ] * (self.max_tickets - len(schedule.tickets)),
             }
+
+    def make_person(self, person):
+        speciality = person.speciality
+        return {
+            'id': person.id,
+            'name': person.nameText,
+            'speciality': person.speciality.name if speciality else None
+        }
 
     def push_all(self, schedules, month_f, month_l):
         result = []
