@@ -33,7 +33,7 @@ class Client(db.Model):
 
     contacts = db.relationship('ClientContact', lazy='dynamic')
     documentsAll = db.relationship('ClientDocument')
-    policies = db.relationship('ClientPolicy')
+    policies = db.relationship('ClientPolicy', lazy='dynamic')
 
     @property
     def nameText(self):
@@ -84,17 +84,20 @@ class Client(db.Model):
 
     @property
     def compulsoryPolicy(self):
-        # TODO: order by db.Date code?
-        for policy in self.policies:
-            if not policy.policyType or u"ОМС" in policy.policyType.name:
-                return policy
+        return self.policies.\
+            join(rbPolicyType).\
+            filter(rbPolicyType.name.like(u"%ОМС%")).\
+            order_by(ClientPolicy.begDate.desc()).\
+            first()
 
     @property
     def voluntaryPolicy(self):
-        # TODO: order by db.Date code?
-        for policy in self.policies:
-            if policy.policyType and policy.policyType.name.startswith(u"ДМС"):
-                return policy
+        return self.policies. \
+            join(rbPolicyType). \
+            filter(rbPolicyType.name.like(u"ДМС%")). \
+            order_by(ClientPolicy.begDate.desc()). \
+            first()
+
     @property
     def policy(self):
         return self.compulsoryPolicy
@@ -212,7 +215,7 @@ class ClientPolicy(db.Model):
     policyType = db.relationship(u'rbPolicyType')
 
     def __unicode__(self):
-        return (' '.join([self.policyType, db.Unicode(self.insurer), self.serial, self.number])).strip()
+        return (' '.join([self.policyType.name, unicode(self.insurer), self.serial, self.number])).strip()
 
 
 class Organisation(db.Model):
@@ -260,10 +263,12 @@ class Organisation(db.Model):
     isOrganisation = db.Column(db.Integer, nullable=False, server_default=u"'0'")
     uuid_id = db.Column(db.Integer, nullable=False, index=True, server_default=u"'0'")
 
-
     net = db.relationship('rbNet')
     OKPF = db.relationship('rbOKPF')
     OKFS = db.relationship('rbOKFS')
+
+    def __unicode__(self):
+        return self.fullName
 
 
 class OrgStructure(db.Model):

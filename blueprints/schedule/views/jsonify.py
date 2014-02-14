@@ -89,6 +89,8 @@ class ScheduleVisualizer(object):
 
 class ClientVisualizer(object):
     def make_client_info(self, client):
+        voluntaryPolicy = client.voluntaryPolicy
+        compulsoryPolicy = client.compulsoryPolicy
         return {
             'id': client.id,
             'nameText': client.nameText,
@@ -99,6 +101,8 @@ class ClientVisualizer(object):
             'regAddress': None,
             'liveAddress': None,
             'contact': client.phones,
+            'compulsoryPolicy': unicode(compulsoryPolicy) if compulsoryPolicy else None,
+            'voluntaryPolicy': unicode(voluntaryPolicy) if voluntaryPolicy else None,
         }
 
     def make_records(self, client):
