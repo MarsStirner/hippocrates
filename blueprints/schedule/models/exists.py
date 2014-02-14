@@ -31,7 +31,7 @@ class Client(db.Model):
     embryonalPeriodWeek = db.Column(db.String(16), nullable=False, server_default=u"''")
     uuid_id = db.Column(db.Integer, nullable=False, index=True, server_default=u"'0'")
 
-    contacts = db.relationship('ClientContact')
+    contacts = db.relationship('ClientContact', lazy='dynamic')
     documentsAll = db.relationship('ClientDocument')
     policies = db.relationship('ClientPolicy')
 
@@ -59,25 +59,28 @@ class Client(db.Model):
             return u''
 
     @property
-    def SNILS(self):
+    def formatted_SNILS(self):
         if self.SNILS:
-            s = self.SNILS+' '*14
-            return s[0:3]+'-'+s[3:6]+'-'+s[6:9]+' '+s[9:11]
+            s = self.SNILS + ' ' * 14
+            return u'%s-%s-%s %s' % (s[0:3], s[3:6], s[6:9], s[9:11])
         else:
             return u''
 
     @property
     def document(self):
-        # TODO: отстортировать по дате
-        for document in self.documents:
-            if document.deleted == 0 and document.documentType.group.code == '1':
-                return document
+        return self.documents.\
+            filter(ClientDocument.deleted == 0).\
+            filter(rbDocumentTypeGroup.code == '1').\
+            order_by(ClientDocument.date.desc()).first()
 
     @property
     def phones(self):
         contacts = [(contact.name, contact.contact, contact.notes) for contact in self.contacts if contact.deleted == 0]
-        return ', '.join([(phone[0]+': '+phone[1]+' ('+phone[2]+')') if phone[2] else (phone[0]+': '+phone[1])
-                          for phone in contacts])
+        return ', '.join([
+            (u'%s: %s (%s)' % (phone[0], phone[1], phone[2])) if phone[2]
+            else (u'%s: %s' % (phone[0], phone[1]))
+            for phone in contacts
+        ])
 
     @property
     def compulsoryPolicy(self):
@@ -121,7 +124,7 @@ class ClientContact(db.Model):
 
     @property
     def name(self):
-        return self.contactType.names
+        return self.contactType.name
 
 
 class ClientDocument(db.Model):
@@ -145,7 +148,7 @@ class ClientDocument(db.Model):
     version = db.Column(db.Integer, nullable=False)
     endDate = db.Column(db.Date)
 
-    client = db.relationship(u'Client')
+    client = db.relationship(u'Client', backref=db.backref('documents', lazy='dynamic'))
     documentType = db.relationship(u'rbDocumentType')
 
     @property
@@ -153,7 +156,7 @@ class ClientDocument(db.Model):
         return self.documentType.regionalCode
 
     def __unicode__(self):
-        return (' '.join([self.documentType, self.serial, self.number])).strip()
+        return (' '.join([self.documentType.name, self.serial, self.number])).strip()
 
 
 class rbDocumentTypeGroup(db.Model):

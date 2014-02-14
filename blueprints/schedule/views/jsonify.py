@@ -82,3 +82,18 @@ class ScheduleVisualizer(object):
         self.max_tickets = max_tickets
 
         self.schedule = [self.make_schedule(s) for s in result]
+
+
+class ClientVisualizer(object):
+    def make_client_info(self, client):
+        return {
+            'id': client.id,
+            'nameText': client.nameText,
+            'sex': client.sex,
+            'SNILS': client.formatted_SNILS or None,
+            'document': unicode(client.document),
+            'birthDate': client.birthDate.isoformat(),
+            'regAddress': None,
+            'liveAddress': None,
+            'contact': client.phones,
+        }

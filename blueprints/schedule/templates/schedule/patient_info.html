@@ -1,0 +1,82 @@
+{% extends 'schedule/base.html' %}
+
+{% block title %}> {{ module_name }}{% endblock %}
+
+{% block main %}
+    <legend xmlns="http://www.w3.org/1999/html">Пациент</legend>
+    <div ng-controller="Schedule">
+{#        <form class="form-inline" role="form">#}
+{#            <input class="form-control" type="text" ng-model="doctorInput" placeholder="ФИО врача">#}
+{#        </form>#}
+        <table class="table table-condensed">
+            <caption>Основная информация</caption>
+            <tbody>
+            <tr ng-repeat="key in clientInfoCodeOrder">
+                <td>[[ clientInfoCode2Name[key] ]]</td>
+                <td>[[ clientDataItems[key] ]]</td>
+            </tr>
+            </tbody>
+        </table>
+{#        <table class="table">#}
+{#            <caption>Предварительные записи</caption>#}
+{#            <thead>#}
+{#            <tr>#}
+{#                <th>Отметка</th>#}
+{#                <th>Дата и время приёма</th>#}
+{#                <th>Кабинет</th>#}
+{#                <th>Специалист</th>#}
+{#                <th>Записал</th>#}
+{#                <th>Примечания</th>#}
+{#            </tr>#}
+{#            </thead>#}
+{#            <tbody>#}
+{#            <tr ng-repeat="row in aux.range(max_tickets)">#}
+{#                <td ng-repeat="day in schedule" ng-switch="day.tickets[row].status">#}
+{#                    <button type="button" class="btn btn-block btn-danger" ng-switch-when="busy" ng-if="day.tickets[row].attendance_type == attendance_type">[[ aux.moment(day.tickets[row].begDateTime).format('hh:mm') ]] - [[ day.tickets[row].client ]]</button>#}
+{#                    <button type="button" class="btn btn-block btn-success" ng-switch-when="free" ng-if="day.tickets[row].attendance_type == attendance_type">[[ aux.moment(day.tickets[row].begDateTime).format('hh:mm') ]]</button>#}
+{#                    <button type="button" class="btn btn-block disabled" ng-switch-when="empty" ng-if="day.tickets[row].attendance_type == attendance_type">&nbsp;</button>#}
+{#                    <button type="button" class="btn btn-block disabled" ng-if="day.tickets[row].attendance_type != attendance_type">&nbsp;</button>#}
+{#                </td>#}
+{#            </tr>#}
+{#            </tbody>#}
+{#        </table>#}
+{#        <pre>[[schedule|json]]</pre>#}
+    </div>
+{% endblock %}
+{% block modules_js %}
+    {{ super() }}
+    <script type="text/javascript">
+        WebMis20.controller('Schedule', ['$scope', '$http', function ($scope, $http) {
+            $scope.max_tickets = 0;
+            $scope.aux = aux;
+            $scope.params = aux.getQueryParams(document.location.search);
+            $scope.client_id = $scope.params.client_id;
+            var curDate = new Date();
+            var curYear = curDate.getUTCFullYear();
+            $scope.years = [curYear - 1, curYear, curYear + 1];
+            $scope.year = curYear;
+            $scope.clientInfoCode2Name = {
+                'id': 'Код пациента',
+                'birthDate': 'Дата рождения',
+                'regAddress': 'Адрес регистрации',
+                'liveAddress': 'Адрес проживания',
+                'SNILS': 'СНИЛС',
+                'nameText': 'ФИО',
+                'sex': 'Пол',
+                'document': 'Документ',
+                'contact': 'Контакты'
+            };
+            $scope.clientInfoCodeOrder = ['id', 'nameText', 'birthDate', 'sex', 'regAddress', 'liveAddress', 'document', 'SNILS', 'contact'];
+            $http.get(
+                '{{ url_for('.api_patient') }}', {
+                    params: {
+                        'client_id': $scope.client_id
+                    }
+                }
+            ).success(function (data) {
+                $scope.clientDataItems = data;
+            });
+
+        }]);
+    </script>
+{% endblock %}

@@ -7,7 +7,7 @@
     <div ng-controller="Schedule">
         <form class="form-inline" role="form">
             <select class="form-control" ng-model="year" ng-options="y for y in years" ng-change="monthChanged()"></select>
-            <select class="form-control" ng-model="month" ng-options="item.value as item.name for item in months" ng-change="monthChanged()"></select>
+            <select class="form-control" ng-model="month" ng-options="item.value as item.name for item in aux.months" ng-change="monthChanged()"></select>
             <input class="form-control" type="text" ng-model="doctorInput" placeholder="ФИО врача">
         </form>
         <ul class="nav nav-tabs nav-tabs-justified" ng-model="attendance_type">
@@ -42,33 +42,14 @@
     <script type="text/javascript">
         WebMis20.controller('Schedule', ['$scope', '$http', function ($scope, $http) {
             $scope.max_tickets = 0;
-            $scope.aux = {
-                range: function (num) {
-                    return Array.apply(null, new Array(num)).map(function(_, i) {return i;})
-                },
-                moment: moment
-            };
-            $scope.params = getQueryParams(document.location.search);
+            $scope.aux = aux;
+            $scope.params = aux.getQueryParams(document.location.search);
             $scope.person_id = $scope.params.person_id;
             var curDate = new Date();
             var curYear = curDate.getUTCFullYear();
             $scope.years = [curYear - 1, curYear, curYear + 1];
             $scope.year = curYear;
 
-            $scope.months = [
-                {name: 'Январь', value: 0},
-                {name: 'Февраль', value: 1},
-                {name: 'Март', value: 2},
-                {name: 'Апрель', value: 3},
-                {name: 'Май', value: 4},
-                {name: 'Июнь', value: 5},
-                {name: 'Июль', value: 6},
-                {name: 'Август', value: 7},
-                {name: 'Сентябрь', value: 8},
-                {name: 'Октябрь', value: 9},
-                {name: 'Ноябрь', value: 10},
-                {name: 'Декабрь', value: 11}
-            ];
             $scope.month = curDate.getMonth();
 
             $scope.attendance_types = [

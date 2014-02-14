@@ -13,9 +13,9 @@ from ..app import module
 from application.database import db
 from application.lib.utils import admin_permission, public_endpoint
 from blueprints.schedule.lib.utils import get_schedule
-from blueprints.schedule.models.exists import Person
+from blueprints.schedule.models.exists import Person, Client
 from blueprints.schedule.models.schedule import Schedule
-from blueprints.schedule.views.jsonify import ScheduleVisualizer, MyJsonEncoder
+from blueprints.schedule.views.jsonify import ScheduleVisualizer, MyJsonEncoder, ClientVisualizer
 
 
 @module.route('/')
@@ -45,7 +45,16 @@ def patients():
         abort(404)
 
 
-@module.route('/api/schedule/')
+@module.route('/patient_info/')
+@public_endpoint
+def patient_info():
+    try:
+        return render_template('schedule/patient_info.html')
+    except TemplateNotFound:
+        abort(404)
+
+
+@module.route('/api/schedule.json')
 @public_endpoint
 def api_schedule():
     try:
@@ -69,3 +78,16 @@ def api_schedule():
         'person': context.make_person(person),
     }, cls=MyJsonEncoder)
 
+
+@module.route('/api/patient.json')
+@public_endpoint
+def api_patient():
+    try:
+        client_id = int(request.args['client_id'])
+    except KeyError or ValueError:
+        return abort(404)
+    client = Client.query.get(client_id)
+    if not client:
+        return abort(404)
+    context = ClientVisualizer()
+    return json.dumps(context.make_client_info(client), cls=MyJsonEncoder)
