@@ -13,33 +13,23 @@
             <tbody>
             <tr ng-repeat="key in clientInfoCodeOrder">
                 <td>[[ clientInfoCode2Name[key] ]]</td>
-                <td>[[ clientDataItems[key] ]]</td>
+                <td>[[ aux.format(clientDataItems, key) ]]</td>
             </tr>
             </tbody>
         </table>
-{#        <table class="table">#}
-{#            <caption>Предварительные записи</caption>#}
-{#            <thead>#}
-{#            <tr>#}
-{#                <th>Отметка</th>#}
-{#                <th>Дата и время приёма</th>#}
-{#                <th>Кабинет</th>#}
-{#                <th>Специалист</th>#}
-{#                <th>Записал</th>#}
-{#                <th>Примечания</th>#}
-{#            </tr>#}
-{#            </thead>#}
-{#            <tbody>#}
-{#            <tr ng-repeat="row in aux.range(max_tickets)">#}
-{#                <td ng-repeat="day in schedule" ng-switch="day.tickets[row].status">#}
-{#                    <button type="button" class="btn btn-block btn-danger" ng-switch-when="busy" ng-if="day.tickets[row].attendance_type == attendance_type">[[ aux.moment(day.tickets[row].begDateTime).format('hh:mm') ]] - [[ day.tickets[row].client ]]</button>#}
-{#                    <button type="button" class="btn btn-block btn-success" ng-switch-when="free" ng-if="day.tickets[row].attendance_type == attendance_type">[[ aux.moment(day.tickets[row].begDateTime).format('hh:mm') ]]</button>#}
-{#                    <button type="button" class="btn btn-block disabled" ng-switch-when="empty" ng-if="day.tickets[row].attendance_type == attendance_type">&nbsp;</button>#}
-{#                    <button type="button" class="btn btn-block disabled" ng-if="day.tickets[row].attendance_type != attendance_type">&nbsp;</button>#}
-{#                </td>#}
-{#            </tr>#}
-{#            </tbody>#}
-{#        </table>#}
+        <table class="table">
+            <caption>Предварительные записи</caption>
+            <thead>
+            <tr>
+                <th ng-repeat="key in recordColumnOrder" ng-bind="recordColumns[key]"></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="record in records">
+                <td ng-repeat="key in recordColumnOrder" ng-bind="aux.format(record, key)"></td>
+            </tr>
+            </tbody>
+        </table>
 {#        <pre>[[schedule|json]]</pre>#}
     </div>
 {% endblock %}
@@ -48,6 +38,7 @@
     <script type="text/javascript">
         WebMis20.controller('Schedule', ['$scope', '$http', function ($scope, $http) {
             $scope.max_tickets = 0;
+            $scope.records = [];
             $scope.aux = aux;
             $scope.params = aux.getQueryParams(document.location.search);
             $scope.client_id = $scope.params.client_id;
@@ -67,6 +58,15 @@
                 'contact': 'Контакты'
             };
             $scope.clientInfoCodeOrder = ['id', 'nameText', 'birthDate', 'sex', 'regAddress', 'liveAddress', 'document', 'SNILS', 'contact'];
+            $scope.recordColumns = {
+                'mark': 'Отметка',
+                'begDateTime': 'Дата и время приёма',
+                'office': 'Кабинет',
+                'person': 'Специалист',
+                'createPerson': 'Записал',
+                'note': 'Примечания'
+            };
+            $scope.recordColumnOrder = ['mark', 'begDateTime', 'office', 'person', 'createPerson', 'note'];
             $http.get(
                 '{{ url_for('.api_patient') }}', {
                     params: {
@@ -74,7 +74,8 @@
                     }
                 }
             ).success(function (data) {
-                $scope.clientDataItems = data;
+                $scope.clientDataItems = data.clientData;
+                $scope.records = data.records;
             });
 
         }]);

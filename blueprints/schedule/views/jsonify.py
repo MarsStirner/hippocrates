@@ -2,6 +2,9 @@
 import datetime
 from json import JSONEncoder
 
+from blueprints.schedule.models.schedule import ScheduleTicket, ScheduleClientTicket
+
+
 __author__ = 'mmalkov'
 
 
@@ -96,4 +99,21 @@ class ClientVisualizer(object):
             'regAddress': None,
             'liveAddress': None,
             'contact': client.phones,
+        }
+
+    def make_records(self, client):
+        appointments = client.appointments.join(ScheduleClientTicket.ticket).order_by(ScheduleTicket.begDateTime.desc()).all()
+        return map(self.make_record, appointments)
+
+    def make_record(self, record):
+        person = record.ticket.schedule.person
+        createPerson = record.createPerson
+        return {
+            'id': record.id,
+            'mark': None,
+            'begDateTime': record.ticket.begDateTime,
+            'office': record.ticket.schedule.office,
+            'person': person.nameText if person else None,
+            'createPerson': createPerson.nameText if createPerson else None,
+            'note': record.note,
         }

@@ -36,5 +36,19 @@ var aux = {
         {name: 'Октябрь', value: 9},
         {name: 'Ноябрь', value: 10},
         {name: 'Декабрь', value: 11}
-    ]
+    ],
+    endswith: function (str, suffix) {
+        return str.indexOf(suffix, str.length - suffix.length) !== -1;
+    },
+    format: function (record, key) {
+        if (typeof (record) === 'undefined') {
+            return null;
+        } else if (aux.endswith(key, 'DateTime')) {
+            return moment(record[key]).format('DD-MM-YYYY HH:mm');
+        } else if (aux.endswith(key, 'Date')) {
+            return moment(record[key]).format('DD-MM-YYYY');
+        } else {
+            return record[key];
+        }
+    }
 };

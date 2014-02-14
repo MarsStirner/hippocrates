@@ -1,18 +1,12 @@
 # -*- encoding: utf-8 -*-
-import calendar
 import datetime
 import json
-from flask import render_template, abort, request, redirect, url_for, flash, jsonify
 
+from flask import render_template, abort, request
 from jinja2 import TemplateNotFound
-from wtforms import TextField, BooleanField, IntegerField
-from wtforms.validators import Required
-from flask.ext.wtf import Form
 
 from ..app import module
-from application.database import db
-from application.lib.utils import admin_permission, public_endpoint
-from blueprints.schedule.lib.utils import get_schedule
+from application.lib.utils import public_endpoint
 from blueprints.schedule.models.exists import Person, Client
 from blueprints.schedule.models.schedule import Schedule
 from blueprints.schedule.views.jsonify import ScheduleVisualizer, MyJsonEncoder, ClientVisualizer
@@ -90,4 +84,7 @@ def api_patient():
     if not client:
         return abort(404)
     context = ClientVisualizer()
-    return json.dumps(context.make_client_info(client), cls=MyJsonEncoder)
+    return json.dumps({
+        'clientData': context.make_client_info(client),
+        'records': context.make_records(client),
+    }, cls=MyJsonEncoder)
