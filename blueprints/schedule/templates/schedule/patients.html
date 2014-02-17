@@ -8,11 +8,12 @@
         <form class="form-horizontal" role="form">
             <div class="input-group">
                 <span class="input-group-addon glyphicon glyphicon-search"></span>
-                <input id="search" class="form-control" type="text" ng-model="query" ng-change="perform_search()"
+                <input id="search" class="form-control" type="text" ng-model="query"
                        placeholder="Введите код или фамилию или имя пациента">
             </div>
         </form>
         <table class="table table-condensed table-hover table-clickable">
+            <caption>Результаты поиска</caption>
             <thead>
             <tr>
                 <th ng-repeat="key in clientInfoCodeOrder" ng-bind="clientInfoCode2Name[key]"></th>
@@ -30,7 +31,7 @@
 {% block modules_js %}
     {{ super() }}
     <script type="text/javascript">
-        WebMis20.controller('ClientSearch', ['$scope', '$http', function ($scope, $http) {
+        WebMis20.controller('ClientSearch', ['$scope', '$http', '$timeout', function ($scope, $http, $timeout) {
             $scope.aux = aux;
             $scope.params = aux.getQueryParams(document.location.search);
             $scope.clientInfoCode2Name = {
@@ -46,11 +47,18 @@
             $scope.clientInfoCodeOrder = ['nameText', 'birthDate', 'sex', 'document', 'SNILS', 'compulsoryPolicy', 'voluntaryPolicy'];
             $scope.query = "";
             $scope.results = [];
-            $scope.perform_search = function () {
+            var _timeoutObjectForQuery;
+            $scope.$watch('query', function (val) {
+                if (_timeoutObjectForQuery) $timeout.cancel(_timeoutObjectForQuery);
+                _timeoutObjectForQuery = $timeout(function () {
+                    $scope.perform_search(val);
+                }, 500)
+            });
+            $scope.perform_search = function (val) {
                 $http.get(
                     '{{ url_for('.api_search_clients') }}', {
                         params: {
-                            q: $scope.query
+                            q: val
                         }
                     }
                 ).success(function (data) {
@@ -60,7 +68,6 @@
             $scope.open_client = function (client_id) {
                 window.open('{{ url_for('.html_patient') }}?client_id=' + client_id);
             };
-            $scope.perform_search();
         }]);
     </script>
 {% endblock %}
