@@ -15,6 +15,11 @@ class MyJsonEncoder(JSONEncoder):
         return JSONEncoder.default(self, o)
 
 
+class Format:
+    JSON = 0
+    HTML = 1
+
+
 class ScheduleVisualizer(object):
     class EmptyDay(object):
         def __init__(self, date):
@@ -88,6 +93,9 @@ class ScheduleVisualizer(object):
 
 
 class ClientVisualizer(object):
+    def __init__(self, mode=Format.JSON):
+        self.__mode = mode
+
     def make_client_info(self, client):
         voluntaryPolicy = client.voluntaryPolicy
         compulsoryPolicy = client.compulsoryPolicy
@@ -97,7 +105,9 @@ class ClientVisualizer(object):
             'sex': client.sex,
             'SNILS': client.formatted_SNILS or None,
             'document': unicode(client.document),
-            'birthDate': client.birthDate.isoformat(),
+            'birthDate': client.birthDate
+                if self.__mode == Format.JSON
+                else client.birthDate.strftime('%d-%m-%Y'),
             'regAddress': None,
             'liveAddress': None,
             'contact': client.phones,
@@ -115,7 +125,9 @@ class ClientVisualizer(object):
         return {
             'id': record.id,
             'mark': None,
-            'begDateTime': record.ticket.begDateTime,
+            'begDateTime': record.ticket.begDateTime
+                if self.__mode == Format.JSON
+                else record.ticket.begDateTime.strftime('%d-%m-%Y %H:%M'),
             'office': record.ticket.schedule.office,
             'person': person.nameText if person else None,
             'createPerson': createPerson.nameText if createPerson else None,

@@ -1,0 +1,38 @@
+{% extends 'schedule/base.html' %}
+
+{% block title %}> {{ module_name }}{% endblock %}
+
+{% block main %}
+    <legend xmlns="http://www.w3.org/1999/html">Пациент</legend>
+    <table class="table table-condensed">
+        <caption>Основная информация</caption>
+        <tbody>
+        {% for key in client_info_codes_order if clientData[key] %}
+            <tr>
+                <td>{{ client_info_codes_rus[key] }}</td>
+                <td>{{ clientData[key] }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <table class="table">
+        <caption>Предварительные записи</caption>
+        <thead>
+        <tr>
+            {% for key in record_codes_order %}
+                <th>{{ record_codes_rus[key] }}</th>
+            {% endfor %}
+        </tr>
+        </thead>
+        <tbody>
+        {% for record in records %}
+            <tr>
+                {% for key in record_codes_order %}
+                    <td>{{ record[key] or '' }}</td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {#        <pre>[[schedule|json]]</pre>#}
+{% endblock %}
