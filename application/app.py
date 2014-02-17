@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
-from flask import Flask
+from flask import Flask, jsonify
 from flask.ext.principal import Principal
 from flask.ext.babel import Babel
 from flask_beaker import BeakerSession

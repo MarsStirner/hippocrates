@@ -14,5 +14,6 @@ selenium
 #dateutils
 beaker
 Flask-Beaker
+sphinxit
 
 #-r ../pysimplelogs/requirements.txt
