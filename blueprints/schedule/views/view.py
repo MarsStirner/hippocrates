@@ -130,3 +130,18 @@ def html_patient():
         clientData=context.make_client_info(client),
         records=context.make_records(client),
     )
+
+@module.route('/api/search_clients.json')
+@public_endpoint
+def api_search_clients():
+    try:
+        query_string = request.args['q']
+    except KeyError or ValueError:
+        return abort(404)
+    # Здесь должен быть полнотекстный поиск
+    clients = Client.query.filter(Client.lastName.like('%%%s%%' % query_string)).limit(100).all()
+    context = ClientVisualizer(Format.JSON)
+    return json.dumps(
+        map(context.make_client_info, clients),
+        cls=MyJsonEncoder
+    )
