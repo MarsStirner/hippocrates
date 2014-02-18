@@ -35,6 +35,11 @@ TIME_ZONE = 'Europe/Moscow'
 
 SIMPLELOGS_URL = 'http://127.0.0.1:8080'
 
+SEARCHD_CONNECTION = {
+    'host': '127.0.0.1',
+    'port': 9306,
+}
+
 try:
     from config_local import *
 except ImportError:

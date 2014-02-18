@@ -3,16 +3,71 @@
 {% block title %}> {{ module_name }}{% endblock %}
 
 {% block main %}
-    <legend>Поиск пациента</legend>
-    <div class="">
-    {{ lipsum(5) }}
+    <legend xmlns="http://www.w3.org/1999/html">Пациенты</legend>
+    <div ng-controller="ClientSearch">
+        <form class="form-horizontal" role="form">
+            <div class="input-group">
+                <span class="input-group-addon glyphicon glyphicon-search"></span>
+                <input id="search" class="form-control" type="text" ng-model="query"
+                       placeholder="Введите код или фамилию или имя пациента">
+            </div>
+        </form>
+        <table class="table table-condensed table-hover table-clickable">
+            <caption>Результаты поиска</caption>
+            <thead>
+            <tr>
+                <th ng-repeat="key in clientInfoCodeOrder" ng-bind="clientInfoCode2Name[key]"></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="result in results" ng-click="open_client(result.id)" style="cursor: pointer">
+                <td ng-repeat="key in clientInfoCodeOrder" ng-bind="aux.format(result, key)"></td>
+            </tr>
+            </tbody>
+        </table>
+{#        <pre>[[schedule|json]]</pre>#}
     </div>
 {% endblock %}
 {% block modules_js %}
     {{ super() }}
     <script type="text/javascript">
-        $(function() {
-
-        });
+        WebMis20.controller('ClientSearch', ['$scope', '$http', '$timeout', function ($scope, $http, $timeout) {
+            $scope.aux = aux;
+            $scope.params = aux.getQueryParams(document.location.search);
+            $scope.clientInfoCode2Name = {
+                'id': 'Код пациента',
+                'birthDate': 'Дата рождения',
+                'SNILS': 'СНИЛС',
+                'nameText': 'ФИО',
+                'sex': 'Пол',
+                'document': 'Документ',
+                'voluntaryPolicy': 'Полис ДМС',
+                'compulsoryPolicy': 'Полис ОМС'
+            };
+            $scope.clientInfoCodeOrder = ['nameText', 'birthDate', 'sex', 'document', 'SNILS', 'compulsoryPolicy', 'voluntaryPolicy'];
+            $scope.query = "";
+            $scope.results = [];
+            var _timeoutObjectForQuery;
+            $scope.$watch('query', function (val) {
+                if (_timeoutObjectForQuery) $timeout.cancel(_timeoutObjectForQuery);
+                _timeoutObjectForQuery = $timeout(function () {
+                    $scope.perform_search(val);
+                }, 500)
+            });
+            $scope.perform_search = function (val) {
+                $http.get(
+                    '{{ url_for('.api_search_clients') }}', {
+                        params: {
+                            q: val
+                        }
+                    }
+                ).success(function (data) {
+                    $scope.results = data;
+                })
+            };
+            $scope.open_client = function (client_id) {
+                window.open('{{ url_for('.html_patient') }}?client_id=' + client_id);
+            };
+        }]);
     </script>
 {% endblock %}

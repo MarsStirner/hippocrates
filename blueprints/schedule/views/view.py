@@ -1,21 +1,15 @@
 # -*- encoding: utf-8 -*-
-import calendar
 import datetime
 import json
-from flask import render_template, abort, request, redirect, url_for, flash, jsonify
 
+from flask import render_template, abort, request
 from jinja2 import TemplateNotFound
-from wtforms import TextField, BooleanField, IntegerField
-from wtforms.validators import Required
-from flask.ext.wtf import Form
 
 from ..app import module
-from application.database import db
-from application.lib.utils import admin_permission, public_endpoint
-from blueprints.schedule.lib.utils import get_schedule
-from blueprints.schedule.models.exists import Person
+from application.lib.utils import public_endpoint
+from blueprints.schedule.models.exists import Person, Client
 from blueprints.schedule.models.schedule import Schedule
-from blueprints.schedule.views.jsonify import ScheduleVisualizer, MyJsonEncoder
+from blueprints.schedule.views.jsonify import ScheduleVisualizer, MyJsonEncoder, ClientVisualizer, Format
 
 
 @module.route('/')
@@ -45,7 +39,16 @@ def patients():
         abort(404)
 
 
-@module.route('/api/schedule/')
+@module.route('/patient_info/')
+@public_endpoint
+def patient_info():
+    try:
+        return render_template('schedule/patient_info.html')
+    except TemplateNotFound:
+        abort(404)
+
+
+@module.route('/api/schedule.json')
 @public_endpoint
 def api_schedule():
     try:
@@ -69,3 +72,76 @@ def api_schedule():
         'person': context.make_person(person),
     }, cls=MyJsonEncoder)
 
+
+@module.route('/api/patient.json')
+@public_endpoint
+def api_patient():
+    try:
+        client_id = int(request.args['client_id'])
+    except KeyError or ValueError:
+        return abort(404)
+    client = Client.query.get(client_id)
+    if not client:
+        return abort(404)
+    context = ClientVisualizer()
+    return json.dumps({
+        'clientData': context.make_client_info(client),
+        'records': context.make_records(client),
+    }, cls=MyJsonEncoder)
+
+
+@module.route('/api/patient.html')
+@public_endpoint
+def html_patient():
+    try:
+        client_id = int(request.args['client_id'])
+    except KeyError or ValueError:
+        return abort(404)
+    client = Client.query.get(client_id)
+    if not client:
+        return abort(404)
+    context = ClientVisualizer(Format.HTML)
+    return render_template(
+        'schedule/patient_info_nojs.html',
+        client=client,
+        client_info_codes_rus={
+            'id': u'Код пациента',
+            'birthDate': u'Дата рождения',
+            'regAddress': u'Адрес регистрации',
+            'liveAddress': u'Адрес проживания',
+            'SNILS': u'СНИЛС',
+            'nameText': u'ФИО',
+            'sex': u'Пол',
+            'document': u'Документ',
+            'contact': u'Контакты',
+            'voluntaryPolicy': u'Полис ДМС',
+            'compulsoryPolicy': u'Полис ОМС'
+        },
+        client_info_codes_order=['id', 'nameText', 'birthDate', 'sex', 'regAddress', 'liveAddress', 'document', 'compulsoryPolicy', 'voluntaryPolicy', 'SNILS', 'contact'],
+        record_codes_rus={
+            'mark': u'Отметка',
+            'begDateTime': u'Дата и время приёма',
+            'office': u'Кабинет',
+            'person': u'Специалист',
+            'createPerson': u'Записал',
+            'note': u'Примечания'
+        },
+        record_codes_order=['mark', 'begDateTime', 'office', 'person', 'createPerson', 'note'],
+        clientData=context.make_client_info(client),
+        records=context.make_records(client),
+    )
+
+@module.route('/api/search_clients.json')
+@public_endpoint
+def api_search_clients():
+    try:
+        query_string = request.args['q']
+    except KeyError or ValueError:
+        return abort(404)
+    # Здесь должен быть полнотекстный поиск
+    clients = Client.query.filter(Client.lastName.like('%%%s%%' % query_string)).limit(100).all()
+    context = ClientVisualizer(Format.JSON)
+    return json.dumps(
+        map(context.make_client_info, clients),
+        cls=MyJsonEncoder
+    )

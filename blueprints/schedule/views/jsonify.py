@@ -2,6 +2,9 @@
 import datetime
 from json import JSONEncoder
 
+from blueprints.schedule.models.schedule import ScheduleTicket, ScheduleClientTicket
+
+
 __author__ = 'mmalkov'
 
 
@@ -10,6 +13,11 @@ class MyJsonEncoder(JSONEncoder):
         if isinstance(o, (datetime.datetime, datetime.date, datetime.time)):
             return o.isoformat()
         return JSONEncoder.default(self, o)
+
+
+class Format:
+    JSON = 0
+    HTML = 1
 
 
 class ScheduleVisualizer(object):
@@ -82,3 +90,46 @@ class ScheduleVisualizer(object):
         self.max_tickets = max_tickets
 
         self.schedule = [self.make_schedule(s) for s in result]
+
+
+class ClientVisualizer(object):
+    def __init__(self, mode=Format.JSON):
+        self.__mode = mode
+
+    def make_client_info(self, client):
+        voluntaryPolicy = client.voluntaryPolicy
+        compulsoryPolicy = client.compulsoryPolicy
+        return {
+            'id': client.id,
+            'nameText': client.nameText,
+            'sex': client.sex,
+            'SNILS': client.formatted_SNILS or None,
+            'document': unicode(client.document),
+            'birthDate': client.birthDate
+                if self.__mode == Format.JSON
+                else client.birthDate.strftime('%d-%m-%Y'),
+            'regAddress': None,
+            'liveAddress': None,
+            'contact': client.phones,
+            'compulsoryPolicy': unicode(compulsoryPolicy) if compulsoryPolicy else None,
+            'voluntaryPolicy': unicode(voluntaryPolicy) if voluntaryPolicy else None,
+        }
+
+    def make_records(self, client):
+        appointments = client.appointments.join(ScheduleClientTicket.ticket).order_by(ScheduleTicket.begDateTime.desc()).all()
+        return map(self.make_record, appointments)
+
+    def make_record(self, record):
+        person = record.ticket.schedule.person
+        createPerson = record.createPerson
+        return {
+            'id': record.id,
+            'mark': None,
+            'begDateTime': record.ticket.begDateTime
+                if self.__mode == Format.JSON
+                else record.ticket.begDateTime.strftime('%d-%m-%Y %H:%M'),
+            'office': record.ticket.schedule.office,
+            'person': person.nameText if person else None,
+            'createPerson': createPerson.nameText if createPerson else None,
+            'note': record.note,
+        }
