@@ -89,7 +89,8 @@ class ScheduleClientTicket(db.Model):
     modifyPerson_id = db.Column(db.Integer, db.ForeignKey('Person.id'), index=True)
     deleted = db.Column(db.SmallInteger, nullable=False, server_default='0')
     
-    client = db.relationship('Client')
+    client = db.relationship('Client', backref=db.backref('appointments', lazy='dynamic'))
     appointmentType = db.relationship('rbAppointmentType')
     orgFrom = db.relationship('Organisation')
     ticket = db.relationship('ScheduleTicket', backref=db.backref('client_tickets', lazy='dynamic'))
+    createPerson = db.relationship('Person', foreign_keys=[createPerson_id])

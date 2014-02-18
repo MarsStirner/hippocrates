@@ -86,3 +86,8 @@ form.icon button {
 a.icon {
     text-decoration: none;
 }
+
+.table caption {
+    font-size: 19px;
+    text-align: left;
+}

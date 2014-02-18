@@ -1,0 +1,85 @@
+{% extends 'schedule/base.html' %}
+
+{% block title %}> {{ module_name }}{% endblock %}
+
+{% block main %}
+    <legend xmlns="http://www.w3.org/1999/html">Пациент</legend>
+    <div ng-controller="ClientInfo">
+{#        <form class="form-inline" role="form">#}
+{#            <input class="form-control" type="text" ng-model="doctorInput" placeholder="ФИО врача">#}
+{#        </form>#}
+        <table class="table table-condensed">
+            <caption>Основная информация</caption>
+            <tbody>
+            <tr ng-repeat="key in clientInfoCodeOrder" ng-if="clientDataItems[key]">
+                <td>[[ clientInfoCode2Name[key] ]]</td>
+                <td>[[ aux.format(clientDataItems, key) ]]</td>
+            </tr>
+            </tbody>
+        </table>
+        <table class="table">
+            <caption>Предварительные записи</caption>
+            <thead>
+            <tr>
+                <th ng-repeat="key in recordColumnOrder" ng-bind="recordColumns[key]"></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="record in records">
+                <td ng-repeat="key in recordColumnOrder" ng-bind="aux.format(record, key)"></td>
+            </tr>
+            </tbody>
+        </table>
+{#        <pre>[[schedule|json]]</pre>#}
+    </div>
+{% endblock %}
+{% block modules_js %}
+    {{ super() }}
+    <script type="text/javascript">
+        WebMis20.controller('ClientInfo', ['$scope', '$http', function ($scope, $http) {
+            $scope.max_tickets = 0;
+            $scope.records = [];
+            $scope.aux = aux;
+            $scope.params = aux.getQueryParams(document.location.search);
+            $scope.client_id = $scope.params.client_id;
+            var curDate = new Date();
+            var curYear = curDate.getUTCFullYear();
+            $scope.years = [curYear - 1, curYear, curYear + 1];
+            $scope.year = curYear;
+            $scope.clientInfoCode2Name = {
+                'id': 'Код пациента',
+                'birthDate': 'Дата рождения',
+                'regAddress': 'Адрес регистрации',
+                'liveAddress': 'Адрес проживания',
+                'SNILS': 'СНИЛС',
+                'nameText': 'ФИО',
+                'sex': 'Пол',
+                'document': 'Документ',
+                'contact': 'Контакты',
+                'voluntaryPolicy': 'Полис ДМС',
+                'compulsoryPolicy': 'Полис ОМС'
+            };
+            $scope.clientInfoCodeOrder = ['id', 'nameText', 'birthDate', 'sex', 'regAddress', 'liveAddress', 'document', 'compulsoryPolicy', 'voluntaryPolicy', 'SNILS', 'contact'];
+            $scope.recordColumns = {
+                'mark': 'Отметка',
+                'begDateTime': 'Дата и время приёма',
+                'office': 'Кабинет',
+                'person': 'Специалист',
+                'createPerson': 'Записал',
+                'note': 'Примечания'
+            };
+            $scope.recordColumnOrder = ['mark', 'begDateTime', 'office', 'person', 'createPerson', 'note'];
+            $http.get(
+                '{{ url_for('.api_patient') }}', {
+                    params: {
+                        'client_id': $scope.client_id
+                    }
+                }
+            ).success(function (data) {
+                $scope.clientDataItems = data.clientData;
+                $scope.records = data.records;
+            });
+
+        }]);
+    </script>
+{% endblock %}
