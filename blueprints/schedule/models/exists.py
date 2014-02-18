@@ -420,6 +420,12 @@ class Person(db.Model):
     def nameText(self):
         return u' '.join((u'%s %s %s' % (self.lastName, self.firstName, self.patrName)).split())
 
+    @property
+    def shortNameText(self):
+        words = self.firstName.split() + self.patrName.split()
+        initials = ['%s.' % word[0].upper() for word in words if word]
+        return u'%s %s' % (self.lastName, u' '.join(initials))
+
 
 class rbAcademicDegree(db.Model):
     __tablename__ = 'rbAcademicDegree'

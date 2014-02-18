@@ -1,4 +1,5 @@
 # -*- encoding: utf-8 -*-
+from collections import defaultdict
 import datetime
 import json
 
@@ -37,6 +38,22 @@ def patients():
         return render_template('schedule/patients.html')
     except TemplateNotFound:
         abort(404)
+
+
+@module.route('/appointment/')
+@public_endpoint
+def appointment():
+    try:
+        client_id = int(request.args['client_id'])
+    except KeyError or ValueError:
+        return abort(404)
+    client = Client.query.get(client_id)
+    if not client:
+        return abort(404)
+    return render_template(
+        'schedule/person_appointment.html',
+        client=client
+    )
 
 
 @module.route('/patient_info/')
@@ -144,4 +161,21 @@ def api_search_clients():
     return json.dumps(
         map(context.make_client_info, clients),
         cls=MyJsonEncoder
+    )
+
+
+@module.route('/api/all_persons_tree.json')
+@public_endpoint
+def api_all_persons_tree():
+    result = defaultdict(list)
+    persons = Person.query.\
+        filter(Person.deleted == 0).\
+        filter(Person.speciality).\
+        order_by(Person.lastName, Person.firstName).\
+        all()
+    for person in persons:
+        result[person.speciality.name].append({'id': person.id, 'name': person.shortNameText})
+    return json.dumps(
+        result,
+        cls=MyJsonEncoder,
     )
