@@ -66,10 +66,8 @@ def api_schedule():
         filter(Schedule.date <= month_l).\
         order_by(Schedule.date)
     context = ScheduleVisualizer()
-    context.push_all(schedules, month_f, month_l)
     return json.dumps({
-        'schedule': context.schedule,
-        'max_tickets': context.max_tickets,
+        'schedule': context.make_schedule(schedules, month_f, month_l),
         'person': context.make_person(person),
     }, cls=MyJsonEncoder)
 
