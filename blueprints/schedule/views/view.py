@@ -6,6 +6,7 @@ from flask import render_template, abort, request
 from jinja2 import TemplateNotFound
 
 from ..app import module
+from application.lib.sphinx_search import SearchPerson
 from application.lib.utils import public_endpoint
 from blueprints.schedule.models.exists import Person, Client
 from blueprints.schedule.models.schedule import Schedule
@@ -131,6 +132,7 @@ def html_patient():
         records=context.make_records(client),
     )
 
+
 @module.route('/api/search_clients.json')
 @public_endpoint
 def api_search_clients():
@@ -143,5 +145,30 @@ def api_search_clients():
     context = ClientVisualizer(Format.JSON)
     return json.dumps(
         map(context.make_client_info, clients),
+        cls=MyJsonEncoder
+    )
+
+
+@module.route('/api/search_persons.json')
+@public_endpoint
+def api_search_persons():
+    try:
+        query_string = request.args['q']
+    except KeyError or ValueError:
+        return abort(404)
+    result = SearchPerson.search(query_string)
+
+    def cat(item):
+        return {
+            'display': u'#%d - %s %s %s (%s)' % (
+                item['id'], item['lastname'], item['firstname'], item['patrname'], item['speciality']),
+            'name': u'%s %s %s' % (item['lastname'], item['firstname'], item['patrname']),
+            'speciality': item['speciality'],
+            'id': item['id'],
+            'tokens': [item['lastname'], item['firstname'], item['patrname']] + item['speciality'].split(),
+        }
+    data = map(cat, result['result']['items'])
+    return json.dumps(
+        data,
         cls=MyJsonEncoder
     )
