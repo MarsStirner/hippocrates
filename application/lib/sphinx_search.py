@@ -23,5 +23,16 @@ class SearchPerson():
         return result
 
 
+class SearchPatient():
+
+    @staticmethod
+    def search(name):
+        search = Search(indexes=['patient'], config=SearchConfig)
+        search = search.match(name).limit(0, 100)
+        result = search.ask()
+        return result
+
+
 if __name__ == '__main__':
     data = SearchPerson.search(u'аллерг')
+    data = SearchPatient.search(u'Тапка')
