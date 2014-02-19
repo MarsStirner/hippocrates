@@ -6,7 +6,7 @@ from flask import render_template, abort, request
 from jinja2 import TemplateNotFound
 
 from ..app import module
-from application.lib.sphinx_search import SearchPerson
+from application.lib.sphinx_search import SearchPerson, SearchPatient
 from application.lib.utils import public_endpoint
 from blueprints.schedule.models.exists import Person, Client
 from blueprints.schedule.models.schedule import Schedule
@@ -138,8 +138,16 @@ def api_search_clients():
         query_string = request.args['q']
     except KeyError or ValueError:
         return abort(404)
-    # Здесь должен быть полнотекстный поиск
-    clients = Client.query.filter(Client.lastName.like('%%%s%%' % query_string)).limit(100).all()
+
+    if query_string:
+        result = SearchPatient.search(query_string)
+        id_list = [item['id'] for item in result['result']['items']]
+        if id_list:
+            clients = Client.query.filter(Client.id.in_(id_list)).all()
+        else:
+            clients = []
+    else:
+        clients = Client.query.limit(100).all()
     context = ClientVisualizer(Format.JSON)
     return json.dumps(
         map(context.make_client_info, clients),
