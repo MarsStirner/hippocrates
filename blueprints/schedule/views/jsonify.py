@@ -25,6 +25,10 @@ class ScheduleVisualizer(object):
         def __init__(self, date):
             self.date = date
 
+    def __init__(self):
+        self.attendance_type = None
+        self.client_id = None
+
     def make_ticket(self, ticket):
         client = ticket.client
         return {
@@ -46,7 +50,12 @@ class ScheduleVisualizer(object):
                 'id': schedule.id,
                 'date': schedule.date,
                 'office': schedule.office,
-                'tickets': map(self.make_ticket, schedule.tickets),
+                'tickets': [
+                    self.make_ticket(ticket)
+                    for ticket in schedule.tickets
+                    if not (self.client_id and ticket.client and ticket.client.id != self.client_id) and
+                       not (self.attendance_type and ticket.attendanceType.code != self.attendance_type)
+                ],
             }
 
     def make_person(self, person):

@@ -1,4 +1,5 @@
 # -*- encoding: utf-8 -*-
+from collections import defaultdict
 import datetime
 import json
 
@@ -40,6 +41,22 @@ def patients():
         abort(404)
 
 
+@module.route('/appointment/')
+@public_endpoint
+def appointment():
+    try:
+        client_id = int(request.args['client_id'])
+    except KeyError or ValueError:
+        return abort(404)
+    client = Client.query.get(client_id)
+    if not client:
+        return abort(404)
+    return render_template(
+        'schedule/person_appointment.html',
+        client=client
+    )
+
+
 @module.route('/patient_info/')
 @public_endpoint
 def patient_info():
@@ -54,6 +71,7 @@ def patient_info():
 def api_schedule():
     try:
         person_id = int(request.args['person_id'])
+        client_id = int(request.args.get('client_id', None))
         person = Person.query.get(person_id)
         month_f = datetime.datetime.strptime(request.args['start_date'], '%Y-%m-%d').date()
         month_l = month_f + datetime.timedelta(weeks=1)
@@ -66,6 +84,8 @@ def api_schedule():
         filter(Schedule.date <= month_l).\
         order_by(Schedule.date)
     context = ScheduleVisualizer()
+    context.client_id = client_id
+    context.attendance_type = attendance_type
     return json.dumps({
         'schedule': context.make_schedule(schedules, month_f, month_l),
         'person': context.make_person(person),
@@ -152,6 +172,23 @@ def api_search_clients():
     return json.dumps(
         map(context.make_client_info, clients),
         cls=MyJsonEncoder
+    )
+
+
+@module.route('/api/all_persons_tree.json')
+@public_endpoint
+def api_all_persons_tree():
+    result = defaultdict(list)
+    persons = Person.query.\
+        filter(Person.deleted == 0).\
+        filter(Person.speciality).\
+        order_by(Person.lastName, Person.firstName).\
+        all()
+    for person in persons:
+        result[person.speciality.name].append({'id': person.id, 'name': person.shortNameText})
+    return json.dumps(
+        result,
+        cls=MyJsonEncoder,
     )
 
 
