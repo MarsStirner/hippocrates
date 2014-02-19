@@ -26,8 +26,8 @@ class ScheduleVisualizer(object):
             self.date = date
 
     def __init__(self):
-        self.max_tickets = 0
-        self.schedule = []
+        self.attendance_type = None
+        self.client_id = None
 
     def make_ticket(self, ticket):
         client = ticket.client
@@ -39,25 +39,23 @@ class ScheduleVisualizer(object):
             'attendance_type': ticket.attendanceType.code,
         }
 
-    def make_empty_ticket(self):
-        return {
-            'status': 'empty',
-        }
-
-    def make_schedule(self, schedule):
+    def make_day(self, schedule):
         if isinstance(schedule, self.EmptyDay):
             return {
                 'date': schedule.date,
-                'tickets': [self.make_empty_ticket()] * self.max_tickets,
+                'tickets': [],
             }
         else:
             return {
                 'id': schedule.id,
                 'date': schedule.date,
                 'office': schedule.office,
-                'tickets': map(self.make_ticket, schedule.tickets) + [
-                    self.make_empty_ticket()
-                ] * (self.max_tickets - len(schedule.tickets)),
+                'tickets': [
+                    self.make_ticket(ticket)
+                    for ticket in schedule.tickets
+                    if not (self.client_id and ticket.client and ticket.client.id != self.client_id) and
+                       not (self.attendance_type and ticket.attendanceType.code != self.attendance_type)
+                ],
             }
 
     def make_person(self, person):
@@ -68,28 +66,22 @@ class ScheduleVisualizer(object):
             'speciality': person.speciality.name if speciality else None
         }
 
-    def push_all(self, schedules, month_f, month_l):
+    def make_schedule(self, schedules, date_start, date_end):
         result = []
         one_day = datetime.timedelta(days=1)
-        max_tickets = 0
         for schedule in schedules:
-            if len(schedule.tickets) > max_tickets:
-                max_tickets = len(schedule.tickets)
-
-            while schedule.date > month_f:
-                result.append(self.EmptyDay(month_f))
-                month_f += one_day
+            while schedule.date > date_start:
+                result.append(self.EmptyDay(date_start))
+                date_start += one_day
 
             result.append(schedule)
-            month_f += one_day
+            date_start += one_day
 
-        while month_f < month_l:
-            result.append(self.EmptyDay(month_f))
-            month_f += one_day
+        while date_start < date_end:
+            result.append(self.EmptyDay(date_start))
+            date_start += one_day
 
-        self.max_tickets = max_tickets
-
-        self.schedule = [self.make_schedule(s) for s in result]
+        return [self.make_day(s) for s in result]
 
 
 class ClientVisualizer(object):

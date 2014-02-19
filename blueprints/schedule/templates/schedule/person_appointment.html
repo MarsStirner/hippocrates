@@ -1,1 +1,165 @@
 {% extends 'schedule/base.html' %}
+
+{% block title %}> {{ module_name }}{% endblock %}
+
+{% block main %}
+    <legend xmlns="http://www.w3.org/1999/html">Запись пациента на прием</legend>
+    <div ng-controller="Schedule">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="row">
+                    <div class="col-md-2">
+                        <select class="form-control" name="year" ng-model="year" ng-options="y for y in years"
+                                ng-change="monthChanged()"></select>
+                    </div>
+                    <div class="col-md-2">
+                        <select class="form-control" name="month" ng-model="month"
+                                ng-options="item.value as item.name for item in aux.months"
+                                ng-change="monthChanged()"></select>
+                    </div>
+                    <div class="col-md-8">
+                        <ul class="nav nav-pills">
+                            <li ng-class="{active: ($index == page)}" ng-repeat="p in pages">
+                                <a ng-click="setDatePage($index)" href="#">
+                                    [[ p.format('MM.DD') ]] - [[ aux.moment(p).add(6, 'd').format('MM.DD') ]]
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="row" ng-repeat="person in persons">
+                    <div class="col-md-12">
+                        <table class="table table-condensed" ng-if="person">
+                            <caption>[[ person.name ]]</caption>
+                            <thead>
+                            <tr>
+                                <th ng-repeat="day in schedule[attendance_type]">
+                                    [[ aux.moment(day.date).format('DD.MM.YYYY, dd') ]]
+                                </th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr ng-repeat="row in aux.range(max_tickets[attendance_type])">
+                                <td ng-repeat="day in schedule[attendance_type]" ng-switch="day.tickets[row].status">
+                                    <button type="button" class="btn btn-block btn-danger" ng-switch-when="busy">
+                                        [[ aux.moment(day.tickets[row].begDateTime).format('hh:mm') ]] - [[ day.tickets[row].client ]]
+                                    </button>
+                                    <button type="button" class="btn btn-block btn-success" ng-switch-when="free">
+                                        [[ aux.moment(day.tickets[row].begDateTime).format('hh:mm') ]]
+                                    </button>
+                                    <button type="button" class="btn btn-block disabled" ng-switch-default>&nbsp;</button>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <input id="person_query" class="form-control" type="text" ng-model="person_query" placeholder="Поиск врача"/>
+            </div>
+        </div>
+{#        <pre>[[schedule|json]]</pre>#}
+    </div>
+{% endblock %}
+{% block modules_js %}
+    {{ super() }}
+    <script type="text/javascript">
+        WebMis20.controller('Schedule', ['$scope', '$http', function ($scope, $http) {
+            $scope.max_tickets = [];
+            $scope.aux = aux;
+            $scope.params = aux.getQueryParams(document.location.search);
+            $scope.person_id = $scope.params.person_id;
+            $scope.person_query = '';
+            var curDate = new Date();
+            var curYear = curDate.getUTCFullYear();
+            $scope.years = [curYear - 1, curYear, curYear + 1];
+            $scope.year = curYear;
+            $scope.client_id = null;
+
+            $scope.month = curDate.getMonth();
+
+            $scope.attendance_types = [
+                {name: 'Амбулаторно', code: 'amb'},
+                {name: 'На дому', code: 'home'}
+            ];
+            $scope.attendance_type = 'amb';
+
+            $scope.reloadSchedule = function (person_id) {
+                if (person_id && $scope.client_id) {
+                    $http.get(
+                        '{{ url_for('.api_schedule') }}',
+                        {
+                            params: {
+                                person_id: person_id,
+                                client_id: $scope.client_id,
+                                attendance_type: $scope.attendance_type,
+                                start_date: $scope.pages[$scope.page].format('YYYY-MM-DD')
+                            }
+                        }
+                    ).success(function (data) {
+                        var d = processSchedule(data.schedule, $scope.attendance_types);
+                        $scope.max_tickets = d.max_tickets;
+                        $scope.schedule = d.schedules;
+                        $scope.person = data.person;
+                    })
+                }
+            };
+
+            $scope.setDatePage = function(index) {
+                if (index != $scope.page) {
+                    $scope.page = index;
+                    $scope.reloadSchedule();
+                }
+            };
+
+            $scope.monthChanged = function () {
+                var mid_date = moment({
+                    year: $scope.year,
+                    month: $scope.month,
+                    day: new Date().getDate()
+                });
+                var start_date = moment({
+                    year: $scope.year,
+                    month: $scope.month,
+                    day: 1
+                });
+                var end_date = moment(start_date).add(1, 'M').subtract(1, 'd');
+                var chosen_page = -1;
+                var pages = [];
+                while (start_date <= end_date) {
+                    if (mid_date >= start_date) {
+                        chosen_page += 1;
+                    }
+                    pages.push(moment(start_date));
+                    start_date.add(1, 'w');
+                }
+                $scope.page = chosen_page;
+                $scope.pages = pages;
+                $scope.reloadSchedule();
+            };
+
+            $scope.changeAttendanceType = function (code) {
+                $scope.attendance_type = code;
+            };
+
+            $scope.monthChanged();
+
+            var persons = new Bloodhound({
+                datumTokenizer: function(d) { return Bloodhound.tokenizers.whitespace(d.value); },
+                queryTokenizer: Bloodhound.tokenizers.whitespace,
+                remote: '{{ url_for('.api_search_persons') }}?q=%QUERY'
+            });
+
+            persons.initialize();
+
+            $("#person_query").typeahead(null, {
+                displayKey: 'display',
+                source: persons.ttAdapter()
+            }).bind('typeahead:selected', function (obj, datum) {
+                $scope.person_id = datum['id'];
+                $scope.reloadSchedule();
+            });
+        }]);
+    </script>
+{% endblock %}

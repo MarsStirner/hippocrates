@@ -5,30 +5,35 @@
 {% block main %}
     <legend xmlns="http://www.w3.org/1999/html">График врача</legend>
     <div ng-controller="Schedule">
-        <form class="form-inline" role="form">
-            <select class="form-control" name="year" ng-model="year" ng-options="y for y in years" ng-change="monthChanged()"></select>
-            <select class="form-control" name="month" ng-model="month" ng-options="item.value as item.name for item in aux.months" ng-change="monthChanged()"></select>
-            <input class="form-control" type="text" ng-model="doctorInput" placeholder="ФИО врача">
-        </form>
-        <ul class="nav nav-tabs nav-tabs-justified" ng-model="attendance_type">
+        <div class="row">
+            <div class="col-md-2">
+                <select class="form-control" name="year" ng-model="year" ng-options="y for y in years" ng-change="monthChanged()"></select>
+            </div>
+            <div class="col-md-2">
+                <select class="form-control" name="month" ng-model="month" ng-options="item.value as item.name for item in aux.months" ng-change="monthChanged()"></select>
+            </div>
+            <div class="col-md-8">
+                <input id="person_query" class="form-control" type="text" ng-model="person_query" placeholder="ФИО врача" />
+            </div>
+        </div>
+        <ul class="nav nav-tabs nav-tabs-justified" ng-model="attendance_type" ng-if="person">
             <li ng-class="{active: (at.code == attendance_type)}" ng-repeat="at in attendance_types" ng-click="changeAttendanceType(at.code)"><a href="#">[[ at.name ]]</a></li>
         </ul>
         <span ng-if="person"><span class="speciality">[[ person.speciality ]]</span>: <span class="doctor-name">[[ person.name ]]</span></span>
-        <ul class="nav nav-pills">
+        <ul class="nav nav-pills" ng-if="person">
             <li ng-class="{active: ($index == page)}" ng-repeat="p in pages"><a ng-click="setDatePage($index)" href="#">[[ p.format('MM.DD') ]] - [[ aux.moment(p).add(6, 'd').format('MM.DD') ]]</a></li>
         </ul>
-        <table class="table">
+        <table class="table table-condensed" ng-if="person">
             <thead>
             <tr>
-                <th ng-repeat="day in schedule">[[ aux.moment(day.date).format('DD.MM.YYYY, dd') ]]</th>
+                <th ng-repeat="day in schedule[attendance_type]">[[ aux.moment(day.date).format('DD.MM.YYYY, dd') ]]</th>
             </tr>
             </thead>
             <tbody>
-            <tr ng-repeat="row in aux.range(max_tickets)">
-                <td ng-repeat="day in schedule" ng-switch="day.tickets[row].status">
+            <tr ng-repeat="row in aux.range(max_tickets[attendance_type])">
+                <td ng-repeat="day in schedule[attendance_type]" ng-switch="day.tickets[row].status">
                     <button type="button" class="btn btn-block btn-danger" ng-switch-when="busy" ng-if="day.tickets[row].attendance_type == attendance_type">[[ aux.moment(day.tickets[row].begDateTime).format('hh:mm') ]] - [[ day.tickets[row].client ]]</button>
                     <button type="button" class="btn btn-block btn-success" ng-switch-when="free" ng-if="day.tickets[row].attendance_type == attendance_type">[[ aux.moment(day.tickets[row].begDateTime).format('hh:mm') ]]</button>
-                    <button type="button" class="btn btn-block disabled" ng-switch-when="empty" ng-if="day.tickets[row].attendance_type == attendance_type">&nbsp;</button>
                     <button type="button" class="btn btn-block disabled" ng-if="day.tickets[row].attendance_type != attendance_type">&nbsp;</button>
                 </td>
             </tr>
@@ -45,6 +50,7 @@
             $scope.aux = aux;
             $scope.params = aux.getQueryParams(document.location.search);
             $scope.person_id = $scope.params.person_id;
+            $scope.person_query = '';
             var curDate = new Date();
             var curYear = curDate.getUTCFullYear();
             $scope.years = [curYear - 1, curYear, curYear + 1];
@@ -69,8 +75,9 @@
                             }
                         }
                     ).success(function (data) {
-                        $scope.max_tickets = data.max_tickets;
-                        $scope.schedule = data.schedule;
+                        var d = processSchedule(data.schedule, $scope.attendance_types);
+                        $scope.max_tickets = d.max_tickets;
+                        $scope.schedule = d.schedules;
                         $scope.person = data.person;
                     })
                 }
@@ -111,15 +118,25 @@
 
             $scope.changeAttendanceType = function (code) {
                 $scope.attendance_type = code;
-{#                $scope.reloadSchedule();#}
             };
 
             $scope.monthChanged();
 
-            $scope.doctorInput = '';
+            var persons = new Bloodhound({
+                datumTokenizer: function(d) { return Bloodhound.tokenizers.whitespace(d.value); },
+                queryTokenizer: Bloodhound.tokenizers.whitespace,
+                remote: '{{ url_for('.api_search_persons') }}?q=%QUERY'
+            });
 
+            persons.initialize();
 
-
+            $("#person_query").typeahead(null, {
+                displayKey: 'display',
+                source: persons.ttAdapter()
+            }).bind('typeahead:selected', function (obj, datum) {
+                $scope.person_id = datum['id'];
+                $scope.reloadSchedule();
+            });
         }]);
     </script>
 {% endblock %}

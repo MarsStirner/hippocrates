@@ -7,6 +7,7 @@ from flask import render_template, abort, request
 from jinja2 import TemplateNotFound
 
 from ..app import module
+from application.lib.sphinx_search import SearchPerson
 from application.lib.utils import public_endpoint
 from blueprints.schedule.models.exists import Person, Client
 from blueprints.schedule.models.schedule import Schedule
@@ -70,6 +71,7 @@ def patient_info():
 def api_schedule():
     try:
         person_id = int(request.args['person_id'])
+        client_id = int(request.args.get('client_id', None))
         person = Person.query.get(person_id)
         month_f = datetime.datetime.strptime(request.args['start_date'], '%Y-%m-%d').date()
         month_l = month_f + datetime.timedelta(weeks=1)
@@ -82,10 +84,10 @@ def api_schedule():
         filter(Schedule.date <= month_l).\
         order_by(Schedule.date)
     context = ScheduleVisualizer()
-    context.push_all(schedules, month_f, month_l)
+    context.client_id = client_id
+    context.attendance_type = attendance_type
     return json.dumps({
-        'schedule': context.schedule,
-        'max_tickets': context.max_tickets,
+        'schedule': context.make_schedule(schedules, month_f, month_l),
         'person': context.make_person(person),
     }, cls=MyJsonEncoder)
 
@@ -148,6 +150,7 @@ def html_patient():
         records=context.make_records(client),
     )
 
+
 @module.route('/api/search_clients.json')
 @public_endpoint
 def api_search_clients():
@@ -178,4 +181,29 @@ def api_all_persons_tree():
     return json.dumps(
         result,
         cls=MyJsonEncoder,
+    )
+
+
+@module.route('/api/search_persons.json')
+@public_endpoint
+def api_search_persons():
+    try:
+        query_string = request.args['q']
+    except KeyError or ValueError:
+        return abort(404)
+    result = SearchPerson.search(query_string)
+
+    def cat(item):
+        return {
+            'display': u'#%d - %s %s %s (%s)' % (
+                item['id'], item['lastname'], item['firstname'], item['patrname'], item['speciality']),
+            'name': u'%s %s %s' % (item['lastname'], item['firstname'], item['patrname']),
+            'speciality': item['speciality'],
+            'id': item['id'],
+            'tokens': [item['lastname'], item['firstname'], item['patrname']] + item['speciality'].split(),
+        }
+    data = map(cat, result['result']['items'])
+    return json.dumps(
+        data,
+        cls=MyJsonEncoder
     )
