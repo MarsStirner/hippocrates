@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
-from flask import g
+import datetime
+from json import JSONEncoder, dumps
+import json
+from flask import g, current_app, request
 from flask.ext.principal import identity_loaded, Principal, Permission, RoleNeed, UserNeed
 from flask.ext.login import LoginManager, current_user
 from ..database import db
@@ -66,3 +69,53 @@ logger = SimpleLogger.get_logger(SIMPLELOGS_URL,
                                  PROJECT_NAME,
                                  dict(name=PROJECT_NAME, version=version),
                                  DEBUG)
+
+
+class WebMisJsonEncoder(JSONEncoder):
+    def default(self, o):
+        if isinstance(o, (datetime.datetime, datetime.date, datetime.time)):
+            return o.isoformat()
+        return JSONEncoder.default(self, o)
+
+app.json_encoder = WebMisJsonEncoder
+
+def jsonify(obj):
+    """Creates a :class:`~flask.Response` with the JSON representation of
+    the given arguments with an `application/json` mimetype.  The arguments
+    to this function are the same as to the :class:`dict` constructor.
+
+    Example usage::
+
+        from flask import jsonify
+
+        @app.route('/_get_current_user')
+        def get_current_user():
+            return jsonify(username=g.user.username,
+                           email=g.user.email,
+                           id=g.user.id)
+
+    This will send a JSON response like this to the browser::
+
+        {
+            "username": "admin",
+            "email": "admin@localhost",
+            "id": 42
+        }
+
+    For security reasons only objects are supported toplevel.  For more
+    information about this, have a look at :ref:`json-security`.
+
+    This function's response will be pretty printed if it was not requested
+    with ``X-Requested-With: XMLHttpRequest`` to simplify debugging unless
+    the ``JSONIFY_PRETTYPRINT_REGULAR`` config parameter is set to false.
+
+    .. versionadded:: 0.2
+    """
+    indent = None
+    if current_app.config['JSONIFY_PRETTYPRINT_REGULAR'] and not request.is_xhr:
+        indent = 2
+    return (
+        json.dumps(obj, indent=indent, cls=WebMisJsonEncoder),
+        200,
+        [('content-type', 'application/json')]
+    )

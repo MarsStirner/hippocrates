@@ -159,3 +159,97 @@ span.twitter-typeahead {
 .tt-suggestion p {
   margin: 0;
 }
+
+/* CSS# TreeView */
+
+/*
+ * CSS3 Treeview. No JavaScript
+ * @version 1.0
+ * @author Martin Ivanov
+ * @url developer's website: http://wemakesites.net/
+ * @url developer's twitter: https://twitter.com/#!/wemakesitesnet
+ * @url developer's blog http://acidmartin.wordpress.com/
+ **/
+
+/*
+ * This solution works with all modern browsers and Internet Explorer 9+.
+ * If you are interested in purchasing a JavaScript enabler for IE8
+ * for the CSS3 Treeview, please, check this link:
+ * http://experiments.wemakesites.net/miscellaneous/acidjs-css3-treeview/
+ **/
+
+.css-treeview ul,
+.css-treeview li {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+.css-treeview input.plus {
+    position: absolute;
+    display: none;
+}
+
+.css-treeview {
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.css-treeview input.plus + label + ul {
+    margin-left: 18px;
+}
+
+.css-treeview input.plus ~ ul {
+    display: none;
+}
+
+.css-treeview label.group,
+.css-treeview label.leaf,
+.css-treeview label.group::before {
+    cursor: pointer;
+    vertical-align: middle;
+    font-weight: normal;
+}
+
+.css-treeview input.plus:disabled + label.group {
+    cursor: default;
+    opacity: .6;
+}
+
+.css-treeview input.plus:checked:not(:disabled) ~ ul {
+    display: block;
+}
+
+.css-treeview label.group::before {
+    background: url("/static/i/tree-icons.png") no-repeat;
+    display: inline-block;
+    height: 16px;
+}
+
+.css-treeview label.group::before {
+    content: "";
+    width: 16px;
+    margin: 0 2px 0 0;
+    vertical-align: middle;
+    background-position: 0 -32px;
+}
+
+.css-treeview input.plus:checked + label.group::before {
+    background-position: 0 -16px;
+}
+
+/* webkit adjacent element selector bugfix */
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+    .css-treeview {
+        -webkit-animation: webkit-adjacent-element-selector-bugfix infinite 1s;
+    }
+
+    @-webkit-keyframes webkit-adjacent-element-selector-bugfix {
+        from {
+            padding: 0;
+        } to {
+            padding: 0;
+        }
+    }
+}

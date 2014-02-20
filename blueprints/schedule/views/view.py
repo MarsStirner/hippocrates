@@ -5,6 +5,7 @@ from jinja2 import TemplateNotFound
 
 from ..app import module
 from application.lib.utils import public_endpoint
+from blueprints.schedule.app import module
 from blueprints.schedule.models.exists import Client
 
 # noinspection PyUnresolvedReferences
@@ -52,3 +53,12 @@ def appointment():
         'schedule/person_appointment.html',
         client=client
     )
+
+
+@module.route('/patient_info/')
+@public_endpoint
+def patient_info():
+    try:
+        return render_template('schedule/patient_info.html')
+    except TemplateNotFound:
+        abort(404)

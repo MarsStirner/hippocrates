@@ -1,18 +1,11 @@
 # -*- coding: utf-8 -*-
+from collections import defaultdict
 import datetime
-from json import JSONEncoder
 
 from blueprints.schedule.models.schedule import ScheduleTicket, ScheduleClientTicket
 
 
 __author__ = 'mmalkov'
-
-
-class MyJsonEncoder(JSONEncoder):
-    def default(self, o):
-        if isinstance(o, (datetime.datetime, datetime.date, datetime.time)):
-            return o.isoformat()
-        return JSONEncoder.default(self, o)
 
 
 class Format:
@@ -70,7 +63,7 @@ class ScheduleVisualizer(object):
         result = []
         one_day = datetime.timedelta(days=1)
         for schedule in schedules:
-            while schedule.date > date_start:
+            while date_start < schedule.date < date_end:
                 result.append(self.EmptyDay(date_start))
                 date_start += one_day
 
@@ -125,3 +118,23 @@ class ClientVisualizer(object):
             'createPerson': createPerson.nameText if createPerson else None,
             'note': record.note,
         }
+
+class PersonTreeVisualizer(object):
+    def make_person(self, person):
+        return {
+            'id': person.id,
+            'name': person.shortNameText,
+        }
+
+    def make_speciality(self, speciality):
+        return {
+            'id': speciality.id,
+            'name': speciality.name,
+            'persons': [],
+        }
+
+    def make_tree(self, persons):
+        specs = defaultdict(list)
+        for person in persons:
+            if person.speciality:
+                specs[person.speciality.name].append(self.make_person(person))

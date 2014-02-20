@@ -1,26 +1,19 @@
 # -*- coding: utf-8 -*-
 from collections import defaultdict
 import datetime
-import json
-from flask import render_template, abort, request
-from jinja2 import TemplateNotFound
+import logging
+
+from flask import abort, request
+
 from application.lib.sphinx_search import SearchPatient, SearchPerson
-from application.lib.utils import public_endpoint
+from application.lib.utils import public_endpoint, jsonify
 from blueprints.schedule.app import module
 from blueprints.schedule.models.exists import Person, Client
-from blueprints.schedule.models.schedule import Schedule
-from blueprints.schedule.views.jsonify import ScheduleVisualizer, MyJsonEncoder, ClientVisualizer, Format
+from blueprints.schedule.models.schedule import Schedule, ScheduleTicket, ScheduleClientTicket
+from blueprints.schedule.views.jsonify import ScheduleVisualizer, ClientVisualizer, Format
+
 
 __author__ = 'mmalkov'
-
-
-@module.route('/patient_info/')
-@public_endpoint
-def patient_info():
-    try:
-        return render_template('schedule/patient_info.html')
-    except TemplateNotFound:
-        abort(404)
 
 
 @module.route('/api/schedule.json')
@@ -43,10 +36,10 @@ def api_schedule():
     context = ScheduleVisualizer()
     context.client_id = client_id
     context.attendance_type = attendance_type
-    return json.dumps({
+    return jsonify({
         'schedule': context.make_schedule(schedules, month_f, month_l),
         'person': context.make_person(person),
-    }, cls=MyJsonEncoder)
+    })
 
 
 @module.route('/api/patient.json')
@@ -60,10 +53,10 @@ def api_patient():
     if not client:
         return abort(404)
     context = ClientVisualizer()
-    return json.dumps({
+    return jsonify({
         'clientData': context.make_client_info(client),
         'records': context.make_records(client),
-    }, cls=MyJsonEncoder)
+    })
 
 
 @module.route('/api/search_clients.json')
@@ -84,10 +77,7 @@ def api_search_clients():
     else:
         clients = Client.query.limit(100).all()
     context = ClientVisualizer(Format.JSON)
-    return json.dumps(
-        map(context.make_client_info, clients),
-        cls=MyJsonEncoder
-    )
+    return jsonify(map(context.make_client_info, clients))
 
 
 @module.route('/api/all_persons_tree.json')
@@ -101,10 +91,7 @@ def api_all_persons_tree():
         all()
     for person in persons:
         result[person.speciality.name].append({'id': person.id, 'name': person.shortNameText})
-    return json.dumps(
-        result,
-        cls=MyJsonEncoder,
-    )
+    return jsonify(result)
 
 
 @module.route('/api/search_persons.json')
@@ -126,7 +113,43 @@ def api_search_persons():
             'tokens': [item['lastname'], item['firstname'], item['patrname']] + item['speciality'].split(),
         }
     data = map(cat, result['result']['items'])
-    return json.dumps(
-        data,
-        cls=MyJsonEncoder
-    )
+    return jsonify(data)
+
+
+@module.route('/api/client_appointments.json')
+@public_endpoint
+def api_client_appointments():
+    try:
+        client_id = int(request.args['client_id'])
+        month_f = datetime.datetime.strptime(request.args['start_date'], '%Y-%m-%d').date()
+        month_l = month_f + datetime.timedelta(weeks=1)
+    except KeyError or ValueError:
+        return abort(404)
+    persons = Person.query.\
+        join(ScheduleClientTicket.ticket).\
+        join(ScheduleTicket.schedule).\
+        join(Schedule.person).\
+        filter(month_f <= Schedule.date, Schedule.date <= month_l).\
+        filter(ScheduleClientTicket.client_id == client_id).\
+        filter(ScheduleClientTicket.deleted == 0).\
+        distinct()
+
+    person_schedules = [{
+        'person': person,
+        'schedule': Schedule.query.\
+            filter(Schedule.person_id == int(person.id)).\
+            order_by(Schedule.date),
+        }
+        for person in persons
+    ]
+
+    context = ScheduleVisualizer()
+    context.client_id = client_id
+    context.attendance_type = 'amb'
+    return jsonify([
+        {
+            'person': context.make_person(schedules['person']),
+            'schedule': context.make_schedule(schedules['schedule'], month_f, month_l)
+        }
+        for schedules in person_schedules
+    ])
