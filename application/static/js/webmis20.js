@@ -40,6 +40,9 @@ var aux = {
     endswith: function (str, suffix) {
         return str.indexOf(suffix, str.length - suffix.length) !== -1;
     },
+    startswith: function (str, prefix) {
+        return str.indexOf(prefix) === 0;
+    },
     format: function (record, key) {
         if (typeof (record) === 'undefined') {
             return null;

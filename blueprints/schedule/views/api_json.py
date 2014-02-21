@@ -8,7 +8,7 @@ from flask import abort, request
 from application.lib.sphinx_search import SearchPatient, SearchPerson
 from application.lib.utils import public_endpoint, jsonify
 from blueprints.schedule.app import module
-from blueprints.schedule.models.exists import Person, Client
+from blueprints.schedule.models.exists import Person, Client, rbSpeciality
 from blueprints.schedule.models.schedule import Schedule, ScheduleTicket, ScheduleClientTicket
 from blueprints.schedule.views.jsonify import ScheduleVisualizer, ClientVisualizer, Format
 
@@ -83,14 +83,23 @@ def api_search_clients():
 @module.route('/api/all_persons_tree.json')
 @public_endpoint
 def api_all_persons_tree():
-    result = defaultdict(list)
+    sub_result = defaultdict(list)
     persons = Person.query.\
         filter(Person.deleted == 0).\
         filter(Person.speciality).\
         order_by(Person.lastName, Person.firstName).\
         all()
     for person in persons:
-        result[person.speciality.name].append({'id': person.id, 'name': person.shortNameText})
+        sub_result[person.speciality_id].append({'id': person.id, 'name': person.shortNameText})
+    result = [
+        {
+            'speciality': {
+                'id': spec_id,
+                'name': rbSpeciality.query.get(spec_id).name,
+            },
+            'persons': person_list,
+        } for spec_id, person_list in sub_result.iteritems()
+    ]
     return jsonify(result)
 
 

@@ -55,15 +55,21 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-3">
-                <input id="person_query" class="form-control" type="text" ng-model="person_query" placeholder="Поиск врача"/>
+            <div class="col-md-3" ng-controller="PersonTree">
+                <input id="person_query" class="form-control" type="text" ng-model="query" placeholder="Поиск врача"/>
                 <div class="css-treeview well well-sm">
                     <ul>
-                        <li ng-repeat="(spec_name, persons) in person_tree">
-                            <input class="plus" type="checkbox" id="spec-[[$index]]" checked><label class="group" for="spec-[[$index]]">[[ spec_name ]]</label>
+                        <li ng-repeat="spec_group in tree">
+                            <input class="plus" type="checkbox" id="spec-[[spec_group.speciality.id]]" checked>
+                            <label class="group" for="spec-[[spec_group.speciality.id]]">
+                                [[ spec_group.speciality.name ]]
+                            </label>
                             <ul>
-                                <li ng-repeat="person in persons">
-                                    <input type="checkbox" id="doc-[[person.id]]"><label class="leaf" for="doc-[[person.id]]">[[ person.name ]]</label>
+                                <li ng-repeat="person in spec_group.persons">
+                                    <input type="checkbox" id="doc-[[person.id]]" ng-model="person.checked" ng-disabled="person.disabled" ng-change="selection_change(person)">
+                                    <label class="leaf" for="doc-[[person.id]]">
+                                        [[ person.name ]]
+                                    </label>
                                 </li>
                             </ul>
                         </li>
@@ -77,6 +83,67 @@
 {% block modules_js %}
     {{ super() }}
     <script type="text/javascript">
+        WebMis20.controller('PersonTree', ['$scope', '$http', function($scope, $http) {
+            $scope.data = [];
+            $scope.query = '';
+            $scope.tree = [];
+            $scope.data_selected = [];
+            $scope.user_selected = [];
+{#            // Может, всё это грузить прямо здесь?#}
+            $scope.reloadTree = function() {
+                $http.get(
+                    '{{ url_for('.api_all_persons_tree') }}'
+                ).success(function (data) {
+                    $scope.data = data;
+                    $scope.compose();
+                })
+            };
+            $scope.reset = function () {
+                $scope.query = '';
+                $scope.user_selected = [];
+                $scope.reloadTree();
+            };
+            $scope.compose = function () {
+                $scope.tree = $scope.data.map(function (spec_group) {
+                    return {
+                        speciality: spec_group.speciality,
+                        persons: (spec_group.persons).filter(function (person) {
+                            return aux.startswith(person.name, $scope.query) || $scope.query == '';
+                        }).map(function (person) {
+                            return {
+                                id: person.id,
+                                name: person.name,
+                                disabled: $.inArray(person.id, $scope.data_selected) !== -1,
+                                checked: $.inArray(person.id, [].concat($scope.data_selected, $scope.user_selected)) !== -1
+                            }
+                        })
+                    }
+                })
+            };
+            $scope.selection_change = function (person) {
+                $scope.user_selected = [].concat($scope.tree.map(function (spec_group) {
+                    spec_group.persons.filter(function (person) {
+                        return person.checked;
+                    }).map(function (person) {
+                        return person.id;
+                    })
+                }));
+                $scope.$parent.$emit('UserSelectionChanged', person);
+            };
+            $scope.$on('DataSelectedChanged', function (event, data_selected) {
+                $scope.data_selected = data_selected;
+                $scope.compose();
+            });
+            $scope.$on('UserSelectionChanged', function (event) {
+                $scope.compose();
+            });
+            $scope.$on('Reset', function () {
+                $scope.reset();
+            });
+
+            $scope.reset();
+
+        }]);
         WebMis20.controller('Appointment', ['$scope', '$http', function ($scope, $http) {
             $scope.max_tickets = [];
             $scope.aux = aux;
@@ -133,15 +200,6 @@
                 $scope.attendance_type = code;
             };
 
-            $scope.loadTree = function () {
-                $http.get(
-                    '{{ url_for('.api_all_persons_tree') }}'
-                ).success(function (data) {
-                    $scope.person_tree = data;
-                    $scope.persons_selected = [];
-                })
-            };
-
             $scope.loadData = function () {
                 $http.get(
                     '{{ url_for('.api_client_appointments') }}', {
@@ -158,11 +216,16 @@
                             schedule: d.schedules,
                             max_tickets: d.max_tickets
                         }
-                    })
+                    });
+                    $scope.$broadcast('DataSelectedChanged', data.map(function (item) {
+                        return item.person.id;
+                    }))
                 })
             };
+            $scope.$on('UserSelectionChanged', function (event, person) {
+                console.info('USC ' + person.id + ' ' + person.checked);
+            });
 
-            $scope.loadTree();
             $scope.monthChanged();
         }]);
     </script>
