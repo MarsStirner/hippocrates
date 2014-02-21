@@ -3,10 +3,10 @@
 {% block title %}> {{ module_name }}{% endblock %}
 
 {% block main %}
-    <div ng-controller="Appointment">
+    <div>
         <legend xmlns="http://www.w3.org/1999/html">Запись пациента на прием - {{ client.nameText }}</legend>
         <div class="row">
-            <div class="col-md-9">
+            <div class="col-md-9" ng-controller="Schedules">
                 <div class="row">
                     <div class="col-md-2">
                         <select class="form-control" name="year" ng-model="year" ng-options="y for y in years"
@@ -121,14 +121,16 @@
                 })
             };
             $scope.selection_change = function (person) {
-                $scope.user_selected = [].concat($scope.tree.map(function (spec_group) {
+                var user_selected = [];
+                $scope.tree.map(function (spec_group) {
                     spec_group.persons.filter(function (person) {
                         return person.checked;
                     }).map(function (person) {
-                        return person.id;
+                        user_selected.push(person.id);
                     })
-                }));
-                $scope.$parent.$emit('UserSelectionChanged', person);
+                });
+                $scope.user_selected = user_selected;
+                $scope.$root.$broadcast('UserSelectionChanged', person);
             };
             $scope.$on('DataSelectedChanged', function (event, data_selected) {
                 $scope.data_selected = data_selected;
@@ -144,7 +146,7 @@
             $scope.reset();
 
         }]);
-        WebMis20.controller('Appointment', ['$scope', '$http', function ($scope, $http) {
+        WebMis20.controller('Schedules', ['$scope', '$http', function ($scope, $http) {
             $scope.max_tickets = [];
             $scope.aux = aux;
             $scope.params = aux.getQueryParams(document.location.search);
@@ -217,13 +219,13 @@
                             max_tickets: d.max_tickets
                         }
                     });
-                    $scope.$broadcast('DataSelectedChanged', data.map(function (item) {
+                    $scope.$root.$broadcast('DataSelectedChanged', data.map(function (item) {
                         return item.person.id;
                     }))
                 })
             };
             $scope.$on('UserSelectionChanged', function (event, person) {
-                console.info('USC ' + person.id + ' ' + person.checked);
+                console.info('USC ' + person.name + ' ' + person.checked);
             });
 
             $scope.monthChanged();
