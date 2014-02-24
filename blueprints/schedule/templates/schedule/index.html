@@ -7,38 +7,71 @@
     <div ng-controller="Schedule">
         <div class="row">
             <div class="col-md-2">
-                <select class="form-control" name="year" ng-model="year" ng-options="y for y in years" ng-change="monthChanged()"></select>
+                <select class="form-control" name="year" ng-model="year"
+                        ng-options="y for y in years" ng-change="monthChanged()"></select>
             </div>
             <div class="col-md-2">
-                <select class="form-control" name="month" ng-model="month" ng-options="item.value as item.name for item in aux.months" ng-change="monthChanged()"></select>
+                <select class="form-control" name="month" ng-model="month"
+                        ng-options="item.value as item.name for item in aux.months" ng-change="monthChanged()"></select>
             </div>
             <div class="col-md-8">
-                <input id="person_query" class="form-control" type="text" ng-model="person_query" placeholder="ФИО врача" />
+                <input id="person_query" class="form-control" type="text" ng-model="person_query"
+                       placeholder="ФИО врача" />
             </div>
         </div>
-        <ul class="nav nav-tabs nav-tabs-justified" ng-model="attendance_type" ng-if="person">
-            <li ng-class="{active: (at.code == attendance_type)}" ng-repeat="at in attendance_types" ng-click="changeAttendanceType(at.code)"><a href="#">[[ at.name ]]</a></li>
-        </ul>
-        <span ng-if="person"><span class="speciality">[[ person.speciality ]]</span>: <span class="doctor-name">[[ person.name ]]</span></span>
-        <ul class="nav nav-pills" ng-if="person">
-            <li ng-class="{active: ($index == page)}" ng-repeat="p in pages"><a ng-click="setDatePage($index)" href="#">[[ p.format('MM.DD') ]] - [[ aux.moment(p).add(6, 'd').format('MM.DD') ]]</a></li>
-        </ul>
-        <table class="table table-condensed" ng-if="person">
-            <thead>
-            <tr>
-                <th ng-repeat="day in schedule[attendance_type]">[[ aux.moment(day.date).format('DD.MM.YYYY, dd') ]]</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr ng-repeat="row in aux.range(max_tickets[attendance_type])">
-                <td ng-repeat="day in schedule[attendance_type]" ng-switch="day.tickets[row].status">
-                    <button type="button" class="btn btn-block btn-danger" ng-switch-when="busy" ng-if="day.tickets[row].attendance_type == attendance_type">[[ aux.moment(day.tickets[row].begDateTime).format('hh:mm') ]] - [[ day.tickets[row].client ]]</button>
-                    <button type="button" class="btn btn-block btn-success" ng-switch-when="free" ng-if="day.tickets[row].attendance_type == attendance_type">[[ aux.moment(day.tickets[row].begDateTime).format('hh:mm') ]]</button>
-                    <button type="button" class="btn btn-block disabled" ng-if="day.tickets[row].attendance_type != attendance_type">&nbsp;</button>
-                </td>
-            </tr>
-            </tbody>
-        </table>
+        <div class="row">
+            <div class="col-md-12">
+                <ul class="nav nav-tabs nav-justified" ng-model="attendance_type" ng-if="person">
+                    <li ng-class="{active: (at.code == attendance_type)}" ng-repeat="at in attendance_types"
+                        ng-click="changeAttendanceType(at.code)"><a href="#">[[ at.name ]]</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <ul class="nav nav-pills" ng-if="person">
+                    <li ng-class="{active: ($index == page)}" ng-repeat="p in pages">
+                        <a ng-click="setDatePage($index)" href="#">
+                            [[ p.format('MM.DD') ]] - [[ aux.moment(p).add(6, 'd').format('MM.DD') ]]
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <table class="table table-condensed" ng-if="person">
+                    <caption>[[ person.name ]]<small>, [[ person.speciality ]]</small></caption>
+                    <thead>
+                    <tr>
+                        <th ng-repeat="day in schedule[attendance_type]"
+                            ng-bind="aux.moment(day.date).format('DD.MM.YYYY, dd')"></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="row in aux.range(max_tickets[attendance_type])">
+                        <td ng-repeat="day in schedule[attendance_type]" ng-switch="day.tickets[row].status">
+                            <button type="button" class="btn btn-block btn-danger" ng-switch-when="busy"
+                                    ng-if="day.tickets[row].attendance_type == attendance_type">
+                                [[ aux.moment(day.tickets[row].begDateTime).format('hh:mm') ]] - [[ day.tickets[row].client ]]
+                            </button>
+                            <button type="button" class="btn btn-block btn-success" ng-switch-when="free"
+                                    ng-if="day.tickets[row].attendance_type == attendance_type">
+                                [[ aux.moment(day.tickets[row].begDateTime).format('hh:mm') ]]
+                            </button>
+                            <button type="button" class="btn btn-block disabled"
+                                    ng-if="day.tickets[row].attendance_type != attendance_type">&nbsp;
+                            </button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+
+
 {#        <pre>[[schedule|json]]</pre>#}
     </div>
 {% endblock %}
@@ -75,9 +108,9 @@
                             }
                         }
                     ).success(function (data) {
-                        var d = processSchedule(data.schedule, $scope.attendance_types);
+                        var d = processSchedule(data, $scope.attendance_types);
                         $scope.max_tickets = d.max_tickets;
-                        $scope.schedule = d.schedules;
+                        $scope.schedule = d.schedule;
                         $scope.person = data.person;
                     })
                 }

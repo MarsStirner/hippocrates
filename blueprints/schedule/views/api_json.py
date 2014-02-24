@@ -42,6 +42,37 @@ def api_schedule():
     })
 
 
+@module.route('/api/schedules.json')
+@public_endpoint
+def api_schedules():
+    pid = request.args.get('person_id', '')
+    if pid and not (pid.startswith('[') and pid.endswith(']')) or pid and len(pid) < 3:
+        return abort(404)
+    try:
+        person_ids = map(int, pid[1:-1].split(','))
+        client_id = int(request.args['client_id']) if 'client_id' in request.args else None
+        month_f = datetime.datetime.strptime(request.args['start_date'], '%Y-%m-%d').date()
+        month_l = month_f + datetime.timedelta(weeks=1)
+        attendance_type = request.args.get('attendance_type')
+    except KeyError or ValueError:
+        return abort(404)
+    context = ScheduleVisualizer()
+    context.client_id = client_id
+    context.attendance_type = attendance_type
+    result = []
+    for person_id in person_ids:
+        person = Person.query.get(person_id)
+        schedules = Schedule.query.\
+            filter(Schedule.person_id == person_id).\
+            filter(month_f <= Schedule.date).\
+            filter(Schedule.date <= month_l).\
+            order_by(Schedule.date)
+        result.append({
+            'schedule': context.make_schedule(schedules, month_f, month_l),
+            'person': context.make_person(person),
+        })
+    return jsonify(result)
+
 @module.route('/api/patient.json')
 @public_endpoint
 def api_patient():

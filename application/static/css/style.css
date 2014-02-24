@@ -185,7 +185,7 @@ span.twitter-typeahead {
     list-style: none;
 }
 
-.css-treeview input.plus {
+.css-treeview input.group {
     position: absolute;
     display: none;
 }
@@ -196,12 +196,22 @@ span.twitter-typeahead {
     user-select: none;
 }
 
-.css-treeview input.plus + label + ul {
+.css-treeview input.leaf {
+    cursor: pointer;
+}
+
+.css-treeview input.group + label + ul {
     margin-left: 18px;
 }
 
-.css-treeview input.plus ~ ul {
+.css-treeview input.group ~ ul {
     display: none;
+}
+
+.css-treeview label.group:hover,
+.css-treeview label.leaf:hover {
+    background-color: mediumseagreen;
+    color: lightyellow;
 }
 
 .css-treeview label.group,
@@ -210,14 +220,15 @@ span.twitter-typeahead {
     cursor: pointer;
     vertical-align: middle;
     font-weight: normal;
+    border-radius: 2px;
 }
 
-.css-treeview input.plus:disabled + label.group {
+.css-treeview input.group:disabled + label.group {
     cursor: default;
     opacity: .6;
 }
 
-.css-treeview input.plus:checked:not(:disabled) ~ ul {
+.css-treeview input.group:checked:not(:disabled) ~ ul {
     display: block;
 }
 
@@ -235,7 +246,7 @@ span.twitter-typeahead {
     background-position: 0 -32px;
 }
 
-.css-treeview input.plus:checked + label.group::before {
+.css-treeview input.group:checked + label.group::before {
     background-position: 0 -16px;
 }
 
@@ -252,4 +263,10 @@ span.twitter-typeahead {
             padding: 0;
         }
     }
+}
+
+.scrolled-tree {
+    height: 100%;
+    overflow-y: auto;
+    max-height: 500px;
 }

@@ -21,31 +21,31 @@
                         <ul class="nav nav-pills small">
                             <li ng-class="{active: ($index == page)}" ng-repeat="p in pages">
                                 <a ng-click="setDatePage($index)" href="#">
-                                    [[ p.format('MM.DD') ]] - [[ aux.moment(p).add(6, 'd').format('MM.DD') ]]
+                                    [[ p.format('DD.MM') ]] - [[ aux.moment(p).add(6, 'd').format('DD.MM') ]]
                                 </a>
                             </li>
                         </ul>
                     </div>
                 </div>
-                <div class="row" ng-repeat="person_schedule in person_schedules">
+                <div class="row" ng-repeat="person_schedule in total_schedules">
                     <div class="col-md-12">
                         <table class="table table-condensed">
-                            <caption>[[ person_schedule.person.name ]]</caption>
+                            <caption>[[ person_schedule.person.name ]]<small>, [[ person_schedule.person.speciality ]]</small></caption>
                             <thead>
                             <tr>
-                                <th ng-repeat="day in person_schedule.schedule[attendance_type]">
-                                    [[ aux.moment(day.date).format('DD.MM.YYYY, dd') ]]
+                                <th ng-repeat="day in person_schedule.schedule[attendance_type]"
+                                    ng-bind="aux.moment(day.date).format('DD.MM.YYYY, dd')">
                                 </th>
                             </tr>
                             </thead>
                             <tbody>
                             <tr ng-repeat="row in aux.range(person_schedule.max_tickets[attendance_type])">
                                 <td ng-repeat="day in person_schedule.schedule[attendance_type]" ng-switch="day.tickets[row].status">
-                                    <button type="button" class="btn btn-block btn-danger" ng-switch-when="busy">
-                                        [[ aux.moment(day.tickets[row].begDateTime).format('hh:mm') ]]
+                                    <button type="button" class="btn btn-block btn-danger" ng-switch-when="busy"
+                                            ng-bind="aux.moment(day.tickets[row].begDateTime).format('hh:mm')">
                                     </button>
-                                    <button type="button" class="btn btn-block btn-success" ng-switch-when="free">
-                                        [[ aux.moment(day.tickets[row].begDateTime).format('hh:mm') ]]
+                                    <button type="button" class="btn btn-block btn-success" ng-switch-when="free"
+                                            ng-bind="aux.moment(day.tickets[row].begDateTime).format('hh:mm')">
                                     </button>
                                     <button type="button" class="btn btn-block disabled" ng-switch-default>&nbsp;</button>
                                 </td>
@@ -56,20 +56,16 @@
                 </div>
             </div>
             <div class="col-md-3" ng-controller="PersonTree">
-                <input id="person_query" class="form-control" type="text" ng-model="query" placeholder="Поиск врача"/>
-                <div class="css-treeview well well-sm">
+                <input id="person_query" class="form-control" type="text" ng-model="query" placeholder="Поиск врача" ng-change="compose()"/>
+                <div class="css-treeview well well-sm scrolled-tree">
                     <ul>
                         <li ng-repeat="spec_group in tree">
-                            <input class="plus" type="checkbox" id="spec-[[spec_group.speciality.id]]" checked>
-                            <label class="group" for="spec-[[spec_group.speciality.id]]">
-                                [[ spec_group.speciality.name ]]
-                            </label>
+                            <input class="group" type="checkbox" id="spec-[[spec_group.speciality.id]]" checked>
+                            <label class="group" for="spec-[[spec_group.speciality.id]]" ng-bind="spec_group.speciality.name" ></label>
                             <ul>
                                 <li ng-repeat="person in spec_group.persons">
-                                    <input type="checkbox" id="doc-[[person.id]]" ng-model="person.checked" ng-disabled="person.disabled" ng-change="selection_change(person)">
-                                    <label class="leaf" for="doc-[[person.id]]">
-                                        [[ person.name ]]
-                                    </label>
+                                    <input type="checkbox" id="doc-[[person.id]]" ng-model="person.checked" ng-disabled="person.disabled" ng-change="selection_change(person)" class="leaf">
+                                    <label class="leaf" for="doc-[[person.id]]" ng-bind="person.name"></label>
                                 </li>
                             </ul>
                         </li>
@@ -108,7 +104,7 @@
                     return {
                         speciality: spec_group.speciality,
                         persons: (spec_group.persons).filter(function (person) {
-                            return aux.startswith(person.name, $scope.query) || $scope.query == '';
+                            return aux.startswith(person.name.toLocaleLowerCase(), $scope.query.toLocaleLowerCase()) || $scope.query == '';
                         }).map(function (person) {
                             return {
                                 id: person.id,
@@ -118,6 +114,8 @@
                             }
                         })
                     }
+                }).filter(function (spec_group) {
+                    return spec_group.persons.length > 0;
                 })
             };
             $scope.selection_change = function (person) {
@@ -130,7 +128,7 @@
                     })
                 });
                 $scope.user_selected = user_selected;
-                $scope.$root.$broadcast('UserSelectionChanged', person);
+                $scope.$root.$broadcast('UserSelectionChanged', person, user_selected);
             };
             $scope.$on('DataSelectedChanged', function (event, data_selected) {
                 $scope.data_selected = data_selected;
@@ -148,10 +146,16 @@
         }]);
         WebMis20.controller('Schedules', ['$scope', '$http', function ($scope, $http) {
             $scope.max_tickets = [];
+            $scope.person_schedules = [];
+            $scope.user_schedules = [];
+            $scope.total_schedules = [];
+
+            $scope.user_selected = [];
+            $scope.data_selected = [];
+
             $scope.aux = aux;
             $scope.params = aux.getQueryParams(document.location.search);
             $scope.client_id = $scope.params.client_id;
-            $scope.person_query = '';
             var curDate = new Date();
             var curYear = curDate.getUTCFullYear();
             $scope.years = [curYear - 1, curYear, curYear + 1];
@@ -212,19 +216,66 @@
                     }
                 ).success(function (data) {
                     $scope.person_schedules = data.map(function (item) {
-                        var d = processSchedule(item.schedule, $scope.attendance_types);
-                        return {
-                            person: item.person,
-                            schedule: d.schedules,
-                            max_tickets: d.max_tickets
-                        }
+                        return processSchedule(item, $scope.attendance_types);
                     });
-                    $scope.$root.$broadcast('DataSelectedChanged', data.map(function (item) {
+                    $scope.data_selected = data.map(function (item) {
                         return item.person.id;
-                    }))
-                })
+                    });
+                    var user_get = $scope.user_selected.filter(function (person_id) {
+                        return $scope.data_selected.indexOf(person_id) == -1;
+                    });
+                    $scope.user_schedules = [];
+                    $scope.refreshSchedules();
+                    if (user_get.length > 0) {
+                        $http.get(
+                            '{{ url_for('.api_schedules') }}', {
+                                params: {
+                                    client_id: $scope.client_id,
+                                    start_date: $scope.pages[$scope.page].format('YYYY-MM-DD'),
+                                    person_id: '[' + user_get.join(',') + ']'
+                                }
+                            }
+                        ).success(function (data) {
+                            $scope.user_schedules = data.map(function (item) {
+                                return processSchedule(item, $scope.attendance_types);
+                            });
+                            $scope.refreshSchedules();
+                        });
+                    }
+                    $scope.$root.$broadcast('DataSelectedChanged', $scope.data_selected);
+                });
             };
-            $scope.$on('UserSelectionChanged', function (event, person) {
+
+            $scope.refreshSchedules = function () {
+                $scope.total_schedules = [].concat($scope.person_schedules, $scope.user_schedules).sort(function compare(a, b) {
+                    if (a.person.name < b.person.name)
+                        return -1;
+                    else if (a.person.name > b.person.name)
+                        return 1;
+                    return 0;
+                });
+            };
+
+            $scope.$on('UserSelectionChanged', function (event, person, user_selected) {
+                $scope.user_selected = user_selected;
+                if (person.checked) {
+                    $http.get('{{ url_for('.api_schedule') }}', {
+                        params: {
+                            client_id: $scope.client_id,
+                            person_id: person.id,
+                            start_date: $scope.pages[$scope.page].format('YYYY-MM-DD'),
+                            attendance_type: 'amb'
+                        }
+                    }).success(function (data) {
+                        $scope.user_schedules.push(processSchedule(data, $scope.attendance_types));
+                        $scope.refreshSchedules();
+                    })
+                } else {
+                    $scope.user_schedules = $scope.user_schedules.filter(function (sched_group) {
+                        return sched_group.person.id != person.id;
+                    });
+                    $scope.refreshSchedules();
+                }
                 console.info('USC ' + person.name + ' ' + person.checked);
             });
 
