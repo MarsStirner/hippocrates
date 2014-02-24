@@ -70,8 +70,13 @@ class ScheduleTicket(db.Model):
 
     @property
     def client(self):
-        ct = self.client_tickets.filter(ScheduleClientTicket.deleted == 0).first()
+        ct = self.client_ticket
         return ct.client if ct else None
+
+    @property
+    def client_ticket(self):
+        return self.client_tickets.filter(ScheduleClientTicket.deleted == 0).first()
+
 
 class ScheduleClientTicket(db.Model):
     __tablename__ = 'ScheduleClientTicket'

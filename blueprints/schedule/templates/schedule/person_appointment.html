@@ -42,16 +42,37 @@
                             <tr ng-repeat="row in aux.range(person_schedule.max_tickets[attendance_type])">
                                 <td ng-repeat="day in person_schedule.schedule[attendance_type]" ng-switch="day.tickets[row].status">
                                     <button type="button" class="btn btn-block btn-danger" ng-switch-when="busy"
-                                            ng-bind="aux.moment(day.tickets[row].begDateTime).format('hh:mm')">
+                                            ng-bind="aux.moment(day.tickets[row].begDateTime).format('hh:mm')"
+                                            ng-click="appointment_cancel(day.tickets[row], person_schedule.person)">
                                     </button>
                                     <button type="button" class="btn btn-block btn-success" ng-switch-when="free"
-                                            ng-bind="aux.moment(day.tickets[row].begDateTime).format('hh:mm')">
+                                            ng-bind="aux.moment(day.tickets[row].begDateTime).format('hh:mm')"
+                                            ng-click="appointment_make(day.tickets[row], person_schedule.person)">
                                     </button>
                                     <button type="button" class="btn btn-block disabled" ng-switch-default>&nbsp;</button>
                                 </td>
                             </tr>
                             </tbody>
                         </table>
+                    </div>
+                </div>
+                <!-- Modal -->
+                <div class="modal fade" id="modalDialog" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                <h4 class="modal-title" id="myModalLabel" ng-bind="modal.title"></h4>
+                            </div>
+                            <div class="modal-body" ng-bind="modal.body">
+                                ...
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-danger" data-dismiss="modal">Отмена</button>
+                                <button type="button" class="btn btn-success" ng-bind="modal.acceptText"
+                                        ng-click="modal.accept()" ng-disabled="modal.unacceptable"></button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -145,6 +166,7 @@
 
         }]);
         WebMis20.controller('Schedules', ['$scope', '$http', function ($scope, $http) {
+            $scope.modal = {};
             $scope.max_tickets = [];
             $scope.person_schedules = [];
             $scope.user_schedules = [];
@@ -215,9 +237,7 @@
                         }
                     }
                 ).success(function (data) {
-                    $scope.person_schedules = data.map(function (item) {
-                        return processSchedule(item, $scope.attendance_types);
-                    });
+                    $scope.person_schedules = data.map(scheduleProcessor($scope.attendance_types));
                     $scope.data_selected = data.map(function (item) {
                         return item.person.id;
                     });
@@ -236,9 +256,7 @@
                                 }
                             }
                         ).success(function (data) {
-                            $scope.user_schedules = data.map(function (item) {
-                                return processSchedule(item, $scope.attendance_types);
-                            });
+                            $scope.user_schedules = data.map(scheduleProcessor($scope.attendance_types));
                             $scope.refreshSchedules();
                         });
                     }
@@ -254,6 +272,58 @@
                         return 1;
                     return 0;
                 });
+            };
+
+            // Следующие 2 метода надобно привести к какому-то цивильному виду
+
+            $scope.appointment_cancel = function (ticket, person) {
+                $scope.modal = {
+                    title: 'Отменить запись на приём?',
+                    acceptText: 'Так точно',
+                    body: 'Отменить запись на приём к ' + person.name + ' на ' + moment(ticket.begDateTime).format('HH:mm DD MMM') + '?',
+                    accept: function () {
+                        $http.get(
+                            '{{ url_for('.api_appointment_cancel') }}', {
+                                params: {
+                                    client_id: $scope.client_id,
+                                    ticket_id: ticket.id
+                                }
+                            }
+                        ).success(function () {
+                            $scope.loadData();
+                            $('#modalDialog').modal('hide');
+                        }).error(function () {
+                            $scope.modal.unacceptable = true;
+                            $scope.modal.body = 'Отмена не удалась.'
+                        });
+                    }
+                };
+                $('#modalDialog').modal('show')
+            };
+
+            $scope.appointment_make = function (ticket, person) {
+                $scope.modal = {
+                    title: 'Записать на приём?',
+                    acceptText: 'Так точно',
+                    body: 'Записать на приём к ' + person.name + ' на ' + moment(ticket.begDateTime).format('HH:mm DD MMM') + '?',
+                    accept: function () {
+                        $http.get(
+                            '{{ url_for('.api_appointment_make') }}', {
+                                params: {
+                                    client_id: $scope.client_id,
+                                    ticket_id: ticket.id
+                                }
+                            }
+                        ).success(function () {
+                            $scope.loadData();
+                            $('#modalDialog').modal('hide');
+                        }).error(function () {
+                            $scope.modal.unacceptable = true;
+                            $scope.modal.body = 'Запись на приём не удалась.'
+                        });
+                    }
+                };
+                $('#modalDialog').modal('show')
             };
 
             $scope.$on('UserSelectionChanged', function (event, person, user_selected) {

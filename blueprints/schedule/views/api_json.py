@@ -4,12 +4,13 @@ import datetime
 import logging
 
 from flask import abort, request
+from application.database import db
 
 from application.lib.sphinx_search import SearchPatient, SearchPerson
 from application.lib.utils import public_endpoint, jsonify
 from blueprints.schedule.app import module
 from blueprints.schedule.models.exists import Person, Client, rbSpeciality
-from blueprints.schedule.models.schedule import Schedule, ScheduleTicket, ScheduleClientTicket
+from blueprints.schedule.models.schedule import Schedule, ScheduleTicket, ScheduleClientTicket, rbAppointmentType
 from blueprints.schedule.views.jsonify import ScheduleVisualizer, ClientVisualizer, Format
 
 
@@ -193,3 +194,45 @@ def api_client_appointments():
         }
         for schedules in person_schedules
     ])
+
+    # Следующие 2 функции следует привести к приличному виду - записывать id создавших, проверки, ответы
+
+@module.route('/api/appointment_cancel.json')
+@public_endpoint
+def api_appointment_cancel():
+    try:
+        client_id = int(request.args['client_id'])
+        ticket_id = int(request.args['ticket_id'])
+    except KeyError or ValueError:
+        return abort(404)
+    ticket = ScheduleTicket.query.get(ticket_id)
+    client_ticket = ticket.client_ticket
+    if client_ticket and client_ticket.client.id == client_id:
+        client_ticket.deleted = 1
+        db.session.commit()
+        return ''
+    else:
+        return abort(400)
+
+
+@module.route('/api/appointment_make.json')
+@public_endpoint
+def api_appointment_make():
+    try:
+        client_id = int(request.args['client_id'])
+        ticket_id = int(request.args['ticket_id'])
+    except KeyError or ValueError:
+        return abort(404)
+    ticket = ScheduleTicket.query.get(ticket_id)
+    client_ticket = ticket.client_ticket
+    if client_ticket:
+        return abort(400)
+    client_ticket = ScheduleClientTicket()
+    client_ticket.client_id = client_id
+    client_ticket.ticket_id = ticket_id
+    client_ticket.createDatetime = datetime.datetime.now()
+    client_ticket.modifyDatetime = datetime.datetime.now()
+    db.session.add(client_ticket)
+    client_ticket.appointmentType = rbAppointmentType.query.filter(rbAppointmentType.code == 'amb').first()
+    db.session.commit()
+    return ''

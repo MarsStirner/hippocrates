@@ -37,3 +37,9 @@ function processSchedule(item, attendance_types) {
         max_tickets: my_max_tickets
     }
 }
+
+function scheduleProcessor(attendance_types) {
+    return function (item) {
+        return processSchedule(item, attendance_types);
+    }
+}
