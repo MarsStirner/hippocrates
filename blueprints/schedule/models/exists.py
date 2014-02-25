@@ -1,5 +1,119 @@
 # -*- coding: utf-8 -*-
 from application.database import db
+from kladr_models import *
+
+
+class Address(db.Model):
+    __tablename__ = u'Address'
+    __table_args__ = (
+        db.Index(u'house_id', u'house_id', u'flat'),
+    )
+
+    id = db.Column(db.Integer, primary_key=True)
+    createDatetime = db.Column(db.DateTime, nullable=False)
+    createPerson_id = db.Column(db.Integer, index=True)
+    modifyDatetime = db.Column(db.DateTime, nullable=False)
+    modifyPerson_id = db.Column(db.Integer, index=True)
+    deleted = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    house_id = db.Column(db.Integer, db.ForeignKey('AddressHouse.id'), nullable=False)
+    flat = db.Column(db.String(6), nullable=False)
+
+    house = db.relationship(u'Addresshouse')
+
+    @property
+    def KLADRCode(self):
+        return self.house.KLADRCode
+
+    @property
+    def KLADRStreetCode(self):
+        return self.house.KLADRStreetCode
+
+    @property
+    def city(self):
+        if self.KLADRCode:
+            record = Kladr.query.filter(Kladr.CODE == self.KLADRCode).first()
+            name = [" ".join([record.NAME, record.SOCR])]
+            parent = record.parent
+            while parent:
+                record = Kladr.query.filter(Kladr.CODE == parent.ljust(13, "0")).first()
+                name.insert(0, " ".join([record.NAME, record.SOCR]))
+                parent = record.parent
+            return ", ".join(name)
+        else:
+            return ''
+
+    @property
+    def town(self):
+        return self.city
+
+    @property
+    def text(self):
+        parts = [self.city]
+        if self.street:
+            parts.append(self.street)
+        if self.number:
+            parts.append(u'д.'+self.number)
+        if self.corpus:
+            parts.append(u'к.'+self.corpus)
+        if self.flat:
+            parts.append(u'кв.'+self.flat)
+        return (', '.join(parts)).strip()
+
+    @property
+    def number(self):
+        return self.house.number
+
+    @property
+    def corpus(self):
+        return self.house.corpus
+
+    @property
+    def street(self):
+        if self.KLADRStreetCode:
+            record = Street.query.filter(Street.CODE == self.KLADRStreetCode).first()
+            return record.NAME + " " + record.SOCR
+        else:
+            return ''
+
+    def __unicode__(self):
+        return self.text
+
+
+class Addressareaitem(db.Model):
+    __tablename__ = u'AddressAreaItem'
+
+    id = db.Column(db.Integer, primary_key=True)
+    createDatetime = db.Column(db.DateTime, nullable=False)
+    createPerson_id = db.Column(db.Integer, index=True)
+    modifyDatetime = db.Column(db.DateTime, nullable=False)
+    modifyPerson_id = db.Column(db.Integer, index=True)
+    deleted = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    LPU_id = db.Column(db.Integer, nullable=False, index=True)
+    struct_id = db.Column(db.Integer, nullable=False, index=True)
+    house_id = db.Column(db.Integer, nullable=False, index=True)
+    flatRange = db.Column(db.Integer, nullable=False)
+    begFlat = db.Column(db.Integer, nullable=False)
+    endFlat = db.Column(db.Integer, nullable=False)
+    begDate = db.Column(db.Date, nullable=False)
+    endDate = db.Column(db.Date)
+
+
+class Addresshouse(db.Model):
+    __tablename__ = u'AddressHouse'
+    __table_args__ = (
+        db.Index(u'KLADRCode', u'KLADRCode', u'KLADRStreetCode', u'number', u'corpus'),
+    )
+
+    id = db.Column(db.Integer, primary_key=True)
+    createDatetime = db.Column(db.DateTime, nullable=False)
+    createPerson_id = db.Column(db.Integer, index=True)
+    modifyDatetime = db.Column(db.DateTime, nullable=False)
+    modifyPerson_id = db.Column(db.Integer, index=True)
+    deleted = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    KLADRCode = db.Column(db.String(13), nullable=False)
+    KLADRStreetCode = db.Column(db.String(17), nullable=False)
+    number = db.Column(db.String(8), nullable=False)
+    corpus = db.Column(db.String(8), nullable=False)
 
 
 class Client(db.Model):
@@ -34,6 +148,12 @@ class Client(db.Model):
     contacts = db.relationship('ClientContact', lazy='dynamic')
     documentsAll = db.relationship('ClientDocument')
     policies = db.relationship('ClientPolicy', lazy='dynamic')
+    reg_addresses = db.relationship(u'Clientaddress',
+                                    primaryjoin="and_(Client.id==Clientaddress.client_id, Clientaddress.type==0)",
+                                    order_by="desc(Clientaddress.id)")
+    loc_addresses = db.relationship(u'Clientaddress',
+                                    primaryjoin="and_(Client.id==Clientaddress.client_id, Clientaddress.type==1)",
+                                    order_by="desc(Clientaddress.id)")
 
     @property
     def nameText(self):
@@ -105,6 +225,63 @@ class Client(db.Model):
     @property
     def policyDMS(self):
         return self.voluntaryPolicy
+
+
+class Clientaddress(db.Model):
+    __tablename__ = u'ClientAddress'
+    __table_args__ = (
+        db.Index(u'address_id', u'address_id', u'type'),
+        db.Index(u'client_id', u'client_id', u'type', u'address_id')
+    )
+
+    id = db.Column(db.Integer, primary_key=True)
+    createDatetime = db.Column(db.DateTime, nullable=False)
+    createPerson_id = db.Column(db.Integer, index=True)
+    modifyDatetime = db.Column(db.DateTime, nullable=False)
+    modifyPerson_id = db.Column(db.Integer, index=True)
+    deleted = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    client_id = db.Column(db.ForeignKey('Client.id'), nullable=False)
+    type = db.Column(db.Integer, nullable=False)
+    address_id = db.Column(db.Integer, db.ForeignKey('Address.id'))
+    freeInput = db.Column(db.String(200), nullable=False)
+    version = db.Column(db.Integer, nullable=False)
+    localityType = db.Column(db.Integer, nullable=False)
+
+    address = db.relationship(u'Address')
+
+    @property
+    def KLADRCode(self):
+        return self.address.house.KLADRCode if self.address else ''
+
+    @property
+    def KLADRStreetCode(self):
+        return self.address.house.KLADRStreetCode if self.address else ''
+
+    @property
+    def city(self):
+        return self.address.city if self.address else ''
+
+    @property
+    def town(self):
+        return self.address.town if self.address else ''
+
+    @property
+    def text(self):
+        return self.address.text if self.address else ''
+
+    @property
+    def number(self):
+        return self.address.number if self.address else ''
+
+    @property
+    def corpus(self):
+        return self.address.corpus if self.address else ''
+
+    def __unicode__(self):
+        if self.text:
+            return self.text
+        else:
+            return self.freeInput
 
 
 class ClientContact(db.Model):

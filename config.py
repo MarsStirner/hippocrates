@@ -53,3 +53,12 @@ SQLALCHEMY_DATABASE_URI = '{0}://{1}:{2}@{3}:{4}/{5}{6}'.format(DB_DRIVER,
                                                        DB_PORT,
                                                        DB_NAME,
                                                        DB_CONNECT_OPTIONS)
+
+SQLALCHEMY_BINDS = {
+    'kladr':        '{0}://{1}:{2}@{3}:{4}/kladr{5}'.format(DB_DRIVER,
+                                                       DB_USER,
+                                                       DB_PASSWORD,
+                                                       DB_HOST,
+                                                       DB_PORT,
+                                                       DB_CONNECT_OPTIONS)
+}
