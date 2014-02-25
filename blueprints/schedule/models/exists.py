@@ -226,6 +226,9 @@ class Client(db.Model):
     def policyDMS(self):
         return self.voluntaryPolicy
 
+    def __unicode__(self):
+        return self.nameText
+
 
 class ClientAddress(db.Model):
     __tablename__ = u'ClientAddress'
@@ -602,6 +605,9 @@ class Person(db.Model):
         words = self.firstName.split() + self.patrName.split()
         initials = ['%s.' % word[0].upper() for word in words if word]
         return u'%s %s' % (self.lastName, u' '.join(initials))
+
+    def __unicode__(self):
+        return self.nameText
 
 
 class rbAcademicDegree(db.Model):

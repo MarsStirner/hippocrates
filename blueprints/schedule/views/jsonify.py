@@ -99,12 +99,15 @@ class ClientVisualizer(object):
         }
 
     def make_records(self, client):
-        appointments = client.appointments.join(ScheduleClientTicket.ticket).order_by(ScheduleTicket.begDateTime.desc()).all()
-        return map(self.make_record, appointments)
+        return map(
+            self.make_record,
+            client.appointments.
+                join(ScheduleClientTicket.ticket).
+                filter(ScheduleClientTicket.deleted == 0).
+                order_by(ScheduleTicket.begDateTime.desc())
+        )
 
     def make_record(self, record):
-        person = record.ticket.schedule.person
-        createPerson = record.createPerson
         return {
             'id': record.id,
             'mark': None,
@@ -112,8 +115,8 @@ class ClientVisualizer(object):
                 if self.__mode == Format.JSON
                 else record.ticket.begDateTime.strftime('%d-%m-%Y %H:%M'),
             'office': record.ticket.schedule.office,
-            'person': person.nameText if person else None,
-            'createPerson': createPerson.nameText if createPerson else None,
+            'person': record.ticket.schedule.person,
+            'createPerson': record.createPerson,
             'note': record.note,
         }
 
