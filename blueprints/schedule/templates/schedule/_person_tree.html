@@ -112,6 +112,7 @@ WebMis20.controller('PersonTree', ['$scope', '$http', function($scope, $http) {
     var person_input = we.find('input#person_query');
     var person_tree_div = we.find('div.scrolled-tree');
     $scope.show_tree = function () {
+        $scope.compose();
         person_tree_div.width(person_input.width());
         person_tree_div.show();
     };

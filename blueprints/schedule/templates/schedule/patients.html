@@ -13,13 +13,16 @@
             </div>
         </form>
         <table class="table table-condensed table-hover table-clickable">
-            <caption>Результаты поиска</caption>
-            <thead>
+            <caption>
+                <span ng-if="results.length > 0">Результаты поиска</span>
+                <span ng-if="results.length == 0 && query">Нет результатов</span>
+            </caption>
+            <thead ng-if="results.length > 0">
             <tr>
                 <th ng-repeat="key in clientInfoCodeOrder" ng-bind="clientInfoCode2Name[key]"></th>
             </tr>
             </thead>
-            <tbody>
+            <tbody ng-if="results.length > 0">
             <tr ng-repeat="result in results" ng-click="open_client(result.id)" style="cursor: pointer">
                 <td ng-repeat="key in clientInfoCodeOrder" ng-bind="aux.format(result, key)"></td>
             </tr>
@@ -55,15 +58,23 @@
                 }, 500)
             });
             $scope.perform_search = function (val) {
-                $http.get(
-                    '{{ url_for('.api_search_clients') }}', {
-                        params: {
-                            q: val
+                if (!val) {
+                    $scope.results = [];
+                } else {
+                    $http.get(
+                        '{{ url_for('.api_search_clients') }}', {
+                            params: {
+                                q: val
+                            }
                         }
-                    }
-                ).success(function (data) {
-                    $scope.results = data;
-                })
+                    ).success(function (data) {
+                        $scope.results = data.sort(function compare(a, b) {
+                            if (a.nameText < b.nameText) return -1;
+                            else if (a.nameText > b.nameText) return 1;
+                            return 0;
+                        });
+                    })
+                }
             };
             $scope.open_client = function (client_id) {
                 window.open('{{ url_for('.html_patient') }}?client_id=' + client_id);
