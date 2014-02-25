@@ -1,0 +1,36 @@
+<!-- Modal -->
+{% macro modal_html(name="modalDialog") -%}
+<div class="modal fade" id="{{ name }}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" ng-controller="Modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel" ng-bind="title"></h4>
+            </div>
+            <div class="modal-body" ng-bind="body">
+                ...
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" ng-bind="acceptText" ng-click="accept()"
+                        ng-disabled="unacceptable"></button>
+                <button type="button" class="btn btn-danger" ng-bind="cancelText" data-dismiss="modal"></button>
+            </div>
+        </div>
+    </div>
+</div>
+{%- endmacro %}
+<script type="text/javascript">
+{% macro modal_js(name="modalDialog") -%}
+    WebMis20.controller('Modal', ['$scope', function ($scope) {
+        $scope.$on('ModalOpen', function (event, params) {
+            $scope.title = params.title;
+            $scope.body = params.body;
+            $scope.accept = params.accept;
+            $scope.acceptText = params.acceptText ? params.acceptText : 'Ok';
+            $scope.cancelText = params.cancelText ? params.cancelText : 'Отмена';
+            $scope.unacceptable = params.unacceptable || !params.accept;
+            $('#{{ name }}').modal('show');
+        })
+    }]);
+{%- endmacro %}
+</script>

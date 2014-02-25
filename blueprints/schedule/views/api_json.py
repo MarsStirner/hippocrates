@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from collections import defaultdict
 import datetime
-import logging
 
 from flask import abort, request
 from application.database import db
@@ -122,7 +121,11 @@ def api_all_persons_tree():
         order_by(Person.lastName, Person.firstName).\
         all()
     for person in persons:
-        sub_result[person.speciality_id].append({'id': person.id, 'name': person.shortNameText})
+        sub_result[person.speciality_id].append({
+            'id': person.id,
+            'name': person.shortNameText,
+            'nameFull': [person.lastName, person.firstName, person.patrName]
+        })
     result = [
         {
             'speciality': {
@@ -175,24 +178,18 @@ def api_client_appointments():
         filter(ScheduleClientTicket.deleted == 0).\
         distinct()
 
-    person_schedules = [{
-        'person': person,
-        'schedule': Schedule.query.\
-            filter(Schedule.person_id == int(person.id)).\
-            order_by(Schedule.date),
-        }
-        for person in persons
-    ]
-
     context = ScheduleVisualizer()
     context.client_id = client_id
     context.attendance_type = 'amb'
     return jsonify([
         {
-            'person': context.make_person(schedules['person']),
-            'schedule': context.make_schedule(schedules['schedule'], month_f, month_l)
+            'person': context.make_person(person),
+            'schedule': context.make_schedule(
+                Schedule.query.filter(Schedule.person_id == int(person.id)).order_by(Schedule.date).all(),
+                month_f, month_l
+            )
         }
-        for schedules in person_schedules
+        for person in persons
     ])
 
     # Следующие 2 функции следует привести к приличному виду - записывать id создавших, проверки, ответы

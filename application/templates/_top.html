@@ -1,26 +1,21 @@
 <div class="navbar navbar-inverse navbar-static-top">
     <div class="container-fluid">
         <ul class="nav navbar-nav" id="cur_modules">
-          <li><div class="btn-group">
-                <a class="btn btn-sm btn-default navbar-btn" href="/" title="Главная страница"><span class="glyphicon glyphicon-home"></span></a>
-              {% for item in main_menu %}
-                <a class="btn btn-sm btn-default navbar-btn{% if request.blueprint == item.module %}{% endif %}" href="{{ url_for(item.module + '.index') }}" title="{{ item.name }}">{{ item.name }}</a>
-              {% endfor %}
-          </div>
-          </li>
+            <li>
+                <div class="btn-group">
+                    <a class="btn btn-sm btn-default navbar-btn" href="/" title="Главная страница"><span class="glyphicon glyphicon-home"></span></a>
+                    {% for item in main_menu -%}
+                        <a class="btn btn-sm btn-default navbar-btn{% if request.blueprint == item.module %}{% endif %}" href="{{ url_for(item.module + '.index') }}" title="{{ item.name }}">{{ item.name }}</a>
+                    {% endfor %}
+                </div>
+            </li>
         </ul>
         <ul class="nav pull-right">
-{#          <li>#}
-{#              <div class="btn-group">#}
-{#                <a class="btn btn-small btn-inverse" href="javascript:startIntro();" title="Помощь"><i class="icon-question-sign icon-white"></i></a>#}
-{#              </div>#}
-{#          </li>#}
-{#          <li class="divider-vertical"></li>#}
-          <li>
-              <div class="btn-group">
-                <a id="logout" class="btn btn-small btn-default navbar-btn" href="{{ url_for('logout') }}" title="Выйти"><span class="glyphicon glyphicon-log-out"></span></a>
-              </div>
-          </li>
+            <li>
+                <div class="btn-group">
+                    <a id="logout" class="btn btn-small btn-default navbar-btn" href="{{ url_for('logout') }}" title="Выйти"><span class="glyphicon glyphicon-log-out"></span></a>
+                </div>
+            </li>
         </ul>
     </div>
 </div>

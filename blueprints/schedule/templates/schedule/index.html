@@ -1,4 +1,5 @@
 {% extends 'schedule/base.html' %}
+{% import "schedule/_person_tree.html" as person_tree %}
 
 {% block title %}> {{ module_name }}{% endblock %}
 
@@ -15,10 +16,10 @@
                         ng-options="item.value as item.name for item in aux.months" ng-change="monthChanged()"></select>
             </div>
             <div class="col-md-8">
-                <input id="person_query" class="form-control" type="text" ng-model="person_query"
-                       placeholder="ФИО врача" />
+                {{ person_tree.html_dropdown_select() }}
             </div>
         </div>
+        <br/>{# Dirtiest hack you've ever seen! #}
         <div class="row">
             <div class="col-md-12">
                 <ul class="nav nav-tabs nav-justified" ng-model="attendance_type" ng-if="person">
@@ -41,15 +42,16 @@
         </div>
         <div class="row">
             <div class="col-md-12">
-                <table class="table table-condensed" ng-if="person">
-                    <caption>[[ person.name ]]<small>, [[ person.speciality ]]</small></caption>
-                    <thead>
+                <table class="table table-condensed person-schedule" ng-if="person">
+                    <caption><span ng-if="max_tickets[attendance_type] == 0" class="no-schedule-label">Нет расписания</span>
+                        [[ person.name ]]<small>, [[ person.speciality ]]</small></caption>
+                    <thead ng-if="max_tickets[attendance_type] > 0">
                     <tr>
                         <th ng-repeat="day in schedule[attendance_type]"
                             ng-bind="aux.moment(day.date).format('DD.MM.YYYY, dd')"></th>
                     </tr>
                     </thead>
-                    <tbody>
+                    <tbody ng-if="max_tickets[attendance_type] > 0">
                     <tr ng-repeat="row in aux.range(max_tickets[attendance_type])">
                         <td ng-repeat="day in schedule[attendance_type]" ng-switch="day.tickets[row].status">
                             <button type="button" class="btn btn-block btn-danger" ng-switch-when="busy"
@@ -69,15 +71,12 @@
                 </table>
             </div>
         </div>
-
-
-
-{#        <pre>[[schedule|json]]</pre>#}
     </div>
 {% endblock %}
 {% block modules_js %}
     {{ super() }}
     <script type="text/javascript">
+        {{ person_tree.js() }}
         WebMis20.controller('Schedule', ['$scope', '$http', function ($scope, $http) {
             $scope.max_tickets = 0;
             $scope.aux = aux;
@@ -155,19 +154,8 @@
 
             $scope.monthChanged();
 
-            var persons = new Bloodhound({
-                datumTokenizer: function(d) { return Bloodhound.tokenizers.whitespace(d.value); },
-                queryTokenizer: Bloodhound.tokenizers.whitespace,
-                remote: '{{ url_for('.api_search_persons') }}?q=%QUERY'
-            });
-
-            persons.initialize();
-
-            $("#person_query").typeahead(null, {
-                displayKey: 'display',
-                source: persons.ttAdapter()
-            }).bind('typeahead:selected', function (obj, datum) {
-                $scope.person_id = datum['id'];
+            $scope.$on('PersonSelected', function (event, person) {
+                $scope.person_id = person.id;
                 $scope.reloadSchedule();
             });
         }]);

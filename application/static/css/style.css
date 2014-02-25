@@ -194,6 +194,8 @@ span.twitter-typeahead {
     -moz-user-select: none;
     -webkit-user-select: none;
     user-select: none;
+    z-index: 100;
+    margin-top: 8px;
 }
 
 .css-treeview input.leaf {
@@ -209,13 +211,15 @@ span.twitter-typeahead {
 }
 
 .css-treeview label.group:hover,
-.css-treeview label.leaf:hover {
+.css-treeview label.leaf:hover,
+.css-treeview a.leaf:hover {
     background-color: mediumseagreen;
     color: lightyellow;
 }
 
 .css-treeview label.group,
 .css-treeview label.leaf,
+.css-treeview a.leaf,
 .css-treeview label.group::before {
     cursor: pointer;
     vertical-align: middle;
@@ -269,4 +273,10 @@ span.twitter-typeahead {
     height: 100%;
     overflow-y: auto;
     max-height: 500px;
+    min-height: 250px;
+}
+
+.scrolled-tree.popup {
+    display: none;
+    position: absolute;
 }
