@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from application.database import db
-from kladr_models import *
+from blueprints.schedule.models.kladr_models import Kladr, Street
 
 
 class Address(db.Model):
@@ -18,7 +18,7 @@ class Address(db.Model):
     house_id = db.Column(db.Integer, db.ForeignKey('AddressHouse.id'), nullable=False)
     flat = db.Column(db.String(6), nullable=False)
 
-    house = db.relationship(u'Addresshouse')
+    house = db.relationship(u'AddressHouse')
 
     @property
     def KLADRCode(self):
@@ -79,7 +79,7 @@ class Address(db.Model):
         return self.text
 
 
-class Addressareaitem(db.Model):
+class AddressAreaItem(db.Model):
     __tablename__ = u'AddressAreaItem'
 
     id = db.Column(db.Integer, primary_key=True)
@@ -98,7 +98,7 @@ class Addressareaitem(db.Model):
     endDate = db.Column(db.Date)
 
 
-class Addresshouse(db.Model):
+class AddressHouse(db.Model):
     __tablename__ = u'AddressHouse'
     __table_args__ = (
         db.Index(u'KLADRCode', u'KLADRCode', u'KLADRStreetCode', u'number', u'corpus'),
@@ -148,12 +148,12 @@ class Client(db.Model):
     contacts = db.relationship('ClientContact', lazy='dynamic')
     documentsAll = db.relationship('ClientDocument')
     policies = db.relationship('ClientPolicy', lazy='dynamic')
-    reg_addresses = db.relationship(u'Clientaddress',
-                                    primaryjoin="and_(Client.id==Clientaddress.client_id, Clientaddress.type==0)",
-                                    order_by="desc(Clientaddress.id)")
-    loc_addresses = db.relationship(u'Clientaddress',
-                                    primaryjoin="and_(Client.id==Clientaddress.client_id, Clientaddress.type==1)",
-                                    order_by="desc(Clientaddress.id)")
+    reg_addresses = db.relationship(u'ClientAddress',
+                                    primaryjoin="and_(Client.id==ClientAddress.client_id, ClientAddress.type==0)",
+                                    order_by="desc(ClientAddress.id)", lazy='dynamic')
+    loc_addresses = db.relationship(u'ClientAddress',
+                                    primaryjoin="and_(Client.id==ClientAddress.client_id, ClientAddress.type==1)",
+                                    order_by="desc(ClientAddress.id)", lazy='dynamic')
 
     @property
     def nameText(self):
@@ -227,7 +227,7 @@ class Client(db.Model):
         return self.voluntaryPolicy
 
 
-class Clientaddress(db.Model):
+class ClientAddress(db.Model):
     __tablename__ = u'ClientAddress'
     __table_args__ = (
         db.Index(u'address_id', u'address_id', u'type'),
@@ -492,7 +492,7 @@ class OrgStructure(db.Model):
 
     def get_org_structure_full_name(self, org_structure_id):
         names = [self.code]
-        ids = set([self.id])
+        ids = {self.id}
         parent_id = self.parent_id
         parent = self.parent
 

@@ -82,22 +82,20 @@ class ClientVisualizer(object):
         self.__mode = mode
 
     def make_client_info(self, client):
-        voluntaryPolicy = client.voluntaryPolicy
-        compulsoryPolicy = client.compulsoryPolicy
         return {
             'id': client.id,
             'nameText': client.nameText,
             'sex': client.sex,
             'SNILS': client.formatted_SNILS or None,
-            'document': unicode(client.document),
+            'document': client.document,
             'birthDate': client.birthDate
                 if self.__mode == Format.JSON
                 else client.birthDate.strftime('%d-%m-%Y'),
-            'regAddress': None,
-            'liveAddress': None,
+            'regAddress': client.reg_addresses.first(),
+            'liveAddress': client.loc_addresses.first(),
             'contact': client.phones,
-            'compulsoryPolicy': unicode(compulsoryPolicy) if compulsoryPolicy else None,
-            'voluntaryPolicy': unicode(voluntaryPolicy) if voluntaryPolicy else None,
+            'compulsoryPolicy': client.compulsoryPolicy,
+            'voluntaryPolicy': client.voluntaryPolicy,
         }
 
     def make_records(self, client):

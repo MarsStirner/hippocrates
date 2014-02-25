@@ -75,6 +75,8 @@ class WebMisJsonEncoder(JSONEncoder):
     def default(self, o):
         if isinstance(o, (datetime.datetime, datetime.date, datetime.time)):
             return o.isoformat()
+        elif isinstance(o, db.Model) and hasattr(o, '__unicode__'):
+            return unicode(o)
         return JSONEncoder.default(self, o)
 
 app.json_encoder = WebMisJsonEncoder
