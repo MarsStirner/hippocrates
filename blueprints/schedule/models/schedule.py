@@ -11,6 +11,9 @@ class rbReceptionType(db.Model):
     code = db.Column(db.Unicode(32), nullable=False)
     name = db.Column(db.Unicode(64), nullable=False)
 
+    def __unicode__(self):
+        return u'(%s) %s' % (self.code, self.name)
+
 
 class rbAttendanceType(db.Model):
     __tablename__ = 'rbAttendanceType'
@@ -19,6 +22,9 @@ class rbAttendanceType(db.Model):
     code = db.Column(db.Unicode(32), nullable=False)
     name = db.Column(db.Unicode(64), nullable=False)
 
+    def __unicode__(self):
+        return u'(%s) %s' % (self.code, self.name)
+
 
 class rbAppointmentType(db.Model):
     __tablename__ = 'rbAppointmentType'
@@ -26,6 +32,9 @@ class rbAppointmentType(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     code = db.Column(db.Unicode(32), nullable=False)
     name = db.Column(db.Unicode(64), nullable=False)
+
+    def __unicode__(self):
+        return u'(%s) %s' % (self.code, self.name)
 
 
 class Schedule(db.Model):

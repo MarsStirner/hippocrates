@@ -62,3 +62,12 @@ def patient_info():
         return render_template('schedule/patient_info.html')
     except TemplateNotFound:
         abort(404)
+
+
+@module.route('/person_month/')
+@public_endpoint
+def person_schedule_monthview():
+    try:
+        return render_template('schedule/person_schedule_monthview.html')
+    except TemplateNotFound:
+        abort(404)

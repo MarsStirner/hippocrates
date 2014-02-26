@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import calendar
 from collections import defaultdict
 import datetime
 
@@ -25,8 +26,14 @@ def api_schedule():
     attendance_type = request.args.get('attendance_type')
     related = bool(request.args.get('related', False))
     try:
-        start_date = datetime.datetime.strptime(start_date_s, '%Y-%m-%d').date()
-        end_date = start_date + datetime.timedelta(weeks=1)
+        try:
+            # Пытаемся вытащить расписание на неделю
+            start_date = datetime.datetime.strptime(start_date_s, '%Y-%m-%d').date()
+            end_date = start_date + datetime.timedelta(weeks=1)
+        except ValueError:
+            # Пытаемся вытащить расписание на месяц
+            start_date = datetime.datetime.strptime(start_date_s, '%Y-%m').date()
+            end_date = start_date + datetime.timedelta(calendar.monthrange(start_date.year, start_date.month)[1])
         client_id = int(client_id_s) if client_id_s else None
     except ValueError:
         return abort(400)

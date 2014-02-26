@@ -51,6 +51,10 @@ class ScheduleVisualizer(object):
                 'date': schedule.date,
                 'office': schedule.office,
                 'tickets': tickets,
+                'begTime': schedule.begTime,
+                'endTime': schedule.endTime,
+                'roa': schedule.reasonOfAbsence,
+                'rt': schedule.receptionType,
             } if tickets else {
                 'date': schedule.date,
                 'tickets': [],
