@@ -2,7 +2,7 @@
 from collections import defaultdict
 import datetime
 
-from blueprints.schedule.models.schedule import ScheduleTicket, ScheduleClientTicket
+from blueprints.schedule.models.schedule import ScheduleTicket, ScheduleClientTicket, Schedule, rbAttendanceType
 
 
 __author__ = 'mmalkov'
@@ -21,6 +21,7 @@ class ScheduleVisualizer(object):
     def __init__(self):
         self.attendance_type = None
         self.client_id = None
+        self.attendance_types = [at.code for at in rbAttendanceType.query]
 
     def make_ticket(self, ticket):
         client = ticket.client
@@ -29,26 +30,30 @@ class ScheduleVisualizer(object):
             'begDateTime': ticket.begDateTime,
             'status': 'busy' if client else 'free',
             'client': client.shortNameText if client else None,
-            'attendance_type': ticket.attendanceType.code,
+            # 'attendance_type': ticket.attendanceType.code,
         }
 
-    def make_day(self, schedule):
+    def make_day(self, schedule, attendance_type):
         if isinstance(schedule, self.EmptyDay):
             return {
                 'date': schedule.date,
                 'tickets': [],
             }
         else:
+            tickets = [
+                self.make_ticket(ticket)
+                for ticket in schedule.tickets
+                if not (self.client_id and ticket.client and ticket.client.id != self.client_id) and
+                   not (attendance_type and ticket.attendanceType.code != attendance_type)
+            ]
             return {
                 'id': schedule.id,
                 'date': schedule.date,
                 'office': schedule.office,
-                'tickets': [
-                    self.make_ticket(ticket)
-                    for ticket in schedule.tickets
-                    if not (self.client_id and ticket.client and ticket.client.id != self.client_id) and
-                       not (self.attendance_type and ticket.attendanceType.code != self.attendance_type)
-                ],
+                'tickets': tickets,
+            } if tickets else {
+                'date': schedule.date,
+                'tickets': [],
             }
 
     def make_person(self, person):
@@ -60,21 +65,43 @@ class ScheduleVisualizer(object):
         }
 
     def make_schedule(self, schedules, date_start, date_end):
-        result = []
+        sub_result = []
         one_day = datetime.timedelta(days=1)
         for schedule in schedules:
             while date_start < schedule.date < date_end:
-                result.append(self.EmptyDay(date_start))
+                sub_result.append(self.EmptyDay(date_start))
                 date_start += one_day
 
-            result.append(schedule)
+            sub_result.append(schedule)
             date_start += one_day
 
         while date_start < date_end:
-            result.append(self.EmptyDay(date_start))
+            sub_result.append(self.EmptyDay(date_start))
             date_start += one_day
 
-        return [self.make_day(s) for s in result]
+        result_schedule = {}
+        for at_code in ([self.attendance_type] if self.attendance_type else self.attendance_types):
+            grouped_schedule = [
+                self.make_day(s, at_code)
+                for s in sub_result
+            ]
+            result_schedule[at_code] = {
+                'schedule': grouped_schedule,
+                'max_tickets': max([len(day['tickets']) for day in grouped_schedule])
+            }
+
+        return result_schedule
+
+    def make_persons_schedule(self, persons, start_date, end_date):
+        return [{
+            'person': self.make_person(person),
+            'grouped': self.make_schedule(
+                Schedule.query.filter(
+                    Schedule.person_id == person.id,
+                    start_date <= Schedule.date, Schedule.date <= end_date
+                ).order_by(Schedule.date),
+                start_date, end_date
+            )} for person in persons]
 
 
 class ClientVisualizer(object):

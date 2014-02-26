@@ -30,6 +30,11 @@
             $scope.cancelText = params.cancelText ? params.cancelText : 'Отмена';
             $scope.unacceptable = params.unacceptable || !params.accept;
             $('#{{ name }}').modal('show');
+        });
+        $scope.$on('ModalChange', function (event, params) {
+            for (var key in params) {
+                $scope[key] = params[key];
+            }
         })
     }]);
 {%- endmacro %}
