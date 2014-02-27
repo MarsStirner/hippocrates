@@ -94,11 +94,11 @@
 
             $scope.month = curDate.getMonth();
 
-            $scope.attendance_types = [
+            $scope.reception_types = [
                 {name: 'Амбулаторно', code: 'amb'},
                 {name: 'На дому', code: 'home'}
             ];
-            $scope.attendance_type = 'amb';
+            $scope.reception_type = 'amb';
 
             $scope.setDatePage = function(index) {
                 if (index != $scope.page) {
@@ -133,8 +133,8 @@
                 $scope.loadData();
             };
 
-            $scope.changeAttendanceType = function (code) {
-                $scope.attendance_type = code;
+            $scope.changeReceptionType = function (code) {
+                $scope.reception_type = code;
             };
 
             $scope.loadData = function () {
@@ -145,7 +145,7 @@
                             start_date: $scope.pages[$scope.page].format('YYYY-MM-DD'),
                             related: 1,
                             person_ids: '[' + $scope.user_selected.join() + ']',
-                            attendance_type: 'amb'
+                            reception_type: 'amb'
                         }
                     }
                 ).success(function (data) {
@@ -233,7 +233,7 @@
                             client_id: $scope.client_id,
                             person_ids: person.id,
                             start_date: $scope.pages[$scope.page].format('YYYY-MM-DD'),
-                            attendance_type: 'amb'
+                            reception_type: 'amb'
                         }
                     }).success(function (data) {
                         $scope.user_schedules.push(data['schedules'][0]);

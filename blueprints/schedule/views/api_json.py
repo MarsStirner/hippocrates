@@ -23,8 +23,9 @@ def api_schedule():
     person_id_s = request.args.get('person_ids')
     client_id_s = request.args.get('client_id')
     start_date_s = request.args.get('start_date')
-    attendance_type = request.args.get('attendance_type')
+    reception_type = request.args.get('reception_type')
     related = bool(request.args.get('related', False))
+    expand = bool(request.args.get('expand', False))
     try:
         try:
             # Пытаемся вытащить расписание на неделю
@@ -44,7 +45,7 @@ def api_schedule():
 
     context = ScheduleVisualizer()
     context.client_id = client_id
-    context.attendance_type = attendance_type
+    context.reception_type = reception_type
 
     if person_id_s and not person_id_s == '[]':
         if person_id_s.startswith('[') and person_id_s.endswith(']'):
@@ -65,14 +66,14 @@ def api_schedule():
             filter(start_date <= Schedule.date, Schedule.date <= end_date).\
             filter(ScheduleClientTicket.client_id == client_id, ScheduleClientTicket.deleted == 0).\
             distinct()
-        related_schedules = context.make_persons_schedule(persons, start_date, end_date)
+        related_schedules = context.make_persons_schedule(persons, start_date, end_date, expand)
         related_person_ids = set(person.id for person in persons)
         person_ids -= related_person_ids
         result['related_schedules'] = related_schedules
 
     if person_ids:
         persons = Person.query.filter(Person.id.in_(person_ids))
-        schedules = context.make_persons_schedule(persons, start_date, end_date)
+        schedules = context.make_persons_schedule(persons, start_date, end_date, expand)
         result['schedules'] = schedules
 
     return jsonify(result)

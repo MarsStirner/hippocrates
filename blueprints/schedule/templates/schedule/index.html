@@ -22,9 +22,9 @@
         <br/>{# Dirtiest hack you've ever seen! #}
         <div class="row">
             <div class="col-md-12">
-                <ul class="nav nav-tabs nav-justified" ng-model="attendance_type" ng-if="person">
-                    <li ng-class="{active: (at.code == attendance_type)}" ng-repeat="at in attendance_types"
-                        ng-click="changeAttendanceType(at.code)"><a href="#">[[ at.name ]]</a>
+                <ul class="nav nav-tabs nav-justified" ng-model="reception_type" ng-if="person">
+                    <li ng-class="{active: (rt.code == reception_type)}" ng-repeat="rt in reception_types"
+                        ng-click="changeReceptionType(rt.code)"><a href="#">[[ rt.name ]]</a>
                     </li>
                 </ul>
             </div>
@@ -43,17 +43,17 @@
         <div class="row">
             <div class="col-md-12">
                 <table class="table table-condensed person-schedule" ng-if="person">
-                    <caption><span ng-if="grouped[attendance_type].max_tickets == 0" class="no-schedule-label">Нет расписания</span>
+                    <caption><span ng-if="grouped[reception_type].max_tickets == 0" class="no-schedule-label">Нет расписания</span>
                         [[ person.name ]]<small>, [[ person.speciality ]]</small></caption>
-                    <thead ng-if="grouped[attendance_type].max_tickets > 0">
+                    <thead ng-if="grouped[reception_type].max_tickets > 0">
                     <tr>
-                        <th ng-repeat="day in grouped[attendance_type].schedule"
+                        <th ng-repeat="day in grouped[reception_type].schedule"
                             ng-bind="aux.moment(day.date).format('DD.MM.YYYY, dd')"></th>
                     </tr>
                     </thead>
-                    <tbody ng-if="grouped[attendance_type].max_tickets > 0">
-                    <tr ng-repeat="row in aux.range(grouped[attendance_type].max_tickets)">
-                        <td ng-repeat="day in grouped[attendance_type].schedule" ng-switch="day.tickets[row].status">
+                    <tbody ng-if="grouped[reception_type].max_tickets > 0">
+                    <tr ng-repeat="row in aux.range(grouped[reception_type].max_tickets)">
+                        <td ng-repeat="day in grouped[reception_type].schedule" ng-switch="day.tickets[row].status">
                             <button type="button" class="btn btn-block btn-danger" ng-switch-when="busy">
                                 [[ aux.moment(day.tickets[row].begDateTime).format('HH:mm') ]] - [[ day.tickets[row].client ]]
                             </button>
@@ -87,11 +87,11 @@
 
             $scope.month = curDate.getMonth();
 
-            $scope.attendance_types = [
+            $scope.reception_types = [
                 {name: 'Амбулаторно', code: 'amb'},
                 {name: 'На дому', code: 'home'}
             ];
-            $scope.attendance_type = 'amb';
+            $scope.reception_type = 'amb';
 
             $scope.reloadSchedule = function () {
                 if ($scope.person_id) {
@@ -144,8 +144,8 @@
                 $scope.reloadSchedule();
             };
 
-            $scope.changeAttendanceType = function (code) {
-                $scope.attendance_type = code;
+            $scope.changeReceptionType = function (code) {
+                $scope.reception_type = code;
             };
 
             $scope.monthChanged();

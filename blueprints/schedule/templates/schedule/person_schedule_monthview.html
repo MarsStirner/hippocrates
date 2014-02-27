@@ -22,9 +22,9 @@
         <br/>{# Dirtiest hack you've ever seen! #}
         <div class="row">
             <div class="col-md-12">
-                <ul class="nav nav-tabs nav-justified" ng-model="attendance_type" ng-if="person">
-                    <li ng-class="{active: (at.code == attendance_type)}" ng-repeat="at in attendance_types"
-                        ng-click="changeAttendanceType(at.code)"><a href="#">[[ at.name ]]</a>
+                <ul class="nav nav-tabs nav-justified" ng-model="reception_type" ng-if="person">
+                    <li ng-class="{active: (rt.code == reception_type)}" ng-repeat="rt in reception_types"
+                        ng-click="changeAttendanceType(rt.code)"><a href="#">[[ rt.name ]]</a>
                     </li>
                 </ul>
             </div>
@@ -41,20 +41,17 @@
                     <tbody>
                     <tr ng-repeat="week in week_data">
                         <td ng-repeat="day in week">
-                            <div class="panel small"
-                                 ng-class="{
-                                     'panel-primary': day.tickets.length > 0,
-                                     'panel-danger': $index >= 5,
-                                     'panel-default': $index < 5 && day.tickets.length == 0
-                                 }" ng-if="!day.not_exists">
+                            <div class="panel small person-schedule-day" ng-class="{'panel-primary': day.scheds.length > 0, 'panel-danger': $index >= 5, 'panel-default': $index < 5 && day.scheds.length == 0}" ng-if="!day.not_exists">
                                 <div class="panel-heading">
                                     [[ aux.moment(day.date).format('DD.MM.YYYY') ]]
                                 </div>
-                                <div class="panel-body " ng-if="day.tickets.length > 0">
-                                    <p>кабинет: [[ day.office ]]</p>
-                                    <p>[[ aux.moment(day.date + 'T' + day.begTime).format('HH:mm') ]] - [[ aux.moment(day.date + 'T' + day.endTime).format('HH:mm') ]]</p>
+                                <div class="panel-body" ng-if="day.scheds.length > 0">
+                                    <div ng-repeat="sched in day.scheds">
+                                        <p>кабинет: [[ sched.office ]]</p>
+                                        <p>[[ aux.moment(day.date + 'T' + sched.begTime).format('HH:mm') ]] - [[ aux.moment(day.date + 'T' + sched.endTime).format('HH:mm') ]]</p>
+                                    </div>
                                 </div>
-                                <div class="panel-body " ng-if="day.tickets.length == 0">
+                                <div class="panel-body " ng-if="day.scheds.length == 0">
                                     Не заполнено
                                 </div>
                             </div>
@@ -86,11 +83,11 @@
             $scope.weekdays = ['Пн', "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
             $scope.week_data = [];
 
-            $scope.attendance_types = [
+            $scope.reception_types = [
                 {name: 'Амбулаторно', code: 'amb'},
                 {name: 'На дому', code: 'home'}
             ];
-            $scope.attendance_type = 'amb';
+            $scope.reception_type = 'amb';
 
             $scope.reloadSchedule = function () {
                 if ($scope.person_id) {
@@ -99,7 +96,8 @@
                         {
                             params: {
                                 person_ids: $scope.person_id,
-                                start_date: $scope.monthDate.format('YYYY-MM')
+                                start_date: $scope.monthDate.format('YYYY-MM'),
+                                expand: 1
                             }
                         }
                     ).success(function (data) {
@@ -114,7 +112,7 @@
             $scope.make_week = function () {
                 var first_weekday = $scope.monthDate.weekday();
                 var day_iter = 0;
-                var schedule = $scope.grouped[$scope.attendance_type]['schedule'];
+                var schedule = $scope.grouped[$scope.reception_type]['schedule'];
                 var result = [];
                 for (var week_n = 0; ; week_n++) {
                     var week = [];
@@ -134,6 +132,7 @@
                     }
                 }
                 $scope.week_data = result;
+{#                $scope.#}
             };
 
             $scope.monthChanged = function () {
@@ -145,8 +144,8 @@
                 $scope.reloadSchedule();
             };
 
-            $scope.changeAttendanceType = function (code) {
-                $scope.attendance_type = code;
+            $scope.changeReceptionType = function (code) {
+                $scope.reception_type = code;
                 $scope.make_week();
             };
 

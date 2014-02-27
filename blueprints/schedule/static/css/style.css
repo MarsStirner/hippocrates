@@ -1,3 +1,17 @@
 table.person-schedule caption span.no-schedule-label {
     color: red;
 }
+
+div.person-schedule-day div p {
+    margin: 0;
+}
+
+div.person-schedule-day.panel {
+    margin-bottom: 0;
+}
+
+div.person-schedule-day.panel div.panel-heading,
+div.person-schedule-day.panel div.panel-body {
+    padding-top: 5px;
+    padding-bottom: 5px;
+}

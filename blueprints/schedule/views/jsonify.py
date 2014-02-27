@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 from collections import defaultdict
 import datetime
+import itertools
 
-from blueprints.schedule.models.schedule import ScheduleTicket, ScheduleClientTicket, Schedule, rbAttendanceType
+from blueprints.schedule.models.schedule import ScheduleTicket, ScheduleClientTicket, Schedule, rbReceptionType
 
 
 __author__ = 'mmalkov'
@@ -14,14 +15,10 @@ class Format:
 
 
 class ScheduleVisualizer(object):
-    class EmptyDay(object):
-        def __init__(self, date):
-            self.date = date
-
     def __init__(self):
-        self.attendance_type = None
+        self.reception_type = None
         self.client_id = None
-        self.attendance_types = [at.code for at in rbAttendanceType.query]
+        self.reception_types = [at.code for at in rbReceptionType.query]
 
     def make_ticket(self, ticket):
         client = ticket.client
@@ -30,35 +27,22 @@ class ScheduleVisualizer(object):
             'begDateTime': ticket.begDateTime,
             'status': 'busy' if client else 'free',
             'client': client.shortNameText if client else None,
-            # 'attendance_type': ticket.attendanceType.code,
+            'attendance_type': ticket.attendanceType,
         }
 
-    def make_day(self, schedule, attendance_type):
-        if isinstance(schedule, self.EmptyDay):
-            return {
-                'date': schedule.date,
-                'tickets': [],
-            }
-        else:
-            tickets = [
+    def make_day(self, schedule):
+        return {
+            'id': schedule.id,
+            'office': schedule.office,
+            'tickets': [
                 self.make_ticket(ticket)
                 for ticket in schedule.tickets
-                if not (self.client_id and ticket.client and ticket.client.id != self.client_id) and
-                   not (attendance_type and ticket.attendanceType.code != attendance_type)
-            ]
-            return {
-                'id': schedule.id,
-                'date': schedule.date,
-                'office': schedule.office,
-                'tickets': tickets,
-                'begTime': schedule.begTime,
-                'endTime': schedule.endTime,
-                'roa': schedule.reasonOfAbsence,
-                'rt': schedule.receptionType,
-            } if tickets else {
-                'date': schedule.date,
-                'tickets': [],
-            }
+                if not (self.client_id and ticket.client and ticket.client.id != self.client_id)
+            ],
+            'begTime': schedule.begTime,
+            'endTime': schedule.endTime,
+            'roa': schedule.reasonOfAbsence,
+        }
 
     def make_person(self, person):
         speciality = person.speciality
@@ -68,35 +52,50 @@ class ScheduleVisualizer(object):
             'speciality': person.speciality.name if speciality else None
         }
 
-    def make_schedule(self, schedules, date_start, date_end):
-        sub_result = []
+    def make_schedule(self, schedules, date_start, date_end, expand=False):
         one_day = datetime.timedelta(days=1)
-        for schedule in schedules:
-            while date_start < schedule.date < date_end:
-                sub_result.append(self.EmptyDay(date_start))
-                date_start += one_day
 
-            sub_result.append(schedule)
-            date_start += one_day
-
-        while date_start < date_end:
-            sub_result.append(self.EmptyDay(date_start))
-            date_start += one_day
-
-        result_schedule = {}
-        for at_code in ([self.attendance_type] if self.attendance_type else self.attendance_types):
-            grouped_schedule = [
-                self.make_day(s, at_code)
-                for s in sub_result
-            ]
-            result_schedule[at_code] = {
-                'schedule': grouped_schedule,
-                'max_tickets': max([len(day['tickets']) for day in grouped_schedule])
+        def new_rt():
+            date_iter = date_start
+            rt_group = []
+            while date_iter < date_end:
+                rt_group.append({
+                    'date': date_iter,
+                    'scheds': []
+                })
+                date_iter += one_day
+            return {
+                'max_tickets': 0,
+                'schedule': rt_group,
             }
+        if self.reception_type:
+            result = {self.reception_type: new_rt()}
+        else:
+            result = dict((rt, new_rt()) for rt in self.reception_types)
 
-        return result_schedule
+        for schedule in schedules:
+            if schedule.receptionType.code in result:
+                result[schedule.receptionType.code]['schedule'][(schedule.date - date_start).days]['scheds'].\
+                    append(self.make_day(schedule))
 
-    def make_persons_schedule(self, persons, start_date, end_date):
+        for group in result.itervalues():
+            group['max_tickets'] = max(
+                sum(
+                    len(sched['tickets'])
+                    for sched in day['scheds']
+                )
+                for day in group['schedule']
+            )
+
+        if not expand:
+            for group in result.itervalues():
+                for day in group['schedule']:
+                    day['tickets'] = sorted(itertools.chain(*(sched['tickets'] for sched in day['scheds'])), key=lambda t: t['begDateTime'])
+                    del day['scheds']
+
+        return result
+
+    def make_persons_schedule(self, persons, start_date, end_date, expand=False):
         return [{
             'person': self.make_person(person),
             'grouped': self.make_schedule(
@@ -104,7 +103,7 @@ class ScheduleVisualizer(object):
                     Schedule.person_id == person.id,
                     start_date <= Schedule.date, Schedule.date <= end_date
                 ).order_by(Schedule.date),
-                start_date, end_date
+                start_date, end_date, expand
             )} for person in persons]
 
 
@@ -150,6 +149,7 @@ class ClientVisualizer(object):
             'createPerson': record.createPerson,
             'note': record.note,
         }
+
 
 class PersonTreeVisualizer(object):
     def make_person(self, person):
