@@ -87,12 +87,33 @@ class ScheduleVisualizer(object):
                 for day in group['schedule']
             )
 
-        if not expand:
-            for group in result.itervalues():
-                for day in group['schedule']:
-                    day['tickets'] = sorted(itertools.chain(*(sched['tickets'] for sched in day['scheds'])), key=lambda t: t['begDateTime'])
+        for group in result.itervalues():
+            for day in group['schedule']:
+                if expand:
+                    planned = 0
+                    CITO = 0
+                    extra = 0
+                    busy = False
+                    for ticket in itertools.chain(*(sched['tickets'] for sched in day['scheds'])):
+                        at = ticket['attendance_type'].code
+                        if at == 'normal':
+                            planned += 1
+                        elif at == 'CITO':
+                            CITO += 1
+                        elif at == 'extra':
+                            extra += 1
+                        if not busy and ticket['client']:
+                            busy = True
+                    day['summary'] = {
+                        'planned_tickets': planned,
+                        'CITO_tickets': CITO,
+                        'extra_tickets': extra,
+                        'busy_tickets': busy,
+                    }
+                else:
+                    tickets = sorted(itertools.chain(*(sched['tickets'] for sched in day['scheds'])), key=lambda t: t['begDateTime'])
+                    day['tickets'] = tickets
                     del day['scheds']
-
         return result
 
     def make_persons_schedule(self, persons, start_date, end_date, expand=False):

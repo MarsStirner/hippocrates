@@ -24,7 +24,7 @@
             <div class="col-md-12">
                 <ul class="nav nav-tabs nav-justified" ng-model="reception_type" ng-if="person">
                     <li ng-class="{active: (rt.code == reception_type)}" ng-repeat="rt in reception_types"
-                        ng-click="changeAttendanceType(rt.code)"><a href="#">[[ rt.name ]]</a>
+                        ng-click="changeReceptionType(rt.code)"><a href="#">[[ rt.name ]]</a>
                     </li>
                 </ul>
             </div>
@@ -41,19 +41,25 @@
                     <tbody>
                     <tr ng-repeat="week in week_data">
                         <td ng-repeat="day in week">
-                            <div class="panel small person-schedule-day" ng-class="{'panel-primary': day.scheds.length > 0, 'panel-danger': $index >= 5, 'panel-default': $index < 5 && day.scheds.length == 0}" ng-if="!day.not_exists">
+                            <div class="panel small person-schedule-day"
+                                 ng-class="person_schedule_day_class(day, $index)" ng-if="!day.not_exists">
                                 <div class="panel-heading">
                                     [[ aux.moment(day.date).format('DD.MM.YYYY') ]]
                                 </div>
-                                <div class="panel-body" ng-if="day.scheds.length > 0">
-                                    <div ng-repeat="sched in day.scheds">
-                                        <p>кабинет: [[ sched.office ]]</p>
+                                <ul class="panel-body list-group" ng-if="day.scheds.length > 0">
+                                    <li class="list-group-item" ng-repeat="sched in day.scheds">
                                         <p>[[ aux.moment(day.date + 'T' + sched.begTime).format('HH:mm') ]] - [[ aux.moment(day.date + 'T' + sched.endTime).format('HH:mm') ]]</p>
-                                    </div>
-                                </div>
-                                <div class="panel-body " ng-if="day.scheds.length == 0">
-                                    Не заполнено
-                                </div>
+                                        <p>Кабинет: [[ sched.office ]]</p>
+                                    </li>
+                                    <li class="list-group-item">
+                                        <p>План: [[ day.summary.planned_tickets ]]</p>
+                                        <p>Сверх плана: [[ day.summary.extra_tickets ]]</p>
+                                        <p>Вне очереди: [[ day.summary.CITO_tickets ]]</p>
+                                    </li>
+                                </ul>
+                                <ul class="panel-body list-group" ng-if="day.scheds.length == 0">
+                                    <li class="list-group-item">Не заполнено</li>
+                                </ul>
                             </div>
                         </td>
                     </tr>
@@ -155,6 +161,19 @@
                 $scope.person_id = person.id;
                 $scope.reloadSchedule();
             });
+
+            $scope.person_schedule_day_class = function (day, index) {
+                // {'panel-primary': day.scheds.length > 0, 'panel-danger': $index >= 5, 'panel-default': $index < 5 && day.scheds.length == 0}
+                if (day.summary.busy_tickets) {
+                    return 'panel-success'
+                } else if (day.scheds.length > 0) {
+                    return'panel-primary'
+                } else if (index >= 5) {
+                    return 'panel-danger'
+                } else {
+                    return 'panel-default'
+                }
+            }
         }]);
     </script>
 {% endblock %}

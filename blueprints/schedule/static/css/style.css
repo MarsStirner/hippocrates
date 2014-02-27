@@ -2,16 +2,22 @@ table.person-schedule caption span.no-schedule-label {
     color: red;
 }
 
-div.person-schedule-day div p {
+div.person-schedule-day ul li p,
+div.person-schedule-day .panel-body {
     margin: 0;
+    padding: 0;
 }
 
-div.person-schedule-day.panel {
+div.person-schedule-day {
     margin-bottom: 0;
 }
 
-div.person-schedule-day.panel div.panel-heading,
-div.person-schedule-day.panel div.panel-body {
+div.person-schedule-day ul.list-group li.list-group-item {
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+div.person-schedule-day div.panel-heading {
     padding-top: 5px;
     padding-bottom: 5px;
 }
