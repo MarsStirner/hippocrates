@@ -3,7 +3,9 @@
 {% block title %}> {{ module_name }}{% endblock %}
 
 {% block main %}
-    <legend xmlns="http://www.w3.org/1999/html">Пациент</legend>
+    <legend xmlns="http://www.w3.org/1999/html">Пациент - {{ clientData['nameText'] }}</legend>
+    <button class="btn btn-default" onclick="history.back()">Назад к результатам поиска</button>
+    <a class="btn btn-success" href="{{ url_for('.appointment') }}?client_id={{ clientData['id'] }}">Записать на приём</a>
     <table class="table table-condensed">
         <caption>Основная информация</caption>
         <tbody>
@@ -34,5 +36,4 @@
         {% endfor %}
         </tbody>
     </table>
-    {#        <pre>[[schedule|json]]</pre>#}
 {% endblock %}

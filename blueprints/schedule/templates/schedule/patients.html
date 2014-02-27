@@ -10,6 +10,7 @@
                 <span class="input-group-addon glyphicon glyphicon-search"></span>
                 <input id="search" class="form-control" type="text" ng-model="query"
                        placeholder="Введите код или фамилию или имя пациента">
+                <span class="input-group-addon glyphicon glyphicon-remove" ng-click="query_clear()" style="cursor: pointer"></span>
             </div>
         </form>
         <table class="table table-condensed table-hover table-clickable">
@@ -77,8 +78,11 @@
                 }
             };
             $scope.open_client = function (client_id) {
-                window.open('{{ url_for('.html_patient') }}?client_id=' + client_id);
+                window.open('{{ url_for('.html_patient') }}?client_id=' + client_id, '_self');
             };
+            $scope.query_clear = function () {
+                $scope.query = '';
+            }
         }]);
     </script>
 {% endblock %}
