@@ -29,6 +29,7 @@
                 </ul>
             </div>
         </div>
+        <a class="btn btn-primary" ng-href="#" ng-if="person">Заполнить план приёма</a>{# dummy #}
         <div class="row">
             <div class="col-md-12">
                 <table class="table table-condensed person-schedule" ng-if="person">
@@ -46,19 +47,18 @@
                                 <div class="panel-heading">
                                     [[ aux.moment(day.date).format('DD.MM.YYYY') ]]
                                 </div>
-                                <ul class="panel-body list-group" ng-if="day.scheds.length > 0">
+                                <ul class="panel-body list-group" ng-switch="person_schedule_day_switch(day)">
                                     <li class="list-group-item" ng-repeat="sched in day.scheds">
                                         <p>[[ aux.moment(day.date + 'T' + sched.begTime).format('HH:mm') ]] - [[ aux.moment(day.date + 'T' + sched.endTime).format('HH:mm') ]]</p>
                                         <p>Кабинет: [[ sched.office ]]</p>
                                     </li>
-                                    <li class="list-group-item">
+                                    <li class="list-group-item" ng-switch-when="normal">
                                         <p>План: [[ day.summary.planned_tickets ]]</p>
                                         <p>Сверх плана: [[ day.summary.extra_tickets ]]</p>
                                         <p>Вне очереди: [[ day.summary.CITO_tickets ]]</p>
                                     </li>
-                                </ul>
-                                <ul class="panel-body list-group" ng-if="day.scheds.length == 0">
-                                    <li class="list-group-item">Не заполнено</li>
+                                    <li class="list-group-item" ng-switch-when="empty">Не заполнено</li>
+                                    <li class="list-group-item" ng-switch-when="absent">Причина отсутствия: day.roa.name</li>
                                 </ul>
                             </div>
                         </td>
@@ -168,12 +168,22 @@
                     return 'panel-success'
                 } else if (day.scheds.length > 0) {
                     return'panel-primary'
-                } else if (index >= 5) {
+                } else if (index >= 5 || day.roa) {
                     return 'panel-danger'
                 } else {
                     return 'panel-default'
                 }
-            }
+            };
+
+            $scope.person_schedule_day_switch = function (day) {
+                if (day.roa) {
+                    return 'absent'
+                } else if (day.scheds.length > 0) {
+                    return 'normal'
+                } else {
+                    return 'empty'
+                }
+            };
         }]);
     </script>
 {% endblock %}

@@ -710,6 +710,12 @@ class rbReasonOfAbsence(db.Model):
     code = db.Column(db.Unicode(8), nullable=False, index=True)
     name = db.Column(db.Unicode(64), nullable=False, index=True)
 
+    def __json__(self):
+        return {
+            'code': self.code,
+            'name': self.name,
+        }
+
 
 class rbSpeciality(db.Model):
     __tablename__ = 'rbSpeciality'

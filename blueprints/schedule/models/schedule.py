@@ -14,6 +14,12 @@ class rbReceptionType(db.Model):
     def __unicode__(self):
         return u'(%s) %s' % (self.code, self.name)
 
+    def __json__(self):
+        return {
+            'code': self.code,
+            'name': self.name,
+        }
+
 
 class rbAttendanceType(db.Model):
     __tablename__ = 'rbAttendanceType'
@@ -24,6 +30,12 @@ class rbAttendanceType(db.Model):
 
     def __unicode__(self):
         return u'(%s) %s' % (self.code, self.name)
+
+    def __json__(self):
+        return {
+            'code': self.code,
+            'name': self.name,
+        }
 
 
 class rbAppointmentType(db.Model):
@@ -36,6 +48,11 @@ class rbAppointmentType(db.Model):
     def __unicode__(self):
         return u'(%s) %s' % (self.code, self.name)
 
+    def __json__(self):
+        return {
+            'code': self.code,
+            'name': self.name,
+        }
 
 class Schedule(db.Model):
     __tablename__ = 'Schedule'
