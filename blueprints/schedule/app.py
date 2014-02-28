@@ -7,6 +7,10 @@ module = Blueprint(MODULE_NAME, __name__, template_folder='templates', static_fo
 
 @module.context_processor
 def module_name():
-    return dict(module_name=RUS_NAME)
+    return dict(
+        module_name=RUS_NAME,
+        rbReceptionTypes=u"""[{name: 'Амбулаторно', code: 'amb'}, {name: 'На дому', code: 'home'}]"""
+    )
 
+# noinspection PyUnresolvedReferences
 from .views import *

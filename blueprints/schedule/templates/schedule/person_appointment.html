@@ -94,10 +94,7 @@
 
             $scope.month = curDate.getMonth();
 
-            $scope.reception_types = [
-                {name: 'Амбулаторно', code: 'amb'},
-                {name: 'На дому', code: 'home'}
-            ];
+            $scope.reception_types = {{ rbReceptionTypes | safe }};
             $scope.reception_type = 'amb';
 
             $scope.setDatePage = function(index) {
@@ -143,9 +140,9 @@
                         params: {
                             client_id: $scope.client_id,
                             start_date: $scope.pages[$scope.page].format('YYYY-MM-DD'),
-                            related: 1,
+                            related: true,
                             person_ids: '[' + $scope.user_selected.join() + ']',
-                            reception_type: 'amb'
+                            reception_type: $scope.reception_type
                         }
                     }
                 ).success(function (data) {

@@ -87,10 +87,7 @@
 
             $scope.month = curDate.getMonth();
 
-            $scope.reception_types = [
-                {name: 'Амбулаторно', code: 'amb'},
-                {name: 'На дому', code: 'home'}
-            ];
+            $scope.reception_types = {{ rbReceptionTypes | safe }};
             $scope.reception_type = 'amb';
 
             $scope.reloadSchedule = function () {
