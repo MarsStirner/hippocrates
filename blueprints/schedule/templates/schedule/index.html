@@ -34,7 +34,7 @@
                 <ul class="nav nav-pills" ng-if="person">
                     <li ng-class="{active: ($index == page)}" ng-repeat="p in pages">
                         <a ng-click="setDatePage($index)" href="#">
-                            [[ p.format('MM.DD') ]] - [[ aux.moment(p).add(6, 'd').format('MM.DD') ]]
+                            [[ p | asShortDate ]] - [[ aux.moment(p).add(6, 'd') | asShortDate ]]
                         </a>
                     </li>
                 </ul>
@@ -48,17 +48,17 @@
                     <thead ng-if="grouped[reception_type].max_tickets > 0">
                     <tr>
                         <th ng-repeat="day in grouped[reception_type].schedule"
-                            ng-bind="aux.moment(day.date).format('DD.MM.YYYY, dd')"></th>
+                            ng-bind="day.date | asMomentFormat:'DD.MM.YYYY, dd'"></th>
                     </tr>
                     </thead>
                     <tbody ng-if="grouped[reception_type].max_tickets > 0">
                     <tr ng-repeat="row in aux.range(grouped[reception_type].max_tickets)">
                         <td ng-repeat="day in grouped[reception_type].schedule" ng-switch="day.tickets[row].status">
                             <button type="button" class="btn btn-block btn-danger" ng-switch-when="busy">
-                                [[ aux.moment(day.tickets[row].begDateTime).format('HH:mm') ]] - [[ day.tickets[row].client ]]
+                                [[ day.tickets[row].begDateTime | asTime ]] - [[ day.tickets[row].client ]]
                             </button>
                             <button type="button" class="btn btn-block btn-success" ng-switch-when="free">
-                                [[ aux.moment(day.tickets[row].begDateTime).format('HH:mm') ]]
+                                [[ day.tickets[row].begDateTime | asTime]]
                             </button>
                             <button type="button" class="btn btn-block disabled" ng-switch-default>&nbsp;
                             </button>

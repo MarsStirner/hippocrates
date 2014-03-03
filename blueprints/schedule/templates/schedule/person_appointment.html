@@ -22,7 +22,7 @@
                         <ul class="nav nav-pills small">
                             <li ng-class="{active: ($index == page)}" ng-repeat="p in pages">
                                 <a ng-click="setDatePage($index)" href="#">
-                                    [[ p.format('DD.MM') ]] - [[ aux.moment(p).add(6, 'd').format('DD.MM') ]]
+                                    [[ p | asShortDate ]] - [[ aux.moment(p).add(6, 'd') | asShortDate ]]
                                 </a>
                             </li>
                         </ul>
@@ -38,7 +38,7 @@
                             <thead ng-if="person_schedule.grouped[reception_type].max_tickets > 0">
                             <tr>
                                 <th ng-repeat="day in person_schedule.grouped[reception_type].schedule"
-                                    ng-bind="aux.moment(day.date).format('DD.MM.YYYY, dd')">
+                                    ng-bind="day.date | asMomentFormat:'DD.MM.YYYY, dd'">
                                 </th>
                             </tr>
                             </thead>
@@ -46,11 +46,11 @@
                             <tr ng-repeat="row in aux.range(person_schedule.grouped[reception_type].max_tickets)">
                                 <td ng-repeat="day in person_schedule.grouped[reception_type].schedule" ng-switch="day.tickets[row].status">
                                     <button type="button" class="btn btn-block btn-danger" ng-switch-when="busy"
-                                            ng-bind="aux.moment(day.tickets[row].begDateTime).format('HH:mm')"
+                                            ng-bind="day.tickets[row].begDateTime | asTime"
                                             ng-click="appointment_cancel(day.tickets[row], person_schedule.person)">
                                     </button>
                                     <button type="button" class="btn btn-block btn-success" ng-switch-when="free"
-                                            ng-bind="aux.moment(day.tickets[row].begDateTime).format('HH:mm')"
+                                            ng-bind="day.tickets[row].begDateTime | asTime"
                                             ng-click="appointment_make(day.tickets[row], person_schedule.person)">
                                     </button>
                                     <button type="button" class="btn btn-block disabled" ng-switch-default>&nbsp;</button>

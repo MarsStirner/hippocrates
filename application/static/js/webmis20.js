@@ -6,6 +6,66 @@ WebMis20.config(function ($interpolateProvider) {
     $interpolateProvider.startSymbol('[[');
     $interpolateProvider.endSymbol(']]');
 });
+WebMis20.filter('asDateTime', function ($filter) {
+    return function (data) {
+        if (!data) return data;
+        var result = moment(data);
+        if (!result.isValid()) return data;
+        return result.format('DD.MM.YYYY HH:mm');
+    }
+});
+WebMis20.filter('asDate', function ($filter) {
+    return function (data) {
+        if (!data) return data;
+        var result = moment(data);
+        if (!result.isValid()) return data;
+        return result.format('DD.MM.YYYY');
+    }
+});
+WebMis20.filter('asShortDate', function ($filter) {
+    return function (data) {
+        if (!data) return data;
+        var result = moment(data);
+        if (!result.isValid()) return data;
+        return result.format('DD.MM');
+    }
+});
+WebMis20.filter('asTime', function ($filter) {
+    return function (data) {
+        if (!data) return data;
+        var result = moment(data);
+        if (!result.isValid()) return data;
+        return result.format('HH:mm');
+    }
+});
+WebMis20.filter('asMomentFormat', function ($filter) {
+    return function (data, format) {
+        if (!data) return data;
+        var result = moment(data);
+        if (!result.isValid()) return data;
+        return result.format(format);
+    }
+});
+WebMis20.filter('asAutoFormat', function ($filter) {
+    return function (data, key) {
+        var value = data[key];
+        if (!value) return value;
+        var result = moment(value);
+        if (aux.endswith(key, 'Date')) {
+            return result.format('DD.MM.YYYY');
+        } else if (aux.endswith(key, 'DateTime')) {
+            return result.format('DD.MM.YYYY HH:mm');
+        } else if (aux.endswith(key, 'Time')) {
+            return result.format('HH:mm');
+        } else {
+            if (result.isValid()) {
+                return result.toISOString();
+            } else {
+                return value;
+            }
+        }
+    }
+});
 var aux = {
     getQueryParams: function (qs) {
         qs = qs.split("+").join(" ");

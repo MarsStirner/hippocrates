@@ -45,11 +45,11 @@
                             <div class="panel small person-schedule-day"
                                  ng-class="person_schedule_day_class(day, $index)" ng-if="!day.not_exists">
                                 <div class="panel-heading">
-                                    [[ aux.moment(day.date).format('DD.MM.YYYY') ]]
+                                    [[ day.date | asDate ]]
                                 </div>
                                 <ul class="panel-body list-group" ng-switch="person_schedule_day_switch(day)">
                                     <li class="list-group-item" ng-repeat="sched in day.scheds">
-                                        <p>[[ aux.moment(day.date + 'T' + sched.begTime).format('HH:mm') ]] - [[ aux.moment(day.date + 'T' + sched.endTime).format('HH:mm') ]]</p>
+                                        <p>[[ (day.date + 'T' + sched.begTime) | asTime ]] - [[ (day.date + 'T' + sched.endTime) | asTime ]]</p>
                                         <p>Кабинет: [[ sched.office ]]</p>
                                     </li>
                                     <li class="list-group-item" ng-switch-when="normal">
@@ -135,7 +135,6 @@
                     }
                 }
                 $scope.week_data = result;
-{#                $scope.#}
             };
 
             $scope.monthChanged = function () {
@@ -160,7 +159,6 @@
             });
 
             $scope.person_schedule_day_class = function (day, index) {
-                // {'panel-primary': day.scheds.length > 0, 'panel-danger': $index >= 5, 'panel-default': $index < 5 && day.scheds.length == 0}
                 if (day.summary.busy_tickets) {
                     return 'panel-success'
                 } else if (day.scheds.length > 0) {
