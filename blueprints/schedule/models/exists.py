@@ -1,4 +1,5 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*
+import datetime
 from application.database import db
 from blueprints.schedule.models.kladr_models import Kladr, Street
 
@@ -116,6 +117,19 @@ class AddressHouse(db.Model):
     corpus = db.Column(db.String(8), nullable=False)
 
 
+class Bloodhistory(db.Model):
+    __tablename__ = u'BloodHistory'
+
+    id = db.Column(db.Integer, primary_key=True)
+    bloodDate = db.Column(db.Date, nullable=False)
+    client_id = db.Column(db.Integer, db.ForeignKey('Client.id'), nullable=False)
+    bloodType_id = db.Column(db.Integer, db.ForeignKey('rbBloodType.id'), nullable=False)
+    person_id = db.Column(db.Integer, db.ForeignKey('Person.id'), nullable=False)
+
+    bloodType = db.relationship("rbBloodType")
+    person = db.relationship("Person")
+
+
 class Client(db.Model):
     __tablename__ = 'Client'
     __table_args__ = (
@@ -154,6 +168,15 @@ class Client(db.Model):
     loc_addresses = db.relationship(u'ClientAddress',
                                     primaryjoin="and_(Client.id==ClientAddress.client_id, ClientAddress.type==1)",
                                     order_by="desc(ClientAddress.id)", lazy='dynamic')
+    socStatuses = db.relationship(u'ClientSocStatus',
+                                  primaryjoin='and_(ClientSocStatus.deleted == 0,ClientSocStatus.client_id==Client.id,'
+                                  'or_(ClientSocStatus.endDate == None, ClientSocStatus.endDate>={0}))'.format(datetime.date.today()))
+    intolerances = db.relationship(u'ClientIntoleranceMedicament',
+                                   primaryjoin='and_(ClientIntoleranceMedicament.client_id==Client.id,'
+                                               'ClientIntoleranceMedicament.deleted == 0)')
+    allergies = db.relationship(u'ClientAllergy', primaryjoin='and_(ClientAllergy.client_id==Client.id,'
+                                                              'ClientAllergy.deleted == 0)')
+    blood_history = db.relationship(u'Bloodhistory')
 
     @property
     def nameText(self):
@@ -287,6 +310,28 @@ class ClientAddress(db.Model):
             return self.freeInput
 
 
+class ClientAllergy(db.Model):
+    __tablename__ = u'ClientAllergy'
+
+    id = db.Column(db.Integer, primary_key=True)
+    createDatetime = db.Column(db.DateTime, nullable=False)
+    createPerson_id = db.Column(db.Integer, index=True)
+    modifyDatetime = db.Column(db.DateTime, nullable=False)
+    modifyPerson_id = db.Column(db.Integer, index=True)
+    deleted = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    client_id = db.Column(db.ForeignKey('Client.id'), nullable=False, index=True)
+    name = db.Column("nameSubstance", db.Unicode(128), nullable=False)
+    power = db.Column(db.Integer, nullable=False)
+    createDate = db.Column(db.Date)
+    notes = db.Column(db.String, nullable=False)
+    version = db.Column(db.Integer, nullable=False)
+
+    client = db.relationship(u'Client')
+
+    def __unicode__(self):
+        return self.name
+
+
 class ClientContact(db.Model):
     __tablename__ = 'ClientContact'
 
@@ -340,6 +385,82 @@ class ClientDocument(db.Model):
 
     def __unicode__(self):
         return (' '.join([self.documentType.name, self.serial, self.number])).strip()
+
+
+class ClientIntoleranceMedicament(db.Model):
+    __tablename__ = u'ClientIntoleranceMedicament'
+
+    id = db.Column(db.Integer, primary_key=True)
+    createDatetime = db.Column(db.DateTime, nullable=False)
+    createPerson_id = db.Column(db.Integer, index=True)
+    modifyDatetime = db.Column(db.DateTime, nullable=False)
+    modifyPerson_id = db.Column(db.Integer, index=True)
+    deleted = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    client_id = db.Column(db.ForeignKey('Client.id'), nullable=False, index=True)
+    name = db.Column("nameMedicament", db.Unicode(128), nullable=False)
+    power = db.Column(db.Integer, nullable=False)
+    createDate = db.Column(db.Date)
+    notes = db.Column(db.String, nullable=False)
+    version = db.Column(db.Integer, nullable=False)
+
+    client = db.relationship(u'Client')
+
+    def __unicode__(self):
+        return self.name
+
+
+class ClientSocStatus(db.Model):
+    __tablename__ = u'ClientSocStatus'
+
+    id = db.Column(db.Integer, primary_key=True)
+    createDatetime = db.Column(db.DateTime, nullable=False)
+    createPerson_id = db.Column(db.Integer, index=True)
+    modifyDatetime = db.Column(db.DateTime, nullable=False)
+    modifyPerson_id = db.Column(db.Integer, index=True)
+    deleted = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    client_id = db.Column(db.ForeignKey('Client.id'), nullable=False, index=True)
+    socStatusClass_id = db.Column(db.ForeignKey('rbSocStatusClass.id'), index=True)
+    socStatusType_id = db.Column(db.ForeignKey('rbSocStatusType.id'), nullable=False, index=True)
+    begDate = db.Column(db.Date, nullable=False)
+    endDate = db.Column(db.Date)
+    document_id = db.Column(db.ForeignKey('ClientDocument.id'), index=True)
+    version = db.Column(db.Integer, nullable=False)
+    note = db.Column(db.String(256), nullable=False, server_default=u"''")
+    benefitCategory_id = db.Column(db.Integer)
+
+    client = db.relationship(u'Client')
+    soc_status_class = db.relationship(u'rbSocStatusClass')
+    socStatusType = db.relationship(u'rbSocStatusType')
+    self_document = db.relationship(u'ClientDocument')
+
+    @property
+    def classes(self):
+        return self.socStatusType.classes
+
+    @property
+    def code(self):
+        return self.socStatusType.code
+
+    @property
+    def name(self):
+        return self.socStatusType.name
+
+    @property
+    def document(self):
+        if self.document_id:
+            return self.self_document
+        else:
+            return self.getClientDocument()
+
+    def getClientDocument(self):
+        documents = ClientDocument.query().filter(ClientDocument.clientId == self.client_id).\
+            filter(ClientDocument.deleted == 0).all()
+        documents = [document for document in documents if document.documentType and
+                     document.documentType.group.code == "1"]
+        return documents[-1]
+
+    def __unicode__(self):
+        return self.name
 
 
 class rbDocumentTypeGroup(db.Model):
@@ -735,6 +856,39 @@ class rbSpeciality(db.Model):
     mkbFilter = db.Column(db.String(32), nullable=False)
     regionalCode = db.Column(db.String(16), nullable=False)
     quotingEnabled = db.Column(db.Integer, server_default=u"'0'")
+
+
+class rbSocStatusClass(db.Model):
+    __tablename__ = u'rbSocStatusClass'
+
+    id = db.Column(db.Integer, primary_key=True)
+    group_id = db.Column(db.ForeignKey('rbSocStatusClass.id'), index=True)
+    code = db.Column(db.String(8), nullable=False, index=True)
+    name = db.Column(db.String(64), nullable=False, index=True)
+
+    group = db.relationship(u'rbSocStatusClass', remote_side=[id])
+
+    def __unicode__(self):
+        return self.name
+
+
+rbSocStatusClassTypeAssoc = db.Table('rbSocStatusClassTypeAssoc', db.Model.metadata,
+                                     db.Column('class_id', db.Integer, db.ForeignKey('rbSocStatusClass.id')),
+                                     db.Column('type_id', db.Integer, db.ForeignKey('rbSocStatusType.id'))
+                                     )
+
+
+class rbSocStatusType(db.Model):
+    __tablename__ = u'rbSocStatusType'
+
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(8), nullable=False, index=True)
+    name = db.Column(db.String(250), nullable=False, index=True)
+    socCode = db.Column(db.String(8), nullable=False, index=True)
+    TFOMSCode = db.Column(db.Integer)
+    regionalCode = db.Column(db.String(8), nullable=False)
+
+    classes = db.relationship(u'rbSocStatusClass', secondary=rbSocStatusClassTypeAssoc)
 
 
 class rbTariffCategory(db.Model):

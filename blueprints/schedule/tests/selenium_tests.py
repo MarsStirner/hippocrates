@@ -62,8 +62,6 @@ class HippoSimpleTest(SimpleTestCase):
         driver.find_element_by_xpath("//select[@name='month']/option[text()='Март']").click()
         driver.find_element_by_xpath("//select[@name='month']/option[text()='Сентябрь']").click()
         driver.find_element_by_xpath("//select[@name='month']/option[text()='Февраль']").click()
-        driver.find_element_by_link_text("02.15 - 02.21").click()
-        driver.find_element_by_link_text("02.01 - 02.07").click()
 
 
 test_cases = (HippoSimpleTest, )
