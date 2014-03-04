@@ -113,6 +113,43 @@ class ClientVisualizer(object):
         self.__mode = mode
 
     def make_client_info(self, client):
+
+        socStatuses = []
+        allergies = []
+        intolerances = []
+        bloodHistory = []
+
+        for socStatus in client.socStatuses:
+            socStatuses.append({
+                'class': socStatus.soc_status_class.name,
+                'type': socStatus.name,
+                'begDate': socStatus.begDate.strftime('%d-%m-%Y') if socStatus.begDate else '',
+                'endDate': socStatus.endDate.strftime('%d-%m-%Y') if socStatus.endDate else ''
+            })
+
+        for allergy in client.allergies:
+            allergies.append({
+                'nameSubstance': allergy.name,
+                'power': allergy.power,
+                'createDate': allergy.createDate.strftime('%d-%m-%Y') if allergy.createDate else '',
+                'notes': allergy.notes
+            })
+
+        for intolerance in client.intolerances:
+            intolerances.append({
+                'nameMedicament': intolerance.name,
+                'power': intolerance.power,
+                'createDate': intolerance.createDate.strftime('%d-%m-%Y') if allergy.createDate else '',
+                'notes': intolerance.notes
+            })
+
+        for blood in client.blood_history:
+            bloodHistory.append({
+                'bloodGroup': blood.bloodType.name,
+                'bloodDate': blood.bloodDate.strftime('%d-%m-%Y') if blood.bloodDate else '',
+                'physician': blood.person,
+            })
+
         return {
             'id': client.id,
             'nameText': client.nameText,
@@ -127,6 +164,10 @@ class ClientVisualizer(object):
             'contact': client.phones,
             'compulsoryPolicy': client.compulsoryPolicy,
             'voluntaryPolicy': client.voluntaryPolicy,
+            'socStatuses': socStatuses,
+            'allergies': allergies,
+            'intolerances': intolerances,
+            'boolHistory': bloodHistory
         }
 
     def make_records(self, client):
@@ -150,6 +191,7 @@ class ClientVisualizer(object):
             'createPerson': record.createPerson,
             'note': record.note,
         }
+
 
 class PersonTreeVisualizer(object):
     def make_person(self, person):

@@ -8,15 +8,108 @@
 {#        <form class="form-inline" role="form">#}
 {#            <input class="form-control" type="text" ng-model="doctorInput" placeholder="ФИО врача">#}
 {#        </form>#}
-        <table class="table table-condensed">
-            <caption>Основная информация</caption>
-            <tbody>
-            <tr ng-repeat="key in clientInfoCodeOrder" ng-if="clientDataItems[key]">
-                <td>[[ clientInfoCode2Name[key] ]]</td>
-                <td>[[ aux.format(clientDataItems, key) ]]</td>
-            </tr>
-            </tbody>
-        </table>
+        <h3>Информация о пациенте </h3>
+        <ul class="nav nav-tabs">
+            <li ng-class="{active: tub_selected==1 }"><a href ng-click="tub_selected=1">Основная информация</a></li>
+            <li ng-class="{active: tub_selected==2 }"><a href ng-click="tub_selected=2">Соц. статус</a></li>
+            <li ng-class="{active: tub_selected==3 }"><a href ng-click="tub_selected=3">Особенности</a></li>
+{#            <li ng-class="{active: tub_selected==4 }"><a href ng-click="tub_selected=3">Связи с др. пациентами</a></li>#}
+{#            <li ng-class="{active: tub_selected==5 }"><a href ng-click="tub_selected=3">Связь с внешними сисемами</a></li>#}
+{#            <li ng-class="{active: tub_selected==6 }"><a href ng-click="tub_selected=3">История документов</a></li>#}
+        </ul>
+
+        <div ng-show="tub_selected == 1">
+            <table class="table table-condensed">
+                <tbody>
+                <tr ng-repeat="key in clientMainInfoCodeOrder" ng-if="clientDataItems[key]">
+                    <td>[[ clientInfoCode2Name[key] ]]</td>
+                    <td>[[ aux.format(clientDataItems, key) ]]</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div ng-show="tub_selected == 2">
+            <table class="table table-condensed" ng-if="clientDataItems['socStatuses']">
+                <thead>
+                     <tr>
+                        <th>Класс</th>
+                        <th>Тип</th>
+                        <th>Дата начала</th>
+                        <th>Дата окончания</th>
+                     </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="status in clientDataItems['socStatuses']">
+                        <td>[[status.class]]</td>
+                        <td>[[status.type]]</td>
+                        <td>[[status.begDate]]</td>
+                        <td>[[status.endDate]]</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div ng-show="tub_selected == 3">
+            <table class="table table-condensed" ng-if="clientDataItems['bloodHistory']">
+                <caption>Группа крови и резус-фактор</caption>
+                <thead>
+                     <tr>
+                         <th>Группа крови</th>
+                         <th>Дата установления</th>
+                         <th>Врач</th>
+                     </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="blood in clientDataItems['bloodHistory']">
+                        <td>[[blood.bloodGroup]]</td>
+                        <td>[[blood.bloodDate]]</td>
+                        <td>[[blood.physician]]</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <table class="table table-condensed" ng-if="clientDataItems['allergies']">
+                <caption>Аллергия</caption>
+                <thead>
+                     <tr>
+                        <th>Наименование вещества</th>
+                        <th>Степень</th>
+                        <th>Дата установления</th>
+                        <th>Примечание</th>
+                     </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="allergy in clientDataItems['allergies']">
+                        <td>[[allergy.nameSubstance]]</td>
+                        <td>[[allergy.power]]</td>
+                        <td>[[allergy.createDate]]</td>
+                        <td>[[allergy.notes]]</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <table class="table table-condensed" ng-if="clientDataItems['intolerances']">
+                <caption>Медикаметозная непереносимость</caption>
+                <thead>
+                     <tr>
+                        <th>Наименование медикамента</th>
+                        <th>Степень</th>
+                        <th>Дата установления</th>
+                        <th>Примечание</th>
+                     </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="intolerance in clientDataItems['intolerances']">
+                        <td>[[intolerance.nameMedicament]]</td>
+                        <td>[[intolerance.power]]</td>
+                        <td>[[intolerance.createDate]]</td>
+                        <td>[[intolerance.notes]]</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div ng-show="tub_selected == 4">
+
+        </div>
         <table class="table">
             <caption>Предварительные записи</caption>
             <thead>
@@ -42,6 +135,7 @@
             $scope.aux = aux;
             $scope.params = aux.getQueryParams(document.location.search);
             $scope.client_id = $scope.params.client_id;
+            $scope.tub_selected = 1;
             var curDate = new Date();
             var curYear = curDate.getUTCFullYear();
             $scope.years = [curYear - 1, curYear, curYear + 1];
@@ -59,7 +153,7 @@
                 'voluntaryPolicy': 'Полис ДМС',
                 'compulsoryPolicy': 'Полис ОМС'
             };
-            $scope.clientInfoCodeOrder = ['id', 'nameText', 'birthDate', 'sex', 'regAddress', 'liveAddress', 'document', 'compulsoryPolicy', 'voluntaryPolicy', 'SNILS', 'contact'];
+            $scope.clientMainInfoCodeOrder = ['id', 'nameText', 'birthDate', 'sex', 'regAddress', 'liveAddress', 'document', 'compulsoryPolicy', 'voluntaryPolicy', 'SNILS', 'contact'];
             $scope.recordColumns = {
                 'mark': 'Отметка',
                 'begDateTime': 'Дата и время приёма',
