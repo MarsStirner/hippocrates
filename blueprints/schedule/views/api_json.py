@@ -79,6 +79,36 @@ def api_schedule():
     return jsonify(result)
 
 
+@module.route('/api/schedule-description.json')
+@public_endpoint
+def api_schedule_description():
+    person_id_s = request.args.get('person_ids')
+    start_date_s = request.args.get('start_date')
+    try:
+        start_date = datetime.datetime.strptime(start_date_s, '%Y-%m').date()
+        end_date = start_date + datetime.timedelta(calendar.monthrange(start_date.year, start_date.month)[1])
+    except ValueError:
+        return abort(400)
+
+    result = {
+        'schedules': [],
+    }
+
+    context = ScheduleVisualizer()
+
+    try:
+        person_ids = {int(person_id_s)}
+    except ValueError:
+        person_ids = set()
+
+    if person_ids:
+        persons = Person.query.filter(Person.id.in_(person_ids))
+        schedules = context.make_persons_schedule_description(persons, start_date, end_date)
+        result['schedules'] = schedules
+
+    return jsonify(result)
+
+
 @module.route('/api/patient.json')
 @public_endpoint
 def api_patient():

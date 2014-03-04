@@ -134,6 +134,105 @@ class ScheduleVisualizer(object):
                 start_date, end_date, expand
             )} for person in persons]
 
+    def make_sched_description(self, schedule):
+        planned = 0
+        CITO = 0
+        extra = 0
+        busy = False
+        for ticket in schedule.tickets:
+            at = ticket.attendanceType.code
+            if at == 'normal':
+                planned += 1
+            elif at == 'CITO':
+                CITO += 1
+            elif at == 'extra':
+                extra += 1
+            if not busy and ticket.client:
+                busy = True
+        return {
+            'id': schedule.id,
+            'office': schedule.office,
+            'planned': planned,
+            'CITO': CITO,
+            'extra': extra,
+            'busy': busy,
+            'begTime': schedule.begTime,
+            'endTime': schedule.endTime,
+            'roa': schedule.reasonOfAbsence,
+        }
+
+    def collapse_scheds_description(self, scheds):
+        planned = 0
+        CITO = 0
+        extra = 0
+        roa = None
+        busy = False
+        office = None
+        mini_scheds = []
+        for sched in scheds:
+            if not roa and sched['roa']:
+                roa = sched['roa']
+            if not busy and sched['busy']:
+                busy = True
+            if not office and sched['office']:
+                office = sched['office']
+            planned += sched['planned']
+            CITO += sched['CITO']
+            extra += sched['extra']
+            mini_scheds.append({
+                'begTime': sched['begTime'],
+                'endTime': sched['endTime'],
+            })
+        return {
+            'scheds': mini_scheds,
+            'planned': planned,
+            'CITO': CITO,
+            'extra': extra,
+            'busy': busy,
+            'roa': roa,
+            'office': office,
+        }
+
+    def make_schedule_description(self, schedules, date_start, date_end):
+        one_day = datetime.timedelta(days=1)
+
+        def new_rt():
+            date_iter = date_start
+            rt_group = []
+            while date_iter < date_end:
+                rt_group.append({
+                    'date': date_iter,
+                    'scheds': []
+                })
+                date_iter += one_day
+            return {
+                'max_tickets': 0,
+                'schedule': rt_group,
+            }
+        result = dict((rt, new_rt()) for rt in self.reception_types)
+
+        for schedule in schedules:
+            if schedule.receptionType.code in result:
+                result[schedule.receptionType.code]['schedule'][(schedule.date - date_start).days]['scheds'].\
+                    append(self.make_sched_description(schedule))
+
+        for group in result.itervalues():
+            for day in group['schedule']:
+                day.update(self.collapse_scheds_description(day['scheds']))
+
+        return result
+
+    def make_persons_schedule_description(self, persons, start_date, end_date):
+        return [{
+            'person': self.make_person(person),
+            'grouped': self.make_schedule_description(
+                Schedule.query.filter(
+                    Schedule.person_id == person.id,
+                    start_date <= Schedule.date, Schedule.date <= end_date
+                ).order_by(Schedule.date),
+                start_date, end_date
+            )} for person in persons]
+
 
 class ClientVisualizer(object):
     def __init__(self, mode=Format.JSON):

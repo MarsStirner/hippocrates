@@ -1,6 +1,5 @@
 {% extends 'schedule/base.html' %}
 {% import "schedule/_person_tree.html" as person_tree %}
-
 {% block title %}> {{ module_name }}{% endblock %}
 
 {% block main %}
@@ -8,63 +7,143 @@
     <div ng-controller="Schedule">
         <div class="row">
             <div class="col-md-2">
-                <select class="form-control" name="year" ng-model="year"
+                <select class="form-control" name="year" ng-model="year" ng-disabled="editing"
                         ng-options="y for y in years" ng-change="monthChanged()"></select>
             </div>
             <div class="col-md-2">
-                <select class="form-control" name="month" ng-model="month"
+                <select class="form-control" name="month" ng-model="month" ng-disabled="editing"
                         ng-options="item.value as item.name for item in aux.months" ng-change="monthChanged()"></select>
             </div>
             <div class="col-md-8">
                 {{ person_tree.html_dropdown_select() }}
             </div>
         </div>
-        <br/>{# Dirtiest hack you've ever seen! #}
-        <div class="row">
-            <div class="col-md-12">
-                <ul class="nav nav-tabs nav-justified" ng-model="reception_type" ng-if="person">
-                    <li ng-class="{active: (rt.code == reception_type)}" ng-repeat="rt in reception_types"
-                        ng-click="changeReceptionType(rt.code)"><a href="#">[[ rt.name ]]</a>
-                    </li>
-                </ul>
+        <div ng-show="person">
+            <br/>{# Dirtiest hack you've ever seen! #}
+            <div class="row">
+                <div class="col-md-12">
+                    <ul class="nav nav-tabs nav-justified" ng-model="reception_type">
+                        <li ng-class="{active: (rt.code == reception_type), disabled: editing}" ng-repeat="rt in reception_types"
+                            ng-click="changeReceptionType(rt.code)"><a href="#" ng-disabled="editing">[[ rt.name ]]</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <br/>{# Dirtiest hack you've ever seen! #}
+            <div class="btn-group">
+                <button class="btn btn-primary" ng-click="start_editing()" ng-if="!editing">Редактировать</button>
+                <button class="btn btn-success" ng-click="finish_editing()" ng-if="editing">Сохранить</button>
+                <button class="btn btn-danger" ng-click="cancel_editing()" ng-if="editing">Отменить</button>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-primary" ng-click="select_odd_days()" ng-if="editing">Выбрать нечет дни</button>
+                <button class="btn btn-primary" ng-click="invert_selection()" ng-if="editing">Обратить выделение</button>
+                <button class="btn btn-warning" ng-click="fill_selection()" ng-if="editing" ng-disabled="selected_days.length == 0">Заполнить</button>
+            </div>
+            <div ng-show="editing">
+                <input type="checkbox" id="weekendCheckBox" ng-model="weekends_selectable" /><label for="weekendCheckBox">Выбирать выходные</label>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <table class="table table-condensed person-schedule">
+                        <caption>[[ person.name ]]<small>, [[ person.speciality ]]</small></caption>
+                        <thead>
+                        <tr>
+                            <th class="text-center" ng-if="editing">&raquo;</th>
+                            <th class="text-center" ng-repeat="weekday in weekdays" ng-bind="weekday"></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr ng-repeat="week in week_data">
+                            <td ng-if="editing" class="text-center">
+                                <button class="btn btn-default" type="button" ng-click="toggle_week_selected(week)">&raquo;</button>
+                            </td>
+                            <td ng-repeat="day in week">
+                                <div class="panel small person-schedule-day"
+                                     ng-if="!day.not_exists"
+                                     ng-class="get_day_class(day, $index)"
+                                     ng-click="toggle_day_selected(day)">
+                                    <div class="panel-heading" ng-bind="day.date | asDate"></div>
+                                    <ul class="panel-body list-group" ng-switch="person_schedule_day_switch(day)">
+                                        <li class="list-group-item" ng-repeat="sched in day.scheds">
+                                            <p>[[ (day.date + 'T' + sched.begTime) | asTime ]] - [[ (day.date + 'T' + sched.endTime) | asTime ]]</p>
+                                        </li>
+                                        <li class="list-group-item" ng-switch-when="normal">
+                                            <p>Кабинет: [[ day.office ]]</p>
+                                            <p>План: [[ day.planned ]]</p>
+                                            <p>Сверх плана: [[ day.extra ]]</p>
+                                            <p>Вне очереди: [[ day.CITO ]]</p>
+                                        </li>
+                                        <li class="list-group-item" ng-switch-when="empty">Не заполнено</li>
+                                        <li class="list-group-item" ng-switch-when="absent">Причина отсутствия: day.roa.name</li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
-        <a class="btn btn-primary" ng-href="#" ng-if="person">Заполнить план приёма</a>{# dummy #}
-        <div class="row">
-            <div class="col-md-12">
-                <table class="table table-condensed person-schedule" ng-if="person">
-                    <caption>[[ person.name ]]<small>, [[ person.speciality ]]</small></caption>
-                    <thead>
-                    <tr>
-                        <th ng-repeat="weekday in weekdays" ng-bind="weekday"></th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr ng-repeat="week in week_data">
-                        <td ng-repeat="day in week">
-                            <div class="panel small person-schedule-day"
-                                 ng-class="person_schedule_day_class(day, $index)" ng-if="!day.not_exists">
-                                <div class="panel-heading">
-                                    [[ day.date | asDate ]]
+    </div>
+    <div ng-controller="Modal" class="modal fade" id="ModalDialog" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel" ng-bind="title"></h4>
+                </div>
+                <div class="modal-body">
+                    <form role="form">
+                        <fieldset>
+                            <div class="form-group">
+                                <label class="col-md-3 control-label" for="begTime1,endTime1">Часы приёма</label>
+                                <div class="input-group col-md-9">
+                                    <input type="time" class="form-control" ng-keypress="checkTime('begTime1')" ng-model="begTime1" >
+                                    <span class="input-group-addon">-</span>
+                                    <input type="time" class="form-control" ng-keypress="checkTime('endTime1')" ng-model="endTime1">
                                 </div>
-                                <ul class="panel-body list-group" ng-switch="person_schedule_day_switch(day)">
-                                    <li class="list-group-item" ng-repeat="sched in day.scheds">
-                                        <p>[[ (day.date + 'T' + sched.begTime) | asTime ]] - [[ (day.date + 'T' + sched.endTime) | asTime ]]</p>
-                                        <p>Кабинет: [[ sched.office ]]</p>
-                                    </li>
-                                    <li class="list-group-item" ng-switch-when="normal">
-                                        <p>План: [[ day.summary.planned_tickets ]]</p>
-                                        <p>Сверх плана: [[ day.summary.extra_tickets ]]</p>
-                                        <p>Вне очереди: [[ day.summary.CITO_tickets ]]</p>
-                                    </li>
-                                    <li class="list-group-item" ng-switch-when="empty">Не заполнено</li>
-                                    <li class="list-group-item" ng-switch-when="absent">Причина отсутствия: day.roa.name</li>
-                                </ul>
                             </div>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">Перерыв</label>
+                                <div class="input-group col-md-9">
+                                    <input type="time" class="form-control" id="begTime2">
+                                    <span class="input-group-addon">-</span>
+                                    <input type="time" class="form-control" id="endTime2">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">Кабинет</label>
+                                <div class="col-md-3">
+                                    <input type="time" class="form-control">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">План приёма</label>
+                                <div class="col-md-3">
+                                    <input type="time" class="form-control">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">Сверх плана</label>
+                                <div class="col-md-3">
+                                    <input type="time" class="form-control">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">Вне очереди</label>
+                                <div class="col-md-3">
+                                    <input type="time" class="form-control">
+                                </div>
+                            </div>
+                        </fieldset>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" ng-bind="acceptText" ng-click="accept()"
+                            ng-disabled="unacceptable"></button>
+                    <button type="button" class="btn btn-danger" ng-bind="cancelText" data-dismiss="modal"></button>
+                </div>
             </div>
         </div>
     </div>
@@ -73,7 +152,28 @@
     {{ super() }}
     <script type="text/javascript">
         {{ person_tree.js() }}
+        WebMis20.controller('Modal', ['$scope', function ($scope) {
+            $scope.$on('ModalOpen', function (event, params) {
+                $scope.title = params.title;
+                $scope.accept = params.accept;
+                $scope.acceptText = params.acceptText ? params.acceptText : 'Ok';
+                $scope.cancelText = params.cancelText ? params.cancelText : 'Отмена';
+                $scope.unacceptable = params.unacceptable || !params.accept;
+                $('#ModalDialog').modal('show');
+            });
+            $scope.begTime1 = '  :  ';
+            $scope.endTime1 = '  :  ';
+            $scope.checkTime = function ($event, fieldName) {};
+            $scope.$on('ModalChange', function (event, params) {
+                for (var key in params) {
+                    $scope[key] = params[key];
+                }
+            })
+        }]);
         WebMis20.controller('Schedule', ['$scope', '$http', function ($scope, $http) {
+            $scope.editing = false;
+            $scope.weekends_selectable = false;
+            $scope.selected_days = [];
             $scope.data = {};
             $scope.aux = aux;
             $scope.params = aux.getQueryParams(document.location.search);
@@ -95,7 +195,7 @@
             $scope.reloadSchedule = function () {
                 if ($scope.person_id) {
                     $http.get(
-                        '{{ url_for('.api_schedule') }}',
+                        '{{ url_for('.api_schedule_description') }}',
                         {
                             params: {
                                 person_ids: $scope.person_id,
@@ -107,12 +207,12 @@
                         var d = data['schedules'][0];
                         $scope.person = d.person;
                         $scope.grouped = d.grouped;
-                        $scope.make_week();
+                        make_week();
                     })
                 }
             };
 
-            $scope.make_week = function () {
+            var make_week = function () {
                 var first_weekday = $scope.monthDate.weekday();
                 var day_iter = 0;
                 var schedule = $scope.grouped[$scope.reception_type]['schedule'];
@@ -147,8 +247,24 @@
             };
 
             $scope.changeReceptionType = function (code) {
+                if ($scope.editing) return;
                 $scope.reception_type = code;
-                $scope.make_week();
+                $scope.selected_days = [];
+                make_week();
+            };
+
+            $scope.start_editing = function () {
+                $scope.editing = true;
+            };
+
+            $scope.finish_editing = function () {
+                $scope.editing = false;
+                $scope.selected_days = [];
+            };
+
+            $scope.cancel_editing = function () {
+                $scope.editing = false;
+                $scope.selected_days = [];
             };
 
             $scope.monthChanged();
@@ -158,16 +274,80 @@
                 $scope.reloadSchedule();
             });
 
-            $scope.person_schedule_day_class = function (day, index) {
-                if (day.summary.busy_tickets) {
-                    return 'panel-success'
-                } else if (day.scheds.length > 0) {
-                    return'panel-primary'
-                } else if (index >= 5 || day.roa) {
-                    return 'panel-danger'
+            var day_selected = function (day) {
+                return $scope.selected_days.indexOf(day) !== -1;
+            };
+
+            $scope.toggle_day_selected = function (day) {
+                if (!$scope.editing) return;
+                if (!$scope.weekends_selectable && moment(day.date).weekday() >= 5) return;
+                var index = $scope.selected_days.indexOf(day);
+                if (index !== -1) {
+                    $scope.selected_days.splice(index, 1);
                 } else {
-                    return 'panel-default'
+                    $scope.selected_days.push(day);
                 }
+            };
+
+            $scope.toggle_week_selected = function (week) {
+                if (!$scope.editing) return;
+                var weekdays = week.filter(function (day) {
+                    return !day.not_exists;
+                });
+                var weekdays_unselected = weekdays.filter(function (day) {
+                    return $scope.selected_days.indexOf(day) === -1 && !(!$scope.weekends_selectable && moment(day.date).weekday() >= 5)
+                });
+                var select = weekdays_unselected.length > 0;
+                if (select) {
+                    $scope.selected_days = $scope.selected_days.concat(weekdays_unselected.filter(function (day) {
+                        return !(!$scope.weekends_selectable && moment(day.date).weekday() >= 5)
+                    }));
+                } else {
+                    $scope.selected_days = $scope.selected_days.filter(function (day) {
+                        return weekdays.indexOf(day) === -1;
+                    })
+                }
+            };
+
+            $scope.select_odd_days = function () {
+                $scope.selected_days = $scope.grouped[$scope.reception_type]['schedule'].filter(function (day) {
+                    return moment(day.date).date() % 2 !== 0 && !(!$scope.weekends_selectable && moment(day.date).weekday() >= 5)
+                })
+            };
+
+            $scope.invert_selection = function () {
+                $scope.selected_days = $scope.grouped[$scope.reception_type]['schedule'].filter(function (day) {
+                    return $scope.selected_days.indexOf(day) === -1 && !(!$scope.weekends_selectable && moment(day.date).weekday() >= 5);
+                })
+            };
+
+            $scope.fill_selection = function () {
+                $scope.$root.$broadcast('ModalOpen', {
+                    title: 'Заполнять!'
+                })
+            };
+
+            $scope.get_day_class = function (day, index) {
+                var result = [];
+                if ($scope.editing) {
+                    result.push('day-selectable');
+                    if (day_selected(day)) {
+                        result.push('panel-primary')
+                    } else {
+                        result.push('panel-default')
+                    }
+                } else {
+                    if (day.busy) {
+                        result.push('panel-success');
+                    } else if (day.scheds.length > 0) {
+                        result.push('panel-warning');
+                    } else if (index >= 5 || day.roa) {
+                        result.push('panel-danger')
+                    } else {
+                        result.push('panel-default')
+                    }
+                }
+                return result;
             };
 
             $scope.person_schedule_day_switch = function (day) {
