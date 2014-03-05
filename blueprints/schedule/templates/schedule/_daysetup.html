@@ -1,0 +1,91 @@
+<div class="modal-header" xmlns="http://www.w3.org/1999/html">
+    <button type="button" class="close" ng-click="cancel()">&times;</button>
+    <h4 class="modal-title" id="myModalLabel">Заполнение расписания</h4>
+</div>
+<div class="modal-body">
+    <div class="row">
+        <div class="col-md-4">
+            <input type="checkbox" id="absent" ng-model="absent" ng-change="absent_checked()"><label for="absent">Причина
+            отсутствия</label>
+        </div>
+        <div class="col-md-8">
+            <select class="form-control" ng-options="item.code as item.name for item in roas" ng-model="model.roa"
+                    ng-show="absent"></select>
+        </div>
+    </div>
+    <div ng-show="!absent">
+        <div class="row">
+            <div class="col-md-4 col-md-offset-4 text-center">
+                <label>Начало</label>
+            </div>
+            <div class="col-md-4 text-center">
+                <label>Конец</label>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4"><label>Время приёма</label></div>
+            <div class="col-md-4">
+                <div ng-model="model.begTime1" style="display: inline-block">
+                    <timepicker minute-step="15" show-meridian="false"></timepicker>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div ng-model="model.endTime1" style="display: inline-block">
+                    <timepicker minute-step="15" show-meridian="false"></timepicker>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <input id="pause" type="checkbox" ng-model="model.pause"/>
+                <label for="pause">Перерыв</label>
+            </div>
+            <div class="col-md-4">
+                <div ng-model="model.begTime2" style="display: inline-block" ng-show="model.pause">
+                    <timepicker minute-step="15" show-meridian="false"></timepicker>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div ng-model="model.endTime2" style="display: inline-block" ng-show="model.pause">
+                    <timepicker minute-step="15" show-meridian="false"></timepicker>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <label for="office">Кабинет</label>
+            </div>
+            <div class="col-md-8">
+                <input class="form-control" id="office" type="text" ng-model="model.office">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <label for="planned">План приёма</label>
+            </div>
+            <div class="col-md-8">
+                <input class="form-control" id="planned" type="text" ng-model="model.planned">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <label for="extra">Сверх плана</label>
+            </div>
+            <div class="col-md-8">
+                <input class="form-control" id="extra" type="text" ng-model="model.extra">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <label for="CITO">Вне очереди</label>
+            </div>
+            <div class="col-md-8">
+                <input class="form-control" id="CITO" type="text" ng-model="model.CITO">
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-success" ng-click="accept()">Ok</button>
+    <button type="button" class="btn btn-danger" ng-click="cancel()">Отмена</button>
+</div>

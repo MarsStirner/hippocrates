@@ -113,5 +113,28 @@ var aux = {
         } else {
             return record[key];
         }
+    },
+    arrayCopy: function (source) {
+        // proven fastest copy mechanism http://jsperf.com/new-array-vs-splice-vs-slice/28
+        var b = [];
+        var i = source.length;
+        while (i--) {b[i] = source[i]}
+        return b;
+    },
+    func_in: function (against) {
+        return function (item) {
+            return against.indexOf(item) !== -1;
+        }
+    },
+    func_not_in: function (against) {
+        return function (item) {
+            return against.indexOf(item) === -1;
+        }
+    },
+    find_by_code: function (where, code, field) {
+        if (typeof (field) === 'undefined') field = 'code';
+        var subresult = where.filter(function (item) {return item[field] == code});
+        if (subresult.length === 0) return null;
+        return subresult[0]
     }
 };

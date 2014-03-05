@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from flask import Blueprint
+from blueprints.schedule.models.exists import rbReasonOfAbsence
 from .config import MODULE_NAME, RUS_NAME
 
 module = Blueprint(MODULE_NAME, __name__, template_folder='templates', static_folder='static')
@@ -9,7 +10,8 @@ module = Blueprint(MODULE_NAME, __name__, template_folder='templates', static_fo
 def module_name():
     return dict(
         module_name=RUS_NAME,
-        rbReceptionTypes=u"""[{name: 'Амбулаторно', code: 'amb'}, {name: 'На дому', code: 'home'}]"""
+        rbReceptionTypes=u"""[{name: 'Амбулаторно', code: 'amb'}, {name: 'На дому', code: 'home'}]""",
+        rbReasonOfAbsence=rbReasonOfAbsence.query.order_by(rbReasonOfAbsence.code).all()
     )
 
 # noinspection PyUnresolvedReferences

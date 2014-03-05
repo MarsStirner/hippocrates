@@ -79,7 +79,7 @@ def api_schedule():
     return jsonify(result)
 
 
-@module.route('/api/schedule-description.json')
+@module.route('/api/schedule-description.json', methods=['GET'])
 @public_endpoint
 def api_schedule_description():
     person_id_s = request.args.get('person_ids')
@@ -107,6 +107,12 @@ def api_schedule_description():
         result['schedules'] = schedules
 
     return jsonify(result)
+
+
+@module.route('/api/schedule-description.json', methods=['POST'])
+@public_endpoint
+def api_schedule_description_post():
+    pass
 
 
 @module.route('/api/patient.json')

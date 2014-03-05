@@ -5,6 +5,7 @@
 {% block main %}
     <legend xmlns="http://www.w3.org/1999/html">График врача</legend>
     <div ng-controller="Schedule">
+        <script type="text/ng-template" id="modal-DaysSetup.html">{% include "schedule/_daysetup.html" %}</script>
         <div class="row">
             <div class="col-md-2">
                 <select class="form-control" name="year" ng-model="year" ng-disabled="editing"
@@ -35,10 +36,11 @@
                 <button class="btn btn-success" ng-click="finish_editing()" ng-if="editing">Сохранить</button>
                 <button class="btn btn-danger" ng-click="cancel_editing()" ng-if="editing">Отменить</button>
             </div>
+            <button class="btn btn-warning" ng-click="fill_selection()" ng-if="editing" ng-disabled="selected_days.length == 0">Заполнить</button>
             <div class="btn-group">
-                <button class="btn btn-primary" ng-click="select_odd_days()" ng-if="editing">Выбрать нечет дни</button>
-                <button class="btn btn-primary" ng-click="invert_selection()" ng-if="editing">Обратить выделение</button>
-                <button class="btn btn-warning" ng-click="fill_selection()" ng-if="editing" ng-disabled="selected_days.length == 0">Заполнить</button>
+                <button class="btn btn-primary" ng-click="select.odd()" ng-if="editing">Выбрать нечет дни</button>
+                <button class="btn btn-primary" ng-click="select.invert()" ng-if="editing">Обратить выделение</button>
+                <button class="btn btn-primary" ng-click="select.all()" ng-if="editing">Выбрать все</button>
             </div>
             <div ng-show="editing">
                 <input type="checkbox" id="weekendCheckBox" ng-model="weekends_selectable" /><label for="weekendCheckBox">Выбирать выходные</label>
@@ -56,26 +58,26 @@
                         <tbody>
                         <tr ng-repeat="week in week_data">
                             <td ng-if="editing" class="text-center">
-                                <button class="btn btn-default" type="button" ng-click="toggle_week_selected(week)">&raquo;</button>
+                                <button class="btn btn-default" type="button" ng-click="select.week(week)">&raquo;</button>
                             </td>
                             <td ng-repeat="day in week">
                                 <div class="panel small person-schedule-day"
                                      ng-if="!day.not_exists"
                                      ng-class="get_day_class(day, $index)"
-                                     ng-click="toggle_day_selected(day)">
+                                     ng-click="select.day(day)">
                                     <div class="panel-heading" ng-bind="day.date | asDate"></div>
                                     <ul class="panel-body list-group" ng-switch="person_schedule_day_switch(day)">
                                         <li class="list-group-item" ng-repeat="sched in day.scheds">
                                             <p>[[ (day.date + 'T' + sched.begTime) | asTime ]] - [[ (day.date + 'T' + sched.endTime) | asTime ]]</p>
                                         </li>
                                         <li class="list-group-item" ng-switch-when="normal">
-                                            <p>Кабинет: [[ day.office ]]</p>
-                                            <p>План: [[ day.planned ]]</p>
-                                            <p>Сверх плана: [[ day.extra ]]</p>
-                                            <p>Вне очереди: [[ day.CITO ]]</p>
+                                            <p>Кабинет:&nbsp;[[ day.office ]]</p>
+                                            <p>План:&nbsp;[[ day.planned ]]</p>
+                                            <p>Сверх плана:&nbsp;[[ day.extra ]]</p>
+                                            <p>Вне очереди:&nbsp;[[ day.CITO ]]</p>
                                         </li>
                                         <li class="list-group-item" ng-switch-when="empty">Не заполнено</li>
-                                        <li class="list-group-item" ng-switch-when="absent">Причина отсутствия: day.roa.name</li>
+                                        <li class="list-group-item" ng-switch-when="absent">Причина отсутствия: [[ day.roa.name ]]</li>
                                     </ul>
                                 </div>
                             </td>
@@ -86,91 +88,30 @@
             </div>
         </div>
     </div>
-    <div ng-controller="Modal" class="modal fade" id="ModalDialog" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                    <h4 class="modal-title" id="myModalLabel" ng-bind="title"></h4>
-                </div>
-                <div class="modal-body">
-                    <form role="form">
-                        <fieldset>
-                            <div class="form-group">
-                                <label class="col-md-3 control-label" for="begTime1,endTime1">Часы приёма</label>
-                                <div class="input-group col-md-9">
-                                    <input type="time" class="form-control" ng-keypress="checkTime('begTime1')" ng-model="begTime1" >
-                                    <span class="input-group-addon">-</span>
-                                    <input type="time" class="form-control" ng-keypress="checkTime('endTime1')" ng-model="endTime1">
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label class="col-md-3 control-label">Перерыв</label>
-                                <div class="input-group col-md-9">
-                                    <input type="time" class="form-control" id="begTime2">
-                                    <span class="input-group-addon">-</span>
-                                    <input type="time" class="form-control" id="endTime2">
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label class="col-md-3 control-label">Кабинет</label>
-                                <div class="col-md-3">
-                                    <input type="time" class="form-control">
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label class="col-md-3 control-label">План приёма</label>
-                                <div class="col-md-3">
-                                    <input type="time" class="form-control">
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label class="col-md-3 control-label">Сверх плана</label>
-                                <div class="col-md-3">
-                                    <input type="time" class="form-control">
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label class="col-md-3 control-label">Вне очереди</label>
-                                <div class="col-md-3">
-                                    <input type="time" class="form-control">
-                                </div>
-                            </div>
-                        </fieldset>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-success" ng-bind="acceptText" ng-click="accept()"
-                            ng-disabled="unacceptable"></button>
-                    <button type="button" class="btn btn-danger" ng-bind="cancelText" data-dismiss="modal"></button>
-                </div>
-            </div>
-        </div>
-    </div>
 {% endblock %}
 {% block modules_js %}
     {{ super() }}
     <script type="text/javascript">
+        roas = {{ rbReasonOfAbsence | tojson | safe}};
         {{ person_tree.js() }}
-        WebMis20.controller('Modal', ['$scope', function ($scope) {
-            $scope.$on('ModalOpen', function (event, params) {
-                $scope.title = params.title;
-                $scope.accept = params.accept;
-                $scope.acceptText = params.acceptText ? params.acceptText : 'Ok';
-                $scope.cancelText = params.cancelText ? params.cancelText : 'Отмена';
-                $scope.unacceptable = params.unacceptable || !params.accept;
-                $('#ModalDialog').modal('show');
-            });
-            $scope.begTime1 = '  :  ';
-            $scope.endTime1 = '  :  ';
-            $scope.checkTime = function ($event, fieldName) {};
-            $scope.$on('ModalChange', function (event, params) {
-                for (var key in params) {
-                    $scope[key] = params[key];
+        ModalInstanceCtrl = function ($scope, $modalInstance, model) {
+            $scope.model = model;
+            $scope.absent = model.roa !== null;
+            $scope.accept = function () {
+                $modalInstance.close($scope.model);
+            };
+            $scope.cancel = function () {
+                $modalInstance.dismiss('cancel');
+            };
+            $scope.absent_checked = function () {
+                {# не спрашивайте почему так. Если стучаться через $scope, то не работает #}
+                if (!this.absent) {
+                    this.model.roa = null;
                 }
-            })
-        }]);
-        WebMis20.controller('Schedule', ['$scope', '$http', function ($scope, $http) {
+            };
+            $scope.roas = roas;
+        };
+        WebMis20.controller('Schedule', ['$scope', '$http', '$modal', function ($scope, $http, $modal) {
             $scope.editing = false;
             $scope.weekends_selectable = false;
             $scope.selected_days = [];
@@ -258,12 +199,21 @@
             };
 
             $scope.finish_editing = function () {
-                $scope.editing = false;
-                $scope.selected_days = [];
+                $http.post('{{ url_for('.api_schedule_description_post') }}', {
+                    receptionType: $scope.reception_type,
+                    person_id: $scope.person_id,
+                    schedule: $scope.grouped[$scope.reception_type]['schedule'].filter(function (day) {
+                        return day.altered;
+                    })
+                }).success(function () {
+                    $scope.editing = false;
+                    $scope.selected_days = [];
+                });
             };
 
             $scope.cancel_editing = function () {
                 $scope.editing = false;
+                $scope.reloadSchedule();
                 $scope.selected_days = [];
             };
 
@@ -278,53 +228,123 @@
                 return $scope.selected_days.indexOf(day) !== -1;
             };
 
-            $scope.toggle_day_selected = function (day) {
-                if (!$scope.editing) return;
-                if (!$scope.weekends_selectable && moment(day.date).weekday() >= 5) return;
-                var index = $scope.selected_days.indexOf(day);
-                if (index !== -1) {
-                    $scope.selected_days.splice(index, 1);
-                } else {
-                    $scope.selected_days.push(day);
-                }
+            var day_selectable = function (day) {
+                return !day.busy && ($scope.weekends_selectable || moment(day.date).weekday() < 5)
             };
 
-            $scope.toggle_week_selected = function (week) {
-                if (!$scope.editing) return;
-                var weekdays = week.filter(function (day) {
-                    return !day.not_exists;
-                });
-                var weekdays_unselected = weekdays.filter(function (day) {
-                    return $scope.selected_days.indexOf(day) === -1 && !(!$scope.weekends_selectable && moment(day.date).weekday() >= 5)
-                });
-                var select = weekdays_unselected.length > 0;
-                if (select) {
-                    $scope.selected_days = $scope.selected_days.concat(weekdays_unselected.filter(function (day) {
-                        return !(!$scope.weekends_selectable && moment(day.date).weekday() >= 5)
-                    }));
-                } else {
-                    $scope.selected_days = $scope.selected_days.filter(function (day) {
-                        return weekdays.indexOf(day) === -1;
+            $scope.select = {
+                day: function (day) {
+                    if (!$scope.editing) return;
+                    if (!day_selectable(day)) return;
+                    var index = $scope.selected_days.indexOf(day);
+                    if (index !== -1) {
+                        $scope.selected_days.splice(index, 1);
+                    } else {
+                        $scope.selected_days.push(day);
+                    }
+                },
+                week: function (week) {
+                    if (!$scope.editing) return;
+                    var weekdays = week.filter(function (day) {
+                        return !day.not_exists;
+                    });
+                    var weekdays_unselected = weekdays.filter(day_selectable).filter(function (day) {
+                        return $scope.selected_days.indexOf(day) === -1;
+                    });
+                    var select = weekdays_unselected.length > 0;
+                    if (select) {
+                        $scope.selected_days = $scope.selected_days.concat(weekdays_unselected.filter(day_selectable));
+                    } else {
+                        $scope.selected_days = $scope.selected_days.filter(aux.func_not_in(weekdays));
+                    }
+                },
+                odd: function () {
+                    $scope.selected_days = $scope.grouped[$scope.reception_type]['schedule'].
+                            filter(day_selectable).filter(function (day) {
+                        return moment(day.date).date() % 2 !== 0
                     })
+                },
+                invert: function () {
+                    $scope.selected_days = $scope.grouped[$scope.reception_type]['schedule'].
+                            filter(aux.func_not_in($scope.selected_days)).filter(day_selectable);
+                },
+                all: function () {
+                    $scope.selected_days = $scope.grouped[$scope.reception_type]['schedule'].filter(day_selectable)
                 }
-            };
-
-            $scope.select_odd_days = function () {
-                $scope.selected_days = $scope.grouped[$scope.reception_type]['schedule'].filter(function (day) {
-                    return moment(day.date).date() % 2 !== 0 && !(!$scope.weekends_selectable && moment(day.date).weekday() >= 5)
-                })
-            };
-
-            $scope.invert_selection = function () {
-                $scope.selected_days = $scope.grouped[$scope.reception_type]['schedule'].filter(function (day) {
-                    return $scope.selected_days.indexOf(day) === -1 && !(!$scope.weekends_selectable && moment(day.date).weekday() >= 5);
-                })
             };
 
             $scope.fill_selection = function () {
-                $scope.$root.$broadcast('ModalOpen', {
-                    title: 'Заполнять!'
-                })
+                var modalInstance = $modal.open({
+                    templateUrl: 'modal-DaysSetup.html',
+                    controller: ModalInstanceCtrl,
+                    resolve: {
+                        model: function () {
+                            var primary = $scope.selected_days[0];
+                            var secondary = {
+                                office: primary.office,
+                                planned: primary.planned,
+                                extra: primary.extra,
+                                CITO: primary.CITO,
+                                roa: primary.roa ? primary.roa.code : null
+                            };
+                            // This is the hack - we concat ephemeral date with our time to produce Date object
+                            if (primary.scheds.length > 1) {
+                                secondary.begTime1 = new Date('1970-01-01T' + primary.scheds[0].begTime);
+                                secondary.endTime1 = new Date('1970-01-01T' + primary.scheds[primary.scheds.length - 1].endTime);
+                                secondary.begTime2 = new Date('1970-01-01T' + primary.scheds[0].endTime);
+                                secondary.endTime2 = new Date('1970-01-01T' + primary.scheds[primary.scheds.length - 1].begTime);
+                                secondary.pause = true;
+                            } else if (primary.scheds.length > 1) {
+                                secondary.begTime1 = new Date('1970-01-01T' + primary.scheds[0].begTime);
+                                secondary.endTime1 = new Date('1970-01-01T' + primary.scheds[0].endTime);
+                                secondary.begTime2 = new Date('1970-01-01T00:00');
+                                secondary.endTime2 = new Date('1970-01-01T00:00');
+                                secondary.pause = false;
+                            } else {
+                                secondary.begTime1 = new Date('1970-01-01T08:00');
+                                secondary.endTime1 = new Date('1970-01-01T18:00');
+                                secondary.begTime2 = new Date('1970-01-01T00:00');
+                                secondary.endTime2 = new Date('1970-01-01T00:00');
+                                secondary.pause = false;
+                            }
+                            return secondary;
+                        }
+                    }
+                });
+                modalInstance.result.then(function (model) {
+                    $scope.selected_days.map(function (day) {
+                        day.roa = aux.find_by_code(roas, model.roa);
+                        day.altered = true;
+                        if (model.roa) {
+                            day.office = null;
+                            day.planned = 0;
+                            day.extra = 0;
+                            day.CITO = 0;
+                            day.scheds = [];
+                        } else {
+                            day.office = model.office;
+                            day.planned = model.planned;
+                            day.extra = model.extra;
+                            day.CITO = model.CITO;
+                            if (model.pause) {
+                                day.scheds = [{
+                                    begTime: moment(model.begTime1).format('HH:mm:ss'),
+                                    endTime: moment(model.begTime2).format('HH:mm:ss')
+                                } , {
+                                    begTime: moment(model.endTime2).format('HH:mm:ss'),
+                                    endTime: moment(model.begTime1).format('HH:mm:ss')
+                                }]
+                            } else {
+                                day.scheds = [{
+                                    begTime: moment(model.begTime1).format('HH:mm:ss'),
+                                    endTime: moment(model.endTime1).format('HH:mm:ss')
+                                }]
+                            }
+                        }
+                    })
+                }, function () {
+                    console.log('dismissed!')
+                });
             };
 
             $scope.get_day_class = function (day, index) {
@@ -333,6 +353,8 @@
                     result.push('day-selectable');
                     if (day_selected(day)) {
                         result.push('panel-primary')
+                    } else if (!day_selectable(day)) {
+                        result.push('panel-danger')
                     } else {
                         result.push('panel-default')
                     }
