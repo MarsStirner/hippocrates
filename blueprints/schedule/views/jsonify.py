@@ -21,12 +21,12 @@ class ScheduleVisualizer(object):
         self.reception_types = [at.code for at in rbReceptionType.query]
 
     def make_ticket(self, ticket):
-        client = ticket.client
+        client_id = ticket.client_id
         return {
             'id': ticket.id,
             'begDateTime': ticket.begDateTime,
-            'status': 'busy' if client else 'free',
-            'client': client.shortNameText if client else None,
+            'status': 'busy' if client_id else 'free',
+            'client': ticket.client.shortNameText if client_id else None,
             'attendance_type': ticket.attendanceType,
         }
 
@@ -37,7 +37,7 @@ class ScheduleVisualizer(object):
             'tickets': [
                 self.make_ticket(ticket)
                 for ticket in schedule.tickets
-                if not (self.client_id and ticket.client and ticket.client.id != self.client_id)
+                if not (self.client_id and ticket.client_id != self.client_id)
             ],
             'begTime': schedule.begTime,
             'endTime': schedule.endTime,
@@ -151,7 +151,7 @@ class ScheduleVisualizer(object):
                 CITO += 1
             elif at == 'extra':
                 extra += 1
-            if not busy and ticket.client:
+            if not busy and ticket.client_ticket:
                 busy = True
         return {
             'id': schedule.id,
@@ -232,7 +232,7 @@ class ScheduleVisualizer(object):
             'grouped': self.make_schedule_description(
                 Schedule.query.filter(
                     Schedule.person_id == person.id,
-                    start_date <= Schedule.date, Schedule.date <= end_date,
+                    start_date <= Schedule.date, Schedule.date < end_date,
                     Schedule.deleted == 0
                 ).order_by(Schedule.date),
                 start_date, end_date

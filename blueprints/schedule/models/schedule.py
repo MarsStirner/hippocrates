@@ -73,8 +73,11 @@ class Schedule(db.Model):
     deleted = db.Column(db.SmallInteger, nullable=False, server_default='0')
 
     person = db.relationship('Person', foreign_keys=person_id)
-    reasonOfAbsence = db.relationship('rbReasonOfAbsence')
-    receptionType = db.relationship('rbReceptionType')
+    reasonOfAbsence = db.relationship('rbReasonOfAbsence', lazy='joined')
+    receptionType = db.relationship('rbReceptionType', lazy='joined')
+    tickets = db.relationship(
+        'ScheduleTicket', lazy='joined', primaryjoin=
+        "and_(ScheduleTicket.schedule_id == Schedule.id, ScheduleTicket.deleted == 0)")
     
 
 class ScheduleTicket(db.Model):
@@ -91,8 +94,10 @@ class ScheduleTicket(db.Model):
     modifyPerson_id = db.Column(db.Integer, db.ForeignKey('Person.id'), index=True)
     deleted = db.Column(db.SmallInteger, nullable=False, server_default='0')
 
-    schedule = db.relationship('Schedule', backref='tickets')
     attendanceType = db.relationship('rbAttendanceType')
+    client_tickets = db.relationship(
+        'ScheduleClientTicket', lazy='joined', primaryjoin=
+        "and_(ScheduleClientTicket.ticket_id == ScheduleTicket.id, ScheduleClientTicket.deleted == 0)")
 
     @property
     def client(self):
@@ -101,8 +106,7 @@ class ScheduleTicket(db.Model):
 
     @property
     def client_ticket(self):
-        return self.client_tickets.filter(ScheduleClientTicket.deleted == 0).first()
-
+        return self.client_tickets[0] if len(self.client_tickets) > 0 else None
 
 class ScheduleClientTicket(db.Model):
     __tablename__ = 'ScheduleClientTicket'
@@ -123,5 +127,4 @@ class ScheduleClientTicket(db.Model):
     client = db.relationship('Client', backref=db.backref('appointments', lazy='dynamic'))
     appointmentType = db.relationship('rbAppointmentType')
     orgFrom = db.relationship('Organisation')
-    ticket = db.relationship('ScheduleTicket', backref=db.backref('client_tickets', lazy='dynamic'))
     createPerson = db.relationship('Person', foreign_keys=[createPerson_id])

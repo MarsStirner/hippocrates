@@ -280,3 +280,18 @@ span.twitter-typeahead {
     display: none;
     position: absolute;
 }
+
+.btn-gray {
+  color: #333333;
+  background-color: #999999;
+  border-color: #cccccc;
+}
+.btn-gray:hover,
+.btn-gray:focus,
+.btn-gray:active,
+.btn-gray.active,
+.open .dropdown-toggle.btn-gray {
+  color: #666666;
+  background-color: #ebebeb;
+  border-color: #adadad;
+}

@@ -45,15 +45,24 @@
                             <tbody ng-if="person_schedule.grouped[reception_type].max_tickets > 0">
                             <tr ng-repeat="row in aux.range(person_schedule.grouped[reception_type].max_tickets)">
                                 <td ng-repeat="day in person_schedule.grouped[reception_type].schedule" ng-switch="day.tickets[row].status">
-                                    <button type="button" class="btn btn-block btn-danger" ng-switch-when="busy"
-                                            ng-bind="day.tickets[row].begDateTime | asTime"
-                                            ng-click="appointment_cancel(day.tickets[row], person_schedule.person)">
+                                    <button type="button" class="btn btn-block btn-danger" ng-switch-when="busy">
+                                        <span ng-if="day.tickets[row].attendance_type.code == 'planned'">[[ day.tickets[row].begDateTime | asTime ]]</span>
+                                        <span ng-if="day.tickets[row].attendance_type.code == 'CITO'">CITO</span>
                                     </button>
                                     <button type="button" class="btn btn-block btn-success" ng-switch-when="free"
-                                            ng-bind="day.tickets[row].begDateTime | asTime"
-                                            ng-click="appointment_make(day.tickets[row], person_schedule.person)">
+                                            ng-if="day.tickets[row].attendance_type.code == 'planned'">
+                                        [[ day.tickets[row].begDateTime | asTime ]]
                                     </button>
-                                    <button type="button" class="btn btn-block disabled" ng-switch-default>&nbsp;</button>
+                                    <button type="button" class="btn btn-block btn-warning" ng-switch-when="free"
+                                            ng-if="day.tickets[row].attendance_type.code == 'CITO'">
+                                        CITO
+                                    </button>
+                                    <button type="button" class="btn btn-block btn-gray" ng-switch-when="free"
+                                            ng-if="day.tickets[row].attendance_type.code == 'extra'">
+                                        &PlusMinus;
+                                    </button>
+                                    <button type="button" class="btn btn-block disabled" ng-switch-default>&nbsp;
+                                    </button>
                                 </td>
                             </tr>
                             </tbody>

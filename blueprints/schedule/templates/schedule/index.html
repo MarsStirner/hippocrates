@@ -59,10 +59,17 @@
                                 <span ng-if="day.tickets[row].attendance_type.code == 'CITO'">CITO</span>
                                 - [[ day.tickets[row].client ]]
                             </button>
-                            <button type="button" class="btn btn-block btn-success" ng-switch-when="free">
-                                <span ng-if="day.tickets[row].attendance_type.code == 'planned'">[[ day.tickets[row].begDateTime | asTime ]]</span>
-                                <span ng-if="day.tickets[row].attendance_type.code == 'CITO'">CITO</span>
-                                <span ng-if="day.tickets[row].attendance_type.code == 'extra'">&PlusMinus;</span>
+                            <button type="button" class="btn btn-block btn-success" ng-switch-when="free"
+                                    ng-if="day.tickets[row].attendance_type.code == 'planned'">
+                                [[ day.tickets[row].begDateTime | asTime ]]
+                            </button>
+                            <button type="button" class="btn btn-block btn-warning" ng-switch-when="free"
+                                    ng-if="day.tickets[row].attendance_type.code == 'CITO'">
+                                CITO
+                            </button>
+                            <button type="button" class="btn btn-block btn-gray" ng-switch-when="free"
+                                    ng-if="day.tickets[row].attendance_type.code == 'extra'">
+                                &PlusMinus;
                             </button>
                             <button type="button" class="btn btn-block disabled" ng-switch-default>&nbsp;
                             </button>
