@@ -4,22 +4,23 @@
 
 {% block main %}
     <legend xmlns="http://www.w3.org/1999/html">Пациент</legend>
+    <button class="btn btn-default" onclick="history.back()">Назад к результатам поиска</button>
+    <a class="btn btn-success" href="{{ url_for('.appointment') }}?client_id={{ clientData['id'] }}">Записать на приём</a>
     <div ng-controller="ClientInfo">
 {#        <form class="form-inline" role="form">#}
 {#            <input class="form-control" type="text" ng-model="doctorInput" placeholder="ФИО врача">#}
 {#        </form>#}
-        <h3>Информация о пациенте </h3>
+        <h4>Информация о пациенте <a  ng-click="editing = true" class="btn btn-sm btn-default navbar-btn" href="" title="Редактировать"><span class="glyphicon glyphicon-pencil"></span></a></h4>
         <ul class="nav nav-tabs">
-            <li ng-class="{active: tub_selected==1 }"><a href ng-click="tub_selected=1">Основная информация</a></li>
-            <li ng-class="{active: tub_selected==2 }"><a href ng-click="tub_selected=2">Соц. статус</a></li>
-            <li ng-class="{active: tub_selected==3 }"><a href ng-click="tub_selected=3">Особенности</a></li>
+            <li ng-class="{active: tub_selected==1 }"><a href ng-click="tub_selected=1; editing=false">Основная информация</a></li>
+            <li ng-class="{active: tub_selected==2 }"><a href ng-click="tub_selected=2; editing=false">Соц. статус</a></li>
+            <li ng-class="{active: tub_selected==3 }"><a href ng-click="tub_selected=3; editing=false">Особенности</a></li>
 {#            <li ng-class="{active: tub_selected==4 }"><a href ng-click="tub_selected=3">Связи с др. пациентами</a></li>#}
 {#            <li ng-class="{active: tub_selected==5 }"><a href ng-click="tub_selected=3">Связь с внешними сисемами</a></li>#}
 {#            <li ng-class="{active: tub_selected==6 }"><a href ng-click="tub_selected=3">История документов</a></li>#}
         </ul>
-
-        <div ng-show="tub_selected == 1">
-            <table class="table table-condensed">
+        <div class="tub_content" ng-show="tub_selected == 1">
+            <table class="table table-condensed" ng-hide="editing">
                 <tbody>
                 <tr ng-repeat="key in clientMainInfoCodeOrder" ng-if="clientDataItems[key]">
                     <td>[[ clientInfoCode2Name[key] ]]</td>
@@ -27,8 +28,83 @@
                 </tr>
                 </tbody>
             </table>
+
+            <form class="form-horizontal" role="form" ng-show="editing">
+{#                <div class="form-group" >#}
+{#                    <label class="col-sm-2 control-label" for="id">[[ clientInfoCode2Name["id"] ]]</label>#}
+{#                    <div class="col-sm-7">#}
+{#                         <span>[[ clientDataItems['id'] ]]</span>#}
+{#                    </div>#}
+{#                </div>#}
+                <div class="form-group" >
+                    <label class="col-sm-2 control-label" for="nameText">[[ clientInfoCode2Name["nameText"] ]]</label>
+                    <div id="nameText" class="col-sm-7">
+                        <input style="display:inline; width:32%;" ng-model="clientDataItems['lastName']" type="text" class="form-control" required placeholder="Фамилия" pattern="^[А-Яа-яЁё\s]+$" ng-required/>
+                        <input style="display:inline; width:32%;" ng-model="clientDataItems['firstName']" type="text" class="form-control" required placeholder="Имя" pattern="^[А-Яа-яЁё\s]+$" ng-required/>
+                        <input style="display:inline; width:32%;" ng-model="clientDataItems['patrName']" type="text" class="form-control" required placeholder="Отчество" pattern="^[А-Яа-яЁё\s]+$" ng-required/>
+                    </div>
+                </div>
+                <div class="form-group" >
+                    <label class="col-sm-2 control-label" for="birthDate">[[ clientInfoCode2Name["birthDate"] ]]</label>
+                    <div class="col-sm-2">
+                        <p class="input-group">
+                            <input type="text" class="form-control" datepicker-popup="dd.MM.yyyy" ng-model="clientDataItems['birthDate']" is-open="opened_birthDate" required ng-required/>
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" ng-click="opened_birthDate=open($event)"><i class="glyphicon glyphicon-calendar"></i></button>
+                            </span>
+                        </p>
+                    </div>
+                </div>
+                <div class="form-group" >
+                    <label class="col-sm-2 control-label" for="sex">[[ clientInfoCode2Name["sex"] ]]</label>
+                    <div id="sex" class="col-sm-2">
+                        <select  ng-model="clientDataItems['sex']" class="form-control">
+                            <option value="М"> М </option>
+                            <option value="Ж"> Ж </option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group" >
+                    <label class="col-sm-2 control-label" for="document">[[ clientInfoCode2Name["documentText"] ]]</label>
+                    <div class="col-sm-7">
+                        <p>
+                        <select ng-model="clientDataItems['document']['typeCode']" class="form-control" style="display:inline; display:inline; width:32%;" >
+                            <option ng-repeat="type in referenceBooksItems" value="[[ type['code'] ]]">[[ type['name'] ]]</option>
+                        </select>
+                        <input style="display:inline; width:32%;" ng-model="clientDataItems['document']['serial']" type="text" class="form-control" required placeholder="серия" ng-required/>
+                        <input style="display:inline; width:32%;" ng-model="clientDataItems['document']['number']" type="text" class="form-control" required placeholder="номер" ng-required/>
+                        </p>
+
+                        Дата выдачи
+                        <p class="input-group col-sm-3">
+                            <input type="text" class="form-control" datepicker-popup="dd.MM.yyyy" ng-model="clientDataItems['document']['date']" is-open="opened_doc_date" required ng-required/>
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" ng-click="opened_doc_date=open($event)" ><i class="glyphicon glyphicon-calendar"></i></button>
+                            </span>
+                        </p>
+                        Дейстителен до
+                        <p class="input-group col-sm-3" >
+                            <input type="text" class="form-control" datepicker-popup="dd.MM.yyyy" ng-model="clientDataItems['document']['endDate']" is-open="opened_doc_endDate" required ng-required/>
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" ng-click="opened_doc_endDate=open($event)" ><i class="glyphicon glyphicon-calendar"></i></button>
+                            </span>
+                        </p>
+                    </div>
+
+                </div>
+                <div class="form-group" >
+                    <label class="col-sm-2 control-label" for="SNILS">[[ clientInfoCode2Name["SNILS"] ]]</label>
+                    <div id="SNILS" class="col-sm-4">
+                        <input ng-model="clientDataItems['SNILS']" type="text" class="form-control" required placeholder="" pattern="\d{3}-\d{3}-\d{3} \d{2}" ng-required/>
+                    </div>
+                </div>
+            </form>
+            <div class="col-sm-offset-2 col-sm-10" ng-show="editing">
+                <button ng-click="save_client_info()" class="btn btn-success">Сохранить</button>
+            </div>
+
         </div>
-        <div ng-show="tub_selected == 2">
+        <div class="tub_content" ng-show="tub_selected == 2">
             <table class="table table-condensed" ng-if="clientDataItems['socStatuses']">
                 <thead>
                      <tr>
@@ -48,7 +124,7 @@
                 </tbody>
             </table>
         </div>
-        <div ng-show="tub_selected == 3">
+        <div class="tub_content" ng-show="tub_selected == 3">
             <table class="table table-condensed" ng-if="clientDataItems['bloodHistory']">
                 <caption>Группа крови и резус-фактор</caption>
                 <thead>
@@ -107,9 +183,9 @@
                 </tbody>
             </table>
         </div>
-        <div ng-show="tub_selected == 4">
-
-        </div>
+{#        <div class="tub_content" ng-show="tub_selected == 4">#}
+{##}
+{#        </div>#}
         <table class="table">
             <caption>Предварительные записи</caption>
             <thead>
@@ -136,6 +212,7 @@
             $scope.params = aux.getQueryParams(document.location.search);
             $scope.client_id = $scope.params.client_id;
             $scope.tub_selected = 1;
+            $scope.view = true;
             var curDate = new Date();
             var curYear = curDate.getUTCFullYear();
             $scope.years = [curYear - 1, curYear, curYear + 1];
@@ -148,12 +225,12 @@
                 'SNILS': 'СНИЛС',
                 'nameText': 'ФИО',
                 'sex': 'Пол',
-                'document': 'Документ',
+                'documentText': 'Документ',
                 'contact': 'Контакты',
                 'voluntaryPolicy': 'Полис ДМС',
                 'compulsoryPolicy': 'Полис ОМС'
             };
-            $scope.clientMainInfoCodeOrder = ['id', 'nameText', 'birthDate', 'sex', 'regAddress', 'liveAddress', 'document', 'compulsoryPolicy', 'voluntaryPolicy', 'SNILS', 'contact'];
+            $scope.clientMainInfoCodeOrder = ['id', 'nameText', 'birthDate', 'sex', 'regAddress', 'liveAddress', 'documentText', 'compulsoryPolicy', 'voluntaryPolicy', 'SNILS', 'contact'];
             $scope.recordColumns = {
                 'mark': 'Отметка',
                 'begDateTime': 'Дата и время приёма',
@@ -163,6 +240,20 @@
                 'note': 'Примечания'
             };
             $scope.recordColumnOrder = ['mark', 'begDateTime', 'office', 'person', 'createPerson', 'note'];
+            $scope.save_client_info = function() {
+                $scope.editing = false;
+                $http.get(
+                    '{{ url_for('.api_save_patient_info') }}', {
+                        params: {
+                            client_info: $scope.clientDataItems
+                        }
+                    });
+            };
+            $scope.open = function($event) {
+                $event.preventDefault();
+                $event.stopPropagation();
+                return true;
+            };
             $http.get(
                 '{{ url_for('.api_patient') }}', {
                     params: {
@@ -171,6 +262,7 @@
                 }
             ).success(function (data) {
                 $scope.clientDataItems = data.clientData;
+                $scope.referenceBooksItems = data.referenceBooks;
                 $scope.records = data.records;
             });
 

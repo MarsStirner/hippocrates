@@ -2,6 +2,7 @@
 import calendar
 from collections import defaultdict
 import datetime
+import json
 
 from flask import abort, request
 
@@ -9,9 +10,9 @@ from application.database import db
 from application.lib.sphinx_search import SearchPatient, SearchPerson
 from application.lib.utils import public_endpoint, jsonify
 from blueprints.schedule.app import module
-from blueprints.schedule.models.exists import Person, Client, rbSpeciality
+from blueprints.schedule.models.exists import Person, Client, rbSpeciality, rbDocumentType
 from blueprints.schedule.models.schedule import Schedule, ScheduleTicket, ScheduleClientTicket, rbAppointmentType
-from blueprints.schedule.views.jsonify import ScheduleVisualizer, ClientVisualizer, Format
+from blueprints.schedule.views.jsonify import ScheduleVisualizer, ClientVisualizer, RbVisualizer, Format
 
 
 __author__ = 'mmalkov'
@@ -120,9 +121,13 @@ def api_patient():
     if not client:
         return abort(404)
     context = ClientVisualizer()
+    rbDocumentTypes = [document_type for document_type in rbDocumentType.query.all() if document_type.group.code == '1']
+    rb_context = RbVisualizer()
+    reference_books = [rb_context.make_rb_info(document_type) for document_type in rbDocumentTypes]
     return jsonify({
         'clientData': context.make_client_info(client),
         'records': context.make_records(client),
+        'referenceBooks': reference_books
     })
 
 
@@ -236,4 +241,30 @@ def api_appointment_make():
     db.session.add(client_ticket)
     client_ticket.appointmentType = rbAppointmentType.query.filter(rbAppointmentType.code == 'amb').first()
     db.session.commit()
+    return ''
+
+
+@module.route('/api/save_patient_info.json')
+@public_endpoint
+def api_save_patient_info():
+    try:
+        client_info = json.loads(request.args['client_info'])
+        client_id = int(client_info['id'])
+        client = Client.query.get(client_id)
+        db.session.add(client)
+        client.lastName = client_info['lastName']
+        client.firstName = client_info['firstName']
+        client.patrName = client_info['patrName']
+        client.sexCode = 1 if client_info['sex'] == u'М' else 2
+        client.birthDate = client_info['birthDate']
+        client.document.serial = client_info['document']['serial']
+        client.document.number = client_info['document']['number']
+        client.document.date = client_info['document']['date']
+        client.document.endDate = client_info['document']['endDate']
+        client.document.documentType = rbDocumentType.query.filter(rbDocumentType.code == client_info['document']['typeCode']).first()
+        client.SNILS = client_info['SNILS'].replace(" ", "").replace("-", "")
+        db.session.commit()
+    except KeyError or ValueError:
+        return abort(404)
+
     return ''

@@ -240,48 +240,44 @@ class ClientVisualizer(object):
 
     def make_client_info(self, client):
 
-        socStatuses = []
-        allergies = []
-        intolerances = []
-        bloodHistory = []
+        socStatuses = [{'class': socStatus.soc_status_class.name,
+                        'type': socStatus.name,
+                        'begDate': socStatus.begDate.strftime('%d-%m-%Y') if socStatus.begDate else '',
+                        'endDate': socStatus.endDate.strftime('%d-%m-%Y') if socStatus.endDate else ''
+                        } for socStatus in client.socStatuses]
+        allergies = [{'nameSubstance': allergy.name,
+                      'power': allergy.power,
+                      'createDate': allergy.createDate.strftime('%d-%m-%Y') if allergy.createDate else '',
+                      'notes': allergy.notes
+                      } for allergy in client.allergies]
 
-        for socStatus in client.socStatuses:
-            socStatuses.append({
-                'class': socStatus.soc_status_class.name,
-                'type': socStatus.name,
-                'begDate': socStatus.begDate.strftime('%d-%m-%Y') if socStatus.begDate else '',
-                'endDate': socStatus.endDate.strftime('%d-%m-%Y') if socStatus.endDate else ''
-            })
+        intolerances = [{'nameMedicament': intolerance.name,
+                         'power': intolerance.power,
+                         'createDate': intolerance.createDate.strftime('%d-%m-%Y') if allergy.createDate else '',
+                         'notes': intolerance.notes
+                         } for intolerance in client.intolerances]
+        bloodHistory = [{'bloodGroup': blood.bloodType.name,
+                         'bloodDate': blood.bloodDate.strftime('%d-%m-%Y') if blood.bloodDate else '',
+                         'physician': blood.person,
+                         } for blood in client.blood_history]
 
-        for allergy in client.allergies:
-            allergies.append({
-                'nameSubstance': allergy.name,
-                'power': allergy.power,
-                'createDate': allergy.createDate.strftime('%d-%m-%Y') if allergy.createDate else '',
-                'notes': allergy.notes
-            })
-
-        for intolerance in client.intolerances:
-            intolerances.append({
-                'nameMedicament': intolerance.name,
-                'power': intolerance.power,
-                'createDate': intolerance.createDate.strftime('%d-%m-%Y') if allergy.createDate else '',
-                'notes': intolerance.notes
-            })
-
-        for blood in client.blood_history:
-            bloodHistory.append({
-                'bloodGroup': blood.bloodType.name,
-                'bloodDate': blood.bloodDate.strftime('%d-%m-%Y') if blood.bloodDate else '',
-                'physician': blood.person,
-            })
+        document = {'number': client.document.number,
+                    'serial': client.document.serial,
+                    'date': client.document.date,
+                    'endDate': client.document.endDate,
+                    'typeCode': client.document.documentType.code,
+                    'documentText': client.document} if client.document else {}
 
         return {
             'id': client.id,
+            'lastName': client.lastName,
+            'firstName': client.firstName,
+            'patrName': client.patrName,
             'nameText': client.nameText,
             'sex': client.sex,
             'SNILS': client.formatted_SNILS or None,
-            'document': client.document,
+            'document': document,
+            'documentText': client.document,
             'birthDate': client.birthDate
                 if self.__mode == Format.JSON
                 else client.birthDate.strftime('%d-%m-%Y'),
@@ -338,3 +334,10 @@ class PersonTreeVisualizer(object):
         for person in persons:
             if person.speciality:
                 specs[person.speciality.name].append(self.make_person(person))
+
+
+class RbVisualizer(object):
+    def make_rb_info(self, reference_book):
+        reference_book.code
+        return {'code': reference_book.code,
+                'name': reference_book.name}
