@@ -76,7 +76,7 @@ class Schedule(db.Model):
     reasonOfAbsence = db.relationship('rbReasonOfAbsence', lazy='joined')
     receptionType = db.relationship('rbReceptionType', lazy='joined')
     tickets = db.relationship(
-        'ScheduleTicket', lazy='joined', primaryjoin=
+        'ScheduleTicket', lazy='joined', backref='schedule', primaryjoin=
         "and_(ScheduleTicket.schedule_id == Schedule.id, ScheduleTicket.deleted == 0)")
     
 
@@ -96,7 +96,7 @@ class ScheduleTicket(db.Model):
 
     attendanceType = db.relationship('rbAttendanceType')
     client_tickets = db.relationship(
-        'ScheduleClientTicket', lazy='joined', primaryjoin=
+        'ScheduleClientTicket', lazy='joined', backref='ticket', primaryjoin=
         "and_(ScheduleClientTicket.ticket_id == ScheduleTicket.id, ScheduleClientTicket.deleted == 0)")
 
     @property

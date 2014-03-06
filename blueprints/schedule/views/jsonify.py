@@ -21,7 +21,7 @@ class ScheduleVisualizer(object):
         self.reception_types = [at.code for at in rbReceptionType.query]
 
     def make_ticket(self, ticket):
-        client_id = ticket.client_id
+        client_id = ticket.client_ticket.client_id if ticket.client_ticket else None
         return {
             'id': ticket.id,
             'begDateTime': ticket.begDateTime,
@@ -37,7 +37,7 @@ class ScheduleVisualizer(object):
             'tickets': [
                 self.make_ticket(ticket)
                 for ticket in schedule.tickets
-                if not (self.client_id and ticket.client_id != self.client_id)
+                if not (self.client_id and ticket.client_ticket and ticket.client_ticket.client_id != self.client_id)
             ],
             'begTime': schedule.begTime,
             'endTime': schedule.endTime,
