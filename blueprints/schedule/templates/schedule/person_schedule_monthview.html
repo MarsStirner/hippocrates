@@ -68,16 +68,16 @@
                                     <div class="panel-heading" ng-bind="day.date | asDate"></div>
                                     <ul class="panel-body list-group" ng-switch="person_schedule_day_switch(day)">
                                         <li class="list-group-item" ng-repeat="sched in day.scheds">
-                                            <p>[[ (day.date + 'T' + sched.begTime) | asTime ]] - [[ (day.date + 'T' + sched.endTime) | asTime ]]</p>
+                                            <p><nobr>[[ (day.date + 'T' + sched.begTime) | asTime ]] - [[ (day.date + 'T' + sched.endTime) | asTime ]]</nobr></p>
                                         </li>
                                         <li class="list-group-item" ng-switch-when="normal">
-                                            <p>Кабинет:&nbsp;[[ day.office ]]</p>
-                                            <p>План:&nbsp;[[ day.planned ]]</p>
-                                            <p>Сверх плана:&nbsp;[[ day.extra ]]</p>
-                                            <p>Вне очереди:&nbsp;[[ day.CITO ]]</p>
+                                            <p><nobr>Кабинет:&nbsp;[[ day.office ]]</nobr></p>
+                                            <p><nobr>План:&nbsp;[[ day.planned ]]</nobr></p>
+                                            <p><nobr>Сверх плана:&nbsp;[[ day.extra ]]</nobr></p>
+                                            <p><nobr>Вне очереди:&nbsp;[[ day.CITO ]]</nobr></p>
                                         </li>
                                         <li class="list-group-item" ng-switch-when="empty">Не заполнено</li>
-                                        <li class="list-group-item" ng-switch-when="absent">Причина отсутствия: [[ day.roa.name ]]</li>
+                                        <li class="list-group-item" ng-switch-when="absent">Причина отсутствия:<br/>[[ day.roa.name ]]</li>
                                     </ul>
                                 </div>
                             </td>
@@ -130,7 +130,7 @@
             $scope.weekdays = ['Пн', "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
             $scope.week_data = [];
 
-            $scope.reception_types = {{ rbReceptionTypes | safe }};
+            $scope.reception_types = {{ rbReceptionTypes | tojson | safe }};
             $scope.reception_type = 'amb';
 
             $scope.reloadSchedule = function () {
@@ -145,7 +145,7 @@
                             }
                         }
                     ).success(function (data) {
-                        var d = data['schedules'][0];
+                        var d = data.result['schedules'][0];
                         $scope.person = d.person;
                         $scope.grouped = d.grouped;
                         make_week();
@@ -208,6 +208,7 @@
                 }).success(function () {
                     $scope.editing = false;
                     $scope.selected_days = [];
+                    $scope.reloadSchedule();
                 });
             };
 
@@ -332,7 +333,7 @@
                                     endTime: moment(model.begTime2).format('HH:mm:ss')
                                 } , {
                                     begTime: moment(model.endTime2).format('HH:mm:ss'),
-                                    endTime: moment(model.begTime1).format('HH:mm:ss')
+                                    endTime: moment(model.endTime1).format('HH:mm:ss')
                                 }]
                             } else {
                                 day.scheds = [{

@@ -51,7 +51,7 @@ WebMis20.controller('PersonTree', ['$scope', '$http', function($scope, $http) {
         $http.get(
             '{{ url_for('.api_all_persons_tree') }}'
         ).success(function (data) {
-            $scope.data = data;
+            $scope.data = data.result;
             $scope.compose();
         })
     };

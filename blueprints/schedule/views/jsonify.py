@@ -97,7 +97,7 @@ class ScheduleVisualizer(object):
                     roa = None
                     for ticket in itertools.chain(*(sched['tickets'] for sched in day['scheds'])):
                         at = ticket['attendance_type'].code
-                        if at == 'normal':
+                        if at == 'planned':
                             planned += 1
                         elif at == 'CITO':
                             CITO += 1
@@ -118,8 +118,11 @@ class ScheduleVisualizer(object):
                     }
                     day['roa'] = roa
                 else:
-                    tickets = sorted(itertools.chain(*(sched['tickets'] for sched in day['scheds'])), key=lambda t: t['begDateTime'])
-                    day['tickets'] = tickets
+                    tickets = list(itertools.chain(*(sched['tickets'] for sched in day['scheds'])))
+                    planned_tickets = sorted(filter(lambda t: t['attendance_type'].code == 'planned', tickets), key=lambda t: t['begDateTime'])
+                    extra_tickets = filter(lambda t: t['attendance_type'].code == 'extra', tickets)
+                    CITO_tickets = filter(lambda t: t['attendance_type'].code == 'CITO', tickets)
+                    day['tickets'] = CITO_tickets + planned_tickets + extra_tickets
                     del day['scheds']
         return result
 
@@ -129,7 +132,8 @@ class ScheduleVisualizer(object):
             'grouped': self.make_schedule(
                 Schedule.query.filter(
                     Schedule.person_id == person.id,
-                    start_date <= Schedule.date, Schedule.date <= end_date
+                    start_date <= Schedule.date, Schedule.date < end_date,
+                    Schedule.deleted == 0
                 ).order_by(Schedule.date),
                 start_date, end_date, expand
             )} for person in persons]
@@ -141,7 +145,7 @@ class ScheduleVisualizer(object):
         busy = False
         for ticket in schedule.tickets:
             at = ticket.attendanceType.code
-            if at == 'normal':
+            if at == 'planned':
                 planned += 1
             elif at == 'CITO':
                 CITO += 1
@@ -184,7 +188,7 @@ class ScheduleVisualizer(object):
                 'endTime': sched['endTime'],
             })
         return {
-            'scheds': mini_scheds,
+            'scheds': mini_scheds if not roa else [],
             'planned': planned,
             'CITO': CITO,
             'extra': extra,
@@ -228,7 +232,8 @@ class ScheduleVisualizer(object):
             'grouped': self.make_schedule_description(
                 Schedule.query.filter(
                     Schedule.person_id == person.id,
-                    start_date <= Schedule.date, Schedule.date <= end_date
+                    start_date <= Schedule.date, Schedule.date <= end_date,
+                    Schedule.deleted == 0
                 ).order_by(Schedule.date),
                 start_date, end_date
             )} for person in persons]

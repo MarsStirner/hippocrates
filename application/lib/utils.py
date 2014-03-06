@@ -83,7 +83,7 @@ class WebMisJsonEncoder(JSONEncoder):
 
 app.json_encoder = WebMisJsonEncoder
 
-def jsonify(obj):
+def jsonify(obj, result_code=200, result_name='OK'):
     """Creates a :class:`~flask.Response` with the JSON representation of
     the given arguments with an `application/json` mimetype.  The arguments
     to this function are the same as to the :class:`dict` constructor.
@@ -119,7 +119,13 @@ def jsonify(obj):
     if current_app.config['JSONIFY_PRETTYPRINT_REGULAR'] and not request.is_xhr:
         indent = 2
     return (
-        json.dumps(obj, indent=indent, cls=WebMisJsonEncoder),
+        json.dumps({
+            'result': obj,
+            'meta': {
+                'code': result_code,
+                'name': result_name,
+            }
+        }, indent=indent, cls=WebMisJsonEncoder),
         200,
         [('content-type', 'application/json')]
     )

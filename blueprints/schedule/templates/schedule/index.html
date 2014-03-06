@@ -55,10 +55,14 @@
                     <tr ng-repeat="row in aux.range(grouped[reception_type].max_tickets)">
                         <td ng-repeat="day in grouped[reception_type].schedule" ng-switch="day.tickets[row].status">
                             <button type="button" class="btn btn-block btn-danger" ng-switch-when="busy">
-                                [[ day.tickets[row].begDateTime | asTime ]] - [[ day.tickets[row].client ]]
+                                <span ng-if="day.tickets[row].attendance_type.code == 'planned'">[[ day.tickets[row].begDateTime | asTime ]]</span>
+                                <span ng-if="day.tickets[row].attendance_type.code == 'CITO'">CITO</span>
+                                - [[ day.tickets[row].client ]]
                             </button>
                             <button type="button" class="btn btn-block btn-success" ng-switch-when="free">
-                                [[ day.tickets[row].begDateTime | asTime]]
+                                <span ng-if="day.tickets[row].attendance_type.code == 'planned'">[[ day.tickets[row].begDateTime | asTime ]]</span>
+                                <span ng-if="day.tickets[row].attendance_type.code == 'CITO'">CITO</span>
+                                <span ng-if="day.tickets[row].attendance_type.code == 'extra'">&PlusMinus;</span>
                             </button>
                             <button type="button" class="btn btn-block disabled" ng-switch-default>&nbsp;
                             </button>
@@ -87,7 +91,7 @@
 
             $scope.month = curDate.getMonth();
 
-            $scope.reception_types = {{ rbReceptionTypes | safe }};
+            $scope.reception_types = {{ rbReceptionTypes | tojson | safe }};
             $scope.reception_type = 'amb';
 
             $scope.reloadSchedule = function () {
@@ -101,7 +105,7 @@
                             }
                         }
                     ).success(function (data) {
-                        var d = data['schedules'][0];
+                        var d = data.result['schedules'][0];
                         $scope.person = d.person;
                         $scope.grouped = d.grouped;
                     })

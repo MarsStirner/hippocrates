@@ -170,8 +170,8 @@
                     }
                 }
             ).success(function (data) {
-                $scope.clientDataItems = data.clientData;
-                $scope.records = data.records;
+                $scope.clientDataItems = data.result.clientData;
+                $scope.records = data.result.records;
             });
 
         }]);
