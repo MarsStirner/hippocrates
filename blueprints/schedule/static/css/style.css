@@ -25,3 +25,7 @@ div.person-schedule-day div.panel-heading {
 .day-selectable {
     cursor: pointer;
 }
+
+.tub_content{
+    padding-top: 20px;
+}
