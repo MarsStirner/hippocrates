@@ -10,7 +10,8 @@ from application.database import db
 from application.lib.sphinx_search import SearchPatient, SearchPerson
 from application.lib.utils import public_endpoint, jsonify
 from blueprints.schedule.app import module
-from blueprints.schedule.models.exists import Person, Client, rbSpeciality, rbDocumentType, rbReasonOfAbsence
+from blueprints.schedule.models.exists import Person, Client, rbSpeciality, rbDocumentType, rbPolicyType, \
+    rbReasonOfAbsence
 from blueprints.schedule.models.schedule import Schedule, ScheduleTicket, ScheduleClientTicket, rbAppointmentType, \
     rbReceptionType, rbAttendanceType
 from blueprints.schedule.views.jsonify import ScheduleVisualizer, ClientVisualizer, RbVisualizer, Format
@@ -234,8 +235,15 @@ def api_patient():
         return abort(404)
     context = ClientVisualizer()
     rbDocumentTypes = [document_type for document_type in rbDocumentType.query.all() if document_type.group.code == '1']
+    rbPolicyTypes = rbPolicyType.query.all()
     rb_context = RbVisualizer()
-    reference_books = [rb_context.make_rb_info(document_type) for document_type in rbDocumentTypes]
+    document_types = [rb_context.make_rb_info(document_type) for document_type in rbDocumentTypes]
+    compulsory_policy_types = [rb_context.make_rb_info(policy_type) for policy_type in
+                               rbPolicyTypes if policy_type.code in ('cmiOld', 'cmiTmp', 'cmiCommonPaper', 'cmiCommonElectron', 'cmiUEC', 'cmiFnkcIndustrial', 'cmiFnkcLocal')]
+    voluntary_policy_types = [rb_context.make_rb_info(policy_type) for policy_type in
+                              rbPolicyTypes if policy_type.code == 'vmi']
+    reference_books = {'document_types': document_types, 'compulsory_policy_types': compulsory_policy_types,
+                       'voluntary_policy_types': voluntary_policy_types}
     return jsonify({
         'clientData': context.make_client_info(client),
         'records': context.make_records(client),
@@ -369,11 +377,27 @@ def api_save_patient_info():
         client.patrName = client_info['patrName']
         client.sexCode = 1 if client_info['sex'] == u'М' else 2
         client.birthDate = client_info['birthDate']
+
         client.document.serial = client_info['document']['serial']
         client.document.number = client_info['document']['number']
-        client.document.date = client_info['document']['date']
+        client.document.date = client_info['document']['begDate']
         client.document.endDate = client_info['document']['endDate']
         client.document.documentType = rbDocumentType.query.filter(rbDocumentType.code == client_info['document']['typeCode']).first()
+
+        if client.compulsoryPolicy:
+            client.compulsoryPolicy.serial = client_info['compulsoryPolicy']['serial']
+            client.compulsoryPolicy.number = client_info['compulsoryPolicy']['number']
+            client.compulsoryPolicy.begDate = client_info['compulsoryPolicy']['begDate']
+            client.compulsoryPolicy.endDate = client_info['compulsoryPolicy']['endDate']
+            client.compulsoryPolicy.policyType = rbPolicyType.query.filter(rbPolicyType.code == client_info['compulsoryPolicy']['typeCode']).first()
+
+        if client.voluntaryPolicy:
+            client.voluntaryPolicy.serial = client_info['voluntaryPolicy']['serial']
+            client.voluntaryPolicy.number = client_info['voluntaryPolicy']['number']
+            client.voluntaryPolicy.begDate = client_info['voluntaryPolicy']['begDate']
+            client.voluntaryPolicy.endDate = client_info['voluntaryPolicy']['endDate']
+            client.voluntaryPolicy.policyType = rbPolicyType.query.filter(rbPolicyType.code == client_info['voluntaryPolicy']['typeCode']).first()
+
         client.SNILS = client_info['SNILS'].replace(" ", "").replace("-", "")
         db.session.commit()
     except KeyError or ValueError:

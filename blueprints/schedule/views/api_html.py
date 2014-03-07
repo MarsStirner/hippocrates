@@ -20,7 +20,7 @@ def html_patient():
         return abort(404)
     context = ClientVisualizer(Format.HTML)
     return render_template(
-        'schedule/patient_info_nojs.html',
+        'schedule/patient_info.html',
         client=client,
         client_info_codes_rus={
             'id': u'Код пациента',

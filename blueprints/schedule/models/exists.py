@@ -160,8 +160,12 @@ class Client(db.Model):
     uuid_id = db.Column(db.Integer, nullable=False, index=True, server_default=u"'0'")
 
     contacts = db.relationship('ClientContact', lazy='dynamic')
-    documentsAll = db.relationship('ClientDocument')
-    policies = db.relationship('ClientPolicy', lazy='dynamic')
+    documentsAll = db.relationship(u'ClientDocument', primaryjoin='and_(ClientDocument.clientId==Client.id,'
+                                                                  'ClientDocument.deleted == 0)',
+                                   order_by="desc(ClientDocument.documentId)")
+    policies = db.relationship(u'ClientPolicy', primaryjoin='and_(ClientPolicy.clientId==Client.id,'
+                                                            'ClientPolicy.deleted == 0)',
+                               order_by="desc(ClientPolicy.id)")
     reg_addresses = db.relationship(u'ClientAddress',
                                     primaryjoin="and_(Client.id==ClientAddress.client_id, ClientAddress.type==0)",
                                     order_by="desc(ClientAddress.id)", lazy='dynamic')
@@ -227,19 +231,15 @@ class Client(db.Model):
 
     @property
     def compulsoryPolicy(self):
-        return self.policies.\
-            join(rbPolicyType).\
-            filter(rbPolicyType.name.like(u"%ОМС%")).\
-            order_by(ClientPolicy.begDate.desc()).\
-            first()
+        for policy in self.policies:
+            if not policy.policyType or u"ОМС" in policy.policyType.name:
+                return policy
 
     @property
     def voluntaryPolicy(self):
-        return self.policies. \
-            join(rbPolicyType). \
-            filter(rbPolicyType.name.like(u"ДМС%")). \
-            order_by(ClientPolicy.begDate.desc()). \
-            first()
+        for policy in self.policies:
+            if policy.policyType and policy.policyType.name.startswith(u"ДМС"):
+                return policy
 
     @property
     def policy(self):

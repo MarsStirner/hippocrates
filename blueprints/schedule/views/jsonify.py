@@ -243,6 +243,24 @@ class ClientVisualizer(object):
     def __init__(self, mode=Format.JSON):
         self.__mode = mode
 
+    def make_document_info(self, document):
+        return {'number': document.number,
+                'serial': document.serial,
+                'begDate': document.date,
+                'endDate': document.endDate,
+                'typeName': document.documentType.name,
+                'typeCode': document.documentType.code,
+                'documentText': document} if document else {}
+
+    def make_policy_info(self, policy):
+        return {'number': policy.number,
+                'serial': policy.serial,
+                'begDate': policy.begDate,
+                'endDate': policy.endDate,
+                'typeName': policy.policyType.name,
+                'typeCode': policy.policyType.code,
+                'policyText': policy} if policy else {}
+
     def make_client_info(self, client):
 
         socStatuses = [{'class': socStatus.soc_status_class.name,
@@ -266,12 +284,14 @@ class ClientVisualizer(object):
                          'physician': blood.person,
                          } for blood in client.blood_history]
 
-        document = {'number': client.document.number,
-                    'serial': client.document.serial,
-                    'date': client.document.date,
-                    'endDate': client.document.endDate,
-                    'typeCode': client.document.documentType.code,
-                    'documentText': client.document} if client.document else {}
+        pers_document = self.make_document_info(client.document)
+
+        compulsoryPolicy = self.make_policy_info(client.compulsoryPolicy)
+        voluntaryPolicy = self.make_policy_info(client.voluntaryPolicy)
+
+        documentsAll = [self.make_document_info(document) for document in client.documentsAll]
+        policies = [self.make_policy_info(policy) for policy in client.policies]
+        documentHistory = documentsAll + policies
 
         return {
             'id': client.id,
@@ -281,7 +301,7 @@ class ClientVisualizer(object):
             'nameText': client.nameText,
             'sex': client.sex,
             'SNILS': client.formatted_SNILS or None,
-            'document': document,
+            'document': pers_document,
             'documentText': client.document,
             'birthDate': client.birthDate
                 if self.__mode == Format.JSON
@@ -289,12 +309,15 @@ class ClientVisualizer(object):
             'regAddress': client.reg_addresses.first(),
             'liveAddress': client.loc_addresses.first(),
             'contact': client.phones,
-            'compulsoryPolicy': client.compulsoryPolicy,
-            'voluntaryPolicy': client.voluntaryPolicy,
+            'compulsoryPolicy': compulsoryPolicy,
+            'compulsoryPolicyText': client.compulsoryPolicy,
+            'voluntaryPolicy': voluntaryPolicy,
+            'voluntaryPolicyText': client.voluntaryPolicy,
             'socStatuses': socStatuses,
             'allergies': allergies,
             'intolerances': intolerances,
-            'boolHistory': bloodHistory
+            'boolHistory': bloodHistory,
+            'documentHistory': documentHistory
         }
 
     def make_records(self, client):
