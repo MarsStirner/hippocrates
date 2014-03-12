@@ -1,5 +1,5 @@
 {%- extends 'schedule/base.html' -%}
-{%- import "_modal_dialog.html" as modal -%}
+{%- import "schedule/_appointment.html" as appointment -%}
 {%- import "schedule/_person_tree.html" as person_tree -%}
 {% block title %}> {{ module_name }}{% endblock %}
 
@@ -8,6 +8,8 @@
         <legend xmlns="http://www.w3.org/1999/html">Запись пациента на прием - {{ client.nameText }}</legend>
         <div class="row">
             <div class="col-md-9" ng-controller="Schedules">
+                <script type="text/ng-template" id="makeAppointment.html">{{ appointment.html_make() }}</script>
+                <script type="text/ng-template" id="cancelAppointment.html">{{ appointment.html_cancel() }}</script>
                 <div class="row">
                     <div class="col-md-2">
                         <select class="form-control" name="year" ng-model="year" ng-options="y for y in years"
@@ -28,11 +30,23 @@
                         </ul>
                     </div>
                 </div>
+                <br/>{# Dirtiest hack you've ever seen! #}
+                <div class="row">
+                    <div class="col-md-12">
+                        <ul class="nav nav-tabs nav-justified" ng-model="reception_type">
+                            <li ng-class="{active: (rt.code == reception_type)}" ng-repeat="rt in reception_types"
+                                ng-click="changeReceptionType(rt.code)"><a href="#">[[ rt.name ]]</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
                 <div class="row" ng-repeat="person_schedule in total_schedules">
                     <div class="col-md-12">
                         <table class="table table-condensed person-schedule">
                             <caption>
-                                <span ng-if="person_schedule.grouped[reception_type].max_tickets == 0" class="no-schedule-label">Нет расписания</span>
+                                <a class="btn btn-success" ng-click="person_fold(person_schedule.person.id)" ng-if="!is_folded(person_schedule.person.id)">&bigodot;</a>
+                                <a class="btn btn-danger" ng-click="person_unfold(person_schedule.person.id)" ng-if="is_folded(person_schedule.person.id)">&bigoplus;</a>
+                                <span ng-if="person_schedule.grouped[reception_type].max_tickets == 0 && !is_folded(person_schedule.person.id)" class="no-schedule-label">Нет расписания</span>
                                 [[ person_schedule.person.name ]]<small>, [[ person_schedule.person.speciality ]]</small>
                             </caption>
                             <thead ng-if="person_schedule.grouped[reception_type].max_tickets > 0">
@@ -49,7 +63,7 @@
                                             ng-click="appointment_cancel(day.tickets[row], person_schedule.person)">
                                         <span ng-if="day.tickets[row].attendance_type.code == 'planned'">[[ day.tickets[row].begDateTime | asTime ]]</span>
                                         <span ng-if="day.tickets[row].attendance_type.code == 'CITO'">CITO</span>
-                                        <span ng-if="day.tickets[row].attendance_type.code == 'extra'">&PlusMinus;</span>
+                                        <span ng-if="day.tickets[row].attendance_type.code == 'extra'">Сверх плана</span>
                                     </button>
                                     <button type="button" class="btn btn-block btn-success" ng-switch-when="free"
                                             ng-click="appointment_make(day.tickets[row], person_schedule.person)"
@@ -64,7 +78,7 @@
                                     <button type="button" class="btn btn-block btn-gray" ng-switch-when="free"
                                             ng-click="appointment_make(day.tickets[row], person_schedule.person)"
                                             ng-if="day.tickets[row].attendance_type.code == 'extra'">
-                                        &PlusMinus;
+                                        Сверх плана
                                     </button>
                                     <button type="button" class="btn btn-block disabled" ng-switch-default>&nbsp;
                                     </button>
@@ -81,14 +95,13 @@
         </div>
 {#        <pre>[[schedule|json]]</pre>#}
     </div>
-{{ modal.modal_html() }}
 {% endblock %}
 {% block modules_js %}
     {{ super() }}
     <script type="text/javascript">
-        {{ modal.modal_js() }}
         {{ person_tree.js() }}
-        WebMis20.controller('Schedules', ['$scope', '$http', function ($scope, $http) {
+        {{ appointment.js() }}
+        WebMis20.controller('Schedules', ['$scope', '$http', '$modal', function ($scope, $http, $modal) {
             $scope.modal = {};
             $scope.max_tickets = [];
             $scope.person_schedules = [];
@@ -97,6 +110,7 @@
 
             $scope.user_selected = [];
             $scope.data_selected = [];
+            $scope.foldedArray = [];
 
             $scope.aux = aux;
             $scope.params = aux.getQueryParams(document.location.search);
@@ -155,8 +169,7 @@
                             client_id: $scope.client_id,
                             start_date: $scope.pages[$scope.page].format('YYYY-MM-DD'),
                             related: true,
-                            person_ids: '[' + $scope.user_selected.join() + ']',
-                            reception_type: $scope.reception_type
+                            person_ids: '[' + $scope.user_selected.join() + ']'
                         }
                     }
                 ).success(function (data) {
@@ -177,64 +190,76 @@
                     else if (a.person.name > b.person.name)
                         return 1;
                     return 0;
-                });
-            };
-
-            $scope.appointment_cancel = function (ticket, person) {
-                $scope.$root.$broadcast('ModalOpen', {
-                    title: 'Отменить запись на приём?',
-                    body: 'Отменить запись на приём к \n' + person.name + ' (' + person.speciality + ') на ' +
-                            moment(ticket.begDateTime).format('HH:mm DD MMM') + '?',
-                    accept: function () {
-                        $http.get(
-                            '{{ url_for('.api_appointment_cancel') }}', {
-                                params: {
-                                    client_id: $scope.client_id,
-                                    ticket_id: ticket.id
+                }).map(function fold(person_schedule) {
+                    if ($scope.is_folded(person_schedule.person.id)) {
+                        return {
+                            person: person_schedule.person,
+                            grouped: aux.forEach(person_schedule.grouped, function (grouped_schedule) {
+                                var max_tickets = 0;
+                                var schedule = grouped_schedule.schedule.map(function (day) {
+                                    var result = {
+                                        date: day.date,
+                                        tickets: day.tickets.filter(function (ticket) {return ticket.client != null;})
+                                    };
+                                    max_tickets = Math.max(max_tickets, result.tickets.length);
+                                    return result;
+                                });
+                                return {
+                                    max_tickets: max_tickets,
+                                    schedule: schedule
                                 }
-                            }
-                        ).success(function () {
-                            $scope.loadData();
-                            $('#modalDialog').modal('hide');
-                        }).error(function () {
-                            $scope.$root.$broadcast(
-                                'ModalChange', {
-                                    unacceptable: true,
-                                    body: 'Отмена не удалась.'
-                                }
-                            )
-                        });
+                            })
+                        }
+                    } else {
+                        return person_schedule;
                     }
                 });
+            };
+            $scope.appointment_cancel = function (ticket, person) {
+                var instance = $modal.open({
+                    templateUrl: 'cancelAppointment.html',
+                    controller: CancelAppointmentModalInstanceCtrl,
+                    resolve: {
+                        person: function () {return person},
+                        ticket: function () {return ticket},
+                        client_id: function () {return $scope.client_id}
+                    }
+                });
+                instance.result.then(function () {
+                    $scope.loadData();
+                })
             };
 
             $scope.appointment_make = function (ticket, person) {
-                $scope.$root.$broadcast('ModalOpen', {
-                    title: 'Записать на приём?',
-                    body: 'Записать на приём к \n' + person.name + ' (' + person.speciality + ') на ' +
-                            moment(ticket.begDateTime).format('HH:mm DD MMM') + '?',
-                    accept: function () {
-                        $http.get(
-                            '{{ url_for('.api_appointment_make') }}', {
-                                params: {
-                                    client_id: $scope.client_id,
-                                    ticket_id: ticket.id
-                                }
-                            }
-                        ).success(function () {
-                            $scope.loadData();
-                            $('#modalDialog').modal('hide');
-                        }).error(function () {
-                            $scope.$root.$broadcast(
-                                'ModalChange', {
-                                    unacceptable: true,
-                                    body: 'Запись на приём не удалась.'
-                                }
-                            )
-                        });
+                var instance = $modal.open({
+                    templateUrl: 'makeAppointment.html',
+                    controller: MakeAppointmentModalInstanceCtrl,
+                    resolve: {
+                        person: function () {return person},
+                        ticket: function () {return ticket},
+                        client_id: function () {return $scope.client_id}
                     }
                 });
+                instance.result.then(function () {
+                    $scope.loadData();
+                })
             };
+
+            $scope.is_folded = function (person_id) {
+                return aux.inArray($scope.foldedArray, person_id);
+            };
+
+            $scope.person_fold = function (person_id) {
+                $scope.foldedArray.push(person_id);
+                $scope.refreshSchedules();
+            };
+
+            $scope.person_unfold = function (person_id) {
+                var index = $scope.foldedArray.indexOf(person_id);
+                $scope.foldedArray.splice(index, 1);
+                $scope.refreshSchedules();
+            };
+
 
             $scope.$on('UserSelectionChanged', function (event, person, user_selected) {
                 $scope.user_selected = user_selected;
