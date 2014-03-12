@@ -14,8 +14,8 @@ from blueprints.schedule.models.exists import Person, Client, rbSpeciality, rbDo
     rbReasonOfAbsence
 from blueprints.schedule.models.schedule import Schedule, ScheduleTicket, ScheduleClientTicket, rbAppointmentType, \
     rbReceptionType, rbAttendanceType
-from blueprints.schedule.views.jsonify import ScheduleVisualizer, ClientVisualizer, RbVisualizer, Format
-
+from blueprints.schedule.views.jsonify import ScheduleVisualizer, ClientVisualizer, Format
+from blueprints.schedule.views.utils import *
 
 __author__ = 'mmalkov'
 
@@ -234,20 +234,9 @@ def api_patient():
     if not client:
         return abort(404)
     context = ClientVisualizer()
-    rbDocumentTypes = [document_type for document_type in rbDocumentType.query.all() if document_type.group.code == '1']
-    rbPolicyTypes = rbPolicyType.query.all()
-    rb_context = RbVisualizer()
-    document_types = [rb_context.make_rb_info(document_type) for document_type in rbDocumentTypes]
-    compulsory_policy_types = [rb_context.make_rb_info(policy_type) for policy_type in
-                               rbPolicyTypes if policy_type.code in ('cmiOld', 'cmiTmp', 'cmiCommonPaper', 'cmiCommonElectron', 'cmiUEC', 'cmiFnkcIndustrial', 'cmiFnkcLocal')]
-    voluntary_policy_types = [rb_context.make_rb_info(policy_type) for policy_type in
-                              rbPolicyTypes if policy_type.code == 'vmi']
-    reference_books = {'document_types': document_types, 'compulsory_policy_types': compulsory_policy_types,
-                       'voluntary_policy_types': voluntary_policy_types}
     return jsonify({
         'clientData': context.make_client_info(client),
-        'records': context.make_records(client),
-        'referenceBooks': reference_books
+        'records': context.make_records(client)
     })
 
 
@@ -382,21 +371,36 @@ def api_save_patient_info():
         client.document.number = client_info['document']['number']
         client.document.date = client_info['document']['begDate']
         client.document.endDate = client_info['document']['endDate']
-        client.document.documentType = rbDocumentType.query.filter(rbDocumentType.code == client_info['document']['typeCode']).first()
+        client.document.documentType = rbDocumentType.query.filter(rbDocumentType.code ==
+                                                                   client_info['document']['typeCode']).first()
 
-        if client.compulsoryPolicy:
-            client.compulsoryPolicy.serial = client_info['compulsoryPolicy']['serial']
-            client.compulsoryPolicy.number = client_info['compulsoryPolicy']['number']
+        if client.compulsoryPolicy and check_edit_policy(client.compulsoryPolicy,
+                                                         client_info['compulsoryPolicy']['serial'],
+                                                         client_info['compulsoryPolicy']['number'],
+                                                         client_info['compulsoryPolicy']['typeCode']):
             client.compulsoryPolicy.begDate = client_info['compulsoryPolicy']['begDate']
             client.compulsoryPolicy.endDate = client_info['compulsoryPolicy']['endDate']
-            client.compulsoryPolicy.policyType = rbPolicyType.query.filter(rbPolicyType.code == client_info['compulsoryPolicy']['typeCode']).first()
+            client.compulsoryPolicy.modifyDatetime = datetime.datetime.now()
+        else:
+            compulsory_policy = create_new_policy(client_info['compulsoryPolicy'], client.id)
+            compulsory_policy.policyType = rbPolicyType.query.filter(rbPolicyType.code ==
+                                                                 client_info['compulsoryPolicy']['typeCode']).first()
+            db.session.add(compulsory_policy)
+            compulsory_policy.compulsoryPolicy = compulsory_policy
 
-        if client.voluntaryPolicy:
-            client.voluntaryPolicy.serial = client_info['voluntaryPolicy']['serial']
-            client.voluntaryPolicy.number = client_info['voluntaryPolicy']['number']
+        if client.voluntaryPolicy and check_edit_policy(client.compulsoryPolicy,
+                                                        client_info['voluntaryPolicy']['serial'],
+                                                        client_info['voluntaryPolicyy']['number'],
+                                                        client_info['voluntaryPolicy']['typeCode']):
             client.voluntaryPolicy.begDate = client_info['voluntaryPolicy']['begDate']
             client.voluntaryPolicy.endDate = client_info['voluntaryPolicy']['endDate']
-            client.voluntaryPolicy.policyType = rbPolicyType.query.filter(rbPolicyType.code == client_info['voluntaryPolicy']['typeCode']).first()
+            client.voluntaryPolicy.modifyDatetime = datetime.datetime.now()
+        # else:
+        #     voluntary_policy = create_new_policy(client_info['voluntaryPolicy'], client.id)
+        #     client.voluntaryPolicy.policyType = rbPolicyType.query.filter(rbPolicyType.code ==
+        #                                                                   client_info['voluntaryPolicy']['typeCode']).first()
+        #     db.session.add(voluntary_policy)
+        #     compulsory_policy.compulsoryPolicy = voluntary_policy
 
         client.SNILS = client_info['SNILS'].replace(" ", "").replace("-", "")
         db.session.commit()

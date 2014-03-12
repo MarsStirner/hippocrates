@@ -4,6 +4,7 @@ from application.lib.utils import public_endpoint
 from blueprints.schedule.app import module
 from blueprints.schedule.models.exists import Client
 from blueprints.schedule.views.jsonify import ClientVisualizer, Format
+from blueprints.schedule.forms import ClientForm
 
 __author__ = 'mmalkov'
 
@@ -19,6 +20,7 @@ def html_patient():
     if not client:
         return abort(404)
     context = ClientVisualizer(Format.HTML)
+    client_form = ClientForm()
     return render_template(
         'schedule/patient_info.html',
         client=client,
@@ -47,4 +49,5 @@ def html_patient():
         record_codes_order=['mark', 'begDateTime', 'office', 'person', 'createPerson', 'note'],
         clientData=context.make_client_info(client),
         records=context.make_records(client),
+        form=client_form
     )

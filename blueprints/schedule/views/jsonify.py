@@ -250,6 +250,7 @@ class ClientVisualizer(object):
                 'endDate': document.endDate,
                 'typeName': document.documentType.name,
                 'typeCode': document.documentType.code,
+                'origin': document.origin,
                 'documentText': document} if document else {}
 
     def make_policy_info(self, policy):

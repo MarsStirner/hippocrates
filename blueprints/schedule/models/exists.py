@@ -509,7 +509,7 @@ class ClientPolicy(db.Model):
     endDate = db.Column(db.Date)
     name = db.Column(db.Unicode(64), nullable=False, server_default=u"''")
     note = db.Column(db.String(200), nullable=False, server_default=u"''")
-    version = db.Column(db.Integer, nullable=False)
+    version = db.Column(db.Integer, nullable=False, server_default=u"'0'")
 
     client = db.relationship(u'Client')
     insurer = db.relationship(u'Organisation')
@@ -897,3 +897,11 @@ class rbTariffCategory(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     code = db.Column(db.String(16), nullable=False, index=True)
     name = db.Column(db.String(64), nullable=False, index=True)
+
+
+class rbUFMS(db.Model):
+    __tablename__ = u'rbUFMS'
+
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(50, u'utf8_bin'), nullable=False)
+    name = db.Column(db.Unicode(256), nullable=False)

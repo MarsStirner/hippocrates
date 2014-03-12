@@ -29,126 +29,200 @@
                 </tbody>
             </table>
 
-            <form class="form-horizontal" role="form" ng-show="editing">
+
+            <form name="client_form container-fluid" class="form-horizontal " role="form" ng-show="editing">
+                <div class="row">
+                    <div class="form-group col-md-4" >
+                        {{ form.lastname.label(class="control-label") }}
+                        <div>
+                            {{ form.lastname(class="form-control", autocomplete="off", placeholder="Фамилия", ng_model="clientDataItems['lastName']") }}
+                        </div>
+                    </div>
+                    <div class="form-group col-md-4" style="margin-right: -5px; margin-left: -5px;">
+                        {{ form.firstname.label(class="control-label") }}
+                        <div>
+                            {{ form.firstname(class="form-control", autocomplete="off", placeholder="Имя", ng_model="clientDataItems['firstName']")}}
+                        </div>
+                    </div>
+                    <div class="form-group col-md-4">
+                        {{ form.patronymic.label(class="control-label") }}
+                        <div>
+                            {{ form.patronymic(class="form-control", autocomplete="off", placeholder="Отчество", ng_model="clientDataItems['patrName']") }}
+                        </div>
+                    </div>
+                </div>
 {#                <div class="form-group" >#}
-{#                    <label class="col-sm-2 control-label" for="id">[[ clientInfoCode2Name["id"] ]]</label>#}
-{#                    <div class="col-sm-7">#}
-{#                         <span>[[ clientDataItems['id'] ]]</span>#}
+{#                    {{ form.birthDate.label.label(class="control-label") }}#}
+{#                    <div class="col-sm-2">#}
+{#                        <p class="input-group">#}
+{#                            <input type="text" class="form-control" datepicker-popup="dd.MM.yyyy" ng-model="clientDataItems['birthDate']" is-open="opened_birthDate" required ng-required/>#}
+{#                            <span class="input-group-btn">#}
+{#                                <button class="btn btn-default" ng-click="opened_birthDate = open($event)"><i class="glyphicon glyphicon-calendar"></i></button>#}
+{#                            </span>#}
+{#                        </p>#}
 {#                    </div>#}
 {#                </div>#}
-                <div class="form-group" >
-                    <label class="col-sm-2 control-label" for="nameText">[[ clientInfoCode2Name["nameText"] ]]</label>
-                    <div id="nameText" class="col-sm-7">
-                        <input style="display:inline; width:32%;" ng-model="clientDataItems['lastName']" type="text" class="form-control" required placeholder="Фамилия" pattern="^[А-Яа-яЁё\s]+$" ng-required/>
-                        <input style="display:inline; width:32%;" ng-model="clientDataItems['firstName']" type="text" class="form-control" required placeholder="Имя" pattern="^[А-Яа-яЁё\s]+$" ng-required/>
-                        <input style="display:inline; width:32%;" ng-model="clientDataItems['patrName']" type="text" class="form-control" required placeholder="Отчество" pattern="^[А-Яа-яЁё\s]+$" ng-required/>
+                <div class="row">
+                    <div class="form-group col-md-2">
+                        {{ form.gender.label(class="control-label") }}
+                        <div>
+                            {{ form.gender(class="form-control", autocomplete="off", value=clientData['sex'], ng_model="clientDataItems['sex']") }}
+                        </div>
                     </div>
                 </div>
-                <div class="form-group" >
-                    <label class="col-sm-2 control-label" for="birthDate">[[ clientInfoCode2Name["birthDate"] ]]</label>
-                    <div class="col-sm-2">
-                        <p class="input-group">
-                            <input type="text" class="form-control" datepicker-popup="dd.MM.yyyy" ng-model="clientDataItems['birthDate']" is-open="opened_birthDate" required ng-required/>
-                            <span class="input-group-btn">
-                                <button class="btn btn-default" ng-click="opened_birthDate = open($event)"><i class="glyphicon glyphicon-calendar"></i></button>
-                            </span>
-                        </p>
+                <div class="row">
+                    <div class="form-group col-md-4">
+                        {{ form.document_type.label(class="control-label") }}
+                        <div>
+                            {{ form.document_type(class="form-control", autocomplete="off", ng_model="clientDataItems['document']['typeCode']") }}
+                        </div>
+                    </div>
+                    <div class="form-group col-md-4" style="margin-right: -5px; margin-left: -5px;">
+                        {{ form.document_serial.label(class="control-label") }}
+                        <div>
+                            {{ form.document_serial(class="form-control", autocomplete="off", placeholder="серия", ng_model="clientDataItems['document']['serial']") }}
+                        </div>
+                    </div>
+                    <div class="form-group col-md-4" >
+                        {{ form.document_number.label(class="control-label") }}
+                        <div>
+                            {{ form.document_number(class="form-control", autocomplete="off", placeholder="номер", ng_model="clientDataItems['document']['number']") }}
+                        </div>
                     </div>
                 </div>
-                <div class="form-group" >
-                    <label class="col-sm-2 control-label" for="sex">[[ clientInfoCode2Name["sex"] ]]</label>
-                    <div id="sex" class="col-sm-2">
-                        <select  ng-model="clientDataItems['sex']" class="form-control">
-                            <option value="М"> М </option>
-                            <option value="Ж"> Ж </option>
-                        </select>
+{#                    <label class="col-sm-2 control-label" for="document">[[ clientInfoCode2Name["documentText"] ]]</label>#}
+{#                    <div class="col-sm-7">#}
+{#                        <div class="input-group col-sm-3" style="float:left; margin-right: 3px; margin-bottom: 10px;" >#}
+{#                            <input type="text" class="form-control" datepicker-popup="dd.MM.yyyy" ng-model="clientDataItems['document']['begDate']" is-open="opened_doc_date" required ng-required/>#}
+{#                            <span class="input-group-btn">#}
+{#                                <button class="btn btn-default" ng-click="opened_doc_date = open($event)" ><i class="glyphicon glyphicon-calendar"></i></button>#}
+{#                            </span>#}
+{#                        </div >#}
+{#                        <div  class="input-group col-sm-3" style="float:left; margin-right: 3px; margin-bottom: 10px;">#}
+{#                            <input type="text" class="form-control" datepicker-popup="dd.MM.yyyy" ng-model="clientDataItems['document']['endDate']" is-open="opened_doc_endDate" required ng-required/>#}
+{#                            <span class="input-group-btn">#}
+{#                                <button class="btn btn-default" ng-click="opened_doc_endDate = open($event)" ><i class="glyphicon glyphicon-calendar"></i></button>#}
+{#                            </span>#}
+{#                        </div >#}
+{#                    </div>#}
+                <div class="row">
+                    <div class="form-group col-md-4">
+                        {{ form.smo.label(class="control-label") }}
+                        <div>
+                            {{ form.smo(class="form-control", autocomplete="off") }}
+                        </div>
                     </div>
                 </div>
-                <div class="form-group" >
-                    <label class="col-sm-2 control-label" for="document">[[ clientInfoCode2Name["documentText"] ]]</label>
-                    <div class="col-sm-7">
-                        <p>
-                        <select ng-model="clientDataItems['document']['typeCode']" class="form-control" style="display:inline; display:inline; width:32%;" >
-                            <option ng-repeat="type in referenceBooksItems['document_types']" value="[[ type['code'] ]]">[[ type['name'] ]]</option>
-                        </select>
-                        <input style="display:inline; width:32%;" ng-model="clientDataItems['document']['serial']" type="text" class="form-control" required placeholder="серия" ng-required/>
-                        <input style="display:inline; width:32%;" ng-model="clientDataItems['document']['number']" type="text" class="form-control" required placeholder="номер" ng-required/>
-                        </p>
-                        <div class="input-group col-sm-3" style="float:left; margin-right: 3px;" >
-                            <input type="text" class="form-control" datepicker-popup="dd.MM.yyyy" ng-model="clientDataItems['document']['begDate']" is-open="opened_doc_date" required ng-required/>
-                            <span class="input-group-btn">
-                                <button class="btn btn-default" ng-click="opened_doc_date = open($event)" ><i class="glyphicon glyphicon-calendar"></i></button>
-                            </span>
-                        </div >
-                        <div  class="input-group col-sm-3">
-                            <input type="text" class="form-control" datepicker-popup="dd.MM.yyyy" ng-model="clientDataItems['document']['endDate']" is-open="opened_doc_endDate" required ng-required/>
-                            <span class="input-group-btn">
-                                <button class="btn btn-default" ng-click="opened_doc_endDate = open($event)" ><i class="glyphicon glyphicon-calendar"></i></button>
-                            </span>
-                        </div >
+                <div class="row">
+                    <div class="form-group col-md-4">
+                        {{ form.compulsory_policy_type.label(class="control-label") }}
+                        <div>
+                            {{ form.compulsory_policy_type(class="form-control", autocomplete="off", ng_model="clientDataItems['compulsoryPolicy']['typeCode']") }}
+                        </div>
                     </div>
+                    <div class="form-group col-md-4" style="margin-right: -5px; margin-left: -5px;">
+                        {{ form.compulsory_policy_serial.label(class="control-label") }}
+                        <div>
+                            {{ form.compulsory_policy_serial(class="form-control", autocomplete="off", placeholder="серия", ng_model="clientDataItems['compulsoryPolicy']['serial']") }}
+                        </div>
+                    </div>
+                    <div class="form-group col-md-4" >
+                        {{ form.compulsory_policy_number.label(class="control-label") }}
+                        <div>
+                            {{ form.compulsory_policy_number(class="form-control", autocomplete="off", placeholder="номер", ng_model="clientDataItems['compulsoryPolicy']['number']") }}
+                        </div>
+                    </div>
+                </div>
+{#                        <p class="input-group col-sm-3" style="float:left; margin-right: 3px;">#}
+{#                            <input type="text" class="form-control" datepicker-popup="dd.MM.yyyy" ng-model="clientDataItems['compulsoryPolicy']['begDate']" is-open="opened_compulsoryPolicy_date" required ng-required/>#}
+{#                            <span class="input-group-btn">#}
+{#                                <button class="btn btn-default" ng-click="opened_compulsoryPolicy_date = open($event)" ><i class="glyphicon glyphicon-calendar"></i></button>#}
+{#                            </span>#}
+{#                        </p>#}
+{#                        <p class="input-group col-sm-3">#}
+{#                            <input type="text" class="form-control" datepicker-popup="dd.MM.yyyy" ng-model="clientDataItems['compulsoryPolicy']['endDate']" is-open="opened_compulsoryPolicy_endDate" required ng-required/>#}
+{#                            <span class="input-group-btn">#}
+{#                                <button class="btn btn-default" ng-click="opened_compulsoryPolicy_endDate = open($event)" ><i class="glyphicon glyphicon-calendar"></i></button>#}
+{#                            </span>#}
+{#                        </p>#}
 
-                </div>
-                <div class="form-group" >
-                    <label class="col-sm-2 control-label" for="document">[[ clientInfoCode2Name["compulsoryPolicyText"] ]]</label>
-                    <div class="col-sm-7">
-                        <p>
-                        <select ng-model="clientDataItems['compulsoryPolicy']['typeCode']" class="form-control" style="display:inline; display:inline; width:32%;" >
-                            <option ng-repeat="type in referenceBooksItems['compulsory_policy_types']" value="[[ type['code'] ]]">[[ type['name'] ]]</option>
-                        </select>
-                        <input style="display:inline; width:32%;" ng-model="clientDataItems['compulsoryPolicy']['serial']" type="text" class="form-control" required placeholder="серия" ng-required/>
-                        <input style="display:inline; width:32%;" ng-model="clientDataItems['compulsoryPolicy']['number']" type="text" class="form-control" required placeholder="номер" ng-required/>
-                        </p>
-
-                        <p class="input-group col-sm-3" style="float:left; margin-right: 3px;">
-                            <input type="text" class="form-control" datepicker-popup="dd.MM.yyyy" ng-model="clientDataItems['compulsoryPolicy']['begDate']" is-open="opened_compulsoryPolicy_date" required ng-required/>
-                            <span class="input-group-btn">
-                                <button class="btn btn-default" ng-click="opened_compulsoryPolicy_date = open($event)" ><i class="glyphicon glyphicon-calendar"></i></button>
-                            </span>
-                        </p>
-
-                        <p class="input-group col-sm-3">
-                            <input type="text" class="form-control" datepicker-popup="dd.MM.yyyy" ng-model="clientDataItems['compulsoryPolicy']['endDate']" is-open="opened_compulsoryPolicy_endDate" required ng-required/>
-                            <span class="input-group-btn">
-                                <button class="btn btn-default" ng-click="opened_compulsoryPolicy_endDate = open($event)" ><i class="glyphicon glyphicon-calendar"></i></button>
-                            </span>
-                        </p>
-                    </div>
-
-                </div>
-                <div class="form-group" >
-                    <label class="col-sm-2 control-label" for="voluntaryPolicy">[[ clientInfoCode2Name["voluntaryPolicyText"] ]]</label>
-                    <div class="col-sm-7">
-                        <p>
-                        <select ng-model="clientDataItems['voluntaryPolicy']['typeCode']" class="form-control" style="display:inline; display:inline; width:32%;" >
-                            <option ng-repeat="type in referenceBooksItems['voluntary_policy_types']" value="[[ type['code'] ]]">[[ type['name'] ]]</option>
-                        </select>
-                        <input style="display:inline; width:32%;" ng-model="clientDataItems['voluntaryPolicy']['serial']" type="text" class="form-control" required placeholder="серия" ng-required/>
-                        <input style="display:inline; width:32%;" ng-model="clientDataItems['voluntaryPolicy']['number']" type="text" class="form-control" required placeholder="номер" ng-required/>
-                        </p>
-
-                        <p class="input-group col-sm-3" style="float:left; margin-right: 3px;">
-                            <input type="text" class="form-control" datepicker-popup="dd.MM.yyyy" ng-model="clientDataItems['voluntaryPolicy']['begDate']" is-open="opened_voluntaryPolicy_date" required ng-required/>
-                            <span class="input-group-btn">
-                                <button class="btn btn-default" ng-click="opened_voluntaryPolicy_date = open($event)" ><i class="glyphicon glyphicon-calendar"></i></button>
-                            </span>
-                        </p>
-                        <p class="input-group col-sm-3" >
-                            <input type="text" class="form-control" datepicker-popup="dd.MM.yyyy" ng-model="clientDataItems['voluntaryPolicy']['endDate']" is-open="opened_voluntaryPolicy_endDate" required ng-required/>
-                            <span class="input-group-btn">
-                                <button class="btn btn-default" ng-click="opened_voluntaryPolicy_endDate = open($event)" ><i class="glyphicon glyphicon-calendar"></i></button>
-                            </span>
-                        </p>
+                <div class="row">
+                    <div class="form-group col-md-4">
+                        {{ form.compulsory_policy_org.label(class="control-label") }}
+                        <div>
+                            {{ form.compulsory_policy_org(class="form-control", autocomplete="off") }}
+                        </div>
                     </div>
                 </div>
-                <div class="form-group" >
-                    <label class="col-sm-2 control-label" for="SNILS">[[ clientInfoCode2Name["SNILS"] ]]</label>
-                    <div id="SNILS" class="col-sm-4">
-                        <input ng-model="clientDataItems['SNILS']" type="text" class="form-control" required placeholder="" pattern="\d{3}-\d{3}-\d{3} \d{2}" ng-required/>
+
+                <div class="row">
+                    <div class="form-group col-md-4">
+                        {{ form.voluntary_policy_type.label(class="control-label") }}
+                        <div>
+                            {{ form.voluntary_policy_type(class="form-control", autocomplete="off", ng_model="clientDataItems['voluntaryPolicy']['typeCode']") }}
+                        </div>
+                    </div>
+                    <div class="form-group col-md-4" style="margin-right: -5px; margin-left: -5px;">
+                        {{ form.compulsory_policy_serial.label(class="control-label") }}
+                        <div>
+                            {{ form.voluntary_policy_serial(class="form-control", autocomplete="off", placeholder="серия", ng_model="clientDataItems['voluntaryPolicy']['serial']") }}
+                        </div>
+                    </div>
+                    <div class="form-group col-md-4" >
+                        {{ form.compulsory_policy_number.label(class="control-label") }}
+                        <div>
+                            {{ form.voluntary_policy_number(class="form-control", autocomplete="off", placeholder="номер", ng_model="clientDataItems['voluntaryPolicy']['number']") }}
+                        </div>
+                    </div>
+                </div>
+{#                        <p class="input-group col-sm-3" style="float:left; margin-right: 3px;">#}
+{#                            <input type="text" class="form-control" datepicker-popup="dd.MM.yyyy" ng-model="clientDataItems['compulsoryPolicy']['begDate']" is-open="opened_compulsoryPolicy_date" required ng-required/>#}
+{#                            <span class="input-group-btn">#}
+{#                                <button class="btn btn-default" ng-click="opened_compulsoryPolicy_date = open($event)" ><i class="glyphicon glyphicon-calendar"></i></button>#}
+{#                            </span>#}
+{#                        </p>#}
+{#                        <p class="input-group col-sm-3">#}
+{#                            <input type="text" class="form-control" datepicker-popup="dd.MM.yyyy" ng-model="clientDataItems['compulsoryPolicy']['endDate']" is-open="opened_compulsoryPolicy_endDate" required ng-required/>#}
+{#                            <span class="input-group-btn">#}
+{#                                <button class="btn btn-default" ng-click="opened_compulsoryPolicy_endDate = open($event)" ><i class="glyphicon glyphicon-calendar"></i></button>#}
+{#                            </span>#}
+{#                        </p>#}
+                <div class="row">
+                    <div class="form-group col-md-4">
+                        {{ form.voluntary_policy_org.label(class="control-label") }}
+                        <div>
+                            {{ form.voluntary_policy_org(class="form-control", autocomplete="off") }}
+                        </div>
+                    </div>
+                </div>
+
+{#                <div class="form-group" >#}
+{#                    <label class="col-sm-2 control-label" for="voluntaryPolicy">[[ clientInfoCode2Name["voluntaryPolicyText"] ]]</label>#}
+{#                    <div class="col-sm-7">#}
+{#                        <p class="input-group col-sm-3" style="float:left; margin-right: 3px;">#}
+{#                            <input type="text" class="form-control" datepicker-popup="dd.MM.yyyy" ng-model="clientDataItems['voluntaryPolicy']['begDate']" is-open="opened_voluntaryPolicy_date" required ng-required/>#}
+{#                            <span class="input-group-btn">#}
+{#                                <button class="btn btn-default" ng-click="opened_voluntaryPolicy_date = open($event)" ><i class="glyphicon glyphicon-calendar"></i></button>#}
+{#                            </span>#}
+{#                        </p>#}
+{#                        <p class="input-group col-sm-3" >#}
+{#                            <input type="text" class="form-control" datepicker-popup="dd.MM.yyyy" ng-model="clientDataItems['voluntaryPolicy']['endDate']" is-open="opened_voluntaryPolicy_endDate" required ng-required/>#}
+{#                            <span class="input-group-btn">#}
+{#                                <button class="btn btn-default" ng-click="opened_voluntaryPolicy_endDate = open($event)" ><i class="glyphicon glyphicon-calendar"></i></button>#}
+{#                            </span>#}
+{#                        </p>#}
+{#                    </div>#}
+{#                </div>#}
+                <div class="row">
+                    <div class="form-group col-md-4" >
+                        {{ form.snils.label(class="control-label") }}
+                        <div id="SNILS">
+                            {{ form.snils(class="form-control", autocomplete="off", ng_model="clientDataItems['SNILS']") }}
+                        </div>
                     </div>
                 </div>
             </form>
-            <div class="col-sm-offset-2 col-sm-10" ng-show="editing">
+            <div class="col-sm-offset-2 col-md-10" ng-show="editing">
                 <button ng-click="save_client_info()" class="btn btn-success">Сохранить</button>
             </div>
 
