@@ -66,7 +66,7 @@
                     <div class="form-group col-md-2">
                         {{ form.gender.label(class="control-label") }}
                         <div>
-                            {{ form.gender(class="form-control", autocomplete="off", value=clientData['sex'], ng_model="clientDataItems['sex']") }}
+                            {{ form.gender(class="form-control", autocomplete="off", ng_model="clientDataItems['sex']") }}
                         </div>
                     </div>
                 </div>
@@ -107,9 +107,9 @@
 {#                    </div>#}
                 <div class="row">
                     <div class="form-group col-md-4">
-                        {{ form.smo.label(class="control-label") }}
+                        {{ form.ufms.label(class="control-label") }}
                         <div>
-                            {{ form.smo(class="form-control", autocomplete="off") }}
+                            {{ form.ufms(class="form-control", autocomplete="off", ng_model="clientDataItems['document']['origin']") }}
                         </div>
                     </div>
                 </div>
@@ -150,7 +150,7 @@
                     <div class="form-group col-md-4">
                         {{ form.compulsory_policy_org.label(class="control-label") }}
                         <div>
-                            {{ form.compulsory_policy_org(class="form-control", autocomplete="off") }}
+                            {{ form.compulsory_policy_org(class="form-control", autocomplete="off", ng_model="clientDataItems['compulsoryPolicy']['insurer_id']") }}
                         </div>
                     </div>
                 </div>
@@ -191,7 +191,7 @@
                     <div class="form-group col-md-4">
                         {{ form.voluntary_policy_org.label(class="control-label") }}
                         <div>
-                            {{ form.voluntary_policy_org(class="form-control", autocomplete="off") }}
+                            {{ form.voluntary_policy_org(class="form-control", autocomplete="off", ng_model="clientDataItems['voluntaryPolicy']['insurer_id']") }}
                         </div>
                     </div>
                 </div>

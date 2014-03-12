@@ -5,7 +5,7 @@ from wtforms.widgets import TextInput, Select
 from wtforms.validators import DataRequired, Email, AnyOf, Optional, Required
 
 from application.app import app
-from blueprints.schedule.models.exists import rbDocumentType, rbUFMS, rbPolicyType
+from blueprints.schedule.models.exists import rbDocumentType, rbUFMS, rbPolicyType, Organisation
 
 
 class AngularJSTextInput(TextInput):
@@ -43,21 +43,22 @@ class ClientForm(Form):
     voluntary_policy_serial = StringField(u'Серия', widget=AngularJSTextInput())
     with app.app_context():
         document_type = SelectField(u'Тип', choices=[(doc_type.code, doc_type.name) for
-                                                     doc_type in rbDocumentType.query.all() if doc_type.group.code == '1'],
+                                    doc_type in rbDocumentType.query.all() if doc_type.group.code == '1'],
                                     widget=AngularJSSelect())
-        smo = SelectField(u'Выдан', choices=[(smo.code, smo.name) for smo in rbUFMS.query.all()],
-                          widget=AngularJSSelect())
-        compulsory_policy_type = SelectField(u'Тип', choices=[(c_policy_type.code, c_policy_type.name) for c_policy_type in rbPolicyType.query.all() if
-                                                              c_policy_type.code in ('cmiOld', 'cmiTmp', 'cmiCommonPaper',
-                                                                                     'cmiCommonElectron', 'cmiUEC',
-                                                                                     'cmiFnkcIndustrial', 'cmiFnkcLocal')],
+        ufms = SelectField(u'Выдан', choices=[(ufms.name, ufms.name) for ufms in rbUFMS.query.all()],
+                           widget=AngularJSSelect())
+        compulsory_policy_type = SelectField(u'Тип', choices=[(c_policy_type.code, c_policy_type.name) for
+                                             c_policy_type in rbPolicyType.query.all() if
+                                             c_policy_type.code in ('cmiOld', 'cmiTmp', 'cmiCommonPaper',
+                                                                    'cmiCommonElectron', 'cmiUEC',
+                                                                    'cmiFnkcIndustrial', 'cmiFnkcLocal')],
                                              widget=AngularJSSelect())
-        compulsory_policy_org = SelectField(u'СМО', choices=[],
+        compulsory_policy_org = SelectField(u'СМО', choices=[(org.id, org.shortName) for org in
+                                            Organisation.query.all()], widget=AngularJSSelect())
+        voluntary_policy_type = SelectField(u'Тип', choices=[(v_policy_type.code, v_policy_type.name) for
+                                            v_policy_type in rbPolicyType.query.all() if v_policy_type.code in 'vmi'],
                                             widget=AngularJSSelect())
-        voluntary_policy_type = SelectField(u'Тип', choices=[(v_policy_type.code, v_policy_type.name) for v_policy_type in rbPolicyType.query.all() if
-                                                             v_policy_type.code in ('vmi')],
-                                            widget=AngularJSSelect())
-        voluntary_policy_org = SelectField(u'СМО', choices=[],
-                                           widget=AngularJSSelect())
+        voluntary_policy_org = SelectField(u'СМО', choices=[(org.id, org.shortName) for org in
+                                           Organisation.query.all()], widget=AngularJSSelect())
 
     snils = StringField(u'СНИЛС', widget=AngularJSTextInput())

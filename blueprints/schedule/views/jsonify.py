@@ -260,6 +260,7 @@ class ClientVisualizer(object):
                 'endDate': policy.endDate,
                 'typeName': policy.policyType.name,
                 'typeCode': policy.policyType.code,
+                'insurer_id': policy.insurer_id,
                 'policyText': policy} if policy else {}
 
     def make_client_info(self, client):
