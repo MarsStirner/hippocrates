@@ -268,6 +268,10 @@ class ClientVisualizer(object):
                 'accountingSystem_id': identification.accountingSystems.name,
                 'checkDate': identification.checkDate}
 
+    def make_relation_info(self, relation):
+        return {'relativeType': relation.name,
+                'client': relation.other.nameText + ' ({})'.format(relation.other.id)}
+
     def make_client_info(self, client):
 
         socStatuses = [{'class': socStatus.soc_status_class.name,
@@ -300,6 +304,8 @@ class ClientVisualizer(object):
         policies = [self.make_policy_info(policy) for policy in client.policies]
         documentHistory = documentsAll + policies
         identifications = [self.make_identification_info(identification) for identification in client.identifications]
+        direct_relations = [self.make_relation_info(relation) for relation in client.direct_relations]
+        reversed_relations = [self.make_relation_info(relation) for relation in client.reversed_relations]
 
         return {
             'id': client.id,
@@ -327,7 +333,9 @@ class ClientVisualizer(object):
             'intolerances': intolerances,
             'bloodHistory': bloodHistory,
             'documentHistory': documentHistory,
-            'identifications': identifications
+            'identifications': identifications,
+            'direct_relations': direct_relations,
+            'reversed_relations': reversed_relations
         }
 
     def make_records(self, client):
