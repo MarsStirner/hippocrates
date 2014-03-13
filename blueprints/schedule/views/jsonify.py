@@ -94,7 +94,6 @@ class ScheduleVisualizer(object):
                     CITO = 0
                     extra = 0
                     busy = False
-                    roa = None
                     for ticket in itertools.chain(*(sched['tickets'] for sched in day['scheds'])):
                         at = ticket['attendance_type'].code
                         if at == 'planned':
@@ -105,24 +104,25 @@ class ScheduleVisualizer(object):
                             extra += 1
                         if not busy and ticket['client']:
                             busy = True
-                    for sched in day['scheds']:
-                        if not roa and sched['roa']:
-                            roa = sched['roa']
-                            break
-                        del sched['roa']
                     day['summary'] = {
                         'planned_tickets': planned,
                         'CITO_tickets': CITO,
                         'extra_tickets': extra,
                         'busy_tickets': busy,
                     }
-                    day['roa'] = roa
                 else:
                     tickets = list(itertools.chain(*(sched['tickets'] for sched in day['scheds'])))
                     planned_tickets = sorted(filter(lambda t: t['attendance_type'].code == 'planned', tickets), key=lambda t: t['begDateTime'])
                     extra_tickets = filter(lambda t: t['attendance_type'].code == 'extra', tickets)
                     CITO_tickets = filter(lambda t: t['attendance_type'].code == 'CITO', tickets)
                     day['tickets'] = CITO_tickets + planned_tickets + extra_tickets
+                roa = None
+                for sched in day['scheds']:
+                    if not roa and sched['roa']:
+                        roa = sched['roa']
+                    del sched['roa']
+                day['roa'] = roa
+                if not expand:
                     del day['scheds']
         return result
 

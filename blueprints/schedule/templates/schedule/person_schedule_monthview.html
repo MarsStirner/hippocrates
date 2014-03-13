@@ -6,6 +6,7 @@
     <legend xmlns="http://www.w3.org/1999/html">График врача</legend>
     <div ng-controller="Schedule">
         <script type="text/ng-template" id="modal-DaysSetup.html">{% include "schedule/_daysetup.html" %}</script>
+        <script type="text/ng-template" id="modal-DayFree.html">{% include "schedule/_day_free.html" %}</script>
         <div class="row">
             <div class="col-md-2">
                 <select class="form-control" name="year" ng-model="year" ng-disabled="editing"
@@ -16,7 +17,7 @@
                         ng-options="item.value as item.name for item in aux.months" ng-change="monthChanged()"></select>
             </div>
             <div class="col-md-8">
-                {{ person_tree.html_dropdown_select() }}
+                {{ person_tree.html(popup=True) }}
             </div>
         </div>
         <div ng-show="person">
@@ -37,11 +38,12 @@
                 <button class="btn btn-danger" ng-click="cancel_editing()" ng-if="editing">Отменить</button>
             </div>
             <button class="btn btn-warning" ng-click="fill_selection()" ng-if="editing" ng-disabled="selected_days.length == 0">Заполнить</button>
-            <div class="btn-group">
-                <button class="btn btn-primary" ng-click="select.odd()" ng-if="editing">Выбрать нечет дни</button>
-                <button class="btn btn-primary" ng-click="select.invert()" ng-if="editing">Обратить выделение</button>
-                <button class="btn btn-primary" ng-click="select.all()" ng-if="editing">Выбрать все</button>
-                <button class="btn btn-primary" ng-click="select.none()" ng-if="editing">Снять выделение</button>
+            <div class="btn-group" ng-if="editing">
+                <button class="btn btn-primary disabled"><span class="glyphicon glyphicon-ok"></span></button>
+                <button class="btn btn-primary" ng-click="select.odd()">Нечет дни</button>
+                <button class="btn btn-primary" ng-click="select.invert()">Инверсия</button>
+                <button class="btn btn-primary" ng-click="select.all()">Все</button>
+                <button class="btn btn-primary" ng-click="select.none()">Снять</button>
             </div>
             <div ng-show="editing">
                 <input type="checkbox" id="weekendCheckBox" ng-model="weekends_selectable" /><label for="weekendCheckBox">Выбирать выходные</label>
@@ -66,19 +68,23 @@
                                      ng-if="!day.not_exists"
                                      ng-class="get_day_class(day, $index)"
                                      ng-click="select.day(day)">
-                                    <div class="panel-heading" ng-bind="day.date | asDate"></div>
+                                    <div class="panel-heading">[[ day.date | asDate ]]
+                                        <i class="pull-right glyphicon glyphicon-edit day-selectable" ng-if="day.busy"
+                                                ng-click="free_up_day(day)"></i>
+                                    </div>
                                     <ul class="panel-body list-group" ng-switch="person_schedule_day_switch(day)">
-                                        <li class="list-group-item" ng-repeat="sched in day.scheds">
+                                        <li class="list-group-item list-group-item-danger" ng-if="day.busy">Есть записи</li>
+                                        <li class="list-group-item list-group-item-info" ng-repeat="sched in day.scheds">
                                             <p><nobr>[[ (day.date + 'T' + sched.begTime) | asTime ]] - [[ (day.date + 'T' + sched.endTime) | asTime ]]</nobr></p>
                                         </li>
-                                        <li class="list-group-item" ng-switch-when="normal">
+                                        <li class="list-group-item list-group-item-info" ng-switch-when="normal">
                                             <p><nobr>Кабинет:&nbsp;[[ day.office ]]</nobr></p>
                                             <p><nobr>План:&nbsp;[[ day.planned ]]</nobr></p>
                                             <p><nobr>Сверх плана:&nbsp;[[ day.extra ]]</nobr></p>
                                             <p><nobr>Вне очереди:&nbsp;[[ day.CITO ]]</nobr></p>
                                         </li>
-                                        <li class="list-group-item" ng-switch-when="empty">Не заполнено</li>
-                                        <li class="list-group-item" ng-switch-when="absent">Причина отсутствия:<br/>[[ day.roa.name ]]</li>
+                                        <li class="list-group-item" ng-switch-when="empty">Не&nbsp;заполнено</li>
+                                        <li class="list-group-item list-group-item-danger" ng-switch-when="absent">Причина отсутствия:<br/>[[ day.roa.name ]]</li>
                                     </ul>
                                 </div>
                             </td>
@@ -95,7 +101,7 @@
     <script type="text/javascript">
         roas = {{ rbReasonOfAbsence | tojson | safe}};
         {{ person_tree.js() }}
-        ModalInstanceCtrl = function ($scope, $modalInstance, model) {
+        DaySetupModalCtrl = function ($scope, $modalInstance, model) {
             $scope.model = model;
             $scope.absent = model.roa !== null;
             $scope.accept = function () {
@@ -109,6 +115,17 @@
                 if (!this.absent) {
                     this.model.roa = null;
                 }
+            };
+            $scope.roas = roas;
+        };
+        DayFreeModalCtrl = function ($scope, $modalInstance, day) {
+            $scope.day = day;
+            $scope.roa = day.roa.code;
+            $scope.accept = function () {
+                $modalInstance.close(this.roa);
+            };
+            $scope.cancel = function () {
+                $modalInstance.dismiss('cancel');
             };
             $scope.roas = roas;
         };
@@ -283,7 +300,7 @@
             $scope.fill_selection = function () {
                 var modalInstance = $modal.open({
                     templateUrl: 'modal-DaysSetup.html',
-                    controller: ModalInstanceCtrl,
+                    controller: DaySetupModalCtrl,
                     resolve: {
                         model: function () {
                             var primary = $scope.selected_days[0];
@@ -355,22 +372,42 @@
                 });
             };
 
+            $scope.free_up_day = function (day) {
+                var instance = $modal.open({
+                    templateUrl: 'modal-DayFree.html',
+                    controller: DayFreeModalCtrl,
+                    resolve: {
+                        day: function () {return day;}
+                    }
+                });
+                instance.result.then(function (roa) {
+                    $http.post('{{ url_for('.api_schedule_lock') }}', {
+                        person_id: $scope.person_id,
+                        date: day.date,
+                        roa: roa
+                    }).success(function () {
+                        window.open('{{ url_for('.html_day_free') }}', '_self');
+                    });
+
+                })
+            };
+
             $scope.get_day_class = function (day, index) {
                 var result = [];
                 if ($scope.editing) {
-                    result.push('day-selectable');
+                    if (day_selectable(day)) {
+                        result.push('day-selectable');
+                    }
                     if (day_selected(day)) {
                         result.push('panel-primary')
-                    } else if (!day_selectable(day)) {
+                    } else if (index >= 5 || day.roa) {
                         result.push('panel-danger')
                     } else {
                         result.push('panel-default')
                     }
                 } else {
-                    if (day.busy) {
+                    if (day.scheds.length > 0) {
                         result.push('panel-success');
-                    } else if (day.scheds.length > 0) {
-                        result.push('panel-warning');
                     } else if (index >= 5 || day.roa) {
                         result.push('panel-danger')
                     } else {

@@ -16,7 +16,7 @@
                         ng-options="item.value as item.name for item in aux.months" ng-change="monthChanged()"></select>
             </div>
             <div class="col-md-8">
-                {{ person_tree.html_dropdown_select() }}
+                {{ person_tree.html(popup=True) }}
             </div>
         </div>
         <br/>{# Dirtiest hack you've ever seen! #}
@@ -89,7 +89,7 @@
             $scope.data = {};
             $scope.aux = aux;
             $scope.params = aux.getQueryParams(document.location.search);
-            $scope.person_id = $scope.params.person_id;
+{#            $scope.person_id = $scope.params.person_id;#}
             $scope.person_query = '';
             var curDate = new Date();
             var curYear = curDate.getUTCFullYear();
@@ -159,9 +159,13 @@
             $scope.monthChanged();
 
             $scope.$on('PersonSelected', function (event, person) {
+                history.pushState(null, null, window.location.origin + window.location.pathname + '?person_id=' + person.id);
                 $scope.person_id = person.id;
                 $scope.reloadSchedule();
             });
+            if ($scope.params.person_id) {
+                $scope.$root.$broadcast('ManuallySelectedPersonId', $scope.params.person_id)
+            }
         }]);
     </script>
 {% endblock %}

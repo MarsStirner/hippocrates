@@ -1,0 +1,25 @@
+<div class="modal-header" xmlns="http://www.w3.org/1999/html">
+    <button type="button" class="close" ng-click="cancel()">&times;</button>
+    <h4 class="modal-title" id="myModalLabel">Блокировка дня и перенос пациентов</h4>
+</div>
+<div class="modal-body">
+    <div class="row">
+        <div class="col-md-12">
+            <p>
+
+            </p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-4">
+            <label for="absent">Причина отсутствия</label>
+        </div>
+        <div class="col-md-8">
+            <select id="absent" class="form-control" ng-options="item.code as item.name for item in roas" ng-model="roa"></select>
+        </div>
+    </div>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-success" ng-click="accept()">Ok</button>
+    <button type="button" class="btn btn-danger" ng-click="cancel()">Отмена</button>
+</div>

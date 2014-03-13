@@ -71,3 +71,9 @@ def person_schedule_monthview():
         return render_template('schedule/person_schedule_monthview.html')
     except TemplateNotFound:
         abort(404)
+
+
+@module.route('/day_free.html')
+@public_endpoint
+def html_day_free():
+    return render_template('schedule/day_free.html')

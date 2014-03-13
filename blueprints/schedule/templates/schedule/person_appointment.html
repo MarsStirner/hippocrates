@@ -44,8 +44,8 @@
                     <div class="col-md-12">
                         <table class="table table-condensed person-schedule">
                             <caption>
-                                <a class="btn btn-success" ng-click="person_fold(person_schedule.person.id)" ng-if="!is_folded(person_schedule.person.id)">&bigodot;</a>
-                                <a class="btn btn-danger" ng-click="person_unfold(person_schedule.person.id)" ng-if="is_folded(person_schedule.person.id)">&bigoplus;</a>
+                                <a class="btn btn-default glyphicon glyphicon-chevron-up" ng-click="person_fold(person_schedule.person.id)" ng-if="!is_folded(person_schedule.person.id)"></a>
+                                <a class="btn btn-default glyphicon glyphicon-chevron-down" ng-click="person_unfold(person_schedule.person.id)" ng-if="is_folded(person_schedule.person.id)"></a>
                                 <span ng-if="person_schedule.grouped[reception_type].max_tickets == 0 && !is_folded(person_schedule.person.id)" class="no-schedule-label">Нет расписания</span>
                                 [[ person_schedule.person.name ]]<small>, [[ person_schedule.person.speciality ]]</small>
                             </caption>
@@ -65,20 +65,17 @@
                                         <span ng-if="day.tickets[row].attendance_type.code == 'CITO'">CITO</span>
                                         <span ng-if="day.tickets[row].attendance_type.code == 'extra'">Сверх плана</span>
                                     </button>
-                                    <button type="button" class="btn btn-block btn-success" ng-switch-when="free"
-                                            ng-click="appointment_make(day.tickets[row], person_schedule.person)"
-                                            ng-if="day.tickets[row].attendance_type.code == 'planned'">
-                                        [[ day.tickets[row].begDateTime | asTime ]]
-                                    </button>
-                                    <button type="button" class="btn btn-block btn-warning" ng-switch-when="free"
-                                            ng-click="appointment_make(day.tickets[row], person_schedule.person)"
-                                            ng-if="day.tickets[row].attendance_type.code == 'CITO'">
-                                        CITO
-                                    </button>
-                                    <button type="button" class="btn btn-block btn-gray" ng-switch-when="free"
-                                            ng-click="appointment_make(day.tickets[row], person_schedule.person)"
-                                            ng-if="day.tickets[row].attendance_type.code == 'extra'">
-                                        Сверх плана
+                                    <button type="button" class="btn btn-block" ng-switch-when="free"
+                                            ng-class="{
+                                                'btn-success': (day.tickets[row].attendance_type.code == 'planned'),
+                                                'btn-warning': (day.tickets[row].attendance_type.code == 'CITO'),
+                                                'btn-gray': (day.tickets[row].attendance_type.code == 'extra')
+                                            }"
+                                            ng-disabled="day.roa"
+                                            ng-click="appointment_make(day.tickets[row], person_schedule.person)">
+                                        <span ng-if="day.tickets[row].attendance_type.code == 'planned'">[[ day.tickets[row].begDateTime | asTime ]]</span>
+                                        <span ng-if="day.tickets[row].attendance_type.code == 'CITO'">CITO</span>
+                                        <span ng-if="day.tickets[row].attendance_type.code == 'extra'">Сверх плана</span>
                                     </button>
                                     <button type="button" class="btn btn-block disabled" ng-switch-default>&nbsp;
                                     </button>
@@ -90,7 +87,7 @@
                 </div>
             </div>
             <div class="col-md-3">
-                {{ person_tree.html_fixed() }}
+                {{ person_tree.html(checkbox=True) }}
             </div>
         </div>
 {#        <pre>[[schedule|json]]</pre>#}

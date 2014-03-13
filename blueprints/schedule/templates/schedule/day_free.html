@@ -1,0 +1,39 @@
+{% extends 'schedule/base.html' %}
+{% import 'schedule/_person_tree.html' as person_tree %}
+{% block main %}
+    <div class="row">
+        <div class="col-md-4">
+            <div class="panel panel-default panel-info">
+                <div class="panel-heading">
+                    Откуда переносим
+                </div>
+                <div class="panel-body">
+                    ...
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="panel panel-default panel-success">
+                <div class="panel-heading">
+                    Куда переносим
+                </div>
+                <div class="panel-body">
+                    ...
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+                    <div class="static-calendar well-sm" ng-model="dt" ng-change="date_changed()">
+                        <datepicker show-weeks="false"></datepicker>
+                    </div>
+                    {{ person_tree.html() }}
+        </div>
+    </div>
+{% endblock %}
+
+{% block modules_js %}
+    {{ super() }}
+    <script type="application/javascript">
+        {{ person_tree.js() }}
+    </script>
+{% endblock %}
