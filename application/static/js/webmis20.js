@@ -136,5 +136,16 @@ var aux = {
         var subresult = where.filter(function (item) {return item[field] == code});
         if (subresult.length === 0) return null;
         return subresult[0]
+    },
+    inArray: function (array, item) {
+        return array.indexOf(item) !== -1;
+    },
+    forEach: function (object, callback) {
+        var result = {};
+        var key;
+        for (key in object) {
+            result[key] = callback(object[key]);
+        }
+        return result
     }
 };

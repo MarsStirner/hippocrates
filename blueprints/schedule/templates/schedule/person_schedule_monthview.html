@@ -41,6 +41,7 @@
                 <button class="btn btn-primary" ng-click="select.odd()" ng-if="editing">Выбрать нечет дни</button>
                 <button class="btn btn-primary" ng-click="select.invert()" ng-if="editing">Обратить выделение</button>
                 <button class="btn btn-primary" ng-click="select.all()" ng-if="editing">Выбрать все</button>
+                <button class="btn btn-primary" ng-click="select.none()" ng-if="editing">Снять выделение</button>
             </div>
             <div ng-show="editing">
                 <input type="checkbox" id="weekendCheckBox" ng-model="weekends_selectable" /><label for="weekendCheckBox">Выбирать выходные</label>
@@ -222,6 +223,8 @@
 
             $scope.$on('PersonSelected', function (event, person) {
                 $scope.person_id = person.id;
+{#                location.search = '?person_id=' + person.id;#}
+                history.pushState(null, document.title, location.origin + location.pathname + '?person_id=' + person.id);
                 $scope.reloadSchedule();
             });
 
@@ -271,6 +274,9 @@
                 },
                 all: function () {
                     $scope.selected_days = $scope.grouped[$scope.reception_type]['schedule'].filter(day_selectable)
+                },
+                none: function () {
+                    $scope.selected_days = [];
                 }
             };
 
@@ -342,7 +348,8 @@
                                 }]
                             }
                         }
-                    })
+                    });
+                    $scope.select.none();
                 }, function () {
                     console.log('dismissed!')
                 });
