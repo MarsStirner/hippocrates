@@ -333,6 +333,34 @@
             </table>
         </div>
         <div class="tub_content" ng-show="tub_selected == 5">
+           <table class="table table-condensed" ng-if="clientDataItems['direct_relations']">
+                <thead>
+                     <tr>
+                        <th>Прямая связь</th>
+                        <th>Связан с пациентом</th>
+                     </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="relation in  clientDataItems['direct_relations']">
+                        <td>[[relation.relativeType]]</td>
+                        <td>[[relation.client]]</td>
+                    </tr>
+                </tbody>
+            </table>
+           <table class="table table-condensed" ng-if="clientDataItems['reversed_relations']">
+                <thead>
+                     <tr>
+                        <th>Обратная связь</th>
+                        <th>Связан с пациентом</th>
+                     </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="relation in  clientDataItems['reversed_relations']">
+                        <td>[[relation.relativeType]]</td>
+                        <td>[[relation.client]]</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
         <div class="tub_content" ng-show="tub_selected == 6">
             <table class="table table-condensed">

@@ -184,6 +184,8 @@ class Client(db.Model):
     allergies = db.relationship(u'ClientAllergy', primaryjoin='and_(ClientAllergy.client_id==Client.id,'
                                                               'ClientAllergy.deleted == 0)')
     blood_history = db.relationship(u'Bloodhistory')
+    direct_relations = db.relationship(u'DirectClientRelation', foreign_keys='ClientRelation.client_id')
+    reversed_relations = db.relationship(u'ReversedClientRelation', foreign_keys='ClientRelation.relative_id')
 
     @property
     def nameText(self):
@@ -440,6 +442,150 @@ class ClientIntoleranceMedicament(db.Model):
 
     def __unicode__(self):
         return self.name
+
+
+class ClientRelation(db.Model):
+    __tablename__ = u'ClientRelation'
+
+    id = db.Column(db.Integer, primary_key=True)
+    createDatetime = db.Column(db.DateTime, nullable=False)
+    createPerson_id = db.Column(db.Integer, index=True)
+    modifyDatetime = db.Column(db.DateTime, nullable=False)
+    modifyPerson_id = db.Column(db.Integer, index=True)
+    deleted = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    client_id = db.Column(db.ForeignKey('Client.id'), nullable=False, index=True)
+    relativeType_id = db.Column(db.Integer, db.ForeignKey('rbRelationType.id'), index=True)
+    relative_id = db.Column(db.Integer, db.ForeignKey('Client.id'), nullable=False, index=True)
+    version = db.Column(db.Integer, nullable=False)
+
+    relativeType = db.relationship(u'rbRelationType')
+
+    @property
+    def leftName(self):
+        return self.relativeType.leftName
+
+    @property
+    def rightName(self):
+        return self.relativeType.rightName
+
+    @property
+    def code(self):
+        return self.relativeType.code
+
+    @property
+    def name(self):
+        return self.role + ' -> ' + self.otherRole
+
+
+class DirectClientRelation(ClientRelation):
+
+    other = db.relationship(u'Client', foreign_keys='ClientRelation.relative_id')
+
+    @property
+    def role(self):
+        return self.leftName
+
+    @property
+    def otherRole(self):
+        return self.rightName
+
+    @property
+    def regionalCode(self):
+        return self.relativeType.regionalCode
+
+    @property
+    def clientId(self):
+        return self.relative_id
+
+    @property
+    def isDirectGenetic(self):
+        return self.relativeType.isDirectGenetic
+
+    @property
+    def isBackwardGenetic(self):
+        return self.relativeType.isBackwardGenetic
+
+    @property
+    def isDirectRepresentative(self):
+        return self.relativeType.isDirectRepresentative
+
+    @property
+    def isBackwardRepresentative(self):
+        return self.relativeType.isBackwardRepresentative
+
+    @property
+    def isDirectEpidemic(self):
+        return self.relativeType.isDirectEpidemic
+
+    @property
+    def isBackwardEpidemic(self):
+        return self.relativeType.isBackwardEpidemic
+
+    @property
+    def isDirectDonation(self):
+        return self.relativeType.isDirectDonation
+
+    @property
+    def isBackwardDonation(self):
+        return self.relativeType.isBackwardDonation
+
+    def __unicode__(self):
+        return self.name + ' ' + self.other
+
+
+class ReversedClientRelation(ClientRelation):
+
+    other = db.relationship(u'Client', foreign_keys='ClientRelation.client_id')
+
+    @property
+    def role(self):
+        return self.rightName
+
+    @property
+    def otherRole(self):
+        return self.leftName
+
+    @property
+    def regionalCode(self):
+        return self.relativeType.regionalReverseCode
+
+    @property
+    def clientId(self):
+        return self.client_id
+    @property
+    def isDirectGenetic(self):
+        return self.relativeType.isBackwardGenetic
+
+    @property
+    def isBackwardGenetic(self):
+        return self.relativeType.isDirectGenetic
+
+    @property
+    def isDirectRepresentative(self):
+        return self.relativeType.isBackwardRepresentative
+
+    @property
+    def isBackwardRepresentative(self):
+        return self.relativeType.isDirectRepresentative
+
+    @property
+    def isDirectEpidemic(self):
+        return self.relativeType.isBackwardEpidemic
+
+    @property
+    def isBackwardEpidemic(self):
+        return self.relativeType.isDirectEpidemic
+
+    @property
+    def isDirectDonation(self):
+        return self.relativeType.isBackwardDonation
+
+    @property
+    def isBackwardDonation(self):
+        return self.relativeType.isDirectDonation
+
+    def __unicode__(self):
+        return self.name + ' ' + self.other
 
 
 class ClientSocStatus(db.Model):
@@ -879,6 +1025,27 @@ class rbReasonOfAbsence(db.Model):
             'code': self.code,
             'name': self.name,
         }
+
+
+class rbRelationType(db.Model):
+    __tablename__ = u'rbRelationType'
+
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(8), nullable=False, index=True)
+    leftName = db.Column(db.String(64), nullable=False)
+    rightName = db.Column(db.String(64), nullable=False)
+    isDirectGenetic = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    isBackwardGenetic = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    isDirectRepresentative = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    isBackwardRepresentative = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    isDirectEpidemic = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    isBackwardEpidemic = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    isDirectDonation = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    isBackwardDonation = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    leftSex = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    rightSex = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    regionalCode = db.Column(db.String(64), nullable=False)
+    regionalReverseCode = db.Column(db.String(64), nullable=False)
 
 
 class rbSpeciality(db.Model):
