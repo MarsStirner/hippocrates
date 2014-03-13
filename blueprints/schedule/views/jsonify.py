@@ -272,6 +272,11 @@ class ClientVisualizer(object):
         return {'relativeType': relation.name,
                 'client': relation.other.nameText + ' ({})'.format(relation.other.id)}
 
+    def make_contact_info(self, contact):
+        return {'contactType': contact.contactType.name,
+                'contact': contact.contact,
+                'notes': contact.notes}
+
     def make_client_info(self, client):
 
         socStatuses = [{'class': socStatus.soc_status_class.name,
@@ -306,6 +311,7 @@ class ClientVisualizer(object):
         identifications = [self.make_identification_info(identification) for identification in client.identifications]
         direct_relations = [self.make_relation_info(relation) for relation in client.direct_relations]
         reversed_relations = [self.make_relation_info(relation) for relation in client.reversed_relations]
+        contacts = [self.make_contact_info(contact) for contact in client.contacts]
 
         return {
             'id': client.id,
@@ -335,7 +341,8 @@ class ClientVisualizer(object):
             'documentHistory': documentHistory,
             'identifications': identifications,
             'direct_relations': direct_relations,
-            'reversed_relations': reversed_relations
+            'reversed_relations': reversed_relations,
+            'contacts': contacts
         }
 
     def make_records(self, client):

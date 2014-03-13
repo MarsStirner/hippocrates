@@ -361,6 +361,23 @@
                     </tr>
                 </tbody>
             </table>
+           <table class="table table-condensed" ng-if="clientDataItems['contacts']">
+                <caption>Контакты</caption>
+                <thead>
+                     <tr>
+                          <th>Тип</th>
+                          <th>Номер</th>
+                          <th>Примечение</th>
+                     </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="contact in  clientDataItems['contacts']">
+                          <td>[[contact.contactType]]</td>
+                          <td>[[contact.contact]]</td>
+                          <td>[[contact.notes]]</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
         <div class="tub_content" ng-show="tub_selected == 6">
             <table class="table table-condensed">

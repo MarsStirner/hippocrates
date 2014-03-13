@@ -159,7 +159,8 @@ class Client(db.Model):
     embryonalPeriodWeek = db.Column(db.String(16), nullable=False, server_default=u"''")
     uuid_id = db.Column(db.Integer, nullable=False, index=True, server_default=u"'0'")
 
-    contacts = db.relationship('ClientContact', lazy='dynamic')
+    contacts = db.relationship('ClientContact', primaryjoin='and_(ClientContact.client_id==Client.id,'
+                                                            'ClientContact.deleted == 0)', lazy='dynamic')
     documentsAll = db.relationship(u'ClientDocument', primaryjoin='and_(ClientDocument.clientId==Client.id,'
                                                                   'ClientDocument.deleted == 0)',
                                    order_by="desc(ClientDocument.documentId)")
@@ -227,7 +228,7 @@ class Client(db.Model):
 
     @property
     def phones(self):
-        contacts = [(contact.name, contact.contact, contact.notes) for contact in self.contacts if contact.deleted == 0]
+        contacts = [(contact.name, contact.contact, contact.notes) for contact in self.contacts]
         return ', '.join([
             (u'%s: %s (%s)' % (phone[0], phone[1], phone[2])) if phone[2]
             else (u'%s: %s' % (phone[0], phone[1]))
