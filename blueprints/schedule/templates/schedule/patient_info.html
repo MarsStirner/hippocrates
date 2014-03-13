@@ -15,9 +15,9 @@
             <li ng-class="{active: tub_selected==1 }"><a href ng-click="tub_selected=1; editing=false">Основная информация</a></li>
             <li ng-class="{active: tub_selected==2 }"><a href ng-click="tub_selected=2; editing=false">Соц. статус</a></li>
             <li ng-class="{active: tub_selected==3 }"><a href ng-click="tub_selected=3; editing=false">Особенности</a></li>
-{#            <li ng-class="{active: tub_selected==4 }"><a href ng-click="tub_selected=3">Связи с др. пациентами</a></li>#}
-{#            <li ng-class="{active: tub_selected==5 }"><a href ng-click="tub_selected=3">Связь с внешними сисемами</a></li>#}
-            <li ng-class="{active: tub_selected==4 }"><a href ng-click="tub_selected=4; editing=false">История документов</a></li>
+            <li ng-class="{active: tub_selected==4 }"><a href ng-click="tub_selected=4; editing=false">Идентификаторы</a></li>
+            <li ng-class="{active: tub_selected==5 }"><a href ng-click="tub_selected=5; editing=false">Связи и контакты</a></li>
+            <li ng-class="{active: tub_selected==6 }"><a href ng-click="tub_selected=6; editing=false">История документов</a></li>
         </ul>
         <div class="tub_content" ng-show="tub_selected == 1">
             <table class="table table-condensed" ng-hide="editing">
@@ -32,19 +32,19 @@
 
             <form name="client_form container-fluid" class="form-horizontal " role="form" ng-show="editing">
                 <div class="row">
-                    <div class="form-group col-md-4" >
+                    <div class="form-group col-md-3" >
                         {{ form.lastname.label(class="control-label") }}
                         <div>
                             {{ form.lastname(class="form-control", autocomplete="off", placeholder="Фамилия", ng_model="clientDataItems['lastName']") }}
                         </div>
                     </div>
-                    <div class="form-group col-md-4" style="margin-right: -5px; margin-left: -5px;">
+                    <div class="form-group col-md-3" style="margin-right: -5px; margin-left: -5px;">
                         {{ form.firstname.label(class="control-label") }}
                         <div>
                             {{ form.firstname(class="form-control", autocomplete="off", placeholder="Имя", ng_model="clientDataItems['firstName']")}}
                         </div>
                     </div>
-                    <div class="form-group col-md-4">
+                    <div class="form-group col-md-3">
                         {{ form.patronymic.label(class="control-label") }}
                         <div>
                             {{ form.patronymic(class="form-control", autocomplete="off", placeholder="Отчество", ng_model="clientDataItems['patrName']") }}
@@ -77,13 +77,13 @@
                             {{ form.document_type(class="form-control", autocomplete="off", ng_model="clientDataItems['document']['typeCode']") }}
                         </div>
                     </div>
-                    <div class="form-group col-md-4" style="margin-right: -5px; margin-left: -5px;">
+                    <div class="form-group col-md-2" style="margin-right: -5px; margin-left: -5px;">
                         {{ form.document_serial.label(class="control-label") }}
                         <div>
                             {{ form.document_serial(class="form-control", autocomplete="off", placeholder="серия", ng_model="clientDataItems['document']['serial']") }}
                         </div>
                     </div>
-                    <div class="form-group col-md-4" >
+                    <div class="form-group col-md-2" >
                         {{ form.document_number.label(class="control-label") }}
                         <div>
                             {{ form.document_number(class="form-control", autocomplete="off", placeholder="номер", ng_model="clientDataItems['document']['number']") }}
@@ -120,13 +120,13 @@
                             {{ form.compulsory_policy_type(class="form-control", autocomplete="off", ng_model="clientDataItems['compulsoryPolicy']['typeCode']") }}
                         </div>
                     </div>
-                    <div class="form-group col-md-4" style="margin-right: -5px; margin-left: -5px;">
+                    <div class="form-group col-md-2" style="margin-right: -5px; margin-left: -5px;">
                         {{ form.compulsory_policy_serial.label(class="control-label") }}
                         <div>
                             {{ form.compulsory_policy_serial(class="form-control", autocomplete="off", placeholder="серия", ng_model="clientDataItems['compulsoryPolicy']['serial']") }}
                         </div>
                     </div>
-                    <div class="form-group col-md-4" >
+                    <div class="form-group col-md-2" >
                         {{ form.compulsory_policy_number.label(class="control-label") }}
                         <div>
                             {{ form.compulsory_policy_number(class="form-control", autocomplete="off", placeholder="номер", ng_model="clientDataItems['compulsoryPolicy']['number']") }}
@@ -162,13 +162,13 @@
                             {{ form.voluntary_policy_type(class="form-control", autocomplete="off", ng_model="clientDataItems['voluntaryPolicy']['typeCode']") }}
                         </div>
                     </div>
-                    <div class="form-group col-md-4" style="margin-right: -5px; margin-left: -5px;">
+                    <div class="form-group col-md-2" style="margin-right: -5px; margin-left: -5px;">
                         {{ form.compulsory_policy_serial.label(class="control-label") }}
                         <div>
                             {{ form.voluntary_policy_serial(class="form-control", autocomplete="off", placeholder="серия", ng_model="clientDataItems['voluntaryPolicy']['serial']") }}
                         </div>
                     </div>
-                    <div class="form-group col-md-4" >
+                    <div class="form-group col-md-2" >
                         {{ form.compulsory_policy_number.label(class="control-label") }}
                         <div>
                             {{ form.voluntary_policy_number(class="form-control", autocomplete="off", placeholder="номер", ng_model="clientDataItems['voluntaryPolicy']['number']") }}
@@ -218,6 +218,14 @@
                         {{ form.snils.label(class="control-label") }}
                         <div id="SNILS">
                             {{ form.snils(class="form-control", autocomplete="off", ng_model="clientDataItems['SNILS']") }}
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group col-md-4" >
+                        {{ form.notes.label(class="control-label") }}
+                        <div>
+                            {{ form.notes(class="form-control", autocomplete="off", ng_model="clientDataItems['notes']") }}
                         </div>
                     </div>
                 </div>
@@ -310,6 +318,26 @@
             <table class="table table-condensed">
                 <thead>
                      <tr>
+                        <th>Внешняя учетная система</th>
+                        <th>Идентификатор</th>
+                        <th>Дата подтверждения</th>
+                     </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="identification in  clientDataItems['identifications']">
+                        <td>[[identification.accountingSystem_id]]</td>
+                        <td>[[identification.identifier]]</td>
+                        <td>[[identification.checkDate]]</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="tub_content" ng-show="tub_selected == 5">
+        </div>
+        <div class="tub_content" ng-show="tub_selected == 6">
+            <table class="table table-condensed">
+                <thead>
+                     <tr>
                         <th>Тип</th>
                         <th>Серия</th>
                         <th>Номер</th>
@@ -370,9 +398,11 @@
                 'documentText': 'Документ',
                 'contact': 'Контакты',
                 'voluntaryPolicyText': 'Полис ДМС',
-                'compulsoryPolicyText': 'Полис ОМС'
+                'compulsoryPolicyText': 'Полис ОМС',
+                'notes': 'Примечания'
             };
-            $scope.clientMainInfoCodeOrder = ['id', 'nameText', 'birthDate', 'sex', 'regAddress', 'liveAddress', 'documentText', 'compulsoryPolicyText', 'voluntaryPolicyText', 'SNILS', 'contact'];
+            $scope.clientMainInfoCodeOrder = ['id', 'nameText', 'birthDate', 'sex', 'regAddress', 'liveAddress',
+                'documentText', 'compulsoryPolicyText', 'voluntaryPolicyText', 'SNILS', 'contact', 'notes'];
             $scope.recordColumns = {
                 'mark': 'Отметка',
                 'begDateTime': 'Дата и время приёма',

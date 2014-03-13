@@ -365,6 +365,7 @@ def api_save_patient_info():
         client.firstName = client_info['firstName']
         client.patrName = client_info['patrName']
         client.sexCode = 1 if client_info['sex'] == u'М' else 2
+        client.notes = client_info['notes']
         client.birthDate = client_info['birthDate']
 
         client.document.serial = client_info['document']['serial']

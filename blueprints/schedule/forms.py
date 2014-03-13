@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from flask.ext.wtf import Form, RecaptchaField
-from wtforms import StringField, IntegerField, RadioField, SelectField, BooleanField, FormField
+from wtforms import StringField, IntegerField, RadioField, SelectField, TextAreaField, BooleanField, FormField
 from wtforms.widgets import TextInput, Select
 from wtforms.validators import DataRequired, Email, AnyOf, Optional, Required
 
@@ -35,6 +35,7 @@ class ClientForm(Form):
     #                     [DataRequired(u'Обязательное поле'), DateValidator('month', 'day')])
     gender = SelectField(u'Пол<span class="text-danger">*</span>', [Required()], choices=[(u'М', u'М'), (u'Ж', u'Ж')],
                          widget=AngularJSSelect())
+    notes = TextAreaField(u'Примечания')
     document_number = StringField(u'Номер', widget=AngularJSTextInput())
     document_serial = StringField(u'Серия', widget=AngularJSTextInput())
     compulsory_policy_number = StringField(u'Номер', widget=AngularJSTextInput())

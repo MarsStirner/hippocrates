@@ -178,6 +178,9 @@ class Client(db.Model):
     intolerances = db.relationship(u'ClientIntoleranceMedicament',
                                    primaryjoin='and_(ClientIntoleranceMedicament.client_id==Client.id,'
                                                'ClientIntoleranceMedicament.deleted == 0)')
+    identifications = db.relationship(u'ClientIdentification',
+                                      primaryjoin='and_(ClientIdentification.client_id==Client.id,'
+                                      'ClientIdentification.deleted == 0)')
     allergies = db.relationship(u'ClientAllergy', primaryjoin='and_(ClientAllergy.client_id==Client.id,'
                                                               'ClientAllergy.deleted == 0)')
     blood_history = db.relationship(u'Bloodhistory')
@@ -387,6 +390,36 @@ class ClientDocument(db.Model):
         return (' '.join([self.documentType.name, self.serial, self.number])).strip()
 
 
+class ClientIdentification(db.Model):
+    __tablename__ = u'ClientIdentification'
+    __table_args__ = (
+        db.Index(u'accountingSystem_id', u'accountingSystem_id', u'identifier'),
+    )
+
+    id = db.Column(db.Integer, primary_key=True)
+    createDatetime = db.Column(db.DateTime, nullable=False)
+    createPerson_id = db.Column(db.Integer, index=True)
+    modifyDatetime = db.Column(db.DateTime, nullable=False)
+    modifyPerson_id = db.Column(db.Integer, index=True)
+    deleted = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    client_id = db.Column(db.ForeignKey('Client.id'), nullable=False, index=True)
+    accountingSystem_id = db.Column(db.Integer, db.ForeignKey('rbAccountingSystem.id'), nullable=False)
+    identifier = db.Column(db.String(16), nullable=False)
+    checkDate = db.Column(db.Date)
+    version = db.Column(db.Integer, nullable=False)
+
+    client = db.relationship(u'Client')
+    accountingSystems = db.relationship(u'rbAccountingSystem')
+
+    @property
+    def code(self):
+        return self.attachType.code
+
+    @property
+    def name(self):
+        return self.attachType.name
+
+
 class ClientIntoleranceMedicament(db.Model):
     __tablename__ = u'ClientIntoleranceMedicament'
 
@@ -508,7 +541,7 @@ class ClientPolicy(db.Model):
     begDate = db.Column(db.Date, nullable=False)
     endDate = db.Column(db.Date)
     name = db.Column(db.Unicode(64), nullable=False, server_default=u"''")
-    note = db.Column(db.String(200), nullable=False, server_default=u"''")
+    note = db.Column(db.Unicode(200), nullable=False, server_default=u"''")
     version = db.Column(db.Integer, nullable=False, server_default=u"'0'")
 
     client = db.relationship(u'Client')
@@ -745,6 +778,16 @@ class rbAcademicTitle(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     code = db.Column(db.String(8), nullable=False, index=True)
     name = db.Column(db.Unicode(64), nullable=False, index=True)
+
+
+class rbAccountingSystem(db.Model):
+    __tablename__ = u'rbAccountingSystem'
+
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(8), nullable=False, index=True)
+    name = db.Column(db.Unicode(64), nullable=False, index=True)
+    isEditable = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    showInClientInfo = db.Column(db.Integer, nullable=False, server_default=u"'0'")
 
 
 class rbContactType(db.Model):

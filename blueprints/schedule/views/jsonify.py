@@ -263,6 +263,11 @@ class ClientVisualizer(object):
                 'insurer_id': policy.insurer_id,
                 'policyText': policy} if policy else {}
 
+    def make_identification_info(self, identification):
+        return {'identifier': identification.identifier,
+                'accountingSystem_id': identification.accountingSystems.name,
+                'checkDate': identification.checkDate}
+
     def make_client_info(self, client):
 
         socStatuses = [{'class': socStatus.soc_status_class.name,
@@ -294,6 +299,7 @@ class ClientVisualizer(object):
         documentsAll = [self.make_document_info(document) for document in client.documentsAll]
         policies = [self.make_policy_info(policy) for policy in client.policies]
         documentHistory = documentsAll + policies
+        identifications = [self.make_identification_info(identification) for identification in client.identifications]
 
         return {
             'id': client.id,
@@ -303,6 +309,7 @@ class ClientVisualizer(object):
             'nameText': client.nameText,
             'sex': client.sex,
             'SNILS': client.formatted_SNILS or None,
+            'notes': client.notes,
             'document': pers_document,
             'documentText': client.document,
             'birthDate': client.birthDate
@@ -318,8 +325,9 @@ class ClientVisualizer(object):
             'socStatuses': socStatuses,
             'allergies': allergies,
             'intolerances': intolerances,
-            'boolHistory': bloodHistory,
-            'documentHistory': documentHistory
+            'bloodHistory': bloodHistory,
+            'documentHistory': documentHistory,
+            'identifications': identifications
         }
 
     def make_records(self, client):
