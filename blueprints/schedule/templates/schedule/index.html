@@ -1,5 +1,6 @@
 {% extends 'schedule/base.html' %}
 {% import "schedule/_person_tree.html" as person_tree %}
+{% import "schedule/_schedule_macros.html" as schedule_macros %}
 
 {% block title %}> {{ module_name }}{% endblock %}
 
@@ -53,26 +54,10 @@
                     </thead>
                     <tbody ng-if="grouped[reception_type].max_tickets > 0">
                     <tr ng-repeat="row in aux.range(grouped[reception_type].max_tickets)">
-                        <td ng-repeat="day in grouped[reception_type].schedule" ng-switch="day.tickets[row].status">
-                            <button type="button" class="btn btn-block btn-danger" ng-switch-when="busy">
-                                <span ng-if="day.tickets[row].attendance_type.code == 'planned'">[[ day.tickets[row].begDateTime | asTime ]]</span>
-                                <span ng-if="day.tickets[row].attendance_type.code == 'CITO'">CITO</span>
-                                - [[ day.tickets[row].client ]]
-                            </button>
-                            <button type="button" class="btn btn-block btn-success" ng-switch-when="free"
-                                    ng-if="day.tickets[row].attendance_type.code == 'planned'">
-                                [[ day.tickets[row].begDateTime | asTime ]]
-                            </button>
-                            <button type="button" class="btn btn-block btn-warning" ng-switch-when="free"
-                                    ng-if="day.tickets[row].attendance_type.code == 'CITO'">
-                                CITO
-                            </button>
-                            <button type="button" class="btn btn-block btn-gray" ng-switch-when="free"
-                                    ng-if="day.tickets[row].attendance_type.code == 'extra'">
-                                Сверх плана
-                            </button>
-                            <button type="button" class="btn btn-block disabled" ng-switch-default>&nbsp;
-                            </button>
+                        <td ng-repeat="day in grouped[reception_type].schedule">
+                            {{ schedule_macros.ticket_btn(
+                                ticket='day.tickets[row]',
+                                showName=True) }}
                         </td>
                     </tr>
                     </tbody>

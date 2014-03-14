@@ -66,6 +66,13 @@ WebMis20.filter('asAutoFormat', function ($filter) {
         }
     }
 });
+WebMis20.filter('join', function ($filter) {
+    return function (data, char) {
+        if (data instanceof Array)
+            return data.join(char);
+        return data
+    }
+});
 var aux = {
     getQueryParams: function (qs) {
         qs = qs.split("+").join(" ");
