@@ -279,18 +279,24 @@ class ClientVisualizer(object):
 
     def make_client_info(self, client):
 
-        socStatuses = [{'class': socStatus.soc_status_class.name,
-                        'type': socStatus.name,
+        socStatuses = [{'id': socStatus.id,
+                        'className': socStatus.soc_status_class.name,
+                        'classCode': socStatus.soc_status_class.code,
+                        'typeName': socStatus.name,
+                        'typeCode': socStatus.code,
                         'begDate': socStatus.begDate.strftime('%d-%m-%Y') if socStatus.begDate else '',
                         'endDate': socStatus.endDate.strftime('%d-%m-%Y') if socStatus.endDate else ''
                         } for socStatus in client.socStatuses]
-        allergies = [{'nameSubstance': allergy.name,
+
+        allergies = [{'id': allergy.id,
+                      'nameSubstance': allergy.name,
                       'power': allergy.power,
                       'createDate': allergy.createDate.strftime('%d-%m-%Y') if allergy.createDate else '',
                       'notes': allergy.notes
                       } for allergy in client.allergies]
 
-        intolerances = [{'nameMedicament': intolerance.name,
+        intolerances = [{'id': intolerance.id,
+                         'nameMedicament': intolerance.name,
                          'power': intolerance.power,
                          'createDate': intolerance.createDate.strftime('%d-%m-%Y') if allergy.createDate else '',
                          'notes': intolerance.notes

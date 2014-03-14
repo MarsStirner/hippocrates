@@ -11,7 +11,7 @@ from application.lib.sphinx_search import SearchPatient, SearchPerson
 from application.lib.utils import public_endpoint, jsonify
 from blueprints.schedule.app import module
 from blueprints.schedule.models.exists import Person, Client, rbSpeciality, rbDocumentType, rbPolicyType, \
-    rbReasonOfAbsence
+    rbReasonOfAbsence, rbSocStatusClass, rbSocStatusType
 from blueprints.schedule.models.schedule import Schedule, ScheduleTicket, ScheduleClientTicket, rbAppointmentType, \
     rbReceptionType, rbAttendanceType
 from blueprints.schedule.views.jsonify import ScheduleVisualizer, ClientVisualizer, Format
@@ -385,7 +385,7 @@ def api_save_patient_info():
         else:
             compulsory_policy = create_new_policy(client_info['compulsoryPolicy'], client.id)
             compulsory_policy.policyType = rbPolicyType.query.filter(rbPolicyType.code ==
-                                                                 client_info['compulsoryPolicy']['typeCode']).first()
+                                                                     client_info['compulsoryPolicy']['typeCode']).first()
             db.session.add(compulsory_policy)
             compulsory_policy.compulsoryPolicy = compulsory_policy
 
@@ -404,6 +404,29 @@ def api_save_patient_info():
         #     compulsory_policy.compulsoryPolicy = voluntary_policy
 
         client.SNILS = client_info['SNILS'].replace(" ", "").replace("-", "")
+
+        for soc_status in client.socStatuses:
+            item = filter(lambda x: x['id'] == soc_status.id, client_info['socStatuses'])[0]
+            soc_status.soc_status_class = rbSocStatusClass.query.filter(rbSocStatusClass.code ==
+                                                                        item['classCode']).first()
+            soc_status.socStatusType = rbSocStatusType.query.filter(rbSocStatusType.code ==
+                                                                    item['typeCode']).first()
+            soc_status.begDate = item['begDate']
+            if item['endDate']:
+                soc_status.endDate = item['endDate']
+
+        for allergy in client.allergies:
+            item = filter(lambda x: x['id'] == allergy.id, client_info['allergies'])[0]
+            allergy.name = item['nameSubstance']
+            allergy.power = item['power']
+            allergy.notes = item['notes']
+
+        for intolerance in client.intolerances:
+            item = filter(lambda x: x['id'] == intolerance.id, client_info['intolerances'])[0]
+            intolerance.name = item['nameMedicament']
+            intolerance.power = item['power']
+            intolerance.notes = item['notes']
+
         db.session.commit()
     except KeyError or ValueError:
         return abort(404)
