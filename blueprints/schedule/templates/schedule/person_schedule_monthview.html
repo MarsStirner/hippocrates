@@ -120,7 +120,7 @@
         };
         DayFreeModalCtrl = function ($scope, $modalInstance, day) {
             $scope.day = day;
-            $scope.roa = day.roa.code;
+            $scope.roa = day.roa ? (day.roa.code) : (null);
             $scope.accept = function () {
                 $modalInstance.close(this.roa);
             };
@@ -386,7 +386,10 @@
                         date: day.date,
                         roa: roa
                     }).success(function () {
-                        window.open('{{ url_for('.html_day_free') }}', '_self');
+                        window.open('{{ url_for('.html_day_free') }}' +
+                                '?person_id=' + $scope.person_id +
+                                '&date=' + day.date,
+                                '_self');
                     });
 
                 })

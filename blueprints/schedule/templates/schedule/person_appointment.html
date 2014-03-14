@@ -1,6 +1,7 @@
 {%- extends 'schedule/base.html' -%}
 {%- import "schedule/_appointment.html" as appointment -%}
 {%- import "schedule/_person_tree.html" as person_tree -%}
+{% import "schedule/_schedule_macros.html" as schedule_macros %}
 {% block title %}> {{ module_name }}{% endblock %}
 
 {% block main %}
@@ -58,27 +59,11 @@
                             </thead>
                             <tbody ng-if="person_schedule.grouped[reception_type].max_tickets > 0">
                             <tr ng-repeat="row in aux.range(person_schedule.grouped[reception_type].max_tickets)">
-                                <td ng-repeat="day in person_schedule.grouped[reception_type].schedule" ng-switch="day.tickets[row].status">
-                                    <button type="button" class="btn btn-block btn-danger" ng-switch-when="busy"
-                                            ng-click="appointment_cancel(day.tickets[row], person_schedule.person)">
-                                        <span ng-if="day.tickets[row].attendance_type.code == 'planned'">[[ day.tickets[row].begDateTime | asTime ]]</span>
-                                        <span ng-if="day.tickets[row].attendance_type.code == 'CITO'">CITO</span>
-                                        <span ng-if="day.tickets[row].attendance_type.code == 'extra'">Сверх плана</span>
-                                    </button>
-                                    <button type="button" class="btn btn-block" ng-switch-when="free"
-                                            ng-class="{
-                                                'btn-success': (day.tickets[row].attendance_type.code == 'planned'),
-                                                'btn-warning': (day.tickets[row].attendance_type.code == 'CITO'),
-                                                'btn-gray': (day.tickets[row].attendance_type.code == 'extra')
-                                            }"
-                                            ng-disabled="day.roa"
-                                            ng-click="appointment_make(day.tickets[row], person_schedule.person)">
-                                        <span ng-if="day.tickets[row].attendance_type.code == 'planned'">[[ day.tickets[row].begDateTime | asTime ]]</span>
-                                        <span ng-if="day.tickets[row].attendance_type.code == 'CITO'">CITO</span>
-                                        <span ng-if="day.tickets[row].attendance_type.code == 'extra'">Сверх плана</span>
-                                    </button>
-                                    <button type="button" class="btn btn-block disabled" ng-switch-default>&nbsp;
-                                    </button>
+                                <td ng-repeat="day in person_schedule.grouped[reception_type].schedule">
+                                    {{ schedule_macros.ticket_btn(
+                                        ticket='day.tickets[row]',
+                                        ngClick="appointment_toggle(day.tickets[row], person_schedule.person)",
+                                        showName=False) }}
                                 </td>
                             </tr>
                             </tbody>
@@ -212,31 +197,29 @@
                     }
                 });
             };
-            $scope.appointment_cancel = function (ticket, person) {
-                var instance = $modal.open({
-                    templateUrl: 'cancelAppointment.html',
-                    controller: CancelAppointmentModalInstanceCtrl,
-                    resolve: {
-                        person: function () {return person},
-                        ticket: function () {return ticket},
-                        client_id: function () {return $scope.client_id}
-                    }
-                });
-                instance.result.then(function () {
-                    $scope.loadData();
-                })
-            };
-
-            $scope.appointment_make = function (ticket, person) {
-                var instance = $modal.open({
-                    templateUrl: 'makeAppointment.html',
-                    controller: MakeAppointmentModalInstanceCtrl,
-                    resolve: {
-                        person: function () {return person},
-                        ticket: function () {return ticket},
-                        client_id: function () {return $scope.client_id}
-                    }
-                });
+            $scope.appointment_toggle = function (ticket, person) {
+                var instance;
+                if (ticket.status == 'busy') {
+                    instance = $modal.open({
+                        templateUrl: 'cancelAppointment.html',
+                        controller: CancelAppointmentModalInstanceCtrl,
+                        resolve: {
+                            person: function () {return person},
+                            ticket: function () {return ticket},
+                            client_id: function () {return $scope.client_id}
+                        }
+                    });
+                } else {
+                    instance = $modal.open({
+                        templateUrl: 'makeAppointment.html',
+                        controller: MakeAppointmentModalInstanceCtrl,
+                        resolve: {
+                            person: function () {return person},
+                            ticket: function () {return ticket},
+                            client_id: function () {return $scope.client_id}
+                        }
+                    });
+                }
                 instance.result.then(function () {
                     $scope.loadData();
                 })

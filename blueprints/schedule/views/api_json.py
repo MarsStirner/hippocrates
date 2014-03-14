@@ -26,18 +26,15 @@ def api_schedule():
     person_id_s = request.args.get('person_ids')
     client_id_s = request.args.get('client_id')
     start_date_s = request.args.get('start_date')
+    one_day = bool(request.args.get('one_day', False))
     reception_type = request.args.get('reception_type')
     related = bool(request.args.get('related', False))
-    expand = bool(request.args.get('expand', False))
     try:
-        try:
-            # Пытаемся вытащить расписание на неделю
-            start_date = datetime.datetime.strptime(start_date_s, '%Y-%m-%d').date()
+        start_date = datetime.datetime.strptime(start_date_s, '%Y-%m-%d').date()
+        if one_day:
+            end_date = start_date + datetime.timedelta(days=1)
+        else:
             end_date = start_date + datetime.timedelta(weeks=1)
-        except ValueError:
-            # Пытаемся вытащить расписание на месяц
-            start_date = datetime.datetime.strptime(start_date_s, '%Y-%m').date()
-            end_date = start_date + datetime.timedelta(calendar.monthrange(start_date.year, start_date.month)[1])
         client_id = int(client_id_s) if client_id_s else None
     except ValueError:
         return abort(400)
@@ -69,14 +66,14 @@ def api_schedule():
             filter(start_date <= Schedule.date, Schedule.date <= end_date).\
             filter(ScheduleClientTicket.client_id == client_id, ScheduleClientTicket.deleted == 0).\
             distinct()
-        related_schedules = context.make_persons_schedule(persons, start_date, end_date, expand)
+        related_schedules = context.make_persons_schedule(persons, start_date, end_date)
         related_person_ids = set(person.id for person in persons)
         person_ids -= related_person_ids
         result['related_schedules'] = related_schedules
 
     if person_ids:
         persons = Person.query.filter(Person.id.in_(person_ids))
-        schedules = context.make_persons_schedule(persons, start_date, end_date, expand)
+        schedules = context.make_persons_schedule(persons, start_date, end_date)
         result['schedules'] = schedules
 
     return jsonify(result)
@@ -441,7 +438,6 @@ def api_schedule_lock():
 def api_move_client():
     j = request.json
     try:
-        client_id = int(j['client_id'])
         ticket_id = int(j['ticket_id'])
         destination_tid = j['destination_ticket_id']
     except ValueError or KeyError:
@@ -454,15 +450,16 @@ def api_move_client():
         return abort(512)
     ct = ScheduleClientTicket()
     ct.appointmentType_id = oldCT.appointmentType_id
-    ct.client_id = client_id
+    ct.client_id = oldCT.client_id
     ct.createDatetime = datetime.datetime.now()
     ct.modifyDatetime = ct.createDatetime
     ct.isUrgent = oldCT.isUrgent
     ct.orgFrom_id = oldCT.orgFrom_id
     ct.ticket_id = destination_tid
-    oldCT.deleted = 0
+    oldCT.deleted = 1
 
     db.session.add(ct)
     db.session.add(oldCT)
 
     db.session.commit()
+    return ''

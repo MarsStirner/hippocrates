@@ -52,7 +52,7 @@ class ScheduleVisualizer(object):
             'speciality': person.speciality.name if speciality else None
         }
 
-    def make_schedule(self, schedules, date_start, date_end, expand=False):
+    def make_schedule(self, schedules, date_start, date_end):
         one_day = datetime.timedelta(days=1)
 
         def new_rt():
@@ -89,44 +89,21 @@ class ScheduleVisualizer(object):
 
         for group in result.itervalues():
             for day in group['schedule']:
-                if expand:
-                    planned = 0
-                    CITO = 0
-                    extra = 0
-                    busy = False
-                    for ticket in itertools.chain(*(sched['tickets'] for sched in day['scheds'])):
-                        at = ticket['attendance_type'].code
-                        if at == 'planned':
-                            planned += 1
-                        elif at == 'CITO':
-                            CITO += 1
-                        elif at == 'extra':
-                            extra += 1
-                        if not busy and ticket['client']:
-                            busy = True
-                    day['summary'] = {
-                        'planned_tickets': planned,
-                        'CITO_tickets': CITO,
-                        'extra_tickets': extra,
-                        'busy_tickets': busy,
-                    }
-                else:
-                    tickets = list(itertools.chain(*(sched['tickets'] for sched in day['scheds'])))
-                    planned_tickets = sorted(filter(lambda t: t['attendance_type'].code == 'planned', tickets), key=lambda t: t['begDateTime'])
-                    extra_tickets = filter(lambda t: t['attendance_type'].code == 'extra', tickets)
-                    CITO_tickets = filter(lambda t: t['attendance_type'].code == 'CITO', tickets)
-                    day['tickets'] = CITO_tickets + planned_tickets + extra_tickets
+                tickets = list(itertools.chain(*(sched['tickets'] for sched in day['scheds'])))
+                planned_tickets = sorted(filter(lambda t: t['attendance_type'].code == 'planned', tickets), key=lambda t: t['begDateTime'])
+                extra_tickets = filter(lambda t: t['attendance_type'].code == 'extra', tickets)
+                CITO_tickets = filter(lambda t: t['attendance_type'].code == 'CITO', tickets)
+                day['tickets'] = CITO_tickets + planned_tickets + extra_tickets
                 roa = None
                 for sched in day['scheds']:
                     if not roa and sched['roa']:
                         roa = sched['roa']
                     del sched['roa']
                 day['roa'] = roa
-                if not expand:
-                    del day['scheds']
+                del day['scheds']
         return result
 
-    def make_persons_schedule(self, persons, start_date, end_date, expand=False):
+    def make_persons_schedule(self, persons, start_date, end_date):
         return [{
             'person': self.make_person(person),
             'grouped': self.make_schedule(
@@ -135,7 +112,7 @@ class ScheduleVisualizer(object):
                     start_date <= Schedule.date, Schedule.date < end_date,
                     Schedule.deleted == 0
                 ).order_by(Schedule.date),
-                start_date, end_date, expand
+                start_date, end_date
             )} for person in persons]
 
     def make_sched_description(self, schedule):

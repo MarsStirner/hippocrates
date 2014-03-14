@@ -1,39 +1,152 @@
 {% extends 'schedule/base.html' %}
 {% import 'schedule/_person_tree.html' as person_tree %}
+{% import "schedule/_schedule_macros.html" as schedule_macros %}
+
 {% block main %}
-    <div class="row">
-        <div class="col-md-4">
-            <div class="panel panel-default panel-info">
-                <div class="panel-heading">
-                    Откуда переносим
-                </div>
-                <div class="panel-body">
-                    ...
+    <div ng-controller="DayFree">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="panel panel-default panel-info">
+                    <div class="panel-heading">
+                        [[ sourcePerson.name ]] ([[ sourceDate | asMomentFormat:'DD-MM-YYYY' ]])
+                    </div>
+                    <ul class="list-group" ng-if="source">
+                        <li class="list-group-item" ng-repeat="ticket in filtered_tickets = (source[reception_type] | filter:'busy':true)"
+                                ng-class="{'list-group-item-info': (ticket == selectedSourceTicket)}">
+                            {{ schedule_macros.ticket_btn(
+                                ticket='ticket',
+                                showName=True,
+                                ngClick='selectSourceTicket(ticket)'
+                            ) }}
+                        </li>
+                        <li class="list-group-item" ng-if="!filtered_tickets.length">
+                            <button class="btn btn-block btn-success" ng-click="back2monthview()">
+                                Вернуться в распсиание
+                            </button>
+                        </li>
+                    </ul>
                 </div>
             </div>
-        </div>
-        <div class="col-md-4">
-            <div class="panel panel-default panel-success">
-                <div class="panel-heading">
-                    Куда переносим
-                </div>
-                <div class="panel-body">
-                    ...
+            <div class="col-md-4">
+                <div class="panel panel-default panel-success">
+                    <div class="panel-heading">
+                        [[ destinationPerson.nameFull | join:' ' ]] ([[ destinationDate | asMomentFormat:'DD-MM-YYYY' ]])
+                    </div>
+                    <ul class="list-group" ng-if="destination">
+                        <li class="list-group-item" ng-repeat="ticket in destination[reception_type]">
+                            {{ schedule_macros.ticket_btn(
+                                ticket='ticket',
+                                showName=True,
+                                roa='roa',
+                                ngClick='pasteSourceTicket(ticket)'
+                            ) }}
+                        </li>
+                    </ul>
                 </div>
             </div>
-        </div>
-        <div class="col-md-4">
-                    <div class="static-calendar well-sm" ng-model="dt" ng-change="date_changed()">
+            <div class="col-md-4">
+                <div class="center-block">
+                    <div class="static-calendar text-center" ng-model="destinationDate" ng-change="reloadSchedule()">
                         <datepicker show-weeks="false"></datepicker>
                     </div>
-                    {{ person_tree.html() }}
+                </div>
+                {{ person_tree.html() }}
+            </div>
         </div>
+    <pre>[[ data | json ]]</pre>
     </div>
 {% endblock %}
 
 {% block modules_js %}
     {{ super() }}
-    <script type="application/javascript">
+    <script type="text/javascript">
         {{ person_tree.js() }}
+        WebMis20.controller('DayFree', ['$scope', '$http', function ($scope, $http) {
+            $scope.aux = aux;
+            var params = aux.getQueryParams(location.search);
+
+            $scope.destination = null;
+            $scope.destinationDate = new Date();
+            $scope.destinationPerson = null;
+
+            $scope.source = null;
+            $scope.sourceDate = moment(params.date);
+            $scope.sourcePerson = null;
+
+            $scope.reception_types = {{ rbReceptionTypes | tojson | safe }};
+            $scope.reception_type = 'amb';
+            $scope.day = null;
+
+            $scope.selectedSourceTicket = null;
+
+            $scope.reloadSchedule = function () {
+                if ($scope.destinationPerson == null) return;
+                $http.get('{{ url_for('.api_schedule') }}', {
+                    params: {
+                        person_ids: $scope.destinationPerson.id,
+                        start_date: moment($scope.destinationDate).format('YYYY-MM-DD'),
+                        one_day: true
+                    }
+                }).success(function (data) {
+                    if (data.result.schedules.length !== 1) {
+                        $scope.destination = null;
+                        return;
+                    }
+                    $scope.roa = false;
+                    $scope.destination = aux.forEach(data.result.schedules[0].grouped, function (group) {
+                        $scope.roa |= Boolean(group.schedule[0].roa);
+                        return group.schedule[0].tickets;
+                    });
+                })
+            };
+
+            var loadSchedule = function () {
+                $http.get('{{ url_for('.api_schedule') }}', {
+                    params: {
+                        person_ids: params.person_id,
+                        start_date: $scope.sourceDate.format('YYYY-MM-DD'),
+                        one_day: true
+                    }
+                }).success(function (data) {
+                    if (data.result.schedules.length !== 1) {
+                        $scope.source = null;
+                        return;
+                    }
+                    $scope.sourcePerson = data.result.schedules[0].person;
+                    $scope.source = aux.forEach(data.result.schedules[0].grouped, function (group) {
+                        return group.schedule[0].tickets;
+                    });
+                }).then(function () {
+                    $scope.selectedSourceTicket = null;
+                })
+            };
+
+            $scope.selectSourceTicket = function (ticket) {
+                $scope.selectedSourceTicket = ticket;
+            };
+
+            $scope.pasteSourceTicket = function (ticket) {
+                if (!$scope.selectedSourceTicket) return;
+                if (ticket.status !== 'free') return;
+                $http.post('{{ url_for('.api_move_client') }}', {
+                    ticket_id: $scope.selectedSourceTicket.id,
+                    destination_ticket_id: ticket.id
+                }).then(function () {
+                    loadSchedule();
+                    $scope.reloadSchedule();
+                })
+            };
+
+            $scope.$on('PersonSelected', function (event, person) {
+                $scope.destinationPerson = person;
+                $scope.reloadSchedule();
+            });
+
+            $scope.back2monthview = function () {
+                window.open('{{ url_for('.person_schedule_monthview') }}?person_id=' + params.person_id, '_self')
+            };
+
+            loadSchedule();
+        }])
     </script>
 {% endblock %}
