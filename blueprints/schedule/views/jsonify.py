@@ -241,16 +241,23 @@ class ClientVisualizer(object):
                 'policyText': policy} if policy else {}
 
     def make_identification_info(self, identification):
-        return {'identifier': identification.identifier,
-                'accountingSystem_id': identification.accountingSystems.name,
+        return {'id': identification.id,
+                'identifier': identification.identifier,
+                'accountingSystem_code': identification.accountingSystems.code,
+                'accountingSystem_name': identification.accountingSystems.name,
                 'checkDate': identification.checkDate}
 
     def make_relation_info(self, relation):
-        return {'relativeType': relation.name,
-                'client': relation.other.nameText + ' ({})'.format(relation.other.id)}
+        return {'id': relation.id,
+                'relativeType_name': relation.name,
+                'relativeType_code': relation.code,
+                'other_id': relation.other.id,
+                'other_text': relation.other.nameText + ' ({})'.format(relation.other.id)}
 
     def make_contact_info(self, contact):
-        return {'contactType': contact.contactType.name,
+        return {'id': contact.id,
+                'contactType_code': contact.contactType.code,
+                'contactType_name': contact.contactType.name,
                 'contact': contact.contact,
                 'notes': contact.notes}
 

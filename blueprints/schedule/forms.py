@@ -6,7 +6,7 @@ from wtforms.validators import DataRequired, Email, AnyOf, Optional, Required
 
 from application.app import app
 from blueprints.schedule.models.exists import rbDocumentType, rbUFMS, rbPolicyType, Organisation, rbSocStatusType, \
-    rbSocStatusClass, rbBloodType
+    rbSocStatusClass, rbBloodType, rbAccountingSystem, rbRelationType, rbContactType, Client
 
 
 class AngularJSTextInput(TextInput):
@@ -34,6 +34,7 @@ class ClientForm(Form):
     birthDate = DateField(u'День рождения<span class="text-danger">*</span>', [DataRequired()])
     gender = SelectField(u'Пол<span class="text-danger">*</span>', [Required()], choices=[(u'М', u'М'), (u'Ж', u'Ж')],
                          widget=AngularJSSelect())
+    snils = StringField(u'СНИЛС', widget=AngularJSTextInput())
     notes = TextAreaField(u'Примечания')
     document_number = StringField(u'Номер', widget=AngularJSTextInput())
     document_serial = StringField(u'Серия', widget=AngularJSTextInput())
@@ -72,6 +73,20 @@ class ClientForm(Form):
                                       rbSocStatusType.query.all()], widget=AngularJSSelect())
         blood_group = SelectField(u'Группа крови', choices=[(blood_type.name, blood_type.name) for blood_type in
                                   rbBloodType.query.all()], widget=AngularJSSelect())
+        identification_accountingSystem = SelectField(u'Внешняя учетная система', choices=[(system.code, system.name) for system in
+                                                      rbAccountingSystem.query.all()], widget=AngularJSSelect())
+
+        direct_relation_relation = SelectField(u'Тип прямой связи', choices=[(relation.code, relation.leftName + ' -> '+ relation.rightName) for relation in
+                                                      rbRelationType.query.all()], widget=AngularJSSelect())
+        reversed_relation_relation = SelectField(u'Тип обратной связи', choices=[(relation.code, relation.rightName + ' -> ' + relation.leftName) for relation in
+                                                      rbRelationType.query.all()], widget=AngularJSSelect())
+        direct_relation_other = SelectField(u'Связан с пациентом', choices=[(client.id, client.nameText) for client in
+                                            Client.query.all()], widget=AngularJSSelect())
+        reversed_relation_other = SelectField(u'Связан с пациентом', choices=[(client.id, client.nameText) for client in
+                                              Client.query.all()], widget=AngularJSSelect())
+        contact_contactType = SelectField(u'Тип контакатаа', choices=[(contact.code, contact.name) for contact in
+                                          rbContactType.query.all()], widget=AngularJSSelect())
+
     soc_status_begDate = DateField(u'Дата начала')
     soc_status_endDate = DateField(u'Дата окончания')
     blood_date = DateField(u'Дата установления')
@@ -85,5 +100,10 @@ class ClientForm(Form):
     allergy_notes = StringField(u'Примечания', widget=AngularJSTextInput())
     intolerance_medicament = StringField(u'Медикамент', widget=AngularJSTextInput())
     intolerance_notes = StringField(u'Примечания', widget=AngularJSTextInput())
-    snils = StringField(u'СНИЛС', widget=AngularJSTextInput())
+
+    identification_identifier = StringField(u'Идентификатор', widget=AngularJSTextInput())
+    identification_checkDate = DateField(u'Дата подтверждения')
+
+    contact_contact = StringField(u'Контакт', widget=AngularJSTextInput())
+    contact_notes = StringField(u'Примечание', widget=AngularJSTextInput())
 

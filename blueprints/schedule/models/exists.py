@@ -248,6 +248,10 @@ class Client(db.Model):
                 return policy
 
     @property
+    def relations(self):
+        return self.reversed_relations + self.direct_relations
+
+    @property
     def policy(self):
         return self.compulsoryPolicy
 

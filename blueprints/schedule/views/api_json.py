@@ -11,7 +11,7 @@ from application.lib.sphinx_search import SearchPatient, SearchPerson
 from application.lib.utils import public_endpoint, jsonify
 from blueprints.schedule.app import module
 from blueprints.schedule.models.exists import Person, Client, rbSpeciality, rbDocumentType, rbPolicyType, \
-    rbReasonOfAbsence, rbSocStatusClass, rbSocStatusType
+    rbReasonOfAbsence, rbSocStatusClass, rbSocStatusType, rbAccountingSystem, rbContactType, rbRelationType
 from blueprints.schedule.models.schedule import Schedule, ScheduleTicket, ScheduleClientTicket, rbAppointmentType, \
     rbReceptionType, rbAttendanceType
 from blueprints.schedule.views.jsonify import ScheduleVisualizer, ClientVisualizer, Format
@@ -423,6 +423,24 @@ def api_save_patient_info():
             intolerance.name = item['nameMedicament']
             intolerance.power = item['power']
             intolerance.notes = item['notes']
+
+        for identification in client.identifications:
+            item = filter(lambda x: x['id'] == identification.id, client_info['identifications'])[0]
+            identification.accountingSystems = rbAccountingSystem.query.filter(rbAccountingSystem.code == item['accountingSystem_code']).first()
+            identification.identifier = item['identifier']
+            identification.checkDate = item['checkDate']
+
+        for relation in client.relations:
+            all_relations = client_info['direct_relations'] + client_info['reversed_relations']
+            item = filter(lambda x: x['id'] == relation.id, all_relations)[0]
+            relation.relativeType = rbRelationType.query.filter(rbRelationType.code == item['relativeType_code']).first()
+            relation.other = Client.query.filter(Client.id == item['other_id']).first()
+
+        for contact in client.contacts:
+            item = filter(lambda x: x['id'] == contact.id, client_info['contacts'])[0]
+            contact.contactType = rbContactType.query.filter(rbContactType.code == item['contactType_code']).first()
+            contact.contact = item['contact']
+            contact.notes = item['notes']
 
         db.session.commit()
     except KeyError or ValueError:
