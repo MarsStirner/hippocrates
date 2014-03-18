@@ -11,7 +11,8 @@ from application.lib.sphinx_search import SearchPatient, SearchPerson
 from application.lib.utils import public_endpoint, jsonify
 from blueprints.schedule.app import module
 from blueprints.schedule.models.exists import Person, Client, rbSpeciality, rbDocumentType, rbPolicyType, \
-    rbReasonOfAbsence, rbSocStatusClass, rbSocStatusType, rbAccountingSystem, rbContactType, rbRelationType, ClientDocument
+    rbReasonOfAbsence, rbSocStatusClass, rbSocStatusType, rbAccountingSystem, rbContactType, rbRelationType, \
+    ClientDocument
 from blueprints.schedule.models.schedule import Schedule, ScheduleTicket, ScheduleClientTicket, rbAppointmentType, \
     rbReceptionType, rbAttendanceType
 from blueprints.schedule.views.jsonify import ScheduleVisualizer, ClientVisualizer, Format
@@ -413,17 +414,29 @@ def api_save_patient_info():
             if item['endDate']:
                 soc_status.endDate = item['endDate']
 
-        for allergy in client.allergies:
-            item = filter(lambda x: x['id'] == allergy.id, client_info['allergies'])[0]
-            allergy.name = item['nameSubstance']
-            allergy.power = item['power']
-            allergy.notes = item['notes']
+        for allergy in client_info['allergies']:
+            if not 'id' in allergy:
+                item = create_new_allergy(client.id)
+                db.session.add(item)
+            else:
+                item = filter(lambda x: x.id == allergy['id'], client.allergies)[0]
+            item.name = allergy['nameSubstance']
+            item.createDate = allergy['createDate'].split('T')[0]
+            item.power = allergy['power']
+            item.notes = allergy['notes']
+            item.deleted = allergy['deleted']
 
-        for intolerance in client.intolerances:
-            item = filter(lambda x: x['id'] == intolerance.id, client_info['intolerances'])[0]
-            intolerance.name = item['nameMedicament']
-            intolerance.power = item['power']
-            intolerance.notes = item['notes']
+        for intolerance in client_info['intolerances']:
+            if not 'id' in intolerance:
+                item = create_new_intolerance(client.id)
+                db.session.add(item)
+            else:
+                item = filter(lambda x: x.id == intolerance['id'], client.intolerances)[0]
+            item.name = intolerance['nameMedicament']
+            item.createDate = intolerance['createDate'].split('T')[0]
+            item.power = intolerance['power']
+            item.notes = intolerance['notes']
+            item.deleted = intolerance['deleted']
 
         for identification in client.identifications:
             item = filter(lambda x: x['id'] == identification.id, client_info['identifications'])[0]

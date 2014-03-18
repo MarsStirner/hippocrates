@@ -92,7 +92,31 @@
                         });
                 })
             };
+            $scope.add_allergy = function() {
+                $scope.clientDataItems['allergies'].push({'nameSubstance': '',
+                                                          'power': 0,
+                                                          'createDate': '',
+                                                          'deleted':0,
+                                                          'notes': ''
+                                                          })
+            };
+            $scope.add_medicament = function() {
+                $scope.clientDataItems['intolerances'].push({'nameMedicament': '',
+                                                          'power': 0,
+                                                          'createDate': '',
+                                                          'deleted':0,
+                                                          'notes': ''
+                                                          })
+            };
+            $scope.delete_item = function(clientData_array, item) {
+                if ('id' in item) {
+                    item['deleted'] = 1;
+                } else {
+                    var index = clientData_array.indexOf(item);
+                    clientData_array.splice(index, 1);
+                }
 
+            };
             $scope.open = function($event) {
                 $event.preventDefault();
                 $event.stopPropagation();
