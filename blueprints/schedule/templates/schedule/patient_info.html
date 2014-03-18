@@ -5,7 +5,7 @@
 {% block main %}
     <div ng-controller="ClientInfo">
     <script type="text/ng-template" id="modal-deleteDocument.html">{% include "schedule/_delete_document.html" %}</script>
-    <legend xmlns="http://www.w3.org/1999/html">Пациент</legend>
+    <legend xmlns="http://www.w3.org/1999/html">Пациент [[ clientDataItems.nameText ]]</legend>
     <button class="btn btn-default" onclick="history.back()">Назад к результатам поиска</button>
     <a class="btn btn-success" href="{{ url_for('.appointment') }}?client_id={{ request.args['client_id'] }}">Записать на приём</a>
     <tabset>
@@ -26,7 +26,7 @@
             </tabset>
         </tab>
         <tab heading="Предварительные записи">{% include "schedule/client_info/appointments.html" %}</tab>
-        <tab heading="Обращения"></tab>
+        <tab heading="Обращения">{% include "schedule/client_info/event_list.html" %}</tab>
     </tabset>
     </div>
 {% endblock %}
@@ -108,6 +108,7 @@
                 $scope.clientDataItems = data.result.clientData;
                 $scope.referenceBooksItems = data.result.referenceBooks;
                 $scope.records = data.result.records;
+                $scope.client_events = data.result.events;
             });
 
         }]);

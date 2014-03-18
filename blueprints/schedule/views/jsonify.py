@@ -355,6 +355,30 @@ class ClientVisualizer(object):
             'note': record.note,
         }
 
+    def make_events(self, client):
+        return map(
+            self.make_event,
+            client.events
+        )
+
+    def make_person(self, person):
+        if person is None:
+            return {}
+        speciality = person.speciality
+        return {
+            'id': person.id,
+            'name': person.nameText,
+            'speciality': person.speciality.name if speciality else None
+        }
+
+    def make_event(self, event):
+        return {
+            'externalId': event.externalId,
+            'setDate': event.setDate,
+            'execDate': event.execDate,
+            'person': self.make_person(event.execPerson),
+            'requestType': event.eventType.requestType,
+        }
 
 class PersonTreeVisualizer(object):
     def make_person(self, person):

@@ -187,6 +187,9 @@ class Client(db.Model):
     blood_history = db.relationship(u'Bloodhistory')
     direct_relations = db.relationship(u'DirectClientRelation', foreign_keys='ClientRelation.client_id')
     reversed_relations = db.relationship(u'ReversedClientRelation', foreign_keys='ClientRelation.relative_id')
+    events = db.relationship(
+        u'Event', lazy='dynamic', order_by='desc(Event.createDatetime)',
+        primaryjoin='and_(Event.deleted == 0, Event.client_id == Client.id)')
 
     @property
     def nameText(self):
@@ -1120,3 +1123,413 @@ class rbUFMS(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     code = db.Column(db.String(50, u'utf8_bin'), nullable=False)
     name = db.Column(db.Unicode(256), nullable=False)
+
+
+class Event(db.Model):
+    __tablename__ = u'Event'
+
+    id = db.Column(db.Integer, primary_key=True)
+    createDatetime = db.Column(db.DateTime, nullable=False)
+    createPerson_id = db.Column(db.Integer, index=True)
+    modifyDatetime = db.Column(db.DateTime, nullable=False)
+    modifyPerson_id = db.Column(db.Integer, index=True)
+    deleted = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    externalId = db.Column(db.String(30), nullable=False)
+    eventType_id = db.Column(db.Integer, db.ForeignKey('EventType.id'), nullable=False, index=True)
+    org_id = db.Column(db.Integer, db.ForeignKey('Organisation.id'))
+    client_id = db.Column(db.Integer, db.ForeignKey('Client.id'), index=True)
+    contract_id = db.Column(db.Integer, db.ForeignKey('Contract.id'), index=True)
+    prevEventDate = db.Column(db.DateTime)
+    setDate = db.Column(db.DateTime, nullable=False, index=True)
+    setPerson_id = db.Column(db.Integer, index=True)
+    execDate = db.Column(db.DateTime, index=True)
+    execPerson_id = db.Column(db.Integer, db.ForeignKey('Person.id'), index=True)
+    isPrimaryCode = db.Column("isPrimary", db.Integer, nullable=False)
+    order = db.Column(db.Integer, nullable=False)
+    result_id = db.Column(db.Integer, db.ForeignKey('rbResult.id'), index=True)
+    nextEventDate = db.Column(db.DateTime)
+    payStatus = db.Column(db.Integer, nullable=False)
+    typeAsset_id = db.Column(db.Integer, db.ForeignKey('rbEmergencyTypeAsset.id'), index=True)
+    note = db.Column(db.Text, nullable=False)
+    curator_id = db.Column(db.Integer, db.ForeignKey('Person.id'), index=True)
+    assistant_id = db.Column(db.Integer, db.ForeignKey('Person.id'), index=True)
+    pregnancyWeek = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    MES_id = db.Column(db.Integer, index=True)
+    mesSpecification_id = db.Column(db.ForeignKey('rbMesSpecification.id'), index=True)
+    rbAcheResult_id = db.Column(db.ForeignKey('rbAcheResult.id'), index=True)
+    version = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    privilege = db.Column(db.Integer, server_default=u"'0'")
+    urgent = db.Column(db.Integer, server_default=u"'0'")
+    orgStructure_id = db.Column(db.Integer, db.ForeignKey('Person.orgStructure_id'))
+    uuid_id = db.Column(db.Integer, nullable=False, index=True, server_default=u"'0'")
+    lpu_transfer = db.Column(db.String(100))
+
+    # actions = db.relationship(u'Action')
+    eventType = db.relationship(u'EventType')
+    execPerson = db.relationship(u'Person', foreign_keys='Event.execPerson_id')
+    curator = db.relationship(u'Person', foreign_keys='Event.curator_id')
+    assistant = db.relationship(u'Person', foreign_keys='Event.assistant_id')
+    contract = db.relationship(u'Contract')
+    organisation = db.relationship(u'Organisation')
+    mesSpecification = db.relationship(u'rbMesSpecification')
+    rbAcheResult = db.relationship(u'rbAcheResult')
+    result = db.relationship(u'rbResult')
+    typeAsset = db.relationship(u'rbEmergencyTypeAsset')
+    localContract = db.relationship(u'EventLocalContract')
+    client = db.relationship(u'Client')
+
+    @property
+    def isPrimary(self):
+        return self.isPrimaryCode == 1
+
+    @property
+    def finance(self):
+        return self.eventType.finance
+
+    @property
+    def departmentManager(self):
+        return Person.join(rbPost).filter(
+            Person.orgStructure_id == self.orgStructure_id,
+            rbPost.flatCode == u'departmentManager'
+        ).first()
+
+    @property
+    def date(self):
+        date = self.execDate if self.execDate is not None else datetime.date.today()
+        return date
+
+    def __unicode__(self):
+        return unicode(self.eventType)
+
+
+class EventType(db.Model):
+    __tablename__ = u'EventType'
+
+    id = db.Column(db.Integer, primary_key=True)
+    createDatetime = db.Column(db.DateTime, nullable=False)
+    createPerson_id = db.Column(db.Integer, index=True)
+    modifyDatetime = db.Column(db.DateTime, nullable=False)
+    modifyPerson_id = db.Column(db.Integer, index=True)
+    deleted = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    code = db.Column(db.String(8), nullable=False, index=True)
+    name = db.Column(db.String(64), nullable=False)
+    purpose_id = db.Column(db.Integer, db.ForeignKey('rbEventTypePurpose.id'), index=True)
+    finance_id = db.Column(db.Integer, db.ForeignKey('rbFinance.id'), index=True)
+    scene_id = db.Column(db.Integer, index=True)
+    visitServiceModifier = db.Column(db.String(128), nullable=False)
+    visitServiceFilter = db.Column(db.String(32), nullable=False)
+    visitFinance = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    actionFinance = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    period = db.Column(db.Integer, nullable=False)
+    singleInPeriod = db.Column(db.Integer, nullable=False)
+    isLong = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    dateInput = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    service_id = db.Column(db.Integer, db.ForeignKey('rbService.id'), index=True)
+    printContext = db.Column("context", db.String(64), nullable=False)
+    form = db.Column(db.String(64), nullable=False)
+    minDuration = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    maxDuration = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    showStatusActionsInPlanner = db.Column(db.Integer, nullable=False, server_default=u"'1'")
+    showDiagnosticActionsInPlanner = db.Column(db.Integer, nullable=False, server_default=u"'1'")
+    showCureActionsInPlanner = db.Column(db.Integer, nullable=False, server_default=u"'1'")
+    showMiscActionsInPlanner = db.Column(db.Integer, nullable=False, server_default=u"'1'")
+    limitStatusActionsInput = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    limitDiagnosticActionsInput = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    limitCureActionsInput = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    limitMiscActionsInput = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    showTime = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    medicalAidType_id = db.Column(db.Integer, index=True)
+    eventProfile_id = db.Column(db.Integer, index=True)
+    mesRequired = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    mesCodeMask = db.Column(db.String(64), server_default=u"''")
+    mesNameMask = db.Column(db.String(64), server_default=u"''")
+    counter_id = db.Column(db.ForeignKey('rbCounter.id'), index=True)
+    isExternal = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    isAssistant = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    isCurator = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    canHavePayableActions = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    isRequiredCoordination = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    isOrgStructurePriority = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    isTakenTissue = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    sex = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    age = db.Column(db.String(9), nullable=False)
+    rbMedicalKind_id = db.Column(db.ForeignKey('rbMedicalKind.id'), index=True)
+    age_bu = db.Column(db.Integer)
+    age_bc = db.Column(db.SmallInteger)
+    age_eu = db.Column(db.Integer)
+    age_ec = db.Column(db.SmallInteger)
+    requestType_id = db.Column(db.Integer, db.ForeignKey('rbRequestType.id'))
+
+    counter = db.relationship(u'rbCounter')
+    rbMedicalKind = db.relationship(u'rbMedicalKind')
+    purpose = db.relationship(u'rbEventTypePurpose')
+    finance = db.relationship(u'rbFinance')
+    service = db.relationship(u'rbService')
+    requestType = db.relationship(u'rbRequestType', lazy=False)
+
+
+class rbCounter(db.Model):
+    __tablename__ = u'rbCounter'
+
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(8), nullable=False)
+    name = db.Column(db.String(64), nullable=False)
+    value = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    prefix = db.Column(db.String(32))
+    separator = db.Column(db.String(8), server_default=u"' '")
+    reset = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    startDate = db.Column(db.DateTime, nullable=False)
+    resetDate = db.Column(db.DateTime)
+    sequenceFlag = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+
+
+class rbMedicalKind(db.Model):
+    __tablename__ = u'rbMedicalKind'
+
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(1, u'utf8_unicode_ci'), nullable=False)
+    name = db.Column(db.String(64, u'utf8_unicode_ci'), nullable=False)
+
+
+class rbEventTypePurpose(db.Model):
+    __tablename__ = u'rbEventTypePurpose'
+
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(8), nullable=False, index=True)
+    name = db.Column(db.Unicode(64), nullable=False, index=True)
+    codePlace = db.Column(db.String(2))
+
+
+class rbService(db.Model):
+    __tablename__ = u'rbService'
+    __table_args__ = (
+        db.Index(u'infis', u'infis', u'eisLegacy'),
+        db.Index(u'group_id_idx', u'group_id', u'idx')
+    )
+
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(31), nullable=False, index=True)
+    name = db.Column(db.String(255), nullable=False, index=True)
+    eisLegacy = db.Column(db.Boolean, nullable=False)
+    nomenclatureLegacy = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    license = db.Column(db.Boolean, nullable=False)
+    infis = db.Column(db.String(31), nullable=False)
+    begDate = db.Column(db.Date, nullable=False)
+    endDate = db.Column(db.Date, nullable=False)
+    medicalAidProfile_id = db.Column(db.ForeignKey('rbMedicalAidProfile.id'), index=True)
+    adultUetDoctor = db.Column(db.Float(asdecimal=True), server_default=u"'0'")
+    adultUetAverageMedWorker = db.Column(db.Float(asdecimal=True), server_default=u"'0'")
+    childUetDoctor = db.Column(db.Float(asdecimal=True), server_default=u"'0'")
+    childUetAverageMedWorker = db.Column(db.Float(asdecimal=True), server_default=u"'0'")
+    rbMedicalKind_id = db.Column(db.ForeignKey('rbMedicalKind.id'), index=True)
+    UET = db.Column(db.Float(asdecimal=True), nullable=False, server_default=u"'0'")
+    departCode = db.Column(db.String(3))
+    group_id = db.Column(db.ForeignKey('rbService.id'))
+    idx = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+
+    group = db.relationship(u'rbService', remote_side=[id])
+    medicalAidProfile = db.relationship(u'rbMedicalAidProfile')
+    rbMedicalKind = db.relationship(u'rbMedicalKind')
+
+
+class rbRequestType(db.Model):
+    __tablename__ = u'rbRequestType'
+
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(16), nullable=False, index=True)
+    name = db.Column(db.Unicode(64), nullable=False, index=True)
+    relevant = db.Column(db.Integer, nullable=False, server_default=u"'1'")
+
+    def __json__(self):
+        return {
+            'id': self.id,
+            'code': self.code,
+            'name': self.name,
+        }
+
+
+class rbResult(db.Model):
+    __tablename__ = u'rbResult'
+
+    id = db.Column(db.Integer, primary_key=True)
+    eventPurpose_id = db.Column(db.Integer, nullable=False, index=True)
+    code = db.Column(db.String(8), nullable=False, index=True)
+    name = db.Column(db.Unicode(64), nullable=False, index=True)
+    continued = db.Column(db.Integer, nullable=False)
+    regionalCode = db.Column(db.String(8), nullable=False)
+
+
+class rbAcheResult(db.Model):
+    __tablename__ = u'rbAcheResult'
+
+    id = db.Column(db.Integer, primary_key=True)
+    eventPurpose_id = db.Column(db.ForeignKey('rbEventTypePurpose.id'), nullable=False, index=True)
+    code = db.Column(db.String(3, u'utf8_unicode_ci'), nullable=False)
+    name = db.Column(db.String(64, u'utf8_unicode_ci'), nullable=False)
+
+    eventPurpose = db.relationship(u'rbEventTypePurpose')
+
+
+class Contract(db.Model):
+    __tablename__ = u'Contract'
+
+    id = db.Column(db.Integer, primary_key=True)
+    createDatetime = db.Column(db.DateTime, nullable=False)
+    createPerson_id = db.Column(db.Integer, index=True)
+    modifyDatetime = db.Column(db.DateTime, nullable=False)
+    modifyPerson_id = db.Column(db.Integer, index=True)
+    deleted = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    number = db.Column(db.String(64), nullable=False)
+    date = db.Column(db.Date, nullable=False)
+    recipient_id = db.Column(db.Integer, db.ForeignKey('Organisation.id'), nullable=False, index=True)
+    recipientAccount_id = db.Column(db.Integer, db.ForeignKey('Organisation_Account.id'), index=True)
+    recipientKBK = db.Column(db.String(30), nullable=False)
+    payer_id = db.Column(db.Integer, db.ForeignKey('Organisation.id'), index=True)
+    payerAccount_id = db.Column(db.Integer, db.ForeignKey('Organisation_Account.id'), index=True)
+    payerKBK = db.Column(db.String(30), nullable=False)
+    begDate = db.Column(db.Date, nullable=False)
+    endDate = db.Column(db.Date, nullable=False)
+    finance_id = db.Column(db.Integer, db.ForeignKey('rbFinance.id'), nullable=False, index=True)
+    grouping = db.Column(db.String(64), nullable=False)
+    resolution = db.Column(db.String(64), nullable=False)
+    format_id = db.Column(db.Integer, index=True)
+    exposeUnfinishedEventVisits = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    exposeUnfinishedEventActions = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    visitExposition = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    actionExposition = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    exposeDiscipline = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    priceList_id = db.Column(db.Integer)
+    coefficient = db.Column(db.Float(asdecimal=True), nullable=False, server_default=u"'0'")
+    coefficientEx = db.Column(db.Float(asdecimal=True), nullable=False, server_default=u"'0'")
+
+    recipient = db.relationship(u'Organisation', foreign_keys='Contract.recipient_id')
+    payer = db.relationship(u'Organisation', foreign_keys='Contract.payer_id')
+    finance = db.relationship(u'rbFinance')
+    recipientAccount = db.relationship(u'OrganisationAccount', foreign_keys='Contract.recipientAccount_id')
+    payerAccount = db.relationship(u'OrganisationAccount', foreign_keys='Contract.payerAccount_id')
+
+    def __unicode__(self):
+        return u'%s %s' % (self.number, self.date)
+
+
+class OrganisationAccount(db.Model):
+    __tablename__ = u'Organisation_Account'
+
+    id = db.Column(db.Integer, primary_key=True)
+    organisation_id = db.Column(db.Integer, db.ForeignKey('Organisation.id'), nullable=False, index=True)
+    bankName = db.Column(db.Unicode(128), nullable=False)
+    name = db.Column(db.String(20), nullable=False)
+    notes = db.Column(db.String, nullable=False)
+    bank_id = db.Column(db.Integer, db.ForeignKey('Bank.id'), nullable=False, index=True)
+    cash = db.Column(db.Integer, nullable=False)
+
+    org = db.relationship(u'Organisation')
+    bank = db.relationship(u'Bank')
+
+
+class Bank(db.Model):
+    __tablename__ = u'Bank'
+
+    id = db.Column(db.Integer, primary_key=True)
+    createDatetime = db.Column(db.DateTime, nullable=False)
+    createPerson_id = db.Column(db.Integer, index=True)
+    modifyDatetime = db.Column(db.DateTime, nullable=False)
+    modifyPerson_id = db.Column(db.Integer, index=True)
+    deleted = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    bik = db.Column("BIK", db.String(10), nullable=False, index=True)
+    name = db.Column(db.Unicode(100), nullable=False, index=True)
+    branchName = db.Column(db.Unicode(100), nullable=False)
+    corrAccount = db.Column(db.String(20), nullable=False)
+    subAccount = db.Column(db.String(20), nullable=False)
+
+
+class EventLocalContract(db.Model):
+    __tablename__ = u'Event_LocalContract'
+    __table_args__ = (
+        db.Index(u'lastName', u'lastName', u'firstName', u'patrName', u'birthDate', u'id'),
+    )
+
+    id = db.Column(db.Integer, primary_key=True)
+    createDatetime = db.Column(db.DateTime, nullable=False)
+    createPerson_id = db.Column(db.Integer, index=True)
+    modifyDatetime = db.Column(db.DateTime, nullable=False)
+    modifyPerson_id = db.Column(db.Integer, index=True)
+    deleted = db.Column(db.Integer, nullable=False)
+    master_id = db.Column(db.Integer, db.ForeignKey('Event.id'), nullable=False, index=True)
+    coordDate = db.Column(db.DateTime)
+    coordAgent = db.Column(db.String(128), nullable=False, server_default=u"''")
+    coordInspector = db.Column(db.String(128), nullable=False, server_default=u"''")
+    coordText = db.Column(db.String, nullable=False)
+    dateContract = db.Column(db.Date, nullable=False)
+    numberContract = db.Column(db.Unicode(64), nullable=False)
+    sumLimit = db.Column(db.Float(asdecimal=True), nullable=False)
+    lastName = db.Column(db.Unicode(30), nullable=False)
+    firstName = db.Column(db.Unicode(30), nullable=False)
+    patrName = db.Column(db.Unicode(30), nullable=False)
+    birthDate = db.Column(db.Date, nullable=False, index=True)
+    documentType_id = db.Column(db.Integer, db.ForeignKey('rbDocumentType.id'), index=True)
+    serialLeft = db.Column(db.Unicode(8), nullable=False)
+    serialRight = db.Column(db.Unicode(8), nullable=False)
+    number = db.Column(db.String(16), nullable=False)
+    regAddress = db.Column(db.Unicode(64), nullable=False)
+    org_id = db.Column(db.Integer, db.ForeignKey('Organisation.id'), index=True)
+
+    org = db.relationship(u'Organisation')
+    documentType = db.relationship(u'rbDocumentType')
+
+    def __unicode__(self):
+        parts = []
+        if self.coordDate:
+            parts.append(u'согласовано ' + self.coordDate)
+        if self.coordText:
+            parts.append(self.coordText)
+        if self.number:
+            parts.append(u'№ ' + self.number)
+        if self.date:
+            parts.append(u'от ' + self.date)
+        if self.org:
+            parts.append(unicode(self.org))
+        else:
+            parts.append(self.lastName)
+            parts.append(self.firstName)
+            parts.append(self.patrName)
+        return ' '.join(parts)
+
+    # Это что вообще?!
+    @property
+    def document(self):
+        document = ClientDocument()
+        document.documentType = self.documentType
+        document.serial = u'%s %s' % (self.serialLeft, self.serialRight)
+        document.number = self.number
+        return document
+
+
+class rbMesSpecification(db.Model):
+    __tablename__ = u'rbMesSpecification'
+
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(16), nullable=False, index=True)
+    regionalCode = db.Column(db.String(16), nullable=False)
+    name = db.Column(db.Unicode(64), nullable=False)
+    done = db.Column(db.Integer, nullable=False)
+
+
+class rbEmergencyTypeAsset(db.Model):
+    __tablename__ = u'rbEmergencyTypeAsset'
+
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(8), nullable=False, index=True)
+    name = db.Column(db.Unicode(64), nullable=False, index=True)
+    codeRegional = db.Column(db.String(8), nullable=False, index=True)
+
+
+class rbMedicalAidProfile(db.Model):
+    __tablename__ = u'rbMedicalAidProfile'
+
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(16), nullable=False, index=True)
+    regionalCode = db.Column(db.String(16), nullable=False)
+    name = db.Column(db.String(64), nullable=False)
+
+

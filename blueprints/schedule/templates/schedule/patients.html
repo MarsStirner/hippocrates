@@ -20,12 +20,24 @@
             </caption>
             <thead ng-if="results.length > 0">
             <tr>
-                <th ng-repeat="key in clientInfoCodeOrder" ng-bind="clientInfoCode2Name[key]"></th>
+                <th>ФИО</th>
+                <th>Дата рождения</th>
+                <th>Пол</th>
+                <th>Документ</th>
+                <th>СНИЛС</th>
+                <th>Полис ОМС</th>
+                <th>Полис ДМС</th>
             </tr>
             </thead>
             <tbody ng-if="results.length > 0">
             <tr ng-repeat="result in results" ng-click="open_client(result.id)" style="cursor: pointer">
-                <td ng-repeat="key in clientInfoCodeOrder" ng-bind="result | asAutoFormat:key"></td>
+                <td>[[ result.nameText ]]</td>
+                <td>[[ result.birthDate | asDate ]]</td>
+                <td>[[ result.sex ]]</td>
+                <td>[[ result.documentText ]]</td>
+                <td>[[ result.SNILS ]]</td>
+                <td>[[ result.compulsoryPolicyText ]]</td>
+                <td>[[ result.voluntaryPolicyText ]]</td>
             </tr>
             </tbody>
         </table>
@@ -38,17 +50,6 @@
         WebMis20.controller('ClientSearch', ['$scope', '$http', '$timeout', function ($scope, $http, $timeout) {
             $scope.aux = aux;
             $scope.params = aux.getQueryParams(document.location.search);
-            $scope.clientInfoCode2Name = {
-                'id': 'Код пациента',
-                'birthDate': 'Дата рождения',
-                'SNILS': 'СНИЛС',
-                'nameText': 'ФИО',
-                'sex': 'Пол',
-                'document': 'Документ',
-                'voluntaryPolicy': 'Полис ДМС',
-                'compulsoryPolicy': 'Полис ОМС'
-            };
-            $scope.clientInfoCodeOrder = ['nameText', 'birthDate', 'sex', 'documentText', 'SNILS', 'compulsoryPolicyText', 'voluntaryPolicyText'];
             $scope.query = "";
             $scope.results = [];
             var _timeoutObjectForQuery;

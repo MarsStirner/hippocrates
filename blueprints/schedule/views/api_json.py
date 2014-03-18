@@ -233,7 +233,8 @@ def api_patient():
     context = ClientVisualizer()
     return jsonify({
         'clientData': context.make_client_info(client),
-        'records': context.make_records(client)
+        'records': context.make_records(client),
+        'events': context.make_events(client)
     })
 
 

@@ -1,0 +1,23 @@
+<table class="table table-condensed table-hover table-clickable">
+    <thead>
+    <tr>
+        <th>Номер ИБ</th>
+        <th>Дата начала</th>
+        <th>Дата окончания</th>
+        <th>Лечащий врач</th>
+        <th>Специальность</th>
+        {# <th>Тип обращения</th> #}
+    </tr>
+    </thead>
+    <tbody>
+    <tr ng-repeat="event in client_events" {# ng-class="{'bg-danger': !event.execDate}" #}
+        ng-click="openEvent(event)" style="cursor: pointer">
+        <td>[[ event.externalId ]]</td>
+        <td>[[ event.setDate | asDate ]]</td>
+        <td>[[ event.execDate | asDate ]]</td>
+        <td>[[ event.person.name ]]</td>
+        <td>[[ event.person.speciality ]]</td>
+        {# <td>[[ event.requestType.name ]]</td>#}
+    </tr>
+    </tbody>
+</table>
