@@ -1,0 +1,23 @@
+<table class="table">
+    <caption>Предварительные записи</caption>
+    <thead>
+    <tr>
+        <th>Отметка</th>
+        <th>Дата и время приёма</th>
+        <th>Кабинет</th>
+        <th>Специалист</th>
+        <th>Записал</th>
+        <th>Примечания</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr ng-repeat="record in records">
+        <td>[[ record.mark ]]</td>
+        <td>[[ record.begDateTime | asDateTime ]]</td>
+        <td>[[ record.office ]]</td>
+        <td>[[ record.person ]]</td>
+        <td>[[ record.createPerson ]]</td>
+        <td>[[ record.note ]]</td>
+    </tr>
+    </tbody>
+</table>

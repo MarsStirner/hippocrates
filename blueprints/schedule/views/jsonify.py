@@ -316,11 +316,9 @@ class ClientVisualizer(object):
             'notes': client.notes,
             'document': pers_document,
             'documentText': client.document,
-            'birthDate': client.birthDate
-                if self.__mode == Format.JSON
-                else client.birthDate.strftime('%d-%m-%Y'),
-            'regAddress': client.reg_addresses.first(),
-            'liveAddress': client.loc_addresses.first(),
+            'birthDate': client.birthDate,
+            'regAddress': client.reg_address,
+            'liveAddress': client.loc_address,
             'contact': client.phones,
             'compulsoryPolicy': compulsoryPolicy,
             'compulsoryPolicyText': client.compulsoryPolicy,
@@ -350,9 +348,7 @@ class ClientVisualizer(object):
         return {
             'id': record.id,
             'mark': None,
-            'begDateTime': record.ticket.begDateTime
-                if self.__mode == Format.JSON
-                else record.ticket.begDateTime.strftime('%d-%m-%Y %H:%M'),
+            'begDateTime': record.ticket.begDateTime,
             'office': record.ticket.schedule.office,
             'person': record.ticket.schedule.person,
             'createPerson': record.createPerson,

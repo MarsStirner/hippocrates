@@ -1,0 +1,98 @@
+<table class="table table-condensed" ng-if="clientDataItems['direct_relations']" ng-hide="editing">
+    <thead>
+    <tr>
+        <th>Прямая связь</th>
+        <th>Связан с пациентом</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr ng-repeat="relation in  clientDataItems['direct_relations']">
+        <td>[[relation.relativeType_name]]</td>
+        <td>[[relation.other_text]]</td>
+    </tr>
+    </tbody>
+</table>
+<form class="form-horizontal" role="form">
+    <table class="table table-condensed" ng-show="editing">
+        <thead>
+        <tr>
+            <th>Прямая связь</th>
+            <th>Связан с пациентом</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="relation in  clientDataItems['direct_relations']">
+            <td class="col-md-4">{{ form.direct_relation_relation(class="form-control", autocomplete="off", ng_model="relation.relativeType_code") }}</td>
+            <td class="col-md-3">{{ form.direct_relation_other(class="form-control", autocomplete="off", ng_model="relation.other_id") }}</td>
+        </tr>
+        </tbody>
+    </table>
+</form>
+<table class="table table-condensed" ng-if="clientDataItems['reversed_relations']" ng-hide="editing">
+    <thead>
+    <tr>
+        <th>Обратная связь</th>
+        <th>Связан с пациентом</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr ng-repeat="relation in  clientDataItems['reversed_relations']">
+        <td>[[relation.relativeType_name]]</td>
+        <td>[[relation.other_text]]</td>
+    </tr>
+    </tbody>
+</table>
+<form class="form-horizontal" role="form">
+    <table class="table table-condensed" ng-show="editing">
+        <thead>
+        <tr>
+            <th>Обратная связь</th>
+            <th>Связан с пациентом</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="relation in  clientDataItems['reversed_relations']">
+            <td class="col-md-4">{{ form.reversed_relation_relation(class="form-control", autocomplete="off", ng_model="relation.relativeType_code") }}</td>
+            <td class="col-md-3">{{ form.reversed_relation_other(class="form-control", autocomplete="off", ng_model="relation.other_id") }}</td>
+        </tr>
+        </tbody>
+    </table>
+</form>
+<table class="table table-condensed" ng-if="clientDataItems['contacts']" ng-hide="editing">
+    <caption>Контакты</caption>
+    <thead>
+    <tr>
+        <th>Тип</th>
+        <th>Номер</th>
+        <th>Примечение</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr ng-repeat="contact in  clientDataItems['contacts']">
+        <td>[[contact.contactType_name]]</td>
+        <td>[[contact.contact]]</td>
+        <td>[[contact.notes]]</td>
+    </tr>
+    </tbody>
+</table>
+<form class="form-horizontal" role="form">
+    <table class="table table-condensed" ng-show="editing">
+        <thead>
+        <tr>
+            <th>Тип</th>
+            <th>Номер</th>
+            <th>Примечение</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="contact in  clientDataItems['contacts']">
+            <td class="col-md-4">{{ form.contact_contactType(class="form-control", autocomplete="off", ng_model="contact.contactType_code") }}</td>
+            <td class="col-md-3">{{ form.contact_contact(class="form-control", autocomplete="off", ng_model="contact.contact") }}</td>
+            <td class="col-md-2">{{ form.contact_notes(class="form-control", autocomplete="off", ng_model="contact.notes") }}</td>
+        </tr>
+        </tbody>
+    </table>
+</form>
+<div class="col-sm-offset-2 col-md-10" ng-show="editing">
+    <button ng-click="save_client_info()" class="btn btn-success">Сохранить</button>
+</div>

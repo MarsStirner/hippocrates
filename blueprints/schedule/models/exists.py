@@ -167,12 +167,12 @@ class Client(db.Model):
     policies = db.relationship(u'ClientPolicy', primaryjoin='and_(ClientPolicy.clientId==Client.id,'
                                                             'ClientPolicy.deleted == 0)',
                                order_by="desc(ClientPolicy.id)")
-    reg_addresses = db.relationship(u'ClientAddress',
+    reg_address = db.relationship(u'ClientAddress',
                                     primaryjoin="and_(Client.id==ClientAddress.client_id, ClientAddress.type==0)",
-                                    order_by="desc(ClientAddress.id)", lazy='dynamic')
-    loc_addresses = db.relationship(u'ClientAddress',
+                                    order_by="desc(ClientAddress.id)", uselist=False)
+    loc_address = db.relationship(u'ClientAddress',
                                     primaryjoin="and_(Client.id==ClientAddress.client_id, ClientAddress.type==1)",
-                                    order_by="desc(ClientAddress.id)", lazy='dynamic')
+                                    order_by="desc(ClientAddress.id)", uselist=False)
     socStatuses = db.relationship(u'ClientSocStatus',
                                   primaryjoin='and_(ClientSocStatus.deleted == 0,ClientSocStatus.client_id==Client.id,'
                                   'or_(ClientSocStatus.endDate == None, ClientSocStatus.endDate>={0}))'.format(datetime.date.today()))
@@ -358,7 +358,7 @@ class ClientContact(db.Model):
     version = db.Column(db.Integer, nullable=False)
 
     client = db.relationship(u'Client')
-    contactType = db.relationship(u'rbContactType')
+    contactType = db.relationship(u'rbContactType', lazy=False)
 
     @property
     def name(self):
@@ -387,7 +387,7 @@ class ClientDocument(db.Model):
     endDate = db.Column(db.Date)
 
     client = db.relationship(u'Client', backref=db.backref('documents', lazy='dynamic'))
-    documentType = db.relationship(u'rbDocumentType')
+    documentType = db.relationship(u'rbDocumentType', lazy=False)
 
     @property
     def documentTypeCode(self):
@@ -416,7 +416,7 @@ class ClientIdentification(db.Model):
     version = db.Column(db.Integer, nullable=False)
 
     client = db.relationship(u'Client')
-    accountingSystems = db.relationship(u'rbAccountingSystem')
+    accountingSystems = db.relationship(u'rbAccountingSystem', lazy=False)
 
     @property
     def code(self):
@@ -463,7 +463,7 @@ class ClientRelation(db.Model):
     relative_id = db.Column(db.Integer, db.ForeignKey('Client.id'), nullable=False, index=True)
     version = db.Column(db.Integer, nullable=False)
 
-    relativeType = db.relationship(u'rbRelationType')
+    relativeType = db.relationship(u'rbRelationType', lazy=False)
 
     @property
     def leftName(self):
@@ -613,9 +613,9 @@ class ClientSocStatus(db.Model):
     benefitCategory_id = db.Column(db.Integer)
 
     client = db.relationship(u'Client')
-    soc_status_class = db.relationship(u'rbSocStatusClass')
-    socStatusType = db.relationship(u'rbSocStatusType')
-    self_document = db.relationship(u'ClientDocument')
+    soc_status_class = db.relationship(u'rbSocStatusClass', lazy=False)
+    socStatusType = db.relationship(u'rbSocStatusType', lazy=False)
+    self_document = db.relationship(u'ClientDocument', lazy=False)
 
     @property
     def classes(self):
@@ -696,8 +696,8 @@ class ClientPolicy(db.Model):
     version = db.Column(db.Integer, nullable=False, server_default=u"'0'")
 
     client = db.relationship(u'Client')
-    insurer = db.relationship(u'Organisation')
-    policyType = db.relationship(u'rbPolicyType')
+    insurer = db.relationship(u'Organisation', lazy=False)
+    policyType = db.relationship(u'rbPolicyType', lazy=False)
 
     def __unicode__(self):
         return (' '.join([self.policyType.name, unicode(self.insurer), self.serial, self.number])).strip()
@@ -963,7 +963,7 @@ class rbDocumentType(db.Model):
     socCode = db.Column(db.String(8), nullable=False, index=True)
     TFOMSCode = db.Column(db.Integer)
 
-    group = db.relationship(u'rbDocumentTypeGroup')
+    group = db.relationship(u'rbDocumentTypeGroup', lazy=False)
 
 
 class rbNet(db.Model):
