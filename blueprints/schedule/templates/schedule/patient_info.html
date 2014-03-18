@@ -10,6 +10,7 @@
 {#        <form class="form-inline" role="form">#}
 {#            <input class="form-control" type="text" ng-model="doctorInput" placeholder="ФИО врача">#}
 {#        </form>#}
+        <script type="text/ng-template" id="modal-deleteDocument.html">{% include "schedule/_delete_document.html" %}</script>
         <h4>Информация о пациенте <a  ng-click="editing = true" class="btn btn-sm btn-default navbar-btn" href="" title="Редактировать"><span class="glyphicon glyphicon-pencil"></span></a></h4>
         <ul class="nav nav-tabs">
             <li ng-class="{active: tub_selected==1 }"><a href ng-click="tub_selected=1; editing=false">Основная информация</a></li>
@@ -284,6 +285,10 @@
                 </tbody>
             </table>
 
+            <div class="col-sm-offset-10 col-md-10" ng-hide="editing" ng-if="clientDataItems['bloodHistory']">
+                <button class="btn btn-primary"><span class="glyphicon glyphicon-plus btn-sm"></span> Добавить</button>
+            </div>
+
             <form class="form-horizontal" role="form" ng-show="editing">
                 <table class="table table-condensed">
                 <caption>Группа крови и резус-фактор</caption>
@@ -323,6 +328,10 @@
                     </tr>
                 </tbody>
             </table>
+
+            <div class="col-sm-offset-10 col-md-10" ng-hide="editing" ng-if="clientDataItems['allergies']">
+                <button  class="btn btn-primary btn-sm"><span class="glyphicon glyphicon-plus"></span> Добавить</button>
+            </div>
 
             <form class="form-horizontal" role="form" ng-show="editing">
                 <table class="table table-condensed">
@@ -365,6 +374,11 @@
                     </tr>
                 </tbody>
             </table>
+
+            <div class="col-sm-offset-10 col-md-10" ng-hide="editing" ng-if="clientDataItems['intolerances']">
+                <button class="btn btn-primary btn-sm"><span class="glyphicon glyphicon-plus"></span> Добавить</button>
+            </div>
+
             <form class="form-horizontal" role="form" ng-show="editing">
                 <table class="table table-condensed">
                     <caption>Медикаметозная непереносимость</caption>
@@ -538,6 +552,7 @@
                         <th>Номер</th>
                         <th>Дата начала</th>
                         <th>Дата окончания</th>
+                        <th></th>
                      </tr>
                 </thead>
                 <tbody>
@@ -547,6 +562,7 @@
                         <td>[[document.number]]</td>
                         <td>[[document.begDate]]</td>
                         <td>[[document.endDate]]</td>
+                        <td><a class="btn btn-sm btn-default" href="" title="Удалить документ" ng-click="delete_document(document)" ><span class="glyphicon glyphicon-trash"></span></a></td>
                     </tr>
                 </tbody>
             </table>
@@ -570,7 +586,16 @@
 {% block modules_js %}
     {{ super() }}
     <script type="text/javascript">
-        WebMis20.controller('ClientInfo', ['$scope', '$http', function ($scope, $http) {
+        DeleteDocumentModalCtrl = function ($scope, $modalInstance) {
+            $scope.accept = function () {
+                $modalInstance.close();
+            };
+            $scope.cancel = function () {
+                $modalInstance.dismiss('cancel');
+            };
+        };
+
+        WebMis20.controller('ClientInfo', ['$scope', '$http', '$modal', function ($scope, $http, $modal) {
             $scope.max_tickets = 0;
             $scope.records = [];
             $scope.aux = aux;
@@ -616,6 +641,21 @@
                         }
                     });
             };
+            $scope.delete_document = function(document) {
+                var modalInstance = $modal.open({
+                                    templateUrl: 'modal-deleteDocument.html',
+                                    controller: DeleteDocumentModalCtrl
+                    });
+                modalInstance.result.then(function () {
+                    $http.get(
+                        '{{ url_for('.api_delete_document') }}', {
+                            params: {
+                                document: document
+                            }
+                        });
+                })
+            };
+
             $scope.open = function($event) {
                 $event.preventDefault();
                 $event.stopPropagation();
