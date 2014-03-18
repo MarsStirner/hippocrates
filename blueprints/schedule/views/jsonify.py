@@ -270,25 +270,27 @@ class ClientVisualizer(object):
                         'classCode': socStatus.soc_status_class.code,
                         'typeName': socStatus.name,
                         'typeCode': socStatus.code,
-                        'begDate': socStatus.begDate.strftime('%d-%m-%Y') if socStatus.begDate else '',
-                        'endDate': socStatus.endDate.strftime('%d-%m-%Y') if socStatus.endDate else ''
+                        'begDate': socStatus.begDate.strftime('%d.%m.%Y') if socStatus.begDate else '',
+                        'endDate': socStatus.endDate.strftime('%d.%m.%Y') if socStatus.endDate else ''
                         } for socStatus in client.socStatuses]
 
         allergies = [{'id': allergy.id,
                       'nameSubstance': allergy.name,
                       'power': allergy.power,
-                      'createDate': allergy.createDate.strftime('%d-%m-%Y') if allergy.createDate else '',
+                      'deleted': allergy.deleted,
+                      'createDate': allergy.createDate.strftime('%d.%m.%Y') if allergy.createDate else '',
                       'notes': allergy.notes
                       } for allergy in client.allergies]
 
         intolerances = [{'id': intolerance.id,
                          'nameMedicament': intolerance.name,
                          'power': intolerance.power,
-                         'createDate': intolerance.createDate.strftime('%d-%m-%Y') if allergy.createDate else '',
+                         'deleted': intolerance.deleted,
+                         'createDate': intolerance.createDate.strftime('%d.%m.%Y') if intolerance.createDate else '',
                          'notes': intolerance.notes
                          } for intolerance in client.intolerances]
         bloodHistory = [{'bloodGroup': blood.bloodType.name,
-                         'bloodDate': blood.bloodDate.strftime('%d-%m-%Y') if blood.bloodDate else '',
+                         'bloodDate': blood.bloodDate.strftime('%d.%m.%Y') if blood.bloodDate else '',
                          'physician': blood.person,
                          } for blood in client.blood_history]
 

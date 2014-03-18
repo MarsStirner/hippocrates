@@ -35,6 +35,10 @@
         </tbody>
     </table>
 </form>
+{#<div class="col-sm-offset-10 col-md-2" ng-show="editing">#}
+{#    <button ng-click="" class="btn btn-primary btn-sm"><span class="glyphicon glyphicon-plus"#}
+{#                                                             title="Добавить новую запись"></span> Добавить</button>#}
+{#</div>#}
 
 <table class="table table-condensed" ng-if="clientDataItems['allergies']" ng-hide="editing">
     <caption>Аллергия</caption>
@@ -65,18 +69,27 @@
             <th>Степень</th>
             <th>Дата установления</th>
             <th>Примечание</th>
+            <th></th>
         </tr>
         </thead>
         <tbody>
         <tr ng-repeat="allergy in clientDataItems['allergies']">
-            <td class="col-md-4">{{ form.allergy_substance(class="form-control", autocomplete="off", ng_model="allergy.nameSubstance") }}</td>
-            <td class="col-md-3">{{ form.allergy_power(class="form-control", autocomplete="off", ng_model="allergy.power") }}</td>
-            <td class="col-md-2">{{ form.allergy_createDate(class="form-control", autocomplete="off", datepicker_popup="dd.MM.yyyy", ng_model="allergy.createDate") }}</td>
-            <td class="col-md-3">{{ form.allergy_notes(class="form-control", autocomplete="off", ng_model="allergy.notes") }}</td>
+            <td class="col-md-4" ng-hide="allergy.deleted">{{ form.allergy_substance(class="form-control", autocomplete="off", ng_model="allergy.nameSubstance") }}</td>
+            <td class="col-md-2" ng-hide="allergy.deleted">{{ form.allergy_power(class="form-control", autocomplete="off", ng_model="allergy.power") }}</td>
+            <td class="col-md-2" ng-hide="allergy.deleted">{{ form.allergy_createDate(class="form-control", autocomplete="off", datepicker_popup="dd.MM.yyyy", ng_model="allergy.createDate") }}</td>
+            <td class="col-md-3" ng-hide="allergy.deleted">{{ form.allergy_notes(class="form-control", autocomplete="off", ng_model="allergy.notes") }}</td>
+            <td class="col-md-1" ng-hide="allergy.deleted"><a class="btn btn-sm btn-default"
+                                                              href=""
+                                                              title="Удалить текущую строку"
+                                                              ng-click="delete_item(clientDataItems['allergies'], allergy)" ><span class="glyphicon glyphicon-trash"></span></a></td>
         </tr>
         </tbody>
     </table>
 </form>
+<div class="col-sm-offset-10 col-md-2" ng-show="editing">
+    <button ng-click="add_allergy()" class="btn btn-primary btn-sm"><span class="glyphicon glyphicon-plus"
+                                                                          title="Добавить новую запись"></span> Добавить</button>
+</div>
 
 <table class="table table-condensed" ng-if="clientDataItems['intolerances']" ng-hide="editing">
     <caption>Медикаметозная непереносимость</caption>
@@ -97,6 +110,7 @@
     </tr>
     </tbody>
 </table>
+
 <form class="form-horizontal" role="form" ng-show="editing">
     <table class="table table-condensed">
         <caption>Медикаметозная непереносимость</caption>
@@ -106,19 +120,27 @@
             <th>Степень</th>
             <th>Дата установления</th>
             <th>Примечание</th>
+            <th></th>
         </tr>
         </thead>
         <tbody>
         <tr ng-repeat="intolerance in clientDataItems['intolerances']">
-            <td class="col-md-4">{{ form.intolerance_medicament(class="form-control", autocomplete="off", ng_model="intolerance.nameMedicament") }}</td>
-            <td class="col-md-3">{{ form.intolerance_power(class="form-control", autocomplete="off", ng_model="intolerance.power") }}</td>
-            <td class="col-md-2">{{ form.intolerance_createDate(class="form-control", autocomplete="off", datepicker_popup="dd.MM.yyyy", ng_model="intolerance.createDate") }}</td>
-            </td>
-            <td class="col-md-3">{{ form.intolerance_notes(class="form-control", autocomplete="off", ng_model="intolerance.notes") }}</td>
+            <td class="col-md-4" ng-hide="intolerance.deleted">{{ form.intolerance_medicament(class="form-control", autocomplete="off", ng_model="intolerance.nameMedicament") }}</td>
+            <td class="col-md-3" ng-hide="intolerance.deleted">{{ form.intolerance_power(class="form-control", autocomplete="off", ng_model="intolerance.power") }}</td>
+            <td class="col-md-2" ng-hide="intolerance.deleted">{{ form.intolerance_createDate(class="form-control", autocomplete="off", datepicker_popup="dd.MM.yyyy", ng_model="intolerance.createDate") }}</td>
+            <td class="col-md-3" ng-hide="intolerance.deleted">{{ form.intolerance_notes(class="form-control", autocomplete="off", ng_model="intolerance.notes") }}</td>
+            <td class="col-md-1" ng-hide="intolerance.deleted"><a class="btn btn-sm btn-default" href=""
+                                                              title="Удалить текущую строку"
+                                                              ng-click="delete_item(clientDataItems['intolerances'], intolerance)" ><span class="glyphicon glyphicon-trash"></span></a></td>
         </tr>
         </tbody>
     </table>
 </form>
+<div class="col-sm-offset-10 col-md-2" ng-show="editing">
+    <button ng-click="add_medicament()" class="btn btn-primary btn-sm"><span class="glyphicon glyphicon-plus"
+                                                                             title="Добавить новую запись"></span> Добавить</button>
+</div>
+
 <div class="col-sm-offset-2 col-md-10" ng-show="editing">
     <button ng-click="save_client_info()" class="btn btn-success">Сохранить</button>
 </div>
