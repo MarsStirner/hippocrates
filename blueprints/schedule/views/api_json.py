@@ -11,7 +11,7 @@ from application.lib.sphinx_search import SearchPatient, SearchPerson
 from application.lib.utils import public_endpoint, jsonify
 from blueprints.schedule.app import module
 from blueprints.schedule.models.exists import Person, Client, rbSpeciality, rbDocumentType, rbPolicyType, \
-    rbReasonOfAbsence, rbSocStatusClass, rbSocStatusType, rbAccountingSystem, rbContactType, rbRelationType
+    rbReasonOfAbsence, rbSocStatusClass, rbSocStatusType, rbAccountingSystem, rbContactType, rbRelationType, ClientDocument
 from blueprints.schedule.models.schedule import Schedule, ScheduleTicket, ScheduleClientTicket, rbAppointmentType, \
     rbReceptionType, rbAttendanceType
 from blueprints.schedule.views.jsonify import ScheduleVisualizer, ClientVisualizer, Format
@@ -446,6 +446,20 @@ def api_save_patient_info():
     except KeyError or ValueError:
         return abort(404)
 
+    return ''
+
+
+@module.route('/api/save_delete_document.json')
+@public_endpoint
+def api_delete_document():
+    document_info = json.loads(request.args['document'])
+    if 'documentText' in document_info:
+        document = ClientDocument.query.get(document_info['id'])
+    elif 'policyText' in document_info:
+        document = ClientPolicy.query.get(document_info['id'])
+    document.deleted = 1
+    db.session.add(document)
+    db.session.commit()
     return ''
 
 

@@ -221,7 +221,8 @@ class ClientVisualizer(object):
         self.__mode = mode
 
     def make_document_info(self, document):
-        return {'number': document.number,
+        return {'id': document.documentId,
+                'number': document.number,
                 'serial': document.serial,
                 'begDate': document.date,
                 'endDate': document.endDate,
@@ -231,7 +232,8 @@ class ClientVisualizer(object):
                 'documentText': document} if document else {}
 
     def make_policy_info(self, policy):
-        return {'number': policy.number,
+        return {'id': policy.id,
+                'number': policy.number,
                 'serial': policy.serial,
                 'begDate': policy.begDate,
                 'endDate': policy.endDate,
