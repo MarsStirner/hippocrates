@@ -9,9 +9,9 @@
     </thead>
     <tbody>
     <tr ng-repeat="blood in clientDataItems['bloodHistory']">
-        <td>[[blood.bloodGroup]]</td>
+        <td>[[blood.bloodGroup_name]]</td>
         <td>[[blood.bloodDate]]</td>
-        <td>[[blood.physician]]</td>
+        <td>[[blood.person_name]]</td>
     </tr>
     </tbody>
 </table>
@@ -28,13 +28,17 @@
         </thead>
         <tbody>
         <tr ng-repeat="blood in clientDataItems['bloodHistory']">
-            <td class="col-md-4">{{ form.blood_group(class="form-control", autocomplete="off", ng_model="blood.bloodGroup") }}</td>
-            <td class="col-md-3">{{ form.blood_date(class="form-control", datepicker_popup="dd.MM.yyyy", autocomplete="off", ng_model="blood.bloodDate") }}</td>
-            <td class="col-md-5"></td>
+            <td class="col-md-4" ng-if="!blood.id">{{ form.blood_group(class="form-control", autocomplete="off", ng_model="blood.bloodGroup_code") }}</td><td ng-if="blood.id">[[blood.bloodGroup_name]]</td>
+            <td class="col-md-3" ng-if="!blood.id">{{ form.blood_date(class="form-control", datepicker_popup="dd.MM.yyyy", autocomplete="off", ng_model="blood.bloodDate") }}</td><td ng-if="blood.id">[[blood.bloodDate]]</td>
+            <td class="col-md-5" ng-if="!blood.id">{{ form.blood_person(class="form-control", autocomplete="off", ng_model="blood.person_id") }}</td><td ng-if="blood.id">[[blood.person_name]]</td>
         </tr>
         </tbody>
     </table>
 </form>
+<div class="col-sm-offset-10 col-md-2" ng-show="editing">
+    <button ng-click="add_blood()" class="btn btn-primary btn-sm"><span class="glyphicon glyphicon-plus"
+                                                                        title="Добавить новую запись"></span> Добавить</button>
+</div>
 {#<div class="col-sm-offset-10 col-md-2" ng-show="editing">#}
 {#    <button ng-click="" class="btn btn-primary btn-sm"><span class="glyphicon glyphicon-plus"#}
 {#                                                             title="Добавить новую запись"></span> Добавить</button>#}

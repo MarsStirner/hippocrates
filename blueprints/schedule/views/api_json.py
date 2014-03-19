@@ -12,7 +12,7 @@ from application.lib.utils import public_endpoint, jsonify
 from blueprints.schedule.app import module
 from blueprints.schedule.models.exists import Person, Client, rbSpeciality, rbDocumentType, rbPolicyType, \
     rbReasonOfAbsence, rbSocStatusClass, rbSocStatusType, rbAccountingSystem, rbContactType, rbRelationType, \
-    ClientDocument
+    ClientDocument, rbBloodType, Bloodhistory
 from blueprints.schedule.models.schedule import Schedule, ScheduleTicket, ScheduleClientTicket, rbAppointmentType, \
     rbReceptionType, rbAttendanceType
 from blueprints.schedule.views.jsonify import ScheduleVisualizer, ClientVisualizer, Format
@@ -448,6 +448,15 @@ def api_save_patient_info():
             item.checkDate = identification['checkDate'].split('T')[0]
             item.identifier = identification['identifier']
             item.deleted = identification['deleted']
+
+        for blood in client_info['bloodHistory']:
+            if not 'id' in blood:
+                item = Bloodhistory()
+                item.client_id = client.id
+                db.session.add(item)
+                item.bloodType = rbBloodType.query.filter(rbBloodType.code == blood['bloodGroup_code']).first()
+                item.bloodDate = blood['bloodDate'].split('T')[0]
+                item.person_id = blood['person_id']
 
         for relation in client.relations:
             all_relations = client_info['direct_relations'] + client_info['reversed_relations']

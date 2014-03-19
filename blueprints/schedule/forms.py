@@ -6,7 +6,7 @@ from wtforms.validators import DataRequired, Email, AnyOf, Optional, Required
 
 from application.app import app
 from blueprints.schedule.models.exists import rbDocumentType, rbUFMS, rbPolicyType, Organisation, rbSocStatusType, \
-    rbSocStatusClass, rbBloodType, rbAccountingSystem, rbRelationType, rbContactType, Client
+    rbSocStatusClass, rbBloodType, rbAccountingSystem, rbRelationType, rbContactType, Client, Person
 
 
 class AngularJSTextInput(TextInput):
@@ -71,8 +71,11 @@ class ClientForm(Form):
                                        rbSocStatusClass.query.all()], widget=AngularJSSelect())
         soc_status_type = SelectField(u'Тип', choices=[(status_class.code, status_class.name) for status_class in
                                       rbSocStatusType.query.all()], widget=AngularJSSelect())
-        blood_group = SelectField(u'Группа крови', choices=[(blood_type.name, blood_type.name) for blood_type in
+        blood_group = SelectField(u'Группа крови', choices=[(blood_type.code, blood_type.name) for blood_type in
                                   rbBloodType.query.all()], widget=AngularJSSelect())
+        blood_person = SelectField(u'Врач', choices=[(person.id, person.nameText) for person in
+                                          Person.query.all()], widget=AngularJSSelect())
+
         identification_accountingSystem = SelectField(u'Внешняя учетная система', choices=[(system.code, system.name) for system in
                                                       rbAccountingSystem.query.all()], widget=AngularJSSelect())
 

@@ -291,9 +291,12 @@ class ClientVisualizer(object):
                          'createDate': intolerance.createDate.strftime('%d.%m.%Y') if intolerance.createDate else '',
                          'notes': intolerance.notes
                          } for intolerance in client.intolerances]
-        bloodHistory = [{'bloodGroup': blood.bloodType.name,
+        bloodHistory = [{'id': blood.id,
+                         'bloodGroup_name': blood.bloodType.name,
+                         'bloodGroup_code': blood.bloodType.code,
                          'bloodDate': blood.bloodDate.strftime('%d.%m.%Y') if blood.bloodDate else '',
-                         'physician': blood.person,
+                         'person_id': blood.person.id,
+                         'person_name': blood.person.nameText
                          } for blood in client.blood_history]
 
         pers_document = self.make_document_info(client.document)

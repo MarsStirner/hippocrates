@@ -112,15 +112,19 @@
                 $scope.clientDataItems['identifications'].push({'deleted': 0,
                                                                 'identifier': '',
                                                                 'accountingSystem_code': '',
-                                                                'accountingSystem_name': '',
                                                                 'checkDate': ''})
             };
             $scope.add_contact = function() {
                 $scope.clientDataItems['contacts'].push({'deleted': 0,
                                                          'contactType_code': '',
-                                                         'contactType_name': '',
                                                          'contact': '',
                                                          'notes': ''})
+            };
+            $scope.add_blood = function() {
+                $scope.clientDataItems['bloodHistory'].push({'bloodGroup_code': '',
+                                                             'bloodDate': '',
+                                                             'person_id': 0
+                                                             })
             };
             $scope.delete_item = function(clientData_array, item) {
                 if ('id' in item) {
