@@ -18,12 +18,17 @@
         <tr>
             <th>Прямая связь</th>
             <th>Связан с пациентом</th>
+            <th></th>
         </tr>
         </thead>
         <tbody>
         <tr ng-repeat="relation in  clientDataItems['direct_relations']">
-            <td class="col-md-4">{{ form.direct_relation_relation(class="form-control", autocomplete="off", ng_model="relation.relativeType_code") }}</td>
-            <td class="col-md-3">{{ form.direct_relation_other(class="form-control", autocomplete="off", ng_model="relation.other_id") }}</td>
+            <td class="col-md-4" ng-hide="relation.deleted">{{ form.direct_relation_relation(class="form-control", autocomplete="off", ng_model="relation.relativeType_code") }}</td>
+            <td class="col-md-3" ng-hide="relation.deleted">{{ form.direct_relation_other(class="form-control", autocomplete="off", ng_model="relation.other_id") }}</td>
+            <td class="col-md-1" ng-hide="relation.deleted"><a class="btn btn-sm btn-default"
+                                                               href=""
+                                                               title="Удалить текущую строку"
+                                                               ng-click="delete_item(clientDataItems['direct_relations'], relation)" ><span class="glyphicon glyphicon-trash"></span></a></td>
         </tr>
         </tbody>
     </table>
@@ -48,12 +53,17 @@
         <tr>
             <th>Обратная связь</th>
             <th>Связан с пациентом</th>
+            <th></th>
         </tr>
         </thead>
         <tbody>
         <tr ng-repeat="relation in  clientDataItems['reversed_relations']">
-            <td class="col-md-4">{{ form.reversed_relation_relation(class="form-control", autocomplete="off", ng_model="relation.relativeType_code") }}</td>
-            <td class="col-md-3">{{ form.reversed_relation_other(class="form-control", autocomplete="off", ng_model="relation.other_id") }}</td>
+            <td class="col-md-4" ng-hide="relation.deleted">{{ form.reversed_relation_relation(class="form-control", autocomplete="off", ng_model="relation.relativeType_code") }}</td>
+            <td class="col-md-3" ng-hide="relation.deleted">{{ form.reversed_relation_other(class="form-control", autocomplete="off", ng_model="relation.other_id") }}</td>
+            <td class="col-md-1" ng-hide="relation.deleted"><a class="btn btn-sm btn-default"
+                                                               href=""
+                                                               title="Удалить текущую строку"
+                                                               ng-click="delete_item(clientDataItems['reversed_relations'], relation)" ><span class="glyphicon glyphicon-trash"></span></a></td>
         </tr>
         </tbody>
     </table>
@@ -82,17 +92,27 @@
             <th>Тип</th>
             <th>Номер</th>
             <th>Примечение</th>
+            <th></th>
         </tr>
         </thead>
         <tbody>
         <tr ng-repeat="contact in  clientDataItems['contacts']">
-            <td class="col-md-4">{{ form.contact_contactType(class="form-control", autocomplete="off", ng_model="contact.contactType_code") }}</td>
-            <td class="col-md-3">{{ form.contact_contact(class="form-control", autocomplete="off", ng_model="contact.contact") }}</td>
-            <td class="col-md-2">{{ form.contact_notes(class="form-control", autocomplete="off", ng_model="contact.notes") }}</td>
+            <td class="col-md-4" ng-hide="contact.deleted">{{ form.contact_contactType(class="form-control", autocomplete="off", ng_model="contact.contactType_code") }}</td>
+            <td class="col-md-3" ng-hide="contact.deleted">{{ form.contact_contact(class="form-control", autocomplete="off", ng_model="contact.contact") }}</td>
+            <td class="col-md-2" ng-hide="contact.deleted">{{ form.contact_notes(class="form-control", autocomplete="off", ng_model="contact.notes") }}</td>
+            <td class="col-md-1" ng-hide="contact.deleted"><a class="btn btn-sm btn-default"
+                                                              href=""
+                                                              title="Удалить текущую строку"
+                                                              ng-click="delete_item(clientDataItems['contacts'], contact)" ><span class="glyphicon glyphicon-trash"></span></a></td>
         </tr>
         </tbody>
     </table>
 </form>
-<div class="col-sm-offset-2 col-md-10" ng-show="editing">
+<div class="col-sm-offset-10 col-md-2" ng-show="editing">
+    <button ng-click="add_contact()" class="btn btn-primary btn-sm"><span class="glyphicon glyphicon-plus"
+                                                                          title="Добавить новую запись"></span> Добавить</button>
+</div>
+
+<div class="col-sm-offset-10 col-md-2" ng-show="editing">
     <button ng-click="save_client_info()" class="btn btn-success">Сохранить</button>
 </div>

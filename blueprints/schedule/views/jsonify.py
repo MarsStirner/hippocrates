@@ -244,6 +244,7 @@ class ClientVisualizer(object):
 
     def make_identification_info(self, identification):
         return {'id': identification.id,
+                'deleted': identification.deleted,
                 'identifier': identification.identifier,
                 'accountingSystem_code': identification.accountingSystems.code,
                 'accountingSystem_name': identification.accountingSystems.name,
@@ -258,6 +259,7 @@ class ClientVisualizer(object):
 
     def make_contact_info(self, contact):
         return {'id': contact.id,
+                'deleted': contact.deleted,
                 'contactType_code': contact.contactType.code,
                 'contactType_name': contact.contactType.name,
                 'contact': contact.contact,

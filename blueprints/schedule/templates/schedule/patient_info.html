@@ -108,6 +108,20 @@
                                                           'notes': ''
                                                           })
             };
+            $scope.add_identification = function() {
+                $scope.clientDataItems['identifications'].push({'deleted': 0,
+                                                                'identifier': '',
+                                                                'accountingSystem_code': '',
+                                                                'accountingSystem_name': '',
+                                                                'checkDate': ''})
+            };
+            $scope.add_contact = function() {
+                $scope.clientDataItems['contacts'].push({'deleted': 0,
+                                                         'contactType_code': '',
+                                                         'contactType_name': '',
+                                                         'contact': '',
+                                                         'notes': ''})
+            };
             $scope.delete_item = function(clientData_array, item) {
                 if ('id' in item) {
                     item['deleted'] = 1;

@@ -75,7 +75,7 @@
         <tbody>
         <tr ng-repeat="allergy in clientDataItems['allergies']">
             <td class="col-md-4" ng-hide="allergy.deleted">{{ form.allergy_substance(class="form-control", autocomplete="off", ng_model="allergy.nameSubstance") }}</td>
-            <td class="col-md-2" ng-hide="allergy.deleted">{{ form.allergy_power(class="form-control", autocomplete="off", ng_model="allergy.power") }}</td>
+            <td class="col-md-3" ng-hide="allergy.deleted">{{ form.allergy_power(class="form-control", autocomplete="off", ng_model="allergy.power") }}</td>
             <td class="col-md-2" ng-hide="allergy.deleted">{{ form.allergy_createDate(class="form-control", autocomplete="off", datepicker_popup="dd.MM.yyyy", ng_model="allergy.createDate") }}</td>
             <td class="col-md-3" ng-hide="allergy.deleted">{{ form.allergy_notes(class="form-control", autocomplete="off", ng_model="allergy.notes") }}</td>
             <td class="col-md-1" ng-hide="allergy.deleted"><a class="btn btn-sm btn-default"

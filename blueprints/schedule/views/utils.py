@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import datetime
-from blueprints.schedule.models.exists import ClientPolicy, ClientAllergy, ClientIntoleranceMedicament
+from blueprints.schedule.models.exists import ClientPolicy, ClientAllergy, ClientIntoleranceMedicament, ClientContact, \
+    ClientIdentification
 
 #
 # def format_snils(SNILS):
@@ -85,3 +86,21 @@ def create_new_intolerance(client_id):
     new_intolerance.modifyDatetime = datetime.datetime.now()
     new_intolerance.version = 0
     return new_intolerance
+
+
+def create_new_contact(client_id):
+    new_contact = ClientContact()
+    new_contact.client_id = client_id
+    new_contact.createDatetime = datetime.datetime.now()
+    new_contact.modifyDatetime = datetime.datetime.now()
+    new_contact.version = 0
+    return new_contact
+
+
+def create_new_identification(client_id):
+    new_identification = ClientIdentification()
+    new_identification.client_id = client_id
+    new_identification.createDatetime = datetime.datetime.now()
+    new_identification.modifyDatetime = datetime.datetime.now()
+    new_identification.version = 0
+    return new_identification

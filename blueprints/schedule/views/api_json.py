@@ -438,11 +438,16 @@ def api_save_patient_info():
             item.notes = intolerance['notes']
             item.deleted = intolerance['deleted']
 
-        for identification in client.identifications:
-            item = filter(lambda x: x['id'] == identification.id, client_info['identifications'])[0]
-            identification.accountingSystems = rbAccountingSystem.query.filter(rbAccountingSystem.code == item['accountingSystem_code']).first()
-            identification.identifier = item['identifier']
-            identification.checkDate = item['checkDate']
+        for identification in client_info['identifications']:
+            if not 'id' in identification:
+                item = create_new_identification(client.id)
+                db.session.add(item)
+            else:
+                item = filter(lambda x: x.id == identification['id'], client.identifications)[0]
+            item.accountingSystems = rbAccountingSystem.query.filter(rbAccountingSystem.code == identification['accountingSystem_code']).first()
+            item.checkDate = identification['checkDate'].split('T')[0]
+            item.identifier = identification['identifier']
+            item.deleted = identification['deleted']
 
         for relation in client.relations:
             all_relations = client_info['direct_relations'] + client_info['reversed_relations']
@@ -450,11 +455,16 @@ def api_save_patient_info():
             relation.relativeType = rbRelationType.query.filter(rbRelationType.code == item['relativeType_code']).first()
             relation.other = Client.query.filter(Client.id == item['other_id']).first()
 
-        for contact in client.contacts:
-            item = filter(lambda x: x['id'] == contact.id, client_info['contacts'])[0]
-            contact.contactType = rbContactType.query.filter(rbContactType.code == item['contactType_code']).first()
-            contact.contact = item['contact']
-            contact.notes = item['notes']
+        for contact in client_info['contacts']:
+            if not 'id' in contact:
+                item = create_new_contact(client.id)
+                db.session.add(item)
+            else:
+                item = filter(lambda x: x.id == contact['id'], client.contacts)[0]
+            item.contactType = rbContactType.query.filter(rbContactType.code == contact['contactType_code']).first()
+            item.contact = contact['contact']
+            item.deleted = contact['deleted']
+            item.notes = contact['notes']
 
         db.session.commit()
     except KeyError or ValueError:
