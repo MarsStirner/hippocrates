@@ -404,15 +404,20 @@ def api_save_patient_info():
 
         client.SNILS = client_info['SNILS'].replace(" ", "").replace("-", "")
 
-        for soc_status in client.socStatuses:
-            item = filter(lambda x: x['id'] == soc_status.id, client_info['socStatuses'])[0]
-            soc_status.soc_status_class = rbSocStatusClass.query.filter(rbSocStatusClass.code ==
-                                                                        item['classCode']).first()
-            soc_status.socStatusType = rbSocStatusType.query.filter(rbSocStatusType.code ==
-                                                                    item['typeCode']).first()
-            soc_status.begDate = item['begDate']
-            if item['endDate']:
-                soc_status.endDate = item['endDate']
+        for soc_status in client_info['socStatuses']:
+            if not 'id' in soc_status:
+                item = create_new_soc_status(client.id)
+                db.session.add(item)
+            else:
+                item = filter(lambda x: x.id == soc_status['id'], client.socStatuses)[0]
+            item.deleted = soc_status['deleted']
+            item.soc_status_class = rbSocStatusClass.query.filter(rbSocStatusClass.code ==
+                                                                  soc_status['classCode']).first()
+            item.socStatusType = rbSocStatusType.query.filter(rbSocStatusType.code ==
+                                                              soc_status['typeCode']).first()
+            item.begDate = soc_status['begDate'].split('T')[0]
+            if soc_status['endDate']:
+                item.endDate = soc_status['endDate'].split('T')[0]
 
         for allergy in client_info['allergies']:
             if not 'id' in allergy:

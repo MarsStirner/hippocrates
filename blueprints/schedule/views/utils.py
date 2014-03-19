@@ -2,7 +2,7 @@
 
 import datetime
 from blueprints.schedule.models.exists import ClientPolicy, ClientAllergy, ClientIntoleranceMedicament, ClientContact, \
-    ClientIdentification, DirectClientRelation, ReversedClientRelation
+    ClientIdentification, DirectClientRelation, ReversedClientRelation, ClientSocStatus
 
 #
 # def format_snils(SNILS):
@@ -122,3 +122,12 @@ def create_new_reversed_relation(client_id):
     new_relation.modifyDatetime = datetime.datetime.now()
     new_relation.version = 0
     return new_relation
+
+
+def create_new_soc_status(client_id):
+    new_status = ClientSocStatus()
+    new_status.client_id = client_id
+    new_status.createDatetime = datetime.datetime.now()
+    new_status.modifyDatetime = datetime.datetime.now()
+    new_status.version = 0
+    return new_status

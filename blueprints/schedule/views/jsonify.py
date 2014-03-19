@@ -268,6 +268,7 @@ class ClientVisualizer(object):
     def make_client_info(self, client):
 
         socStatuses = [{'id': socStatus.id,
+                        'deleted': socStatus.deleted,
                         'className': socStatus.soc_status_class.name,
                         'classCode': socStatus.soc_status_class.code,
                         'typeName': socStatus.name,
