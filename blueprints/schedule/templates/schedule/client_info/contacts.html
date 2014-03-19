@@ -33,6 +33,11 @@
         </tbody>
     </table>
 </form>
+<div class="col-sm-offset-10 col-md-2" ng-show="editing">
+    <button ng-click="add_relation(clientDataItems['direct_relations'])" class="btn btn-primary btn-sm"><span class="glyphicon glyphicon-plus"
+                                                                          title="Добавить новую запись"></span> Добавить</button>
+</div>
+
 <table class="table table-condensed" ng-if="clientDataItems['reversed_relations']" ng-hide="editing">
     <thead>
     <tr>
@@ -68,6 +73,10 @@
         </tbody>
     </table>
 </form>
+<div class="col-sm-offset-10 col-md-2" ng-show="editing">
+    <button ng-click="add_relation(clientDataItems['reversed_relations'])" class="btn btn-primary btn-sm"><span class="glyphicon glyphicon-plus"
+                                                                          title="Добавить новую запись"></span> Добавить</button>
+</div>
 <table class="table table-condensed" ng-if="clientDataItems['contacts']" ng-hide="editing">
     <caption>Контакты</caption>
     <thead>

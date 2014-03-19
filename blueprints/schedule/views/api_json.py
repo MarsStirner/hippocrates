@@ -458,11 +458,23 @@ def api_save_patient_info():
                 item.bloodDate = blood['bloodDate'].split('T')[0]
                 item.person_id = blood['person_id']
 
-        for relation in client.relations:
-            all_relations = client_info['direct_relations'] + client_info['reversed_relations']
-            item = filter(lambda x: x['id'] == relation.id, all_relations)[0]
-            relation.relativeType = rbRelationType.query.filter(rbRelationType.code == item['relativeType_code']).first()
-            relation.other = Client.query.filter(Client.id == item['other_id']).first()
+        for relation in client_info['direct_relations']:
+            if not 'id' in relation:
+                item = create_new_direct_relation(client.id)
+                db.session.add(item)
+            else:
+                item = filter(lambda x: x.id == relation['id'], client.direct_relations)[0]
+            item.relativeType = rbRelationType.query.filter(rbRelationType.code == relation['relativeType_code']).first()
+            item.other = Client.query.filter(Client.id == relation['other_id']).first()
+
+        for relation in client_info['reversed_relations']:
+            if not 'id' in relation:
+                item = create_new_reversed_relation(client.id)
+                db.session.add(item)
+            else:
+                item = filter(lambda x: x.id == relation['id'], client.reversed_relations)[0]
+            item.relativeType = rbRelationType.query.filter(rbRelationType.code == relation['relativeType_code']).first()
+            item.other = Client.query.filter(Client.id == relation['other_id']).first()
 
         for contact in client_info['contacts']:
             if not 'id' in contact:

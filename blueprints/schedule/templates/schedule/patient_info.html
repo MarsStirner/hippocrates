@@ -126,6 +126,12 @@
                                                              'person_id': 0
                                                              })
             };
+            $scope.add_relation = function(relation_array) {
+                relation_array.push({'relativeType_name': '',
+                                     'relativeType_code': '',
+                                     'other_id': 0
+                                     })
+            };
             $scope.delete_item = function(clientData_array, item) {
                 if ('id' in item) {
                     item['deleted'] = 1;
