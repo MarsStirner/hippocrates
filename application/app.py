@@ -24,6 +24,12 @@ login_manager.init_app(app)
 
 BeakerSession(app)
 
+@app.context_processor
+def enum():
+    from application.lib.enum import Enum
+    return {
+        'Enum': Enum,
+    }
 
 @babel.timezoneselector
 def get_timezone():

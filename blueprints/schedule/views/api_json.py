@@ -7,14 +7,16 @@ import json
 from flask import abort, request
 
 from application.database import db
+from application.der_cache import cache
 from application.lib.sphinx_search import SearchPatient, SearchPerson
 from application.lib.utils import public_endpoint, jsonify
 from blueprints.schedule.app import module
 from blueprints.schedule.models.exists import Person, Client, rbSpeciality, rbDocumentType, rbPolicyType, \
-    rbReasonOfAbsence, rbSocStatusClass, rbSocStatusType, rbAccountingSystem, rbContactType, rbRelationType, ClientDocument
+    rbReasonOfAbsence, rbSocStatusClass, rbSocStatusType, rbAccountingSystem, rbContactType, rbRelationType, ClientDocument, \
+    Event
 from blueprints.schedule.models.schedule import Schedule, ScheduleTicket, ScheduleClientTicket, rbAppointmentType, \
     rbReceptionType, rbAttendanceType
-from blueprints.schedule.views.jsonify import ScheduleVisualizer, ClientVisualizer, Format
+from blueprints.schedule.views.jsonify import ScheduleVisualizer, ClientVisualizer, Format, EventVisualizer
 from blueprints.schedule.views.utils import *
 
 __author__ = 'mmalkov'
@@ -519,3 +521,26 @@ def api_move_client():
 
     db.session.commit()
     return ''
+
+
+@module.route('/api/event_info.json')
+@public_endpoint
+def api_event_info():
+    event_id = int(request.args['event_id'])
+    event = Event.query.get(event_id)
+    vis = EventVisualizer()
+    return jsonify({
+        'event': vis.make_event(event),
+        'diagnoses': vis.make_diagnoses(event),
+    })
+
+
+@module.route('/api/rb/')
+@module.route('/api/rb/<name>')
+@public_endpoint
+def api_refbook(name):
+    from ..models import exists
+    if not hasattr(exists, name):
+        return abort(404)
+    ref_book = getattr(exists, name)
+    return jsonify(ref_book.query.order_by(ref_book.id).all())

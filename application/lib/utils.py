@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import datetime
-from json import JSONEncoder, dumps
 import json
 from flask import g, current_app, request
 from flask.ext.principal import identity_loaded, Principal, Permission, RoleNeed, UserNeed
@@ -71,7 +70,7 @@ logger = SimpleLogger.get_logger(SIMPLELOGS_URL,
                                  DEBUG)
 
 
-class WebMisJsonEncoder(JSONEncoder):
+class WebMisJsonEncoder(json.JSONEncoder):
     def default(self, o):
         if isinstance(o, (datetime.datetime, datetime.date, datetime.time)):
             return o.isoformat()
@@ -79,9 +78,10 @@ class WebMisJsonEncoder(JSONEncoder):
             return o.__json__()
         elif isinstance(o, db.Model) and hasattr(o, '__unicode__'):
             return unicode(o)
-        return JSONEncoder.default(self, o)
+        return json.JSONEncoder.default(self, o)
 
 app.json_encoder = WebMisJsonEncoder
+
 
 def jsonify(obj, result_code=200, result_name='OK'):
     """Creates a :class:`~flask.Response` with the JSON representation of
@@ -125,7 +125,22 @@ def jsonify(obj, result_code=200, result_name='OK'):
                 'code': result_code,
                 'name': result_name,
             }
-        }, indent=indent, cls=WebMisJsonEncoder),
+        }, indent=indent, cls=WebMisJsonEncoder, encoding='utf-8', ensure_ascii=False),
         200,
-        [('content-type', 'application/json')]
+        [('content-type', 'application/json; charset=utf-8'),
+         ('Expires', 'Thu, 20 Mar 2014 23:59:58 GMT'),
+            ('Cache-Control', 'max-age=43200')
+        ]
     )
+
+
+def safe_unicode(obj):
+    if obj is None:
+        return None
+    return unicode(obj)
+
+
+def safe_int(obj):
+    if obj is None:
+        return None
+    return int(obj)

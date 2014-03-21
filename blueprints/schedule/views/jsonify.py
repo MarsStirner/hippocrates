@@ -2,6 +2,8 @@
 from collections import defaultdict
 import datetime
 import itertools
+from application.lib.utils import safe_unicode
+from blueprints.schedule.models.enums import EventPrimary, EventOrder
 
 from blueprints.schedule.models.schedule import ScheduleTicket, ScheduleClientTicket, Schedule, rbReceptionType
 
@@ -315,7 +317,7 @@ class ClientVisualizer(object):
             'SNILS': client.formatted_SNILS or None,
             'notes': client.notes,
             'document': pers_document,
-            'documentText': client.document,
+            'documentText': safe_unicode(client.document),
             'birthDate': client.birthDate,
             'regAddress': client.reg_address,
             'liveAddress': client.loc_address,
@@ -338,10 +340,7 @@ class ClientVisualizer(object):
     def make_records(self, client):
         return map(
             self.make_record,
-            client.appointments.
-                join(ScheduleClientTicket.ticket).
-                filter(ScheduleClientTicket.deleted == 0).
-                order_by(ScheduleTicket.begDateTime.desc())
+            client.appointments#.order_by(ScheduleTicket.begDateTime.desc())
         )
 
     def make_record(self, record):
@@ -373,12 +372,14 @@ class ClientVisualizer(object):
 
     def make_event(self, event):
         return {
+            'id': event.id,
             'externalId': event.externalId,
             'setDate': event.setDate,
             'execDate': event.execDate,
             'person': self.make_person(event.execPerson),
             'requestType': event.eventType.requestType,
         }
+
 
 class PersonTreeVisualizer(object):
     def make_person(self, person):
@@ -400,6 +401,54 @@ class PersonTreeVisualizer(object):
             if person.speciality:
                 specs[person.speciality.name].append(self.make_person(person))
 
+
+class EventVisualizer(object):
+    def make_event(self, event):
+        """
+        @param event: Event
+        """
+        return {
+            'id': event.id,
+            'external_id': event.externalId,
+            'order': EventOrder(event.order),
+            'order_': event.order,
+            'is_primary': EventPrimary(event.isPrimaryCode),
+            'is_primary_': event.isPrimaryCode,
+            'client': event.client,
+            'setDate': event.setDate,
+            'execDate': event.execDate,
+            'exec_person': event.execPerson,
+            'result': event.result,
+            'ache_result': event.rbAcheResult,
+            'contract': event.contract,
+            'event_type': event.eventType,
+            'finance': event.finance,
+            'organisation': event.organisation,
+        }
+
+    def make_diagnoses(self, event):
+        result = []
+        for diagnostic in event.diagnostics:
+            for diagnosis in diagnostic.diagnoses:
+                result.append(self.make_diagnose_row(diagnostic, diagnosis))
+        return result
+
+    def make_diagnose_row(self, diagnostic, diagnosis):
+        return {
+            'diagnosis_id': diagnosis.id,
+            'diagnostic_id': diagnostic.id,
+            'diagnosis_type': diagnostic.diagnosisType,
+            'person': diagnosis.person,
+            'mkb': diagnosis.MKB,
+            'mkb_ex': diagnosis.MKBEx,
+            'character': diagnosis.character,
+            'phase': diagnostic.phase,
+            'stage': diagnostic.stage,
+            'health_group': diagnostic.healthGroup,
+            'dispanser': diagnosis.dispanser,
+            'trauma': diagnosis.traumaType,
+            'note': diagnostic.notes,
+        }
 
 class RbVisualizer(object):
     def make_rb_info(self, reference_book):

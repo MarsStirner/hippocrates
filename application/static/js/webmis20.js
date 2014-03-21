@@ -1,7 +1,7 @@
 /**
  * Created by mmalkov on 10.02.14.
  */
-var WebMis20 = angular.module('WebMis20', ['ui.bootstrap']);
+var WebMis20 = angular.module('WebMis20', ['ui.bootstrap', 'ui.select']);
 WebMis20.config(function ($interpolateProvider) {
     $interpolateProvider.startSymbol('[[');
     $interpolateProvider.endSymbol(']]');
@@ -73,6 +73,28 @@ WebMis20.filter('join', function ($filter) {
         return data
     }
 });
+WebMis20.factory('RefBook', ['$http', function ($http) {
+    var RefBook = function (name) {
+        this.name = name;
+//        this.objects = [];
+        this.load();
+    };
+    RefBook.prototype.load = function () {
+        var t = this;
+        $http.get(rb_root + this.name).success(function (data) {
+            t.objects = data.result;
+        });
+        return this;
+    };
+    RefBook.prototype.get = function (id) {
+        var i = this.objects.length;
+        while (i--) {
+            if (this.objects[i].id == id) return this.objects[i];
+        }
+        return null;
+    };
+    return RefBook;
+}]);
 var aux = {
     getQueryParams: function (qs) {
         qs = qs.split("+").join(" ");

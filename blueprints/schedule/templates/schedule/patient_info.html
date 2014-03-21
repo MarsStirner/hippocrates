@@ -98,6 +98,11 @@
                 $event.stopPropagation();
                 return true;
             };
+
+            $scope.open_event = function(event) {
+                window.open('{{ url_for('.html_event_info') }}?event_id=' + event.id, '_self')
+            };
+
             $http.get(
                 '{{ url_for('.api_patient') }}', {
                     params: {

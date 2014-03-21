@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*
 import datetime
 from application.database import db
+from application.lib.agesex import AgeSex
 from blueprints.schedule.models.kladr_models import Kladr, Street
 
 
@@ -79,6 +80,9 @@ class Address(db.Model):
     def __unicode__(self):
         return self.text
 
+    def __int__(self):
+        return self.id
+
 
 class AddressAreaItem(db.Model):
     __tablename__ = u'AddressAreaItem'
@@ -98,6 +102,9 @@ class AddressAreaItem(db.Model):
     begDate = db.Column(db.Date, nullable=False)
     endDate = db.Column(db.Date)
 
+    def __int__(self):
+        return self.id
+
 
 class AddressHouse(db.Model):
     __tablename__ = u'AddressHouse'
@@ -116,6 +123,9 @@ class AddressHouse(db.Model):
     number = db.Column(db.String(8), nullable=False)
     corpus = db.Column(db.String(8), nullable=False)
 
+    def __int__(self):
+        return self.id
+
 
 class Bloodhistory(db.Model):
     __tablename__ = u'BloodHistory'
@@ -128,6 +138,9 @@ class Bloodhistory(db.Model):
 
     bloodType = db.relationship("rbBloodType")
     person = db.relationship("Person")
+
+    def __int__(self):
+        return self.id
 
 
 class Client(db.Model):
@@ -190,6 +203,11 @@ class Client(db.Model):
     events = db.relationship(
         u'Event', lazy='dynamic', order_by='desc(Event.createDatetime)',
         primaryjoin='and_(Event.deleted == 0, Event.client_id == Client.id)')
+    appointments = db.relationship(
+        u'ScheduleClientTicket', lazy='dynamic', #order_by='desc(ScheduleTicket.begDateTime)',
+        primaryjoin='and_(ScheduleClientTicket.deleted == 0, ScheduleClientTicket.client_id == Client.id)',
+        innerjoin=True
+    )
 
     @property
     def nameText(self):
@@ -265,6 +283,9 @@ class Client(db.Model):
     def __unicode__(self):
         return self.nameText
 
+    def __int__(self):
+        return self.id
+
 
 class ClientAddress(db.Model):
     __tablename__ = u'ClientAddress'
@@ -322,6 +343,9 @@ class ClientAddress(db.Model):
         else:
             return self.freeInput
 
+    def __int__(self):
+        return self.id
+
 
 class ClientAllergy(db.Model):
     __tablename__ = u'ClientAllergy'
@@ -343,6 +367,9 @@ class ClientAllergy(db.Model):
 
     def __unicode__(self):
         return self.name
+
+    def __int__(self):
+        return self.id
 
 
 class ClientContact(db.Model):
@@ -366,6 +393,9 @@ class ClientContact(db.Model):
     @property
     def name(self):
         return self.contactType.name
+
+    def __int__(self):
+        return self.id
 
 
 class ClientDocument(db.Model):
@@ -399,6 +429,20 @@ class ClientDocument(db.Model):
     def __unicode__(self):
         return (' '.join([self.documentType.name, self.serial, self.number])).strip()
 
+    def __json__(self):
+        return {
+            'id': self.documentId,
+            'serial': self.serial,
+            'number': self.number,
+            'date': self.date,
+            'origin': self.origin,
+            'endDate': self.endDate,
+            'document_type': self.documentType
+        }
+
+    def __int__(self):
+        return self.id
+
 
 class ClientIdentification(db.Model):
     __tablename__ = u'ClientIdentification'
@@ -429,6 +473,17 @@ class ClientIdentification(db.Model):
     def name(self):
         return self.attachType.name
 
+    def __json__(self):
+        return {
+            'id': self.id,
+            'accounting_system': self.accountingSystems,
+            'identifier': self.identifier,
+            'chechDate': self.checkDate,
+        }
+
+    def __int__(self):
+        return self.id
+
 
 class ClientIntoleranceMedicament(db.Model):
     __tablename__ = u'ClientIntoleranceMedicament'
@@ -450,6 +505,9 @@ class ClientIntoleranceMedicament(db.Model):
 
     def __unicode__(self):
         return self.name
+
+    def __int__(self):
+        return self.id
 
 
 class ClientRelation(db.Model):
@@ -483,6 +541,9 @@ class ClientRelation(db.Model):
     @property
     def name(self):
         return self.role + ' -> ' + self.otherRole
+
+    def __int__(self):
+        return self.id
 
 
 class DirectClientRelation(ClientRelation):
@@ -649,6 +710,9 @@ class ClientSocStatus(db.Model):
     def __unicode__(self):
         return self.name
 
+    def __int__(self):
+        return self.id
+
 
 class rbDocumentTypeGroup(db.Model):
     __tablename__ = 'rbDocumentTypeGroup'
@@ -656,6 +720,16 @@ class rbDocumentTypeGroup(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     code = db.Column(db.Unicode(8), nullable=False)
     name = db.Column(db.Unicode(64), nullable=False)
+
+    def __json__(self):
+        return {
+            'id': self.id,
+            'code': self.code,
+            'name': self.name,
+        }
+
+    def __int__(self):
+        return self.id
 
 
 class rbFinance(db.Model):
@@ -665,6 +739,16 @@ class rbFinance(db.Model):
     code = db.Column(db.Unicode(8), nullable=False)
     name = db.Column(db.Unicode(64), nullable=False)
 
+    def __json__(self):
+        return {
+            'id': self.id,
+            'code': self.code,
+            'name': self.name,
+        }
+
+    def __int__(self):
+        return self.id
+
 
 class rbBloodType(db.Model):
     __tablename__ = 'rbBloodType'
@@ -672,6 +756,16 @@ class rbBloodType(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     code = db.Column(db.Unicode(32), nullable=False)
     name = db.Column(db.Unicode(64), nullable=False)
+
+    def __json__(self):
+        return {
+            'id': self.id,
+            'code': self.code,
+            'name': self.name,
+        }
+
+    def __int__(self):
+        return self.id
 
 
 class ClientPolicy(db.Model):
@@ -704,6 +798,9 @@ class ClientPolicy(db.Model):
 
     def __unicode__(self):
         return (' '.join([self.policyType.name, unicode(self.insurer), self.serial, self.number])).strip()
+
+    def __int__(self):
+        return self.id
 
 
 class Organisation(db.Model):
@@ -757,6 +854,19 @@ class Organisation(db.Model):
 
     def __unicode__(self):
         return self.fullName
+
+    def __json__(self):
+        return {
+            'id': self.id,
+            'full_name': self.fullName,
+            'short_name': self.shortName,
+            'title': self.title,
+            'net': self.net,
+            'infis': self.infisCode,
+        }
+
+    def __int__(self):
+        return self.id
 
 
 class OrgStructure(db.Model):
@@ -836,6 +946,9 @@ class OrgStructure(db.Model):
     net = property(getNet)
     fullName = property(getFullName)
     address = property(getAddress)
+
+    def __int__(self):
+        return self.id
 
 
 class Person(db.Model):
@@ -917,6 +1030,25 @@ class Person(db.Model):
     def __unicode__(self):
         return self.nameText
 
+    def __json__(self):
+        return {
+            'id': self.id,
+            'name': self.nameText,
+            'code': self.code,
+            'birth_date': self.birthDate,
+            'speciality': self.speciality,
+            'federal_code': self.federalCode,
+            'regional_code': self.regionalCode,
+            'post': self.post,
+            'organisation': self.organisation,
+            'org_structure': self.OrgStructure,
+            'academic_degree': self.academicDegree,
+            'academic_title': self.academicTitle,
+        }
+
+    def __int__(self):
+        return self.id
+
 
 class rbAcademicDegree(db.Model):
     __tablename__ = 'rbAcademicDegree'
@@ -925,6 +1057,13 @@ class rbAcademicDegree(db.Model):
     code = db.Column(db.String(8), nullable=False)
     name = db.Column(db.Unicode(64), nullable=False)
 
+    def __json__(self):
+        return {
+            'id': self.id,
+            'code': self.code,
+            'name': self.name,
+        }
+
 
 class rbAcademicTitle(db.Model):
     __tablename__ = 'rbAcademicTitle'
@@ -932,6 +1071,16 @@ class rbAcademicTitle(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     code = db.Column(db.String(8), nullable=False, index=True)
     name = db.Column(db.Unicode(64), nullable=False, index=True)
+
+    def __json__(self):
+        return {
+            'id': self.id,
+            'code': self.code,
+            'name': self.name,
+        }
+
+    def __int__(self):
+        return self.id
 
 
 class rbAccountingSystem(db.Model):
@@ -943,6 +1092,18 @@ class rbAccountingSystem(db.Model):
     isEditable = db.Column(db.Integer, nullable=False, server_default=u"'0'")
     showInClientInfo = db.Column(db.Integer, nullable=False, server_default=u"'0'")
 
+    def __json__(self):
+        return {
+            'id': self.id,
+            'code': self.code,
+            'name': self.name,
+            'is_editable': bool(self.isEditable),
+            'show_in_client_info': bool(self.showInClientInfo),
+        }
+
+    def __int__(self):
+        return self.id
+
 
 class rbContactType(db.Model):
     __tablename__ = 'rbContactType'
@@ -951,6 +1112,16 @@ class rbContactType(db.Model):
     code = db.Column(db.String(8), nullable=False, index=True)
     name = db.Column(db.Unicode(64), nullable=False, index=True)
     
+    def __json__(self):
+        return {
+            'id': self.id,
+            'code': self.code,
+            'name': self.name,
+        }
+
+    def __int__(self):
+        return self.id
+
 
 class rbDocumentType(db.Model):
     __tablename__ = 'rbDocumentType'
@@ -968,6 +1139,20 @@ class rbDocumentType(db.Model):
 
     group = db.relationship(u'rbDocumentTypeGroup', lazy=False)
 
+    def __json__(self):
+        return {
+            'id': self.id,
+            'code': self.code,
+            'name': self.name,
+            'regional_code': self.regionalCode,
+            'federal_code': self.federalCode,
+            'soc_code': self.socCode,
+            'TFOMS_code': self.TFOMSCode
+        }
+
+    def __int__(self):
+        return self.id
+
 
 class rbNet(db.Model):
     __tablename__ = 'rbNet'
@@ -982,6 +1167,17 @@ class rbNet(db.Model):
     age_eu = db.Column(db.Integer)
     age_ec = db.Column(db.SmallInteger)
 
+    def __json__(self):
+        return {
+            'id': self.id,
+            'code': self.code,
+            'name': self.name,
+            'restrictions': AgeSex(self),
+        }
+
+    def __int__(self):
+        return self.id
+
 
 class rbOKFS(db.Model):
     __tablename__ = 'rbOKFS'
@@ -991,6 +1187,17 @@ class rbOKFS(db.Model):
     name = db.Column(db.String(64), nullable=False, index=True)
     ownership = db.Column(db.Integer, nullable=False, server_default=u"'0'")
 
+    def __json__(self):
+        return {
+            'id': self.id,
+            'code': self.code,
+            'name': self.name,
+            'ownership': self.ownership,
+        }
+
+    def __int__(self):
+        return self.id
+
 
 class rbOKPF(db.Model):
     __tablename__ = 'rbOKPF'
@@ -998,6 +1205,16 @@ class rbOKPF(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     code = db.Column(db.String(8), nullable=False, index=True)
     name = db.Column(db.String(64), nullable=False, index=True)
+
+    def __json__(self):
+        return {
+            'id': self.id,
+            'code': self.code,
+            'name': self.name,
+        }
+
+    def __int__(self):
+        return self.id
 
 
 class rbPolicyType(db.Model):
@@ -1007,6 +1224,17 @@ class rbPolicyType(db.Model):
     code = db.Column(db.String(64), nullable=False, unique=True)
     name = db.Column(db.Unicode(256), nullable=False, index=True)
     TFOMSCode = db.Column(db.String(8))
+
+    def __json__(self):
+        return {
+            'id': self.id,
+            'code': self.code,
+            'name': self.name,
+            'TFOMS_code': self.TFOMSCode,
+        }
+
+    def __int__(self):
+        return self.id
 
 
 class rbPost(db.Model):
@@ -1019,6 +1247,20 @@ class rbPost(db.Model):
     key = db.Column(db.String(6), nullable=False, index=True)
     high = db.Column(db.String(6), nullable=False)
     flatCode = db.Column(db.String(65), nullable=False)
+
+    def __json__(self):
+        return {
+            'id': self.id,
+            'code': self.code,
+            'name': self.name,
+            'regional_code': self.regionalCode,
+            'key': self.key,
+            'high': self.high,
+            'flat_code': self.flatCode,
+        }
+
+    def __int__(self):
+        return self.id
 
 
 class rbReasonOfAbsence(db.Model):
@@ -1033,6 +1275,9 @@ class rbReasonOfAbsence(db.Model):
             'code': self.code,
             'name': self.name,
         }
+
+    def __int__(self):
+        return self.id
 
 
 class rbRelationType(db.Model):
@@ -1055,6 +1300,9 @@ class rbRelationType(db.Model):
     regionalCode = db.Column(db.String(64), nullable=False)
     regionalReverseCode = db.Column(db.String(64), nullable=False)
 
+    def __int__(self):
+        return self.id
+
 
 class rbSpeciality(db.Model):
     __tablename__ = 'rbSpeciality'
@@ -1075,6 +1323,21 @@ class rbSpeciality(db.Model):
     regionalCode = db.Column(db.String(16), nullable=False)
     quotingEnabled = db.Column(db.Integer, server_default=u"'0'")
 
+    def __json__(self):
+        return {
+            'id': self.id,
+            'code': self.code,
+            'name': self.name,
+            'OKSO_name': self.OKSOName,
+            'OKSO_code': self.OKSOCode,
+            'MKB_filter': self.mkbFilter,
+            'regional_code': self.regionalCode,
+            'quoting_qnabled': bool(self.quotingEnabled),
+        }
+
+    def __int__(self):
+        return self.id
+
 
 class rbSocStatusClass(db.Model):
     __tablename__ = u'rbSocStatusClass'
@@ -1088,6 +1351,9 @@ class rbSocStatusClass(db.Model):
 
     def __unicode__(self):
         return self.name
+
+    def __int__(self):
+        return self.id
 
 
 rbSocStatusClassTypeAssoc = db.Table('rbSocStatusClassTypeAssoc', db.Model.metadata,
@@ -1108,6 +1374,9 @@ class rbSocStatusType(db.Model):
 
     classes = db.relationship(u'rbSocStatusClass', secondary=rbSocStatusClassTypeAssoc)
 
+    def __int__(self):
+        return self.id
+
 
 class rbTariffCategory(db.Model):
     __tablename__ = 'rbTariffCategory'
@@ -1116,6 +1385,16 @@ class rbTariffCategory(db.Model):
     code = db.Column(db.String(16), nullable=False, index=True)
     name = db.Column(db.String(64), nullable=False, index=True)
 
+    def __json__(self):
+        return {
+            'id': self.id,
+            'code': self.code,
+            'name': self.name,
+        }
+
+    def __int__(self):
+        return self.id
+
 
 class rbUFMS(db.Model):
     __tablename__ = u'rbUFMS'
@@ -1123,6 +1402,106 @@ class rbUFMS(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     code = db.Column(db.String(50, u'utf8_bin'), nullable=False)
     name = db.Column(db.Unicode(256), nullable=False)
+
+    def __json__(self):
+        return {
+            'id': self.id,
+            'code': self.code,
+            'name': self.name,
+        }
+
+    def __int__(self):
+        return self.id
+
+
+class Diagnosis(db.Model):
+    __tablename__ = u'Diagnosis'
+
+    id = db.Column(db.Integer, primary_key=True)
+    createDatetime = db.Column(db.DateTime, nullable=False)
+    createPerson_id = db.Column(db.ForeignKey('Person.id'), index=True)
+    modifyDatetime = db.Column(db.DateTime, nullable=False)
+    modifyPerson_id = db.Column(db.ForeignKey('Person.id'), index=True)
+    deleted = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    client_id = db.Column(db.ForeignKey('Client.id'), index=True, nullable=False)
+    diagnosisType_id = db.Column(db.ForeignKey('rbDiagnosisType.id'), index=True, nullable=False)
+    character_id = db.Column(db.ForeignKey('rbDiseaseCharacter.id'), index=True)
+    MKB = db.Column(db.String(8), db.ForeignKey('MKB.DiagID'), index=True)
+    MKBEx = db.Column(db.String(8), db.ForeignKey('MKB.DiagID'), index=True)
+    dispanser_id = db.Column(db.ForeignKey('rbDispanser.id'), index=True)
+    traumaType_id = db.Column(db.ForeignKey('rbTraumaType.id'), index=True)
+    setDate = db.Column(db.Date)
+    endDate = db.Column(db.Date, nullable=False)
+    mod_id = db.Column(db.ForeignKey('Diagnosis.id'), index=True)
+    person_id = db.Column(db.ForeignKey('Person.id'), index=True)
+    # diagnosisName = db.Column(db.String(64), nullable=False)
+
+    createPerson = db.relationship('Person', foreign_keys=[createPerson_id])
+    modifyPerson = db.relationship('Person', foreign_keys=[modifyPerson_id])
+    person = db.relationship('Person', foreign_keys=[person_id], lazy=False, innerjoin=True)
+    client = db.relationship('Client')
+    diagnosisType = db.relationship('rbDiagnosisType', lazy=False, innerjoin=True)
+    character = db.relationship('rbDiseaseCharacter', lazy=False)
+    mkb = db.relationship('MKB', foreign_keys=[MKB])
+    mkb_ex = db.relationship('MKB', foreign_keys=[MKB])
+    dispanser = db.relationship('rbDispanser', lazy=False)
+    mod = db.relationship('Diagnosis', remote_side=[id])
+    traumaType = db.relationship('rbTraumaType', lazy=False)
+
+    def __int__(self):
+        return self.id
+
+
+class Diagnostic(db.Model):
+    __tablename__ = u'Diagnostic'
+
+    id = db.Column(db.Integer, primary_key=True)
+    createDatetime = db.Column(db.DateTime, nullable=False)
+    createPerson_id = db.Column(db.ForeignKey('Person.id'), index=True)
+    modifyDatetime = db.Column(db.DateTime, nullable=False)
+    modifyPerson_id = db.Column(db.ForeignKey('Person.id'), index=True)
+    deleted = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    event_id = db.Column(db.ForeignKey('Event.id'), nullable=False, index=True)
+    diagnosis_id = db.Column(db.ForeignKey('Diagnosis.id'), index=True)
+    diagnosisType_id = db.Column(db.ForeignKey('rbDiagnosisType.id'), index=True, nullable=False)
+    character_id = db.Column(db.ForeignKey('rbDiseaseCharacter.id'), index=True)
+    stage_id = db.Column(db.ForeignKey('rbDiseaseStage.id'), index=True)
+    phase_id = db.Column(db.ForeignKey('rbDiseasePhases.id'), index=True)
+    dispanser_id = db.Column(db.ForeignKey('rbDispanser.id'), index=True)
+    sanatorium = db.Column(db.Integer, nullable=False)
+    hospital = db.Column(db.Integer, nullable=False)
+    traumaType_id = db.Column(db.ForeignKey('rbTraumaType.id'), index=True)
+    speciality_id = db.Column(db.Integer, nullable=False, index=True)
+    person_id = db.Column(db.ForeignKey('Person.id'), index=True)
+    healthGroup_id = db.Column(db.ForeignKey('rbHealthGroup.id'), index=True)
+    result_id = db.Column(db.ForeignKey('rbResult.id'), index=True)
+    setDate = db.Column(db.DateTime, nullable=False)
+    endDate = db.Column(db.DateTime)
+    notes = db.Column(db.Text, nullable=False)
+    rbAcheResult_id = db.Column(db.ForeignKey('rbAcheResult.id'), index=True)
+    version = db.Column(db.Integer, nullable=False)
+    action_id = db.Column(db.Integer, index=True)
+
+    rbAcheResult = db.relationship(u'rbAcheResult', innerjoin=True)
+    result = db.relationship(u'rbResult', innerjoin=True)
+    createPerson = db.relationship('Person', foreign_keys=[createPerson_id])
+    modifyPerson = db.relationship('Person', foreign_keys=[modifyPerson_id])
+    person = db.relationship('Person', foreign_keys=[person_id])
+    event = db.relationship('Event', innerjoin=True)
+    diagnoses = db.relationship(
+        'Diagnosis', innerjoin=True, lazy=False, uselist=True,
+        primaryjoin='and_(Diagnostic.diagnosis_id == Diagnosis.id, Diagnosis.deleted == 0)'
+    )
+    diagnosisType = db.relationship('rbDiagnosisType', lazy=False, innerjoin=True)
+    character = db.relationship('rbDiseaseCharacter')
+    stage = db.relationship('rbDiseaseStage', lazy=False)
+    phase = db.relationship('rbDiseasePhases', lazy=False)
+    dispanser = db.relationship('rbDispanser')
+    traumaType = db.relationship('rbTraumaType')
+    healthGroup = db.relationship('rbHealthGroup', lazy=False)
+
+    def __int__(self):
+        return self.id
 
 
 class Event(db.Model):
@@ -1165,18 +1544,22 @@ class Event(db.Model):
     lpu_transfer = db.Column(db.String(100))
 
     # actions = db.relationship(u'Action')
-    eventType = db.relationship(u'EventType')
-    execPerson = db.relationship(u'Person', foreign_keys='Event.execPerson_id')
-    curator = db.relationship(u'Person', foreign_keys='Event.curator_id')
-    assistant = db.relationship(u'Person', foreign_keys='Event.assistant_id')
+    eventType = db.relationship(u'EventType', lazy=False)
+    execPerson = db.relationship(u'Person', foreign_keys='Event.execPerson_id', lazy=False)
+    curator = db.relationship(u'Person', foreign_keys='Event.curator_id', lazy=False)
+    assistant = db.relationship(u'Person', foreign_keys='Event.assistant_id', lazy=False)
     contract = db.relationship(u'Contract')
     organisation = db.relationship(u'Organisation')
-    mesSpecification = db.relationship(u'rbMesSpecification')
-    rbAcheResult = db.relationship(u'rbAcheResult')
-    result = db.relationship(u'rbResult')
-    typeAsset = db.relationship(u'rbEmergencyTypeAsset')
+    mesSpecification = db.relationship(u'rbMesSpecification', lazy=False)
+    rbAcheResult = db.relationship(u'rbAcheResult', lazy=False)
+    result = db.relationship(u'rbResult', lazy=False)
+    typeAsset = db.relationship(u'rbEmergencyTypeAsset', lazy=False)
     localContract = db.relationship(u'EventLocalContract')
     client = db.relationship(u'Client')
+    diagnostics = db.relationship(
+        u'Diagnostic', lazy=True, innerjoin=True, primaryjoin=
+        "and_(Event.id == Diagnostic.event_id, Diagnostic.deleted == 0)"
+    )
 
     @property
     def isPrimary(self):
@@ -1200,6 +1583,9 @@ class Event(db.Model):
 
     def __unicode__(self):
         return unicode(self.eventType)
+
+    def __int__(self):
+        return self.id
 
 
 class EventType(db.Model):
@@ -1267,6 +1653,29 @@ class EventType(db.Model):
     service = db.relationship(u'rbService')
     requestType = db.relationship(u'rbRequestType', lazy=False)
 
+    def __json__(self):
+        return {
+            'id': self.id,
+            'code': self.code,
+            'name': self.name,
+            'purpose': self.purpose,
+            'finance': self.finance,
+            'print_context': self.printContext,
+            'form': self.form,
+            'mes': {
+                'required': self.mesRequired,
+                'code_mask': self.mesCodeMask,
+                'name_mask': self.mesNameMask,
+            },
+            'restrictions': AgeSex(self),
+            'medical_kind': self.rbMedicalKind,
+            'service': self.service,
+            'request_type': self.requestType,
+        }
+
+    def __int__(self):
+        return self.id
+
 
 class rbCounter(db.Model):
     __tablename__ = u'rbCounter'
@@ -1290,6 +1699,16 @@ class rbMedicalKind(db.Model):
     code = db.Column(db.String(1, u'utf8_unicode_ci'), nullable=False)
     name = db.Column(db.String(64, u'utf8_unicode_ci'), nullable=False)
 
+    def __json__(self):
+        return {
+            'id': self.id,
+            'code': self.code,
+            'name': self.name,
+        }
+
+    def __int__(self):
+        return self.id
+
 
 class rbEventTypePurpose(db.Model):
     __tablename__ = u'rbEventTypePurpose'
@@ -1298,6 +1717,17 @@ class rbEventTypePurpose(db.Model):
     code = db.Column(db.String(8), nullable=False, index=True)
     name = db.Column(db.Unicode(64), nullable=False, index=True)
     codePlace = db.Column(db.String(2))
+
+    def __json__(self):
+        return {
+            'id': self.id,
+            'code': self.code,
+            'name': self.name,
+            'code_place': self.codePlace,
+        }
+
+    def __int__(self):
+        return self.id
 
 
 class rbService(db.Model):
@@ -1331,6 +1761,27 @@ class rbService(db.Model):
     medicalAidProfile = db.relationship(u'rbMedicalAidProfile')
     rbMedicalKind = db.relationship(u'rbMedicalKind')
 
+    def __json__(self):
+        return {
+            'id': self.id,
+            'code': self.code,
+            'name': self.name,
+            'infis': self.infis,
+            'begDate': self.begDate,
+            'endDate': self.endDate,
+            'adult_uet_doctor': self.adultUetDoctor,
+            'adult_uet_average_medical_worker': self.adultUetAverageMedWorker,
+            'child_uet_doctor': self.childUetDoctor,
+            'child_uet_average_medical_worker': self.childUetAverageMedWorker,
+            'uet': self.UET,
+            'department_code': self.departCode,
+            'medical_aid_profile': self.medicalAidProfile,
+            'medical_kind': self.rbMedicalKind,
+        }
+
+    def __int__(self):
+        return self.id
+
 
 class rbRequestType(db.Model):
     __tablename__ = u'rbRequestType'
@@ -1347,16 +1798,33 @@ class rbRequestType(db.Model):
             'name': self.name,
         }
 
+    def __int__(self):
+        return self.id
+
 
 class rbResult(db.Model):
     __tablename__ = u'rbResult'
 
     id = db.Column(db.Integer, primary_key=True)
-    eventPurpose_id = db.Column(db.Integer, nullable=False, index=True)
+    eventPurpose_id = db.Column(db.ForeignKey('rbEventTypePurpose.id'), nullable=False, index=True)
     code = db.Column(db.String(8), nullable=False, index=True)
     name = db.Column(db.Unicode(64), nullable=False, index=True)
     continued = db.Column(db.Integer, nullable=False)
     regionalCode = db.Column(db.String(8), nullable=False)
+
+    eventPurpose = db.relationship(u'rbEventTypePurpose')
+
+    def __json__(self):
+        return {
+            'id': self.id,
+            'code': self.code,
+            'name': self.name,
+            'continued': bool(self.continued),
+            'regional_code': self.regionalCode,
+        }
+
+    def __int__(self):
+        return self.id
 
 
 class rbAcheResult(db.Model):
@@ -1368,6 +1836,16 @@ class rbAcheResult(db.Model):
     name = db.Column(db.String(64, u'utf8_unicode_ci'), nullable=False)
 
     eventPurpose = db.relationship(u'rbEventTypePurpose')
+
+    def __json__(self):
+        return {
+            'id': self.id,
+            'code': self.code,
+            'name': self.name,
+        }
+
+    def __int__(self):
+        return self.id
 
 
 class Contract(db.Model):
@@ -1411,6 +1889,40 @@ class Contract(db.Model):
     def __unicode__(self):
         return u'%s %s' % (self.number, self.date)
 
+    def __json__(self):
+        return {
+            'id': self.id,
+            'number': self.number,
+            'date': self.date,
+            'begDate': self.begDate,
+            'endDate': self.endDate,
+            'grouping': self.grouping,
+            'resolution': self.resolution,
+            # format_id = db.Column(db.Integer, index=True)
+            'exposeUnfinishedEventVisits': bool(self.exposeUnfinishedEventVisits),
+            'exposeUnfinishedEventActions': bool(self.exposeUnfinishedEventActions),
+            'visitExposition': self.visitExposition,
+            'actionExposition': self.actionExposition,
+            'exposeDiscipline': self.exposeDiscipline,
+            # priceList_id = db.Column(db.Integer)
+            'coefficient': float(self.coefficient),
+            'coefficientEx': float(self.coefficientEx),
+
+            'recipient': self.recipient,
+            'recipientKBK': self.recipientKBK,
+            'recipientAccount': self.recipientAccount,
+
+            'payer': self.payer,
+            'payerKBK': self.payerKBK,
+            'payerAccount': self.payerAccount,
+
+            'finance': self.finance,
+
+        }
+
+    def __int__(self):
+        return self.id
+
 
 class OrganisationAccount(db.Model):
     __tablename__ = u'Organisation_Account'
@@ -1425,6 +1937,20 @@ class OrganisationAccount(db.Model):
 
     org = db.relationship(u'Organisation')
     bank = db.relationship(u'Bank')
+
+    def __json__(self):
+        return {
+            'id': self.id,
+            'bank_name': self.bankName,
+            'name': self.name,
+            'notes': self.notes,
+            'cash': self.cash,
+            # 'organisation': self.org,
+            'bank': self.bank,
+        }
+
+    def __int__(self):
+        return self.id
 
 
 class Bank(db.Model):
@@ -1441,6 +1967,19 @@ class Bank(db.Model):
     branchName = db.Column(db.Unicode(100), nullable=False)
     corrAccount = db.Column(db.String(20), nullable=False)
     subAccount = db.Column(db.String(20), nullable=False)
+
+    def __json__(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'bik': self.bik,
+            'branch_name': self.branchName,
+            'corr_account': self.corrAccount,
+            'sub_account': self.subAccount,
+        }
+
+    def __int__(self):
+        return self.id
 
 
 class EventLocalContract(db.Model):
@@ -1504,6 +2043,9 @@ class EventLocalContract(db.Model):
         document.number = self.number
         return document
 
+    def __int__(self):
+        return self.id
+
 
 class rbMesSpecification(db.Model):
     __tablename__ = u'rbMesSpecification'
@@ -1514,6 +2056,18 @@ class rbMesSpecification(db.Model):
     name = db.Column(db.Unicode(64), nullable=False)
     done = db.Column(db.Integer, nullable=False)
 
+    def __json__(self):
+        return {
+            'id': self.id,
+            'code': self.code,
+            'name': self.name,
+            'regional_code': self.regionalCode,
+            'done': self.done,
+        }
+
+    def __int__(self):
+        return self.id
+
 
 class rbEmergencyTypeAsset(db.Model):
     __tablename__ = u'rbEmergencyTypeAsset'
@@ -1523,6 +2077,17 @@ class rbEmergencyTypeAsset(db.Model):
     name = db.Column(db.Unicode(64), nullable=False, index=True)
     codeRegional = db.Column(db.String(8), nullable=False, index=True)
 
+    def __json__(self):
+        return {
+            'id': self.id,
+            'code': self.code,
+            'name': self.name,
+            'regional_code': self.codeRegional,
+        }
+
+    def __int__(self):
+        return self.id
+
 
 class rbMedicalAidProfile(db.Model):
     __tablename__ = u'rbMedicalAidProfile'
@@ -1531,5 +2096,185 @@ class rbMedicalAidProfile(db.Model):
     code = db.Column(db.String(16), nullable=False, index=True)
     regionalCode = db.Column(db.String(16), nullable=False)
     name = db.Column(db.String(64), nullable=False)
+
+    def __json__(self):
+        return {
+            'id': self.id,
+            'code': self.code,
+            'name': self.name,
+            'regional_code': self.regionalCode,
+        }
+
+    def __int__(self):
+        return self.id
+
+
+class rbDiagnosisType(db.Model):
+    __tablename__ = u'rbDiagnosisType'
+
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(8), nullable=False, index=True)
+    name = db.Column(db.String(64), nullable=False, index=True)
+    replaceInDiagnosis = db.Column(db.String(8), nullable=False)
+    flatCode = db.Column(db.String(64), nullable=False)
+
+    def __json__(self):
+        return {
+            'id': self.id,
+            'code': self.code,
+            'name': self.name,
+            'flat_code': self.flatCode,
+        }
+
+    def __int__(self):
+        return self.id
+
+
+class rbDiseaseCharacter(db.Model):
+    __tablename__ = u'rbDiseaseCharacter'
+
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(8), nullable=False, index=True)
+    name = db.Column(db.String(64), nullable=False, index=True)
+    replaceInDiagnosis = db.Column(db.String(8), nullable=False)
+
+    def __json__(self):
+        return {
+            'id': self.id,
+            'code': self.code,
+            'name': self.name,
+        }
+
+    def __int__(self):
+        return self.id
+
+
+class rbDiseasePhases(db.Model):
+    __tablename__ = u'rbDiseasePhases'
+
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(8), nullable=False, index=True)
+    name = db.Column(db.String(64), nullable=False, index=True)
+    characterRelation = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+
+    def __json__(self):
+        return {
+            'id': self.id,
+            'code': self.code,
+            'name': self.name,
+        }
+
+    def __int__(self):
+        return self.id
+
+
+class rbDiseaseStage(db.Model):
+    __tablename__ = u'rbDiseaseStage'
+
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(8), nullable=False, index=True)
+    name = db.Column(db.String(64), nullable=False, index=True)
+    characterRelation = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+
+    def __json__(self):
+        return {
+            'id': self.id,
+            'code': self.code,
+            'name': self.name,
+        }
+
+    def __int__(self):
+        return self.id
+
+
+class rbDispanser(db.Model):
+    __tablename__ = u'rbDispanser'
+
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(8), nullable=False, index=True)
+    name = db.Column(db.String(64), nullable=False, index=True)
+    observed = db.Column(db.Integer, nullable=False)
+
+    def __json__(self):
+        return {
+            'id': self.id,
+            'code': self.code,
+            'name': self.name,
+            'observed': self.observed,
+        }
+
+    def __int__(self):
+        return self.id
+
+
+class rbTraumaType(db.Model):
+    __tablename__ = u'rbTraumaType'
+
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(8), nullable=False, index=True)
+    name = db.Column(db.String(64), nullable=False, index=True)
+
+    def __json__(self):
+        return {
+            'id': self.id,
+            'code': self.code,
+            'name': self.name,
+        }
+
+    def __int__(self):
+        return self.id
+
+
+class rbHealthGroup(db.Model):
+    __tablename__ = u'rbHealthGroup'
+
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(8), nullable=False, index=True)
+    name = db.Column(db.String(64), nullable=False, index=True)
+
+    def __json__(self):
+        return {
+            'id': self.id,
+            'code': self.code,
+            'name': self.name,
+        }
+
+    def __int__(self):
+        return self.id
+
+
+class MKB(db.Model):
+    __tablename__ = u'MKB'
+    __table_args__ = (
+        db.Index(u'BlockID', u'BlockID', u'DiagID'),
+        db.Index(u'ClassID_2', u'ClassID', u'BlockID', u'BlockName'),
+        db.Index(u'ClassID', u'ClassID', u'ClassName')
+    )
+
+    id = db.Column(db.Integer, primary_key=True)
+    ClassID = db.Column(db.String(8), nullable=False)
+    ClassName = db.Column(db.String(150), nullable=False)
+    BlockID = db.Column(db.String(9), nullable=False)
+    BlockName = db.Column(db.String(160), nullable=False)
+    DiagID = db.Column(db.String(8), nullable=False, index=True)
+    DiagName = db.Column(db.String(160), nullable=False, index=True)
+    Prim = db.Column(db.String(1), nullable=False)
+    sex = db.Column(db.Integer, nullable=False)
+    age = db.Column(db.String(12), nullable=False)
+    age_bu = db.Column(db.Integer)
+    age_bc = db.Column(db.SmallInteger)
+    age_eu = db.Column(db.Integer)
+    age_ec = db.Column(db.SmallInteger)
+    characters = db.Column(db.Integer, nullable=False)
+    duration = db.Column(db.Integer, nullable=False)
+    service_id = db.Column(db.Integer, index=True)
+    MKBSubclass_id = db.Column(db.Integer)
+
+    def __unicode__(self):
+        return self.DiagID
+
+    def __int__(self):
+        return self.id
+
 
 
