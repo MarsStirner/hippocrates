@@ -7,9 +7,8 @@ import json
 from flask import abort, request
 
 from application.database import db
-from application.der_cache import cache
 from application.lib.sphinx_search import SearchPatient, SearchPerson
-from application.lib.utils import public_endpoint, jsonify
+from application.lib.utils import public_endpoint, jsonify, safe_traverse
 from blueprints.schedule.app import module
 from blueprints.schedule.models.exists import Person, Client, rbSpeciality, rbDocumentType, rbPolicyType, \
     rbReasonOfAbsence, rbSocStatusClass, rbSocStatusType, rbAccountingSystem, rbContactType, rbRelationType, ClientDocument, \
@@ -544,3 +543,60 @@ def api_refbook(name):
         return abort(404)
     ref_book = getattr(exists, name)
     return jsonify(ref_book.query.order_by(ref_book.id).all())
+
+
+@module.route('/api/events/diagnosis.json', methods=['POST'])
+@public_endpoint
+def api_diagnosis_save():
+    current_datetime = datetime.datetime.now()
+    from ..models.exists import Diagnosis, Diagnostic
+    data = request.json
+    diagnosis_id = data.get('diagnosis_id')
+    diagnostic_id = data.get('diagnostic_id')
+    if diagnosis_id:
+        diagnosis = Diagnosis.get(diagnosis_id)
+    else:
+        diagnosis = Diagnosis()
+        diagnosis.createDatetime = current_datetime
+    if diagnostic_id:
+        diagnostic = Diagnostic.get(diagnostic_id)
+    else:
+        diagnostic = Diagnostic()
+        diagnostic.createDatetime = current_datetime
+
+    diagnosis.modifyDatetime = current_datetime
+    diagnostic.modifyDatetime = current_datetime
+
+    diagnosis.client_id = data['client_id']
+    diagnosis.diagnosisType_id = safe_traverse(data, 'diagnosis_type', 'id')
+    diagnosis.character_id = safe_traverse(data, 'character', 'id')
+    diagnosis.dispanser_id = safe_traverse(data, 'dispanser', 'id')
+    diagnosis.traumaType_id = safe_traverse(data, 'trauma', 'id')
+    db.session.add(diagnosis)
+
+    diagnostic.event_id = data['event_id']
+    diagnostic.diagnosis = diagnosis
+    diagnostic.diagnosisType_id = safe_traverse(data, 'diagnosis_type', 'id')
+    diagnostic.character_id = safe_traverse(data, 'character', 'id')
+    diagnostic.stage_id = safe_traverse(data, 'stage', 'id')
+    diagnostic.phase_id = safe_traverse(data, 'phase', 'id')
+    diagnostic.dispanser_id = safe_traverse(data, 'dispanser', 'id')
+    diagnostic.traumaType_id = safe_traverse(data, 'trauma', 'id')
+    diagnostic.healthGroup_id = safe_traverse(data, 'health_group', 'id')
+    diagnostic.result_id = safe_traverse(data, 'result', 'id')
+    diagnostic.notes = data.get('notes', '')
+    diagnostic.rbAcheResult_id = safe_traverse(data, 'ache_result', 'id')
+    db.session.add(diagnostic)
+
+    db.session.commit()
+
+
+@module.route('/api/events/diagnosis.json', methods=['DELETE'])
+@public_endpoint
+def api_diagnosis_delete():
+    from ..models.exists import Diagnosis, Diagnostic
+    data = request.json
+    if data['diagnosis_id']:
+        Diagnosis.query.filter(Diagnosis.id == data['diagnosis_id']).update({'deleted': 1})
+    if data['diagnostic_id']:
+        Diagnostic.query.filter(Diagnostic.id == data['diagnostic_id']).update({'deleted': 1})

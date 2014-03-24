@@ -40,33 +40,35 @@
                         </ul>
                     </div>
                 </div>
-                <div class="row" ng-repeat="person_schedule in total_schedules">
-                    <div class="col-md-12">
-                        <table class="table table-condensed person-schedule">
-                            <caption>
-                                <a class="btn btn-default glyphicon glyphicon-chevron-up" ng-click="person_fold(person_schedule.person.id)" ng-if="!is_folded(person_schedule.person.id)"></a>
-                                <a class="btn btn-default glyphicon glyphicon-chevron-down" ng-click="person_unfold(person_schedule.person.id)" ng-if="is_folded(person_schedule.person.id)"></a>
-                                <span ng-if="person_schedule.grouped[reception_type].max_tickets == 0 && !is_folded(person_schedule.person.id)" class="no-schedule-label">Нет расписания</span>
-                                [[ person_schedule.person.name ]]<small>, [[ person_schedule.person.speciality ]]</small>
-                            </caption>
-                            <thead ng-if="person_schedule.grouped[reception_type].max_tickets > 0">
-                            <tr>
-                                <th ng-repeat="day in person_schedule.grouped[reception_type].schedule"
-                                    ng-bind="day.date | asMomentFormat:'DD.MM.YYYY, dd'">
-                                </th>
-                            </tr>
-                            </thead>
-                            <tbody ng-if="person_schedule.grouped[reception_type].max_tickets > 0">
-                            <tr ng-repeat="row in aux.range(person_schedule.grouped[reception_type].max_tickets)">
-                                <td ng-repeat="day in person_schedule.grouped[reception_type].schedule">
-                                    {{ schedule_macros.ticket_btn(
-                                        ticket='day.tickets[row]',
-                                        ngClick="appointment_toggle(day.tickets[row], person_schedule.person)",
-                                        showName=False) }}
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
+                <div class="tab-content">
+                    <div class="row" ng-repeat="person_schedule in total_schedules">
+                        <div class="col-md-12">
+                            <table class="table table-condensed person-schedule">
+                                <caption>
+                                    <a class="btn btn-default glyphicon glyphicon-chevron-up" ng-click="person_fold(person_schedule.person.id)" ng-if="!is_folded(person_schedule.person.id)"></a>
+                                    <a class="btn btn-default glyphicon glyphicon-chevron-down" ng-click="person_unfold(person_schedule.person.id)" ng-if="is_folded(person_schedule.person.id)"></a>
+                                    <span ng-if="person_schedule.grouped[reception_type].max_tickets == 0 && !is_folded(person_schedule.person.id)" class="no-schedule-label">Нет расписания</span>
+                                    [[ person_schedule.person.name ]]<small>, [[ person_schedule.person.speciality ]]</small>
+                                </caption>
+                                <thead ng-if="person_schedule.grouped[reception_type].max_tickets > 0">
+                                <tr>
+                                    <th ng-repeat="day in person_schedule.grouped[reception_type].schedule"
+                                        ng-bind="day.date | asMomentFormat:'DD.MM.YYYY, dd'">
+                                    </th>
+                                </tr>
+                                </thead>
+                                <tbody ng-if="person_schedule.grouped[reception_type].max_tickets > 0">
+                                <tr ng-repeat="row in aux.range(person_schedule.grouped[reception_type].max_tickets)">
+                                    <td ng-repeat="day in person_schedule.grouped[reception_type].schedule">
+                                        {{ schedule_macros.ticket_btn(
+                                            ticket='day.tickets[row]',
+                                            ngClick="appointment_toggle(day.tickets[row], person_schedule.person)",
+                                            showName=False) }}
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>

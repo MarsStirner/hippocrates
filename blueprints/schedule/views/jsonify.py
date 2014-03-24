@@ -415,6 +415,7 @@ class EventVisualizer(object):
             'is_primary': EventPrimary(event.isPrimaryCode),
             'is_primary_': event.isPrimaryCode,
             'client': event.client,
+            'client_id': event.client_id,
             'setDate': event.setDate,
             'execDate': event.execDate,
             'exec_person': event.execPerson,
@@ -447,7 +448,7 @@ class EventVisualizer(object):
             'health_group': diagnostic.healthGroup,
             'dispanser': diagnosis.dispanser,
             'trauma': diagnosis.traumaType,
-            'note': diagnostic.notes,
+            'notes': diagnostic.notes,
         }
 
 class RbVisualizer(object):

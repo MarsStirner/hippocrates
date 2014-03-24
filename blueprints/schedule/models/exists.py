@@ -1492,6 +1492,7 @@ class Diagnostic(db.Model):
         'Diagnosis', innerjoin=True, lazy=False, uselist=True,
         primaryjoin='and_(Diagnostic.diagnosis_id == Diagnosis.id, Diagnosis.deleted == 0)'
     )
+    diagnosis = db.relationship('Diagnosis')
     diagnosisType = db.relationship('rbDiagnosisType', lazy=False, innerjoin=True)
     character = db.relationship('rbDiseaseCharacter')
     stage = db.relationship('rbDiseaseStage', lazy=False)

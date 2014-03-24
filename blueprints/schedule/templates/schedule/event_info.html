@@ -45,9 +45,12 @@
             if ($scope.diag_edit[index]) {
                 $scope.diagnoses[index] = $scope.diag_edit[index];
                 $scope.diagnoses[index]._dirty = true;
-                $scope.diag_edit[index] = undefined;
-                delete $scope.diagnoses[index]._first;
-                // TODO: Make request to save the data
+                $scope.diagnoses[index].client_id = $scope.event_info.client_id;
+                $scope.diagnoses[index].event_id = $scope.event_info.id;
+                $http.post('{{ url_for('.api_diagnosis_save') }}', $scope.diagnoses[index]).then(function () {
+                    $scope.diag_edit[index] = undefined;
+                    delete $scope.diagnoses[index]._first;
+                });
             }
         };
         $scope.diag_edit_stop = function (index) {
@@ -65,6 +68,10 @@
                 _first: true
             });
             $scope.diag_edit_start(0);
+        };
+        $scope.diag_edit_save_disabled = function (index) {
+            var q = $scope.diag_edit[index];
+            return !q.diagnosis_type;
         };
         $scope.edit = true;
 

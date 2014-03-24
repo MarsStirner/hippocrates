@@ -144,3 +144,21 @@ def safe_int(obj):
     if obj is None:
         return None
     return int(obj)
+
+
+def safe_traverse(obj, *args, **kwargs):
+    """Безопасное копание вглубь dict'а
+    @param obj: точка входя для копания
+    @param *args: ключи, по которым надо проходить
+    @param default=None: возвращаемое значение, если раскопки не удались
+    @rtype: any
+    """
+    default = kwargs.get('default', None)
+    if obj is None:
+        return default
+    if len(args) == 0:
+        raise ValueError(u'len(args) must be > 0')
+    elif len(args) == 1:
+        return obj.get(args[0], default)
+    else:
+        return safe_traverse(obj.get(args[0]), *args[1:])
