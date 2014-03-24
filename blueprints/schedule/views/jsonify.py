@@ -388,6 +388,7 @@ class ClientVisualizer(object):
             'requestType': event.eventType.requestType,
         }
 
+
 class PersonTreeVisualizer(object):
     def make_person(self, person):
         return {
@@ -409,8 +410,9 @@ class PersonTreeVisualizer(object):
                 specs[person.speciality.name].append(self.make_person(person))
 
 
-class RbVisualizer(object):
-    def make_rb_info(self, reference_book):
-        reference_book.code
-        return {'code': reference_book.code,
-                'name': reference_book.name}
+class PrintTemplateVisualizer(object):
+    def make_template_info(self, template):
+        return {'id': template.id,
+                'code': template.code,
+                'name': template.name,
+                }

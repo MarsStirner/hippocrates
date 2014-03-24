@@ -12,10 +12,10 @@ from application.lib.utils import public_endpoint, jsonify
 from blueprints.schedule.app import module
 from blueprints.schedule.models.exists import Person, Client, rbSpeciality, rbDocumentType, rbPolicyType, \
     rbReasonOfAbsence, rbSocStatusClass, rbSocStatusType, rbAccountingSystem, rbContactType, rbRelationType, \
-    ClientDocument, rbBloodType, Bloodhistory
+    ClientDocument, rbBloodType, Bloodhistory, rbPrintTemplate
 from blueprints.schedule.models.schedule import Schedule, ScheduleTicket, ScheduleClientTicket, rbAppointmentType, \
     rbReceptionType, rbAttendanceType
-from blueprints.schedule.views.jsonify import ScheduleVisualizer, ClientVisualizer, Format
+from blueprints.schedule.views.jsonify import ScheduleVisualizer, ClientVisualizer, PrintTemplateVisualizer, Format
 from blueprints.schedule.views.utils import *
 
 __author__ = 'mmalkov'
@@ -256,8 +256,12 @@ def api_search_clients():
             clients = []
     else:
         clients = Client.query.limit(100).all()
+    print_templates = rbPrintTemplate.query.filter(rbPrintTemplate.context == 'token').all()
     context = ClientVisualizer(Format.JSON)
-    return jsonify(map(context.make_client_info, clients))
+    print_context = PrintTemplateVisualizer()
+    return jsonify({'clients': map(context.make_client_info, clients),
+                    'print_templates': map(print_context.make_template_info, print_templates),
+                    })
 
 
 @module.route('/api/all_persons_tree.json')

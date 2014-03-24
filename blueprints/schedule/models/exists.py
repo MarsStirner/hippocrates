@@ -1300,6 +1300,19 @@ class rbEventTypePurpose(db.Model):
     codePlace = db.Column(db.String(2))
 
 
+class rbPrintTemplate(db.Model):
+    __tablename__ = u'rbPrintTemplate'
+
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(16), nullable=False)
+    name = db.Column(db.Unicode(64), nullable=False)
+    context = db.Column(db.String(64), nullable=False)
+    fileName = db.Column(db.String(128), nullable=False)
+    default = db.Column(db.Unicode, nullable=False)
+    dpdAgreement = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    render = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+
+
 class rbService(db.Model):
     __tablename__ = u'rbService'
     __table_args__ = (
