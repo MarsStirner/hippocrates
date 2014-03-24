@@ -7,7 +7,7 @@
     <div ng-controller="Schedule">
         <script type="text/ng-template" id="modal-DaysSetup.html">{% include "schedule/_daysetup.html" %}</script>
         <script type="text/ng-template" id="modal-DayFree.html">{% include "schedule/_day_free.html" %}</script>
-        <div class="row">
+        <div class="row marginal">
             <div class="col-md-2">
                 <select class="form-control" name="year" ng-model="year" ng-disabled="editing"
                         ng-options="y for y in years" ng-change="monthChanged()"></select>
@@ -21,8 +21,7 @@
             </div>
         </div>
         <div ng-show="person">
-            <br/>{# Dirtiest hack you've ever seen! #}
-            <div class="row">
+            <div class="row marginal">
                 <div class="col-md-12">
                     <ul class="nav nav-tabs nav-justified" ng-model="reception_type">
                         <li ng-class="{active: (rt.code == reception_type), disabled: editing}" ng-repeat="rt in reception_types"
@@ -31,7 +30,6 @@
                     </ul>
                 </div>
             </div>
-            <br/>{# Dirtiest hack you've ever seen! #}
             <div class="btn-group">
                 <button class="btn btn-primary" ng-click="start_editing()" ng-if="!editing">Редактировать</button>
                 <button class="btn btn-success" ng-click="finish_editing()" ng-if="editing">Сохранить</button>

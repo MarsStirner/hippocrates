@@ -11,7 +11,7 @@
             <div class="col-md-9" ng-controller="Schedules">
                 <script type="text/ng-template" id="makeAppointment.html">{{ appointment.html_make() }}</script>
                 <script type="text/ng-template" id="cancelAppointment.html">{{ appointment.html_cancel() }}</script>
-                <div class="row">
+                <div class="row marginal">
                     <div class="col-md-2">
                         <select class="form-control" name="year" ng-model="year" ng-options="y for y in years"
                                 ng-change="monthChanged()"></select>
@@ -31,7 +31,6 @@
                         </ul>
                     </div>
                 </div>
-                <br/>{# Dirtiest hack you've ever seen! #}
                 <div class="row">
                     <div class="col-md-12">
                         <ul class="nav nav-tabs nav-justified" ng-model="reception_type">

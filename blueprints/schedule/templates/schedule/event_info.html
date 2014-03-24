@@ -44,6 +44,7 @@
         $scope.diag_edit_save = function (index) {
             if ($scope.diag_edit[index]) {
                 $scope.diagnoses[index] = $scope.diag_edit[index];
+                $scope.diagnoses[index]._dirty = true;
                 $scope.diag_edit[index] = undefined;
                 delete $scope.diagnoses[index]._first;
                 // TODO: Make request to save the data
@@ -58,13 +59,12 @@
             }
         };
         $scope.diag_edit_new = function () {
-            var index = $scope.diagnoses.length;
-            $scope.diagnoses.push({
+            $scope.diagnoses.splice(0, 0, {
                 person: null, // TODO: get current user_id?
                 _new: true,
                 _first: true
             });
-            $scope.diag_edit_start(index);
+            $scope.diag_edit_start(0);
         };
         $scope.edit = true;
 
@@ -77,10 +77,6 @@
                 $scope.event_info = data.result.event;
                 $scope.diagnoses = data.result.diagnoses;
             })
-        };
-
-        $scope.das_stop = function () {
-            var i = 0;
         };
 
         $scope.load_data();

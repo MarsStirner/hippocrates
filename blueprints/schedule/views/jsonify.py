@@ -291,7 +291,7 @@ class ClientVisualizer(object):
                          } for intolerance in client.intolerances]
         bloodHistory = [{'bloodGroup': blood.bloodType.name,
                          'bloodDate': blood.bloodDate.strftime('%d-%m-%Y') if blood.bloodDate else '',
-                         'physician': blood.person,
+                         'physician': safe_unicode(blood.person),
                          } for blood in client.blood_history]
 
         pers_document = self.make_document_info(client.document)
@@ -349,7 +349,7 @@ class ClientVisualizer(object):
             'mark': None,
             'begDateTime': record.ticket.begDateTime,
             'office': record.ticket.schedule.office,
-            'person': record.ticket.schedule.person,
+            'person': safe_unicode(record.ticket.schedule.person),
             'createPerson': record.createPerson,
             'note': record.note,
         }
