@@ -224,10 +224,13 @@ class Client(db.Model):
 
     @property
     def document(self):
-        return self.documents.\
-            filter(ClientDocument.deleted == 0).\
-            filter(rbDocumentTypeGroup.code == '1').\
-            order_by(ClientDocument.date.desc()).first()
+        try:
+            return self.documents.\
+                filter(ClientDocument.deleted == 0).\
+                filter(rbDocumentTypeGroup.code == '1').\
+                order_by(ClientDocument.date.desc()).first()
+        except:
+            return None
 
     @property
     def phones(self):

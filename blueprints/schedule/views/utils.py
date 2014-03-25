@@ -2,7 +2,8 @@
 
 import datetime
 from blueprints.schedule.models.exists import ClientPolicy, ClientAllergy, ClientIntoleranceMedicament, ClientContact, \
-    ClientIdentification, DirectClientRelation, ReversedClientRelation, ClientSocStatus
+    ClientIdentification, DirectClientRelation, ReversedClientRelation, ClientSocStatus, ClientDocument, Client, \
+    rbDocumentType
 
 #
 # def format_snils(SNILS):
@@ -131,3 +132,30 @@ def create_new_soc_status(client_id):
     new_status.modifyDatetime = datetime.datetime.now()
     new_status.version = 0
     return new_status
+
+
+def create_new_document(client_id, document_info):
+    new_document = ClientDocument()
+    new_document .client_id = client_id
+    fill_in_new_record(new_document)
+    new_document.serial = document_info['serial']
+    new_document.number = document_info['number']
+    new_document.date = document_info['begDate']
+    new_document.endDate = document_info['endDate']
+    new_document.documentType = rbDocumentType.query.filter(rbDocumentType.code == document_info['typeCode']).first()
+    return new_document
+
+
+def fill_in_new_record(record):
+    record.createDatetime = datetime.datetime.now()
+    record.modifyDatetime = datetime.datetime.now()
+    record.version = 0
+
+
+def create_new_client():
+    new_client = Client()
+    fill_in_new_record(new_client)
+    new_client.bloodNotes = ''
+    new_client.growth = 0
+    new_client.weight = 0
+    return new_client

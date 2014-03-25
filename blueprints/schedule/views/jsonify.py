@@ -221,26 +221,46 @@ class ClientVisualizer(object):
         self.__mode = mode
 
     def make_document_info(self, document):
-        return {'id': document.documentId,
-                'number': document.number,
-                'serial': document.serial,
-                'begDate': document.date,
-                'endDate': document.endDate,
-                'typeName': document.documentType.name,
-                'typeCode': document.documentType.code,
-                'origin': document.origin,
-                'documentText': document} if document else {}
+        if document:
+            return {'id': document.documentId,
+                    'number': document.number,
+                    'serial': document.serial,
+                    'begDate': document.date,
+                    'endDate': document.endDate,
+                    'typeName': document.documentType.name,
+                    'typeCode': document.documentType.code,
+                    'origin': document.origin,
+                    'documentText': document}
+        else:
+            return {'number': '',
+                    'serial': '',
+                    'begDate': '',
+                    'endDate': '',
+                    'typeName': '',
+                    'typeCode': '',
+                    'origin': '',
+                    'documentText': ''}
 
     def make_policy_info(self, policy):
-        return {'id': policy.id,
-                'number': policy.number,
-                'serial': policy.serial,
-                'begDate': policy.begDate,
-                'endDate': policy.endDate,
-                'typeName': policy.policyType.name,
-                'typeCode': policy.policyType.code,
-                'insurer_id': policy.insurer_id,
-                'policyText': policy} if policy else {}
+        if policy:
+            return {'id': policy.id,
+                    'number': policy.number,
+                    'serial': policy.serial,
+                    'begDate': policy.begDate,
+                    'endDate': policy.endDate,
+                    'typeName': policy.policyType.name,
+                    'typeCode': policy.policyType.code,
+                    'insurer_id': policy.insurer_id,
+                    'policyText': policy}
+        else:
+            return {'number': '',
+                    'serial': '',
+                    'begDate': '',
+                    'endDate': '',
+                    'typeName': '',
+                    'typeCode': '',
+                    'insurer_id': '',
+                    'policyText': ''}
 
     def make_identification_info(self, identification):
         return {'id': identification.id,
@@ -314,7 +334,7 @@ class ClientVisualizer(object):
         contacts = [self.make_contact_info(contact) for contact in client.contacts]
 
         return {
-            'id': client.id,
+            'id': client.id if client.id else 0,
             'lastName': client.lastName,
             'firstName': client.firstName,
             'patrName': client.patrName,

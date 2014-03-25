@@ -162,7 +162,6 @@
                 }
             ).success(function (data) {
                 $scope.clientDataItems = data.result.clientData;
-                $scope.referenceBooksItems = data.result.referenceBooks;
                 $scope.records = data.result.records;
                 $scope.client_events = data.result.events;
             });
