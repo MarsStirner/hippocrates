@@ -18,3 +18,10 @@ class EventPrimary(Enum):
     transport = 4, u'Транспортировка'
     ambulatory = 5, u'Амбулаторно'
 
+
+class ActionStatus(Enum):
+    started = 0, u'Начато'
+    waiting = 1, u'Ожидание'
+    finished = 2, u'Закончено'
+    cancelled = 3, u'Отменено'
+    no_result = 4, u'Без результата'

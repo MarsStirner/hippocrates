@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import datetime
 import json
+from decimal import Decimal
 from flask import g, current_app, request
 from flask.ext.principal import identity_loaded, Principal, Permission, RoleNeed, UserNeed
 from flask.ext.login import LoginManager, current_user
@@ -74,6 +75,8 @@ class WebMisJsonEncoder(json.JSONEncoder):
     def default(self, o):
         if isinstance(o, (datetime.datetime, datetime.date, datetime.time)):
             return o.isoformat()
+        elif isinstance(o, Decimal):
+            return float(o)
         elif hasattr(o, '__json__'):
             return o.__json__()
         elif isinstance(o, db.Model) and hasattr(o, '__unicode__'):
@@ -161,4 +164,4 @@ def safe_traverse(obj, *args, **kwargs):
     elif len(args) == 1:
         return obj.get(args[0], default)
     else:
-        return safe_traverse(obj.get(args[0]), *args[1:])
+        return safe_traverse(obj.get(args[0]), *args[1:], **kwargs)

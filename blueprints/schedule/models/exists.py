@@ -1544,7 +1544,7 @@ class Event(db.Model):
     uuid_id = db.Column(db.Integer, nullable=False, index=True, server_default=u"'0'")
     lpu_transfer = db.Column(db.String(100))
 
-    # actions = db.relationship(u'Action')
+    actions = db.relationship(u'Action', primaryjoin="and_(Action.event_id == Event.id, Action.deleted == 0)")
     eventType = db.relationship(u'EventType', lazy=False)
     execPerson = db.relationship(u'Person', foreign_keys='Event.execPerson_id', lazy=False)
     curator = db.relationship(u'Person', foreign_keys='Event.curator_id', lazy=False)
@@ -2277,5 +2277,92 @@ class MKB(db.Model):
     def __int__(self):
         return self.id
 
+
+class rbUserProfile(db.Model):
+    __tablename__ = u'rbUserProfile'
+
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(16), nullable=False, index=True)
+    name = db.Column(db.String(128), nullable=False, index=True)
+    withDep = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+
+
+class rbUserProfileRight(db.Model):
+    __tablename__ = u'rbUserProfile_Right'
+
+    id = db.Column(db.Integer, primary_key=True)
+    master_id = db.Column(db.Integer, nullable=False, index=True)
+    userRight_id = db.Column(db.Integer, nullable=False, index=True)
+
+
+class rbUserRight(db.Model):
+    __tablename__ = u'rbUserRight'
+
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(64), nullable=False, index=True)
+    name = db.Column(db.String(128), nullable=False, index=True)
+
+
+class FDField(db.Model):
+    __tablename__ = u'FDField'
+
+    id = db.Column(db.Integer, primary_key=True)
+    fdFieldType_id = db.Column(db.ForeignKey('FDFieldType.id'), nullable=False, index=True)
+    flatDirectory_id = db.Column(db.ForeignKey('FlatDirectory.id'), nullable=False, index=True)
+    flatDirectory_code = db.Column(db.ForeignKey('FlatDirectory.code'), index=True)
+    name = db.Column(db.String(4096), nullable=False)
+    description = db.Column(db.String(4096))
+    mask = db.Column(db.String(4096))
+    mandatory = db.Column(db.Integer)
+    order = db.Column(db.Integer)
+
+    fdFieldType = db.relationship(u'FDFieldType')
+    FlatDirectory = db.relationship(u'FlatDirectory', primaryjoin='FDField.flatDirectory_code == FlatDirectory.code')
+    flatDirectory = db.relationship(u'FlatDirectory', primaryjoin='FDField.flatDirectory_id == FlatDirectory.id')
+
+
+class FDFieldType(db.Model):
+    __tablename__ = u'FDFieldType'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(4096), nullable=False)
+    description = db.Column(db.String(4096))
+
+
+class FDFieldValue(db.Model):
+    __tablename__ = u'FDFieldValue'
+
+    id = db.Column(db.Integer, primary_key=True)
+    fdRecord_id = db.Column(db.ForeignKey('FDRecord.id'), nullable=False, index=True)
+    fdField_id = db.Column(db.ForeignKey('FDField.id'), nullable=False, index=True)
+    value = db.Column(db.String)
+
+    fdField = db.relationship(u'FDField')
+    fdRecord = db.relationship(u'FDRecord')
+
+
+class FDRecord(db.Model):
+    __tablename__ = u'FDRecord'
+
+    id = db.Column(db.Integer, primary_key=True)
+    flatDirectory_id = db.Column(db.ForeignKey('FlatDirectory.id'), nullable=False, index=True)
+    flatDirectory_code = db.Column(db.ForeignKey('FlatDirectory.code'), index=True)
+    order = db.Column(db.Integer)
+    name = db.Column(db.String(4096))
+    description = db.Column(db.String(4096))
+    dateStart = db.Column(db.DateTime)
+    dateEnd = db.Column(db.DateTime)
+
+    FlatDirectory = db.relationship(u'FlatDirectory', primaryjoin='FDRecord.flatDirectory_code == FlatDirectory.code')
+    flatDirectory = db.relationship(u'FlatDirectory', primaryjoin='FDRecord.flatDirectory_id == FlatDirectory.id')
+
+
+class FlatDirectory(db.Model):
+    __tablename__ = u'FlatDirectory'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(4096), nullable=False)
+    code = db.Column(db.String(128), index=True)
+    description = db.Column(db.String(4096))
 
 

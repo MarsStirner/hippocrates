@@ -3,10 +3,10 @@ from collections import defaultdict
 import datetime
 import itertools
 from application.lib.utils import safe_unicode
-from blueprints.schedule.models.enums import EventPrimary, EventOrder
+from blueprints.schedule.models.enums import EventPrimary, EventOrder, ActionStatus
 
 from blueprints.schedule.models.schedule import ScheduleTicket, ScheduleClientTicket, Schedule, rbReceptionType
-
+from ..models.actions import Action, ActionProperty
 
 __author__ = 'mmalkov'
 
@@ -451,8 +451,43 @@ class EventVisualizer(object):
             'notes': diagnostic.notes,
         }
 
-class RbVisualizer(object):
-    def make_rb_info(self, reference_book):
-        reference_book.code
-        return {'code': reference_book.code,
-                'name': reference_book.name}
+
+class ActionVisualizer(object):
+    def make_action(self, action):
+        """
+        @type action: Action
+        """
+        return {
+            'id': action.id,
+            'action_type': action.actionType,
+            'event_id': action.event_id,
+            'client': action.event.client,
+            'directionDate': action.directionDate,
+            'begDate': action.begDate,
+            'endDate': action.endDate,
+            'planned_endDate': action.plannedEndDate,
+            'status': ActionStatus(action.status),
+            'set_person': action.setPerson,
+            'person': action.person,
+            'properties': [
+                self.make_property(prop)
+                for prop in action.properties
+            ]
+        }
+    
+    def make_property(self, prop):
+        """
+        @type prop: ActionProperty
+        """
+        action_property_type = prop.type
+        if action_property_type.isVector:
+            values = [item.get_value() for item in prop.raw_values_query.all()]
+        else:
+            value = prop.raw_values_query.first()
+            values = value.get_value() if value else None
+        return {
+            'id': prop.id,
+            'type': prop.type,
+            'is_assigned': prop.isAssigned,
+            'value': values
+        }

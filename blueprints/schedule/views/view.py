@@ -85,3 +85,10 @@ def html_event_info():
     return render_template(
         'schedule/event_info.html'
     )
+
+@module.route('/action.html')
+@public_endpoint
+def html_action():
+    return render_template(
+        'schedule/action.html'
+    )

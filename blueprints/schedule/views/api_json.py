@@ -15,7 +15,8 @@ from blueprints.schedule.models.exists import Person, Client, rbSpeciality, rbDo
     Event
 from blueprints.schedule.models.schedule import Schedule, ScheduleTicket, ScheduleClientTicket, rbAppointmentType, \
     rbReceptionType, rbAttendanceType
-from blueprints.schedule.views.jsonify import ScheduleVisualizer, ClientVisualizer, Format, EventVisualizer
+from blueprints.schedule.views.jsonify import ScheduleVisualizer, ClientVisualizer, Format, EventVisualizer, \
+    ActionVisualizer
 from blueprints.schedule.views.utils import *
 
 __author__ = 'mmalkov'
@@ -600,3 +601,13 @@ def api_diagnosis_delete():
         Diagnosis.query.filter(Diagnosis.id == data['diagnosis_id']).update({'deleted': 1})
     if data['diagnostic_id']:
         Diagnostic.query.filter(Diagnostic.id == data['diagnostic_id']).update({'deleted': 1})
+
+
+@module.route('/api/actions', methods=['GET'])
+@public_endpoint
+def api_action_get():
+    from ..models.actions import Action
+    action_id = int(request.args.get('action_id'))
+    action = Action.query.get(action_id)
+    v = ActionVisualizer()
+    return jsonify(v.make_action(action))
