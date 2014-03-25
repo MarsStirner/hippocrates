@@ -1,0 +1,93 @@
+{% extends "schedule/base.html" %}
+{% block main %}
+    <div ng-controller="EventInfoCtrl">
+    <legend xmlns="http://www.w3.org/1999/html">[[ event_info.client ]]</legend>
+    <tabset>
+        <tab>
+            <tab-heading>Основная Информация</tab-heading>
+            {% include "schedule/client_event/main.html" %}
+        </tab>
+        <tab><tab-heading>Медицинские документы</tab-heading></tab>
+        <tab><tab-heading>Диагностика и лаб.исследования</tab-heading></tab>
+        <tab><tab-heading>Лечение</tab-heading></tab>
+        <tab><tab-heading>Оплата</tab-heading></tab>
+    </tabset>
+    </div>
+{% endblock %}
+
+{% block modules_js %}
+    <script>
+    WebMis20.controller('EventInfoCtrl', ['$scope', '$http', 'RefBook', function ($scope, $http, RefBook) {
+        $scope.aux = aux;
+        $scope.event_info = null;
+        $scope.event_id = aux.getQueryParams(location.search).event_id;
+        $scope.rbResult = new RefBook('rbResult');
+        $scope.rbAcheResult = new RefBook('rbAcheResult');
+        $scope.rbDiagnosisType = new RefBook('rbDiagnosisType');
+        $scope.rbDiseaseCharacter = new RefBook('rbDiseaseCharacter');
+        $scope.rbDiseasePhases = new RefBook('rbDiseasePhases');
+        $scope.rbDiseaseStage = new RefBook('rbDiseaseStage');
+        $scope.rbHealthGroup = new RefBook('rbHealthGroup');
+        $scope.rbDispanser = new RefBook('rbDispanser');
+        $scope.rbTraumaType = new RefBook('rbTraumaType');
+        $scope.Person = new RefBook('Person');
+{#        $scope.rbMKB = new RefBook('MKB');#}
+        $scope.rbOrder = {{ Enum.get_class_by_name('EventOrder').rb() | tojson}};
+        $scope.rbPrimary = {{ Enum.get_class_by_name('EventOrder').rb() | tojson}};
+
+        $scope.diag_edit = [];
+        $scope.diag_edit_start = function (index) {
+            if (!$scope.diag_edit[index]) {
+                $scope.diag_edit[index] = angular.extend({}, $scope.diagnoses[index])
+            }
+        };
+        $scope.diag_edit_save = function (index) {
+            if ($scope.diag_edit[index]) {
+                $scope.diagnoses[index] = $scope.diag_edit[index];
+                $scope.diagnoses[index]._dirty = true;
+                $scope.diagnoses[index].client_id = $scope.event_info.client_id;
+                $scope.diagnoses[index].event_id = $scope.event_info.id;
+                $http.post('{{ url_for('.api_diagnosis_save') }}', $scope.diagnoses[index]).then(function () {
+                    $scope.diag_edit[index] = undefined;
+                    delete $scope.diagnoses[index]._first;
+                });
+            }
+        };
+        $scope.diag_edit_stop = function (index) {
+            if ($scope.diag_edit[index]) {
+                if ($scope.diag_edit[index]._first) {
+                    $scope.diagnoses.splice(index, 1);
+                }
+                $scope.diag_edit[index] = undefined;
+            }
+        };
+        $scope.diag_edit_new = function () {
+            $scope.diagnoses.splice(0, 0, {
+                person: null, // TODO: get current user_id?
+                _new: true,
+                _first: true
+            });
+            $scope.diag_edit_start(0);
+        };
+        $scope.diag_edit_save_disabled = function (index) {
+            var q = $scope.diag_edit[index];
+            return !q.diagnosis_type;
+        };
+        $scope.edit = true;
+
+        $scope.load_data = function () {
+            $http.get('{{ url_for('.api_event_info') }}', {
+                params: {
+                    event_id: $scope.event_id
+                }
+            }).success(function (data) {
+                $scope.event_info = data.result.event;
+                $scope.diagnoses = data.result.diagnoses;
+            })
+        };
+
+        $scope.load_data();
+
+    }])
+    </script>
+{% endblock %}

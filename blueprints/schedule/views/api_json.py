@@ -1,21 +1,21 @@
 # -*- coding: utf-8 -*-
 import calendar
 from collections import defaultdict
-import datetime
 import json
 
 from flask import abort, request
 
 from application.database import db
 from application.lib.sphinx_search import SearchPatient, SearchPerson
-from application.lib.utils import public_endpoint, jsonify
+from application.lib.utils import public_endpoint, jsonify, safe_traverse
 from blueprints.schedule.app import module
 from blueprints.schedule.models.exists import Person, Client, rbSpeciality, rbDocumentType, rbPolicyType, \
     rbReasonOfAbsence, rbSocStatusClass, rbSocStatusType, rbAccountingSystem, rbContactType, rbRelationType, \
-    ClientDocument, rbBloodType, Bloodhistory, rbPrintTemplate
+    ClientDocument, rbBloodType, Bloodhistory, rbPrintTemplate, Event
 from blueprints.schedule.models.schedule import Schedule, ScheduleTicket, ScheduleClientTicket, rbAppointmentType, \
     rbReceptionType, rbAttendanceType
-from blueprints.schedule.views.jsonify import ScheduleVisualizer, ClientVisualizer, PrintTemplateVisualizer, Format
+from blueprints.schedule.views.jsonify import ScheduleVisualizer, ClientVisualizer, PrintTemplateVisualizer, Format, \
+    EventVisualizer, ActionVisualizer
 from blueprints.schedule.views.utils import *
 
 __author__ = 'mmalkov'
@@ -572,3 +572,93 @@ def api_move_client():
 
     db.session.commit()
     return ''
+
+
+@module.route('/api/event_info.json')
+@public_endpoint
+def api_event_info():
+    event_id = int(request.args['event_id'])
+    event = Event.query.get(event_id)
+    vis = EventVisualizer()
+    return jsonify({
+        'event': vis.make_event(event),
+        'diagnoses': vis.make_diagnoses(event),
+    })
+
+
+@module.route('/api/rb/')
+@module.route('/api/rb/<name>')
+@public_endpoint
+def api_refbook(name):
+    from ..models import exists
+    if not hasattr(exists, name):
+        return abort(404)
+    ref_book = getattr(exists, name)
+    return jsonify(ref_book.query.order_by(ref_book.id).all())
+
+
+@module.route('/api/events/diagnosis.json', methods=['POST'])
+@public_endpoint
+def api_diagnosis_save():
+    current_datetime = datetime.datetime.now()
+    from ..models.exists import Diagnosis, Diagnostic
+    data = request.json
+    diagnosis_id = data.get('diagnosis_id')
+    diagnostic_id = data.get('diagnostic_id')
+    if diagnosis_id:
+        diagnosis = Diagnosis.get(diagnosis_id)
+    else:
+        diagnosis = Diagnosis()
+        diagnosis.createDatetime = current_datetime
+    if diagnostic_id:
+        diagnostic = Diagnostic.get(diagnostic_id)
+    else:
+        diagnostic = Diagnostic()
+        diagnostic.createDatetime = current_datetime
+
+    diagnosis.modifyDatetime = current_datetime
+    diagnostic.modifyDatetime = current_datetime
+
+    diagnosis.client_id = data['client_id']
+    diagnosis.diagnosisType_id = safe_traverse(data, 'diagnosis_type', 'id')
+    diagnosis.character_id = safe_traverse(data, 'character', 'id')
+    diagnosis.dispanser_id = safe_traverse(data, 'dispanser', 'id')
+    diagnosis.traumaType_id = safe_traverse(data, 'trauma', 'id')
+    db.session.add(diagnosis)
+
+    diagnostic.event_id = data['event_id']
+    diagnostic.diagnosis = diagnosis
+    diagnostic.diagnosisType_id = safe_traverse(data, 'diagnosis_type', 'id')
+    diagnostic.character_id = safe_traverse(data, 'character', 'id')
+    diagnostic.stage_id = safe_traverse(data, 'stage', 'id')
+    diagnostic.phase_id = safe_traverse(data, 'phase', 'id')
+    diagnostic.dispanser_id = safe_traverse(data, 'dispanser', 'id')
+    diagnostic.traumaType_id = safe_traverse(data, 'trauma', 'id')
+    diagnostic.healthGroup_id = safe_traverse(data, 'health_group', 'id')
+    diagnostic.result_id = safe_traverse(data, 'result', 'id')
+    diagnostic.notes = data.get('notes', '')
+    diagnostic.rbAcheResult_id = safe_traverse(data, 'ache_result', 'id')
+    db.session.add(diagnostic)
+
+    db.session.commit()
+
+
+@module.route('/api/events/diagnosis.json', methods=['DELETE'])
+@public_endpoint
+def api_diagnosis_delete():
+    from ..models.exists import Diagnosis, Diagnostic
+    data = request.json
+    if data['diagnosis_id']:
+        Diagnosis.query.filter(Diagnosis.id == data['diagnosis_id']).update({'deleted': 1})
+    if data['diagnostic_id']:
+        Diagnostic.query.filter(Diagnostic.id == data['diagnostic_id']).update({'deleted': 1})
+
+
+@module.route('/api/actions', methods=['GET'])
+@public_endpoint
+def api_action_get():
+    from ..models.actions import Action
+    action_id = int(request.args.get('action_id'))
+    action = Action.query.get(action_id)
+    v = ActionVisualizer()
+    return jsonify(v.make_action(action))

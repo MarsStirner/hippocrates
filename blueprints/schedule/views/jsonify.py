@@ -2,9 +2,11 @@
 from collections import defaultdict
 import datetime
 import itertools
+from application.lib.utils import safe_unicode, safe_int
+from blueprints.schedule.models.enums import EventPrimary, EventOrder, ActionStatus
 
 from blueprints.schedule.models.schedule import ScheduleTicket, ScheduleClientTicket, Schedule, rbReceptionType
-
+from ..models.actions import Action, ActionProperty
 
 __author__ = 'mmalkov'
 
@@ -296,8 +298,8 @@ class ClientVisualizer(object):
                          'bloodGroup_name': blood.bloodType.name,
                          'bloodGroup_code': blood.bloodType.code,
                          'bloodDate': blood.bloodDate.strftime('%d.%m.%Y') if blood.bloodDate else '',
-                         'person_id': blood.person.id,
-                         'person_name': blood.person.nameText
+                         'person_id': safe_int(blood.person),
+                         'person_name': safe_unicode(blood.person)
                          } for blood in client.blood_history]
 
         pers_document = self.make_document_info(client.document)
@@ -323,7 +325,7 @@ class ClientVisualizer(object):
             'SNILS': client.formatted_SNILS or None,
             'notes': client.notes,
             'document': pers_document,
-            'documentText': client.document,
+            'documentText': safe_unicode(client.document),
             'birthDate': client.birthDate,
             'regAddress': client.reg_address,
             'liveAddress': client.loc_address,
@@ -346,10 +348,7 @@ class ClientVisualizer(object):
     def make_records(self, client):
         return map(
             self.make_record,
-            client.appointments.
-                join(ScheduleClientTicket.ticket).
-                filter(ScheduleClientTicket.deleted == 0).
-                order_by(ScheduleTicket.begDateTime.desc())
+            client.appointments#.order_by(ScheduleTicket.begDateTime.desc())
         )
 
     def make_record(self, record):
@@ -358,7 +357,7 @@ class ClientVisualizer(object):
             'mark': None,
             'begDateTime': record.ticket.begDateTime,
             'office': record.ticket.schedule.office,
-            'person': record.ticket.schedule.person,
+            'person': safe_unicode(record.ticket.schedule.person),
             'createPerson': record.createPerson,
             'note': record.note,
         }
@@ -381,6 +380,7 @@ class ClientVisualizer(object):
 
     def make_event(self, event):
         return {
+            'id': event.id,
             'externalId': event.externalId,
             'setDate': event.setDate,
             'execDate': event.execDate,
@@ -416,3 +416,94 @@ class PrintTemplateVisualizer(object):
                 'code': template.code,
                 'name': template.name,
                 }
+
+
+class EventVisualizer(object):
+    def make_event(self, event):
+        """
+        @param event: Event
+        """
+        return {
+            'id': event.id,
+            'external_id': event.externalId,
+            'order': EventOrder(event.order),
+            'order_': event.order,
+            'is_primary': EventPrimary(event.isPrimaryCode),
+            'is_primary_': event.isPrimaryCode,
+            'client': event.client,
+            'client_id': event.client_id,
+            'setDate': event.setDate,
+            'execDate': event.execDate,
+            'exec_person': event.execPerson,
+            'result': event.result,
+            'ache_result': event.rbAcheResult,
+            'contract': event.contract,
+            'event_type': event.eventType,
+            'finance': event.finance,
+            'organisation': event.organisation,
+        }
+
+    def make_diagnoses(self, event):
+        result = []
+        for diagnostic in event.diagnostics:
+            for diagnosis in diagnostic.diagnoses:
+                result.append(self.make_diagnose_row(diagnostic, diagnosis))
+        return result
+
+    def make_diagnose_row(self, diagnostic, diagnosis):
+        return {
+            'diagnosis_id': diagnosis.id,
+            'diagnostic_id': diagnostic.id,
+            'diagnosis_type': diagnostic.diagnosisType,
+            'person': diagnosis.person,
+            'mkb': diagnosis.MKB,
+            'mkb_ex': diagnosis.MKBEx,
+            'character': diagnosis.character,
+            'phase': diagnostic.phase,
+            'stage': diagnostic.stage,
+            'health_group': diagnostic.healthGroup,
+            'dispanser': diagnosis.dispanser,
+            'trauma': diagnosis.traumaType,
+            'notes': diagnostic.notes,
+        }
+
+
+class ActionVisualizer(object):
+    def make_action(self, action):
+        """
+        @type action: Action
+        """
+        return {
+            'id': action.id,
+            'action_type': action.actionType,
+            'event_id': action.event_id,
+            'client': action.event.client,
+            'directionDate': action.directionDate,
+            'begDate': action.begDate,
+            'endDate': action.endDate,
+            'planned_endDate': action.plannedEndDate,
+            'status': ActionStatus(action.status),
+            'set_person': action.setPerson,
+            'person': action.person,
+            'properties': [
+                self.make_property(prop)
+                for prop in action.properties
+            ]
+        }
+    
+    def make_property(self, prop):
+        """
+        @type prop: ActionProperty
+        """
+        action_property_type = prop.type
+        if action_property_type.isVector:
+            values = [item.get_value() for item in prop.raw_values_query.all()]
+        else:
+            value = prop.raw_values_query.first()
+            values = value.get_value() if value else None
+        return {
+            'id': prop.id,
+            'type': prop.type,
+            'is_assigned': prop.isAssigned,
+            'value': values
+        }
