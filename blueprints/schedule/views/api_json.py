@@ -590,11 +590,12 @@ def api_event_info():
 @module.route('/api/rb/<name>')
 @public_endpoint
 def api_refbook(name):
-    from ..models import exists
-    if not hasattr(exists, name):
-        return abort(404)
-    ref_book = getattr(exists, name)
-    return jsonify(ref_book.query.order_by(ref_book.id).all())
+    from ..models import exists, schedule, actions
+    for mod in (exists, schedule, actions):
+        if hasattr(mod, name):
+            ref_book = getattr(mod, name)
+            return jsonify(ref_book.query.order_by(ref_book.id).all())
+    return abort(404)
 
 
 @module.route('/api/events/diagnosis.json', methods=['POST'])

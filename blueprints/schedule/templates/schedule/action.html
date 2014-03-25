@@ -39,8 +39,11 @@
     WebMis20.controller('ActionCtrl', ['$scope', '$http', function ($scope, $http) {
         $scope.ckEditorOptions = {
             language: 'ru',
-            uiColor: '#000000',
-            skin: 'bootstrapck'
+            removeButtons: 'Cut,Copy,Paste,Undo,Redo,Anchor,Strike',
+            toolbarCanCollapse: true,
+            toolbarStartupExpanded: false,
+            autoGrow_minHeight: 50,
+            autoGrow_bottomSpace: 50
         };
         $scope.params = aux.getQueryParams(location.search);
         $scope.action_id = $scope.params.action_id;
