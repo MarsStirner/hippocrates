@@ -17,6 +17,7 @@ from blueprints.schedule.models.schedule import Schedule, ScheduleTicket, Schedu
     rbReceptionType, rbAttendanceType
 from blueprints.schedule.views.jsonify import ScheduleVisualizer, ClientVisualizer, PrintTemplateVisualizer, Format
 from blueprints.schedule.views.utils import *
+from blueprints.schedule.views.uuid_generator import getNewUUID_id
 
 __author__ = 'mmalkov'
 
@@ -379,6 +380,7 @@ def api_save_patient_info():
         client.SNILS = client_info['SNILS'].replace(" ", "").replace("-", "") if client_info['SNILS'] else ''
         client.notes = client_info['notes'] if client_info['notes'] else ''
         client.birthDate = client_info['birthDate']
+        client.uuid_id = getNewUUID_id()
 
         db.session.add(client)
         db.session.commit()

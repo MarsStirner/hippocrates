@@ -1549,3 +1549,8 @@ class rbMedicalAidProfile(db.Model):
     name = db.Column(db.String(64), nullable=False)
 
 
+class UUID(db.Model):
+    __tablename__ = u'UUID'
+
+    id = db.Column(db.Integer, primary_key=True)
+    uuid = db.Column(db.String(100), nullable=False, unique=True)
