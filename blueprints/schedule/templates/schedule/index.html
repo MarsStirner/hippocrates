@@ -21,7 +21,7 @@
             </div>
         </div>
         <ul class="nav nav-tabs nav-justified" ng-model="reception_type" ng-if="person">
-            <li ng-class="{active: (rt.code == reception_type)}" ng-repeat="rt in reception_types"
+            <li ng-class="{active: (rt.code == reception_type)}" ng-repeat="rt in reception_types.objects"
                 ng-click="changeReceptionType(rt.code)"><a href="#">[[ rt.name ]]</a>
             </li>
         </ul>
@@ -69,7 +69,7 @@
     {{ super() }}
     <script type="text/javascript">
         {{ person_tree.js() }}
-        WebMis20.controller('Schedule', ['$scope', '$http', function ($scope, $http) {
+        WebMis20.controller('Schedule', ['$scope', '$http', 'RefBook', function ($scope, $http, RefBook) {
             $scope.data = {};
             $scope.aux = aux;
             $scope.params = aux.getQueryParams(document.location.search);
@@ -82,7 +82,7 @@
 
             $scope.month = curDate.getMonth();
 
-            $scope.reception_types = {{ rbReceptionTypes | tojson | safe }};
+            $scope.reception_types = new RefBook('rbReceptionTypes');
             $scope.reception_type = 'amb';
 
             $scope.reloadSchedule = function () {

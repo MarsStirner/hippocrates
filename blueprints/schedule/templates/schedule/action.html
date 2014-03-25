@@ -14,14 +14,19 @@
         </thead>
         <tbody>
         <tr ng-repeat="property in action.properties" ng-switch="property.type.type_name">
-            <td class="action-property-name-field"><strong>[[ property.type.name ]]</strong></td>
+            <td class="action-property-name-field"><strong ng-bind="property.type.name"></strong></td>
             <td ng-if="action_columns.assignable"><input type="checkbox" ng-model="property.is_assigned" ng-if="property.type.is_assignable"></td>
-            <td ng-switch-when="Text" ng-bind-html="property.value"></td>
-            <td ng-switch-when="Html" ng-bind-html="property.value"></td>
-            <td ng-switch-when="Constructor" ng-bind-html="property.value"></td>
-            <td ng-switch-when="Жалобы" ng-bind-html="property.value"></td>
+            <!-- Здесь начинаются вариации на тему разных виджетов -->
+            <td ng-switch-when="Text"><textarea ckeditor="ckEditorOptions" ng-model="property.value"></textarea></td>
+            <td ng-switch-when="Html"><textarea ckeditor="ckEditorOptions" ng-model="property.value"></textarea></td>
+            <td ng-switch-when="Constructor"><textarea ckeditor="ckEditorOptions" ng-model="property.value"></textarea></td>
+            <td ng-switch-when="Жалобы"><textarea ckeditor="ckEditorOptions" ng-model="property.value"></textarea></td>
+            <td ng-switch-when="Date"><datepicker ng-model="property.value"></datepicker></td>
+            <td ng-switch-when="Integer"><input class="form-control" type="text" ng-model="property.value"></td> {# Validate! #}
+            <td ng-switch-when="Double"><input class="form-control" type="text" ng-model="property.value"></td> {# Validate! #}
             <td ng-switch-default ng-bind="property.value"></td>
-            <td ng-if="action_columns.unit">[[ property.type.unit.code ]]</td>
+            <!-- Здесь заканчиваются вариации на тему разных виджетов -->
+            <td ng-if="action_columns.unit" ng-bind="property.type.unit.code"></td>
         </tr>
         </tbody>
     </table>
@@ -32,6 +37,11 @@
 {% block modules_js %}
     <script>
     WebMis20.controller('ActionCtrl', ['$scope', '$http', function ($scope, $http) {
+        $scope.ckEditorOptions = {
+            language: 'ru',
+            uiColor: '#000000',
+            skin: 'bootstrapck'
+        };
         $scope.params = aux.getQueryParams(location.search);
         $scope.action_id = $scope.params.action_id;
         $scope.action = null;

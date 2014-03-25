@@ -1,7 +1,7 @@
 /**
  * Created by mmalkov on 10.02.14.
  */
-var WebMis20 = angular.module('WebMis20', ['ui.bootstrap', 'ui.select', 'ngSanitize']);
+var WebMis20 = angular.module('WebMis20', ['ui.bootstrap', 'ui.select', 'ngSanitize', 'ngCkeditor']);
 WebMis20.config(function ($interpolateProvider) {
     $interpolateProvider.startSymbol('[[');
     $interpolateProvider.endSymbol(']]');
@@ -90,6 +90,13 @@ WebMis20.factory('RefBook', ['$http', function ($http) {
         var i = this.objects.length;
         while (i--) {
             if (this.objects[i].id == id) return this.objects[i];
+        }
+        return null;
+    };
+    RefBook.prototype.get_by_code = function (code) {
+        var i = this.objects.length;
+        while (i--) {
+            if (this.objects[i].code == code) return this.objects[i];
         }
         return null;
     };

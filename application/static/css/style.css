@@ -321,3 +321,7 @@ div.select2-container {
 .action-property-name-field {
     width: 16%;
 }
+
+.ng-ckeditor {
+    border:0 none
+}

@@ -24,7 +24,7 @@
             <div class="row marginal">
                 <div class="col-md-12">
                     <ul class="nav nav-tabs nav-justified" ng-model="reception_type">
-                        <li ng-class="{active: (rt.code == reception_type), disabled: editing}" ng-repeat="rt in reception_types"
+                        <li ng-class="{active: (rt.code == reception_type), disabled: editing}" ng-repeat="rt in reception_types.objects"
                             ng-click="changeReceptionType(rt.code)"><a href="#" ng-disabled="editing">[[ rt.name ]]</a>
                         </li>
                     </ul>
@@ -97,9 +97,8 @@
 {% block modules_js %}
     {{ super() }}
     <script type="text/javascript">
-        roas = {{ rbReasonOfAbsence | tojson | safe}};
         {{ person_tree.js() }}
-        DaySetupModalCtrl = function ($scope, $modalInstance, model) {
+        DaySetupModalCtrl = function ($scope, $modalInstance, model, roas) {
             $scope.model = model;
             $scope.absent = model.roa !== null;
             $scope.accept = function () {
@@ -116,7 +115,7 @@
             };
             $scope.roas = roas;
         };
-        DayFreeModalCtrl = function ($scope, $modalInstance, day) {
+        DayFreeModalCtrl = function ($scope, $modalInstance, day, roas) {
             $scope.day = day;
             $scope.roa = day.roa ? (day.roa.code) : (null);
             $scope.accept = function () {
@@ -127,7 +126,8 @@
             };
             $scope.roas = roas;
         };
-        WebMis20.controller('Schedule', ['$scope', '$http', '$modal', function ($scope, $http, $modal) {
+        WebMis20.controller('Schedule', ['$scope', '$http', '$modal', 'RefBook', function ($scope, $http, $modal, RefBook) {
+            $scope.rbReasonOfAbsence = new RefBook('rbReasonOfAbsence');
             $scope.editing = false;
             $scope.weekends_selectable = false;
             $scope.selected_days = [];
@@ -146,7 +146,7 @@
             $scope.weekdays = ['Пн', "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
             $scope.week_data = [];
 
-            $scope.reception_types = {{ rbReceptionTypes | tojson | safe }};
+            $scope.reception_types = new RefBook('rbReceptionTypes');
             $scope.reception_type = 'amb';
 
             $scope.reloadSchedule = function () {
@@ -330,12 +330,15 @@
                                 secondary.pause = false;
                             }
                             return secondary;
+                        },
+                        roas: function () {
+                            return $scope.rbReasonOfAbsence.objects;
                         }
                     }
                 });
                 modalInstance.result.then(function (model) {
                     $scope.selected_days.map(function (day) {
-                        day.roa = aux.find_by_code(roas, model.roa);
+                        day.roa = $scope.rbReasonOfAbsence.get_by_code(model.roa);
                         day.altered = true;
                         if (model.roa) {
                             day.office = null;
@@ -375,7 +378,12 @@
                     templateUrl: 'modal-DayFree.html',
                     controller: DayFreeModalCtrl,
                     resolve: {
-                        day: function () {return day;}
+                        day: function () {
+                            return day;
+                        },
+                        roas: function () {
+                            return $scope.rbReasonOfAbsence.objects
+                        }
                     }
                 });
                 instance.result.then(function (roa) {
