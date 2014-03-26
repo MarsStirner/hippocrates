@@ -68,6 +68,7 @@ def create_new_policy(policy_info, client_id):
     client_policy.number = policy_info['number']
     client_policy.begDate = policy_info['begDate']
     client_policy.endDate = policy_info['endDate']
+    client_policy.insurer_id = policy_info['insurer_id']
     return client_policy
 
 
@@ -136,12 +137,13 @@ def create_new_soc_status(client_id):
 
 def create_new_document(client_id, document_info):
     new_document = ClientDocument()
-    new_document .client_id = client_id
+    new_document.clientId = client_id
     fill_in_new_record(new_document)
     new_document.serial = document_info['serial']
     new_document.number = document_info['number']
     new_document.date = document_info['begDate']
     new_document.endDate = document_info['endDate']
+    new_document.origin = document_info['origin']
     new_document.documentType = rbDocumentType.query.filter(rbDocumentType.code == document_info['typeCode']).first()
     return new_document
 

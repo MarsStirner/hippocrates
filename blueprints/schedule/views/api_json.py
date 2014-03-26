@@ -385,7 +385,7 @@ def api_save_patient_info():
         db.session.add(client)
         db.session.commit()
 
-        if not client.document:
+        if not client.document and client_info['document']['number']:
             client_document = create_new_document(client.id, client_info['document'])
             db.session.add(client_document)
         else:
@@ -393,6 +393,7 @@ def api_save_patient_info():
             client.document.number = client_info['document']['number']
             client.document.date = client_info['document']['begDate']
             client.document.endDate = client_info['document']['endDate']
+            client.document.origin = client_info['document']['origin']
             client.document.documentType = rbDocumentType.query.filter(rbDocumentType.code ==
                                                                        client_info['document']['typeCode']).first()
 
@@ -402,13 +403,13 @@ def api_save_patient_info():
                                                          client_info['compulsoryPolicy']['typeCode']):
             client.compulsoryPolicy.begDate = client_info['compulsoryPolicy']['begDate']
             client.compulsoryPolicy.endDate = client_info['compulsoryPolicy']['endDate']
+            client.compulsoryPolicy.insurer_id = client_info['compulsoryPolicy']['insurer_id']
             client.compulsoryPolicy.modifyDatetime = datetime.datetime.now()
-        else:
+        elif client_info['compulsoryPolicy']['number']:
             compulsory_policy = create_new_policy(client_info['compulsoryPolicy'], client.id)
             compulsory_policy.policyType = rbPolicyType.query.filter(rbPolicyType.code ==
                                                                      client_info['compulsoryPolicy']['typeCode']).first()
             db.session.add(compulsory_policy)
-            compulsory_policy.compulsoryPolicy = compulsory_policy
 
         if client.voluntaryPolicy and check_edit_policy(client.compulsoryPolicy,
                                                         client_info['voluntaryPolicy']['serial'],
@@ -416,13 +417,13 @@ def api_save_patient_info():
                                                         client_info['voluntaryPolicy']['typeCode']):
             client.voluntaryPolicy.begDate = client_info['voluntaryPolicy']['begDate']
             client.voluntaryPolicy.endDate = client_info['voluntaryPolicy']['endDate']
+            client.voluntaryPolicy.insurer_id = client_info['voluntaryPolicy']['insurer_id']
             client.voluntaryPolicy.modifyDatetime = datetime.datetime.now()
-        else:
+        elif client_info['voluntaryPolicy']['number']:
             voluntary_policy = create_new_policy(client_info['voluntaryPolicy'], client.id)
             client.voluntaryPolicy.policyType = rbPolicyType.query.filter(rbPolicyType.code ==
                                                                           client_info['voluntaryPolicy']['typeCode']).first()
             db.session.add(voluntary_policy)
-            compulsory_policy.compulsoryPolicy = voluntary_policy
 
         for soc_status in client_info['socStatuses']:
             if not 'id' in soc_status:
