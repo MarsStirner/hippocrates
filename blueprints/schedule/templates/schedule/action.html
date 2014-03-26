@@ -6,24 +6,24 @@
     <table id="general_action_info" class="table table-condensed">
         <tbody>
         <tr>
-            <td class="form-group">
+            <td>
                 <label for="begDate" class="control-label">Начато</label>
             </td>
-            <td class="col-md-3">
+            <td>
                 <input id="begDate" type="text" class="form-control" datepicker-popup="dd.MM.yyyy" ng-model="begDate"/>
             </td>
-            <td class="col-md-2">
+            <td>
                 <div ng-model="begDate" style="display:inline-block;">
                       <timepicker show-meridian="false"></timepicker>
                 </div>
             </td>
-            <td class="col-md-1">
+            <td>
                 <label for="endDate" class="control-label">Выполнено</label>
             </td>
-            <td class="col-md-3">
+            <td>
                 <input id="endDate" type="text" class="form-control" datepicker-popup="dd.MM.yyyy" ng-model="endDate"/>
             </td>
-            <td class="col-md-2">
+            <td>
                 <div ng-model="endDate" style="display:inline-block;">
                       <timepicker show-meridian="false"></timepicker>
                 </div>{#ng-change="changed()"#}
@@ -31,9 +31,15 @@
         </tr>
         <tr>
             <td>
-                <label for="person" class="control-label">Примечания</label>
+                <label for="status" class="control-label">Статус</label>
+            </td>
+            <td colspan="2">
+                <select id="status" class="form-control" ng-model="action.status.name" ng-options="status for status in statuses"></select>
             </td>
             <td>
+                <label for="person" class="control-label">Примечания</label>
+            </td>
+            <td colspan="2">
                 <input class="form-control" type="text" ng-model="action.note">
             </td>
         </tr>
@@ -87,6 +93,7 @@
         $scope.params = aux.getQueryParams(location.search);
         $scope.action_id = $scope.params.action_id;
         $scope.action = null;
+        $scope.statuses = ["Начато", "Ожидание", "Закончено", "Отменено", "Без результата"];
         $scope.action_columns = {};
         $scope.load = function () {
             $http.get('{{ url_for('.api_action_get') }}', {
@@ -97,7 +104,6 @@
                 $scope.action = data.result;
                 $scope.begDate = new Date($scope.action.begDate);
                 $scope.endDate = new Date($scope.action.endDate);
-                console.log($scope.begDate);
                 $scope.action_columns = {
                     assignable: false,
                     unit: false

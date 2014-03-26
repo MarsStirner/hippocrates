@@ -496,7 +496,6 @@ class ActionVisualizer(object):
         """
         @type action: Action
         """
-        d = action.begDate.strftime('%Y-%m-%d');
         return {
             'id': action.id,
             'action_type': action.actionType,
