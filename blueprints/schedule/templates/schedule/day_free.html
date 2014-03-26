@@ -61,7 +61,7 @@
     {{ super() }}
     <script type="text/javascript">
         {{ person_tree.js() }}
-        WebMis20.controller('DayFree', ['$scope', '$http', function ($scope, $http) {
+        WebMis20.controller('DayFree', ['$scope', '$http', 'RefBook', function ($scope, $http, RefBook) {
             $scope.aux = aux;
             var params = aux.getQueryParams(location.search);
 
@@ -73,7 +73,7 @@
             $scope.sourceDate = moment(params.date);
             $scope.sourcePerson = null;
 
-            $scope.reception_types = {{ rbReceptionTypes | tojson | safe }};
+{#            $scope.reception_types = new RefBook('rbReceptionType');#}
             $scope.reception_type = 'amb';
             $scope.day = null;
 

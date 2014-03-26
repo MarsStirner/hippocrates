@@ -1,0 +1,72 @@
+{% extends "schedule/base.html" %}
+{% block main %}
+<div ng-controller="ActionCtrl">
+<legend xmlns="http://www.w3.org/1999/html">[[ action.action_type.name ]] - [[ action.client ]]</legend>
+<div>
+    <table class="table table-condensed">
+        <thead>
+        <tr>
+            <th></th>
+            <th ng-if="action_columns.assignable">Назначено</th>
+            <th>Значение</th>
+            <th ng-if="action_columns.unit">ед.изм</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="property in action.properties" ng-switch="property.type.type_name">
+            <td class="action-property-name-field"><strong ng-bind="property.type.name"></strong></td>
+            <td ng-if="action_columns.assignable"><input type="checkbox" ng-model="property.is_assigned" ng-if="property.type.is_assignable"></td>
+            <!-- Здесь начинаются вариации на тему разных виджетов -->
+            <td ng-switch-when="Text"><textarea ckeditor="ckEditorOptions" ng-model="property.value"></textarea></td>
+            <td ng-switch-when="Html"><textarea ckeditor="ckEditorOptions" ng-model="property.value"></textarea></td>
+            <td ng-switch-when="Constructor"><textarea ckeditor="ckEditorOptions" ng-model="property.value"></textarea></td>
+            <td ng-switch-when="Жалобы"><textarea ckeditor="ckEditorOptions" ng-model="property.value"></textarea></td>
+            <td ng-switch-when="Date"><datepicker ng-model="property.value"></datepicker></td>
+            <td ng-switch-when="Integer"><input class="form-control" type="text" ng-model="property.value"></td> {# Validate! #}
+            <td ng-switch-when="Double"><input class="form-control" type="text" ng-model="property.value"></td> {# Validate! #}
+            <td ng-switch-default ng-bind="property.value"></td>
+            <!-- Здесь заканчиваются вариации на тему разных виджетов -->
+            <td ng-if="action_columns.unit" ng-bind="property.type.unit.code"></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+{% endblock %}
+
+{% block modules_js %}
+    <script>
+    WebMis20.controller('ActionCtrl', ['$scope', '$http', function ($scope, $http) {
+        $scope.ckEditorOptions = {
+            language: 'ru',
+            removeButtons: 'Cut,Copy,Paste,Undo,Redo,Anchor,Strike',
+            toolbarCanCollapse: true,
+            toolbarStartupExpanded: false,
+            autoGrow_minHeight: 50,
+            autoGrow_bottomSpace: 50
+        };
+        $scope.params = aux.getQueryParams(location.search);
+        $scope.action_id = $scope.params.action_id;
+        $scope.action = null;
+        $scope.action_columns = {};
+        $scope.load = function () {
+            $http.get('{{ url_for('.api_action_get') }}', {
+                params: {
+                    'action_id': $scope.action_id
+                }
+            }).success(function (data) {
+                $scope.action = data.result;
+                $scope.action_columns = {
+                    assignable: false,
+                    unit: false
+                };
+                angular.forEach(data.result.properties, function (item) {
+                    $scope.action_columns.assignable |= item.type.is_assignable;
+                    $scope.action_columns.unit |= item.type.unit;
+                });
+            })
+        }
+        $scope.load();
+    }])
+    </script>
+{% endblock %}

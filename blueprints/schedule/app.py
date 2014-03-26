@@ -11,8 +11,6 @@ module = Blueprint(MODULE_NAME, __name__, template_folder='templates', static_fo
 def module_name():
     return dict(
         module_name=RUS_NAME,
-        rbReceptionTypes=rbReceptionType.query.order_by(rbReceptionType.code).all(),  #  u"""[{name: 'Амбулаторно', code: 'amb'}, {name: 'На дому', code: 'home'}]""",
-        rbReasonOfAbsence=rbReasonOfAbsence.query.order_by(rbReasonOfAbsence.code).all()
     )
 
 # noinspection PyUnresolvedReferences

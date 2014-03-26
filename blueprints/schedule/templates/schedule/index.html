@@ -7,7 +7,7 @@
 {% block main %}
     <legend xmlns="http://www.w3.org/1999/html">График врача</legend>
     <div ng-controller="Schedule">
-        <div class="row">
+        <div class="row marginal">
             <div class="col-md-2">
                 <select class="form-control" name="year" ng-model="year"
                         ng-options="y for y in years" ng-change="monthChanged()"></select>
@@ -20,48 +20,47 @@
                 {{ person_tree.html(popup=True) }}
             </div>
         </div>
-        <br/>{# Dirtiest hack you've ever seen! #}
-        <div class="row">
-            <div class="col-md-12">
-                <ul class="nav nav-tabs nav-justified" ng-model="reception_type" ng-if="person">
-                    <li ng-class="{active: (rt.code == reception_type)}" ng-repeat="rt in reception_types"
-                        ng-click="changeReceptionType(rt.code)"><a href="#">[[ rt.name ]]</a>
-                    </li>
-                </ul>
+        <ul class="nav nav-tabs nav-justified" ng-model="reception_type" ng-if="person">
+            <li ng-class="{active: (rt.code == reception_type)}" ng-repeat="rt in reception_types.objects"
+                ng-click="changeReceptionType(rt.code)"><a href="#">[[ rt.name ]]</a>
+            </li>
+        </ul>
+        <div class="tab-content" ng-if="person">
+            <div class="row">
+                <div class="col-md-12">
+                    <ul class="nav nav-pills">
+                        <li ng-class="{active: ($index == page)}" ng-repeat="p in pages">
+                            <a ng-click="setDatePage($index)" href="#">
+                                [[ p | asShortDate ]] - [[ aux.moment(p).add(6, 'd') | asShortDate ]]
+                            </a>
+                        </li>
+                    </ul>
+                </div>
             </div>
-        </div>
-        <div class="row">
-            <div class="col-md-12">
-                <ul class="nav nav-pills" ng-if="person">
-                    <li ng-class="{active: ($index == page)}" ng-repeat="p in pages">
-                        <a ng-click="setDatePage($index)" href="#">
-                            [[ p | asShortDate ]] - [[ aux.moment(p).add(6, 'd') | asShortDate ]]
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-12">
-                <table class="table table-condensed person-schedule" ng-if="person">
-                    <caption><span ng-if="grouped[reception_type].max_tickets == 0" class="no-schedule-label">Нет расписания</span>
-                        [[ person.name ]]<small>, [[ person.speciality ]]</small></caption>
-                    <thead ng-if="grouped[reception_type].max_tickets > 0">
-                    <tr>
-                        <th ng-repeat="day in grouped[reception_type].schedule"
-                            ng-bind="day.date | asMomentFormat:'DD.MM.YYYY, dd'"></th>
-                    </tr>
-                    </thead>
-                    <tbody ng-if="grouped[reception_type].max_tickets > 0">
-                    <tr ng-repeat="row in aux.range(grouped[reception_type].max_tickets)">
-                        <td ng-repeat="day in grouped[reception_type].schedule">
-                            {{ schedule_macros.ticket_btn(
-                                ticket='day.tickets[row]',
-                                showName=True) }}
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
+            <div class="row">
+                <div class="col-md-12">
+                    <table class="table table-condensed person-schedule">
+                        <caption><span ng-if="grouped[reception_type].max_tickets == 0" class="no-schedule-label">Нет расписания</span>
+                            [[ person.name ]]
+                            <small>, [[ person.speciality ]]</small>
+                        </caption>
+                        <thead ng-if="grouped[reception_type].max_tickets > 0">
+                        <tr>
+                            <th ng-repeat="day in grouped[reception_type].schedule"
+                                ng-bind="day.date | asMomentFormat:'DD.MM.YYYY, dd'"></th>
+                        </tr>
+                        </thead>
+                        <tbody ng-if="grouped[reception_type].max_tickets > 0">
+                        <tr ng-repeat="row in aux.range(grouped[reception_type].max_tickets)">
+                            <td ng-repeat="day in grouped[reception_type].schedule">
+                                {{ schedule_macros.ticket_btn(
+                            ticket='day.tickets[row]',
+                            showName=True) }}
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -70,11 +69,11 @@
     {{ super() }}
     <script type="text/javascript">
         {{ person_tree.js() }}
-        WebMis20.controller('Schedule', ['$scope', '$http', function ($scope, $http) {
+        WebMis20.controller('Schedule', ['$scope', '$http', 'RefBook', function ($scope, $http, RefBook) {
             $scope.data = {};
             $scope.aux = aux;
             $scope.params = aux.getQueryParams(document.location.search);
-{#            $scope.person_id = $scope.params.person_id;#}
+            {#            $scope.person_id = $scope.params.person_id;#}
             $scope.person_query = '';
             var curDate = new Date();
             var curYear = curDate.getUTCFullYear();
@@ -83,28 +82,28 @@
 
             $scope.month = curDate.getMonth();
 
-            $scope.reception_types = {{ rbReceptionTypes | tojson | safe }};
+            $scope.reception_types = new RefBook('rbReceptionType');
             $scope.reception_type = 'amb';
 
             $scope.reloadSchedule = function () {
                 if ($scope.person_id) {
                     $http.get(
-                        '{{ url_for('.api_schedule') }}',
-                        {
-                            params: {
-                                person_ids: $scope.person_id,
-                                start_date: $scope.pages[$scope.page].format('YYYY-MM-DD')
+                            '{{ url_for('.api_schedule') }}',
+                            {
+                                params: {
+                                    person_ids: $scope.person_id,
+                                    start_date: $scope.pages[$scope.page].format('YYYY-MM-DD')
+                                }
                             }
-                        }
                     ).success(function (data) {
-                        var d = data.result['schedules'][0];
-                        $scope.person = d.person;
-                        $scope.grouped = d.grouped;
-                    })
+                                var d = data.result['schedules'][0];
+                                $scope.person = d.person;
+                                $scope.grouped = d.grouped;
+                            })
                 }
             };
 
-            $scope.setDatePage = function(index) {
+            $scope.setDatePage = function (index) {
                 if (index != $scope.page) {
                     $scope.page = index;
                     $scope.reloadSchedule();

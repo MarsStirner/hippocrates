@@ -11,7 +11,7 @@
             <div class="col-md-9" ng-controller="Schedules">
                 <script type="text/ng-template" id="makeAppointment.html">{{ appointment.html_make() }}</script>
                 <script type="text/ng-template" id="cancelAppointment.html">{{ appointment.html_cancel() }}</script>
-                <div class="row">
+                <div class="row marginal">
                     <div class="col-md-2">
                         <select class="form-control" name="year" ng-model="year" ng-options="y for y in years"
                                 ng-change="monthChanged()"></select>
@@ -31,43 +31,44 @@
                         </ul>
                     </div>
                 </div>
-                <br/>{# Dirtiest hack you've ever seen! #}
                 <div class="row">
                     <div class="col-md-12">
                         <ul class="nav nav-tabs nav-justified" ng-model="reception_type">
-                            <li ng-class="{active: (rt.code == reception_type)}" ng-repeat="rt in reception_types"
+                            <li ng-class="{active: (rt.code == reception_type)}" ng-repeat="rt in reception_types.objects"
                                 ng-click="changeReceptionType(rt.code)"><a href="#">[[ rt.name ]]</a>
                             </li>
                         </ul>
                     </div>
                 </div>
-                <div class="row" ng-repeat="person_schedule in total_schedules">
-                    <div class="col-md-12">
-                        <table class="table table-condensed person-schedule">
-                            <caption>
-                                <a class="btn btn-default glyphicon glyphicon-chevron-up" ng-click="person_fold(person_schedule.person.id)" ng-if="!is_folded(person_schedule.person.id)"></a>
-                                <a class="btn btn-default glyphicon glyphicon-chevron-down" ng-click="person_unfold(person_schedule.person.id)" ng-if="is_folded(person_schedule.person.id)"></a>
-                                <span ng-if="person_schedule.grouped[reception_type].max_tickets == 0 && !is_folded(person_schedule.person.id)" class="no-schedule-label">Нет расписания</span>
-                                [[ person_schedule.person.name ]]<small>, [[ person_schedule.person.speciality ]]</small>
-                            </caption>
-                            <thead ng-if="person_schedule.grouped[reception_type].max_tickets > 0">
-                            <tr>
-                                <th ng-repeat="day in person_schedule.grouped[reception_type].schedule"
-                                    ng-bind="day.date | asMomentFormat:'DD.MM.YYYY, dd'">
-                                </th>
-                            </tr>
-                            </thead>
-                            <tbody ng-if="person_schedule.grouped[reception_type].max_tickets > 0">
-                            <tr ng-repeat="row in aux.range(person_schedule.grouped[reception_type].max_tickets)">
-                                <td ng-repeat="day in person_schedule.grouped[reception_type].schedule">
-                                    {{ schedule_macros.ticket_btn(
-                                        ticket='day.tickets[row]',
-                                        ngClick="appointment_toggle(day.tickets[row], person_schedule.person)",
-                                        showName=False) }}
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
+                <div class="tab-content">
+                    <div class="row" ng-repeat="person_schedule in total_schedules">
+                        <div class="col-md-12">
+                            <table class="table table-condensed person-schedule">
+                                <caption>
+                                    <a class="btn btn-default glyphicon glyphicon-chevron-up" ng-click="person_fold(person_schedule.person.id)" ng-if="!is_folded(person_schedule.person.id)"></a>
+                                    <a class="btn btn-default glyphicon glyphicon-chevron-down" ng-click="person_unfold(person_schedule.person.id)" ng-if="is_folded(person_schedule.person.id)"></a>
+                                    <span ng-if="person_schedule.grouped[reception_type].max_tickets == 0 && !is_folded(person_schedule.person.id)" class="no-schedule-label">Нет расписания</span>
+                                    [[ person_schedule.person.name ]]<small>, [[ person_schedule.person.speciality ]]</small>
+                                </caption>
+                                <thead ng-if="person_schedule.grouped[reception_type].max_tickets > 0">
+                                <tr>
+                                    <th ng-repeat="day in person_schedule.grouped[reception_type].schedule"
+                                        ng-bind="day.date | asMomentFormat:'DD.MM.YYYY, dd'">
+                                    </th>
+                                </tr>
+                                </thead>
+                                <tbody ng-if="person_schedule.grouped[reception_type].max_tickets > 0">
+                                <tr ng-repeat="row in aux.range(person_schedule.grouped[reception_type].max_tickets)">
+                                    <td ng-repeat="day in person_schedule.grouped[reception_type].schedule">
+                                        {{ schedule_macros.ticket_btn(
+                                            ticket='day.tickets[row]',
+                                            ngClick="appointment_toggle(day.tickets[row], person_schedule.person)",
+                                            showName=False) }}
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -83,7 +84,7 @@
     <script type="text/javascript">
         {{ person_tree.js() }}
         {{ appointment.js() }}
-        WebMis20.controller('Schedules', ['$scope', '$http', '$modal', function ($scope, $http, $modal) {
+        WebMis20.controller('Schedules', ['$scope', '$http', '$modal', 'RefBook', function ($scope, $http, $modal, RefBook) {
             $scope.modal = {};
             $scope.max_tickets = [];
             $scope.person_schedules = [];
@@ -104,7 +105,7 @@
 
             $scope.month = curDate.getMonth();
 
-            $scope.reception_types = {{ rbReceptionTypes | tojson | safe }};
+            $scope.reception_types = new RefBook('rbReceptionType');
             $scope.reception_type = 'amb';
 
             $scope.setDatePage = function(index) {

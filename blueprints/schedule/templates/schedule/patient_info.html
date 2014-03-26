@@ -6,8 +6,10 @@
     <div ng-controller="ClientInfo">
     <script type="text/ng-template" id="modal-deleteDocument.html">{% include "schedule/_delete_document.html" %}</script>
     <legend xmlns="http://www.w3.org/1999/html">Пациент [[ clientDataItems.nameText ]]</legend>
-    <button class="btn btn-default" onclick="history.back()">Назад к результатам поиска</button>
-    <a class="btn btn-success" href="{{ url_for('.appointment') }}?client_id={{ request.args['client_id'] }}">Записать на приём</a>
+    <div class="marginal">
+        <button class="btn btn-default" onclick="history.back()">Назад к результатам поиска</button>
+        <a class="btn btn-success" href="{{ url_for('.appointment') }}?client_id={{ request.args['client_id'] }}">Записать на приём</a>
+    </div>
     <tabset>
         <tab>
             <tab-heading>
@@ -154,6 +156,11 @@
                 $event.stopPropagation();
                 return true;
             };
+
+            $scope.open_event = function(event) {
+                window.open('{{ url_for('.html_event_info') }}?event_id=' + event.id, '_self')
+            };
+
             $http.get(
                 '{{ url_for('.api_patient') }}', {
                     params: {

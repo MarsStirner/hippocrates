@@ -90,3 +90,18 @@ def new_patient():
 @public_endpoint
 def html_day_free():
     return render_template('schedule/day_free.html')
+
+@module.route('/event.html')
+@public_endpoint
+def html_event_info():
+    # event_id = int(request.args['event_id'])
+    return render_template(
+        'schedule/event_info.html'
+    )
+
+@module.route('/action.html')
+@public_endpoint
+def html_action():
+    return render_template(
+        'schedule/action.html'
+    )
