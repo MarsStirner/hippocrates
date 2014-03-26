@@ -3,6 +3,42 @@
 <div ng-controller="ActionCtrl">
 <legend xmlns="http://www.w3.org/1999/html">[[ action.action_type.name ]] - [[ action.client ]]</legend>
 <div>
+    <table id="general_action_info" class="table table-condensed">
+        <tbody>
+        <tr>
+            <td class="form-group">
+                <label for="begDate" class="control-label">Начато</label>
+            </td>
+            <td class="col-md-3">
+                <input id="begDate" type="text" class="form-control" datepicker-popup="dd.MM.yyyy" ng-model="begDate"/>
+            </td>
+            <td class="col-md-2">
+                <div ng-model="begDate" style="display:inline-block;">
+                      <timepicker show-meridian="false"></timepicker>
+                </div>
+            </td>
+            <td class="col-md-1">
+                <label for="endDate" class="control-label">Выполнено</label>
+            </td>
+            <td class="col-md-3">
+                <input id="endDate" type="text" class="form-control" datepicker-popup="dd.MM.yyyy" ng-model="endDate"/>
+            </td>
+            <td class="col-md-2">
+                <div ng-model="endDate" style="display:inline-block;">
+                      <timepicker show-meridian="false"></timepicker>
+                </div>{#ng-change="changed()"#}
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <label for="person" class="control-label">Примечания</label>
+            </td>
+            <td>
+                <input class="form-control" type="text" ng-model="action.note">
+            </td>
+        </tr>
+        </tbody>
+    </table>
     <table class="table table-condensed">
         <thead>
         <tr>
@@ -21,7 +57,7 @@
             <td ng-switch-when="Html"><textarea ckeditor="ckEditorOptions" ng-model="property.value"></textarea></td>
             <td ng-switch-when="Constructor"><textarea ckeditor="ckEditorOptions" ng-model="property.value"></textarea></td>
             <td ng-switch-when="Жалобы"><textarea ckeditor="ckEditorOptions" ng-model="property.value"></textarea></td>
-            <td ng-switch-when="Date"><input type="text" class="form-control" datepicker-popup="'dd-MM-yyyy'" ng-model="property.value" /></td>
+            <td ng-switch-when="Date"><input type="text" class="form-control" datepicker-popup="dd-MM-yyyy" ng-model="property.value" /></td>
             <td ng-switch-when="Integer"><input class="form-control" type="text" ng-model="property.value"></td> {# Validate! #}
             <td ng-switch-when="Double"><input class="form-control" type="text" ng-model="property.value"></td> {# Validate! #}
             <td ng-switch-when="String" ng-if="!property.type.domain"><input class="form-control" type="text" ng-model="property.value"></td>
@@ -59,6 +95,9 @@
                 }
             }).success(function (data) {
                 $scope.action = data.result;
+                $scope.begDate = new Date($scope.action.begDate);
+                $scope.endDate = new Date($scope.action.endDate);
+                console.log($scope.begDate);
                 $scope.action_columns = {
                     assignable: false,
                     unit: false

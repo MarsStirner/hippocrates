@@ -442,7 +442,9 @@ class EventVisualizer(object):
             'event_type': event.eventType,
             'finance': event.finance,
             'organisation': event.organisation,
-            'actions': [self.make_action(action) for action in event.actions]
+            'med_doc_actions': [self.make_action(action) for action in event.actions if action.actionType.class_ == 0],
+            'diag_actions': [self.make_action(action) for action in event.actions if action.actionType.class_ == 1],
+            'cure_actions': [self.make_action(action) for action in event.actions if action.actionType.class_ == 2]
         }
 
     def make_diagnoses(self, event):
@@ -494,18 +496,20 @@ class ActionVisualizer(object):
         """
         @type action: Action
         """
+        d = action.begDate.strftime('%Y-%m-%d');
         return {
             'id': action.id,
             'action_type': action.actionType,
             'event_id': action.event_id,
             'client': action.event.client,
             'directionDate': action.directionDate,
-            'begDate': action.begDate,
-            'endDate': action.endDate,
+            'begDate': action.begDate.strftime('%Y-%m-%d %H:%M:%S') if action.begDate else '',
+            'endDate': action.endDate.strftime('%Y-%m-%d %H:%M:%S') if action.endDate else '',
             'planned_endDate': action.plannedEndDate,
             'status': ActionStatus(action.status),
             'set_person': action.setPerson,
             'person': action.person,
+            'note': action.note,
             'properties': [
                 self.make_property(prop)
                 for prop in action.properties

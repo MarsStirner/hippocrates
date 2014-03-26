@@ -29,3 +29,8 @@ div.person-schedule-day div.panel-heading {
 .tub_content{
     padding-top: 20px;
 }
+
+#general_action_info td{
+    border: 0px;
+    vertical-align: middle;
+}
