@@ -7,7 +7,7 @@ from blueprints.schedule.models.enums import EventPrimary, EventOrder, ActionSta
 
 from blueprints.schedule.models.schedule import ScheduleTicket, ScheduleClientTicket, Schedule, rbReceptionType
 from ..models.actions import Action, ActionProperty
-from ..models.exists import Event
+from ..models.exists import Event, EventType, rbRequestType
 
 __author__ = 'mmalkov'
 
@@ -366,7 +366,7 @@ class ClientVisualizer(object):
     def make_events(self, client):
         return map(
             self.make_event,
-            client.events
+            client.events.join(EventType).join(rbRequestType).filter(rbRequestType.code == u'policlinic')
         )
 
     def make_person(self, person):
