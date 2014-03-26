@@ -7,7 +7,27 @@
             <tab-heading>Основная Информация</tab-heading>
             {% include "schedule/client_event/main.html" %}
         </tab>
-        <tab><tab-heading>Медицинские документы</tab-heading></tab>
+        <tab><tab-heading>Медицинские документы</tab-heading>
+            {# Здесь надо распилить на классы типов действий #}
+        <table class="table table-condensed table-hover table-clickable">
+            <thead>
+            <tr>
+                <th>Тип действия</th>
+                <th>Начало</th>
+                <th>Конец</th>
+                <th>Исполнитель</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="action in event_info.actions" ng-click="open_action(action.id)">
+                <td>[[ action.name ]]</td>
+                <td>[[ action.begDate | asDate ]]</td>
+                <td>[[ action.endDate | asDateTime ]]</td>
+                <td>[[ action.person_text ]]</td>
+            </tr>
+            </tbody>
+        </table>
+        </tab>
         <tab><tab-heading>Диагностика и лаб.исследования</tab-heading></tab>
         <tab><tab-heading>Лечение</tab-heading></tab>
         <tab><tab-heading>Оплата</tab-heading></tab>
@@ -84,6 +104,10 @@
                 $scope.event_info = data.result.event;
                 $scope.diagnoses = data.result.diagnoses;
             })
+        };
+
+        $scope.open_action = function (action_id) {
+            window.open('{{ url_for('.html_action') }}?action_id=' + action_id, '_self');
         };
 
         $scope.load_data();

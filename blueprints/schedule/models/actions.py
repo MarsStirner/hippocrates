@@ -161,7 +161,7 @@ class ActionPropertyType(db.Model):
     unit = db.relationship('rbUnit')
 
     def __json__(self):
-        return {
+        result = {
             'id': self.id,
             'name': self.name,
             'code': self.code,
@@ -172,6 +172,10 @@ class ActionPropertyType(db.Model):
             'type_name': self.typeName,
             'unit': self.unit,
         }
+        if self.typeName == 'String':
+            if self.valueDomain:
+                result['values'] = [choice.strip('\' *') for choice in self.valueDomain.split(',')]
+        return result
 
 class ActionProperty_Action(db.Model):
     __tablename__ = u'ActionProperty_Action'

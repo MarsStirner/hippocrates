@@ -7,6 +7,7 @@ from blueprints.schedule.models.enums import EventPrimary, EventOrder, ActionSta
 
 from blueprints.schedule.models.schedule import ScheduleTicket, ScheduleClientTicket, Schedule, rbReceptionType
 from ..models.actions import Action, ActionProperty
+from ..models.exists import Event
 
 __author__ = 'mmalkov'
 
@@ -421,7 +422,7 @@ class PrintTemplateVisualizer(object):
 class EventVisualizer(object):
     def make_event(self, event):
         """
-        @param event: Event
+        @type event: Event
         """
         return {
             'id': event.id,
@@ -441,9 +442,13 @@ class EventVisualizer(object):
             'event_type': event.eventType,
             'finance': event.finance,
             'organisation': event.organisation,
+            'actions': [self.make_action(action) for action in event.actions]
         }
 
     def make_diagnoses(self, event):
+        """
+        @type event: Event
+        """
         result = []
         for diagnostic in event.diagnostics:
             for diagnosis in diagnostic.diagnoses:
@@ -451,6 +456,10 @@ class EventVisualizer(object):
         return result
 
     def make_diagnose_row(self, diagnostic, diagnosis):
+        """
+        @type diagnostic: Diagnostic
+        @type diagnosis: Diagnosis
+        """
         return {
             'diagnosis_id': diagnosis.id,
             'diagnostic_id': diagnostic.id,
@@ -465,6 +474,18 @@ class EventVisualizer(object):
             'dispanser': diagnosis.dispanser,
             'trauma': diagnosis.traumaType,
             'notes': diagnostic.notes,
+        }
+
+    def make_action(self, action):
+        """
+        @type action: Action
+        """
+        return {
+            'id': action.id,
+            'name': action.actionType.name,
+            'begDate': action.begDate,
+            'endDate': action.endDate,
+            'person_text': safe_unicode(action.person)
         }
 
 
@@ -503,6 +524,7 @@ class ActionVisualizer(object):
             values = value.get_value() if value else None
         return {
             'id': prop.id,
+            'idx': prop.type.idx,
             'type': prop.type,
             'is_assigned': prop.isAssigned,
             'value': values
