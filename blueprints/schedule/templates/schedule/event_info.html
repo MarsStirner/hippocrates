@@ -1,15 +1,19 @@
 {% extends "schedule/base.html" %}
+{% import "schedule/client_event/action_list.html" as action_list %}
 {% block main %}
     <div ng-controller="EventInfoCtrl">
     <legend xmlns="http://www.w3.org/1999/html">[[ event_info.client ]]</legend>
     <tabset>
-        <tab>
-            <tab-heading>Основная Информация</tab-heading>
-            {% include "schedule/client_event/main.html" %}
+        <tab><tab-heading>Основная Информация</tab-heading>{% include "schedule/client_event/main.html" %}</tab>
+        <tab><tab-heading>Медицинские документы</tab-heading>
+            {{ action_list.action_list('event_info.med_doc_actions') }}
         </tab>
-        <tab><tab-heading>Медицинские документы</tab-heading></tab>
-        <tab><tab-heading>Диагностика и лаб.исследования</tab-heading></tab>
-        <tab><tab-heading>Лечение</tab-heading></tab>
+        <tab><tab-heading>Диагностика и лаб.исследования</tab-heading>
+            {{ action_list.action_list('event_info.diag_actions') }}
+        </tab>
+        <tab><tab-heading>Лечение</tab-heading>
+            {{ action_list.action_list('event_info.cure_actions') }}
+        </tab>
         <tab><tab-heading>Оплата</tab-heading></tab>
     </tabset>
     </div>
@@ -84,6 +88,10 @@
                 $scope.event_info = data.result.event;
                 $scope.diagnoses = data.result.diagnoses;
             })
+        };
+
+        $scope.open_action = function (action_id) {
+            window.open('{{ url_for('.html_action') }}?action_id=' + action_id, '_self');
         };
 
         $scope.load_data();

@@ -1,8 +1,51 @@
 {% extends "schedule/base.html" %}
+{% import "_macros.html" as macros %}
 {% block main %}
 <div ng-controller="ActionCtrl">
 <legend xmlns="http://www.w3.org/1999/html">[[ action.action_type.name ]] - [[ action.client ]]</legend>
 <div>
+    <table id="general_action_info" class="table table-condensed">
+        <tbody>
+        <tr>
+            <td>
+                <label for="begDate" class="control-label">Начато</label>
+            </td>
+            <td>
+                <input id="begDate" type="text" class="form-control" datepicker-popup="dd.MM.yyyy" ng-model="begDate"/>
+            </td>
+            <td>
+                <div ng-model="begDate" style="display:inline-block;">
+                      <timepicker show-meridian="false"></timepicker>
+                </div>
+            </td>
+            <td>
+                <label for="endDate" class="control-label">Выполнено</label>
+            </td>
+            <td>
+                <input id="endDate" type="text" class="form-control" datepicker-popup="dd.MM.yyyy" ng-model="endDate"/>
+            </td>
+            <td>
+                <div ng-model="endDate" style="display:inline-block;">
+                      <timepicker show-meridian="false"></timepicker>
+                </div>{#ng-change="changed()"#}
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <label for="status" class="control-label">Статус</label>
+            </td>
+            <td colspan="2">
+                {{ macros.ui_select('action.status', 'ActionStatus', 'true') }}
+            </td>
+            <td>
+                <label for="person" class="control-label">Примечания</label>
+            </td>
+            <td colspan="2">
+                <input class="form-control" type="text" ng-model="action.note">
+            </td>
+        </tr>
+        </tbody>
+    </table>
     <table class="table table-condensed">
         <thead>
         <tr>
@@ -13,17 +56,19 @@
         </tr>
         </thead>
         <tbody>
-        <tr ng-repeat="property in action.properties" ng-switch="property.type.type_name">
-            <td class="action-property-name-field"><strong ng-bind="property.type.name"></strong></td>
+        <tr ng-repeat="property in action.properties | orderBy:property.idx " ng-switch="property.type.type_name">
+            <td class="action-property-name-field"><strong ng-bind="property.type.name"><span class="label label-danger" ng-if="property.type.mandatory">&ast;</span></strong></td>
             <td ng-if="action_columns.assignable"><input type="checkbox" ng-model="property.is_assigned" ng-if="property.type.is_assignable"></td>
             <!-- Здесь начинаются вариации на тему разных виджетов -->
             <td ng-switch-when="Text"><textarea ckeditor="ckEditorOptions" ng-model="property.value"></textarea></td>
             <td ng-switch-when="Html"><textarea ckeditor="ckEditorOptions" ng-model="property.value"></textarea></td>
             <td ng-switch-when="Constructor"><textarea ckeditor="ckEditorOptions" ng-model="property.value"></textarea></td>
             <td ng-switch-when="Жалобы"><textarea ckeditor="ckEditorOptions" ng-model="property.value"></textarea></td>
-            <td ng-switch-when="Date"><datepicker ng-model="property.value"></datepicker></td>
+            <td ng-switch-when="Date"><input type="text" class="form-control" datepicker-popup="dd-MM-yyyy" ng-model="property.value" /></td>
             <td ng-switch-when="Integer"><input class="form-control" type="text" ng-model="property.value"></td> {# Validate! #}
             <td ng-switch-when="Double"><input class="form-control" type="text" ng-model="property.value"></td> {# Validate! #}
+            <td ng-switch-when="String" ng-if="!property.type.domain"><input class="form-control" type="text" ng-model="property.value"></td>
+            <td ng-switch-when="String" ng-if="property.type.domain"><select class="form-control" ng-model="property.value" ng-options="val for val in property.type.values"></select></td>
             <td ng-switch-default ng-bind="property.value"></td>
             <!-- Здесь заканчиваются вариации на тему разных виджетов -->
             <td ng-if="action_columns.unit" ng-bind="property.type.unit.code"></td>
@@ -43,11 +88,13 @@
             toolbarCanCollapse: true,
             toolbarStartupExpanded: false,
             autoGrow_minHeight: 50,
-            autoGrow_bottomSpace: 50
+            autoGrow_bottomSpace: 50,
+            height: 200
         };
         $scope.params = aux.getQueryParams(location.search);
         $scope.action_id = $scope.params.action_id;
         $scope.action = null;
+        $scope.ActionStatus = {{ Enum.get_class_by_name('ActionStatus').rb() | tojson}};
         $scope.action_columns = {};
         $scope.load = function () {
             $http.get('{{ url_for('.api_action_get') }}', {
@@ -56,6 +103,8 @@
                 }
             }).success(function (data) {
                 $scope.action = data.result;
+                $scope.begDate = new Date($scope.action.begDate);
+                $scope.endDate = new Date($scope.action.endDate);
                 $scope.action_columns = {
                     assignable: false,
                     unit: false
@@ -65,7 +114,7 @@
                     $scope.action_columns.unit |= item.type.unit;
                 });
             })
-        }
+        };
         $scope.load();
     }])
     </script>

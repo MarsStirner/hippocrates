@@ -7,6 +7,7 @@ from blueprints.schedule.models.enums import EventPrimary, EventOrder, ActionSta
 
 from blueprints.schedule.models.schedule import ScheduleTicket, ScheduleClientTicket, Schedule, rbReceptionType
 from ..models.actions import Action, ActionProperty
+from ..models.exists import Event, EventType, rbRequestType
 
 __author__ = 'mmalkov'
 
@@ -227,8 +228,8 @@ class ClientVisualizer(object):
             return {'id': document.documentId,
                     'number': document.number,
                     'serial': document.serial,
-                    'begDate': document.date,
-                    'endDate': document.endDate,
+                    'begDate': document.date or '',
+                    'endDate': document.endDate or '',
                     'typeName': document.documentType.name,
                     'typeCode': document.documentType.code,
                     'origin': document.origin,
@@ -248,8 +249,8 @@ class ClientVisualizer(object):
             return {'id': policy.id,
                     'number': policy.number,
                     'serial': policy.serial,
-                    'begDate': policy.begDate,
-                    'endDate': policy.endDate,
+                    'begDate': policy.begDate or '',
+                    'endDate': policy.endDate or '',
                     'typeName': policy.policyType.name,
                     'typeCode': policy.policyType.code,
                     'insurer_id': policy.insurer_id,
@@ -270,7 +271,7 @@ class ClientVisualizer(object):
                 'identifier': identification.identifier,
                 'accountingSystem_code': identification.accountingSystems.code,
                 'accountingSystem_name': identification.accountingSystems.name,
-                'checkDate': identification.checkDate}
+                'checkDate': identification.checkDate or ''}
 
     def make_relation_info(self, relation):
         return {'id': relation.id,
@@ -295,15 +296,15 @@ class ClientVisualizer(object):
                         'classCode': socStatus.soc_status_class.code,
                         'typeName': socStatus.name,
                         'typeCode': socStatus.code,
-                        'begDate': socStatus.begDate.strftime('%d.%m.%Y') if socStatus.begDate else '',
-                        'endDate': socStatus.endDate.strftime('%d.%m.%Y') if socStatus.endDate else ''
+                        'begDate': socStatus.begDate or '',
+                        'endDate': socStatus.endDate or ''
                         } for socStatus in client.socStatuses]
 
         allergies = [{'id': allergy.id,
                       'nameSubstance': allergy.name,
                       'power': allergy.power,
                       'deleted': allergy.deleted,
-                      'createDate': allergy.createDate.strftime('%d.%m.%Y') if allergy.createDate else '',
+                      'createDate': allergy.createDate or '',
                       'notes': allergy.notes
                       } for allergy in client.allergies]
 
@@ -311,13 +312,13 @@ class ClientVisualizer(object):
                          'nameMedicament': intolerance.name,
                          'power': intolerance.power,
                          'deleted': intolerance.deleted,
-                         'createDate': intolerance.createDate.strftime('%d.%m.%Y') if intolerance.createDate else '',
+                         'createDate': intolerance.createDate or '',
                          'notes': intolerance.notes
                          } for intolerance in client.intolerances]
         bloodHistory = [{'id': blood.id,
                          'bloodGroup_name': blood.bloodType.name,
                          'bloodGroup_code': blood.bloodType.code,
-                         'bloodDate': blood.bloodDate.strftime('%d.%m.%Y') if blood.bloodDate else '',
+                         'bloodDate': blood.bloodDate or '',
                          'person_id': safe_int(blood.person),
                          'person_name': safe_unicode(blood.person)
                          } for blood in client.blood_history]
@@ -346,7 +347,7 @@ class ClientVisualizer(object):
             'notes': client.notes,
             'document': pers_document,
             'documentText': safe_unicode(client.document),
-            'birthDate': client.birthDate,
+            'birthDate': client.birthDate or '',
             'regAddress': client.reg_address,
             'liveAddress': client.loc_address,
             'contact': client.phones,
@@ -385,7 +386,7 @@ class ClientVisualizer(object):
     def make_events(self, client):
         return map(
             self.make_event,
-            client.events
+            client.events.join(EventType).join(rbRequestType).filter(rbRequestType.code == u'policlinic')
         )
 
     def make_person(self, person):
@@ -441,7 +442,7 @@ class PrintTemplateVisualizer(object):
 class EventVisualizer(object):
     def make_event(self, event):
         """
-        @param event: Event
+        @type event: Event
         """
         return {
             'id': event.id,
@@ -461,9 +462,15 @@ class EventVisualizer(object):
             'event_type': event.eventType,
             'finance': event.finance,
             'organisation': event.organisation,
+            'med_doc_actions': [self.make_action(action) for action in event.actions if action.actionType.class_ == 0],
+            'diag_actions': [self.make_action(action) for action in event.actions if action.actionType.class_ == 1],
+            'cure_actions': [self.make_action(action) for action in event.actions if action.actionType.class_ == 2]
         }
 
     def make_diagnoses(self, event):
+        """
+        @type event: Event
+        """
         result = []
         for diagnostic in event.diagnostics:
             for diagnosis in diagnostic.diagnoses:
@@ -471,6 +478,10 @@ class EventVisualizer(object):
         return result
 
     def make_diagnose_row(self, diagnostic, diagnosis):
+        """
+        @type diagnostic: Diagnostic
+        @type diagnosis: Diagnosis
+        """
         return {
             'diagnosis_id': diagnosis.id,
             'diagnostic_id': diagnostic.id,
@@ -487,6 +498,18 @@ class EventVisualizer(object):
             'notes': diagnostic.notes,
         }
 
+    def make_action(self, action):
+        """
+        @type action: Action
+        """
+        return {
+            'id': action.id,
+            'name': action.actionType.name,
+            'begDate': action.begDate,
+            'endDate': action.endDate,
+            'person_text': safe_unicode(action.person)
+        }
+
 
 class ActionVisualizer(object):
     def make_action(self, action):
@@ -499,12 +522,13 @@ class ActionVisualizer(object):
             'event_id': action.event_id,
             'client': action.event.client,
             'directionDate': action.directionDate,
-            'begDate': action.begDate,
-            'endDate': action.endDate,
+            'begDate': action.begDate.strftime('%Y-%m-%d %H:%M:%S') if action.begDate else '',
+            'endDate': action.endDate.strftime('%Y-%m-%d %H:%M:%S') if action.endDate else '',
             'planned_endDate': action.plannedEndDate,
             'status': ActionStatus(action.status),
             'set_person': action.setPerson,
             'person': action.person,
+            'note': action.note,
             'properties': [
                 self.make_property(prop)
                 for prop in action.properties
@@ -523,6 +547,7 @@ class ActionVisualizer(object):
             values = value.get_value() if value else None
         return {
             'id': prop.id,
+            'idx': prop.type.idx,
             'type': prop.type,
             'is_assigned': prop.isAssigned,
             'value': values

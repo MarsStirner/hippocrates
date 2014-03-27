@@ -325,3 +325,7 @@ div.select2-container {
 .ng-ckeditor {
     border:0 none
 }
+
+table.table-clickable tbody tr {
+    cursor: pointer;
+}
