@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 from flask import Blueprint
-from blueprints.schedule.models.exists import rbReasonOfAbsence
-from blueprints.schedule.models.schedule import rbReceptionType
 from .config import MODULE_NAME, RUS_NAME
 
 module = Blueprint(MODULE_NAME, __name__, template_folder='templates', static_folder='static')

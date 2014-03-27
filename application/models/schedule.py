@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from sqlalchemy.sql.elements import False_
 from application.database import db
 from exists import Person, Client, rbReasonOfAbsence, Organisation
 

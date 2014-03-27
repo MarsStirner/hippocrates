@@ -2,7 +2,7 @@
 from flask import request, abort, render_template
 from application.lib.utils import public_endpoint
 from blueprints.schedule.app import module
-from blueprints.schedule.models.exists import Client
+from application.models.exists import Client
 from blueprints.schedule.views.jsonify import ClientVisualizer, Format
 from blueprints.schedule.forms import ClientForm
 

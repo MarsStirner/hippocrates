@@ -6,7 +6,7 @@ from flask import g, current_app, request
 from flask.ext.principal import identity_loaded, Principal, Permission, RoleNeed, UserNeed
 from flask.ext.login import LoginManager, current_user
 from ..database import db
-from ..models import Users, Roles
+from ..models.models import Users, Roles
 from application.app import app
 from pysimplelogs.logger import SimpleLogger
 
