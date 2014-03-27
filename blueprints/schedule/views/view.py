@@ -3,10 +3,9 @@
 from flask import render_template, abort, request
 from jinja2 import TemplateNotFound
 
-from ..app import module
 from application.lib.utils import public_endpoint
 from blueprints.schedule.app import module
-from blueprints.schedule.models.exists import Client
+from application.models.exists import Client
 from blueprints.schedule.forms import ClientForm
 
 # noinspection PyUnresolvedReferences

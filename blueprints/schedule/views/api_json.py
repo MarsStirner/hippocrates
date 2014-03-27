@@ -9,10 +9,10 @@ from application.database import db
 from application.lib.sphinx_search import SearchPatient, SearchPerson
 from application.lib.utils import public_endpoint, jsonify, safe_traverse
 from blueprints.schedule.app import module
-from blueprints.schedule.models.exists import Person, Client, rbSpeciality, rbDocumentType, rbPolicyType, \
+from application.models.exists import Person, Client, rbSpeciality, rbDocumentType, rbPolicyType, \
     rbReasonOfAbsence, rbSocStatusClass, rbSocStatusType, rbAccountingSystem, rbContactType, rbRelationType, \
     ClientDocument, rbBloodType, Bloodhistory, rbPrintTemplate, Event
-from blueprints.schedule.models.schedule import Schedule, ScheduleTicket, ScheduleClientTicket, rbAppointmentType, \
+from application.models.schedule import Schedule, ScheduleTicket, ScheduleClientTicket, rbAppointmentType, \
     rbReceptionType, rbAttendanceType
 from blueprints.schedule.views.jsonify import ScheduleVisualizer, ClientVisualizer, PrintTemplateVisualizer, Format, \
     EventVisualizer, ActionVisualizer
@@ -603,23 +603,11 @@ def api_event_info():
     })
 
 
-@module.route('/api/rb/')
-@module.route('/api/rb/<name>')
-@public_endpoint
-def api_refbook(name):
-    from ..models import exists, schedule, actions
-    for mod in (exists, schedule, actions):
-        if hasattr(mod, name):
-            ref_book = getattr(mod, name)
-            return jsonify(ref_book.query.order_by(ref_book.id).all())
-    return abort(404)
-
-
 @module.route('/api/events/diagnosis.json', methods=['POST'])
 @public_endpoint
 def api_diagnosis_save():
     current_datetime = datetime.datetime.now()
-    from ..models.exists import Diagnosis, Diagnostic
+    from application.models.exists import Diagnosis, Diagnostic
     data = request.json
     diagnosis_id = data.get('diagnosis_id')
     diagnostic_id = data.get('diagnostic_id')
@@ -664,7 +652,7 @@ def api_diagnosis_save():
 @module.route('/api/events/diagnosis.json', methods=['DELETE'])
 @public_endpoint
 def api_diagnosis_delete():
-    from ..models.exists import Diagnosis, Diagnostic
+    from application.models.exists import Diagnosis, Diagnostic
     data = request.json
     if data['diagnosis_id']:
         Diagnosis.query.filter(Diagnosis.id == data['diagnosis_id']).update({'deleted': 1})
@@ -675,7 +663,7 @@ def api_diagnosis_delete():
 @module.route('/api/actions', methods=['GET'])
 @public_endpoint
 def api_action_get():
-    from ..models.actions import Action
+    from application.models.actions import Action
     action_id = int(request.args.get('action_id'))
     action = Action.query.get(action_id)
     v = ActionVisualizer()

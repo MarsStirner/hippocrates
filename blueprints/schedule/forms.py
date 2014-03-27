@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-from flask.ext.wtf import Form, RecaptchaField
-from wtforms import StringField, IntegerField, RadioField, SelectField, TextAreaField, BooleanField, FormField, DateField
+from flask.ext.wtf import Form
+from wtforms import StringField, SelectField, TextAreaField, DateField
 from wtforms.widgets import TextInput, Select
-from wtforms.validators import DataRequired, Email, AnyOf, Optional, Required
+from wtforms.validators import DataRequired, Required
 
 from application.app import app
-from blueprints.schedule.models.exists import rbDocumentType, rbUFMS, rbPolicyType, Organisation, rbSocStatusType, \
+from application.models.exists import rbDocumentType, rbUFMS, rbPolicyType, Organisation, rbSocStatusType, \
     rbSocStatusClass, rbBloodType, rbAccountingSystem, rbRelationType, rbContactType, Client, Person
 
 

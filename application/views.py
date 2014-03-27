@@ -12,7 +12,10 @@ from flask.ext.login import login_user, logout_user, login_required, current_use
 
 from application.app import app, db, login_manager
 from application.context_processors import general_menu
-from models import Users, Roles
+from application.lib.utils import public_endpoint, jsonify
+from application.models import actions
+from blueprints.schedule.app import module
+from models.models import Users, Roles
 from lib.user import User
 from forms import LoginForm
 from lib.utils import admin_permission, public_endpoint
@@ -95,6 +98,19 @@ def logout():
     identity_changed.send(current_app._get_current_object(), identity=AnonymousIdentity())
 
     return redirect(request.args.get('next') or '/')
+
+
+@app.route('/api/rb/')
+@app.route('/api/rb/<name>')
+@public_endpoint
+def api_refbook(name):
+    from application.models import exists, schedule
+
+    for mod in (exists, schedule, actions):
+        if hasattr(mod, name):
+            ref_book = getattr(mod, name)
+            return jsonify(ref_book.query.order_by(ref_book.id).all())
+    return abort(404)
 
 
 @app.errorhandler(403)

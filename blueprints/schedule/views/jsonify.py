@@ -3,11 +3,11 @@ from collections import defaultdict
 import datetime
 import itertools
 from application.lib.utils import safe_unicode, safe_int
-from blueprints.schedule.models.enums import EventPrimary, EventOrder, ActionStatus
+from application.models.enums import EventPrimary, EventOrder, ActionStatus
 
-from blueprints.schedule.models.schedule import ScheduleTicket, ScheduleClientTicket, Schedule, rbReceptionType
-from ..models.actions import Action, ActionProperty
-from ..models.exists import Event, EventType, rbRequestType
+from application.models.schedule import Schedule, rbReceptionType
+from application.models.actions import Action, ActionProperty
+from application.models.exists import Event, EventType, rbRequestType
 
 __author__ = 'mmalkov'
 

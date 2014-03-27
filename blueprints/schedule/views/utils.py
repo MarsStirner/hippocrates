@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import datetime
-from blueprints.schedule.models.exists import ClientPolicy, ClientAllergy, ClientIntoleranceMedicament, ClientContact, \
+from application.models.exists import ClientPolicy, ClientAllergy, ClientIntoleranceMedicament, ClientContact, \
     ClientIdentification, DirectClientRelation, ReversedClientRelation, ClientSocStatus, ClientDocument, Client, \
     rbDocumentType
 
