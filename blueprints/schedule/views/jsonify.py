@@ -227,8 +227,8 @@ class ClientVisualizer(object):
         return {'id': document.documentId,
                 'number': document.number,
                 'serial': document.serial,
-                'begDate': document.date,
-                'endDate': document.endDate,
+                'begDate': document.date.strftime('%Y-%m-%d') if document.date else '',
+                'endDate': document.endDate.strftime('%Y-%m-%d') if document.endDate else '',
                 'typeName': document.documentType.name,
                 'typeCode': document.documentType.code,
                 'origin': document.origin,
@@ -238,8 +238,8 @@ class ClientVisualizer(object):
         return {'id': policy.id,
                 'number': policy.number,
                 'serial': policy.serial,
-                'begDate': policy.begDate,
-                'endDate': policy.endDate,
+                'begDate': policy.begDate.strftime('%Y-%m-%d') if policy.begDate else '',
+                'endDate': policy.endDate.strftime('%Y-%m-%d') if policy.endDate else '',
                 'typeName': policy.policyType.name,
                 'typeCode': policy.policyType.code,
                 'insurer_id': policy.insurer_id,
@@ -251,7 +251,7 @@ class ClientVisualizer(object):
                 'identifier': identification.identifier,
                 'accountingSystem_code': identification.accountingSystems.code,
                 'accountingSystem_name': identification.accountingSystems.name,
-                'checkDate': identification.checkDate}
+                'checkDate': identification.checkDate.strftime('%Y-%m-%d') if identification.checkDate else ''}
 
     def make_relation_info(self, relation):
         return {'id': relation.id,
@@ -276,15 +276,15 @@ class ClientVisualizer(object):
                         'classCode': socStatus.soc_status_class.code,
                         'typeName': socStatus.name,
                         'typeCode': socStatus.code,
-                        'begDate': socStatus.begDate.strftime('%d.%m.%Y') if socStatus.begDate else '',
-                        'endDate': socStatus.endDate.strftime('%d.%m.%Y') if socStatus.endDate else ''
+                        'begDate': socStatus.begDate.strftime('%Y-%m-%d') if socStatus.begDate else '',
+                        'endDate': socStatus.endDate.strftime('%Y-%m-%d') if socStatus.endDate else ''
                         } for socStatus in client.socStatuses]
 
         allergies = [{'id': allergy.id,
                       'nameSubstance': allergy.name,
                       'power': allergy.power,
                       'deleted': allergy.deleted,
-                      'createDate': allergy.createDate.strftime('%d.%m.%Y') if allergy.createDate else '',
+                      'createDate': allergy.createDate.strftime('%Y-%m-%d') if allergy.createDate else '',
                       'notes': allergy.notes
                       } for allergy in client.allergies]
 
@@ -292,13 +292,13 @@ class ClientVisualizer(object):
                          'nameMedicament': intolerance.name,
                          'power': intolerance.power,
                          'deleted': intolerance.deleted,
-                         'createDate': intolerance.createDate.strftime('%d.%m.%Y') if intolerance.createDate else '',
+                         'createDate': intolerance.createDate.strftime('%Y-%m-%d') if intolerance.createDate else '',
                          'notes': intolerance.notes
                          } for intolerance in client.intolerances]
         bloodHistory = [{'id': blood.id,
                          'bloodGroup_name': blood.bloodType.name,
                          'bloodGroup_code': blood.bloodType.code,
-                         'bloodDate': blood.bloodDate.strftime('%d.%m.%Y') if blood.bloodDate else '',
+                         'bloodDate': blood.bloodDate.strftime('%Y-%m-%d') if blood.bloodDate else '',
                          'person_id': safe_int(blood.person),
                          'person_name': safe_unicode(blood.person)
                          } for blood in client.blood_history]
@@ -327,7 +327,7 @@ class ClientVisualizer(object):
             'notes': client.notes,
             'document': pers_document,
             'documentText': safe_unicode(client.document),
-            'birthDate': client.birthDate,
+            'birthDate': client.birthDate.strftime('%Y-%m-%d') if client.birthDate else '',
             'regAddress': client.reg_address,
             'liveAddress': client.loc_address,
             'contact': client.phones,
