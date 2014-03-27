@@ -11,10 +11,10 @@
                 <label for="begDate" class="control-label">Начато</label>
             </td>
             <td>
-                <input id="begDate" type="text" class="form-control" datepicker-popup="dd.MM.yyyy" ng-model="begDate"/>
+                <input id="begDate" type="text" class="form-control" datepicker-popup="dd.MM.yyyy" ng-model="action.begDate"/>
             </td>
             <td>
-                <div ng-model="begDate" style="display:inline-block;">
+                <div ng-model="action.begDate" style="display:inline-block;">
                       <timepicker show-meridian="false"></timepicker>
                 </div>
             </td>
@@ -22,10 +22,10 @@
                 <label for="endDate" class="control-label">Выполнено</label>
             </td>
             <td>
-                <input id="endDate" type="text" class="form-control" datepicker-popup="dd.MM.yyyy" ng-model="endDate"/>
+                <input id="endDate" type="text" class="form-control" datepicker-popup="dd.MM.yyyy" ng-model="action.endDate"/>
             </td>
             <td>
-                <div ng-model="endDate" style="display:inline-block;">
+                <div ng-model="action.endDate" style="display:inline-block;">
                       <timepicker show-meridian="false"></timepicker>
                 </div>{#ng-change="changed()"#}
             </td>
@@ -56,7 +56,7 @@
         </tr>
         </thead>
         <tbody>
-        <tr ng-repeat="property in action.properties | orderBy:property.idx " ng-switch="property.type.type_name">
+        <tr ng-repeat="property in action.properties | orderBy:'idx' " ng-switch="property.type.type_name">
             <td class="action-property-name-field"><strong ng-bind="property.type.name"><span class="label label-danger" ng-if="property.type.mandatory">&ast;</span></strong></td>
             <td ng-if="action_columns.assignable"><input type="checkbox" ng-model="property.is_assigned" ng-if="property.type.is_assignable"></td>
             <!-- Здесь начинаются вариации на тему разных виджетов -->
@@ -103,8 +103,6 @@
                 }
             }).success(function (data) {
                 $scope.action = data.result;
-                $scope.begDate = new Date($scope.action.begDate);
-                $scope.endDate = new Date($scope.action.endDate);
                 $scope.action_columns = {
                     assignable: false,
                     unit: false
