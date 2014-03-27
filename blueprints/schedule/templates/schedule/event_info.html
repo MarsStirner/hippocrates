@@ -1,72 +1,18 @@
 {% extends "schedule/base.html" %}
+{% import "schedule/client_event/action_list.html" as action_list %}
 {% block main %}
     <div ng-controller="EventInfoCtrl">
     <legend xmlns="http://www.w3.org/1999/html">[[ event_info.client ]]</legend>
     <tabset>
-        <tab>
-            <tab-heading>Основная Информация</tab-heading>
-            {% include "schedule/client_event/main.html" %}
-        </tab>
+        <tab><tab-heading>Основная Информация</tab-heading>{% include "schedule/client_event/main.html" %}</tab>
         <tab><tab-heading>Медицинские документы</tab-heading>
-            {# Здесь надо распилить на классы типов действий #}
-            <table class="table table-condensed table-hover table-clickable">
-                <thead>
-                <tr>
-                    <th>Тип действия</th>
-                    <th>Начало</th>
-                    <th>Конец</th>
-                    <th>Исполнитель</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr ng-repeat="action in event_info.med_doc_actions" ng-click="open_action(action.id)">
-                    <td>[[ action.name ]]</td>
-                    <td>[[ action.begDate | asDate ]]</td>
-                    <td>[[ action.endDate | asDateTime ]]</td>
-                    <td>[[ action.person_text ]]</td>
-                </tr>
-                </tbody>
-            </table>
+            {{ action_list.action_list('event_info.med_doc_actions') }}
         </tab>
         <tab><tab-heading>Диагностика и лаб.исследования</tab-heading>
-            <table class="table table-condensed table-hover table-clickable">
-                <thead>
-                <tr>
-                    <th>Тип действия</th>
-                    <th>Начало</th>
-                    <th>Конец</th>
-                    <th>Исполнитель</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr ng-repeat="action in event_info.diag_actions" ng-click="open_action(action.id)">
-                    <td>[[ action.name ]]</td>
-                    <td>[[ action.begDate | asDate ]]</td>
-                    <td>[[ action.endDate | asDateTime ]]</td>
-                    <td>[[ action.person_text ]]</td>
-                </tr>
-                </tbody>
-            </table>
+            {{ action_list.action_list('event_info.diag_actions') }}
         </tab>
         <tab><tab-heading>Лечение</tab-heading>
-            <table class="table table-condensed table-hover table-clickable">
-                <thead>
-                <tr>
-                    <th>Тип действия</th>
-                    <th>Начало</th>
-                    <th>Конец</th>
-                    <th>Исполнитель</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr ng-repeat="action in event_info.cure_actions" ng-click="open_action(action.id)">
-                    <td>[[ action.name ]]</td>
-                    <td>[[ action.begDate | asDate ]]</td>
-                    <td>[[ action.endDate | asDateTime ]]</td>
-                    <td>[[ action.person_text ]]</td>
-                </tr>
-                </tbody>
-            </table>
+            {{ action_list.action_list('event_info.cure_actions') }}
         </tab>
         <tab><tab-heading>Оплата</tab-heading></tab>
     </tabset>
