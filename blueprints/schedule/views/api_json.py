@@ -596,10 +596,13 @@ def api_move_client():
 def api_event_info():
     event_id = int(request.args['event_id'])
     event = Event.query.get(event_id)
+    print_templates = rbPrintTemplate.query.filter(rbPrintTemplate.context == 'f025').all()
     vis = EventVisualizer()
+    print_context = PrintTemplateVisualizer()
     return jsonify({
         'event': vis.make_event(event),
         'diagnoses': vis.make_diagnoses(event),
+        'print_templates': map(print_context.make_template_info, print_templates),
     })
 
 
@@ -666,5 +669,10 @@ def api_action_get():
     from application.models.actions import Action
     action_id = int(request.args.get('action_id'))
     action = Action.query.get(action_id)
+    context = action.actionType.context
+    print_templates = rbPrintTemplate.query.filter(rbPrintTemplate.context == context).all()
     v = ActionVisualizer()
-    return jsonify(v.make_action(action))
+    print_context = PrintTemplateVisualizer()
+    return jsonify({'action': v.make_action(action),
+                    'print_templates': map(print_context.make_template_info, print_templates)
+                    })

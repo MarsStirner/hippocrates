@@ -76,12 +76,25 @@
         </tbody>
     </table>
 </div>
+<div class="row">
+    <div class="dropdown col-md-offset-10 col-md-2">
+        <button class="btn dropdown-toggle" type="button" id="print_dropdownMenu" data-toggle="dropdown">
+            <span class="glyphicon glyphicon-print"></span>
+            Печать
+            <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="print_dropdownMenu">
+            <li role="presentation"
+                ng-repeat="template in PrintTemplates"><a role="menuitem" tabindex="-1" href="" class="print_template" ng-click="print_template(template.id)">[[ template.name ]]</a></li>
+        </ul>
+    </div>
+</div>
 </div>
 {% endblock %}
 
 {% block modules_js %}
     <script>
-    WebMis20.controller('ActionCtrl', ['$scope', '$http', function ($scope, $http) {
+    WebMis20.controller('ActionCtrl', ['$scope', '$http', '$window', function ($scope, $http, $window) {
         $scope.ckEditorOptions = {
             language: 'ru',
             removeButtons: 'Cut,Copy,Paste,Undo,Redo,Anchor,Strike',
@@ -102,7 +115,8 @@
                     'action_id': $scope.action_id
                 }
             }).success(function (data) {
-                $scope.action = data.result;
+                $scope.action = data.result.action;
+                $scope.PrintTemplates = data.result.print_templates
                 $scope.action_columns = {
                     assignable: false,
                     unit: false
@@ -114,6 +128,23 @@
             })
         };
         $scope.load();
+        $scope.print_template = function (template_id) {
+            $http({url: 'http://127.0.0.1:5005/print_subsystem/print_template',
+                   method: "POST",
+                   data: JSON.stringify({id: template_id,
+                                         context_type: "action",
+                                         action_id: $scope.action_id,
+                                         additional_context:{'currentOrgStructure':"", 'currentOrganisation':3479, 'currentPerson':"1"}
+                                        }),
+                   headers: {'Content-Type': 'application/json'}
+                   }).success(function (data) {
+                        $scope.w = $window.open();
+                        $scope.w.document.open();
+                        $scope.w.document.write(data)
+                        $scope.w.document.close();
+                        $scope.w.print();
+                   })
+        };
     }])
     </script>
 {% endblock %}
