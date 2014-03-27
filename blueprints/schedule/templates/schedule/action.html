@@ -11,10 +11,10 @@
                 <label for="begDate" class="control-label">Начато</label>
             </td>
             <td>
-                <input id="begDate" type="text" class="form-control" datepicker-popup="dd.MM.yyyy" ng-model="begDate"/>
+                <input id="begDate" type="text" class="form-control" datepicker-popup="dd.MM.yyyy" ng-model="action.begDate"/>
             </td>
             <td>
-                <div ng-model="begDate" style="display:inline-block;">
+                <div ng-model="action.begDate" style="display:inline-block;">
                       <timepicker show-meridian="false"></timepicker>
                 </div>
             </td>
@@ -22,10 +22,10 @@
                 <label for="endDate" class="control-label">Выполнено</label>
             </td>
             <td>
-                <input id="endDate" type="text" class="form-control" datepicker-popup="dd.MM.yyyy" ng-model="endDate"/>
+                <input id="endDate" type="text" class="form-control" datepicker-popup="dd.MM.yyyy" ng-model="action.endDate"/>
             </td>
             <td>
-                <div ng-model="endDate" style="display:inline-block;">
+                <div ng-model="action.endDate" style="display:inline-block;">
                       <timepicker show-meridian="false"></timepicker>
                 </div>{#ng-change="changed()"#}
             </td>
@@ -56,7 +56,7 @@
         </tr>
         </thead>
         <tbody>
-        <tr ng-repeat="property in action.properties | orderBy:property.idx " ng-switch="property.type.type_name">
+        <tr ng-repeat="property in action.properties | orderBy:'idx' " ng-switch="property.type.type_name">
             <td class="action-property-name-field"><strong ng-bind="property.type.name"><span class="label label-danger" ng-if="property.type.mandatory">&ast;</span></strong></td>
             <td ng-if="action_columns.assignable"><input type="checkbox" ng-model="property.is_assigned" ng-if="property.type.is_assignable"></td>
             <!-- Здесь начинаются вариации на тему разных виджетов -->
@@ -76,12 +76,25 @@
         </tbody>
     </table>
 </div>
+<div class="row">
+    <div class="dropdown col-md-offset-10 col-md-2">
+        <button class="btn dropdown-toggle" type="button" id="print_dropdownMenu" data-toggle="dropdown">
+            <span class="glyphicon glyphicon-print"></span>
+            Печать
+            <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="print_dropdownMenu">
+            <li role="presentation"
+                ng-repeat="template in PrintTemplates"><a role="menuitem" tabindex="-1" href="" class="print_template" ng-click="print_template(template.id)">[[ template.name ]]</a></li>
+        </ul>
+    </div>
+</div>
 </div>
 {% endblock %}
 
 {% block modules_js %}
     <script>
-    WebMis20.controller('ActionCtrl', ['$scope', '$http', function ($scope, $http) {
+    WebMis20.controller('ActionCtrl', ['$scope', '$http', '$window', function ($scope, $http, $window) {
         $scope.ckEditorOptions = {
             language: 'ru',
             removeButtons: 'Cut,Copy,Paste,Undo,Redo,Anchor,Strike',
@@ -102,9 +115,8 @@
                     'action_id': $scope.action_id
                 }
             }).success(function (data) {
-                $scope.action = data.result;
-                $scope.begDate = new Date($scope.action.begDate);
-                $scope.endDate = new Date($scope.action.endDate);
+                $scope.action = data.result.action;
+                $scope.PrintTemplates = data.result.print_templates
                 $scope.action_columns = {
                     assignable: false,
                     unit: false
@@ -116,6 +128,23 @@
             })
         };
         $scope.load();
+        $scope.print_template = function (template_id) {
+            $http({url: 'http://127.0.0.1:5005/print_subsystem/print_template',
+                   method: "POST",
+                   data: JSON.stringify({id: template_id,
+                                         context_type: "action",
+                                         action_id: $scope.action_id,
+                                         additional_context:{'currentOrgStructure':"", 'currentOrganisation':3479, 'currentPerson':"1"}
+                                        }),
+                   headers: {'Content-Type': 'application/json'}
+                   }).success(function (data) {
+                        $scope.w = $window.open();
+                        $scope.w.document.open();
+                        $scope.w.document.write(data)
+                        $scope.w.document.close();
+                        $scope.w.print();
+                   })
+        };
     }])
     </script>
 {% endblock %}

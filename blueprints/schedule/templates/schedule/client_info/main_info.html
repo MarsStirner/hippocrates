@@ -13,19 +13,19 @@
                 <div class="form-group col-md-3">
                     {{ form.lastname.label(class="control-label") }}
                     <div>
-                        {{ form.lastname(class="form-control", autocomplete="off", placeholder="Фамилия", ng_model="clientDataItems['lastName']") }}
+                        {{ form.lastname(class="form-control", autocomplete="off", placeholder="Фамилия", ng_model="clientDataItems.lastName") }}
                     </div>
                 </div>
                 <div class="form-group col-md-3" style="margin-right: -5px; margin-left: -5px;">
                     {{ form.firstname.label(class="control-label") }}
                     <div>
-                        {{ form.firstname(class="form-control", autocomplete="off", placeholder="Имя", ng_model="clientDataItems['firstName']") }}
+                        {{ form.firstname(class="form-control", autocomplete="off", placeholder="Имя", ng_model="clientDataItems.firstName") }}
                     </div>
                 </div>
                 <div class="form-group col-md-offset-3 col-md-3">
                     {{ form.patronymic.label(class="control-label") }}
                     <div>
-                        {{ form.patronymic(class="form-control", autocomplete="off", placeholder="Отчество", ng_model="clientDataItems['patrName']") }}
+                        {{ form.patronymic(class="form-control", autocomplete="off", placeholder="Отчество", ng_model="clientDataItems.patrName") }}
                     </div>
                 </div>
             </div>
@@ -210,7 +210,9 @@
             </div>
          </div>
     </div>
-</form>
-<div class="col-sm-offset-2 col-md-10" ng-show="editing">
-    <button ng-click="save_client_info()" class="btn btn-success">Сохранить</button>
+<div class="col-sm-offset-10 col-md-2" ng-show="editing">
+    <button ng-click="editing=false; save_client_info()" class="btn btn-success">Сохранить</button>
 </div>
+</form>
+
+

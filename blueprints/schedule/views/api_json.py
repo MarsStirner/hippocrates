@@ -17,6 +17,7 @@ from application.models.schedule import Schedule, ScheduleTicket, ScheduleClient
 from blueprints.schedule.views.jsonify import ScheduleVisualizer, ClientVisualizer, PrintTemplateVisualizer, Format, \
     EventVisualizer, ActionVisualizer
 from blueprints.schedule.views.utils import *
+from blueprints.schedule.views.uuid_generator import getNewUUID_id
 
 __author__ = 'mmalkov'
 
@@ -228,16 +229,21 @@ def api_patient():
         client_id = int(request.args['client_id'])
     except KeyError or ValueError:
         return abort(404)
-    client = Client.query.get(client_id)
-    if not client:
-        return abort(404)
     context = ClientVisualizer()
-    return jsonify({
-        'clientData': context.make_client_info(client),
-        'records': context.make_records(client),
-        'events': context.make_events(client)
-    })
-
+    if client_id:
+        client = Client.query.get(client_id)
+        if not client:
+            return abort(404)
+        return jsonify({
+            'clientData': context.make_client_info(client),
+            'records': context.make_records(client),
+            'events': context.make_events(client)
+        })
+    else:
+        client = Client()
+        return jsonify({
+            'clientData': context.make_client_info(client)
+        })
 
 @module.route('/api/search_clients.json')
 @public_endpoint
@@ -362,21 +368,34 @@ def api_save_patient_info():
     try:
         client_info = json.loads(request.args['client_info'])
         client_id = int(client_info['id'])
-        client = Client.query.get(client_id)
-        db.session.add(client)
+        if client_id:
+            client = Client.query.get(client_id)
+        else:
+            client = create_new_client()
+
         client.lastName = client_info['lastName']
         client.firstName = client_info['firstName']
         client.patrName = client_info['patrName']
         client.sexCode = 1 if client_info['sex'] == u'М' else 2
-        client.notes = client_info['notes']
+        client.SNILS = client_info['SNILS'].replace(" ", "").replace("-", "") if client_info['SNILS'] else ''
+        client.notes = client_info['notes'] if client_info['notes'] else ''
         client.birthDate = client_info['birthDate']
+        client.uuid_id = getNewUUID_id()
 
-        client.document.serial = client_info['document']['serial']
-        client.document.number = client_info['document']['number']
-        client.document.date = client_info['document']['begDate']
-        client.document.endDate = client_info['document']['endDate']
-        client.document.documentType = rbDocumentType.query.filter(rbDocumentType.code ==
-                                                                   client_info['document']['typeCode']).first()
+        db.session.add(client)
+        db.session.commit()
+
+        if not client.document and client_info['document']['number']:
+            client_document = create_new_document(client.id, client_info['document'])
+            db.session.add(client_document)
+        else:
+            client.document.serial = client_info['document']['serial']
+            client.document.number = client_info['document']['number']
+            client.document.date = client_info['document']['begDate']
+            client.document.endDate = client_info['document']['endDate']
+            client.document.origin = client_info['document']['origin']
+            client.document.documentType = rbDocumentType.query.filter(rbDocumentType.code ==
+                                                                       client_info['document']['typeCode']).first()
 
         if client.compulsoryPolicy and check_edit_policy(client.compulsoryPolicy,
                                                          client_info['compulsoryPolicy']['serial'],
@@ -384,13 +403,14 @@ def api_save_patient_info():
                                                          client_info['compulsoryPolicy']['typeCode']):
             client.compulsoryPolicy.begDate = client_info['compulsoryPolicy']['begDate']
             client.compulsoryPolicy.endDate = client_info['compulsoryPolicy']['endDate']
+            client.compulsoryPolicy.insurer_id = client_info['compulsoryPolicy']['insurer_id']
             client.compulsoryPolicy.modifyDatetime = datetime.datetime.now()
-        else:
+        elif client_info['compulsoryPolicy']['number']:
+            client.compulsoryPolicy.deleted = 2
             compulsory_policy = create_new_policy(client_info['compulsoryPolicy'], client.id)
             compulsory_policy.policyType = rbPolicyType.query.filter(rbPolicyType.code ==
                                                                      client_info['compulsoryPolicy']['typeCode']).first()
             db.session.add(compulsory_policy)
-            compulsory_policy.compulsoryPolicy = compulsory_policy
 
         if client.voluntaryPolicy and check_edit_policy(client.compulsoryPolicy,
                                                         client_info['voluntaryPolicy']['serial'],
@@ -398,15 +418,14 @@ def api_save_patient_info():
                                                         client_info['voluntaryPolicy']['typeCode']):
             client.voluntaryPolicy.begDate = client_info['voluntaryPolicy']['begDate']
             client.voluntaryPolicy.endDate = client_info['voluntaryPolicy']['endDate']
+            client.voluntaryPolicy.insurer_id = client_info['voluntaryPolicy']['insurer_id']
             client.voluntaryPolicy.modifyDatetime = datetime.datetime.now()
-        # else:
-        #     voluntary_policy = create_new_policy(client_info['voluntaryPolicy'], client.id)
-        #     client.voluntaryPolicy.policyType = rbPolicyType.query.filter(rbPolicyType.code ==
-        #                                                                   client_info['voluntaryPolicy']['typeCode']).first()
-        #     db.session.add(voluntary_policy)
-        #     compulsory_policy.compulsoryPolicy = voluntary_policy
-
-        client.SNILS = client_info['SNILS'].replace(" ", "").replace("-", "")
+        elif client_info['voluntaryPolicy']['number']:
+            client.voluntaryPolicy.deleted = 2
+            voluntary_policy = create_new_policy(client_info['voluntaryPolicy'], client.id)
+            client.voluntaryPolicy.policyType = rbPolicyType.query.filter(rbPolicyType.code ==
+                                                                          client_info['voluntaryPolicy']['typeCode']).first()
+            db.session.add(voluntary_policy)
 
         for soc_status in client_info['socStatuses']:
             if not 'id' in soc_status:
@@ -579,10 +598,13 @@ def api_move_client():
 def api_event_info():
     event_id = int(request.args['event_id'])
     event = Event.query.get(event_id)
+    print_templates = rbPrintTemplate.query.filter(rbPrintTemplate.context == 'f025').all()
     vis = EventVisualizer()
+    print_context = PrintTemplateVisualizer()
     return jsonify({
         'event': vis.make_event(event),
         'diagnoses': vis.make_diagnoses(event),
+        'print_templates': map(print_context.make_template_info, print_templates),
     })
 
 
@@ -649,5 +671,10 @@ def api_action_get():
     from application.models.actions import Action
     action_id = int(request.args.get('action_id'))
     action = Action.query.get(action_id)
+    context = action.actionType.context
+    print_templates = rbPrintTemplate.query.filter(rbPrintTemplate.context == context).all()
     v = ActionVisualizer()
-    return jsonify(v.make_action(action))
+    print_context = PrintTemplateVisualizer()
+    return jsonify({'action': v.make_action(action),
+                    'print_templates': map(print_context.make_template_info, print_templates)
+                    })

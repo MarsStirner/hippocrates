@@ -4,7 +4,7 @@ from flask.ext.login import UserMixin
 from application.database import db
 from application.lib.agesex import AgeSex
 from application.models.kladr_models import Kladr, Street
-from application.models.actions import Action
+# from application.models.actions import Action
 
 
 class Address(db.Model):
@@ -953,7 +953,7 @@ class OrgStructure(db.Model):
         return self.id
 
 
-class Person(db.Model, UserMixin):
+class Person(db.Model):
     __tablename__ = 'Person'
     __table_args__ = (
         db.Index(u'lastName', u'lastName', u'firstName', u'patrName'),
@@ -1018,7 +1018,6 @@ class Person(db.Model, UserMixin):
     academicDegree = db.relationship('rbAcademicDegree')
     academicTitle = db.relationship('rbAcademicTitle')
     tariffCategory = db.relationship('rbTariffCategory')
-    user_profiles = db.relation('rbUserProfile', secondary='Person_Profiles')
 
     @property
     def nameText(self):
@@ -1051,9 +1050,6 @@ class Person(db.Model, UserMixin):
 
     def __int__(self):
         return self.id
-
-    def is_active(self):
-        return self.deleted == 0
 
 
 class rbAcademicDegree(db.Model):
@@ -2305,15 +2301,13 @@ class rbUserProfile(db.Model):
     name = db.Column(db.String(128), nullable=False, index=True)
     withDep = db.Column(db.Integer, nullable=False, server_default=u"'0'")
 
-    rights = db.relationship(u'rbUserRight', secondary=u'rbUserProfile_Right')
-
 
 class rbUserProfileRight(db.Model):
     __tablename__ = u'rbUserProfile_Right'
 
     id = db.Column(db.Integer, primary_key=True)
-    master_id = db.Column(db.ForeignKey('rbUserProfile.id'), nullable=False, index=True)
-    userRight_id = db.Column(db.ForeignKey('rbUserRight.id'), nullable=False, index=True)
+    master_id = db.Column(db.Integer, nullable=False, index=True)
+    userRight_id = db.Column(db.Integer, nullable=False, index=True)
 
 
 class rbUserRight(db.Model):
@@ -2385,6 +2379,13 @@ class FlatDirectory(db.Model):
     name = db.Column(db.String(4096), nullable=False)
     code = db.Column(db.String(128), index=True)
     description = db.Column(db.String(4096))
+
+
+class UUID(db.Model):
+    __tablename__ = u'UUID'
+
+    id = db.Column(db.Integer, primary_key=True)
+    uuid = db.Column(db.String(100), nullable=False, unique=True)
 
 
 class PersonProfiles(db.Model):

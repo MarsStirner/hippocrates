@@ -17,7 +17,7 @@
     </tbody>
 </table>
 <form name="client_form_tab2" class="form-horizontal" role="form" ng-show="editing">
-    <table class="table table-condensed" ng-if="clientDataItems['socStatuses']">
+    <table class="table table-condensed">
         <thead>
         <tr>
             <th>Класс</th>
@@ -46,5 +46,5 @@
                                                                              title="Добавить новую запись"></span> Добавить</button>
 </div>
 <div class="col-sm-offset-2 col-md-10" ng-show="editing">
-    <button ng-click="save_client_info()" class="btn btn-success">Сохранить</button>
+    <button ng-click="editing=false; save_client_info()" class="btn btn-success">Сохранить</button>
 </div>

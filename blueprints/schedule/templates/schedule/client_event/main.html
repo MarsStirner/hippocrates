@@ -133,3 +133,16 @@
         </div>
     </div>
 </div>
+<div class="row">
+    <div class="dropdown col-md-offset-10 col-md-2">
+        <button class="btn dropdown-toggle" type="button" id="print_dropdownMenu" data-toggle="dropdown">
+            <span class="glyphicon glyphicon-print"></span>
+            Печать
+            <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="print_dropdownMenu">
+            <li role="presentation"
+                ng-repeat="template in PrintTemplates"><a role="menuitem" tabindex="-1" href="" class="print_template" ng-click="print_template(template.id)">[[ template.name ]]</a></li>
+        </ul>
+    </div>
+</div>

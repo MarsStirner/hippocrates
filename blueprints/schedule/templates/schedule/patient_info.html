@@ -72,7 +72,6 @@
             $scope.clientMainInfoCodeOrder = ['id', 'nameText', 'birthDate', 'sex', 'regAddress', 'liveAddress',
                 'documentText', 'compulsoryPolicyText', 'voluntaryPolicyText', 'SNILS', 'contact', 'notes'];
             $scope.save_client_info = function() {
-                $scope.editing = false;
                 $http.get(
                     '{{ url_for('.api_save_patient_info') }}', {
                         params: {
@@ -169,7 +168,6 @@
                 }
             ).success(function (data) {
                 $scope.clientDataItems = data.result.clientData;
-                $scope.referenceBooksItems = data.result.referenceBooks;
                 $scope.records = data.result.records;
                 $scope.client_events = data.result.events;
             });

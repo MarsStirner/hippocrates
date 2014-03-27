@@ -224,26 +224,46 @@ class ClientVisualizer(object):
         self.__mode = mode
 
     def make_document_info(self, document):
-        return {'id': document.documentId,
-                'number': document.number,
-                'serial': document.serial,
-                'begDate': document.date.strftime('%Y-%m-%d') if document.date else '',
-                'endDate': document.endDate.strftime('%Y-%m-%d') if document.endDate else '',
-                'typeName': document.documentType.name,
-                'typeCode': document.documentType.code,
-                'origin': document.origin,
-                'documentText': document} if document else {}
+        if document:
+            return {'id': document.documentId,
+                    'number': document.number,
+                    'serial': document.serial,
+                    'begDate': document.date or '',
+                    'endDate': document.endDate or '',
+                    'typeName': document.documentType.name,
+                    'typeCode': document.documentType.code,
+                    'origin': document.origin,
+                    'documentText': document}
+        else:
+            return {'number': '',
+                    'serial': '',
+                    'begDate': '',
+                    'endDate': '',
+                    'typeName': '',
+                    'typeCode': '',
+                    'origin': '',
+                    'documentText': ''}
 
     def make_policy_info(self, policy):
-        return {'id': policy.id,
-                'number': policy.number,
-                'serial': policy.serial,
-                'begDate': policy.begDate.strftime('%Y-%m-%d') if policy.begDate else '',
-                'endDate': policy.endDate.strftime('%Y-%m-%d') if policy.endDate else '',
-                'typeName': policy.policyType.name,
-                'typeCode': policy.policyType.code,
-                'insurer_id': policy.insurer_id,
-                'policyText': policy} if policy else {}
+        if policy:
+            return {'id': policy.id,
+                    'number': policy.number,
+                    'serial': policy.serial,
+                    'begDate': policy.begDate or '',
+                    'endDate': policy.endDate or '',
+                    'typeName': policy.policyType.name,
+                    'typeCode': policy.policyType.code,
+                    'insurer_id': policy.insurer_id,
+                    'policyText': policy}
+        else:
+            return {'number': '',
+                    'serial': '',
+                    'begDate': '',
+                    'endDate': '',
+                    'typeName': '',
+                    'typeCode': '',
+                    'insurer_id': '',
+                    'policyText': ''}
 
     def make_identification_info(self, identification):
         return {'id': identification.id,
@@ -251,7 +271,7 @@ class ClientVisualizer(object):
                 'identifier': identification.identifier,
                 'accountingSystem_code': identification.accountingSystems.code,
                 'accountingSystem_name': identification.accountingSystems.name,
-                'checkDate': identification.checkDate.strftime('%Y-%m-%d') if identification.checkDate else ''}
+                'checkDate': identification.checkDate or ''}
 
     def make_relation_info(self, relation):
         return {'id': relation.id,
@@ -276,15 +296,15 @@ class ClientVisualizer(object):
                         'classCode': socStatus.soc_status_class.code,
                         'typeName': socStatus.name,
                         'typeCode': socStatus.code,
-                        'begDate': socStatus.begDate.strftime('%Y-%m-%d') if socStatus.begDate else '',
-                        'endDate': socStatus.endDate.strftime('%Y-%m-%d') if socStatus.endDate else ''
+                        'begDate': socStatus.begDate or '',
+                        'endDate': socStatus.endDate or ''
                         } for socStatus in client.socStatuses]
 
         allergies = [{'id': allergy.id,
                       'nameSubstance': allergy.name,
                       'power': allergy.power,
                       'deleted': allergy.deleted,
-                      'createDate': allergy.createDate.strftime('%Y-%m-%d') if allergy.createDate else '',
+                      'createDate': allergy.createDate or '',
                       'notes': allergy.notes
                       } for allergy in client.allergies]
 
@@ -292,13 +312,13 @@ class ClientVisualizer(object):
                          'nameMedicament': intolerance.name,
                          'power': intolerance.power,
                          'deleted': intolerance.deleted,
-                         'createDate': intolerance.createDate.strftime('%Y-%m-%d') if intolerance.createDate else '',
+                         'createDate': intolerance.createDate or '',
                          'notes': intolerance.notes
                          } for intolerance in client.intolerances]
         bloodHistory = [{'id': blood.id,
                          'bloodGroup_name': blood.bloodType.name,
                          'bloodGroup_code': blood.bloodType.code,
-                         'bloodDate': blood.bloodDate.strftime('%Y-%m-%d') if blood.bloodDate else '',
+                         'bloodDate': blood.bloodDate or '',
                          'person_id': safe_int(blood.person),
                          'person_name': safe_unicode(blood.person)
                          } for blood in client.blood_history]
@@ -317,7 +337,7 @@ class ClientVisualizer(object):
         contacts = [self.make_contact_info(contact) for contact in client.contacts]
 
         return {
-            'id': client.id,
+            'id': client.id if client.id else 0,
             'lastName': client.lastName,
             'firstName': client.firstName,
             'patrName': client.patrName,
@@ -327,7 +347,7 @@ class ClientVisualizer(object):
             'notes': client.notes,
             'document': pers_document,
             'documentText': safe_unicode(client.document),
-            'birthDate': client.birthDate.strftime('%Y-%m-%d') if client.birthDate else '',
+            'birthDate': client.birthDate or '',
             'regAddress': client.reg_address,
             'liveAddress': client.loc_address,
             'contact': client.phones,
@@ -502,8 +522,8 @@ class ActionVisualizer(object):
             'event_id': action.event_id,
             'client': action.event.client,
             'directionDate': action.directionDate,
-            'begDate': action.begDate.strftime('%Y-%m-%d %H:%M:%S') if action.begDate else '',
-            'endDate': action.endDate.strftime('%Y-%m-%d %H:%M:%S') if action.endDate else '',
+            'begDate': action.begDate,
+            'endDate': action.endDate,
             'planned_endDate': action.plannedEndDate,
             'status': ActionStatus(action.status),
             'set_person': action.setPerson,

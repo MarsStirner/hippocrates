@@ -21,7 +21,7 @@
 
 {% block modules_js %}
     <script>
-    WebMis20.controller('EventInfoCtrl', ['$scope', '$http', 'RefBook', function ($scope, $http, RefBook) {
+    WebMis20.controller('EventInfoCtrl', ['$scope', '$http', 'RefBook', '$window', function ($scope, $http, RefBook, $window) {
         $scope.aux = aux;
         $scope.event_info = null;
         $scope.event_id = aux.getQueryParams(location.search).event_id;
@@ -87,6 +87,7 @@
             }).success(function (data) {
                 $scope.event_info = data.result.event;
                 $scope.diagnoses = data.result.diagnoses;
+                $scope.PrintTemplates = data.result.print_templates
             })
         };
 
@@ -96,6 +97,23 @@
 
         $scope.load_data();
 
+        $scope.print_template = function (template_id) {
+            $http({url: 'http://127.0.0.1:5005/print_subsystem/print_template',
+                   method: "POST",
+                   data: JSON.stringify({id: template_id,
+                                         context_type: "event",
+                                         event_id: $scope.event_id,
+                                         additional_context:{'currentOrgStructure':"", 'currentOrganisation':3479, 'currentPerson':"1"}
+                                        }),
+                   headers: {'Content-Type': 'application/json'}
+                   }).success(function (data) {
+                        $scope.w = $window.open();
+                        $scope.w.document.open();
+                        $scope.w.document.write(data)
+                        $scope.w.document.close();
+                        $scope.w.print();
+                   })
+        };
     }])
     </script>
 {% endblock %}

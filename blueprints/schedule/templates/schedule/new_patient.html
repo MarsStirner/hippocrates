@@ -1,0 +1,110 @@
+{% extends 'schedule/base.html' %}
+
+{% block title %}> {{ module_name }}{% endblock %}
+
+{% block main %}
+    <div ng-controller="NewClient">
+        <tabset>
+            <tab heading="Основная информация"> {% include "schedule/client_info/main_info.html" %}</tab>
+            <tab heading="Соц. статус">{% include "schedule/client_info/soc_status.html" %}</tab>
+            <tab heading="Особенности">{% include "schedule/client_info/characteristics.html" %}</tab>
+            <tab heading="Идентификаторы">{% include "schedule/client_info/identifiers.html" %}</tab>
+            <tab heading="Связи и контакты">{% include "schedule/client_info/contacts.html" %}</tab>
+        </tabset>
+
+{#        <ul class="pager">#}
+{#             <li><a href="" ng-click="change_tab()">Previous</a></li>#}
+{#             <li><a href="">Next</a></li>#}
+{#        </ul>#}
+
+    </div>
+{% endblock %}
+
+{% block modules_js %}
+    {{ super() }}
+    <script type="text/javascript">
+        WebMis20.controller('NewClient', ['$scope', '$http', function ($scope, $http) {
+            $scope.editing = true;
+            $scope.change_tab = function() {
+                console.log($scope.tabs);
+            };
+            $scope.add_allergy = function() {
+                $scope.clientDataItems['allergies'].push({'nameSubstance': '',
+                                                          'power': 0,
+                                                          'createDate': '',
+                                                          'deleted':0,
+                                                          'notes': ''
+                                                          })
+            };
+            $scope.add_medicament = function() {
+                $scope.clientDataItems['intolerances'].push({'nameMedicament': '',
+                                                          'power': 0,
+                                                          'createDate': '',
+                                                          'deleted':0,
+                                                          'notes': ''
+                                                          })
+            };
+            $scope.add_identification = function() {
+                $scope.clientDataItems['identifications'].push({'deleted': 0,
+                                                                'identifier': '',
+                                                                'accountingSystem_code': '',
+                                                                'checkDate': ''})
+            };
+            $scope.add_contact = function() {
+                $scope.clientDataItems['contacts'].push({'deleted': 0,
+                                                         'contactType_code': '',
+                                                         'contact': '',
+                                                         'notes': ''})
+            };
+            $scope.add_blood = function() {
+                $scope.clientDataItems['bloodHistory'].push({'bloodGroup_code': '',
+                                                             'bloodDate': '',
+                                                             'person_id': 0
+                                                             })
+            };
+            $scope.add_relation = function(relation_array) {
+                relation_array.push({'relativeType_name': '',
+                                     'relativeType_code': '',
+                                     'other_id': 0
+                                     })
+            };
+            $scope.add_soc_status = function() {
+                console.log('add soc status');
+                $scope.clientDataItems['socStatuses'].push({'deleted': 0,
+                                                            'classCode': '',
+                                                            'typeCode': '',
+                                                            'begDate': '',
+                                                            'endDate': ''
+                                                            })
+            };
+            $scope.delete_item = function(clientData_array, item) {
+                if ('id' in item) {
+                    item['deleted'] = 1;
+                } else {
+                    var index = clientData_array.indexOf(item);
+                    clientData_array.splice(index, 1);
+                }
+
+            };
+
+            $scope.save_client_info = function() {
+                $scope.editing = false;
+                $http.get(
+                    '{{ url_for('.api_save_patient_info') }}', {
+                        params: {
+                            client_info: $scope.clientDataItems
+                        }
+                    });
+            };
+            $http.get(
+                '{{ url_for('.api_patient') }}', {
+                    params: {
+                        'client_id': 0
+                    }
+                }
+            ).success(function (data) {
+                $scope.clientDataItems = data.result.clientData;
+            });
+         }]);
+    </script>
+{% endblock %}
