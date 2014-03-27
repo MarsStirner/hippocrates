@@ -1,4 +1,5 @@
 {% extends "schedule/base.html" %}
+{% import "_macros.html" as macros %}
 {% block main %}
 <div ng-controller="ActionCtrl">
 <legend xmlns="http://www.w3.org/1999/html">[[ action.action_type.name ]] - [[ action.client ]]</legend>
@@ -34,7 +35,7 @@
                 <label for="status" class="control-label">Статус</label>
             </td>
             <td colspan="2">
-                <select id="status" class="form-control" ng-model="action.status.name" ng-options="status for status in statuses"></select>
+                {{ macros.ui_select('action.status', 'ActionStatus', 'true') }}
             </td>
             <td>
                 <label for="person" class="control-label">Примечания</label>
@@ -93,7 +94,7 @@
         $scope.params = aux.getQueryParams(location.search);
         $scope.action_id = $scope.params.action_id;
         $scope.action = null;
-        $scope.statuses = ["Начато", "Ожидание", "Закончено", "Отменено", "Без результата"];
+        $scope.ActionStatus = {{ Enum.get_class_by_name('ActionStatus').rb() | tojson}};
         $scope.action_columns = {};
         $scope.load = function () {
             $http.get('{{ url_for('.api_action_get') }}', {
@@ -113,7 +114,7 @@
                     $scope.action_columns.unit |= item.type.unit;
                 });
             })
-        }
+        };
         $scope.load();
     }])
     </script>
