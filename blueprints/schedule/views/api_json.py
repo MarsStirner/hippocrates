@@ -406,6 +406,7 @@ def api_save_patient_info():
             client.compulsoryPolicy.insurer_id = client_info['compulsoryPolicy']['insurer_id']
             client.compulsoryPolicy.modifyDatetime = datetime.datetime.now()
         elif client_info['compulsoryPolicy']['number']:
+            client.compulsoryPolicy.deleted = 2
             compulsory_policy = create_new_policy(client_info['compulsoryPolicy'], client.id)
             compulsory_policy.policyType = rbPolicyType.query.filter(rbPolicyType.code ==
                                                                      client_info['compulsoryPolicy']['typeCode']).first()
@@ -420,6 +421,7 @@ def api_save_patient_info():
             client.voluntaryPolicy.insurer_id = client_info['voluntaryPolicy']['insurer_id']
             client.voluntaryPolicy.modifyDatetime = datetime.datetime.now()
         elif client_info['voluntaryPolicy']['number']:
+            client.voluntaryPolicy.deleted = 2
             voluntary_policy = create_new_policy(client_info['voluntaryPolicy'], client.id)
             client.voluntaryPolicy.policyType = rbPolicyType.query.filter(rbPolicyType.code ==
                                                                           client_info['voluntaryPolicy']['typeCode']).first()

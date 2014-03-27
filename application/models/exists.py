@@ -176,11 +176,11 @@ class Client(db.Model):
     contacts = db.relationship('ClientContact', primaryjoin='and_(ClientContact.client_id==Client.id,'
                                                             'ClientContact.deleted == 0)', lazy='dynamic')
     documentsAll = db.relationship(u'ClientDocument', primaryjoin='and_(ClientDocument.clientId==Client.id,'
-                                                                  'ClientDocument.deleted == 0)',
+                                                                  'ClientDocument.deleted != 1)',
                                    order_by="desc(ClientDocument.documentId)")
     policies = db.relationship(u'ClientPolicy', primaryjoin='and_(ClientPolicy.clientId==Client.id,'
-                                                            'ClientPolicy.deleted == 0)',
-                               order_by="desc(ClientPolicy.id)")
+                                                            'ClientPolicy.deleted != 1)',
+                               order_by="desc(ClientPolicy.id)", innerjoin=False)
     reg_address = db.relationship(u'ClientAddress',
                                     primaryjoin="and_(Client.id==ClientAddress.client_id, ClientAddress.type==0)",
                                     order_by="desc(ClientAddress.id)", uselist=False)
