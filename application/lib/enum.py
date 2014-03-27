@@ -31,7 +31,7 @@ class EnumBase(object):
 
     def __json__(self):
         result = {
-            'value': self.value,
+            'id': self.value,
             'code': self.__unicode__(),
         }
         if hasattr(self, 'names'):
@@ -47,9 +47,9 @@ class EnumBase(object):
         return {
             'objects': [{
                 'id': key,
-                'code': unicode(key),
-                'name': value,
-            } for key, value in cls.names.iteritems()],
+                'code': code,
+                'name': cls.names.get(key),
+            } for key, code in cls.codes.iteritems()],
         }
 
 
