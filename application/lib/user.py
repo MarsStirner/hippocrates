@@ -1,17 +1,29 @@
 # -*- coding: utf-8 -*-
-from werkzeug.security import generate_password_hash, check_password_hash
-from flask.ext.login import UserMixin
+from application.database import db
+from application.models.exists import Person
+import hashlib
 
 
-class User(UserMixin):
+class UserAuth():
 
-    def __init__(self, login, password=None):
-        self.login = login
-        if password:
-            self.set_password(password)
+    @classmethod
+    def check_user(cls, login, password):
+        user = cls.__get_by_login(login)
+        if user and cls.__check_password(user.password, password):
+            return user
+        return None
 
-    def set_password(self, password):
-        self.pw_hash = generate_password_hash(password)
+    @classmethod
+    def __get_by_login(cls, login):
+        user = db.session.query(Person).filter(Person.login == login).first()
+        if user:
+            return user
+        return None
 
-    def check_password(self, password, pw_hash):
-        return check_password_hash(pw_hash, password)
+    @classmethod
+    def __check_password(cls, pw_hash, password):
+        return pw_hash == hashlib.md5(password).hexdigest()
+
+    @classmethod
+    def get_by_id(cls, user_id):
+        return db.session.query(Person).get(user_id)

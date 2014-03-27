@@ -3,10 +3,9 @@ import datetime
 import json
 from decimal import Decimal
 from flask import g, current_app, request
-from flask.ext.principal import identity_loaded, Principal, Permission, RoleNeed, UserNeed
-from flask.ext.login import LoginManager, current_user
+from flask.ext.principal import Permission, RoleNeed, ActionNeed
 from ..database import db
-from ..models.models import Users, Roles
+from application.models.exists import rbUserProfile
 from application.app import app
 from pysimplelogs.logger import SimpleLogger
 
@@ -42,25 +41,25 @@ def public_endpoint(function):
 #     return _config
 
 
-with app.app_context():
-    permissions = dict()
-    login_manager = LoginManager()
-    try:
-        roles = db.session.query(Roles).all()
-    except Exception, e:
-        print e
-        permissions['admin'] = Permission(RoleNeed('admin'))
-    else:
-        if roles:
-            for role in roles:
-                permissions[role.code] = Permission(RoleNeed(role.code))
-                permissions[role.code].description = role.description
-        else:
-            permissions['admin'] = Permission(RoleNeed('admin'))
+class Bunch:
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
 
-# TODO: разобраться как покрасивше сделать
-admin_permission = permissions.get('admin')
-user_permission = permissions.get('user')
+
+with app.app_context():
+    _roles = dict()
+    _permissions = dict()
+    user_roles = db.session.query(rbUserProfile).all()
+    if user_roles:
+        for role in user_roles:
+            _roles[role.code] = Permission(RoleNeed(role.code))
+            # _roles[role.code].name = role.name
+            for right in getattr(role, 'rights', []):
+                if right.code not in _permissions:
+                    _permissions[right.code] = Permission(ActionNeed(right.code))
+                    # _permissions[right.code].name = right.name
+    roles = Bunch(**_roles)
+    permissions = Bunch(**_permissions)
 
 # инициализация логгера
 from config import DEBUG, PROJECT_NAME, SIMPLELOGS_URL

@@ -8,7 +8,7 @@ from flask.ext.wtf import Form
 
 from ..app import module
 from application.database import db
-from application.lib.utils import admin_permission, public_endpoint
+from application.lib.utils import public_endpoint
 
 
 @module.route('/')
