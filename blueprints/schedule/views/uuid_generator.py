@@ -3,7 +3,7 @@
 import uuid
 
 from application.database import db
-from blueprints.schedule.models.exists import UUID
+from application.models.exists import UUID
 
 
 def getNewUUID_id():
