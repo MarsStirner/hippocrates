@@ -22,3 +22,4 @@ SEARCHD_CONNECTION = {
 #>>> import os
 #>>> os.urandom(24)
 SECRET_KEY = '\x9e\xb5kL\xcf\xc2\xf3P\xbf\xda}a\xbe\xcb3\x9e3\xcb\xe5\xf3\xc3\xef:i'
+PRINT_SUBSYSTEM_URL = ''

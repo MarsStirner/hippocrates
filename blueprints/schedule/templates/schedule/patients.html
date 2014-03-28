@@ -96,7 +96,7 @@
                 window.open('{{ url_for('.html_patient') }}?client_id=' + client_id, '_self');
             };
             $scope.print_template = function (client_id, template_id) {
-                $http({url: 'http://127.0.0.1:5005/print_subsystem/print_template',
+                $http({url: '{{ print_subsystem_url }}',
                        method: "POST",
                        data: JSON.stringify({id: template_id,
                                              context_type: "registry",

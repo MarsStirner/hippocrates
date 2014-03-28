@@ -40,6 +40,8 @@ SEARCHD_CONNECTION = {
     'port': 9306,
 }
 
+PRINT_SUBSYSTEM_URL = ''
+
 try:
     from config_local import *
 except ImportError:

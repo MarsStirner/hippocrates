@@ -11,6 +11,10 @@ def copyright():
 
 
 @app.context_processor
+def print_subsystem():
+    return dict(print_subsystem_url=app.config['PRINT_SUBSYSTEM_URL'])
+
+@app.context_processor
 def general_menu():
     menu_items = list()
     blueprints = app.blueprints
