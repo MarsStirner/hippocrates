@@ -362,11 +362,12 @@ def api_appointment_make():
     return ''
 
 
-@module.route('/api/save_patient_info.json')
+@module.route('/api/save_patient_info.json', methods=['POST'])
 @public_endpoint
 def api_save_patient_info():
+    j = request.json
     try:
-        client_info = json.loads(request.args['client_info'])
+        client_info = j['client_info']
         client_id = int(client_info['id'])
         if client_id:
             client = Client.query.get(client_id)
