@@ -72,11 +72,9 @@
             $scope.clientMainInfoCodeOrder = ['id', 'nameText', 'birthDate', 'sex', 'regAddress', 'liveAddress',
                 'documentText', 'compulsoryPolicyText', 'voluntaryPolicyText', 'SNILS', 'contact', 'notes'];
             $scope.save_client_info = function() {
-                $http.get(
+                $http.post(
                     '{{ url_for('.api_save_patient_info') }}', {
-                        params: {
                             client_info: $scope.clientDataItems
-                        }
                     });
             };
             $scope.delete_document = function(document) {
