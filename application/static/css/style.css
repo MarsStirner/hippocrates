@@ -329,3 +329,10 @@ div.select2-container {
 table.table-clickable tbody tr {
     cursor: pointer;
 }
+
+.popupable {
+    display: block;
+    position: absolute;
+    z-index: 10;
+}
+

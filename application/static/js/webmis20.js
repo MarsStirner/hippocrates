@@ -102,6 +102,41 @@ WebMis20.factory('RefBook', ['$http', function ($http) {
     };
     return RefBook;
 }]);
+WebMis20.directive('uiPopup', function ($timeout) {
+    return {
+        restrict: 'E',
+        template:
+            '<input type="text" class="form-control" ng-click="to_show()">' +
+            '<div class="well well-sm popupable" ng-show="shown" ng-transclude ng-mouseleave="to_hide_delay()" ng-mouseenter="to_hide_cancel()">',
+        transclude: true,
+        link: function (scope, element, attributes) {
+            var elem = $(element);
+            var input_elem = $(elem.children()[0]);
+            var div_elem = $(elem.children()[1]);
+            var timeout = null;
+            scope.shown = false;
+            scope.to_show = function () {
+                div_elem.width(input_elem.width());
+                scope.shown = true;
+            };
+            scope.to_hide_delay = function () {
+                if (!timeout) {
+                    timeout = $timeout(to_hide, 600)
+                }
+            };
+            function to_hide () {
+                timeout = null;
+                scope.shown = false;
+            }
+            scope.to_hide_cancel = function () {
+                if (timeout) {
+                    $timeout.cancel(timeout);
+                    timeout = null;
+                }
+            };
+        }
+    }
+});
 var aux = {
     getQueryParams: function (qs) {
         qs = qs.split("+").join(" ");
