@@ -106,34 +106,66 @@ WebMis20.directive('uiPopup', function ($timeout) {
     return {
         restrict: 'E',
         template:
-            '<input type="text" class="form-control" ng-click="to_show()">' +
+            '<input type="text" class="form-control" ng-click="to_show()" ng-model="query">' +
             '<div class="well well-sm popupable" ng-show="shown" ng-transclude ng-mouseleave="to_hide_delay()" ng-mouseenter="to_hide_cancel()">',
         transclude: true,
-        link: function (scope, element, attributes) {
-            var elem = $(element);
-            var input_elem = $(elem.children()[0]);
-            var div_elem = $(elem.children()[1]);
+        controller: function ($scope, $element) {
+            var input_elem = $($element.children()[0]);
+            var div_elem = $($element.children()[1]);
             var timeout = null;
-            scope.shown = false;
-            scope.to_show = function () {
+            $scope.shown = false;
+            $scope.query='';
+            $scope.to_show = function () {
                 div_elem.width(input_elem.width());
-                scope.shown = true;
+                $scope.shown = true;
             };
-            scope.to_hide_delay = function () {
+            $scope.to_hide_delay = function () {
                 if (!timeout) {
                     timeout = $timeout(to_hide, 600)
                 }
             };
-            function to_hide () {
-                timeout = null;
-                scope.shown = false;
-            }
-            scope.to_hide_cancel = function () {
+            $scope.to_hide_cancel = function () {
                 if (timeout) {
                     $timeout.cancel(timeout);
                     timeout = null;
                 }
             };
+            this.finish_him =function (query) {
+                to_hide();
+                $scope.query = query;
+            };
+            function to_hide () {
+                timeout = null;
+                $scope.shown = false;
+            }
+        }
+    }
+});
+WebMis20.directive('uiRbTable', function () {
+    return {
+        restrict: 'E',
+        require: '^uiPopup',
+        template: '<table class="table table-condensed table-hover table-clickable">' +
+            '<thead><tr><th>Код</th><th>Наименование</th></tr></thead>' +
+            '<tbody>' +
+                '<tr ng-repeat="row in refBook.objects | filter:query" ng-click="onClick(row)">' +
+                    '<td ng-bind="row.code"></td><td ng-bind="row.name"></td>' +
+                '</tr>' +
+            '</tbody></table>',
+        link: function (scope, element, attributes, popupCtrl) {
+            scope.refBook = scope.$eval(attributes.refBook);
+            scope.$parent.$watch('query', function (newVal, oldVal) {
+                scope.query = newVal;
+            });
+            scope.onClick = function (row) {
+                scope.$parent.$parent[attributes.ngModel] = row; // HACK!
+                popupCtrl.finish_him(row.name);
+            };
+            scope.search = function (actual, expected) {
+                return actual.split(' ').filter(function (part) {
+                    return aux.startswith(part, expected)
+                }).length > 0;
+            }
         }
     }
 });
