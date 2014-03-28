@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from application.app import app
 from werkzeug.utils import import_string
-from application.lib.utils import current_user
+from flask.ext.login import current_user
 from datetime import datetime
 
 

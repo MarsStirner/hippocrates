@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*
 import datetime
+from flask.ext.login import UserMixin
 from application.database import db
 from application.lib.agesex import AgeSex
 from application.models.kladr_models import Kladr, Street
@@ -176,11 +177,11 @@ class Client(db.Model):
     contacts = db.relationship('ClientContact', primaryjoin='and_(ClientContact.client_id==Client.id,'
                                                             'ClientContact.deleted == 0)', lazy='dynamic')
     documentsAll = db.relationship(u'ClientDocument', primaryjoin='and_(ClientDocument.clientId==Client.id,'
-                                                                  'ClientDocument.deleted != 1)',
+                                                                  'ClientDocument.deleted == 0)',
                                    order_by="desc(ClientDocument.documentId)")
     policies = db.relationship(u'ClientPolicy', primaryjoin='and_(ClientPolicy.clientId==Client.id,'
-                                                            'ClientPolicy.deleted != 1)',
-                               order_by="desc(ClientPolicy.id)", innerjoin=False)
+                                                            'ClientPolicy.deleted == 0)',
+                               order_by="desc(ClientPolicy.id)")
     reg_address = db.relationship(u'ClientAddress',
                                     primaryjoin="and_(Client.id==ClientAddress.client_id, ClientAddress.type==0)",
                                     order_by="desc(ClientAddress.id)", uselist=False)
@@ -243,13 +244,10 @@ class Client(db.Model):
 
     @property
     def document(self):
-        try:
-            return self.documents.\
-                filter(ClientDocument.deleted == 0).\
-                filter(rbDocumentTypeGroup.code == '1').\
-                order_by(ClientDocument.date.desc()).first()
-        except:
-            return None
+        return self.documents.\
+            filter(ClientDocument.deleted == 0).\
+            filter(rbDocumentTypeGroup.code == '1').\
+            order_by(ClientDocument.date.desc()).first()
 
     @property
     def phones(self):
@@ -2388,3 +2386,11 @@ class UUID(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     uuid = db.Column(db.String(100), nullable=False, unique=True)
+
+
+class PersonProfiles(db.Model):
+    __tablename__ = u'Person_Profiles'
+
+    id = db.Column(db.Integer, primary_key=True)
+    person_id = db.Column(db.ForeignKey('Person.id'), nullable=False, index=True)
+    userProfile_id = db.Column(db.ForeignKey('rbUserProfile.id'), nullable=False, index=True)

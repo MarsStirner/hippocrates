@@ -3,6 +3,7 @@ import os
 from flask import Flask, jsonify
 from flask.ext.principal import Principal
 from flask.ext.babel import Babel
+from flask.ext.login import LoginManager, current_user
 from flask_beaker import BeakerSession
 import pytz
 from database import db
@@ -18,11 +19,11 @@ from models import *
 babel = Babel(app)
 
 
-from lib.utils import login_manager
+login_manager = LoginManager(app)
 Principal(app)
-login_manager.init_app(app)
 
 BeakerSession(app)
+
 
 @app.context_processor
 def enum():
@@ -30,6 +31,7 @@ def enum():
     return {
         'Enum': Enum,
     }
+
 
 @babel.timezoneselector
 def get_timezone():
