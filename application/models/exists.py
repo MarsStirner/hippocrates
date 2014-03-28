@@ -953,7 +953,7 @@ class OrgStructure(db.Model):
         return self.id
 
 
-class Person(db.Model):
+class Person(db.Model, UserMixin):
     __tablename__ = 'Person'
     __table_args__ = (
         db.Index(u'lastName', u'lastName', u'firstName', u'patrName'),
@@ -1018,6 +1018,7 @@ class Person(db.Model):
     academicDegree = db.relationship('rbAcademicDegree')
     academicTitle = db.relationship('rbAcademicTitle')
     tariffCategory = db.relationship('rbTariffCategory')
+    user_profiles = db.relation('rbUserProfile', secondary='Person_Profiles')
 
     @property
     def nameText(self):
@@ -1050,6 +1051,9 @@ class Person(db.Model):
 
     def __int__(self):
         return self.id
+
+    def is_active(self):
+        return self.deleted == 0
 
 
 class rbAcademicDegree(db.Model):
@@ -2301,13 +2305,15 @@ class rbUserProfile(db.Model):
     name = db.Column(db.String(128), nullable=False, index=True)
     withDep = db.Column(db.Integer, nullable=False, server_default=u"'0'")
 
+    rights = db.relationship(u'rbUserRight', secondary=u'rbUserProfile_Right')
+
 
 class rbUserProfileRight(db.Model):
     __tablename__ = u'rbUserProfile_Right'
 
     id = db.Column(db.Integer, primary_key=True)
-    master_id = db.Column(db.Integer, nullable=False, index=True)
-    userRight_id = db.Column(db.Integer, nullable=False, index=True)
+    master_id = db.Column(db.ForeignKey('rbUserProfile.id'), nullable=False, index=True)
+    userRight_id = db.Column(db.ForeignKey('rbUserRight.id'), nullable=False, index=True)
 
 
 class rbUserRight(db.Model):
