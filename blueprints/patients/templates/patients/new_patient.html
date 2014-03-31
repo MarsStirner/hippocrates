@@ -1,15 +1,15 @@
-{% extends 'schedule/base.html' %}
+{% extends 'patients/base.html' %}
 
 {% block title %}> {{ module_name }}{% endblock %}
 
 {% block main %}
     <div ng-controller="NewClient">
         <tabset>
-            <tab heading="Основная информация"> {% include "schedule/client_info/main_info.html" %}</tab>
-            <tab heading="Соц. статус">{% include "schedule/client_info/soc_status.html" %}</tab>
-            <tab heading="Особенности">{% include "schedule/client_info/characteristics.html" %}</tab>
-            <tab heading="Идентификаторы">{% include "schedule/client_info/identifiers.html" %}</tab>
-            <tab heading="Связи и контакты">{% include "schedule/client_info/contacts.html" %}</tab>
+            <tab heading="Основная информация"> {% include "patients/main_info.html" %}</tab>
+            <tab heading="Соц. статус">{% include "patients/soc_status.html" %}</tab>
+            <tab heading="Особенности">{% include "patients/characteristics.html" %}</tab>
+            <tab heading="Идентификаторы">{% include "patients/identifiers.html" %}</tab>
+            <tab heading="Связи и контакты">{% include "patients/contacts.html" %}</tab>
         </tabset>
 
 {#        <ul class="pager">#}

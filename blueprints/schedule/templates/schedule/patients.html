@@ -93,7 +93,7 @@
                 }
             };
             $scope.open_client = function (client_id) {
-                window.open('{{ url_for('.html_patient') }}?client_id=' + client_id, '_self');
+                window.open('{{ url_for('patients.html_patient') }}?client_id=' + client_id, '_self');
             };
             $scope.print_template = function (client_id, template_id) {
                 $http({url: '{{ print_subsystem_url }}',

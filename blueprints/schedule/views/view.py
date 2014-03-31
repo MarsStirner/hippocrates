@@ -6,7 +6,6 @@ from jinja2 import TemplateNotFound
 from application.lib.utils import public_endpoint
 from blueprints.schedule.app import module
 from application.models.exists import Client
-from blueprints.schedule.forms import ClientForm
 
 # noinspection PyUnresolvedReferences
 from . import api_html, api_json
@@ -55,32 +54,11 @@ def appointment():
     )
 
 
-@module.route('/patient_info/')
-@public_endpoint
-def patient_info():
-    try:
-        return render_template('schedule/patient_info.html')
-    except TemplateNotFound:
-        abort(404)
-
-
 @module.route('/person_month/')
 @public_endpoint
 def person_schedule_monthview():
     try:
         return render_template('schedule/person_schedule_monthview.html')
-    except TemplateNotFound:
-        abort(404)
-
-
-@module.route('/new_patient/')
-@public_endpoint
-def new_patient():
-    try:
-        client = Client()
-        client_form = ClientForm()
-
-        return render_template('schedule/new_patient.html', form=client_form)
     except TemplateNotFound:
         abort(404)
 
