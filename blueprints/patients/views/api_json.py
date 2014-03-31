@@ -120,7 +120,7 @@ def api_save_patient_info():
 
         if client.voluntaryPolicy and check_edit_policy(client.compulsoryPolicy,
                                                         client_info['voluntaryPolicy']['serial'],
-                                                        client_info['voluntaryPolicyy']['number'],
+                                                        client_info['voluntaryPolicy']['number'],
                                                         client_info['voluntaryPolicy']['typeCode']):
             client.voluntaryPolicy.begDate = client_info['voluntaryPolicy']['begDate']
             client.voluntaryPolicy.endDate = client_info['voluntaryPolicy']['endDate']
@@ -223,6 +223,7 @@ def api_save_patient_info():
 
         db.session.commit()
     except KeyError or ValueError:
+        raise
         return abort(404)
 
     return ''

@@ -76,19 +76,21 @@ class ClientForm(Form):
         blood_person = SelectField(u'Врач', choices=[(person.id, person.nameText) for person in
                                           Person.query.all()], widget=AngularJSSelect())
 
-        identification_accountingSystem = SelectField(u'Внешняя учетная система', choices=[(system.code, system.name) for system in
-                                                      rbAccountingSystem.query.all()], widget=AngularJSSelect())
+        identification_accountingSystem = SelectField(u'Внешняя учетная система',
+            choices=[(system.code, system.name) for system in rbAccountingSystem.query.all()], widget=AngularJSSelect())
 
-        direct_relation_relation = SelectField(u'Тип прямой связи', choices=[(relation.code, relation.leftName + ' -> '+ relation.rightName) for relation in
-                                                      rbRelationType.query.all()], widget=AngularJSSelect())
-        reversed_relation_relation = SelectField(u'Тип обратной связи', choices=[(relation.code, relation.rightName + ' -> ' + relation.leftName) for relation in
-                                                      rbRelationType.query.all()], widget=AngularJSSelect())
-        direct_relation_other = SelectField(u'Связан с пациентом', choices=[(client.id, client.nameText) for client in
-                                            Client.query.all()], widget=AngularJSSelect())
-        reversed_relation_other = SelectField(u'Связан с пациентом', choices=[(client.id, client.nameText) for client in
-                                              Client.query.all()], widget=AngularJSSelect())
-        contact_contactType = SelectField(u'Тип контакатаа', choices=[(contact.code, contact.name) for contact in
-                                          rbContactType.query.all()], widget=AngularJSSelect())
+        direct_relation_relation = SelectField(u'Тип прямой связи',
+            choices=[(relation.code, relation.leftName + ' -> '+ relation.rightName)
+                     for relation in rbRelationType.query.all()], widget=AngularJSSelect())
+        reversed_relation_relation = SelectField(u'Тип обратной связи',
+            choices=[(relation.code, relation.rightName + ' -> ' + relation.leftName)
+                     for relation in rbRelationType.query.all()], widget=AngularJSSelect())
+        direct_relation_other = SelectField(u'Связан с пациентом',
+            choices=[(client.id, client.nameText) for client in Client.query.all()], widget=AngularJSSelect())
+        reversed_relation_other = SelectField(u'Связан с пациентом',
+            choices=[(client.id, client.nameText) for client in Client.query.all()], widget=AngularJSSelect())
+        contact_contactType = SelectField(u'Тип контакатаа',
+            choices=[(contact.code, contact.name) for contact in rbContactType.query.all()], widget=AngularJSSelect())
 
     soc_status_begDate = DateField(u'Дата начала')
     soc_status_endDate = DateField(u'Дата окончания')
