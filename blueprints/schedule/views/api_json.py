@@ -6,7 +6,7 @@ import json
 from flask import abort, request
 
 from application.database import db
-from application.lib.sphinx_search import SearchPatient, SearchPerson
+from application.lib.sphinx_search import SearchPerson
 from application.lib.utils import public_endpoint, jsonify, safe_traverse
 from blueprints.schedule.app import module
 from application.models.exists import Person, Client, rbSpeciality, rbDocumentType, rbPolicyType, \
@@ -14,7 +14,7 @@ from application.models.exists import Person, Client, rbSpeciality, rbDocumentTy
     ClientDocument, rbBloodType, Bloodhistory, rbPrintTemplate, Event
 from application.models.schedule import Schedule, ScheduleTicket, ScheduleClientTicket, rbAppointmentType, \
     rbReceptionType, rbAttendanceType
-from blueprints.schedule.views.jsonify import ScheduleVisualizer, ClientVisualizer, PrintTemplateVisualizer, Format, \
+from blueprints.schedule.views.jsonify import ScheduleVisualizer, PrintTemplateVisualizer, \
     EventVisualizer, ActionVisualizer
 from blueprints.schedule.views.utils import *
 from blueprints.schedule.views.uuid_generator import getNewUUID_id
@@ -219,31 +219,6 @@ def api_schedule_description_post():
 
     db.session.commit()
     return jsonify({})
-
-
-@module.route('/api/search_clients.json')
-@public_endpoint
-def api_search_clients():
-    try:
-        query_string = request.args['q']
-    except KeyError or ValueError:
-        return abort(404)
-
-    if query_string:
-        result = SearchPatient.search(query_string)
-        id_list = [item['id'] for item in result['result']['items']]
-        if id_list:
-            clients = Client.query.filter(Client.id.in_(id_list)).all()
-        else:
-            clients = []
-    else:
-        clients = Client.query.limit(100).all()
-    print_templates = rbPrintTemplate.query.filter(rbPrintTemplate.context == 'token').all()
-    context = ClientVisualizer(Format.JSON)
-    print_context = PrintTemplateVisualizer()
-    return jsonify({'clients': map(context.make_client_info, clients),
-                    'print_templates': map(print_context.make_template_info, print_templates),
-                    })
 
 
 @module.route('/api/all_persons_tree.json')

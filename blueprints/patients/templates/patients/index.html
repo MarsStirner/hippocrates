@@ -3,16 +3,141 @@
 {% block title %}> {{ module_name }}{% endblock %}
 
 {% block main %}
-    <legend>Пример</legend>
-    <div class="">
-    {{ lipsum(5) }}
+    <legend xmlns="http://www.w3.org/1999/html">Пациенты</legend>
+    <div ng-controller="ClientSearch" class="ng-cloak">
+        <form class="form-horizontal" role="form">
+            <div class="input-group">
+                <span class="input-group-addon"><span class="glyphicon glyphicon-search"></span></span>
+                <input id="search" class="form-control" type="text" ng-model="query"
+                       placeholder="Введите код или фамилию или имя пациента">
+                <span class="input-group-addon" ng-click="query_clear()" style="cursor: pointer">
+                    <span class="glyphicon glyphicon-remove"></span></span>
+            </div>
+        </form>
+        <br />{# FIXME please #}
+        <div class="marginal" ng-if="printError">
+            <div class="alert alert-danger alert-dismissable">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                [[printError.text]]
+            </div>
+        </div>
+        <table class="table table-condensed table-hover table-clickable">
+            <caption>
+                <span ng-if="results.length > 0">Результаты поиска</span>
+                <span ng-if="results.length == 0 && query">Нет результатов</span>
+            </caption>
+            <thead ng-if="results.length > 0">
+            <tr>
+                <th>ФИО</th>
+                <th>Дата рождения</th>
+                <th>Пол</th>
+                <th>Документ</th>
+                <th>СНИЛС</th>
+                <th>Полис ОМС</th>
+                <th>Полис ДМС</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody ng-if="results.length > 0">
+            <tr ng-repeat="result in results" style="cursor: pointer">
+                <td ng-click="open_client(result.id)">[[ result.nameText ]]</td>
+                <td ng-click="open_client(result.id)">[[ result.birthDate | asDate ]]</td>
+                <td ng-click="open_client(result.id)">[[ result.sex ]]</td>
+                <td ng-click="open_client(result.id)">[[ result.documentText ]]</td>
+                <td ng-click="open_client(result.id)">[[ result.SNILS ]]</td>
+                <td ng-click="open_client(result.id)">[[ result.compulsoryPolicyText ]]</td>
+                <td ng-click="open_client(result.id)">[[ result.voluntaryPolicyText ]]</td>
+                <td>
+                    <div class="dropdown">
+                        <button class="btn dropdown-toggle" type="button" id="print_dropdownMenu" data-toggle="dropdown">
+                            <span class="glyphicon glyphicon-print"></span>
+                            <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="print_dropdownMenu">
+                            <li role="presentation" ng-repeat="template in PrintTemplates">
+                                <a role="menuitem" tabindex="-1" href="" class="print_template"
+                                   ng-click="print_template(result.id, template.id)">[[ template.name ]]
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+{#        <pre>[[schedule|json]]</pre>#}
     </div>
 {% endblock %}
+
 {% block modules_js %}
     {{ super() }}
     <script type="text/javascript">
-        $(function() {
+        WebMis20.controller('ClientSearch',
+                ['$scope', '$http', '$timeout', '$window',
+                function ($scope, $http, $timeout, $window) {
+            $scope.aux = aux;
+            $scope.params = aux.getQueryParams(document.location.search);
+            $scope.query = "";
+            $scope.results = [];
+            var _timeoutObjectForQuery;
 
-        });
+            $scope.$watch('query', function (val) {
+                if (_timeoutObjectForQuery) $timeout.cancel(_timeoutObjectForQuery);
+                _timeoutObjectForQuery = $timeout(function () {
+                    $scope.perform_search(val);
+                }, 500)
+            });
+
+            $scope.perform_search = function (val) {
+                if (!val) {
+                    $scope.results = [];
+                } else {
+                    $http.get(
+                        '{{ url_for('.api_search_clients') }}', {
+                            params: {
+                                q: val
+                            }
+                        }
+                    ).success(function (data) {
+                        $scope.results = data.result.clients.sort(function compare(a, b) {
+                            if (a.nameText < b.nameText) return -1;
+                            else if (a.nameText > b.nameText) return 1;
+                            return 0;
+                        });
+                        $scope.PrintTemplates = data.result.print_templates
+                    })
+                }
+            };
+
+            $scope.open_client = function (client_id) {
+                window.open('{{ url_for('patients.patient_get') }}?client_id=' + client_id, '_self');
+            };
+
+            $scope.print_template = function (client_id, template_id) {
+                $http({url: '{{ print_subsystem_url }}',
+                       method: "POST",
+                       data: JSON.stringify({id: template_id,
+                                             context_type: "registry",
+                                             client_id: client_id,
+                                             additional_context: {'currentOrgStructure': "",
+                                                                  'currentOrganisation': 3479,
+                                                                  'currentPerson': "1" }
+                                            }),
+                       headers: {'Content-Type': 'application/json'}
+                }).success(function(data) {
+                            $scope.w = $window.open();
+                            $scope.w.document.open();
+                            $scope.w.document.write(data)
+                            $scope.w.document.close();
+                            $scope.w.print();
+                }).error(function(data, status) {
+                    $scope.printError = {text: "Ошибка соединения с сервером печати: " + data + status};
+                })
+            };
+
+            $scope.query_clear = function () {
+                $scope.query = '';
+            }
+        }]);
     </script>
 {% endblock %}

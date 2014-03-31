@@ -1,7 +1,7 @@
 {% macro html(popup=False, checkbox=False) %}
 <div ng-controller="PersonTree" id="PersonTree">
     <span class="input-group" id="person-query-group">
-        <span class="input-group-addon glyphicon glyphicon-search"></span>
+        <span class="input-group-addon"><span class="glyphicon glyphicon-search"></span></span>
         <input id="person_query" class="form-control" type="text" ng-model="query" placeholder="Поиск врача"
                ng-change="compose()"{% if popup %} ng-focus="show_tree()"{% endif %}/>
         <span class="input-group-btn">

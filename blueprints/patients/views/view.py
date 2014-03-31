@@ -22,9 +22,9 @@ def index():
         abort(404)
 
 
-@module.route('/api/patient/')
+@module.route('/patient')
 @public_endpoint
-def html_patient():
+def patient_get():
     try:
         client_id = int(request.args['client_id'])
     except KeyError or ValueError:
@@ -40,7 +40,7 @@ def html_patient():
     )
 
 
-@module.route('/new_patient/')
+@module.route('/new_patient')
 @public_endpoint
 def new_patient():
     try:

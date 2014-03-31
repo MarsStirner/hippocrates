@@ -4,31 +4,31 @@
 
 {% block main %}
     <div ng-controller="ClientInfo">
-    <script type="text/ng-template" id="modal-deleteDocument.html">{% include "patients/_delete_document.html" %}</script>
-    <legend xmlns="http://www.w3.org/1999/html">Пациент [[ clientDataItems.nameText ]]</legend>
-    <div class="marginal">
-        <button class="btn btn-default" onclick="history.back()">Назад к результатам поиска</button>
-        <a class="btn btn-success" href="{{ url_for('schedule.appointment') }}?client_id={{ request.args['client_id'] }}">
-            Записать на приём</a>
-    </div>
-    <tabset>
-        <tab>
-            <tab-heading>
-                Информация о пациенте
-                <a ng-click="start_editing();" class="glyphicon glyphicon-pencil" href="" title="Редактировать"></a>
-            </tab-heading>
-            <tabset justified="false">
-                <tab heading="Основная информация">{% include "patients/main_info.html" %}</tab>
-                <tab heading="Соц. статус">{% include "patients/soc_status.html" %}</tab>
-                <tab heading="Особенности">{% include "patients/characteristics.html" %}</tab>
-                <tab heading="Идентификаторы">{% include "patients/identifiers.html" %}</tab>
-                <tab heading="Связи и контакты">{% include "patients/contacts.html" %}</tab>
-                <tab heading="История документов">{% include "patients/documents.html" %}</tab>
-            </tabset>
-        </tab>
-        <tab heading="Предварительные записи">{% include "patients/appointments.html" %}</tab>
-        <tab heading="Обращения">{% include "patients/event_list.html" %}</tab>
-    </tabset>
+        <script type="text/ng-template" id="modal-deleteDocument.html">{% include "patients/_delete_document.html" %}</script>
+        <legend xmlns="http://www.w3.org/1999/html">Пациент [[ clientDataItems.nameText ]]</legend>
+        <div class="marginal">
+            <button class="btn btn-default" onclick="history.back()">Назад к результатам поиска</button>
+            <a class="btn btn-success" href="{{ url_for('schedule.appointment') }}?client_id={{ request.args['client_id'] }}">
+                Записать на приём</a>
+        </div>
+        <tabset>
+            <tab>
+                <tab-heading>
+                    Информация о пациенте
+                    <a ng-click="start_editing();" class="glyphicon glyphicon-pencil" href="" title="Редактировать"></a>
+                </tab-heading>
+                <tabset justified="false">
+                    <tab heading="Основная информация">{% include "patients/main_info.html" %}</tab>
+                    <tab heading="Соц. статус">{% include "patients/soc_status.html" %}</tab>
+                    <tab heading="Особенности">{% include "patients/characteristics.html" %}</tab>
+                    <tab heading="Идентификаторы">{% include "patients/identifiers.html" %}</tab>
+                    <tab heading="Связи и контакты">{% include "patients/contacts.html" %}</tab>
+                    <tab heading="История документов">{% include "patients/documents.html" %}</tab>
+                </tabset>
+            </tab>
+            <tab heading="Предварительные записи">{% include "patients/appointments.html" %}</tab>
+            <tab heading="Обращения">{% include "patients/event_list.html" %}</tab>
+        </tabset>
     </div>
 {% endblock %}
 
@@ -45,16 +45,16 @@
         };
 
         WebMis20.controller('ClientInfo', ['$scope', '$http', '$modal', function ($scope, $http, $modal) {
-            $scope.max_tickets = 0;
+{#            $scope.max_tickets = 0;#}
             $scope.records = [];
             $scope.aux = aux;
             $scope.params = aux.getQueryParams(document.location.search);
             $scope.client_id = $scope.params.client_id;
             $scope.view = true;
-            var curDate = new Date();
-            var curYear = curDate.getUTCFullYear();
-            $scope.years = [curYear - 1, curYear, curYear + 1];
-            $scope.year = curYear;
+{#            var curDate = new Date();#}
+{#            var curYear = curDate.getUTCFullYear();#}
+{#            $scope.years = [curYear - 1, curYear, curYear + 1];#}
+{#            $scope.year = curYear;#}
             $scope.clientInfoCode2Name = {
                 'id': 'Код пациента',
                 'birthDate': 'Дата рождения',
@@ -77,12 +77,11 @@
             };
 
             $scope.save_client_info = function() {
-                $http.post(
-                    '{{ url_for('.api_save_patient_info') }}', {
-                            client_info: $scope.clientDataItems
-                    }).success(function(data) {
-                            $scope.editing = false;
-                        });
+                $http.post('{{ url_for('.api_save_patient_info') }}',
+                           { client_info: $scope.clientDataItems }
+                ).success(function(data) {
+                    $scope.editing = false;
+                });
             };
 
             $scope.delete_document = function(document) {
@@ -91,12 +90,10 @@
                                     controller: DeleteDocumentModalCtrl
                     });
                 modalInstance.result.then(function () {
-                    $http.get(
-                        '{{ url_for('.api_delete_document') }}', {
-                            params: {
-                                document: document
-                            }
-                        });
+                    $http.get('{{ url_for('.api_delete_document') }}',
+                              {params: {document: document}
+                              }
+                    );
                 })
             };
 
@@ -162,7 +159,6 @@
                     var index = clientData_array.indexOf(item);
                     clientData_array.splice(index, 1);
                 }
-
             };
 
             $scope.open = function($event) {

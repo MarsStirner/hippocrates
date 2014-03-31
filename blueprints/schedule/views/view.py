@@ -29,15 +29,6 @@ def doctors():
         abort(404)
 
 
-@module.route('/patients/')
-@public_endpoint
-def patients():
-    try:
-        return render_template('schedule/patients.html')
-    except TemplateNotFound:
-        abort(404)
-
-
 @module.route('/appointment/')
 @public_endpoint
 def appointment():

@@ -6,14 +6,41 @@ from flask import abort, request
 from application.database import db
 from application.lib.utils import public_endpoint, jsonify
 from blueprints.patients.app import module
+from application.lib.sphinx_search import SearchPatient
 from application.models.exists import (rbPolicyType,
     rbSocStatusClass, rbSocStatusType, rbAccountingSystem, rbContactType, rbRelationType,
-    rbBloodType, Bloodhistory)
-from blueprints.schedule.views.jsonify import ClientVisualizer
+    rbBloodType, Bloodhistory, rbPrintTemplate)
+from blueprints.schedule.views.jsonify import (ClientVisualizer, PrintTemplateVisualizer,
+    Format)
 from blueprints.schedule.views.utils import *
 from blueprints.schedule.views.uuid_generator import getNewUUID_id
 
 __author__ = 'mmalkov'
+
+
+@module.route('/api/search_clients.json')
+@public_endpoint
+def api_search_clients():
+    try:
+        query_string = request.args['q']
+    except KeyError or ValueError:
+        return abort(404)
+
+    if query_string:
+        result = SearchPatient.search(query_string)
+        id_list = [item['id'] for item in result['result']['items']]
+        if id_list:
+            clients = Client.query.filter(Client.id.in_(id_list)).all()
+        else:
+            clients = []
+    else:
+        clients = Client.query.limit(100).all()
+    print_templates = rbPrintTemplate.query.filter(rbPrintTemplate.context == 'token').all()
+    context = ClientVisualizer(Format.JSON)
+    print_context = PrintTemplateVisualizer()
+    return jsonify({'clients': map(context.make_client_info, clients),
+                    'print_templates': map(print_context.make_template_info, print_templates),
+                    })
 
 
 @module.route('/api/patient.json')
