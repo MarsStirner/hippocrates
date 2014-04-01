@@ -334,5 +334,8 @@ table.table-clickable tbody tr {
     display: block;
     position: absolute;
     z-index: 10;
+    margin-top: 8px;
+    max-height: 500px;
+    overflow-y: auto;
 }
 
