@@ -4,11 +4,11 @@
 <div class="panel panel-default">
     <div class="panel-heading"><h3 class="panel-title">Доступные функции</h3></div>
     <div class="list-group">
-        {{ item('.index', 'График врача') }}
-        {{ item('.person_schedule_monthview', 'Формирование графика врача') }}
-        {{ item('.doctors', 'Поиск врача') }}
-        {{ item('patients.index', 'Поиск пациента') }}
-        {{ item('patients.patient', 'Регистрация пациента', appendurl='?client_id=new') }}
+        {{ item('schedule.index', 'График врача') }}
+        {{ item('schedule.person_schedule_monthview', 'Формирование графика врача') }}
+        {{ item('schedule.doctors', 'Поиск врача') }}
+        {{ item('.index', 'Поиск пациента') }}
+        {{ item('.patient', 'Регистрация пациента', appendurl='?client_id=new') }}
     </div>
     <!-- /.navbar -->
 </div>

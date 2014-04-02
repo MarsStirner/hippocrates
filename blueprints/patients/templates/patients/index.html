@@ -1,22 +1,32 @@
-{% extends 'schedule/base.html' %}
+{% extends 'patients/base.html' %}
 
 {% block title %}> {{ module_name }}{% endblock %}
 
 {% block main %}
     <legend xmlns="http://www.w3.org/1999/html">Пациенты</legend>
-    <div ng-controller="ClientSearch">
+    <div ng-controller="ClientSearch" class="ng-cloak">
         <form class="form-horizontal" role="form">
             <div class="input-group">
-                <span class="input-group-addon glyphicon glyphicon-search"></span>
+                <span class="input-group-addon"><span class="glyphicon glyphicon-search"></span></span>
                 <input id="search" class="form-control" type="text" ng-model="query"
                        placeholder="Введите код или фамилию или имя пациента">
-                <span class="input-group-addon glyphicon glyphicon-remove" ng-click="query_clear()" style="cursor: pointer"></span>
+                <span class="input-group-addon" ng-click="query_clear()" style="cursor: pointer">
+                    <span class="glyphicon glyphicon-remove"></span></span>
             </div>
         </form>
+        <br />{# FIXME please #}
+        <div class="marginal" ng-if="printError">
+            <div class="alert alert-danger alert-dismissable">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                [[printError.text]]
+            </div>
+        </div>
         <table class="table table-condensed table-hover table-clickable">
             <caption>
                 <span ng-if="results.length > 0">Результаты поиска</span>
                 <span ng-if="results.length == 0 && query">Нет результатов</span>
+                <button ng-click="open_client('new');" class="btn btn-primary pull-right"
+                        ng-show="!results.length">Зарегистрировать пациента</button>
             </caption>
             <thead ng-if="results.length > 0">
             <tr>
@@ -46,8 +56,11 @@
                             <span class="caret"></span>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="print_dropdownMenu">
-                            <li role="presentation"
-                                ng-repeat="template in PrintTemplates"><a role="menuitem" tabindex="-1" href="" class="print_template" ng-click="print_template(result.id, template.id)">[[ template.name ]]</a></li>
+                            <li role="presentation" ng-repeat="template in PrintTemplates">
+                                <a role="menuitem" tabindex="-1" href="" class="print_template"
+                                   ng-click="print_template(result.id, template.id)">[[ template.name ]]
+                                </a>
+                            </li>
                         </ul>
                     </div>
                 </td>
@@ -57,21 +70,26 @@
 {#        <pre>[[schedule|json]]</pre>#}
     </div>
 {% endblock %}
+
 {% block modules_js %}
     {{ super() }}
     <script type="text/javascript">
-        WebMis20.controller('ClientSearch', ['$scope', '$http', '$timeout', '$window', function ($scope, $http, $timeout, $window) {
+        WebMis20.controller('ClientSearch',
+                ['$scope', '$http', '$timeout', '$window',
+                function ($scope, $http, $timeout, $window) {
             $scope.aux = aux;
             $scope.params = aux.getQueryParams(document.location.search);
             $scope.query = "";
             $scope.results = [];
             var _timeoutObjectForQuery;
+
             $scope.$watch('query', function (val) {
                 if (_timeoutObjectForQuery) $timeout.cancel(_timeoutObjectForQuery);
                 _timeoutObjectForQuery = $timeout(function () {
                     $scope.perform_search(val);
                 }, 500)
             });
+
             $scope.perform_search = function (val) {
                 if (!val) {
                     $scope.results = [];
@@ -92,26 +110,33 @@
                     })
                 }
             };
+
             $scope.open_client = function (client_id) {
-                window.open('{{ url_for('.html_patient') }}?client_id=' + client_id, '_self');
+                window.open('{{ url_for('patients.patient') }}?client_id=' + client_id, '_self');
             };
+
             $scope.print_template = function (client_id, template_id) {
                 $http({url: '{{ print_subsystem_url }}',
                        method: "POST",
                        data: JSON.stringify({id: template_id,
                                              context_type: "registry",
                                              client_id: client_id,
-                                             additional_context:{'currentOrgStructure':"", 'currentOrganisation':3479, 'currentPerson':"1"}
+                                             additional_context: {'currentOrgStructure': "",
+                                                                  'currentOrganisation': 3479,
+                                                                  'currentPerson': "1" }
                                             }),
                        headers: {'Content-Type': 'application/json'}
-                       }).success(function (data) {
+                }).success(function(data) {
                             $scope.w = $window.open();
                             $scope.w.document.open();
                             $scope.w.document.write(data)
                             $scope.w.document.close();
                             $scope.w.print();
-                       })
+                }).error(function(data, status) {
+                    $scope.printError = {text: "Ошибка соединения с сервером печати: " + data + status};
+                })
             };
+
             $scope.query_clear = function () {
                 $scope.query = '';
             }

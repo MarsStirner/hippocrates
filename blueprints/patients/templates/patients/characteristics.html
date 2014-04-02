@@ -1,0 +1,182 @@
+<div class="row">
+    <div class="col-md-12">
+        <table class="table table-condensed" ng-if="client.client_info['bloodHistory']" ng-hide="editing">
+            <caption>Группа крови и резус-фактор</caption>
+            <thead>
+            <tr>
+                <th>Группа крови</th>
+                <th>Дата установления</th>
+                <th>Врач</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="blood in client.client_info['bloodHistory']">
+                <td>[[blood.bloodGroup_name]]</td>
+                <td>[[blood.bloodDate]]</td>
+                <td>[[blood.person_name]]</td>
+            </tr>
+            </tbody>
+        </table>
+
+        <form class="form-horizontal" role="form" ng-show="editing">
+            <table class="table table-condensed">
+                <caption>Группа крови и резус-фактор</caption>
+                <thead>
+                <tr>
+                    <th>Группа крови</th>
+                    <th>Дата установления</th>
+                    <th>Врач</th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="blood in client.client_info['bloodHistory']">
+                        <td class="col-md-4" ng-if="!blood.id">{{ form.blood_group(class="form-control",
+                            autocomplete="off", ng_model="blood.bloodGroup_code") }}</td>
+                        <td ng-if="blood.id">[[blood.bloodGroup_name]]</td>
+                        <td class="col-md-3" ng-if="!blood.id">{{ form.blood_date(class="form-control",
+                            datepicker_popup="dd.MM.yyyy", autocomplete="off", ng_model="blood.bloodDate") }}</td>
+                        <td ng-if="blood.id">[[blood.bloodDate]]</td>
+                        <td class="col-md-5" ng-if="!blood.id">{{ form.blood_person(class="form-control",
+                            autocomplete="off", ng_model="blood.person_id") }}</td>
+                        <td ng-if="blood.id">[[blood.person_name]]</td>
+                    </tr>
+                </tbody>
+            </table>
+        </form>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-offset-9 col-md-3" ng-show="editing">
+        <button ng-click="client.add_blood()" class="btn btn-primary btn-sm pull-right">
+            <span class="glyphicon glyphicon-plus" title="Добавить новую запись"></span> Добавить
+        </button>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <table class="table table-condensed" ng-if="client.client_info['allergies']" ng-hide="editing">
+            <caption>Аллергия</caption>
+            <thead>
+                <tr>
+                    <th>Наименование вещества</th>
+                    <th>Степень</th>
+                    <th>Дата установления</th>
+                    <th>Примечание</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="allergy in client.client_info['allergies']">
+                    <td>[[allergy.nameSubstance]]</td>
+                    <td>[[allergy.power]]</td>
+                    <td>[[allergy.createDate]]</td>
+                    <td>[[allergy.notes]]</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <form class="form-horizontal" role="form" ng-show="editing">
+            <table class="table table-condensed">
+                <caption>Аллергия</caption>
+                <thead>
+                <tr>
+                    <th>Наименование вещества</th>
+                    <th>Степень</th>
+                    <th>Дата установления</th>
+                    <th>Примечание</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="allergy in client.client_info['allergies']">
+                        <td class="col-md-4" ng-hide="allergy.deleted">{{ form.allergy_substance(class="form-control",
+                            autocomplete="off", ng_model="allergy.nameSubstance") }}</td>
+                        <td class="col-md-3" ng-hide="allergy.deleted">{{ form.allergy_power(class="form-control",
+                            autocomplete="off", ng_model="allergy.power") }}</td>
+                        <td class="col-md-2" ng-hide="allergy.deleted">{{ form.allergy_createDate(class="form-control",
+                            autocomplete="off", datepicker_popup="dd.MM.yyyy", ng_model="allergy.createDate") }}</td>
+                        <td class="col-md-3" ng-hide="allergy.deleted">{{ form.allergy_notes(class="form-control",
+                            autocomplete="off", ng_model="allergy.notes") }}</td>
+                        <td class="col-md-1" ng-hide="allergy.deleted">
+                            <a class="btn btn-sm btn-default" href="" title="Удалить текущую строку"
+                                ng-click="delete_record('allergies', allergy)">
+                                <span class="glyphicon glyphicon-trash"></span>
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </form>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-offset-9 col-md-3" ng-show="editing">
+        <button ng-click="client.add_allergy()" class="btn btn-primary btn-sm pull-right">
+            <span class="glyphicon glyphicon-plus" title="Добавить новую запись"></span> Добавить
+        </button>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <table class="table table-condensed" ng-if="client.client_info['intolerances']" ng-hide="editing">
+            <caption>Медикаметозная непереносимость</caption>
+            <thead>
+                <tr>
+                    <th>Наименование медикамента</th>
+                    <th>Степень</th>
+                    <th>Дата установления</th>
+                    <th>Примечание</th>
+                </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="intolerance in client.client_info['intolerances']">
+                <td>[[intolerance.nameMedicament]]</td>
+                <td>[[intolerance.power]]</td>
+                <td>[[intolerance.createDate]]</td>
+                <td>[[intolerance.notes]]</td>
+            </tr>
+            </tbody>
+        </table>
+
+        <form class="form-horizontal" role="form" ng-show="editing">
+            <table class="table table-condensed">
+                <caption>Медикаметозная непереносимость</caption>
+                <thead>
+                    <tr>
+                        <th>Наименование медикамента</th>
+                        <th>Степень</th>
+                        <th>Дата установления</th>
+                        <th>Примечание</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="intolerance in client.client_info['intolerances']">
+                    <td class="col-md-4" ng-hide="intolerance.deleted">{{ form.intolerance_medicament(class="form-control",
+                        autocomplete="off", ng_model="intolerance.nameMedicament") }}</td>
+                    <td class="col-md-3" ng-hide="intolerance.deleted">{{ form.intolerance_power(class="form-control",
+                        autocomplete="off", ng_model="intolerance.power") }}</td>
+                    <td class="col-md-2" ng-hide="intolerance.deleted">{{ form.intolerance_createDate(class="form-control",
+                        autocomplete="off", datepicker_popup="dd.MM.yyyy", ng_model="intolerance.createDate") }}</td>
+                    <td class="col-md-3" ng-hide="intolerance.deleted">{{ form.intolerance_notes(class="form-control",
+                        autocomplete="off", ng_model="intolerance.notes") }}</td>
+                    <td class="col-md-1" ng-hide="intolerance.deleted">
+                        <a class="btn btn-sm btn-default" href="" title="Удалить текущую строку"
+                            ng-click="delete_record('intolerances', intolerance)">
+                            <span class="glyphicon glyphicon-trash"></span>
+                        </a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </form>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-offset-9 col-md-3" ng-show="editing">
+        <button ng-click="client.add_medicament()" class="btn btn-primary btn-sm pull-right">
+            <span class="glyphicon glyphicon-plus" title="Добавить новую запись"></span> Добавить
+        </button>
+    </div>
+</div>

@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 import datetime
 import json
+import uuid
 from decimal import Decimal
 from flask import g, current_app, request
 from flask.ext.principal import Permission, RoleNeed, ActionNeed
-from ..database import db
-from application.models.exists import rbUserProfile
+from application.database import db
+from application.models.exists import rbUserProfile, UUID
 from application.app import app
 from pysimplelogs.logger import SimpleLogger
 
@@ -164,3 +165,19 @@ def safe_traverse(obj, *args, **kwargs):
         return obj.get(args[0], default)
     else:
         return safe_traverse(obj.get(args[0]), *args[1:], **kwargs)
+
+
+
+def get_new_uuid():
+    """Сгенерировать новый uuid уникальный в пределах бд.
+    @rtype: application.models.exist.UUID
+    """
+    uuid_model = UUID()
+    # paranoia mode on
+    unique = False
+    while not unique:
+        new_uuid = str(uuid.uuid4())
+        unique = uuid_model.query.filter_by(uuid=new_uuid).count() == 0
+    uuid_model.uuid = new_uuid
+
+    return uuid_model

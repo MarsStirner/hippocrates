@@ -1,9 +1,9 @@
 <table class="table table-condensed" ng-hide="editing">
     <tbody>
-    <tr ng-repeat="key in clientMainInfoCodeOrder" ng-if="clientDataItems[key]">
-        <td>[[ clientInfoCode2Name[key] ]]</td>
-        <td>[[ aux.format(clientDataItems, key) ]]</td>
-    </tr>
+        <tr ng-repeat="key in clientMainInfoCodeOrder" ng-if="client.client_info[key]">
+            <td>[[ clientInfoCode2Name[key] ]]</td>
+            <td>[[ aux.format(client.client_info, key) ]]</td>
+        </tr>
     </tbody>
 </table>
 <form name="client_form_tab1" class="form-horizontal container-fluid" role="form" ng-show="editing">
@@ -13,19 +13,22 @@
                 <div class="form-group col-md-3">
                     {{ form.lastname.label(class="control-label") }}
                     <div>
-                        {{ form.lastname(class="form-control", autocomplete="off", placeholder="Фамилия", ng_model="clientDataItems.lastName") }}
+                        {{ form.lastname(class="form-control", autocomplete="off", placeholder="Фамилия",
+                        ng_model="client.client_info.lastName") }}
                     </div>
                 </div>
                 <div class="form-group col-md-3" style="margin-right: -5px; margin-left: -5px;">
                     {{ form.firstname.label(class="control-label") }}
                     <div>
-                        {{ form.firstname(class="form-control", autocomplete="off", placeholder="Имя", ng_model="clientDataItems.firstName") }}
+                        {{ form.firstname(class="form-control", autocomplete="off", placeholder="Имя",
+                        ng_model="client.client_info.firstName") }}
                     </div>
                 </div>
                 <div class="form-group col-md-offset-3 col-md-3">
                     {{ form.patronymic.label(class="control-label") }}
                     <div>
-                        {{ form.patronymic(class="form-control", autocomplete="off", placeholder="Отчество", ng_model="clientDataItems.patrName") }}
+                        {{ form.patronymic(class="form-control", autocomplete="off", placeholder="Отчество",
+                        ng_model="client.client_info.patrName") }}
                     </div>
                 </div>
             </div>
@@ -33,13 +36,14 @@
                 <div class="form-group col-md-3" style="margin-right: -5px;">
                     {{ form.birthDate.label(class="control-label") }}
                     <div>
-                        {{ form.birthDate(class="form-control", datepicker_popup="dd.MM.yyyy", autocomplete="off", ng_model="clientDataItems['birthDate']") }}
+                        {{ form.birthDate(class="form-control", datepicker_popup="dd.MM.yyyy", autocomplete="off",
+                        ng_model="client.client_info['birthDate']") }}
                     </div>
                 </div>
                 <div class="form-group col-md-offset-5 col-md-2">
                     {{ form.gender.label(class="control-label") }}
                     <div>
-                        {{ form.gender(class="form-control", autocomplete="off", ng_model="clientDataItems['sex']") }}
+                        {{ form.gender(class="form-control", autocomplete="off", ng_model="client.client_info['sex']") }}
                     </div>
                 </div>
             </div>
@@ -47,12 +51,13 @@
                 <div class="form-group col-md-4">
                     {{ form.snils.label(class="control-label") }}
                     <div id="SNILS">
-                        {{ form.snils(class="form-control", autocomplete="off", ng_model="clientDataItems['SNILS']") }}
+                        {{ form.snils(class="form-control", autocomplete="off", ng_model="client.client_info['SNILS']") }}
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
     <div class="panel panel-default">
         <div class="panel-heading">
            <h4>Документ</h4>
@@ -62,19 +67,22 @@
                 <div class="form-group col-md-4">
                     {{ form.document_type.label(class="control-label") }}
                     <div>
-                        {{ form.document_type(class="form-control", autocomplete="off", ng_model="clientDataItems['document']['typeCode']") }}
+                        {{ form.document_type(class="form-control", autocomplete="off",
+                        ng_model="client.client_info['document']['typeCode']") }}
                     </div>
                 </div>
                 <div class="form-group col-md-2" style="margin-right: -5px; margin-left: -5px;">
                     {{ form.document_serial.label(class="control-label") }}
                     <div>
-                        {{ form.document_serial(class="form-control", autocomplete="off", placeholder="серия", ng_model="clientDataItems['document']['serial']") }}
+                        {{ form.document_serial(class="form-control", autocomplete="off", placeholder="серия",
+                        ng_model="client.client_info['document']['serial']") }}
                     </div>
                 </div>
                 <div class="form-group col-md-2">
                     {{ form.document_number.label(class="control-label") }}
                     <div>
-                        {{ form.document_number(class="form-control", autocomplete="off", placeholder="номер", ng_model="clientDataItems['document']['number']") }}
+                        {{ form.document_number(class="form-control", autocomplete="off", placeholder="номер",
+                        ng_model="client.client_info['document']['number']") }}
                     </div>
                 </div>
             </div>
@@ -83,19 +91,22 @@
                 <div class="form-group col-md-2">
                     {{ form.document_begDate.label(class="control-label") }}
                     <div>
-                        {{ form.document_begDate(class="form-control", datepicker_popup="dd.MM.yyyy", autocomplete="off", ng_model="clientDataItems['document']['begDate']") }}
+                        {{ form.document_begDate(class="form-control", datepicker_popup="dd.MM.yyyy",
+                        autocomplete="off", ng_model="client.client_info['document']['begDate']") }}
                     </div>
                 </div>
                 <div class="form-group col-md-2" style="margin-right: -5px; margin-left: -5px;">
                     {{ form.document_endDate.label(class="control-label") }}
                     <div>
-                        {{ form.document_endDate(class="form-control", datepicker_popup="dd.MM.yyyy", autocomplete="off", ng_model="clientDataItems['document']['endDate']") }}
+                        {{ form.document_endDate(class="form-control", datepicker_popup="dd.MM.yyyy",
+                        autocomplete="off", ng_model="client.client_info['document']['endDate']") }}
                     </div>
                 </div>
                 <div class="form-group col-md-4">
                     {{ form.ufms.label(class="control-label") }}
                     <div>
-                        {{ form.ufms(class="form-control", autocomplete="off", ng_model="clientDataItems['document']['origin']") }}
+                        {{ form.ufms(class="form-control", autocomplete="off",
+                        ng_model="client.client_info['document']['origin']") }}
                     </div>
                 </div>
             </div>
@@ -111,19 +122,22 @@
                 <div class="form-group col-md-4">
                     {{ form.compulsory_policy_type.label(class="control-label") }}
                     <div>
-                        {{ form.compulsory_policy_type(class="form-control", autocomplete="off", ng_model="clientDataItems['compulsoryPolicy']['typeCode']") }}
+                        {{ form.compulsory_policy_type(class="form-control", autocomplete="off",
+                        ng_model="client.client_info['compulsoryPolicy']['typeCode']") }}
                     </div>
                 </div>
                 <div class="form-group col-md-2" style="margin-right: -5px; margin-left: -5px;">
                     {{ form.compulsory_policy_serial.label(class="control-label") }}
                     <div>
-                        {{ form.compulsory_policy_serial(class="form-control", autocomplete="off", placeholder="серия", ng_model="clientDataItems['compulsoryPolicy']['serial']") }}
+                        {{ form.compulsory_policy_serial(class="form-control", autocomplete="off",
+                        placeholder="серия", ng_model="client.client_info['compulsoryPolicy']['serial']") }}
                     </div>
                 </div>
                 <div class="form-group col-md-2">
                     {{ form.compulsory_policy_number.label(class="control-label") }}
                     <div>
-                        {{ form.compulsory_policy_number(class="form-control", autocomplete="off", placeholder="номер", ng_model="clientDataItems['compulsoryPolicy']['number']") }}
+                        {{ form.compulsory_policy_number(class="form-control", autocomplete="off",
+                        placeholder="номер", ng_model="client.client_info['compulsoryPolicy']['number']") }}
                     </div>
                 </div>
             </div>
@@ -132,19 +146,22 @@
                 <div class="form-group col-md-2">
                     {{ form.compulsory_policy_begDate.label(class="control-label") }}
                     <div>
-                        {{ form.compulsory_policy_begDate(class="form-control", datepicker_popup="dd.MM.yyyy", autocomplete="off", ng_model="clientDataItems['compulsoryPolicy']['begDate']") }}
+                        {{ form.compulsory_policy_begDate(class="form-control", datepicker_popup="dd.MM.yyyy",
+                        autocomplete="off", ng_model="client.client_info['compulsoryPolicy']['begDate']") }}
                     </div>
                 </div>
                 <div class="form-group col-md-2" style="margin-right: -5px; margin-left: -5px;">
                     {{ form.compulsory_policy_endDate.label(class="control-label") }}
                     <div>
-                        {{ form.compulsory_policy_endDate(class="form-control", datepicker_popup="dd.MM.yyyy", autocomplete="off", ng_model="clientDataItems['compulsoryPolicy']['endDate']") }}
+                        {{ form.compulsory_policy_endDate(class="form-control", datepicker_popup="dd.MM.yyyy",
+                        autocomplete="off", ng_model="client.client_info['compulsoryPolicy']['endDate']") }}
                     </div>
                 </div>
                 <div class="form-group col-md-4">
                     {{ form.compulsory_policy_org.label(class="control-label") }}
                     <div>
-                        {{ form.compulsory_policy_org(class="form-control", autocomplete="off", ng_model="clientDataItems['compulsoryPolicy']['insurer_id']") }}
+                        {{ form.compulsory_policy_org(class="form-control", autocomplete="off",
+                        ng_model="client.client_info['compulsoryPolicy']['insurer_id']") }}
                     </div>
                 </div>
             </div>
@@ -160,19 +177,22 @@
                 <div class="form-group col-md-4">
                     {{ form.voluntary_policy_type.label(class="control-label") }}
                     <div>
-                        {{ form.voluntary_policy_type(class="form-control", autocomplete="off", ng_model="clientDataItems['voluntaryPolicy']['typeCode']") }}
+                        {{ form.voluntary_policy_type(class="form-control", autocomplete="off",
+                        ng_model="client.client_info['voluntaryPolicy']['typeCode']") }}
                     </div>
                 </div>
                 <div class="form-group col-md-2" style="margin-right: -5px; margin-left: -5px;">
                     {{ form.compulsory_policy_serial.label(class="control-label") }}
                     <div>
-                        {{ form.voluntary_policy_serial(class="form-control", autocomplete="off", placeholder="серия", ng_model="clientDataItems['voluntaryPolicy']['serial']") }}
+                        {{ form.voluntary_policy_serial(class="form-control", autocomplete="off",
+                        placeholder="серия", ng_model="client.client_info['voluntaryPolicy']['serial']") }}
                     </div>
                 </div>
                 <div class="form-group col-md-2">
                     {{ form.voluntary_policy_number.label(class="control-label") }}
                     <div>
-                        {{ form.voluntary_policy_number(class="form-control", autocomplete="off", placeholder="номер", ng_model="clientDataItems['voluntaryPolicy']['number']") }}
+                        {{ form.voluntary_policy_number(class="form-control", autocomplete="off",
+                        placeholder="номер", ng_model="client.client_info['voluntaryPolicy']['number']") }}
                     </div>
                 </div>
             </div>
@@ -180,39 +200,41 @@
                 <div class="form-group col-md-2">
                     {{ form.voluntary_policy_begDate.label(class="control-label") }}
                     <div>
-                        {{ form.voluntary_policy_begDate(class="form-control", datepicker_popup="dd.MM.yyyy", autocomplete="off", ng_model="clientDataItems['voluntaryPolicy']['begDate']") }}
+                        {{ form.voluntary_policy_begDate(class="form-control", datepicker_popup="dd.MM.yyyy",
+                        autocomplete="off", ng_model="client.client_info['voluntaryPolicy']['begDate']") }}
                     </div>
                 </div>
                 <div class="form-group col-md-2" style="margin-right: -5px; margin-left: -5px;">
                     {{ form.voluntary_policy_endDate.label(class="control-label") }}
                     <div>
-                        {{ form.voluntary_policy_endDate(class="form-control", datepicker_popup="dd.MM.yyyy", autocomplete="off", ng_model="clientDataItems['voluntaryPolicy']['endDate']") }}
+                        {{ form.voluntary_policy_endDate(class="form-control", datepicker_popup="dd.MM.yyyy",
+                        autocomplete="off", ng_model="client.client_info['voluntaryPolicy']['endDate']") }}
                     </div>
                 </div>
                 <div class="form-group col-md-4">
                     {{ form.voluntary_policy_org.label(class="control-label") }}
                     <div>
-                        {{ form.voluntary_policy_org(class="form-control", autocomplete="off", ng_model="clientDataItems['voluntaryPolicy']['insurer_id']") }}
+                        {{ form.voluntary_policy_org(class="form-control", autocomplete="off",
+                        ng_model="client.client_info['voluntaryPolicy']['insurer_id']") }}
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
     <div class="panel panel-default">
         <div class="panel-body">
             <div class="row" style="margin-left: 10px;">
                 <div class="form-group col-md-4">
                     {{ form.notes.label(class="control-label") }}
                     <div>
-                        {{ form.notes(class="form-control", autocomplete="off", ng_model="clientDataItems['notes']") }}
+                        {{ form.notes(class="form-control", autocomplete="off",
+                        ng_model="client.client_info['notes']") }}
                     </div>
                 </div>
             </div>
          </div>
     </div>
-<div class="col-sm-offset-10 col-md-2" ng-show="editing">
-    <button ng-click="editing=false; save_client_info()" class="btn btn-success">Сохранить</button>
-</div>
 </form>
 
 

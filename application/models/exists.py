@@ -172,31 +172,42 @@ class Client(db.Model):
     version = db.Column(db.Integer, nullable=False)
     birthPlace = db.Column(db.String(128), nullable=False, server_default=u"''")
     embryonalPeriodWeek = db.Column(db.String(16), nullable=False, server_default=u"''")
-    uuid_id = db.Column(db.Integer, nullable=False, index=True, server_default=u"'0'")
+    uuid_id = db.Column(db.Integer, db.ForeignKey('UUID.id'), nullable=False, index=True,
+                        server_default=u"'0'")
 
+    uuid = db.relationship('UUID')
+    documents = db.relationship(u'ClientDocument',
+                                primaryjoin='and_(ClientDocument.clientId==Client.id, ClientDocument.deleted == 0)',
+                                order_by="desc(ClientDocument.id)",
+                                backref=db.backref('client'),
+                                lazy='dynamic')
+    documents_all = db.relationship('ClientDocument', order_by="desc(ClientDocument.id)")
+    policies = db.relationship(u'ClientPolicy',
+                               primaryjoin='and_(ClientPolicy.clientId==Client.id, ClientPolicy.deleted == 0)',
+                               order_by="desc(ClientPolicy.id)",
+                               backref=db.backref('client'),
+                               lazy='dynamic')
+    policies_all = db.relationship('ClientPolicy', order_by="desc(ClientPolicy.id)")
+    reg_address = db.relationship(u'ClientAddress',
+                                  primaryjoin="and_(Client.id==ClientAddress.client_id, ClientAddress.type==0)",
+                                  order_by="desc(ClientAddress.id)", uselist=False)
+    loc_address = db.relationship(u'ClientAddress',
+                                  primaryjoin="and_(Client.id==ClientAddress.client_id, ClientAddress.type==1)",
+                                  order_by="desc(ClientAddress.id)", uselist=False)
+    socStatuses = db.relationship(u'ClientSocStatus',
+                                  primaryjoin='and_(ClientSocStatus.deleted == 0, ClientSocStatus.client_id==Client.id)',
+                                  lazy='dynamic')
+    #  primaryjoin='and_(ClientSocStatus.deleted == 0, ClientSocStatus.client_id==Client.id,'
+    #                                           'or_(ClientSocStatus.endDate == None, ClientSocStatus.endDate>={0}))'.format(
+    #                                   datetime.date.today()))
     contacts = db.relationship('ClientContact', primaryjoin='and_(ClientContact.client_id==Client.id,'
                                                             'ClientContact.deleted == 0)', lazy='dynamic')
-    documentsAll = db.relationship(u'ClientDocument', primaryjoin='and_(ClientDocument.clientId==Client.id,'
-                                                                  'ClientDocument.deleted == 0)',
-                                   order_by="desc(ClientDocument.documentId)")
-    policies = db.relationship(u'ClientPolicy', primaryjoin='and_(ClientPolicy.clientId==Client.id,'
-                                                            'ClientPolicy.deleted == 0)',
-                               order_by="desc(ClientPolicy.id)")
-    reg_address = db.relationship(u'ClientAddress',
-                                    primaryjoin="and_(Client.id==ClientAddress.client_id, ClientAddress.type==0)",
-                                    order_by="desc(ClientAddress.id)", uselist=False)
-    loc_address = db.relationship(u'ClientAddress',
-                                    primaryjoin="and_(Client.id==ClientAddress.client_id, ClientAddress.type==1)",
-                                    order_by="desc(ClientAddress.id)", uselist=False)
-    socStatuses = db.relationship(u'ClientSocStatus',
-                                  primaryjoin='and_(ClientSocStatus.deleted == 0,ClientSocStatus.client_id==Client.id,'
-                                  'or_(ClientSocStatus.endDate == None, ClientSocStatus.endDate>={0}))'.format(datetime.date.today()))
     intolerances = db.relationship(u'ClientIntoleranceMedicament',
                                    primaryjoin='and_(ClientIntoleranceMedicament.client_id==Client.id,'
                                                'ClientIntoleranceMedicament.deleted == 0)')
     identifications = db.relationship(u'ClientIdentification',
                                       primaryjoin='and_(ClientIdentification.client_id==Client.id,'
-                                      'ClientIdentification.deleted == 0)')
+                                                  'ClientIdentification.deleted == 0)')
     allergies = db.relationship(u'ClientAllergy', primaryjoin='and_(ClientAllergy.client_id==Client.id,'
                                                               'ClientAllergy.deleted == 0)')
     blood_history = db.relationship(u'Bloodhistory')
@@ -206,7 +217,7 @@ class Client(db.Model):
         u'Event', lazy='dynamic', order_by='desc(Event.createDatetime)',
         primaryjoin='and_(Event.deleted == 0, Event.client_id == Client.id)')
     appointments = db.relationship(
-        u'ScheduleClientTicket', lazy='dynamic', #order_by='desc(ScheduleTicket.begDateTime)',
+        u'ScheduleClientTicket', lazy='dynamic',  #order_by='desc(ScheduleTicket.begDateTime)',
         primaryjoin='and_(ScheduleClientTicket.deleted == 0, ScheduleClientTicket.client_id == Client.id)',
         innerjoin=True
     )
@@ -231,10 +242,6 @@ class Client(db.Model):
 
     @property
     def sex(self):
-        """
-        Делаем из пола строку
-        sexCode - код пола (1 мужской, 2 женский)
-        """
         if self.sexCode == 1:
             return u'М'
         elif self.sexCode == 2:
@@ -252,19 +259,29 @@ class Client(db.Model):
 
     @property
     def document(self):
-        return self.documents.\
-            filter(ClientDocument.deleted == 0).\
-            filter(rbDocumentTypeGroup.code == '1').\
-            order_by(ClientDocument.date.desc()).first()
+        # todo: fix code
+        return (self.documents.filter(ClientDocument.deleted == 0).
+                filter(rbDocumentTypeGroup.code == '1').order_by(ClientDocument.date.desc()).first())
+
+    def get_actual_document_by_code(self, doc_type_code):
+        # пока не используется
+        return (self.documents.filter(ClientDocument.deleted == 0).
+                filter(rbDocumentTypeGroup.code == doc_type_code).
+                order_by(ClientDocument.date.desc()).first())
+
+    def get_document_by_id(self, doc_id):
+        return self.documents.filter(ClientDocument.id == doc_id).first()
+
+    def get_policy_by_id(self, policy_id):
+        return self.policies.filter(ClientPolicy.id == policy_id).first()
 
     @property
-    def phones(self):
-        contacts = [(contact.name, contact.contact, contact.notes) for contact in self.contacts]
-        return ', '.join([
-            (u'%s: %s (%s)' % (phone[0], phone[1], phone[2])) if phone[2]
-            else (u'%s: %s' % (phone[0], phone[1]))
-            for phone in contacts
-        ])
+    def policy(self):
+        return self.compulsoryPolicy
+
+    @property
+    def policyDMS(self):
+        return self.voluntaryPolicy
 
     @property
     def compulsoryPolicy(self):
@@ -279,16 +296,17 @@ class Client(db.Model):
                 return policy
 
     @property
+    def phones(self):
+        contacts = [(contact.name, contact.contact, contact.notes) for contact in self.contacts]
+        return ', '.join([
+            (u'%s: %s (%s)' % (phone[0], phone[1], phone[2])) if phone[2]
+            else (u'%s: %s' % (phone[0], phone[1]))
+            for phone in contacts
+        ])
+
+    @property
     def relations(self):
         return self.reversed_relations + self.direct_relations
-
-    @property
-    def policy(self):
-        return self.compulsoryPolicy
-
-    @property
-    def policyDMS(self):
-        return self.voluntaryPolicy
 
     def __unicode__(self):
         return self.nameText
@@ -414,7 +432,7 @@ class ClientDocument(db.Model):
         db.Index(u'Ser_Numb', u'serial', u'number'),
     )
 
-    documentId = db.Column("id", db.Integer, primary_key=True)
+    id = db.Column("id", db.Integer, primary_key=True)
     createDatetime = db.Column(db.DateTime, nullable=False)
     createPerson_id = db.Column(db.Integer, index=True)
     modifyDatetime = db.Column(db.DateTime, nullable=False)
@@ -429,7 +447,6 @@ class ClientDocument(db.Model):
     version = db.Column(db.Integer, nullable=False)
     endDate = db.Column(db.Date)
 
-    client = db.relationship(u'Client', backref=db.backref('documents', lazy='dynamic'))
     documentType = db.relationship(u'rbDocumentType', lazy=False)
 
     @property
@@ -441,7 +458,7 @@ class ClientDocument(db.Model):
 
     def __json__(self):
         return {
-            'id': self.documentId,
+            'id': self.id,
             'serial': self.serial,
             'number': self.number,
             'date': self.date,
@@ -802,7 +819,6 @@ class ClientPolicy(db.Model):
     note = db.Column(db.Unicode(200), nullable=False, server_default=u"''")
     version = db.Column(db.Integer, nullable=False, server_default=u"'0'")
 
-    client = db.relationship(u'Client')
     insurer = db.relationship(u'Organisation', lazy=False)
     policyType = db.relationship(u'rbPolicyType', lazy=False)
 
