@@ -96,6 +96,15 @@ class ActionProperty(db.Model):
         return self.valueTypeClass.query.filter(self.id == self.valueTypeClass.id)
 
 
+    @property
+    def value(self):
+        if self.type.isVector:
+            return [item.get_value() for item in self.raw_values_query.all()]
+        else:
+            item = self.raw_values_query.first()
+            return item.get_value() if item else None
+
+
 class ActionPropertyTemplate(db.Model):
     __tablename__ = u'ActionPropertyTemplate'
 
@@ -129,7 +138,7 @@ class ActionPropertyType(db.Model):
     deleted = db.Column(db.Integer, nullable=False, server_default=u"'0'")
     actionType_id = db.Column(db.Integer, db.ForeignKey('ActionType.id'), nullable=False, index=True)
     idx = db.Column(db.Integer, nullable=False, server_default=u"'0'")
-    template_id = db.Column(db.Integer, index=True)
+    template_id = db.Column(db.ForeignKey('ActionPropertyTemplate.id'), index=True)
     name = db.Column(db.String(128), nullable=False)
     descr = db.Column(db.String(128), nullable=False)
     unit_id = db.Column(db.Integer, db.ForeignKey('rbUnit.id'), index=True)
@@ -159,6 +168,7 @@ class ActionPropertyType(db.Model):
     modifyPerson_id = db.Column(db.Integer)
 
     unit = db.relationship('rbUnit')
+    template = db.relationship('ActionPropertyTemplate')
 
     def __json__(self):
         result = {
@@ -536,16 +546,10 @@ class ActionType(db.Model):
     group = db.relationship(u'ActionType', remote_side=[id])
 
     def get_property_type_by_name(self, name):
-        for property_type in self.property_types:
-            if property_type.name == unicode(name):
-                return property_type
-        return None
+        return self.property_types.filter(ActionPropertyType.name == name).first()
 
     def get_property_type_by_code(self, code):
-        for property_type in self.property_types:
-            if property_type.name == code:
-                return property_type
-        return None
+        return self.property_types.filter(ActionPropertyType.code == code).first()
 
     def __json__(self):
         return {

@@ -76,7 +76,7 @@ class Schedule(db.Model):
     reasonOfAbsence = db.relationship('rbReasonOfAbsence', lazy='joined')
     receptionType = db.relationship('rbReceptionType', lazy='joined')
     tickets = db.relationship(
-        'ScheduleTicket', lazy='joined', primaryjoin=
+        'ScheduleTicket', lazy=False, primaryjoin=
         "and_(ScheduleTicket.schedule_id == Schedule.id, ScheduleTicket.deleted == 0)")
     
 
@@ -96,12 +96,12 @@ class ScheduleTicket(db.Model):
 
     attendanceType = db.relationship('rbAttendanceType', lazy=False)
     client_ticket = db.relationship(
-        'ScheduleClientTicket', lazy=True, primaryjoin=
+        'ScheduleClientTicket', lazy=False, primaryjoin=
         "and_(ScheduleClientTicket.ticket_id == ScheduleTicket.id, ScheduleClientTicket.deleted == 0)",
         uselist=False)
 
     schedule = db.relationship(
-        'Schedule', lazy='joined', innerjoin=True, uselist=False,
+        'Schedule', lazy=True, innerjoin=True, uselist=False,
         primaryjoin='and_('
                     'Schedule.deleted == 0, ScheduleTicket.deleted == 0, ScheduleTicket.schedule_id == Schedule.id)'
     )
@@ -134,7 +134,7 @@ class ScheduleClientTicket(db.Model):
     createPerson = db.relationship('Person', foreign_keys=[createPerson_id])
 
     ticket = db.relationship(
-        'ScheduleTicket', lazy='joined', innerjoin=True, uselist=False,
+        'ScheduleTicket', lazy=True, innerjoin=True, uselist=False,
         primaryjoin='and_('
                     'ScheduleClientTicket.deleted == 0, '
                     'ScheduleTicket.deleted == 0, '

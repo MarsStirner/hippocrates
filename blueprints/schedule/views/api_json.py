@@ -2,20 +2,23 @@
 import calendar
 from collections import defaultdict
 import json
+import datetime
 
 from flask import abort, request
-
 from application.database import db
 from application.lib.sphinx_search import SearchPerson
+from application.lib.agesex import recordAcceptableEx
 from application.lib.utils import public_endpoint, jsonify, safe_traverse
 from blueprints.schedule.app import module
-from application.models.exists import Person, Client, rbSpeciality, rbDocumentType, rbPolicyType, \
+from application.models.exists import rbSpeciality, rbPolicyType, \
     rbReasonOfAbsence, rbSocStatusClass, rbSocStatusType, rbAccountingSystem, rbContactType, rbRelationType, \
-    ClientDocument, rbBloodType, Bloodhistory, rbPrintTemplate, Event
+    rbBloodType, Bloodhistory, rbPrintTemplate, Event, Person
+from application.models.actions import Action, ActionType, ActionProperty, ActionPropertyType
 from application.models.schedule import Schedule, ScheduleTicket, ScheduleClientTicket, rbAppointmentType, \
     rbReceptionType, rbAttendanceType
 from blueprints.schedule.views.jsonify import ScheduleVisualizer, PrintTemplateVisualizer, \
     EventVisualizer, ActionVisualizer
+
 
 __author__ = 'mmalkov'
 
@@ -450,6 +453,116 @@ def api_action_get():
     print_templates = rbPrintTemplate.query.filter(rbPrintTemplate.context == context).all()
     v = ActionVisualizer()
     print_context = PrintTemplateVisualizer()
-    return jsonify({'action': v.make_action(action),
-                    'print_templates': map(print_context.make_template_info, print_templates)
-                    })
+    return jsonify({
+        'action': v.make_action(action),
+        'print_templates': map(print_context.make_template_info, print_templates)
+    })
+
+
+@module.route('/api/actions/new.json', methods=['GET'])
+@public_endpoint
+def api_action_new_get():
+
+    # Preparación de datos de entrada
+
+    now = datetime.datetime.now()
+    src_action = Action.query.get(int(request.args['src_action_id'])) \
+        if 'src_action_id' in request.args else None
+    """@type: Action | None"""
+    src_props = dict((prop.type_id, prop) for prop in src_action.properties) if src_action else {}
+    given_datetime = datetime.datetime.strptime(request.args['datetime'], '%Y-%m-%dT%H:%M') \
+        if 'datetime' in request.args else None
+    actionType = ActionType.query.get(int(request.args['action_type_id']))
+    """@type: ActionType"""
+    event = Event.query.get(int(request.args['event_id']))
+    """@type: Event"""
+
+    # Action creation starts
+
+    action = Action()
+    action.createDatetime = action.modifyDatetime = action.begDate = now
+    action.createPerson = action.modifyPerson = action.setPerson = None  # TODO: current User
+    action.office = actionType.office or u''
+    action.amount = actionType.amount if actionType.amountEvaluation in (0, 7) else 1
+    action.uet = 0  # TODO: calculate UET
+
+    if given_datetime:
+        action.plannedEndDate = given_datetime
+        # TODO: calculate plannedEndDate
+
+    if actionType.defaultEndDate == 1:
+        action.endDate = now
+    elif actionType.defaultEndDate == 2:
+        action.endDate = event.setDate
+    elif actionType.defaultEndDate == 3:
+        action.endDate = event.execDate
+    if actionType.defaultDirectionDate == 1:
+        action.directionDate = event.setDate
+    elif actionType.defaultDirectionDate == 2:
+        action.directionDate = now
+    elif actionType.defaultDirectionDate == 3 and action.endDate:
+        action.directionDate = max(action.endDate, event.setDate)
+    else:
+        action.directionDate = event.setDate
+
+    if src_action:
+        action.person = src_action.person
+    elif actionType.defaultExecPerson_id:
+        action.person = Person.query.get(actionType.defaultExecPersonId)
+    elif actionType.defaultPersonInEvent == 0:
+        action.person = None
+    elif actionType.defaultPersonInEvent == 2:
+        action.person = action.setPerson
+    elif actionType.defaultPersonInEvent == 3:
+        action.person = event.execPerson
+    elif actionType.defaultPersonInEvent == 4:
+        action.person = None  # TODO: current User
+
+    action.event = event
+    action.actionType = actionType
+    action.status = actionType.defaultStatus
+    prop_types = actionType.property_types.filter(ActionPropertyType.deleted == 0)
+    v = ActionVisualizer()
+
+    result = v.make_action(action)
+
+    # アクションプロパティを作成する
+
+    now_date = now.date()
+    for prop_type in prop_types:
+        if recordAcceptableEx(event.client.sex, event.client.age_tuple(now_date), prop_type.sex, prop_type.age):
+            prop = ActionProperty()
+            prop.type = prop_type
+            prop.action = action
+            value = src_props[prop_type.id].value if src_props.get(prop_type.id) else None
+            result['properties'].append(v.make_abstract_property(prop, value))
+    db.session.rollback()
+    return jsonify(result)
+
+
+@module.route('/api/actions', methods=['POST'])
+@public_endpoint
+def api_action_post():
+    from application.models.actions import Action, ActionProperty
+    data = request.json
+    action_desc = data['action']
+    if action_desc['id']:
+        action = Action.query.get(action_desc['id'])
+    else:
+        # new action
+        action = Action()
+        action.actionType_id = action_desc['action_type']['id']
+        action.event_id = action_desc['event_id']
+        for prop_desc in action_desc:
+            prop = ActionProperty()
+            prop.action = action
+            prop.isAssigned = prop_desc['is_assigned']
+            prop.type_id = prop_desc['type_id']
+    action.begDate = action_desc['begDate']
+    action.endDate = action_desc['endDate']
+    action.plannedEndDate = action_desc['planned_endDate']
+    action.status = action_desc['status'].id
+    action.setPerson_id = safe_traverse(action_desc, 'set_person', 'id')
+    action.person_id = safe_traverse(action_desc, 'person', 'id')
+    action.note = action_desc['note']
+    # TODO: set properties

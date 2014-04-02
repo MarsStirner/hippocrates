@@ -2,7 +2,7 @@
 import datetime
 from flask.ext.login import UserMixin
 from application.database import db
-from application.lib.agesex import AgeSex
+from application.lib.agesex import AgeSex, calcAgeTuple
 from application.models.kladr_models import Kladr, Street
 # from application.models.actions import Action
 
@@ -221,6 +221,14 @@ class Client(db.Model):
         primaryjoin='and_(ScheduleClientTicket.deleted == 0, ScheduleClientTicket.client_id == Client.id)',
         innerjoin=True
     )
+
+    def age_tuple(self, moment=None):
+        """
+        @type moment: datetime.datetime
+        """
+        if not moment:
+            moment = datetime.datetime.now()
+        return calcAgeTuple(self.birthDate, moment)
 
     @property
     def nameText(self):
@@ -2321,7 +2329,7 @@ class rbUserProfile(db.Model):
     name = db.Column(db.String(128), nullable=False, index=True)
     withDep = db.Column(db.Integer, nullable=False, server_default=u"'0'")
 
-    rights = db.relationship(u'rbUserRight', secondary=u'rbUserProfile_Right')
+    rights = db.relationship(u'rbUserRight', secondary=u'rbUserProfile_Right', lazy=False)
 
 
 class rbUserProfileRight(db.Model):

@@ -557,3 +557,16 @@ class ActionVisualizer(object):
             'is_assigned': prop.isAssigned,
             'value': values
         }
+
+    def make_abstract_property(self, prop, value):
+        """
+        @type prop: ActionProperty
+        @type value: any
+        """
+        return {
+            'id': prop.id,
+            'idx': prop.type.idx,
+            'type': prop.type,
+            'is_assigned': prop.isAssigned,
+            'value': value
+        }
