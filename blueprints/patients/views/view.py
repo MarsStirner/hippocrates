@@ -24,29 +24,19 @@ def index():
 
 @module.route('/patient')
 @public_endpoint
-def patient_get():
+def patient():
     try:
-        client_id = int(request.args['client_id'])
+        client_id = request.args['client_id']
+        if client_id != 'new':
+            client_id = int(client_id)
     except KeyError or ValueError:
         return abort(404)
-    client = Client.query.get(client_id)
-    if not client:
-        return abort(404)
-    context = ClientVisualizer(Format.HTML)
+    if client_id != 'new':
+        client = Client.query.get(client_id)
+        if not client:
+            return abort(404)
     client_form = ClientForm()
     return render_template(
         'patients/patient_info.html',
         form=client_form
     )
-
-
-@module.route('/new_patient')
-@public_endpoint
-def new_patient():
-    try:
-        client = Client()
-        client_form = ClientForm()
-
-        return render_template('patients/new_patient.html', form=client_form)
-    except TemplateNotFound:
-        abort(404)

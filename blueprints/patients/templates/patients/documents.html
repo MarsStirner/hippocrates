@@ -12,7 +12,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr ng-repeat="document in  clientDataItems['documentHistory']">
+                <tr ng-repeat="document in  client.client_info['documentHistory']">
                     <td>[[document.typeName]]</td>
                     <td>[[document.serial]]</td>
                     <td>[[document.number]]</td>
@@ -20,7 +20,7 @@
                     <td>[[document.endDate]]</td>
                     <td>
                         <a class="btn btn-sm btn-default" href="" title="Удалить документ"
-                           ng-click="delete_document(document)">
+                           ng-click="delete_record('documentHistory', document)">
                             <span class="glyphicon glyphicon-trash"></span>
                         </a>
                     </td>

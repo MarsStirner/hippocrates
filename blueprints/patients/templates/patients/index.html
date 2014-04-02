@@ -25,6 +25,8 @@
             <caption>
                 <span ng-if="results.length > 0">Результаты поиска</span>
                 <span ng-if="results.length == 0 && query">Нет результатов</span>
+                <button ng-click="open_client('new');" class="btn btn-primary pull-right"
+                        ng-show="!results.length">Зарегистрировать пациента</button>
             </caption>
             <thead ng-if="results.length > 0">
             <tr>
@@ -110,7 +112,7 @@
             };
 
             $scope.open_client = function (client_id) {
-                window.open('{{ url_for('patients.patient_get') }}?client_id=' + client_id, '_self');
+                window.open('{{ url_for('patients.patient') }}?client_id=' + client_id, '_self');
             };
 
             $scope.print_template = function (client_id, template_id) {

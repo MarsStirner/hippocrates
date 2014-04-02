@@ -16,8 +16,6 @@ from application.models.schedule import Schedule, ScheduleTicket, ScheduleClient
     rbReceptionType, rbAttendanceType
 from blueprints.schedule.views.jsonify import ScheduleVisualizer, PrintTemplateVisualizer, \
     EventVisualizer, ActionVisualizer
-from blueprints.schedule.views.utils import *
-from blueprints.schedule.views.uuid_generator import getNewUUID_id
 
 __author__ = 'mmalkov'
 

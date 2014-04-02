@@ -3,8 +3,8 @@
 {% block title %}> {{ module_name }}{% endblock %}
 
 {% block main %}
-    <div ng-controller="ClientInfo" class="ng-cloak">
-        <script type="text/ng-template" id="modal-deleteDocument.html">{% include "patients/_delete_document.html" %}</script>
+    <div ng-controller="ClientCtrl" class="ng-cloak">
+        <script type="text/ng-template" id="modal-deleteRecord.html">{% include "patients/_modal_delete_record.html" %}</script>
         <legend xmlns="http://www.w3.org/1999/html">Пациент [[ clientDataItems.nameText ]]</legend>
         <div class="marginal">
             <button class="btn btn-default" onclick="history.back()">Назад к результатам поиска</button>
@@ -24,6 +24,7 @@
                     <tab heading="Идентификаторы">{% include "patients/identifiers.html" %}</tab>
                     <tab heading="Связи и контакты">{% include "patients/contacts.html" %}</tab>
                     <tab heading="История документов">{% include "patients/documents.html" %}</tab>
+                    <tab heading="Debug"><span ng-bind="client.client_info.lastName"></span></tab>
                 </tabset>
             </tab>
             <tab heading="Предварительные записи">{% include "patients/appointments.html" %}</tab>
@@ -32,7 +33,7 @@
         <br /> {# FIXME, daaamn #}
         <div class="pull-right" ng-show="editing">
             <button ng-click="cancel_editing();" class="btn btn-lg btn-danger">Отменить</button>
-            <button ng-click="save_client_info();" class="btn btn-lg btn-success">Сохранить</button>
+            <button ng-click="save_client();" class="btn btn-lg btn-success">Сохранить</button>
         </div>
     </div>
 {% endblock %}
@@ -40,7 +41,7 @@
 {% block modules_js %}
     {{ super() }}
     <script type="text/javascript">
-        DeleteDocumentModalCtrl = function ($scope, $modalInstance) {
+        DeleteRecordModalCtrl = function ($scope, $modalInstance) {
             $scope.accept = function () {
                 $modalInstance.close();
             };
@@ -48,18 +49,19 @@
                 $modalInstance.dismiss('cancel');
             };
         };
-
-        WebMis20.controller('ClientInfo', ['$scope', '$http', '$modal', function ($scope, $http, $modal) {
-{#            $scope.max_tickets = 0;#}
+        WebMis20.factory('Client',
+            function($resource) {
+                return $resource('{{ url_for('patients.api_patient_get') }}' + '?client_id=:client_id', {}, {
+                    query: {method: 'GET', params: {client_id: 1}}
+                });
+        });
+        WebMis20.controller('ClientCtrl', ['$scope', '$http', '$modal', 'ClientNTK',
+                            function ($scope, $http, $modal, ClientNTK) {
             $scope.records = [];
             $scope.aux = aux;
             $scope.params = aux.getQueryParams(document.location.search);
             $scope.client_id = $scope.params.client_id;
-            $scope.view = true;
-{#            var curDate = new Date();#}
-{#            var curYear = curDate.getUTCFullYear();#}
-{#            $scope.years = [curYear - 1, curYear, curYear + 1];#}
-{#            $scope.year = curYear;#}
+
             $scope.clientInfoCode2Name = {
                 'id': 'Код пациента',
                 'birthDate': 'Дата рождения',
@@ -83,91 +85,41 @@
 
             $scope.cancel_editing = function() {
                 $scope.editing = false;
+                $scope.client = new ClientNTK($scope.client_id); // FIXME defer/promise or reload
             };
 
-            $scope.save_client_info = function() {
-                $http.post('{{ url_for('.api_save_patient_info') }}',
-                           { client_info: $scope.clientDataItems }
-                ).success(function(data) {
+            $scope.save_client = function() {
+                var promise = $scope.client.save();
+                promise.then(function(result) {
                     $scope.editing = false;
-                });
-            };
-
-            $scope.delete_document = function(document) {
-                var modalInstance = $modal.open({
-                                    templateUrl: 'modal-deleteDocument.html',
-                                    controller: DeleteDocumentModalCtrl
-                    });
-                modalInstance.result.then(function () {
-                    $http.get('{{ url_for('.api_delete_document') }}',
-                              {params: {document: document}
-                              }
-                    );
-                })
-            };
-
-            $scope.add_allergy = function() {
-                $scope.clientDataItems['allergies'].push({'nameSubstance': '',
-                                                          'power': 0,
-                                                          'createDate': '',
-                                                          'deleted':0,
-                                                          'notes': ''
-                                                          })
-            };
-
-            $scope.add_medicament = function() {
-                $scope.clientDataItems['intolerances'].push({'nameMedicament': '',
-                                                          'power': 0,
-                                                          'createDate': '',
-                                                          'deleted':0,
-                                                          'notes': ''
-                                                          })
-            };
-
-            $scope.add_identification = function() {
-                $scope.clientDataItems['identifications'].push({'deleted': 0,
-                                                                'identifier': '',
-                                                                'accountingSystem_code': '',
-                                                                'checkDate': ''})
-            };
-
-            $scope.add_contact = function() {
-                $scope.clientDataItems['contacts'].push({'deleted': 0,
-                                                         'contactType_code': '',
-                                                         'contact': '',
-                                                         'notes': ''})
-            };
-
-            $scope.add_blood = function() {
-                $scope.clientDataItems['bloodHistory'].push({'bloodGroup_code': '',
-                                                             'bloodDate': '',
-                                                             'person_id': 0
-                                                             })
-            };
-
-            $scope.add_relation = function(relation_array) {
-                relation_array.push({'relativeType_name': '',
-                                     'relativeType_code': '',
-                                     'other_id': 0
-                                     })
-            };
-
-            $scope.add_soc_status = function() {
-                $scope.clientDataItems['socStatuses'].push({'deleted': 0,
-                                                            'classCode': '',
-                                                            'typeCode': '',
-                                                            'begDate': '',
-                                                            'endDate': ''
-                                                            })
-            };
-
-            $scope.delete_item = function(clientData_array, item) {
-                if ('id' in item) {
-                    item['deleted'] = 1;
-                } else {
-                    var index = clientData_array.indexOf(item);
-                    clientData_array.splice(index, 1);
+                }, function(reason) {
+                    alert(reason);
                 }
+                );
+            }
+
+{#            $scope.delete_document = function(document) {#}
+{#                var modalInstance = $modal.open({#}
+{#                                    templateUrl: 'modal-deleteDocument.html',#}
+{#                                    controller: DeleteDocumentModalCtrl#}
+{#                    });#}
+{#                modalInstance.result.then(function () {#}
+{#                    $http.get('{{ url_for('.api_delete_document') }}',#}
+{#                              {params: {document: document}#}
+{#                              }#}
+{#                    );#}
+{#                })#}
+{#            };#}
+
+            $scope.delete_record = function(entity, record) {
+                var modalInstance = $modal.open({
+                    templateUrl: 'modal-deleteRecord.html',
+                    controller: DeleteRecordModalCtrl
+                });
+
+                modalInstance.result.then(function () {
+                    $scope.client.delete_record(entity, record);
+                });
             };
 
             $scope.open = function($event) {
@@ -180,17 +132,17 @@
                 window.open('{{ url_for('schedule.html_event_info') }}?event_id=' + event.id, '_self')
             };
 
-            $http.get(
-                '{{ url_for('.api_patient') }}', {
-                    params: {
-                        'client_id': $scope.client_id
-                    }
+            $scope.$watchCollection('[client.client_info.firstName, client.client_info.lastName, client.client_info.patrName]',
+                function() {
+                    $scope.client.update_fullName();
                 }
-            ).success(function (data) {
-                $scope.clientDataItems = data.result.clientData;
-                $scope.records = data.result.records;
-                $scope.client_events = data.result.events;
-            });
+            )
+            if ($scope.client_id == 'new') {
+                $scope.start_editing();
+                // TODO: btnCancel href back
+            }
+
+            $scope.client = new ClientNTK($scope.client_id);
 
         }]);
     </script>

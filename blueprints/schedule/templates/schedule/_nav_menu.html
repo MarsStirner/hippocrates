@@ -1,5 +1,5 @@
-{% macro item(fname, caption) %}
-<a href="{{ url_for(fname) }}" class="list-group-item{% if request.path == url_for(fname) %} active{% endif %}">{{ caption }}</a>
+{% macro item(fname, caption, appendurl='') %}
+<a href="{{ url_for(fname) + appendurl }}" class="list-group-item{% if request.path == url_for(fname) %} active{% endif %}">{{ caption }}</a>
 {% endmacro %}
 <div class="panel panel-default">
     <div class="panel-heading"><h3 class="panel-title">Доступные функции</h3></div>
@@ -8,7 +8,7 @@
         {{ item('.person_schedule_monthview', 'Формирование графика врача') }}
         {{ item('.doctors', 'Поиск врача') }}
         {{ item('patients.index', 'Поиск пациента') }}
-        {{ item('patients.new_patient', 'Регистрация пациента') }}
+        {{ item('patients.patient', 'Регистрация пациента', appendurl='?client_id=new') }}
     </div>
     <!-- /.navbar -->
 </div>

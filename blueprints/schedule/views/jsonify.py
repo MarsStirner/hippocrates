@@ -225,7 +225,8 @@ class ClientVisualizer(object):
 
     def make_document_info(self, document):
         if document:
-            return {'id': document.documentId,
+            return {'id': document.id,
+                    'deleted': document.deleted,
                     'number': document.number,
                     'serial': document.serial,
                     'begDate': document.date or '',
@@ -242,11 +243,13 @@ class ClientVisualizer(object):
                     'typeName': '',
                     'typeCode': '',
                     'origin': '',
-                    'documentText': ''}
+                    'documentText': '',
+                    'deleted': 0}
 
     def make_policy_info(self, policy):
         if policy:
             return {'id': policy.id,
+                    'deleted': policy.deleted,
                     'number': policy.number,
                     'serial': policy.serial,
                     'begDate': policy.begDate or '',
@@ -263,7 +266,8 @@ class ClientVisualizer(object):
                     'typeName': '',
                     'typeCode': '',
                     'insurer_id': '',
-                    'policyText': ''}
+                    'policyText': '',
+                    'deleted': 0}
 
     def make_identification_info(self, identification):
         return {'id': identification.id,
@@ -275,6 +279,7 @@ class ClientVisualizer(object):
 
     def make_relation_info(self, relation):
         return {'id': relation.id,
+                'deleted': relation.deleted,
                 'relativeType_name': relation.name,
                 'relativeType_code': relation.code,
                 'other_id': relation.other.id,
@@ -328,16 +333,16 @@ class ClientVisualizer(object):
         compulsoryPolicy = self.make_policy_info(client.compulsoryPolicy)
         voluntaryPolicy = self.make_policy_info(client.voluntaryPolicy)
 
-        documentsAll = [self.make_document_info(document) for document in client.documentsAll]
-        policies = [self.make_policy_info(policy) for policy in client.policies]
-        documentHistory = documentsAll + policies
+        documents = [self.make_document_info(document) for document in client.documents_all]
+        policies = [self.make_policy_info(policy) for policy in client.policies_all]
+        documentHistory = documents + policies
         identifications = [self.make_identification_info(identification) for identification in client.identifications]
         direct_relations = [self.make_relation_info(relation) for relation in client.direct_relations]
         reversed_relations = [self.make_relation_info(relation) for relation in client.reversed_relations]
         contacts = [self.make_contact_info(contact) for contact in client.contacts]
 
         return {
-            'id': client.id if client.id else 0,
+            'id': client.id,
             'lastName': client.lastName,
             'firstName': client.firstName,
             'patrName': client.patrName,
@@ -366,21 +371,21 @@ class ClientVisualizer(object):
             'contacts': contacts
         }
 
-    def make_records(self, client):
+    def make_appointments(self, client):
         return map(
-            self.make_record,
+            self.make_appointment,
             client.appointments#.order_by(ScheduleTicket.begDateTime.desc())
         )
 
-    def make_record(self, record):
+    def make_appointment(self, apnt):
         return {
-            'id': record.id,
+            'id': apnt.id,
             'mark': None,
-            'begDateTime': record.ticket.begDateTime,
-            'office': record.ticket.schedule.office,
-            'person': safe_unicode(record.ticket.schedule.person),
-            'createPerson': record.createPerson,
-            'note': record.note,
+            'begDateTime': apnt.ticket.begDateTime,
+            'office': apnt.ticket.schedule.office,
+            'person': safe_unicode(apnt.ticket.schedule.person),
+            'createPerson': apnt.createPerson,
+            'note': apnt.note,
         }
 
     def make_events(self, client):

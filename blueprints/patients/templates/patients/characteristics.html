@@ -1,6 +1,6 @@
 <div class="row">
     <div class="col-md-12">
-        <table class="table table-condensed" ng-if="clientDataItems['bloodHistory']" ng-hide="editing">
+        <table class="table table-condensed" ng-if="client.client_info['bloodHistory']" ng-hide="editing">
             <caption>Группа крови и резус-фактор</caption>
             <thead>
             <tr>
@@ -10,7 +10,7 @@
             </tr>
             </thead>
             <tbody>
-            <tr ng-repeat="blood in clientDataItems['bloodHistory']">
+            <tr ng-repeat="blood in client.client_info['bloodHistory']">
                 <td>[[blood.bloodGroup_name]]</td>
                 <td>[[blood.bloodDate]]</td>
                 <td>[[blood.person_name]]</td>
@@ -29,7 +29,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                    <tr ng-repeat="blood in clientDataItems['bloodHistory']">
+                    <tr ng-repeat="blood in client.client_info['bloodHistory']">
                         <td class="col-md-4" ng-if="!blood.id">{{ form.blood_group(class="form-control",
                             autocomplete="off", ng_model="blood.bloodGroup_code") }}</td>
                         <td ng-if="blood.id">[[blood.bloodGroup_name]]</td>
@@ -47,7 +47,7 @@
 </div>
 <div class="row">
     <div class="col-md-offset-9 col-md-3" ng-show="editing">
-        <button ng-click="add_blood()" class="btn btn-primary btn-sm pull-right">
+        <button ng-click="client.add_blood()" class="btn btn-primary btn-sm pull-right">
             <span class="glyphicon glyphicon-plus" title="Добавить новую запись"></span> Добавить
         </button>
     </div>
@@ -55,7 +55,7 @@
 
 <div class="row">
     <div class="col-md-12">
-        <table class="table table-condensed" ng-if="clientDataItems['allergies']" ng-hide="editing">
+        <table class="table table-condensed" ng-if="client.client_info['allergies']" ng-hide="editing">
             <caption>Аллергия</caption>
             <thead>
                 <tr>
@@ -66,7 +66,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr ng-repeat="allergy in clientDataItems['allergies']">
+                <tr ng-repeat="allergy in client.client_info['allergies']">
                     <td>[[allergy.nameSubstance]]</td>
                     <td>[[allergy.power]]</td>
                     <td>[[allergy.createDate]]</td>
@@ -88,7 +88,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                    <tr ng-repeat="allergy in clientDataItems['allergies']">
+                    <tr ng-repeat="allergy in client.client_info['allergies']">
                         <td class="col-md-4" ng-hide="allergy.deleted">{{ form.allergy_substance(class="form-control",
                             autocomplete="off", ng_model="allergy.nameSubstance") }}</td>
                         <td class="col-md-3" ng-hide="allergy.deleted">{{ form.allergy_power(class="form-control",
@@ -99,7 +99,7 @@
                             autocomplete="off", ng_model="allergy.notes") }}</td>
                         <td class="col-md-1" ng-hide="allergy.deleted">
                             <a class="btn btn-sm btn-default" href="" title="Удалить текущую строку"
-                                ng-click="delete_item(clientDataItems['allergies'], allergy)">
+                                ng-click="delete_record('allergies', allergy)">
                                 <span class="glyphicon glyphicon-trash"></span>
                             </a>
                         </td>
@@ -111,7 +111,7 @@
 </div>
 <div class="row">
     <div class="col-md-offset-9 col-md-3" ng-show="editing">
-        <button ng-click="add_allergy()" class="btn btn-primary btn-sm pull-right">
+        <button ng-click="client.add_allergy()" class="btn btn-primary btn-sm pull-right">
             <span class="glyphicon glyphicon-plus" title="Добавить новую запись"></span> Добавить
         </button>
     </div>
@@ -119,7 +119,7 @@
 
 <div class="row">
     <div class="col-md-12">
-        <table class="table table-condensed" ng-if="clientDataItems['intolerances']" ng-hide="editing">
+        <table class="table table-condensed" ng-if="client.client_info['intolerances']" ng-hide="editing">
             <caption>Медикаметозная непереносимость</caption>
             <thead>
                 <tr>
@@ -130,7 +130,7 @@
                 </tr>
             </thead>
             <tbody>
-            <tr ng-repeat="intolerance in clientDataItems['intolerances']">
+            <tr ng-repeat="intolerance in client.client_info['intolerances']">
                 <td>[[intolerance.nameMedicament]]</td>
                 <td>[[intolerance.power]]</td>
                 <td>[[intolerance.createDate]]</td>
@@ -152,7 +152,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                <tr ng-repeat="intolerance in clientDataItems['intolerances']">
+                <tr ng-repeat="intolerance in client.client_info['intolerances']">
                     <td class="col-md-4" ng-hide="intolerance.deleted">{{ form.intolerance_medicament(class="form-control",
                         autocomplete="off", ng_model="intolerance.nameMedicament") }}</td>
                     <td class="col-md-3" ng-hide="intolerance.deleted">{{ form.intolerance_power(class="form-control",
@@ -163,7 +163,7 @@
                         autocomplete="off", ng_model="intolerance.notes") }}</td>
                     <td class="col-md-1" ng-hide="intolerance.deleted">
                         <a class="btn btn-sm btn-default" href="" title="Удалить текущую строку"
-                            ng-click="delete_item(clientDataItems['intolerances'], intolerance)">
+                            ng-click="delete_record('intolerances', intolerance)">
                             <span class="glyphicon glyphicon-trash"></span>
                         </a>
                     </td>
@@ -175,7 +175,7 @@
 </div>
 <div class="row">
     <div class="col-md-offset-9 col-md-3" ng-show="editing">
-        <button ng-click="add_medicament()" class="btn btn-primary btn-sm pull-right">
+        <button ng-click="client.add_medicament()" class="btn btn-primary btn-sm pull-right">
             <span class="glyphicon glyphicon-plus" title="Добавить новую запись"></span> Добавить
         </button>
     </div>

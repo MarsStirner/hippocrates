@@ -1,6 +1,6 @@
 <div class="row">
     <div class="col-md-12">
-        <table class="table table-condensed" ng-if="clientDataItems['direct_relations']" ng-hide="editing">
+        <table class="table table-condensed" ng-if="client.client_info['direct_relations']" ng-hide="editing">
             <thead>
                 <tr>
                     <th>Прямая связь</th>
@@ -8,7 +8,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr ng-repeat="relation in clientDataItems['direct_relations']">
+                <tr ng-repeat="relation in client.client_info['direct_relations']">
                     <td>[[relation.relativeType_name]]</td>
                     <td>[[relation.other_text]]</td>
                 </tr>
@@ -25,7 +25,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr ng-repeat="relation in  clientDataItems['direct_relations']">
+                    <tr ng-repeat="relation in client.client_info['direct_relations']">
                         <td class="col-md-4" ng-hide="relation.deleted">
                             {{ form.direct_relation_relation(class="form-control",
                                autocomplete="off", ng_model="relation.relativeType_code") }}</td>
@@ -34,7 +34,7 @@
                                ng_model="relation.other_id") }}</td>
                         <td class="col-md-1" ng-hide="relation.deleted">
                             <a class="btn btn-sm btn-default" href="" title="Удалить текущую строку"
-                               ng-click="delete_item(clientDataItems['direct_relations'], relation)">
+                               ng-click="delete_record('direct_relations', relation)">
                                 <span class="glyphicon glyphicon-trash"></span>
                             </a>
                         </td>
@@ -46,7 +46,7 @@
 </div>
 <div class="row">
     <div class="col-md-offset-9 col-md-3" ng-show="editing">
-        <button ng-click="add_relation(clientDataItems['direct_relations'])" class="btn btn-primary btn-sm pull-right">
+        <button ng-click="client.add_relation('direct_relations')" class="btn btn-primary btn-sm pull-right">
             <span class="glyphicon glyphicon-plus" title="Добавить новую запись"></span> Добавить
         </button>
     </div>
@@ -54,7 +54,7 @@
 
 <div class="row">
     <div class="col-md-12">
-        <table class="table table-condensed" ng-if="clientDataItems['reversed_relations']" ng-hide="editing">
+        <table class="table table-condensed" ng-if="client.client_info['reversed_relations']" ng-hide="editing">
             <thead>
                 <tr>
                     <th>Обратная связь</th>
@@ -62,7 +62,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr ng-repeat="relation in clientDataItems['reversed_relations']">
+                <tr ng-repeat="relation in client.client_info['reversed_relations']">
                     <td>[[relation.relativeType_name]]</td>
                     <td>[[relation.other_text]]</td>
                 </tr>
@@ -78,7 +78,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr ng-repeat="relation in  clientDataItems['reversed_relations']">
+                    <tr ng-repeat="relation in  client.client_info['reversed_relations']">
                         <td class="col-md-4" ng-hide="relation.deleted">
                             {{ form.reversed_relation_relation(class="form-control", autocomplete="off",
                                ng_model="relation.relativeType_code") }}</td>
@@ -87,7 +87,7 @@
                                ng_model="relation.other_id") }}</td>
                         <td class="col-md-1" ng-hide="relation.deleted">
                             <a class="btn btn-sm btn-default" href="" title="Удалить текущую строку"
-                               ng-click="delete_item(clientDataItems['reversed_relations'], relation)">
+                               ng-click="delete_record('reversed_relations', relation)">
                                 <span class="glyphicon glyphicon-trash"></span>
                             </a>
                         </td>
@@ -99,7 +99,7 @@
 </div>
 <div class="row">
     <div class="col-md-offset-9 col-md-3" ng-show="editing">
-        <button ng-click="add_relation(clientDataItems['reversed_relations'])" class="btn btn-primary btn-sm pull-right">
+        <button ng-click="client.add_relation('reversed_relations')" class="btn btn-primary btn-sm pull-right">
             <span class="glyphicon glyphicon-plus" title="Добавить новую запись"></span> Добавить
         </button>
     </div>
@@ -107,7 +107,7 @@
 
 <div class="row">
     <div class="col-md-12">
-        <table class="table table-condensed" ng-if="clientDataItems['contacts']" ng-hide="editing">
+        <table class="table table-condensed" ng-if="client.client_info['contacts']" ng-hide="editing">
             <caption>Контакты</caption>
             <thead>
                 <tr>
@@ -117,7 +117,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr ng-repeat="contact in  clientDataItems['contacts']">
+                <tr ng-repeat="contact in  client.client_info['contacts']">
                     <td>[[contact.contactType_name]]</td>
                     <td>[[contact.contact]]</td>
                     <td>[[contact.notes]]</td>
@@ -135,7 +135,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                    <tr ng-repeat="contact in  clientDataItems['contacts']">
+                    <tr ng-repeat="contact in  client.client_info['contacts']">
                         <td class="col-md-4" ng-hide="contact.deleted">{{ form.contact_contactType(class="form-control",
                             autocomplete="off", ng_model="contact.contactType_code") }}</td>
                         <td class="col-md-3" ng-hide="contact.deleted">{{ form.contact_contact(class="form-control",
@@ -144,7 +144,7 @@
                             autocomplete="off", ng_model="contact.notes") }}</td>
                         <td class="col-md-1" ng-hide="contact.deleted">
                             <a class="btn btn-sm btn-default" href="" title="Удалить текущую строку"
-                               ng-click="delete_item(clientDataItems['contacts'], contact)" >
+                               ng-click="delete_record('contacts', contact)" >
                                 <span class="glyphicon glyphicon-trash"></span>
                             </a>
                         </td>
@@ -156,7 +156,7 @@
 </div>
 <div class="row">
     <div class="col-md-offset-9 col-md-3" ng-show="editing">
-        <button ng-click="add_contact()" class="btn btn-primary btn-sm pull-right">
+        <button ng-click="client.add_contact()" class="btn btn-primary btn-sm pull-right">
             <span class="glyphicon glyphicon-plus" title="Добавить новую запись"></span> Добавить
         </button>
     </div>

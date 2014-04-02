@@ -1,6 +1,6 @@
 <div class="row">
     <div class="col-md-12">
-        <table class="table table-condensed" ng-hide="editing">
+        <table class="table table-condensed" ng-if="client.client_info['identifications']" ng-hide="editing">
             <thead>
                 <tr>
                     <th>Внешняя учетная система</th>
@@ -9,7 +9,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr ng-repeat="identification in  clientDataItems['identifications']">
+                <tr ng-repeat="identification in  client.client_info['identifications']">
                     <td>[[identification.accountingSystem_name]]</td>
                     <td>[[identification.identifier]]</td>
                     <td>[[identification.checkDate]]</td>
@@ -27,7 +27,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                    <tr ng-repeat="identification in  clientDataItems['identifications']">
+                    <tr ng-repeat="identification in  client.client_info['identifications']">
                         <td class="col-md-4" ng-hide="identification.deleted">
                             {{ form.identification_accountingSystem(class="form-control", autocomplete="off",
                                ng_model="identification.accountingSystem_code") }}</td>
@@ -39,7 +39,7 @@
                                datepicker_popup="dd.MM.yyyy", ng_model="identification.checkDate") }}</td>
                         <td class="col-md-1" ng-hide="identification.deleted">
                             <a class="btn btn-sm btn-default" href="" title="Удалить текущую строку"
-                               ng-click="delete_item(clientDataItems['identifications'], identification)" >
+                               ng-click="delete_record('identifications', identification)" >
                                 <span class="glyphicon glyphicon-trash"></span>
                             </a>
                         </td>
@@ -51,7 +51,7 @@
 </div>
 <div class="row">
     <div class="col-md-offset-9 col-md-3" ng-show="editing">
-        <button ng-click="add_identification()" class="btn btn-primary btn-sm pull-right">
+        <button ng-click="client.add_identification()" class="btn btn-primary btn-sm pull-right">
             <span class="glyphicon glyphicon-plus" title="Добавить новую запись"></span> Добавить
         </button>
     </div>

@@ -2,7 +2,9 @@
 ================================================== -->
 <!-- Placed at the end of the document so the pages load faster -->
 <script>
-    var rb_root = '{{ url_for('api_refbook') }}'
+    var rb_root = '{{ url_for('api_refbook') }}',
+        url_client_get = '{{ url_for('patients.api_patient_get') }}' + '?client_id=:client_id',
+        url_client_save = '{{ url_for('patients.api_patient_save') }}';
 </script>
 <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
 <script src="{{ url_for('static', filename='jquery-ui/js/jquery-1.10.2.js') }}"></script>
