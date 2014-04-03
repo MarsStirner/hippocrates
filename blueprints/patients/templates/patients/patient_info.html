@@ -79,14 +79,20 @@
 
             $scope.cancel_editing = function() {
                 $scope.editing = false;
-                $scope.client = new ClientNTK($scope.client_id); // FIXME defer/promise or reload
+                $scope.client.reload();
             };
 
             $scope.save_client = function() {
                 var promise = $scope.client.save();
                 promise.then(function(result) {
-                    $scope.client.reload()
-                    $scope.editing = false;
+                    if ($scope.client_id == 'new') {
+                        var new_client_id = result;
+                        window.open('{{ url_for('patients.patient') }}?client_id=' + new_client_id, '_self');
+                    } else {
+                        $scope.client.reload();
+                        $scope.editing = false;
+                    }
+
                 }, function(reason) {
                     alert(reason);
                 }

@@ -206,15 +206,13 @@ def api_patient_save():
         db.session.commit()
     except KeyError, e:
         db.session.rollback()
-        raise
         raise ClientSaveException(u'Ошибка сохранения данных клиента', str(e))
-    except ValueError:
-        db.session.rollback()
-        raise
-        return abort(404)
+    # except ValueError:
+    #     db.session.rollback()
+    #     raise
+    #     return abort(404)
     except:
         db.session.rollback()
-        raise
         return abort(404)
 
-    return ''
+    return jsonify(int(client))
