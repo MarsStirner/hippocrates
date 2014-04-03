@@ -127,7 +127,7 @@ WebMis20.factory('Client',
                     t.events = data.result.events;
                 },
                 function(data) {
-                    throw 'Error requesting Client, id = ' + client_id;
+                    throw 'Error requesting Client, id = ' + this.client_id;
                 });
         }
 
@@ -136,7 +136,7 @@ WebMis20.factory('Client',
             var deferred = $q.defer();
             ClientResource.save({ client_info: this.client_info },
                 function(value, headers) {
-                    deferred.resolve();
+                    deferred.resolve(value['result']);
                 },
                 function(httpResponse) {
                     var r = httpResponse.data;
