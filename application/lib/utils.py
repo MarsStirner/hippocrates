@@ -167,7 +167,6 @@ def safe_traverse(obj, *args, **kwargs):
         return safe_traverse(obj.get(args[0]), *args[1:], **kwargs)
 
 
-
 def get_new_uuid():
     """Сгенерировать новый uuid уникальный в пределах бд.
     @rtype: application.models.exist.UUID

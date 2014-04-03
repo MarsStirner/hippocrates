@@ -3,9 +3,10 @@
 import datetime
 from application.models.exists import (ClientPolicy, ClientAllergy, ClientIntoleranceMedicament,
     ClientContact, ClientIdentification, DirectClientRelation, ReversedClientRelation, ClientSocStatus,
-    ClientDocument, Client, rbDocumentType, rbPolicyType, rbSocStatusClass, rbSocStatusType)
+    ClientDocument, Client, rbDocumentType, rbPolicyType, rbSocStatusClass, rbSocStatusType,
+    BloodHistory, rbBloodType, rbAccountingSystem, rbContactType, rbRelationType)
 
-#
+
 # def format_snils(SNILS):
 #     if SNILS:
 #         s = SNILS+' '*14
@@ -52,61 +53,6 @@ from application.models.exists import (ClientPolicy, ClientAllergy, ClientIntole
 #             return result
 #     return True
 
-
-def create_new_allergy(client_id):
-    new_allergy = ClientAllergy()
-    new_allergy.client_id = client_id
-    new_allergy.createDatetime = datetime.datetime.now()
-    new_allergy.modifyDatetime = datetime.datetime.now()
-    new_allergy.version = 0
-    return new_allergy
-
-
-def create_new_intolerance(client_id):
-    new_intolerance = ClientIntoleranceMedicament()
-    new_intolerance.client_id = client_id
-    new_intolerance.createDatetime = datetime.datetime.now()
-    new_intolerance.modifyDatetime = datetime.datetime.now()
-    new_intolerance.version = 0
-    return new_intolerance
-
-
-def create_new_contact(client_id):
-    new_contact = ClientContact()
-    new_contact.client_id = client_id
-    new_contact.createDatetime = datetime.datetime.now()
-    new_contact.modifyDatetime = datetime.datetime.now()
-    new_contact.version = 0
-    return new_contact
-
-
-def create_new_identification(client_id):
-    new_identification = ClientIdentification()
-    new_identification.client_id = client_id
-    new_identification.createDatetime = datetime.datetime.now()
-    new_identification.modifyDatetime = datetime.datetime.now()
-    new_identification.version = 0
-    return new_identification
-
-
-def create_new_direct_relation(client_id):
-    new_relation = DirectClientRelation()
-    new_relation.client_id = client_id
-    new_relation.createDatetime = datetime.datetime.now()
-    new_relation.modifyDatetime = datetime.datetime.now()
-    new_relation.version = 0
-    return new_relation
-
-
-def create_new_reversed_relation(client_id):
-    new_relation = ReversedClientRelation()
-    new_relation.relative_id = client_id
-    new_relation.createDatetime = datetime.datetime.now()
-    new_relation.modifyDatetime = datetime.datetime.now()
-    new_relation.version = 0
-    return new_relation
-
-
 def create_new_client():
     new_client = Client()
     new_client.createDatetime = new_client.modifyDatetime = datetime.datetime.now()
@@ -132,16 +78,29 @@ def get_new_document(document_info):
 
 
 def get_modified_document(client, document_info):
-    doc = client.get_document_by_id(document_info['id'])
-    doc.modifyDatetime = datetime.datetime.now()
-    doc.serial = document_info['serial']
-    doc.number = document_info['number']
-    doc.date = document_info['begDate']
-    doc.endDate = document_info['endDate']
-    doc.origin = document_info['origin']
-    doc.documentType = rbDocumentType.query.filter(
-        rbDocumentType.code == document_info['typeCode']).first()
-    return doc
+    now = datetime.datetime.now()
+    doc = client.documents.filter(ClientDocument.id == document_info['id']).first()
+
+    def _big_changes(d, d_info):
+        if (d.documentType.code != d_info['typeCode']
+                or d.serial != d_info['serial']
+                or d.number != d_info['number']):
+            return True
+        return False
+
+    if _big_changes(doc, document_info):
+        new_doc = get_new_document(document_info)
+        doc.deleted = 2
+        doc.modifyDatetime = now
+        return (doc, new_doc)
+    else:
+        doc.serial = document_info['serial']
+        doc.number = document_info['number']
+        doc.date = document_info['begDate']
+        doc.endDate = document_info['endDate']
+        doc.origin = document_info['origin']
+        doc.modifyDatetime = now
+        return (doc, None)
 
 
 def get_new_policy(policy_info):
@@ -159,7 +118,7 @@ def get_new_policy(policy_info):
 
 def get_modified_policy(client, policy_info):
     now = datetime.datetime.now()
-    policy = client.get_policy_by_id(policy_info['id'])
+    policy = client.policies.filter(ClientPolicy.id == policy_info['id']).first()
 
     if policy_info['deleted'] == 1:
         policy.deleted = 1
@@ -176,13 +135,13 @@ def get_modified_policy(client, policy_info):
         new_policy = get_new_policy(policy_info)
         policy.deleted = 2
         policy.modifyDatetime = now
-        return [policy, new_policy]
+        return (policy, new_policy)
     else:
         policy.begDate = policy_info['begDate']
         policy.endDate = policy_info['endDate']
         policy.insurer_id = policy_info['insurer_id']
         policy.modifyDatetime = now
-        return [policy, ]
+        return (policy, None)
 
 
 def get_new_soc_status(ss_info):
@@ -213,4 +172,191 @@ def get_modified_soc_status(client, ss_info):
         rbSocStatusType.code == ss_info['typeCode']).first()
     ss.begDate = ss_info['begDate']#.split('T')[0]
     ss.endDate = ss_info['endDate']
+    ss.modifyDatetime = now
     return ss
+
+
+def get_new_blood(blood_info):
+    b = BloodHistory()
+    b.createDatetime = b.modifyDatetime = datetime.datetime.now()
+    b.version = 0
+    b.bloodType = rbBloodType.query.filter(rbBloodType.code == blood_info['bloodGroup_code']).first()
+    b.bloodDate = blood_info['bloodDate']
+    b.person_id = blood_info['person_id']
+    return b
+
+
+def get_new_allergy(allergy_info):
+    a = ClientAllergy()
+    a.createDatetime = a.modifyDatetime = datetime.datetime.now()
+    a.version = 0
+    a.deleted = allergy_info['deleted']
+    a.name = allergy_info['nameSubstance']
+    a.createDate = allergy_info['createDate']#.split('T')[0]
+    a.power = allergy_info['power']
+    a.notes = allergy_info['notes']
+    a.deleted = allergy_info['deleted']
+    return a
+
+
+def get_modified_allergy(client, allergy_info):
+    now = datetime.datetime.now()
+    a = client.allergies.filter(ClientAllergy.id == allergy_info['id']).first()
+
+    if allergy_info['deleted'] == 1:
+        a.deleted = 1
+        return a
+
+    a.name = allergy_info['nameSubstance']
+    a.createDate = allergy_info['createDate']#.split('T')[0]
+    a.power = allergy_info['power']
+    a.notes = allergy_info['notes']
+    a.deleted = allergy_info['deleted']
+    a.modifyDatetime = now
+    return a
+
+
+def get_new_intolerance(intolerance_info):
+    i = ClientIntoleranceMedicament()
+    i.createDatetime = i.modifyDatetime = datetime.datetime.now()
+    i.version = 0
+    i.deleted = intolerance_info['deleted']
+    i.name = intolerance_info['nameMedicament']
+    i.createDate = intolerance_info['createDate']
+    i.power = intolerance_info['power']
+    i.notes = intolerance_info['notes']
+    i.deleted = intolerance_info['deleted']
+    return i
+
+
+def get_modified_intolerance(client, intolerance_info):
+    now = datetime.datetime.now()
+    i = client.allergies.filter(ClientIntoleranceMedicament.id == intolerance_info['id']).first()
+
+    if intolerance_info['deleted'] == 1:
+        i.deleted = 1
+        return i
+
+    i.name = intolerance_info['nameMedicament']
+    i.createDate = intolerance_info['createDate']
+    i.power = intolerance_info['power']
+    i.notes = intolerance_info['notes']
+    i.deleted = intolerance_info['deleted']
+    i.modifyDatetime = now
+    return i
+
+
+def get_new_identification(id_info):
+    id_ext = ClientIdentification()
+    id_ext.createDatetime = id_ext.modifyDatetime = datetime.datetime.now()
+    id_ext.version = 0
+    id_ext.deleted = id_info['deleted']
+    id_ext.accountingSystems = rbAccountingSystem.query.filter(
+        rbAccountingSystem.code == id_info['accountingSystem_code']).first()
+    id_ext.checkDate = id_info['checkDate']
+    id_ext.identifier = id_info['identifier']
+    return id_ext
+
+
+def get_modified_identification(client, id_info):
+    now = datetime.datetime.now()
+    id_ext = client.identifications.filter(ClientIdentification.id == id_info['id']).first()
+
+    if id_info['deleted'] == 1:
+        id_ext.deleted = 1
+        return id_ext
+
+    id_ext.accountingSystems = rbAccountingSystem.query.filter(
+        rbAccountingSystem.code == id_info['accountingSystem_code']).first()
+    id_ext.checkDate = id_info['checkDate']
+    id_ext.identifier = id_info['identifier']
+    id_ext.modifyDatetime = now
+    return id_ext
+
+
+def get_new_direct_relation(relation_info):
+    rel = DirectClientRelation()
+    rel.createDatetime = rel.modifyDatetime = datetime.datetime.now()
+    rel.version = 0
+    rel.deleted = relation_info['deleted']
+    rel.relativeType = rbRelationType.query.filter(
+        rbRelationType.code == relation_info['relativeType_code']).first()
+    rel.other = Client.query.filter(Client.id == relation_info['other_id']).first()
+    return rel
+
+
+def get_modified_direct_relation(client, relation_info):
+    now = datetime.datetime.now()
+    rel = client.direct_relations.filter(DirectClientRelation.id == relation_info['id']).first()
+
+    if relation_info['deleted'] == 1:
+        rel.deleted = 1
+        return rel
+
+    rel.relativeType = rbRelationType.query.filter(
+        rbRelationType.code == relation_info['relativeType_code']).first()
+    rel.other = Client.query.filter(Client.id == relation_info['other_id']).first()
+    rel.modifyDatetime = now
+    return rel
+
+
+def get_new_reversed_relation(relation_info):
+    rel = ReversedClientRelation()
+    rel.createDatetime = rel.modifyDatetime = datetime.datetime.now()
+    rel.version = 0
+    rel.deleted = relation_info['deleted']
+    rel.relativeType = rbRelationType.query.filter(
+        rbRelationType.code == relation_info['relativeType_code']).first()
+    rel.other = Client.query.filter(Client.id == relation_info['other_id']).first()
+    return rel
+
+
+def get_modified_reversed_relation(client, relation_info):
+    now = datetime.datetime.now()
+    rel = client.reversed_relations.filter(ReversedClientRelation.id == relation_info['id']).first()
+
+    if relation_info['deleted'] == 1:
+        rel.deleted = 1
+        return rel
+
+    rel.relativeType = rbRelationType.query.filter(
+        rbRelationType.code == relation_info['relativeType_code']).first()
+    rel.other = Client.query.filter(Client.id == relation_info['other_id']).first()
+    rel.modifyDatetime = now
+    return rel
+
+
+def get_new_contact(contact_info):
+    con = ClientContact()
+    con.createDatetime = con.modifyDatetime = datetime.datetime.now()
+    con.version = 0
+    con.contactType = rbContactType.query.filter(rbContactType.code == contact_info['contactType_code']).first()
+    con.contact = contact_info['contact']
+    con.deleted = contact_info['deleted']
+    con.notes = contact_info['notes']
+    return con
+
+
+def get_modified_contact(client, contact_info):
+    now = datetime.datetime.now()
+    con = client.contacts.filter(ClientIdentification.id == contact_info['id']).first()
+
+    if contact_info['deleted'] == 1:
+        con.deleted = 1
+        return con
+
+    con.contactType = rbContactType.query.filter(rbContactType.code == contact_info['contactType_code']).first()
+    con.contact = contact_info['contact']
+    con.deleted = contact_info['deleted']
+    con.notes = contact_info['notes']
+    con.modifyDatetime = now
+    return con
+
+
+def get_deleted_document(client, doc_info):
+    if 'documentText' in doc_info:
+        doc = ClientDocument.query.get(doc_info['id'])
+    elif 'policyText' in doc_info:
+        doc = ClientPolicy.query.get(doc_info['id'])
+    doc.deleted = 1
+    return doc
