@@ -139,6 +139,7 @@ class BloodHistory(db.Model):
     person_id = db.Column(db.Integer, db.ForeignKey('Person.id'), nullable=False)
 
     bloodType = db.relationship("rbBloodType")
+    person = db.relationship('Person')
 
     def __int__(self):
         return self.id
