@@ -12,7 +12,7 @@ from application.lib.utils import public_endpoint, jsonify, safe_traverse
 from blueprints.schedule.app import module
 from application.models.exists import rbSpeciality, rbPolicyType, \
     rbReasonOfAbsence, rbSocStatusClass, rbSocStatusType, rbAccountingSystem, rbContactType, rbRelationType, \
-    rbBloodType, Bloodhistory, rbPrintTemplate, Event, Person
+    rbBloodType, BloodHistory, rbPrintTemplate, Event, Person
 from application.models.actions import Action, ActionType, ActionProperty, ActionPropertyType
 from application.models.schedule import Schedule, ScheduleTicket, ScheduleClientTicket, rbAppointmentType, \
     rbReceptionType, rbAttendanceType

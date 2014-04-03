@@ -111,12 +111,16 @@ WebMis20.factory('ClientResource',
         });
     }
 );
-WebMis20.factory('ClientNTK',
+WebMis20.factory('Client',
     ['ClientResource', '$q', function(ClientResource, $q) {
         var Client = function(client_id) {
             this.client_id = client_id;
+            this.reload();
+        }
+
+        Client.prototype.reload = function() {
             var t = this;
-            ClientResource.get({client_id: client_id},
+            ClientResource.get({client_id: this.client_id},
                 function(data) {
                     t.client_info = data.result.clientData;
                     t.appointments = data.result.appointments;
@@ -125,14 +129,6 @@ WebMis20.factory('ClientNTK',
                 function(data) {
                     throw 'Error requesting Client, id = ' + client_id;
                 });
-        }
-
-        Client.prototype.update_fullName = function() {
-            if (this.client_info) {
-                this.client_info['nameText'] = [this.client_info['lastName'],
-                                                this.client_info['firstName'],
-                                                this.client_info['patrName']].join(' ')
-            }
         }
 
         Client.prototype.save = function() {
@@ -193,7 +189,8 @@ WebMis20.factory('ClientNTK',
         };
 
         Client.prototype.add_relation = function (entity) {
-            this.client_info[entity].push({'relativeType_name': '',
+            this.client_info[entity].push({'deleted': 0,
+                'relativeType_name': '',
                 'relativeType_code': '',
                 'other_id': 0
             })

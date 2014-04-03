@@ -24,7 +24,6 @@
                     <tab heading="Идентификаторы">{% include "patients/identifiers.html" %}</tab>
                     <tab heading="Связи и контакты">{% include "patients/contacts.html" %}</tab>
                     <tab heading="История документов">{% include "patients/documents.html" %}</tab>
-                    <tab heading="Debug"><span ng-bind="client.client_info.lastName"></span></tab>
                 </tabset>
             </tab>
             <tab heading="Предварительные записи">{% include "patients/appointments.html" %}</tab>
@@ -49,14 +48,9 @@
                 $modalInstance.dismiss('cancel');
             };
         };
-        WebMis20.factory('Client',
-            function($resource) {
-                return $resource('{{ url_for('patients.api_patient_get') }}' + '?client_id=:client_id', {}, {
-                    query: {method: 'GET', params: {client_id: 1}}
-                });
-        });
-        WebMis20.controller('ClientCtrl', ['$scope', '$http', '$modal', 'ClientNTK',
-                            function ($scope, $http, $modal, ClientNTK) {
+
+        WebMis20.controller('ClientCtrl', ['$scope', '$http', '$modal', 'Client',
+                            function ($scope, $http, $modal, Client) {
             $scope.records = [];
             $scope.aux = aux;
             $scope.params = aux.getQueryParams(document.location.search);
@@ -91,25 +85,13 @@
             $scope.save_client = function() {
                 var promise = $scope.client.save();
                 promise.then(function(result) {
+                    $scope.client.reload()
                     $scope.editing = false;
                 }, function(reason) {
                     alert(reason);
                 }
                 );
             }
-
-{#            $scope.delete_document = function(document) {#}
-{#                var modalInstance = $modal.open({#}
-{#                                    templateUrl: 'modal-deleteDocument.html',#}
-{#                                    controller: DeleteDocumentModalCtrl#}
-{#                    });#}
-{#                modalInstance.result.then(function () {#}
-{#                    $http.get('{{ url_for('.api_delete_document') }}',#}
-{#                              {params: {document: document}#}
-{#                              }#}
-{#                    );#}
-{#                })#}
-{#            };#}
 
             $scope.delete_record = function(entity, record) {
                 var modalInstance = $modal.open({
@@ -123,6 +105,7 @@
             };
 
             $scope.open = function($event) {
+{#                what's this#}
                 $event.preventDefault();
                 $event.stopPropagation();
                 return true;
@@ -132,17 +115,12 @@
                 window.open('{{ url_for('schedule.html_event_info') }}?event_id=' + event.id, '_self')
             };
 
-            $scope.$watchCollection('[client.client_info.firstName, client.client_info.lastName, client.client_info.patrName]',
-                function() {
-                    $scope.client.update_fullName();
-                }
-            )
             if ($scope.client_id == 'new') {
                 $scope.start_editing();
                 // TODO: btnCancel href back
             }
 
-            $scope.client = new ClientNTK($scope.client_id);
+            $scope.client = new Client($scope.client_id);
 
         }]);
     </script>
