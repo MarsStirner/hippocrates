@@ -1,17 +1,10 @@
 # -*- encoding: utf-8 -*-
-from flask import render_template, abort, request, redirect, url_for, flash, session, current_app, g
-from flask.views import MethodView
-
-from jinja2 import TemplateNotFound
-from wtforms import TextField, PasswordField, IntegerField
-from flask_wtf import Form
-from wtforms.validators import Required
+from flask import render_template, abort, request, redirect, url_for, flash, session, current_app
 from flask.ext.principal import Identity, AnonymousIdentity, identity_changed
 from flask.ext.principal import identity_loaded, Permission, RoleNeed, UserNeed, ActionNeed
 from flask.ext.login import login_user, logout_user, login_required, current_user
 
 from application.app import app, db, login_manager
-from application.context_processors import general_menu
 from .lib.utils import public_endpoint, jsonify, roles, permissions
 from application.models import actions
 from lib.user import UserAuth
