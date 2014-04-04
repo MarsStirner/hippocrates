@@ -45,7 +45,7 @@ class Action(db.Model):
         db.Enum(u'0', u'amb', u'hospital', u'polyclinic', u'diagnostics', u'portal', u'otherLPU'), nullable=False)
     version = db.Column(db.Integer, nullable=False, server_default=u"'0'")
     parentAction_id = db.Column(db.Integer, index=True)
-    uuid_id = db.Column(db.Integer, nullable=False, index=True, server_default=u"'0'")
+    uuid_id = db.Column(db.ForeignKey('UUID.id'), nullable=False, index=True, server_default=u"'0'")
     dcm_study_uid = db.Column(db.String(50))
 
     actionType = db.relationship(u'ActionType')
@@ -56,6 +56,7 @@ class Action(db.Model):
     # tissues = db.relationship(u'Tissue', secondary=u'ActionTissue')
     properties = db.relationship(u'ActionProperty')
     self_finance = db.relationship(u'rbFinance')
+    uuid = db.relationship('UUID')
 
 
 class ActionProperty(db.Model):
@@ -181,6 +182,7 @@ class ActionPropertyType(db.Model):
             'mandatory': self.mandatory,
             'type_name': self.typeName,
             'unit': self.unit,
+            'vector': bool(self.isVector),
         }
         if self.typeName == 'String':
             if self.valueDomain:
@@ -197,6 +199,8 @@ class ActionProperty_Action(db.Model):
     def get_value(self):
         return Action.query.get(self.value) if self.value else None
 
+    property_object = db.relationship('ActionProperty')
+
 
 class ActionProperty_Date(db.Model):
     __tablename__ = u'ActionProperty_Date'
@@ -208,6 +212,8 @@ class ActionProperty_Date(db.Model):
     def get_value(self):
         return self.value
 
+    property_object = db.relationship('ActionProperty')
+
 
 class ActionProperty_Double(db.Model):
     __tablename__ = u'ActionProperty_Double'
@@ -218,6 +224,8 @@ class ActionProperty_Double(db.Model):
 
     def get_value(self):
         return self.value
+
+    property_object = db.relationship('ActionProperty')
 
 
 class ActionProperty_FDRecord(db.Model):
@@ -231,6 +239,8 @@ class ActionProperty_FDRecord(db.Model):
 
     def get_value(self):
         return self.value
+
+    property_object = db.relationship('ActionProperty')
 
 
 class ActionProperty_HospitalBed(db.Model):
@@ -246,6 +256,8 @@ class ActionProperty_HospitalBed(db.Model):
     def get_value(self):
         return OrgStructure_HospitalBed.query.filter(OrgStructure_HospitalBed.id == self.value).first()
 
+    property_object = db.relationship('ActionProperty')
+
 
 class ActionProperty_HospitalBedProfile(db.Model):
     __tablename__ = u'ActionProperty_HospitalBedProfile'
@@ -256,6 +268,8 @@ class ActionProperty_HospitalBedProfile(db.Model):
 
     def get_value(self):
         return rbHospitalBedProfile.query.get(self.value) if self.value else None
+
+    property_object = db.relationship('ActionProperty')
 
 
 class ActionProperty_Image(db.Model):
@@ -279,6 +293,8 @@ class ActionProperty_ImageMap(db.Model):
     def get_value(self):
         return None
 
+    property_object = db.relationship('ActionProperty')
+
 
 class ActionProperty_Integer(db.Model):
     __tablename__ = u'ActionProperty_Integer'
@@ -290,11 +306,15 @@ class ActionProperty_Integer(db.Model):
     def get_value(self):
         return self.value
 
+    property_object = db.relationship('ActionProperty')
+
 
 class ActionProperty_RLS(ActionProperty_Integer):
 
     def get_value(self):
         return v_Nomen.query.get(self.value).first() if self.value else None
+
+    property_object = db.relationship('ActionProperty')
 
 
 class ActionProperty_OperationType(ActionProperty_Integer):
@@ -313,6 +333,8 @@ class ActionProperty_JobTicket(db.Model):
     def get_value(self):
         return JobTicket.query.get(self.value)
 
+    property_object = db.relationship('ActionProperty')
+
 
 class ActionProperty_MKB(db.Model):
     __tablename__ = u'ActionProperty_MKB'
@@ -324,6 +346,8 @@ class ActionProperty_MKB(db.Model):
     def get_value(self):
         from exists import MKB
         return MKB.query.get(self.value)
+
+    property_object = db.relationship('ActionProperty')
 
 
 class ActionProperty_OrgStructure(db.Model):
@@ -337,6 +361,8 @@ class ActionProperty_OrgStructure(db.Model):
         from exists import OrgStructure
         return OrgStructure.query.get(self.value)
 
+    property_object = db.relationship('ActionProperty')
+
 
 class ActionProperty_Organisation(db.Model):
     __tablename__ = u'ActionProperty_Organisation'
@@ -349,6 +375,8 @@ class ActionProperty_Organisation(db.Model):
         from exists import Organisation
         return Organisation.query.get(self.value)
 
+    property_object = db.relationship('ActionProperty')
+
 
 class ActionProperty_OtherLPURecord(db.Model):
     __tablename__ = u'ActionProperty_OtherLPURecord'
@@ -359,6 +387,8 @@ class ActionProperty_OtherLPURecord(db.Model):
 
     def get_value(self):
         return self.value
+
+    property_object = db.relationship('ActionProperty')
 
 
 class ActionProperty_Person(db.Model):
@@ -375,6 +405,8 @@ class ActionProperty_Person(db.Model):
         from exists import Person
         return Person.query.get(self.value)
 
+    property_object = db.relationship('ActionProperty')
+
 
 class ActionProperty_String(db.Model):
     __tablename__ = u'ActionProperty_String'
@@ -385,6 +417,8 @@ class ActionProperty_String(db.Model):
 
     def get_value(self):
         return self.value
+
+    property_object = db.relationship('ActionProperty')
 
 
 class ActionProperty_Text(ActionProperty_String):
@@ -416,6 +450,8 @@ class ActionProperty_Time(db.Model):
     def get_value(self):
         return self.value
 
+    property_object = db.relationship('ActionProperty')
+
 
 class ActionProperty_ReferenceRb(ActionProperty_Integer):
 
@@ -428,18 +464,20 @@ class ActionProperty_ReferenceRb(ActionProperty_Integer):
 class ActionProperty_rbBloodComponentType(db.Model):
     __tablename__ = u'ActionProperty_rbBloodComponentType'
 
-    id = db.Column(db.Integer, primary_key=True, nullable=False)
+    id = db.Column(db.ForeignKey('ActionProperty.id'), primary_key=True, nullable=False)
     index = db.Column(db.Integer, primary_key=True, nullable=False)
     value = db.Column(db.Integer, nullable=False)
 
     def get_value(self):
         return None
 
+    property_object = db.relationship('ActionProperty')
+
 
 class ActionProperty_rbFinance(db.Model):
     __tablename__ = u'ActionProperty_rbFinance'
 
-    id = db.Column(db.Integer, primary_key=True, nullable=False)
+    id = db.Column(db.ForeignKey('ActionProperty.id'), primary_key=True, nullable=False)
     index = db.Column(db.Integer, primary_key=True, nullable=False, server_default=u"'0'")
     value = db.Column(db.Integer, index=True)
 
@@ -447,17 +485,21 @@ class ActionProperty_rbFinance(db.Model):
         from exists import rbFinance
         return rbFinance.query.get(self.value)
 
+    property_object = db.relationship('ActionProperty')
+
 
 class ActionProperty_rbReasonOfAbsence(db.Model):
     __tablename__ = u'ActionProperty_rbReasonOfAbsence'
 
-    id = db.Column(db.Integer, primary_key=True, nullable=False)
+    id = db.Column(db.ForeignKey('ActionProperty.id'), primary_key=True, nullable=False)
     index = db.Column(db.Integer, primary_key=True, nullable=False, server_default=u"'0'")
     value = db.Column(db.Integer, index=True)
 
     def get_value(self):
         from exists import rbReasonOfAbsence
         return rbReasonOfAbsence.query.get(self.value)
+
+    property_object = db.relationship('ActionProperty')
 
 
 class ActionTemplate(db.Model):

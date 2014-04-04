@@ -3,6 +3,7 @@ import calendar
 from collections import defaultdict
 import json
 import datetime
+from uuid import uuid4
 
 from flask import abort, request
 from application.database import db
@@ -12,7 +13,7 @@ from application.lib.utils import public_endpoint, jsonify, safe_traverse
 from blueprints.schedule.app import module
 from application.models.exists import rbSpeciality, rbPolicyType, \
     rbReasonOfAbsence, rbSocStatusClass, rbSocStatusType, rbAccountingSystem, rbContactType, rbRelationType, \
-    rbBloodType, BloodHistory, rbPrintTemplate, Event, Person
+    rbBloodType, BloodHistory, rbPrintTemplate, Event, Person, UUID
 from application.models.actions import Action, ActionType, ActionProperty, ActionPropertyType
 from application.models.schedule import Schedule, ScheduleTicket, ScheduleClientTicket, rbAppointmentType, \
     rbReceptionType, rbAttendanceType
@@ -543,21 +544,71 @@ def api_action_new_get():
 @module.route('/api/actions', methods=['POST'])
 @public_endpoint
 def api_action_post():
-    from application.models.actions import Action, ActionProperty
+    now = datetime.datetime.now()
     data = request.json
     action_desc = data['action']
     if action_desc['id']:
         action = Action.query.get(action_desc['id'])
+        for prop_desc in action_desc['properties']:
+            prop_type = ActionPropertyType.query.get(prop_desc['type']['id'])
+            prop = ActionProperty.query.get(prop_desc['id'])
+            prop.action = action
+            prop.isAssigned = prop_desc['is_assigned']
+            prop.type = prop_type
+            if prop_desc['vector']:
+                # Идите в жопу со своими векторными значениями
+                continue
+            if prop_desc['value'] is not None:
+                prop_value = prop.raw_values_query.first()
+                if isinstance(prop_desc['value'], dict):
+                    if prop_value:
+                        if prop_desc['value']['id'] != prop_value.value:
+                            prop_value.value = prop_desc['value']['id']
+                            db.session.add(prop_value)
+                    else:
+                        prop_value = prop.valueTypeClass()
+                        prop_value.property_object = prop
+                        prop_value.value = prop_desc['value']['id']
+                        db.session.add(prop_value)
+                else:
+                    if prop_value:
+                        if prop_value.value != prop_desc['value']:
+                            prop_value.value = prop_desc['value']
+                            db.session.add(prop_value)
+                    else:
+                        prop_value = prop.valueTypeClass()
+                        prop_value.property_object = prop
+                        prop_value.value = prop_desc['value']
+                        db.session.add(prop_value)
+            else:
+                prop.raw_values_query.delete()
+            db.session.add(prop)
     else:
         # new action
         action = Action()
-        action.actionType_id = action_desc['action_type']['id']
-        action.event_id = action_desc['event_id']
-        for prop_desc in action_desc:
+        action.createDatetime = now
+        action.actionType = ActionType.query.get(action_desc['action_type']['id'])
+        action.event = Event.query.get(action_desc['event_id'])
+        for prop_desc in action_desc['properties']:
+            prop_type = ActionPropertyType.query.get(prop_desc['type']['id'])
             prop = ActionProperty()
             prop.action = action
             prop.isAssigned = prop_desc['is_assigned']
-            prop.type_id = prop_desc['type_id']
+            prop.type = prop_type
+            if prop_desc['vector']:
+                # Идите в жопу со своими векторными значениями
+                continue
+            if prop_desc['value'] is not None:
+                prop_value = prop.valueTypeClass()
+                prop_value.property_object = prop
+                if isinstance(prop_desc['value'], dict):
+                    prop_value.value = prop_desc['value']['id']
+                else:
+                    prop_value.value = prop_desc['value']
+                db.session.add(prop_value)
+            db.session.add(prop)
+
+    action.modifyDatetime = now
     action.begDate = action_desc['begDate']
     action.endDate = action_desc['endDate']
     action.plannedEndDate = action_desc['planned_endDate']
@@ -565,4 +616,15 @@ def api_action_post():
     action.setPerson_id = safe_traverse(action_desc, 'set_person', 'id')
     action.person_id = safe_traverse(action_desc, 'person', 'id')
     action.note = action_desc['note']
-    # TODO: set properties
+    action.directionDate = action_desc['direction_date']
+    action.office = action_desc['office']
+    action.amount = action['amount']
+    action.uet = action_desc['uet']
+    action.payStatus = action_desc['pay_status']
+    action.account = action['account']
+    if not action.uuid:
+        uuid = UUID()
+        uuid.uuid = '{%s}' % uuid4().get_hex
+        action.uuid = uuid
+
+    db.session.add(action)
