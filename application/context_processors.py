@@ -14,6 +14,7 @@ def copyright():
 def print_subsystem():
     return dict(print_subsystem_url=app.config['PRINT_SUBSYSTEM_URL'])
 
+
 @app.context_processor
 def general_menu():
     menu_items = list()
@@ -30,13 +31,3 @@ def general_menu():
                 menu_items.append(dict(module=v.name, name=v.name))
 
     return dict(main_menu=menu_items)
-
-
-@app.context_processor
-def user_role():
-    roles = getattr(current_user, 'roles', [])
-    if len(roles):
-        current_user.role = roles[0].code
-    else:
-        current_user.role = None
-    return dict()

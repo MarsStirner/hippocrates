@@ -1,5 +1,5 @@
 # -*- encoding: utf-8 -*-
-from flask import render_template, abort, request, redirect, url_for, flash, session, current_app
+from flask import render_template, abort, request, redirect, url_for, flash, session, current_app, g
 from flask.views import MethodView
 
 from jinja2 import TemplateNotFound
@@ -28,6 +28,7 @@ def check_valid_login():
     if (request.endpoint and
             'static' not in request.endpoint and
             not login_valid and
+            not current_user.is_admin() and
             not getattr(app.view_functions[request.endpoint], 'is_public', False)):
         return redirect(url_for('login', next=url_for(request.endpoint)))
 
@@ -47,7 +48,7 @@ def login():
     errors = list()
     # Validate form input
     if form.validate_on_submit():
-        user = UserAuth.check_user(form.login.data.strip(), form.password.data.strip())
+        user = UserAuth.auth_user(form.login.data.strip(), form.password.data.strip())
         if user:
             # Keep the user info in the session using Flask-Login
             login_user(user)
@@ -91,6 +92,12 @@ def authorisation_failed(e):
     return render_template('user/denied.html')
 
 
+@app.errorhandler(404)
+def page_not_found(e):
+    flash(u'Указанный вами адрес не найден')
+    return render_template('404.html')
+
+
 #########################################
 
 @login_manager.user_loader
@@ -102,17 +109,16 @@ def load_user(user_id):
 @identity_loaded.connect_via(app)
 def on_identity_loaded(sender, identity):
     # Set the identity user object
-    if identity.id:
-        identity.user = load_user(identity.id)
+    identity.user = current_user
 
-        # Add the UserNeed to the identity
-        if hasattr(identity.user, 'id'):
-            identity.provides.add(UserNeed(identity.user.id))
+    # Add the UserNeed to the identity
+    if hasattr(identity.user, 'id'):
+        identity.provides.add(UserNeed(identity.user.id))
 
-        # Assuming the User model has a list of roles, update the
-        # identity with the roles that the user provides
-        if hasattr(identity.user, 'user_profiles'):
-            for role in identity.user.user_profiles:
-                identity.provides.add(RoleNeed(role.code))
-                for right in getattr(role, 'rights', []):
-                    identity.provides.add(ActionNeed(right.code))
+    # Assuming the User model has a list of roles, update the
+    # identity with the roles that the user provides
+    if hasattr(identity.user, 'user_profiles'):
+        for role in identity.user.user_profiles:
+            identity.provides.add(RoleNeed(role.code))
+            for right in getattr(role, 'rights', []):
+                identity.provides.add(ActionNeed(right.code))
