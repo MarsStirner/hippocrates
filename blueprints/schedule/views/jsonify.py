@@ -534,6 +534,11 @@ class ActionVisualizer(object):
             'set_person': action.setPerson,
             'person': action.person,
             'note': action.note,
+            'office': action.office,
+            'amount': action.amount,
+            'uet': action.uet,
+            'pay_status': action.payStatus,
+            'account': action.account,
             'properties': [
                 self.make_property(prop)
                 for prop in action.properties
