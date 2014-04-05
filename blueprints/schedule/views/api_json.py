@@ -482,13 +482,15 @@ def api_action_new_get():
 
     action = Action()
     action.createDatetime = action.modifyDatetime = action.begDate = now
-    action.createPerson = action.modifyPerson = action.setPerson = None  # TODO: current User
+    action.createPerson = action.modifyPerson = action.setPerson = Person.query.get(1)  # TODO: current User
     action.office = actionType.office or u''
     action.amount = actionType.amount if actionType.amountEvaluation in (0, 7) else 1
     action.uet = 0  # TODO: calculate UET
 
     if given_datetime:
-        action.plannedEndDate = given_datetime
+        action.plannedEndDate = given_datetime or now
+    else:
+        action.plannedEndDate = now
         # TODO: calculate plannedEndDate
 
     if actionType.defaultEndDate == 1:
@@ -520,6 +522,7 @@ def api_action_new_get():
         action.person = None  # TODO: current User
 
     action.event = event
+    action.event_id = event.id
     action.actionType = actionType
     action.status = actionType.defaultStatus
     prop_types = actionType.property_types.filter(ActionPropertyType.deleted == 0)
@@ -538,15 +541,20 @@ def api_action_new_get():
             value = src_props[prop_type.id].value if src_props.get(prop_type.id) else None
             result['properties'].append(v.make_abstract_property(prop, value))
     db.session.rollback()
-    return jsonify(result)
+
+    print_templates = rbPrintTemplate.query.filter(rbPrintTemplate.context == actionType.context)
+    print_context = PrintTemplateVisualizer()
+    return jsonify({
+        'action': result,
+        'print_templates': map(print_context.make_template_info, print_templates)
+    })
 
 
 @module.route('/api/actions', methods=['POST'])
 @public_endpoint
 def api_action_post():
     now = datetime.datetime.now()
-    data = request.json
-    action_desc = data['action']
+    action_desc = request.json
     if action_desc['id']:
         action = Action.query.get(action_desc['id'])
         for prop_desc in action_desc['properties']:
@@ -555,7 +563,7 @@ def api_action_post():
             prop.action = action
             prop.isAssigned = prop_desc['is_assigned']
             prop.type = prop_type
-            if prop_desc['vector']:
+            if prop_desc['type']['vector']:
                 # Идите в жопу со своими векторными значениями
                 continue
             if prop_desc['value'] is not None:
@@ -592,10 +600,13 @@ def api_action_post():
         for prop_desc in action_desc['properties']:
             prop_type = ActionPropertyType.query.get(prop_desc['type']['id'])
             prop = ActionProperty()
+            prop.createDatetime = prop.modifyDatetime = now
+            prop.norm = ''
+            prop.evaluation = ''
             prop.action = action
             prop.isAssigned = prop_desc['is_assigned']
             prop.type = prop_type
-            if prop_desc['vector']:
+            if prop_desc['type']['vector']:
                 # Идите в жопу со своими векторными значениями
                 continue
             if prop_desc['value'] is not None:
@@ -611,20 +622,75 @@ def api_action_post():
     action.modifyDatetime = now
     action.begDate = action_desc['begDate']
     action.endDate = action_desc['endDate']
-    action.plannedEndDate = action_desc['planned_endDate']
-    action.status = action_desc['status'].id
+    action.plannedEndDate = action_desc['planned_endDate'] or now
+    action.status = action_desc['status']['id']
     action.setPerson_id = safe_traverse(action_desc, 'set_person', 'id')
     action.person_id = safe_traverse(action_desc, 'person', 'id')
     action.note = action_desc['note']
     action.directionDate = action_desc['direction_date']
     action.office = action_desc['office']
-    action.amount = action['amount']
+    action.amount = action_desc['amount']
     action.uet = action_desc['uet']
-    action.payStatus = action_desc['pay_status']
-    action.account = action['account']
+    action.payStatus = action_desc['pay_status'] or 0
+    action.account = action_desc['account'] or 0
+    action.coordText = ''
+    action.AppointmentType = 0
     if not action.uuid:
         uuid = UUID()
         uuid.uuid = '{%s}' % uuid4().get_hex
         action.uuid = uuid
 
     db.session.add(action)
+    db.session.commit()
+
+    context = action.actionType.context
+    print_templates = rbPrintTemplate.query.filter(rbPrintTemplate.context == context).all()
+    v = ActionVisualizer()
+    print_context = PrintTemplateVisualizer()
+    return jsonify({
+        'action': v.make_action(action),
+        'print_templates': map(print_context.make_template_info, print_templates)
+    })
+
+
+@module.route('/api/action-type-list.json')
+@public_endpoint
+def api_atl_get():
+    at_class = int(request.args['at_class'])
+    if not (0 <= at_class < 4):
+        return abort(401)
+    atypes = ActionType.query.filter(
+        ActionType.class_ == at_class, ActionType.deleted == 0, ActionType.hidden == 0
+    )
+    at = dict((item.id, (item.name, item.group_id, item.code, set())) for item in atypes)
+    for item_id, (name, gid, code, children) in at.iteritems():
+        if gid in at:
+            at[gid][3].add(item_id)
+
+    def render_node(node_id):
+        node = at[node_id]
+        return {
+            'id': node_id,
+            'name': node[0],
+            'code': node[2],
+            'children': [render_node(child_id) for child_id in node[3]] if node[3] else None
+        }
+
+    result = {
+        'id': None,
+        'name': None,
+        'code': None,
+        'children': [
+            render_node(item_id) for item_id, (name, gid, code, children) in at.iteritems() if not gid
+        ]
+    }
+
+    def res_sort(node):
+        if node['children']:
+            node['children'].sort(key=lambda nd: nd['code'])
+            for nd in node['children']:
+                res_sort(nd)
+
+    res_sort(result)
+
+    return jsonify(result)

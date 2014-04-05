@@ -526,7 +526,7 @@ class ActionVisualizer(object):
             'action_type': action.actionType,
             'event_id': action.event_id,
             'client': action.event.client,
-            'directionDate': action.directionDate,
+            'direction_date': action.directionDate,
             'begDate': action.begDate,
             'endDate': action.endDate,
             'planned_endDate': action.plannedEndDate,

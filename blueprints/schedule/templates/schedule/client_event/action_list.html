@@ -1,4 +1,26 @@
-{% macro action_list(model) %}
+{% macro action_list(model, action_type_class) %}
+    <button class="btn btn-info" ng-click="at_pop_toggle({{ action_type_class }})">Создать...</button>
+    <div class="well popupable" style="overflow-y: auto; max-height: 400px" ng-if="action_type_popped === {{ action_type_class }}">
+        <div class="ui-treeview">
+            <ul ng-repeat="root in action_type_tree[{{ action_type_class }}].children">
+                <li sf-treepeat="node in children of root">
+                    <div ng-if="node.children" class="tree-label"
+                         ng-class="{'collapsed': !subtree_shown(node.id),
+                                    'expanded': subtree_shown(node.id)}"
+                         ng-click="toggle_vis(node.id)">&nbsp;</div>
+                    <div ng-if="!node.children" class="tree-label leaf">&nbsp;</div>
+                    <a ng-href="{{ url_for('.html_action') }}?action_type_id=[[node.id]]&event_id=[[event_id]]"
+                       ng-if="!node.children">
+                        [ [[node.code]] ] [[ node.name ]]
+                    </a>
+                    <span ng-if="node.children">[ [[node.code]] ] [[ node.name ]]</span>
+                    <ul ng-if="node.children && subtree_shown(node.id)">
+                        <li sf-treecurse></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
     <table class="table table-condensed table-hover table-clickable">
         <thead>
         <tr>
