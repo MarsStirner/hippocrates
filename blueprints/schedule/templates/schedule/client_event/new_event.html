@@ -1,0 +1,138 @@
+{% extends "schedule/base.html" %}
+
+{% block modules_css %}
+    {{ super() }}
+    <style>
+        .minheight .list-group-item {
+            min-height: 81px;
+        }
+    </style>
+{% endblock %}
+
+{% import "_macros.html" as macros %}
+{% block main %}
+    <div ng-controller="EventCreateCtrl">
+        <legend xmlns="http://www.w3.org/1999/html">Создание обращения, пациент
+            <a href="{{ url_for('patients.patient') }}?client_id=[[event_info.client_id]]">
+                [[ event_info.client.fullName ]]</a></legend>
+        <div class="col-md-6" style="">
+            <ul class="list-group minheight">
+                <li class="list-group-item">
+                    <label for="">Организация</label>
+                    <div>[[ event_info.organisation.short_name ]]</div>
+                </li>
+                <li class="list-group-item">
+                    <label for="">Лечащий врач</label>
+                    {{ macros.ui_select_rb('Person', 'event_info.exec_person', 'true') }}
+                </li>
+                <li class="list-group-item">
+                    <label for="">Договор</label>
+                    {{ macros.ui_select_rb('Contract', 'event_info.contract', 'true') }}
+                </li>
+                <li class="list-group-item">
+                </li>
+                <li class="list-group-item">
+                    <label for="">Дата начала</label>
+                    <input type="text" class="form-control" datepicker_popup="dd.MM.yyyy" autocomplete="off"
+                        ng_model="event_info.set_date">
+                </li>
+                <li class="list-group-item">
+                    <label for="">Дата выполнения</label>
+                    <input type="text" class="form-control" datepicker_popup="dd.MM.yyyy" autocomplete="off"
+                        ng_model="event_info.exec_date">
+                </li>
+            </ul>
+        </div>
+        <div class="col-md-6">
+            <ul class="list-group minheight">
+                <li class="list-group-item">
+                    <label for="">Тип обращения</label>
+                    {{ macros.ui_select_rb('rbRequestType', 'event_info.event_type.request_type', 'true',
+                        extra_filter='| filter: rbRequestType.objects.code="policlinic"') }}
+                </li>
+                <li class="list-group-item">
+                    <label for="">Источник финансирования</label>
+                    {{ macros.ui_select_rb('rbFinance', 'event_info.event_type.finance', 'true') }} {# editing_list.indexOf("event_info.event_type.finance") != -1 #}
+                </li>
+                <li class="list-group-item">
+                    <label for="">Тип события</label>
+                    {{ macros.ui_select_rb('EventType', 'event_info.event_type', 'true') }}
+                </li>
+                <li class="list-group-item">
+                    <label for="">Подразделение</label>
+                    {{ macros.ui_select_rb('OrgStructure', 'event_info.org_structure', 'true') }}
+                </li>
+                <li class="list-group-item">
+                    <label for="">Первичность</label>
+                    {{ macros.ui_select_rb('rbPrimary', 'event_info.is_primary', 'true') }}
+                </li>
+                <li class="list-group-item">
+                    <label for="">Порядок</label>
+                    {{ macros.ui_select_rb('rbOrder', 'event_info.order', 'true') }}
+                </li>
+            </ul>
+        </div>
+
+{#        <div>#}
+{#            <p>debug:</p>#}
+{#            <p>[[event_info | json]]</p>#}
+{#        </div>#}
+        <br />
+        <div class="pull-right">
+            <button ng-click="cancel_editing();" class="btn btn-lg btn-danger">Назад</button>
+            <button ng-click="create_event();" class="btn btn-lg btn-success">Создать</button>
+        </div>
+    </div>
+{% endblock %}
+
+{% block modules_js %}
+    <script>
+    WebMis20.controller('EventCreateCtrl', ['$scope', '$http', 'RefBook', '$window',
+                        function ($scope, $http, RefBook, $window) {
+        $scope.aux = aux;
+        $scope.event_info = null;
+        $scope.client_id = aux.getQueryParams(location.search).client_id;
+        $scope.Organisation = new RefBook('Organisation');
+        $scope.Person = new RefBook('vrbPersonWithSpeciality');
+        $scope.Contract = new RefBook('Contract');
+        $scope.rbRequestType = new RefBook('rbRequestType');
+        $scope.rbFinance = new RefBook('rbFinance');
+        $scope.EventType = new RefBook('EventType');
+        $scope.OrgStructure = new RefBook('OrgStructure');
+
+        $scope.rbOrder = {{ Enum.get_class_by_name('EventOrder').rb() | tojson}};
+        $scope.rbPrimary = {{ Enum.get_class_by_name('EventPrimary').rb() | tojson}};
+
+
+
+        $scope.editing_list = [];
+        $scope.start_edit = function(element) {
+            $scope.editing_list.push(element);
+        };
+
+        $scope.stop_edit = function(element) {
+            $scope.editing_list.splice($scope.editing_list.indexOf(element), 1);
+        };
+
+        $scope.create_event = function() {
+            $http.post('{{ url_for('schedule.api_event_save') }}', $scope.event_info).success(function (data) {
+                var event_id = data['result'];
+                window.open('{{ url_for('schedule.html_event_info') }}?event_id=' + event_id, '_self');
+            });
+        };
+
+        $scope.load_data = function () {
+            $http.get('{{ url_for('schedule.api_event_new_get') }}', {
+                params: {
+                    client_id: $scope.client_id
+                }
+            }).success(function (data) {
+                $scope.event_info = data.result;
+            })
+        };
+
+        $scope.load_data();
+
+    }])
+    </script>
+{% endblock %}

@@ -2,7 +2,9 @@
 {% import "_macros.html" as macros %}
 {% block main %}
 <div ng-controller="ActionCtrl">
-<legend xmlns="http://www.w3.org/1999/html">[[ action.action.action_type.name ]] - [[ action.action.client ]]</legend>
+<legend xmlns="http://www.w3.org/1999/html">[[ action.action.action_type.name ]] -
+    <a href="{{ url_for('patients.patient') }}?client_id=[[action.action.client.id]]">
+                [[ action.action.client.fullName ]]</a></legend>
 <div>
     <table id="general_action_info" class="table table-condensed">
         <tbody>

@@ -5,15 +5,16 @@ import json
 import datetime
 from uuid import uuid4
 
-from flask import abort, request
+from flask import abort, request, g
+from flask.ext.login import current_user
 from application.database import db
 from application.lib.sphinx_search import SearchPerson
 from application.lib.agesex import recordAcceptableEx
-from application.lib.utils import public_endpoint, jsonify, safe_traverse
+from application.lib.utils import (public_endpoint, jsonify, safe_traverse, get_new_uuid,
+    get_new_event_ext_id)
 from blueprints.schedule.app import module
-from application.models.exists import rbSpeciality, rbPolicyType, \
-    rbReasonOfAbsence, rbSocStatusClass, rbSocStatusType, rbAccountingSystem, rbContactType, rbRelationType, \
-    rbBloodType, BloodHistory, rbPrintTemplate, Event, Person, UUID
+from application.models.exists import (rbSpeciality, rbReasonOfAbsence, rbPrintTemplate, Event,
+    Person, EventType, Client, Organisation, UUID, rbAcheResult)
 from application.models.actions import Action, ActionType, ActionProperty, ActionPropertyType
 from application.models.schedule import Schedule, ScheduleTicket, ScheduleClientTicket, rbAppointmentType, \
     rbReceptionType, rbAttendanceType
@@ -385,6 +386,69 @@ def api_event_info():
         'diagnoses': vis.make_diagnoses(event),
         'print_templates': map(print_context.make_template_info, print_templates),
     })
+
+
+@module.route('/api/event_new.json', methods=['GET'])
+@public_endpoint
+def api_event_new_get():
+    client_id = int(request.args['client_id'])
+    event = Event()
+    event.eventType = EventType.get_default_et()
+    event.organisation = Organisation.query.filter_by(infisCode='500').first()
+    event.client = Client.query.get(client_id)
+    v = EventVisualizer()
+    return jsonify(v.make_event(event))
+
+
+@module.route('api/event_save.json', methods=['POST'])
+@public_endpoint
+def api_event_save():
+    data = request.json
+    now = datetime.datetime.now()
+    event_id = data.get('id')
+    if event_id:
+        event = Event.query.get(event_id)
+        event.modifyDatetime = now
+        event.modifyPerson_id = current_user.get_id() or 1 # todo: fix
+        event.deleted = data['deleted']
+        event.eventType = EventType.query.get(data['event_type']['id'])
+        event.setDate = data['set_date']
+        event.execDate = data['exec_date']
+        # event.contract = None
+        event.isPrimaryCode = data['is_primary']['id']
+        event.order = data['order']['id']
+        event.orgStructure_id = data['org_structure']['id']
+        event.result_id = data['result']['id'] if data.get('result') else None
+        event.rbAcheResult_id = data['ache_result']['id'] if data.get('ache_result') else None
+        event.note = ''
+    else:
+        event = Event()
+        event.createDatetime = event.modifyDatetime = now
+        event.createPerson_id = event.modifyPerson_id = event.setPerson_id = current_user.get_id() or 1 # todo: fix
+        event.deleted = 0
+        event.version = 0
+        event.eventType = EventType.query.get(data['event_type']['id'])
+        event.client_id = data['client_id']
+        event.setDate = data['set_date']
+        event.execDate = data['exec_date']
+        event.externalId = get_new_event_ext_id(event.eventType.id, event.client_id)
+        # event.contract = None
+        event.isPrimaryCode = data['is_primary']['id']
+        event.order = data['order']['id']
+        event.org_id = data['organisation']['id']
+        event.orgStructure_id = data['org_structure']['id']
+        event.note = ''
+        event.payStatus = 0
+        event.uuid = get_new_uuid()
+    # todo: Event_Persons, Visit, ...
+    db.session.add(event)
+    try:
+        db.session.commit()
+    except:
+        db.session.rollback()
+        raise
+
+    return jsonify(int(event))
 
 
 @module.route('/api/events/diagnosis.json', methods=['POST'])

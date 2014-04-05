@@ -33,3 +33,50 @@
         </ui-select>
     </div>
 {% endmacro %}
+
+{% macro ui_select_rb(rb, model, trigger_edit, attr='name', extra_filter='') %}
+    {# trigger_edit = 'true' -> always edit #}
+    {% set id_ = model.replace('.', '_') %}
+    <div class="form-control-static" ng-hide="{{ trigger_edit }}"
+         ng-mouseenter="show_editing_btn_{{ id_ }}=true;" ng-mouseleave="show_editing_btn_{{ id_ }}=false;">
+        <i>[[ {{ model }}.{{ attr }} ]]&nbsp;</i>
+        <button class="btn btn-default btn-sm" ng-show="show_editing_btn_{{ id_ }}" ng-click="start_edit('{{ model }}');">
+            <span class="glyphicon glyphicon-pencil"></span></button>
+    </div>
+    <div class="row" ng-show="{{ trigger_edit }}">
+        <div class="col-md-11">
+            <ui-select ng-model="{{ model }}" id="{{ model }}" theme="select2">
+                <match placeholder="не выбрано">[[ $select.selected.{{ attr }} ]]</match>
+                <choices data="{{ rb }}.objects | filter: $select.search {{ extra_filter }}">
+                    <span ng-bind-html="trustAsHtml((item.{{ attr }} | highlight: $select.search))"></span>
+                </choices>
+            </ui-select>
+        </div>
+        <div class="col-md-1 nomarpad">
+            <button class="btn btn-default btn-sm" {% if trigger_edit == 'true' %} ng-show="false"{% endif %}
+                    ng-click="stop_edit({{ model }});">
+                <span class="glyphicon glyphicon-ok"></span></button>
+        </div>
+    </div>
+{% endmacro %}
+
+{% macro edit_date(model, trigger_edit) %}
+    {% set id_ = model.replace('.', '_') %}
+    <div class="form-control-static" ng-hide="{{ trigger_edit }}"
+         ng-mouseenter="show_editing_btn_{{ id_ }}=true;" ng-mouseleave="show_editing_btn_{{ id_ }}=false;">
+        <i>[[ {{ model }} | asDate ]]&nbsp;</i>
+        <button class="btn btn-default btn-sm" ng-show="show_editing_btn_{{ id_ }}" ng-click="start_edit('{{ model }}');">
+            <span class="glyphicon glyphicon-pencil"></span></button>
+    </div>
+    <div class="row" ng-show="{{ trigger_edit }}">
+        <div class="col-md-11">
+            <input type="text" class="form-control" datepicker_popup="dd.MM.yyyy" autocomplete="off"
+                   ng_model="{{ model }}">
+        </div>
+        <div class="col-md-1 nomarpad">
+            <button class="btn btn-default btn-sm" {% if trigger_edit == 'true' %} ng-show="false"{% endif %}
+                    ng-click="stop_edit({{ model }});">
+                <span class="glyphicon glyphicon-ok"></span></button>
+        </div>
+    </div>
+{% endmacro %}

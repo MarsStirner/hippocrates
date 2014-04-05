@@ -167,7 +167,9 @@ WebMis20.factory('ClientResource',
     function($resource) {
         return $resource(url_client_get, {}, {
             save: {url: url_client_save, method: 'POST',
-                params: {client_info: {}}}
+                   params: {client_info: {},
+                            }
+            }
         });
     }
 );
@@ -180,7 +182,10 @@ WebMis20.factory('Client',
 
         Client.prototype.reload = function() {
             var t = this;
-            ClientResource.get({client_id: this.client_id},
+            ClientResource.get({
+                    client_id: this.client_id,
+                    cache_dt: new Date().getMilliseconds() // todo: cache
+                },
                 function(data) {
                     t.client_info = data.result.clientData;
                     t.appointments = data.result.appointments;
@@ -194,7 +199,9 @@ WebMis20.factory('Client',
         Client.prototype.save = function() {
             var t = this;
             var deferred = $q.defer();
-            ClientResource.save({ client_info: this.client_info },
+            ClientResource.save({
+                    client_info: this.client_info
+                },
                 function(value, headers) {
                     deferred.resolve(value['result']);
                 },
@@ -213,7 +220,7 @@ WebMis20.factory('Client',
                 'power': 0,
                 'createDate': '',
                 'deleted':0,
-                'notes': '' })
+                'notes': '' });
         };
 
         Client.prototype.add_medicament = function() {
@@ -222,7 +229,7 @@ WebMis20.factory('Client',
                 'power': 0,
                 'createDate': '',
                 'deleted':0,
-                'notes': '' })
+                'notes': '' });
         };
 
         Client.prototype.add_identification = function() {
@@ -230,7 +237,7 @@ WebMis20.factory('Client',
                 'deleted': 0,
                 'identifier': '',
                 'accountingSystem_code': '',
-                'checkDate': ''})
+                'checkDate': ''});
         };
 
         Client.prototype.add_contact = function() {
@@ -238,14 +245,14 @@ WebMis20.factory('Client',
                 'deleted': 0,
                 'contactType_code': '',
                 'contact': '',
-                'notes': ''})
+                'notes': ''});
         };
 
         Client.prototype.add_blood = function () {
             this.client_info['bloodHistory'].push({'bloodGroup_code': '',
                 'bloodDate': '',
                 'person_id': 0
-            })
+            });
         };
 
         Client.prototype.add_relation = function (entity) {
@@ -253,7 +260,7 @@ WebMis20.factory('Client',
                 'relativeType_name': '',
                 'relativeType_code': '',
                 'other_id': 0
-            })
+            });
         };
 
         Client.prototype.add_soc_status = function () {
@@ -262,7 +269,7 @@ WebMis20.factory('Client',
                 'typeCode': '',
                 'begDate': '',
                 'endDate': ''
-            })
+            });
         };
 
         Client.prototype.delete_record = function(entity, record) {
