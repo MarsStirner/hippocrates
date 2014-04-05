@@ -329,6 +329,18 @@ class Client(db.Model):
     def __int__(self):
         return self.id
 
+    def __json__(self):
+        return {
+            'id': self.id,
+            'firstName': self.firstName,
+            'lastName': self.lastName,
+            'patrName': self.patrName,
+            'birthDate': self.birthDate,
+            'sex': self.sex,
+            'SNILS': self.SNILS,
+            'fullName': self.nameText,  # todo: more
+        }
+
 
 class ClientAddress(db.Model):
     __tablename__ = u'ClientAddress'
@@ -923,15 +935,22 @@ class OrgStructure(db.Model):
                 self.Address = ''
         return self.Address
 
-    def __unicode__(self):
-        return self.getFullName()
-
     net = property(getNet)
     fullName = property(getFullName)
     address = property(getAddress)
 
+    def __unicode__(self):
+        return self.getFullName()
+
     def __int__(self):
         return self.id
+
+    def __json__(self):
+        return {
+            'id': self.id,
+            'code': self.code,
+            'name': self.name,  # TODO: more
+        }
 
 
 class Person(db.Model, UserMixin):
@@ -1527,8 +1546,9 @@ class Event(db.Model):
     version = db.Column(db.Integer, nullable=False, server_default=u"'0'")
     privilege = db.Column(db.Integer, server_default=u"'0'")
     urgent = db.Column(db.Integer, server_default=u"'0'")
-    orgStructure_id = db.Column(db.Integer, db.ForeignKey('Person.orgStructure_id'))
-    uuid_id = db.Column(db.Integer, nullable=False, index=True, server_default=u"'0'")
+    orgStructure_id = db.Column(db.Integer, db.ForeignKey('OrgStructure.id'))
+    uuid_id = db.Column(db.Integer, db.ForeignKey('UUID.id'),
+                        nullable=False, index=True, server_default=u"'0'")
     lpu_transfer = db.Column(db.String(100))
 
     actions = db.relationship(u'Action', primaryjoin="and_(Action.event_id == Event.id, Action.deleted == 0)")
@@ -1538,6 +1558,7 @@ class Event(db.Model):
     assistant = db.relationship(u'Person', foreign_keys='Event.assistant_id', lazy=False)
     contract = db.relationship(u'Contract')
     organisation = db.relationship(u'Organisation')
+    orgStructure = db.relationship('OrgStructure')
     mesSpecification = db.relationship(u'rbMesSpecification', lazy=False)
     rbAcheResult = db.relationship(u'rbAcheResult', lazy=False)
     result = db.relationship(u'rbResult', lazy=False)
@@ -1548,6 +1569,7 @@ class Event(db.Model):
         u'Diagnostic', lazy=True, innerjoin=True, primaryjoin=
         "and_(Event.id == Diagnostic.event_id, Diagnostic.deleted == 0)"
     )
+    uuid = db.relationship('UUID')
 
     @property
     def isPrimary(self):
@@ -1640,6 +1662,15 @@ class EventType(db.Model):
     finance = db.relationship(u'rbFinance')
     service = db.relationship(u'rbService')
     requestType = db.relationship(u'rbRequestType', lazy=False)
+
+    @classmethod
+    def get_default_et(cls):
+        """Тип события (обращения по умолчанию).
+        Должно браться из настроек, а сейчас это поликлиника(бюджет) -
+        EventType.code = '09'
+
+        """
+        return cls.query.filter_by(code='09').first()
 
     def __json__(self):
         return {
@@ -2381,3 +2412,21 @@ class PersonProfiles(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     person_id = db.Column(db.ForeignKey('Person.id'), nullable=False, index=True)
     userProfile_id = db.Column(db.ForeignKey('rbUserProfile.id'), nullable=False, index=True)
+
+
+class vrbPersonWithSpeciality(db.Model):
+    __tablename__ = u'vrbPersonWithSpeciality'
+
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(12), nullable=False, index=True)
+    name = db.Column(db.String(101), nullable=False, index=True)
+
+    def __json__(self):
+        return {
+            'id': self.id,
+            'code': self.code,
+            'name': self.name,
+        }
+
+    def __int__(self):
+        return self.id

@@ -451,15 +451,16 @@ class EventVisualizer(object):
         """
         return {
             'id': event.id,
+            'deleted': event.deleted,
             'external_id': event.externalId,
             'order': EventOrder(event.order),
             'order_': event.order,
             'is_primary': EventPrimary(event.isPrimaryCode),
             'is_primary_': event.isPrimaryCode,
             'client': event.client,
-            'client_id': event.client_id,
-            'setDate': event.setDate,
-            'execDate': event.execDate,
+            'client_id': event.client.id,
+            'set_date': event.setDate,
+            'exec_date': event.execDate,
             'exec_person': event.execPerson,
             'result': event.result,
             'ache_result': event.rbAcheResult,
@@ -467,6 +468,7 @@ class EventVisualizer(object):
             'event_type': event.eventType,
             'finance': event.finance,
             'organisation': event.organisation,
+            'org_structure': event.orgStructure,
             'med_doc_actions': [self.make_action(action) for action in event.actions if action.actionType.class_ == 0],
             'diag_actions': [self.make_action(action) for action in event.actions if action.actionType.class_ == 1],
             'cure_actions': [self.make_action(action) for action in event.actions if action.actionType.class_ == 2]

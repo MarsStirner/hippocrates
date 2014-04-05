@@ -31,7 +31,7 @@ class ClientForm(Form):
     lastname = StringField(u'Фамилия<span class="text-danger">*</span>', [DataRequired()], widget=AngularJSTextInput())
     firstname = StringField(u'Имя<span class="text-danger">*</span>', [DataRequired()], widget=AngularJSTextInput())
     patronymic = StringField(u'Отчество<span class="text-danger">*</span>', widget=AngularJSTextInput())
-    birthDate = DateField(u'День рождения<span class="text-danger">*</span>', [DataRequired()])
+    birthDate = DateField(u'Дата рождения<span class="text-danger">*</span>', [DataRequired()])
     gender = SelectField(u'Пол<span class="text-danger">*</span>', [Required()], choices=[(u'М', u'М'), (u'Ж', u'Ж')],
                          widget=AngularJSSelect())
     snils = StringField(u'СНИЛС', widget=AngularJSTextInput())
