@@ -412,6 +412,7 @@ def api_event_save():
         event.modifyPerson_id = current_user.get_id() or 1 # todo: fix
         event.deleted = data['deleted']
         event.eventType = EventType.query.get(data['event_type']['id'])
+        event.execPerson_id = data['exec_person']['id']
         event.setDate = data['set_date']
         event.execDate = data['exec_date']
         # event.contract = None
@@ -429,6 +430,7 @@ def api_event_save():
         event.version = 0
         event.eventType = EventType.query.get(data['event_type']['id'])
         event.client_id = data['client_id']
+        event.execPerson_id = data['exec_person']['id']
         event.setDate = data['set_date']
         event.execDate = data['exec_date']
         event.externalId = get_new_event_ext_id(event.eventType.id, event.client_id)

@@ -540,6 +540,7 @@ class ActionVisualizer(object):
             'amount': action.amount,
             'uet': action.uet,
             'pay_status': action.payStatus,
+            'note': '',
             'account': action.account,
             'properties': [
                 self.make_property(prop)
