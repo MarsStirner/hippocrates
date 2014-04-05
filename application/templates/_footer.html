@@ -4,7 +4,10 @@
 <script>
     var rb_root = '{{ url_for('api_refbook') }}',
         url_client_get = '{{ url_for('patients.api_patient_get') }}' + '?client_id=:client_id',
-        url_client_save = '{{ url_for('patients.api_patient_save') }}';
+        url_client_save = '{{ url_for('patients.api_patient_save') }}',
+        url_action_get = '{{ url_for('schedule.api_action_get') }}',
+        url_action_new = '{{ url_for('schedule.api_action_new_get') }}',
+        url_action_save = '{{ url_for('schedule.api_action_post') }}';
 </script>
 <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
 <script src="{{ url_for('static', filename='jquery-ui/js/jquery-1.10.2.js') }}"></script>
@@ -24,5 +27,6 @@
 <script src="{{ url_for('static', filename='select2/select2.js') }}"></script>
 <script src="{{ url_for('static', filename='select2/select2_locale_ru.js') }}"></script>
 <script src="{{ url_for('static', filename='angular.js/select.js') }}"></script>
+<script src="{{ url_for('static', filename='angular.js/angular-tree-repeat.js') }}"></script>
 
 <script src="{{ url_for('static', filename='js/webmis20.js') }}"></script>

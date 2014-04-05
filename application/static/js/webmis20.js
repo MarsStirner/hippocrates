@@ -1,7 +1,7 @@
 /**
  * Created by mmalkov on 10.02.14.
  */
-var WebMis20 = angular.module('WebMis20', ['ngResource', 'ui.bootstrap', 'ui.select', 'ngSanitize', 'ngCkeditor']);
+var WebMis20 = angular.module('WebMis20', ['ngResource', 'ui.bootstrap', 'ui.select', 'ngSanitize', 'ngCkeditor', 'sf.treeRepeat']);
 WebMis20.config(function ($interpolateProvider) {
     $interpolateProvider.startSymbol('[[');
     $interpolateProvider.endSymbol(']]');
@@ -103,6 +103,66 @@ WebMis20.factory('RefBook', ['$http', function ($http) {
     };
     return RefBook;
 }]);
+WebMis20.factory('WMAction', ['$http', '$rootScope', function ($http, $rootScope) {
+    var Action = function () {
+        this.action = null;
+        this.print_templates = null;
+        this.action_culumns = {};
+        this.event_id = null;
+        this.action_type_id = null;
+    };
+    function success(t, data) {
+        t.action = data.result.action;
+        t.print_templates = data.result.print_templates;
+        t.action_columns = {
+            assignable: false,
+            unit: false
+        };
+        angular.forEach(data.result.properties, function (item) {
+            t.action_columns.assignable |= item.type.is_assignable;
+            t.action_columns.unit |= item.type.unit;
+        });
+    }
+    function success_wrapper(t) {
+        return function (data) {
+            success(t, data);
+        }
+    }
+    Action.prototype.get = function (id) {
+        var t = this;
+        $http.get(url_action_get, {
+            params: {
+                action_id: id
+            }
+        }).success(success_wrapper(t));
+        return this;
+    };
+    Action.prototype.get_new = function (event_id, action_type_id) {
+        this.event_id = event_id;
+        this.action_type_id = action_type_id;
+        var t = this;
+        $http.get(url_action_new, {
+            params: {
+                action_type_id: action_type_id,
+                event_id: event_id
+            }
+        }).success(success_wrapper(t));
+        return this;
+    };
+    Action.prototype.save = function () {
+        var t = this;
+        $http.post(url_action_save, this.action).success(success_wrapper(t));
+        return this;
+    };
+    Action.prototype.cancel = function () {
+        if (this.action.id) {
+            this.get(this.action.id)
+        } else {
+            this.get_new(this.event_id, this.action_type_id)
+        }
+    }
+    return Action;
+}]);
 WebMis20.factory('ClientResource',
     function($resource) {
         return $resource(url_client_get, {}, {
@@ -116,7 +176,7 @@ WebMis20.factory('Client',
         var Client = function(client_id) {
             this.client_id = client_id;
             this.reload();
-        }
+        };
 
         Client.prototype.reload = function() {
             var t = this;
@@ -127,12 +187,12 @@ WebMis20.factory('Client',
                     t.events = data.result.events;
                 },
                 function(data) {
-                    throw 'Error requesting Client, id = ' + this.client_id;
+                    throw 'Error requesting Client, id = ' + t.client_id;
                 });
-        }
+        };
 
         Client.prototype.save = function() {
-            t = this
+            var t = this;
             var deferred = $q.defer();
             ClientResource.save({ client_info: this.client_info },
                 function(value, headers) {
@@ -140,12 +200,12 @@ WebMis20.factory('Client',
                 },
                 function(httpResponse) {
                     var r = httpResponse.data;
-                    var message = [r['result']['name'], ':\nНе заполнено поле ', r['result']['data']].join('')
+                    var message = [r['result']['name'], ':\nНе заполнено поле ', r['result']['data']].join('');
                     deferred.reject(message);
                 }
             );
             return deferred.promise;
-        }
+        };
 
         Client.prototype.add_allergy = function() {
             this.client_info['allergies'].push({

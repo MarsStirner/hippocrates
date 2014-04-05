@@ -6,13 +6,13 @@
     <tabset>
         <tab><tab-heading>Основная Информация</tab-heading>{% include "schedule/client_event/main.html" %}</tab>
         <tab><tab-heading>Медицинские документы</tab-heading>
-            {{ action_list.action_list('event_info.med_doc_actions') }}
+            {{ action_list.action_list('event_info.med_doc_actions', 0) }}
         </tab>
         <tab><tab-heading>Диагностика и лаб.исследования</tab-heading>
-            {{ action_list.action_list('event_info.diag_actions') }}
+            {{ action_list.action_list('event_info.diag_actions', 1) }}
         </tab>
         <tab><tab-heading>Лечение</tab-heading>
-            {{ action_list.action_list('event_info.cure_actions') }}
+            {{ action_list.action_list('event_info.cure_actions', 2) }}
         </tab>
         <tab><tab-heading>Оплата</tab-heading></tab>
     </tabset>
@@ -38,6 +38,16 @@
 {#        $scope.rbMKB = new RefBook('MKB');#}
         $scope.rbOrder = {{ Enum.get_class_by_name('EventOrder').rb() | tojson}};
         $scope.rbPrimary = {{ Enum.get_class_by_name('EventOrder').rb() | tojson}};
+
+        $scope.action_type_tree = [];
+        $scope.action_type_popped = null;
+        $scope.at_pop_toggle = function (at_class) {
+            if ($scope.action_type_popped === at_class) {
+                $scope.action_type_popped = null;
+            } else {
+                $scope.action_type_popped = at_class;
+            }
+        };
 
         $scope.diag_edit = [];
         $scope.diag_edit_start = function (index) {
@@ -88,7 +98,28 @@
                 $scope.event_info = data.result.event;
                 $scope.diagnoses = data.result.diagnoses;
                 $scope.PrintTemplates = data.result.print_templates
+            });
+            aux.range(3).map(function (at_class) {
+                $http.get('{{ url_for('.api_atl_get') }}', {
+                    params: {
+                        at_class: at_class
+                    }
+                }).success(function (data) {
+                    $scope.action_type_tree[at_class] = data.result;
+                })
             })
+        };
+
+        $scope.hidden_nodes = [];
+        $scope.toggle_vis = function (node_id) {
+            if (aux.inArray($scope.hidden_nodes, node_id)) {
+                $scope.hidden_nodes.splice($scope.hidden_nodes.indexOf(node_id), 1);
+            } else {
+                $scope.hidden_nodes.push(node_id);
+            }
+        };
+        $scope.subtree_shown = function (node_id) {
+            return !aux.inArray($scope.hidden_nodes, node_id);
         };
 
         $scope.open_action = function (action_id) {
@@ -98,21 +129,23 @@
         $scope.load_data();
 
         $scope.print_template = function (template_id) {
-            $http({url: '{{ print_subsystem_url }}',
-                   method: "POST",
-                   data: JSON.stringify({id: template_id,
-                                         context_type: "event",
-                                         event_id: $scope.event_id,
-                                         additional_context:{'currentOrgStructure':"", 'currentOrganisation':3479, 'currentPerson':"1"}
-                                        }),
-                   headers: {'Content-Type': 'application/json'}
-                   }).success(function (data) {
-                        $scope.w = $window.open();
-                        $scope.w.document.open();
-                        $scope.w.document.write(data)
-                        $scope.w.document.close();
-                        $scope.w.print();
-                   })
+            $http.post(
+                '{{ print_subsystem_url }}', {
+                    id: template_id,
+                    context_type: "event",
+                    event_id: $scope.event_id,
+                    additional_context: {
+                        currentOrgStructure: "",
+                        currentOrganisation: 3479,
+                        currentPerson:"1"
+                    }
+                }).success(function (data) {
+                    $scope.w = $window.open();
+                    $scope.w.document.open();
+                    $scope.w.document.write(data);
+                    $scope.w.document.close();
+                    $scope.w.print();
+               })
         };
     }])
     </script>
