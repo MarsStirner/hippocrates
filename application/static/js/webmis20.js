@@ -345,6 +345,45 @@ WebMis20.directive('uiRbTable', function () {
         }
     }
 });
+WebMis20.directive('uiActionProperty', ['$compile', function ($compile) {
+    return {
+        restrict: 'A',
+        replace: true,
+        link: function (scope, element, attributes) {
+            var property = scope.$property = scope.$eval(attributes.uiActionProperty);
+            var typeName = property.type.type_name;
+            var element_code = null;
+            switch (typeName) {
+                case 'Text':
+                case 'Html':
+                case 'Жалобы':
+                case 'Constructor':
+                    element_code = '<textarea ckeditor="ckEditorOptions" ng-model="$property.value"></textarea>';
+                    break;
+                case 'Date':
+                    element_code = '<input type="text" class="form-control" datepicker-popup="dd-MM-yyyy" ng-model="$property.value" />';
+                    break;
+                case 'Integer':
+                case 'Double':
+                case 'Time':
+                    element_code = '<input class="form-control" type="text" ng-model="$property.value">';
+                    break;
+                case 'String':
+                    if (property.type.domain) {
+                        element_code = '<select class="form-control" ng-model="$property.value" ng-options="val for val in $property.type.values"></select>'
+                    } else {
+                        element_code = '<input class="form-control" type="text" ng-model="$property.value">';
+                    }
+                    break;
+                default:
+                    element_code = '<span ng-bind="$property.value">';
+            }
+            var el = angular.element(element_code);
+            $(element[0]).append(el);
+            $compile(el)(scope);
+        }
+    }
+}]);
 var aux = {
     getQueryParams: function (qs) {
         qs = qs.split("+").join(" ");

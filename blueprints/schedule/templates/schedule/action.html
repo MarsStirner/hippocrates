@@ -56,21 +56,10 @@
         </tr>
         </thead>
         <tbody>
-        <tr ng-repeat="property in action.action.properties | orderBy:'idx' " ng-switch="property.type.type_name">
+        <tr ng-repeat="property in action.action.properties | orderBy:'idx'">
             <td class="action-property-name-field"><strong ng-bind="property.type.name"><span class="label label-danger" ng-if="property.type.mandatory">&ast;</span></strong></td>
             <td ng-if="action.action_columns.assignable"><input type="checkbox" ng-model="property.is_assigned" ng-if="property.type.is_assignable"></td>
-            <!-- Здесь начинаются вариации на тему разных виджетов -->
-            <td ng-switch-when="Text"><textarea ckeditor="ckEditorOptions" ng-model="property.value"></textarea></td>
-            <td ng-switch-when="Html"><textarea ckeditor="ckEditorOptions" ng-model="property.value"></textarea></td>
-            <td ng-switch-when="Constructor"><textarea ckeditor="ckEditorOptions" ng-model="property.value"></textarea></td>
-            <td ng-switch-when="Жалобы"><textarea ckeditor="ckEditorOptions" ng-model="property.value"></textarea></td>
-            <td ng-switch-when="Date"><input type="text" class="form-control" datepicker-popup="dd-MM-yyyy" ng-model="property.value" /></td>
-            <td ng-switch-when="Integer"><input class="form-control" type="text" ng-model="property.value"></td> {# Validate! #}
-            <td ng-switch-when="Double"><input class="form-control" type="text" ng-model="property.value"></td> {# Validate! #}
-            <td ng-switch-when="String" ng-if="!property.type.domain"><input class="form-control" type="text" ng-model="property.value"></td>
-            <td ng-switch-when="String" ng-if="property.type.domain"><select class="form-control" ng-model="property.value" ng-options="val for val in property.type.values"></select></td>
-            <td ng-switch-default ng-bind="property.value"></td>
-            <!-- Здесь заканчиваются вариации на тему разных виджетов -->
+            <td ui-action-property="property"></td>
             <td ng-if="action.action_columns.unit" ng-bind="property.type.unit.code"></td>
         </tr>
         </tbody>
