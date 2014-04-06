@@ -283,71 +283,63 @@ WebMis20.factory('Client',
 
         return Client;
     }
-    ])
+]);
 // end services
-WebMis20.directive('uiPopup', function ($timeout) {
+WebMis20.directive('uiMkb', function ($timeout) {
     return {
         restrict: 'E',
+        require: '?ngModel',
         template:
-            '<input type="text" class="form-control" ng-click="to_show()" ng-model="query">' +
-            '<div class="well well-sm popupable" ng-show="shown" ng-transclude ng-mouseleave="to_hide_delay()" ng-mouseenter="to_hide_cancel()">',
-        transclude: true,
-        controller: function ($scope, $element) {
-            var input_elem = $($element.children()[0]);
-            var div_elem = $($element.children()[1]);
+            '<button class="btn btn-default btn-block" ng-click="to_show()">[[ $model.$modelValue.code ]] <span class="caret"></span></button>' +
+            '<div class="well well-sm popupable" ng-show="shown" ng-mouseleave="to_hide_delay()" ng-mouseenter="to_hide_cancel()">' +
+                '<input type="text" ng-model="query" class="form-control" />' +
+                '<table class="table table-condensed table-hover table-clickable">' +
+                    '<thead><tr><th>Код</th><th>Наименование</th></tr></thead>' +
+                    '<tbody>' +
+                        '<tr ng-repeat="row in refBook.objects | filter:query | limitTo:100" ng-click="onClick(row)">' +
+                            '<td ng-bind="row.code"></td><td ng-bind="row.name"></td>' +
+                        '</tr>' +
+                    '</tbody>' +
+                '</table>' +
+            '</div>',
+        scope: {
+            refBook: '=refBook'
+        },
+        link: function (scope, element, attributes, ngModel) {
+            scope.$model = ngModel;
+            var input_elem = $(element[0][0]);
+            var div_elem = $(element[0][1]);
             var timeout = null;
-            $scope.shown = false;
-            $scope.query='';
-            $scope.to_show = function () {
+            scope.shown = false;
+            scope.query='';
+            scope.to_show = function () {
+                scope.query = ngModel.$modelValue.code;
                 div_elem.width(input_elem.width());
-                $scope.shown = true;
+                scope.shown = true;
             };
-            $scope.to_hide_delay = function () {
+            scope.to_hide_delay = function () {
                 if (!timeout) {
                     timeout = $timeout(to_hide, 600)
                 }
             };
-            $scope.to_hide_cancel = function () {
+            scope.to_hide_cancel = function () {
                 if (timeout) {
                     $timeout.cancel(timeout);
                     timeout = null;
                 }
             };
-            this.finish_him =function (query) {
-                to_hide();
-                $scope.query = query;
-            };
-            function to_hide () {
-                timeout = null;
-                $scope.shown = false;
-            }
-        }
-    }
-});
-WebMis20.directive('uiRbTable', function () {
-    return {
-        restrict: 'E',
-        require: '^uiPopup',
-        template: '<table class="table table-condensed table-hover table-clickable">' +
-            '<thead><tr><th>Код</th><th>Наименование</th></tr></thead>' +
-            '<tbody>' +
-                '<tr ng-repeat="row in refBook.objects | filter:query" ng-click="onClick(row)">' +
-                    '<td ng-bind="row.code"></td><td ng-bind="row.name"></td>' +
-                '</tr>' +
-            '</tbody></table>',
-        link: function (scope, element, attributes, popupCtrl) {
-            scope.refBook = scope.$eval(attributes.refBook);
-            scope.$parent.$watch('query', function (newVal, oldVal) {
-                scope.query = newVal;
-            });
             scope.onClick = function (row) {
-                scope.$parent.$parent[attributes.ngModel] = row; // HACK!
-                popupCtrl.finish_him(row.name);
+                ngModel.$setViewValue(row);
+                to_hide();
             };
             scope.search = function (actual, expected) {
                 return actual.split(' ').filter(function (part) {
                     return aux.startswith(part, expected)
                 }).length > 0;
+            };
+            function to_hide () {
+                timeout = null;
+                scope.shown = false;
             }
         }
     }

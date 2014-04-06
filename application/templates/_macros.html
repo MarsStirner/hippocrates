@@ -23,14 +23,9 @@
 {% endmacro %}
 
 {% macro ui_select_tmp_noa(source, model, rb, trigger) %}
-    <div class="form-control-static" ng-if="!{{ trigger }}">[[ {{ source }}.{{ model }} ]]</div>
-    <div ng-hide="!{{ trigger }}">
-        <ui-select ng-model="{{ trigger }}.{{ model }}" id="{{ source }}.{{ model }}" theme="select2" class="form-control">
-            <match placeholder="не выбрано">[[ $select.selected ]]</match>
-            <choices data="{{ rb }}.objects | filter: $select.search">
-                <span ng-bind-html="trustAsHtml((item | highlight: $select.search))"></span>
-            </choices>
-        </ui-select>
+    <div class="form-control-static" ng-hide="{{ trigger }}">[[ {{ source }}.{{ model }}.code ]]</div>
+    <div ng-show="{{ trigger }}">
+        <ui-mkb ng-model="{{ trigger }}.{{ model }}" ref-book="{{ rb }}"></ui-mkb>
     </div>
 {% endmacro %}
 

@@ -7,7 +7,7 @@ from application.models.enums import EventPrimary, EventOrder, ActionStatus
 
 from application.models.schedule import Schedule, rbReceptionType
 from application.models.actions import Action, ActionProperty
-from application.models.exists import Event, EventType, rbRequestType
+from application.models.exists import Event, EventType, rbRequestType, Diagnosis, Diagnostic
 
 __author__ = 'mmalkov'
 
@@ -494,8 +494,8 @@ class EventVisualizer(object):
             'diagnostic_id': diagnostic.id,
             'diagnosis_type': diagnostic.diagnosisType,
             'person': diagnosis.person,
-            'mkb': diagnosis.MKB,
-            'mkb_ex': diagnosis.MKBEx,
+            'mkb': diagnosis.mkb,
+            'mkb_ex': diagnosis.mkb_ex,
             'character': diagnosis.character,
             'phase': diagnostic.phase,
             'stage': diagnostic.stage,

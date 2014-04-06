@@ -462,12 +462,12 @@ def api_diagnosis_save():
     diagnosis_id = data.get('diagnosis_id')
     diagnostic_id = data.get('diagnostic_id')
     if diagnosis_id:
-        diagnosis = Diagnosis.get(diagnosis_id)
+        diagnosis = Diagnosis.query.get(diagnosis_id)
     else:
         diagnosis = Diagnosis()
         diagnosis.createDatetime = current_datetime
     if diagnostic_id:
-        diagnostic = Diagnostic.get(diagnostic_id)
+        diagnostic = Diagnostic.query.get(diagnostic_id)
     else:
         diagnostic = Diagnostic()
         diagnostic.createDatetime = current_datetime
@@ -480,6 +480,8 @@ def api_diagnosis_save():
     diagnosis.character_id = safe_traverse(data, 'character', 'id')
     diagnosis.dispanser_id = safe_traverse(data, 'dispanser', 'id')
     diagnosis.traumaType_id = safe_traverse(data, 'trauma', 'id')
+    diagnosis.MKB = safe_traverse(data, 'mkb', 'code') or ''
+    diagnosis.MKBEx = safe_traverse(data, 'mkb_ex', 'code') or ''
     db.session.add(diagnosis)
 
     diagnostic.event_id = data['event_id']
@@ -497,6 +499,7 @@ def api_diagnosis_save():
     db.session.add(diagnostic)
 
     db.session.commit()
+    return jsonify(None)
 
 
 @module.route('/api/events/diagnosis.json', methods=['DELETE'])
@@ -692,7 +695,7 @@ def api_action_post():
     action.status = action_desc['status']['id']
     action.setPerson_id = safe_traverse(action_desc, 'set_person', 'id')
     action.person_id = safe_traverse(action_desc, 'person', 'id')
-    action.note = action_desc['note']
+    action.note = action_desc['note'] or ''
     action.directionDate = action_desc['direction_date']
     action.office = action_desc['office']
     action.amount = action_desc['amount']

@@ -1011,13 +1011,13 @@ class Person(db.Model, UserMixin):
     academicdegree_id = db.Column(db.Integer, db.ForeignKey('rbAcademicDegree.id'))
     academicTitle_id = db.Column(db.Integer, db.ForeignKey('rbAcademicTitle.id'))
 
-    post = db.relationship('rbPost')
-    speciality = db.relationship('rbSpeciality')
-    organisation = db.relationship('Organisation')
-    OrgStructure = db.relationship('OrgStructure')
-    academicDegree = db.relationship('rbAcademicDegree')
-    academicTitle = db.relationship('rbAcademicTitle')
-    tariffCategory = db.relationship('rbTariffCategory')
+    post = db.relationship('rbPost', lazy=False)
+    speciality = db.relationship('rbSpeciality', lazy=False)
+    organisation = db.relationship('Organisation', lazy=False)
+    OrgStructure = db.relationship('OrgStructure', lazy=False)
+    academicDegree = db.relationship('rbAcademicDegree', lazy=False)
+    academicTitle = db.relationship('rbAcademicTitle', lazy=False)
+    tariffCategory = db.relationship('rbTariffCategory', lazy=False)
     user_profiles = db.relation('rbUserProfile', secondary='Person_Profiles')
 
     @property
@@ -1449,7 +1449,7 @@ class Diagnosis(db.Model):
     diagnosisType = db.relationship('rbDiagnosisType', lazy=False, innerjoin=True)
     character = db.relationship('rbDiseaseCharacter', lazy=False)
     mkb = db.relationship('MKB', foreign_keys=[MKB])
-    mkb_ex = db.relationship('MKB', foreign_keys=[MKB])
+    mkb_ex = db.relationship('MKB', foreign_keys=[MKBEx])
     dispanser = db.relationship('rbDispanser', lazy=False)
     mod = db.relationship('Diagnosis', remote_side=[id])
     traumaType = db.relationship('rbTraumaType', lazy=False)
@@ -2304,6 +2304,13 @@ class MKB(db.Model):
 
     def __unicode__(self):
         return self.DiagID
+
+    def __json__(self):
+        return {
+            'id': self.id,
+            'code': self.DiagID,
+            'name': self.DiagName,
+        }
 
     def __int__(self):
         return self.id

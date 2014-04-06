@@ -52,11 +52,11 @@
         $scope.rbDispanser = new RefBook('rbDispanser');
         $scope.rbTraumaType = new RefBook('rbTraumaType');
         $scope.Person = new RefBook('Person');
+        $scope.rbMKB = new RefBook('MKB');
         $scope.vrbPerson = new RefBook('vrbPersonWithSpeciality');
         $scope.rbFinance = new RefBook('rbFinance');
         $scope.rbOrder = {{ Enum.get_class_by_name('EventOrder').rb() | tojson}};
         $scope.rbPrimary = {{ Enum.get_class_by_name('EventOrder').rb() | tojson}};
-{#        $scope.rbMKB = new RefBook('MKB');#}
 
         $scope.action_type_tree = [];
         $scope.action_type_popped = null;
