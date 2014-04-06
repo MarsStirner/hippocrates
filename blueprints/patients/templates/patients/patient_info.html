@@ -19,7 +19,7 @@
             <tab>
                 <tab-heading>
                     Информация о пациенте
-                    <a ng-click="start_editing();" class="glyphicon glyphicon-pencil" href="" title="Редактировать"></a>
+                    <a ng-click="start_editing();" class="btn btn-sm btn-default glyphicon glyphicon-pencil" href="" title="Редактировать"></a>
                 </tab-heading>
                 <tabset justified="false">
                     <tab heading="Основная информация">{% include "patients/main_info.html" %}</tab>
@@ -121,7 +121,7 @@
             };
 
             $scope.open_event = function(event) {
-                window.open('{{ url_for('schedule.html_event_info') }}?event_id=' + event.id, '_self')
+                window.open('{{ url_for('schedule.html_event_info') }}?event_id=' + event.id, '_blank')
             };
 
             if ($scope.client_id == 'new') {
