@@ -5,7 +5,7 @@
                 <div class="btn-group">
                     <a class="btn btn-sm btn-default navbar-btn" href="/" title="Главная страница"><span class="glyphicon glyphicon-home"></span></a>
                     {% for item in main_menu -%}
-                        <a class="btn btn-sm btn-default navbar-btn{% if request.blueprint == item.module %}{% endif %}" href="{{ url_for(item.module + '.index') }}" title="{{ item.name }}">{{ item.name }}</a>
+                        <a class="btn btn-sm btn-default navbar-btn{% if request.blueprint == item.module %} active{% endif %}" href="{{ url_for(item.module + '.index') }}" title="{{ item.name }}">{{ item.name }}</a>
                     {% endfor %}
                 </div>
             </li>
