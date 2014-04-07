@@ -1,6 +1,5 @@
 {% extends 'schedule/base.html' %}
 {% import 'schedule/_person_tree.html' as person_tree %}
-{% import "schedule/_schedule_macros.html" as schedule_macros %}
 
 {% block main %}
     <div ng-controller="DayFree">
@@ -13,11 +12,8 @@
                     <ul class="list-group" ng-if="source">
                         <li class="list-group-item" ng-repeat="ticket in filtered_tickets = (source[reception_type] | filter:'busy':true)"
                                 ng-class="{'list-group-item-info': (ticket == selectedSourceTicket)}">
-                            {{ schedule_macros.ticket_btn(
-                                ticket='ticket',
-                                showName=True,
-                                ngClick='selectSourceTicket(ticket)'
-                            ) }}
+                            <button ui-schedule-ticket="ticket" day="day" show-name="true"
+                                    ng-click="selectSourceTicket(ticket)"></button>
                         </li>
                         <li class="list-group-item" ng-if="!filtered_tickets.length">
                             <button class="btn btn-block btn-success" ng-click="back2monthview()">
@@ -34,12 +30,8 @@
                     </div>
                     <ul class="list-group" ng-if="destination">
                         <li class="list-group-item" ng-repeat="ticket in destination[reception_type]">
-                            {{ schedule_macros.ticket_btn(
-                                ticket='ticket',
-                                showName=True,
-                                roa='roa',
-                                ngClick='pasteSourceTicket(ticket)'
-                            ) }}
+                            <button ui-schedule-ticket="ticket" day="day" show-name="true"
+                                    ng-click="pasteSourceTicket(ticket)"></button>
                         </li>
                     </ul>
                 </div>
@@ -131,10 +123,9 @@
                 $http.post('{{ url_for('.api_move_client') }}', {
                     ticket_id: $scope.selectedSourceTicket.id,
                     destination_ticket_id: ticket.id
-                }).then(function () {
-                    loadSchedule();
-                    $scope.reloadSchedule();
                 })
+                .success($scope.reloadSchedule)
+                .success(loadSchedule)
             };
 
             $scope.$on('PersonSelected', function (event, person) {

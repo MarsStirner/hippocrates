@@ -160,14 +160,16 @@
                                 expand: 1
                             }
                         }
-                    ).success(function (data) {
-                        var d = data.result['schedules'][0];
-                        $scope.person = d.person;
-                        $scope.grouped = d.grouped;
-                        make_week();
-                    })
+                    ).success(make_schedule)
                 }
             };
+
+            function make_schedule (data) {
+                var d = data.result['schedules'][0];
+                $scope.person = d.person;
+                $scope.grouped = d.grouped;
+                make_week();
+            }
 
             var make_week = function () {
                 var first_weekday = $scope.monthDate.weekday();
@@ -215,16 +217,18 @@
             };
 
             $scope.finish_editing = function () {
-                $http.post('{{ url_for('.api_schedule_description_post') }}', {
+                $http.post(
+                    '{{ url_for('.api_schedule_description_post') }}', {
                     receptionType: $scope.reception_type,
                     person_id: $scope.person_id,
                     schedule: $scope.grouped[$scope.reception_type]['schedule'].filter(function (day) {
                         return day.altered;
-                    })
+                    }),
+                    start_date: $scope.monthDate.format('YYYY-MM')
                 }).success(function () {
                     $scope.editing = false;
                     $scope.selected_days = [];
-                    $scope.reloadSchedule();
+                    make_schedule(data);
                 });
             };
 

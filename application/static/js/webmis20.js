@@ -348,6 +348,64 @@ WebMis20.directive('uiMkb', function ($timeout) {
         }
     }
 });
+WebMis20.directive('uiScheduleTicket', ['$compile', function ($compile) {
+    return {
+        restrict: 'A',
+        scope: {
+            day: '=day',
+            showName: '=showName',
+            ticket: '=uiScheduleTicket'
+        },
+        link: function (scope, element, attributes) {
+            var elem = $(element);
+            elem.addClass('btn btn-block');
+            scope.$watch('ticket.status', function (n, o) {
+                if (!scope.ticket) {
+                    elem.html('&nbsp');
+                    return
+                }
+                var text = '';
+                if (scope.ticket.attendance_type.code == 'planned') {
+                    text = moment(scope.ticket.begDateTime).format('HH:mm')
+                } else if (scope.ticket.attendance_type.code == 'CITO') {
+                    text = 'CITO'
+                } else if (scope.ticket.attendance_type.code == 'extra') {
+                    text = 'Сверх плана'
+                }
+                if (n == 'busy') {
+                    elem.removeClass('btn-success btn-warning btn-gray disabled');
+                    elem.addClass('btn-danger');
+                    if (scope.showName) {
+                        text += ' - ' + scope.ticket.client
+                    }
+                } else {
+                    elem.removeClass('btn-danger');
+                    if (scope.ticket.attendance_type.code == 'planned') {
+                        elem.addClass('btn-success')
+                    } else if (scope.ticket.attendance_type.code == 'CITO') {
+                        elem.addClass('btn-warning')
+                    } else if (scope.ticket.attendance_type.code == 'extra') {
+                        elem.addClass('btn-gray')
+                    }
+                    var now = moment();
+                    var time;
+                    if (scope.ticket.begDateTime) {
+                        if (scope.day.roa || moment(scope.ticket.begDateTime) < now) {
+                            elem.addClass('disabled');
+                        }
+                    } else {
+                        if (scope.day.roa || moment(scope.day.date) < now.startOf('day')) {
+                            elem.addClass('disabled');
+                        }
+                    }
+
+                }
+                elem.html(text);
+            });
+
+        }
+    }
+}]);
 WebMis20.directive('uiActionProperty', ['$compile', function ($compile) {
     return {
         restrict: 'A',

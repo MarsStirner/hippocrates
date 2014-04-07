@@ -183,10 +183,7 @@ def jsonify(obj, result_code=200, result_name='OK'):
             }
         }, indent=indent, cls=WebMisJsonEncoder, encoding='utf-8', ensure_ascii=False),
         200,
-        [('content-type', 'application/json; charset=utf-8'),
-         ('Expires', 'Thu, 20 Mar 2014 23:59:58 GMT'),
-            ('Cache-Control', 'max-age=43200')
-        ]
+        [('content-type', 'application/json; charset=utf-8'),]
     )
 
 

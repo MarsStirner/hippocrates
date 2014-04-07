@@ -1,12 +1,11 @@
 {%- extends 'schedule/base.html' -%}
 {%- import "schedule/_appointment.html" as appointment -%}
 {%- import "schedule/_person_tree.html" as person_tree -%}
-{% import "schedule/_schedule_macros.html" as schedule_macros %}
 {% block title %}> {{ module_name }}{% endblock %}
 
 {% block main %}
     <div>
-        <legend xmlns="http://www.w3.org/1999/html">Запись пациента на прием - {{ client.nameText }}</legend>
+        <legend xmlns="http://www.w3.org/1999/html">Запись пациента на прием - <a href="{{ url_for('patients.patient', client_id=client.id) }}">{{ client.nameText }}</a></legend>
         <div class="row">
             <div class="col-md-9" ng-controller="Schedules">
                 <script type="text/ng-template" id="makeAppointment.html">{{ appointment.html_make() }}</script>
@@ -60,10 +59,9 @@
                                 <tbody ng-if="person_schedule.grouped[reception_type].max_tickets > 0">
                                 <tr ng-repeat="row in aux.range(person_schedule.grouped[reception_type].max_tickets)">
                                     <td ng-repeat="day in person_schedule.grouped[reception_type].schedule">
-                                        {{ schedule_macros.ticket_btn(
-                                            ticket='day.tickets[row]',
-                                            ngClick="appointment_toggle(day.tickets[row], person_schedule.person)",
-                                            showName=False) }}
+                                        <button ui-schedule-ticket="day.tickets[row]" day="day" show-name="false"
+                                                ng-click="appointment_toggle(day.tickets[row], person_schedule.person)">
+                                        </button>
                                     </td>
                                 </tr>
                                 </tbody>
