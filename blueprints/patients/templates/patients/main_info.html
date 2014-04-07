@@ -1,11 +1,7 @@
-<table class="table table-condensed" ng-hide="editing">
-    <tbody>
-        <tr ng-repeat="key in clientMainInfoCodeOrder" ng-if="client.client_info[key]">
-            <td>[[ clientInfoCode2Name[key] ]]</td>
-            <td>[[ aux.format(client.client_info, key) ]]</td>
-        </tr>
-    </tbody>
-</table>
+<dl class="dl-horizontal" ng-hide="editing">
+    <dt ng-repeat-start="key in clientMainInfoCodeOrder" ng-if="client.client_info[key]">[[ clientInfoCode2Name[key] ]]</dt>
+    <dd ng-repeat-end>[[ aux.format(client.client_info, key) ]]</dd>
+</dl>
 <form name="client_form_tab1" class="form-horizontal container-fluid" role="form" ng-show="editing">
     <div class="panel panel-default">
         <div class="panel-body">

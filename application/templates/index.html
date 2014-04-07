@@ -10,7 +10,43 @@
   <div id="container" class="container">
     {% block content %}
       <!-- Jumbotron -->
-      <div class="jumbotron"><h2>Добро пожаловать!</h2></div>
+      <div class="well">
+          <h2>Добро пожаловать, {% if current_user.firstName %}{{ current_user.firstName }}{% else %}{{ current_user.lastName }}{% endif %}!</h2><p>{{ lipsum(1, max=40) }}</p>
+
+      </div>
+        <div class="row">
+          <div class="col-md-4">
+            <div class="thumbnail">
+              <a href="{{ url_for('patients.index') }}" title="К поиску пациентов"><img alt="300x200" data-src="holder.js/300x200" style="width: 100%; height: 200px;" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMjAwIj48cmVjdCB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2VlZSIvPjx0ZXh0IHRleHQtYW5jaG9yPSJtaWRkbGUiIHg9IjE1MCIgeT0iMTAwIiBzdHlsZT0iZmlsbDojYWFhO2ZvbnQtd2VpZ2h0OmJvbGQ7Zm9udC1zaXplOjE5cHg7Zm9udC1mYW1pbHk6QXJpYWwsSGVsdmV0aWNhLHNhbnMtc2VyaWY7ZG9taW5hbnQtYmFzZWxpbmU6Y2VudHJhbCI+MzAweDIwMDwvdGV4dD48L3N2Zz4="></a>
+              <div class="caption">
+                <h3>Пациенты</h3>
+                <p>У вас сегодня назначен приём пациентов <h4><span class="label label-warning">15 пациентов</span> <span class="label label-danger">3 экстренных</span></h4></p>
+                <p><a role="button" class="btn btn-primary btn-lg btn-block" href="{{ url_for('patients.index') }}">К поиску пациентов</a></p>
+              </div>
+            </div>
+          </div>
+            <div class="col-md-4">
+            <div class="thumbnail">
+              <a href="{{ url_for('schedule.index') }}" title="К расписанию"><img alt="300x200" data-src="holder.js/300x200" style="width: 100%; height: 200px;" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMjAwIj48cmVjdCB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2VlZSIvPjx0ZXh0IHRleHQtYW5jaG9yPSJtaWRkbGUiIHg9IjE1MCIgeT0iMTAwIiBzdHlsZT0iZmlsbDojYWFhO2ZvbnQtd2VpZ2h0OmJvbGQ7Zm9udC1zaXplOjE5cHg7Zm9udC1mYW1pbHk6QXJpYWwsSGVsdmV0aWNhLHNhbnMtc2VyaWY7ZG9taW5hbnQtYmFzZWxpbmU6Y2VudHJhbCI+MzAweDIwMDwvdGV4dD48L3N2Zz4="></a>
+              <div class="caption">
+                <h3>Расписание</h3>
+                <p>График приёма на сегодня <h4><span class="label label-warning">10:00 - 17:00</span></h4></p>
+                <p><a role="button" class="btn btn-primary btn-lg btn-block" href="{{ url_for('schedule.index') }}">К расписанию</a></p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="thumbnail">
+              <a href="{{ url_for('schedule.person_schedule_monthview') }}" title="К формированию расписания"><img alt="300x200" data-src="holder.js/300x200" style="width: 100%; height: 200px;" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMjAwIj48cmVjdCB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2VlZSIvPjx0ZXh0IHRleHQtYW5jaG9yPSJtaWRkbGUiIHg9IjE1MCIgeT0iMTAwIiBzdHlsZT0iZmlsbDojYWFhO2ZvbnQtd2VpZ2h0OmJvbGQ7Zm9udC1zaXplOjE5cHg7Zm9udC1mYW1pbHk6QXJpYWwsSGVsdmV0aWNhLHNhbnMtc2VyaWY7ZG9taW5hbnQtYmFzZWxpbmU6Y2VudHJhbCI+MzAweDIwMDwvdGV4dD48L3N2Zz4="></a>
+              <div class="caption">
+                <h3>Формировать расписание</h3>
+                <p>Расписание заведено на период</p>
+                <h4><span class="label label-warning">07.04.14 - 31.05.14</span></h4>
+                <p><a role="button" class="btn btn-primary btn-lg btn-block" href="{{ url_for('schedule.person_schedule_monthview') }}">К формированию расписания</a></p>
+              </div>
+            </div>
+          </div>
+      </div>
       {% endblock %}
    </div> <!-- /container -->
    <div id="push"></div>
