@@ -412,6 +412,8 @@ class ClientVisualizer(object):
             'execDate': event.execDate,
             'person': self.make_person(event.execPerson),
             'requestType': event.eventType.requestType,
+            'event_type': event.eventType,
+            'result': event.result,
         }
 
 
