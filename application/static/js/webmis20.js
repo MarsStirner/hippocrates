@@ -313,7 +313,11 @@ WebMis20.directive('uiMkb', function ($timeout) {
             scope.shown = false;
             scope.query='';
             scope.to_show = function () {
-                scope.query = ngModel.$modelValue.code;
+                if (ngModel.$modelValue) {
+                    scope.query = ngModel.$modelValue.code;
+                } else {
+                    scope.query = '';
+                }
                 div_elem.width(input_elem.width());
                 scope.shown = true;
             };
