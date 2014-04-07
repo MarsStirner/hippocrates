@@ -1,24 +1,19 @@
 # -*- encoding: utf-8 -*-
 from flask import render_template, abort, request, redirect, url_for, flash, session, current_app
-from flask.views import MethodView
-
-from jinja2 import TemplateNotFound
-from wtforms import TextField, PasswordField, IntegerField
-from flask_wtf import Form
-from wtforms.validators import Required
 from flask.ext.principal import Identity, AnonymousIdentity, identity_changed
 from flask.ext.principal import identity_loaded, Permission, RoleNeed, UserNeed, ActionNeed
 from flask.ext.login import login_user, logout_user, login_required, current_user
 
 from application.app import app, db, login_manager
-from application.context_processors import general_menu
-from .lib.utils import public_endpoint, jsonify, roles, permissions
+from application.context_processors import *
+from .lib.utils import public_endpoint, jsonify, roles_require, rights_require
 from application.models import actions
-from lib.user import UserAuth
+from lib.user import UserAuth, AnonymousUser
 from forms import LoginForm
 
 
 login_manager.login_view = 'login'
+login_manager.anonymous_user = AnonymousUser
 
 
 @app.before_request
@@ -28,12 +23,11 @@ def check_valid_login():
     if (request.endpoint and
             'static' not in request.endpoint and
             not login_valid and
+            not current_user.is_admin() and
             not getattr(app.view_functions[request.endpoint], 'is_public', False)):
         return redirect(url_for('login', next=url_for(request.endpoint)))
 
 
-# @roles.personal.require()
-# @permissions.adm.require()
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -47,7 +41,7 @@ def login():
     errors = list()
     # Validate form input
     if form.validate_on_submit():
-        user = UserAuth.check_user(form.login.data.strip(), form.password.data.strip())
+        user = UserAuth.auth_user(form.login.data.strip(), form.password.data.strip())
         if user:
             # Keep the user info in the session using Flask-Login
             login_user(user)
@@ -88,7 +82,13 @@ def api_refbook(name):
 @app.errorhandler(403)
 def authorisation_failed(e):
     flash(u'У вас недостаточно привилегий для доступа к функционалу')
-    return render_template('user/denied.html')
+    return render_template('user/denied.html'), 403
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+    flash(u'Указанный вами адрес не найден')
+    return render_template('404.html'), 404
 
 
 #########################################
@@ -102,17 +102,16 @@ def load_user(user_id):
 @identity_loaded.connect_via(app)
 def on_identity_loaded(sender, identity):
     # Set the identity user object
-    if identity.id:
-        identity.user = load_user(identity.id)
+    identity.user = current_user
 
-        # Add the UserNeed to the identity
-        if hasattr(identity.user, 'id'):
-            identity.provides.add(UserNeed(identity.user.id))
+    # Add the UserNeed to the identity
+    if hasattr(identity.user, 'id'):
+        identity.provides.add(UserNeed(identity.user.id))
 
-        # Assuming the User model has a list of roles, update the
-        # identity with the roles that the user provides
-        if hasattr(identity.user, 'user_profiles'):
-            for role in identity.user.user_profiles:
-                identity.provides.add(RoleNeed(role.code))
-                for right in getattr(role, 'rights', []):
-                    identity.provides.add(ActionNeed(right.code))
+    # Assuming the User model has a list of roles, update the
+    # identity with the roles that the user provides
+    if hasattr(identity.user, 'user_profiles'):
+        for role in identity.user.user_profiles:
+            identity.provides.add(RoleNeed(role.code))
+            for right in getattr(role, 'rights', []):
+                identity.provides.add(ActionNeed(right.code))

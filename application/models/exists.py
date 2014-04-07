@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*
 import datetime
-from flask.ext.login import UserMixin
 from application.database import db
 from application.lib.agesex import AgeSex, calcAgeTuple
 from application.models.kladr_models import Kladr, Street
@@ -953,7 +952,7 @@ class OrgStructure(db.Model):
         }
 
 
-class Person(db.Model, UserMixin):
+class Person(db.Model):
     __tablename__ = 'Person'
     __table_args__ = (
         db.Index(u'lastName', u'lastName', u'firstName', u'patrName'),
@@ -1051,9 +1050,6 @@ class Person(db.Model, UserMixin):
 
     def __int__(self):
         return self.id
-
-    def is_active(self):
-        return self.deleted == 0
 
 
 class rbAcademicDegree(db.Model):

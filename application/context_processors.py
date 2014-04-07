@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from application.app import app
 from werkzeug.utils import import_string
-from flask.ext.login import current_user
 from datetime import datetime
 
 
@@ -13,6 +12,7 @@ def copyright():
 @app.context_processor
 def print_subsystem():
     return dict(print_subsystem_url=app.config['PRINT_SUBSYSTEM_URL'])
+
 
 @app.context_processor
 def general_menu():
@@ -30,13 +30,3 @@ def general_menu():
                 menu_items.append(dict(module=v.name, name=v.name))
 
     return dict(main_menu=menu_items)
-
-
-@app.context_processor
-def user_role():
-    roles = getattr(current_user, 'roles', [])
-    if len(roles):
-        current_user.role = roles[0].code
-    else:
-        current_user.role = None
-    return dict()
