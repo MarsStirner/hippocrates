@@ -1,6 +1,5 @@
 {% extends 'schedule/base.html' %}
 {% import "schedule/_person_tree.html" as person_tree %}
-{% import "schedule/_schedule_macros.html" as schedule_macros %}
 
 {% block title %}> {{ module_name }}{% endblock %}
 
@@ -53,9 +52,8 @@
                         <tbody ng-if="grouped[reception_type].max_tickets > 0">
                         <tr ng-repeat="row in aux.range(grouped[reception_type].max_tickets)">
                             <td ng-repeat="day in grouped[reception_type].schedule">
-                                {{ schedule_macros.ticket_btn(
-                            ticket='day.tickets[row]',
-                            showName=True) }}
+                                <button ui-schedule-ticket="day.tickets[row]" day="day" show-name="true"
+                                        ng-click="pasteSourceTicket(ticket)"></button>
                             </td>
                         </tr>
                         </tbody>
