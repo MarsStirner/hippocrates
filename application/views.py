@@ -6,13 +6,14 @@ from flask.ext.login import login_user, logout_user, login_required, current_use
 
 from application.app import app, db, login_manager
 from application.context_processors import *
-from .lib.utils import public_endpoint, jsonify, roles, permissions
+from .lib.utils import public_endpoint, jsonify, roles_require, rights_require
 from application.models import actions
-from lib.user import UserAuth
+from lib.user import UserAuth, AnonymousUser
 from forms import LoginForm
 
 
 login_manager.login_view = 'login'
+login_manager.anonymous_user = AnonymousUser
 
 
 @app.before_request
@@ -27,8 +28,6 @@ def check_valid_login():
         return redirect(url_for('login', next=url_for(request.endpoint)))
 
 
-# @roles.personal.require()
-# @permissions.adm.require()
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -83,13 +82,13 @@ def api_refbook(name):
 @app.errorhandler(403)
 def authorisation_failed(e):
     flash(u'У вас недостаточно привилегий для доступа к функционалу')
-    return render_template('user/denied.html')
+    return render_template('user/denied.html'), 403
 
 
 @app.errorhandler(404)
 def page_not_found(e):
     flash(u'Указанный вами адрес не найден')
-    return render_template('404.html')
+    return render_template('404.html'), 404
 
 
 #########################################
