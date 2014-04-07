@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from application.database import db
 from application.models.exists import Person
-from flask.ext.login import UserMixin
+from flask.ext.login import UserMixin, AnonymousUserMixin
 import hashlib
 
 
@@ -18,7 +18,7 @@ class User(UserMixin):
         return self.__person.deleted == 0
 
     def is_admin(self):
-        return self.has_right('admin')
+        return self.has_role('admin')
 
     def has_role(self, role):
         # what about list?
@@ -54,6 +54,12 @@ class User(UserMixin):
 
     def __getattr__(self, name):
         return getattr(self.__person, name)
+
+
+class AnonymousUser(AnonymousUserMixin):
+
+    def is_admin(self):
+        return False
 
 
 class UserAuth():

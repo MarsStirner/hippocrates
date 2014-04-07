@@ -2,9 +2,11 @@
 import datetime
 import json
 import uuid
+from functools import wraps
 from decimal import Decimal
-from flask import g, current_app, request
-from flask.ext.principal import Permission, RoleNeed, ActionNeed
+from flask import g, current_app, request, abort
+from flask.ext.principal import Permission, RoleNeed, ActionNeed, PermissionDenied
+from flask.ext.login import current_user
 from application.database import db
 from application.models.exists import rbUserProfile, UUID, rbCounter, EventType, ClientIdentification, \
     rbAccountingSystem
@@ -54,14 +56,64 @@ with app.app_context():
     user_roles = db.session.query(rbUserProfile).all()
     if user_roles:
         for role in user_roles:
-            _roles[role.code] = Permission(RoleNeed(role.code))
-            # _roles[role.code].name = role.name
+            if role.code:
+                _roles[role.code] = Permission(RoleNeed(role.code))
+                # _roles[role.code].name = role.name
             for right in getattr(role, 'rights', []):
-                if right.code not in _permissions:
+                if right.code and right.code not in _permissions:
                     _permissions[right.code] = Permission(ActionNeed(right.code))
                     # _permissions[right.code].name = right.name
-    roles = Bunch(**_roles)
-    permissions = Bunch(**_permissions)
+    # roles = Bunch(**_roles)
+    # permissions = Bunch(**_permissions)
+
+
+def roles_require(*role_codes):
+    http_exception = 403
+
+    def factory(func):
+        @wraps(func)
+        def decorator(*args, **kwargs):
+            if current_user.is_admin():
+                return func(*args, **kwargs)
+            checked_roles = list()
+            for role_code in role_codes:
+                if role_code in _roles:
+                    role_permission = _roles[role_code]
+                    role_permission.require(http_exception)
+                    if role_permission.can():
+                        return func(*args, **kwargs)
+                    checked_roles.append(role_permission)
+            if http_exception:
+                abort(http_exception, checked_roles)
+            raise PermissionDenied(checked_roles)
+        return decorator
+
+    return factory
+
+
+def rights_require(*right_codes):
+    http_exception = 403
+
+    def factory(func):
+        @wraps(func)
+        def decorator(*args, **kwargs):
+            if current_user.is_admin():
+                return func(*args, **kwargs)
+            checked_rights = list()
+            for right_code in right_codes:
+                if right_code in _permissions:
+                    right_permission = _permissions[right_code]
+                    right_permission.require(http_exception)
+                    if right_permission.can():
+                        return func(*args, **kwargs)
+                    checked_rights.append(right_permission)
+            if http_exception:
+                abort(http_exception, checked_rights)
+            raise PermissionDenied(checked_rights)
+        return decorator
+
+    return factory
+
 
 # инициализация логгера
 from config import DEBUG, PROJECT_NAME, SIMPLELOGS_URL
