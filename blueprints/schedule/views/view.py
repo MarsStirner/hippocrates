@@ -12,7 +12,6 @@ from . import api_html, api_json
 
 
 @module.route('/')
-@public_endpoint
 def index():
     try:
         return render_template('schedule/index.html')
@@ -21,7 +20,6 @@ def index():
 
 
 @module.route('/doctors/')
-@public_endpoint
 def doctors():
     try:
         return render_template('schedule/doctors.html')
@@ -30,7 +28,6 @@ def doctors():
 
 
 @module.route('/appointment/')
-@public_endpoint
 def appointment():
     try:
         client_id = int(request.args['client_id'])
@@ -46,7 +43,6 @@ def appointment():
 
 
 @module.route('/person_month/')
-@public_endpoint
 def person_schedule_monthview():
     try:
         return render_template('schedule/person_schedule_monthview.html')
@@ -55,12 +51,10 @@ def person_schedule_monthview():
 
 
 @module.route('/day_free.html')
-@public_endpoint
 def html_day_free():
     return render_template('schedule/day_free.html')
 
 @module.route('/event.html')
-@public_endpoint
 def html_event_info():
     # event_id = int(request.args['event_id'])
     return render_template(
@@ -69,13 +63,11 @@ def html_event_info():
 
 
 @module.route('/event_new.html')
-@public_endpoint
 def new_event():
     return render_template('schedule/client_event/new_event.html')
 
 
 @module.route('/action.html')
-@public_endpoint
 def html_action():
     return render_template(
         'schedule/action.html'

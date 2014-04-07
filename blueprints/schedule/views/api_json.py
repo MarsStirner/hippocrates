@@ -26,7 +26,6 @@ __author__ = 'mmalkov'
 
 
 @module.route('/api/schedule.json')
-@public_endpoint
 def api_schedule():
     person_id_s = request.args.get('person_ids')
     client_id_s = request.args.get('client_id')
@@ -85,7 +84,6 @@ def api_schedule():
 
 
 @module.route('/api/schedule-description.json', methods=['GET'])
-@public_endpoint
 def api_schedule_description():
     person_id_s = request.args.get('person_ids')
     start_date_s = request.args.get('start_date')
@@ -115,7 +113,6 @@ def api_schedule_description():
 
 
 @module.route('/api/schedule-description.json', methods=['POST'])
-@public_endpoint
 def api_schedule_description_post():
     def make_default_ticket(schedule):
         ticket = ScheduleTicket()
@@ -233,7 +230,6 @@ def api_schedule_description_post():
 
 
 @module.route('/api/all_persons_tree.json')
-@public_endpoint
 def api_all_persons_tree():
     sub_result = defaultdict(list)
     persons = Person.query.\
@@ -260,7 +256,6 @@ def api_all_persons_tree():
 
 
 @module.route('/api/search_persons.json')
-@public_endpoint
 def api_search_persons():
     try:
         query_string = request.args['q']
@@ -284,7 +279,6 @@ def api_search_persons():
     # Следующие 2 функции следует привести к приличному виду - записывать id создавших, проверки, ответы
 
 @module.route('/api/appointment_cancel.json')
-@public_endpoint
 def api_appointment_cancel():
     try:
         client_id = int(request.args['client_id'])
@@ -302,7 +296,6 @@ def api_appointment_cancel():
 
 
 @module.route('/api/appointment_make.json')
-@public_endpoint
 def api_appointment_make():
     try:
         client_id = int(request.args['client_id'])
@@ -325,7 +318,6 @@ def api_appointment_make():
 
 
 @module.route('/api/schedule_lock.json', methods=['POST'])
-@public_endpoint
 def api_schedule_lock():
     j = request.json
     try:
@@ -350,7 +342,6 @@ def api_schedule_lock():
 
 
 @module.route('/api/move_client.json', methods=['POST'])
-@public_endpoint
 def api_move_client():
     j = request.json
     try:
@@ -382,7 +373,6 @@ def api_move_client():
 
 
 @module.route('/api/event_info.json')
-@public_endpoint
 def api_event_info():
     event_id = int(request.args['event_id'])
     event = Event.query.get(event_id)
@@ -397,7 +387,6 @@ def api_event_info():
 
 
 @module.route('/api/event_new.json', methods=['GET'])
-@public_endpoint
 def api_event_new_get():
     client_id = int(request.args['client_id'])
     event = Event()
@@ -409,7 +398,6 @@ def api_event_new_get():
 
 
 @module.route('api/event_save.json', methods=['POST'])
-@public_endpoint
 def api_event_save():
     data = request.json
     now = datetime.datetime.now()
@@ -462,7 +450,6 @@ def api_event_save():
 
 
 @module.route('/api/events/diagnosis.json', methods=['POST'])
-@public_endpoint
 def api_diagnosis_save():
     current_datetime = datetime.datetime.now()
     from application.models.exists import Diagnosis, Diagnostic
@@ -511,7 +498,6 @@ def api_diagnosis_save():
 
 
 @module.route('/api/events/diagnosis.json', methods=['DELETE'])
-@public_endpoint
 def api_diagnosis_delete():
     from application.models.exists import Diagnosis, Diagnostic
     data = request.json
@@ -522,7 +508,6 @@ def api_diagnosis_delete():
 
 
 @module.route('/api/actions', methods=['GET'])
-@public_endpoint
 def api_action_get():
     from application.models.actions import Action
     action_id = int(request.args.get('action_id'))
@@ -538,7 +523,6 @@ def api_action_get():
 
 
 @module.route('/api/actions/new.json', methods=['GET'])
-@public_endpoint
 def api_action_new_get():
 
     # Preparación de datos de entrada
@@ -628,7 +612,6 @@ def api_action_new_get():
 
 
 @module.route('/api/actions', methods=['POST'])
-@public_endpoint
 def api_action_post():
     now = datetime.datetime.now()
     action_desc = request.json
@@ -731,7 +714,6 @@ def api_action_post():
 
 
 @module.route('/api/action-type-list.json')
-@public_endpoint
 def api_atl_get():
     at_class = int(request.args['at_class'])
     if not (0 <= at_class < 4):

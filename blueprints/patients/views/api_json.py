@@ -31,7 +31,6 @@ def handle_client_error(err):
 
 
 @module.route('/api/search_clients.json')
-@public_endpoint
 def api_search_clients():
     try:
         query_string = request.args['q']
@@ -56,7 +55,6 @@ def api_search_clients():
 
 
 @module.route('/api/patient.json')
-@public_endpoint
 def api_patient_get():
     try:
         client_id = request.args['client_id']
@@ -83,7 +81,6 @@ def api_patient_get():
 
 
 @module.route('/api/save_patient_info.json', methods=['POST'])
-@public_endpoint
 def api_patient_save():
     j = request.json
     try:

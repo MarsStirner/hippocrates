@@ -14,7 +14,6 @@ from . import api_html, api_json
 
 
 @module.route('/')
-@public_endpoint
 def index():
     try:
         return render_template('patients/index.html')
@@ -23,7 +22,6 @@ def index():
 
 
 @module.route('/patient')
-@public_endpoint
 def patient():
     try:
         client_id = request.args['client_id']
