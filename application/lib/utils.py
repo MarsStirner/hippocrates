@@ -6,7 +6,8 @@ from decimal import Decimal
 from flask import g, current_app, request
 from flask.ext.principal import Permission, RoleNeed, ActionNeed
 from application.database import db
-from application.models.exists import rbUserProfile, UUID
+from application.models.exists import rbUserProfile, UUID, rbCounter, EventType, ClientIdentification, \
+    rbAccountingSystem
 from application.app import app
 from pysimplelogs.logger import SimpleLogger
 
@@ -180,3 +181,61 @@ def get_new_uuid():
     uuid_model.uuid = new_uuid
 
     return uuid_model
+
+
+def get_new_event_ext_id(event_type_id, client_id):
+    """Формирование externalId (номер обращения/истории болезни)."""
+    et = EventType.query.get(event_type_id)
+    if not et.counter_id:
+        return ''
+
+    counter = rbCounter.query.filter_by(id=et.counter_id).with_for_update().first()
+    # todo: check for update
+    if not counter:
+        return ''
+    external_id = _get_external_id_from_counter(counter.prefix,
+                                                counter.value + 1,
+                                                counter.separator,
+                                                client_id)
+    counter.value += 1
+    db.session.add(counter)
+    return external_id
+
+
+def _get_external_id_from_counter(prefix, value, separator, client_id):
+    def get_date_prefix(val):
+        val = val.replace('Y', 'y').replace('m', 'M').replace('D', 'd')
+        if val.count('y') not in [0, 2, 4] or val.count('M') > 2 or val.count('d') > 2:
+            return None
+        # qt -> python date format
+        _map = {'yyyy': '%Y', 'yy': '%y', 'mm': '%m', 'dd': '%d'}
+        try:
+            format_ = _map.get(val, '%Y')
+            date_val = datetime.date.today().strftime(format_)
+            check = datetime.datetime.strptime(date_val, format_)
+        except ValueError, e:
+            print e
+            return None
+        return date_val
+
+    def get_id_prefix(val):
+        if val == '':
+            return str(client_id)
+        ext_val = ClientIdentification.query.join(rbAccountingSystem).filter(
+            ClientIdentification.client_id == client_id, rbAccountingSystem.code == val).first()
+        return ext_val.identifier if ext_val else None
+
+    prefix_types = {'date': get_date_prefix, 'id': get_id_prefix}
+
+    prefix_parts = prefix.split(';')
+    prefix = []
+    for p in prefix_parts:
+        for t in prefix_types:
+            pos = p.find(t)
+            if pos == 0:
+                val = p[len(t):]
+                if val.startswith('(') and val.endswith(')'):
+                    val = prefix_types[t](val[1:-1])
+                    if val:
+                        prefix.append(val)
+    return separator.join(prefix + ['%d' % value])

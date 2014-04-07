@@ -77,8 +77,8 @@ class ActionProperty(db.Model):
     version = db.Column(db.Integer, nullable=False, server_default=u"'0'")
 
     action = db.relationship(u'Action')
-    type = db.relationship(u'ActionPropertyType')
-    unit = db.relationship(u'rbUnit')
+    type = db.relationship(u'ActionPropertyType', lazy=False, innerjoin=True)
+    unit = db.relationship(u'rbUnit', lazy=False)
 
     @property
     def valueTypeClass(self):
@@ -900,6 +900,18 @@ class JobTicket(db.Model):
         return u'%s, %s, %s' % (unicode(self.jobType),
                                 unicode(self.datetime),
                                 unicode(self.orgStructure))
+
+    def __json__(self):
+        return {
+            'id': self.id,
+            'job': self.job,
+            'datetime': self.datetime,
+            'status': self.status,
+            'beg_datetime': self.begDateTime,
+            'end_datetime': self.endDateTime,
+            'label': self.label,
+            'note': self.note,
+        }
 
 
 class rbJobType(db.Model):

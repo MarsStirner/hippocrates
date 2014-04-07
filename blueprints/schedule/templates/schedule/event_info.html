@@ -1,8 +1,24 @@
 {% extends "schedule/base.html" %}
+
 {% import "schedule/client_event/action_list.html" as action_list %}
+
+{% block modules_css %}
+    {{ super() }}
+    <style>
+        .list-no-border .list-group-item {
+            border: 0;
+        }
+        .list-no-border li div {
+            display: inline-block;
+        }
+    </style>
+{% endblock %}
+
 {% block main %}
-    <div ng-controller="EventInfoCtrl">
-    <legend xmlns="http://www.w3.org/1999/html">[[ event_info.client ]]</legend>
+    <div ng-controller="EventInfoCtrl" class="ng-cloak">
+    <legend xmlns="http://www.w3.org/1999/html">Обращение № [[event_info.external_id]], пациент
+        <a href="{{ url_for('patients.patient') }}?client_id=[[event_info.client_id]]">
+                [[ event_info.client.fullName ]]</a></legend>
     <tabset>
         <tab><tab-heading>Основная Информация</tab-heading>{% include "schedule/client_event/main.html" %}</tab>
         <tab><tab-heading>Медицинские документы</tab-heading>
@@ -21,7 +37,8 @@
 
 {% block modules_js %}
     <script>
-    WebMis20.controller('EventInfoCtrl', ['$scope', '$http', 'RefBook', '$window', function ($scope, $http, RefBook, $window) {
+    WebMis20.controller('EventInfoCtrl', ['$scope', '$http', 'RefBook', '$window',
+                        function ($scope, $http, RefBook, $window) {
         $scope.aux = aux;
         $scope.event_info = null;
         $scope.event_id = aux.getQueryParams(location.search).event_id;
@@ -35,7 +52,9 @@
         $scope.rbDispanser = new RefBook('rbDispanser');
         $scope.rbTraumaType = new RefBook('rbTraumaType');
         $scope.Person = new RefBook('Person');
-{#        $scope.rbMKB = new RefBook('MKB');#}
+        $scope.rbMKB = new RefBook('MKB');
+        $scope.vrbPerson = new RefBook('vrbPersonWithSpeciality');
+        $scope.rbFinance = new RefBook('rbFinance');
         $scope.rbOrder = {{ Enum.get_class_by_name('EventOrder').rb() | tojson}};
         $scope.rbPrimary = {{ Enum.get_class_by_name('EventOrder').rb() | tojson}};
 
@@ -47,6 +66,22 @@
             } else {
                 $scope.action_type_popped = at_class;
             }
+        };
+
+        $scope.event_edit_list = [];
+        $scope.start_edit = function(element) {
+            $scope.event_edit_list.push(element);
+        };
+
+        $scope.stop_edit = function(element) {
+            $scope.event_edit_list.splice($scope.event_edit_list.indexOf(element), 1);
+        };
+
+        $scope.save_event = function() {
+            $http.post('{{ url_for('schedule.api_event_save') }}', $scope.event_info).success(function (data) {
+                var event_id = data['result'];
+                $scope.load_data();
+            });
         };
 
         $scope.diag_edit = [];
@@ -92,7 +127,8 @@
         $scope.load_data = function () {
             $http.get('{{ url_for('.api_event_info') }}', {
                 params: {
-                    event_id: $scope.event_id
+                    event_id: $scope.event_id,
+                    cache_dt: new Date().getTime() // todo: надо разобраться с кешем
                 }
             }).success(function (data) {
                 $scope.event_info = data.result.event;

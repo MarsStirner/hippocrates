@@ -8,14 +8,18 @@
         <legend xmlns="http://www.w3.org/1999/html">Пациент [[ clientDataItems.nameText ]]</legend>
         <div class="marginal">
             <button class="btn btn-default" onclick="history.back()">Назад к результатам поиска</button>
-            <a class="btn btn-success" href="{{ url_for('schedule.appointment') }}?client_id={{ request.args['client_id'] }}">
+            <a class="btn btn-success" href="{{ url_for('schedule.appointment') }}?client_id={{ request.args['client_id'] }}"
+               ng-if="client_id != 'new'">
                 Записать на приём</a>
+            <a class="btn btn-primary" href="{{ url_for('schedule.new_event') }}?client_id={{ request.args['client_id'] }}"
+                ng-if="client_id != 'new'">
+                Создать обращение</a>
         </div>
         <tabset>
             <tab>
                 <tab-heading>
                     Информация о пациенте
-                    <a ng-click="start_editing();" class="glyphicon glyphicon-pencil" href="" title="Редактировать"></a>
+                    <a ng-click="start_editing();" class="btn btn-sm btn-default glyphicon glyphicon-pencil" href="" title="Редактировать"></a>
                 </tab-heading>
                 <tabset justified="false">
                     <tab heading="Основная информация">{% include "patients/main_info.html" %}</tab>
@@ -95,9 +99,8 @@
 
                 }, function(reason) {
                     alert(reason);
-                }
-                );
-            }
+                });
+            };
 
             $scope.delete_record = function(entity, record) {
                 var modalInstance = $modal.open({
@@ -118,7 +121,7 @@
             };
 
             $scope.open_event = function(event) {
-                window.open('{{ url_for('schedule.html_event_info') }}?event_id=' + event.id, '_self')
+                window.open('{{ url_for('schedule.html_event_info') }}?event_id=' + event.id, '_blank')
             };
 
             if ($scope.client_id == 'new') {

@@ -1,63 +1,53 @@
 {% import "_macros.html" as macros %}
 <div class="row">
     <div class="col-md-6">
-        <p>Организация: [[ event_info.organisation.short_name ]]</p>
-        <p>Лечащий врач: [[ event_info.exec_person.name ]]</p>
-        <p>Договор: [[ event_info.contract.number ]]</p>
-        <p>Дата начала: [[ event_info.setDate | asDate]]</p>
+        <ul class="list-group list-no-border">
+            <li class="list-group-item">Организация:&nbsp; [[ event_info.organisation.short_name ]]</li>
+            <li class="list-group-item"><div>Лечащий врач:&nbsp;{{ macros.ui_select_rb('vrbPerson', 'event_info.exec_person',
+                'event_edit_list.indexOf("event_info.exec_person") != -1') }}</div></li>
+            <li class="list-group-item">Договор:&nbsp; [[ event_info.contract.number ]]</li>
+            <li class="list-group-item">Дата начала:&nbsp; [[ event_info.set_date | asDate]]</li>
+        </ul>
     </div>
     <div class="col-md-6">
-        <p>Тип обращения: [[ event_info.event_type.request_type.name ]]</p>
-        <p>Источник финансирования: [[ event_info.finance.name ]]</p>
-        <p>Тип события: [[ event_info.event_type.name ]]</p>
-        <p>Дата выполнения: [[ event_info.execDate | asDate ]]</p>
+        <ul class="list-group list-no-border">
+            <li class="list-group-item">Тип обращения:&nbsp; [[ event_info.event_type.request_type.name ]]</li>
+            <li class="list-group-item"><div>Источник финансирования:&nbsp; [[ event_info.event_type.finance.name ]]</div></li>
+            <li class="list-group-item">Тип события:&nbsp; [[ event_info.event_type.name ]]</li>
+            <li class="list-group-item">Дата выполнения:&nbsp; <div>{{ macros.edit_date('event_info.exec_date',
+                'event_edit_list.indexOf("event_info.exec_date") != -1') }}</div></li>
+        </ul>
     </div>
 </div>
 <div class="row">
     <div class="col-md-6">
         <div class="panel panel-default">
             <div class="panel-heading">Порядок обращения</div>
-            <div class="list-group">
-                <div class="list-group-item">
-                    <div class="row">
-                        <div class="col-sm-4"><label for="event_info.order">Порядок</label></div>
-                        <div class="col-sm-8">
-                            {{ macros.ui_select('event_info.order', 'rbOrder', 'edit') }}
-                        </div>
-                    </div>
-                </div>
-                <div class="list-group-item">
-                    <div class="row">
-                        <div class="col-sm-4"><label for="event_info.is_primary">Первичность</label></div>
-                        <div class="col-sm-8">
-                            {{ macros.ui_select('event_info.is_primary', 'rbPrimary', 'edit') }}
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <ul class="list-group list-no-border">
+                <li class="list-group-item">
+                    <div>Порядок:&nbsp;{{ macros.ui_select_rb('rbOrder', 'event_info.order',
+                        'event_edit_list.indexOf("event_info.order") != -1') }}</div>
+                </li>
+                <li class="list-group-item">
+                    <div>Первичность:&nbsp;{{ macros.ui_select_rb('rbPrimary', 'event_info.is_primary',
+                        'event_edit_list.indexOf("event_info.is_primary") != -1') }}</div>
+                </li>
+            </ul>
         </div>
     </div>
     <div class="col-md-6">
         <div class="panel panel-default">
             <div class="panel-heading">Результат обращения</div>
-            <div class="list-group">
-                <div class="list-group-item">
-                    <div class="row">
-                        <div class="col-sm-4"><label for="event_info.result">Результат</label></div>
-                        <div class="col-sm-8">
-                            {{ macros.ui_select('event_info.result', 'rbResult', trigger='edit') }}
-                        </div>
-                    </div>
-                </div>
-                <div class="list-group-item">
-                    <div class="row">
-                        <div class="col-sm-4"><label for="event_info.acheResult">Исход</label></div>
-                        <div class="col-sm-8">
-                            {{ macros.ui_select('event_info.acheResult', 'rbAcheResult', 'edit') }}
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <ul class="list-group list-no-border">
+                <li class="list-group-item">
+                    <div>Результат:&nbsp;{{ macros.ui_select_rb('rbResult', 'event_info.result',
+                        'event_edit_list.indexOf("event_info.result") != -1') }}</div>
+                </li>
+                <li class="list-group-item">
+                    <div>Исход:&nbsp;{{ macros.ui_select_rb('rbAcheResult', 'event_info.acheResult',
+                        'event_edit_list.indexOf("event_info.acheResult") != -1') }}</div>
+                </li>
+            </ul>
         </div>
     </div>
 </div>
@@ -68,9 +58,12 @@
     <div class="col-md-12">
         <div class="panel panel-info">
             <div class="panel-heading">
-                <a ng-if="!diag_edit[$index]" ng-click="diag_edit_start($index)" class="btn btn-default glyphicon glyphicon-edit"></a>
-                <a ng-if="diag_edit[$index]" ng-click="diag_edit_save($index)" class="btn btn-success glyphicon glyphicon-ok" ng-disabled="diag_edit_save_disabled($index)"></a>
-                <a ng-if="diag_edit[$index]" ng-click="diag_edit_stop($index)" class="btn btn-danger glyphicon glyphicon-remove"></a>
+                <a ng-if="!diag_edit[$index]" ng-click="diag_edit_start($index)"
+                   class="btn btn-default glyphicon glyphicon-edit"></a>
+                <a ng-if="diag_edit[$index]" ng-click="diag_edit_save($index)"
+                   class="btn btn-success glyphicon glyphicon-ok" ng-disabled="diag_edit_save_disabled($index)"></a>
+                <a ng-if="diag_edit[$index]" ng-click="diag_edit_stop($index)"
+                   class="btn btn-danger glyphicon glyphicon-remove"></a>
                 Диагноз ([[ diagnose.diagnosis_type.name ]])
             </div>
             <div class="panel-body">
@@ -134,15 +127,21 @@
     </div>
 </div>
 <div class="row">
-    <div class="dropdown col-md-offset-10 col-md-2">
-        <button class="btn dropdown-toggle" type="button" id="print_dropdownMenu" data-toggle="dropdown">
-            <span class="glyphicon glyphicon-print"></span>
-            Печать
-            <span class="caret"></span>
-        </button>
-        <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="print_dropdownMenu">
-            <li role="presentation"
-                ng-repeat="template in PrintTemplates"><a role="menuitem" tabindex="-1" href="" class="print_template" ng-click="print_template(template.id)">[[ template.name ]]</a></li>
-        </ul>
+    <div class="col-md-offset-7 col-md-2 text-right">
+        <div class="dropup">
+            <button class="btn btn-lg dropdown-toggle" type="button" id="print_dropdownMenu" data-toggle="dropdown">
+                <span class="glyphicon glyphicon-print"></span> Печать <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="print_dropdownMenu">
+                <li role="presentation" ng-repeat="template in PrintTemplates">
+                    <a role="menuitem" tabindex="-1" href="" class="print_template"
+                       ng-click="print_template(template.id)">[[ template.name ]]</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class="col-md-3 text-right">
+        <button ng-click="cancel_editing();" class="btn btn-danger btn-lg">Назад</button>
+        <button ng-click="save_event();" class="btn btn-success btn-lg">Сохранить</button>
     </div>
 </div>

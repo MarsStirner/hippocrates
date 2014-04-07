@@ -67,6 +67,13 @@ def html_event_info():
         'schedule/event_info.html'
     )
 
+
+@module.route('/event_new.html')
+@public_endpoint
+def new_event():
+    return render_template('schedule/client_event/new_event.html')
+
+
 @module.route('/action.html')
 @public_endpoint
 def html_action():

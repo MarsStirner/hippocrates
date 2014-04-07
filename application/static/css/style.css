@@ -310,6 +310,11 @@ div.select2-container {
     margin-bottom: 20px;
 }
 
+.nomarpad {
+    margin: 0px;
+    padding: 0px;
+}
+
 .tab-content {
     border-left: 1px solid #ddd;
     border-right: 1px solid #ddd;

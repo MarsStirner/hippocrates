@@ -167,7 +167,9 @@ WebMis20.factory('ClientResource',
     function($resource) {
         return $resource(url_client_get, {}, {
             save: {url: url_client_save, method: 'POST',
-                params: {client_info: {}}}
+                   params: {client_info: {},
+                            }
+            }
         });
     }
 );
@@ -180,7 +182,10 @@ WebMis20.factory('Client',
 
         Client.prototype.reload = function() {
             var t = this;
-            ClientResource.get({client_id: this.client_id},
+            ClientResource.get({
+                    client_id: this.client_id,
+                    cache_dt: new Date().getMilliseconds() // todo: cache
+                },
                 function(data) {
                     t.client_info = data.result.clientData;
                     t.appointments = data.result.appointments;
@@ -194,7 +199,9 @@ WebMis20.factory('Client',
         Client.prototype.save = function() {
             var t = this;
             var deferred = $q.defer();
-            ClientResource.save({ client_info: this.client_info },
+            ClientResource.save({
+                    client_info: this.client_info
+                },
                 function(value, headers) {
                     deferred.resolve(value['result']);
                 },
@@ -213,7 +220,7 @@ WebMis20.factory('Client',
                 'power': 0,
                 'createDate': '',
                 'deleted':0,
-                'notes': '' })
+                'notes': '' });
         };
 
         Client.prototype.add_medicament = function() {
@@ -222,7 +229,7 @@ WebMis20.factory('Client',
                 'power': 0,
                 'createDate': '',
                 'deleted':0,
-                'notes': '' })
+                'notes': '' });
         };
 
         Client.prototype.add_identification = function() {
@@ -230,7 +237,7 @@ WebMis20.factory('Client',
                 'deleted': 0,
                 'identifier': '',
                 'accountingSystem_code': '',
-                'checkDate': ''})
+                'checkDate': ''});
         };
 
         Client.prototype.add_contact = function() {
@@ -238,14 +245,14 @@ WebMis20.factory('Client',
                 'deleted': 0,
                 'contactType_code': '',
                 'contact': '',
-                'notes': ''})
+                'notes': ''});
         };
 
         Client.prototype.add_blood = function () {
             this.client_info['bloodHistory'].push({'bloodGroup_code': '',
                 'bloodDate': '',
                 'person_id': 0
-            })
+            });
         };
 
         Client.prototype.add_relation = function (entity) {
@@ -253,7 +260,7 @@ WebMis20.factory('Client',
                 'relativeType_name': '',
                 'relativeType_code': '',
                 'other_id': 0
-            })
+            });
         };
 
         Client.prototype.add_soc_status = function () {
@@ -262,7 +269,7 @@ WebMis20.factory('Client',
                 'typeCode': '',
                 'begDate': '',
                 'endDate': ''
-            })
+            });
         };
 
         Client.prototype.delete_record = function(entity, record) {
@@ -276,75 +283,110 @@ WebMis20.factory('Client',
 
         return Client;
     }
-    ])
+]);
 // end services
-WebMis20.directive('uiPopup', function ($timeout) {
+WebMis20.directive('uiMkb', function ($timeout) {
     return {
         restrict: 'E',
+        require: '?ngModel',
         template:
-            '<input type="text" class="form-control" ng-click="to_show()" ng-model="query">' +
-            '<div class="well well-sm popupable" ng-show="shown" ng-transclude ng-mouseleave="to_hide_delay()" ng-mouseenter="to_hide_cancel()">',
-        transclude: true,
-        controller: function ($scope, $element) {
-            var input_elem = $($element.children()[0]);
-            var div_elem = $($element.children()[1]);
+            '<button class="btn btn-default btn-block" ng-click="to_show()">[[ $model.$modelValue.code ]] <span class="caret"></span></button>' +
+            '<div class="well well-sm popupable" ng-show="shown" ng-mouseleave="to_hide_delay()" ng-mouseenter="to_hide_cancel()">' +
+                '<input type="text" ng-model="query" class="form-control" />' +
+                '<table class="table table-condensed table-hover table-clickable">' +
+                    '<thead><tr><th>Код</th><th>Наименование</th></tr></thead>' +
+                    '<tbody>' +
+                        '<tr ng-repeat="row in refBook.objects | filter:query | limitTo:100" ng-click="onClick(row)">' +
+                            '<td ng-bind="row.code"></td><td ng-bind="row.name"></td>' +
+                        '</tr>' +
+                    '</tbody>' +
+                '</table>' +
+            '</div>',
+        scope: {
+            refBook: '=refBook'
+        },
+        link: function (scope, element, attributes, ngModel) {
+            scope.$model = ngModel;
+            var input_elem = $(element[0][0]);
+            var div_elem = $(element[0][1]);
             var timeout = null;
-            $scope.shown = false;
-            $scope.query='';
-            $scope.to_show = function () {
+            scope.shown = false;
+            scope.query='';
+            scope.to_show = function () {
+                if (ngModel.$modelValue) {
+                    scope.query = ngModel.$modelValue.code;
+                } else {
+                    scope.query = '';
+                }
                 div_elem.width(input_elem.width());
-                $scope.shown = true;
+                scope.shown = true;
             };
-            $scope.to_hide_delay = function () {
+            scope.to_hide_delay = function () {
                 if (!timeout) {
                     timeout = $timeout(to_hide, 600)
                 }
             };
-            $scope.to_hide_cancel = function () {
+            scope.to_hide_cancel = function () {
                 if (timeout) {
                     $timeout.cancel(timeout);
                     timeout = null;
                 }
             };
-            this.finish_him =function (query) {
-                to_hide();
-                $scope.query = query;
-            };
-            function to_hide () {
-                timeout = null;
-                $scope.shown = false;
-            }
-        }
-    }
-});
-WebMis20.directive('uiRbTable', function () {
-    return {
-        restrict: 'E',
-        require: '^uiPopup',
-        template: '<table class="table table-condensed table-hover table-clickable">' +
-            '<thead><tr><th>Код</th><th>Наименование</th></tr></thead>' +
-            '<tbody>' +
-                '<tr ng-repeat="row in refBook.objects | filter:query" ng-click="onClick(row)">' +
-                    '<td ng-bind="row.code"></td><td ng-bind="row.name"></td>' +
-                '</tr>' +
-            '</tbody></table>',
-        link: function (scope, element, attributes, popupCtrl) {
-            scope.refBook = scope.$eval(attributes.refBook);
-            scope.$parent.$watch('query', function (newVal, oldVal) {
-                scope.query = newVal;
-            });
             scope.onClick = function (row) {
-                scope.$parent.$parent[attributes.ngModel] = row; // HACK!
-                popupCtrl.finish_him(row.name);
+                ngModel.$setViewValue(row);
+                to_hide();
             };
             scope.search = function (actual, expected) {
                 return actual.split(' ').filter(function (part) {
                     return aux.startswith(part, expected)
                 }).length > 0;
+            };
+            function to_hide () {
+                timeout = null;
+                scope.shown = false;
             }
         }
     }
 });
+WebMis20.directive('uiActionProperty', ['$compile', function ($compile) {
+    return {
+        restrict: 'A',
+        replace: true,
+        link: function (scope, element, attributes) {
+            var property = scope.$property = scope.$eval(attributes.uiActionProperty);
+            var typeName = property.type.type_name;
+            var element_code = null;
+            switch (typeName) {
+                case 'Text':
+                case 'Html':
+                case 'Жалобы':
+                case 'Constructor':
+                    element_code = '<textarea ckeditor="ckEditorOptions" ng-model="$property.value"></textarea>';
+                    break;
+                case 'Date':
+                    element_code = '<input type="text" class="form-control" datepicker-popup="dd-MM-yyyy" ng-model="$property.value" />';
+                    break;
+                case 'Integer':
+                case 'Double':
+                case 'Time':
+                    element_code = '<input class="form-control" type="text" ng-model="$property.value">';
+                    break;
+                case 'String':
+                    if (property.type.domain) {
+                        element_code = '<select class="form-control" ng-model="$property.value" ng-options="val for val in $property.type.values"></select>'
+                    } else {
+                        element_code = '<input class="form-control" type="text" ng-model="$property.value">';
+                    }
+                    break;
+                default:
+                    element_code = '<span ng-bind="$property.value">';
+            }
+            var el = angular.element(element_code);
+            $(element[0]).append(el);
+            $compile(el)(scope);
+        }
+    }
+}]);
 var aux = {
     getQueryParams: function (qs) {
         qs = qs.split("+").join(" ");
