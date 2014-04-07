@@ -4,8 +4,9 @@
         <th>Номер ИБ</th>
         <th>Дата начала</th>
         <th>Дата окончания</th>
+        <th>Тип события</th>
         <th>Лечащий врач</th>
-        <th>Специальность</th>
+        <th>Результат</th>
         {# <th>Тип обращения</th> #}
     </tr>
     </thead>
@@ -15,8 +16,9 @@
         <td>[[ event.externalId ]]</td>
         <td>[[ event.setDate | asDate ]]</td>
         <td>[[ event.execDate | asDate ]]</td>
+        <td>[[ event.event_type.name ]]</td>
         <td>[[ event.person.name ]]</td>
-        <td>[[ event.person.speciality ]]</td>
+        <td>[[ event.result.name ]]</td>
         {# <td>[[ event.requestType.name ]]</td>#}
     </tr>
     </tbody>
