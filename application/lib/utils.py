@@ -291,3 +291,8 @@ def _get_external_id_from_counter(prefix, value, separator, client_id):
                     if val:
                         prefix.append(val)
     return separator.join(prefix + ['%d' % value])
+
+
+def request_wants_json():
+    best = request.accept_mimetypes.best_match(['application/json', 'text/html'])
+    return best == 'application/json' and request.accept_mimetypes[best] > request.accept_mimetypes['text/html']
