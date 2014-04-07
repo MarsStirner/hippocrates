@@ -6,7 +6,7 @@ from flask.ext.login import login_user, logout_user, login_required, current_use
 
 from application.app import app, db, login_manager
 from application.context_processors import *
-from .lib.utils import public_endpoint, jsonify, roles_require, rights_require
+from .lib.utils import public_endpoint, jsonify, roles_require, rights_require, request_wants_json
 from application.models import actions
 from lib.user import UserAuth, AnonymousUser
 from forms import LoginForm
@@ -68,7 +68,6 @@ def logout():
 
 @app.route('/api/rb/')
 @app.route('/api/rb/<name>')
-@public_endpoint
 def api_refbook(name):
     from application.models import exists, schedule
 
@@ -81,12 +80,16 @@ def api_refbook(name):
 
 @app.errorhandler(403)
 def authorisation_failed(e):
+    if request_wants_json():
+        return jsonify(unicode(e), result_code=403, result_name=u'Forbidden')
     flash(u'У вас недостаточно привилегий для доступа к функционалу')
     return render_template('user/denied.html'), 403
 
 
 @app.errorhandler(404)
 def page_not_found(e):
+    if request_wants_json():
+        return jsonify(unicode(e), result_code=404, result_name=u'Page not found')
     flash(u'Указанный вами адрес не найден')
     return render_template('404.html'), 404
 
