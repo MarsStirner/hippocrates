@@ -221,7 +221,15 @@ def api_schedule_description_post():
                 db.session.add(add_sched)
 
     db.session.commit()
-    return jsonify({})
+
+    start_date_s = json.get('start_date')
+    start_date = datetime.datetime.strptime(start_date_s, '%Y-%m').date()
+    end_date = start_date + datetime.timedelta(calendar.monthrange(start_date.year, start_date.month)[1])
+    context = ScheduleVisualizer()
+    persons = Person.query.filter(Person.id == person_id)
+    return jsonify({
+        'schedules': context.make_persons_schedule_description(persons, start_date, end_date)
+    })
 
 
 @module.route('/api/all_persons_tree.json')
