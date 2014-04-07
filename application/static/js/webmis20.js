@@ -361,6 +361,7 @@ WebMis20.directive('uiScheduleTicket', ['$compile', function ($compile) {
             elem.addClass('btn btn-block');
             scope.$watch('ticket.status', function (n, o) {
                 if (!scope.ticket) {
+                    elem.addClass('disabled');
                     elem.html('&nbsp');
                     return
                 }
