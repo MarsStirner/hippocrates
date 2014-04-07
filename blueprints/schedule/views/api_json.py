@@ -770,4 +770,4 @@ def api_atl_get():
 
     res_sort(result)
 
-    return jsonify(result)
+    return jsonify(result, extra_headers=[('max-age', '86400')])
