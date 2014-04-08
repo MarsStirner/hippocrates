@@ -1433,7 +1433,7 @@ class Diagnosis(db.Model):
     dispanser_id = db.Column(db.ForeignKey('rbDispanser.id'), index=True)
     traumaType_id = db.Column(db.ForeignKey('rbTraumaType.id'), index=True)
     setDate = db.Column(db.Date)
-    endDate = db.Column(db.Date, nullable=False)
+    endDate = db.Column(db.Date)
     mod_id = db.Column(db.ForeignKey('Diagnosis.id'), index=True)
     person_id = db.Column(db.ForeignKey('Person.id'), index=True)
     # diagnosisName = db.Column(db.String(64), nullable=False)
