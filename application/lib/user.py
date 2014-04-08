@@ -10,12 +10,21 @@ class User(UserMixin):
     def __init__(self, person):
         if not isinstance(person, Person):
             raise AttributeError(u'Not instance of models.Person')
-        self.__person = person
-        self.__roles = list()
-        self.__rights = list()
+        self.deleted = 0
+        self.__dict__.update(dict((key, value)
+                                  for key, value in person.__dict__.iteritems()
+                                  if not callable(value) and not key.startswith('__')))
+        self.roles = list()
+        self.rights = list()
+        self.post = dict()
+        if person.post:
+            self.post.update(dict((key, value)
+                             for key, value in person.post.__dict__.iteritems()
+                             if not callable(value) and not key.startswith('__')))
+        self.set_roles_rights(person)
 
     def is_active(self):
-        return self.__person.deleted == 0
+        return self.deleted == 0
 
     def is_admin(self):
         return self.has_role('admin')
@@ -28,32 +37,13 @@ class User(UserMixin):
         # what about list?
         return right in self.rights
 
-    @property
-    def roles(self):
-        if self.__roles:
-            return self.__roles
-        if self.__person.user_profiles:
-            self.__rights = list()
-            for role in self.__person.user_profiles:
-                self.__roles.append(role.code)
+    def set_roles_rights(self, person):
+        if person.user_profiles:
+            for role in person.user_profiles:
+                self.roles.append(role.code)
                 if role.rights:
                     for right in role.rights:
-                        self.__rights.append(right.code)
-        return self.__roles
-
-    @property
-    def rights(self):
-        if self.__rights:
-            return list(set(self.__rights))
-        if self.__person.user_profiles:
-            for role in self.__person.user_profiles:
-                if role.rights:
-                    for right in role.rights:
-                        self.__rights.append(right.code)
-        return list(set(self.__rights))
-
-    def __getattr__(self, name):
-        return getattr(self.__person, name)
+                        self.rights.append(right.code)
 
 
 class AnonymousUser(AnonymousUserMixin):
@@ -88,4 +78,4 @@ class UserAuth():
 
     @classmethod
     def get_by_id(cls, user_id):
-        return User(db.session.query(Person).get(user_id))
+        return User(db.session.query(Person).get(int(user_id)))

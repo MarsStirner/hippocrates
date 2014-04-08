@@ -59,7 +59,7 @@ def logout():
     # Remove the user information from the session
     logout_user()
     # Remove session keys set by Flask-Principal
-    for key in ('identity.name', 'identity.auth_type'):
+    for key in ('identity.name', 'identity.auth_type', 'hippo_user'):
         session.pop(key, None)
     # Tell Flask-Principal the user is anonymous
     identity_changed.send(current_app._get_current_object(), identity=AnonymousIdentity())
@@ -99,7 +99,13 @@ def page_not_found(e):
 @login_manager.user_loader
 def load_user(user_id):
     # Return an instance of the User model
-    return UserAuth.get_by_id(user_id)
+    # Минимизируем количество обращений к БД за данными пользователя
+    hippo_user = session.get('hippo_user', None)
+    if not hippo_user:
+        hippo_user = UserAuth.get_by_id(int(user_id))
+        session['hippo_user'] = hippo_user
+    # session['hippo_user'] = hippo_user
+    return hippo_user
 
 
 @identity_loaded.connect_via(app)
@@ -113,8 +119,7 @@ def on_identity_loaded(sender, identity):
 
     # Assuming the User model has a list of roles, update the
     # identity with the roles that the user provides
-    if hasattr(identity.user, 'user_profiles'):
-        for role in identity.user.user_profiles:
-            identity.provides.add(RoleNeed(role.code))
-            for right in getattr(role, 'rights', []):
-                identity.provides.add(ActionNeed(right.code))
+    for role in getattr(identity.user, 'roles', []):
+        identity.provides.add(RoleNeed(role))
+    for right in getattr(identity.user, 'rights', []):
+        identity.provides.add(ActionNeed(right))
