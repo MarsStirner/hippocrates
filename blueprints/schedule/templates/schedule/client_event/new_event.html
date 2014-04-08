@@ -47,16 +47,21 @@
             <ul class="list-group minheight">
                 <li class="list-group-item">
                     <label for="">Тип обращения</label>
-                    {{ macros.ui_select_rb('rbRequestType', 'event_info.event_type.request_type', 'true',
-                        extra_filter='| filter: rbRequestType.objects.code="policlinic"') }}
+                    {{ macros.ui_select_rb('rbRequestType', 'request_type.selected', 'true',
+                       extra_filter='| filter: rbRequestType.objects && rbRequestType.get_by_code("policlinic")') }}
                 </li>
                 <li class="list-group-item">
                     <label for="">Источник финансирования</label>
-                    {{ macros.ui_select_rb('rbFinance', 'event_info.event_type.finance', 'true') }} {# editing_list.indexOf("event_info.event_type.finance") != -1 #}
+                    {{ macros.ui_select_rb('rbFinance', 'finance.selected', 'true',
+                       extra_filter='| event_type_filter: rbFinance.objects &&'
+                            ' rbEventType.get_finances_by_rt(request_type.selected.id)') }}
                 </li>
                 <li class="list-group-item">
                     <label for="">Тип события</label>
-                    {{ macros.ui_select_rb('EventType', 'event_info.event_type', 'true') }}
+                    {{ macros.ui_select_rb('rbEventType', 'event_info.event_type', 'true',
+                       extra_filter='| event_type_filter: rbEventType.objects'
+                            ' && rbEventType.get_filtered_by_rtf(request_type.selected.id,'
+                                                               ' finance.selected.id)') }}
                 </li>
                 <li class="list-group-item">
                     <label for="">Подразделение</label>
@@ -76,6 +81,8 @@
 {#        <div>#}
 {#            <p>debug:</p>#}
 {#            <p>[[event_info | json]]</p>#}
+{#            <p>[[request_type.selected | json]]</p>#}
+{#            <p>[[finance.selected | json]]</p>#}
 {#        </div>#}
         <br />
         <div class="pull-right">
@@ -87,8 +94,8 @@
 
 {% block modules_js %}
     <script>
-    WebMis20.controller('EventCreateCtrl', ['$scope', '$http', 'RefBookService', '$window',
-                        function ($scope, $http, RefBookService, $window) {
+    WebMis20.controller('EventCreateCtrl', ['$scope', '$http', 'RefBookService', 'EventType','$window',
+                        function ($scope, $http, RefBookService, EventType, $window) {
         $scope.aux = aux;
         $scope.event_info = null;
         $scope.client_id = aux.getQueryParams(location.search).client_id;
@@ -97,13 +104,11 @@
         $scope.Contract = RefBookService.get('Contract');
         $scope.rbRequestType = RefBookService.get('rbRequestType');
         $scope.rbFinance = RefBookService.get('rbFinance');
-        $scope.EventType = RefBookService.get('EventType');
+        $scope.rbEventType = new EventType();
         $scope.OrgStructure = RefBookService.get('OrgStructure');
 
         $scope.rbOrder = {{ Enum.get_class_by_name('EventOrder').rb() | tojson}};
         $scope.rbPrimary = {{ Enum.get_class_by_name('EventPrimary').rb() | tojson}};
-
-
 
         $scope.editing_list = [];
         $scope.start_edit = function(element) {
@@ -121,6 +126,23 @@
             });
         };
 
+        $scope.request_type = {};
+        $scope.finance = {};
+
+        $scope.$watch('request_type.selected', function(new_val, old_val) {
+            if (new_val) {
+                $scope.finance.selected = $scope.finance_init || $scope.rbEventType.get_finances_by_rt(new_val.id)[0];
+                $scope.finance_init = undefined;
+            }
+        });
+        $scope.$watch('finance.selected', function(new_val, old_val) {
+            if (new_val) {
+                $scope.event_info.event_type = $scope.event_type_init || $scope.rbEventType.get_filtered_by_rtf(
+                    $scope.request_type.selected.id, new_val.id)[0];
+                    $scope.event_type_init = undefined;
+            }
+        });
+
         $scope.load_data = function () {
             $http.get('{{ url_for('schedule.api_event_new_get') }}', {
                 params: {
@@ -128,6 +150,13 @@
                 }
             }).success(function (data) {
                 $scope.event_info = data.result;
+
+                $scope.request_type_init = angular.extend({}, $scope.event_info.event_type.request_type);
+                $scope.finance_init = angular.extend({}, $scope.event_info.event_type.finance);
+                $scope.event_type_init = angular.extend({}, $scope.event_info.event_type);
+
+                $scope.request_type.selected = $scope.request_type_init;
+                $scope.finance.selected = $scope.finance_init;
             })
         };
 
