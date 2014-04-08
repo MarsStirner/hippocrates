@@ -37,24 +37,24 @@
 
 {% block modules_js %}
     <script>
-    WebMis20.controller('EventInfoCtrl', ['$scope', '$http', 'RefBook', '$window',
-                        function ($scope, $http, RefBook, $window) {
+    WebMis20.controller('EventInfoCtrl', ['$scope', '$http', 'RefBookService', '$window',
+                        function ($scope, $http, RefBookService, $window) {
         $scope.aux = aux;
         $scope.event_info = null;
         $scope.event_id = aux.getQueryParams(location.search).event_id;
-        $scope.rbResult = new RefBook('rbResult');
-        $scope.rbAcheResult = new RefBook('rbAcheResult');
-        $scope.rbDiagnosisType = new RefBook('rbDiagnosisType');
-        $scope.rbDiseaseCharacter = new RefBook('rbDiseaseCharacter');
-        $scope.rbDiseasePhases = new RefBook('rbDiseasePhases');
-        $scope.rbDiseaseStage = new RefBook('rbDiseaseStage');
-        $scope.rbHealthGroup = new RefBook('rbHealthGroup');
-        $scope.rbDispanser = new RefBook('rbDispanser');
-        $scope.rbTraumaType = new RefBook('rbTraumaType');
-        $scope.Person = new RefBook('Person');
-        $scope.rbMKB = new RefBook('MKB');
-        $scope.vrbPerson = new RefBook('vrbPersonWithSpeciality');
-        $scope.rbFinance = new RefBook('rbFinance');
+        $scope.rbResult = RefBookService.get('rbResult');
+        $scope.rbAcheResult = RefBookService.get('rbAcheResult');
+        $scope.rbDiagnosisType = RefBookService.get('rbDiagnosisType');
+        $scope.rbDiseaseCharacter = RefBookService.get('rbDiseaseCharacter');
+        $scope.rbDiseasePhases = RefBookService.get('rbDiseasePhases');
+        $scope.rbDiseaseStage = RefBookService.get('rbDiseaseStage');
+        $scope.rbHealthGroup = RefBookService.get('rbHealthGroup');
+        $scope.rbDispanser = RefBookService.get('rbDispanser');
+        $scope.rbTraumaType = RefBookService.get('rbTraumaType');
+        $scope.Person = RefBookService.get('Person');
+{#        $scope.rbMKB = RefBookService.get('MKB');#}
+        $scope.vrbPerson = RefBookService.get('vrbPersonWithSpeciality');
+        $scope.rbFinance = RefBookService.get('rbFinance');
         $scope.rbOrder = {{ Enum.get_class_by_name('EventOrder').rb() | tojson}};
         $scope.rbPrimary = {{ Enum.get_class_by_name('EventOrder').rb() | tojson}};
 
@@ -112,7 +112,7 @@
         };
         $scope.diag_edit_new = function () {
             $scope.diagnoses.splice(0, 0, {
-                person: null, // TODO: get current user_id?
+                person: $scope.Person.get({{ current_user.get_id() }}),
                 _new: true,
                 _first: true
             });
@@ -159,7 +159,7 @@
         };
 
         $scope.open_action = function (action_id) {
-            window.open('{{ url_for('.html_action') }}?action_id=' + action_id, '_self');
+            window.open('{{ url_for('.html_action') }}?action_id=' + action_id);
         };
 
         $scope.load_data();

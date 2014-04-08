@@ -1,52 +1,52 @@
 /**
  * Created by mmalkov on 10.02.14.
  */
-var WebMis20 = angular.module('WebMis20', ['ngResource', 'ui.bootstrap', 'ui.select', 'ngSanitize', 'ngCkeditor', 'sf.treeRepeat']);
-WebMis20.config(function ($interpolateProvider) {
+var WebMis20 = angular.module('WebMis20', ['ngResource', 'ui.bootstrap', 'ui.select', 'ngSanitize', 'ngCkeditor', 'sf.treeRepeat'])
+.config(function ($interpolateProvider) {
     $interpolateProvider.startSymbol('[[');
     $interpolateProvider.endSymbol(']]');
-});
-WebMis20.filter('asDateTime', function ($filter) {
+})
+.filter('asDateTime', function ($filter) {
     return function (data) {
         if (!data) return data;
         var result = moment(data);
         if (!result.isValid()) return data;
         return result.format('DD.MM.YYYY HH:mm');
     }
-});
-WebMis20.filter('asDate', function ($filter) {
+})
+.filter('asDate', function ($filter) {
     return function (data) {
         if (!data) return data;
         var result = moment(data);
         if (!result.isValid()) return data;
         return result.format('DD.MM.YYYY');
     }
-});
-WebMis20.filter('asShortDate', function ($filter) {
+})
+.filter('asShortDate', function ($filter) {
     return function (data) {
         if (!data) return data;
         var result = moment(data);
         if (!result.isValid()) return data;
         return result.format('DD.MM');
     }
-});
-WebMis20.filter('asTime', function ($filter) {
+})
+.filter('asTime', function ($filter) {
     return function (data) {
         if (!data) return data;
         var result = moment(data);
         if (!result.isValid()) return data;
         return result.format('HH:mm');
     }
-});
-WebMis20.filter('asMomentFormat', function ($filter) {
+})
+.filter('asMomentFormat', function ($filter) {
     return function (data, format) {
         if (!data) return data;
         var result = moment(data);
         if (!result.isValid()) return data;
         return result.format(format);
     }
-});
-WebMis20.filter('asAutoFormat', function ($filter) {
+})
+.filter('asAutoFormat', function ($filter) {
     return function (data, key) {
         var value = data[key];
         if (!value) return value;
@@ -65,19 +65,19 @@ WebMis20.filter('asAutoFormat', function ($filter) {
             }
         }
     }
-});
-WebMis20.filter('join', function ($filter) {
+})
+.filter('join', function ($filter) {
     return function (data, char) {
         if (data instanceof Array)
             return data.join(char);
         return data
     }
-});
+})
 // Services
-WebMis20.factory('RefBook', ['$http', function ($http) {
+.factory('RefBook', ['$http', function ($http) {
     var RefBook = function (name) {
         this.name = name;
-//        this.objects = [];
+        this.objects = [];
         this.load();
     };
     RefBook.prototype.load = function () {
@@ -102,8 +102,18 @@ WebMis20.factory('RefBook', ['$http', function ($http) {
         return null;
     };
     return RefBook;
-}]);
-WebMis20.factory('WMAction', ['$http', '$rootScope', function ($http, $rootScope) {
+}])
+.service('RefBookService', ['RefBook', function (RefBook) {
+    var cache = {};
+    this.get = function (name) {
+        if (cache.hasOwnProperty(name)) {
+            return cache[name]
+        } else {
+            return cache[name] = new RefBook(name)
+        }
+    }
+}])
+.factory('WMAction', ['$http', '$rootScope', function ($http, $rootScope) {
     var Action = function () {
         this.action = null;
         this.print_templates = null;
@@ -160,20 +170,23 @@ WebMis20.factory('WMAction', ['$http', '$rootScope', function ($http, $rootScope
         } else {
             this.get_new(this.event_id, this.action_type_id)
         }
-    }
+    };
     return Action;
-}]);
-WebMis20.factory('ClientResource',
+}])
+.factory('ClientResource',
     function($resource) {
         return $resource(url_client_get, {}, {
-            save: {url: url_client_save, method: 'POST',
-                   params: {client_info: {},
-                            }
+            save: {
+                url: url_client_save,
+                method: 'POST',
+                params: {
+                    client_info: {}
+                }
             }
         });
     }
-);
-WebMis20.factory('Client',
+)
+.factory('Client',
     ['ClientResource', '$q', function(ClientResource, $q) {
         var Client = function(client_id) {
             this.client_id = client_id;
@@ -283,9 +296,9 @@ WebMis20.factory('Client',
 
         return Client;
     }
-]);
+])
 // end services
-WebMis20.directive('uiMkb', function ($timeout) {
+.directive('uiMkb', function ($timeout, RefBookService) {
     return {
         restrict: 'E',
         require: '?ngModel',
@@ -296,17 +309,16 @@ WebMis20.directive('uiMkb', function ($timeout) {
                 '<table class="table table-condensed table-hover table-clickable">' +
                     '<thead><tr><th>Код</th><th>Наименование</th></tr></thead>' +
                     '<tbody>' +
-                        '<tr ng-repeat="row in refBook.objects | filter:query | limitTo:100" ng-click="onClick(row)">' +
+                        '<tr ng-repeat="row in $refBook.objects | filter:query | limitTo:100" ng-click="onClick(row)">' +
                             '<td ng-bind="row.code"></td><td ng-bind="row.name"></td>' +
                         '</tr>' +
                     '</tbody>' +
                 '</table>' +
             '</div>',
-        scope: {
-            refBook: '=refBook'
-        },
+        scope: {},
         link: function (scope, element, attributes, ngModel) {
             scope.$model = ngModel;
+            scope.$RefBook = RefBookService.get('MKB');
             var input_elem = $(element[0][0]);
             var div_elem = $(element[0][1]);
             var timeout = null;
@@ -347,8 +359,8 @@ WebMis20.directive('uiMkb', function ($timeout) {
             }
         }
     }
-});
-WebMis20.directive('uiScheduleTicket', ['$compile', function ($compile) {
+})
+.directive('uiScheduleTicket', ['$compile', function ($compile) {
     return {
         restrict: 'A',
         scope: {
@@ -366,12 +378,10 @@ WebMis20.directive('uiScheduleTicket', ['$compile', function ($compile) {
                     return
                 }
                 var text = '';
-                if (scope.ticket.attendance_type.code == 'planned') {
-                    text = moment(scope.ticket.begDateTime).format('HH:mm')
-                } else if (scope.ticket.attendance_type.code == 'CITO') {
-                    text = 'CITO'
-                } else if (scope.ticket.attendance_type.code == 'extra') {
-                    text = 'Сверх плана'
+                switch (scope.ticket.attendance_type.code) {
+                    case 'planned': text = moment(scope.ticket.begDateTime).format('HH:mm'); break;
+                    case 'CITO': text = 'CITO'; break;
+                    case 'extra': text = 'Сверх плана'; break;
                 }
                 if (n == 'busy') {
                     elem.removeClass('btn-success btn-warning btn-gray disabled');
@@ -381,33 +391,25 @@ WebMis20.directive('uiScheduleTicket', ['$compile', function ($compile) {
                     }
                 } else {
                     elem.removeClass('btn-danger');
-                    if (scope.ticket.attendance_type.code == 'planned') {
-                        elem.addClass('btn-success')
-                    } else if (scope.ticket.attendance_type.code == 'CITO') {
-                        elem.addClass('btn-warning')
-                    } else if (scope.ticket.attendance_type.code == 'extra') {
-                        elem.addClass('btn-gray')
+                    switch (scope.ticket.attendance_type.code) {
+                        case 'planned': elem.addClass('btn-success'); break;
+                        case 'CITO': elem.addClass('btn-warning'); break;
+                        case 'extra': elem.addClass('btn-gray'); break;
                     }
                     var now = moment();
-                    var time;
-                    if (scope.ticket.begDateTime) {
-                        if (scope.day.roa || moment(scope.ticket.begDateTime) < now) {
-                            elem.addClass('disabled');
-                        }
-                    } else {
-                        if (scope.day.roa || moment(scope.day.date) < now.startOf('day')) {
-                            elem.addClass('disabled');
-                        }
+                    if (scope.day.roa ||
+                        scope.ticket.begDateTime && (moment(scope.ticket.begDateTime) < now) ||
+                                                     moment(scope.day.date) < now.startOf('day')) {
+                        elem.addClass('disabled');
                     }
-
                 }
-                elem.html(text);
+                elem.text(text);
             });
 
         }
     }
-}]);
-WebMis20.directive('uiActionProperty', ['$compile', function ($compile) {
+}])
+.directive('uiActionProperty', ['$compile', function ($compile) {
     return {
         restrict: 'A',
         replace: true,

@@ -172,8 +172,6 @@ def jsonify(obj, result_code=200, result_name='OK', extra_headers=None):
     .. versionadded:: 0.2
     """
     indent = None
-    if current_app.config['JSONIFY_PRETTYPRINT_REGULAR'] and not request.is_xhr:
-        indent = 2
     headers = [('content-type', 'application/json; charset=utf-8')]
     if extra_headers:
         headers.extend(extra_headers)

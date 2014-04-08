@@ -477,6 +477,8 @@ def api_diagnosis_save():
     diagnosis.traumaType_id = safe_traverse(data, 'trauma', 'id')
     diagnosis.MKB = safe_traverse(data, 'mkb', 'code') or ''
     diagnosis.MKBEx = safe_traverse(data, 'mkb_ex', 'code') or ''
+    if not diagnosis.endDate:
+        diagnosis.endDate = current_datetime
     db.session.add(diagnosis)
 
     diagnostic.event_id = data['event_id']
@@ -491,6 +493,8 @@ def api_diagnosis_save():
     diagnostic.result_id = safe_traverse(data, 'result', 'id')
     diagnostic.notes = data.get('notes', '')
     diagnostic.rbAcheResult_id = safe_traverse(data, 'ache_result', 'id')
+    if not diagnostic.setDate:
+        diagnostic.setDate = current_datetime
     db.session.add(diagnostic)
 
     db.session.commit()

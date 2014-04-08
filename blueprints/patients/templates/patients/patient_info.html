@@ -15,6 +15,7 @@
                 ng-if="client_id != 'new'">
                 Создать обращение</a>
         </div>
+        <div class="marginal">
         <tabset>
             <tab>
                 <tab-heading>
@@ -33,10 +34,10 @@
             <tab heading="Предварительные записи">{% include "patients/appointments.html" %}</tab>
             <tab heading="Обращения">{% include "patients/event_list.html" %}</tab>
         </tabset>
-        <br /> {# FIXME, daaamn #}
+        </div>
         <div class="pull-right" ng-show="editing">
-            <button ng-click="cancel_editing();" class="btn btn-lg btn-danger">Отменить</button>
-            <button ng-click="save_client();" class="btn btn-lg btn-success">Сохранить</button>
+            <button ng-click="cancel_editing()" class="btn btn-lg btn-danger">Отменить</button>
+            <button ng-click="save_client()" class="btn btn-lg btn-success">Сохранить</button>
         </div>
     </div>
 {% endblock %}
@@ -59,6 +60,7 @@
             $scope.aux = aux;
             $scope.params = aux.getQueryParams(document.location.search);
             $scope.client_id = $scope.params.client_id;
+            $scope.client = new Client($scope.client_id);
 
             $scope.clientInfoCode2Name = {
                 'id': 'Код пациента',
@@ -87,16 +89,14 @@
             };
 
             $scope.save_client = function() {
-                var promise = $scope.client.save();
-                promise.then(function(result) {
+                $scope.client.save()
+                .then(function(new_client_id) {
                     if ($scope.client_id == 'new') {
-                        var new_client_id = result;
                         window.open('{{ url_for('patients.patient') }}?client_id=' + new_client_id, '_self');
                     } else {
                         $scope.client.reload();
                         $scope.editing = false;
                     }
-
                 }, function(reason) {
                     alert(reason);
                 });
@@ -121,16 +121,13 @@
             };
 
             $scope.open_event = function(event) {
-                window.open('{{ url_for('schedule.html_event_info') }}?event_id=' + event.id, '_blank')
+                window.open('{{ url_for('schedule.html_event_info') }}?event_id=' + event.id, '_self')
             };
 
             if ($scope.client_id == 'new') {
                 $scope.start_editing();
                 // TODO: btnCancel href back
             }
-
-            $scope.client = new Client($scope.client_id);
-
         }]);
     </script>
 {% endblock %}

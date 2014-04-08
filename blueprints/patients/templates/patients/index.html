@@ -5,7 +5,7 @@
 {% block main %}
     <legend xmlns="http://www.w3.org/1999/html">Пациенты</legend>
     <div ng-controller="ClientSearch" class="ng-cloak">
-        <form class="form-horizontal" role="form">
+        <form class="form-horizontal marginal" role="form">
             <div class="input-group">
                 <span class="input-group-addon"><span class="glyphicon glyphicon-search"></span></span>
                 <input id="search" class="form-control" type="text" ng-model="query"
@@ -14,7 +14,6 @@
                     <span class="glyphicon glyphicon-remove"></span></span>
             </div>
         </form>
-        <br />{# FIXME please #}
         <div class="marginal" ng-if="printError">
             <div class="alert alert-danger alert-dismissable">
                 <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
@@ -24,7 +23,7 @@
         <table class="table table-condensed table-hover table-clickable">
             <caption>
                 <span ng-if="results.length > 0">Результаты поиска</span>
-                <span ng-if="results.length == 0 && query">Нет результатов</span>
+                <span ng-if="results.length === 0 && query">Нет результатов</span>
                 <button ng-click="open_client('new');" class="btn btn-primary pull-right"
                         ng-show="!results.length">Зарегистрировать пациента</button>
             </caption>
@@ -86,6 +85,7 @@
             $scope.$watch('query', function (val) {
                 if (_timeoutObjectForQuery) $timeout.cancel(_timeoutObjectForQuery);
                 _timeoutObjectForQuery = $timeout(function () {
+                    $scope.results = null;
                     $scope.perform_search(val);
                 }, 500)
             });

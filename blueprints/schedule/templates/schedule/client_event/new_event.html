@@ -87,18 +87,18 @@
 
 {% block modules_js %}
     <script>
-    WebMis20.controller('EventCreateCtrl', ['$scope', '$http', 'RefBook', '$window',
-                        function ($scope, $http, RefBook, $window) {
+    WebMis20.controller('EventCreateCtrl', ['$scope', '$http', 'RefBookService', '$window',
+                        function ($scope, $http, RefBookService, $window) {
         $scope.aux = aux;
         $scope.event_info = null;
         $scope.client_id = aux.getQueryParams(location.search).client_id;
-        $scope.Organisation = new RefBook('Organisation');
-        $scope.Person = new RefBook('vrbPersonWithSpeciality');
-        $scope.Contract = new RefBook('Contract');
-        $scope.rbRequestType = new RefBook('rbRequestType');
-        $scope.rbFinance = new RefBook('rbFinance');
-        $scope.EventType = new RefBook('EventType');
-        $scope.OrgStructure = new RefBook('OrgStructure');
+        $scope.Organisation = RefBookService.get('Organisation');
+        $scope.Person = RefBookService.get('vrbPersonWithSpeciality');
+        $scope.Contract = RefBookService.get('Contract');
+        $scope.rbRequestType = RefBookService.get('rbRequestType');
+        $scope.rbFinance = RefBookService.get('rbFinance');
+        $scope.EventType = RefBookService.get('EventType');
+        $scope.OrgStructure = RefBookService.get('OrgStructure');
 
         $scope.rbOrder = {{ Enum.get_class_by_name('EventOrder').rb() | tojson}};
         $scope.rbPrimary = {{ Enum.get_class_by_name('EventPrimary').rb() | tojson}};

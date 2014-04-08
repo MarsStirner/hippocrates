@@ -22,10 +22,10 @@
     </div>
 {% endmacro %}
 
-{% macro ui_select_tmp_noa(source, model, rb, trigger) %}
+{% macro ui_select_tmp_noa(source, model, trigger) %}
     <div class="form-control-static" ng-hide="{{ trigger }}">[[ {{ source }}.{{ model }}.code ]]</div>
     <div ng-show="{{ trigger }}">
-        <ui-mkb ng-model="{{ trigger }}.{{ model }}" ref-book="{{ rb }}"></ui-mkb>
+        <ui-mkb ng-model="{{ trigger }}.{{ model }}"></ui-mkb>
     </div>
 {% endmacro %}
 
