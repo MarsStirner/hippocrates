@@ -339,7 +339,7 @@ def get_new_contact(contact_info):
 
 def get_modified_contact(client, contact_info):
     now = datetime.datetime.now()
-    con = client.contacts.filter(ClientIdentification.id == contact_info['id']).first()
+    con = client.contacts.filter(ClientContact.id == contact_info['id']).first()
 
     if contact_info['deleted'] == 1:
         con.deleted = 1
