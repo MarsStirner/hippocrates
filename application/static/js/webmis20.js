@@ -73,6 +73,32 @@ var WebMis20 = angular.module('WebMis20', ['ngResource', 'ui.bootstrap', 'ui.sel
         return data
     }
 })
+.filter('event_type_filter', function() {
+    return function(items, props) {
+        var out = [];
+        if (angular.isArray(items) && props) {
+            items.forEach(function(item) {
+                var itemMatches = false;
+                var keys = Object.keys(props);
+                for (var i = 0; i < keys.length; i++) {
+                    var prop = keys[i];
+                    var prop_id = props[prop]['id'];
+                    if (item.id === prop_id) {
+                        itemMatches = true;
+                        break;
+                    }
+                }
+                if (itemMatches) {
+                    out.push(item);
+                }
+            });
+        } else {
+            // Let the output be the input untouched
+            out = items;
+        }
+        return out;
+    }
+})
 // Services
 .factory('RefBook', ['$http', function ($http) {
     var RefBook = function (name) {
@@ -295,6 +321,33 @@ var WebMis20 = angular.module('WebMis20', ['ngResource', 'ui.bootstrap', 'ui.sel
         };
 
         return Client;
+    }
+])
+.factory('EventType', ['RefBook', function (RefBook) {
+    var EventType = function () {
+        RefBook.call(this, 'EventType')
+    };
+
+    EventType.prototype = new RefBook('EventType');
+    EventType.prototype.get_finances_by_rt = function(rt_id) {
+        return this.get_filtered_by_rt(rt_id).map(function(el) {
+            return el.finance;
+        }).filter(function(el) {
+            return el !== undefined && el != null;
+        });
+    };
+    EventType.prototype.get_filtered_by_rt = function(rt_id) {
+        return this.objects.filter(function(el) {
+            return el.request_type && el.request_type.id === rt_id;
+        });
+    };
+    EventType.prototype.get_filtered_by_rtf = function(rt_id, fin_id) {
+        return this.objects.filter(function(el) {
+            return el.request_type && el.finance &&
+                el.request_type.id === rt_id && el.finance.id === fin_id;
+        });
+    }
+    return EventType;
     }
 ])
 // end services

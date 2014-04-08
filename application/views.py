@@ -74,7 +74,12 @@ def api_refbook(name):
     for mod in (exists, schedule, actions):
         if hasattr(mod, name):
             ref_book = getattr(mod, name)
-            return jsonify(ref_book.query.order_by(ref_book.id).all(), extra_headers=[('max-age', '86400')])
+            if 'deleted' in ref_book.__dict__:
+                return jsonify(ref_book.query.filter_by(deleted=0).order_by(ref_book.id).all(),
+                               extra_headers=[('max-age', '86400')])
+            else:
+                return jsonify(ref_book.query.order_by(ref_book.id).all(),
+                               extra_headers=[('max-age', '86400')])
     return abort(404)
 
 

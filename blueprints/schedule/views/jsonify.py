@@ -468,7 +468,6 @@ class EventVisualizer(object):
             'ache_result': event.rbAcheResult,
             'contract': event.contract,
             'event_type': event.eventType,
-            'finance': event.finance,
             'organisation': event.organisation,
             'org_structure': event.orgStructure,
             'med_doc_actions': [self.make_action(action) for action in event.actions if action.actionType.class_ == 0],
