@@ -309,7 +309,7 @@ var WebMis20 = angular.module('WebMis20', ['ngResource', 'ui.bootstrap', 'ui.sel
                 '<table class="table table-condensed table-hover table-clickable">' +
                     '<thead><tr><th>Код</th><th>Наименование</th></tr></thead>' +
                     '<tbody>' +
-                        '<tr ng-repeat="row in $refBook.objects | filter:query | limitTo:100" ng-click="onClick(row)">' +
+                        '<tr ng-repeat="row in $RefBook.objects | filter:query | limitTo:100" ng-click="onClick(row)">' +
                             '<td ng-bind="row.code"></td><td ng-bind="row.name"></td>' +
                         '</tr>' +
                     '</tbody>' +
