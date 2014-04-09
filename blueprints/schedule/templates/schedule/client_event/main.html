@@ -130,13 +130,13 @@
     <div class="col-md-6 text-left">
         <div class="dropup">
             <button class="btn btn-lg btn-default dropdown-toggle" type="button" id="print_dropdownMenu"
-                    data-toggle="dropdown" ng-disabled="!PrintTemplates">
+                    data-toggle="dropdown" ng-disabled="!ps.templates">
                 <span class="glyphicon glyphicon-print"></span> Печать <span class="caret"></span>
             </button>
             <ul class="dropdown-menu dropdown-menu" role="menu" aria-labelledby="print_dropdownMenu">
-                <li role="presentation" ng-repeat="template in PrintTemplates">
+                <li role="presentation" ng-repeat="template in ps.templates">
                     <a role="menuitem" tabindex="-1" href="" class="print_template"
-                       ng-click="print_template(template.id)">[[ template.name ]]</a>
+                       ng-click="ps.print_template(template.id)" ng-bind="template.name"></a>
                 </li>
             </ul>
         </div>

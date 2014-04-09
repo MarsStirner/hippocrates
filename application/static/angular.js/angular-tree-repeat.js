@@ -81,7 +81,6 @@ angular.module('sf.treeRepeat', []);
       // which must come from a parent `sf-treepeat`.
       require: "^sfTreepeat",
       link: function sfTreecursePostLink(scope, iterStartElement, attrs, controller) {
-        iterStartElement = $(iterStartElement[0]);
         // Now we stitch together an element containing a vanila repeater using
         // the values from the controller.
         var build = [

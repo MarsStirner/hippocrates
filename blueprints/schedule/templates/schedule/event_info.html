@@ -37,8 +37,8 @@
 
 {% block modules_js %}
     <script>
-    WebMis20.controller('EventInfoCtrl', ['$scope', '$http', 'RefBookService', '$window',
-                        function ($scope, $http, RefBookService, $window) {
+    WebMis20.controller('EventInfoCtrl', ['$scope', '$http', 'RefBookService', '$window', 'PrintingService',
+                        function ($scope, $http, RefBookService, $window, PrintingService) {
         $scope.aux = aux;
         $scope.event_info = null;
         $scope.event_id = aux.getQueryParams(location.search).event_id;
@@ -67,6 +67,17 @@
                 $scope.action_type_popped = at_class;
             }
         };
+
+        $scope.ps = new PrintingService("event", function (template_id) {
+            return {
+                event_id: $scope.event_id,
+                additional_context: {
+                    currentOrgStructure: "",
+                    currentOrganisation: 3479,
+                    currentPerson:"1"
+                }
+            }
+        });
 
         $scope.event_edit_list = [];
         $scope.start_edit = function(element) {
@@ -127,13 +138,12 @@
         $scope.load_data = function () {
             $http.get('{{ url_for('.api_event_info') }}', {
                 params: {
-                    event_id: $scope.event_id,
-                    cache_dt: new Date().getTime() // todo: надо разобраться с кешем
+                    event_id: $scope.event_id
                 }
             }).success(function (data) {
                 $scope.event_info = data.result.event;
                 $scope.diagnoses = data.result.diagnoses;
-                $scope.PrintTemplates = data.result.print_templates
+                $scope.ps.set_context(data.result.event.event_type.print_context)
             });
             aux.range(3).map(function (at_class) {
                 $http.get('{{ url_for('.api_atl_get') }}', {

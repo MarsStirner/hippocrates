@@ -11,7 +11,12 @@ def copyright():
 
 @app.context_processor
 def print_subsystem():
-    return dict(print_subsystem_url=app.config['PRINT_SUBSYSTEM_URL'])
+    ps_url = app.config['PRINT_SUBSYSTEM_URL'].rstrip('/')
+    return {
+        'print_subsystem_url': ps_url,
+        'print_subsystem_templates': '%s/templates/' % ps_url,
+        'print_subsystem_print_template': '%s/print_template' % ps_url,
+    }
 
 
 @app.context_processor

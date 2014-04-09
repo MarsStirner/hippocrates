@@ -139,51 +139,87 @@ var WebMis20 = angular.module('WebMis20', ['ngResource', 'ui.bootstrap', 'ui.sel
         }
     }
 }])
+.factory('PrintingService', ['$window', '$http', '$rootScope', function ($window, $http, $rootScope) {
+    var PrintingService = function (context_type, resolver) {
+        if (arguments.length >= 3) {
+            this.target = arguments[2]
+        } else {
+            this.target = '_blank'
+        }
+        this.context_type = context_type;
+        this.resolver = resolver;
+        this.context = null;
+        this.templates = [];
+    };
+    PrintingService.prototype.set_context = function (context) {
+        if (context === this.context) return;
+        var t = this;
+        $http.get(url_print_templates + context + '.json')
+        .success(function (data) {
+            t.templates = data.result;
+        })
+    };
+    PrintingService.prototype.print_template = function(template_id) {
+        return $http.post(url_print_template, angular.extend({
+                id: template_id,
+                context_type: this.context_type
+            }, this.resolver.apply(this, arguments)))
+        .success(function (data) {
+            var w = $window.open();
+            w.document.open();
+            w.document.write(data);
+            w.document.close();
+            w.print();
+        })
+        .error(function (data, status) {
+            $rootScope.$broadcast('printing_error', {
+                text: 'Ошибка соединения с сервером печати',
+                code: status,
+                data: data
+            })
+        })
+    };
+    return PrintingService;
+}])
 .factory('WMAction', ['$http', '$rootScope', function ($http, $rootScope) {
     var Action = function () {
         this.action = null;
-        this.print_templates = null;
         this.action_culumns = {};
         this.event_id = null;
         this.action_type_id = null;
     };
-    function success(t, data) {
-        t.action = data.result.action;
-        t.print_templates = data.result.print_templates;
-        t.action_columns = {
-            assignable: false,
-            unit: false
-        };
-        angular.forEach(data.result.properties, function (item) {
-            t.action_columns.assignable |= item.type.is_assignable;
-            t.action_columns.unit |= item.type.unit;
-        });
-    }
     function success_wrapper(t) {
         return function (data) {
-            success(t, data);
+            angular.extend(t, data.result);
+            t.action_columns = {
+                assignable: false,
+                unit: false
+            };
+            angular.forEach(data.result.properties, function (item) {
+                t.action_columns.assignable |= item.type.is_assignable;
+                t.action_columns.unit |= item.type.unit;
+            });
+            $rootScope.$broadcast('action_loaded', t);
         }
     }
     Action.prototype.get = function (id) {
         var t = this;
-        $http.get(url_action_get, {
+        return $http.get(url_action_get, {
             params: {
                 action_id: id
             }
         }).success(success_wrapper(t));
-        return this;
     };
     Action.prototype.get_new = function (event_id, action_type_id) {
         this.event_id = event_id;
         this.action_type_id = action_type_id;
         var t = this;
-        $http.get(url_action_new, {
+        return $http.get(url_action_new, {
             params: {
                 action_type_id: action_type_id,
                 event_id: event_id
             }
         }).success(success_wrapper(t));
-        return this;
     };
     Action.prototype.save = function () {
         var t = this;
