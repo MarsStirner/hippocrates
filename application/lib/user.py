@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from application.database import db
+from application.systemwide import db
 from application.models.exists import Person
 from flask.ext.login import UserMixin, AnonymousUserMixin
 import hashlib

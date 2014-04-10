@@ -7,7 +7,7 @@ from decimal import Decimal
 from flask import g, current_app, request, abort
 from flask.ext.principal import Permission, RoleNeed, ActionNeed, PermissionDenied
 from flask.ext.login import current_user
-from application.database import db
+from application.systemwide import db
 from application.models.exists import rbUserProfile, UUID, rbCounter, EventType, ClientIdentification, \
     rbAccountingSystem
 from application.app import app

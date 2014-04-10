@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*
 import datetime
-from application.database import db
+from application.systemwide import db
 from application.lib.agesex import AgeSex, calcAgeTuple
 from application.models.kladr_models import Kladr, Street
 # from application.models.actions import Action

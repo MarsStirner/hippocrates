@@ -7,7 +7,7 @@ from wtforms.validators import Required
 from flask.ext.wtf import Form
 
 from ..app import module
-from application.database import db
+from application.systemwide import db
 from application.lib.utils import public_endpoint
 
 

@@ -1,20 +1,20 @@
 # -*- coding: utf-8 -*-
 import calendar
 from collections import defaultdict
-import json
 import datetime
 from uuid import uuid4
 
-from flask import abort, request, g
+from flask import abort, request
 from flask.ext.login import current_user
-from application.database import db
+
+from application.systemwide import db, cache
 from application.lib.sphinx_search import SearchPerson
 from application.lib.agesex import recordAcceptableEx
-from application.lib.utils import (public_endpoint, jsonify, safe_traverse, get_new_uuid,
+from application.lib.utils import (jsonify, safe_traverse, get_new_uuid,
     get_new_event_ext_id)
 from blueprints.schedule.app import module
 from application.models.exists import (rbSpeciality, rbReasonOfAbsence, rbPrintTemplate, Event,
-    Person, EventType, Client, Organisation, UUID, rbAcheResult)
+    Person, EventType, Client, Organisation, UUID)
 from application.models.actions import Action, ActionType, ActionProperty, ActionPropertyType
 from application.models.schedule import Schedule, ScheduleTicket, ScheduleClientTicket, rbAppointmentType, \
     rbReceptionType, rbAttendanceType
@@ -703,11 +703,8 @@ def api_action_post():
     })
 
 
-@module.route('/api/action-type-list.json')
-def api_atl_get():
-    at_class = int(request.args['at_class'])
-    if not (0 <= at_class < 4):
-        return abort(401)
+@cache.memoize(86400)
+def int_get_atl(at_class):
     atypes = ActionType.query.filter(
         ActionType.class_ == at_class, ActionType.deleted == 0, ActionType.hidden == 0
     )
@@ -741,5 +738,15 @@ def api_atl_get():
                 res_sort(nd)
 
     res_sort(result)
+    return result
 
-    return jsonify(result, extra_headers=[('max-age', '86400')])
+
+@module.route('/api/action-type-list.json')
+def api_atl_get():
+    at_class = int(request.args['at_class'])
+    if not (0 <= at_class < 4):
+        return abort(401)
+
+    result = int_get_atl(at_class)
+
+    return jsonify(result)

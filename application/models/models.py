@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from ..database import db
+from ..systemwide import db
 from flask_login import UserMixin
 
 TABLE_PREFIX = 'app'

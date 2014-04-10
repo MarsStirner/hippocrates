@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from application.database import db
+from application.systemwide import db
 
 __author__ = 'mmalkov'
 

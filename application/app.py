@@ -6,7 +6,8 @@ from flask.ext.babel import Babel
 from flask.ext.login import LoginManager, current_user
 from flask_beaker import BeakerSession
 import pytz
-from database import db
+from application.middleware import Gzip
+from systemwide import db, cache
 from autoload import load_blueprints
 import config
 
@@ -23,6 +24,9 @@ login_manager = LoginManager(app)
 Principal(app)
 
 BeakerSession(app)
+
+
+cache.init_app(app)
 
 
 @app.context_processor
@@ -43,3 +47,5 @@ load_blueprints(app, apps_path=blueprints_path)
 
 # Import all views
 from views import *
+
+Gzip(app)

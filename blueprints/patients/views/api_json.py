@@ -3,7 +3,7 @@
 from flask import abort, request
 from flask.helpers import make_response
 
-from application.database import db
+from application.systemwide import db
 from application.lib.utils import jsonify, get_new_uuid
 from blueprints.patients.app import module
 from application.lib.sphinx_search import SearchPatient
