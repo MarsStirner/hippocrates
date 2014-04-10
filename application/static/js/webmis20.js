@@ -100,7 +100,7 @@ var WebMis20 = angular.module('WebMis20', ['ngResource', 'ui.bootstrap', 'ui.sel
     }
 })
 // Services
-.factory('RefBook', ['$http', function ($http) {
+.factory('RefBook', ['$http', '$rootScope', function ($http, $rootScope) {
     var RefBook = function (name) {
         this.name = name;
         this.objects = [];
@@ -108,8 +108,17 @@ var WebMis20 = angular.module('WebMis20', ['ngResource', 'ui.bootstrap', 'ui.sel
     };
     RefBook.prototype.load = function () {
         var t = this;
-        $http.get(rb_root + this.name).success(function (data) {
+        $http.get(rb_root + this.name)
+        .success(function (data) {
             t.objects = data.result;
+        })
+        .error(function (data, status) {
+            $rootScope.$broadcast('load_error', {
+                text: 'Ошибка при загрузке справочника ' + t.name,
+                code: status,
+                data: data,
+                type: 'danger'
+            })
         });
         return this;
     };
@@ -175,7 +184,8 @@ var WebMis20 = angular.module('WebMis20', ['ngResource', 'ui.bootstrap', 'ui.sel
             $rootScope.$broadcast('printing_error', {
                 text: 'Ошибка соединения с сервером печати',
                 code: status,
-                data: data
+                data: data,
+                type: 'danger'
             })
         })
     };
@@ -249,7 +259,7 @@ var WebMis20 = angular.module('WebMis20', ['ngResource', 'ui.bootstrap', 'ui.sel
     }
 )
 .factory('Client',
-    ['ClientResource', '$q', function(ClientResource, $q) {
+    ['ClientResource', '$q', '$rootScope', function(ClientResource, $q, $rootScope) {
         var Client = function(client_id) {
             this.client_id = client_id;
             this.reload();
@@ -258,15 +268,20 @@ var WebMis20 = angular.module('WebMis20', ['ngResource', 'ui.bootstrap', 'ui.sel
         Client.prototype.reload = function() {
             var t = this;
             ClientResource.get({
-                    client_id: this.client_id,
-                    cache_dt: new Date().getMilliseconds() // todo: cache
+                    client_id: this.client_id
                 },
                 function(data) {
                     t.client_info = data.result.clientData;
                     t.appointments = data.result.appointments;
                     t.events = data.result.events;
                 },
-                function(data) {
+                function(data, status) {
+                    $rootScope.$broadcast('load_error', {
+                        text: 'Ошибка при загрузке клиента ' + t.id,
+                        data: data,
+                        code: status,
+                        type: 'danger'
+                    });
                     throw 'Error requesting Client, id = ' + t.client_id;
                 });
         };

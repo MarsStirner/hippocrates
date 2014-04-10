@@ -16,6 +16,9 @@
                 Создать обращение</a>
         </div>
         <div class="marginal">
+            <alert ng-repeat="alert in alerts" type="alert.type" close="alerts.splice(index, 1)">[[ alert.text ]] [ [[alert.code]] ]</alert>
+        </div>
+        <div class="marginal">
         <tabset>
             <tab>
                 <tab-heading>
@@ -54,8 +57,7 @@
             };
         };
 
-        WebMis20.controller('ClientCtrl', ['$scope', '$http', '$modal', 'Client',
-                            function ($scope, $http, $modal, Client) {
+        WebMis20.controller('ClientCtrl', ['$scope', '$http', '$modal', 'Client', function ($scope, $http, $modal, Client) {
             $scope.records = [];
             $scope.aux = aux;
             $scope.params = aux.getQueryParams(document.location.search);
@@ -78,6 +80,8 @@
             };
             $scope.clientMainInfoCodeOrder = ['id', 'nameText', 'birthDate', 'sex', 'regAddress', 'liveAddress',
                 'documentText', 'compulsoryPolicyText', 'voluntaryPolicyText', 'SNILS', 'contact', 'notes'];
+
+            $scope.alerts = [];
 
             $scope.start_editing = function() {
                 $scope.editing = true;
@@ -123,6 +127,10 @@
             $scope.open_event = function(event) {
                 window.open('{{ url_for('schedule.html_event_info') }}?event_id=' + event.id, '_self')
             };
+
+            $scope.$on('printing_error', function (event, error) {
+                $scope.alerts.push(error);
+            });
 
             if ($scope.client_id == 'new') {
                 $scope.start_editing();

@@ -19,6 +19,9 @@
     <legend xmlns="http://www.w3.org/1999/html">Обращение № [[event_info.external_id]], пациент
         <a href="{{ url_for('patients.patient') }}?client_id=[[event_info.client_id]]">
                 [[ event_info.client.fullName ]]</a></legend>
+    <div class="marginal">
+        <alert ng-repeat="alert in alerts" type="alert.type" close="alerts.splice(index, 1)">[[ alert.text ]] [ [[alert.code]] ]</alert>
+    </div>
     <tabset>
         <tab><tab-heading>Основная Информация</tab-heading>{% include "schedule/client_event/main.html" %}</tab>
         <tab><tab-heading>Медицинские документы</tab-heading>
@@ -38,7 +41,7 @@
 {% block modules_js %}
     <script>
     WebMis20.controller('EventInfoCtrl', ['$scope', '$http', 'RefBookService', '$window', 'PrintingService',
-                        function ($scope, $http, RefBookService, $window, PrintingService) {
+    function ($scope, $http, RefBookService, $window, PrintingService) {
         $scope.aux = aux;
         $scope.event_info = null;
         $scope.event_id = aux.getQueryParams(location.search).event_id;
@@ -193,6 +196,10 @@
                     $scope.w.print();
                })
         };
+
+        $scope.$on('printing_error', function (event, error) {
+            $scope.alerts.push(error);
+        });
     }])
     </script>
 {% endblock %}

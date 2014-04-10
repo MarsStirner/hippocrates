@@ -14,11 +14,8 @@
                     <span class="glyphicon glyphicon-remove"></span></span>
             </div>
         </form>
-        <div class="marginal" ng-if="printError">
-            <div class="alert alert-danger alert-dismissable">
-                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-                [[printError.text]]
-            </div>
+        <div class="marginal">
+            <alert ng-repeat="alert in alerts" type="alert.type" close="alerts.splice(index, 1)">[[ alert.text ]] [ [[alert.code]] ]</alert>
         </div>
         <table class="table table-condensed table-hover table-clickable">
             <caption>
@@ -74,9 +71,8 @@
 {% block modules_js %}
     {{ super() }}
     <script type="text/javascript">
-        WebMis20.controller('ClientSearch',
-                ['$scope', '$http', '$timeout', '$window', 'PrintingService',
-                function ($scope, $http, $timeout, $window, PrintingService) {
+        WebMis20.controller('ClientSearch', ['$scope', '$http', '$timeout', '$window', 'PrintingService',
+        function ($scope, $http, $timeout, $window, PrintingService) {
             $scope.ps = new PrintingService('registry', function (template_id, client_id) {
                 return {
                     client_id: client_id,
@@ -92,6 +88,7 @@
             $scope.params = aux.getQueryParams(document.location.search);
             $scope.query = "";
             $scope.results = [];
+            $scope.alerts = [];
             var _timeoutObjectForQuery;
 
             $scope.$watch('query', function (val) {
@@ -123,7 +120,7 @@
             };
 
             $scope.$on('printing_error', function (event, error) {
-                $scope.printError = error;
+                $scope.alerts.push(error);
             });
 
             $scope.query_clear = function () {
