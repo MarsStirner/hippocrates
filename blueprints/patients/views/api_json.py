@@ -88,7 +88,7 @@ def api_patient_save():
         client.lastName = client_info['lastName']
         client.firstName = client_info['firstName']
         client.patrName = client_info['patrName']
-        client.sexCode = 1 if client_info['sex'] == u'М' else 2
+        client.sexCode = client_info['sex']['id'] if client_info['sex']['id'] != 0 else 1 # todo: fix
         client.SNILS = client_info['SNILS'].replace(" ", "").replace("-", "") if client_info['SNILS'] else ''
         client.notes = client_info['notes'] if client_info['notes'] else ''
         client.birthDate = client_info['birthDate']

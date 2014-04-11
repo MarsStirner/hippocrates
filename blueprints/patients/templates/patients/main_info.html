@@ -2,48 +2,52 @@
     <dt ng-repeat-start="key in clientMainInfoCodeOrder" ng-if="client.client_info[key]">[[ clientInfoCode2Name[key] ]]</dt>
     <dd ng-repeat-end>[[ aux.format(client.client_info, key) ]]</dd>
 </dl>
-<form name="client_form_tab1" class="form-horizontal container-fluid" role="form" ng-show="editing">
+<form name="client_form" role="form" ng-show="editing" novalidate>
     <div class="panel panel-default">
         <div class="panel-body">
-            <div class="row" style="margin-left: 10px;">
+            <div class="row">
+                <div class="form-group col-md-3"
+                     ng-class="{'has-error': client_form.lastname.$invalid && client_form.lastname.$dirty}">
+                    <label for="lastname">Фамилия <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" autocomplete="off" placeholder="Фамилия"
+                           id="lastname" name="lastname" ng-model="client.client_info.lastName" ng-required="true"/>
+                </div>
+                <div class="form-group col-md-3"
+                     ng-class="{'has-error': client_form.firstname.$invalid && client_form.firstname.$dirty}">
+                    <label for="lastname">Имя <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" autocomplete="off" placeholder="Имя"
+                            id="firstname" name="firstname" ng-model="client.client_info.firstName" ng-required="true"/>
+                </div>
                 <div class="form-group col-md-3">
-                    {{ form.lastname.label(class="control-label") }}
-                    <div>
-                        {{ form.lastname(class="form-control", autocomplete="off", placeholder="Фамилия",
-                        ng_model="client.client_info.lastName") }}
-                    </div>
-                </div>
-                <div class="form-group col-md-3" style="margin-right: -5px; margin-left: -5px;">
-                    {{ form.firstname.label(class="control-label") }}
-                    <div>
-                        {{ form.firstname(class="form-control", autocomplete="off", placeholder="Имя",
-                        ng_model="client.client_info.firstName") }}
-                    </div>
-                </div>
-                <div class="form-group col-md-offset-3 col-md-3">
-                    {{ form.patronymic.label(class="control-label") }}
-                    <div>
-                        {{ form.patronymic(class="form-control", autocomplete="off", placeholder="Отчество",
-                        ng_model="client.client_info.patrName") }}
-                    </div>
+                    <label for="patronymic">Отчество</label>
+                    <input type="text" class="form-control" autocomplete="off" placeholder="Отчество"
+                           id="patronymic" name="patronymic" ng-model="client.client_info.patrName"/>
                 </div>
             </div>
-            <div class="row" style="margin-left: 10px;">
-                <div class="form-group col-md-3" style="margin-right: -5px;">
-                    {{ form.birthDate.label(class="control-label") }}
-                    <div>
-                        {{ form.birthDate(class="form-control", datepicker_popup="dd.MM.yyyy", autocomplete="off",
-                        ng_model="client.client_info['birthDate']") }}
+            <div class="row">
+                <div class="form-group col-md-3"
+                     ng-class="{'has-error': client_form.birthdate.$invalid && client_form.birthdate.$dirty}">
+                    <label for="birthdate">Дата рождения <span class="text-danger">*</span></label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="birthdate" name="birthdate"
+                               ng-model="client.client_info.birthDate" is-open="datepicker_popup.opened"
+                               datepicker_popup="dd.MM.yyyy" ng-required="true" manual-date/>
+                        <span class="input-group-btn">
+                            <button class="btn btn-default" ng-click="open_datepicker_popup()">
+                                <i class="glyphicon glyphicon-calendar"></i></button>
+                        </span>
                     </div>
                 </div>
-                <div class="form-group col-md-offset-5 col-md-2">
-                    {{ form.gender.label(class="control-label") }}
-                    <div>
-                        {{ form.gender(class="form-control", autocomplete="off", ng_model="client.client_info['sex']") }}
-                    </div>
+                <div class="form-group col-md-2"
+                     ng-class="{'has-error': client_form.gender.$invalid && client_form.gender.$dirty}">
+                    <label for="gender">Пол <span class="text-danger">*</span></label>
+                    <select class="form-control" id="gender" name="gender"
+                            ng-model="client.client_info.sex" ng-options="item as item.name for item in rbGender.objects"
+                            ng-required="true" enum-validator>
+                    </select>
                 </div>
             </div>
-            <div class="row" style="margin-left: 10px;">
+            <div class="row">
                 <div class="form-group col-md-4">
                     {{ form.snils.label(class="control-label") }}
                     <div id="SNILS">
