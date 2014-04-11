@@ -15,5 +15,6 @@ selenium
 beaker
 Flask-Beaker
 sphinxit
+Flask-Cache
 
 #-r ../pysimplelogs/requirements.txt

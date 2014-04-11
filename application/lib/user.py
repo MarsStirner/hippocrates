@@ -70,10 +70,12 @@ class UserAuth():
 
     @classmethod
     def __check_password(cls, pw_hash, password):
+        password = password.encode('utf-8')
         return pw_hash == hashlib.md5(password).hexdigest()
 
     @classmethod
     def __prepare_user(cls, pw_hash, password):
+        password = password.encode('utf-8')
         return pw_hash == hashlib.md5(password).hexdigest()
 
     @classmethod
