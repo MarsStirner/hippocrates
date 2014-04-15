@@ -506,6 +506,7 @@ def api_diagnosis_delete():
         Diagnosis.query.filter(Diagnosis.id == data['diagnosis_id']).update({'deleted': 1})
     if data['diagnostic_id']:
         Diagnostic.query.filter(Diagnostic.id == data['diagnostic_id']).update({'deleted': 1})
+    db.session.commit()
 
 
 @module.route('/api/actions', methods=['GET'])
