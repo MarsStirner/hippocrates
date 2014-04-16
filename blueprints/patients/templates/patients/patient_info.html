@@ -57,12 +57,27 @@
             };
         };
 
-        WebMis20.controller('ClientCtrl', ['$scope', '$http', '$modal', 'Client', function ($scope, $http, $modal, Client) {
+        WebMis20.controller('ClientCtrl', ['$scope', '$http', '$modal', 'Client', 'PrintingService',
+        function ($scope, $http, $modal, Client, PrintingService) {
             $scope.records = [];
             $scope.aux = aux;
             $scope.params = aux.getQueryParams(document.location.search);
             $scope.client_id = $scope.params.client_id;
             $scope.client = new Client($scope.client_id);
+            $scope.ps_amb = new PrintingService('preliminary_records', function (template_id, client_ticket_id) {
+                return {
+                    client_id: $scope.client_id,
+                    ticket_id: client_ticket_id
+                }
+            });
+            $scope.ps_home = new PrintingService('preliminary_records', function (template_id, client_ticket_id) {
+                return {
+                    client_id: $scope.client_id,
+                    ticket_id: client_ticket_id
+                }
+            });
+            $scope.ps_amb.set_context('orderAmb');
+            $scope.ps_home.set_context('orderHome');
 
             $scope.clientInfoCode2Name = {
                 'id': 'Код пациента',
@@ -91,7 +106,6 @@
                 $scope.editing = false;
                 $scope.client.reload();
             };
-
             $scope.save_client = function() {
                 $scope.client.save()
                 .then(function(new_client_id) {
