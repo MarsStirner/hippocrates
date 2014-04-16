@@ -229,12 +229,12 @@ class ClientVisualizer(object):
                     'deleted': document.deleted,
                     'number': document.number,
                     'serial': document.serial,
-                    'begDate': document.date or '',
-                    'endDate': document.endDate or '',
+                    'begDate': document.date,
+                    'endDate': document.endDate,
                     'typeName': document.documentType.name,
                     'typeCode': document.documentType.code,
                     'origin': document.origin,
-                    'documentText': document}
+                    'documentText': unicode(document)}
         else:
             return {'number': '',
                     'serial': '',
@@ -294,7 +294,6 @@ class ClientVisualizer(object):
                 'notes': contact.notes}
 
     def make_client_info(self, client):
-
         socStatuses = [{'id': socStatus.id,
                         'deleted': socStatus.deleted,
                         'className': socStatus.soc_status_class.name,

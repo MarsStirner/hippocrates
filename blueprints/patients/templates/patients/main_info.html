@@ -62,15 +62,22 @@
     <div class="panel panel-default">
         <div class="panel-heading">Документ</div>
         <div class="panel-body">
-            <div class="row" style="margin-left: 10px;">
+            <div class="row" >
                 <div class="form-group col-md-4">
-                    {{ form.document_type.label(class="control-label") }}
-                    <div>
-                        {{ form.document_type(class="form-control", autocomplete="off",
-                        ng_model="client.client_info['document']['typeCode']") }}
-                    </div>
+                    <label for="document_type">Тип</label>
+                    <ui-select ng-model="client.client_info['document']['typeCode']"
+                            theme="select2">
+                        <match placeholder="Тип документа">[[$select.selected.name]]</match>
+                        <choices repeat="dt in rbDocumentType.objects | filter: $select.search">
+                            <div ng-bind-html="dt.name | highlight: $select.search"></div>
+                        </choices>
+                    </ui-select>
+{#                    <div>#}
+{#                        {{ form.document_type(class="form-control", autocomplete="off",#}
+{#                        ng_model="client.client_info['document']['typeCode']") }}#}
+{#                    </div>#}
                 </div>
-                <div class="form-group col-md-2" style="margin-right: -5px; margin-left: -5px;">
+                <div class="form-group col-md-2">
                     {{ form.document_serial.label(class="control-label") }}
                     <div>
                         {{ form.document_serial(class="form-control", autocomplete="off", placeholder="серия",
