@@ -3,6 +3,7 @@ import datetime
 from application.systemwide import db
 from application.lib.agesex import AgeSex, calcAgeTuple
 from application.models.kladr_models import Kladr, Street
+from application.models.enums import Gender
 # from application.models.actions import Action
 
 
@@ -257,7 +258,7 @@ class Client(db.Model):
 
     @property
     def nameText(self):
-        return u' '.join((u'%s %s %s' % (self.lastName, self.firstName, self.patrName)).split())
+        return u' '.join((u'%s %s %s' % (self.lastName or '', self.firstName or '', self.patrName or '')).split())
 
     @property
     def shortNameText(self):
@@ -267,12 +268,7 @@ class Client(db.Model):
 
     @property
     def sex(self):
-        if self.sexCode == 1:
-            return u'М'
-        elif self.sexCode == 2:
-            return u'Ж'
-        else:
-            return u''
+        return unicode(Gender(self.sexCode))
 
     @property
     def formatted_SNILS(self):
@@ -335,7 +331,7 @@ class Client(db.Model):
             'lastName': self.lastName,
             'patrName': self.patrName,
             'birthDate': self.birthDate,
-            'sex': self.sex,
+            'sex': Gender(self.sexCode),
             'SNILS': self.SNILS,
             'fullName': self.nameText,  # todo: more
         }

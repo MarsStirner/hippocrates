@@ -25,3 +25,9 @@ class ActionStatus(Enum):
     finished = 2, u'Закончено'
     cancelled = 3, u'Отменено'
     no_result = 4, u'Без результата'
+
+
+class Gender(Enum):
+    undefined = 0, u'Не выбрано'
+    male = 1, u'М'
+    female = 2, u'Ж'

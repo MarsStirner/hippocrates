@@ -3,7 +3,7 @@ from collections import defaultdict
 import datetime
 import itertools
 from application.lib.utils import safe_unicode, safe_int
-from application.models.enums import EventPrimary, EventOrder, ActionStatus
+from application.models.enums import EventPrimary, EventOrder, ActionStatus, Gender
 
 from application.models.schedule import Schedule, rbReceptionType
 from application.models.actions import Action, ActionProperty
@@ -347,12 +347,12 @@ class ClientVisualizer(object):
             'firstName': client.firstName,
             'patrName': client.patrName,
             'nameText': client.nameText,
-            'sex': client.sex,
+            'sex': Gender(client.sexCode),
             'SNILS': client.formatted_SNILS or None,
             'notes': client.notes,
             'document': pers_document,
             'documentText': safe_unicode(client.document),
-            'birthDate': client.birthDate or '',
+            'birthDate': client.birthDate,
             'regAddress': client.reg_address,
             'liveAddress': client.loc_address,
             'contact': client.phones,
