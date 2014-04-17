@@ -17,4 +17,4 @@ Flask-Beaker
 sphinxit
 Flask-Cache
 
-#-r ../pysimplelogs/requirements.txt
+-e https://github.com/Se7ge/pysimplelogs.git#egg=pysimplelogs
