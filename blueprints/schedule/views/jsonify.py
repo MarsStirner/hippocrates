@@ -280,8 +280,7 @@ class ClientVisualizer(object):
     def make_relation_info(self, relation):
         return {'id': relation.id,
                 'deleted': relation.deleted,
-                'relativeType_name': relation.name,
-                'relativeType_code': relation.code,
+                'relativeType': relation.relativeType,
                 'other_id': relation.other.id,
                 'other_text': relation.other.nameText + ' ({})'.format(relation.other.id)}
 

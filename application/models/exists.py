@@ -1298,6 +1298,16 @@ class rbRelationType(db.Model):
     regionalCode = db.Column(db.String(64), nullable=False)
     regionalReverseCode = db.Column(db.String(64), nullable=False)
 
+    def __json__(self):
+        return {
+            'id': self.id,
+            'code': self.code,
+            'leftName': self.leftName,
+            'rightName': self.rightName,
+            'leftSex': self.leftSex,
+            'rightSex': self.rightSex,
+        }
+
     def __int__(self):
         return self.id
 

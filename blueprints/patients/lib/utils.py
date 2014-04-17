@@ -280,7 +280,7 @@ def get_new_direct_relation(relation_info):
     rel.version = 0
     rel.deleted = relation_info['deleted']
     rel.relativeType = rbRelationType.query.filter(
-        rbRelationType.code == relation_info['relativeType_code']).first()
+        rbRelationType.code == relation_info['relativeType']['code']).first()
     rel.other = Client.query.filter(Client.id == relation_info['other_id']).first()
     return rel
 
@@ -294,7 +294,7 @@ def get_modified_direct_relation(client, relation_info):
         return rel
 
     rel.relativeType = rbRelationType.query.filter(
-        rbRelationType.code == relation_info['relativeType_code']).first()
+        rbRelationType.code == relation_info['relativeType']['code']).first()
     rel.other = Client.query.filter(Client.id == relation_info['other_id']).first()
     rel.modifyDatetime = now
     return rel
@@ -306,7 +306,7 @@ def get_new_reversed_relation(relation_info):
     rel.version = 0
     rel.deleted = relation_info['deleted']
     rel.relativeType = rbRelationType.query.filter(
-        rbRelationType.code == relation_info['relativeType_code']).first()
+        rbRelationType.code == relation_info['relativeType']['code']).first()
     rel.other = Client.query.filter(Client.id == relation_info['other_id']).first()
     return rel
 
@@ -320,7 +320,7 @@ def get_modified_reversed_relation(client, relation_info):
         return rel
 
     rel.relativeType = rbRelationType.query.filter(
-        rbRelationType.code == relation_info['relativeType_code']).first()
+        rbRelationType.code == relation_info['relativeType']['code']).first()
     rel.other = Client.query.filter(Client.id == relation_info['other_id']).first()
     rel.modifyDatetime = now
     return rel

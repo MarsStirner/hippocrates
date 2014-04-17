@@ -1,3 +1,4 @@
+{% import "_macros.html" as macros %}
 <div class="row">
     <div class="col-md-12">
         <table class="table table-condensed" ng-if="client.client_info['direct_relations']" ng-hide="editing">
@@ -27,8 +28,14 @@
                 <tbody>
                     <tr ng-repeat="relation in client.client_info['direct_relations']">
                         <td class="col-md-4" ng-hide="relation.deleted">
-                            {{ form.direct_relation_relation(class="form-control",
-                               autocomplete="off", ng_model="relation.relativeType_code") }}</td>
+                            <ui-select ng-model="relation.relativeType"
+                                    theme="select2">
+                                <match placeholder="Тип связи">[[$select.selected.leftName]] -> [[$select.selected.rightName]]</match>
+                                <choices repeat="rt in rbRelationType.objects| filter:directRelationFilter | filter: $select.search">
+                                    <div ng-bind-html="(rt.leftName + ' -> ' + rt.rightName) | highlight: $select.search"></div>
+                                </choices>
+                            </ui-select>
+                        </td>
                         <td class="col-md-3" ng-hide="relation.deleted">
                             {{ form.direct_relation_other(class="form-control", autocomplete="off",
                                ng_model="relation.other_id") }}</td>
@@ -80,8 +87,14 @@
                 <tbody>
                     <tr ng-repeat="relation in  client.client_info['reversed_relations']">
                         <td class="col-md-4" ng-hide="relation.deleted">
-                            {{ form.reversed_relation_relation(class="form-control", autocomplete="off",
-                               ng_model="relation.relativeType_code") }}</td>
+                            <ui-select ng-model="relation['relativeType']"
+                                    theme="select2">
+                                <match placeholder="Тип связи">[[$select.selected.rightName]] -> [[$select.selected.leftName]]</match>
+                                <choices repeat="rt in rbRelationType.objects| filter:reversedRelationFilter | filter: $select.search">
+                                    <div ng-bind-html="(rt.rightName + ' -> ' + rt.leftName) | highlight: $select.search"></div>
+                                </choices>
+                            </ui-select>
+                        </td>
                         <td class="col-md-3" ng-hide="relation.deleted">
                             {{ form.reversed_relation_other(class="form-control", autocomplete="off",
                                ng_model="relation.other_id") }}</td>

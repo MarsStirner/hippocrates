@@ -79,7 +79,8 @@ def api_refbook(name):
             if 'deleted' in ref_book.__dict__:
                 return jsonify(ref_book.query.filter_by(deleted=0).order_by(ref_book.id).all())
             else:
-                return jsonify(ref_book.query.order_by(ref_book.id).all())
+                res = ref_book.query.order_by(ref_book.id).all()
+                return jsonify(res)
     return abort(404)
 
 
