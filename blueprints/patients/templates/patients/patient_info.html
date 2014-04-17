@@ -63,12 +63,13 @@
             };
         };
 
-        WebMis20.controller('ClientCtrl', ['$scope', '$http', '$modal', 'Client', '$timeout',
-                function ($scope, $http, $modal, Client, $timeout) {
+        WebMis20.controller('ClientCtrl', ['$scope', '$http', '$modal', 'Client', '$timeout', 'RefBookService',
+                function ($scope, $http, $modal, Client, $timeout, RefBookService) {
             $scope.records = [];
             $scope.aux = aux;
             $scope.params = aux.getQueryParams(document.location.search);
             $scope.rbGender = {{ Enum.get_class_by_name('Gender').rb() | tojson }};
+            $scope.rbDocumentType = RefBookService.get('rbDocumentType');
             $scope.client_id = $scope.params.client_id;
             $scope.client = new Client($scope.client_id);
 

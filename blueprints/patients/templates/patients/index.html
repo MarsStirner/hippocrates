@@ -55,7 +55,7 @@
                         <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="print_dropdownMenu">
                             <li role="presentation" ng-repeat="template in ps.templates">
                                 <a role="menuitem" tabindex="-1" href="" class="print_template"
-                                   ng-click="ps.print_template(result.id, template.id)" ng-bind="template.name">
+                                   ng-click="ps.print_template(template.id, result.id)" ng-bind="template.name">
                                 </a>
                             </li>
                         </ul>

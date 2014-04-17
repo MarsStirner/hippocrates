@@ -38,7 +38,7 @@
                         </span>
                     </div>
                 </div>
-                <div class="form-group col-md-2"
+                <div class="form-group col-md-1"
                      ng-class="{'has-error': client_form.gender.$invalid && client_form.gender.$dirty}">
                     <label for="gender">Пол <span class="text-danger">*</span></label>
                     <select class="form-control" id="gender" name="gender"
@@ -48,11 +48,12 @@
                 </div>
             </div>
             <div class="row">
-                <div class="form-group col-md-4">
-                    {{ form.snils.label(class="control-label") }}
-                    <div id="SNILS">
-                        {{ form.snils(class="form-control", autocomplete="off", ng_model="client.client_info['SNILS']") }}
-                    </div>
+                <div class="form-group col-md-3"
+                     ng-class="{'has-error': client_form.snils.$invalid && client_form.snils.$dirty}">
+                    <label for="snils">СНИЛС</label>
+                    <input type="text" class="form-control" id="snils" name="snils" ui-mask="999-999-999 99"
+                           ng-model="client.client_info.SNILS" placeholder="___-___-___ __"
+                           ng-pattern="/\d{3}-\d{3}-\d{3} \d\d/"/>
                 </div>
             </div>
         </div>
@@ -61,15 +62,22 @@
     <div class="panel panel-default">
         <div class="panel-heading">Документ</div>
         <div class="panel-body">
-            <div class="row" style="margin-left: 10px;">
+            <div class="row" >
                 <div class="form-group col-md-4">
-                    {{ form.document_type.label(class="control-label") }}
-                    <div>
-                        {{ form.document_type(class="form-control", autocomplete="off",
-                        ng_model="client.client_info['document']['typeCode']") }}
-                    </div>
+                    <label for="document_type">Тип</label>
+                    <ui-select ng-model="client.client_info['document']['typeCode']"
+                            theme="select2">
+                        <match placeholder="Тип документа">[[$select.selected.name]]</match>
+                        <choices repeat="dt in rbDocumentType.objects | filter: $select.search">
+                            <div ng-bind-html="dt.name | highlight: $select.search"></div>
+                        </choices>
+                    </ui-select>
+{#                    <div>#}
+{#                        {{ form.document_type(class="form-control", autocomplete="off",#}
+{#                        ng_model="client.client_info['document']['typeCode']") }}#}
+{#                    </div>#}
                 </div>
-                <div class="form-group col-md-2" style="margin-right: -5px; margin-left: -5px;">
+                <div class="form-group col-md-2">
                     {{ form.document_serial.label(class="control-label") }}
                     <div>
                         {{ form.document_serial(class="form-control", autocomplete="off", placeholder="серия",

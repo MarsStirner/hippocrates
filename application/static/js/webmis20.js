@@ -1,7 +1,8 @@
 /**
  * Created by mmalkov on 10.02.14.
  */
-var WebMis20 = angular.module('WebMis20', ['ngResource', 'ui.bootstrap', 'ui.select', 'ngSanitize', 'ngCkeditor', 'sf.treeRepeat'])
+var WebMis20 = angular.module('WebMis20', ['ngResource', 'ui.bootstrap', 'ui.select', 'ngSanitize',
+            'ngCkeditor', 'sf.treeRepeat', 'ui.mask'])
 .config(function ($interpolateProvider, datepickerConfig, datepickerPopupConfig) {
     $interpolateProvider.startSymbol('[[');
     $interpolateProvider.endSymbol(']]');
@@ -470,7 +471,7 @@ var WebMis20 = angular.module('WebMis20', ['ngResource', 'ui.bootstrap', 'ui.sel
                 scope.shown = false;
             }
         }
-    }
+    };
 })
 .directive('uiScheduleTicket', ['$compile', function ($compile) {
     return {
@@ -519,7 +520,7 @@ var WebMis20 = angular.module('WebMis20', ['ngResource', 'ui.bootstrap', 'ui.sel
             });
 
         }
-    }
+    };
 }])
 .directive('uiActionProperty', ['$compile', function ($compile) {
     return {
@@ -565,11 +566,11 @@ var WebMis20 = angular.module('WebMis20', ['ngResource', 'ui.bootstrap', 'ui.sel
         restrict: 'A',
         require: 'ngModel',
         link: function(scope, elm, attrs, ctrl) {
-            ctrl.$parsers.push(function(viewValue) {
+            ctrl.$parsers.unshift(function(viewValue) {
                 var viewValue = ctrl.$viewValue;
-                if (viewValue instanceof Date || !viewValue) return viewValue;
+                if (!viewValue || viewValue instanceof Date) return viewValue;
                 var parts = viewValue.split('.');
-                var d =  new Date(Date.UTC(parseInt(parts[2]), parseInt(parts[1] - 1),
+                var d = new Date(Date.UTC(parseInt(parts[2]), parseInt(parts[1] - 1),
                     parseInt(parts[0]), 0, 0, 0));
                 if (moment(d).isValid()) {
                     ctrl.$setValidity('date', true);
