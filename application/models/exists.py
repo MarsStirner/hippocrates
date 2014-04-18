@@ -647,6 +647,57 @@ class DirectClientRelation(ClientRelation):
 
     other = db.relationship(u'Client', foreign_keys='ClientRelation.relative_id')
 
+    @property
+    def role(self):
+        return self.leftName
+
+    @property
+    def otherRole(self):
+        return self.rightName
+
+    @property
+    def regionalCode(self):
+        return self.relativeType.regionalCode
+
+    @property
+    def clientId(self):
+        return self.relative_id
+
+    @property
+    def isDirectGenetic(self):
+        return self.relativeType.isDirectGenetic
+
+    @property
+    def isBackwardGenetic(self):
+        return self.relativeType.isBackwardGenetic
+
+    @property
+    def isDirectRepresentative(self):
+        return self.relativeType.isDirectRepresentative
+
+    @property
+    def isBackwardRepresentative(self):
+        return self.relativeType.isBackwardRepresentative
+
+    @property
+    def isDirectEpidemic(self):
+        return self.relativeType.isDirectEpidemic
+
+    @property
+    def isBackwardEpidemic(self):
+        return self.relativeType.isBackwardEpidemic
+
+    @property
+    def isDirectDonation(self):
+        return self.relativeType.isDirectDonation
+
+    @property
+    def isBackwardDonation(self):
+        return self.relativeType.isBackwardDonation
+
+    def __unicode__(self):
+        return self.name + ' ' + self.other
+
 
 class ReversedClientRelation(ClientRelation):
 
