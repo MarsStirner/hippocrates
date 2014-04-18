@@ -28,21 +28,17 @@
                 <div class="form-group col-md-3"
                      ng-class="{'has-error': client_form.birthdate.$invalid && client_form.birthdate.$dirty}">
                     <label for="birthdate">Дата рождения <span class="text-danger">*</span></label>
-                    <div class="input-group">
-                        <input type="text" class="form-control" id="birthdate" name="birthdate"
-                               ng-model="client.client_info.birthDate" is-open="datepicker_popup.opened"
-                               datepicker_popup="dd.MM.yyyy" ng-required="true" manual-date/>
-                        <span class="input-group-btn">
-                            <button class="btn btn-default" ng-click="open_datepicker_popup()">
-                                <i class="glyphicon glyphicon-calendar"></i></button>
-                        </span>
-                    </div>
+                    <wm-date id="birthdate" name="birthdate"
+                             ng-model="client.client_info.birthDate"
+                             ng-required="true">
+                    </wm-date>
                 </div>
                 <div class="form-group col-md-1"
                      ng-class="{'has-error': client_form.gender.$invalid && client_form.gender.$dirty}">
                     <label for="gender">Пол <span class="text-danger">*</span></label>
                     <select class="form-control" id="gender" name="gender"
-                            ng-model="client.client_info.sex" ng-options="item as item.name for item in rbGender.objects"
+                            ng-model="client.client_info.sex"
+                            ng-options="item as item.name for item in rbGender.objects track by item.id"
                             ng-required="true" enum-validator>
                     </select>
                 </div>
@@ -60,179 +56,214 @@
     </div>
 
     <div class="panel panel-default">
-        <div class="panel-heading">Документ</div>
+        <div class="panel-heading panel-title">Документ</div>
         <div class="panel-body">
-            <div class="row" >
-                <div class="form-group col-md-4">
-                    <label for="document_type">Тип</label>
-                    <ui-select ng-model="client.client_info['document']['typeCode']"
-                            theme="select2">
-                        <match placeholder="Тип документа">[[$select.selected.name]]</match>
-                        <choices repeat="dt in rbDocumentType.objects | filter: $select.search">
-                            <div ng-bind-html="dt.name | highlight: $select.search"></div>
-                        </choices>
-                    </ui-select>
-{#                    <div>#}
-{#                        {{ form.document_type(class="form-control", autocomplete="off",#}
-{#                        ng_model="client.client_info['document']['typeCode']") }}#}
-{#                    </div>#}
-                </div>
-                <div class="form-group col-md-2">
-                    {{ form.document_serial.label(class="control-label") }}
-                    <div>
-                        {{ form.document_serial(class="form-control", autocomplete="off", placeholder="серия",
-                        ng_model="client.client_info['document']['serial']") }}
+            <ng-form name="docForm">
+                <div class="row">
+                    {# TODO: есть проблема с начальным значением селекта - оно всегда валидно, плюс непонятно как добавить выбор пустого значения #}
+                    <div class="form-group col-md-4">
+                        <label for="doc_type">Тип</label>
+                        <ui-select class="form-control" id="doc_type" name="doc_type"
+                                   ng-model="client.client_info['document']['documentType']"
+                                   theme="select2" autocomplete="off">
+                            <match placeholder="Тип документа">[[$select.selected.name]]</match>
+                            <choices repeat="dt in rbDocumentType.objects | filter: $select.search">
+                                <div ng-bind-html="dt.name | highlight: $select.search"></div>
+                            </choices>
+                        </ui-select>
+                    </div>
+                    <div class="form-group col-md-2"
+                         ng-class="{'has-error': docForm.doc_serial.$invalid && docForm.doc_serial.$dirty}">
+                        <label for="doc_serial">Серия</label>
+                        <input type="text" class="form-control" id="doc_serial" name="doc_serial"
+                               autocomplete="off" placeholder="серия" ng-pattern="/^[\d\s]+$/" {# FIXME: its ok? #}
+                               ng-model="client.client_info['document']['serial']"/>
+                    </div>
+                    <div class="form-group col-md-2"
+                         ng-class="{'has-error': docForm.doc_type.$viewValue && docForm.doc_number.$invalid}">
+                        <label for="doc_number">Номер</label>
+                        <input type="text" class="form-control" id="doc_number" name="doc_number"
+                               autocomplete="off" placeholder="номер" ng-pattern="/^\d+$/" {# FIXME: allows whitespace as first char #}
+                               ng-model="client.client_info['document']['number']"
+                               ng-required="docForm.doc_type.$viewValue"/>
                     </div>
                 </div>
-                <div class="form-group col-md-2">
-                    {{ form.document_number.label(class="control-label") }}
-                    <div>
-                        {{ form.document_number(class="form-control", autocomplete="off", placeholder="номер",
-                        ng_model="client.client_info['document']['number']") }}
-                    </div>
-                </div>
-            </div>
 
-            <div class="row" style="margin-left: 10px;">
-                <div class="form-group col-md-2">
-                    {{ form.document_begDate.label(class="control-label") }}
-                    <div>
-                        {{ form.document_begDate(class="form-control", datepicker_popup="dd.MM.yyyy",
-                        autocomplete="off", ng_model="client.client_info['document']['begDate']") }}
+                <div class="row">
+                    <div class="form-group col-md-2"
+                         ng-class="{'has-error': docForm.doc_type.$viewValue && docForm.doc_begDate.$invalid}">
+                        <label for="doc_begDate">Дата выдачи</label>
+                        <wm-date id="doc_begDate" name="doc_begDate"
+                                 ng-model="client.client_info['document']['begDate']"
+                                 ng-required="docForm.doc_type.$viewValue">
+                        </wm-date>
+                    </div>
+                    <div class="form-group col-md-2"
+                         ng-class="{'has-error': docForm.doc_endDate.$invalid }">
+                        <label for="doc_endDate">Действителен до</label>
+                        {# TODO: неправильная установка даты, если в модели сейчас null #}
+                        <wm-date id="doc_endDate" name="doc_endDate"
+                                 ng-model="client.client_info['document']['endDate']">
+                                 {# TODO: валидация для необязательной даты - только для введенного#}
+                        </wm-date>
+                    </div>
+                    <div class="form-group col-md-4"
+                         ng-class="{'has-error': docForm.doc_type.$viewValue && docForm.ufms.$invalid}">
+                        <label for="ufms">Выдан</label>
+                        <select class="form-control" id="ufms" name="ufms"
+                                ng-model="client.client_info['document']['origin']"
+                                ng-options="org.name as org.name for org in rbUFMS.objects"
+                                ng-required="docForm.doc_type.$valid">
+                        </select>
+                        {# TODO: manual-input#}
                     </div>
                 </div>
-                <div class="form-group col-md-2" style="margin-right: -5px; margin-left: -5px;">
-                    {{ form.document_endDate.label(class="control-label") }}
-                    <div>
-                        {{ form.document_endDate(class="form-control", datepicker_popup="dd.MM.yyyy",
-                        autocomplete="off", ng_model="client.client_info['document']['endDate']") }}
-                    </div>
-                </div>
-                <div class="form-group col-md-4">
-                    {{ form.ufms.label(class="control-label") }}
-                    <div>
-                        {{ form.ufms(class="form-control", autocomplete="off",
-                        ng_model="client.client_info['document']['origin']") }}
-                    </div>
-                </div>
-            </div>
+            </ng-form>
         </div>
     </div>
 
     <div class="panel panel-default">
-        <div class="panel-heading">Полис ОМС</div>
+        <div class="panel-heading panel-title">Полис ОМС</div>
         <div class="panel-body">
-            <div class="row" style="margin-left: 10px;">
-                <div class="form-group col-md-4">
-                    {{ form.compulsory_policy_type.label(class="control-label") }}
-                    <div>
-                        {{ form.compulsory_policy_type(class="form-control", autocomplete="off",
-                        ng_model="client.client_info['compulsoryPolicy']['typeCode']") }}
+            <ng-form name="cpolForm">
+                <div class="row">
+                    <div class="form-group col-md-4">
+                        <label for="cpol_type">Тип</label>
+                        <ui-select class="form-control" id="cpol_type" name="cpol_type"
+                                   ng-model="client.client_info['compulsoryPolicy']['policyType']"
+                                   theme="select2" autocomplete="off">
+                            <match placeholder="Тип полиса">[[$select.selected.name]]</match>
+                            <choices repeat="pt in rbPolicyType.objects | filter: filter_cpolicy | filter: $select.search">
+                                <div ng-bind-html="pt.name | highlight: $select.search"></div>
+                            </choices>
+                        </ui-select>
+                    </div>
+                    <div class="form-group col-md-2"
+                         ng-class="{'has-error': cpolForm.cpol_serial.$invalid && cpolForm.cpol_serial.$dirty}">
+                        <label for="cpol_serial">Серия</label>
+                        <input type="text" class="form-control" id="cpol_serial" name="cpol_serial"
+                               autocomplete="off" placeholder="серия" ng-pattern="/^[\d\s]+$/" {# FIXME: its ok? #}
+                               ng-model="client.client_info['compulsoryPolicy']['serial']"/>
+                    </div>
+                    <div class="form-group col-md-2"
+                         ng-class="{'has-error': cpolForm.cpol_type.$viewValue && cpolForm.cpol_number.$invalid}">
+                        <label for="cpol_number">Номер</label>
+                        <input type="text" class="form-control" id="cpol_number" name="cpol_number"
+                               autocomplete="off" placeholder="номер" ng-pattern="/^\d+$/" {# FIXME: allows whitespace as first char #}
+                               ng-model="client.client_info['compulsoryPolicy']['number']"
+                               ng-required="cpolForm.cpol_type.$viewValue"/>
                     </div>
                 </div>
-                <div class="form-group col-md-2" style="margin-right: -5px; margin-left: -5px;">
-                    {{ form.compulsory_policy_serial.label(class="control-label") }}
-                    <div>
-                        {{ form.compulsory_policy_serial(class="form-control", autocomplete="off",
-                        placeholder="серия", ng_model="client.client_info['compulsoryPolicy']['serial']") }}
-                    </div>
-                </div>
-                <div class="form-group col-md-2">
-                    {{ form.compulsory_policy_number.label(class="control-label") }}
-                    <div>
-                        {{ form.compulsory_policy_number(class="form-control", autocomplete="off",
-                        placeholder="номер", ng_model="client.client_info['compulsoryPolicy']['number']") }}
-                    </div>
-                </div>
-            </div>
 
-            <div class="row" style="margin-left: 10px;">
-                <div class="form-group col-md-2">
-                    {{ form.compulsory_policy_begDate.label(class="control-label") }}
-                    <div>
-                        {{ form.compulsory_policy_begDate(class="form-control", datepicker_popup="dd.MM.yyyy",
-                        autocomplete="off", ng_model="client.client_info['compulsoryPolicy']['begDate']") }}
+                <div class="row">
+                    <div class="form-group col-md-2"
+                         ng-class="{'has-error': cpolForm.cpol_type.$viewValue && cpolForm.cpol_begDate.$invalid}">
+                        <label for="cpol_begDate">Дата выдачи</label>
+                        <wm-date id="cpol_begDate" name="cpol_begDate"
+                                 ng-model="client.client_info['compulsoryPolicy']['begDate']"
+                                 ng-required="cpolForm.cpol_type.$viewValue">
+                        </wm-date>
+                    </div>
+                    <div class="form-group col-md-2"
+                         ng-class="{'has-error': cpolForm.cpol_endDate.$invalid }">
+                        <label for="cpol_endDate">Действителен до</label>
+                        {# TODO: неправильная установка даты, если в модели сейчас null #}
+                        <wm-date id="cpol_endDate" name="cpol_endDate"
+                                 ng-model="client.client_info['compulsoryPolicy']['endDate']">
+                                 {# TODO: валидация для необязательной даты - только для введенного#}
+                        </wm-date>
+                    </div>
+                    <div class="form-group col-md-4"
+                         ng-class="{'has-error': cpolForm.cpol_type.$viewValue && cpolForm.ufms.$invalid}">
+                        <label for="ufms">Выдан</label>
+                        <ui-select class="form-control" id="ufms" name="ufms"
+                                ng-model="client.client_info['compulsoryPolicy']['insurer']"
+                                theme="select2" ng-required="cpolForm.cpol_type.$valid">
+                            <match placeholder="Тип документа">[[$select.selected.short_name]]</match>
+                            <choices repeat="org in rbOrganisation.objects | filter: $select.search">
+                                <div ng-bind-html="org.short_name | highlight: $select.search"></div>
+                            </choices>
+                        </ui-select>
                     </div>
                 </div>
-                <div class="form-group col-md-2" style="margin-right: -5px; margin-left: -5px;">
-                    {{ form.compulsory_policy_endDate.label(class="control-label") }}
-                    <div>
-                        {{ form.compulsory_policy_endDate(class="form-control", datepicker_popup="dd.MM.yyyy",
-                        autocomplete="off", ng_model="client.client_info['compulsoryPolicy']['endDate']") }}
-                    </div>
-                </div>
-                <div class="form-group col-md-4">
-                    {{ form.compulsory_policy_org.label(class="control-label") }}
-                    <div>
-                        {{ form.compulsory_policy_org(class="form-control", autocomplete="off",
-                        ng_model="client.client_info['compulsoryPolicy']['insurer_id']") }}
-                    </div>
-                </div>
-            </div>
+            </ng-form>
         </div>
     </div>
 
     <div class="panel panel-default">
-        <div class="panel-heading">Полис ДМС</div>
+        <div class="panel-heading panel-title">Полис ДМС</div>
         <div class="panel-body">
-            <div class="row" style="margin-left: 10px;">
-                <div class="form-group col-md-4">
-                    {{ form.voluntary_policy_type.label(class="control-label") }}
-                    <div>
-                        {{ form.voluntary_policy_type(class="form-control", autocomplete="off",
-                        ng_model="client.client_info['voluntaryPolicy']['typeCode']") }}
+            <ng-form name="vpolForm">
+                <div class="row">
+                    <div class="form-group col-md-4">
+                        <label for="vpol_type">Тип</label>
+                        <ui-select class="form-control" id="vpol_type" name="vpol_type"
+                                   ng-model="client.client_info['voluntaryPolicy']['policyType']"
+                                   theme="select2" autocomplete="off">
+                            <match placeholder="Тип полиса">[[$select.selected.name]]</match>
+                            <choices repeat="pt in rbPolicyType.objects | filter: filter_vpolicy | filter: $select.search">
+                                <div ng-bind-html="pt.name | highlight: $select.search"></div>
+                            </choices>
+                        </ui-select>
+                    </div>
+                    <div class="form-group col-md-2"
+                         ng-class="{'has-error': vpolForm.vpol_serial.$invalid && vpolForm.vpol_serial.$dirty}">
+                        <label for="vpol_serial">Серия</label>
+                        <input type="text" class="form-control" id="vpol_serial" name="vpol_serial"
+                               autocomplete="off" placeholder="серия" ng-pattern="/^[\d\s]+$/" {# FIXME: its ok? #}
+                               ng-model="client.client_info['voluntaryPolicy']['serial']"/>
+                    </div>
+                    <div class="form-group col-md-2"
+                         ng-class="{'has-error': vpolForm.vpol_type.$viewValue && vpolForm.vpol_number.$invalid}">
+                        <label for="vpol_number">Номер</label>
+                        <input type="text" class="form-control" id="vpol_number" name="vpol_number"
+                               autocomplete="off" placeholder="номер" ng-pattern="/^\d+$/" {# FIXME: allows whitespace as first char #}
+                               ng-model="client.client_info['voluntaryPolicy']['number']"
+                               ng-required="vpolForm.vpol_type.$viewValue"/>
                     </div>
                 </div>
-                <div class="form-group col-md-2" style="margin-right: -5px; margin-left: -5px;">
-                    {{ form.compulsory_policy_serial.label(class="control-label") }}
-                    <div>
-                        {{ form.voluntary_policy_serial(class="form-control", autocomplete="off",
-                        placeholder="серия", ng_model="client.client_info['voluntaryPolicy']['serial']") }}
+
+                <div class="row">
+                    <div class="form-group col-md-2"
+                         ng-class="{'has-error': vpolForm.vpol_type.$viewValue && vpolForm.vpol_begDate.$invalid}">
+                        <label for="vpol_begDate">Дата выдачи</label>
+                        <wm-date id="vpol_begDate" name="vpol_begDate"
+                                 ng-model="client.client_info['voluntaryPolicy']['begDate']"
+                                 ng-required="vpolForm.vpol_type.$viewValue">
+                        </wm-date>
+                    </div>
+                    <div class="form-group col-md-2"
+                         ng-class="{'has-error': vpolForm.vpol_endDate.$invalid }">
+                        <label for="vpol_endDate">Действителен до</label>
+                        {# TODO: неправильная установка даты, если в модели сейчас null #}
+                        <wm-date id="vpol_endDate" name="vpol_endDate"
+                                 ng-model="client.client_info['voluntaryPolicy']['endDate']">
+                                 {# TODO: валидация для необязательной даты - только для введенного#}
+                        </wm-date>
+                    </div>
+                    <div class="form-group col-md-4"
+                         ng-class="{'has-error': vpolForm.vpol_type.$viewValue && vpolForm.ufms.$invalid}">
+                        <label for="ufms">Выдан</label>
+                        <ui-select class="form-control" id="ufms" name="ufms"
+                                ng-model="client.client_info['voluntaryPolicy']['insurer']"
+                                theme="select2" ng-required="vpolForm.vpol_type.$valid">
+                            <match placeholder="Тип документа">[[$select.selected.short_name]]</match>
+                            <choices repeat="org in rbOrganisation.objects | filter: $select.search">
+                                <div ng-bind-html="org.short_name | highlight: $select.search"></div>
+                            </choices>
+                        </ui-select>
                     </div>
                 </div>
-                <div class="form-group col-md-2">
-                    {{ form.voluntary_policy_number.label(class="control-label") }}
-                    <div>
-                        {{ form.voluntary_policy_number(class="form-control", autocomplete="off",
-                        placeholder="номер", ng_model="client.client_info['voluntaryPolicy']['number']") }}
-                    </div>
-                </div>
-            </div>
-            <div class="row" style="margin-left: 10px;">
-                <div class="form-group col-md-2">
-                    {{ form.voluntary_policy_begDate.label(class="control-label") }}
-                    <div>
-                        {{ form.voluntary_policy_begDate(class="form-control", datepicker_popup="dd.MM.yyyy",
-                        autocomplete="off", ng_model="client.client_info['voluntaryPolicy']['begDate']") }}
-                    </div>
-                </div>
-                <div class="form-group col-md-2" style="margin-right: -5px; margin-left: -5px;">
-                    {{ form.voluntary_policy_endDate.label(class="control-label") }}
-                    <div>
-                        {{ form.voluntary_policy_endDate(class="form-control", datepicker_popup="dd.MM.yyyy",
-                        autocomplete="off", ng_model="client.client_info['voluntaryPolicy']['endDate']") }}
-                    </div>
-                </div>
-                <div class="form-group col-md-4">
-                    {{ form.voluntary_policy_org.label(class="control-label") }}
-                    <div>
-                        {{ form.voluntary_policy_org(class="form-control", autocomplete="off",
-                        ng_model="client.client_info['voluntaryPolicy']['insurer_id']") }}
-                    </div>
-                </div>
-            </div>
+            </ng-form>
         </div>
     </div>
 
     <div class="panel panel-default">
         <div class="panel-body">
-            <div class="row" style="margin-left: 10px;">
-                <div class="form-group col-md-4">
-                    {{ form.notes.label(class="control-label") }}
-                    <div>
-                        {{ form.notes(class="form-control", autocomplete="off",
-                        ng_model="client.client_info['notes']") }}
-                    </div>
+            <div class="row">
+                <div class="form-group col-md-8">
+                    <label for="notes">Примечания</label>
+                    <textarea class="form-control" id="notes" name="notes" rows="3" autocomplete="off"></textarea>
                 </div>
             </div>
          </div>

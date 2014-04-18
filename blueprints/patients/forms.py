@@ -36,37 +36,30 @@ class ClientForm(Form):
                          widget=AngularJSSelect())
     snils = StringField(u'СНИЛС', widget=AngularJSTextInput())
     notes = TextAreaField(u'Примечания')
-    document_number = StringField(u'Номер', widget=AngularJSTextInput())
-    document_serial = StringField(u'Серия', widget=AngularJSTextInput())
-    document_begDate = DateField(u'Дата выдачи')
-    document_endDate = DateField(u'Действителен до')
-    compulsory_policy_number = StringField(u'Номер', widget=AngularJSTextInput())
-    compulsory_policy_serial = StringField(u'Серия', widget=AngularJSTextInput())
-    compulsory_policy_begDate = DateField(u'Дата выдачи')
-    compulsory_policy_endDate = DateField(u'Действителен до')
-    voluntary_policy_number = StringField(u'Номер', widget=AngularJSTextInput())
-    voluntary_policy_serial = StringField(u'Серия', widget=AngularJSTextInput())
-    voluntary_policy_begDate = DateField(u'Дата выдачи')
-    voluntary_policy_endDate = DateField(u'Действителен до')
+
+    doc_type = SelectField(u'Тип', choices=[], widget=AngularJSSelect())
+    doc_number = StringField(u'Номер', widget=AngularJSTextInput())
+    doc_serial = StringField(u'Серия', widget=AngularJSTextInput())
+    doc_begDate = DateField(u'Дата выдачи')
+    doc_endDate = DateField(u'Действителен до')
+    ufms = SelectField(u'Выдан', widget=AngularJSSelect())
+
+    cpol_type = SelectField(u'Тип', widget=AngularJSSelect())
+    cpol_number = StringField(u'Номер', widget=AngularJSTextInput())
+    cpol_serial = StringField(u'Серия', widget=AngularJSTextInput())
+    cpol_begDate = DateField(u'Дата выдачи')
+    cpol_endDate = DateField(u'Действителен до')
+    compulsory_policy_org = SelectField(u'СМО', widget=AngularJSSelect())
+
+    vpol_type = SelectField(u'Тип', widget=AngularJSSelect())
+    vpol_number = StringField(u'Номер', widget=AngularJSTextInput())
+    vpol_serial = StringField(u'Серия', widget=AngularJSTextInput())
+    vpol_begDate = DateField(u'Дата выдачи')
+    vpol_endDate = DateField(u'Действителен до')
+    vpol_org = SelectField(u'СМО', widget=AngularJSSelect())
+
     with app.app_context():
-        document_type = SelectField(u'Тип', choices=[(doc_type.code, doc_type.name) for
-                                    doc_type in rbDocumentType.query.all() if doc_type.group.code == '1'],
-                                    widget=AngularJSSelect())
-        ufms = SelectField(u'Выдан', choices=[(ufms.name, ufms.name) for ufms in rbUFMS.query.all()],
-                           widget=AngularJSSelect())
-        compulsory_policy_type = SelectField(u'Тип', choices=[(c_policy_type.code, c_policy_type.name) for
-                                             c_policy_type in rbPolicyType.query.all() if
-                                             c_policy_type.code in ('cmiOld', 'cmiTmp', 'cmiCommonPaper',
-                                                                    'cmiCommonElectron', 'cmiUEC',
-                                                                    'cmiFnkcIndustrial', 'cmiFnkcLocal')],
-                                             widget=AngularJSSelect())
-        compulsory_policy_org = SelectField(u'СМО', choices=[(org.id, org.shortName) for org in
-                                            Organisation.query.all()], widget=AngularJSSelect())
-        voluntary_policy_type = SelectField(u'Тип', choices=[(v_policy_type.code, v_policy_type.name) for
-                                            v_policy_type in rbPolicyType.query.all() if v_policy_type.code in 'vmi'],
-                                            widget=AngularJSSelect())
-        voluntary_policy_org = SelectField(u'СМО', choices=[(org.id, org.shortName) for org in
-                                           Organisation.query.all()], widget=AngularJSSelect())
+
         soc_status_class = SelectField(u'Тип', choices=[(status_type.code, status_type.name) for status_type in
                                        rbSocStatusClass.query.all()], widget=AngularJSSelect())
         soc_status_type = SelectField(u'Тип', choices=[(status_class.code, status_class.name) for status_class in

@@ -150,9 +150,9 @@ var WebMis20 = angular.module('WebMis20', ['ngResource', 'ui.bootstrap', 'ui.sel
     var cache = {};
     this.get = function (name) {
         if (cache.hasOwnProperty(name)) {
-            return cache[name]
+            return cache[name];
         } else {
-            return cache[name] = new RefBook(name)
+            return cache[name] = new RefBook(name);
         }
     }
 }])
@@ -282,7 +282,7 @@ var WebMis20 = angular.module('WebMis20', ['ngResource', 'ui.bootstrap', 'ui.sel
                     t.client_info = data.result.clientData;
                     t.appointments = data.result.appointments;
                     t.events = data.result.events;
-                    $rootScope.$broadcast('client_loaded');
+//                    $rootScope.$broadcast('client_loaded');
                 },
                 function(data, status) {
                     $rootScope.$broadcast('load_error', {
@@ -590,7 +590,7 @@ var WebMis20 = angular.module('WebMis20', ['ngResource', 'ui.bootstrap', 'ui.sel
         require: 'ngModel',
         link: function(scope, elm, attrs, ctrl) {
             ctrl.$parsers.unshift(function(viewValue) {
-                if (viewValue.id > 0) {
+                if (viewValue && viewValue.id > 0) {
                     ctrl.$setValidity('text', true);
                     return viewValue;
                 } else {
@@ -601,6 +601,39 @@ var WebMis20 = angular.module('WebMis20', ['ngResource', 'ui.bootstrap', 'ui.sel
         }
     };
 })
+.directive('wmDate', ['$timeout',
+    function ($timeout) {
+        return {
+            restrict: 'E',
+            replace: true,
+            scope: {
+                id: '=',
+                name: '=',
+                ngModel: '=',
+                ngRequired: '='
+            },
+            controller: function ($scope) {
+                $scope.popup = {};
+                $scope.open_datepicker_popup = function () {
+                    $timeout(function () {
+                        $scope.popup['opened'] = true;
+                    });
+                };
+            },
+            template: ['<div class="input-group">',
+                        '<input type="text" id="{{id}}" name="{{name}}" class="form-control"',
+                        'is-open="popup.opened" ng-model="ngModel" autocomplete="off"',
+                        'datepicker_popup="dd.MM.yyyy" ng-required="ngRequired" manual-date/>',
+                        '<span class="input-group-btn">',
+                        '<button class="btn btn-default" ng-click="open_datepicker_popup()">',
+                        '<i class="glyphicon glyphicon-calendar"></i></button>',
+                        '</span>',
+                        '</div>'
+            ].join('\n')
+
+        };
+    }
+])
 ;
 var aux = {
     getQueryParams: function (qs) {

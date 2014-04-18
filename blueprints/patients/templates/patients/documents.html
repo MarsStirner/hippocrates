@@ -13,7 +13,7 @@
             </thead>
             <tbody>
                 <tr ng-repeat="document in client.client_info['documentHistory']">
-                    <td>[[document.typeName]]</td>
+                    <td>[[document.documentType.name]]</td>
                     <td>[[document.serial]]</td>
                     <td>[[document.number]]</td>
                     <td>[[document.begDate]]</td>

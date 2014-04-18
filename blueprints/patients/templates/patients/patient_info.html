@@ -70,17 +70,32 @@
             $scope.params = aux.getQueryParams(document.location.search);
             $scope.rbGender = {{ Enum.get_class_by_name('Gender').rb() | tojson }};
             $scope.rbDocumentType = RefBookService.get('rbDocumentType');
+            $scope.rbUFMS = RefBookService.get('rbUFMS');
+            $scope.rbPolicyType = RefBookService.get('rbPolicyType');
+            $scope.rbOrganisation = RefBookService.get('Organisation');
             $scope.rbRelationType = RefBookService.get('rbRelationType');
+
             $scope.client_id = $scope.params.client_id;
             $scope.client = new Client($scope.client_id);
 
-            $scope.$on('client_loaded', function() {
-                // ref objects?...
-                $scope.client.client_info.sex = $scope.rbGender.objects.filter(
-                    function(element) {
-                        return element.id === $scope.client.client_info.sex.id;
-                    })[0];
-            });
+            $scope.alerts = [];
+
+            $scope.filter_cpolicy = function(elem, type) {
+                return ['cmiOld', 'cmiTmp', 'cmiCommonPaper', 'cmiCommonElectron',
+                    'cmiUEC', 'cmiFnkcIndustrial', 'cmiFnkcLocal'].indexOf(elem.code) != -1;
+            };
+
+            $scope.filter_vpolicy = function(elem, type) {
+                return elem.code === 'vmi';
+            };
+
+            $scope.directRelationFilter = function (relationType) {
+                return (relationType.leftSex == 0 || relationType.leftSex == $scope.client.client_info.sex.id);
+            }
+
+            $scope.reversedRelationFilter = function (relationType) {
+                return (relationType.rightSex == 0 || relationType.rightSex == $scope.client.client_info.sex.id);
+            }
 
             $scope.clientInfoCode2Name = {
                 'id': 'Код пациента',
@@ -98,16 +113,6 @@
             };
             $scope.clientMainInfoCodeOrder = ['id', 'nameText', 'birthDate', 'sex', 'regAddress', 'liveAddress',
                 'documentText', 'compulsoryPolicyText', 'voluntaryPolicyText', 'SNILS', 'contact', 'notes'];
-
-            $scope.alerts = [];
-
-            $scope.directRelationFilter = function (relationType) {
-                return (relationType.leftSex == 0 || relationType.leftSex == $scope.client.client_info.sex.id);
-            }
-
-            $scope.reversedRelationFilter = function (relationType) {
-                return (relationType.rightSex == 0 || relationType.rightSex == $scope.client.client_info.sex.id);
-            }
 
             $scope.start_editing = function() {
                 $scope.editing = true;
@@ -141,13 +146,6 @@
                 modalInstance.result.then(function () {
                     $scope.client.delete_record(entity, record);
                 });
-            };
-            $scope.datepicker_popup = {};
-            $scope.open_datepicker_popup = function() {
-                $timeout(function() {
-                    $scope.datepicker_popup['opened'] = true;
-                });
-
             };
 
             $scope.open_event = function(event) {

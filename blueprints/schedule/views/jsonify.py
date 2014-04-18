@@ -231,8 +231,7 @@ class ClientVisualizer(object):
                     'serial': document.serial,
                     'begDate': document.date,
                     'endDate': document.endDate,
-                    'typeName': document.documentType.name,
-                    'typeCode': document.documentType.code,
+                    'documentType': document.documentType,
                     'origin': document.origin,
                     'documentText': unicode(document)}
         else:
@@ -240,8 +239,7 @@ class ClientVisualizer(object):
                     'serial': '',
                     'begDate': '',
                     'endDate': '',
-                    'typeName': '',
-                    'typeCode': '',
+                    'documentType': None,
                     'origin': '',
                     'documentText': '',
                     'deleted': 0}
@@ -254,18 +252,16 @@ class ClientVisualizer(object):
                     'serial': policy.serial,
                     'begDate': policy.begDate or '',
                     'endDate': policy.endDate or '',
-                    'typeName': policy.policyType.name,
-                    'typeCode': policy.policyType.code,
-                    'insurer_id': policy.insurer_id,
+                    'policyType': policy.policyType,
+                    'insurer': policy.insurer,
                     'policyText': policy}
         else:
             return {'number': '',
                     'serial': '',
                     'begDate': '',
                     'endDate': '',
-                    'typeName': '',
-                    'typeCode': '',
-                    'insurer_id': '',
+                    'policyType': None,
+                    'insurer': None,
                     'policyText': '',
                     'deleted': 0}
 
