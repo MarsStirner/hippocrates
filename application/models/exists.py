@@ -1970,6 +1970,8 @@ class Contract(db.Model):
     finance = db.relationship(u'rbFinance')
     recipientAccount = db.relationship(u'OrganisationAccount', foreign_keys='Contract.recipientAccount_id')
     payerAccount = db.relationship(u'OrganisationAccount', foreign_keys='Contract.payerAccount_id')
+    specifications = db.relationship(u'ContractSpecification',
+                                     primaryjoin="and_(ContractSpecification.master_id == Contract.id, ContractSpecification.deleted == 0)")
 
     def __unicode__(self):
         return u'%s %s' % (self.number, self.date)
@@ -2002,11 +2004,96 @@ class Contract(db.Model):
             'payerAccount': self.payerAccount,
 
             'finance': self.finance,
-
+            'specifications': self.specifications
         }
 
     def __int__(self):
         return self.id
+
+
+class ContractContingent(db.Model):
+    __tablename__ = u'Contract_Contingent'
+
+    id = db.Column(db.Integer, primary_key=True)
+    deleted = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    master_id = db.Column(db.Integer, nullable=False, index=True)
+    client_id = db.Column(db.Integer, index=True)
+    attachType_id = db.Column(db.Integer, index=True)
+    org_id = db.Column(db.Integer, index=True)
+    socStatusType_id = db.Column(db.Integer, index=True)
+    insurer_id = db.Column(db.Integer, index=True)
+    policyType_id = db.Column(db.Integer, index=True)
+    sex = db.Column(db.Integer, nullable=False)
+    age = db.Column(db.String(9), nullable=False)
+    age_bu = db.Column(db.Integer)
+    age_bc = db.Column(db.SmallInteger)
+    age_eu = db.Column(db.Integer)
+    age_ec = db.Column(db.SmallInteger)
+
+
+class ContractContragent(db.Model):
+    __tablename__ = u'Contract_Contragent'
+
+    id = db.Column(db.Integer, primary_key=True)
+    deleted = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    master_id = db.Column(db.Integer, nullable=False, index=True)
+    insurer_id = db.Column(db.Integer, nullable=False, index=True)
+    payer_id = db.Column(db.Integer, nullable=False, index=True)
+    payerAccount_id = db.Column(db.Integer, nullable=False, index=True)
+    payerKBK = db.Column(db.String(30), nullable=False)
+    begDate = db.Column(db.Date, nullable=False)
+    endDate = db.Column(db.Date, nullable=False)
+
+
+class ContractSpecification(db.Model):
+    __tablename__ = u'Contract_Specification'
+
+    id = db.Column(db.Integer, primary_key=True)
+    deleted = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    master_id = db.Column(db.Integer, db.ForeignKey('Contract.id'), nullable=False, index=True)
+    eventType_id = db.Column(db.Integer, db.ForeignKey('EventType.id'), nullable=False, index=True)
+
+    def __json__(self):
+        return {
+            'id': self.id,
+            'master_id': self.master_id,
+            'event_type_id': self.eventType_id
+        }
+
+
+class ContractTariff(db.Model):
+    __tablename__ = u'Contract_Tariff'
+
+    id = db.Column(db.Integer, primary_key=True)
+    deleted = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    master_id = db.Column(db.Integer, nullable=False, index=True)
+    eventType_id = db.Column(db.Integer, index=True)
+    tariffType = db.Column(db.Integer, nullable=False)
+    service_id = db.Column(db.Integer, index=True)
+    tariffCategory_id = db.Column(db.Integer, index=True)
+    begDate = db.Column(db.Date, nullable=False)
+    endDate = db.Column(db.Date, nullable=False)
+    sex = db.Column(db.Integer, nullable=False)
+    age = db.Column(db.String(9), nullable=False)
+    age_bu = db.Column(db.Integer)
+    age_bc = db.Column(db.SmallInteger)
+    age_eu = db.Column(db.Integer)
+    age_ec = db.Column(db.SmallInteger)
+    unit_id = db.Column(db.Integer, index=True)
+    amount = db.Column(db.Float(asdecimal=True), nullable=False)
+    uet = db.Column(db.Float(asdecimal=True), nullable=False, server_default=u"'0'")
+    price = db.Column(db.Float(asdecimal=True), nullable=False, server_default=u"'0'")
+    limitationExceedMode = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    limitation = db.Column(db.Float(asdecimal=True), nullable=False, server_default=u"'0'")
+    priceEx = db.Column(db.Float(asdecimal=True), nullable=False, server_default=u"'0'")
+    MKB = db.Column(db.String(8), nullable=False)
+    rbServiceFinance_id = db.Column(db.ForeignKey('rbServiceFinance.id'), index=True)
+    createDatetime = db.Column(db.DateTime, nullable=False)
+    createPerson_id = db.Column(db.Integer)
+    modifyDatetime = db.Column(db.DateTime, nullable=False)
+    modifyPerson_id = db.Column(db.Integer)
+
+    rbServiceFinance = db.relationship(u'rbServiceFinance')
 
 
 class OrganisationAccount(db.Model):
@@ -2290,6 +2377,14 @@ class rbDispanser(db.Model):
 
     def __int__(self):
         return self.id
+
+
+class rbServiceFinance(db.Model):
+    __tablename__ = u'rbServiceFinance'
+
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(2, u'utf8_unicode_ci'), nullable=False)
+    name = db.Column(db.String(64, u'utf8_unicode_ci'), nullable=False)
 
 
 class rbTraumaType(db.Model):
