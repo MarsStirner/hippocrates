@@ -18,4 +18,4 @@ sphinxit
 Flask-Cache
 fabric
 
--e https://github.com/KorusConsulting/pysimplelogs.git#egg=pysimplelogs
+-e git+https://github.com/KorusConsulting/pysimplelogs.git#egg=pysimplelogs
