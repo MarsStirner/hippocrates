@@ -120,6 +120,13 @@ var WebMis20 = angular.module('WebMis20', ['ngResource', 'ui.bootstrap', 'ui.sel
                         }
                     });
                 }
+                if (event_info.set_date){
+                    var item_begDate = new Date(item.begDate);
+                    var item_endDate = new Date(item.endDate);
+                    if (!(item_begDate <= event_info.set_date && item_endDate >= event_info.set_date)){
+                        itemMatches = false;
+                    }
+                }
                 if (itemMatches) {
                     out.push(item);
                 }
