@@ -341,7 +341,7 @@ class ClientVisualizer(object):
             'firstName': client.firstName,
             'patrName': client.patrName,
             'nameText': client.nameText,
-            'sex': Gender(client.sexCode),
+            'sex': Gender(client.sexCode) if client.sexCode else None,
             'SNILS': client.formatted_SNILS or None,
             'notes': client.notes,
             'document': pers_document,
