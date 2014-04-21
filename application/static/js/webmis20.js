@@ -107,6 +107,28 @@ var WebMis20 = angular.module('WebMis20', ['ngResource', 'ui.bootstrap', 'ui.sel
         return out;
     }
 })
+.filter('contract_filter', function() {
+    return function(items, event_info) {
+        var out = [];
+        if (angular.isArray(items) && event_info) {
+            items.forEach(function(item) {
+                var itemMatches = false;
+                if (item.finance.id == event_info.event_type.finance.id && item.recipient.id == event_info.organisation.id){
+                    item.specifications.forEach(function(spec){
+                        if(spec.event_type_id == event_info.event_type.id){
+                            itemMatches = true;
+                        }
+                    });
+                }
+                if (itemMatches) {
+                    out.push(item);
+                }
+            });
+        }
+        return out;
+    }
+})
+
 // Services
 .factory('RefBook', ['$http', '$rootScope', function ($http, $rootScope) {
     var RefBook = function (name) {
