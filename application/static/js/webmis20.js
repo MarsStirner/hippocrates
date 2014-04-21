@@ -241,7 +241,7 @@ var WebMis20 = angular.module('WebMis20', ['ngResource', 'ui.bootstrap', 'ui.sel
     };
     Action.prototype.save = function () {
         var t = this;
-        $http.post(url_action_save, this.action).success(success_wrapper(t));
+        $http.post(url_action_save, this).success(success_wrapper(t));
         return this;
     };
     Action.prototype.cancel = function () {
