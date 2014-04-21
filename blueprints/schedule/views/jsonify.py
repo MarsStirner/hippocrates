@@ -380,6 +380,7 @@ class ClientVisualizer(object):
             'person': safe_unicode(apnt.ticket.schedule.person),
             'createPerson': apnt.createPerson,
             'note': apnt.note,
+            'receptionType': apnt.ticket.schedule.receptionType
         }
 
     def make_events(self, client):
