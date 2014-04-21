@@ -1,6 +1,6 @@
 <div class="row">
     <div class="col-md-12">
-        <table class="table table-condensed" ng-if="client.client_info['direct_relations']" ng-hide="editing">
+        <table class="table table-condensed" ng-hide="editing_is_active() || !client.client_info['direct_relations'].length">
             <thead>
                 <tr>
                     <th>Прямая связь</th>
@@ -15,8 +15,8 @@
             </tbody>
         </table>
 
-        <form class="form" role="form">
-            <table class="table table-condensed" ng-show="editing">
+        <div id="client_dirrel_subform" ng-show="editing_is_active()">
+            <table class="table table-condensed" >
                 <thead>
                     <tr>
                         <th>Прямая связь</th>
@@ -27,8 +27,14 @@
                 <tbody>
                     <tr ng-repeat="relation in client.client_info['direct_relations']">
                         <td class="col-md-4" ng-hide="relation.deleted">
-                            {{ form.direct_relation_relation(class="form-control",
-                               autocomplete="off", ng_model="relation.relativeType_code") }}</td>
+                            <ui-select ng-model="relation.relativeType"
+                                    theme="select2">
+                                <match placeholder="Тип связи">[[$select.selected.leftName]] -> [[$select.selected.rightName]]</match>
+                                <choices repeat="rt in rbRelationType.objects| filter:directRelationFilter | filter: $select.search">
+                                    <div ng-bind-html="(rt.leftName + ' -> ' + rt.rightName) | highlight: $select.search"></div>
+                                </choices>
+                            </ui-select>
+                        </td>
                         <td class="col-md-3" ng-hide="relation.deleted">
                             {{ form.direct_relation_other(class="form-control", autocomplete="off",
                                ng_model="relation.other_id") }}</td>
@@ -41,20 +47,16 @@
                     </tr>
                 </tbody>
             </table>
-        </form>
-    </div>
-</div>
-<div class="row">
-    <div class="col-md-offset-9 col-md-3" ng-show="editing">
-        <button ng-click="client.add_relation('direct_relations')" class="btn btn-primary btn-sm pull-right">
-            <span class="glyphicon glyphicon-plus" title="Добавить новую запись"></span> Добавить
-        </button>
+            <button ng-click="client.add_relation('direct_relations')" class="btn btn-primary btn-sm">
+                <span class="glyphicon glyphicon-plus" title="Добавить новую запись"></span>Добавить
+            </button>
+        </div>
     </div>
 </div>
 
 <div class="row">
     <div class="col-md-12">
-        <table class="table table-condensed" ng-if="client.client_info['reversed_relations']" ng-hide="editing">
+        <table class="table table-condensed" ng-hide="editing_is_active() || !client.client_info['reversed_relations'].length">
             <thead>
                 <tr>
                     <th>Обратная связь</th>
@@ -68,8 +70,8 @@
                 </tr>
             </tbody>
         </table>
-        <form class="form-horizontal" role="form">
-            <table class="table table-condensed" ng-show="editing">
+        <div id="client_revrel_subform" ng-show="editing_is_active()">
+            <table class="table table-condensed" >
                 <thead>
                     <tr>
                         <th>Обратная связь</th>
@@ -80,8 +82,14 @@
                 <tbody>
                     <tr ng-repeat="relation in  client.client_info['reversed_relations']">
                         <td class="col-md-4" ng-hide="relation.deleted">
-                            {{ form.reversed_relation_relation(class="form-control", autocomplete="off",
-                               ng_model="relation.relativeType_code") }}</td>
+                            <ui-select ng-model="relation['relativeType']"
+                                    theme="select2">
+                                <match placeholder="Тип связи">[[$select.selected.rightName]] -> [[$select.selected.leftName]]</match>
+                                <choices repeat="rt in rbRelationType.objects| filter:reversedRelationFilter | filter: $select.search">
+                                    <div ng-bind-html="(rt.rightName + ' -> ' + rt.leftName) | highlight: $select.search"></div>
+                                </choices>
+                            </ui-select>
+                        </td>
                         <td class="col-md-3" ng-hide="relation.deleted">
                             {{ form.reversed_relation_other(class="form-control", autocomplete="off",
                                ng_model="relation.other_id") }}</td>
@@ -94,20 +102,16 @@
                     </tr>
                 </tbody>
             </table>
-        </form>
-    </div>
-</div>
-<div class="row">
-    <div class="col-md-offset-9 col-md-3" ng-show="editing">
-        <button ng-click="client.add_relation('reversed_relations')" class="btn btn-primary btn-sm pull-right">
-            <span class="glyphicon glyphicon-plus" title="Добавить новую запись"></span> Добавить
-        </button>
+            <button ng-click="client.add_relation('reversed_relations')" class="btn btn-primary btn-sm">
+                <span class="glyphicon glyphicon-plus" title="Добавить новую запись"></span>Добавить
+            </button>
+        </div>
     </div>
 </div>
 
 <div class="row">
     <div class="col-md-12">
-        <table class="table table-condensed" ng-if="client.client_info['contacts']" ng-hide="editing">
+        <table class="table table-condensed" ng-hide="editing_is_active() || !client.client_info['contacts'].length">
             <caption>Контакты</caption>
             <thead>
                 <tr>
@@ -124,8 +128,8 @@
                 </tr>
             </tbody>
         </table>
-        <form class="form-horizontal" role="form">
-            <table class="table table-condensed" ng-show="editing">
+        <div id="client_contacts_subform" ng-show="editing_is_active()">
+            <table class="table table-condensed">
                 <thead>
                 <tr>
                     <th>Тип</th>
@@ -151,13 +155,9 @@
                     </tr>
                 </tbody>
             </table>
-        </form>
-    </div>
-</div>
-<div class="row">
-    <div class="col-md-offset-9 col-md-3" ng-show="editing">
-        <button ng-click="client.add_contact()" class="btn btn-primary btn-sm pull-right">
-            <span class="glyphicon glyphicon-plus" title="Добавить новую запись"></span> Добавить
-        </button>
+            <button ng-click="client.add_contact()" class="btn btn-primary btn-sm">
+                <span class="glyphicon glyphicon-plus" title="Добавить новую запись"></span>Добавить
+            </button>
+        </div>
     </div>
 </div>

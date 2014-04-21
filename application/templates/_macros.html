@@ -1,10 +1,10 @@
 {% macro ui_select(model, rb, trigger=None, attr='name') %}
     {% if trigger %}<div class="form-control-static" ng-hide="{{ trigger }}">[[ {{ model }}.{{ attr }} ]]&nbsp;</div><div ng-show="{{ trigger }}">{% endif %}
-    <ui-select ng-model="{{ model }}" id="{{ model }}" theme="select2" class="form-control">
+    <ui-select ng-model="{{ model }}" id="{{ model }}" theme="select2" class="form-control" autocomplete="off">
         <match placeholder="не выбрано">[[ $select.selected.{{ attr }} ]]</match>
-        <choices data="{{ rb }}.objects | filter: $select.search">
+        <choices repeat="item in {{ rb }}.objects | filter: $select.search">
 {#            [<small ng-bind-html="trustAsHtml((item.code | highlight: $select.search))"></small>]#}
-            <span ng-bind-html="trustAsHtml((item.{{ attr }} | highlight: $select.search))"></span>
+            <span ng-bind-html="item.{{ attr }} | highlight: $select.search"></span>
         </choices>
     </ui-select>
     {% if trigger %}</div>{% endif %}
@@ -13,10 +13,11 @@
 {% macro ui_select_tmp(source, model, rb, trigger, attr='name') %}
     <div class="form-control-static" ng-if="!{{ trigger }}">[[ {{ source }}.{{ model }}.{{ attr }} ]]</div>
     <div ng-hide="!{{ trigger }}">
-        <ui-select ng-model="{{ trigger }}.{{ model }}" id="{{ source }}.{{ model }}" theme="select2" class="form-control">
+        <ui-select ng-model="{{ trigger }}.{{ model }}" id="{{ source }}.{{ model }}" theme="select2" class="form-control"
+                autocomplete="off">
             <match placeholder="не выбрано">[[ $select.selected.{{ attr }} ]]</match>
-            <choices data="{{ rb }}.objects | filter: $select.search">
-                <span ng-bind-html="trustAsHtml((item.{{ attr }} | highlight: $select.search))"></span>
+            <choices repeat="item in {{ rb }}.objects | filter: $select.search">
+                <span ng-bind-html="item.{{ attr }} | highlight: $select.search"></span>
             </choices>
         </ui-select>
     </div>
@@ -40,10 +41,10 @@
     </div>
     <div class="row" ng-show="{{ trigger_edit }}">
         <div class="col-md-11">
-            <ui-select ng-model="{{ model }}" id="{{ model }}" theme="select2">
+            <ui-select ng-model="{{ model }}" id="{{ model }}" theme="select2" autocomplete="off">
                 <match placeholder="не выбрано">[[ $select.selected.{{ attr }} ]]</match>
-                <choices data="{{ rb }}.objects | filter: $select.search {{ extra_filter }}">
-                    <span ng-bind-html="trustAsHtml((item.{{ attr }} | highlight: $select.search))"></span>
+                <choices repeat="item in {{ rb }}.objects | filter: $select.search {{ extra_filter }}">
+                    <span ng-bind-html="item.{{ attr }} | highlight: $select.search"></span>
                 </choices>
             </ui-select>
         </div>

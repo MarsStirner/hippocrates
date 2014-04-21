@@ -88,7 +88,7 @@ def api_patient_save():
         client.lastName = client_info['lastName']
         client.firstName = client_info['firstName']
         client.patrName = client_info['patrName']
-        client.sexCode = 1 if client_info['sex'] == u'М' else 2
+        client.sexCode = client_info['sex']['id'] if client_info['sex']['id'] != 0 else 1 # todo: fix
         client.SNILS = client_info['SNILS'].replace(" ", "").replace("-", "") if client_info['SNILS'] else ''
         client.notes = client_info['notes'] if client_info['notes'] else ''
         client.birthDate = client_info['birthDate']
@@ -98,7 +98,7 @@ def api_patient_save():
 
         db.session.add(client)
 
-        if client_info['document']['typeCode']:
+        if client_info['document'].get('documentType'):
             if not client.document:
                 client_document = get_new_document(client_info['document'])
                 client.documents.append(client_document)
@@ -108,7 +108,7 @@ def api_patient_save():
                 if docs[1]:
                     client.documents.append(docs[1])
 
-        if client_info['compulsoryPolicy'].get('typeCode'):
+        if client_info['compulsoryPolicy'].get('policyType'):
             if not client.compulsoryPolicy:
                 policy = get_new_policy(client_info['compulsoryPolicy'])
                 client.policies.append(policy)
@@ -116,9 +116,9 @@ def api_patient_save():
                 policies = get_modified_policy(client, client_info['compulsoryPolicy'])
                 db.session.add(policies[0])
                 if policies[1]:
-                    db.session.add(policies[1])
+                    client.policies.append(policies[1])
 
-        if client_info['voluntaryPolicy'].get('typeCode'):
+        if client_info['voluntaryPolicy'].get('policyType'):
             if not client.voluntaryPolicy:
                 policy = get_new_policy(client_info['voluntaryPolicy'])
                 client.policies.append(policy)
@@ -126,7 +126,7 @@ def api_patient_save():
                 policies = get_modified_policy(client, client_info['voluntaryPolicy'])
                 db.session.add(policies[0])
                 if policies[1]:
-                    db.session.add(policies[1])
+                    client.policies.append(policies[1])
 
         for ss_info in client_info['socStatuses']:
             if not 'id' in ss_info:
@@ -197,6 +197,7 @@ def api_patient_save():
         db.session.commit()
     except KeyError, e:
         db.session.rollback()
+        raise
         raise ClientSaveException(u'Ошибка сохранения данных клиента', str(e))
     # except ValueError:
     #     db.session.rollback()
@@ -204,6 +205,7 @@ def api_patient_save():
     #     return abort(404)
     except:
         db.session.rollback()
+        raise
         return abort(404)
 
     return jsonify(int(client))

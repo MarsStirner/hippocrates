@@ -3,7 +3,7 @@ from collections import defaultdict
 import datetime
 import itertools
 from application.lib.utils import safe_unicode, safe_int
-from application.models.enums import EventPrimary, EventOrder, ActionStatus
+from application.models.enums import EventPrimary, EventOrder, ActionStatus, Gender
 
 from application.models.schedule import Schedule, rbReceptionType
 from application.models.actions import Action, ActionProperty
@@ -229,19 +229,17 @@ class ClientVisualizer(object):
                     'deleted': document.deleted,
                     'number': document.number,
                     'serial': document.serial,
-                    'begDate': document.date or '',
-                    'endDate': document.endDate or '',
-                    'typeName': document.documentType.name,
-                    'typeCode': document.documentType.code,
+                    'begDate': document.date,
+                    'endDate': document.endDate,
+                    'documentType': document.documentType,
                     'origin': document.origin,
-                    'documentText': document}
+                    'documentText': unicode(document)}
         else:
             return {'number': '',
                     'serial': '',
                     'begDate': '',
                     'endDate': '',
-                    'typeName': '',
-                    'typeCode': '',
+                    'documentType': None,
                     'origin': '',
                     'documentText': '',
                     'deleted': 0}
@@ -254,18 +252,16 @@ class ClientVisualizer(object):
                     'serial': policy.serial,
                     'begDate': policy.begDate or '',
                     'endDate': policy.endDate or '',
-                    'typeName': policy.policyType.name,
-                    'typeCode': policy.policyType.code,
-                    'insurer_id': policy.insurer_id,
+                    'policyType': policy.policyType,
+                    'insurer': policy.insurer,
                     'policyText': policy}
         else:
             return {'number': '',
                     'serial': '',
                     'begDate': '',
                     'endDate': '',
-                    'typeName': '',
-                    'typeCode': '',
-                    'insurer_id': '',
+                    'policyType': None,
+                    'insurer': None,
                     'policyText': '',
                     'deleted': 0}
 
@@ -280,8 +276,7 @@ class ClientVisualizer(object):
     def make_relation_info(self, relation):
         return {'id': relation.id,
                 'deleted': relation.deleted,
-                'relativeType_name': relation.name,
-                'relativeType_code': relation.code,
+                'relativeType': relation.relativeType,
                 'other_id': relation.other.id,
                 'other_text': relation.other.nameText + ' ({})'.format(relation.other.id)}
 
@@ -294,7 +289,6 @@ class ClientVisualizer(object):
                 'notes': contact.notes}
 
     def make_client_info(self, client):
-
         socStatuses = [{'id': socStatus.id,
                         'deleted': socStatus.deleted,
                         'className': socStatus.soc_status_class.name,
@@ -347,12 +341,12 @@ class ClientVisualizer(object):
             'firstName': client.firstName,
             'patrName': client.patrName,
             'nameText': client.nameText,
-            'sex': client.sex,
+            'sex': Gender(client.sexCode) if client.sexCode else None,
             'SNILS': client.formatted_SNILS or None,
             'notes': client.notes,
             'document': pers_document,
             'documentText': safe_unicode(client.document),
-            'birthDate': client.birthDate or '',
+            'birthDate': client.birthDate,
             'regAddress': client.reg_address,
             'liveAddress': client.loc_address,
             'contact': client.phones,

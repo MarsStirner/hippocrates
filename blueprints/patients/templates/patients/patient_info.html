@@ -2,6 +2,11 @@
 
 {% block title %}> {{ module_name }}{% endblock %}
 
+{% block modules_css %}
+    <style>
+    </style>
+{%  endblock %}
+
 {% block main %}
     <div ng-controller="ClientCtrl" class="ng-cloak">
         <script type="text/ng-template" id="modal-deleteRecord.html">{% include "patients/_modal_delete_record.html" %}</script>
@@ -12,7 +17,7 @@
                ng-if="client_id != 'new'">
                 Записать на приём</a>
             <a class="btn btn-primary" href="{{ url_for('schedule.new_event') }}?client_id={{ request.args['client_id'] }}"
-                ng-if="client_id != 'new'">
+               ng-if="client_id != 'new'">
                 Создать обращение</a>
             <span class="dropdown">
                 <button class="btn dropdown-toggle" type="button" id="print_dropdownMenu"
@@ -39,22 +44,31 @@
                     Информация о пациенте
                     <a ng-click="start_editing();" class="btn btn-sm btn-default glyphicon glyphicon-pencil" href="" title="Редактировать"></a>
                 </tab-heading>
-                <tabset justified="false">
-                    <tab heading="Основная информация">{% include "patients/main_info.html" %}</tab>
-                    <tab heading="Соц. статус">{% include "patients/soc_status.html" %}</tab>
-                    <tab heading="Особенности">{% include "patients/characteristics.html" %}</tab>
-                    <tab heading="Идентификаторы">{% include "patients/identifiers.html" %}</tab>
-                    <tab heading="Связи и контакты">{% include "patients/contacts.html" %}</tab>
-                    <tab heading="История документов">{% include "patients/documents.html" %}</tab>
-                </tabset>
+                <form name="client_form" role="form" novalidate ng-submit="save_client(client_form)" >
+                    <tabset justified="false" class="marginal">
+                        <tab heading="Основная информация">{% include "patients/main_info.html" %}</tab>
+                        <tab heading="Соц. статус">{% include "patients/soc_status.html" %}</tab>
+                        <tab heading="Особенности">{% include "patients/characteristics.html" %}</tab>
+                        <tab heading="Идентификаторы">{% include "patients/identifiers.html" %}</tab>
+                        <tab heading="Связи и контакты">{% include "patients/contacts.html" %}</tab>
+                        <tab heading="История документов">{% include "patients/documents.html" %}</tab>
+                        <tab heading="Debug">[[client.client_info | json]]</tab>
+                    </tabset>
+                    <div class="row" ng-show="editing_is_active()"> {# wtf... FIXME: layout #}
+                        <div class="col-md-12">
+                            <div class="pull-right">
+                                <button ng-click="cancel_editing()" class="btn btn-lg btn-danger">Отменить</button>
+                                <button type="submit" class="btn btn-lg btn-success"
+                                        tooltip="[[client_form.$invalid ? 'Заполните все обязательные поля': '']]">Сохранить</button>
+                            </div>
+                        </div>
+                        <span ng-show="submitted">Errors!</span>
+                    </div>
+                </form>
             </tab>
             <tab heading="Предварительные записи">{% include "patients/appointments.html" %}</tab>
             <tab heading="Обращения">{% include "patients/event_list.html" %}</tab>
         </tabset>
-        </div>
-        <div class="pull-right" ng-show="editing">
-            <button ng-click="cancel_editing()" class="btn btn-lg btn-danger">Отменить</button>
-            <button ng-click="save_client()" class="btn btn-lg btn-success">Сохранить</button>
         </div>
     </div>
 {% endblock %}
@@ -71,11 +85,18 @@
             };
         };
 
-        WebMis20.controller('ClientCtrl', ['$scope', '$http', '$modal', 'Client', 'PrintingService',
-        function ($scope, $http, $modal, Client, PrintingService) {
+        WebMis20.controller('ClientCtrl', ['$scope', '$http', '$modal', 'Client', 'PrintingService', 'RefBookService',
+                function ($scope, $http, $modal, Client, PrintingService, RefBookService) {
             $scope.records = [];
             $scope.aux = aux;
             $scope.params = aux.getQueryParams(document.location.search);
+            $scope.rbGender = {{ Enum.get_class_by_name('Gender').rb() | tojson }};
+            $scope.rbDocumentType = RefBookService.get('rbDocumentType');
+            $scope.rbUFMS = RefBookService.get('rbUFMS');
+            $scope.rbPolicyType = RefBookService.get('rbPolicyType');
+            $scope.rbOrganisation = RefBookService.get('Organisation');
+            $scope.rbRelationType = RefBookService.get('rbRelationType');
+
             $scope.client_id = $scope.params.client_id;
             $scope.client = new Client($scope.client_id);
             $scope.ps = new PrintingService('registry', function (template_id) {
@@ -100,6 +121,29 @@
             $scope.ps_amb.set_context('orderAmb');
             $scope.ps_home.set_context('orderHome');
 
+            $scope.alerts = [];
+            $scope.editing = {
+                active: false,
+                submit_attempt: false
+            };
+
+            $scope.filter_cpolicy = function(elem, type) {
+                return ['cmiOld', 'cmiTmp', 'cmiCommonPaper', 'cmiCommonElectron',
+                    'cmiUEC', 'cmiFnkcIndustrial', 'cmiFnkcLocal'].indexOf(elem.code) != -1;
+            };
+
+            $scope.filter_vpolicy = function(elem, type) {
+                return elem.code === 'vmi';
+            };
+
+            $scope.directRelationFilter = function (relationType) {
+                return (relationType.leftSex == 0 || relationType.leftSex == $scope.client.client_info.sex.id);
+            }
+
+            $scope.reversedRelationFilter = function (relationType) {
+                return (relationType.rightSex == 0 || relationType.rightSex == $scope.client.client_info.sex.id);
+            }
+
             $scope.clientInfoCode2Name = {
                 'id': 'Код пациента',
                 'birthDate': 'Дата рождения',
@@ -117,24 +161,34 @@
             $scope.clientMainInfoCodeOrder = ['id', 'nameText', 'birthDate', 'sex', 'regAddress', 'liveAddress',
                 'documentText', 'compulsoryPolicyText', 'voluntaryPolicyText', 'SNILS', 'contact', 'notes'];
 
-            $scope.alerts = [];
-
             $scope.start_editing = function() {
-                $scope.editing = true;
+                $scope.editing.active = true;
             };
 
             $scope.cancel_editing = function() {
-                $scope.editing = false;
+                $scope.editing.active = false;
                 $scope.client.reload();
             };
-            $scope.save_client = function() {
+
+            $scope.editing_is_active = function() {
+                return $scope.editing.active;
+            };
+            $scope.editing_is_activex = function() {
+                return $scope.editing.active;
+            };
+
+            $scope.save_client = function(form) {
+                $scope.editing.submit_attempt = true;
+                if (form.$invalid) {
+                    return false;
+                }
                 $scope.client.save()
                 .then(function(new_client_id) {
                     if ($scope.client_id == 'new') {
                         window.open('{{ url_for('patients.patient') }}?client_id=' + new_client_id, '_self');
                     } else {
                         $scope.client.reload();
-                        $scope.editing = false;
+                        $scope.editing.active = false;
                     }
                 }, function(reason) {
                     alert(reason);
@@ -150,13 +204,6 @@
                 modalInstance.result.then(function () {
                     $scope.client.delete_record(entity, record);
                 });
-            };
-
-            $scope.open = function($event) {
-{#                what's this#}
-                $event.preventDefault();
-                $event.stopPropagation();
-                return true;
             };
 
             $scope.open_event = function(event) {

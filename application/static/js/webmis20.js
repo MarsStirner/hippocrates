@@ -1,10 +1,18 @@
 /**
  * Created by mmalkov on 10.02.14.
  */
-var WebMis20 = angular.module('WebMis20', ['ngResource', 'ui.bootstrap', 'ui.select', 'ngSanitize', 'ngCkeditor', 'sf.treeRepeat'])
-.config(function ($interpolateProvider) {
+var WebMis20 = angular.module('WebMis20', ['ngResource', 'ui.bootstrap', 'ui.select', 'ngSanitize',
+            'ngCkeditor', 'sf.treeRepeat', 'ui.mask'])
+.config(function ($interpolateProvider, datepickerConfig, datepickerPopupConfig) {
     $interpolateProvider.startSymbol('[[');
     $interpolateProvider.endSymbol(']]');
+    datepickerConfig.showWeek = false;
+    datepickerConfig.startingDay = 1;
+    datepickerPopupConfig.currentText = 'Сегодня';
+    datepickerPopupConfig.toggleWeeksText = 'Недели';
+    datepickerPopupConfig.clearText = 'Убрать';
+    datepickerPopupConfig.closeText = 'Готово';
+//    datepickerPopupConfig.appendToBody=true;
 })
 .filter('asDateTime', function ($filter) {
     return function (data) {
@@ -142,9 +150,9 @@ var WebMis20 = angular.module('WebMis20', ['ngResource', 'ui.bootstrap', 'ui.sel
     var cache = {};
     this.get = function (name) {
         if (cache.hasOwnProperty(name)) {
-            return cache[name]
+            return cache[name];
         } else {
-            return cache[name] = new RefBook(name)
+            return cache[name] = new RefBook(name);
         }
     }
 }])
@@ -238,7 +246,7 @@ var WebMis20 = angular.module('WebMis20', ['ngResource', 'ui.bootstrap', 'ui.sel
     };
     Action.prototype.save = function () {
         var t = this;
-        $http.post(url_action_save, this.action).success(success_wrapper(t));
+        $http.post(url_action_save, this).success(success_wrapper(t));
         return this;
     };
     Action.prototype.cancel = function () {
@@ -279,6 +287,7 @@ var WebMis20 = angular.module('WebMis20', ['ngResource', 'ui.bootstrap', 'ui.sel
                     t.client_info = data.result.clientData;
                     t.appointments = data.result.appointments;
                     t.events = data.result.events;
+//                    $rootScope.$broadcast('client_loaded');
                 },
                 function(data, status) {
                     $rootScope.$broadcast('load_error', {
@@ -467,7 +476,7 @@ var WebMis20 = angular.module('WebMis20', ['ngResource', 'ui.bootstrap', 'ui.sel
                 scope.shown = false;
             }
         }
-    }
+    };
 })
 .directive('uiScheduleTicket', ['$compile', function ($compile) {
     return {
@@ -516,7 +525,7 @@ var WebMis20 = angular.module('WebMis20', ['ngResource', 'ui.bootstrap', 'ui.sel
             });
 
         }
-    }
+    };
 }])
 .directive('uiActionProperty', ['$compile', function ($compile) {
     return {
@@ -556,7 +565,81 @@ var WebMis20 = angular.module('WebMis20', ['ngResource', 'ui.bootstrap', 'ui.sel
             $compile(el)(scope);
         }
     }
-}]);
+}])
+.directive('manualDate', function(){
+    return {
+        restrict: 'A',
+        require: 'ngModel',
+        link: function(scope, elm, attrs, ctrl) {
+            ctrl.$parsers.unshift(function(viewValue) {
+                var viewValue = ctrl.$viewValue;
+                if (!viewValue || viewValue instanceof Date) return viewValue;
+                var parts = viewValue.split('.');
+                var d = new Date(Date.UTC(parseInt(parts[2]), parseInt(parts[1] - 1),
+                    parseInt(parts[0]), 0, 0, 0));
+                if (moment(d).isValid()) {
+                    ctrl.$setValidity('date', true);
+                    ctrl.$setViewValue(d);
+                    return d;
+                } else {
+                    ctrl.$setValidity('date', false);
+                    return undefined;
+                }
+            });
+        }
+    };
+})
+.directive('enumValidator', function() {
+    return {
+        restrict: 'A',
+        require: 'ngModel',
+        link: function(scope, elm, attrs, ctrl) {
+            ctrl.$parsers.unshift(function(viewValue) {
+                if (viewValue && viewValue.id > 0) {
+                    ctrl.$setValidity('text', true);
+                    return viewValue;
+                } else {
+                    ctrl.$setValidity('text', false);
+                    return undefined;
+                }
+            });
+        }
+    };
+})
+.directive('wmDate', ['$timeout',
+    function ($timeout) {
+        return {
+            restrict: 'E',
+            replace: true,
+            scope: {
+                id: '=',
+                name: '=',
+                ngModel: '=',
+                ngRequired: '='
+            },
+            controller: function ($scope) {
+                $scope.popup = {};
+                $scope.open_datepicker_popup = function () {
+                    $timeout(function () {
+                        $scope.popup['opened'] = true;
+                    });
+                };
+            },
+            template: ['<div class="input-group">',
+                        '<input type="text" id="{{id}}" name="{{name}}" class="form-control"',
+                        'is-open="popup.opened" ng-model="ngModel" autocomplete="off"',
+                        'datepicker_popup="dd.MM.yyyy" ng-required="ngRequired" manual-date/>',
+                        '<span class="input-group-btn">',
+                        '<button class="btn btn-default" ng-click="open_datepicker_popup()">',
+                        '<i class="glyphicon glyphicon-calendar"></i></button>',
+                        '</span>',
+                        '</div>'
+            ].join('\n')
+
+        };
+    }
+])
+;
 var aux = {
     getQueryParams: function (qs) {
         qs = qs.split("+").join(" ");
