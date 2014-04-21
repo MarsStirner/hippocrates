@@ -1,6 +1,6 @@
 <div class="row">
     <div class="col-md-12">
-        <table class="table table-condensed" ng-if="client.client_info['bloodHistory']" ng-hide="editing">
+        <table class="table table-condensed" ng-hide="editing_is_active() || !client.client_info['bloodHistory'].length">
             <caption>Группа крови и резус-фактор</caption>
             <thead>
             <tr>
@@ -18,7 +18,7 @@
             </tbody>
         </table>
 
-        <form class="form-horizontal" role="form" ng-show="editing">
+        <div id="client_blood_subform" ng-show="editing_is_active()">
             <table class="table table-condensed">
                 <caption>Группа крови и резус-фактор</caption>
                 <thead>
@@ -42,20 +42,16 @@
                     </tr>
                 </tbody>
             </table>
-        </form>
-    </div>
-</div>
-<div class="row">
-    <div class="col-md-offset-9 col-md-3" ng-show="editing">
-        <button ng-click="client.add_blood()" class="btn btn-primary btn-sm pull-right">
-            <span class="glyphicon glyphicon-plus" title="Добавить новую запись"></span> Добавить
-        </button>
+            <button ng-click="client.add_blood()" class="btn btn-primary btn-sm">
+                <span class="glyphicon glyphicon-plus" title="Добавить новую запись"></span>Добавить
+            </button>
+        </div>
     </div>
 </div>
 
 <div class="row">
     <div class="col-md-12">
-        <table class="table table-condensed" ng-if="client.client_info['allergies']" ng-hide="editing">
+        <table class="table table-condensed" ng-hide="editing_is_active() || !client.client_info['allergies'].length">
             <caption>Аллергия</caption>
             <thead>
                 <tr>
@@ -75,7 +71,7 @@
             </tbody>
         </table>
 
-        <form class="form-horizontal" role="form" ng-show="editing">
+        <div id="client_allergies_subform" ng-show="editing_is_active()">
             <table class="table table-condensed">
                 <caption>Аллергия</caption>
                 <thead>
@@ -106,20 +102,16 @@
                     </tr>
                 </tbody>
             </table>
-        </form>
-    </div>
-</div>
-<div class="row">
-    <div class="col-md-offset-9 col-md-3" ng-show="editing">
-        <button ng-click="client.add_allergy()" class="btn btn-primary btn-sm pull-right">
-            <span class="glyphicon glyphicon-plus" title="Добавить новую запись"></span> Добавить
-        </button>
+            <button ng-click="client.add_allergy()" class="btn btn-primary btn-sm">
+                <span class="glyphicon glyphicon-plus" title="Добавить новую запись"></span>Добавить
+            </button>
+        </div>
     </div>
 </div>
 
 <div class="row">
     <div class="col-md-12">
-        <table class="table table-condensed" ng-if="client.client_info['intolerances']" ng-hide="editing">
+        <table class="table table-condensed" ng-hide="editing_is_active() || !client.client_info['intolerances'].length">
             <caption>Медикаметозная непереносимость</caption>
             <thead>
                 <tr>
@@ -139,7 +131,7 @@
             </tbody>
         </table>
 
-        <form class="form-horizontal" role="form" ng-show="editing">
+        <div id="client_intol_subform" ng-show="editing_is_active()">
             <table class="table table-condensed">
                 <caption>Медикаметозная непереносимость</caption>
                 <thead>
@@ -170,13 +162,9 @@
                 </tr>
                 </tbody>
             </table>
-        </form>
-    </div>
-</div>
-<div class="row">
-    <div class="col-md-offset-9 col-md-3" ng-show="editing">
-        <button ng-click="client.add_medicament()" class="btn btn-primary btn-sm pull-right">
-            <span class="glyphicon glyphicon-plus" title="Добавить новую запись"></span> Добавить
-        </button>
+            <button ng-click="client.add_medicament()" class="btn btn-primary btn-sm pull-right">
+                <span class="glyphicon glyphicon-plus" title="Добавить новую запись"></span>Добавить
+            </button>
+        </div>
     </div>
 </div>

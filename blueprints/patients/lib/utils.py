@@ -73,7 +73,7 @@ def get_new_document(document_info):
     doc.endDate = document_info['endDate']
     doc.origin = document_info['origin']
     doc.documentType = rbDocumentType.query.filter(
-        rbDocumentType.code == document_info['typeCode']).first()
+        rbDocumentType.code == document_info['documentType']['code']).first()
     return doc
 
 
@@ -82,7 +82,7 @@ def get_modified_document(client, document_info):
     doc = client.documents.filter(ClientDocument.id == document_info['id']).first()
 
     def _big_changes(d, d_info):
-        if (d.documentType.code != d_info['typeCode']
+        if (d.documentType.code != d_info['documentType']['code']
                 or d.serial != d_info['serial']
                 or d.number != d_info['number']):
             return True
@@ -107,12 +107,12 @@ def get_new_policy(policy_info):
     policy = ClientPolicy()
     policy.createDatetime = policy.modifyDatetime = datetime.datetime.now()
     policy.version = 0
-    policy.policyType = rbPolicyType.query.filter(rbPolicyType.code == policy_info['typeCode']).first()
+    policy.policyType = rbPolicyType.query.filter(rbPolicyType.code == policy_info['policyType']['code']).first()
     policy.serial = policy_info.get('serial')
     policy.number = policy_info['number']
     policy.begDate = policy_info.get('begDate')
     policy.endDate = policy_info.get('endDate')
-    policy.insurer_id = policy_info['insurer_id']
+    policy.insurer_id = policy_info['insurer']['id']
     return policy
 
 
@@ -125,7 +125,7 @@ def get_modified_policy(client, policy_info):
         return [policy, ]
 
     def _big_changes(p, p_info):
-        if (p.policyType.code != p_info['typeCode']
+        if (p.policyType.code != p_info['policyType']['code']
                 or p.serial != p_info['serial']
                 or p.number != p_info['number']):
             return True
@@ -139,7 +139,7 @@ def get_modified_policy(client, policy_info):
     else:
         policy.begDate = policy_info['begDate']
         policy.endDate = policy_info['endDate']
-        policy.insurer_id = policy_info['insurer_id']
+        policy.insurer_id = policy_info['insurer']['id']
         policy.modifyDatetime = now
         return (policy, None)
 
