@@ -75,12 +75,7 @@
         function ($scope, $http, $timeout, $window, PrintingService) {
             $scope.ps = new PrintingService('registry', function (template_id, client_id) {
                 return {
-                    client_id: client_id,
-                    additional_context: {
-                        'currentOrgStructure': "",
-                        'currentOrganisation': 3479,
-                        'currentPerson': "1"
-                    }
+                    client_id: client_id
                 }
             });
             $scope.ps.set_context('token');

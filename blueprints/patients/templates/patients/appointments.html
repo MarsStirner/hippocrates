@@ -7,6 +7,7 @@
         <th>Специалист</th>
         <th>Записал</th>
         <th>Примечания</th>
+        <th></th>
     </tr>
     </thead>
     <tbody>
@@ -17,6 +18,34 @@
         <td>[[ record.person ]]</td>
         <td>[[ record.createPerson ]]</td>
         <td>[[ record.note ]]</td>
+        <td>
+            <div class="dropdown">
+                <button class="btn dropdown-toggle" type="button" id="print_dropdownMenu"
+                        data-toggle="dropdown" ng-if="record.receptionType.code == 'amb'" ng-disabled="!ps_amb.templates">
+                    <span class="glyphicon glyphicon-print"></span>
+                    <span class="caret"></span>
+                </button>
+                <button class="btn dropdown-toggle" type="button" id="print_dropdownMenu"
+                        data-toggle="dropdown" ng-if="record.receptionType.code == 'home'" ng-disabled="!ps_home.templates">
+                    <span class="glyphicon glyphicon-print"></span>
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="print_dropdownMenu">
+                    <li role="presentation" ng-repeat="template in ps_amb.templates"
+                        ng-if="record.receptionType.code == 'amb'">
+                        <a role="menuitem" tabindex="-1" href="" class="print_template"
+                           ng-click="ps_amb.print_template(template.id, record.id)" ng-bind="template.name">
+                        </a>
+                    </li>
+                    <li role="presentation" ng-repeat="template in ps_home.templates"
+                        ng-if="record.receptionType.code == 'home'">
+                        <a role="menuitem" tabindex="-1" href="" class="print_template"
+                           ng-click="ps_home.print_template(template.id, record.id)" ng-bind="template.name">
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </td>
     </tr>
     </tbody>
 </table>

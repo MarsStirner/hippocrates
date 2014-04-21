@@ -73,12 +73,7 @@
 
         $scope.ps = new PrintingService("event", function (template_id) {
             return {
-                event_id: $scope.event_id,
-                additional_context: {
-                    currentOrgStructure: "",
-                    currentOrganisation: 3479,
-                    currentPerson:"1"
-                }
+                event_id: $scope.event_id
             }
         });
 

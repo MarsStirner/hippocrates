@@ -179,7 +179,12 @@ var WebMis20 = angular.module('WebMis20', ['ngResource', 'ui.bootstrap', 'ui.sel
     PrintingService.prototype.print_template = function(template_id) {
         return $http.post(url_print_template, angular.extend({
                 id: template_id,
-                context_type: this.context_type
+                context_type: this.context_type,
+                additional_context: {
+                    'currentOrgStructure': "",
+                    'currentOrganisation': 3479,
+                    'currentPerson': current_user_id
+                }
             }, this.resolver.apply(this, arguments)))
         .success(function (data) {
             var w = $window.open();
