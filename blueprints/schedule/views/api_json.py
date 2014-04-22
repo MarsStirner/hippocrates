@@ -114,6 +114,7 @@ def api_schedule_description():
 
 @module.route('/api/schedule-description.json', methods=['POST'])
 def api_schedule_description_post():
+    # TODO: validations
     def make_default_ticket(schedule):
         ticket = ScheduleTicket()
         ticket.schedule = schedule
