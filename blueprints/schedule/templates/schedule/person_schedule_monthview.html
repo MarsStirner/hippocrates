@@ -113,6 +113,25 @@
                     this.model.roa = null;
                 }
             };
+
+            // timepicker validation, TODO: directive
+            $scope.times_valid = true;
+            $scope.sync_times = function() {
+                var m = $scope.model;
+                if (m.begTime1 < m.endTime1 &&
+                        (!m.pause ||
+                                (m.pause &&
+                                        m.begTime1 < m.begTime2 &&
+                                        m.begTime2 < m.endTime1 &&
+                                        m.begTime2 < m.endTime2 &&
+                                        m.endTime2 < m.endTime1)
+                                )
+                    ) {
+                    $scope.times_valid = true;
+                } else {
+                    $scope.times_valid = false;
+                }
+            };
             $scope.roas = roas;
         };
         DayFreeModalCtrl = function ($scope, $modalInstance, day, roas) {

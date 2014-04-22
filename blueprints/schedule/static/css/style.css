@@ -34,3 +34,10 @@ div.person-schedule-day div.panel-heading {
     border: 0px;
     vertical-align: middle;
 }
+
+.error-border {
+    border: solid;
+    border-width: 1px;
+    border-color: #a94442;
+    border-radius: 3px;
+}
