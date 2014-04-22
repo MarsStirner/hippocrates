@@ -111,6 +111,7 @@ var WebMis20 = angular.module('WebMis20', ['ngResource', 'ui.bootstrap', 'ui.sel
     return function(items, event_info) {
         var out = [];
         if (angular.isArray(items) && event_info) {
+            var client_info = event_info.client
             items.forEach(function(item) {
                 var itemMatches = false;
                 if (item.finance.id == event_info.event_type.finance.id && item.recipient.id == event_info.organisation.id){
@@ -119,7 +120,21 @@ var WebMis20 = angular.module('WebMis20', ['ngResource', 'ui.bootstrap', 'ui.sel
                             itemMatches = true;
                         }
                     });
+                    if (item.contingent && itemMatches){
+                        item.contingent.forEach(function(cont){
+                            if((!cont.sex || cont.sex == client_info.sex.id) &&
+                               (!cont.org_id || cont.org_id == client_info.work_org_id) &&
+                               ((!cont.insurer_id || cont.insurer_id == client_info.comp_policy.insurer_id) &&
+                                 (!cont.policyType_id || cont.policyType_id == client_info.comp_policy.policyType_id)) &&
+                               ((!cont.insurer_id || cont.insurer_id == client_info.vol_policy.insurer_id) &&
+                                 (!cont.policyType_id || cont.policyType_id == client_info.vol_policy.policyType_id))){
+                                itemMatches = true;
+                            }
+                        });
+                    }
+
                 }
+
                 if (event_info.set_date){
                     var item_begDate = new Date(item.begDate);
                     var item_endDate = new Date(item.endDate);

@@ -238,6 +238,8 @@ class Client(db.Model):
                                primaryjoin='and_(ClientContact.client_id==Client.id, ClientContact.deleted == 0)',
                                backref=db.backref('client'),
                                lazy='dynamic')
+    works = db.relationship(u'ClientWork', primaryjoin='and_(ClientWork.client_id==Client.id, ClientWork.deleted == 0)',
+                            order_by="desc(ClientWork.id)")
 
     events = db.relationship(
         u'Event', lazy='dynamic', order_by='desc(Event.createDatetime)',
@@ -334,6 +336,9 @@ class Client(db.Model):
             'sex': Gender(self.sexCode),
             'SNILS': self.SNILS,
             'fullName': self.nameText,  # todo: more
+            'work_org_id': self.works[0].org_id,
+            'comp_policy': self.compulsoryPolicy,
+            'vol_policy': self.voluntaryPolicy,
         }
 
 
@@ -639,6 +644,40 @@ class ClientRelation(db.Model):
         return self.id
 
 
+class ClientWork(db.Model):
+    __tablename__ = u'ClientWork'
+
+    id = db.Column(db.Integer, primary_key=True)
+    createDatetime = db.Column(db.DateTime, nullable=False)
+    createPerson_id = db.Column(db.Integer, index=True)
+    modifyDatetime = db.Column(db.DateTime, nullable=False)
+    modifyPerson_id = db.Column(db.Integer, index=True)
+    deleted = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    client_id = db.Column(db.ForeignKey('Client.id'), nullable=False, index=True)
+    org_id = db.Column(db.ForeignKey('Organisation.id'), index=True)
+    shortName = db.Column('freeInput', db.String(200), nullable=False)
+    post = db.Column(db.String(200), nullable=False)
+    stage = db.Column(db.Integer, nullable=False)
+    OKVED = db.Column(db.String(10), nullable=False)
+    version = db.Column(db.Integer, nullable=False)
+    rank_id = db.Column(db.Integer, nullable=False)
+    arm_id = db.Column(db.Integer, nullable=False)
+
+    client = db.relationship(u'Client')
+    organisation = db.relationship(u'Organisation')
+    # hurts = db.relationship(u'ClientworkHurt')
+
+    def __unicode__(self):
+        parts = []
+        if self.shortName:
+            parts.append(self.shortName)
+        if self.post:
+            parts.append(self.post)
+        if self.OKVED:
+            parts.append(u'ОКВЭД: '+self._OKVED)
+        return ', '.join(parts)
+
+
 class DirectClientRelation(ClientRelation):
 
     other = db.relationship(u'Client', foreign_keys='ClientRelation.relative_id')
@@ -842,6 +881,13 @@ class ClientPolicy(db.Model):
 
     def __int__(self):
         return self.id
+
+    def __json__(self):
+        return {
+            'id': self.id,
+            'insurer_id': self.insurer_id,
+            'policyType_id': self.policyType_id
+        }
 
 
 class Organisation(db.Model):
@@ -1972,6 +2018,8 @@ class Contract(db.Model):
     payerAccount = db.relationship(u'OrganisationAccount', foreign_keys='Contract.payerAccount_id')
     specifications = db.relationship(u'ContractSpecification',
                                      primaryjoin="and_(ContractSpecification.master_id == Contract.id, ContractSpecification.deleted == 0)")
+    contingent = db.relationship(u'ContractContingent',
+                                 primaryjoin="and_(ContractContingent.master_id == Contract.id, ContractContingent.deleted == 0)")
 
     def __unicode__(self):
         return u'%s %s' % (self.number, self.date)
@@ -2004,7 +2052,8 @@ class Contract(db.Model):
             'payerAccount': self.payerAccount,
 
             'finance': self.finance,
-            'specifications': self.specifications
+            'specifications': self.specifications,
+            'contingent': self.contingent
         }
 
     def __int__(self):
@@ -2016,7 +2065,7 @@ class ContractContingent(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     deleted = db.Column(db.Integer, nullable=False, server_default=u"'0'")
-    master_id = db.Column(db.Integer, nullable=False, index=True)
+    master_id = db.Column(db.Integer, db.ForeignKey('Contract.id'), nullable=False, index=True)
     client_id = db.Column(db.Integer, index=True)
     attachType_id = db.Column(db.Integer, index=True)
     org_id = db.Column(db.Integer, index=True)
@@ -2029,6 +2078,17 @@ class ContractContingent(db.Model):
     age_bc = db.Column(db.SmallInteger)
     age_eu = db.Column(db.Integer)
     age_ec = db.Column(db.SmallInteger)
+
+    def __json__(self):
+        return {
+            'id': self.id,
+            'master_id': self.master_id,
+            'client_id': self.client_id,
+            'insurer_id': self.insurer_id,
+            'org_id': self.org_id,
+            'policyType_id': self.policyType_id,
+            'sex': self.sex
+        }
 
 
 class ContractContragent(db.Model):
