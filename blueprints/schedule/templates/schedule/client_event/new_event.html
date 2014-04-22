@@ -39,7 +39,7 @@
                                                      [[$select.selected.resolution]]</match>
                         <choices repeat="c in Contract.objects
                                          | contract_filter:event_info
-                                         | filter: $select.search ">
+                                         | filter: $select.search">
                             <div ng-bind-html="(c.number+' '+c.date+' '+c.resolution) | highlight: $select.search"></div>
                         </choices>
                     </ui-select>

@@ -132,7 +132,6 @@ var WebMis20 = angular.module('WebMis20', ['ngResource', 'ui.bootstrap', 'ui.sel
                             }
                         });
                     }
-
                 }
 
                 if (event_info.set_date){
@@ -146,6 +145,9 @@ var WebMis20 = angular.module('WebMis20', ['ngResource', 'ui.bootstrap', 'ui.sel
                     out.push(item);
                 }
             });
+            if (out){
+                event_info.contract = out[0]
+            }
         }
         return out;
     }
