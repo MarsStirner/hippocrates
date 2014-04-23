@@ -254,7 +254,7 @@ class ClientVisualizer(object):
                     'endDate': policy.endDate or '',
                     'policyType': policy.policyType,
                     'insurer': policy.insurer,
-                    'policyText': policy}
+                    'policyText': unicode(policy)}
         else:
             return {'number': '',
                     'serial': '',
@@ -351,9 +351,7 @@ class ClientVisualizer(object):
             'liveAddress': client.loc_address,
             'contact': client.phones,
             'compulsoryPolicy': compulsoryPolicy,
-            'compulsoryPolicyText': client.compulsoryPolicy,
             'voluntaryPolicy': voluntaryPolicy,
-            'voluntaryPolicyText': client.voluntaryPolicy,
             'socStatuses': socStatuses,
             'allergies': allergies,
             'intolerances': intolerances,

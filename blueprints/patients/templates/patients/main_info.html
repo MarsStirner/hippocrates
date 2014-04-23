@@ -1,6 +1,28 @@
 <dl class="dl-horizontal" ng-hide="editing_is_active()">
-    <dt ng-repeat-start="key in clientMainInfoCodeOrder" ng-if="client.client_info[key]">[[ clientInfoCode2Name[key] ]]</dt>
-    <dd ng-repeat-end>[[ aux.format(client.client_info, key) ]]</dd>
+    <dt ng-if="client.client_info.id">Код пациента</dt>
+    <dd>[[ client.client_info.id ]]</dd>
+    <dt ng-if="client.client_info.nameText">ФИО</dt>
+    <dd>[[ client.client_info.nameText ]]</dd>
+    <dt ng-if="client.client_info.birthDate">Дата рождения</dt>
+    <dd>[[ client.client_info.birthDate | asDate ]]</dd>
+    <dt ng-if="client.client_info.sex">Пол</dt>
+    <dd>[[ client.client_info.sex.name ]]</dd>
+    <dt ng-if="client.client_info.regAddress">Адрес регистрации</dt>
+    <dd>[[ client.client_info.regAddress ]]</dd>
+    <dt ng-if="client.client_info.liveAddress">Адрес проживания</dt>
+    <dd>[[ client.client_info.liveAddress ]]</dd>
+    <dt ng-if="client.client_info.documentText">Документ</dt>
+    <dd>[[ client.client_info.documentText ]]</dd>
+    <dt ng-if="client.client_info.compulsoryPolicy.policyText">Полис ОМС</dt>
+    <dd>[[ client.client_info.compulsoryPolicy.policyText ]]</dd>
+    <dt ng-if="client.client_info.voluntaryPolicy.policyText">Полис ДМС</dt>
+    <dd>[[ client.client_info.voluntaryPolicy.policyText ]]</dd>
+    <dt ng-if="client.client_info.SNILS">СНИЛС</dt>
+    <dd>[[ client.client_info.SNILS ]]</dd>
+    <dt ng-if="client.client_info.contact">Контакты</dt>
+    <dd>[[ client.client_info.contact ]]</dd>
+    <dt ng-if="client.client_info.notes">Примечания</dt>
+    <dd>[[ client.client_info.notes ]]</dd>
 </dl>
 
 <div id="main_info_tab" ng-show="editing_is_active()">
