@@ -85,8 +85,9 @@
             };
         };
 
-        WebMis20.controller('ClientCtrl', ['$scope', '$http', '$modal', 'Client', 'PrintingService', 'RefBookService',
-                function ($scope, $http, $modal, Client, PrintingService, RefBookService) {
+        WebMis20.controller('ClientCtrl',
+                ['$scope', '$http', '$modal', 'Client', 'PrintingService', 'RefBookService', '$window',
+                function ($scope, $http, $modal, Client, PrintingService, RefBookService, $window) {
             $scope.records = [];
             $scope.aux = aux;
             $scope.params = aux.getQueryParams(document.location.search);
@@ -144,30 +145,17 @@
                 return (relationType.rightSex == 0 || relationType.rightSex == $scope.client.client_info.sex.id);
             }
 
-            $scope.clientInfoCode2Name = {
-                'id': 'Код пациента',
-                'birthDate': 'Дата рождения',
-                'regAddress': 'Адрес регистрации',
-                'liveAddress': 'Адрес проживания',
-                'SNILS': 'СНИЛС',
-                'nameText': 'ФИО',
-                'sex': 'Пол',
-                'documentText': 'Документ',
-                'contact': 'Контакты',
-                'voluntaryPolicyText': 'Полис ДМС',
-                'compulsoryPolicyText': 'Полис ОМС',
-                'notes': 'Примечания'
-            };
-            $scope.clientMainInfoCodeOrder = ['id', 'nameText', 'birthDate', 'sex', 'regAddress', 'liveAddress',
-                'documentText', 'compulsoryPolicyText', 'voluntaryPolicyText', 'SNILS', 'contact', 'notes'];
-
             $scope.start_editing = function() {
                 $scope.editing.active = true;
             };
 
             $scope.cancel_editing = function() {
-                $scope.editing.active = false;
-                $scope.client.reload();
+                if ($scope.client_id == 'new') {
+                    $window.history.back();
+                } else {
+                    $scope.editing.active = false;
+                    $scope.client.reload();
+                }
             };
 
             $scope.editing_is_active = function() {
@@ -216,7 +204,6 @@
 
             if ($scope.client_id == 'new') {
                 $scope.start_editing();
-                // TODO: btnCancel href back
             }
         }]);
     </script>

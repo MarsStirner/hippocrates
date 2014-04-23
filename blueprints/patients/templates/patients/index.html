@@ -40,11 +40,11 @@
             <tr ng-repeat="result in results" style="cursor: pointer">
                 <td ng-click="open_client(result.id)" ng-bind="result.nameText"></td>
                 <td ng-click="open_client(result.id)" ng-bind="result.birthDate | asDate"></td>
-                <td ng-click="open_client(result.id)" ng-bind="result.sex"></td>
+                <td ng-click="open_client(result.id)" ng-bind="result.sex.name"></td>
                 <td ng-click="open_client(result.id)" ng-bind="result.documentText"></td>
                 <td ng-click="open_client(result.id)" ng-bind="result.SNILS"></td>
-                <td ng-click="open_client(result.id)" ng-bind="result.compulsoryPolicyText"></td>
-                <td ng-click="open_client(result.id)" ng-bind="result.voluntaryPolicyText"></td>
+                <td ng-click="open_client(result.id)" ng-bind="result.compulsoryPolicy.policyText"></td>
+                <td ng-click="open_client(result.id)" ng-bind="result.voluntaryPolicy.policyText"></td>
                 <td>
                     <div class="dropdown">
                         <button class="btn dropdown-toggle" type="button" id="print_dropdownMenu"
