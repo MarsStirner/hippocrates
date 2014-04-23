@@ -25,31 +25,41 @@
             </div>
             <div class="row">
                 <div class="col-md-4"><label>Время приёма</label></div>
-                <div class="col-md-4">
-                    <div ng-model="model.begTime1" style="display: inline-block">
-                        <timepicker minute-step="15" show-meridian="false"></timepicker>
+                <div class="col-md-4 text-center">
+                    <div ng-model="model.begTime1" style="display: inline-block" ng-change="sync_times()"
+                         ng-class="{'error-border': !times_valid}">
+                        <timepicker minute-step="15" show-meridian="false" ></timepicker>
                     </div>
                 </div>
-                <div class="col-md-4">
-                    <div ng-model="model.endTime1" style="display: inline-block">
+                <div class="col-md-4 text-center">
+                    <div ng-model="model.endTime1" style="display: inline-block" ng-change="sync_times()"
+                         ng-class="{'error-border': !times_valid}">
                         <timepicker minute-step="15" show-meridian="false"></timepicker>
                     </div>
                 </div>
             </div>
             <div class="row">
                 <div class="col-md-4">
-                    <input id="pause" type="checkbox" ng-model="model.pause"/>
+                    <input id="pause" type="checkbox" ng-model="model.pause" ng-change="sync_times()" />
                     <label for="pause">Перерыв</label>
                 </div>
-                <div class="col-md-4">
-                    <div ng-model="model.begTime2" style="display: inline-block" ng-show="model.pause">
+                <div class="col-md-4 text-center">
+                    <div ng-model="model.begTime2" style="display: inline-block" ng-show="model.pause" ng-change="sync_times()"
+                         ng-class="{'error-border': !times_valid}">
                         <timepicker minute-step="15" show-meridian="false"></timepicker>
                     </div>
                 </div>
-                <div class="col-md-4">
-                    <div ng-model="model.endTime2" style="display: inline-block" ng-show="model.pause">
+                <div class="col-md-4 text-center">
+                    <div ng-model="model.endTime2" style="display: inline-block" ng-show="model.pause" ng-change="sync_times()"
+                         ng-class="{'error-border': !times_valid}">
                         <timepicker minute-step="15" show-meridian="false"></timepicker>
                     </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-offset-4 col-md-8">
+                    <span class='text-danger' ng-show="!times_valid">Время начала должно быть меньше времени окончания
+                        и время перерыва должно попадать в интервал времени приёма</span>
                 </div>
             </div>
             <div class="row">
@@ -85,7 +95,8 @@
                     <label for="CITO">Вне очереди</label>
                 </div>
                 <div class="col-md-8" ng-class="{'has-error': daysetupForm.CITO.$invalid}">
-                    <input class="form-control" id="CITO" name="CITO" type="number" ng-model="model.CITO">
+                    <input class="form-control" id="CITO" name="CITO" type="number" ng-model="model.CITO"
+                           min="0" max="10" ng-required="true">
                     <span class='text-danger' ng-show="daysetupForm.CITO.$invalid">Обязательно для заполнения (от 0 до 10)</span>
                 </div>
             </div>
@@ -93,7 +104,7 @@
     </div>
 </div>
 <div class="modal-footer">
+    <button type="button" class="btn btn-default" ng-click="cancel()">Отмена</button>
     <button type="button" class="btn btn-success" ng-click="accept()"
-            ng-disabled="(!absent && daysetupForm.$invalid) || (absent && model.roa === null)">Ok</button>
-    <button type="button" class="btn btn-danger" ng-click="cancel()">Отмена</button>
+            ng-disabled="(!absent && (daysetupForm.$invalid || !times_valid)) || (absent && model.roa === null)">Подтвердить</button>
 </div>

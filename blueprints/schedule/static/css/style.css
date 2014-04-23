@@ -38,3 +38,10 @@ div.person-schedule-day div.panel-heading {
 blockquote {
     border-color: mediumturquoise;
 }
+
+.error-border {
+    border: solid;
+    border-width: 1px;
+    border-color: #a94442;
+    border-radius: 3px;
+}

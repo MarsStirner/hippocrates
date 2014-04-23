@@ -157,6 +157,7 @@ def api_schedule_description_post():
         day['date'] for day in schedule
     ]
     schedules = Schedule.query.join(rbReceptionType).filter(
+        Schedule.receptionType_id == rbReceptionType.id,
         Schedule.deleted == 0, Schedule.person_id == person_id,
         Schedule.date.in_(dates), rbReceptionType.code == reception_type
     )
