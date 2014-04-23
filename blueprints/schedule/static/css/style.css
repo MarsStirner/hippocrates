@@ -34,3 +34,7 @@ div.person-schedule-day div.panel-heading {
     border: 0px;
     vertical-align: middle;
 }
+
+blockquote {
+    border-color: mediumturquoise;
+}

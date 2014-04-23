@@ -15,130 +15,143 @@
         <legend xmlns="http://www.w3.org/1999/html">Создание обращения, пациент
             <a href="{{ url_for('patients.patient') }}?client_id=[[event_info.client_id]]">
                 [[ event_info.client.fullName ]]</a></legend>
-        <div class="col-md-6" style="">
-            <ul class="list-group minheight">
-                <li class="list-group-item">
-                    <label for="">Организация</label>
-                    <div>[[ event_info.organisation.short_name ]]</div>
-                </li>
-                <li class="list-group-item">
-                    <label for="">Лечащий врач</label>
-                    <ui-select ng-model="event_info.exec_person"
-                               theme="select2">
-                        <match placeholder="Лечащий врач">[[$select.selected.name]]</match>
-                        <choices repeat="p in Person.objects | filter: $select.search ">
-                            <div ng-bind-html="p.name | highlight: $select.search"></div>
-                        </choices>
-                    </ui-select>
-                </li>
-                <li class="list-group-item">
-                    <label for="">Договор</label>
-                    <ui-select ng-model="event_info.contract"
-                               theme="select2">
-                        <match placeholder="Договор">[[$select.selected.number]] [[$select.selected.date]]
-                                                     [[$select.selected.resolution]]</match>
-                        <choices repeat="c in Contract.objects
-                                         | contract_filter:event_info
-                                         | filter: $select.search">
-                            <div ng-bind-html="(c.number+' '+c.date+' '+c.resolution) | highlight: $select.search"></div>
-                        </choices>
-                    </ui-select>
-                </li>
-                <li class="list-group-item">
-                </li>
-                <li class="list-group-item">
-                    <label for="">Дата начала</label>
-                    <input type="text" class="form-control" datepicker_popup="dd.MM.yyyy" autocomplete="off"
-                        ng_model="event_info.set_date">
-                </li>
-                <li class="list-group-item">
-                    <label for="">Дата выполнения</label>
-                    <input type="text" class="form-control" datepicker_popup="dd.MM.yyyy" autocomplete="off"
-                        ng_model="event_info.exec_date">
-                </li>
-            </ul>
-        </div>
-        <div class="col-md-6">
-            <ul class="list-group minheight">
-                <li class="list-group-item">
-                    <label for="">Тип обращения</label>
-                    <ui-select ng-model="request_type.selected"
-                               theme="select2">
-                        <match placeholder="Тип обращения">[[$select.selected.name]]</match>
-                        <choices repeat="rt in rbRequestType.objects
-                                         | filter: rbRequestType.objects && rbRequestType.get_by_code('policlinic')
-                                         | filter: $select.search ">
-                            <div ng-bind-html="rt.name | highlight: $select.search"></div>
-                        </choices>
-                    </ui-select>
-                </li>
-                <li class="list-group-item">
-                    <label for="">Источник финансирования</label>
-                    <ui-select ng-model="finance.selected"
-                               theme="select2">
-                        <match placeholder="Источник финансирования">[[$select.selected.name]]</match>
-                        <choices repeat="f in rbFinance.objects
-                                         | event_type_filter: rbFinance.objects && rbEventType.get_finances_by_rt(request_type.selected.id)
-                                         | filter: $select.search ">
-                            <div ng-bind-html="f.name | highlight: $select.search"></div>
-                        </choices>
-                    </ui-select>
-                </li>
-                <li class="list-group-item">
-                    <label for="">Тип события</label>
-                    <ui-select ng-model="event_info.event_type"
-                               theme="select2">
-                        <match placeholder="Тип события">[[$select.selected.name]]</match>
-                        <choices repeat='et in rbEventType.objects
-                                         | event_type_filter: rbEventType.objects && rbEventType.get_filtered_by_rtf(request_type.selected.id, finance.selected.id)
-                                         | filter: $select.search '>
-                            <div ng-bind-html="et.name | highlight: $select.search"></div>
-                        </choices>
-                    </ui-select>
-                </li>
-                <li class="list-group-item">
-                    <label for="">Подразделение</label>
-                    <ui-select ng-model="event_info.org_structure"
-                               theme="select2">
-                        <match placeholder="Подразделение">[[$select.selected.name]]</match>
-                        <choices repeat="os in OrgStructure.objects | filter: $select.search ">
-                            <div ng-bind-html="os.name | highlight: $select.search"></div>
-                        </choices>
-                    </ui-select>
-                </li>
-                <li class="list-group-item">
-                    <label for="">Первичность</label>
-                    <ui-select ng-model="event_info.is_primary"
-                               theme="select2">
-                        <match placeholder="Первичность">[[$select.selected.name]]</match>
-                        <choices repeat="rbp in rbPrimary.objects | filter: $select.search ">
-                            <div ng-bind-html="rbp.name | highlight: $select.search"></div>
-                        </choices>
-                    </ui-select>
-                </li>
-                <li class="list-group-item">
-                    <label for="">Порядок</label>
-                    <ui-select ng-model="event_info.order"
-                               theme="select2">
-                        <match placeholder="Порядок">[[$select.selected.name]]</match>
-                        <choices repeat="rbo in rbOrder.objects | filter: $select.search ">
-                            <div ng-bind-html="rbo.name | highlight: $select.search"></div>
-                        </choices>
-                    </ui-select>
-                </li>
-            </ul>
-        </div>
-
+        <div class="container-fluid">
+            <div class="row">
+                  <h4>  <strong>Организация</strong> [[ event_info.organisation.short_name ]] </h4>
+            </div>
+            <blockquote>
+                <div class="row">
+                    <div class="col-md-4">
+                        <label for="">Тип обращения</label>
+                        <ui-select ng-model="request_type.selected"
+                                   theme="select2">
+                            <match placeholder="Тип обращения">[[$select.selected.name]]</match>
+                            <choices repeat="rt in rbRequestType.objects
+                                             | filter: rbRequestType.objects && rbRequestType.get_by_code('policlinic')
+                                             | filter: $select.search ">
+                                <div ng-bind-html="rt.name | highlight: $select.search"></div>
+                            </choices>
+                        </ui-select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="">Источник финансирования</label>
+                        <ui-select ng-model="finance.selected"
+                                   theme="select2">
+                            <match placeholder="Источник финансирования">[[$select.selected.name]]</match>
+                            <choices repeat="f in rbFinance.objects
+                                             | event_type_filter: rbFinance.objects && rbEventType.get_finances_by_rt(request_type.selected.id)
+                                             | filter: $select.search ">
+                                <div ng-bind-html="f.name | highlight: $select.search"></div>
+                            </choices>
+                        </ui-select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="contract">Договор</label>
+                        <ui-select ng-model="event_info.contract"
+                                   theme="select2" id="contract">
+                            <match placeholder="Договор">[[$select.selected.number]] [[$select.selected.date]]
+                                                         [[$select.selected.resolution]]</match>
+                            <choices repeat="c in Contract.objects
+                                             | contract_filter:event_info
+                                             | filter: $select.search">
+                                <div ng-bind-html="(c.number+' '+c.date+' '+c.resolution) | highlight: $select.search"></div>
+                            </choices>
+                        </ui-select>
+                    </div>
+                </div>
+                <br>
+                <div class="row">
+                    <div class="col-md-4">
+                        <label for="">Тип события</label>
+                        <ui-select ng-model="event_info.event_type"
+                                   theme="select2">
+                            <match placeholder="Тип события">[[$select.selected.name]]</match>
+                            <choices repeat='et in rbEventType.objects
+                                             | event_type_filter: rbEventType.objects && rbEventType.get_filtered_by_rtf(request_type.selected.id, finance.selected.id)
+                                             | filter: $select.search '>
+                                <div ng-bind-html="et.name | highlight: $select.search"></div>
+                            </choices>
+                        </ui-select>
+                    </div>
+                </div>
+            </blockquote>
+            <blockquote>
+                <div class="row">
+                    <div class="col-md-4">
+                        <label for="">Лечащий врач</label>
+                        <ui-select ng-model="event_info.exec_person"
+                                   theme="select2">
+                            <match placeholder="Лечащий врач">[[$select.selected.name]]</match>
+                            <choices repeat="p in Person.objects | filter: $select.search ">
+                                <div ng-bind-html="p.name | highlight: $select.search"></div>
+                            </choices>
+                        </ui-select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="">Подразделение</label>
+                        <ui-select ng-model="event_info.org_structure"
+                                   theme="select2">
+                            <match placeholder="Подразделение">[[$select.selected.name]]</match>
+                            <choices repeat="os in OrgStructure.objects | filter: $select.search ">
+                                <div ng-bind-html="os.name | highlight: $select.search"></div>
+                            </choices>
+                        </ui-select>
+                    </div>
+                </div>
+            </blockquote>
+            <blockquote>
+                <div class="row">
+                    <div class="col-md-4">
+                        <label for="">Первичность</label>
+                        <ui-select ng-model="event_info.is_primary"
+                                   theme="select2">
+                            <match placeholder="Первичность">[[$select.selected.name]]</match>
+                            <choices repeat="rbp in rbPrimary.objects | filter: $select.search ">
+                                <div ng-bind-html="rbp.name | highlight: $select.search"></div>
+                            </choices>
+                        </ui-select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="">Порядок</label>
+                        <ui-select ng-model="event_info.order"
+                                   theme="select2">
+                            <match placeholder="Порядок">[[$select.selected.name]]</match>
+                            <choices repeat="rbo in rbOrder.objects | filter: $select.search ">
+                                <div ng-bind-html="rbo.name | highlight: $select.search"></div>
+                            </choices>
+                        </ui-select>
+                    </div>
+                </div>
+                <br>
+                <div class="row">
+                    <div class="col-md-3">
+                        <label for="event_setDate">Дата начала</label>
+                        <wm-date id="event_setDate" name="event_setDate"
+                                 ng-model="event_info.set_date">
+                        </wm-date>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="event_execDate">Дата выполнения</label>
+                        <wm-date id="event_execDate" name="event_execDate"
+                                 ng-model="event_info.exec_date">
+                        </wm-date>
+                    </div>
+                </div>
+            </blockquote>
 {#        <div>#}
 {#            <p>debug:</p>#}
 {#            <p>[[event_info | json]]</p>#}
 {#            <p>[[request_type.selected | json]]</p>#}
 {#            <p>[[finance.selected | json]]</p>#}
 {#        </div>#}
-        <br />
-        <div class="pull-right">
-            <button ng-click="cancel_editing();" class="btn btn-lg btn-danger">Назад</button>
-            <button ng-click="create_event();" class="btn btn-lg btn-success">Создать</button>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="pull-right">
+                        <button ng-click="cancel_editing();" class="btn btn-lg btn-danger">Назад</button>
+                        <button ng-click="create_event();" class="btn btn-lg btn-success">Создать</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 {% endblock %}
