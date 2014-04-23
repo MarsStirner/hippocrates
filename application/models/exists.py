@@ -336,7 +336,7 @@ class Client(db.Model):
             'sex': Gender(self.sexCode),
             'SNILS': self.SNILS,
             'fullName': self.nameText,  # todo: more
-            'work_org_id': self.works[0].org_id,
+            'work_org_id': self.works[0].org_id if self.works else None,
             'comp_policy': self.compulsoryPolicy,
             'vol_policy': self.voluntaryPolicy,
         }
