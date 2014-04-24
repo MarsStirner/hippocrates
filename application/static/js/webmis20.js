@@ -685,6 +685,62 @@ var WebMis20 = angular.module('WebMis20', ['ngResource', 'ui.bootstrap', 'ui.sel
         };
     }
 ])
+.directive('wmTime', ['$document',
+    function ($document) {
+        return {
+            restrict: 'E',
+            replace: true,
+            scope: {
+                id: '=',
+                name: '=',
+                ngModel: '=',
+                ngRequired: '='
+            },
+            templateUrl: "_timePicker.html",
+            link: function(scope, element, attr){
+                scope.isPopupVisible = false;
+                scope.open_timepicker_popup = function(){
+                    scope.isPopupVisible = !scope.isPopupVisible;
+                }
+
+                $document.bind('click', function(event){
+                    var isClickedElementChildOfPopup = element
+                      .find(event.target)
+                      .length > 0;
+
+                    if (isClickedElementChildOfPopup)
+                      return;
+
+                    scope.isPopupVisible = false;
+                    scope.$apply();
+                  });
+            }
+
+        };
+    }
+])
+
+.directive('showTime', function() {
+  return {
+      restrict: 'A',
+      require: 'ngModel',
+      link: function(scope, element, attrs, ngModel) {
+
+          if(ngModel) {
+
+//              ngModel.$parsers.push(function (value) {
+//                  return value;
+//              });
+
+              ngModel.$formatters.push(function (value) {
+                  return value.getHours() + ":" + value.getMinutes();
+              });
+
+      }
+    }
+  };
+});
+
 ;
 var aux = {
     getQueryParams: function (qs) {
