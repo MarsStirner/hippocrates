@@ -28,7 +28,7 @@ class SearchPatient():
     @staticmethod
     def search(name):
         search = Search(indexes=['patient'], config=SearchConfig)
-        search = search.match(name).group_by('id').limit(0, 100)
+        search = search.match(name).limit(0, 100)
         result = search.ask()
         return result
 
