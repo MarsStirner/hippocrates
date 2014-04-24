@@ -137,11 +137,24 @@
                             </wm-date>
                         </div>
                     </ng-form>
+                    <div class="col-md-2">
+                        <label for="event_setDate">Время начала</label>
+                        <wm-time id="event_setTime" name="event_setTime"
+                                 ng-model="event_info.set_date"
+                                 ng-required="true">
+                        </wm-time>
+                    </div>
                     <div class="col-md-3">
                         <label for="event_execDate">Дата выполнения</label>
                         <wm-date id="event_execDate" name="event_execDate"
                                  ng-model="event_info.exec_date">
                         </wm-date>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="event_setDate">Время выполнения</label>
+                        <wm-time id="event_execTime" name="event_execTime"
+                                 ng-model="event_info.exec_date">
+                        </wm-time>
                     </div>
                 </div>
             </blockquote>

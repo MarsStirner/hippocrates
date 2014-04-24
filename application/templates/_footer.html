@@ -35,3 +35,21 @@
 <script src="{{ url_for('static', filename='angular-ui-utils/mask.js') }}"></script>
 
 <script src="{{ url_for('static', filename='js/webmis20.js') }}"></script>
+<script type="text/ng-template" id="_timePicker.html">
+    <div class="input-group">
+        <input type="text" id="{{id}}" name="{{name}}" class="form-control"
+               ng-model="ngModel" autocomplete="off"
+               ng-required="ngRequired" show-time/>
+        <span class="input-group-btn">
+            <button class="btn" type="button" ng-click="open_timepicker_popup()">
+                <i class="glyphicon glyphicon-time"></i>
+            </button>
+            <div class="popup" ng-show="isPopupVisible">
+                <div style="display:inline-block;">
+                    <timepicker show-meridian="false"></timepicker>
+                </div>
+            </div>
+        </span>
+
+    </div>
+</script>
