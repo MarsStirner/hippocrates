@@ -408,8 +408,8 @@ def api_event_save():
         event.deleted = data['deleted']
         event.eventType = EventType.query.get(data['event_type']['id'])
         event.execPerson_id = data['exec_person']['id']
-        event.setDate = string_to_datetime(data['set_date'], "%Y-%m-%dT%H:%M:%S.%fZ", 'Europe/Moscow')
-        event.execDate = string_to_datetime(data['exec_date'], "%Y-%m-%dT%H:%M:%S.%fZ", 'Europe/Moscow')
+        event.setDate = string_to_datetime(data['set_date'], "%Y-%m-%dT%H:%M:%S.%fZ")
+        event.execDate = string_to_datetime(data['exec_date'], "%Y-%m-%dT%H:%M:%S.%fZ")
         # event.contract = None
         event.isPrimaryCode = data['is_primary']['id']
         event.order = data['order']['id']
@@ -426,8 +426,8 @@ def api_event_save():
         event.eventType = EventType.query.get(data['event_type']['id'])
         event.client_id = data['client_id']
         event.execPerson_id = data['exec_person']['id']
-        event.setDate = string_to_datetime(data['set_date'], "%Y-%m-%dT%H:%M:%S.%fZ", 'Europe/Moscow')
-        event.execDate = string_to_datetime(data['exec_date'], "%Y-%m-%dT%H:%M:%S.%fZ", 'Europe/Moscow')
+        event.setDate = string_to_datetime(data['set_date'], "%Y-%m-%dT%H:%M:%S.%fZ")
+        event.execDate = string_to_datetime(data['exec_date'], "%Y-%m-%dT%H:%M:%S.%fZ")
         event.externalId = get_new_event_ext_id(event.eventType.id, event.client_id)
         # event.contract = None
         event.isPrimaryCode = data['is_primary']['id']

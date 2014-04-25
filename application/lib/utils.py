@@ -13,6 +13,8 @@ from application.models.exists import rbUserProfile, UUID, rbCounter, EventType,
     rbAccountingSystem
 from application.app import app
 from pysimplelogs.logger import SimpleLogger
+from config import DEBUG, PROJECT_NAME, SIMPLELOGS_URL, TIME_ZONE
+from version import version
 
 
 def public_endpoint(function):
@@ -117,8 +119,6 @@ def rights_require(*right_codes):
 
 
 # инициализация логгера
-from config import DEBUG, PROJECT_NAME, SIMPLELOGS_URL
-from version import version
 logger = SimpleLogger.get_logger(SIMPLELOGS_URL,
                                  PROJECT_NAME,
                                  dict(name=PROJECT_NAME, version=version),
@@ -127,7 +127,9 @@ logger = SimpleLogger.get_logger(SIMPLELOGS_URL,
 
 class WebMisJsonEncoder(json.JSONEncoder):
     def default(self, o):
-        if isinstance(o, (datetime.datetime, datetime.date, datetime.time)):
+        if isinstance(o, datetime.datetime):
+            return timezone(TIME_ZONE).localize(o).astimezone(tz=timezone('UTC')).isoformat()
+        elif isinstance(o, (datetime.date, datetime.time)):
             return o.isoformat()
         elif isinstance(o, Decimal):
             return float(o)
@@ -201,11 +203,10 @@ def safe_int(obj):
     return int(obj)
 
 
-def string_to_datetime(date_string, format, time_zone):
+def string_to_datetime(date_string, format):
     if date_string:
         date = datetime.datetime.strptime(date_string, format)
-        date = date.replace(tzinfo=timezone('UTC')).astimezone(tz=timezone(time_zone))
-        return date
+        return timezone('UTC').localize(date).astimezone(tz=timezone(TIME_ZONE))
     else:
         return date_string
 
