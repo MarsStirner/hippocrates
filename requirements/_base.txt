@@ -17,5 +17,7 @@ Flask-Beaker
 sphinxit
 Flask-Cache
 fabric
+mock
+PyYAML
 
 -e git+https://github.com/KorusConsulting/pysimplelogs.git#egg=pysimplelogs

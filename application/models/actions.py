@@ -821,7 +821,7 @@ class rbHospitalBedProfile(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     code = db.Column(db.String(8), nullable=False, index=True)
     name = db.Column(db.Unicode(64), nullable=False, index=True)
-    service_id = db.Column(db.Integer, db.ForeignKey('rbService'), index=True)
+    service_id = db.Column(db.Integer, db.ForeignKey('rbService.id'), index=True)
 
     # service = db.relationship('rbService')
 
@@ -926,3 +926,11 @@ class rbJobType(db.Model):
     isInstant = db.Column(db.Integer, nullable=False, server_default=u"'0'")
 
 
+class ActionPropertyTypeLayout(db.Model):
+    __tablename__ = u'ActionPropertyTypeLayout'
+
+    id = db.Column(db.Integer, primary_key=True)
+    actionPropertyType_id = db.Column(db.Integer, db.ForeignKey('ActionPropertyType.id'), nullable=False, index=True)
+    template = db.Column(db.UnicodeText, nullable=False)
+
+    type = db.relationship(u'ActionPropertyType', lazy=True, innerjoin=True, backref=db.backref('layout'))
