@@ -4,6 +4,7 @@ import json
 import uuid
 from functools import wraps
 from decimal import Decimal
+from pytz import timezone
 from flask import g, current_app, request, abort
 from flask.ext.principal import Permission, RoleNeed, ActionNeed, PermissionDenied
 from flask.ext.login import current_user
@@ -198,6 +199,15 @@ def safe_int(obj):
     if obj is None:
         return None
     return int(obj)
+
+
+def string_to_datetime(date, format, time_zone):
+    if date:
+        date_string = datetime.datetime.strptime(date, format)
+        date_string = date_string.replace(tzinfo=timezone('UTC')).astimezone(tz=timezone(time_zone))
+        return date_string
+    else:
+        return date
 
 
 def safe_traverse(obj, *args, **kwargs):

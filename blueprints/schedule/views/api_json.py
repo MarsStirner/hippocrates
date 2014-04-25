@@ -11,7 +11,7 @@ from application.systemwide import db, cache
 from application.lib.sphinx_search import SearchPerson
 from application.lib.agesex import recordAcceptableEx
 from application.lib.utils import (jsonify, safe_traverse, get_new_uuid,
-    get_new_event_ext_id)
+    get_new_event_ext_id, string_to_datetime)
 from blueprints.schedule.app import module
 from application.models.exists import (rbSpeciality, rbReasonOfAbsence, rbPrintTemplate, Event,
     Person, EventType, Client, Organisation, UUID)
@@ -404,12 +404,12 @@ def api_event_save():
     if event_id:
         event = Event.query.get(event_id)
         event.modifyDatetime = now
-        event.modifyPerson_id = current_user.get_id() or 1 # todo: fix
+        event.modifyPerson_id = current_user.get_id() or 1  # todo: fix
         event.deleted = data['deleted']
         event.eventType = EventType.query.get(data['event_type']['id'])
         event.execPerson_id = data['exec_person']['id']
-        event.setDate = data['set_date']
-        event.execDate = data['exec_date']
+        event.setDate = string_to_datetime(data['set_date'], "%Y-%m-%dT%H:%M:%S.%fZ", 'Europe/Moscow')
+        event.execDate = string_to_datetime(data['exec_date'], "%Y-%m-%dT%H:%M:%S.%fZ", 'Europe/Moscow')
         # event.contract = None
         event.isPrimaryCode = data['is_primary']['id']
         event.order = data['order']['id']
@@ -420,14 +420,14 @@ def api_event_save():
     else:
         event = Event()
         event.createDatetime = event.modifyDatetime = now
-        event.createPerson_id = event.modifyPerson_id = event.setPerson_id = current_user.get_id() or 1 # todo: fix
+        event.createPerson_id = event.modifyPerson_id = event.setPerson_id = current_user.get_id() or 1  # todo: fix
         event.deleted = 0
         event.version = 0
         event.eventType = EventType.query.get(data['event_type']['id'])
         event.client_id = data['client_id']
         event.execPerson_id = data['exec_person']['id']
-        event.setDate = data['set_date']
-        event.execDate = data['exec_date']
+        event.setDate = string_to_datetime(data['set_date'], "%Y-%m-%dT%H:%M:%S.%fZ", 'Europe/Moscow')
+        event.execDate = string_to_datetime(data['exec_date'], "%Y-%m-%dT%H:%M:%S.%fZ", 'Europe/Moscow')
         event.externalId = get_new_event_ext_id(event.eventType.id, event.client_id)
         # event.contract = None
         event.isPrimaryCode = data['is_primary']['id']

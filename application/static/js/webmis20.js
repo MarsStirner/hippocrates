@@ -733,7 +733,11 @@ var WebMis20 = angular.module('WebMis20', ['ngResource', 'ui.bootstrap', 'ui.sel
 //              });
 
               ngModel.$formatters.push(function (value) {
-                  return value.getHours() + ":" + value.getMinutes();
+                  if(value){
+                      return value.getHours() + ":" + value.getMinutes();
+                  }else{
+                      value
+                  }
               });
 
       }
