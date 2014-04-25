@@ -201,13 +201,13 @@ def safe_int(obj):
     return int(obj)
 
 
-def string_to_datetime(date, format, time_zone):
-    if date:
-        date_string = datetime.datetime.strptime(date, format)
-        date_string = date_string.replace(tzinfo=timezone('UTC')).astimezone(tz=timezone(time_zone))
-        return date_string
-    else:
+def string_to_datetime(date_string, format, time_zone):
+    if date_string:
+        date = datetime.datetime.strptime(date_string, format)
+        date = date.replace(tzinfo=timezone('UTC')).astimezone(tz=timezone(time_zone))
         return date
+    else:
+        return date_string
 
 
 def safe_traverse(obj, *args, **kwargs):
