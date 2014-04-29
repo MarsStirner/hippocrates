@@ -158,6 +158,8 @@
                     </div>
                 </div>
             </blockquote>
+            <hr>
+            {% include "event/services.html" %}
 {#        <div>#}
 {#            <p>debug:</p>#}
 {#            <p>[[event_info | json]]</p>#}
@@ -178,8 +180,8 @@
 
 {% block modules_js %}
     <script>
-    WebMis20.controller('EventCreateCtrl', ['$scope', '$http', 'RefBookService', 'EventType','$window',
-                        function ($scope, $http, RefBookService, EventType, $window) {
+    WebMis20.controller('EventCreateCtrl', ['$scope', '$http', 'RefBookService', 'EventType','$window', '$timeout',
+                        function ($scope, $http, RefBookService, EventType, $window, $timeout) {
         $scope.aux = aux;
         $scope.submit_attempt = false;
         $scope.event_info = null;
@@ -251,6 +253,43 @@
         };
 
         $scope.load_data();
+
+        $scope.query = "";
+        var _timeout;
+        $scope.selected_services = [];
+        $scope.$watch('query', function(newValue, oldValue) {
+            if (newValue != oldValue && newValue.length > 1) {
+                if (_timeout) $timeout.cancel(_timeout);
+                _timeout = $timeout(function() {
+                    $scope.query_results = null;
+                    $scope.perform_search((newValue));
+                }, 500);
+            }
+        });
+
+        $scope.perform_search = function(val) {
+            if (!val) {
+                $scope.query_results = [];
+            } else {
+                $http.get(
+                    '{{ url_for('.api_search_services') }}', {
+                        params: {
+                            q: val
+                        }
+                    }
+                ).success(function (data) {
+                    $scope.query_results = data.result;
+                })
+            }
+        };
+
+        $scope.query_clear = function() {
+            $scope.query_results = null;
+        };
+
+        $scope.add_service = function(service) {
+            $scope.selected_services.push(service)
+        };
 
     }])
     </script>
