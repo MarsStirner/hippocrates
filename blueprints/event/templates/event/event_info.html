@@ -1,4 +1,4 @@
-{% extends "schedule/base.html" %}
+{% extends "event/base.html" %}
 
 {% import "schedule/client_event/action_list.html" as action_list %}
 
@@ -23,7 +23,7 @@
         <alert ng-repeat="alert in alerts" type="alert.type" close="alerts.splice(index, 1)">[[ alert.text ]] [ [[alert.code]] ]</alert>
     </div>
     <tabset>
-        <tab><tab-heading>Основная Информация</tab-heading>{% include "schedule/client_event/main.html" %}</tab>
+        <tab><tab-heading>Основная Информация</tab-heading>{% include "event/main_info.html" %}</tab>
         <tab><tab-heading>Медицинские документы</tab-heading>
             {{ action_list.action_list('event_info.med_doc_actions', 0) }}
         </tab>
@@ -87,7 +87,7 @@
         };
 
         $scope.save_event = function() {
-            $http.post('{{ url_for('schedule.api_event_save') }}', $scope.event_info).success(function (data) {
+            $http.post('{{ url_for('.api_event_save') }}', $scope.event_info).success(function (data) {
                 var event_id = data['result'];
                 $scope.load_data();
             });
@@ -144,7 +144,7 @@
                 $scope.ps.set_context(data.result.event.event_type.print_context)
             });
             aux.range(3).map(function (at_class) {
-                $http.get('{{ url_for('.api_atl_get') }}', {
+                $http.get('{{ url_for('schedule.api_atl_get') }}', {
                     params: {
                         at_class: at_class
                     }
@@ -167,7 +167,7 @@
         };
 
         $scope.open_action = function (action_id) {
-            window.open('{{ url_for('.html_action') }}?action_id=' + action_id);
+            window.open('{{ url_for('schedule.html_action') }}?action_id=' + action_id);
         };
 
         $scope.load_data();

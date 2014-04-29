@@ -1,4 +1,4 @@
-{% extends "schedule/base.html" %}
+{% extends "event/base.html" %}
 
 {% block modules_css %}
     {{ super() }}
@@ -209,9 +209,9 @@
             if ($scope.contractForm.$invalid || $scope.setDateForm.$invalid){
                 return false;
             }
-            $http.post('{{ url_for('schedule.api_event_save') }}', $scope.event_info).success(function (data) {
+            $http.post('{{ url_for('.api_event_save') }}', $scope.event_info).success(function (data) {
                 var event_id = data['result'];
-                window.open('{{ url_for('schedule.html_event_info') }}?event_id=' + event_id, '_self');
+                window.open('{{ url_for('.html_event_info') }}?event_id=' + event_id, '_self');
             });
         };
 
@@ -233,7 +233,7 @@
         });
 
         $scope.load_data = function () {
-            $http.get('{{ url_for('schedule.api_event_new_get') }}', {
+            $http.get('{{ url_for('.api_event_new_get') }}', {
                 params: {
                     client_id: $scope.client_id
                 }

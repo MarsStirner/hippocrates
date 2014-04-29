@@ -9,7 +9,7 @@
                                     'expanded': subtree_shown(node.id)}"
                          ng-click="toggle_vis(node.id)">&nbsp;</div>
                     <div ng-if="!node.children" class="tree-label leaf">&nbsp;</div>
-                    <a ng-href="{{ url_for('.html_action') }}?action_type_id=[[node.id]]&event_id=[[event_id]]"
+                    <a ng-href="{{ url_for('schedule.html_action') }}?action_type_id=[[node.id]]&event_id=[[event_id]]"
                        ng-if="!node.children">
                         [ [[node.code]] ] [[ node.name ]]
                     </a>

@@ -3,7 +3,7 @@
 {% block content %}
     <div class="row">
         <div class="col-md-2">
-        {% include 'sample/_nav_menu.html' %}
+        {% include 'event/_nav_menu.html' %}
         </div>
         <div class="col-md-10">
             {% block main %}
@@ -13,9 +13,11 @@
 {% endblock %}
 
 {% block modules_css %}
-
 {{ super() }}
-
 <link href="{{ url_for('.static', filename='css/style.css') }}" media="screen" rel="stylesheet">
 <link href="{{ url_for('.static', filename='css/print.css') }}" media="print" rel="stylesheet">
 {% endblock %}
+
+{% block modules_js -%}
+{{ super() }}
+{%- endblock %}

@@ -5,8 +5,9 @@ from wtforms.widgets import TextInput, Select
 from wtforms.validators import DataRequired, Required
 
 from application.app import app
+from application.models.client import Client
 from application.models.exists import (rbDocumentType, rbUFMS, rbPolicyType, Organisation, rbSocStatusType,
-    rbSocStatusClass, rbBloodType, rbAccountingSystem, rbRelationType, rbContactType, Client, Person)
+    rbSocStatusClass, rbBloodType, rbAccountingSystem, rbRelationType, rbContactType, Person)
 
 
 class AngularJSTextInput(TextInput):

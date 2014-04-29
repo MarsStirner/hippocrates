@@ -1,0 +1,12 @@
+{% macro item(fname, caption, appendurl='') %}
+<a href="{{ url_for(fname) + appendurl }}" class="list-group-item{% if request.path == url_for(fname) %} active{% endif %}">{{ caption }}</a>
+{% endmacro %}
+<div class="panel panel-default">
+    <div class="panel-heading"><h3 class="panel-title">Доступные функции</h3></div>
+    <div class="list-group">
+        {{ item('schedule.index', 'График врача') }}
+        {{ item('schedule.person_schedule_monthview', 'Формирование графика врача') }}
+        {{ item('patients.index', 'Поиск пациента') }}
+    </div>
+    <!-- /.navbar -->
+</div>

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
+from application.models.client import Client
 from application.systemwide import db
-from exists import Person, Client, rbReasonOfAbsence, Organisation
+from exists import Person, rbReasonOfAbsence, Organisation
 
 
 class rbReceptionType(db.Model):

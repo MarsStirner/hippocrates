@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import datetime
-from application.models.exists import (ClientPolicy, ClientAllergy, ClientIntoleranceMedicament,
-    ClientContact, ClientIdentification, DirectClientRelation, ReversedClientRelation, ClientSocStatus,
-    ClientDocument, Client, rbDocumentType, rbPolicyType, rbSocStatusClass, rbSocStatusType,
-    BloodHistory, rbBloodType, rbAccountingSystem, rbContactType, rbRelationType)
+from application.models.client import Client, ClientAllergy, ClientContact, ClientDocument, ClientIdentification, \
+    ClientIntoleranceMedicament, DirectClientRelation, ReversedClientRelation, ClientSocStatus, ClientPolicy, \
+    BloodHistory
+from application.models.exists import (rbDocumentType, rbPolicyType, rbSocStatusClass, rbSocStatusType,
+                                       rbBloodType, rbAccountingSystem, rbContactType, rbRelationType)
 
 
 # def format_snils(SNILS):

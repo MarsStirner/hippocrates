@@ -4,10 +4,9 @@ from flask import render_template, abort, request
 from jinja2 import TemplateNotFound
 
 from application.lib.utils import public_endpoint
+from application.models.client import Client
 from blueprints.patients.app import module
-from application.models.exists import Client
 from blueprints.patients.forms import ClientForm
-from blueprints.schedule.views.jsonify import ClientVisualizer, Format
 
 # noinspection PyUnresolvedReferences
 from . import api_html, api_json

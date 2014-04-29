@@ -7,8 +7,9 @@ from application.systemwide import db
 from application.lib.utils import jsonify, get_new_uuid
 from blueprints.patients.app import module
 from application.lib.sphinx_search import SearchPatient
-from blueprints.schedule.views.jsonify import (ClientVisualizer, Format)
+from application.lib.jsonify import (ClientVisualizer, Format)
 from blueprints.patients.lib.utils import *
+
 
 __author__ = 'mmalkov'
 

@@ -5,4 +5,4 @@ import os
 MODULE_NAME = os.path.basename(os.path.dirname(__file__))
 
 # Русское название модуля
-RUS_NAME = u'Пример'
+RUS_NAME = u'Обращения'

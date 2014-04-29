@@ -4,10 +4,11 @@ import datetime
 import itertools
 from application.lib.utils import safe_unicode, safe_int
 from application.models.enums import EventPrimary, EventOrder, ActionStatus, Gender
+from application.models.event import Event, EventType, Diagnosis, Diagnostic
 
 from application.models.schedule import Schedule, rbReceptionType
 from application.models.actions import Action, ActionProperty
-from application.models.exists import Event, EventType, rbRequestType, Diagnosis, Diagnostic
+from application.models.exists import rbRequestType
 
 __author__ = 'mmalkov'
 
@@ -480,7 +481,7 @@ class EventVisualizer(object):
 
     def make_diagnose_row(self, diagnostic, diagnosis):
         """
-        @type diagnostic: Diagnostic
+        @type diagnostic: application.models.event.Diagnostic
         @type diagnosis: Diagnosis
         """
         return {
