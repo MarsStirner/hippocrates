@@ -4,11 +4,12 @@ import datetime
 from flask import request
 from flask.ext.login import current_user
 
+from application.models.actions import ActionType
 from application.models.client import Client
-from application.models.event import Event, EventType, Diagnosis, Diagnostic
+from application.models.event import Event, EventType, EventType_Action, Diagnosis, Diagnostic
 from application.systemwide import db
 from application.lib.utils import (jsonify, safe_traverse, get_new_uuid,
-    string_to_datetime)
+                                   string_to_datetime, get_new_event_ext_id)
 from blueprints.event.app import module
 from application.models.exists import (Organisation, )
 from application.lib.jsonify import EventVisualizer
@@ -91,7 +92,6 @@ def api_event_save():
 @module.route('/api/events/diagnosis.json', methods=['POST'])
 def api_diagnosis_save():
     current_datetime = datetime.datetime.now()
-    from application.models.exists import Diagnostic
     data = request.json
     diagnosis_id = data.get('diagnosis_id')
     diagnostic_id = data.get('diagnostic_id')
@@ -142,11 +142,25 @@ def api_diagnosis_save():
 
 @module.route('/api/events/diagnosis.json', methods=['DELETE'])
 def api_diagnosis_delete():
-    from application.models.exists import Diagnosis
-
     data = request.json
     if data['diagnosis_id']:
         Diagnosis.query.filter(Diagnosis.id == data['diagnosis_id']).update({'deleted': 1})
     if data['diagnostic_id']:
         Diagnostic.query.filter(Diagnostic.id == data['diagnostic_id']).update({'deleted': 1})
     db.session.commit()
+
+
+@module.route('/api/service/service_price.json', methods=['GET'])
+def api_search_services():
+    value = request.args['q']
+    q = EventType_Action.query.join(ActionType).join(ActionType.service).filter(ActionType.name.like('%%%s%%' % value)).\
+        filter(EventType_Action.eventType_id == 70).filter(ActionType.deleted == 0).all()
+
+    def make_r(x):
+        return {
+            'at_code': x.actionType.code,
+            'at_name': x.actionType.name,
+            'service_name': x.actionType.service.name,
+            'price': 0
+        }
+    return jsonify([make_r(res) for res in q])

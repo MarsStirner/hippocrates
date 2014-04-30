@@ -1,0 +1,78 @@
+<div>
+    <form class="form-horizontal marginal" role="form">
+        <div class="form-group">
+            <label class="col-md-2 control-label" for="service_search">Поиск услуги</label>
+            <div class="col-md-8 input-group">
+                <span class="input-group-addon"><span class="glyphicon glyphicon-search"></span></span>
+                <input type="text" id="service_search" name="service_search" class="form-control"
+                       autocomplete="off" placeholder="Введите код или наименование услуги"
+                       ng-change="" ng-model="query">
+                <span class="input-group-addon" ng-click="query_clear()" style="cursor: pointer">
+                    <span class="glyphicon glyphicon-remove"></span></span>
+            </div>
+        </div>
+        <div class="col-md-offset-2 col-md-8" ng-show="query_results">
+            <table class="table table-condensed table-bordered table-striped table-hover table-clickable">
+                <thead>
+                    <tr>
+                        <th>Код</th>
+                        <th>Услуга</th>
+                        <th>Тип действия</th>
+                        <th>Цена</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="result in query_results" style="cursor: pointer">
+                        <td ng-click="open_client(result.id)" ng-bind="result.at_code"></td>
+                        <td ng-click="open_client(result.id)" ng-bind="result.service_name"></td>
+                        <td ng-click="open_client(result.id)" ng-bind="result.at_name"></td>
+                        <td ng-click="open_client(result.id)" ng-bind="result.price"></td>
+                        <td><button type="button" ng-click="add_service(result)">
+                            <span class="glyphicon glyphicon-plus"></span></button></td>
+                    </tr>
+                </tbody>
+            </table>
+
+        </div>
+    </form>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div id="summary">
+                <h3>Итого к оплате:<small>10000 руб.</small></h3>
+            </div>
+        </div>
+    </div>
+
+    <div id="selected_services" ng-show="selected_services.length">
+        <ul class="list-group">
+            <li ng-repeat="service in selected_services" class="list-group-item nomarpad">
+                <table class="table table-condensed nomarpad">
+                    <thead>
+                        <tr>
+                            <th>Код</th>
+                            <th>Услуга</th>
+                            <th>Тип действия</th>
+                            <th>Цена</th>
+                            <th>Количество</th>
+                            <th>Сумма к оплате</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td ng-bind="service.at_code"></td>
+                            <td ng-bind="service.service_name"></td>
+                            <td ng-bind="service.at_name"></td>
+                            <td ng-bind="service.price"></td>
+                            <td><input type="text" ng-model="service.amount"/></td>
+                            <td ng-bind="service.price"></td>
+                            <td><button type="button"><span class="glyphicon glyphicon-trash"></span></button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </li>
+        </ul>
+    </div>
+</div>

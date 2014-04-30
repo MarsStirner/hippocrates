@@ -191,6 +191,38 @@ class EventType(db.Model):
         return self.id
 
 
+class EventType_Action(db.Model):
+    __tablename__ = u'EventType_Action'
+
+    id = db.Column(db.Integer, primary_key=True)
+    eventType_id = db.Column(db.Integer, db.ForeignKey('EventType.id'), nullable=False, index=True)
+    idx = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    actionType_id = db.Column(db.Integer, db.ForeignKey('ActionType.id'), nullable=False, index=True)
+    speciality_id = db.Column(db.Integer, index=True)
+    tissueType_id = db.Column(db.Integer, db.ForeignKey('rbTissueType.id'), index=True)
+    sex = db.Column(db.Integer, nullable=False)
+    age = db.Column(db.String(9), nullable=False)
+    age_bu = db.Column(db.Integer)
+    age_bc = db.Column(db.SmallInteger)
+    age_eu = db.Column(db.Integer)
+    age_ec = db.Column(db.SmallInteger)
+    selectionGroup = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    actuality = db.Column(db.Integer, nullable=False)
+    expose = db.Column(db.Integer, nullable=False, server_default=u"'1'")
+    payable = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    academicDegree_id = db.Column(db.Integer, db.ForeignKey('rbAcademicDegree.id'))
+
+    actionType = db.relationship('ActionType')
+
+    def __json__(self):
+        return {
+            'id': self.id
+        }
+
+    def __int__(self):
+        return self.id
+
+
 class EventLocalContract(db.Model):
     __tablename__ = u'Event_LocalContract'
     __table_args__ = (
