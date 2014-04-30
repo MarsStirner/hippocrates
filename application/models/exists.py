@@ -653,6 +653,24 @@ class rbSocStatusType(db.Model):
         return self.id
 
 
+class rbCashOperation(db.Model):
+    __tablename__ = 'rbCashOperation'
+
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(16), nullable=False, index=True)
+    name = db.Column(db.Unicode(64), nullable=False)
+
+    def __json__(self):
+        return {
+            'id': self.id,
+            'code': self.code,
+            'name': self.name,
+        }
+
+    def __int__(self):
+        return self.id
+
+
 class rbTariffCategory(db.Model):
     __tablename__ = 'rbTariffCategory'
 
