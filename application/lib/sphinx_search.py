@@ -53,4 +53,4 @@ class SearchEventService():
 if __name__ == '__main__':
     data = SearchPerson.search(u'аллерг')
     data = SearchPatient.search(u'Тапка')
-    data = SearchEventService.search(u'12')
+    data = SearchEventService.search(u'11.')
