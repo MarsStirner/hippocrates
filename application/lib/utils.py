@@ -204,12 +204,23 @@ def safe_int(obj):
     return int(obj)
 
 
-def string_to_datetime(date_string, format):
+def string_to_datetime(date_string, fmt='%Y-%m-%dT%H:%M:%S.%fZ'):
     if date_string:
-        date = datetime.datetime.strptime(date_string, format)
-        return timezone('UTC').localize(date).astimezone(tz=timezone(TIME_ZONE))
+        date = datetime.datetime.strptime(date_string, fmt)
+        return timezone('UTC').localize(date).astimezone(tz=timezone(TIME_ZONE)).replace(tzinfo=None)
     else:
         return date_string
+
+
+def safe_date(val):
+    if not val:
+        return None
+    if isinstance(val, basestring):
+        try:
+            val = string_to_datetime(val)
+        except ValueError:
+            val = string_to_datetime(val, '%Y-%m-%d')
+        return val.date()
 
 
 def safe_traverse(obj, *args, **kwargs):

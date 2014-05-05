@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 import datetime
 
-from flask import request
+from flask import request, abort
 from flask.ext.login import current_user
 
 from application.models.actions import ActionType
 from application.models.client import Client
-from application.models.event import Event, EventType, EventType_Action, Diagnosis, Diagnostic
+from application.models.event import (Event, EventType, EventType_Action, Diagnosis, Diagnostic,
+    EventLocalContract, EventContractPayer)
 from application.systemwide import db
 from application.lib.utils import (jsonify, safe_traverse, get_new_uuid,
                                    string_to_datetime, get_new_event_ext_id)
@@ -49,8 +50,8 @@ def api_event_save():
         event.deleted = data['deleted']
         event.eventType = EventType.query.get(data['event_type']['id'])
         event.execPerson_id = data['exec_person']['id']
-        event.setDate = string_to_datetime(data['set_date'], "%Y-%m-%dT%H:%M:%S.%fZ")
-        event.execDate = string_to_datetime(data['exec_date'], "%Y-%m-%dT%H:%M:%S.%fZ")
+        event.setDate = string_to_datetime(data['set_date'])
+        event.execDate = string_to_datetime(data['exec_date'])
         # event.contract = None
         event.isPrimaryCode = data['is_primary']['id']
         event.order = data['order']['id']
@@ -67,8 +68,8 @@ def api_event_save():
         event.eventType = EventType.query.get(data['event_type']['id'])
         event.client_id = data['client_id']
         event.execPerson_id = data['exec_person']['id']
-        event.setDate = string_to_datetime(data['set_date'], "%Y-%m-%dT%H:%M:%S.%fZ")
-        event.execDate = string_to_datetime(data['exec_date'], "%Y-%m-%dT%H:%M:%S.%fZ")
+        event.setDate = string_to_datetime(data['set_date'])
+        event.execDate = string_to_datetime(data['exec_date'])
         event.externalId = get_new_event_ext_id(event.eventType.id, event.client_id)
         # event.contract = None
         event.isPrimaryCode = data['is_primary']['id']
@@ -164,3 +165,42 @@ def api_search_services():
             'price': 0
         }
     return jsonify([make_r(res) for res in q])
+
+
+def get_event_payment_info(event_id):
+    event = Event.query.join(EventLocalContract).join(EventContractPayer).\
+        filter(Event.id == event_id).first()  # TODO: one with try-except
+    return event
+
+
+def get_prev_event(event_type_id):
+    event = Event.query.join(EventType).filter(EventType.id == event_type_id).\
+        order_by(Event.setDate.desc()).first()
+    if not event:
+        event = Event()
+        lc = EventLocalContract()
+        payer = EventContractPayer()
+        lc.payer = payer
+        event.localContract = lc
+    return event
+
+
+@module.route('/api/event_payment/local_contract.json', methods=['GET'])
+def api_event_payment_info_get():
+    try:
+        event_id = request.args['event_id']
+        if event_id == 'new':
+            event_type_id = int(request.args['event_type_id'])
+        else:
+            event_id = int(event_id)
+    except KeyError or ValueError:
+        return abort(400)
+
+    if event_id == 'new':
+        event = get_prev_event(event_type_id)
+    else:
+        event = get_event_payment_info(event_id)
+
+    vis = EventVisualizer()
+    res = vis.make_event_payment(event)
+    return jsonify(res)

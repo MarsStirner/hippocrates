@@ -4,7 +4,7 @@ from flask import abort, request
 from flask.helpers import make_response
 
 from application.systemwide import db
-from application.lib.utils import jsonify, get_new_uuid
+from application.lib.utils import jsonify, get_new_uuid, string_to_datetime, safe_date
 from blueprints.patients.app import module
 from application.lib.sphinx_search import SearchPatient
 from application.lib.jsonify import (ClientVisualizer, Format)
@@ -92,7 +92,7 @@ def api_patient_save():
         client.sexCode = client_info['sex']['id'] if client_info['sex']['id'] != 0 else 1 # todo: fix
         client.SNILS = client_info['SNILS'].replace(" ", "").replace("-", "") if client_info['SNILS'] else ''
         client.notes = client_info['notes'] if client_info['notes'] else ''
-        client.birthDate = client_info['birthDate']
+        client.birthDate = safe_date(client_info['birthDate'])
         if not client.uuid:
             new_uuid = get_new_uuid()
             client.uuid = new_uuid

@@ -512,6 +512,13 @@ class EventVisualizer(object):
             'person_text': safe_unicode(action.person)
         }
 
+    def make_event_payment(self, event):
+        return {
+            'localContract': event.localContract,
+            'payer_info': event.localContract.payer,
+            'payments': event.localContract.payer.payments
+        }
+
 
 class ActionVisualizer(object):
     def make_action(self, action):

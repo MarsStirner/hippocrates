@@ -160,6 +160,7 @@
             </blockquote>
             <hr>
             {% include "event/services.html" %}
+            {% include "event/payment.html" %}
 {#        <div>#}
 {#            <p>debug:</p>#}
 {#            <p>[[event_info | json]]</p>#}
@@ -193,6 +194,7 @@
         $scope.rbFinance = RefBookService.get('rbFinance');
         $scope.rbEventType = new EventType();
         $scope.OrgStructure = RefBookService.get('OrgStructure');
+        $scope.rbDocumentType = RefBookService.get('rbDocumentType');
 
         $scope.rbOrder = {{ Enum.get_class_by_name('EventOrder').rb() | tojson}};
         $scope.rbPrimary = {{ Enum.get_class_by_name('EventPrimary').rb() | tojson}};
@@ -249,6 +251,16 @@
 
                 $scope.request_type.selected = $scope.request_type_init;
                 $scope.finance.selected = $scope.finance_init;
+
+
+{#                $http.get('{{ url_for('.api_event_payment_info_get') }}', {#}
+{#                    params: {#}
+{#                        event_id: 'new',#}
+{#                        event_type_id: 70#}
+{#                    }#}
+{#                }).success(function (data) {#}
+{#                    $scope.event_info.payment_info = data.result;#}
+{#                })#}
             })
         };
 

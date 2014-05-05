@@ -71,9 +71,9 @@ def logout():
 @app.route('/api/rb/<name>')
 @cache.memoize(86400)
 def api_refbook(name):
-    from application.models import exists, schedule
+    from application.models import exists, schedule, client, event
 
-    for mod in (exists, schedule, actions):
+    for mod in (exists, schedule, actions, client, event):
         if hasattr(mod, name):
             ref_book = getattr(mod, name)
             if 'deleted' in ref_book.__dict__:

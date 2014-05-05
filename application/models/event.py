@@ -2,7 +2,7 @@
 import datetime
 from application.lib.agesex import AgeSex
 from application.models.client import ClientDocument
-from application.models.exists import Person, rbPost
+from application.models.exists import Person, rbPost, rbCashOperation
 from application.systemwide import db
 
 
@@ -45,20 +45,24 @@ class Event(db.Model):
     uuid_id = db.Column(db.Integer, db.ForeignKey('UUID.id'),
                         nullable=False, index=True, server_default=u"'0'")
     lpu_transfer = db.Column(db.String(100))
+    localContract_id = db.Column(db.Integer, db.ForeignKey('Event_LocalContract.id'))
 
     actions = db.relationship(u'Action', primaryjoin="and_(Action.event_id == Event.id, Action.deleted == 0)")
-    eventType = db.relationship(u'EventType', lazy=False)
-    execPerson = db.relationship(u'Person', foreign_keys='Event.execPerson_id', lazy=False)
-    curator = db.relationship(u'Person', foreign_keys='Event.curator_id', lazy=False)
-    assistant = db.relationship(u'Person', foreign_keys='Event.assistant_id', lazy=False)
+    eventType = db.relationship(u'EventType', lazy=True)
+    execPerson = db.relationship(u'Person', foreign_keys='Event.execPerson_id', lazy=True)
+    curator = db.relationship(u'Person', foreign_keys='Event.curator_id', lazy=True)
+    assistant = db.relationship(u'Person', foreign_keys='Event.assistant_id', lazy=True)
     contract = db.relationship(u'Contract')
     organisation = db.relationship(u'Organisation')
     orgStructure = db.relationship('OrgStructure')
-    mesSpecification = db.relationship(u'rbMesSpecification', lazy=False)
-    rbAcheResult = db.relationship(u'rbAcheResult', lazy=False)
-    result = db.relationship(u'rbResult', lazy=False)
-    typeAsset = db.relationship(u'rbEmergencyTypeAsset', lazy=False)
-    localContract = db.relationship(u'EventLocalContract')
+    mesSpecification = db.relationship(u'rbMesSpecification', lazy=True)
+    rbAcheResult = db.relationship(u'rbAcheResult', lazy=True)
+    result = db.relationship(u'rbResult', lazy=True)
+    typeAsset = db.relationship(u'rbEmergencyTypeAsset', lazy=True)
+    localContract = db.relationship(u'EventLocalContract',
+                                    backref=db.backref('event'),
+                                    lazy='joined'
+                                    )
     client = db.relationship(u'Client')
     diagnostics = db.relationship(
         u'Diagnostic', lazy=True, innerjoin=True, primaryjoin=
@@ -235,7 +239,7 @@ class EventLocalContract(db.Model):
     modifyDatetime = db.Column(db.DateTime, nullable=False)
     modifyPerson_id = db.Column(db.Integer, index=True)
     deleted = db.Column(db.Integer, nullable=False)
-    master_id = db.Column(db.Integer, db.ForeignKey('Event.id'), nullable=False, index=True)
+    master_id = db.Column(db.Integer)
     coordDate = db.Column(db.DateTime)
     coordAgent = db.Column(db.String(128), nullable=False, server_default=u"''")
     coordInspector = db.Column(db.String(128), nullable=False, server_default=u"''")
@@ -256,6 +260,18 @@ class EventLocalContract(db.Model):
 
     org = db.relationship(u'Organisation')
     documentType = db.relationship(u'rbDocumentType')
+    payer = db.relationship('EventContractPayer',
+                            backref=db.backref('localContract'),
+                            uselist=False)
+
+    # Это что вообще?!
+    @property
+    def document(self):
+        document = ClientDocument()
+        document.documentType = self.documentType
+        document.serial = u'%s %s' % (self.serialLeft, self.serialRight)
+        document.number = self.number
+        return document
 
     def __unicode__(self):
         parts = []
@@ -275,17 +291,104 @@ class EventLocalContract(db.Model):
             parts.append(self.patrName)
         return ' '.join(parts)
 
-    # Это что вообще?!
-    @property
-    def document(self):
-        document = ClientDocument()
-        document.documentType = self.documentType
-        document.serial = u'%s %s' % (self.serialLeft, self.serialRight)
-        document.number = self.number
-        return document
+    def __json__(self):
+        return {
+            'id': self.id,
+            'numberContract': self.numberContract,
+            'first_name': self.firstName,
+            'last_mame': self.lastName,
+            'patr_name': self.patrName,
+            'birth_date': self.birthDate,
+            'doc_type_id': self.documentType_id,
+            'doc_type': self.documentType,
+            'serial_left': self.serialLeft,
+            'serial_right': self.serialRight,
+            'number': self.number,
+            'reg_address': self.regAddress,
+            'payer_org_id': self.org_id,
+            'payer_org': self.org,
+        }
 
     def __int__(self):
         return self.id
+
+
+class EventPayment(db.Model):
+    __tablename__ = 'Event_Payment'
+
+    id = db.Column(db.Integer, primary_key=True)
+    createDatetime = db.Column(db.DateTime, nullable=False)
+    createPerson_id = db.Column(db.Integer, index=True)
+    modifyDatetime = db.Column(db.DateTime, nullable=False)
+    modifyPerson_id = db.Column(db.Integer, index=True)
+    deleted = db.Column(db.Integer, nullable=False)
+    master_id = db.Column(db.Integer)
+    date = db.Column(db.Date, nullable=False)
+    cashOperation_id = db.Column(db.ForeignKey('rbCashOperation.id'), index=True)
+    sum = db.Column(db.Float(asdecimal=True), nullable=False)
+    typePayment = db.Column(db.Integer, nullable=False)
+    settlementAccount = db.Column(db.String(64))
+    bank_id = db.Column(db.Integer, index=True)
+    numberCreditCard = db.Column(db.String(64))
+    cashBox = db.Column(db.String(32), nullable=False)
+    sumDiscount = db.Column(db.Float(asdecimal=True), nullable=False)
+    action_id = db.Column(db.Integer, db.ForeignKey('Action.id'))
+    service_id = db.Column(db.Integer, db.ForeignKey('rbService.id'))
+    ecp_id = db.Column(db.Integer, db.ForeignKey('EventContractPayer.id'))
+
+    cashOperation = db.relationship(u'rbCashOperation')
+
+    def __json__(self):
+        return {
+            'id': self.id,
+            'date': self.date,
+            'sum': self.sum,
+            'sum_discount': self.sumDiscount,
+            'action_id': self.action_id,
+            'service_id': self.service_id,
+            'ecp_id': self.ecp_id,
+        }
+
+
+class EventContractPayer(db.Model):
+    __tablename__ = 'EventContractPayer'
+
+    id = db.Column(db.Integer, primary_key=True)
+    event_id = db.Column(db.Integer, db.ForeignKey('Event.id'))
+    localContract_id = db.Column(db.Integer, db.ForeignKey('Event_LocalContract.id'))
+    lastName = db.Column(db.Unicode(30))
+    firstName = db.Column(db.Unicode(30))
+    patrName = db.Column(db.Unicode(30))
+    birthDate = db.Column(db.Date)
+    documentType_id = db.Column(db.Integer, db.ForeignKey('rbDocumentType.id'), index=True)
+    serialLeft = db.Column(db.Unicode(8))
+    serialRight = db.Column(db.Unicode(8))
+    number = db.Column(db.Unicode(16))
+    regAddress = db.Column(db.Unicode(64))
+    payer_org_id = db.Column(db.Integer, db.ForeignKey('Organisation.id'), index=True)
+
+    event = db.relationship('Event')
+    payer_org = db.relationship(u'Organisation')
+    payments = db.relationship('EventPayment',
+                               backref=db.backref('payer'))
+
+    def __json__(self):
+        return {
+            'id': self.id,
+            'event_id': self.event_id,
+            'local_contract_id': self.localContract_id,
+            'first_name': self.firstName,
+            'last_name': self.lastName,
+            'patr_name': self.patrName,
+            'birth_date': self.birthDate,
+            'doc_type_id': self.documentType_id,
+            'serial_left': self.serialLeft,
+            'serial_right': self.serialRight,
+            'number': self.number,
+            'reg_address': self.regAddress,
+            'payer_org_id': self.payer_org_id,
+            'payer_org': self.payer_org,
+        }
 
 
 class Diagnosis(db.Model):

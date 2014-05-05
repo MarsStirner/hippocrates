@@ -621,8 +621,8 @@ var WebMis20 = angular.module('WebMis20', ['ngResource', 'ui.bootstrap', 'ui.sel
                 var viewValue = ctrl.$viewValue;
                 if (!viewValue || viewValue instanceof Date) return viewValue;
                 var parts = viewValue.split('.');
-                var d = new Date(Date.UTC(parseInt(parts[2]), parseInt(parts[1] - 1),
-                    parseInt(parts[0]), 0, 0, 0));
+                var d = new Date(parseInt(parts[2]), parseInt(parts[1] - 1),
+                    parseInt(parts[0]));
                 if (moment(d).isValid()) {
                     ctrl.$setValidity('date', true);
                     ctrl.$setViewValue(d);
