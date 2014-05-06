@@ -111,7 +111,7 @@ var WebMis20 = angular.module('WebMis20', ['ngResource', 'ui.bootstrap', 'ui.sel
     return function(items, event_info) {
         var out = [];
         if (angular.isArray(items) && event_info) {
-            var client_info = event_info.client
+            var client_info = event_info.client;
             items.forEach(function(item) {
                 var itemMatches = false;
                 if (item.finance.id == event_info.event_type.finance.id && item.recipient.id == event_info.organisation.id){
@@ -145,8 +145,8 @@ var WebMis20 = angular.module('WebMis20', ['ngResource', 'ui.bootstrap', 'ui.sel
                     out.push(item);
                 }
             });
-            if (out){
-                event_info.contract = out[0]
+            if (out && out.indexOf(event_info.contract) == -1){
+                event_info.contract = out[0];
             }
         }
         return out;
