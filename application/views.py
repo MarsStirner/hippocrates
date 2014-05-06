@@ -8,7 +8,7 @@ from application.app import app, db, login_manager, cache
 from application.context_processors import *
 from application.models.exists import rbPrintTemplate
 from .lib.utils import public_endpoint, jsonify, roles_require, rights_require, request_wants_json
-from application.models import actions
+from application.models import *
 from lib.user import UserAuth, AnonymousUser
 from forms import LoginForm
 
@@ -71,9 +71,7 @@ def logout():
 @app.route('/api/rb/<name>')
 @cache.memoize(86400)
 def api_refbook(name):
-    from application.models import exists, schedule
-
-    for mod in (exists, schedule, actions):
+    for mod in (exists, schedule, actions, event):
         if hasattr(mod, name):
             ref_book = getattr(mod, name)
             if 'deleted' in ref_book.__dict__:
