@@ -383,6 +383,9 @@ table.table-clickable tbody tr {
     margin-top: 0;
     margin-bottom: 0;
 }
+.no-top-margin{
+    margin-top: 0;
+}
 
 blockquote.danger{
     border-color: #A94442;

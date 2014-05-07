@@ -2,14 +2,14 @@
 
 {% block main %}
     <div ng-controller="EventCreateCtrl">
-        <legend xmlns="http://www.w3.org/1999/html">Создание обращения, пациент
+        <legend xmlns="http://www.w3.org/1999/html"><h2 class="no-top-margin">Создание обращения, пациент
             <a href="{{ url_for('patients.patient') }}?client_id=[[event_info.client_id]]">
-                [[ event_info.client.fullName ]]</a></legend>
-        <div class="container-fluid">
-            <div class="row">
-                  <h4>  <strong>Организация</strong> [[ event_info.organisation.short_name ]] </h4>
-            </div>
-            <blockquote>
+                [[ event_info.client.fullName ]]</a></h2></legend>
+              <h4>[[ event_info.organisation.short_name ]]</h4>
+            <div class="panel panel-default">
+                <ul class="list-group">
+                <li class="list-group-item">
+                <div class="alert alert-warning" ng-show="selected_services.length"><strong>Внимание!</strong> Для разблокирования полей необходимо очистить список выбранных <a href="#services" class="alert-link">услуг</a>.</div>
                 <div class="row">
                     <div class="col-md-4">
                         <label for="">Тип обращения</label>
@@ -65,8 +65,8 @@
                         </ui-select>
                     </div>
                 </div>
-            </blockquote>
-            <blockquote>
+            </li>
+            <li class="list-group-item">
                 <div class="row">
                     <div class="col-md-4">
                         <label for="">Лечащий врач</label>
@@ -89,8 +89,8 @@
                         </ui-select>
                     </div>
                 </div>
-            </blockquote>
-            <blockquote>
+            </li>
+            <li class="list-group-item">
                 <div class="row">
                     <div class="col-md-4">
                         <label for="">Первичность</label>
@@ -145,7 +145,9 @@
                         </wm-time>
                     </div>
                 </div>
-            </blockquote>
+            </li>
+            </ul>
+            </div>
             {% include "event/services.html" %}
             {% include "event/payment.html" %}
 {#        <div>#}
@@ -163,7 +165,6 @@
                 </div>
             </div>
         </div>
-    </div>
 {% endblock %}
 
 {% block modules_js %}
@@ -196,9 +197,10 @@
         $scope.create_event = function() {
             $scope.submit_attempt = true;
             if (!$scope.contractForm.$invalid && !$scope.setDateForm.$invalid){
+                $scope.event_info.services = $scope.selected_services;
                 $http.post('{{ url_for('.api_event_save') }}', $scope.event_info).success(function (data) {
                     var event_id = data['result'];
-                    window.open('{{ url_for('.html_event_info') }}?event_id=' + event_id, '_self');
+                    window.location.href = '{{ url_for('.html_event_info') }}?event_id=' + event_id;
                 });
             }
         };
@@ -245,12 +247,14 @@
         $scope.selected_services = [];
         $scope.full_sum = 0;
         $scope.$watch('query', function(newValue, oldValue) {
-            if (newValue != oldValue && newValue.length > 1) {
-                if (_timeout) $timeout.cancel(_timeout);
-                _timeout = $timeout(function() {
-                    $scope.found_services = null;
-                    $scope.perform_search((newValue));
-                }, 500);
+            if (newValue != oldValue) {
+                $scope.found_services = null;
+                if(newValue.length > 1){
+                    if (_timeout) $timeout.cancel(_timeout);
+                    _timeout = $timeout(function() {
+                        $scope.perform_search((newValue));
+                    }, 500);
+                }
             }
         });
 
@@ -280,9 +284,11 @@
         };
 
         $scope.add_service = function(service) {
-            service.amount = 1;
-            service.sum = service.price * service.amount;
-            $scope.selected_services.push(service);
+            if (!aux.inArray($scope.selected_services, service)){
+                service.amount = 1;
+                service.sum = service.price * service.amount;
+                $scope.selected_services.push(service);
+            }
         };
 
         $scope.remove_service = function(index) {
