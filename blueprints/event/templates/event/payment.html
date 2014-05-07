@@ -1,109 +1,107 @@
-<div class="panel panel-default">
-    <div class="panel-heading"><h4>Оплата</h4></div>
-    <div class="panel-body">
-        <legend xmlns="http://www.w3.org/1999/html">Плательщик</legend>
-        <tabset justified="false" class="marginal">
-            <tab heading="Физ. лицо">
+<legend xmlns="http://www.w3.org/1999/html">Плательщик</legend>
+<tabset justified="false" class="marginal">
+    <tab heading="Физ. лицо">
+        <div class="row">
+            <div class="col-md-10">
                 <div class="row">
-                    <div class="col-md-10">
-                        <div class="row">
-                            <div class="form-group col-md-4">
-                                <label for="lastname">Фамилия</label>
-                                <input type="text" class="form-control" autocomplete="off" placeholder="Фамилия"
-                                       id="lastname" name="lastname" ng-model="event_info.payment_info.local_contract.last_name"/>
-                            </div>
-                            <div class="form-group col-md-4">
-                                <label for="lastname">Имя</label>
-                                <input type="text" class="form-control" autocomplete="off" placeholder="Имя"
-                                       id="firstname" name="firstname" ng-model="event_info.payment_info.local_contract.first_name"/>
-                            </div>
-                            <div class="form-group col-md-4">
-                                <label for="patronymic">Отчество</label>
-                                <input type="text" class="form-control" autocomplete="off" placeholder="Отчество"
-                                       id="patronymic" name="patronymic" ng-model="event_info.payment_info.local_contract.patr_name"/>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="form-group col-md-2">
-                                <label for="birthdate">Дата рождения</label>
-                                <wm-date id="birthdate" name="birthdate" ng-model="event_info.payment_info.local_contract.birth_date">
-                                </wm-date>
-                            </div>
-                            <div class="form-group col-md-4">
-                                <label for="doc_type">Документ</label>
-                                <ui-select class="form-control" id="doc_type" name="doc_type" theme="select2" autocomplete="off"
-                                           ng-model="event_info.payment_info.local_contract.doc_type">
-                                    <match placeholder="Тип документа">[[$select.selected.name]]</match>
-                                    <choices repeat="dt in rbDocumentType.objects | filter: $select.search">
-                                        <div ng-bind-html="dt.name | highlight: $select.search"></div>
-                                    </choices>
-                                </ui-select>
-                            </div>
-                            <div class="form-group col-md-2">
-                                <label for="doc_serial">Серия</label>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <input type="text" class="form-control" id="doc_serial_left" name="doc_serial_left"
-                                               autocomplete="off" ng-pattern="/^[\d]+$/"
-                                               ng-model="event_info.payment_info.local_contract.serial_left"/>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <input type="text" class="form-control" id="doc_serial_right" name="doc_serial_right"
-                                               autocomplete="off" ng-pattern="/^[\d]+$/"
-                                               ng-model="event_info.payment_info.local_contract.serial_right"/>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-group col-md-4">
-                                <label for="doc_number">Номер</label>
-                                <input type="text" class="form-control" id="doc_number" name="doc_number"
-                                       autocomplete="off" placeholder="номер" ng-pattern="/^\d+$/" {# FIXME: allows whitespace as first char #}
-                                       ng-model="event_info.payment_info.local_contract.number"/>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="form-group col-md-12">
-                                <label for="reg_address">Адрес</label>
-                                <input type="text" class="form-control" id="reg_address" name="reg_address" autocomplete="off"
-                                       placeholder="Адрес регистрации" ng-model="event_info.payment_info.local_contract.reg_address"/>
-                            </div>
-                        </div>
+                    <div class="form-group col-md-4">
+                        <label for="lastname">Фамилия</label>
+                        <input type="text" class="form-control" autocomplete="off" placeholder="Фамилия"
+                               id="lastname" name="lastname" ng-model="event_info.payment_info.local_contract.last_name"/>
                     </div>
-
-                    <div class="col-md-2">
-                        <label class="pull-right">Заполнить</label>
-                        <div class="btn-group-vertical pull-right">
-                            <button type="button" class="btn btn-default" ng-click="get_payer('client')">Из карты пациента</button>
-                            <button type="button" class="btn btn-default" ng-click="get_payer('client_relative')">Из карты родственника</button>
-                            <button type="button" class="btn btn-default" ng-click="get_payer('prev_event')">Из предыдущего</button>
-                        </div>
+                    <div class="form-group col-md-4">
+                        <label for="lastname">Имя</label>
+                        <input type="text" class="form-control" autocomplete="off" placeholder="Имя"
+                               id="firstname" name="firstname" ng-model="event_info.payment_info.local_contract.first_name"/>
+                    </div>
+                    <div class="form-group col-md-4">
+                        <label for="patronymic">Отчество</label>
+                        <input type="text" class="form-control" autocomplete="off" placeholder="Отчество"
+                               id="patronymic" name="patronymic" ng-model="event_info.payment_info.local_contract.patr_name"/>
                     </div>
                 </div>
 
-            </tab>
-
-            <tab heading="Юр. лицо">
                 <div class="row">
-                    <div class="col-md-6">
-                        <label for="payer_org">Организация</label>
-                        <ui-select id="payer_org" name="payer_org" ng-model="event_info.payment_info.local_contract.payer_org"
-                                   theme="select2">
-                            <match placeholder="Организация">[[$select.selected.short_name]]</match>
-                            <choices repeat="org in Organisation.objects | filter: $select.search">
-                                <div ng-bind-html="org.short_name | highlight: $select.search"></div>
+                    <div class="form-group col-md-2">
+                        <label for="birthdate">Дата рождения</label>
+                        <wm-date id="birthdate" name="birthdate" ng-model="event_info.payment_info.local_contract.birth_date">
+                        </wm-date>
+                    </div>
+                    <div class="form-group col-md-4">
+                        <label for="doc_type">Документ</label>
+                        <ui-select class="form-control" id="doc_type" name="doc_type" theme="select2" autocomplete="off"
+                                   ng-model="event_info.payment_info.local_contract.doc_type">
+                            <match placeholder="Тип документа">[[$select.selected.name]]</match>
+                            <choices repeat="dt in rbDocumentType.objects | filter: $select.search">
+                                <div ng-bind-html="dt.name | highlight: $select.search"></div>
                             </choices>
                         </ui-select>
                     </div>
+                    <div class="form-group col-md-2">
+                        <label for="doc_serial">Серия</label>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <input type="text" class="form-control" id="doc_serial_left" name="doc_serial_left"
+                                       autocomplete="off" ng-pattern="/^[\d]+$/"
+                                       ng-model="event_info.payment_info.local_contract.serial_left"/>
+                            </div>
+                            <div class="col-md-6">
+                                <input type="text" class="form-control" id="doc_serial_right" name="doc_serial_right"
+                                       autocomplete="off" ng-pattern="/^[\d]+$/"
+                                       ng-model="event_info.payment_info.local_contract.serial_right"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group col-md-4">
+                        <label for="doc_number">Номер</label>
+                        <input type="text" class="form-control" id="doc_number" name="doc_number"
+                               autocomplete="off" placeholder="номер" ng-pattern="/^\d+$/" {# FIXME: allows whitespace as first char #}
+                               ng-model="event_info.payment_info.local_contract.number"/>
+                    </div>
                 </div>
-            </tab>
-        </tabset>
 
-        <legend xmlns="http://www.w3.org/1999/html">Договор между пациентом и ЛПУ
-            <span class="text-warning" ng-if="integration1CODVD_enabled()"> (Заключается при оплате в кассе)</span>
-        </legend>
+                <div class="row">
+                    <div class="form-group col-md-12">
+                        <label for="reg_address">Адрес</label>
+                        <input type="text" class="form-control" id="reg_address" name="reg_address" autocomplete="off"
+                               placeholder="Адрес регистрации" ng-model="event_info.payment_info.local_contract.reg_address"/>
+                    </div>
+                </div>
+            </div>
 
+            <div class="col-md-2">
+                <label class="pull-right">Заполнить</label>
+                <div class="btn-group-vertical pull-right">
+                    <button type="button" class="btn btn-default" ng-click="get_payer('client')">Из карты пациента</button>
+                    <button type="button" class="btn btn-default" ng-click="get_payer('client_relative')">Из карты родственника</button>
+                    <button type="button" class="btn btn-default" ng-click="get_payer('prev_event')">Из предыдущего</button>
+                </div>
+            </div>
+        </div>
+
+    </tab>
+
+    <tab heading="Юр. лицо">
+        <div class="row">
+            <div class="col-md-6">
+                <label for="payer_org">Организация</label>
+                <ui-select id="payer_org" name="payer_org" ng-model="event_info.payment_info.local_contract.payer_org"
+                           theme="select2">
+                    <match placeholder="Организация">[[$select.selected.short_name]]</match>
+                    <choices repeat="org in Organisation.objects | filter: $select.search">
+                        <div ng-bind-html="org.short_name | highlight: $select.search"></div>
+                    </choices>
+                </ui-select>
+            </div>
+        </div>
+    </tab>
+</tabset>
+
+<legend xmlns="http://www.w3.org/1999/html">Договор между пациентом и ЛПУ
+    <span class="text-warning" ng-if="integration1CODVD_enabled()"> (Заключается при оплате в кассе)</span>
+</legend>
+<div class="panel panel-default">
+    <div class="panel-body">
         <div class="row">
             <div class="col-md-2">
                 <label for="date_contract">Дата заключения</label>
