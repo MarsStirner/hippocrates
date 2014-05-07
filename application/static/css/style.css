@@ -373,7 +373,12 @@ table.table-clickable tbody tr {
 .ui-treeview div.tree-label.collapsed {
     background-position: 0 -32px;
 }
-
+.wm-popup {
+    display: none;
+    position: absolute;
+    margin-top: 10px;
+    z-index: 1000;
+}
 .novmargin{
     margin-top: 0;
     margin-bottom: 0;
