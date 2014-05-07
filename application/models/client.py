@@ -5,6 +5,7 @@ from application.models.enums import Gender
 from application.models.exists import rbDocumentTypeGroup
 from application.models.kladr_models import Kladr, Street
 from application.systemwide import db
+from sqlalchemy import orm
 
 
 class Client(db.Model):
@@ -112,6 +113,10 @@ class Client(db.Model):
         innerjoin=True
     )
 
+    @orm.reconstructor
+    def init_on_load(self):
+        self._id_document = None
+
     def age_tuple(self, moment=None):
         """
         @type moment: datetime.datetime
@@ -144,8 +149,15 @@ class Client(db.Model):
 
     @property
     def document(self):
-        return (self.documents.filter(ClientDocument.deleted == 0).
+        # TODO: get rid of
+        return self.id_document
+
+    @property
+    def id_document(self):
+        if not self._id_document:
+            self._id_document = (self.documents.filter(ClientDocument.deleted == 0).
                 filter(rbDocumentTypeGroup.code == '1').order_by(ClientDocument.date.desc()).first())
+        return self._id_document
 
     def get_actual_document_by_code(self, doc_type_code):
         # пока не используется
@@ -339,18 +351,36 @@ class ClientDocument(db.Model):
     def documentTypeCode(self):
         return self.documentType.regionalCode
 
+    @property
+    def serial_left(self):
+        try:
+            sl = self.serial.split(' ')[0]
+        except (AttributeError, IndexError):
+            sl = None
+        return sl
+
+    @property
+    def serial_right(self):
+        try:
+            sr = self.serial.split(' ')[1]
+        except (AttributeError, IndexError):
+            sr = None
+        return sr
+
     def __unicode__(self):
         return (' '.join([self.documentType.name, self.serial, self.number])).strip()
 
     def __json__(self):
         return {
             'id': self.id,
+            'documentType': self.documentType,
+            'deleted': self.deleted,
             'serial': self.serial,
             'number': self.number,
-            'date': self.date,
-            'origin': self.origin,
+            'begDate': self.date,
             'endDate': self.endDate,
-            'document_type': self.documentType
+            'origin': self.origin,
+            'documentText': self.__unicode__(),
         }
 
     def __int__(self):
