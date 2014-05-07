@@ -208,9 +208,10 @@
         $scope.create_event = function() {
             $scope.submit_attempt = true;
             if (!$scope.contractForm.$invalid && !$scope.setDateForm.$invalid){
+                $scope.event_info.services = $scope.selected_services;
                 $http.post('{{ url_for('.api_event_save') }}', $scope.event_info).success(function (data) {
                     var event_id = data['result'];
-                    window.open('{{ url_for('.html_event_info') }}?event_id=' + event_id, '_self');
+                    window.location.href = '{{ url_for('.html_event_info') }}?event_id=' + event_id;
                 });
             }
         };
@@ -302,9 +303,11 @@
         };
 
         $scope.add_service = function(service) {
-            service.amount = 1;
-            service.sum = service.price * service.amount;
-            $scope.selected_services.push(service);
+            if (!aux.inArray($scope.selected_services, service)){
+                service.amount = 1;
+                service.sum = service.price * service.amount;
+                $scope.selected_services.push(service);
+            }
         };
 
         $scope.remove_service = function(index) {
