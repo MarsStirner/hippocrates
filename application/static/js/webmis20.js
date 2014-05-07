@@ -165,6 +165,9 @@ var WebMis20 = angular.module('WebMis20', ['ngResource', 'ui.bootstrap', 'ui.sel
         $http.get(rb_root + this.name)
         .success(function (data) {
             t.objects = data.result;
+            $rootScope.$broadcast('rb_load_success_'+ t.name, {
+                text: 'Загружен справочник ' + t.name
+            });
         })
         .error(function (data, status) {
             $rootScope.$broadcast('load_error', {
@@ -172,7 +175,7 @@ var WebMis20 = angular.module('WebMis20', ['ngResource', 'ui.bootstrap', 'ui.sel
                 code: status,
                 data: data,
                 type: 'danger'
-            })
+            });
         });
         return this;
     };
@@ -201,6 +204,37 @@ var WebMis20 = angular.module('WebMis20', ['ngResource', 'ui.bootstrap', 'ui.sel
             return cache[name] = new RefBook(name);
         }
     }
+}])
+.factory('Settings', ['RefBookService', '$rootScope', function(RefBookService, $rootScope) {
+    var Settings = function() {
+        this.rb_dict = {};
+        this.rb = RefBookService.get('Setting');
+        if (this.rb.objects.length) {
+            this.init();
+        }
+        var self = this;
+        $rootScope.$on('rb_load_success_Setting', function() {
+            self.init();
+        });
+    };
+
+    Settings.prototype.init = function() {
+        var d = this.rb && this.rb.objects || [];
+        for (var i=0; i < d.length; i++) {
+            this.rb_dict[d[i].path] = d[i].value;
+        }
+    };
+
+    Settings.prototype.get_string = function(val, def) {
+        if ($.isEmptyObject(this.rb_dict)) return null;
+        var default_val = '';
+        if (arguments.length > 1) {
+            default_val = def;
+        }
+        return this.rb_dict[val] || default_val;
+    };
+
+    return Settings;
 }])
 .factory('PrintingService', ['$window', '$http', '$rootScope', function ($window, $http, $rootScope) {
     var PrintingService = function (context_type, resolver) {
@@ -661,7 +695,8 @@ var WebMis20 = angular.module('WebMis20', ['ngResource', 'ui.bootstrap', 'ui.sel
                 id: '=',
                 name: '=',
                 ngModel: '=',
-                ngRequired: '='
+                ngRequired: '=',
+                ngDisabled: '='
             },
             controller: function ($scope) {
                 $scope.popup = {};
@@ -674,9 +709,9 @@ var WebMis20 = angular.module('WebMis20', ['ngResource', 'ui.bootstrap', 'ui.sel
             template: ['<div class="input-group">',
                         '<input type="text" id="{{id}}" name="{{name}}" class="form-control"',
                         'is-open="popup.opened" ng-model="ngModel" autocomplete="off"',
-                        'datepicker_popup="dd.MM.yyyy" ng-required="ngRequired" manual-date/>',
+                        'datepicker_popup="dd.MM.yyyy" ng-required="ngRequired" ng-disabled="ngDisabled" manual-date/>',
                         '<span class="input-group-btn">',
-                        '<button type="button" class="btn btn-default" ng-click="open_datepicker_popup()">',
+                        '<button type="button" class="btn btn-default" ng-click="open_datepicker_popup()" ng-disabled="ngDisabled">',
                         '<i class="glyphicon glyphicon-calendar"></i></button>',
                         '</span>',
                         '</div>'

@@ -1,15 +1,5 @@
 {% extends "event/base.html" %}
 
-{% block modules_css %}
-    {{ super() }}
-    <style>
-        .minheight .list-group-item {
-            min-height: 81px;
-        }
-    </style>
-{% endblock %}
-
-{% import "_macros.html" as macros %}
 {% block main %}
     <div ng-controller="EventCreateCtrl">
         <legend xmlns="http://www.w3.org/1999/html">Создание обращения, пациент
@@ -160,12 +150,12 @@
             </blockquote>
             {% include "event/services.html" %}
             {% include "event/payment.html" %}
-        <div>
-            <p>debug:</p>
-            <p>[[event_info | json]]</p>
+{#        <div>#}
+{#            <p>debug:</p>#}
+{#            <p>[[event_info | json]]</p>#}
 {#            <p>[[request_type.selected | json]]</p>#}
 {#            <p>[[finance.selected | json]]</p>#}
-        </div>
+{#        </div>#}
             <div class="row">
                 <div class="col-md-12">
                     <div class="pull-right">
@@ -180,8 +170,9 @@
 
 {% block modules_js %}
     <script>
-    WebMis20.controller('EventCreateCtrl', ['$scope', '$http', 'RefBookService', 'EventType','$window', '$timeout',
-                        function ($scope, $http, RefBookService, EventType, $window, $timeout) {
+    WebMis20.controller('EventCreateCtrl',
+            ['$scope', '$http', 'RefBookService', 'EventType','$window', '$timeout', 'Settings',
+            function ($scope, $http, RefBookService, EventType, $window, $timeout, Settings) {
         $scope.aux = aux;
         $scope.submit_attempt = false;
         $scope.event_info = null;
@@ -198,13 +189,10 @@
         $scope.rbOrder = {{ Enum.get_class_by_name('EventOrder').rb() | tojson}};
         $scope.rbPrimary = {{ Enum.get_class_by_name('EventPrimary').rb() | tojson}};
 
-        $scope.editing_list = [];
-        $scope.start_edit = function(element) {
-            $scope.editing_list.push(element);
-        };
+        $scope.Settings = new Settings();
 
-        $scope.stop_edit = function(element) {
-            $scope.editing_list.splice($scope.editing_list.indexOf(element), 1);
+        $scope.integration1CODVD_enabled = function() {
+            return $scope.Settings.get_string('Event.Payment.1CODVD') == '1';
         };
 
         $scope.create_event = function() {

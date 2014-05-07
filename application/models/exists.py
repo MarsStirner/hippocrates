@@ -1500,3 +1500,18 @@ class vrbPersonWithSpeciality(db.Model):
 
     def __int__(self):
         return self.id
+
+
+class Setting(db.Model):
+    __tablename__ = 'Setting'
+
+    id = db.Column(db.Integer, primary_key=True)
+    path = db.Column(db.String(255), nullable=False, unique=True)
+    value = db.Column(db.Text, nullable=False)
+
+    def __json__(self):
+        return {
+            'id': self.id,
+            'path': self.path,
+            'value': self.value,
+        }

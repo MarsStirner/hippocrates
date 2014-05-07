@@ -293,6 +293,7 @@ class EventLocalContract(db.Model):
         return {
             'id': self.id,
             'number_contract': self.numberContract,
+            'date_contract': self.dateContract,
             'first_name': self.firstName,
             'last_name': self.lastName,
             'patr_name': self.patrName,
