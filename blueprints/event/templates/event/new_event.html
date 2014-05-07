@@ -1,15 +1,5 @@
 {% extends "event/base.html" %}
 
-{% block modules_css %}
-    {{ super() }}
-    <style>
-        .minheight .list-group-item {
-            min-height: 81px;
-        }
-    </style>
-{% endblock %}
-
-{% import "_macros.html" as macros %}
 {% block main %}
     <div ng-controller="EventCreateCtrl">
         <legend xmlns="http://www.w3.org/1999/html">Создание обращения, пациент
@@ -178,8 +168,9 @@
 
 {% block modules_js %}
     <script>
-    WebMis20.controller('EventCreateCtrl', ['$scope', '$http', 'RefBookService', 'EventType','$window', '$timeout',
-                        function ($scope, $http, RefBookService, EventType, $window, $timeout) {
+    WebMis20.controller('EventCreateCtrl',
+            ['$scope', '$http', 'RefBookService', 'EventType','$window', '$timeout', 'Settings',
+            function ($scope, $http, RefBookService, EventType, $window, $timeout, Settings) {
         $scope.aux = aux;
         $scope.submit_attempt = false;
         $scope.event_info = null;
@@ -196,13 +187,10 @@
         $scope.rbOrder = {{ Enum.get_class_by_name('EventOrder').rb() | tojson}};
         $scope.rbPrimary = {{ Enum.get_class_by_name('EventPrimary').rb() | tojson}};
 
-        $scope.editing_list = [];
-        $scope.start_edit = function(element) {
-            $scope.editing_list.push(element);
-        };
+        $scope.Settings = new Settings();
 
-        $scope.stop_edit = function(element) {
-            $scope.editing_list.splice($scope.editing_list.indexOf(element), 1);
+        $scope.integration1CODVD_enabled = function() {
+            return $scope.Settings.get_string('Event.Payment.1CODVD') == '1';
         };
 
         $scope.create_event = function() {
@@ -247,17 +235,7 @@
 
                 $scope.request_type.selected = $scope.request_type_init;
                 $scope.finance.selected = $scope.finance_init;
-
-
-{#                $http.get('{{ url_for('.api_event_payment_info_get') }}', {#}
-{#                    params: {#}
-{#                        event_id: 'new',#}
-{#                        event_type_id: 70#}
-{#                    }#}
-{#                }).success(function (data) {#}
-{#                    $scope.event_info.payment_info = data.result;#}
-{#                })#}
-            })
+            });
         };
 
         $scope.load_data();
@@ -317,6 +295,20 @@
                 $scope.full_sum += new_services[i].price * new_services[i].amount;
             }
         }, true);
+
+        $scope.get_payer = function(source) {
+            $http.get('{{ url_for('.api_new_event_payment_info_get') }}', {
+                params: {
+                    event_type_id: $scope.event_info.event_type.id,
+                    client_id: $scope.event_info.client_id,
+                    source: source
+                }
+            }).success(function(data) {
+                $scope.event_info.payment_info = data.result;
+            }).error(function() {
+                alert('error in getting data from server');
+            });
+        };
 
     }])
     </script>

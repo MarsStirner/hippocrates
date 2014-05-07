@@ -6,15 +6,15 @@ from flask.ext.login import current_user
 
 from application.models.actions import ActionType
 from application.models.client import Client
-from application.models.event import (Event, EventType, EventType_Action, Diagnosis, Diagnostic,
-    EventLocalContract, EventContractPayer)
+from application.models.event import (Event, EventType, EventType_Action, Diagnosis, Diagnostic)
 from application.models.exists import Person
 from application.systemwide import db
 from application.lib.utils import (jsonify, safe_traverse, get_new_uuid,
                                    string_to_datetime, get_new_event_ext_id)
 from blueprints.event.app import module
 from application.models.exists import (Organisation, )
-from application.lib.jsonify import EventVisualizer
+from application.lib.jsonify import EventVisualizer, ClientVisualizer
+from blueprints.event.lib.utils import get_local_contract, get_prev_event_payment, create_new_local_contract
 from application.lib.sphinx_search import SearchEventService
 
 
@@ -54,7 +54,7 @@ def api_event_save():
         event.execPerson_id = data['exec_person']['id']
         event.setDate = string_to_datetime(data['set_date'])
         event.execDate = string_to_datetime(data['exec_date'])
-        # event.contract = None
+        event.contract_id = data['contract']['id']
         event.isPrimaryCode = data['is_primary']['id']
         event.order = data['order']['id']
         event.orgStructure_id = data['org_structure']['id']
@@ -73,7 +73,7 @@ def api_event_save():
         event.setDate = string_to_datetime(data['set_date'])
         event.execDate = string_to_datetime(data['exec_date'])
         event.externalId = get_new_event_ext_id(event.eventType.id, event.client_id)
-        # event.contract = None
+        event.contract_id = data['contract']['id']
         event.isPrimaryCode = data['is_primary']['id']
         event.order = data['order']['id']
         event.org_id = data['organisation']['id']
@@ -81,6 +81,12 @@ def api_event_save():
         event.note = ''
         event.payStatus = 0
         event.uuid = get_new_uuid()
+
+        payment_info = data.get('payment_info')
+        if payment_info:
+            lcon = get_local_contract(payment_info['local_contract'])
+            event.localContract = lcon
+
     # todo: Event_Persons, Visit, ...
     db.session.add(event)
     try:
@@ -180,40 +186,31 @@ def api_search_services():
     return jsonify([make_response(item) for item in result['result']['items']])
 
 
-def get_event_payment_info(event_id):
-    event = Event.query.join(EventLocalContract).join(EventContractPayer).\
-        filter(Event.id == event_id).first()  # TODO: one with try-except
-    return event
-
-
-def get_prev_event(event_type_id):
-    event = Event.query.join(EventType).filter(EventType.id == event_type_id).\
-        order_by(Event.setDate.desc()).first()
-    if not event:
-        event = Event()
-        lc = EventLocalContract()
-        payer = EventContractPayer()
-        lc.payer = payer
-        event.localContract = lc
-    return event
-
-
 @module.route('/api/event_payment/local_contract.json', methods=['GET'])
-def api_event_payment_info_get():
+def api_new_event_payment_info_get():
     try:
-        event_id = request.args['event_id']
-        if event_id == 'new':
+        source = request.args['source']
+    except KeyError:
+        return abort(400)
+    if source == 'prev_event':
+        try:
             event_type_id = int(request.args['event_type_id'])
-        else:
-            event_id = int(event_id)
-    except KeyError or ValueError:
+        except KeyError or ValueError:
+            return abort(400)
+        event = get_prev_event_payment(event_type_id)
+        lcon = event.localContract
+    elif source == 'client':
+        try:
+            client_id = request.args['client_id']
+        except KeyError:
+            return abort(400)
+        client = Client.query.get(client_id)
+        cvis = ClientVisualizer()
+        lc_info = cvis.make_payer_for_lc(client)
+        lcon = create_new_local_contract(lc_info)
+    else:
         return abort(400)
 
-    if event_id == 'new':
-        event = get_prev_event(event_type_id)
-    else:
-        event = get_event_payment_info(event_id)
-
     vis = EventVisualizer()
-    res = vis.make_event_payment(event)
+    res = vis.make_event_payment(lcon)
     return jsonify(res)

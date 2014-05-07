@@ -7,7 +7,7 @@ from application.systemwide import db
 from application.lib.utils import jsonify, get_new_uuid, string_to_datetime, safe_date
 from blueprints.patients.app import module
 from application.lib.sphinx_search import SearchPatient
-from application.lib.jsonify import (ClientVisualizer, Format)
+from application.lib.jsonify import ClientVisualizer
 from blueprints.patients.lib.utils import *
 
 
@@ -45,7 +45,7 @@ def api_search_clients():
         else:
             return jsonify([])
     clients = base_query.order_by(Client.lastName, Client.firstName, Client.patrName).limit(100).all()
-    context = ClientVisualizer(Format.JSON)
+    context = ClientVisualizer()
     return jsonify(map(context.make_client_info, clients))
 
 
