@@ -1412,8 +1412,11 @@ class FDField(db.Model):
     order = db.Column(db.Integer)
 
     fdFieldType = db.relationship(u'FDFieldType')
-    FlatDirectory = db.relationship(u'FlatDirectory', primaryjoin='FDField.flatDirectory_code == FlatDirectory.code')
     flatDirectory = db.relationship(u'FlatDirectory', primaryjoin='FDField.flatDirectory_id == FlatDirectory.id')
+    values = db.relationship(u'FDFieldValue', backref=db.backref('fdField'), lazy='dynamic')
+
+    def get_value(self, record_id):
+        return self.values.filter(FDFieldValue.fdRecord_id == record_id).first().value
 
 
 class FDFieldType(db.Model):
@@ -1432,7 +1435,6 @@ class FDFieldValue(db.Model):
     fdField_id = db.Column(db.ForeignKey('FDField.id'), nullable=False, index=True)
     value = db.Column(db.String)
 
-    fdField = db.relationship(u'FDField')
     fdRecord = db.relationship(u'FDRecord')
 
 
@@ -1451,6 +1453,9 @@ class FDRecord(db.Model):
     FlatDirectory = db.relationship(u'FlatDirectory', primaryjoin='FDRecord.flatDirectory_code == FlatDirectory.code')
     flatDirectory = db.relationship(u'FlatDirectory', primaryjoin='FDRecord.flatDirectory_id == FlatDirectory.id')
 
+    def get_value(self, field_name):
+        return self.FlatDirectory.fields.filter(FDField.name == field_name).first().get_value(self.id)
+
 
 class FlatDirectory(db.Model):
     __tablename__ = u'FlatDirectory'
@@ -1459,6 +1464,9 @@ class FlatDirectory(db.Model):
     name = db.Column(db.String(4096), nullable=False)
     code = db.Column(db.String(128), index=True)
     description = db.Column(db.String(4096))
+
+    fields = db.relationship(u'FDField', foreign_keys='FDField.flatDirectory_code', backref=db.backref('FlatDirectory'),
+                             lazy='dynamic')
 
 
 class UUID(db.Model):

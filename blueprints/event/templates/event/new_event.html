@@ -158,7 +158,6 @@
                     </div>
                 </div>
             </blockquote>
-            <hr>
             {% include "event/services.html" %}
             {% include "event/payment.html" %}
         <div>
@@ -276,7 +275,11 @@
                 $http.get(
                     '{{ url_for('.api_search_services') }}', {
                         params: {
-                            q: val
+                            q: val,
+                            client_id: $scope.event_info.client_id,
+                            event_type_id: $scope.event_info.event_type.id,
+                            contract_id: $scope.event_info.contract ? $scope.event_info.contract.id : null,
+                            person_id: $scope.event_info.exec_person ? $scope.event_info.exec_person.id : null
                         }
                     }
                 ).success(function (data) {

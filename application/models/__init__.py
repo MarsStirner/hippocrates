@@ -1,1 +1,1 @@
-__all__ = ["actions", "enums", "exists", "schedule"]
+__all__ = ["actions", "client", "enums", "event", "exists", "schedule"]

@@ -7,6 +7,7 @@ from flask.ext.login import current_user
 from application.models.actions import ActionType
 from application.models.client import Client
 from application.models.event import (Event, EventType, EventType_Action, Diagnosis, Diagnostic)
+from application.models.exists import Person
 from application.systemwide import db
 from application.lib.utils import (jsonify, safe_traverse, get_new_uuid,
                                    string_to_datetime, get_new_event_ext_id)
@@ -14,6 +15,7 @@ from blueprints.event.app import module
 from application.models.exists import (Organisation, )
 from application.lib.jsonify import EventVisualizer, ClientVisualizer
 from blueprints.event.lib.utils import get_local_contract, get_prev_event_payment, create_new_local_contract
+from application.lib.sphinx_search import SearchEventService
 
 
 @module.route('/api/event_info.json')
@@ -159,18 +161,29 @@ def api_diagnosis_delete():
 
 @module.route('/api/service/service_price.json', methods=['GET'])
 def api_search_services():
-    value = request.args['q']
-    q = EventType_Action.query.join(ActionType).join(ActionType.service).filter(ActionType.name.like('%%%s%%' % value)).\
-        filter(EventType_Action.eventType_id == 70).filter(ActionType.deleted == 0).all()
+    query = request.args['q']
+    client_id = request.args['client_id']
+    event_type_id = request.args.get('event_type_id')
+    contract_id = request.args.get('contract_id')
+    person_id = request.args.get('person_id')
+    speciality_id = None
+    if person_id:
+        doctor = Person.query.get(int(person_id))
+        speciality_id = doctor.speciality_id
+    result = SearchEventService.search(query,
+                                       eventType_id=event_type_id,
+                                       contract_id=contract_id,
+                                       speciality_id=speciality_id)
 
-    def make_r(x):
+    def make_response(_item):
         return {
-            'at_code': x.actionType.code,
-            'at_name': x.actionType.name,
-            'service_name': x.actionType.service.name,
-            'price': 0
+            'at_id': _item['id'],
+            'at_code': _item['code'],
+            'at_name': _item['name'],
+            'service_name': _item['service'],
+            'price': _item['price']
         }
-    return jsonify([make_r(res) for res in q])
+    return jsonify([make_response(item) for item in result['result']['items']])
 
 
 @module.route('/api/event_payment/local_contract.json', methods=['GET'])
