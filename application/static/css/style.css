@@ -311,8 +311,8 @@ div.select2-container {
 }
 
 .nomarpad {
-    margin: 0px;
-    padding: 0px;
+    margin: 0;
+    padding: 0;
 }
 
 .tab-content {
@@ -372,4 +372,17 @@ table.table-clickable tbody tr {
 }
 .ui-treeview div.tree-label.collapsed {
     background-position: 0 -32px;
+}
+
+.novmargin{
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+blockquote.danger{
+    border-color: #A94442;
+}
+
+.nowrap{
+    white-space: nowrap;
 }

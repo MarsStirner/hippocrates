@@ -1,5 +1,5 @@
+<legend>Услуги</legend>
 <div class="panel panel-default">
-<div class="panel-heading">Услуги</div>
 <div class="panel-body">
     <form role="form">
         <div class="form-group">
@@ -8,73 +8,70 @@
                 <input type="text" id="service_search" name="service_search" class="form-control"
                        autocomplete="off" placeholder="Введите код или наименование услуги"
                        ng-change="" ng-model="query">
-                <span class="input-group-addon" ng-click="query_clear()" style="cursor: pointer">
-                    <span class="glyphicon glyphicon-remove"></span></span>
+                <span class="input-group-btn">
+                    <button class="btn btn-default" ng-click="query_clear()" title="Очистить поле">
+                        <span class="glyphicon glyphicon-remove"></span>
+                    </button>
+                </span>
             </div>
         </div>
-        <div ng-show="query_results">
-            <table class="table table-condensed table-bordered table-striped table-hover table-clickable">
+        <div ng-show="found_services" class="panel panel-default">
+            <table class="table table-condensed table-striped table-hover table-clickable table-bordered">
                 <thead>
                     <tr>
                         <th>Код</th>
                         <th>Услуга</th>
                         <th>Тип действия</th>
-                        <th>Цена</th>
+                        <th class="text-right">Цена (руб.)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="result in found_services" ng-click="add_service(result)">
+                        <td ng-bind="result.at_code"></td>
+                        <td ng-bind="result.service_name"></td>
+                        <td ng-bind="result.at_name"></td>
+                        <td ng-bind="result.price" class="text-right"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </form>
+
+    <div id="selected_services" ng-show="selected_services.length">
+        <div class="panel panel-default">
+            <div class="panel-heading"><strong>Выбранные услуги</strong></div>
+            <table class="table table-condensed table-bordered">
+                <thead>
+                    <tr>
+                        <th>Код</th>
+                        <th>Услуга</th>
+                        <th class="nowrap">Тип действия</th>
+                        <th class="nowrap">Цена (руб.)</th>
+                        <th>Количество</th>
+                        <th class="nowrap">Сумма к оплате (руб.)</th>
                         <th></th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr ng-repeat="result in query_results" style="cursor: pointer">
-                        <td ng-click="open_client(result.id)" ng-bind="result.at_code"></td>
-                        <td ng-click="open_client(result.id)" ng-bind="result.service_name"></td>
-                        <td ng-click="open_client(result.id)" ng-bind="result.at_name"></td>
-                        <td ng-click="open_client(result.id)" ng-bind="result.price"></td>
-                        <td><button type="button" ng-click="add_service(result)">
-                            <span class="glyphicon glyphicon-plus"></span></button></td>
+                    <tr ng-repeat="(index, service) in selected_services" class="info">
+                        <td ng-bind="service.at_code"></td>
+                        <td ng-bind="service.service_name"></td>
+                        <td ng-bind="service.at_name"></td>
+                        <td ng-bind="service.price" class="text-right"></td>
+                        <td class="col-md-1"><input type="number" ng-model="service.amount" ng-change="service.sum=service.price*service.amount" class="form-control input-sm"/></td>
+                        <td ng-bind="service.sum" class="text-right"></td>
+                        <td><button type="button" class="btn btn-sm btn-danger" title="Убрать из списка услуг" ng-click="remove_service(index)"><span class="glyphicon glyphicon-trash"></span></button></td>
                     </tr>
                 </tbody>
             </table>
-
         </div>
-    </form>
-
-    <div class="row">
+    </div>
+    <blockquote class="novmargin" ng-show="selected_services.length">
+        <div class="row">
         <div class="col-md-12">
-            <div id="summary">
-                <h4><span class="text-muted">Итого к оплате:</span> 10000 руб.</h4>
-            </div>
+            <span class="text-muted">Итого к оплате:</span> <span ng-bind="full_sum" class="text-info"></span> <span class="text-info">руб.</span>
         </div>
-    </div>
-
-    <div id="selected_services" ng-show="selected_services.length">
-        <ul class="list-group">
-            <li ng-repeat="service in selected_services" class="list-group-item nomarpad">
-                <table class="table table-condensed nomarpad">
-                    <thead>
-                        <tr>
-                            <th>Код</th>
-                            <th>Услуга</th>
-                            <th>Тип действия</th>
-                            <th>Цена</th>
-                            <th>Количество</th>
-                            <th>Сумма к оплате</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td ng-bind="service.at_code"></td>
-                            <td ng-bind="service.service_name"></td>
-                            <td ng-bind="service.at_name"></td>
-                            <td ng-bind="service.price"></td>
-                            <td><input type="text" ng-model="service.amount"/></td>
-                            <td ng-bind="service.price"></td>
-                            <td><button type="button"><span class="glyphicon glyphicon-trash"></span></button></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </li>
-        </ul>
-    </div>
+        </div>
+    </blockquote>
 </div>
 </div>
