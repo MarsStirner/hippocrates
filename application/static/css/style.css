@@ -311,8 +311,8 @@ div.select2-container {
 }
 
 .nomarpad {
-    margin: 0px;
-    padding: 0px;
+    margin: 0;
+    padding: 0;
 }
 
 .tab-content {
@@ -378,4 +378,16 @@ table.table-clickable tbody tr {
     position: absolute;
     margin-top: 10px;
     z-index: 1000;
+}
+.novmargin{
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+blockquote.danger{
+    border-color: #A94442;
+}
+
+.nowrap{
+    white-space: nowrap;
 }

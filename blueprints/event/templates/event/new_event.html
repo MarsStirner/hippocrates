@@ -23,8 +23,7 @@
                 <div class="row">
                     <div class="col-md-4">
                         <label for="">Тип обращения</label>
-                        <ui-select ng-model="request_type.selected"
-                                   theme="select2">
+                        <ui-select ng-model="request_type.selected" ng-disabled="selected_services.length" theme="select2">
                             <match placeholder="Тип обращения">[[$select.selected.name]]</match>
                             <choices repeat="rt in rbRequestType.objects
                                              | filter: rbRequestType.objects && rbRequestType.get_by_code('policlinic')
@@ -35,8 +34,7 @@
                     </div>
                     <div class="col-md-4">
                         <label for="">Источник финансирования</label>
-                        <ui-select ng-model="finance.selected"
-                                   theme="select2">
+                        <ui-select ng-model="finance.selected" ng-disabled="selected_services.length" theme="select2">
                             <match placeholder="Источник финансирования">[[$select.selected.name]]</match>
                             <choices repeat="f in rbFinance.objects
                                              | event_type_filter: rbFinance.objects && rbEventType.get_finances_by_rt(request_type.selected.id)
@@ -49,7 +47,7 @@
                         <div class="col-md-4"
                              ng-class="{'has-error': contractForm.contract.$invalid && submit_attempt}">
                             <label for="contract">Договор</label>
-                            <ui-select ng-model="event_info.contract"
+                            <ui-select ng-model="event_info.contract"  ng-disabled="selected_services.length"
                                        theme="select2" id="contract" name="contract" ng-required="true">
                                 <match placeholder="Договор">[[$select.selected.number]] [[$select.selected.date]]
                                                              [[$select.selected.resolution]]</match>
@@ -66,7 +64,7 @@
                 <div class="row">
                     <div class="col-md-4">
                         <label for="">Тип события</label>
-                        <ui-select ng-model="event_info.event_type"
+                        <ui-select ng-model="event_info.event_type" ng-disabled="selected_services.length"
                                    theme="select2">
                             <match placeholder="Тип события">[[$select.selected.name]]</match>
                             <choices repeat='et in rbEventType.objects
@@ -209,13 +207,12 @@
 
         $scope.create_event = function() {
             $scope.submit_attempt = true;
-            if ($scope.contractForm.$invalid || $scope.setDateForm.$invalid){
-                return false;
+            if (!$scope.contractForm.$invalid && !$scope.setDateForm.$invalid){
+                $http.post('{{ url_for('.api_event_save') }}', $scope.event_info).success(function (data) {
+                    var event_id = data['result'];
+                    window.open('{{ url_for('.html_event_info') }}?event_id=' + event_id, '_self');
+                });
             }
-            $http.post('{{ url_for('.api_event_save') }}', $scope.event_info).success(function (data) {
-                var event_id = data['result'];
-                window.open('{{ url_for('.html_event_info') }}?event_id=' + event_id, '_self');
-            });
         };
 
         $scope.request_type = {};
@@ -268,11 +265,12 @@
         $scope.query = "";
         var _timeout;
         $scope.selected_services = [];
+        $scope.full_sum = 0;
         $scope.$watch('query', function(newValue, oldValue) {
             if (newValue != oldValue && newValue.length > 1) {
                 if (_timeout) $timeout.cancel(_timeout);
                 _timeout = $timeout(function() {
-                    $scope.query_results = null;
+                    $scope.found_services = null;
                     $scope.perform_search((newValue));
                 }, 500);
             }
@@ -280,7 +278,7 @@
 
         $scope.perform_search = function(val) {
             if (!val) {
-                $scope.query_results = [];
+                $scope.found_services = [];
             } else {
                 $http.get(
                     '{{ url_for('.api_search_services') }}', {
@@ -293,18 +291,32 @@
                         }
                     }
                 ).success(function (data) {
-                    $scope.query_results = data.result;
+                    $scope.found_services = data.result;
                 })
             }
         };
 
         $scope.query_clear = function() {
-            $scope.query_results = null;
+            $scope.found_services = null;
+            $scope.query = '';
         };
 
         $scope.add_service = function(service) {
-            $scope.selected_services.push(service)
+            service.amount = 1;
+            service.sum = service.price * service.amount;
+            $scope.selected_services.push(service);
         };
+
+        $scope.remove_service = function(index) {
+            $scope.selected_services.splice(index);
+        };
+
+        $scope.$watch('selected_services', function(new_services, old_services) {
+            $scope.full_sum = 0;
+            for (var i=0; i<new_services.length; i++){
+                $scope.full_sum += new_services[i].price * new_services[i].amount;
+            }
+        }, true);
 
     }])
     </script>
