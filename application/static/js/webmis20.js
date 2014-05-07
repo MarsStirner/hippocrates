@@ -804,6 +804,27 @@ var WebMis20 = angular.module('WebMis20', ['ngResource', 'ui.bootstrap', 'ui.sel
         }
     }
 })
+.directive('wmSlowChange', function ($timeout) {
+    return {
+        restrict: 'A',
+        require: 'ngModel',
+        link: function (scope, element, attr, ngModel) {
+            var query_timeout = null;
+            function ensure_timeout_killed () {
+                if (query_timeout) {
+                    $timeout.cancel(query_timeout);
+                    query_timeout = null;
+                }
+            }
+            ngModel.$viewChangeListeners.push(function () {
+                ensure_timeout_killed();
+                query_timeout = $timeout(function () {
+                    scope.$eval(attr.wmSlowChange)
+                }, attr.wmSlowChangeTimeout || 600)
+            });
+        }
+    }
+})
 var aux = {
     getQueryParams: function (qs) {
         qs = qs.split("+").join(" ");
