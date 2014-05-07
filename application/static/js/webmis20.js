@@ -676,7 +676,7 @@ var WebMis20 = angular.module('WebMis20', ['ngResource', 'ui.bootstrap', 'ui.sel
                         'is-open="popup.opened" ng-model="ngModel" autocomplete="off"',
                         'datepicker_popup="dd.MM.yyyy" ng-required="ngRequired" manual-date/>',
                         '<span class="input-group-btn">',
-                        '<button class="btn btn-default" ng-click="open_datepicker_popup()">',
+                        '<button type="button" class="btn btn-default" ng-click="open_datepicker_popup()">',
                         '<i class="glyphicon glyphicon-calendar"></i></button>',
                         '</span>',
                         '</div>'

@@ -60,8 +60,7 @@ class Event(db.Model):
     result = db.relationship(u'rbResult', lazy=True)
     typeAsset = db.relationship(u'rbEmergencyTypeAsset', lazy=True)
     localContract = db.relationship(u'EventLocalContract',
-                                    backref=db.backref('event'),
-                                    lazy='joined'
+                                    backref=db.backref('event')
                                     )
     client = db.relationship(u'Client')
     diagnostics = db.relationship(
@@ -260,9 +259,8 @@ class EventLocalContract(db.Model):
 
     org = db.relationship(u'Organisation')
     documentType = db.relationship(u'rbDocumentType')
-    payer = db.relationship('EventContractPayer',
-                            backref=db.backref('localContract'),
-                            uselist=False)
+    payments = db.relationship('EventPayment',
+                               backref=db.backref('local_contract'))
 
     # Это что вообще?!
     @property
@@ -294,9 +292,9 @@ class EventLocalContract(db.Model):
     def __json__(self):
         return {
             'id': self.id,
-            'numberContract': self.numberContract,
+            'number_contract': self.numberContract,
             'first_name': self.firstName,
-            'last_mame': self.lastName,
+            'last_name': self.lastName,
             'patr_name': self.patrName,
             'birth_date': self.birthDate,
             'doc_type_id': self.documentType_id,
@@ -334,7 +332,7 @@ class EventPayment(db.Model):
     sumDiscount = db.Column(db.Float(asdecimal=True), nullable=False)
     action_id = db.Column(db.Integer, db.ForeignKey('Action.id'))
     service_id = db.Column(db.Integer, db.ForeignKey('rbService.id'))
-    ecp_id = db.Column(db.Integer, db.ForeignKey('EventContractPayer.id'))
+    localContract_id = db.Column(db.Integer, db.ForeignKey('Event_LocalContract.id'))
 
     cashOperation = db.relationship(u'rbCashOperation')
 
@@ -346,48 +344,7 @@ class EventPayment(db.Model):
             'sum_discount': self.sumDiscount,
             'action_id': self.action_id,
             'service_id': self.service_id,
-            'ecp_id': self.ecp_id,
-        }
-
-
-class EventContractPayer(db.Model):
-    __tablename__ = 'EventContractPayer'
-
-    id = db.Column(db.Integer, primary_key=True)
-    event_id = db.Column(db.Integer, db.ForeignKey('Event.id'))
-    localContract_id = db.Column(db.Integer, db.ForeignKey('Event_LocalContract.id'))
-    lastName = db.Column(db.Unicode(30))
-    firstName = db.Column(db.Unicode(30))
-    patrName = db.Column(db.Unicode(30))
-    birthDate = db.Column(db.Date)
-    documentType_id = db.Column(db.Integer, db.ForeignKey('rbDocumentType.id'), index=True)
-    serialLeft = db.Column(db.Unicode(8))
-    serialRight = db.Column(db.Unicode(8))
-    number = db.Column(db.Unicode(16))
-    regAddress = db.Column(db.Unicode(64))
-    payer_org_id = db.Column(db.Integer, db.ForeignKey('Organisation.id'), index=True)
-
-    event = db.relationship('Event')
-    payer_org = db.relationship(u'Organisation')
-    payments = db.relationship('EventPayment',
-                               backref=db.backref('payer'))
-
-    def __json__(self):
-        return {
-            'id': self.id,
-            'event_id': self.event_id,
-            'local_contract_id': self.localContract_id,
-            'first_name': self.firstName,
-            'last_name': self.lastName,
-            'patr_name': self.patrName,
-            'birth_date': self.birthDate,
-            'doc_type_id': self.documentType_id,
-            'serial_left': self.serialLeft,
-            'serial_right': self.serialRight,
-            'number': self.number,
-            'reg_address': self.regAddress,
-            'payer_org_id': self.payer_org_id,
-            'payer_org': self.payer_org,
+            'localContract_id': self.localContract_id,
         }
 
 

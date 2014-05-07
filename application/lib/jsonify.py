@@ -410,6 +410,20 @@ class ClientVisualizer(object):
             'result': event.result,
         }
 
+    def make_payer_for_lc(self, client):
+        return {
+            'first_name': client.firstName,
+            'last_name': client.lastName,
+            'patr_name': client.patrName,
+            'birth_date': client.birthDate,
+            'doc_type': client.id_document.documentType.__json__(),
+            'doc_type_id': client.id_document.id,
+            'serial_left': client.id_document.serial_left,
+            'serial_right': client.id_document.serial_right,
+            'number': client.id_document.number,
+            'reg_address': None,  # TODO: address
+        }
+
 
 class PersonTreeVisualizer(object):
     def make_person(self, person):
@@ -512,11 +526,10 @@ class EventVisualizer(object):
             'person_text': safe_unicode(action.person)
         }
 
-    def make_event_payment(self, event):
+    def make_event_payment(self, local_contract):
         return {
-            'localContract': event.localContract,
-            'payer_info': event.localContract.payer,
-            'payments': event.localContract.payer.payments
+            'local_contract': local_contract,
+            'payments': local_contract.payments if local_contract else []
         }
 
 

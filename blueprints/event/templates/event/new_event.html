@@ -161,12 +161,12 @@
             <hr>
             {% include "event/services.html" %}
             {% include "event/payment.html" %}
-{#        <div>#}
-{#            <p>debug:</p>#}
-{#            <p>[[event_info | json]]</p>#}
+        <div>
+            <p>debug:</p>
+            <p>[[event_info | json]]</p>
 {#            <p>[[request_type.selected | json]]</p>#}
 {#            <p>[[finance.selected | json]]</p>#}
-{#        </div>#}
+        </div>
             <div class="row">
                 <div class="col-md-12">
                     <div class="pull-right">
@@ -251,17 +251,7 @@
 
                 $scope.request_type.selected = $scope.request_type_init;
                 $scope.finance.selected = $scope.finance_init;
-
-
-{#                $http.get('{{ url_for('.api_event_payment_info_get') }}', {#}
-{#                    params: {#}
-{#                        event_id: 'new',#}
-{#                        event_type_id: 70#}
-{#                    }#}
-{#                }).success(function (data) {#}
-{#                    $scope.event_info.payment_info = data.result;#}
-{#                })#}
-            })
+            });
         };
 
         $scope.load_data();
@@ -301,6 +291,20 @@
 
         $scope.add_service = function(service) {
             $scope.selected_services.push(service)
+        };
+
+        $scope.get_payer = function(source) {
+            $http.get('{{ url_for('.api_new_event_payment_info_get') }}', {
+                params: {
+                    event_type_id: $scope.event_info.event_type.id,
+                    client_id: $scope.event_info.client_id,
+                    source: source
+                }
+            }).success(function(data) {
+                $scope.event_info.payment_info = data.result;
+            }).error(function() {
+                alert('error in getting data from server');
+            });
         };
 
     }])

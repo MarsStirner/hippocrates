@@ -221,7 +221,12 @@ def safe_date(val):
         except ValueError:
             val = string_to_datetime(val, '%Y-%m-%d')
         return val.date()
-
+    elif isinstance(val, datetime.datetime):
+        return val.date()
+    elif isinstance(val, datetime.date):
+        return val
+    else:
+        return None
 
 def safe_traverse(obj, *args, **kwargs):
     """Безопасное копание вглубь dict'а
