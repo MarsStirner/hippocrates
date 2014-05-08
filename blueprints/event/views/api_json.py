@@ -207,20 +207,18 @@ def api_search_services():
 def api_new_event_payment_info_get():
     try:
         source = request.args['source']
-    except KeyError:
+        client_id = int(request.args['client_id'])
+    except KeyError or ValueError:
         return abort(400)
+
     if source == 'prev_event':
         try:
             event_type_id = int(request.args['event_type_id'])
         except KeyError or ValueError:
             return abort(400)
-        event = get_prev_event_payment(event_type_id)
+        event = get_prev_event_payment(client_id, event_type_id)
         lcon = event.localContract
     elif source == 'client':
-        try:
-            client_id = request.args['client_id']
-        except KeyError:
-            return abort(400)
         client = Client.query.get(client_id)
         cvis = ClientVisualizer()
         lc_info = cvis.make_payer_for_lc(client)

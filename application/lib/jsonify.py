@@ -411,16 +411,17 @@ class ClientVisualizer(object):
         }
 
     def make_payer_for_lc(self, client):
+        id_doc = client.id_document
         return {
             'first_name': client.firstName,
             'last_name': client.lastName,
             'patr_name': client.patrName,
             'birth_date': client.birthDate,
-            'doc_type': client.id_document.documentType.__json__(),
-            'doc_type_id': client.id_document.id,
-            'serial_left': client.id_document.serial_left,
-            'serial_right': client.id_document.serial_right,
-            'number': client.id_document.number,
+            'doc_type': id_doc.documentType.__json__() if id_doc else None,
+            'doc_type_id': id_doc.id if id_doc else None,
+            'serial_left': id_doc.serial_left if id_doc else None,
+            'serial_right': id_doc.serial_right if id_doc else None,
+            'number': id_doc.number if id_doc else None,
             'reg_address': client.reg_address,
         }
 

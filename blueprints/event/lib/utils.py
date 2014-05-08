@@ -61,8 +61,8 @@ def get_local_contract(lc_info):
     return lcon
 
 
-def get_prev_event_payment(event_type_id):
-    event = Event.query.join(EventType).filter(EventType.id == event_type_id).\
+def get_prev_event_payment(client_id, event_type_id):
+    event = Event.query.join(EventType).filter(EventType.id == event_type_id, Event.client_id == client_id).\
         order_by(Event.setDate.desc()).first()
     if not event:
         event = Event()
