@@ -237,6 +237,7 @@
                 }
             }).success(function (data) {
                 $scope.event_info = data.result;
+                $scope.event_info.set_date = new Date();
 
                 $scope.request_type_init = angular.extend({}, $scope.event_info.event_type.request_type);
                 $scope.finance_init = angular.extend({}, $scope.event_info.event_type.finance);
@@ -253,17 +254,6 @@
         var _timeout;
         $scope.selected_services = [];
         $scope.full_sum = 0;
-        $scope.$watch('query', function(newValue, oldValue) {
-            if (newValue != oldValue) {
-                $scope.found_services = null;
-                if(newValue.length > 1){
-                    if (_timeout) $timeout.cancel(_timeout);
-                    _timeout = $timeout(function() {
-                        $scope.perform_search((newValue));
-                    }, 500);
-                }
-            }
-        });
 
         $scope.perform_search = function(val) {
             if (!val) {

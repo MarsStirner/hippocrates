@@ -7,7 +7,7 @@
                 <span class="input-group-addon"><span class="glyphicon glyphicon-search"></span></span>
                 <input type="text" id="service_search" name="service_search" class="form-control"
                        autocomplete="off" placeholder="Введите код или наименование услуги"
-                       ng-change="" ng-model="query">
+                       ng-change="" ng-model="query" wm-slow-change="perform_search(query)">
                 <span class="input-group-btn">
                     <button class="btn btn-default" ng-click="query_clear()" title="Очистить поле">
                         <span class="glyphicon glyphicon-remove"></span>
