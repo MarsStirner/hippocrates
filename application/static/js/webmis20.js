@@ -760,7 +760,7 @@ var WebMis20 = angular.module('WebMis20', ['ngResource', 'ui.bootstrap', 'ui.sel
       require: 'ngModel',
       link: function(scope, element, attrs, ngModel) {
           ngModel.$parsers.unshift(function (value) {
-              var oldValue = ngModel.$modelValue
+              var oldValue = ngModel.$modelValue;
               if (value && !(value instanceof Date)){
                    if ( /^([01]\d|2[0-3]):([0-5]\d)$/.test(value)){
                        var parts = value.split(':');
@@ -782,10 +782,13 @@ var WebMis20 = angular.module('WebMis20', ['ngResource', 'ui.bootstrap', 'ui.sel
 
           if(ngModel) {
               ngModel.$formatters.push(function (value) {
-                  if(value){
+                  if (!(value instanceof Date)) {
+                      value = new Date(value);
+                  }
+                  if (value && moment(value).isValid()) {
                       return value.getHours() + ":" + value.getMinutes();
-                  }else{
-                      value
+                  } else {
+                      return undefined;
                   }
               });
 
@@ -823,7 +826,7 @@ var WebMis20 = angular.module('WebMis20', ['ngResource', 'ui.bootstrap', 'ui.sel
                     hide_timeout = null;
                 }
             }
-            scope.hide_popup = function hide_popup_int () {
+            var hide_popup_int = scope.hide_popup = function () {
                 ensure_timeout_killed();
                 element_popup.hide();
             };
@@ -834,7 +837,7 @@ var WebMis20 = angular.module('WebMis20', ['ngResource', 'ui.bootstrap', 'ui.sel
             }
             function hide_popup () {
                 ensure_timeout_killed();
-                hide_timeout = $timeout(hide_popup_int, 600)
+                hide_timeout = $timeout(hide_popup_int, element_popup.attr.wmCddPopup || 600);
             }
         }
     }

@@ -6,8 +6,9 @@ from flask.ext.login import current_user
 
 from application.models.actions import ActionType
 from application.models.client import Client
+from application.models.enums import EventPrimary, EventOrder
 from application.models.event import (Event, EventType, EventType_Action, Diagnosis, Diagnostic)
-from application.models.exists import Person
+from application.models.exists import Person, OrgStructure
 from application.systemwide import db
 from application.lib.utils import (jsonify, safe_traverse, get_new_uuid,
                                    string_to_datetime, get_new_event_ext_id)
@@ -36,7 +37,11 @@ def api_event_new_get():
     event = Event()
     event.eventType = EventType.get_default_et()
     event.organisation = Organisation.query.filter_by(infisCode='500').first()
+    event.isPrimaryCode = EventPrimary.primary  # TODO: check previous events # TODO: fix
+    event.order = EventOrder.planned  # TODO: fix
     event.client = Client.query.get(client_id)
+    event.setDate = datetime.datetime.now()
+    event.orgStructure = OrgStructure.query.filter_by(code=u'Кабинеты врачей').first()  # TODO: fix
     v = EventVisualizer()
     return jsonify(v.make_event(event))
 
