@@ -36,8 +36,8 @@ def api_event_new_get():
     event = Event()
     event.eventType = EventType.get_default_et()
     event.organisation = Organisation.query.filter_by(infisCode='500').first()
-    event.isPrimaryCode = EventPrimary.primary  # TODO: check previous events # TODO: fix
-    event.order = EventOrder.planned  # TODO: fix
+    event.isPrimaryCode = EventPrimary.primary[0]  # TODO: check previous events
+    event.order = EventOrder.planned[0]
     event.client = Client.query.get(client_id)
     event.setDate = datetime.datetime.now()
     event.orgStructure = OrgStructure.query.filter_by(code=u'Кабинеты врачей').first()  # TODO: fix
