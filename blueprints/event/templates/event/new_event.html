@@ -237,6 +237,7 @@
                 }
             }).success(function (data) {
                 $scope.event_info = data.result;
+                $scope.event_info.set_date = new Date();
 
                 $scope.request_type_init = angular.extend({}, $scope.event_info.event_type.request_type);
                 $scope.finance_init = angular.extend({}, $scope.event_info.event_type.finance);
