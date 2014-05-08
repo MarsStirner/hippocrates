@@ -431,7 +431,7 @@ def api_action_new_get():
     if src_action:
         action.person = src_action.person
     elif actionType.defaultExecPerson_id:
-        action.person = Person.query.get(actionType.defaultExecPersonId)
+        action.person = Person.query.get(actionType.defaultExecPerson_id)
     elif actionType.defaultPersonInEvent == 0:
         action.person = None
     elif actionType.defaultPersonInEvent == 2:

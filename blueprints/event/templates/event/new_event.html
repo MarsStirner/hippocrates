@@ -246,17 +246,19 @@
         var _timeout;
         $scope.selected_services = [];
         $scope.full_sum = 0;
-        $scope.$watch('query', function(newValue, oldValue) {
-            if (newValue != oldValue) {
-                $scope.found_services = null;
-                if(newValue.length > 1){
-                    if (_timeout) $timeout.cancel(_timeout);
-                    _timeout = $timeout(function() {
-                        $scope.perform_search((newValue));
-                    }, 500);
-                }
-            }
-        });
+
+{#        //TODO: перевести на wmSlowChange#}
+{#        $scope.$watch('query', function(newValue, oldValue) {#}
+{#            if (newValue != oldValue) {#}
+{#                $scope.found_services = null;#}
+{#                if(newValue.length > 1){#}
+{#                    if (_timeout) $timeout.cancel(_timeout);#}
+{#                    _timeout = $timeout(function() {#}
+{#                        $scope.perform_search((newValue));#}
+{#                    }, 500);#}
+{#                }#}
+{#            }#}
+{#        });#}
 
         $scope.perform_search = function(val) {
             if (!val) {
