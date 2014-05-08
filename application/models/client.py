@@ -209,10 +209,12 @@ class Client(db.Model):
             'birthDate': self.birthDate,
             'sex': Gender(self.sexCode),
             'SNILS': self.SNILS,
-            'fullName': self.nameText,  # todo: more
+            'fullName': self.nameText,
             'work_org_id': self.works[0].org_id if self.works else None,
             'comp_policy': self.compulsoryPolicy,
             'vol_policy': self.voluntaryPolicy,
+            'direct_relations': self.direct_relations.all(),
+            'reversed_relations': self.reversed_relations.all(),  # todo: more
         }
 
 
@@ -535,6 +537,15 @@ class ClientRelation(db.Model):
     def __int__(self):
         return self.id
 
+    def __json__(self):
+        return {
+            'id': self.id,
+            'deleted': self.deleted,
+            'relativeType': self.relativeType,
+            'other_id': self.other.id,
+            'other_text': self.other.nameText + ' ({})'.format(self.other.id)
+        }
+
 
 class ClientWork(db.Model):
     __tablename__ = u'ClientWork'
@@ -629,6 +640,57 @@ class DirectClientRelation(ClientRelation):
 class ReversedClientRelation(ClientRelation):
 
     other = db.relationship(u'Client', foreign_keys='ClientRelation.client_id')
+
+    @property
+    def role(self):
+        return self.rightName
+
+    @property
+    def otherRole(self):
+        return self.leftName
+
+    @property
+    def regionalCode(self):
+        return self.relativeType.regionalReverseCode
+
+    @property
+    def clientId(self):
+        return self.client_id
+
+    @property
+    def isDirectGenetic(self):
+        return self.relativeType.isBackwardGenetic
+
+    @property
+    def isBackwardGenetic(self):
+        return self.relativeType.isDirectGenetic
+
+    @property
+    def isDirectRepresentative(self):
+        return self.relativeType.isBackwardRepresentative
+
+    @property
+    def isBackwardRepresentative(self):
+        return self.relativeType.isDirectRepresentative
+
+    @property
+    def isDirectEpidemic(self):
+        return self.relativeType.isBackwardEpidemic
+
+    @property
+    def isBackwardEpidemic(self):
+        return self.relativeType.isDirectEpidemic
+
+    @property
+    def isDirectDonation(self):
+        return self.relativeType.isBackwardDonation
+
+    @property
+    def isBackwardDonation(self):
+        return self.relativeType.isDirectDonation
+
+    def __unicode__(self):
+        return self.name + ' ' + self.other
 
 
 class ClientSocStatus(db.Model):

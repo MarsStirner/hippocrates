@@ -72,9 +72,9 @@
             <div class="col-md-2">
                 <label class="pull-right">Заполнить</label>
                 <div class="btn-group-vertical pull-right">
-                    <button type="button" class="btn btn-default" ng-click="get_payer('client')">Из карты пациента</button>
-                    <button type="button" class="btn btn-default" ng-click="get_payer('client_relative')">Из карты родственника</button>
-                    <button type="button" class="btn btn-default" ng-click="get_payer('prev_event')">Из предыдущего</button>
+                    <button type="button" class="btn btn-default" ng-click="get_payer('client', event_info.client_id)">Из карты пациента</button>
+                    <button type="button" class="btn btn-default" ng-click="open_relatives_modal()">Из карты родственника</button>
+                    <button type="button" class="btn btn-default" ng-click="get_payer('prev_event', event_info.client_id)">Из предыдущего</button>
                 </div>
             </div>
         </div>

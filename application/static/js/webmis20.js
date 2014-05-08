@@ -782,7 +782,7 @@ var WebMis20 = angular.module('WebMis20', ['ngResource', 'ui.bootstrap', 'ui.sel
 
           if(ngModel) {
               ngModel.$formatters.push(function (value) {
-                  if (!(value instanceof Date)) {
+                  if (!(value instanceof Date) && value) {
                       value = new Date(value);
                   }
                   if (value && moment(value).isValid()) {

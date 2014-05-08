@@ -170,10 +170,12 @@
 {% endblock %}
 
 {% block modules_js %}
+    {{ super() }}
+    <script type="text/ng-template" id="modal-relatives.html">{% include "event/_modal_relatives.html" %}</script>
     <script>
     WebMis20.controller('EventCreateCtrl',
-            ['$scope', '$http', 'RefBookService', 'EventType','$window', '$timeout', 'Settings',
-            function ($scope, $http, RefBookService, EventType, $window, $timeout, Settings) {
+            ['$scope', '$http', 'RefBookService', 'EventType','$window', '$timeout', 'Settings', '$modal',
+            function ($scope, $http, RefBookService, EventType, $window, $timeout, Settings, $modal) {
         $scope.aux = aux;
         $scope.event_info = null;
         $scope.editing = {
@@ -305,11 +307,11 @@
             }
         }, true);
 
-        $scope.get_payer = function(source) {
+        $scope.get_payer = function(source, client_id) {
             $http.get('{{ url_for('.api_new_event_payment_info_get') }}', {
                 params: {
                     event_type_id: $scope.event_info.event_type.id,
-                    client_id: $scope.event_info.client_id,
+                    client_id: client_id,
                     source: source
                 }
             }).success(function(data) {
@@ -319,6 +321,51 @@
             });
         };
 
-    }])
+        $scope.open_relatives_modal = function() {
+            var modalInstance = $modal.open({
+                templateUrl: 'modal-relatives.html',
+                controller: RelativesModalCtrl,
+                scope: $scope
+            });
+
+            modalInstance.result.then(function (selected_client_id) {
+                $scope.get_payer('client', selected_client_id);
+            });
+        };
+
+    }]);
+
+    RelativesModalCtrl = function ($scope, $modalInstance) {
+        $scope.initialize = function() {
+            var relatives_direct = $scope.event_info.client.direct_relations.map(function(rel) {
+                return {
+                    name: rel.other_text,
+                    rel_type: rel.relativeType.rightName,
+                    rel_id: rel.other_id
+                };
+            });
+            var relatives_reverse = $scope.event_info.client.reversed_relations.map(function(rel) {
+                return {
+                    name: rel.other_text,
+                    rel_type: rel.relativeType.leftName,
+                    rel_id: rel.other_id
+                };
+            });
+            $scope.relatives = relatives_direct.concat(relatives_reverse);
+            $scope.selected = {
+                client_id: null
+            };
+
+        };
+
+        $scope.initialize();
+
+        $scope.accept = function() {
+            $modalInstance.close($scope.selected.client_id);
+        };
+        $scope.cancel = function() {
+            $modalInstance.dismiss('cancel');
+        };
+    };
     </script>
 {% endblock %}

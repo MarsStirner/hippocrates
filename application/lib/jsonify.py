@@ -421,7 +421,7 @@ class ClientVisualizer(object):
             'serial_left': client.id_document.serial_left,
             'serial_right': client.id_document.serial_right,
             'number': client.id_document.number,
-            'reg_address': None,  # TODO: address
+            'reg_address': client.reg_address,
         }
 
 
