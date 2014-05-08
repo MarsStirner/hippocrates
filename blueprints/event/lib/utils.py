@@ -62,7 +62,9 @@ def get_local_contract(lc_info):
 
 
 def get_prev_event_payment(client_id, event_type_id):
-    event = Event.query.join(EventType).filter(EventType.id == event_type_id, Event.client_id == client_id).\
+    event = Event.query.join(EventType).filter(EventType.id == event_type_id,
+                                               Event.client_id == client_id,
+                                               Event.deleted == 0).\
         order_by(Event.setDate.desc()).first()
     if not event:
         event = Event()

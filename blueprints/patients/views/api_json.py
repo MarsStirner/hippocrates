@@ -94,8 +94,7 @@ def api_patient_save():
         client.notes = client_info['notes'] if client_info['notes'] else ''
         client.birthDate = safe_date(client_info['birthDate'])
         if not client.uuid:
-            new_uuid = get_new_uuid()
-            client.uuid = new_uuid
+            client.uuid = get_new_uuid()
 
         db.session.add(client)
 

@@ -113,6 +113,9 @@ class Client(db.Model):
         innerjoin=True
     )
 
+    def __init__(self):
+        self.init_on_load()
+
     @orm.reconstructor
     def init_on_load(self):
         self._id_document = None
@@ -154,10 +157,6 @@ class Client(db.Model):
 
     @property
     def id_document(self):
-        try:
-            self._id_document
-        except AttributeError:
-            self._id_document = None
         if not self._id_document:
             self._id_document = (self.documents.filter(ClientDocument.deleted == 0).
                 filter(rbDocumentTypeGroup.code == '1').order_by(ClientDocument.date.desc()).first())

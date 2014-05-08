@@ -41,7 +41,6 @@ def api_event_new_get():
     event.order = EventOrder.planned[0]
     event.client = Client.query.get(client_id)
     event.setDate = datetime.datetime.now()
-    event.orgStructure = OrgStructure.query.filter_by(code=u'Кабинеты врачей').first()  # TODO: fix
     v = EventVisualizer()
     return jsonify(v.make_event(event))
 

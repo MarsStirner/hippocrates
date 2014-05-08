@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime
-from uuid import uuid4
 from application.systemwide import db
-from application.lib.utils import logger
+from application.lib.utils import logger, get_new_uuid
 from application.models.actions import Action, ActionType, ActionPropertyType, ActionProperty
 from application.models.exists import Person, UUID
 from application.models.event import Event
@@ -56,9 +55,7 @@ def create_action(event_id, action_type_id, current_user_id, data):
     action.account = 0
     action.coordText = ''
     action.AppointmentType = 0
-    uuid = UUID()
-    uuid.uuid = '{%s}' % uuid4().get_hex
-    action.uuid = uuid
+    action.uuid = get_new_uuid()
 
     if actionType.defaultEndDate == DED_CURRENT_DATE:
         action.endDate = now
