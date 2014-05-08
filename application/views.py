@@ -29,6 +29,7 @@ def check_valid_login():
         return redirect(url_for('login', next=url_for(request.endpoint)))
 
 
+@roles_require('admin')
 @app.route('/')
 def index():
     return render_template('index.html')

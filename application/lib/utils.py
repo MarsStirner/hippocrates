@@ -54,25 +54,30 @@ class Bunch:
         self.__dict__.update(kwargs)
 
 
-with app.app_context():
-    _roles = dict()
-    _permissions = dict()
-    user_roles = db.session.query(rbUserProfile).all()
-    if user_roles:
-        for role in user_roles:
-            if role.code:
-                _roles[role.code] = Permission(RoleNeed(role.code))
-                # _roles[role.code].name = role.name
-            for right in getattr(role, 'rights', []):
-                if right.code and right.code not in _permissions:
-                    _permissions[right.code] = Permission(ActionNeed(right.code))
-                    # _permissions[right.code].name = right.name
-    # roles = Bunch(**_roles)
-    # permissions = Bunch(**_permissions)
+_roles = dict()
+_permissions = dict()
+
+
+def init_roles_and_permissions():
+    with app.app_context():
+        user_roles = db.session.query(rbUserProfile).all()
+        if user_roles:
+            for role in user_roles:
+                if role.code:
+                    _roles[role.code] = Permission(RoleNeed(role.code))
+                    # _roles[role.code].name = role.name
+                for right in getattr(role, 'rights', []):
+                    if right.code and right.code not in _permissions:
+                        _permissions[right.code] = Permission(ActionNeed(right.code))
+                        # _permissions[right.code].name = right.name
+        # roles = Bunch(**_roles)
+        # permissions = Bunch(**_permissions)
 
 
 def roles_require(*role_codes):
     http_exception = 403
+    if not _roles:
+        init_roles_and_permissions()
 
     def factory(func):
         @wraps(func)
@@ -97,6 +102,8 @@ def roles_require(*role_codes):
 
 def rights_require(*right_codes):
     http_exception = 403
+    if not _permissions:
+        init_roles_and_permissions()
 
     def factory(func):
         @wraps(func)
