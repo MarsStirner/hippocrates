@@ -826,7 +826,7 @@ var WebMis20 = angular.module('WebMis20', ['ngResource', 'ui.bootstrap', 'ui.sel
                     hide_timeout = null;
                 }
             }
-            scope.hide_popup = function hide_popup_int () {
+            var hide_popup_int = scope.hide_popup = function () {
                 ensure_timeout_killed();
                 element_popup.hide();
             };
@@ -837,7 +837,7 @@ var WebMis20 = angular.module('WebMis20', ['ngResource', 'ui.bootstrap', 'ui.sel
             }
             function hide_popup () {
                 ensure_timeout_killed();
-                hide_timeout = $timeout(hide_popup_int, 600)
+                hide_timeout = $timeout(hide_popup_int, element_popup.attr.wmCddPopup || 600);
             }
         }
     }

@@ -1490,12 +1490,16 @@ class vrbPersonWithSpeciality(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     code = db.Column(db.String(12), nullable=False, index=True)
     name = db.Column(db.String(101), nullable=False, index=True)
+    orgStructure_id = db.Column(db.ForeignKey('OrgStructure.id'))
+
+    orgStructure = db.relationship('OrgStructure')
 
     def __json__(self):
         return {
             'id': self.id,
             'code': self.code,
             'name': self.name,
+            'org_structure': self.orgStructure
         }
 
     def __int__(self):

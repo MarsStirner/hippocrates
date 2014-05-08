@@ -75,7 +75,7 @@
                          ng-class="{'has-error': event_form.exec_person.$invalid && editing.submit_attempt}">
                         <label for="exec_person">Лечащий врач</label>
                         <ui-select id="exec_person" name="exec_person" theme="select2"
-                                   ng-model="event_info.exec_person" ng-required="true">
+                                   ng-model="event_info.exec_person" ng-required="true" ng-change="exec_person_changed()">
                             <match placeholder="Лечащий врач">[[$select.selected.name]]</match>
                             <choices repeat="p in Person.objects | filter: $select.search">
                                 <div ng-bind-html="p.name | highlight: $select.search"></div>
@@ -211,6 +211,10 @@
             }
         };
 
+        $scope.exec_person_changed = function () {
+            $scope.event_info.org_structure = $scope.event_info.exec_person.org_structure;
+        };
+
         $scope.request_type = {};
         $scope.finance = {};
 
@@ -235,6 +239,7 @@
                 }
             }).success(function (data) {
                 $scope.event_info = data.result;
+                $scope.event_info.set_date = new Date();
 
                 $scope.request_type_init = angular.extend({}, $scope.event_info.event_type.request_type);
                 $scope.finance_init = angular.extend({}, $scope.event_info.event_type.finance);
@@ -251,17 +256,6 @@
         var _timeout;
         $scope.selected_services = [];
         $scope.full_sum = 0;
-        $scope.$watch('query', function(newValue, oldValue) {
-            if (newValue != oldValue) {
-                $scope.found_services = null;
-                if(newValue.length > 1){
-                    if (_timeout) $timeout.cancel(_timeout);
-                    _timeout = $timeout(function() {
-                        $scope.perform_search((newValue));
-                    }, 500);
-                }
-            }
-        });
 
         $scope.perform_search = function(val) {
             if (!val) {

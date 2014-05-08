@@ -17,6 +17,7 @@ from application.models.exists import (Organisation, )
 from application.lib.jsonify import EventVisualizer, ClientVisualizer
 from blueprints.event.lib.utils import get_local_contract, get_prev_event_payment, create_new_local_contract
 from application.lib.sphinx_search import SearchEventService
+from application.lib.data import create_action
 
 
 @module.route('/api/event_info.json')
@@ -99,6 +100,17 @@ def api_event_save():
     except:
         db.session.rollback()
         raise
+    else:
+        if not event_id:
+            # При создании Event'а создаём Action'ы
+            services = data.get('services', [])
+            finance_id = data['contract'].get('finance', {}).get('id')
+            for service in services:
+                for i in xrange(1, service['amount'] + 1):
+                    result = create_action(event.id,
+                                           service['at_id'],
+                                           current_user.id,
+                                           {'finance_id': finance_id})
 
     return jsonify(int(event))
 
