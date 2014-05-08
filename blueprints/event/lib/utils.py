@@ -5,6 +5,7 @@ from application.models.event import Event, EventType, EventLocalContract
 from application.lib.utils import safe_date
 from flask.ext.login import current_user
 from application.models.exists import rbDocumentType
+from application.lib.settings import Settings
 
 
 def create_new_local_contract(lc_info):
@@ -16,8 +17,13 @@ def create_new_local_contract(lc_info):
     lcon.coordAgent = lc_info.get('coord_agent', '')
     lcon.coordInspector = lc_info.get('coord_inspector', '')
     lcon.coordText = lc_info.get('coord_text', '')
-    lcon.dateContract = lc_info.get('date_contract', '')
-    lcon.numberContract = lc_info.get('number_contract', '')  # todo: if 1c integration on: not required
+
+    if Settings.getBool('Event.Payment.1CODVD'):
+        lcon.dateContract = lc_info.get('date_contract', '')
+        lcon.numberContract = lc_info.get('number_contract', '')
+    else:
+        lcon.dateContract = lc_info['date_contract']
+        lcon.numberContract = lc_info['number_contract']
     lcon.sumLimit = lc_info.get('sum_limit', 0.0)
     lcon.lastName = lc_info.get('last_name')
     lcon.firstName = lc_info.get('first_name')

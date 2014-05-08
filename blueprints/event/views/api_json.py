@@ -86,7 +86,7 @@ def api_event_save():
         event.note = ''
         event.payStatus = 0
         event.uuid = get_new_uuid()
-
+        # TODO: обязательность в зависимости от типа события?
         payment_info = data.get('payment_info')
         if payment_info:
             lcon = get_local_contract(payment_info['local_contract'])
