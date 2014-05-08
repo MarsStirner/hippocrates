@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import datetime
-import json
+from flask import json
 import uuid
 from functools import wraps
 from decimal import Decimal
