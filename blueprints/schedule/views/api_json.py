@@ -2,7 +2,6 @@
 import calendar
 from collections import defaultdict
 import datetime
-from uuid import uuid4
 
 from flask import abort, request
 
@@ -10,9 +9,9 @@ from application.models.event import Event
 from application.systemwide import db, cache
 from application.lib.sphinx_search import SearchPerson
 from application.lib.agesex import recordAcceptableEx
-from application.lib.utils import (jsonify, safe_traverse)
+from application.lib.utils import (jsonify, safe_traverse, get_new_uuid)
 from blueprints.schedule.app import module
-from application.models.exists import (rbSpeciality, rbReasonOfAbsence, rbPrintTemplate, Person, UUID)
+from application.models.exists import (rbSpeciality, rbReasonOfAbsence, rbPrintTemplate, Person)
 from application.models.actions import Action, ActionType, ActionProperty, ActionPropertyType
 from application.models.schedule import Schedule, ScheduleTicket, ScheduleClientTicket, rbAppointmentType, \
     rbReceptionType, rbAttendanceType
@@ -431,7 +430,7 @@ def api_action_new_get():
     if src_action:
         action.person = src_action.person
     elif actionType.defaultExecPerson_id:
-        action.person = Person.query.get(actionType.defaultExecPersonId)
+        action.person = Person.query.get(actionType.defaultExecPerson_id)
     elif actionType.defaultPersonInEvent == 0:
         action.person = None
     elif actionType.defaultPersonInEvent == 2:
@@ -550,9 +549,7 @@ def api_action_post():
     action.coordText = ''
     action.AppointmentType = 0
     if not action.uuid:
-        uuid = UUID()
-        uuid.uuid = '{%s}' % uuid4().get_hex
-        action.uuid = uuid
+        action.uuid = get_new_uuid()
 
     db.session.add(action)
     db.session.commit()

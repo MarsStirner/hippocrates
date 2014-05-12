@@ -1,73 +1,64 @@
 {% extends "event/base.html" %}
 
-{% block modules_css %}
-    {{ super() }}
-    <style>
-        .minheight .list-group-item {
-            min-height: 81px;
-        }
-    </style>
-{% endblock %}
-
-{% import "_macros.html" as macros %}
 {% block main %}
     <div ng-controller="EventCreateCtrl">
-        <legend xmlns="http://www.w3.org/1999/html">Создание обращения, пациент
+        <legend xmlns="http://www.w3.org/1999/html"><h2 class="no-top-margin">Создание обращения, пациент
             <a href="{{ url_for('patients.patient') }}?client_id=[[event_info.client_id]]">
-                [[ event_info.client.fullName ]]</a></legend>
-        <div class="container-fluid">
-            <div class="row">
-                  <h4>  <strong>Организация</strong> [[ event_info.organisation.short_name ]] </h4>
-            </div>
-            <blockquote>
+                [[ event_info.client.fullName ]]</a></h2></legend>
+              <h4>[[ event_info.organisation.short_name ]]</h4>
+            <ng-form name="event_form">
+            <div class="panel panel-default">
+                <ul class="list-group">
+                <li class="list-group-item">
+                <div class="alert alert-warning" ng-show="selected_services.length">
+                    <strong>Внимание!</strong> Для разблокирования полей необходимо очистить список выбранных
+                        <a href="#services" class="alert-link">услуг</a>.</div>
+
                 <div class="row">
                     <div class="col-md-4">
-                        <label for="">Тип обращения</label>
-                        <ui-select ng-model="request_type.selected"
-                                   theme="select2">
+                        <label for="request_type">Тип обращения</label>
+                        <ui-select id="request_type" name="request_type" theme="select2"
+                                   ng-model="request_type.selected" ng-disabled="selected_services.length">
                             <match placeholder="Тип обращения">[[$select.selected.name]]</match>
                             <choices repeat="rt in rbRequestType.objects
                                              | filter: rbRequestType.objects && rbRequestType.get_by_code('policlinic')
-                                             | filter: $select.search ">
+                                             | filter: $select.search">
                                 <div ng-bind-html="rt.name | highlight: $select.search"></div>
                             </choices>
                         </ui-select>
                     </div>
                     <div class="col-md-4">
-                        <label for="">Источник финансирования</label>
-                        <ui-select ng-model="finance.selected"
-                                   theme="select2">
+                        <label for="finance">Источник финансирования</label>
+                        <ui-select id="finance" name="finance" theme="select2"
+                                   ng-model="finance.selected" ng-disabled="selected_services.length">
                             <match placeholder="Источник финансирования">[[$select.selected.name]]</match>
                             <choices repeat="f in rbFinance.objects
                                              | event_type_filter: rbFinance.objects && rbEventType.get_finances_by_rt(request_type.selected.id)
-                                             | filter: $select.search ">
+                                             | filter: $select.search">
                                 <div ng-bind-html="f.name | highlight: $select.search"></div>
                             </choices>
                         </ui-select>
                     </div>
-                    <ng-form name="contractForm">
-                        <div class="col-md-4"
-                             ng-class="{'has-error': contractForm.contract.$invalid && submit_attempt}">
-                            <label for="contract">Договор</label>
-                            <ui-select ng-model="event_info.contract"
-                                       theme="select2" id="contract" name="contract" ng-required="true">
-                                <match placeholder="Договор">[[$select.selected.number]] [[$select.selected.date]]
-                                                             [[$select.selected.resolution]]</match>
-                                <choices repeat="c in Contract.objects
-                                                 | contract_filter:event_info
-                                                 | filter: $select.search">
-                                    <div ng-bind-html="(c.number+' '+c.date+' '+c.resolution) | highlight: $select.search"></div>
-                                </choices>
-                            </ui-select>
-                        </div>
-                    </ng-form>
+                    <div class="col-md-4"
+                         ng-class="{'has-error': event_form.contract.$invalid && editing.submit_attempt}">
+                        <label for="contract">Договор</label>
+                        <ui-select id="contract" name="contract" theme="select2"
+                                   ng-model="event_info.contract" ng-required="true" ng-disabled="selected_services.length">
+                            <match placeholder="Договор">[[$select.selected.number]] [[$select.selected.date]]
+                                                         [[$select.selected.resolution]]</match>
+                            <choices repeat="c in Contract.objects | contract_filter: event_info | filter: $select.search">
+                                <div ng-bind-html="(c.number+' '+c.date+' '+c.resolution) | highlight: $select.search"></div>
+                            </choices>
+                        </ui-select>
+                    </div>
                 </div>
                 <br>
                 <div class="row">
-                    <div class="col-md-4">
-                        <label for="">Тип события</label>
-                        <ui-select ng-model="event_info.event_type"
-                                   theme="select2">
+                    <div class="col-md-4"
+                         ng-class="{'has-error': event_form.event_type.$invalid && editing.submit_attempt}">
+                        <label for="event_type">Тип события</label>
+                        <ui-select id="event_type" name="event_type" theme="select2"
+                                   ng-model="event_info.event_type" ng-required="true" ng-disabled="selected_services.length">
                             <match placeholder="Тип события">[[$select.selected.name]]</match>
                             <choices repeat='et in rbEventType.objects
                                              | event_type_filter: rbEventType.objects && rbEventType.get_filtered_by_rtf(request_type.selected.id, finance.selected.id)
@@ -77,47 +68,51 @@
                         </ui-select>
                     </div>
                 </div>
-            </blockquote>
-            <blockquote>
+            </li>
+            <li class="list-group-item">
                 <div class="row">
-                    <div class="col-md-4">
-                        <label for="">Лечащий врач</label>
-                        <ui-select ng-model="event_info.exec_person"
-                                   theme="select2">
+                    <div class="col-md-4"
+                         ng-class="{'has-error': event_form.exec_person.$invalid && editing.submit_attempt}">
+                        <label for="exec_person">Лечащий врач</label>
+                        <ui-select id="exec_person" name="exec_person" theme="select2"
+                                   ng-model="event_info.exec_person" ng-required="true" ng-change="exec_person_changed()">
                             <match placeholder="Лечащий врач">[[$select.selected.name]]</match>
-                            <choices repeat="p in Person.objects | filter: $select.search ">
+                            <choices repeat="p in Person.objects | filter: $select.search">
                                 <div ng-bind-html="p.name | highlight: $select.search"></div>
                             </choices>
                         </ui-select>
                     </div>
-                    <div class="col-md-4">
-                        <label for="">Подразделение</label>
-                        <ui-select ng-model="event_info.org_structure"
-                                   theme="select2">
+                    <div class="col-md-4"
+                         ng-class="{'has-error': event_form.org_structure.$invalid && editing.submit_attempt}">
+                        <label for="org_structure">Подразделение</label>
+                        <ui-select id="org_structure" name="org_structure" theme="select2"
+                                   ng-model="event_info.org_structure" ng-required="true">
                             <match placeholder="Подразделение">[[$select.selected.name]]</match>
-                            <choices repeat="os in OrgStructure.objects | filter: $select.search ">
+                            <choices repeat="os in OrgStructure.objects | filter: $select.search">
                                 <div ng-bind-html="os.name | highlight: $select.search"></div>
                             </choices>
                         </ui-select>
                     </div>
                 </div>
-            </blockquote>
-            <blockquote>
+            </li>
+            <li class="list-group-item">
                 <div class="row">
-                    <div class="col-md-4">
-                        <label for="">Первичность</label>
-                        <ui-select ng-model="event_info.is_primary"
-                                   theme="select2">
+                    <div class="col-md-4"
+                         ng-class="{'has-error': event_form.is_primary.$invalid && editing.submit_attempt}">
+                        <label for="is_primary">Первичность</label>
+                        <ui-select id="is_primary" name="is_primary" theme="select2"
+                                   ng-model="event_info.is_primary" ng-required="true">
                             <match placeholder="Первичность">[[$select.selected.name]]</match>
-                            <choices repeat="rbp in rbPrimary.objects | filter: $select.search ">
+                            <choices repeat="rbp in rbPrimary.objects | filter: $select.search">
                                 <div ng-bind-html="rbp.name | highlight: $select.search"></div>
                             </choices>
                         </ui-select>
                     </div>
-                    <div class="col-md-4">
-                        <label for="">Порядок</label>
-                        <ui-select ng-model="event_info.order"
-                                   theme="select2">
+                    <div class="col-md-4"
+                         ng-class="{'has-error': event_form.order.$invalid && editing.submit_attempt}">
+                        <label for="order">Порядок</label>
+                        <ui-select id="order" name="order" theme="select2"
+                                   ng-model="event_info.order" ng-required="true">
                             <match placeholder="Порядок">[[$select.selected.name]]</match>
                             <choices repeat="rbo in rbOrder.objects | filter: $select.search ">
                                 <div ng-bind-html="rbo.name | highlight: $select.search"></div>
@@ -127,37 +122,36 @@
                 </div>
                 <br>
                 <div class="row">
-                    <ng-form name="setDateForm">
-                        <div class="col-md-3"
-                             ng-class="{'has-error': setDateForm.event_setDate.$invalid && submit_attempt}">
-                            <label for="event_setDate">Дата начала</label>
-                            <wm-date id="event_setDate" name="event_setDate"
-                                     ng-model="event_info.set_date"
-                                     ng-required="true">
-                            </wm-date>
-                        </div>
-                    </ng-form>
-                    <div class="col-md-2">
-                        <label for="event_setDate">Время начала</label>
-                        <wm-time id="event_setTime" name="event_setTime"
-                                 ng-model="event_info.set_date"
-                                 ng-required="true">
+                    <div class="col-md-3"
+                         ng-class="{'has-error': event_form.set_date.$invalid && editing.submit_attempt}">
+                        <label for="set_date">Дата начала</label>
+                        <wm-date id="set_date" name="set_date" ng-model="event_info.set_date" ng-required="true">
+                        </wm-date>
+                    </div>
+                    <div class="col-md-2"
+                         ng-class="{'has-error': event_form.set_time.$invalid && editing.submit_attempt}">
+                        <label for="set_time">Время начала</label>
+                        <wm-time id="set_time" name="set_time" ng-model="event_info.set_date" ng-required="true">
                         </wm-time>
                     </div>
                     <div class="col-md-3">
-                        <label for="event_execDate">Дата выполнения</label>
-                        <wm-date id="event_execDate" name="event_execDate"
-                                 ng-model="event_info.exec_date">
+                        <label for="exec_date">Дата выполнения</label>
+                        <wm-date id="exec_date" name="exec_date" ng-model="event_info.exec_date">
                         </wm-date>
                     </div>
                     <div class="col-md-3">
-                        <label for="event_setDate">Время выполнения</label>
-                        <wm-time id="event_execTime" name="event_execTime"
-                                 ng-model="event_info.exec_date">
+                        <label for="exec_time">Время выполнения</label>
+                        <wm-time id="exec_time" name="exec_time" ng-model="event_info.exec_date">
                         </wm-time>
                     </div>
                 </div>
-            </blockquote>
+                </li>
+                </ul>
+                </div>
+            </ng-form>
+
+            {% include "event/services.html" %}
+            {% include "event/payment.html" %}
 {#        <div>#}
 {#            <p>debug:</p>#}
 {#            <p>[[event_info | json]]</p>#}
@@ -173,16 +167,20 @@
                 </div>
             </div>
         </div>
-    </div>
 {% endblock %}
 
 {% block modules_js %}
+    {{ super() }}
+    <script type="text/ng-template" id="modal-relatives.html">{% include "event/_modal_relatives.html" %}</script>
     <script>
-    WebMis20.controller('EventCreateCtrl', ['$scope', '$http', 'RefBookService', 'EventType','$window',
-                        function ($scope, $http, RefBookService, EventType, $window) {
+    WebMis20.controller('EventCreateCtrl',
+            ['$scope', '$http', 'RefBookService', 'EventType','$window', '$timeout', 'Settings', '$modal',
+            function ($scope, $http, RefBookService, EventType, $window, $timeout, Settings, $modal) {
         $scope.aux = aux;
-        $scope.submit_attempt = false;
         $scope.event_info = null;
+        $scope.editing = {
+            submit_attempt: false
+        };
         $scope.client_id = aux.getQueryParams(location.search).client_id;
         $scope.Organisation = RefBookService.get('Organisation');
         $scope.Person = RefBookService.get('vrbPersonWithSpeciality');
@@ -191,28 +189,30 @@
         $scope.rbFinance = RefBookService.get('rbFinance');
         $scope.rbEventType = new EventType();
         $scope.OrgStructure = RefBookService.get('OrgStructure');
+        $scope.rbDocumentType = RefBookService.get('rbDocumentType');
 
         $scope.rbOrder = {{ Enum.get_class_by_name('EventOrder').rb() | tojson}};
         $scope.rbPrimary = {{ Enum.get_class_by_name('EventPrimary').rb() | tojson}};
 
-        $scope.editing_list = [];
-        $scope.start_edit = function(element) {
-            $scope.editing_list.push(element);
-        };
+        $scope.Settings = new Settings();
 
-        $scope.stop_edit = function(element) {
-            $scope.editing_list.splice($scope.editing_list.indexOf(element), 1);
+        $scope.integration1CODVD_enabled = function() {
+            return $scope.Settings.get_string('Event.Payment.1CODVD') == '1';
         };
 
         $scope.create_event = function() {
-            $scope.submit_attempt = true;
-            if ($scope.contractForm.$invalid || $scope.setDateForm.$invalid){
-                return false;
+            $scope.editing.submit_attempt = true;
+            if ($scope.event_form.$valid) {
+                $scope.event_info.services = $scope.selected_services;
+                $http.post('{{ url_for('.api_event_save') }}', $scope.event_info).success(function (data) {
+                    var event_id = data['result'];
+                    window.location.href = '{{ url_for('.html_event_info') }}?event_id=' + event_id;
+                });
             }
-            $http.post('{{ url_for('.api_event_save') }}', $scope.event_info).success(function (data) {
-                var event_id = data['result'];
-                window.open('{{ url_for('.html_event_info') }}?event_id=' + event_id, '_self');
-            });
+        };
+
+        $scope.exec_person_changed = function () {
+            $scope.event_info.org_structure = $scope.event_info.exec_person.org_structure;
         };
 
         $scope.request_type = {};
@@ -247,11 +247,119 @@
 
                 $scope.request_type.selected = $scope.request_type_init;
                 $scope.finance.selected = $scope.finance_init;
-            })
+            });
         };
 
         $scope.load_data();
 
-    }])
+        $scope.query = "";
+        var _timeout;
+        $scope.selected_services = [];
+        $scope.full_sum = 0;
+
+        $scope.perform_search = function(val) {
+            if (!val) {
+                $scope.found_services = [];
+            } else {
+                $http.get(
+                    '{{ url_for('.api_search_services') }}', {
+                        params: {
+                            q: val,
+                            client_id: $scope.event_info.client_id,
+                            event_type_id: $scope.event_info.event_type.id,
+                            contract_id: $scope.event_info.contract ? $scope.event_info.contract.id : null,
+                            person_id: $scope.event_info.exec_person ? $scope.event_info.exec_person.id : null
+                        }
+                    }
+                ).success(function (data) {
+                    $scope.found_services = data.result;
+                })
+            }
+        };
+
+        $scope.query_clear = function() {
+            $scope.found_services = null;
+            $scope.query = '';
+        };
+
+        $scope.add_service = function(service) {
+            if (!aux.inArray($scope.selected_services, service)){
+                service.amount = 1;
+                service.sum = service.price * service.amount;
+                $scope.selected_services.push(service);
+            }
+        };
+
+        $scope.remove_service = function(index) {
+            $scope.selected_services.splice(index);
+        };
+
+        $scope.$watch('selected_services', function(new_services, old_services) {
+            $scope.full_sum = 0;
+            for (var i=0; i<new_services.length; i++){
+                $scope.full_sum += new_services[i].price * new_services[i].amount;
+            }
+        }, true);
+
+        $scope.get_payer = function(source, client_id) {
+            $http.get('{{ url_for('.api_new_event_payment_info_get') }}', {
+                params: {
+                    event_type_id: $scope.event_info.event_type.id,
+                    client_id: client_id,
+                    source: source
+                }
+            }).success(function(data) {
+                $scope.event_info.payment_info = data.result;
+            }).error(function() {
+                alert('error in getting data from server');
+            });
+        };
+
+        $scope.open_relatives_modal = function() {
+            var modalInstance = $modal.open({
+                templateUrl: 'modal-relatives.html',
+                controller: RelativesModalCtrl,
+                scope: $scope
+            });
+
+            modalInstance.result.then(function (selected_client_id) {
+                $scope.get_payer('client', selected_client_id);
+            });
+        };
+
+    }]);
+
+    RelativesModalCtrl = function ($scope, $modalInstance) {
+        $scope.initialize = function() {
+            var relatives_direct = $scope.event_info.client.direct_relations.map(function(rel) {
+                return {
+                    name: rel.other_text,
+                    rel_type: rel.relativeType.rightName,
+                    rel_id: rel.other_id
+                };
+            });
+            var relatives_reverse = $scope.event_info.client.reversed_relations.map(function(rel) {
+                return {
+                    name: rel.other_text,
+                    rel_type: rel.relativeType.leftName,
+                    rel_id: rel.other_id
+                };
+            });
+            $scope.relatives = relatives_direct.concat(relatives_reverse);
+            $scope.selected = {
+                client_id: null
+            };
+
+        };
+
+        $scope.initialize();
+
+        $scope.accept = function() {
+            $modalInstance.close($scope.selected.client_id);
+        };
+        $scope.cancel = function() {
+            $modalInstance.dismiss('cancel');
+        };
+    };
     </script>
 {% endblock %}

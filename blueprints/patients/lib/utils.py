@@ -6,6 +6,7 @@ from application.models.client import Client, ClientAllergy, ClientContact, Clie
     BloodHistory
 from application.models.exists import (rbDocumentType, rbPolicyType, rbSocStatusClass, rbSocStatusType,
                                        rbBloodType, rbAccountingSystem, rbContactType, rbRelationType)
+from application.lib.utils import string_to_datetime, safe_date
 
 
 # def format_snils(SNILS):
@@ -70,8 +71,8 @@ def get_new_document(document_info):
     doc.version = 0
     doc.serial = document_info['serial']
     doc.number = document_info['number']
-    doc.date = document_info['begDate']
-    doc.endDate = document_info['endDate']
+    doc.date = safe_date(document_info['begDate'])
+    doc.endDate = safe_date(document_info['endDate'])
     doc.origin = document_info['origin']
     doc.documentType = rbDocumentType.query.filter(
         rbDocumentType.code == document_info['documentType']['code']).first()
@@ -97,8 +98,8 @@ def get_modified_document(client, document_info):
     else:
         doc.serial = document_info['serial']
         doc.number = document_info['number']
-        doc.date = document_info['begDate']
-        doc.endDate = document_info['endDate']
+        doc.date = safe_date(document_info['begDate'])
+        doc.endDate = safe_date(document_info['endDate'])
         doc.origin = document_info['origin']
         doc.modifyDatetime = now
         return (doc, None)

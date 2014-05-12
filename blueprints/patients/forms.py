@@ -59,32 +59,18 @@ class ClientForm(Form):
     vpol_endDate = DateField(u'Действителен до')
     vpol_org = SelectField(u'СМО', widget=AngularJSSelect())
 
-    with app.app_context():
 
-        soc_status_class = SelectField(u'Тип', choices=[(status_type.code, status_type.name) for status_type in
-                                       rbSocStatusClass.query.all()], widget=AngularJSSelect())
-        soc_status_type = SelectField(u'Тип', choices=[(status_class.code, status_class.name) for status_class in
-                                      rbSocStatusType.query.all()], widget=AngularJSSelect())
-        blood_group = SelectField(u'Группа крови', choices=[(blood_type.code, blood_type.name) for blood_type in
-                                  rbBloodType.query.all()], widget=AngularJSSelect())
-        blood_person = SelectField(u'Врач', choices=[(person.id, person.nameText) for person in
-                                          Person.query.all()], widget=AngularJSSelect())
+    soc_status_class = SelectField(u'Тип', choices=[], widget=AngularJSSelect())
+    soc_status_type = SelectField(u'Тип', choices=[], widget=AngularJSSelect())
+    blood_group = SelectField(u'Группа крови', choices=[], widget=AngularJSSelect())
+    blood_person = SelectField(u'Врач', choices=[], widget=AngularJSSelect())
 
-        identification_accountingSystem = SelectField(u'Внешняя учетная система',
-            choices=[(system.code, system.name) for system in rbAccountingSystem.query.all()], widget=AngularJSSelect())
+    identification_accountingSystem = SelectField(u'Внешняя учетная система', choices=[], widget=AngularJSSelect())
 
-        direct_relation_relation = SelectField(u'Тип прямой связи',
-            choices=[(relation.code, relation.leftName + ' -> '+ relation.rightName)
-                     for relation in rbRelationType.query.all()], widget=AngularJSSelect())
-        reversed_relation_relation = SelectField(u'Тип обратной связи',
-            choices=[(relation.code, relation.rightName + ' -> ' + relation.leftName)
-                     for relation in rbRelationType.query.all()], widget=AngularJSSelect())
-        direct_relation_other = SelectField(u'Связан с пациентом',
-            choices=[(client.id, client.nameText) for client in Client.query.all()], widget=AngularJSSelect())
-        reversed_relation_other = SelectField(u'Связан с пациентом',
-            choices=[(client.id, client.nameText) for client in Client.query.all()], widget=AngularJSSelect())
-        contact_contactType = SelectField(u'Тип контакатаа',
-            choices=[(contact.code, contact.name) for contact in rbContactType.query.all()], widget=AngularJSSelect())
+    direct_relation_other = SelectField(u'Связан с пациентом', choices=[], widget=AngularJSSelect())
+    reversed_relation_other = SelectField(u'Связан с пациентом', choices=[], widget=AngularJSSelect())
+    contact_contactType = SelectField(u'Тип контакатаа', choices=[], widget=AngularJSSelect())
+
 
     soc_status_begDate = DateField(u'Дата начала')
     soc_status_endDate = DateField(u'Дата окончания')
@@ -106,3 +92,24 @@ class ClientForm(Form):
     contact_contact = StringField(u'Контакт', widget=AngularJSTextInput())
     contact_notes = StringField(u'Примечание', widget=AngularJSTextInput())
 
+    def __init__(self, *args, **kwargs):
+        super(ClientForm, self).__init__(*args, **kwargs)
+        if not self.soc_status_class.choices:
+            self.soc_status_class.choices = [(status_type.code, status_type.name)
+                                             for status_type in rbSocStatusClass.query.all()]
+        if not self.soc_status_type.choices:
+            self.soc_status_type.choices = [(status_class.code, status_class.name)
+                                            for status_class in rbSocStatusType.query.all()]
+        if not self.blood_group.choices:
+            self.blood_group.choices = [(blood_type.code, blood_type.name) for blood_type in rbBloodType.query.all()]
+        if not self.blood_group.choices:
+            self.blood_group.choices = [(person.id, person.nameText) for person in Person.query.all()]
+        if not self.identification_accountingSystem.choices:
+            self.identification_accountingSystem.choices = [(system.code, system.name)
+                                                            for system in rbAccountingSystem.query.all()]
+        if not self.direct_relation_other.choices:
+            self.direct_relation_other.choices = [(client.id, client.nameText) for client in Client.query.all()]
+        if not self.reversed_relation_other.choices:
+            self.reversed_relation_other.choices = [(client.id, client.nameText) for client in Client.query.all()]
+        if not self.contact_contactType.choices:
+            self.contact_contactType.choices = [(contact.code, contact.name) for contact in rbContactType.query.all()]

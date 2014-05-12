@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import datetime
-import json
+from flask import json
 import uuid
 from functools import wraps
 from decimal import Decimal
@@ -54,25 +54,30 @@ class Bunch:
         self.__dict__.update(kwargs)
 
 
-with app.app_context():
-    _roles = dict()
-    _permissions = dict()
-    user_roles = db.session.query(rbUserProfile).all()
-    if user_roles:
-        for role in user_roles:
-            if role.code:
-                _roles[role.code] = Permission(RoleNeed(role.code))
-                # _roles[role.code].name = role.name
-            for right in getattr(role, 'rights', []):
-                if right.code and right.code not in _permissions:
-                    _permissions[right.code] = Permission(ActionNeed(right.code))
-                    # _permissions[right.code].name = right.name
-    # roles = Bunch(**_roles)
-    # permissions = Bunch(**_permissions)
+_roles = dict()
+_permissions = dict()
+
+
+def init_roles_and_permissions():
+    with app.app_context():
+        user_roles = db.session.query(rbUserProfile).all()
+        if user_roles:
+            for role in user_roles:
+                if role.code:
+                    _roles[role.code] = Permission(RoleNeed(role.code))
+                    # _roles[role.code].name = role.name
+                for right in getattr(role, 'rights', []):
+                    if right.code and right.code not in _permissions:
+                        _permissions[right.code] = Permission(ActionNeed(right.code))
+                        # _permissions[right.code].name = right.name
+        # roles = Bunch(**_roles)
+        # permissions = Bunch(**_permissions)
 
 
 def roles_require(*role_codes):
     http_exception = 403
+    if not _roles:
+        init_roles_and_permissions()
 
     def factory(func):
         @wraps(func)
@@ -97,6 +102,8 @@ def roles_require(*role_codes):
 
 def rights_require(*right_codes):
     http_exception = 403
+    if not _permissions:
+        init_roles_and_permissions()
 
     def factory(func):
         @wraps(func)
@@ -204,13 +211,29 @@ def safe_int(obj):
     return int(obj)
 
 
-def string_to_datetime(date_string, format):
+def string_to_datetime(date_string, fmt='%Y-%m-%dT%H:%M:%S.%fZ'):
     if date_string:
-        date = datetime.datetime.strptime(date_string, format)
-        return timezone('UTC').localize(date).astimezone(tz=timezone(TIME_ZONE))
+        date = datetime.datetime.strptime(date_string, fmt)
+        return timezone('UTC').localize(date).astimezone(tz=timezone(TIME_ZONE)).replace(tzinfo=None)
     else:
         return date_string
 
+
+def safe_date(val):
+    if not val:
+        return None
+    if isinstance(val, basestring):
+        try:
+            val = string_to_datetime(val)
+        except ValueError:
+            val = string_to_datetime(val, '%Y-%m-%d')
+        return val.date()
+    elif isinstance(val, datetime.datetime):
+        return val.date()
+    elif isinstance(val, datetime.date):
+        return val
+    else:
+        return None
 
 def safe_traverse(obj, *args, **kwargs):
     """Безопасное копание вглубь dict'а

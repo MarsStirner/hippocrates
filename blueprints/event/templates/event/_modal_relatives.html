@@ -1,0 +1,18 @@
+<div class="modal-header" xmlns="http://www.w3.org/1999/html">
+    <button type="button" class="close" ng-click="cancel()">&times;</button>
+    <h4 class="modal-title" id="myModalLabel">Родственники</h4>
+</div>
+<div class="modal-body">
+    <ul class="list-group">
+        <li class="list-group-item" ng-repeat="rel in relatives">
+            <input type="radio" ng-model="selected.client_id" ng-value="rel.rel_id"> [[rel.name]] <strong>[[rel.rel_type]]</strong>
+        </li>
+    </ul>
+{#    <p>[[event_info | json]]</p>#}
+{#    <p>[[relatives | json]]</p>#}
+{#    <p>[[selected | json]]</p>#}
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-primary" ng-click="accept()">Выбрать</button>
+    <button type="button" class="btn btn-default" ng-click="cancel()">Отмена</button>
+</div>

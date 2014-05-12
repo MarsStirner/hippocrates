@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from application.systemwide import db
+from exists import FDRecord
 
 __author__ = 'mmalkov'
 
@@ -88,6 +89,8 @@ class ActionProperty(db.Model):
             class_name = u'ActionProperty_Integer'
         elif self.type.typeName == u"Запись в др. ЛПУ":
             class_name = u'ActionProperty_OtherLPURecord'
+        elif self.type.typeName == "FlatDirectory":
+            class_name = u'ActionProperty_FDRecord'
         else:
             class_name = u'ActionProperty_{}'.format(self.type.typeName)
         return globals().get(class_name)
@@ -238,7 +241,7 @@ class ActionProperty_FDRecord(db.Model):
     FDRecord = db.relationship(u'FDRecord')
 
     def get_value(self):
-        return self.value
+        return FDRecord.query.filter(FDRecord.id == self.value).first().get_value(u'Наименование')
 
     property_object = db.relationship('ActionProperty')
 

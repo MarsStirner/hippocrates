@@ -4,10 +4,10 @@ from flask import abort, request
 from flask.helpers import make_response
 
 from application.systemwide import db
-from application.lib.utils import jsonify, get_new_uuid
+from application.lib.utils import jsonify, get_new_uuid, string_to_datetime, safe_date
 from blueprints.patients.app import module
 from application.lib.sphinx_search import SearchPatient
-from application.lib.jsonify import (ClientVisualizer, Format)
+from application.lib.jsonify import ClientVisualizer
 from blueprints.patients.lib.utils import *
 
 
@@ -45,7 +45,7 @@ def api_search_clients():
         else:
             return jsonify([])
     clients = base_query.order_by(Client.lastName, Client.firstName, Client.patrName).limit(100).all()
-    context = ClientVisualizer(Format.JSON)
+    context = ClientVisualizer()
     return jsonify(map(context.make_client_info, clients))
 
 
@@ -88,14 +88,13 @@ def api_patient_save():
 
         client.lastName = client_info['lastName']
         client.firstName = client_info['firstName']
-        client.patrName = client_info['patrName']
+        client.patrName = client_info['patrName'] or ''
         client.sexCode = client_info['sex']['id'] if client_info['sex']['id'] != 0 else 1 # todo: fix
         client.SNILS = client_info['SNILS'].replace(" ", "").replace("-", "") if client_info['SNILS'] else ''
         client.notes = client_info['notes'] if client_info['notes'] else ''
-        client.birthDate = client_info['birthDate']
+        client.birthDate = safe_date(client_info['birthDate'])
         if not client.uuid:
-            new_uuid = get_new_uuid()
-            client.uuid = new_uuid
+            client.uuid = get_new_uuid()
 
         db.session.add(client)
 

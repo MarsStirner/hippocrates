@@ -5,6 +5,7 @@ from application.models.enums import Gender
 from application.models.exists import rbDocumentTypeGroup
 from application.models.kladr_models import Kladr, Street
 from application.systemwide import db
+from sqlalchemy import orm
 
 
 class Client(db.Model):
@@ -112,6 +113,13 @@ class Client(db.Model):
         innerjoin=True
     )
 
+    def __init__(self):
+        self.init_on_load()
+
+    @orm.reconstructor
+    def init_on_load(self):
+        self._id_document = None
+
     def age_tuple(self, moment=None):
         """
         @type moment: datetime.datetime
@@ -144,8 +152,15 @@ class Client(db.Model):
 
     @property
     def document(self):
-        return (self.documents.filter(ClientDocument.deleted == 0).
+        # TODO: get rid of
+        return self.id_document
+
+    @property
+    def id_document(self):
+        if not self._id_document:
+            self._id_document = (self.documents.filter(ClientDocument.deleted == 0).
                 filter(rbDocumentTypeGroup.code == '1').order_by(ClientDocument.date.desc()).first())
+        return self._id_document
 
     def get_actual_document_by_code(self, doc_type_code):
         # пока не используется
@@ -197,10 +212,12 @@ class Client(db.Model):
             'birthDate': self.birthDate,
             'sex': Gender(self.sexCode),
             'SNILS': self.SNILS,
-            'fullName': self.nameText,  # todo: more
+            'fullName': self.nameText,
             'work_org_id': self.works[0].org_id if self.works else None,
             'comp_policy': self.compulsoryPolicy,
             'vol_policy': self.voluntaryPolicy,
+            'direct_relations': self.direct_relations.all(),
+            'reversed_relations': self.reversed_relations.all(),  # todo: more
         }
 
 
@@ -339,18 +356,36 @@ class ClientDocument(db.Model):
     def documentTypeCode(self):
         return self.documentType.regionalCode
 
+    @property
+    def serial_left(self):
+        try:
+            sl = self.serial.split(' ')[0]
+        except (AttributeError, IndexError):
+            sl = None
+        return sl
+
+    @property
+    def serial_right(self):
+        try:
+            sr = self.serial.split(' ')[1]
+        except (AttributeError, IndexError):
+            sr = None
+        return sr
+
     def __unicode__(self):
         return (' '.join([self.documentType.name, self.serial, self.number])).strip()
 
     def __json__(self):
         return {
             'id': self.id,
+            'documentType': self.documentType,
+            'deleted': self.deleted,
             'serial': self.serial,
             'number': self.number,
-            'date': self.date,
-            'origin': self.origin,
+            'begDate': self.date,
             'endDate': self.endDate,
-            'document_type': self.documentType
+            'origin': self.origin,
+            'documentText': self.__unicode__(),
         }
 
     def __int__(self):
@@ -505,6 +540,15 @@ class ClientRelation(db.Model):
     def __int__(self):
         return self.id
 
+    def __json__(self):
+        return {
+            'id': self.id,
+            'deleted': self.deleted,
+            'relativeType': self.relativeType,
+            'other_id': self.other.id,
+            'other_text': self.other.nameText + ' ({})'.format(self.other.id)
+        }
+
 
 class ClientWork(db.Model):
     __tablename__ = u'ClientWork'
@@ -599,6 +643,57 @@ class DirectClientRelation(ClientRelation):
 class ReversedClientRelation(ClientRelation):
 
     other = db.relationship(u'Client', foreign_keys='ClientRelation.client_id')
+
+    @property
+    def role(self):
+        return self.rightName
+
+    @property
+    def otherRole(self):
+        return self.leftName
+
+    @property
+    def regionalCode(self):
+        return self.relativeType.regionalReverseCode
+
+    @property
+    def clientId(self):
+        return self.client_id
+
+    @property
+    def isDirectGenetic(self):
+        return self.relativeType.isBackwardGenetic
+
+    @property
+    def isBackwardGenetic(self):
+        return self.relativeType.isDirectGenetic
+
+    @property
+    def isDirectRepresentative(self):
+        return self.relativeType.isBackwardRepresentative
+
+    @property
+    def isBackwardRepresentative(self):
+        return self.relativeType.isDirectRepresentative
+
+    @property
+    def isDirectEpidemic(self):
+        return self.relativeType.isBackwardEpidemic
+
+    @property
+    def isBackwardEpidemic(self):
+        return self.relativeType.isDirectEpidemic
+
+    @property
+    def isDirectDonation(self):
+        return self.relativeType.isBackwardDonation
+
+    @property
+    def isBackwardDonation(self):
+        return self.relativeType.isDirectDonation
+
+    def __unicode__(self):
+        return self.name + ' ' + self.other
 
 
 class ClientSocStatus(db.Model):
