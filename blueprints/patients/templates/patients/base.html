@@ -1,16 +1,12 @@
 {% extends 'base.html' %}
 
-{% block content %}
+{%- block content %}
     <div class="row">
-        <div class="col-md-2">
-        {% include 'patients/_nav_menu.html' %}
-        </div>
-        <div class="col-md-10">
-            {% block main %}
-            {% endblock %}
+        <div class="col-md-12">
+            {% block main %}{% endblock %}
         </div>
     </div>
-{% endblock %}
+{% endblock -%}
 
 {% block modules_css %}
 {{ super() }}
