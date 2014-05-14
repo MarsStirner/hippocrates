@@ -1,0 +1,158 @@
+<div ng-controller="EventMainInfoCtrl">
+    <legend xmlns="http://www.w3.org/1999/html">Основная информация</legend>
+    <h4>[[ event.info.organisation.short_name ]]</h4>
+    <ng-form name="event_maininfo_form">
+        <div class="panel panel-default">
+            <ul class="list-group">
+                <li class="list-group-item">
+                    <div class="alert alert-warning" ng-show="selected_services.length">
+                        <strong>Внимание!</strong> Для разблокирования полей необходимо очистить список выбранных
+                            <a href="#services" class="alert-link">услуг</a>.</div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label for="request_type">Тип обращения</label>
+                            <ui-select id="request_type" name="request_type" theme="select2"
+                                       ng-model="request_type.selected" ng-disabled="formcnf.request_type.disabled"> {# "selected_services.length" #}
+                                <match placeholder="Тип обращения">[[$select.selected.name]]</match>
+                                <choices repeat="rt in rbRequestType.objects
+                                                 | filter: rbRequestType.objects && rbRequestType.get_by_code('policlinic')
+                                                 | filter: $select.search">
+                                    <div ng-bind-html="rt.name | highlight: $select.search"></div>
+                                </choices>
+                            </ui-select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="finance">Источник финансирования</label>
+                            <ui-select id="finance" name="finance" theme="select2"
+                                       ng-model="finance.selected" ng-disabled="formcnf.finance.disabled"> {# "selected_services.length" #}
+                                <match placeholder="Источник финансирования">[[$select.selected.name]]</match>
+                                <choices repeat="f in rbFinance.objects
+                                                 | event_type_filter: rbFinance.objects && rbEventType.get_finances_by_rt(request_type.selected.id)
+                                                 | filter: $select.search">
+                                    <div ng-bind-html="f.name | highlight: $select.search"></div>
+                                </choices>
+                            </ui-select>
+                        </div>
+                        <div class="col-md-4"
+                             ng-class="{'has-error': event_maininfo_form.contract.$invalid && editing.submit_attempt}">
+                            <label for="contract">Договор</label>
+                            <ui-select id="contract" name="contract" theme="select2"
+                                       ng-model="event.info.contract" ng-required="true" ng-disabled="formcnf.contract.disabled"> {# "selected_services.length" #}
+                                <match placeholder="Договор">[[$select.selected.number]] [[$select.selected.date]]
+                                                             [[$select.selected.resolution]]</match>
+                                <choices repeat="c in Contract.objects | contract_filter: event.info | filter: $select.search">
+                                    <div ng-bind-html="(c.number+' '+c.date+' '+c.resolution) | highlight: $select.search"></div>
+                                </choices>
+                            </ui-select>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="row">
+                        <div class="col-md-4"
+                             ng-class="{'has-error': event_maininfo_form.event_type.$invalid && editing.submit_attempt}">
+                            <label for="event_type">Тип события</label>
+                            <ui-select id="event_type" name="event_type" theme="select2"
+                                       ng-model="event.info.event_type" ng-required="true" ng-disabled="formcnf.event_type.disabled"> {# "selected_services.length" #}
+                                <match placeholder="Тип события">[[$select.selected.name]]</match>
+                                <choices repeat='et in rbEventType.objects
+                                                 | event_type_filter: rbEventType.objects && rbEventType.get_filtered_by_rtf(request_type.selected.id, finance.selected.id)
+                                                 | filter: $select.search '>
+                                    <div ng-bind-html="et.name | highlight: $select.search"></div>
+                                </choices>
+                            </ui-select>
+                        </div>
+                    </div>
+                </li>
+                <li class="list-group-item">
+                    <div class="row">
+                        <div class="col-md-4"
+                             ng-class="{'has-error': event_maininfo_form.exec_person.$invalid && editing.submit_attempt}">
+                            <label for="exec_person">Лечащий врач</label>
+                            <ui-select id="exec_person" name="exec_person" theme="select2"
+                                       ng-model="event.info.exec_person" ng-required="true" ng-change="exec_person_changed()"
+                                       ng-disabled="formcnf.exec_person.disabled">
+                                <match placeholder="Лечащий врач">[[$select.selected.name]]</match>
+                                <choices repeat="p in Person.objects | filter: $select.search">
+                                    <div ng-bind-html="p.name | highlight: $select.search"></div>
+                                </choices>
+                            </ui-select>
+                        </div>
+                        <div class="col-md-4"
+                             ng-class="{'has-error': event_maininfo_form.org_structure.$invalid && editing.submit_attempt}">
+                            <label for="org_structure">Подразделение</label>
+                            <ui-select id="org_structure" name="org_structure" theme="select2"
+                                       ng-model="event.info.org_structure" ng-required="true" ng-disabled="formcnf.org_structure.disabled">
+                                <match placeholder="Подразделение">[[$select.selected.name]]</match>
+                                <choices repeat="os in OrgStructure.objects | filter: $select.search">
+                                    <div ng-bind-html="os.name | highlight: $select.search"></div>
+                                </choices>
+                            </ui-select>
+                        </div>
+                    </div>
+                </li>
+                <li class="list-group-item">
+                    <div class="row">
+                        <div class="col-md-4"
+                             ng-class="{'has-error': event_maininfo_form.primacy.$invalid && editing.submit_attempt}">
+                            <label for="primacy">Первичность</label>
+                            <ui-select id="primacy" name="primacy" theme="select2"
+                                       ng-model="event.info.is_primary" ng-required="true" ng-disabled="formcnf.primacy.disabled">
+                                <match placeholder="Первичность">[[$select.selected.name]]</match>
+                                <choices repeat="rbp in rbPrimary.objects | filter: $select.search">
+                                    <div ng-bind-html="rbp.name | highlight: $select.search"></div>
+                                </choices>
+                            </ui-select>
+                        </div>
+                        <div class="col-md-4"
+                             ng-class="{'has-error': event_maininfo_form.order.$invalid && editing.submit_attempt}">
+                            <label for="order">Порядок</label>
+                            <ui-select id="order" name="order" theme="select2"
+                                       ng-model="event.info.order" ng-required="true" ng-disabled="formcnf.order.disabled">
+                                <match placeholder="Порядок">[[$select.selected.name]]</match>
+                                <choices repeat="rbo in rbOrder.objects | filter: $select.search ">
+                                    <div ng-bind-html="rbo.name | highlight: $select.search"></div>
+                                </choices>
+                            </ui-select>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="row">
+                        <div class="col-md-3"
+                             ng-class="{'has-error': event_maininfo_form.set_date.$invalid && editing.submit_attempt}">
+                            <label for="set_date">Дата начала</label>
+                            <wm-date id="set_date" name="set_date" ng-model="event.info.set_date" ng-required="true"
+                                     ng-disabled="formcnf.set_date.disabled">
+                            </wm-date>
+                        </div>
+                        <div class="col-md-2"
+                             ng-class="{'has-error': event_maininfo_form.set_time.$invalid && editing.submit_attempt}">
+                            <label for="set_time">Время начала</label>
+                            <wm-time id="set_time" name="set_time" ng-model="event.info.set_date" ng-required="true"
+                                     ng-disabled="formcnf.set_date.disabled">
+                            </wm-time>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="exec_date">Дата выполнения</label>
+                            <wm-date id="exec_date" name="exec_date" ng-model="event.info.exec_date"
+                                     ng-disabled="formcnf.exec_date.disabled">
+                            </wm-date>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="exec_time">Время выполнения</label>
+                            <wm-time id="exec_time" name="exec_time" ng-model="event.info.exec_date"
+                                     ng-disabled="formcnf.exec_date.disabled">
+                            </wm-time>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </ng-form>
+{#<div>#}
+{#    <p>debug:</p>#}
+{#    <p>[[event.info | json]]</p>#}
+{#    <p>[[request_type.selected | json]]</p>#}
+{#    <p>[[finance.selected | json]]</p>#}
+{#</div>#}
+</div>
+

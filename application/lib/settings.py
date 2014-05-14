@@ -4,6 +4,7 @@ from application.systemwide import db
 from application.models.exists import Setting
 
 
+# TODO: redo for web
 class Settings(object):
     """Модель доступа к общим (БД, таблицы Setting) настройкам МИС."""
     _cache = None
@@ -53,4 +54,3 @@ class Settings(object):
         db.session.add(s)
         db.session.commit()
         cls._cache[key] = (s.id, val)
-

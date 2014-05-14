@@ -25,10 +25,20 @@ def api_event_info():
     event_id = int(request.args['event_id'])
     event = Event.query.get(event_id)
     vis = EventVisualizer()
-    return jsonify({
+    data = {
         'event': vis.make_event(event),
-        'diagnoses': vis.make_diagnoses(event),
-    })
+    }
+    if 'admin' in current_user.roles and 1 == 10:
+        data['diagnoses'] = vis.make_diagnoses(event)
+        data['payment'] = vis.make_event_payment(event.localContract)
+    elif 'doctor' in current_user.roles and 1 == 10:
+        data['diagnoses'] = vis.make_diagnoses(event)
+    elif 'rRegistartor' in current_user.roles or 'clinicRegistrator' in current_user.roles or 1 == 1:
+        data['payment'] = vis.make_event_payment(event.localContract)
+    else:
+        raise
+
+    return jsonify(data)
 
 
 @module.route('/api/event_new.json', methods=['GET'])
@@ -42,29 +52,31 @@ def api_event_new_get():
     event.client = Client.query.get(client_id)
     event.setDate = datetime.datetime.now()
     v = EventVisualizer()
-    return jsonify(v.make_event(event))
+    return jsonify({
+        'event': v.make_event(event),
+    })
 
 
 @module.route('api/event_save.json', methods=['POST'])
 def api_event_save():
-    data = request.json
     now = datetime.datetime.now()
-    event_id = data.get('id')
+    event_data = request.json['event']
+    event_id = event_data.get('id')
     if event_id:
         event = Event.query.get(event_id)
         event.modifyDatetime = now
         event.modifyPerson_id = current_user.get_id() or 1  # todo: fix
-        event.deleted = data['deleted']
-        event.eventType = EventType.query.get(data['event_type']['id'])
-        event.execPerson_id = data['exec_person']['id']
-        event.setDate = string_to_datetime(data['set_date'])
-        event.execDate = string_to_datetime(data['exec_date'])
-        event.contract_id = data['contract']['id']
-        event.isPrimaryCode = data['is_primary']['id']
-        event.order = data['order']['id']
-        event.orgStructure_id = data['org_structure']['id']
-        event.result_id = data['result']['id'] if data.get('result') else None
-        event.rbAcheResult_id = data['ache_result']['id'] if data.get('ache_result') else None
+        event.deleted = event_data['deleted']
+        event.eventType = EventType.query.get(event_data['event_type']['id'])
+        event.execPerson_id = event_data['exec_person']['id']
+        event.setDate = string_to_datetime(event_data['set_date'])
+        event.execDate = string_to_datetime(event_data['exec_date'])
+        event.contract_id = event_data['contract']['id']
+        event.isPrimaryCode = event_data['is_primary']['id']
+        event.order = event_data['order']['id']
+        event.orgStructure_id = event_data['org_structure']['id']
+        event.result_id = event_data['result']['id'] if event_data.get('result') else None
+        event.rbAcheResult_id = event_data['ache_result']['id'] if event_data.get('ache_result') else None
         event.note = ''
     else:
         event = Event()
@@ -72,24 +84,24 @@ def api_event_save():
         event.createPerson_id = event.modifyPerson_id = event.setPerson_id = current_user.get_id() or 1  # todo: fix
         event.deleted = 0
         event.version = 0
-        event.eventType = EventType.query.get(data['event_type']['id'])
-        event.client_id = data['client_id']
-        event.execPerson_id = data['exec_person']['id']
-        event.setDate = string_to_datetime(data['set_date'])
-        event.execDate = string_to_datetime(data['exec_date'])
+        event.eventType = EventType.query.get(event_data['event_type']['id'])
+        event.client_id = event_data['client_id']
+        event.execPerson_id = event_data['exec_person']['id']
+        event.setDate = string_to_datetime(event_data['set_date'])
+        event.execDate = string_to_datetime(event_data['exec_date'])
         event.externalId = get_new_event_ext_id(event.eventType.id, event.client_id)
-        event.contract_id = data['contract']['id']
-        event.isPrimaryCode = data['is_primary']['id']
-        event.order = data['order']['id']
-        event.org_id = data['organisation']['id']
-        event.orgStructure_id = data['org_structure']['id']
+        event.contract_id = event_data['contract']['id']
+        event.isPrimaryCode = event_data['is_primary']['id']
+        event.order = event_data['order']['id']
+        event.org_id = event_data['organisation']['id']
+        event.orgStructure_id = event_data['org_structure']['id']
         event.note = ''
         event.payStatus = 0
         event.uuid = get_new_uuid()
         # TODO: обязательность в зависимости от типа события?
-        payment_info = data.get('payment_info')
-        if payment_info:
-            lcon = get_local_contract(payment_info['local_contract'])
+        payment_data = request.json['payment']
+        if payment_data:
+            lcon = get_local_contract(payment_data['local_contract'])
             event.localContract = lcon
 
     # todo: Event_Persons, Visit, ...
@@ -102,8 +114,8 @@ def api_event_save():
     else:
         if not event_id:
             # При создании Event'а создаём Action'ы
-            services = data.get('services', [])
-            finance_id = data['contract'].get('finance', {}).get('id')
+            services = event_data.get('services', [])
+            finance_id = event_data['contract'].get('finance', {}).get('id')
             for service in services:
                 for i in xrange(1, service['amount'] + 1):
                     result = create_action(event.id,
@@ -111,7 +123,9 @@ def api_event_save():
                                            current_user.id,
                                            {'finance_id': finance_id})
 
-    return jsonify(int(event))
+    return jsonify({
+        'id': int(event)
+    })
 
 
 @module.route('/api/events/diagnosis.json', methods=['POST'])

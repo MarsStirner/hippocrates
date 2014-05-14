@@ -16,7 +16,7 @@
             <a class="btn btn-success" href="{{ url_for('schedule.appointment') }}?client_id={{ request.args['client_id'] }}"
                ng-if="client_id != 'new'">
                 Записать на приём</a>
-            <a class="btn btn-primary" href="{{ url_for('event.new_event') }}?client_id={{ request.args['client_id'] }}"
+            <a class="btn btn-primary" href="{{ url_for('event.new_event') }}?event_id=new&client_id={{ request.args['client_id'] }}"
                ng-if="client_id != 'new'">
                 Создать обращение</a>
             <span class="dropdown">

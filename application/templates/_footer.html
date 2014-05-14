@@ -8,6 +8,9 @@
         url_action_get = '{{ url_for('schedule.api_action_get') }}',
         url_action_new = '{{ url_for('schedule.api_action_new_get') }}',
         url_action_save = '{{ url_for('schedule.api_action_post') }}',
+        url_event_get = '{{ url_for('event.api_event_info') }}',
+        url_event_new = '{{ url_for('event.api_event_new_get') }}',
+        url_event_save = '{{ url_for('event.api_event_save') }}',
         url_print_templates = '{{ print_subsystem_templates }}',
         url_print_subsystem = '{{ print_subsystem_url }}',
         url_print_template = '{{ print_subsystem_print_template }}';
@@ -21,7 +24,7 @@
 <script src="{{ url_for('static', filename='js/moment.ru.js') }}"></script>
 
 <script src="{{ url_for('static', filename='bootstrap/js/bootstrap.min.js') }}"></script>
-<script src="{{ url_for('static', filename='angular.js/ui-bootstrap-tpls-0.10.0.min.js') }}"></script>
+<script src="{{ url_for('static', filename='angular.js/ui-bootstrap-tpls.min.js') }}"></script>
 
 <script src="{{ url_for('static', filename='ckeditor/ckeditor.js') }}"></script>
 <script src="{{ url_for('static', filename='ckeditor/config.js') }}"></script>
@@ -35,13 +38,15 @@
 <script src="{{ url_for('static', filename='angular-ui-utils/mask.js') }}"></script>
 
 <script src="{{ url_for('static', filename='js/webmis20.js') }}"></script>
+<script src="{{ url_for('static', filename='js/directives.js') }}"></script>
+<script src="{{ url_for('static', filename='js/services.js') }}"></script>
 <script type="text/ng-template" id="_timePicker.html">
     <div class="input-group">
         <input type="text" id="{{id}}" name="{{name}}" class="form-control"
                ng-model="ngModel" autocomplete="off"
-               ng-required="ngRequired" show-time/>
+               ng-required="ngRequired" show-time ng-disabled="ngDisabled"/>
         <span class="input-group-btn">
-            <button class="btn btn-default" type="button" ng-click="open_timepicker_popup()">
+            <button class="btn btn-default" type="button" ng-click="open_timepicker_popup()" ng-disabled="ngDisabled">
                 <i class="glyphicon glyphicon-time"></i>
             </button>
             <div class="popup" ng-show="isPopupVisible">
