@@ -873,6 +873,13 @@ class Job(db.Model):
     job_type = db.relationship(u'rbJobType')
     org_structure = db.relationship(u'OrgStructure')
 
+    def __json__(self):
+        return {
+            'id': self.id,
+            'jobType_id': self.jobType_id,
+            'org_structure': self.org_structure,
+        }
+
 
 class JobTicket(db.Model):
     __tablename__ = u'Job_Ticket'
