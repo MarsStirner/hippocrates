@@ -394,3 +394,15 @@ blockquote.danger{
 .nowrap{
     white-space: nowrap;
 }
+
+.timepicker_popup{
+    margin-top: 1px;
+    padding: 0px 10px;
+    position: absolute;
+    background: #FFF;
+    border: 1px solid #aaa;
+    box-shadow: 0 4px 5px rgba(0,0,0,.15);
+    border-radius: 4px;
+    z-index: 1010;
+    width: 300%;
+}

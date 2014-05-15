@@ -45,16 +45,3 @@ blockquote {
     border-color: #a94442;
     border-radius: 3px;
 }
-
-.popup {
-  margin: 0;
-  background: #fff;
-  border: 1px solid #aaa;
-  box-shadow: 0 4px 5px rgba(0,0,0,.15);
-  z-index: 1010;
-  width: 300%;
-  padding: 10px;
-  border-radius: 4px;
-  margin-top: 1px;
-  position: absolute;
-}
