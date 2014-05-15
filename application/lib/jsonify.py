@@ -533,6 +533,18 @@ class EventVisualizer(object):
             'payments': local_contract.payments if local_contract else []
         }
 
+    def make_event_services(self, event):
+        def make_service(action):
+            return {
+                'at_id': action.actionType.id,
+                'at_code': action.actionType.code,
+                'at_name': action.actionType.name,
+                'service_name': action.actionType.service.name,
+                'price': action.price
+            }
+
+        return map(make_service, event.actions)
+
 
 class ActionVisualizer(object):
     def make_action(self, action):

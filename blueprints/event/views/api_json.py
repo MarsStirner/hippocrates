@@ -15,7 +15,8 @@ from application.lib.utils import (jsonify, safe_traverse, get_new_uuid,
 from blueprints.event.app import module
 from application.models.exists import (Organisation, )
 from application.lib.jsonify import EventVisualizer, ClientVisualizer
-from blueprints.event.lib.utils import get_local_contract, get_prev_event_payment, create_new_local_contract
+from blueprints.event.lib.utils import get_local_contract, get_prev_event_payment, create_new_local_contract, \
+    get_event_services
 from application.lib.sphinx_search import SearchEventService
 from application.lib.data import create_action
 
@@ -35,9 +36,9 @@ def api_event_info():
         data['diagnoses'] = vis.make_diagnoses(event)
     elif 'rRegistartor' in current_user.roles or 'clinicRegistrator' in current_user.roles or 1 == 1:
         data['payment'] = vis.make_event_payment(event.localContract)
+        data['services'] = get_event_services(event_id)  #vis.make_event_services(event)
     else:
         raise
-
     return jsonify(data)
 
 
@@ -114,7 +115,7 @@ def api_event_save():
     else:
         if not event_id:
             # При создании Event'а создаём Action'ы
-            services = event_data.get('services', [])
+            services = request.json.get('services', [])
             finance_id = event_data['contract'].get('finance', {}).get('id')
             for service in services:
                 for i in xrange(1, service['amount'] + 1):
@@ -149,6 +150,7 @@ def api_diagnosis_save():
     diagnostic.modifyDatetime = current_datetime
 
     diagnosis.client_id = data['client_id']
+    diagnosis.person_id = data['person']['id']
     diagnosis.diagnosisType_id = safe_traverse(data, 'diagnosis_type', 'id')
     diagnosis.character_id = safe_traverse(data, 'character', 'id')
     diagnosis.dispanser_id = safe_traverse(data, 'dispanser', 'id')
@@ -170,6 +172,10 @@ def api_diagnosis_save():
     diagnostic.healthGroup_id = safe_traverse(data, 'health_group', 'id')
     diagnostic.result_id = safe_traverse(data, 'result', 'id')
     diagnostic.notes = data.get('notes', '')
+    diagnostic.sanatorium = 0
+    diagnostic.hospital = 0
+    diagnostic.speciality_id = 1
+    diagnostic.version = 0
     diagnostic.rbAcheResult_id = safe_traverse(data, 'ache_result', 'id')
     if not diagnostic.setDate:
         diagnostic.setDate = current_datetime

@@ -2,13 +2,12 @@
 WebMis20.controller('EventServicesCtrl', ['$scope', '$http',
     function($scope, $http) {
         $scope.query = "";
-        var _timeout;
-        $scope.selected_services = [];
+        $scope.found_services = null;
         $scope.full_sum = 0;
 
         $scope.perform_search = function(val) {
             if (!val) {
-                $scope.found_services = [];
+                $scope.found_services = null;
             } else {
                 $http.get(
                     '{{ url_for('.api_search_services') }}', {
@@ -22,7 +21,7 @@ WebMis20.controller('EventServicesCtrl', ['$scope', '$http',
                     }
                 ).success(function (data) {
                     $scope.found_services = data.result;
-                })
+                });
             }
         };
 
@@ -32,21 +31,24 @@ WebMis20.controller('EventServicesCtrl', ['$scope', '$http',
         };
 
         $scope.add_service = function(service) {
-            if (!aux.inArray($scope.selected_services, service)){
+            if (!aux.inArray($scope.event.services, service)){
                 service.amount = 1;
                 service.sum = service.price * service.amount;
-                $scope.selected_services.push(service);
+                $scope.event.services.push(service);
             }
         };
 
         $scope.remove_service = function(index) {
-            $scope.selected_services.splice(index);
+            $scope.event.services.splice(index, 1);
         };
 
-        $scope.$watch('selected_services', function(new_services, old_services) {
-            $scope.full_sum = 0;
-            for (var i=0; i<new_services.length; i++){
-                $scope.full_sum += new_services[i].price * new_services[i].amount;
+        $scope.$watch('event.services', function(new_val, old_val) {
+            if (new_val) {
+                $scope.full_sum = new_val.map(function(service) {
+                    return service.price * service.amount;
+                }).reduce(function(prev_val, cur_val) {
+                    return prev_val + cur_val;
+                }, 0);
             }
         }, true);
 

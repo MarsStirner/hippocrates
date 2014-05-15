@@ -5,14 +5,15 @@
         <div class="panel panel-default">
             <ul class="list-group">
                 <li class="list-group-item">
-                    <div class="alert alert-warning" ng-show="selected_services.length">
+                    <div class="alert alert-warning" ng-show="event.is_new() && event.services.length">
                         <strong>Внимание!</strong> Для разблокирования полей необходимо очистить список выбранных
                             <a href="#services" class="alert-link">услуг</a>.</div>
                     <div class="row">
                         <div class="col-md-4">
                             <label for="request_type">Тип обращения</label>
                             <ui-select id="request_type" name="request_type" theme="select2"
-                                       ng-model="request_type.selected" ng-disabled="formcnf.request_type.disabled"> {# "selected_services.length" #}
+                                       ng-model="request_type.selected"
+                                       ng-disabled="formcnf.request_type.disabled || (event.is_new() && event.services.length)">
                                 <match placeholder="Тип обращения">[[$select.selected.name]]</match>
                                 <choices repeat="rt in rbRequestType.objects
                                                  | filter: rbRequestType.objects && rbRequestType.get_by_code('policlinic')
@@ -24,7 +25,8 @@
                         <div class="col-md-4">
                             <label for="finance">Источник финансирования</label>
                             <ui-select id="finance" name="finance" theme="select2"
-                                       ng-model="finance.selected" ng-disabled="formcnf.finance.disabled"> {# "selected_services.length" #}
+                                       ng-model="finance.selected"
+                                       ng-disabled="formcnf.finance.disabled || (event.is_new() && event.services.length)">
                                 <match placeholder="Источник финансирования">[[$select.selected.name]]</match>
                                 <choices repeat="f in rbFinance.objects
                                                  | event_type_filter: rbFinance.objects && rbEventType.get_finances_by_rt(request_type.selected.id)
@@ -37,7 +39,8 @@
                              ng-class="{'has-error': event_maininfo_form.contract.$invalid && editing.submit_attempt}">
                             <label for="contract">Договор</label>
                             <ui-select id="contract" name="contract" theme="select2"
-                                       ng-model="event.info.contract" ng-required="true" ng-disabled="formcnf.contract.disabled"> {# "selected_services.length" #}
+                                       ng-model="event.info.contract" ng-required="true"
+                                       ng-disabled="formcnf.contract.disabled || (event.is_new() && event.services.length)">
                                 <match placeholder="Договор">[[$select.selected.number]] [[$select.selected.date]]
                                                              [[$select.selected.resolution]]</match>
                                 <choices repeat="c in Contract.objects | contract_filter: event.info | filter: $select.search">
@@ -52,7 +55,8 @@
                              ng-class="{'has-error': event_maininfo_form.event_type.$invalid && editing.submit_attempt}">
                             <label for="event_type">Тип события</label>
                             <ui-select id="event_type" name="event_type" theme="select2"
-                                       ng-model="event.info.event_type" ng-required="true" ng-disabled="formcnf.event_type.disabled"> {# "selected_services.length" #}
+                                       ng-model="event.info.event_type" ng-required="true"
+                                       ng-disabled="formcnf.event_type.disabled || (event.is_new() && event.services.length)">
                                 <match placeholder="Тип события">[[$select.selected.name]]</match>
                                 <choices repeat='et in rbEventType.objects
                                                  | event_type_filter: rbEventType.objects && rbEventType.get_filtered_by_rtf(request_type.selected.id, finance.selected.id)

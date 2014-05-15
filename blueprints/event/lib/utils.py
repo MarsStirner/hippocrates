@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 
 import datetime
+from application.models.actions import Action, ActionType
 from application.models.event import Event, EventType, EventLocalContract
 from application.lib.utils import safe_date
 from flask.ext.login import current_user
-from application.models.exists import rbDocumentType
+from application.models.exists import rbDocumentType, ContractTariff, Contract, rbService
 from application.lib.settings import Settings
+from application.systemwide import db
 
 
 def create_new_local_contract(lc_info):
@@ -77,3 +79,27 @@ def get_prev_event_payment(client_id, event_type_id):
         lc = EventLocalContract()
         event.localContract = lc
     return event
+
+
+def get_event_services(event_id):
+    query = db.session.query(Event, ActionType.id, ActionType.code, ActionType.name, rbService.name, ContractTariff.price).join(
+        EventType, Contract, ContractTariff, Action, ActionType).join(
+        rbService, ActionType.service_id == rbService.id
+    ).filter(
+        Action.event_id == event_id,
+        ContractTariff.eventType_id == EventType.id,
+        ContractTariff.service_id == ActionType.service_id
+    )
+    r = []
+    for e, at_id, at_code, at_name, service_name, price in query:
+        # print at_code, at_name, service_name, price
+        s = {
+            'at_id': at_id,
+            'at_code': at_code,
+            'at_name': at_name,
+            'service_name': service_name,
+            'price': price,
+            'amount': 1
+        }
+        r.append(s)
+    return r

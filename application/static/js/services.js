@@ -8,7 +8,8 @@ angular.module('WebMis20.services', []).
                 this.client_id = client_id;
                 this.info = null;
                 this.payment = null;
-                this.diagnoses = null;
+                this.diagnoses = [];
+                this.services = [];
             };
 
             WMEvent.prototype.reload = function() {
@@ -22,7 +23,8 @@ angular.module('WebMis20.services', []).
                     success(function(data) {
                         self.info = data.result.event;
                         self.payment = data.result.payment || null;
-                        self.diagnoses = data.result.diagnoses || null;
+                        self.diagnoses = data.result.diagnoses || [];
+                        self.services = data.result.services || [];
                         deferred.resolve();
                     }).
                     error(function(data) {
@@ -36,7 +38,8 @@ angular.module('WebMis20.services', []).
                 var deferred = $q.defer();
                 $http.post(url_event_save, {
                     event: this.info,
-                    payment: this.payment
+                    payment: this.payment,
+                    services: this.services
                 }).
                     success(function(data) {
                         deferred.resolve(data.result.id);

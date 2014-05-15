@@ -932,6 +932,8 @@ class Contract(db.Model):
                                      primaryjoin="and_(ContractSpecification.master_id == Contract.id, ContractSpecification.deleted == 0)")
     contingent = db.relationship(u'ContractContingent',
                                  primaryjoin="and_(ContractContingent.master_id == Contract.id, ContractContingent.deleted == 0)")
+    tariff = db.relationship('ContractTariff',
+                             primaryjoin='and_(ContractTariff.master_id == Contract.id, ContractTariff.deleted == 0)')
 
     def __unicode__(self):
         return u'%s %s' % (self.number, self.date)
@@ -1038,7 +1040,7 @@ class ContractTariff(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     deleted = db.Column(db.Integer, nullable=False, server_default=u"'0'")
-    master_id = db.Column(db.Integer, nullable=False, index=True)
+    master_id = db.Column(db.Integer, db.ForeignKey('Contract.id'), nullable=False, index=True)
     eventType_id = db.Column(db.Integer, index=True)
     tariffType = db.Column(db.Integer, nullable=False)
     service_id = db.Column(db.Integer, index=True)

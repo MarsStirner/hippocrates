@@ -19,7 +19,13 @@
         <legend xmlns="http://www.w3.org/1999/html">
             <h2 class="no-top-margin">[[event.is_new() ? 'Создание обращения' : 'Обращение № ' + event.info.external_id]], пациент
                 <a href="{{ url_for('patients.patient') }}?client_id=[[event.info.client_id]]">[[ event.info.client.fullName ]]</a>
+                <span class="pull-right">
+                    <button type="button" ng-click="cancel_editing();" class="btn btn-lg btn-danger">Назад</button>
+                    <button type="button" ng-click="save_event();" class="btn btn-lg btn-success"
+                            ng-bind="event.is_new() ? 'Создать' : 'Сохранить'">Создать</button>
+                </span>
             </h2>
+
         </legend>
 
         <div class="marginal">
@@ -31,7 +37,7 @@
             <tabset>
                 <tab><tab-heading>Основная Информация</tab-heading>
                     {% include "event/_main_info.html" %}
-                    {% include "event/diagnoses.html" %}
+                    {% include "event/_diagnoses.html" %}
                 </tab>
                 <tab><tab-heading>Медицинские документы</tab-heading>
                     {{ action_list.action_list('event.info.med_doc_actions', 0) }}
@@ -52,18 +58,31 @@
         {% endif %}
 
         <div class="row">
-            <div class="col-md-12">
-                <div class="pull-right">
-                    <button type="button" ng-click="cancel_editing();" class="btn btn-lg btn-danger">Назад</button>
-                    <button type="button" ng-click="save_event();" class="btn btn-lg btn-success"
-                            ng-bind="event.is_new() ? 'Создать' : 'Сохранить'">Создать</button>
+            <div class="col-md-6 text-left">
+                <div class="dropup" ng-if="!event.is_new()">
+                    <button class="btn btn-lg btn-default dropdown-toggle" type="button" id="print_dropdownMenu"
+                            data-toggle="dropdown" ng-disabled="!ps.templates">
+                        <span class="glyphicon glyphicon-print"></span> Печать <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu" role="menu" aria-labelledby="print_dropdownMenu">
+                        <li role="presentation" ng-repeat="template in ps.templates">
+                            <a role="menuitem" tabindex="-1" href="" class="print_template"
+                               ng-click="ps.print_template(template.id)" ng-bind="template.name"></a>
+                        </li>
+                    </ul>
                 </div>
             </div>
+            <div class="col-md-6 text-right">
+                <button type="button" ng-click="cancel_editing();" class="btn btn-lg btn-danger">Назад</button>
+                <button type="button" ng-click="save_event();" class="btn btn-lg btn-success"
+                        ng-bind="event.is_new() ? 'Создать' : 'Сохранить'">Создать</button>
+            </div>
         </div>
-        <div>
-            <p>debug:</p>
-            <p>[[event | json]]</p>
-        </div>
+
+{#        <div>#}
+{#            <p>debug:</p>#}
+{#            <p>[[event | json]]</p>#}
+{#        </div>#}
     </div>
 {% endblock %}
 
@@ -74,6 +93,7 @@
         function ($scope, WMEvent, $http, RefBookService, $window, PrintingService, Settings) {
 
         $scope.aux = aux;
+        $scope.Organisation = RefBookService.get('Organisation');
         $scope.Settings = new Settings();
 
         $scope.event_id = aux.getQueryParams(location.search).event_id;
@@ -109,8 +129,6 @@
         $scope.save_event = function() {
             $scope.editing.submit_attempt = true;
             if ($scope.event_form.$valid) {
-                $scope.event.info.services = $scope.selected_services;
-
                 $scope.event.save().
                     then(function(event_id) {
                         if ($scope.event.is_new()) {
@@ -197,7 +215,9 @@
     }]);
 </script>
 {% include "event/_main_info_js.html" %}
-{% if form_role == 'receptionist' %}
+{% if form_role == 'doctor' %}
+    {% include "event/_diagnoses_js.html" %}
+{% elif form_role == 'receptionist' %}
     {% include "event/_services_js.html" %}
     {% include "event/_payment_js.html" %}
 {% endif %}
