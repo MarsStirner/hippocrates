@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from collections import defaultdict
 
 import datetime
 from application.models.actions import Action, ActionType
@@ -82,24 +83,39 @@ def get_prev_event_payment(client_id, event_type_id):
 
 
 def get_event_services(event_id):
-    query = db.session.query(Event, ActionType.id, ActionType.code, ActionType.name, rbService.name, ContractTariff.price).join(
-        EventType, Contract, ContractTariff, Action, ActionType).join(
-        rbService, ActionType.service_id == rbService.id
-    ).filter(
-        Action.event_id == event_id,
-        ContractTariff.eventType_id == EventType.id,
-        ContractTariff.service_id == ActionType.service_id
-    )
-    r = []
-    for e, at_id, at_code, at_name, service_name, price in query:
-        # print at_code, at_name, service_name, price
+    query = db.session.query(Action,
+                             ActionType.id,
+                             ActionType.service_id,
+                             ActionType.code,
+                             ActionType.name,
+                             rbService.name,
+                             ContractTariff.price).\
+        join(Event,
+             EventType,
+             Contract,
+             ContractTariff,
+             ActionType).\
+        join(rbService, ActionType.service_id == rbService.id).\
+        filter(Action.event_id == event_id,
+               ContractTariff.eventType_id == EventType.id,
+               ContractTariff.service_id == ActionType.service_id,
+               Action.deleted == 0,
+               ContractTariff.deleted == 0).all()
+    services_by_at = defaultdict(list)
+    for a, at_id, service_id, at_code, at_name, service_name, price in query:
         s = {
             'at_id': at_id,
             'at_code': at_code,
             'at_name': at_name,
             'service_name': service_name,
             'price': price,
-            'amount': 1
+            'action_id': a.id,
+            'service_id': service_id
         }
-        r.append(s)
-    return r
+        services_by_at[(at_id, service_id)].append(s)
+    services_grouped = [dict(service_group[0],
+                             amount=len(service_group),
+                             sum=service_group[0]['price'] * len(service_group),
+                             actions=[s['action_id'] for s in service_group])
+                        for k, service_group in services_by_at.iteritems()]
+    return services_grouped

@@ -145,7 +145,7 @@ var WebMis20 = angular.module('WebMis20', ['WebMis20.services', 'WebMis20.direct
                     out.push(item);
                 }
             });
-            if (out && out.indexOf(event_info.contract) == -1){
+            if (out.length && out.indexOf(event_info.contract) == -1){
                 event_info.contract = out[0];
             }
         }

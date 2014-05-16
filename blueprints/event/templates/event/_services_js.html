@@ -5,6 +5,17 @@ WebMis20.controller('EventServicesCtrl', ['$scope', '$http',
         $scope.found_services = null;
         $scope.full_sum = 0;
 
+        $scope.$on('event_loaded', function() {
+            var payments = $scope.event.payment.payments;
+            $scope.event.services.forEach(function(service) {
+                service.fully_paied = service.actions.filter(function(a_id) {
+                    return payments.filter(function(p) {
+                        return p.action_id === a_id && p.service_id === service.service_id && p.sum === service.sum;
+                    }).length > 0 ? undefined : true;
+                }).length === 0;
+            });
+        });
+
         $scope.perform_search = function(val) {
             if (!val) {
                 $scope.found_services = null;
@@ -52,6 +63,23 @@ WebMis20.controller('EventServicesCtrl', ['$scope', '$http',
             }
         }, true);
 
+        $scope.pay = function(service) {
+            service.actions.forEach(function(a_id) {
+                $http.post(
+                    '{{ url_for('.api_service_make_payment') }}', {
+                        event_id: $scope.event.info.id,
+                        service_id: service.service_id,
+                        action_id: a_id,
+                        sum: service.sum
+                    }
+                ).success(function() {
+                    alert('ok');
+                }).error(function() {
+                    alert('error');
+                });
+            });
+
+        };
 
 }]);
 </script>

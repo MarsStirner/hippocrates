@@ -54,7 +54,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr ng-repeat="(index, service) in event.services" class="info">
+                    <tr ng-repeat="(index, service) in event.services" ng-class="{'success': service.fully_paied, 'info': !service.fully_paied}">
                         <td ng-bind="service.at_code"></td>
                         <td ng-bind="service.service_name"></td>
                         <td ng-bind="service.at_name"></td>
@@ -67,6 +67,9 @@
                         <td>
                             <button type="button" class="btn btn-sm btn-danger" title="Убрать из списка услуг"
                                     ng-click="remove_service(index)"><span class="glyphicon glyphicon-trash"></span>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-success" title="Убрать из списка услуг"
+                                    ng-click="pay(service)"><span class="glyphicon glyphicon-credit-card"></span>
                             </button>
                         </td>
                     </tr>

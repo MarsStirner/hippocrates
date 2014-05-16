@@ -7,7 +7,7 @@ from flask.ext.login import current_user
 from application.models.actions import ActionType
 from application.models.client import Client
 from application.models.enums import EventPrimary, EventOrder
-from application.models.event import (Event, EventType, EventType_Action, Diagnosis, Diagnostic)
+from application.models.event import (Event, EventType, EventType_Action, Diagnosis, Diagnostic, EventPayment)
 from application.models.exists import Person, OrgStructure
 from application.systemwide import db
 from application.lib.utils import (jsonify, safe_traverse, get_new_uuid,
@@ -248,3 +248,30 @@ def api_new_event_payment_info_get():
     vis = EventVisualizer()
     res = vis.make_event_payment(lcon)
     return jsonify(res)
+
+
+@module.route('/api/event_payment/make_payment.json', methods=['POST'])
+def api_service_make_payment():
+    pay_data = request.json
+    event_id = pay_data['event_id']
+
+    event = Event.query.get(event_id)
+
+    payment = EventPayment()
+    payment.createDatetime = payment.modifyDatetime = datetime.datetime.now()
+    payment.deleted = 0
+    payment.date = datetime.date.today()
+    payment.sum = pay_data['sum']
+    payment.typePayment = 0
+    payment.cashBox = ''
+    payment.sumDiscount = 0
+    payment.action_id = pay_data['action_id']
+    payment.service_id = pay_data['service_id']
+
+    event.localContract.payments.append(payment)
+    db.session.add(event)
+    db.session.commit()
+
+    return jsonify({
+        'result': 'ok'
+    })
