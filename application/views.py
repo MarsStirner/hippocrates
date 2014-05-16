@@ -10,7 +10,7 @@ from application.models.exists import rbPrintTemplate
 from .lib.utils import public_endpoint, jsonify, roles_require, rights_require, request_wants_json
 from application.models import *
 from lib.user import UserAuth, AnonymousUser
-from forms import LoginForm
+from forms import LoginForm, RoleForm
 
 
 login_manager.login_view = 'login'
@@ -49,11 +49,27 @@ def login():
             login_user(user)
             # Tell Flask-Principal the identity changed
             identity_changed.send(current_app._get_current_object(), identity=Identity(user.id))
-            return redirect(request.args.get('next') or url_for('index'))
+            return redirect(url_for('select_role'))
         else:
             errors.append(u'Неверная пара логин/пароль')
 
     return render_template('user/login.html', form=form, errors=errors)
+
+
+@app.route('/select_role/', methods=['GET', 'POST'])
+@public_endpoint
+def select_role():
+    form = RoleForm()
+
+    errors = list()
+
+    form.roles.choices = current_user.roles
+
+    # Validate form input
+    if form.validate():
+        current_user.current_role = form.roles.data
+        return redirect(request.args.get('next') or url_for('index'))
+    return render_template('user/select_role.html', form=form, errors=errors)
 
 
 @app.route('/logout/')
