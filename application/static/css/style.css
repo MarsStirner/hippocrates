@@ -63,7 +63,8 @@ body.loading .loader {
     margin-bottom: 10px;
 }
 .form-signin input[type="text"],
-.form-signin input[type="password"] {
+.form-signin input[type="password"],
+.form-signin select{
     font-size: 16px;
     height: auto;
     margin-bottom: 15px;
@@ -405,4 +406,12 @@ blockquote.danger{
     border-radius: 4px;
     z-index: 1010;
     width: 300%;
+}
+
+.lander a:hover{
+    text-decoration: none;
+}
+
+.lander ol{
+    text-align: left;
 }

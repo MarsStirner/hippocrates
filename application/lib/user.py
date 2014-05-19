@@ -15,6 +15,7 @@ class User(UserMixin):
                                   for key, value in person.__dict__.iteritems()
                                   if not callable(value) and not key.startswith('__')))
         self.roles = list()
+        self.current_role = None
         self.rights = list()
         self.post = dict()
         if person.post:
@@ -27,11 +28,14 @@ class User(UserMixin):
         return self.deleted == 0
 
     def is_admin(self):
-        return self.has_role('admin')
+        return self.current_role == 'admin'
 
     def has_role(self, role):
         # what about list?
-        return role in self.roles
+        for r in self.roles:
+            if r[0] == role:
+                return True
+        return False
 
     def has_right(self, right):
         # what about list?
@@ -40,7 +44,7 @@ class User(UserMixin):
     def set_roles_rights(self, person):
         if person.user_profiles:
             for role in person.user_profiles:
-                self.roles.append(role.code)
+                self.roles.append((role.code, role.name))
                 if role.rights:
                     for right in role.rights:
                         self.rights.append(right.code)
