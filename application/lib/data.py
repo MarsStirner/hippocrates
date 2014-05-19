@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
-from datetime import datetime
+from datetime import datetime, time, timedelta
 from application.systemwide import db
 from application.lib.utils import logger, get_new_uuid
 from application.models.actions import Action, ActionType, ActionPropertyType, ActionProperty
 from application.models.exists import Person, UUID
 from application.models.event import Event
 from application.lib.agesex import recordAcceptableEx
+from application.lib.calendar import calendar
 
 # планируемая дата выполнения (default planned end date)
 DPED_UNDEFINED = 0  # Не определено
@@ -116,15 +117,11 @@ def create_action(event_id, action_type_id, current_user_id, data):
 
 
 def isRedDay(date):
-    holidays = QtGui.qApp.calendarInfo.getList()
+    holidays = calendar.getList()
+    holiday = False
     for hol in holidays:
-        if (date.day() == hol.date.day() and date.month() == hol.date.month() and
-            hol.date.year() <= date.year() <= hol.end_year):
-            holiday = True
-            break
-    else:
-        holiday = False
-    return date.dayOfWeek() > Qt.Friday or holiday
+        break
+    return date.isoweekday > 5 or holiday
 
 
 def addPeriod(startDate, length, countRedDays):
@@ -147,57 +144,59 @@ def addPeriod(startDate, length, countRedDays):
         savedTime = None
 
     if countRedDays:
-        result_date = startDate.addDays(length-1)
+        result_date = startDate + timedelta(days=length-1)
     else:
         current_date = startDate
         # если начальная дата не рабочий день, то она не должна учитываться
         while isRedDay(current_date):
-            current_date = current_date.addDays(1)
-        days_count = length - 1 # не считая текущий
+            current_date = current_date + timedelta(days=1)
+        days_count = length - 1  # не считая текущий
         if days_count < 0:
-            current_date = startDate.addDays(-1)
+            current_date = startDate + timedelta(days=-1)
         while days_count > 0:
-            current_date = current_date.addDays(1)
+            current_date = current_date + timedelta(days=1)
             if not isRedDay(current_date):
                 days_count -= 1
         result_date = current_date
     if savedTime:
-        result_date = QDateTime(result_date, savedTime)
+        result_date = datetime.combine(result_date, savedTime)
     return result_date
 
 
 def get_planned_end_datetime(action_type_id):
     """Получение планируемого времени для действия
     @param actionType_id: тип действия
-    @return: дата, время понируеого действия
+    @return: дата, время понируемого действия
     @rtype 2-tuple"""
+    now = datetime.now()
+    current_date = now.date()
+    action_type = ActionType.query.get(int(action_type_id))
 
-    return datetime.now()
-    # TODO: calculate plannedEndDate
-
-    actionType = ActionTypeInfoProvider.getById(actionType_id)
-    defaultPlannedEndDate = actionType.defaultPlannedEndDate
-    currentDate = QDate.currentDate()
-    if defaultPlannedEndDate == CActionType.dped_undefined:
+    defaultPlannedEndDate = action_type.defaultPlannedEndDate
+    currentDate = datetime.now()
+    if defaultPlannedEndDate == DPED_UNDEFINED:
         plannedEndDate = None
-    elif defaultPlannedEndDate == CActionType.dped_nextDay:
+    elif defaultPlannedEndDate == DPED_NEXT_DAY:
         plannedEndDate = addPeriod(currentDate, 2, True)
-    elif defaultPlannedEndDate == CActionType.dped_nextWorkDay:
+    elif defaultPlannedEndDate == DPED_NEXT_WORK_DAY:
         plannedEndDate = addPeriod(currentDate, 2, False)
-    elif defaultPlannedEndDate == CActionType.dped_currentDay:
-        plannedEndDate = QDate.currentDate()
+    elif defaultPlannedEndDate == DPED_CURRENT_DAY:
+        plannedEndDate = current_date
     else:
         plannedEndDate = None
 
+    plannedEndTime = None
     if plannedEndDate:
-        if defaultPlannedEndDate < CActionType.dped_currentDay:
-            plannedEndTime = QTime(7, 0)
-        elif defaultPlannedEndDate == CActionType.dped_currentDay:
-            cur_hour = QTime.currentTime().hour()
+        if defaultPlannedEndDate < DPED_CURRENT_DAY:
+            plannedEndTime = time(7, 0)
+        elif defaultPlannedEndDate == DPED_CURRENT_DAY:
+            cur_hour = now.hour
             if cur_hour == 23:
-                plannedEndTime = QTime(23, 59)
+                plannedEndTime = time(23, 59)
             else:
-                plannedEndTime  = QTime(cur_hour + 1, 0)
-    else:
-        plannedEndTime = None
-    return plannedEndDate, plannedEndTime
+                plannedEndTime = time(cur_hour + 1, 0)
+    if plannedEndDate is None:
+        plannedEndDate = current_date
+    if plannedEndTime is None:
+        plannedEndTime = time(7, 0)
+    return datetime.combine(plannedEndDate, plannedEndTime)
