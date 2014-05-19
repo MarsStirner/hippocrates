@@ -54,7 +54,8 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr ng-repeat="(index, service) in event.services" ng-class="{'success': service.fully_paied, 'info': !service.fully_paied}">
+                    <tr ng-repeat="(index, service) in event.services"
+                        ng-class="{'success': service.fully_paid, 'warning': service.partially_paid, 'info': !service.fully_paid && !service.partially_paid}">
                         <td ng-bind="service.at_code"></td>
                         <td ng-bind="service.service_name"></td>
                         <td ng-bind="service.at_name"></td>
@@ -66,9 +67,10 @@
                         <td ng-bind="service.sum" class="text-right"></td>
                         <td>
                             <button type="button" class="btn btn-sm btn-danger" title="Убрать из списка услуг"
+                                    ng-if="!(service.fully_paid || service.partially_paid)"
                                     ng-click="remove_service(index)"><span class="glyphicon glyphicon-trash"></span>
                             </button>
-                            <button type="button" class="btn btn-sm btn-success" title="Убрать из списка услуг"
+                            <button type="button" class="btn btn-sm btn-success" title="Оплатить"
                                     ng-click="pay(service)"><span class="glyphicon glyphicon-credit-card"></span>
                             </button>
                         </td>
@@ -80,7 +82,13 @@
     <blockquote class="novmargin" ng-show="event.services.length">
         <div class="row">
         <div class="col-md-12">
-            <span class="text-muted">Итого к оплате:</span> <span ng-bind="full_sum" class="text-info"></span> <span class="text-info">руб.</span>
+            <span class="text-muted">Итого к оплате: </span>
+            <span class="text-success" ng-bind="full_sum"></span><span class="text-success"> руб.</span>
+            <span class="text-muted"> Оплачено: </span>
+            <span class="text-primary" ng-bind="paid_sum"></span><span class="text-primary"> руб.</span>
+            <span class="text-muted"> Долг: </span>
+            <span class="text-danger" ng-bind="full_sum - paid_sum"></span><span class="text-danger"> руб.</span>
+
         </div>
         </div>
     </blockquote>

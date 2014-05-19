@@ -6,15 +6,21 @@ WebMis20.controller('EventServicesCtrl', ['$scope', '$http',
         $scope.full_sum = 0;
 
         $scope.$on('event_loaded', function() {
+            $scope.refresh_payments();
+        });
+
+        $scope.refresh_payments = function() {
             var payments = $scope.event.payment.payments;
             $scope.event.services.forEach(function(service) {
-                service.fully_paied = service.actions.filter(function(a_id) {
+                var unpaid = service.actions.filter(function(a_id) {
                     return payments.filter(function(p) {
-                        return p.action_id === a_id && p.service_id === service.service_id && p.sum === service.sum;
-                    }).length > 0 ? undefined : true;
-                }).length === 0;
+                        return p.action_id === a_id && p.service_id === service.service_id && p.sum === service.price;
+                    }).length === 1 ? undefined : true;
+                });
+                service.fully_paid = unpaid.length === 0;
+                service.partially_paid = unpaid.length > 0 && unpaid.length < service.actions.length;
             });
-        });
+        };
 
         $scope.perform_search = function(val) {
             if (!val) {
@@ -60,25 +66,41 @@ WebMis20.controller('EventServicesCtrl', ['$scope', '$http',
                 }).reduce(function(prev_val, cur_val) {
                     return prev_val + cur_val;
                 }, 0);
+
+                var payment = $scope.event.payment;
+                $scope.paid_sum = payment && payment.payments.map(function(payment) {
+                    return payment.sum + payment.sum_discount;
+                }).reduce(function(prev_val, cur_val) {
+                    return prev_val + cur_val;
+                }, 0) || 0;
             }
         }, true);
 
         $scope.pay = function(service) {
+            var act_to_pay = null;
+            var paid_actions = $scope.event.payment.payments.map(function(p) {
+                return p.action_id;
+            });
             service.actions.forEach(function(a_id) {
+                if (act_to_pay === null && (paid_actions.indexOf(a_id) == -1)) {
+                    act_to_pay = a_id;
+                }
+            });
+            if (act_to_pay) {
                 $http.post(
                     '{{ url_for('.api_service_make_payment') }}', {
                         event_id: $scope.event.info.id,
                         service_id: service.service_id,
-                        action_id: a_id,
-                        sum: service.sum
+                        action_id: act_to_pay,
+                        sum: service.price
                     }
                 ).success(function() {
-                    alert('ok');
+{#                    alert('ok');#}
                 }).error(function() {
                     alert('error');
                 });
-            });
-
+            }
+            $scope.event.reload().then($scope.refresh_payments);
         };
 
 }]);

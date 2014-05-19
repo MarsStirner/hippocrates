@@ -31,11 +31,11 @@ def api_event_info():
     }
     if 'admin' in current_user.roles and 1 == 10:
         data['diagnoses'] = vis.make_diagnoses(event)
-        data['payment'] = vis.make_event_payment(event.localContract)
+        data['payment'] = vis.make_event_payment(event.localContract, event_id)
     elif 'doctor' in current_user.roles and 1 == 10:
         data['diagnoses'] = vis.make_diagnoses(event)
     elif 'rRegistartor' in current_user.roles or 'clinicRegistrator' in current_user.roles or 1 == 1:
-        data['payment'] = vis.make_event_payment(event.localContract)
+        data['payment'] = vis.make_event_payment(event.localContract, event_id)
         data['services'] = get_event_services(event_id)  #vis.make_event_services(event)
     else:
         raise
@@ -252,6 +252,7 @@ def api_new_event_payment_info_get():
 
 @module.route('/api/event_payment/make_payment.json', methods=['POST'])
 def api_service_make_payment():
+    # for tests
     pay_data = request.json
     event_id = pay_data['event_id']
 
@@ -260,6 +261,7 @@ def api_service_make_payment():
     payment = EventPayment()
     payment.createDatetime = payment.modifyDatetime = datetime.datetime.now()
     payment.deleted = 0
+    payment.master_id = event_id
     payment.date = datetime.date.today()
     payment.sum = pay_data['sum']
     payment.typePayment = 0
