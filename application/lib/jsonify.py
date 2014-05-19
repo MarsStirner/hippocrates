@@ -527,11 +527,25 @@ class EventVisualizer(object):
             'person_text': safe_unicode(action.person)
         }
 
-    def make_event_payment(self, local_contract):
+    def make_event_payment(self, local_contract, event_id=None):
         return {
             'local_contract': local_contract,
-            'payments': local_contract.payments if local_contract else []
+            'payments': [payment
+                         for payment in local_contract.payments
+                         if payment.master_id == event_id] if local_contract else []
         }
+
+    def make_event_services(self, event):
+        def make_service(action):
+            return {
+                'at_id': action.actionType.id,
+                'at_code': action.actionType.code,
+                'at_name': action.actionType.name,
+                'service_name': action.actionType.service.name,
+                'price': action.price
+            }
+
+        return map(make_service, event.actions)
 
 
 class ActionVisualizer(object):

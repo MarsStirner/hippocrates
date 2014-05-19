@@ -213,7 +213,10 @@ def safe_int(obj):
 
 def string_to_datetime(date_string, fmt='%Y-%m-%dT%H:%M:%S.%fZ'):
     if date_string:
-        date = datetime.datetime.strptime(date_string, fmt)
+        try:
+            date = datetime.datetime.strptime(date_string, fmt)
+        except ValueError:
+            date = datetime.datetime.strptime(date_string, '%Y-%m-%dT%H:%M:%S+00:00') # ffs
         return timezone('UTC').localize(date).astimezone(tz=timezone(TIME_ZONE)).replace(tzinfo=None)
     else:
         return date_string

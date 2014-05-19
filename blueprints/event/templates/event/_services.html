@@ -1,3 +1,4 @@
+<div ng-controller="EventServicesCtrl">
 <legend id="services">Услуги</legend>
 <div class="panel panel-default">
 <div class="panel-body">
@@ -37,7 +38,7 @@
         </div>
     </form>
 
-    <div id="selected_services" ng-show="selected_services.length">
+    <div id="selected_services" ng-show="event.services.length">
         <div class="panel panel-default">
             <div class="panel-heading"><strong>Выбранные услуги</strong></div>
             <table class="table table-condensed table-bordered">
@@ -53,25 +54,48 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr ng-repeat="(index, service) in selected_services" class="info">
+                    <tr ng-repeat="(index, service) in event.services"
+                        ng-class="{'success': service.fully_paid, 'warning': service.partially_paid, 'info': !service.fully_paid && !service.partially_paid}">
                         <td ng-bind="service.at_code"></td>
                         <td ng-bind="service.service_name"></td>
                         <td ng-bind="service.at_name"></td>
                         <td ng-bind="service.price" class="text-right"></td>
-                        <td class="col-md-1"><input type="number" ng-model="service.amount" ng-change="service.sum=service.price*service.amount" class="form-control input-sm"/></td>
+                        <td class="col-md-1">
+                            <input type="number" class="form-control input-sm"
+                                   ng-model="service.amount" ng-change="service.sum = service.price * service.amount"/>
+                        </td>
                         <td ng-bind="service.sum" class="text-right"></td>
-                        <td><button type="button" class="btn btn-sm btn-danger" title="Убрать из списка услуг" ng-click="remove_service(index)"><span class="glyphicon glyphicon-trash"></span></button></td>
+                        <td>
+                            <button type="button" class="btn btn-sm btn-danger" title="Убрать из списка услуг"
+                                    ng-if="!(service.fully_paid || service.partially_paid)"
+                                    ng-click="remove_service(index)"><span class="glyphicon glyphicon-trash"></span>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-success" title="Оплатить"
+                                    ng-if="!service.fully_paid"
+                                    ng-click="pay(service)"><span class="glyphicon glyphicon-credit-card"></span>
+                            </button>
+                        </td>
                     </tr>
                 </tbody>
             </table>
         </div>
     </div>
-    <blockquote class="novmargin" ng-show="selected_services.length">
+    <blockquote class="novmargin" ng-show="event.services.length">
         <div class="row">
         <div class="col-md-12">
-            <span class="text-muted">Итого к оплате:</span> <span ng-bind="full_sum" class="text-info"></span> <span class="text-info">руб.</span>
+            <span class="text-muted">Итого к оплате: </span>
+            <span class="text-success" ng-bind="full_sum"></span><span class="text-success"> руб.</span>
+            <span class="text-muted"> Оплачено: </span>
+            <span class="text-primary" ng-bind="paid_sum"></span><span class="text-primary"> руб.</span>
+            <span class="text-muted"> Долг: </span>
+            <span class="text-danger" ng-bind="full_sum - paid_sum"></span><span class="text-danger"> руб.</span>
+
         </div>
         </div>
     </blockquote>
 </div>
+</div>
+{#<div>#}
+{#    <pre>[[event.services]]</pre>#}
+{#</div>#}
 </div>

@@ -1,11 +1,15 @@
 # -*- coding: utf-8 -*-
+from collections import defaultdict
 
 import datetime
+from application.lib.data import create_action
+from application.models.actions import Action, ActionType
 from application.models.event import Event, EventType, EventLocalContract
 from application.lib.utils import safe_date
 from flask.ext.login import current_user
-from application.models.exists import rbDocumentType
+from application.models.exists import rbDocumentType, ContractTariff, Contract, rbService
 from application.lib.settings import Settings
+from application.systemwide import db
 
 
 def create_new_local_contract(lc_info):
@@ -19,8 +23,8 @@ def create_new_local_contract(lc_info):
     lcon.coordText = lc_info.get('coord_text', '')
 
     if Settings.getBool('Event.Payment.1CODVD'):
-        lcon.dateContract = lc_info.get('date_contract', '')
-        lcon.numberContract = lc_info.get('number_contract', '')
+        lcon.dateContract = lc_info.get('date_contract') or datetime.date.today()
+        lcon.numberContract = lc_info.get('number_contract') or 'n/a'
     else:
         lcon.dateContract = lc_info['date_contract']
         lcon.numberContract = lc_info['number_contract']
@@ -77,3 +81,54 @@ def get_prev_event_payment(client_id, event_type_id):
         lc = EventLocalContract()
         event.localContract = lc
     return event
+
+
+def get_event_services(event_id):
+    query = db.session.query(Action,
+                             ActionType.id,
+                             ActionType.service_id,
+                             ActionType.code,
+                             ActionType.name,
+                             rbService.name,
+                             ContractTariff.price).\
+        join(Event,
+             EventType,
+             Contract,
+             ContractTariff,
+             ActionType).\
+        join(rbService, ActionType.service_id == rbService.id).\
+        filter(Action.event_id == event_id,
+               ContractTariff.eventType_id == EventType.id,
+               ContractTariff.service_id == ActionType.service_id,
+               Action.deleted == 0,
+               ContractTariff.deleted == 0).all()
+    services_by_at = defaultdict(list)
+    for a, at_id, service_id, at_code, at_name, service_name, price in query:
+        s = {
+            'at_id': at_id,
+            'at_code': at_code,
+            'at_name': at_name,
+            'service_name': service_name,
+            'price': price,
+            'action_id': a.id,
+            'service_id': service_id
+        }
+        services_by_at[(at_id, service_id)].append(s)
+    services_grouped = [dict(service_group[0],
+                             amount=len(service_group),
+                             sum=service_group[0]['price'] * len(service_group),
+                             actions=[s['action_id'] for s in service_group])
+                        for k, service_group in services_by_at.iteritems()]
+    return services_grouped
+
+
+def create_services(event_id, services_data, cfinance_id):
+    for service in services_data:
+        created_count = len(service['actions'])
+        new_count = service['amount']
+        if created_count < new_count:
+            for i in xrange(1, new_count - created_count + 1):
+                result = create_action(event_id,
+                                       service['at_id'],
+                                       current_user.id,
+                                       {'finance_id': cfinance_id})
