@@ -14,7 +14,7 @@
         url_print_templates = '{{ print_subsystem_templates }}',
         url_print_subsystem = '{{ print_subsystem_url }}',
         url_print_template = '{{ print_subsystem_print_template }}';
-        current_user_id = {{ current_user.id }};
+        current_user_id = {{ current_user.id|default('undefined') }};
 </script>
 <script src="{{ url_for('static', filename='jquery-ui/js/jquery-1.10.2.js') }}"></script>
 
@@ -49,7 +49,7 @@
             <button class="btn btn-default" type="button" ng-click="open_timepicker_popup()" ng-disabled="ngDisabled">
                 <i class="glyphicon glyphicon-time"></i>
             </button>
-            <div class="popup" ng-show="isPopupVisible">
+            <div class="timepicker_popup" ng-show="isPopupVisible">
                 <div ng-model="ngModel" style="display:inline-block;">
                     <timepicker show-meridian="false"></timepicker>
                 </div>

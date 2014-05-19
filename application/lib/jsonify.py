@@ -215,9 +215,9 @@ class ScheduleVisualizer(object):
                     Schedule.person_id == person.id,
                     start_date <= Schedule.date, Schedule.date < end_date,
                     Schedule.deleted == 0
-                ).order_by(Schedule.date),
+                ).order_by(Schedule.date).order_by(Schedule.begTime).all(),
                 start_date, end_date
-            )} for person in persons]
+                )} for person in persons]
 
 
 class ClientVisualizer(object):

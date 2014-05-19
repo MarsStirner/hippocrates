@@ -334,22 +334,28 @@
                             };
                             // This is the hack - we concat ephemeral date with our time to produce Date object
                             if (primary.scheds.length > 1) {
-                                secondary.begTime1 = new Date('1970-01-01T' + primary.scheds[0].begTime);
-                                secondary.endTime1 = new Date('1970-01-01T' + primary.scheds[primary.scheds.length - 1].endTime);
-                                secondary.begTime2 = new Date('1970-01-01T' + primary.scheds[0].endTime);
-                                secondary.endTime2 = new Date('1970-01-01T' + primary.scheds[primary.scheds.length - 1].begTime);
+                                var begTime1 = primary.scheds[0].begTime.split(':');
+                                var endTime1 = primary.scheds[primary.scheds.length - 1].endTime.split(':');
+                                var begTime2 = primary.scheds[0].endTime.split(':');
+                                var endTime2 = primary.scheds[primary.scheds.length - 1].begTime.split(':');
+                                secondary.begTime1 = new Date("1970", "1", "1", begTime1[0], begTime1[1], begTime1[2]);
+                                secondary.endTime1 = new Date("1970", "1", "1", endTime1[0], endTime1[1], endTime1[2]);
+                                secondary.begTime2 = new Date("1970", "1", "1", begTime2[0], begTime2[1], begTime2[2]);
+                                secondary.endTime2 = new Date("1970", "1", "1", endTime2[0], endTime2[1], endTime2[2]);
                                 secondary.pause = true;
-                            } else if (primary.scheds.length > 1) {
-                                secondary.begTime1 = new Date('1970-01-01T' + primary.scheds[0].begTime);
-                                secondary.endTime1 = new Date('1970-01-01T' + primary.scheds[0].endTime);
-                                secondary.begTime2 = new Date('1970-01-01T00:00');
-                                secondary.endTime2 = new Date('1970-01-01T00:00');
+                            } else if (primary.scheds.length == 1) {
+                                var begTime = primary.scheds[0].begTime.split(':');
+                                var endTime = primary.scheds[0].endTime.split(':');
+                                secondary.begTime1 = new Date("1970", "1", "1", begTime[0], begTime[1], begTime[2]);
+                                secondary.endTime1 = new Date("1970", "1", "1", endTime[0], endTime[1], endTime[2]);
+                                secondary.begTime2 = new Date("1970", "1", "1", "0", "0", "0", "0");
+                                secondary.endTime2 = new Date("1970", "1", "1", "0", "0", "0", "0");
                                 secondary.pause = false;
                             } else {
-                                secondary.begTime1 = new Date('1970-01-01T08:00');
-                                secondary.endTime1 = new Date('1970-01-01T18:00');
-                                secondary.begTime2 = new Date('1970-01-01T00:00');
-                                secondary.endTime2 = new Date('1970-01-01T00:00');
+                                secondary.begTime1 = new Date("1970", "1", "1", "8", "0", "0", "0");
+                                secondary.endTime1 = new Date("1970", "1", "1", "18", "0", "0", "0");
+                                secondary.begTime2 = new Date("1970", "1", "1", "0", "0", "0", "0");
+                                secondary.endTime2 = new Date("1970", "1", "1", "0", "0", "0", "0");
                                 secondary.pause = false;
                             }
                             return secondary;

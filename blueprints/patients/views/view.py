@@ -15,7 +15,7 @@ from . import api_html, api_json
 @module.route('/')
 def index():
     try:
-        return render_template('patients/index.html')
+        return render_template('patients/servicing.html')
     except TemplateNotFound:
         abort(404)
 

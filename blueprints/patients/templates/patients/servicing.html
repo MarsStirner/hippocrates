@@ -1,0 +1,191 @@
+{% extends 'patients/base.html' %}
+
+{% block title %}> {{ module_name }}{% endblock %}
+
+{% block main %}
+    <legend xmlns="http://www.w3.org/1999/html">Обслуживание пациентов</legend>
+    <div ng-controller="ClientSearch" class="ng-cloak">
+        <script type="text/ng-template" id="modal-createEvent.html">{% include "patients/_modal_create_event.html" %}</script>
+        <form class="form-horizontal marginal" role="form">
+            <div class="input-group">
+                <span class="input-group-addon"><span class="glyphicon glyphicon-search"></span></span>
+                <input id="search" class="form-control" type="text" ng-model="query" autocomplete="off"
+                       ng-change="clear_results()" wm-slow-change="perform_search()"
+                       placeholder="Поиск пациента по коду, ФИО, полису или документу, удостоверяющему личность">
+                <span class="input-group-addon" ng-click="query_clear()" style="cursor: pointer">
+                    <span class="glyphicon glyphicon-remove"></span></span>
+            </div>
+        </form>
+        <div class="marginal">
+            <alert ng-repeat="alert in alerts" type="alert.type" close="alerts.splice(index, 1)">[[ alert.text ]] [ [[alert.code]] ]
+            </alert>
+        </div>
+        <div class="panel panel-default" ng-class="{'panel-danger': results.length === 0, 'panel-success': results.length > 0}">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-sm-8">
+                        <span ng-if="results.length > 0">Результаты поиска</span>
+                        <span ng-if="results.length === 0 && query">Пациент не найден в базе данных</span>
+                    </div>
+                    <div class="col-sm-4 text-right">
+                        <button ng-click="open_client('new')" class="btn btn-primary"
+                                ng-show="!results.length">Зарегистрировать пациента
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <table class="table table-condensed table-clickable" ng-if="results.length > 0">
+                <thead>
+                <tr>
+                    <th>ФИО</th>
+                    <th>Дата рождения</th>
+                    <th>Пол</th>
+                    <th>Документ</th>
+                    <th>СНИЛС</th>
+                    <th>Полис ОМС</th>
+                    <th>Полис ДМС</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="result in results" style="cursor: pointer" ng-click="set_patient_id(result.id)"
+                        ng-class="{'bg-primary text-primary': result.id === client_id}">
+                    <td ng-bind="result.nameText"></td>
+                    <td ng-bind="result.birthDate | asDate"></td>
+                    <td ng-bind="result.sex.name"></td>
+                    <td ng-bind="result.documentText"></td>
+                    <td><nobr>[[ result.SNILS ]]</nobr></td>
+                    <td ng-bind="result.compulsoryPolicy.policyText"></td>
+                    <td ng-bind="result.voluntaryPolicy.policyText"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="btn-group btn-group-justified marginal" ng-if="client">
+            <div class="btn-group">
+                <a class="btn btn-default" ng-href="{{ url_for('event.new_event') }}?client_id=[[ client_id ]]"
+                        ng-if="client.appointments.length == 0">Создать обращение</a>
+                <button class="btn btn-default" ng-click="modal_create_event()"
+                        ng-if="client.appointments.length > 0">Создать обращение</button>
+            </div>
+            <div class="btn-group">
+                <a class="btn btn-default" ng-href="{{ url_for('schedule.appointment') }}?client_id=[[ client_id ]]">Записать на приём</a>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-default" ng-click="open_client(client_id)">Редактировать данные пациента</button>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-default dropdown-toggle" type="button" id="print_dropdownMenu" ng-disabled="!ps.templates" data-toggle="dropdown">
+                    <span class="glyphicon glyphicon-print"></span>
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="print_dropdownMenu">
+                    <li role="presentation" ng-repeat="template in ps.templates">
+                        <a role="menuitem" tabindex="-1" href="" class="print_template"
+                           ng-click="ps.print_template(template.id, client.id)" ng-bind="template.name">
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <tabset  ng-if="client">
+            <tab heading="Предварительные записи">{% include "patients/appointments.html" %}</tab>
+            <tab heading="Обращения">{% include "patients/event_list.html" %}</tab>
+        </tabset>
+        {#        <pre>[[schedule|json]]</pre>#}
+    </div>
+{% endblock %}
+
+{% block modules_js %}
+    {{ super() }}
+    <script type="text/javascript">
+        CreateEventModalCtrl = function ($scope, $modalInstance, client_id) {
+            $scope.cancel = function () {
+                $modalInstance.dismiss('cancel');
+            };
+            $scope.client_id = client_id;
+        };
+        WebMis20.controller('ClientSearch', ['$scope', '$http', '$timeout', '$window', 'PrintingService', 'Client', '$modal',
+            function ($scope, $http, $timeout, $window, PrintingService, Client, $modal) {
+                $scope.ps = new PrintingService('registry', function (template_id, client_id) {
+                    return {
+                        client_id: client_id
+                    }
+                });
+                $scope.ps_amb = new PrintingService('preliminary_records', function (template_id, client_ticket_id) {
+                    return {
+                        client_id: $scope.client_id,
+                        ticket_id: client_ticket_id
+                    }
+                });
+                $scope.ps_home = new PrintingService('preliminary_records', function (template_id, client_ticket_id) {
+                    return {
+                        client_id: $scope.client_id,
+                        ticket_id: client_ticket_id
+                    }
+                });
+                $scope.ps_amb.set_context('orderAmb');
+                $scope.ps_home.set_context('orderHome');
+                $scope.ps.set_context('token');
+                $scope.aux = aux;
+                $scope.params = aux.getQueryParams(document.location.search);
+                $scope.query = "";
+                $scope.results = null;
+                $scope.client_id = null;
+                $scope.client = null;
+                $scope.alerts = [];
+
+                $scope.set_patient_id = function (patient_id) {
+                    $scope.client_id = patient_id;
+                    $scope.client = new Client(patient_id);
+                };
+
+                $scope.clear_results = function () {
+                    $scope.results = null;
+                    $scope.client = null;
+                };
+
+                $scope.perform_search = function () {
+                    if ($scope.query) {
+                        $http.get(
+                            '{{ url_for('.api_search_clients') }}', {
+                                params: {
+                                    q: $scope.query
+                                }
+                            }
+                        ).success(function (data) {
+                            $scope.results = data.result;
+                        })
+                    }
+                };
+
+                $scope.open_client = function (client_id) {
+                    window.open('{{ url_for('patients.patient') }}?client_id=' + client_id, '_self');
+                };
+
+                $scope.open_event = function(event) {
+                    window.open('{{ url_for('event.html_event_info') }}?event_id=' + event.id, '_self')
+                };
+
+                $scope.$on('printing_error', function (event, error) {
+                    $scope.alerts.push(error);
+                });
+
+                $scope.query_clear = function () {
+                    $scope.query = '';
+                    $scope.clear_results();
+                };
+
+                $scope.modal_create_event = function() {
+                    var modalInstance = $modal.open({
+                        templateUrl: 'modal-createEvent.html',
+                        resolve: {
+                            client_id: function () {
+                                return $scope.client_id;
+                            }
+                        },
+                        controller: CreateEventModalCtrl
+                    });
+                };
+            }]);
+    </script>
+{% endblock %}
