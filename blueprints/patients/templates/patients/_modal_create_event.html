@@ -1,0 +1,14 @@
+<div class="modal-header" xmlns="http://www.w3.org/1999/html">
+    <button type="button" class="close" ng-click="cancel()">&times;</button>
+    <h4 class="modal-title" id="myModalLabel">У пациента есть предварительные записи</h4>
+</div>
+<div class="modal-body">
+    Если пациент обратился на основе предварительной записи, то нажмите кнопку "Отмена", затем нажмите на знак "+" в
+    соответствующей строке в таблице предварительных записей
+</div>
+<div class="modal-footer">
+    <a class="btn btn-danger" ng-href="{{ url_for('event.new_event') }}?client_id=[[ client_id ]]" ng-if="client_id != 'new'">
+        Всё равно продолжить
+    </a>
+    <button type="button" class="btn btn-success" ng-click="cancel()">Отмена</button>
+</div>
