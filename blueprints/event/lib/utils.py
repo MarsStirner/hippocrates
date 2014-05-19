@@ -2,6 +2,7 @@
 from collections import defaultdict
 
 import datetime
+from application.lib.data import create_action
 from application.models.actions import Action, ActionType
 from application.models.event import Event, EventType, EventLocalContract
 from application.lib.utils import safe_date
@@ -119,3 +120,15 @@ def get_event_services(event_id):
                              actions=[s['action_id'] for s in service_group])
                         for k, service_group in services_by_at.iteritems()]
     return services_grouped
+
+
+def create_services(event_id, services_data, cfinance_id):
+    for service in services_data:
+        created_count = len(service['actions'])
+        new_count = service['amount']
+        if created_count < new_count:
+            for i in xrange(1, new_count - created_count + 1):
+                result = create_action(event_id,
+                                       service['at_id'],
+                                       current_user.id,
+                                       {'finance_id': cfinance_id})

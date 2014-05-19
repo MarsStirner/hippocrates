@@ -79,10 +79,10 @@
             </div>
         </div>
 
-        <div>
-            <p>debug:</p>
-            <pre>[[event | json]]</pre>
-        </div>
+{#        <div>#}
+{#            <p>debug:</p>#}
+{#            <pre>[[event | json]]</pre>#}
+{#        </div>#}
     </div>
 {% endblock %}
 
@@ -134,7 +134,9 @@
                         if ($scope.event.is_new()) {
                             $window.open('{{ url_for('.html_event_info') }}' + '?event_id=' + event_id, '_self');
                         } else {
-                            $scope.event.reload();
+                            $scope.event.reload().then(function() {
+                                $scope.$broadcast('event_loaded');
+                            });
                         }
                     }, function(reason) {
                         alert(reason);

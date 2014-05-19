@@ -4,7 +4,7 @@ import datetime
 from flask import request, abort
 from flask.ext.login import current_user
 
-from application.models.actions import ActionType
+from application.models.actions import ActionType, Action
 from application.models.client import Client
 from application.models.enums import EventPrimary, EventOrder
 from application.models.event import (Event, EventType, EventType_Action, Diagnosis, Diagnostic, EventPayment)
@@ -16,7 +16,7 @@ from blueprints.event.app import module
 from application.models.exists import (Organisation, )
 from application.lib.jsonify import EventVisualizer, ClientVisualizer
 from blueprints.event.lib.utils import get_local_contract, get_prev_event_payment, create_new_local_contract, \
-    get_event_services
+    get_event_services, create_services
 from application.lib.sphinx_search import SearchEventService
 from application.lib.data import create_action
 
@@ -29,16 +29,15 @@ def api_event_info():
     data = {
         'event': vis.make_event(event),
     }
-    if 'admin' in current_user.roles and 1 == 10:
+    if current_user.role_in('admin'):
         data['diagnoses'] = vis.make_diagnoses(event)
         data['payment'] = vis.make_event_payment(event.localContract, event_id)
-    elif 'doctor' in current_user.roles and 1 == 10:
+        data['services'] = get_event_services(event_id)
+    elif current_user.role_in('doctor'):
         data['diagnoses'] = vis.make_diagnoses(event)
-    elif 'rRegistartor' in current_user.roles or 'clinicRegistrator' in current_user.roles or 1 == 1:
+    elif current_user.role_in(('rRegistartor', 'clinicRegistrator')):
         data['payment'] = vis.make_event_payment(event.localContract, event_id)
-        data['services'] = get_event_services(event_id)  #vis.make_event_services(event)
-    else:
-        raise
+        data['services'] = get_event_services(event_id)
     return jsonify(data)
 
 
@@ -113,16 +112,9 @@ def api_event_save():
         db.session.rollback()
         raise
     else:
-        if not event_id:
-            # При создании Event'а создаём Action'ы
-            services = request.json.get('services', [])
-            finance_id = event_data['contract'].get('finance', {}).get('id')
-            for service in services:
-                for i in xrange(1, service['amount'] + 1):
-                    result = create_action(event.id,
-                                           service['at_id'],
-                                           current_user.id,
-                                           {'finance_id': finance_id})
+        services_data = request.json.get('services', [])
+        cfinance_id = event_data['contract']['finance']['id']
+        create_services(event.id, services_data, cfinance_id)
 
     return jsonify({
         'id': int(event)
@@ -273,6 +265,21 @@ def api_service_make_payment():
     event.localContract.payments.append(payment)
     db.session.add(event)
     db.session.commit()
+
+    return jsonify({
+        'result': 'ok'
+    })
+
+
+@module.route('/api/event_payment/delete_service.json', methods=['POST'])
+def api_service_delete_service():
+    # TODO: validations
+    action_ids = request.json['action_id_list']
+    if action_ids:
+        actions = Action.query.filter(Action.id.in_(action_ids))
+        actions.update({Action.deleted: 1},
+                       synchronize_session=False)
+        db.session.commit()
 
     return jsonify({
         'result': 'ok'

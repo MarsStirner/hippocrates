@@ -20,11 +20,11 @@ def index():
 def html_event_info():
     # event_id = int(request.args['event_id'])
     # В зависимости от ролей и прав разный лейаут
-    if 'admin' in current_user.roles and 1 == 10:
+    if current_user.role_in('admin'):
         form_role = 'admin'
-    elif 'doctor' in current_user.roles and 1 == 10:
+    elif current_user.role_in('doctor'):
         form_role = 'doctor'
-    elif 'rRegistartor' in current_user.roles or 'clinicRegistrator' in current_user.roles or 1 == 1:
+    elif current_user.role_in(('rRegistartor', 'clinicRegistrator')):
         form_role = 'receptionist'
     else:
         raise

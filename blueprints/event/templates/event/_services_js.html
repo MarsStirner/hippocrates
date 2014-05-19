@@ -51,12 +51,27 @@ WebMis20.controller('EventServicesCtrl', ['$scope', '$http',
             if (!aux.inArray($scope.event.services, service)){
                 service.amount = 1;
                 service.sum = service.price * service.amount;
+                service.actions = [];
                 $scope.event.services.push(service);
             }
         };
 
         $scope.remove_service = function(index) {
-            $scope.event.services.splice(index, 1);
+            var service = $scope.event.services[index];
+            if (service.actions.length) {
+                $http.post(
+                    '{{ url_for('.api_service_delete_service') }}', {
+                        event_id: $scope.event.info.id,
+                        action_id_list: service.actions
+                    }
+                ).success(function() {
+                    $scope.event.reload().then($scope.refresh_payments);
+                }).error(function() {
+                    alert('error');
+                });
+            } else {
+                $scope.event.services.splice(index, 1);
+            }
         };
 
         $scope.$watch('event.services', function(new_val, old_val) {
