@@ -4,6 +4,7 @@ import datetime
 from flask import request, abort
 from flask.ext.login import current_user
 
+from config import ORGANISATION_INFIS_CODE
 from application.models.actions import ActionType, Action
 from application.models.client import Client
 from application.models.enums import EventPrimary, EventOrder
@@ -46,7 +47,7 @@ def api_event_new_get():
     client_id = int(request.args['client_id'])
     event = Event()
     event.eventType = EventType.get_default_et()
-    event.organisation = Organisation.query.filter_by(infisCode='500').first()
+    event.organisation = Organisation.query.filter_by(infisCode=str(ORGANISATION_INFIS_CODE)).first()
     event.isPrimaryCode = EventPrimary.primary[0]  # TODO: check previous events
     event.order = EventOrder.planned[0]
     event.client = Client.query.get(client_id)
