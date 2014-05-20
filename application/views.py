@@ -23,10 +23,13 @@ def check_valid_login():
 
     if (request.endpoint and
             'static' not in request.endpoint and
-            not login_valid and
             not current_user.is_admin() and
             not getattr(app.view_functions[request.endpoint], 'is_public', False)):
-        return redirect(url_for('login', next=url_for(request.endpoint)))
+
+        if not login_valid:
+            return redirect(url_for('login', next=url_for(request.endpoint)))
+        if not current_user.current_role:
+            return redirect(url_for('select_role', next=url_for(request.endpoint)))
 
 
 @roles_require('admin')
@@ -66,7 +69,7 @@ def select_role():
     form.roles.choices = current_user.roles
 
     # Validate form input
-    if form.validate():
+    if form.is_submitted():
         current_user.current_role = form.roles.data
         return redirect(request.args.get('next') or url_for('index'))
     return render_template('user/select_role.html', form=form, errors=errors)

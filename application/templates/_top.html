@@ -11,16 +11,23 @@
             </li>
         </ul>
         <ul class="nav navbar-nav pull-right">
-            {% if current_user %}
+            {% if current_user.id %}
             <li>
-                <p class="navbar-text"><span class="glyphicon glyphicon-user"></span> {{ current_user.lastName }} {{ current_user.firstName }} ({{ current_user.current_role }})</p>
+                <p class="navbar-text nohmargin"><span class="glyphicon glyphicon-user"></span> {{ current_user.lastName }} {{ current_user.firstName }}</p>
+                <form class="navbar-form navbar-left" id="_change_role_frm" action="{{ url_for('select_role') }}" method="POST">
+                    <select name="roles" onchange="$('#_change_role_frm').submit();" class="form-control">
+                    {% for code, name in current_user.roles -%}
+                        <option value="{{ code }}"{%- if code == current_user.current_role %} selected="selected"{% endif -%}>{{ name }}</option>
+                    {%- endfor -%}
+                    </select>
+                </form>
             </li>
-            {% endif %}
             <li>
                 <div class="btn-group">
                     <a id="logout" class="btn btn-small btn-default navbar-btn" href="{{ url_for('logout') }}" title="Выйти"><span class="glyphicon glyphicon-log-out"></span></a>
                 </div>
             </li>
+            {% endif %}
         </ul>
     </div>
 </div>

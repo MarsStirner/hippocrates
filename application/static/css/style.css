@@ -384,6 +384,10 @@ table.table-clickable tbody tr {
     margin-top: 0;
     margin-bottom: 0;
 }
+.nohmargin{
+    margin-left: 0;
+    margin-right: 0;
+}
 .no-top-margin{
     margin-top: 0;
 }
