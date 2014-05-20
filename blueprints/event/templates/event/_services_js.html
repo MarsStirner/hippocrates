@@ -1,0 +1,122 @@
+<script>
+WebMis20.controller('EventServicesCtrl', ['$scope', '$http',
+    function($scope, $http) {
+        $scope.query = "";
+        $scope.found_services = null;
+        $scope.full_sum = 0;
+
+        $scope.$on('event_loaded', function() {
+            $scope.refresh_payments();
+        });
+
+        $scope.refresh_payments = function() {
+            var payments = $scope.event.payment.payments;
+            $scope.event.services.forEach(function(service) {
+                var unpaid = service.actions.filter(function(a_id) {
+                    return payments.filter(function(p) {
+                        return p.action_id === a_id && p.service_id === service.service_id && p.sum === service.price;
+                    }).length === 1 ? undefined : true;
+                });
+                service.fully_paid = unpaid.length === 0;
+                service.partially_paid = unpaid.length > 0 && unpaid.length < service.actions.length;
+            });
+        };
+
+        $scope.perform_search = function(val) {
+            if (!val) {
+                $scope.found_services = null;
+            } else {
+                $http.get(
+                    '{{ url_for('.api_search_services') }}', {
+                        params: {
+                            q: val,
+                            client_id: $scope.event.info.client_id,
+                            event_type_id: $scope.event.info.event_type.id,
+                            contract_id: $scope.event.info.contract ? $scope.event.info.contract.id : null,
+                            person_id: $scope.event.info.exec_person ? $scope.event.info.exec_person.id : null
+                        }
+                    }
+                ).success(function (data) {
+                    $scope.found_services = data.result;
+                });
+            }
+        };
+
+        $scope.query_clear = function() {
+            $scope.found_services = null;
+            $scope.query = '';
+        };
+
+        $scope.add_service = function(service) {
+            if (!aux.inArray($scope.event.services, service)){
+                service.amount = 1;
+                service.sum = service.price * service.amount;
+                service.actions = [];
+                $scope.event.services.push(service);
+            }
+        };
+
+        $scope.remove_service = function(index) {
+            var service = $scope.event.services[index];
+            if (service.actions.length) {
+                $http.post(
+                    '{{ url_for('.api_service_delete_service') }}', {
+                        event_id: $scope.event.info.id,
+                        action_id_list: service.actions
+                    }
+                ).success(function() {
+                    $scope.event.reload().then($scope.refresh_payments);
+                }).error(function() {
+                    alert('error');
+                });
+            } else {
+                $scope.event.services.splice(index, 1);
+            }
+        };
+
+        $scope.$watch('event.services', function(new_val, old_val) {
+            if (new_val) {
+                $scope.full_sum = new_val.map(function(service) {
+                    return service.price * service.amount;
+                }).reduce(function(prev_val, cur_val) {
+                    return prev_val + cur_val;
+                }, 0);
+
+                var payment = $scope.event.payment;
+                $scope.paid_sum = payment && payment.payments.map(function(payment) {
+                    return payment.sum + payment.sum_discount;
+                }).reduce(function(prev_val, cur_val) {
+                    return prev_val + cur_val;
+                }, 0) || 0;
+            }
+        }, true);
+
+        $scope.pay = function(service) {
+            var act_to_pay = null;
+            var paid_actions = $scope.event.payment.payments.map(function(p) {
+                return p.action_id;
+            });
+            service.actions.forEach(function(a_id) {
+                if (act_to_pay === null && (paid_actions.indexOf(a_id) == -1)) {
+                    act_to_pay = a_id;
+                }
+            });
+            if (act_to_pay) {
+                $http.post(
+                    '{{ url_for('.api_service_make_payment') }}', {
+                        event_id: $scope.event.info.id,
+                        service_id: service.service_id,
+                        action_id: act_to_pay,
+                        sum: service.price
+                    }
+                ).success(function() {
+{#                    alert('ok');#}
+                }).error(function() {
+                    alert('error');
+                });
+            }
+            $scope.event.reload().then($scope.refresh_payments);
+        };
+
+}]);
+</script>

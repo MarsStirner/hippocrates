@@ -7,7 +7,7 @@
         <th>Специалист</th>
         <th>Записал</th>
         <th>Примечания</th>
-        <th></th>
+        <th colspan="2"></th>
     </tr>
     </thead>
     <tbody>
@@ -18,6 +18,9 @@
         <td>[[ record.person ]]</td>
         <td>[[ record.createPerson ]]</td>
         <td>[[ record.note ]]</td>
+        <td>
+            <a ng-href="{{ url_for('event.new_event') }}?client_id=[[ client_id ]]&ticket_id=[[ record.id ]]" class="btn btn-success glyphicon glyphicon-plus"></a>
+        </td>
         <td>
             <div class="dropdown">
                 <button class="btn dropdown-toggle" type="button" id="print_dropdownMenu"

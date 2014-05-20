@@ -1,0 +1,94 @@
+<script>
+WebMis20.controller('EventMainInfoCtrl', [
+    '$scope', '$http', 'RefBookService', 'EventType', '$window', '$timeout', 'Settings', '$modal',
+    function ($scope, $http, RefBookService, EventType, $window, $timeout, Settings, $modal) {
+
+        $scope.Organisation = RefBookService.get('Organisation');
+        $scope.Person = RefBookService.get('vrbPersonWithSpeciality');
+        $scope.Contract = RefBookService.get('Contract');
+        $scope.rbRequestType = RefBookService.get('rbRequestType');
+        $scope.rbFinance = RefBookService.get('rbFinance');
+        $scope.rbEventType = new EventType();
+        $scope.OrgStructure = RefBookService.get('OrgStructure');
+        $scope.rbDocumentType = RefBookService.get('rbDocumentType');
+        $scope.rbOrder = {{ Enum.get_class_by_name('EventOrder').rb() | tojson}};
+        $scope.rbPrimary = {{ Enum.get_class_by_name('EventPrimary').rb() | tojson}};
+        $scope.rbResult = RefBookService.get('rbResult');
+        $scope.rbAcheResult = RefBookService.get('rbAcheResult');
+
+        var event_created = !$scope.event.is_new();
+        $scope.formcnf = {
+            request_type: {
+                disabled: event_created
+            },
+            finance: {
+                disabled: event_created
+            },
+            contract: {
+                disabled: event_created
+            },
+            event_type: {
+                disabled: event_created
+            },
+            exec_person: {
+                disabled: event_created || {% if form_role in ('admin', 'receptionist') %}false{% else %}true{% endif %}
+            },
+            org_structure: {
+                disabled: event_created
+            },
+            primacy: {
+                disabled: event_created
+            },
+            order: {
+                disabled: event_created
+            },
+            set_date: {
+                disabled: event_created
+            },
+            exec_date: {
+                disabled: $scope.event.closed()
+            },
+            result: {
+                disabled: $scope.event.closed(),
+                show: {% if form_role in ('admin', 'doctor') %}true{% else %}false{% endif %}
+            },
+            ache_result: {
+                disabled: !$scope.event.closed(),
+                show: {% if form_role in ('admin', 'doctor') %}true{% else %}false{% endif %}
+            }
+        };
+
+        $scope.$on('event_loaded', function() {
+            if ($scope.event.is_new()) $scope.event.info.set_date = new Date();
+
+            $scope.request_type_init = angular.extend({}, $scope.event.info.event_type.request_type);
+            $scope.finance_init = angular.extend({}, $scope.event.info.event_type.finance);
+            $scope.event_type_init = angular.extend({}, $scope.event.info.event_type);
+
+            $scope.request_type.selected = $scope.request_type_init;
+            $scope.finance.selected = $scope.finance_init;
+        });
+
+        $scope.request_type = {};
+        $scope.finance = {};
+        $scope.$watch('request_type.selected', function(new_val, old_val) {
+            if (new_val) {
+                $scope.finance.selected = $scope.finance_init || $scope.rbEventType.get_finances_by_rt(new_val.id)[0];
+                $scope.finance_init = undefined;
+            }
+        });
+        $scope.$watch('finance.selected', function(new_val, old_val) {
+            if (new_val) {
+                $scope.event.info.event_type = $scope.event_type_init || $scope.rbEventType.get_filtered_by_rtf(
+                    $scope.request_type.selected.id, new_val.id)[0];
+                    $scope.event_type_init = undefined;
+            }
+        });
+
+        $scope.exec_person_changed = function () {
+            $scope.event.info.org_structure = $scope.event.info.exec_person.org_structure;
+        };
+
+
+}]);
+</script>

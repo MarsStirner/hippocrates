@@ -8,7 +8,7 @@
         <form class="form-horizontal marginal" role="form">
             <div class="input-group">
                 <span class="input-group-addon"><span class="glyphicon glyphicon-search"></span></span>
-                <input id="search" class="form-control" type="text" ng-model="query"
+                <input id="search" class="form-control" type="text" ng-model="query" autocomplete="off"
                        placeholder="Поиск пациента по коду, ФИО, полису или документу, удостоверяющему личность">
                 <span class="input-group-addon" ng-click="query_clear()" style="cursor: pointer">
                     <span class="glyphicon glyphicon-remove"></span></span>
@@ -42,7 +42,7 @@
                 <td ng-click="open_client(result.id)" ng-bind="result.birthDate | asDate"></td>
                 <td ng-click="open_client(result.id)" ng-bind="result.sex.name"></td>
                 <td ng-click="open_client(result.id)" ng-bind="result.documentText"></td>
-                <td ng-click="open_client(result.id)" ng-bind="result.SNILS"></td>
+                <td ng-click="open_client(result.id)"><nobr>[[ result.SNILS ]]</nobr></td>
                 <td ng-click="open_client(result.id)" ng-bind="result.compulsoryPolicy.policyText"></td>
                 <td ng-click="open_client(result.id)" ng-bind="result.voluntaryPolicy.policyText"></td>
                 <td>

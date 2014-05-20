@@ -30,6 +30,11 @@ class User(UserMixin):
     def is_admin(self):
         return self.current_role == 'admin'
 
+    def role_in(self, roles):
+        if not isinstance(roles, (list, tuple)):
+            roles = [roles]
+        return self.current_role in roles
+
     def has_role(self, role):
         # what about list?
         for r in self.roles:

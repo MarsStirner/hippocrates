@@ -13,7 +13,7 @@
         <ul class="nav navbar-nav pull-right">
             {% if current_user %}
             <li>
-                <p class="navbar-text"><span class="glyphicon glyphicon-user"></span> {{ current_user.lastName }} {{ current_user.firstName }}</p>
+                <p class="navbar-text"><span class="glyphicon glyphicon-user"></span> {{ current_user.lastName }} {{ current_user.firstName }} ({{ current_user.current_role }})</p>
             </li>
             {% endif %}
             <li>

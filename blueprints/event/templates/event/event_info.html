@@ -16,133 +16,104 @@
 
 {% block main %}
     <div ng-controller="EventInfoCtrl" class="ng-cloak">
-    <legend xmlns="http://www.w3.org/1999/html">Обращение № [[event_info.external_id]], пациент
-        <a href="{{ url_for('patients.patient') }}?client_id=[[event_info.client_id]]">
-                [[ event_info.client.fullName ]]</a></legend>
-    <div class="marginal">
-        <alert ng-repeat="alert in alerts" type="alert.type" close="alerts.splice(index, 1)">[[ alert.text ]] [ [[alert.code]] ]</alert>
-    </div>
-    <tabset>
-        <tab><tab-heading>Основная Информация</tab-heading>{% include "event/main_info.html" %}</tab>
-        <tab><tab-heading>Медицинские документы</tab-heading>
-            {{ action_list.action_list('event_info.med_doc_actions', 0) }}
-        </tab>
-        <tab><tab-heading>Диагностика и лаб.исследования</tab-heading>
-            {{ action_list.action_list('event_info.diag_actions', 1) }}
-        </tab>
-        <tab><tab-heading>Лечение</tab-heading>
-            {{ action_list.action_list('event_info.cure_actions', 2) }}
-        </tab>
-        <tab><tab-heading>Оплата</tab-heading></tab>
-    </tabset>
+        <legend xmlns="http://www.w3.org/1999/html">
+            <h2 class="no-top-margin">[[event.is_new() ? 'Создание обращения' : 'Обращение № ' + event.info.external_id]], пациент
+                <a href="{{ url_for('patients.patient') }}?client_id=[[event.info.client_id]]">[[ event.info.client.fullName ]]</a>
+                <span class="pull-right">
+                    <button type="button" ng-click="cancel_editing();" class="btn btn-lg btn-danger">Назад</button>
+                    <button type="button" ng-click="save_event();" class="btn btn-lg btn-success"
+                            ng-bind="event.is_new() ? 'Создать' : 'Сохранить'">Создать</button>
+                </span>
+            </h2>
+
+        </legend>
+
+        <div class="marginal">
+            <alert ng-repeat="alert in alerts" type="alert.type" close="alerts.splice(index, 1)">[[ alert.text ]] [ [[alert.code]] ]</alert>
+        </div>
+
+        {# В зависимости от ролей и прав разный лейаут #}
+        {% if form_role == 'doctor' %}
+            <tabset>
+                <tab><tab-heading>Основная Информация</tab-heading>
+                    {% include "event/_main_info.html" %}
+                    {% include "event/_diagnoses.html" %}
+                </tab>
+                <tab><tab-heading>Медицинские документы</tab-heading>
+                    {{ action_list.action_list('event.info.med_doc_actions', 0) }}
+                </tab>
+                <tab><tab-heading>Диагностика и лаб.исследования</tab-heading>
+                    {{ action_list.action_list('event.info.diag_actions', 1) }}
+                </tab>
+                <tab><tab-heading>Лечение</tab-heading>
+                    {{ action_list.action_list('event.info.cure_actions', 2) }}
+                </tab>
+            </tabset>
+        {% elif form_role == 'receptionist' %}
+            <ng-form name="event_form">
+                {% include "event/_main_info.html" %}
+                {% include "event/_services.html" %}
+                {% include "event/_payment.html" %}
+            </ng-form>
+        {% endif %}
+
+        <div class="row">
+            <div class="col-md-6 text-left">
+                <div class="dropup" ng-if="!event.is_new()">
+                    <button class="btn btn-lg btn-default dropdown-toggle" type="button" id="print_dropdownMenu"
+                            data-toggle="dropdown" ng-disabled="!ps.templates">
+                        <span class="glyphicon glyphicon-print"></span> Печать <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu" role="menu" aria-labelledby="print_dropdownMenu">
+                        <li role="presentation" ng-repeat="template in ps.templates">
+                            <a role="menuitem" tabindex="-1" href="" class="print_template"
+                               ng-click="ps.print_template(template.id)" ng-bind="template.name"></a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-6 text-right">
+                <button type="button" ng-click="cancel_editing();" class="btn btn-lg btn-danger">Назад</button>
+                <button type="button" ng-click="save_event();" class="btn btn-lg btn-success"
+                        ng-bind="event.is_new() ? 'Создать' : 'Сохранить'">Создать</button>
+            </div>
+        </div>
+
+{#        <div>#}
+{#            <p>debug:</p>#}
+{#            <pre>[[event | json]]</pre>#}
+{#        </div>#}
     </div>
 {% endblock %}
 
 {% block modules_js %}
-    <script>
-    WebMis20.controller('EventInfoCtrl', ['$scope', '$http', 'RefBookService', '$window', 'PrintingService',
-    function ($scope, $http, RefBookService, $window, PrintingService) {
+{{ super() }}
+<script>
+    WebMis20.controller('EventInfoCtrl', ['$scope', 'WMEvent', '$http', 'RefBookService', '$window', 'PrintingService', 'Settings',
+        function ($scope, WMEvent, $http, RefBookService, $window, PrintingService, Settings) {
+
         $scope.aux = aux;
-        $scope.event_info = null;
+        $scope.Organisation = RefBookService.get('Organisation');
+        $scope.Settings = new Settings();
+
         $scope.event_id = aux.getQueryParams(location.search).event_id;
-        $scope.rbResult = RefBookService.get('rbResult');
-        $scope.rbAcheResult = RefBookService.get('rbAcheResult');
-        $scope.rbDiagnosisType = RefBookService.get('rbDiagnosisType');
-        $scope.rbDiseaseCharacter = RefBookService.get('rbDiseaseCharacter');
-        $scope.rbDiseasePhases = RefBookService.get('rbDiseasePhases');
-        $scope.rbDiseaseStage = RefBookService.get('rbDiseaseStage');
-        $scope.rbHealthGroup = RefBookService.get('rbHealthGroup');
-        $scope.rbDispanser = RefBookService.get('rbDispanser');
-        $scope.rbTraumaType = RefBookService.get('rbTraumaType');
-        $scope.Person = RefBookService.get('Person');
-{#        $scope.rbMKB = RefBookService.get('MKB');#}
-        $scope.vrbPerson = RefBookService.get('vrbPersonWithSpeciality');
-        $scope.rbFinance = RefBookService.get('rbFinance');
-        $scope.rbOrder = {{ Enum.get_class_by_name('EventOrder').rb() | tojson}};
-        $scope.rbPrimary = {{ Enum.get_class_by_name('EventOrder').rb() | tojson}};
-
-        $scope.action_type_tree = [];
-        $scope.action_type_popped = null;
-        $scope.at_pop_toggle = function (at_class) {
-            if ($scope.action_type_popped === at_class) {
-                $scope.action_type_popped = null;
-            } else {
-                $scope.action_type_popped = at_class;
-            }
+        $scope.client_id = aux.getQueryParams(location.search).client_id;
+        $scope.event = new WMEvent($scope.event_id, $scope.client_id);
+        $scope.editing = {
+            submit_attempt: false
         };
 
-        $scope.ps = new PrintingService("event", function (template_id) {
-            return {
-                event_id: $scope.event_id
-            }
-        });
+        $scope.initialize = function() {
+            $scope.event.reload().
+                then(function() {
+                    $scope.$broadcast('event_loaded');
+                    if ($scope.event.is_new()) {
 
-        $scope.event_edit_list = [];
-        $scope.start_edit = function(element) {
-            $scope.event_edit_list.push(element);
-        };
-
-        $scope.stop_edit = function(element) {
-            $scope.event_edit_list.splice($scope.event_edit_list.indexOf(element), 1);
-        };
-
-        $scope.save_event = function() {
-            $http.post('{{ url_for('.api_event_save') }}', $scope.event_info).success(function (data) {
-                var event_id = data['result'];
-                $scope.load_data();
-            });
-        };
-
-        $scope.diag_edit = [];
-        $scope.diag_edit_start = function (index) {
-            if (!$scope.diag_edit[index]) {
-                $scope.diag_edit[index] = angular.extend({}, $scope.diagnoses[index])
-            }
-        };
-        $scope.diag_edit_save = function (index) {
-            if ($scope.diag_edit[index]) {
-                $scope.diagnoses[index] = $scope.diag_edit[index];
-                $scope.diagnoses[index]._dirty = true;
-                $scope.diagnoses[index].client_id = $scope.event_info.client_id;
-                $scope.diagnoses[index].event_id = $scope.event_info.id;
-                $http.post('{{ url_for('.api_diagnosis_save') }}', $scope.diagnoses[index]).then(function () {
-                    $scope.diag_edit[index] = undefined;
-                    delete $scope.diagnoses[index]._first;
+                    } else {
+                        $scope.ps.set_context($scope.event.info.event_type.print_context)
+                    }
                 });
-            }
-        };
-        $scope.diag_edit_stop = function (index) {
-            if ($scope.diag_edit[index]) {
-                if ($scope.diag_edit[index]._first) {
-                    $scope.diagnoses.splice(index, 1);
-                }
-                $scope.diag_edit[index] = undefined;
-            }
-        };
-        $scope.diag_edit_new = function () {
-            $scope.diagnoses.splice(0, 0, {
-                person: $scope.Person.get({{ current_user.get_id() }}),
-                _new: true,
-                _first: true
-            });
-            $scope.diag_edit_start(0);
-        };
-        $scope.diag_edit_save_disabled = function (index) {
-            var q = $scope.diag_edit[index];
-            return !q.diagnosis_type;
-        };
-        $scope.edit = true;
-
-        $scope.load_data = function () {
-            $http.get('{{ url_for('.api_event_info') }}', {
-                params: {
-                    event_id: $scope.event_id
-                }
-            }).success(function (data) {
-                $scope.event_info = data.result.event;
-                $scope.diagnoses = data.result.diagnoses;
-                $scope.ps.set_context(data.result.event.event_type.print_context)
-            });
+            {% if form_role == 'doctor' %}
             aux.range(3).map(function (at_class) {
                 $http.get('{{ url_for('schedule.api_atl_get') }}', {
                     params: {
@@ -151,26 +122,34 @@
                 }).success(function (data) {
                     $scope.action_type_tree[at_class] = data.result;
                 })
-            })
+            });
+            {% endif %}
         };
 
-        $scope.hidden_nodes = [];
-        $scope.toggle_vis = function (node_id) {
-            if (aux.inArray($scope.hidden_nodes, node_id)) {
-                $scope.hidden_nodes.splice($scope.hidden_nodes.indexOf(node_id), 1);
-            } else {
-                $scope.hidden_nodes.push(node_id);
+        $scope.save_event = function() {
+            $scope.editing.submit_attempt = true;
+            if ($scope.event_form.$valid) {
+                $scope.event.save().
+                    then(function(event_id) {
+                        if ($scope.event.is_new()) {
+                            $window.open('{{ url_for('.html_event_info') }}' + '?event_id=' + event_id, '_self');
+                        } else {
+                            $scope.event.reload().then(function() {
+                                $scope.$broadcast('event_loaded');
+                            });
+                        }
+                    }, function(reason) {
+                        alert(reason);
+                    });
             }
         };
-        $scope.subtree_shown = function (node_id) {
-            return !aux.inArray($scope.hidden_nodes, node_id);
-        };
 
-        $scope.open_action = function (action_id) {
-            window.open('{{ url_for('schedule.html_action') }}?action_id=' + action_id);
-        };
 
-        $scope.load_data();
+        $scope.ps = new PrintingService("event", function (template_id) {
+            return {
+                event_id: $scope.event_id
+            }
+        });
 
         $scope.print_template = function (template_id) {
             $http.post(
@@ -195,6 +174,53 @@
         $scope.$on('printing_error', function (event, error) {
             $scope.alerts.push(error);
         });
-    }])
-    </script>
+
+{#        $scope.event_edit_list = [];#}
+{#        $scope.start_edit = function(element) {#}
+{#            $scope.event_edit_list.push(element);#}
+{#        };#}
+{##}
+{#        $scope.stop_edit = function(element) {#}
+{#            $scope.event_edit_list.splice($scope.event_edit_list.indexOf(element), 1);#}
+{#        };#}
+
+
+{#        $scope.edit = true;#}
+
+        $scope.action_type_tree = [];
+        $scope.action_type_popped = null;
+        $scope.at_pop_toggle = function (at_class) {
+            if ($scope.action_type_popped === at_class) {
+                $scope.action_type_popped = null;
+            } else {
+                $scope.action_type_popped = at_class;
+            }
+        };
+
+        $scope.hidden_nodes = [];
+        $scope.toggle_vis = function (node_id) {
+            if (aux.inArray($scope.hidden_nodes, node_id)) {
+                $scope.hidden_nodes.splice($scope.hidden_nodes.indexOf(node_id), 1);
+            } else {
+                $scope.hidden_nodes.push(node_id);
+            }
+        };
+        $scope.subtree_shown = function (node_id) {
+            return !aux.inArray($scope.hidden_nodes, node_id);
+        };
+
+        $scope.open_action = function (action_id) {
+            window.open('{{ url_for('schedule.html_action') }}?action_id=' + action_id);
+        };
+
+        $scope.initialize();
+    }]);
+</script>
+{% include "event/_main_info_js.html" %}
+{% if form_role == 'doctor' %}
+    {% include "event/_diagnoses_js.html" %}
+{% elif form_role == 'receptionist' %}
+    {% include "event/_services_js.html" %}
+    {% include "event/_payment_js.html" %}
+{% endif %}
 {% endblock %}
