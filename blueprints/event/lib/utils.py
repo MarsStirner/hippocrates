@@ -126,6 +126,7 @@ def create_services(event_id, services_data, cfinance_id):
     for service in services_data:
         created_count = len(service['actions'])
         new_count = service['amount']
+        # TODO: отработать случай уменьшения количества услуг при редактировании обращения (created_count > new_count)
         if created_count < new_count:
             for i in xrange(1, new_count - created_count + 1):
                 result = create_action(event_id,

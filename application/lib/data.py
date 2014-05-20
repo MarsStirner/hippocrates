@@ -49,7 +49,8 @@ def create_action(event_id, action_type_id, current_user_id, data):
     action.createDatetime = action.modifyDatetime = action.begDate = now
     action.createPerson_id = action.modifyPerson_id = action.setPerson_id = current_user_id
     action.office = actionType.office or u''
-    action.amount = actionType.amount if actionType.amountEvaluation in (0, 7) else 1
+    # action.amount = actionType.amount if actionType.amountEvaluation in (0, 7) else 1
+    action.amount = 1
     action.status = 0
     action.note = ''
     action.payStatus = 0
