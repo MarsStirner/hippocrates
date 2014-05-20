@@ -4,7 +4,7 @@ angular.module('WebMis20.services', []).
     factory('WMEvent', ['$http', '$q',
         function($http, $q) {
             var WMEvent = function(event_id, client_id) {
-                this.event_id = event_id;
+                this.event_id = parseInt(event_id);
                 this.client_id = client_id;
                 this.info = null;
                 this.payment = null;
@@ -51,7 +51,7 @@ angular.module('WebMis20.services', []).
             };
 
             WMEvent.prototype.is_new = function() {
-                return this.event_id == 'new';
+                return !this.event_id;
             };
 
             WMEvent.prototype.closed = function() {
