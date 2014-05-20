@@ -55,6 +55,7 @@ def api_event_new_get():
     v = EventVisualizer()
     return jsonify({
         'event': v.make_event(event),
+        'payment': v.make_event_payment(None)
     })
 
 
