@@ -10,9 +10,9 @@
   <div id="container" class="container">
     {% block content %}
       <!-- Jumbotron -->
-      <div class="well">
-          <h2>Добро пожаловать, {% if current_user.firstName %}{{ current_user.firstName }}{% else %}{{ current_user.lastName }}{% endif %}!</h2><p> <h4> Для продолжения работы выберите необходимый пункт.</h4> </p>
-      </div>
+      <blockquote class="danger">
+          <h2>Добро пожаловать, {% if current_user.firstName %}{{ current_user.firstName }}{% else %}{{ current_user.lastName }}{% endif %}!<small> Для продолжения работы выберите нужный пункт</small> </h2>
+      </blockquote>
         {% if current_user.current_role == 'clinicDoctor' %}
         <div class="row lander">
           <div class="col-md-4">
@@ -51,34 +51,27 @@
         {% if current_user.current_role == 'clinicRegistrator' %}
           <div class="row lander">
             <div class="col-md-4">
-              <a href="#" title="К поиску пациентов">
-                <div class="thumbnail btn btn-default navbar-btn">
-                  <div class="caption">
-                    <h3>Оказание услуг</h3>
-                    <p>Вы сможете:</p>
-                    <ol>
-                      <li> Нати пациента </li>
-                      <li> Создать предварительную запись </li>
-                      <li> Создать обращение </li>
-                      <li>Добавить/удалить услуги</li>
-                    </ol>
-                  </div>
-                </div>
+              <a href="{{ url_for('patients.index') }}" title="Обслуживание пациентов" class="btn btn-primary btn-block">
+                <h3>Обслуживание пациентов</h3>
+                <strong>Вы сможете:</strong>
+                <ul>
+                  <li>Найти пациента </li>
+                  <li>Создать предварительную запись </li>
+                  <li>Создать обращение </li>
+                  <li>Добавить/удалить услуги</li>
+                </ul>
               </a>
             </div>
-            <div class="col-md-5">
-              <a href="{{ url_for('schedule.person_schedule_monthview') }}" title="К расписанию">
-                <div class="thumbnail btn btn-default navbar-btn">
-                  <div class="caption">
-                    <h3>Управление графиками работы</h3>
-                    <p>Вы сможете:</p>
-                    <ol>
-                      <li> Создать/изменить график работы врача </li>
-                      <li> Установаить причину отсутствия </li>
-                      <li> Перенести записи пациентов, если врач отсутствует </li>
-                    </ol>
-                  </div>
-                </div>
+            <div class="col-md-4">
+              <a href="{{ url_for('schedule.person_schedule_monthview') }}" title="К расписанию" class="btn btn-success btn-block">
+                <h3>Графики работы врачей</h3>
+                <strong>Вы сможете:</strong>
+                <ul>
+                  <li>Создать новый график работы врача</li>
+                  <li>Изменить существующий график работы</li>
+                  <li>Установить причину отсутствия врача</li>
+                  <li>Перенести записи пациентов между врачами</li>
+                </ul>
               </a>
             </div>
           </div>

@@ -393,7 +393,7 @@ table.table-clickable tbody tr {
 }
 
 blockquote.danger{
-    border-color: #A94442;
+    border-color: #D43F3A;
 }
 
 .nowrap{
@@ -412,10 +412,12 @@ blockquote.danger{
     width: 300%;
 }
 
-.lander a:hover{
-    text-decoration: none;
+.lander a.btn{
+    text-align: left;
+    padding: 10px;
 }
 
-.lander ol{
-    text-align: left;
+.lander a h3{
+    text-decoration: underline;
+    margin-top: 10px;
 }
