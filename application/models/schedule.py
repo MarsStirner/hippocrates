@@ -122,7 +122,7 @@ class ScheduleClientTicket(db.Model):
     isUrgent = db.Column(db.Boolean)
     note = db.Column(db.Unicode(256))
     appointmentType_id = db.Column(db.Integer, db.ForeignKey('rbAppointmentType.id'))
-    orgFrom_id = db.Column(db.Integer, db.ForeignKey('Organisation.id'))
+    infisFrom = db.Column(db.Unicode(20))
     createDatetime = db.Column(db.DateTime, nullable=False)
     createPerson_id = db.Column(db.Integer, db.ForeignKey('Person.id'), index=True)
     modifyDatetime = db.Column(db.DateTime, nullable=False)
@@ -131,7 +131,6 @@ class ScheduleClientTicket(db.Model):
     
     client = db.relationship('Client', lazy='joined', uselist=False)
     appointmentType = db.relationship('rbAppointmentType', lazy=False, innerjoin=True)
-    orgFrom = db.relationship('Organisation')
     createPerson = db.relationship('Person', foreign_keys=[createPerson_id])
 
     ticket = db.relationship(
