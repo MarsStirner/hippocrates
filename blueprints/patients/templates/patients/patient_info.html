@@ -10,7 +10,7 @@
 {% block main %}
     <div ng-controller="ClientCtrl" class="ng-cloak">
         <script type="text/ng-template" id="modal-deleteRecord.html">{% include "patients/_modal_delete_record.html" %}</script>
-        <legend xmlns="http://www.w3.org/1999/html">Пациент [[ client.client_info.nameText ]]</legend>
+        <legend xmlns="http://www.w3.org/1999/html" wm-page-header><h2>Пациент: [[ client.client_info.nameText ]]</h2></legend>
         <div class="marginal">
             <button class="btn btn-default" onclick="history.back()">Назад к результатам поиска</button>
             <a class="btn btn-success" href="{{ url_for('schedule.appointment') }}?client_id={{ request.args['client_id'] }}"

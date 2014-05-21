@@ -16,15 +16,15 @@
         <td>[[ record.begDateTime | asDateTime ]]</td>
         <td>[[ record.office ]]</td>
         <td>[[ record.person ]]</td>
-        <td>[[ record.createPerson ]]</td>
+        <td>[[ record.createPerson.name ]]</td>
         <td>[[ record.note ]]</td>
         <td>
-            <a ng-href="{{ url_for('event.new_event') }}?client_id=[[ client_id ]]&ticket_id=[[ record.id ]]" class="btn btn-success glyphicon glyphicon-plus"></a>
+            <a ng-href="{{ url_for('event.new_event') }}?client_id=[[ client_id ]]&ticket_id=[[ record.id ]]" class="btn btn-success glyphicon glyphicon-plus" title="Создать обращение"></a>
         </td>
         <td>
             <div class="dropdown">
-                <button class="btn dropdown-toggle" type="button" id="print_dropdownMenu"
-                        data-toggle="dropdown" ng-if="record.receptionType.code == 'amb'" ng-disabled="!ps_amb.templates">
+                <button class="btn btn-default dropdown-toggle" type="button" id="print_dropdownMenu"
+                        data-toggle="dropdown" ng-if="record.receptionType.code == 'amb'" ng-disabled="!ps_amb.templates" title="Печать">
                     <span class="glyphicon glyphicon-print"></span>
                     <span class="caret"></span>
                 </button>

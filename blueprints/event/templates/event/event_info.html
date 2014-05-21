@@ -16,16 +16,10 @@
 
 {% block main %}
     <div ng-controller="EventInfoCtrl" class="ng-cloak">
-        <legend xmlns="http://www.w3.org/1999/html">
-            <h2 class="no-top-margin">[[event.is_new() ? 'Создание обращения' : 'Обращение № ' + event.info.external_id]], пациент
+        <legend xmlns="http://www.w3.org/1999/html" wm-page-header>
+            <h2>[[event.is_new() ? 'Создание обращения' : 'Обращение № ' + event.info.external_id]], пациент
                 <a href="{{ url_for('patients.patient') }}?client_id=[[event.info.client_id]]">[[ event.info.client.fullName ]]</a>
-                <span class="pull-right">
-                    <button type="button" ng-click="cancel_editing();" class="btn btn-lg btn-danger">Назад</button>
-                    <button type="button" ng-click="save_event();" class="btn btn-lg btn-success"
-                            ng-bind="event.is_new() ? 'Создать' : 'Сохранить'">Создать</button>
-                </span>
             </h2>
-
         </legend>
 
         <div class="marginal">

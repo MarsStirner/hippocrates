@@ -391,7 +391,7 @@ table.table-clickable tbody tr {
 .no-top-margin{
     margin-top: 0;
 }
-
+legend h2{margin-top: 0}
 blockquote.danger{
     border-color: #D43F3A;
 }

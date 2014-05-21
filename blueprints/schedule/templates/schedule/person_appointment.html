@@ -5,7 +5,7 @@
 
 {% block main %}
     <div>
-        <legend xmlns="http://www.w3.org/1999/html">Запись пациента на прием - <a href="{{ url_for('patients.patient', client_id=client.id) }}">{{ client.nameText }}</a></legend>
+        <legend xmlns="http://www.w3.org/1999/html" wm-page-header><h2>Запись пациента на прием - <a href="{{ url_for('patients.patient', client_id=client.id) }}">{{ client.nameText }}</a></h2></legend>
         <div class="row">
             <div class="col-md-9" ng-controller="Schedules">
                 <script type="text/ng-template" id="makeAppointment.html">{{ appointment.html_make() }}</script>

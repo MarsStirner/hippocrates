@@ -807,6 +807,15 @@ var WebMis20 = angular.module('WebMis20', ['WebMis20.services', 'WebMis20.direct
         }
     }
 })
+.directive('wmPageHeader', function ($timeout) {
+    return {
+        link: function (scope, element, attr) {
+            if (window.opener){
+                element.prepend('<div class="pull-right"><button class="btn btn-danger" onclick="window.opener.focus();window.close();"><span class="glyphicon glyphicon-remove"></span> Закрыть</button></div>');
+            }
+        }
+    }
+});
 var aux = {
     getQueryParams: function (qs) {
         qs = qs.split("+").join(" ");
