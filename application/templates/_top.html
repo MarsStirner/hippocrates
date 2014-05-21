@@ -3,9 +3,9 @@
         <ul class="nav navbar-nav" id="cur_modules">
             <li>
                 <div>
-                    <a class="btn btn-default navbar-btn" href="/" title="Главная страница"><span class="glyphicon glyphicon-home"></span></a>
+                    <a class="btn navbar-btn {% if request.endpoint == 'index' %}active btn-info{% else %}btn-default{% endif %}" href="/" title="Главная страница"><span class="glyphicon glyphicon-home"></span></a>
                     {% for item in main_menu -%}
-                        <a class="btn btn-default navbar-btn{% if request.blueprint == item.module %} active{% endif %}" href="{{ url_for(item.link) }}" title="{{ item.title }}">{{ item.title }}</a>
+                        <a class="btn navbar-btn {% if request.blueprint == item.module %}active btn-info{% else %}btn-default{% endif %}" href="{{ url_for(item.link) }}" title="{{ item.title }}">{{ item.title }}</a>
                     {% endfor %}
                 </div>
             </li>
