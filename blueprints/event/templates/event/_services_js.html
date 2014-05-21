@@ -50,6 +50,7 @@ WebMis20.controller('EventServicesCtrl', ['$scope', '$http',
         $scope.add_service = function(service) {
             if (!aux.inArray($scope.event.services, service)){
                 service.amount = 1;
+                service.is_new = 1;
                 service.sum = service.price * service.amount;
                 service.actions = [];
                 $scope.event.services.push(service);

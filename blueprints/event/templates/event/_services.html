@@ -55,13 +55,13 @@
                 </thead>
                 <tbody>
                     <tr ng-repeat="(index, service) in event.services"
-                        ng-class="{'success': service.fully_paid, 'warning': service.partially_paid, 'info': !service.fully_paid && !service.partially_paid}">
+                        ng-class="{'success': service.fully_paid, 'warning': service.partially_paid, 'info': service.is_new, 'danger': !service.fully_paid && !service.partially_paid && !service.is_new}">
                         <td ng-bind="service.at_code"></td>
                         <td ng-bind="service.service_name"></td>
                         <td ng-bind="service.at_name"></td>
                         <td ng-bind="service.price" class="text-right"></td>
                         <td class="col-md-1">
-                            <input type="number" class="form-control input-sm"
+                            <input type="number" class="form-control input-sm" ng-disabled="service.fully_paid || service.partially_paid"
                                    ng-model="service.amount" ng-change="service.sum = service.price * service.amount"/>
                         </td>
                         <td ng-bind="service.sum" class="text-right"></td>
@@ -84,9 +84,9 @@
         <div class="row">
         <div class="col-md-12">
             <span class="text-muted">Итого к оплате: </span>
-            <span class="text-success" ng-bind="full_sum"></span><span class="text-success"> руб.</span>
+            <span class="text-primary" ng-bind="full_sum"></span><span class="text-primary"> руб.</span>
             <span class="text-muted"> Оплачено: </span>
-            <span class="text-primary" ng-bind="paid_sum"></span><span class="text-primary"> руб.</span>
+            <span class="text-success" ng-bind="paid_sum"></span><span class="text-success"> руб.</span>
             <span class="text-muted"> Долг: </span>
             <span class="text-danger" ng-bind="full_sum - paid_sum"></span><span class="text-danger"> руб.</span>
 
