@@ -52,7 +52,7 @@ def login():
             login_user(user)
             # Tell Flask-Principal the identity changed
             identity_changed.send(current_app._get_current_object(), identity=Identity(user.id))
-            return redirect(url_for('select_role'))
+            return redirect(url_for('select_role', next=request.args.get('next')))
         else:
             errors.append(u'Неверная пара логин/пароль')
 
