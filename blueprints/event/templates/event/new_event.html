@@ -2,6 +2,7 @@
 
 {% block main %}
     <div ng-controller="EventCreateCtrl">
+        {% include "_breadcrumbs.html" %}
         <legend xmlns="http://www.w3.org/1999/html" wm-page-header><h2>Создание обращения, пациент
             <a href="{{ url_for('patients.patient') }}?client_id=[[event_info.client_id]]">
                 [[ event_info.client.fullName ]]</a></h2></legend>

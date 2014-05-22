@@ -4,6 +4,7 @@
 {% block title %}> {{ module_name }}{% endblock %}
 
 {% block main %}
+    {% include "_breadcrumbs.html" %}
     <div>
         <legend xmlns="http://www.w3.org/1999/html" wm-page-header><h2>Запись пациента на прием - <a href="{{ url_for('patients.patient', client_id=client.id) }}">{{ client.nameText }}</a></h2></legend>
         <div class="row">
