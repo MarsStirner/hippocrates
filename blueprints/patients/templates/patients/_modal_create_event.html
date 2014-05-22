@@ -7,7 +7,7 @@
     соответствующей строке в таблице предварительных записей
 </div>
 <div class="modal-footer">
-    <a class="btn btn-danger" target="_blank" ng-href="{{ url_for('event.new_event') }}?client_id=[[ client_id ]]" ng-if="client_id != 'new'">
+    <a class="btn btn-danger" target="_blank" ng-href="{{ url_for('event.new_event') }}?client_id=[[ client_id ]]" ng-if="client_id != 'new'" ng-click="cancel()">
         Всё равно продолжить
     </a>
     <button type="button" class="btn btn-default" ng-click="cancel()">Отмена</button>

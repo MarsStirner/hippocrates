@@ -1,4 +1,4 @@
-<table class="table table-condensed table-hover table-clickable">
+<table class="table table-condensed">
     <thead>
     <tr>
         <th>Отметка</th>
@@ -18,10 +18,10 @@
         <td>[[ record.person ]]</td>
         <td>[[ record.createPerson.name ]]</td>
         <td>[[ record.note ]]</td>
-        <td>
-            <a ng-href="{{ url_for('event.new_event') }}?client_id=[[ client_id ]]&ticket_id=[[ record.id ]]" class="btn btn-success glyphicon glyphicon-plus" title="Создать обращение"></a>
+        <td width="1%">
+            <a ng-href="{{ url_for('event.new_event') }}?client_id=[[ client_id ]]&ticket_id=[[ record.id ]]" target="_blank" class="btn btn-success" title="Создать обращение"><span class="glyphicon glyphicon-plus"></span></a>
         </td>
-        <td>
+        <td width="1%">
             <div class="dropdown">
                 <button class="btn btn-default dropdown-toggle" type="button" id="print_dropdownMenu"
                         data-toggle="dropdown" ng-if="record.receptionType.code == 'amb'" ng-disabled="!ps_amb.templates" title="Печать">
@@ -29,7 +29,7 @@
                     <span class="caret"></span>
                 </button>
                 <button class="btn dropdown-toggle" type="button" id="print_dropdownMenu"
-                        data-toggle="dropdown" ng-if="record.receptionType.code == 'home'" ng-disabled="!ps_home.templates">
+                        data-toggle="dropdown" ng-if="record.receptionType.code == 'home'" ng-disabled="!ps_home.templates" title="Печать">
                     <span class="glyphicon glyphicon-print"></span>
                     <span class="caret"></span>
                 </button>
