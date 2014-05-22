@@ -6,6 +6,7 @@ from flask.ext.login import current_user
 
 # noinspection PyUnresolvedReferences
 from . import api_json
+from application.lib.utils import breadcrumb
 
 
 @module.route('/')
@@ -32,5 +33,6 @@ def html_event_info():
 
 
 @module.route('/event_new.html')
+@breadcrumb(u'Новое обращение')
 def new_event():
     return html_event_info()

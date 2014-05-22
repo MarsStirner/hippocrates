@@ -16,6 +16,7 @@
 
 {% block main %}
     <div ng-controller="EventInfoCtrl" class="ng-cloak">
+        {% include "_breadcrumbs.html" %}
         <legend xmlns="http://www.w3.org/1999/html">
             <h2 class="no-top-margin">[[event.is_new() ? 'Создание обращения' : 'Обращение № ' + event.info.external_id]], пациент
                 <a href="{{ url_for('patients.patient') }}?client_id=[[event.info.client_id]]">[[ event.info.client.fullName ]]</a>

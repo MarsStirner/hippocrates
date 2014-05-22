@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import datetime
-from flask import json
+import functools
+from flask import json, session
 import uuid
 from functools import wraps
 from decimal import Decimal
@@ -22,6 +23,18 @@ def public_endpoint(function):
     function.is_public = True
     return function
 
+
+def breadcrumb(view_title):
+    def decorator(f):
+        @functools.wraps(f)
+        def decorated_function(*args, **kwargs):
+            session_crumbs = session.setdefault('crumbs', [])
+            session_crumbs.append((request.url, view_title))
+            # Call the view
+            rv = f(*args, **kwargs)
+            return rv
+        return decorated_function
+    return decorator
 #
 # def create_config_func(module_name, config_table):
 #
