@@ -18,6 +18,7 @@ def index():
 
 
 @module.route('/event.html')
+@breadcrumb(u'Создание обращения')
 def html_event_info():
     # event_id = int(request.args['event_id'])
     # В зависимости от ролей и прав разный лейаут
@@ -33,6 +34,5 @@ def html_event_info():
 
 
 @module.route('/event_new.html')
-@breadcrumb(u'Новое обращение')
 def new_event():
     return html_event_info()
