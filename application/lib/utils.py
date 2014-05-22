@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import datetime
-from flask import json
+import functools
+from flask import json, session
 import uuid
 from functools import wraps
 from decimal import Decimal
@@ -12,6 +13,7 @@ from application.models.client import ClientIdentification
 from application.models.event import EventType
 from application.systemwide import db
 from application.models.exists import rbUserProfile, UUID, rbCounter, rbAccountingSystem
+from application.models.client import Client
 from application.app import app
 from pysimplelogs.logger import SimpleLogger
 from config import DEBUG, PROJECT_NAME, SIMPLELOGS_URL, TIME_ZONE
@@ -22,6 +24,31 @@ def public_endpoint(function):
     function.is_public = True
     return function
 
+
+def breadcrumb(view_title):
+    def decorator(f):
+        @functools.wraps(f)
+        def decorated_function(*args, **kwargs):
+            title = view_title
+            if request.path == u'/patients/patient':
+                client_id = request.args['client_id']
+                if client_id == u'new':
+                    title = u"Новый пациент"
+                else:
+                    title = Client.query.get(client_id).nameText
+            elif request.path == u'/event/event.html':
+                title = u"Редактирование обращения"
+            session_crumbs = session.setdefault('crumbs', [])
+            if (request.url, title) in session_crumbs:
+                index = session_crumbs.index((request.url, title))
+                session['crumbs'] = session_crumbs[:index+1]
+            else:
+                session_crumbs.append((request.url, title))
+            # Call the view
+            rv = f(*args, **kwargs)
+            return rv
+        return decorated_function
+    return decorator
 #
 # def create_config_func(module_name, config_table):
 #

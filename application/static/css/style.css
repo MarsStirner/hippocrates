@@ -421,3 +421,7 @@ blockquote.danger{
     text-decoration: underline;
     margin-top: 10px;
 }
+
+.breadcrumb {
+    padding: 0px 15px;
+}
