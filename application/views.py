@@ -32,7 +32,6 @@ def check_valid_login():
             return redirect(url_for('select_role', next=url_for(request.endpoint)))
 
 
-@roles_require('admin')
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -71,6 +70,7 @@ def select_role():
     # Validate form input
     if form.is_submitted():
         current_user.current_role = form.roles.data
+        identity_changed.send(current_app._get_current_object(), identity=Identity(current_user.id))
         return redirect(request.args.get('next') or url_for('index'))
     return render_template('user/select_role.html', form=form, errors=errors)
 
@@ -144,7 +144,14 @@ def on_identity_loaded(sender, identity):
 
     # Assuming the User model has a list of roles, update the
     # identity with the roles that the user provides
-    for role in getattr(identity.user, 'roles', []):
-        identity.provides.add(RoleNeed(role))
-    for right in getattr(identity.user, 'rights', []):
-        identity.provides.add(ActionNeed(right))
+    # for role in getattr(identity.user, 'roles', []):
+    #     identity.provides.add(RoleNeed(role[0]))
+    current_role = getattr(identity.user, 'current_role', None)
+    if current_role:
+        identity.provides = set()
+        identity.provides.add(RoleNeed(identity.user.current_role))
+
+    user_rights = getattr(identity.user, 'rights', None)
+    if isinstance(user_rights, dict):
+        for right in user_rights.get(current_role, []):
+            identity.provides.add(ActionNeed(right))

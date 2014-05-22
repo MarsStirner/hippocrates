@@ -3,7 +3,7 @@
 from flask import render_template, abort, request
 from jinja2 import TemplateNotFound
 
-from application.lib.utils import public_endpoint
+from application.lib.utils import public_endpoint, roles_require
 from application.models.client import Client
 from application.lib.utils import breadcrumb
 from blueprints.schedule.app import module
@@ -45,6 +45,7 @@ def appointment():
 
 
 @module.route('/person_month/')
+@roles_require('clinicRegistrator')
 def person_schedule_monthview():
     try:
         return render_template('schedule/person_schedule_monthview.html')
