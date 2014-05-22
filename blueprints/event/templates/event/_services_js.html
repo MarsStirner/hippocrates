@@ -92,6 +92,17 @@ WebMis20.controller('EventServicesCtrl', ['$scope', '$http',
             }
         }, true);
 
+        $scope.$watch('event.info.event_type.finance.id', function(new_val, old_val) {
+            if (new_val && new_val != old_val) {
+              $scope.query_clear();
+            }
+        });
+        $scope.$watch('event.info.contract', function(new_val, old_val) {
+            if (new_val && new_val != old_val) {
+              $scope.query_clear();
+            }
+        });
+
         $scope.pay = function(service) {
             var act_to_pay = null;
             var paid_actions = $scope.event.payment.payments.map(function(p) {
