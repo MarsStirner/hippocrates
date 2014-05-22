@@ -3,6 +3,7 @@ WebMis20.controller('EventServicesCtrl', ['$scope', '$http',
     function($scope, $http) {
         $scope.query = "";
         $scope.found_services = null;
+        $scope.search_processed = false;
         $scope.full_sum = 0;
 
         $scope.$on('event_loaded', function() {
@@ -23,6 +24,7 @@ WebMis20.controller('EventServicesCtrl', ['$scope', '$http',
         };
 
         $scope.perform_search = function(val) {
+            $scope.search_processed = false;
             if (!val) {
                 $scope.found_services = null;
             } else {
@@ -38,6 +40,7 @@ WebMis20.controller('EventServicesCtrl', ['$scope', '$http',
                     }
                 ).success(function (data) {
                     $scope.found_services = data.result;
+                    $scope.search_processed = true;
                 });
             }
         };

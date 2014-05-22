@@ -8,7 +8,7 @@
                 <span class="input-group-addon"><span class="glyphicon glyphicon-search"></span></span>
                 <input type="text" id="service_search" name="service_search" class="form-control"
                        autocomplete="off" placeholder="Введите код или наименование услуги"
-                       ng-change="" ng-model="query" wm-slow-change="perform_search(query)">
+                       ng-change="search_processed=false" ng-model="query" wm-slow-change="perform_search(query)">
                 <span class="input-group-btn">
                     <button class="btn btn-default" ng-click="query_clear()" title="Очистить поле">
                         <span class="glyphicon glyphicon-remove"></span>
@@ -16,6 +16,7 @@
                 </span>
             </div>
         </div>
+        <div ng-show="query && search_processed && !found_services.length" class="alert alert-danger novmargin">Нет услуг, удовлетворяющих запросу <strong>"[[query]]"</strong></div>
         <div ng-show="found_services" class="panel panel-default">
             <table class="table table-condensed table-striped table-hover table-clickable table-bordered">
                 <thead>
