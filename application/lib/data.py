@@ -122,7 +122,7 @@ def isRedDay(date):
     holiday = False
     for hol in holidays:
         break
-    return date.isoweekday > 5 or holiday
+    return date.isoweekday() > 5 or holiday
 
 
 def addPeriod(startDate, length, countRedDays):

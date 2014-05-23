@@ -3,6 +3,7 @@ WebMis20.controller('EventServicesCtrl', ['$scope', '$http',
     function($scope, $http) {
         $scope.query = "";
         $scope.found_services = null;
+        $scope.search_processed = false;
         $scope.full_sum = 0;
 
         $scope.$on('event_loaded', function() {
@@ -23,6 +24,7 @@ WebMis20.controller('EventServicesCtrl', ['$scope', '$http',
         };
 
         $scope.perform_search = function(val) {
+            $scope.search_processed = false;
             if (!val) {
                 $scope.found_services = null;
             } else {
@@ -38,6 +40,7 @@ WebMis20.controller('EventServicesCtrl', ['$scope', '$http',
                     }
                 ).success(function (data) {
                     $scope.found_services = data.result;
+                    $scope.search_processed = true;
                 });
             }
         };
@@ -50,6 +53,7 @@ WebMis20.controller('EventServicesCtrl', ['$scope', '$http',
         $scope.add_service = function(service) {
             if (!aux.inArray($scope.event.services, service)){
                 service.amount = 1;
+                service.is_new = 1;
                 service.sum = service.price * service.amount;
                 service.actions = [];
                 $scope.event.services.push(service);
@@ -90,6 +94,17 @@ WebMis20.controller('EventServicesCtrl', ['$scope', '$http',
                 }, 0) || 0;
             }
         }, true);
+
+        $scope.$watch('event.info.event_type.finance.id', function(new_val, old_val) {
+            if (new_val && new_val != old_val) {
+              $scope.query_clear();
+            }
+        });
+        $scope.$watch('event.info.contract', function(new_val, old_val) {
+            if (new_val && new_val != old_val) {
+              $scope.query_clear();
+            }
+        });
 
         $scope.pay = function(service) {
             var act_to_pay = null;

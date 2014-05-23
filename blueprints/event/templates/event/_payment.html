@@ -77,15 +77,17 @@
             </div>
 
             <div class="col-md-2">
-                <label class="pull-right">Заполнить</label>
-                <div class="btn-group-vertical pull-right">
-                    <button type="button" class="btn btn-default" ng-disabled="formcnf.payer_field.disabled"
-                            ng-click="get_payer('client', event.info.client_id)">Из карты пациента</button>
-                    <button type="button" class="btn btn-default" ng-disabled="formcnf.payer_field.disabled"
-                            ng-click="open_relatives_modal()">Из карты родственника</button>
-                    <button type="button" class="btn btn-default" ng-disabled="formcnf.payer_field.disabled"
-                            ng-click="get_payer('prev_event', event.info.client_id)">Из предыдущего</button>
-                </div>
+                <blockquote>
+                    Заполнить из:
+                    <button type="button" class="btn btn-info btn-block" ng-disabled="formcnf.payer_field.disabled"
+                            ng-click="get_payer('client', event.info.client_id)">карты пациента</button>
+
+                    <button type="button" class="btn btn-info btn-block" ng-disabled="formcnf.payer_field.disabled"
+                            ng-click="open_relatives_modal()">карты родственника</button>
+
+                    <button type="button" class="btn btn-info btn-block" ng-disabled="formcnf.payer_field.disabled"
+                            ng-click="get_payer('prev_event', event.info.client_id)">предыдущего</button>
+</blockquote>
             </div>
         </div>
 

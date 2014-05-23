@@ -110,7 +110,7 @@ WebMis20.controller('PersonTree', ['$scope', '$http', function($scope, $http) {
     $scope.show_tree = function () {
         $scope.compose();
         if (person_tree_div) {
-            person_tree_div.width(person_query_group.width());
+            person_tree_div.width(person_query_group.width() - 20);
             person_tree_div.show();
         }
     };
