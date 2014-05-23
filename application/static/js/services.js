@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('WebMis20.services', []).
-    factory('WMEvent', ['$http', '$q',
-        function($http, $q) {
+    factory('WMEvent', ['$http', '$q', 'WMEventService',
+        function($http, $q, WMEventService) {
             var WMEvent = function(event_id, client_id) {
                 this.event_id = parseInt(event_id);
                 this.client_id = client_id;
@@ -22,9 +22,11 @@ angular.module('WebMis20.services', []).
                 }).
                     success(function(data) {
                         self.info = data.result.event;
-                        self.payment = data.result.payment || null;
+                        self.payment = data.result.payment || { payments: [] };
                         self.diagnoses = data.result.diagnoses || [];
-                        self.services = data.result.services || [];
+                        self.services = data.result.services && data.result.services.map(function(service) {
+                            return new WMEventService(service, self.payment.payments); //todo mb null
+                        }) || [];
                         deferred.resolve();
                     }).
                     error(function(data) {
@@ -59,5 +61,32 @@ angular.module('WebMis20.services', []).
             };
 
             return WMEvent;
+        }
+    ]).
+    factory('WMEventService', [
+        function() {
+            var WMEventService = function(service_data, payments) {
+                angular.extend(this, service_data);
+                var self = this;
+                this.payments = payments.filter(function(p) {
+                    return p.service_id === self.service_id && self.actions.indexOf(p.action_id) != -1;
+                });
+                this.refresh();
+            };
+
+            WMEventService.prototype.refresh = function() {
+                var self = this;
+                var unpaid = this.actions.filter(function(a_id) {
+                    return self.payments.filter(function(p) {
+                        return p.action_id === a_id && p.service_id === self.service_id && (p.sum + p.sum_discount) === self.price;
+                    }).length === 1 ? undefined : true;
+                });
+
+                this.fully_paid = this.amount === this.actions.length && unpaid.length === 0;
+                this.partially_paid = unpaid.length > 0 && unpaid.length < this.actions.length;
+                this.paid_count = this.actions.length - unpaid.length;
+            };
+
+            return WMEventService;
         }
     ]);

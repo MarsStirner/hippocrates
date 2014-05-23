@@ -22,9 +22,9 @@ def create_new_local_contract(lc_info):
     lcon.coordInspector = lc_info.get('coord_inspector', '')
     lcon.coordText = lc_info.get('coord_text', '')
 
-    if Settings.getBool('Event.Payment.1CODVD'):
+    if Settings.getBool('Event.Payment.1CODVD', True):  # TODO: default val = enabled, change to disabled
         lcon.dateContract = lc_info.get('date_contract') or datetime.date.today()
-        lcon.numberContract = lc_info.get('number_contract') or 'n/a'
+        lcon.numberContract = lc_info.get('number_contract') or ''
     else:
         lcon.dateContract = lc_info['date_contract']
         lcon.numberContract = lc_info['number_contract']

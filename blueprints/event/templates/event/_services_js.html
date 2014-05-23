@@ -1,27 +1,10 @@
 <script>
-WebMis20.controller('EventServicesCtrl', ['$scope', '$http',
-    function($scope, $http) {
+WebMis20.controller('EventServicesCtrl', ['$scope', '$http', 'WMEventService',
+    function($scope, $http, WMEventService) {
         $scope.query = "";
         $scope.found_services = null;
         $scope.search_processed = false;
         $scope.full_sum = 0;
-
-        $scope.$on('event_loaded', function() {
-            $scope.refresh_payments();
-        });
-
-        $scope.refresh_payments = function() {
-            var payments = $scope.event.payment.payments;
-            $scope.event.services.forEach(function(service) {
-                var unpaid = service.actions.filter(function(a_id) {
-                    return payments.filter(function(p) {
-                        return p.action_id === a_id && p.service_id === service.service_id && p.sum === service.price;
-                    }).length === 1 ? undefined : true;
-                });
-                service.fully_paid = unpaid.length === 0;
-                service.partially_paid = unpaid.length > 0 && unpaid.length < service.actions.length;
-            });
-        };
 
         $scope.perform_search = function(val) {
             $scope.search_processed = false;
@@ -51,12 +34,14 @@ WebMis20.controller('EventServicesCtrl', ['$scope', '$http',
         };
 
         $scope.add_service = function(service) {
-            if (!aux.inArray($scope.event.services, service)){
-                service.amount = 1;
-                service.is_new = 1;
-                service.sum = service.price * service.amount;
-                service.actions = [];
-                $scope.event.services.push(service);
+            if (!aux.inArray($scope.event.services, service)) {
+                var service_data = angular.extend(service, {
+                    amount: 1,
+                    is_new: true,
+                    sum: service.price,
+                    actions: []
+                });
+                $scope.event.services.push(new WMEventService(service_data, $scope.event.payment.payments));
             }
         };
 
@@ -69,7 +54,7 @@ WebMis20.controller('EventServicesCtrl', ['$scope', '$http',
                         action_id_list: service.actions
                     }
                 ).success(function() {
-                    $scope.event.reload().then($scope.refresh_payments);
+                    $scope.event.services.splice(index, 1);
                 }).error(function() {
                     alert('error');
                 });
@@ -130,7 +115,7 @@ WebMis20.controller('EventServicesCtrl', ['$scope', '$http',
                     alert('error');
                 });
             }
-            $scope.event.reload().then($scope.refresh_payments);
+            $scope.event.reload();
         };
 
 }]);
