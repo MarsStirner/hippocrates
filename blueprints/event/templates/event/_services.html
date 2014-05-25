@@ -74,10 +74,12 @@
                                     ng-if="!(service.fully_paid || service.partially_paid)"
                                     ng-click="remove_service(index)"><span class="glyphicon glyphicon-trash"></span>
                             </button>
+                            {% if form_role == 'admin' %}
                             <button type="button" class="btn btn-sm btn-success" title="Оплатить"
                                     ng-if="!service.fully_paid"
                                     ng-click="pay(service)"><span class="glyphicon glyphicon-credit-card"></span>
                             </button>
+                            {% endif %}
                         </td>
                     </tr>
                 </tbody>

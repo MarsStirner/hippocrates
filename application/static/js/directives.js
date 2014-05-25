@@ -27,8 +27,8 @@ angular.module('WebMis20.directives', ['ui.bootstrap', 'ui.select', 'ngSanitize'
             restrict: 'E',
             replace: true,
             scope: {
-                id: '=',
-                name: '=',
+                id: '@',
+                name: '@',
                 ngModel: '=',
                 ngRequired: '=',
                 ngDisabled: '='
@@ -45,7 +45,7 @@ angular.module('WebMis20.directives', ['ui.bootstrap', 'ui.select', 'ngSanitize'
                 };
             },
             template: ['<div class="input-group">',
-                        '<input type="text" id="{{id}}" name="{{name}}" class="form-control"',
+                        '<input type="text" id="[[id]]_inner" name="[[name]]_inner" class="form-control"',
                         'is-open="popup.opened" ng-model="ngModel" autocomplete="off"',
                         'datepicker_popup="dd.MM.yyyy" ng-required="ngRequired" ng-disabled="ngDisabled" manual-date/>',
                         '<span class="input-group-btn">',
