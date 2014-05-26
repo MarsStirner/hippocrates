@@ -264,9 +264,11 @@ def api_service_make_payment():
     payment.action_id = pay_data['action_id']
     payment.service_id = pay_data['service_id']
 
-    event.localContract.payments.append(payment)
-    db.session.add(event)
-    db.session.commit()
+    # check already paid
+    if not db.session.query(EventPayment.id).filter(EventPayment.action_id == pay_data['action_id']).all():
+        event.localContract.payments.append(payment)
+        db.session.add(event)
+        db.session.commit()
 
     return jsonify({
         'result': 'ok'

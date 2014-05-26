@@ -50,6 +50,7 @@
                         <th class="nowrap">Тип действия</th>
                         <th class="nowrap">Цена (руб.)</th>
                         <th>Количество</th>
+                        <th>Кол-во оплаченных</th>
                         <th class="nowrap">Сумма к оплате (руб.)</th>
                         <th></th>
                     </tr>
@@ -62,19 +63,23 @@
                         <td ng-bind="service.at_name"></td>
                         <td ng-bind="service.price" class="text-right"></td>
                         <td class="col-md-1">
-                            <input type="number" class="form-control input-sm" ng-disabled="service.fully_paid || service.partially_paid"
+                            <input type="number" class="form-control input-sm" min="[[service.paid_count || 1]]"
+                                   ng-disabled="service.fully_paid"
                                    ng-model="service.amount" ng-change="service.sum = service.price * service.amount"/>
                         </td>
+                        <td ng-bind="service.paid_count" class="text-right"></td>
                         <td ng-bind="service.sum" class="text-right"></td>
                         <td>
                             <button type="button" class="btn btn-sm btn-danger" title="Убрать из списка услуг"
                                     ng-if="!(service.fully_paid || service.partially_paid)"
                                     ng-click="remove_service(index)"><span class="glyphicon glyphicon-trash"></span>
                             </button>
+                            {% if form_role == 'admin' %}
                             <button type="button" class="btn btn-sm btn-success" title="Оплатить"
                                     ng-if="!service.fully_paid"
                                     ng-click="pay(service)"><span class="glyphicon glyphicon-credit-card"></span>
                             </button>
+                            {% endif %}
                         </td>
                     </tr>
                 </tbody>
@@ -90,7 +95,6 @@
             <span class="text-success" ng-bind="paid_sum"></span><span class="text-success"> руб.</span>
             <span class="text-muted"> Долг: </span>
             <span class="text-danger" ng-bind="full_sum - paid_sum"></span><span class="text-danger"> руб.</span>
-
         </div>
         </div>
     </blockquote>

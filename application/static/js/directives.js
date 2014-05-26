@@ -27,26 +27,29 @@ angular.module('WebMis20.directives', ['ui.bootstrap', 'ui.select', 'ngSanitize'
             restrict: 'E',
             replace: true,
             scope: {
-                id: '=',
-                name: '=',
+                id: '@',
+                name: '@',
                 ngModel: '=',
                 ngRequired: '=',
                 ngDisabled: '='
             },
             controller: function ($scope) {
-                $scope.popup = {};
-                $scope.open_datepicker_popup = function () {
+                $scope.popup = { opened: false };
+                $scope.open_datepicker_popup = function (prev_state) {
                     $timeout(function () {
-                        $scope.popup['opened'] = true;
+                        $scope.popup.opened = !prev_state;
+                        if (!$scope.ngModel) {
+                            $scope.ngModel = new Date();
+                        }
                     });
                 };
             },
             template: ['<div class="input-group">',
-                        '<input type="text" id="{{id}}" name="{{name}}" class="form-control"',
+                        '<input type="text" id="[[id]]_inner" name="[[name]]_inner" class="form-control"',
                         'is-open="popup.opened" ng-model="ngModel" autocomplete="off"',
                         'datepicker_popup="dd.MM.yyyy" ng-required="ngRequired" ng-disabled="ngDisabled" manual-date/>',
                         '<span class="input-group-btn">',
-                        '<button type="button" class="btn btn-default" ng-click="open_datepicker_popup()" ng-disabled="ngDisabled">',
+                        '<button type="button" class="btn btn-default" ng-click="open_datepicker_popup(popup.opened)" ng-disabled="ngDisabled">',
                         '<i class="glyphicon glyphicon-calendar"></i></button>',
                         '</span>',
                         '</div>'
