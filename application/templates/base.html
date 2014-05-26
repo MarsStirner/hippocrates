@@ -4,7 +4,7 @@
     {%- include '_header.html' -%}
     {%- block modules_css %}{% endblock -%}
 </head>
-<body>
+<body ng-class="{loading: pendingRequests}">
 <div id="wrap">
     {% include '_top.html' %}
     <div id="container" class="container-fluid">

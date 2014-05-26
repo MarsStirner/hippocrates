@@ -20,14 +20,16 @@ body{
     display:    none;
     position:   fixed;
     z-index:    1000;
-    top:        0;
-    left:       0;
-    height:     100%;
-    width:      100%;
-    background: rgba( 255, 255, 255, .8 )
-    url('../i/ajax-loader.gif')
+    top:        30%;
+    left:       40%;
+    height:     120px;
+    width:      300px;
+    background: rgba( 0, 0, 0, .55 )
     50% 50%
     no-repeat;
+    color: #ffffff;
+    padding: 19px;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.5) ;
 }
 /* When the body has the loading class, we turn
    the scrollbar off with overflow:hidden */
