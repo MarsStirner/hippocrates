@@ -55,16 +55,37 @@ class rbAppointmentType(db.Model):
         }
 
 
+class Office(db.Model):
+    __tablename__ = 'Office'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    code = db.Column(db.Unicode(32), nullable=False)
+    name = db.Column(db.Unicode(64), nullable=False)
+    orgStructure_id = db.Column(db.ForeignKey('OrgStructure.id'))
+
+    orgStructure = db.relationship('OrgStructure')
+
+    def __unicode__(self):
+        return self.code
+
+    def __json__(self):
+        return {
+            'code': self.code,
+            'name': self.name,
+            'org_structure': self.orgStructure
+        }
+
+
 class Schedule(db.Model):
     __tablename__ = 'Schedule'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    person_id = db.Column(db.Integer, db.ForeignKey('Person.id'), nullable=False)
+    person_id = db.Column(db.Integer, db.ForeignKey('Person.id'))
     date = db.Column(db.Date, nullable=False)
     begTime = db.Column(db.Time, nullable=False)
     endTime = db.Column(db.Time, nullable=False)
     numTickets = db.Column(db.Integer, doc=u'Запланированное количество талонов на данный день')
-    office = db.Column(db.Unicode(64))
+    office_id = db.Column(db.ForeignKey('Office.id'))
     reasonOfAbsence_id = db.Column(db.Integer, db.ForeignKey('rbReasonOfAbsence.id'))
     receptionType_id = db.Column(db.Integer, db.ForeignKey('rbReceptionType.id'))
     createDatetime = db.Column(db.DateTime, nullable=False)
@@ -79,6 +100,7 @@ class Schedule(db.Model):
     tickets = db.relationship(
         'ScheduleTicket', lazy=False, primaryjoin=
         "and_(ScheduleTicket.schedule_id == Schedule.id, ScheduleTicket.deleted == 0)")
+    office = db.relationship('Office', lazy='joined')
     
 
 class ScheduleTicket(db.Model):
