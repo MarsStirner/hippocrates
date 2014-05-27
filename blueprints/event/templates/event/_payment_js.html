@@ -1,4 +1,5 @@
 <script type="text/ng-template" id="modal-relatives.html">{% include "event/_modal_relatives.html" %}</script>
+<script type="text/ng-template" id="modal-switch-payer.html">{% include "event/_modal_switch_payer_tab.html" %}</script>
 <script>
 WebMis20.controller('EventPaymentCtrl', ['$scope', 'RefBookService', 'Settings', '$http', '$modal',
     function($scope, RefBookService, Settings, $http, $modal) {
@@ -13,7 +14,7 @@ WebMis20.controller('EventPaymentCtrl', ['$scope', 'RefBookService', 'Settings',
         };
         $scope.payer_is_org = function() {
             var lc = $scope.event.payment && $scope.event.payment.local_contract || null;
-            return lc !== null && lc.payer_org !== null;
+            return lc !== null && lc.payer_org;
         };
         $scope.person_tab_active = function() { return !event_created || $scope.payer_is_person(); };
         $scope.org_tab_active = function() { return event_created && $scope.payer_is_org(); };
@@ -23,11 +24,11 @@ WebMis20.controller('EventPaymentCtrl', ['$scope', 'RefBookService', 'Settings',
 
         $scope.formcnf = {
             tab_payer_person: {
-                disabled: $scope.payer_is_org,
+                disabled: event_created && $scope.payer_is_org,
                 active: $scope.person_tab_active()
             },
             tab_payer_org: {
-                disabled: $scope.payer_is_person,
+                disabled: event_created && $scope.payer_is_person,
                 active: $scope.org_tab_active()
             },
             payer_field: {
@@ -43,6 +44,52 @@ WebMis20.controller('EventPaymentCtrl', ['$scope', 'RefBookService', 'Settings',
             $scope.formcnf.tab_payer_org.active = $scope.org_tab_active();
             $scope.formcnf.contract_field.disabled = event_created || $scope.integration1CODVD_enabled();
         });
+
+        $scope.switch_tab = function(from_tab) {
+            if ($scope.switch_in_process) {
+                $scope.switch_in_process = false;
+                return;
+            }
+            var lc = $scope.event.payment && $scope.event.payment.local_contract || null;
+            if (lc &&
+                    (
+                        (from_tab === 0 && $scope.payer_is_person()) ||
+                        (from_tab === 1 && $scope.payer_is_org())
+                    )
+                ) {
+                var modalInstance = $modal.open({
+                    templateUrl: 'modal-switch-payer.html',
+                    controller: SwitchPayerModalCtrl,
+                    resolve: {
+                        from_tab: from_tab
+                    }
+                });
+
+                modalInstance.result.then(function () {
+                    if (from_tab === 0) {
+                        lc.first_name = null;
+                        lc.last_name = null;
+                        lc.patr_name = null;
+                        lc.birth_date = null;
+                        lc.doc_type = null;
+                        lc.serial_left = null;
+                        lc.serial_right = null;
+                        lc.number = null;
+                        lc.reg_address = null;
+                    } else {
+                        lc.payer_org = null
+                    }
+                }, function () {
+                    if (from_tab === 0) {
+                        $scope.switch_in_process = true;
+                        $scope.formcnf.tab_payer_person.active = true;
+                    } else {
+                        $scope.switch_in_process = true;
+                        $scope.formcnf.tab_payer_org.active = true;
+                    }
+                });
+            }
+        };
 
         $scope.get_payer = function(source, client_id) {
             $http.get('{{ url_for('.api_new_event_payment_info_get') }}', {
@@ -66,7 +113,9 @@ WebMis20.controller('EventPaymentCtrl', ['$scope', 'RefBookService', 'Settings',
             });
 
             modalInstance.result.then(function (selected_client_id) {
-                $scope.get_payer('client', selected_client_id);
+                if (selected_client_id) {
+                    $scope.get_payer('client', selected_client_id);
+                }
             });
         };
 
@@ -101,5 +150,15 @@ RelativesModalCtrl = function ($scope, $modalInstance) {
     };
 
     $scope.initialize();
+};
+
+SwitchPayerModalCtrl = function ($scope, $modalInstance, from_tab) {
+    $scope.from_tab = from_tab;
+    $scope.accept = function() {
+        $modalInstance.close();
+    };
+    $scope.cancel = function() {
+        $modalInstance.dismiss('cancel');
+    };
 };
 </script>
