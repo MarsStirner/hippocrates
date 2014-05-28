@@ -62,11 +62,11 @@
             </table>
         </div>
         <div class="marginal" ng-if="client">
+                <a class="btn btn-primary" target="_blank" ng-href="{{ url_for('schedule.appointment') }}?client_id=[[ client_id ]]">Записать на приём</a>
                 <a class="btn btn-primary" target="_blank" ng-href="{{ url_for('event.new_event') }}?client_id=[[ client_id ]]"
                         ng-if="client.appointments.length == 0">Создать обращение</a>
                 <button class="btn btn-primary" ng-click="modal_create_event()"
                         ng-if="client.appointments.length > 0">Создать обращение</button>
-                <a class="btn btn-primary" target="_blank" ng-href="{{ url_for('schedule.appointment') }}?client_id=[[ client_id ]]">Записать на приём</a>
                 <button class="btn btn-primary" ng-click="open_client(client_id)">Редактировать данные пациента</button>
             <div class="btn-group">
                 <button class="btn btn-primary dropdown-toggle" type="button" id="print_dropdownMenu" ng-disabled="!ps.templates" data-toggle="dropdown">
