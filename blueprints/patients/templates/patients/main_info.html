@@ -72,7 +72,7 @@
                     <label for="snils">СНИЛС</label>
                     <input type="text" class="form-control" id="snils" name="snils" ui-mask="999-999-999 99"
                            ng-model="client.client_info.SNILS" placeholder="___-___-___ __"
-                           ng-pattern="/\d{3}-\d{3}-\d{3} \d\d/"/>
+                           ng-pattern="/\d{3}-\d{3}-\d{3} \d\d/" snils-validator />
                 </div>
             </div>
         </div>
