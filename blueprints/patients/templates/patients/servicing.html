@@ -18,7 +18,7 @@
             </div>
         </form>
         <div class="marginal">
-            <alert ng-repeat="alert in alerts" type="alert.type" close="alerts.splice(index, 1)">[[ alert.text ]] [ [[alert.code]] ]
+            <alert ng-repeat="alert in alerts" type="[[alert.type]]" close="alerts.splice(index, 1)">[[ alert.text ]] [ [[alert.code]] ]
             </alert>
         </div>
         <div class="panel panel-default" ng-class="{'panel-danger': results.length === 0, 'panel-success': results.length > 0}">
@@ -35,7 +35,7 @@
                     </div>
                 </div>
             </div>
-            <table class="table table-condensed table-clickable" ng-if="results.length > 0">
+            <table class="table table-condensed table-clickable table-hover" ng-if="results.length > 0">
                 <thead>
                 <tr>
                     <th>ФИО</th>
@@ -103,7 +103,7 @@
             function ($scope, $http, $timeout, $window, PrintingService, Client, $modal) {
                 $scope.ps = new PrintingService('registry', function (template_id, client_id) {
                     return {
-                        client_id: client_id
+                        client_id: $scope.client_id
                     }
                 });
                 $scope.ps_amb = new PrintingService('preliminary_records', function (template_id, client_ticket_id) {

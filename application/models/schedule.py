@@ -150,10 +150,12 @@ class ScheduleClientTicket(db.Model):
     modifyDatetime = db.Column(db.DateTime, nullable=False)
     modifyPerson_id = db.Column(db.Integer, db.ForeignKey('Person.id'), index=True)
     deleted = db.Column(db.SmallInteger, nullable=False, server_default='0')
+    event_id = db.Column(db.ForeignKey('Event.id'))
     
     client = db.relationship('Client', lazy='joined', uselist=False)
     appointmentType = db.relationship('rbAppointmentType', lazy=False, innerjoin=True)
     createPerson = db.relationship('Person', foreign_keys=[createPerson_id])
+    event = db.relationship('Event')
 
     ticket = db.relationship(
         'ScheduleTicket', lazy=True, innerjoin=True, uselist=False,

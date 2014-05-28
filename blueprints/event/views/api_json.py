@@ -3,6 +3,7 @@ import datetime
 
 from flask import request, abort
 from flask.ext.login import current_user
+from application.models.schedule import ScheduleClientTicket
 
 from config import ORGANISATION_INFIS_CODE
 from application.models.actions import ActionType, Action
@@ -44,14 +45,25 @@ def api_event_info():
 
 @module.route('/api/event_new.json', methods=['GET'])
 def api_event_new_get():
-    client_id = int(request.args['client_id'])
     event = Event()
     event.eventType = EventType.get_default_et()
     event.organisation = Organisation.query.filter_by(infisCode=str(ORGANISATION_INFIS_CODE)).first()
     event.isPrimaryCode = EventPrimary.primary[0]  # TODO: check previous events
     event.order = EventOrder.planned[0]
+
+    ticket_id = request.args.get('ticket_id')
+    if ticket_id:
+        ticket = ScheduleClientTicket.query.get(int(ticket_id))
+        client_id = ticket.client_id
+        setDate = ticket.ticket.begDateTime
+        note = ticket.note
+    else:
+        client_id = int(request.args['client_id'])
+        setDate = datetime.datetime.now()
+        note = ''
     event.client = Client.query.get(client_id)
-    event.setDate = datetime.datetime.now()
+    event.setDate = setDate
+    event.note = note
     v = EventVisualizer()
     return jsonify({
         'event': v.make_event(event),
@@ -117,6 +129,11 @@ def api_event_save():
         services_data = request.json.get('services', [])
         cfinance_id = event_data['contract']['finance']['id']
         create_services(event.id, services_data, cfinance_id)
+
+    if request.json.get('ticket_id'):
+        ticket = ScheduleClientTicket.query.get(int(request.json['ticket_id']))
+        ticket.event_id = int(event)
+        db.session.commit()
 
     return jsonify({
         'id': int(event)
@@ -264,9 +281,11 @@ def api_service_make_payment():
     payment.action_id = pay_data['action_id']
     payment.service_id = pay_data['service_id']
 
-    event.localContract.payments.append(payment)
-    db.session.add(event)
-    db.session.commit()
+    # check already paid
+    if not db.session.query(EventPayment.id).filter(EventPayment.action_id == pay_data['action_id']).all():
+        event.localContract.payments.append(payment)
+        db.session.add(event)
+        db.session.commit()
 
     return jsonify({
         'result': 'ok'

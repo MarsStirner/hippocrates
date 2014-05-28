@@ -2,20 +2,9 @@
 
 {% import "schedule/client_event/action_list.html" as action_list %}
 
-{% block modules_css %}
-    {{ super() }}
-    <style>
-        .list-no-border .list-group-item {
-            border: 0;
-        }
-        .list-no-border li div {
-            display: inline-block;
-        }
-    </style>
-{% endblock %}
-
 {% block main %}
     <div ng-controller="EventInfoCtrl" class="ng-cloak">
+        {% include "_breadcrumbs.html" %}
         <legend xmlns="http://www.w3.org/1999/html" wm-page-header>
             <h2>[[event.is_new() ? 'Создание обращения' : 'Обращение № ' + event.info.external_id]], пациент
                 <a href="{{ url_for('patients.patient') }}?client_id=[[event.info.client_id]]">[[ event.info.client.fullName ]]</a>
@@ -26,8 +15,32 @@
             <alert ng-repeat="alert in alerts" type="alert.type" close="alerts.splice(index, 1)">[[ alert.text ]] [ [[alert.code]] ]</alert>
         </div>
 
+        <ng-form name="event_form">
         {# В зависимости от ролей и прав разный лейаут #}
-        {% if form_role == 'doctor' %}
+        {% if form_role == 'admin' %}
+            <tabset>
+                <tab><tab-heading>Основная Информация</tab-heading>
+                    {% include "event/_main_info.html" %}
+                    {% if not event_new %}
+                        {% include "event/_diagnoses.html" %}
+                    {% endif %}
+                    {% include "event/_services.html" %}
+                    {% include "event/_payment.html" %}
+                </tab>
+                {% if not event_new %}
+                <tab><tab-heading>Медицинские документы</tab-heading>
+                    {{ action_list.action_list('event.info.med_doc_actions', 0) }}
+                </tab>
+                <tab><tab-heading>Диагностика и лаб.исследования</tab-heading>
+                    {{ action_list.action_list('event.info.diag_actions', 1) }}
+                </tab>
+                <tab><tab-heading>Лечение</tab-heading>
+                    {{ action_list.action_list('event.info.cure_actions', 2) }}
+                </tab>
+                {% endif %}
+            </tabset>
+
+        {% elif form_role == 'doctor' %}
             <tabset>
                 <tab><tab-heading>Основная Информация</tab-heading>
                     {% include "event/_main_info.html" %}
@@ -44,13 +57,11 @@
                 </tab>
             </tabset>
         {% elif form_role == 'receptionist' %}
-            <ng-form name="event_form">
                 {% include "event/_main_info.html" %}
                 {% include "event/_services.html" %}
                 {% include "event/_payment.html" %}
-            </ng-form>
         {% endif %}
-
+        </ng-form>
         <div class="row">
             <div class="col-md-6 text-left">
                 <div class="dropup" ng-if="!event.is_new()">
@@ -72,7 +83,6 @@
                         ng-bind="event.is_new() ? 'Создать' : 'Сохранить'">Создать</button>
             </div>
         </div>
-
 {#        <div>#}
 {#            <p>debug:</p>#}
 {#            <pre>[[event | json]]</pre>#}
@@ -89,10 +99,13 @@
         $scope.aux = aux;
         $scope.Organisation = RefBookService.get('Organisation');
         $scope.Settings = new Settings();
+        $scope.alerts = [];
 
-        $scope.event_id = aux.getQueryParams(location.search).event_id;
-        $scope.client_id = aux.getQueryParams(location.search).client_id;
-        $scope.event = new WMEvent($scope.event_id, $scope.client_id);
+        var params = aux.getQueryParams(location.search);
+        $scope.event_id = params.event_id;
+        $scope.client_id = params.client_id;
+        $scope.ticket_id = params.ticket_id;
+        $scope.event = new WMEvent($scope.event_id, $scope.client_id, $scope.ticket_id);
         $scope.editing = {
             submit_attempt: false
         };
@@ -107,7 +120,7 @@
                         $scope.ps.set_context($scope.event.info.event_type.print_context)
                     }
                 });
-            {% if form_role == 'doctor' %}
+            {% if form_role == 'doctor' or form_role == 'admin' %}
             aux.range(3).map(function (at_class) {
                 $http.get('{{ url_for('schedule.api_atl_get') }}', {
                     params: {
@@ -157,11 +170,11 @@
                         currentPerson:"1"
                     }
                 }).success(function (data) {
-                    $scope.w = $window.open();
-                    $scope.w.document.open();
-                    $scope.w.document.write(data);
-                    $scope.w.document.close();
-                    $scope.w.print();
+                    var w = $window.open();
+                    w.document.open();
+                    w.document.write(data);
+                    w.document.close();
+                    w.print();
                })
         };
 
@@ -169,18 +182,7 @@
             $scope.alerts.push(error);
         });
 
-{#        $scope.event_edit_list = [];#}
-{#        $scope.start_edit = function(element) {#}
-{#            $scope.event_edit_list.push(element);#}
-{#        };#}
-{##}
-{#        $scope.stop_edit = function(element) {#}
-{#            $scope.event_edit_list.splice($scope.event_edit_list.indexOf(element), 1);#}
-{#        };#}
-
-
-{#        $scope.edit = true;#}
-
+        {# todo: action data not here #}
         $scope.action_type_tree = [];
         $scope.action_type_popped = null;
         $scope.at_pop_toggle = function (at_class) {
@@ -206,14 +208,16 @@
         $scope.open_action = function (action_id) {
             window.open('{{ url_for('schedule.html_action') }}?action_id=' + action_id);
         };
+        {# action data end #}
 
         $scope.initialize();
     }]);
 </script>
 {% include "event/_main_info_js.html" %}
-{% if form_role == 'doctor' %}
+{% if form_role == 'doctor' or form_role == 'admin' %}
     {% include "event/_diagnoses_js.html" %}
-{% elif form_role == 'receptionist' %}
+{% endif %}
+{% if form_role == 'receptionist' or form_role == 'admin' %}
     {% include "event/_services_js.html" %}
     {% include "event/_payment_js.html" %}
 {% endif %}

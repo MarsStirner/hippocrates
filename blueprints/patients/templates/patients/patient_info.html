@@ -9,6 +9,7 @@
 
 {% block main %}
     <div ng-controller="ClientCtrl" class="ng-cloak">
+        {% include "_breadcrumbs.html" %}
         <script type="text/ng-template" id="modal-deleteRecord.html">{% include "patients/_modal_delete_record.html" %}</script>
         <legend xmlns="http://www.w3.org/1999/html" wm-page-header><h2>Пациент: [[ client.client_info.nameText ]]</h2></legend>
         <div class="marginal">

@@ -2,7 +2,7 @@
 <legend xmlns="http://www.w3.org/1999/html">Плательщик</legend>
 <tabset justified="false" class="marginal">
     <tab id="tab_payer_person" heading="Физ. лицо" disabled="formcnf.tab_payer_person.disabled()"
-         active="formcnf.tab_payer_person.active">
+         active="formcnf.tab_payer_person.active" deselect="switch_tab(0)">
         <div class="row">
             <div class="col-md-10">
                 <div class="row">
@@ -77,22 +77,24 @@
             </div>
 
             <div class="col-md-2">
-                <label class="pull-right">Заполнить</label>
-                <div class="btn-group-vertical pull-right">
-                    <button type="button" class="btn btn-default" ng-disabled="formcnf.payer_field.disabled"
-                            ng-click="get_payer('client', event.info.client_id)">Из карты пациента</button>
-                    <button type="button" class="btn btn-default" ng-disabled="formcnf.payer_field.disabled"
-                            ng-click="open_relatives_modal()">Из карты родственника</button>
-                    <button type="button" class="btn btn-default" ng-disabled="formcnf.payer_field.disabled"
-                            ng-click="get_payer('prev_event', event.info.client_id)">Из предыдущего</button>
-                </div>
+                <blockquote>
+                    Заполнить из:
+                    <button type="button" class="btn btn-info btn-block" ng-disabled="formcnf.payer_field.disabled"
+                            ng-click="get_payer('client', event.info.client_id)">карты пациента</button>
+
+                    <button type="button" class="btn btn-info btn-block" ng-disabled="formcnf.payer_field.disabled"
+                            ng-click="open_relatives_modal()">карты родственника</button>
+
+                    <button type="button" class="btn btn-info btn-block" ng-disabled="formcnf.payer_field.disabled"
+                            ng-click="get_payer('prev_event', event.info.client_id)">предыдущего</button>
+                </blockquote>
             </div>
         </div>
 
     </tab>
 
     <tab id="tab_payer_org" heading="Юр. лицо" disabled="formcnf.tab_payer_org.disabled()"
-         active="formcnf.tab_payer_org.active">
+         active="formcnf.tab_payer_org.active" deselect="switch_tab(1)">
         <div class="row">
             <div class="col-md-6">
                 <label for="payer_org">Организация</label>

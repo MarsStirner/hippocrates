@@ -16,7 +16,7 @@ class User(UserMixin):
                                   if not callable(value) and not key.startswith('__')))
         self.roles = list()
         self.current_role = None
-        self.rights = list()
+        self.rights = dict()
         self.post = dict()
         if person.post:
             self.post.update(dict((key, value)
@@ -51,8 +51,9 @@ class User(UserMixin):
             for role in person.user_profiles:
                 self.roles.append((role.code, role.name))
                 if role.rights:
+                    self.rights[role.code] = list()
                     for right in role.rights:
-                        self.rights.append(right.code)
+                        self.rights[role.code].append(right.code)
 
 
 class AnonymousUser(AnonymousUserMixin):

@@ -59,7 +59,7 @@ WebMis20.controller('EventMainInfoCtrl', [
         };
 
         $scope.$on('event_loaded', function() {
-            if ($scope.event.is_new()) $scope.event.info.set_date = new Date();
+            if ($scope.event.is_new()) $scope.event.info.set_date = new Date($scope.event.info.set_date);
 
             $scope.request_type_init = angular.extend({}, $scope.event.info.event_type.request_type);
             $scope.finance_init = angular.extend({}, $scope.event.info.event_type.finance);
