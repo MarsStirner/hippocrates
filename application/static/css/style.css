@@ -24,12 +24,12 @@ body{
     left:       40%;
     height:     120px;
     width:      300px;
-    background: rgba( 0, 0, 0, .55 )
+    background: rgba( 0, 0, 0, .75)
     50% 50%
     no-repeat;
     color: #ffffff;
     padding: 19px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.7);
     border-radius: 6px;
 }
 /* When the body has the loading class, we turn
