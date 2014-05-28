@@ -4,6 +4,7 @@ from collections import defaultdict
 import datetime
 
 from flask import abort, request
+from flask.ext.login import current_user
 
 from application.models.event import Event
 from application.systemwide import db, cache
@@ -309,6 +310,7 @@ def api_appointment_make():
     client_ticket.client_id = client_id
     client_ticket.ticket_id = ticket_id
     client_ticket.createDatetime = datetime.datetime.now()
+    client_ticket.createPerson_id = client_ticket.modifyPerson_id = current_user.get_id()
     client_ticket.modifyDatetime = datetime.datetime.now()
     db.session.add(client_ticket)
     client_ticket.appointmentType = rbAppointmentType.query.filter(rbAppointmentType.code == 'amb').first()
@@ -401,7 +403,7 @@ def api_action_new_get():
 
     action = Action()
     action.createDatetime = action.modifyDatetime = action.begDate = now
-    action.createPerson = action.modifyPerson = action.setPerson = Person.query.get(1)  # TODO: current User
+    action.createPerson = action.modifyPerson = action.setPerson = Person.query.get(current_user.get_id())
     action.office = actionType.office or u''
     action.amount = actionType.amount if actionType.amountEvaluation in (0, 7) else 1
     action.uet = 0  # TODO: calculate UET
@@ -438,7 +440,7 @@ def api_action_new_get():
     elif actionType.defaultPersonInEvent == 3:
         action.person = event.execPerson
     elif actionType.defaultPersonInEvent == 4:
-        action.person = None  # TODO: current User
+        action.person = Person.query.get(current_user.get_id())
 
     action.event = event
     action.event_id = event.id
