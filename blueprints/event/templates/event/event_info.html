@@ -99,10 +99,13 @@
         $scope.aux = aux;
         $scope.Organisation = RefBookService.get('Organisation');
         $scope.Settings = new Settings();
+        $scope.alerts = [];
 
-        $scope.event_id = aux.getQueryParams(location.search).event_id;
-        $scope.client_id = aux.getQueryParams(location.search).client_id;
-        $scope.event = new WMEvent($scope.event_id, $scope.client_id);
+        var params = aux.getQueryParams(location.search);
+        $scope.event_id = params.event_id;
+        $scope.client_id = params.client_id;
+        $scope.ticket_id = params.ticket_id;
+        $scope.event = new WMEvent($scope.event_id, $scope.client_id, $scope.ticket_id);
         $scope.editing = {
             submit_attempt: false
         };
@@ -167,11 +170,11 @@
                         currentPerson:"1"
                     }
                 }).success(function (data) {
-                    $scope.w = $window.open();
-                    $scope.w.document.open();
-                    $scope.w.document.write(data);
-                    $scope.w.document.close();
-                    $scope.w.print();
+                    var w = $window.open();
+                    w.document.open();
+                    w.document.write(data);
+                    w.document.close();
+                    w.print();
                })
         };
 

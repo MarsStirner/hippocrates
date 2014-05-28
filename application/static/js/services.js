@@ -3,9 +3,10 @@
 angular.module('WebMis20.services', []).
     factory('WMEvent', ['$http', '$q', 'WMEventService',
         function($http, $q, WMEventService) {
-            var WMEvent = function(event_id, client_id) {
+            var WMEvent = function(event_id, client_id, ticket_id) {
                 this.event_id = parseInt(event_id);
                 this.client_id = client_id;
+                this.ticket_id = ticket_id;
                 this.info = null;
                 this.payment = null;
                 this.diagnoses = [];
@@ -15,7 +16,12 @@ angular.module('WebMis20.services', []).
             WMEvent.prototype.reload = function() {
                 var self = this;
                 var url = this.is_new() ? url_event_new : url_event_get;
-                var params = this.is_new() ? { client_id: this.client_id } : { event_id: this.event_id }
+                var params = this.is_new() ? {
+                    client_id: this.client_id,
+                    ticket_id: this.ticket_id
+                } : {
+                    event_id: this.event_id
+                };
                 var deferred = $q.defer();
                 $http.get(url, {
                     params: params
@@ -41,7 +47,8 @@ angular.module('WebMis20.services', []).
                 $http.post(url_event_save, {
                     event: this.info,
                     payment: this.payment,
-                    services: this.services
+                    services: this.services,
+                    ticket_id: this.ticket_id
                 }).
                     success(function(data) {
                         deferred.resolve(data.result.id);
