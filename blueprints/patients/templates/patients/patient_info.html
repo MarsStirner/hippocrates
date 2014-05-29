@@ -48,12 +48,13 @@
                 <form name="client_form" role="form" novalidate ng-submit="save_client(client_form)" >
                     <tabset justified="false" class="marginal">
                         <tab heading="Основная информация">{% include "patients/main_info.html" %}</tab>
+                        <tab heading="Адреса">{% include "patients/address_info.html" %}</tab>
                         <tab heading="Соц. статус">{% include "patients/soc_status.html" %}</tab>
                         <tab heading="Особенности">{% include "patients/characteristics.html" %}</tab>
                         <tab heading="Идентификаторы">{% include "patients/identifiers.html" %}</tab>
                         <tab heading="Связи и контакты">{% include "patients/contacts.html" %}</tab>
                         <tab heading="История документов">{% include "patients/documents.html" %}</tab>
-                        <tab heading="Debug">[[client.client_info | json]]</tab>
+                        <tab heading="Debug"><pre>[[client.client_info | json]]</pre></tab>
                     </tabset>
                     <div class="row" ng-show="editing_is_active()"> {# wtf... FIXME: layout #}
                         <div class="col-md-12">

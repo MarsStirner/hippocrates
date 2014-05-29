@@ -13,7 +13,8 @@
         url_event_save = '{{ url_for('event.api_event_save') }}',
         url_print_templates = '{{ print_subsystem_templates }}',
         url_print_subsystem = '{{ print_subsystem_url }}',
-        url_print_template = '{{ print_subsystem_print_template }}';
+        url_print_template = '{{ print_subsystem_print_template }}',
+        url_kladr_get = '{{ url_for('patients.api_kladr_city_get') }}';
         current_user_id = {{ current_user.id|default('undefined') }};
 </script>
 <script src="{{ url_for('static', filename='jquery-ui/js/jquery-1.10.2.js') }}"></script>
@@ -32,13 +33,13 @@
 
 <script src="{{ url_for('static', filename='select2/select2.js') }}"></script>
 <script src="{{ url_for('static', filename='select2/select2_locale_ru.js') }}"></script>
-{#<script src="{{ url_for('static', filename='angular.js/select.js') }}"></script>#}
 <script src="{{ url_for('static', filename='angular-ui-select/select.js') }}"></script>
 <script src="{{ url_for('static', filename='angular.js/angular-tree-repeat.js') }}"></script>
 <script src="{{ url_for('static', filename='angular-ui-utils/mask.js') }}"></script>
 
 <script src="{{ url_for('static', filename='js/webmis20.js') }}"></script>
 <script src="{{ url_for('static', filename='js/directives.js') }}"></script>
+<script src="{{ url_for('static', filename='js/kladr-directives.js') }}"></script>
 <script src="{{ url_for('static', filename='js/services.js') }}"></script>
 <script src="{{ url_for('static', filename='js/loader.js') }}"></script>
 <script type="text/ng-template" id="_timePicker.html">
@@ -58,4 +59,7 @@
         </span>
 
     </div>
+</script>
+<script type="text/ng-template" id="kladr-ui.html">
+    {% include "kladr-ui.html" %}
 </script>

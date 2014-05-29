@@ -1,8 +1,9 @@
 /**
  * Created by mmalkov on 10.02.14.
  */
-var WebMis20 = angular.module('WebMis20', ['WebMis20.services', 'WebMis20.directives', 'WebMis20.LoadingIndicator', 'ngResource', 'ui.bootstrap', 'ui.select', 'ngSanitize',
-            'ngCkeditor', 'sf.treeRepeat', 'ui.mask'])
+var WebMis20 = angular.module('WebMis20', ['WebMis20.services', 'WebMis20.directives', 'WebMis20.kladrDirectives',
+    'WebMis20.LoadingIndicator', 'ngResource', 'ui.bootstrap', 'ui.select', 'ngSanitize',
+    'ngCkeditor', 'sf.treeRepeat', 'ui.mask'])
 .config(function ($interpolateProvider, datepickerConfig, datepickerPopupConfig) {
     $interpolateProvider.startSymbol('[[');
     $interpolateProvider.endSymbol(']]');

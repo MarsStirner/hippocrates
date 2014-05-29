@@ -1,0 +1,25 @@
+<dl class="dl-horizontal" ng-hide="editing_is_active()">
+    Адреса
+</dl>
+
+<div id="addresses_tab" ng-show="editing_is_active()">
+    <wm-kladr-address>
+        <wm-kladr-base-layout locality-model="client.client_info.regAddress.address.house.locality_code"
+                free-input-model="client.client_info.regAddress.freeInput">
+
+        </wm-kladr-base-layout>
+    </wm-kladr-address>
+
+    <wm-kladr-address>
+        <wm-kladr-base-layout locality-model="client.client_info.liveAddress.address.house.locality_code">
+            <div class="checkbox">
+                <label><input type="checkbox" id="" name=""
+                              ng-model="scos" ng-click="" ng-required="false"/>Совпадает с адресом регистрации
+                </label>
+            </div>
+        </wm-kladr-base-layout>
+    </wm-kladr-address>
+
+</div>
+
+

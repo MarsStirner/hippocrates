@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from application.models.kladr_models import Kladr
 
 from flask import abort, request
 from flask.helpers import make_response
@@ -209,3 +210,17 @@ def api_patient_save():
         return abort(404)
 
     return jsonify(int(client))
+
+
+@module.route('/api/kladr_info.json', methods=['GET'])
+def api_kladr_city_get():
+    val = request.args['city']
+    res = Kladr.query.filter(Kladr.NAME.startswith(val)).all()
+    return jsonify([r.NAME for r in res])
+    # name = [" ".join([record.NAME, record.SOCR])]
+    # parent = record.parent
+    # while parent:
+    #     record = Kladr.query.filter(Kladr.CODE == parent.ljust(13, "0")).first()
+    #     name.insert(0, " ".join([record.NAME, record.SOCR]))
+    #     parent = record.parent
+    # return ", ".join(name)

@@ -1,0 +1,64 @@
+<div>
+    <ng-form name="address">
+
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <legend>Адрес регистрации</legend>
+            <div ng-transclude></div>
+            <div class="row">
+                <div class="form-group col-md-9">
+                    <label for="">Населенный пункт</label>
+                    <div wm-kladr-locality id="kladr1" name="kladr1" model="localityModel"></div>
+                </div>
+                <div class="form-group col-md-3">
+                    <label for="">Тип населенного пункта</label>
+                    <select class="form-control" id="" name=""
+                            ng-model="wwwwwww"
+                            ng-options="item as item.name for item in [{name: 'Город'}, {name: 'Село'}] track by item.id"
+                            ng-required="false" enum-validator>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group col-md-9">
+                    <label for="">Улица</label>
+                    <input type="text" class="form-control" autocomplete="off" placeholder="Улица"
+                           id="" name="" ng-model="scos" typeahead="city for city in getCity($viewValue)"
+                           typeahead-wait-ms="1000" typeahead-min-length="2"
+                           ng-required="false"/>
+                </div>
+                <div class="form-group col-md-1">
+                    <label for="">Дом</label>
+                    <input type="text" class="form-control" autocomplete="off"
+                           id="" name="" ng-model="scos"
+                           ng-required="false"/>
+                </div>
+                <div class="form-group col-md-1">
+                    <label for="">Корпус</label>
+                    <input type="text" class="form-control" autocomplete="off"
+                           id="" name="" ng-model="scos"
+                           ng-required="false"/>
+                </div>
+                <div class="form-group col-md-1">
+                    <label for="">Квартира</label>
+                    <input type="text" class="form-control" autocomplete="off"
+                           id="" name="" ng-model="scos"
+                           ng-required="false"/>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group col-md-12">
+                    <label for="">В свободном виде</label>
+                    <textarea class="form-control" id="" name="" rows="3" autocomplete="off"
+                              placeholder="Адрес в свободном виде" ng-model="freeInputModel" ng-required="false"></textarea>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    </ng-form>
+
+</div>

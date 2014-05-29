@@ -277,6 +277,17 @@ class ClientAddress(db.Model):
         else:
             return self.freeInput
 
+    def __json__(self):
+        return {
+            'id': self.id,
+            'deleted': self.deleted,
+            'type': self.type,
+            'address_id': self.address_id,
+            'address': self.address,
+            'freeInput': self.freeInput,
+            'localityType': self.localityType
+        }
+
     def __int__(self):
         return self.id
 
@@ -884,6 +895,15 @@ class Address(db.Model):
     def __unicode__(self):
         return self.text
 
+    def __json__(self):
+        return {
+            'id': self.id,
+            'deleted': self.deleted,
+            'house_id': self.house_id,
+            'house': self.house,
+            'flat': self.flat
+        }
+
     def __int__(self):
         return self.id
 
@@ -926,6 +946,16 @@ class AddressHouse(db.Model):
     KLADRStreetCode = db.Column(db.String(17), nullable=False)
     number = db.Column(db.String(8), nullable=False)
     corpus = db.Column(db.String(8), nullable=False)
+
+    def __json__(self):
+        return {
+            'id': self.id,
+            'deleted': self.deleted,
+            'locality_code': self.KLADRCode,
+            'street_code': self.KLADRStreetCode,
+            'number': self.number,
+            'corpus': self.corpus
+        }
 
     def __int__(self):
         return self.id
