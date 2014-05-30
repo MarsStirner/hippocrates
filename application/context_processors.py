@@ -21,6 +21,12 @@ def print_subsystem():
 
 
 @app.context_processor
+def vesta():
+    vesta_url = app.config['VESTA_URL'].rstrip('/')
+    return {'vesta_url': vesta_url}
+
+
+@app.context_processor
 def general_menu():
     menu_items = list()
     menu_items.append(dict(module='patients',

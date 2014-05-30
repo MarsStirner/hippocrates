@@ -13,7 +13,8 @@
         url_event_save = '{{ url_for('event.api_event_save') }}',
         url_print_templates = '{{ print_subsystem_templates }}',
         url_print_subsystem = '{{ print_subsystem_url }}',
-        url_print_template = '{{ print_subsystem_print_template }}';
+        url_print_template = '{{ print_subsystem_print_template }}',
+        url_vesta = '{{ vesta_url }}';
         current_user_id = {{ current_user.id|default('undefined') }};
 </script>
 <script src="{{ url_for('static', filename='jquery-ui/js/jquery-1.10.2.js') }}"></script>
