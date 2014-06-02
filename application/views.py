@@ -1,4 +1,5 @@
 # -*- encoding: utf-8 -*-
+import requests
 from flask import render_template, abort, request, redirect, url_for, flash, session, current_app
 from flask.ext.principal import Identity, AnonymousIdentity, identity_changed
 from flask.ext.principal import identity_loaded, Permission, RoleNeed, UserNeed, ActionNeed
@@ -101,6 +102,39 @@ def api_refbook(name):
                 res = jsonify(res)
             return res
     return abort(404)
+
+
+@app.route('/api/kladr/city/')
+@app.route('/api/kladr/city/<search_query>/')
+@cache.memoize(86400)
+def kladr_city(search_query=None):
+    result = []
+    if search_query is None:
+        return jsonify([])
+    short_types = [u'г', u'п', u'с']
+    response = requests.get(u'{0}/kladr/city/{1}/'.format(app.config['VESTA_URL'], search_query))
+    for city in response.json()['data']:
+        if city['shorttype'] in short_types:
+            data = {'code': city['identcode'], 'name': u'{0}. {1}'.format(city['shorttype'], city['name'])}
+            if city['parents']:
+                for parent in city['parents']:
+                    data['name'] = u'{0}, {1}. {2}'.format(data['name'], parent['shorttype'], parent['name'])
+            result.append(data)
+    return jsonify(result)
+
+
+@app.route('/api/kladr/street/')
+@app.route('/api/kladr/street/<city_code>/<search_query>/')
+@cache.memoize(86400)
+def kladr_street(city_code=None, search_query=None):
+    result = []
+    if city_code is None or search_query is None:
+        return jsonify([])
+    response = requests.get(u'{0}/kladr/street/{1}/{2}/'.format(app.config['VESTA_URL'], city_code, search_query))
+    for street in response.json()['data']:
+        data = {'code': street['identcode'], 'name': u'{0} {1}'.format(street['fulltype'], street['name'])}
+        result.append(data)
+    return jsonify(result)
 
 
 @app.errorhandler(403)
