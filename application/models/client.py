@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import datetime
 from application.lib.agesex import calcAgeTuple
-from application.models.enums import Gender
+from application.models.enums import Gender, LocalityType
 from application.models.exists import rbDocumentTypeGroup
 from application.models.kladr_models import Kladr, Street
 from application.systemwide import db
@@ -284,8 +284,8 @@ class ClientAddress(db.Model):
             'type': self.type,
             'address_id': self.address_id,
             'address': self.address,
-            'freeInput': self.freeInput,
-            'localityType': self.localityType
+            'free_input': self.freeInput,
+            'locality_type': LocalityType(self.localityType)
         }
 
     def __int__(self):

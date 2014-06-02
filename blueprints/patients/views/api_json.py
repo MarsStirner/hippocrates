@@ -216,7 +216,8 @@ def api_patient_save():
 def api_kladr_city_get():
     val = request.args['city']
     res = Kladr.query.filter(Kladr.NAME.startswith(val)).all()
-    return jsonify([r.NAME for r in res])
+    return jsonify([{'name': r.NAME,
+                    'code': '0000000000000000'} for r in res])
     # name = [" ".join([record.NAME, record.SOCR])]
     # parent = record.parent
     # while parent:

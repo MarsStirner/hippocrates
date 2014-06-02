@@ -3,22 +3,40 @@
 </dl>
 
 <div id="addresses_tab" ng-show="editing_is_active()">
+    <legend>Адрес регистрации</legend>
     <wm-kladr-address>
-        <wm-kladr-base-layout locality-model="client.client_info.regAddress.address.house.locality_code"
-                free-input-model="client.client_info.regAddress.freeInput">
-
+        <ng-form ng-attr-name="regAddressForm">
+        <wm-kladr-base-layout prefix='reg'
+            locality-model="client.client_info.regAddress.address.house.locality_code"
+            locality-type-model="client.client_info.regAddress.locality_type"
+            house-model="client.client_info.regAddress.address.house.number"
+            korpus-model="client.client_info.regAddress.address.house.corpus"
+            flat-model="client.client_info.regAddress.address.flat"
+            free-input-model="client.client_info.regAddress.free_input">
         </wm-kladr-base-layout>
+        </ng-form>
     </wm-kladr-address>
+    <div>[[client.client_info.regAddress | json]]</div>
 
+    <legend>Адрес проживания</legend>
     <wm-kladr-address>
-        <wm-kladr-base-layout locality-model="client.client_info.liveAddress.address.house.locality_code">
+        <ng-form ng-attr-name="locAddressForm">
+        <wm-kladr-base-layout prefix='loc'
+            locality-model="client.client_info.liveAddress.address.house.locality_code"
+            locality-type-model="client.client_info.liveAddress.locality_type"
+            house-number-model="client.client_info.liveAddress.address.house.number"
+            korpus-number-model="client.client_info.liveAddress.address.house.corpus"
+            flat-number-model="client.client_info.liveAddress.address.flat"
+            free-input-model="client.client_info.liveAddress.free_input">
             <div class="checkbox">
                 <label><input type="checkbox" id="" name=""
                               ng-model="scos" ng-click="" ng-required="false"/>Совпадает с адресом регистрации
                 </label>
             </div>
         </wm-kladr-base-layout>
+        </ng-form>
     </wm-kladr-address>
+    <div>[[client.client_info.liveAddress | json]]</div>
 
 </div>
 
