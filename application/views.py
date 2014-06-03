@@ -72,7 +72,7 @@ def select_role():
     if form.is_submitted():
         current_user.current_role = form.roles.data
         identity_changed.send(current_app._get_current_object(), identity=Identity(current_user.id))
-        return redirect(request.args.get('next') or url_for('index'))
+        return redirect(request.args.get('next') or request.referrer or url_for('index'))
     return render_template('user/select_role.html', form=form, errors=errors)
 
 
