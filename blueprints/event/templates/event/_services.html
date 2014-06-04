@@ -10,7 +10,7 @@
                        autocomplete="off" placeholder="Введите код или наименование услуги"
                        ng-change="search_processed=false" ng-model="query" wm-slow-change="perform_search(query)">
                 <span class="input-group-btn">
-                    <button class="btn btn-default" ng-click="query_clear()" title="Очистить поле">
+                    <button class="btn btn-danger" ng-click="query_clear()" title="Очистить поле">
                         <span class="glyphicon glyphicon-remove"></span>
                     </button>
                 </span>
@@ -24,7 +24,7 @@
                         <th>Код</th>
                         <th>Услуга</th>
                         <th>Тип действия</th>
-                        <th class="text-right nowrap">Цена (руб.)</th>
+                        <th class="text-right nowrap" ng-hide="event.info.event_type.finance.code == 2">Цена (руб.)</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -32,7 +32,7 @@
                         <td ng-bind="result.at_code"></td>
                         <td ng-bind="result.service_name"></td>
                         <td ng-bind="result.at_name"></td>
-                        <td ng-bind="result.price" class="text-right"></td>
+                        <td ng-bind="result.price" class="text-right"  ng-hide="event.info.event_type.finance.code == 2"></td>
                     </tr>
                 </tbody>
             </table>
@@ -48,10 +48,10 @@
                         <th>Код</th>
                         <th>Услуга</th>
                         <th class="nowrap">Тип действия</th>
-                        <th class="nowrap">Цена (руб.)</th>
+                        <th class="nowrap" ng-hide="event.info.event_type.finance.code == 2">Цена (руб.)</th>
                         <th>Количество</th>
-                        <th>Кол-во оплаченных</th>
-                        <th class="nowrap">Сумма к оплате (руб.)</th>
+                        <th ng-hide="event.info.event_type.finance.code == 2">Кол-во оплаченных</th>
+                        <th class="nowrap" ng-hide="event.info.event_type.finance.code == 2">Сумма к оплате (руб.)</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -61,14 +61,14 @@
                         <td ng-bind="service.at_code"></td>
                         <td ng-bind="service.service_name"></td>
                         <td ng-bind="service.at_name"></td>
-                        <td ng-bind="service.price" class="text-right"></td>
+                        <td ng-bind="service.price" class="text-right" ng-hide="event.info.event_type.finance.code == 2"></td>
                         <td class="col-md-1">
                             <input type="number" class="form-control input-sm" min="[[service.paid_count || 1]]"
                                    ng-disabled="service.fully_paid"
                                    ng-model="service.amount" ng-change="service.sum = service.price * service.amount"/>
                         </td>
-                        <td ng-bind="service.paid_count" class="text-right"></td>
-                        <td ng-bind="service.sum" class="text-right"></td>
+                        <td ng-bind="service.paid_count" class="text-right" ng-hide="event.info.event_type.finance.code == 2"></td>
+                        <td ng-bind="service.sum" class="text-right" ng-hide="event.info.event_type.finance.code == 2"></td>
                         <td>
                             <button type="button" class="btn btn-sm btn-danger" title="Убрать из списка услуг"
                                     ng-if="!(service.fully_paid || service.partially_paid)"
@@ -86,7 +86,7 @@
             </table>
         </div>
     </div>
-    <blockquote class="novmargin" ng-show="event.services.length">
+    <blockquote class="novmargin" ng-show="event.services.length && event.info.event_type.finance.code != 2">
         <div class="row">
         <div class="col-md-12">
             <span class="text-muted">Итого к оплате: </span>
