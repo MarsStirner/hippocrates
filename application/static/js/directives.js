@@ -140,14 +140,26 @@ angular.module('WebMis20.validators', [])
 return {
     restrict: 'A',
     require: 'ngModel',
-    link: function(scope, elm, attrs, ctrl) {
-        var validity_regexp = new RegExp(scope.$eval(attrs.validatorRegexp));
+    link: function(scope, element, attrs, ctrl) {
+        var regexp = null;
+        var evalue = null;
+        scope.$watch(attrs.validatorRegexp, function (n, o) {
+            evalue = n;
+            if (!evalue) {
+                $(element).attr('disabled', true);
+                ctrl.$setValidity('text', true);
+            } else {
+                $(element).removeAttr('disabled');
+                regexp = new RegExp(evalue);
+                ctrl.$setValidity('text', ctrl.$viewValue && regexp.test(ctrl.$viewValue));
+            }
+        });
         ctrl.$parsers.unshift(function(viewValue) {
-            ctrl.$setValidity('text', viewValue && validity_regexp.test(viewValue));
+            if (evalue) {
+                ctrl.$setValidity('text', viewValue && regexp.test(viewValue));
+            }
             return viewValue
         });
-        var element = angular.element(elm);
-        $compile(element)(scope);
     }
 }
 }]);
