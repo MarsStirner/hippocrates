@@ -3,10 +3,10 @@
 import datetime
 from application.models.client import Client, ClientAllergy, ClientContact, ClientDocument, ClientIdentification, \
     ClientIntoleranceMedicament, DirectClientRelation, ReversedClientRelation, ClientSocStatus, ClientPolicy, \
-    BloodHistory
+    BloodHistory, ClientAddress, Address, AddressHouse
 from application.models.exists import (rbDocumentType, rbPolicyType, rbSocStatusClass, rbSocStatusType,
                                        rbBloodType, rbAccountingSystem, rbContactType, rbRelationType)
-from application.lib.utils import string_to_datetime, safe_date
+from application.lib.utils import string_to_datetime, safe_date, safe_traverse
 
 
 # def format_snils(SNILS):
@@ -144,6 +144,64 @@ def get_modified_policy(client, policy_info):
         policy.insurer_id = policy_info['insurer']['id']
         policy.modifyDatetime = now
         return (policy, None)
+
+
+def get_new_address(addr_info):
+    addr_type = addr_info['type']
+    loc_type = safe_traverse(addr_info, 'locality_type', 'id')
+    loc_kladr_code = safe_traverse(addr_info, 'address', 'locality', 'code')
+    street_kladr_code = '0000000'  # safe_traverse(addr_info, 'address', 'street', 'code')
+    free_input = safe_traverse(addr_info, 'free_input')
+
+    if (loc_kladr_code and street_kladr_code):
+        house_number = safe_traverse(addr_info, 'address', 'house_number', default='')
+        corpus_number = safe_traverse(addr_info, 'address', 'corpus_number', default='')
+        flat_number = safe_traverse(addr_info, 'address', 'flat_number', default='')
+        client_addr = ClientAddress.create_from_kladr(addr_type, loc_type, loc_kladr_code, street_kladr_code,
+            house_number, corpus_number, flat_number)
+    elif free_input:
+        client_addr = ClientAddress.create_from_free_input(addr_type, loc_type, free_input)
+    else:
+        raise ValueError
+
+    return client_addr
+
+
+def get_modified_address(client, addr_info):
+    now = datetime.datetime.now()
+    addr = filter(lambda a: a.id == addr_info['id'], client.addresses)[0]
+
+    if addr_info['deleted'] == 1:
+        addr.deleted = 1
+        return [addr, ]
+
+    loc_type = safe_traverse(addr_info, 'locality_type', 'id')
+    loc_kladr_code = safe_traverse(addr_info, 'address', 'locality', 'code')
+    street_kladr_code = '0000000'  # safe_traverse(addr_info, 'address', 'street', 'code')
+    free_input = safe_traverse(addr_info, 'free_input')
+    house_number = safe_traverse(addr_info, 'address', 'house_number', default='')
+    corpus_number = safe_traverse(addr_info, 'address', 'corpus_number', default='')
+    flat_number = safe_traverse(addr_info, 'address', 'flat_number', default='')
+
+    def _big_changes(a):
+        if ((a.address and a.address.KLADRCode) != loc_kladr_code or
+                (a.address and a.address.KLADRStreetCode) != street_kladr_code or
+                (a.address and a.address.number) != house_number or
+                (a.address and a.address.corpus) != corpus_number or
+                (a.address and a.address.flat) != flat_number):
+            return True
+        return False
+
+    if _big_changes(addr):
+        new_addr = get_new_address(addr_info)
+        addr.deleted = 2
+        addr.modifyDatetime = now
+        return (addr, new_addr)
+    else:
+        addr.localityType = loc_type
+        addr.freeInput = free_input
+        addr.modifyDatetime = now
+        return (addr, None)
 
 
 def get_new_soc_status(ss_info):

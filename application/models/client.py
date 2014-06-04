@@ -55,11 +55,14 @@ class Client(db.Model):
     policies_all = db.relationship('ClientPolicy',
                                    primaryjoin='and_(ClientPolicy.clientId==Client.id, ClientPolicy.deleted != 1)',
                                    order_by="desc(ClientPolicy.id)")
+    addresses = db.relationship('ClientAddress',
+                                primaryjoin="and_(Client.id==ClientAddress.client_id, ClientAddress.deleted==0)"
+                                )
     reg_address = db.relationship(u'ClientAddress',
-                                  primaryjoin="and_(Client.id==ClientAddress.client_id, ClientAddress.type==0)",
+                                  primaryjoin="and_(Client.id==ClientAddress.client_id, ClientAddress.type==0, ClientAddress.deleted==0)",
                                   order_by="desc(ClientAddress.id)", uselist=False)
     loc_address = db.relationship(u'ClientAddress',
-                                  primaryjoin="and_(Client.id==ClientAddress.client_id, ClientAddress.type==1)",
+                                  primaryjoin="and_(Client.id==ClientAddress.client_id, ClientAddress.type==1, ClientAddress.deleted==0)",
                                   order_by="desc(ClientAddress.id)", uselist=False)
     socStatuses = db.relationship(u'ClientSocStatus',
                                   primaryjoin='and_(ClientSocStatus.deleted == 0, ClientSocStatus.client_id==Client.id)',
@@ -242,6 +245,28 @@ class ClientAddress(db.Model):
     localityType = db.Column(db.Integer, nullable=False)
 
     address = db.relationship(u'Address')
+
+    @classmethod
+    def create_from_kladr(cls, addr_type, loc_type, loc_kladr_code, street_kladr_code,
+            house_number, corpus_number, flat_number):
+        ca = cls(addr_type, loc_type)
+        addr = Address.create_new(loc_kladr_code, street_kladr_code, house_number, corpus_number, flat_number)
+        ca.address = addr
+        ca.freeInput = ''
+        return ca
+
+    @classmethod
+    def create_from_free_input(cls, addr_type, loc_type, free_input):
+        ca = cls(addr_type, loc_type)
+        ca.address = None
+        ca.freeInput = free_input
+        return ca
+
+    def __init__(self, addr_type, loc_type):
+        self.createDatetime = self.modifyDatetime = datetime.datetime.now()
+        self.deleted = self.version = 0
+        self.type = addr_type
+        self.localityType = loc_type
 
     @property
     def KLADRCode(self):
@@ -837,6 +862,17 @@ class Address(db.Model):
 
     house = db.relationship(u'AddressHouse')
 
+    @classmethod
+    def create_new(cls, loc_kladr_code, street_kladr_code, house_number, corpus_number, flat_number):
+        addr = cls()
+        addr.createDatetime = addr.modifyDatetime = datetime.datetime.now()
+        addr.deleted = 0
+        addr.flat = flat_number
+
+        addr_house = AddressHouse(loc_kladr_code, street_kladr_code, house_number, corpus_number)
+        addr.house = addr_house
+        return addr
+
     @property
     def KLADRCode(self):
         return self.house.KLADRCode
@@ -900,8 +936,17 @@ class Address(db.Model):
             'id': self.id,
             'deleted': self.deleted,
             'house_id': self.house_id,
-            'house': self.house,
-            'flat': self.flat
+            'locality': {
+                'code': self.KLADRCode,
+                'name': self.city
+            },
+            'street': {
+                'code': self.KLADRStreetCode,
+                'name': self.street
+            },
+            'house_number': self.number,
+            'corpus_number': self.corpus,
+            'flat_number': self.flat
         }
 
     def __int__(self):
@@ -946,6 +991,14 @@ class AddressHouse(db.Model):
     KLADRStreetCode = db.Column(db.String(17), nullable=False)
     number = db.Column(db.String(8), nullable=False)
     corpus = db.Column(db.String(8), nullable=False)
+
+    def __init__(self, loc_code, street_code, house_number, corpus_number):
+        self.createDatetime = self.modifyDatetime = datetime.datetime.now()
+        self.deleted = 0
+        self.KLADRCode = loc_code
+        self.KLADRStreetCode = street_code
+        self.number = house_number
+        self.corpus = corpus_number
 
     def __json__(self):
         return {

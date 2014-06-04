@@ -129,6 +129,19 @@ def api_patient_save():
                 if policies[1]:
                     client.policies.append(policies[1])
 
+        reg_address = client_info['regAddress']
+        if reg_address is not None and (reg_address.get('address') or reg_address.get('free_input')):
+            reg_address['type'] = 0
+            if not client.reg_address:
+                address = get_new_address(reg_address)
+                client.addresses.append(address)
+            else:
+                addresses = get_modified_address(client, reg_address)
+                db.session.add(addresses[0])
+                if addresses[1]:
+                    client.addresses.append(addresses[1])
+
+
         for ss_info in client_info['socStatuses']:
             if not 'id' in ss_info:
                 ss = get_new_soc_status(ss_info)

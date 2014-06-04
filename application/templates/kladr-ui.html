@@ -6,7 +6,7 @@
                 <div class="form-group col-md-9"
                      ng-class="{'has-error': addressForm.locality.$invalid}">
                     <label for="[[prefix]]_locality">Населенный пункт</label>
-                    <wm-kladr-locality id="[[prefix]]_locality" ng-attr-name="locality"
+                    <wm-kladr-locality id="[[prefix]]_locality" name="locality"
                         model="localityModel"></wm-kladr-locality>
                 </div>
                 <div class="form-group col-md-3">
@@ -18,11 +18,9 @@
 
             <div class="row">
                 <div class="form-group col-md-9">
-                    <label for="">Улица</label>
-                    <input type="text" class="form-control" autocomplete="off" placeholder="Улица"
-                           id="" name="" ng-model="scos" typeahead="city for city in getCity($viewValue)"
-                           typeahead-wait-ms="1000" typeahead-min-length="2"
-                           ng-required="false"/>
+                    <label for="[[prefix]]_street">Улица</label>
+                    <wm-kladr-street id="[[prefix]]_street" name="street"
+                        model="streetModel"></wm-kladr-street>
                 </div>
                 <div class="form-group col-md-1">
                     <label for="[[prefix]]_house_number">Дом</label>
@@ -30,9 +28,9 @@
                         model="houseModel"></wm-kladr-house-number>
                 </div>
                 <div class="form-group col-md-1">
-                    <label for="[[prefix]]_korpus_number">Корпус</label>
-                    <wm-kladr-korpus-number id="[[prefix]]_korpus_number" name="korpus_number"
-                        model="korpusModel"></wm-kladr-korpus-number>
+                    <label for="[[prefix]]_corpus_number">Корпус</label>
+                    <wm-kladr-corpus-number id="[[prefix]]_corpus_number" name="corpus_number"
+                        model="corpusModel"></wm-kladr-corpus-number>
                 </div>
                 <div class="form-group col-md-1">
                     <label for="[[prefix]]_flat_number">Квартира</label>
