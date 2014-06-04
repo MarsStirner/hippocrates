@@ -80,3 +80,58 @@ angular.module('WebMis20.directives', ['ui.bootstrap', 'ui.select', 'ngSanitize'
         };
     }])
 ;
+angular.module('WebMis20.validators', [])
+.directive('enumValidator', function() {
+    return {
+        restrict: 'A',
+        require: 'ngModel',
+        link: function(scope, elm, attrs, ctrl) {
+            ctrl.$parsers.unshift(function(viewValue) {
+                if (viewValue && viewValue.id > 0) {
+                    ctrl.$setValidity('text', true);
+                    return viewValue;
+                } else {
+                    ctrl.$setValidity('text', false);
+                    return undefined;
+                }
+            });
+        }
+    };
+})
+.directive('snilsValidator', [function() {
+    return {
+        restrict: 'A',
+        require: 'ngModel',
+        link: function(scope, elm, attrs, ctrl) {
+            function snilsCRC (value) {
+                var v = value.substring(0, 3) + value.substring(4, 7) + value.substring(8, 11) + value.substring(12, 14);
+                var result = 0;
+                for (var i=0; i < 9; i++) {
+                    result += (9 - i) * parseInt(v[i])
+                }
+                result = (result % 101) % 100;
+                if (result < 10) return '0' + result;
+                else return '' + result;
+            }
+            ctrl.$parsers.unshift(function(viewValue) {
+                ctrl.$setValidity('text', viewValue && viewValue.substring(12, 14) == snilsCRC(viewValue));
+                return viewValue
+            });
+        }
+    };
+}])
+.directive('validatorRegexp', [function () {
+return {
+    restrict: 'A',
+    require: 'ngModel',
+    link: function(scope, elm, attrs, ctrl) {
+        var validity_regexp = new RegExp(scope.$eval(attrs.validatorRegexp));
+        ctrl.$parsers.unshift(function(viewValue) {
+            ctrl.$setValidity('text', viewValue && validity_regexp.test(viewValue));
+            return viewValue
+        });
+        var element = angular.element(elm);
+        $compile(element)(scope);
+    }
+}
+}]);
