@@ -14,7 +14,25 @@
         <div class="marginal">
             <alert ng-repeat="alert in alerts" type="alert.type" close="alerts.splice(index, 1)">[[ alert.text ]] [ [[alert.code]] ]</alert>
         </div>
-
+        <div class="well well-sm">
+            <div class="row">
+                <div class="col-md-9">
+                    <dl class="dl-horizontal novmargin">
+                        <dt>Контактный телефон:</dt><dd>[[event.info.client.phones]]</dd>
+                        <dt>Адрес регистрации:</dt><dd>[[event.info.client.reg_address]]</dd>
+                        <dt>Адрес проживания:</dt><dd>[[event.info.client.loc_address]]</dd>
+                        <dt>Медицинский полис:</dt><dd>[[event.info.client.comp_policy.policyText]]</dd>
+                    </dl>
+                </div>
+                <div class="col-md-3">
+                    <dl class="dl-horizontal novmargin">
+                        <dt>Код пациента:</dt><dd>[[event.info.client.id]]</dd>
+                        <dt>Дата рождения:</dt><dd>[[event.info.client.birthDate]]</dd>
+                        <dt>Пол:</dt><dd>[[event.info.client.sex.name]]</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
         <ng-form name="event_form">
         {# В зависимости от ролей и прав разный лейаут #}
         {% if form_role == 'admin' %}
