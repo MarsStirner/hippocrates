@@ -344,25 +344,25 @@ def api_schedule_lock():
 
 @module.route('/api/move_client.json', methods=['POST'])
 def api_move_client():
-    j = request.json
+    j = request.get_json()
     try:
         ticket_id = int(j['ticket_id'])
         destination_tid = j['destination_ticket_id']
     except ValueError or KeyError:
-        return abort(418)
+        return jsonify(None, 418, 'Both ticket_id and destination_ticket_id must be specified')
     source = ScheduleTicket.query.get(ticket_id)
     oldCT = source.client_ticket
 
     dest = ScheduleTicket.query.get(destination_tid)
     if dest.client:
-        return abort(512)
+        return jsonify(None, 418, 'Destination ticket is busy')
     ct = ScheduleClientTicket()
     ct.appointmentType_id = oldCT.appointmentType_id
     ct.client_id = oldCT.client_id
     ct.createDatetime = datetime.datetime.now()
     ct.modifyDatetime = ct.createDatetime
     ct.isUrgent = oldCT.isUrgent
-    ct.orgFrom_id = oldCT.orgFrom_id
+    ct.infisFrom = oldCT.infisFrom
     ct.ticket_id = destination_tid
     oldCT.deleted = 1
 
@@ -370,7 +370,7 @@ def api_move_client():
     db.session.add(oldCT)
 
     db.session.commit()
-    return ''
+    return jsonify(None)
 
 
 @module.route('/api/actions', methods=['GET'])
