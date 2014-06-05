@@ -67,6 +67,7 @@ WebMis20.controller('EventMainInfoCtrl', [
 
             $scope.request_type.selected = $scope.request_type_init;
             $scope.finance.selected = $scope.finance_init;
+            $scope.event.info.client.birthDate_formated = moment($scope.event.info.client.birthDate).format('DD.MM.YYYY');
         });
 
         $scope.request_type = {};

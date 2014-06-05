@@ -112,7 +112,10 @@ class Client(db.Model):
         primaryjoin='and_(Event.deleted == 0, Event.client_id == Client.id)')
     appointments = db.relationship(
         u'ScheduleClientTicket', lazy='dynamic',  #order_by='desc(ScheduleTicket.begDateTime)',
-        primaryjoin='and_(ScheduleClientTicket.deleted == 0, ScheduleClientTicket.client_id == Client.id)',
+        primaryjoin='and_('
+                    'ScheduleClientTicket.deleted == 0, '
+                    'ScheduleClientTicket.client_id == Client.id, '
+                    'ScheduleClientTicket.event_id.is_(None))',
         innerjoin=True
     )
 
@@ -221,6 +224,10 @@ class Client(db.Model):
             'vol_policy': self.voluntaryPolicy,
             'direct_relations': self.direct_relations.all(),
             'reversed_relations': self.reversed_relations.all(),  # todo: more
+            'phones': self.phones,
+            'reg_address': self.reg_address,
+            'loc_address': self.loc_address,
+            'document': self.document,
         }
 
 
@@ -825,7 +832,10 @@ class ClientPolicy(db.Model):
         return {
             'id': self.id,
             'insurer_id': self.insurer_id,
-            'policyType_id': self.policyType_id
+            'policyType': self.policyType,
+            'serial': self.serial,
+            'number': self.number,
+            'policyText': self.__unicode__()
         }
 
 

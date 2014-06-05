@@ -197,8 +197,9 @@ class ScheduleVisualizer(object):
         result = dict((rt, new_rt()) for rt in self.reception_types)
 
         for schedule in schedules:
-            if schedule.receptionType.code in result:
-                result[schedule.receptionType.code]['schedule'][(schedule.date - date_start).days]['scheds'].\
+            rtcode = schedule.receptionType.code if schedule.receptionType else 'amb'
+            if rtcode in result:
+                result[rtcode]['schedule'][(schedule.date - date_start).days]['scheds'].\
                     append(self.make_sched_description(schedule))
 
         for group in result.itervalues():

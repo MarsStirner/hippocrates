@@ -14,7 +14,7 @@
     <tr ng-repeat="record in client.appointments">
         <td>[[ record.mark ]]</td>
         <td>[[ record.begDateTime | asDateTime ]]</td>
-        <td>[[ record.office ]]</td>
+        <td>[[ record.office.code ]]</td>
         <td>[[ record.person ]]</td>
         <td>[[ record.createPerson.name ]]</td>
         <td>[[ record.note ]]</td>

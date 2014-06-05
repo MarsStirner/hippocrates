@@ -42,6 +42,7 @@ SEARCHD_CONNECTION = {
 
 ORGANISATION_INFIS_CODE = 500
 PRINT_SUBSYSTEM_URL = ''
+VESTA_URL = ''
 
 try:
     from config_local import *

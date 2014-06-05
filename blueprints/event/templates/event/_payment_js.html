@@ -61,7 +61,9 @@ WebMis20.controller('EventPaymentCtrl', ['$scope', 'RefBookService', 'Settings',
                     templateUrl: 'modal-switch-payer.html',
                     controller: SwitchPayerModalCtrl,
                     resolve: {
-                        from_tab: from_tab
+                        from_tab: function() {
+                            return from_tab;
+                        }
                     }
                 });
 
