@@ -11,9 +11,7 @@
             </h2>
         </legend>
 
-        <div class="marginal">
-            <alert ng-repeat="alert in alerts" type="alert.type" close="alerts.splice(index, 1)">[[ alert.text ]] [ [[alert.code]] ]</alert>
-        </div>
+        <div ui-alert-list="alerts"></div>
         <div class="well well-sm">
             <div class="row">
                 <div class="col-md-9">

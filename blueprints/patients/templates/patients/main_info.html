@@ -99,16 +99,18 @@
                          ng-class="{'has-error': docForm.doc_serial.$invalid && docForm.doc_serial.$dirty}">
                         <label for="doc_serial">Серия</label>
                         <input type="text" class="form-control" id="doc_serial" name="doc_serial"
-                               autocomplete="off" placeholder="серия" ng-pattern="/^[\d\s]+$/" {# FIXME: its ok? #}
-                               ng-model="client.client_info['document']['serial']"/>
+                               autocomplete="off" placeholder="серия"
+                               ng-model="client.client_info.document.serial"
+                               validator-regexp="client.client_info.document.documentType.validators.serial"/>
                     </div>
                     <div class="form-group col-md-2"
                          ng-class="{'has-error': docForm.doc_type.$viewValue && docForm.doc_number.$invalid}">
                         <label for="doc_number">Номер</label>
                         <input type="text" class="form-control" id="doc_number" name="doc_number"
-                               autocomplete="off" placeholder="номер" ng-pattern="/^\d+$/" {# FIXME: allows whitespace as first char #}
-                               ng-model="client.client_info['document']['number']"
-                               ng-required="docForm.doc_type.$viewValue"/>
+                               autocomplete="off" placeholder="номер"
+                               ng-model="client.client_info.document.number"
+                               ng-required="docForm.doc_type.$viewValue"
+                               validator-regexp="client.client_info.document.documentType.validators.number"/>
                     </div>
                 </div>
 
@@ -165,16 +167,18 @@
                          ng-class="{'has-error': cpolForm.cpol_serial.$invalid && cpolForm.cpol_serial.$dirty}">
                         <label for="cpol_serial">Серия</label>
                         <input type="text" class="form-control" id="cpol_serial" name="cpol_serial"
-                               autocomplete="off" placeholder="серия" ng-pattern="/^[\d\s]+$/" {# FIXME: its ok? #}
-                               ng-model="client.client_info['compulsoryPolicy']['serial']"/>
+                               autocomplete="off" placeholder="серия"
+                               ng-model="client.client_info.compulsoryPolicy.serial"
+                               validator-regexp="client.client_info.compulsoryPolicy.policyType.validators.serial"/>
                     </div>
                     <div class="form-group col-md-2"
                          ng-class="{'has-error': cpolForm.cpol_type.$viewValue && cpolForm.cpol_number.$invalid}">
                         <label for="cpol_number">Номер</label>
                         <input type="text" class="form-control" id="cpol_number" name="cpol_number"
-                               autocomplete="off" placeholder="номер" ng-pattern="/^\d+$/" {# FIXME: allows whitespace as first char #}
-                               ng-model="client.client_info['compulsoryPolicy']['number']"
-                               ng-required="cpolForm.cpol_type.$viewValue"/>
+                               autocomplete="off" placeholder="номер"
+                               ng-model="client.client_info.compulsoryPolicy.number"
+                               ng-required="cpolForm.cpol_type.$viewValue"
+                               validator-regexp="client.client_info.compulsoryPolicy.policyType.validators.number"/>
                     </div>
                 </div>
 
@@ -183,7 +187,7 @@
                          ng-class="{'has-error': cpolForm.cpol_type.$viewValue && cpolForm.cpol_begDate.$invalid}">
                         <label for="cpol_begDate">Дата выдачи</label>
                         <wm-date id="cpol_begDate" name="cpol_begDate"
-                                 ng-model="client.client_info['compulsoryPolicy']['begDate']"
+                                 ng-model="client.client_info.compulsoryPolicy.begDate"
                                  ng-required="cpolForm.cpol_type.$viewValue">
                         </wm-date>
                     </div>
@@ -192,7 +196,7 @@
                         <label for="cpol_endDate">Действителен до</label>
                         {# TODO: неправильная установка даты, если в модели сейчас null #}
                         <wm-date id="cpol_endDate" name="cpol_endDate"
-                                 ng-model="client.client_info['compulsoryPolicy']['endDate']">
+                                 ng-model="client.client_info.compulsoryPolicy.endDate">
                                  {# TODO: валидация для необязательной даты - только для введенного#}
                         </wm-date>
                     </div>
@@ -200,7 +204,7 @@
                          ng-class="{'has-error': cpolForm.cpol_type.$viewValue && cpolForm.ufms.$invalid}">
                         <label for="ufms">Выдан</label>
                         <ui-select class="form-control" id="ufms" name="ufms"
-                                ng-model="client.client_info['compulsoryPolicy']['insurer']"
+                                ng-model="client.client_info.compulsoryPolicy.insurer"
                                 theme="select2" ng-required="cpolForm.cpol_type.$viewValue">
                             <match placeholder="Тип документа">[[$select.selected.short_name]]</match>
                             <choices repeat="org in rbOrganisation.objects | filter: $select.search">
@@ -221,7 +225,7 @@
                     <div class="form-group col-md-4">
                         <label for="vpol_type">Тип</label>
                         <ui-select class="form-control" id="vpol_type" name="vpol_type"
-                                   ng-model="client.client_info['voluntaryPolicy']['policyType']"
+                                   ng-model="client.client_info.voluntaryPolicy.policyType"
                                    theme="select2" autocomplete="off">
                             <match placeholder="Тип полиса">[[$select.selected.name]]</match>
                             <choices repeat="pt in rbPolicyType.objects | filter: filter_vpolicy | filter: $select.search">
@@ -234,7 +238,8 @@
                         <label for="vpol_serial">Серия</label>
                         <input type="text" class="form-control" id="vpol_serial" name="vpol_serial"
                                autocomplete="off" placeholder="серия" ng-pattern="/^[\d\s]+$/" {# FIXME: its ok? #}
-                               ng-model="client.client_info['voluntaryPolicy']['serial']"/>
+                               ng-model="client.client_info['voluntaryPolicy']['serial']"
+                               validator-regexp="client.client_info.voluntaryPolicy.policyType.validators.serial"/>
                     </div>
                     <div class="form-group col-md-2"
                          ng-class="{'has-error': vpolForm.vpol_type.$viewValue && vpolForm.vpol_number.$invalid}">
@@ -242,7 +247,8 @@
                         <input type="text" class="form-control" id="vpol_number" name="vpol_number"
                                autocomplete="off" placeholder="номер" ng-pattern="/^\d+$/" {# FIXME: allows whitespace as first char #}
                                ng-model="client.client_info['voluntaryPolicy']['number']"
-                               ng-required="vpolForm.vpol_type.$viewValue"/>
+                               ng-required="vpolForm.vpol_type.$viewValue"
+                               validator-regexp="client.client_info.voluntaryPolicy.policyType.validators.number"/>
                     </div>
                 </div>
 

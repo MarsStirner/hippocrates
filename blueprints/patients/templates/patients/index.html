@@ -14,9 +14,7 @@
                     <span class="glyphicon glyphicon-remove"></span></span>
             </div>
         </form>
-        <div class="marginal">
-            <alert ng-repeat="alert in alerts" type="alert.type" close="alerts.splice(index, 1)">[[ alert.text ]] [ [[alert.code]] ]</alert>
-        </div>
+        <div ui-alert-list="alerts"></div>
         <table class="table table-condensed table-hover table-clickable">
             <caption>
                 <span ng-if="results.length > 0">Результаты поиска</span>

@@ -401,6 +401,8 @@ class rbDocumentType(db.Model):
     federalCode = db.Column(db.String(16), nullable=False)
     socCode = db.Column(db.String(8), nullable=False, index=True)
     TFOMSCode = db.Column(db.Integer)
+    serial_regexp = db.Column(db.Unicode(256))
+    number_regexp = db.Column(db.Unicode(256))
 
     group = db.relationship(u'rbDocumentTypeGroup', lazy=False)
 
@@ -412,7 +414,11 @@ class rbDocumentType(db.Model):
             'regional_code': self.regionalCode,
             'federal_code': self.federalCode,
             'soc_code': self.socCode,
-            'TFOMS_code': self.TFOMSCode
+            'TFOMS_code': self.TFOMSCode,
+            'validators': {
+                'serial': self.serial_regexp,
+                'number': self.number_regexp,
+            },
         }
 
     def __int__(self):
@@ -489,6 +495,8 @@ class rbPolicyType(db.Model):
     code = db.Column(db.String(64), nullable=False, unique=True)
     name = db.Column(db.Unicode(256), nullable=False, index=True)
     TFOMSCode = db.Column(db.String(8))
+    serial_regexp = db.Column(db.Unicode(256))
+    number_regexp = db.Column(db.Unicode(256))
 
     def __json__(self):
         return {
@@ -496,6 +504,10 @@ class rbPolicyType(db.Model):
             'code': self.code,
             'name': self.name,
             'TFOMS_code': self.TFOMSCode,
+            'validators': {
+                'serial': self.serial_regexp,
+                'number': self.number_regexp,
+            },
         }
 
     def __int__(self):

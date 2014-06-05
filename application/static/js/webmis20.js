@@ -1,8 +1,19 @@
 /**
  * Created by mmalkov on 10.02.14.
  */
-var WebMis20 = angular.module('WebMis20', ['WebMis20.services', 'WebMis20.directives', 'WebMis20.LoadingIndicator', 'ngResource', 'ui.bootstrap', 'ui.select', 'ngSanitize',
-            'ngCkeditor', 'sf.treeRepeat', 'ui.mask'])
+var WebMis20 = angular.module('WebMis20', [
+    'WebMis20.services',
+    'WebMis20.directives',
+    'WebMis20.LoadingIndicator',
+    'WebMis20.validators',
+    'ngResource',
+    'ui.bootstrap',
+    'ui.select',
+    'ngSanitize',
+    'ngCkeditor',
+    'sf.treeRepeat',
+    'ui.mask'
+])
 .config(function ($interpolateProvider, datepickerConfig, datepickerPopupConfig) {
     $interpolateProvider.startSymbol('[[');
     $interpolateProvider.endSymbol(']]');
@@ -646,45 +657,6 @@ var WebMis20 = angular.module('WebMis20', ['WebMis20.services', 'WebMis20.direct
         }
     }
 }])
-.directive('enumValidator', function() {
-    return {
-        restrict: 'A',
-        require: 'ngModel',
-        link: function(scope, elm, attrs, ctrl) {
-            ctrl.$parsers.unshift(function(viewValue) {
-                if (viewValue && viewValue.id > 0) {
-                    ctrl.$setValidity('text', true);
-                    return viewValue;
-                } else {
-                    ctrl.$setValidity('text', false);
-                    return undefined;
-                }
-            });
-        }
-    };
-})
-.directive('snilsValidator', function() {
-    return {
-        restrict: 'A',
-        require: 'ngModel',
-        link: function(scope, elm, attrs, ctrl) {
-            function snilsCRC (value) {
-                var v = value.substring(0, 3) + value.substring(4, 7) + value.substring(8, 11) + value.substring(12, 14);
-                var result = 0;
-                for (var i=0; i < 9; i++) {
-                    result += (9 - i) * parseInt(v[i])
-                }
-                result = (result % 101) % 100;
-                if (result < 10) return '0' + result;
-                else return '' + result;
-            }
-            ctrl.$parsers.unshift(function(viewValue) {
-                ctrl.$setValidity('text', viewValue && viewValue.substring(12, 14) == snilsCRC(viewValue));
-                return viewValue
-            });
-        }
-    };
-})
 .directive('wmTime', ['$document',
     function ($document) {
         return {
