@@ -146,8 +146,10 @@ return {
         scope.$watch(attrs.validatorRegexp, function (n, o) {
             evalue = n;
             if (!evalue) {
-                $(element).attr('disabled', true);
+                ctrl.$setViewValue('');
+                ctrl.$render();
                 ctrl.$setValidity('text', true);
+                $(element).attr('disabled', true);
             } else {
                 $(element).removeAttr('disabled');
                 regexp = new RegExp(evalue);
@@ -155,7 +157,7 @@ return {
             }
         });
         ctrl.$parsers.unshift(function(viewValue) {
-            if (evalue) {
+            if (evalue && regexp) {
                 ctrl.$setValidity('text', viewValue && regexp.test(viewValue));
             }
             return viewValue
