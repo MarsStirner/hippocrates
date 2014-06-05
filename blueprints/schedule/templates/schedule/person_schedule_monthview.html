@@ -76,7 +76,7 @@
                                             <p><nobr>[[ (day.date + 'T' + sched.begTime) | asTime ]] - [[ (day.date + 'T' + sched.endTime) | asTime ]]</nobr></p>
                                         </li>
                                         <li class="list-group-item list-group-item-info" ng-switch-when="normal">
-                                            <p><nobr>Кабинет:&nbsp;[[ day.office ]]</nobr></p>
+                                            <p><nobr>Кабинет:&nbsp;[[ day.office.code ]]</nobr></p>
                                             <p><nobr>План:&nbsp;[[ day.planned ]]</nobr></p>
                                             <p><nobr>Сверх плана:&nbsp;[[ day.extra ]]</nobr></p>
                                             <p><nobr>Вне очереди:&nbsp;[[ day.CITO ]]</nobr></p>
@@ -98,7 +98,7 @@
     {{ super() }}
     <script type="text/javascript">
         {{ person_tree.js() }}
-        DaySetupModalCtrl = function ($scope, $modalInstance, model, roas) {
+        DaySetupModalCtrl = function ($scope, $modalInstance, model, roas, offices) {
             $scope.model = model;
             $scope.absent = model.roa !== null;
             $scope.accept = function () {
@@ -133,6 +133,7 @@
                 }
             };
             $scope.roas = roas;
+            $scope.offices = offices
         };
         DayFreeModalCtrl = function ($scope, $modalInstance, day, roas) {
             $scope.day = day;
@@ -147,6 +148,7 @@
         };
         WebMis20.controller('Schedule', ['$scope', '$http', '$modal', 'RefBook', function ($scope, $http, $modal, RefBook) {
             $scope.rbReasonOfAbsence = new RefBook('rbReasonOfAbsence');
+            $scope.offices = new RefBook('Office');
             $scope.editing = false;
             $scope.weekends_selectable = false;
             $scope.selected_days = [];
@@ -362,6 +364,9 @@
                         },
                         roas: function () {
                             return $scope.rbReasonOfAbsence.objects;
+                        },
+                        offices: function () {
+                            return $scope.offices.objects;
                         }
                     }
                 });

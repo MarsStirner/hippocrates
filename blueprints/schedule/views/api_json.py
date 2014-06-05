@@ -174,7 +174,7 @@ def api_schedule_description_post():
         new_sched.createDatetime = datetime.datetime.now()
         new_sched.modifyDatetime = datetime.datetime.now()
         new_sched.receptionType = rbReceptionType.query.filter(rbReceptionType.code == reception_type).first()
-        new_sched.office = day_desc['office']
+        new_sched.office_id = safe_traverse(day_desc, 'office', 'id')
         if day_desc['roa']:
             new_sched.reasonOfAbsence = rbReasonOfAbsence.query.\
                 filter(rbReasonOfAbsence.code == day_desc['roa']['code']).first()
@@ -199,7 +199,7 @@ def api_schedule_description_post():
                 add_sched.receptionType = rbReceptionType.query.filter(rbReceptionType.code == reception_type).first()
                 add_sched.begTime = datetime.datetime.strptime(day_desc['scheds'][1]['begTime'], '%H:%M:%S')
                 add_sched.endTime = datetime.datetime.strptime(day_desc['scheds'][1]['endTime'], '%H:%M:%S')
-                add_sched.office = day_desc['office']
+                add_sched.office_id = safe_traverse(day_desc, 'office', 'id')
 
                 # Here cometh thy math
 
