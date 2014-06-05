@@ -27,12 +27,14 @@
             locality-type-model="client.client_info.liveAddress.locality_type"
             street-model="client.client_info.liveAddress.address.street"
             house-model="client.client_info.liveAddress.address.house_number"
-            corpus-model="client.client_info.liveAddress.address.house_corpus"
-            flat-model="client.client_info.liveAddress.address.house_flat"
+            corpus-model="client.client_info.liveAddress.address.corpus_number"
+            flat-model="client.client_info.liveAddress.address.flat_number"
             free-input-model="client.client_info.liveAddress.free_input">
             <div class="checkbox">
-                <label><input type="checkbox" id="" name=""
-                              ng-model="scos" ng-click="" ng-required="false"/>Совпадает с адресом регистрации
+                <label>
+                    <input type="checkbox" id="copy_addr" name="copy_addr"
+                           ng-model="scos" ng-click="copy_address(scos, client.client_info.regAddress)"/> {# ищи меня в скоупе patient_info :( #}
+                    Совпадает с адресом регистрации
                 </label>
             </div>
         </wm-kladr-base-layout>

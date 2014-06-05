@@ -207,6 +207,16 @@
             if ($scope.client_id == 'new') {
                 $scope.start_editing();
             }
+
+            $scope.copy_address = function(state, addr_from) {
+                // fixme: как бы эту штуку связать с директивами, как изначально задумывалось...
+                if (!state) {
+                    $scope.client.client_info.liveAddress = angular.copy(addr_from);
+                } else {
+                    $scope.client.client_info.liveAddress = {};
+                }
+
+            }
         }]);
     </script>
 {% endblock %}

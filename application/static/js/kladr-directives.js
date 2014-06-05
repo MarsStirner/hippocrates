@@ -5,9 +5,7 @@ angular.module('WebMis20.kladrDirectives', ['ui.bootstrap']).
         return {
             restrict: 'E',
             transclude: true,
-            scope: {
-
-            },
+            scope: { },
             controller: function ($scope) {
                 var widgets = $scope.widgets = {};
                 var params = $scope.params = {};
@@ -32,6 +30,16 @@ angular.module('WebMis20.kladrDirectives', ['ui.bootstrap']).
                     params.free_input_mode = !from_kladr;
                 };
 
+                this.inputStarted = function() {
+                    var started = false;
+                    angular.forEach(widgets, function(content, name) {
+                        if (name !== 'freeinput' && content.model) {
+                            started = true;
+                        }
+                    });
+                    return started;
+                };
+
                 this.getLocation = function() {
                     return widgets.locality.model;
                 };
@@ -47,15 +55,14 @@ angular.module('WebMis20.kladrDirectives', ['ui.bootstrap']).
                                 'кв. ' + widgets.flatnumber.model
                             ].join(', ');
                             widgets.freeinput.model = text;
+                            widgets.locality.onFreeInputStateChanged(true);
                         } else {
                             widgets.freeinput.model = '';
+                            widgets.locality.onFreeInputStateChanged(false);
                         }
                     }
                 });
-
             },
-//            link: function(scope, elm, attrs) {
-//            },
             template: '<alert ng-show="params.free_input_mode" type="danger">Введенный адрес не найден в справочнике адресов Кладр. ' +
                       '<a ng-click="params.accept_free_input = !params.accept_free_input">' +
                       '[[params.accept_free_input ? "Выбрать из Кладр" : "Ввести адрес вручную?"]]</alert>' +
@@ -85,7 +92,7 @@ angular.module('WebMis20.kladrDirectives', ['ui.bootstrap']).
     }]).
     directive('wmKladrLocality', ['$http', function($http) {
         return {
-            require: '^wmKladrAddress',
+            require: ['^wmKladrAddress', 'ngModel'],
             restrict: 'E',
             replace: true,
             scope: {
@@ -103,37 +110,54 @@ angular.module('WebMis20.kladrDirectives', ['ui.bootstrap']).
                     });
                 };
 
-                $scope.from_kladr = function() {
+                $scope.from_kladr = function(value) {
                     return $scope.items.indexOf($scope.model) !== -1;
                 };
             },
-            link: function(scope, elm, attrs, kladrctrl) {
+            link: function(scope, elm, attrs, ctrls) {
+                var kladrctrl = ctrls[0],
+                    modelctrl = ctrls[1];
                 scope.items = [];
                 kladrctrl.register_widget('locality', scope);
                 scope.inFreeInputMode = kladrctrl.inFreeInputMode;
+                scope.inputStarted = kladrctrl.inputStarted;
                 scope.onChanged = function() {
                     kladrctrl.checkValidity();
                 };
+                scope.onFreeInputStateChanged = function(enabled) {
+                    if (enabled) {
+                        scope.prev_validity = modelctrl.$valid;
+                        modelctrl.$setValidity('addr_from_kladr', true);
+                    } else {
+                        modelctrl.$setValidity('addr_from_kladr', scope.prev_validity !== undefined ? scope.prev_validity : true);
+                    }
+                };
                 scope.$watch('model', function(n, o) {
-                    if (o === undefined) {
-                        // первичная инициализция, необходимо для правильной установки free_input_mode после загрузки
-                        scope.items = [scope.model];
+                    if (o === undefined && n !== undefined) {
+                        // первичная инициализация, необходимо для правильной установки free_input_mode после загрузки
+                        scope.items = [n];
                     } else if (n && n !== o) {
                         scope.onChanged();
+
+                        if (!modelctrl.$isEmpty(n) && !scope.from_kladr(n)) {
+                            modelctrl.$setValidity('addr_from_kladr', false);
+                        } else {
+                            modelctrl.$setValidity('addr_from_kladr', true);
+                        }
                     }
                 });
             },
-            // todo: evaluate name in compile
+            // todo: evaluate name in compile ?
             template: '<input type="text" class="form-control"' +
                       'autocomplete="off" placeholder="Населенный пункт"' +
                       'ng-model="model" typeahead="city as city.name for city in getCity($viewValue)"' +
                       'typeahead-wait-ms="1000" typeahead-min-length="2"' +
-                      'ng-required="!inFreeInputMode()" ng-disabled="inFreeInputMode()"/>'
+                      'ng-required="inputStarted() && !inFreeInputMode()" ng-disabled="inFreeInputMode()"/>'
         }
     }]).
     directive('wmKladrLocalityType', ['RefBookService', function(RefBookService) {
         return {
-            require: '^wmKladrAddress',
+            require: ['^wmKladrAddress', 'ngModel'],
             restrict: 'E',
             replace: true,
             scope: {
@@ -142,14 +166,27 @@ angular.module('WebMis20.kladrDirectives', ['ui.bootstrap']).
 //            controller: function($scope) {
 //                $scope.rbLocalityType = RefBookService.get('LocalityType');
 //            },
-            link: function(scope, elm, attrs, kladrctrl) {
+            link: function(scope, elm, attrs, ctrls) {
+                var kladrctrl = ctrls[0],
+                    modelctrl = ctrls[1];
                 scope.rbLocalityType = RefBookService.get('LocalityType');
                 kladrctrl.register_widget('locality_type', scope);
                 scope.inFreeInputMode = kladrctrl.inFreeInputMode;
+                scope.inputStarted = kladrctrl.inputStarted;
+
+                modelctrl.$parsers.unshift(function(viewValue) {
+                    if (modelctrl.$isEmpty(viewValue)) {
+                        modelctrl.$setValidity('select', false);
+                        return undefined;
+                    }
+                    modelctrl.$setValidity('select', true);
+                    return viewValue;
+                });
             },
             template: '<select class="form-control" ng-model="model" ' +
                       'ng-options="item as item.name for item in rbLocalityType.objects track by item.id" ' +
-                      'ng-required="true" ng-disabled="inFreeInputMode()">' +
+                      'ng-required="inputStarted() && !inFreeInputMode()" ng-disabled="inFreeInputMode()">' +
+                      '<option value="">Не выбрано</option>' +
                       '</select>'
         }
     }]).
@@ -182,6 +219,7 @@ angular.module('WebMis20.kladrDirectives', ['ui.bootstrap']).
                 scope.items = [];
                 kladrctrl.register_widget('street', scope);
                 scope.inFreeInputMode = kladrctrl.inFreeInputMode;
+                scope.inputStarted = kladrctrl.inputStarted;
                 scope.getSelectedLocation = function() {
                     return kladrctrl.getLocation().code;
                 };
@@ -194,12 +232,11 @@ angular.module('WebMis20.kladrDirectives', ['ui.bootstrap']).
                     }
                 });
             },
-            // todo: evaluate name in compile
             template: '<input type="text" class="form-control"' +
                       'autocomplete="off" placeholder="Улица"' +
                       'ng-model="model" typeahead="street as street.name for street in getStreet($viewValue)"' +
                       'typeahead-wait-ms="1000" typeahead-min-length="2"' +
-                      'ng-required="!inFreeInputMode()" ng-disabled="inFreeInputMode()"/>'
+                      'ng-required="inputStarted() && !inFreeInputMode()" ng-disabled="inFreeInputMode()"/>'
         }
     }]).
     directive('wmKladrHouseNumber', [function() {
@@ -213,9 +250,11 @@ angular.module('WebMis20.kladrDirectives', ['ui.bootstrap']).
             link: function(scope, elm, attrs, kladrctrl) {
                 kladrctrl.register_widget('housenumber', scope);
                 scope.inFreeInputMode = kladrctrl.inFreeInputMode;
+                scope.inputStarted = kladrctrl.inputStarted;
             },
             template: '<input type="text" class="form-control" autocomplete="off"' +
-                      'ng-model="model" ng-required="!inFreeInputMode()" ng-disabled="inFreeInputMode()"/>'
+                      'ng-model="model" ng-required="inputStarted() && !inFreeInputMode()"' +
+                      'ng-disabled="inFreeInputMode()"/>'
         }
     }]).
     directive('wmKladrCorpusNumber', [function() {
@@ -229,6 +268,7 @@ angular.module('WebMis20.kladrDirectives', ['ui.bootstrap']).
             link: function(scope, elm, attrs, kladrctrl) {
                 kladrctrl.register_widget('corpusnumber', scope);
                 scope.inFreeInputMode = kladrctrl.inFreeInputMode;
+                scope.inputStarted = kladrctrl.inputStarted;
             },
             template: '<input type="text" class="form-control" autocomplete="off"' +
                       'ng-model="model" ng-disabled="inFreeInputMode()"/>'
@@ -245,9 +285,11 @@ angular.module('WebMis20.kladrDirectives', ['ui.bootstrap']).
             link: function(scope, elm, attrs, kladrctrl) {
                 kladrctrl.register_widget('flatnumber', scope);
                 scope.inFreeInputMode = kladrctrl.inFreeInputMode;
+                scope.inputStarted = kladrctrl.inputStarted;
             },
             template: '<input type="text" class="form-control" autocomplete="off"' +
-                      'ng-model="model" ng-required="!inFreeInputMode()" ng-disabled="inFreeInputMode()"/>'
+                      'ng-model="model" ng-required="inputStarted() && !inFreeInputMode()"' +
+                      'ng-disabled="inFreeInputMode()"/>'
         }
     }]).
     directive('wmKladrFreeInput', [function() {
