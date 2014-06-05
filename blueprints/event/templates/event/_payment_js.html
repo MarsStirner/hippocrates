@@ -8,11 +8,13 @@ WebMis20.controller('EventPaymentCtrl', ['$scope', 'RefBookService', 'Settings',
 
         var event_created = !$scope.event.is_new();
         $scope.payer_is_person = function() {
+            // TODO: Учесть смену на ОМС
             var lc = $scope.event.payment && $scope.event.payment.local_contract || null;
             return lc !== null && !!(lc.first_name || lc.last_name || lc.patr_name || lc.birth_date || lc.doc_type ||
                     lc.serial_left || lc.serial_right || lc.number || lc.reg_address);
         };
         $scope.payer_is_org = function() {
+            //TODO: учесть смену на ОМС
             var lc = $scope.event.payment && $scope.event.payment.local_contract || null;
             return lc !== null && lc.payer_org;
         };

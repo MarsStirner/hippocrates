@@ -799,6 +799,8 @@ class ClientPolicy(db.Model):
             'policyType_id': self.policyType_id,
             'serial': self.serial,
             'number': self.number,
+            'begDate': self.begDate,
+            'endDate': self.endDate,
             'policyText': self.__unicode__()
         }
 

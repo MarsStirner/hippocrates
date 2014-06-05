@@ -86,6 +86,15 @@ WebMis20.controller('EventMainInfoCtrl', [
             }
         });
 
+        $scope.check_policy = function (code){
+        };
+        $scope.check_oms = function(){
+            if (!$scope.event.info.client.comp_policy){
+                return false;
+            }
+            if
+        };
+
         $scope.exec_person_changed = function () {
             $scope.event.info.org_structure = $scope.event.info.exec_person.org_structure;
         };
