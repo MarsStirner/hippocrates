@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import datetime
+import json
 from application.lib.agesex import calcAgeTuple
 from application.models.enums import Gender, LocalityType
 from application.models.exists import rbDocumentTypeGroup
@@ -893,6 +894,16 @@ class Address(db.Model):
 
     @property
     def city(self):
+        from application.views import kladr_city
+        text = ''
+        if self.KLADRCode:
+            city_info = json.loads(kladr_city(self.KLADRCode)[0])
+            if city_info:
+                text = city_info['result'][0]['name']
+        return text
+
+    @property
+    def city_old(self):
         if self.KLADRCode:
             record = Kladr.query.filter(Kladr.CODE == self.KLADRCode).first()
             name = [" ".join([record.NAME, record.SOCR])]
@@ -932,6 +943,16 @@ class Address(db.Model):
 
     @property
     def street(self):
+        from application.views import kladr_street
+        text = ''
+        if self.KLADRStreetCode:
+            street_info = json.loads(kladr_street(self.KLADRCode, self.KLADRStreetCode)[0])
+            if street_info:
+                text = street_info['result'][0]['name']
+        return text
+
+    @property
+    def street_old(self):
         if self.KLADRStreetCode:
             record = Street.query.filter(Street.CODE == self.KLADRStreetCode).first()
             return record.NAME + " " + record.SOCR

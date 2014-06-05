@@ -130,17 +130,36 @@ def api_patient_save():
                     client.policies.append(policies[1])
 
         reg_address = client_info['regAddress']
+        actual_reg_address = None
         if reg_address is not None and (reg_address.get('address') or reg_address.get('free_input')):
             reg_address['type'] = 0
             if not client.reg_address:
-                address = get_new_address(reg_address)
+                actual_reg_address = address = get_new_address(reg_address)
                 client.addresses.append(address)
             else:
                 addresses = get_modified_address(client, reg_address)
                 db.session.add(addresses[0])
                 if addresses[1]:
-                    client.addresses.append(addresses[1])
+                    actual_reg_address = addresses[1]
+                    client.addresses.append(actual_reg_address)
 
+        live_address = client_info['liveAddress']
+
+        if live_address is not None:
+            # TODO: check
+            if live_address.get('same_as_reg', False) and actual_reg_address:
+                address = get_address_matched_copy(client, actual_reg_address)
+                client.addresses.append(address)
+            elif live_address.get('address') or live_address.get('free_input'):
+                reg_address['type'] = 0
+                if not client.reg_address:
+                    address = get_new_address(reg_address)
+                    client.addresses.append(address)
+                else:
+                    addresses = get_modified_address(client, reg_address)
+                    db.session.add(addresses[0])
+                    if addresses[1]:
+                        client.addresses.append(addresses[1])
 
         for ss_info in client_info['socStatuses']:
             if not 'id' in ss_info:

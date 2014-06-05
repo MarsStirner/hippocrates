@@ -210,8 +210,10 @@
                 // fixme: как бы эту штуку связать с директивами, как изначально задумывалось...
                 if (!state) {
                     $scope.client.client_info.liveAddress = angular.copy(addr_from);
+                    $scope.client.client_info.liveAddress.same_as_reg = true;
                 } else {
                     $scope.client.client_info.liveAddress = {};
+                    $scope.client.client_info.liveAddress.same_as_reg = false;
                 }
 
             }

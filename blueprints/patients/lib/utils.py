@@ -150,7 +150,7 @@ def get_new_address(addr_info):
     addr_type = addr_info['type']
     loc_type = safe_traverse(addr_info, 'locality_type', 'id')
     loc_kladr_code = safe_traverse(addr_info, 'address', 'locality', 'code')
-    street_kladr_code = '0000000'  # safe_traverse(addr_info, 'address', 'street', 'code')
+    street_kladr_code = safe_traverse(addr_info, 'address', 'street', 'code')
     free_input = safe_traverse(addr_info, 'free_input')
 
     if (loc_kladr_code and street_kladr_code):
@@ -177,7 +177,7 @@ def get_modified_address(client, addr_info):
 
     loc_type = safe_traverse(addr_info, 'locality_type', 'id')
     loc_kladr_code = safe_traverse(addr_info, 'address', 'locality', 'code')
-    street_kladr_code = '0000000'  # safe_traverse(addr_info, 'address', 'street', 'code')
+    street_kladr_code = safe_traverse(addr_info, 'address', 'street', 'code')
     free_input = safe_traverse(addr_info, 'free_input')
     house_number = safe_traverse(addr_info, 'address', 'house_number', default='')
     corpus_number = safe_traverse(addr_info, 'address', 'corpus_number', default='')
@@ -202,6 +202,14 @@ def get_modified_address(client, addr_info):
         addr.freeInput = free_input
         addr.modifyDatetime = now
         return (addr, None)
+
+
+def get_address_matched_copy(client, matched_address):
+    # todo: check prev record and mark deleted
+    live_ca = ClientAddress(1, matched_address.localityType)  # todo: enum
+    live_ca.address = matched_address.address
+    live_ca.freeInput = ''
+    return live_ca
 
 
 def get_new_soc_status(ss_info):

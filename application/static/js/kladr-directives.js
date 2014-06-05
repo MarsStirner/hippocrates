@@ -56,9 +56,11 @@ angular.module('WebMis20.kladrDirectives', ['ui.bootstrap']).
                             ].join(', ');
                             widgets.freeinput.model = text;
                             widgets.locality.onFreeInputStateChanged(true);
+                            widgets.street.onFreeInputStateChanged(true);
                         } else {
                             widgets.freeinput.model = '';
                             widgets.locality.onFreeInputStateChanged(false);
+                            widgets.street.onFreeInputStateChanged(false);
                         }
                     }
                 });
@@ -99,12 +101,8 @@ angular.module('WebMis20.kladrDirectives', ['ui.bootstrap']).
                 model: '='
             },
             controller: function($scope) {
-                $scope.getCity = function(val) {
-                    return $http.get(url_kladr_get, {
-                        params: {
-                            city: val
-                        }
-                    }).then(function(res) {
+                $scope.getCity = function(search_q) {
+                    return $http.get(kladr_city + search_q + '/', {}).then(function(res) {
                         $scope.items = res.data.result;
                         return $scope.items;
                     });
@@ -192,30 +190,28 @@ angular.module('WebMis20.kladrDirectives', ['ui.bootstrap']).
     }]).
     directive('wmKladrStreet', ['$http', function($http) {
         return {
-            require: '^wmKladrAddress',
+            require: ['^wmKladrAddress', 'ngModel'],
             restrict: 'E',
             replace: true,
             scope: {
                 model: '='
             },
             controller: function($scope) {
-                $scope.getStreet = function(val) {
-                    return $http.get(url_kladr_get, {
-                        params: {
-                            city: $scope.getSelectedLocation(),
-                            street: val
-                        }
-                    }).then(function(res) {
+                $scope.getStreet = function(search_q) {
+                    var url = [kladr_street, $scope.getSelectedLocation(), '/', search_q, '/' ].join('')
+                    return $http.get(url, {}).then(function(res) {
                         $scope.items = res.data.result;
                         return $scope.items;
                     });
                 };
 
                 $scope.from_kladr = function() {
-                    return true;//$scope.items.indexOf($scope.model) !== -1;
+                    return $scope.items.indexOf($scope.model) !== -1;
                 };
             },
-            link: function(scope, elm, attrs, kladrctrl) {
+            link: function(scope, elm, attrs, ctrls) {
+                var kladrctrl = ctrls[0],
+                    modelctrl = ctrls[1];
                 scope.items = [];
                 kladrctrl.register_widget('street', scope);
                 scope.inFreeInputMode = kladrctrl.inFreeInputMode;
@@ -226,9 +222,26 @@ angular.module('WebMis20.kladrDirectives', ['ui.bootstrap']).
                 scope.onChanged = function() {
                     kladrctrl.checkValidity();
                 };
+                scope.onFreeInputStateChanged = function(enabled) {
+                    if (enabled) {
+                        scope.prev_validity = modelctrl.$valid;
+                        modelctrl.$setValidity('addr_from_kladr', true);
+                    } else {
+                        modelctrl.$setValidity('addr_from_kladr', scope.prev_validity !== undefined ? scope.prev_validity : true);
+                    }
+                };
                 scope.$watch('model', function(n, o) {
-                    if (n && n !== o) {
+                    if (o === undefined && n !== undefined) {
+                        // первичная инициализация, необходимо для правильной установки free_input_mode после загрузки
+                        scope.items = [n];
+                    } else if (n && n !== o) {
                         scope.onChanged();
+
+                        if (!modelctrl.$isEmpty(n) && !scope.from_kladr(n)) {
+                            modelctrl.$setValidity('addr_from_kladr', false);
+                        } else {
+                            modelctrl.$setValidity('addr_from_kladr', true);
+                        }
                     }
                 });
             },
