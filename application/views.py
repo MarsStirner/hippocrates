@@ -7,8 +7,9 @@ from flask.ext.login import login_user, logout_user, login_required, current_use
 
 from application.app import app, db, login_manager, cache
 from application.context_processors import *
+from application.lib.data import get_kladr_city, get_kladr_street
 from application.models.exists import rbPrintTemplate
-from .lib.utils import public_endpoint, jsonify, roles_require, rights_require, request_wants_json
+from application.lib.utils import public_endpoint, jsonify, roles_require, rights_require, request_wants_json
 from application.models import *
 from lib.user import UserAuth, AnonymousUser
 from forms import LoginForm, RoleForm
@@ -141,32 +142,18 @@ def kladr_search_street(city_code=None, search_query=None):
 @app.route('/api/kladr/city/<code>/')
 @cache.memoize(86400)
 def kladr_city(code=None):
-    result = []
     if code is None:
         return jsonify([])
-    response = requests.get(u'{0}/kladr/city/{1}/'.format(app.config['VESTA_URL'], code))
-    for city in response.json()['data']:
-        data = city
-        data['code'] = city['identcode']
-        data['name'] = u'{0}. {1}'.format(city['shorttype'], city['name'])
-        result.append(data)
-    return jsonify(result)
+    return jsonify([get_kladr_city(code)])
 
 
 @app.route('/api/kladr/street/')
 @app.route('/api/kladr/street/<code>/')
 @cache.memoize(86400)
 def kladr_street(code=None):
-    result = []
     if code is None:
         return jsonify([])
-    response = requests.get(u'{0}/kladr/street/{1}/'.format(app.config['VESTA_URL'], code))
-    for street in response.json()['data']:
-        data = street
-        data['code'] = street['identcode']
-        data['name'] = u'{0} {1}'.format(street['fulltype'], street['name'])
-        result.append(data)
-    return jsonify(result)
+    return jsonify([get_kladr_street(code)])
 
 @app.errorhandler(403)
 def authorisation_failed(e):
