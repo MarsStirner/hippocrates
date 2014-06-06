@@ -82,23 +82,59 @@ WebMis20.controller('EventMainInfoCtrl', [
             if (new_val) {
                 $scope.event.info.event_type = $scope.event_type_init || $scope.rbEventType.get_filtered_by_rtf(
                     $scope.request_type.selected.id, new_val.id)[0];
-                    $scope.event_type_init = undefined;
+                $scope.event_type_init = undefined;
+                if(!$scope.check_policy($scope.finance.selected.code)) {
+                    $scope.modal_policy_error($scope.policy_errors);
+                    $scope.finance.selected = $scope.rbFinance.get_by_code(4);
+                }
             }
         });
 
-        $scope.check_policy = function (code){
+        $scope.check_policy = function (finance_code){
+            if (finance_code == 2){
+                return $scope.check_oms();
+            }
+            return true;
         };
         $scope.check_oms = function(){
-            if (!$scope.event.info.client.comp_policy){
-                return false;
+            var policy = $scope.event.info.client.comp_policy;
+            $scope.policy_errors = [];
+            if (!policy){
+                $scope.policy_errors.push('У пациента не указан полис ОМС');
             }
-            if
+            if (!policy.begDate || moment(policy.begDate).isAfter($scope.event.info.set_date)){
+                $scope.policy_errors.push('Дата начала действия полиса не установлена или превышает дату создания обращения');
+            }
+            if (!policy.endDate || moment($scope.event.info.set_date).isAfter(policy.endDate)){
+                $scope.policy_errors.push('Не установлена дата окончания действия полиса или дата создания обращения превышает её');
+            }
+            return $scope.policy_errors.length == 0;
         };
 
         $scope.exec_person_changed = function () {
             $scope.event.info.org_structure = $scope.event.info.exec_person.org_structure;
         };
 
-
+        $scope.modal_policy_error = function(policy_errors) {
+            var modalInstance = $modal.open({
+                templateUrl: 'modal-policy-invalid.html',
+                resolve: {
+                    policy_errors: function(){
+                        return policy_errors;
+                    },
+                    policy_type: function () {
+                        return $scope.finance.selected.name;
+                    }
+                },
+                controller: PolicyInvalidModalCtrl
+            });
+        };
 }]);
+PolicyInvalidModalCtrl = function ($scope, $modalInstance, policy_errors, policy_type) {
+    $scope.policy_errors = policy_errors;
+    $scope.policy_type = policy_type;
+    $scope.cancel = function() {
+        $modalInstance.dismiss('cancel');
+    };
+};
 </script>
