@@ -9,8 +9,9 @@ from flask.ext.login import login_user, logout_user, login_required, current_use
 
 from application.app import app, db, login_manager, cache
 from application.context_processors import *
+from application.lib.data import get_kladr_city, get_kladr_street
 from application.models.exists import rbPrintTemplate
-from .lib.utils import public_endpoint, jsonify, roles_require, rights_require, request_wants_json
+from application.lib.utils import public_endpoint, jsonify, roles_require, rights_require, request_wants_json
 from application.models import *
 from lib.user import UserAuth, AnonymousUser
 from forms import LoginForm, RoleForm
@@ -111,15 +112,15 @@ def api_refbook(name):
     return abort(404)
 
 
-@app.route('/api/kladr/city/')
-@app.route('/api/kladr/city/<search_query>/')
+@app.route('/api/kladr/city/search/')
+@app.route('/api/kladr/city/search/<search_query>/')
 @cache.memoize(86400)
-def kladr_city(search_query=None):
+def kladr_search_city(search_query=None):
     result = []
     if search_query is None:
         return jsonify([])
     short_types = [u'г', u'п', u'с']
-    response = requests.get(u'{0}/kladr/city/{1}/'.format(app.config['VESTA_URL'], search_query))
+    response = requests.get(u'{0}/kladr/city/search/{1}/'.format(app.config['VESTA_URL'], search_query))
     for city in response.json()['data']:
         if city['shorttype'] in short_types:
             data = {'code': city['identcode'], 'name': u'{0}. {1}'.format(city['shorttype'], city['name'])}
@@ -130,19 +131,36 @@ def kladr_city(search_query=None):
     return jsonify(result)
 
 
-@app.route('/api/kladr/street/')
-@app.route('/api/kladr/street/<city_code>/<search_query>/')
+@app.route('/api/kladr/street/search/')
+@app.route('/api/kladr/street/search/<city_code>/<search_query>/')
 @cache.memoize(86400)
-def kladr_street(city_code=None, search_query=None):
+def kladr_search_street(city_code=None, search_query=None):
     result = []
     if city_code is None or search_query is None:
         return jsonify([])
-    response = requests.get(u'{0}/kladr/street/{1}/{2}/'.format(app.config['VESTA_URL'], city_code, search_query))
+    response = requests.get(u'{0}/kladr/street/search/{1}/{2}/'.format(app.config['VESTA_URL'], city_code, search_query))
     for street in response.json()['data']:
         data = {'code': street['identcode'], 'name': u'{0} {1}'.format(street['fulltype'], street['name'])}
         result.append(data)
     return jsonify(result)
 
+
+@app.route('/api/kladr/city/')
+@app.route('/api/kladr/city/<code>/')
+@cache.memoize(86400)
+def kladr_city(code=None):
+    if code is None:
+        return jsonify([])
+    return jsonify([get_kladr_city(code)])
+
+
+@app.route('/api/kladr/street/')
+@app.route('/api/kladr/street/<code>/')
+@cache.memoize(86400)
+def kladr_street(code=None):
+    if code is None:
+        return jsonify([])
+    return jsonify([get_kladr_street(code)])
 
 @app.errorhandler(403)
 def authorisation_failed(e):

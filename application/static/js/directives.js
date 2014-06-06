@@ -114,7 +114,7 @@ angular.module('WebMis20.validators', [])
         }
     };
 })
-.directive('snilsValidator', [function() {
+.directive('snilsValidator', ['$timeout', function ($timeout) {
     return {
         restrict: 'A',
         require: 'ngModel',
@@ -131,7 +131,14 @@ angular.module('WebMis20.validators', [])
             }
             ctrl.$parsers.unshift(function(viewValue) {
                 ctrl.$setValidity('text', viewValue && viewValue.substring(12, 14) == snilsCRC(viewValue));
-                return viewValue
+                $timeout(function(){
+                    if (ctrl.$invalid){
+                        elm.trigger('show_popover');
+                    } else {
+                        elm.trigger('hide_popover');
+                    }
+                });
+                return viewValue;
             });
         }
     };
