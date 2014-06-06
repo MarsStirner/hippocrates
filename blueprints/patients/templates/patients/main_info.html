@@ -69,10 +69,11 @@
             <div class="row">
                 <div class="form-group col-md-3"
                      ng-class="{'has-error': client_form.snils.$invalid && client_form.snils.$dirty}">
-                    <label for="snils">СНИЛС</label>
+                    <label for="snils">СНИЛС <span class="text-danger">*</span></label>
                     <input type="text" class="form-control" id="snils" name="snils" ui-mask="999-999-999 99"
                            ng-model="client.client_info.SNILS" placeholder="___-___-___ __"
-                           ng-pattern="/\d{3}-\d{3}-\d{3} \d\d/" snils-validator />
+                           ng-pattern="/\d{3}-\d{3}-\d{3} \d\d/" snils-validator
+                           popover="Введён невалидный СНИЛС" popover-placement="right" popover-trigger="show_popover" />
                 </div>
             </div>
         </div>

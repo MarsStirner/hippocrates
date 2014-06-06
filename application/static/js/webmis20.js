@@ -24,7 +24,15 @@ var WebMis20 = angular.module('WebMis20', [
     datepickerPopupConfig.clearText = 'Убрать';
     datepickerPopupConfig.closeText = 'Готово';
 //    datepickerPopupConfig.appendToBody=true;
-})
+}).config(['$tooltipProvider', function($tooltipProvider){
+    $tooltipProvider.setTriggers({
+        'mouseenter': 'mouseleave',
+        'click': 'click',
+        'focus': 'blur',
+        'never': 'mouseleave',
+        'show_popover': 'hide_popover'
+    })
+}])
 .filter('asDateTime', function ($filter) {
     return function (data) {
         if (!data) return data;
