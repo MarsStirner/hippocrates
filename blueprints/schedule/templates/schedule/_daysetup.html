@@ -67,7 +67,8 @@
                     <label for="office">Кабинет</label>
                 </div>
                 <div class="col-md-8">
-                    <input class="form-control" id="office" type="text" ng-model="model.office">
+                    <select class="form-control" ng-options="item.code for item in offices track by item.code" id="office"
+                            ng-model="model.office"></select>
                 </div>
             </div>
             <div class="row">

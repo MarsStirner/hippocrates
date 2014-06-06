@@ -17,10 +17,7 @@
                 </span>
             </div>
         </form>
-        <div class="marginal">
-            <alert ng-repeat="alert in alerts" type="[[alert.type]]" close="alerts.splice(index, 1)">[[ alert.text ]] [ [[alert.code]] ]
-            </alert>
-        </div>
+        <div ui-alert-list="alerts"></div>
         <div class="panel panel-default" ng-class="{'panel-danger': results.length === 0, 'panel-success': results.length > 0}">
             <div class="panel-heading">
                 <div class="row">

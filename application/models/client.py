@@ -796,7 +796,7 @@ class ClientPolicy(db.Model):
         return {
             'id': self.id,
             'insurer_id': self.insurer_id,
-            'policyType_id': self.policyType_id,
+            'policyType': self.policyType,
             'serial': self.serial,
             'number': self.number,
             'begDate': self.begDate,

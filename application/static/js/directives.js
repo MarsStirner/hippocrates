@@ -79,4 +79,96 @@ angular.module('WebMis20.directives', ['ui.bootstrap', 'ui.select', 'ngSanitize'
             }
         };
     }])
+    .directive('uiAlertList', ['$compile', function ($compile) {
+        return {
+            restrict: 'A',
+            link: function (scope, element, attrs) {
+                var e = $(element);
+                e.addClass('marginal');
+                var subelement = $(
+                    '<alert ng-repeat="alert in ' + attrs.uiAlertList + '" type="alert.type" close="alerts.splice(index, 1)">\
+                        <span ng-bind="alert.text"></span> [<span ng-bind="alert.code"></span>]\
+                    </alert>'
+                );
+                e.prepend(subelement);
+                $compile(subelement)(scope);
+            }
+        }
+    }])
 ;
+angular.module('WebMis20.validators', [])
+.directive('enumValidator', function() {
+    return {
+        restrict: 'A',
+        require: 'ngModel',
+        link: function(scope, elm, attrs, ctrl) {
+            ctrl.$parsers.unshift(function(viewValue) {
+                if (viewValue && viewValue.id > 0) {
+                    ctrl.$setValidity('text', true);
+                    return viewValue;
+                } else {
+                    ctrl.$setValidity('text', false);
+                    return undefined;
+                }
+            });
+        }
+    };
+})
+.directive('snilsValidator', ['$timeout', function ($timeout) {
+    return {
+        restrict: 'A',
+        require: 'ngModel',
+        link: function(scope, elm, attrs, ctrl) {
+            function snilsCRC (value) {
+                var v = value.substring(0, 3) + value.substring(4, 7) + value.substring(8, 11) + value.substring(12, 14);
+                var result = 0;
+                for (var i=0; i < 9; i++) {
+                    result += (9 - i) * parseInt(v[i])
+                }
+                result = (result % 101) % 100;
+                if (result < 10) return '0' + result;
+                else return '' + result;
+            }
+            ctrl.$parsers.unshift(function(viewValue) {
+                ctrl.$setValidity('text', viewValue && viewValue.substring(12, 14) == snilsCRC(viewValue));
+                $timeout(function(){
+                    if (ctrl.$invalid){
+                        elm.trigger('show_popover');
+                    } else {
+                        elm.trigger('hide_popover');
+                    }
+                });
+                return viewValue;
+            });
+        }
+    };
+}])
+.directive('validatorRegexp', [function () {
+return {
+    restrict: 'A',
+    require: 'ngModel',
+    link: function(scope, element, attrs, ctrl) {
+        var regexp = null;
+        var evalue = null;
+        scope.$watch(attrs.validatorRegexp, function (n, o) {
+            evalue = n;
+            if (!evalue) {
+                ctrl.$setViewValue('');
+                ctrl.$render();
+                ctrl.$setValidity('text', true);
+                $(element).attr('disabled', true);
+            } else {
+                $(element).removeAttr('disabled');
+                regexp = new RegExp(evalue);
+                ctrl.$setValidity('text', ctrl.$viewValue && regexp.test(ctrl.$viewValue));
+            }
+        });
+        ctrl.$parsers.unshift(function(viewValue) {
+            if (evalue && regexp) {
+                ctrl.$setValidity('text', viewValue && regexp.test(viewValue));
+            }
+            return viewValue
+        });
+    }
+}
+}]);
