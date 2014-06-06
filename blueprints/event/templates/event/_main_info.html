@@ -14,12 +14,12 @@
                             <ui-select id="request_type" name="request_type" theme="select2"
                                        ng-model="request_type.selected"
                                        ng-disabled="formcnf.request_type.disabled || (event.is_new() && event.services.length)">
-                                <match placeholder="Тип обращения">[[$select.selected.name]]</match>
-                                <choices repeat="rt in rbRequestType.objects
+                                <ui-select-match placeholder="Тип обращения">[[$select.selected.name]]</ui-select-match>
+                                <ui-select-choices repeat="rt in rbRequestType.objects
                                                  | filter: rbRequestType.objects && rbRequestType.get_by_code('policlinic')
                                                  | filter: $select.search">
                                     <div ng-bind-html="rt.name | highlight: $select.search"></div>
-                                </choices>
+                                </ui-select-choices>
                             </ui-select>
                         </div>
                         <div class="col-md-4">
@@ -27,12 +27,12 @@
                             <ui-select id="finance" name="finance" theme="select2"
                                        ng-model="finance.selected"
                                        ng-disabled="formcnf.finance.disabled || (event.is_new() && event.services.length)">
-                                <match placeholder="Источник финансирования">[[$select.selected.name]]</match>
-                                <choices repeat="f in rbFinance.objects
+                                <ui-select-match placeholder="Источник финансирования">[[$select.selected.name]]</ui-select-match>
+                                <ui-select-choices repeat="f in rbFinance.objects
                                                  | event_type_filter: rbFinance.objects && rbEventType.get_finances_by_rt(request_type.selected.id)
                                                  | filter: $select.search">
                                     <div ng-bind-html="f.name | highlight: $select.search"></div>
-                                </choices>
+                                </ui-select-choices>
                             </ui-select>
                         </div>
                         <div class="col-md-4"
@@ -41,11 +41,11 @@
                             <ui-select id="contract" name="contract" theme="select2"
                                        ng-model="event.info.contract" ng-required="true"
                                        ng-disabled="formcnf.contract.disabled || (event.is_new() && event.services.length)">
-                                <match placeholder="Договор">[[$select.selected.number]] [[$select.selected.date]]
-                                                             [[$select.selected.resolution]]</match>
-                                <choices repeat="c in Contract.objects | contract_filter: event.info | filter: $select.search">
+                                <ui-select-match placeholder="Договор">[[$select.selected.number]] [[$select.selected.date]]
+                                                             [[$select.selected.resolution]]</ui-select-match>
+                                <ui-select-choices repeat="c in Contract.objects | contract_filter: event.info | filter: $select.search">
                                     <div ng-bind-html="(c.number+' '+c.date+' '+c.resolution) | highlight: $select.search"></div>
-                                </choices>
+                                </ui-select-choices>
                             </ui-select>
                         </div>
                     </div>
@@ -57,12 +57,12 @@
                             <ui-select id="event_type" name="event_type" theme="select2"
                                        ng-model="event.info.event_type" ng-required="true"
                                        ng-disabled="formcnf.event_type.disabled || (event.is_new() && event.services.length)">
-                                <match placeholder="Тип события">[[$select.selected.name]]</match>
-                                <choices repeat='et in rbEventType.objects
+                                <ui-select-match placeholder="Тип события">[[$select.selected.name]]</ui-select-match>
+                                <ui-select-choices repeat='et in rbEventType.objects
                                                  | event_type_filter: rbEventType.objects && rbEventType.get_filtered_by_rtf(request_type.selected.id, finance.selected.id)
                                                  | filter: $select.search '>
                                     <div ng-bind-html="et.name | highlight: $select.search"></div>
-                                </choices>
+                                </ui-select-choices>
                             </ui-select>
                         </div>
                     </div>
@@ -75,10 +75,10 @@
                             <ui-select id="exec_person" name="exec_person" theme="select2"
                                        ng-model="event.info.exec_person" ng-required="true" ng-change="exec_person_changed()"
                                        ng-disabled="formcnf.exec_person.disabled">
-                                <match placeholder="Лечащий врач">[[$select.selected.name]]</match>
-                                <choices repeat="p in Person.objects | filter: $select.search">
+                                <ui-select-match placeholder="Лечащий врач">[[$select.selected.name]]</ui-select-match>
+                                <ui-select-choices repeat="p in Person.objects | filter: $select.search">
                                     <div ng-bind-html="p.name | highlight: $select.search"></div>
-                                </choices>
+                                </ui-select-choices>
                             </ui-select>
                         </div>
                         <div class="col-md-4"
@@ -86,10 +86,10 @@
                             <label for="org_structure">Подразделение</label>
                             <ui-select id="org_structure" name="org_structure" theme="select2"
                                        ng-model="event.info.org_structure" ng-required="true" ng-disabled="formcnf.org_structure.disabled">
-                                <match placeholder="Подразделение">[[$select.selected.name]]</match>
-                                <choices repeat="os in OrgStructure.objects | filter: $select.search">
+                                <ui-select-match placeholder="Подразделение">[[$select.selected.name]]</ui-select-match>
+                                <ui-select-choices repeat="os in OrgStructure.objects | filter: $select.search">
                                     <div ng-bind-html="os.name | highlight: $select.search"></div>
-                                </choices>
+                                </ui-select-choices>
                             </ui-select>
                         </div>
                     </div>
@@ -101,10 +101,10 @@
                             <label for="primacy">Первичность</label>
                             <ui-select id="primacy" name="primacy" theme="select2"
                                        ng-model="event.info.is_primary" ng-required="true" ng-disabled="formcnf.primacy.disabled">
-                                <match placeholder="Первичность">[[$select.selected.name]]</match>
-                                <choices repeat="rbp in rbPrimary.objects | filter: $select.search">
+                                <ui-select-match placeholder="Первичность">[[$select.selected.name]]</ui-select-match>
+                                <ui-select-choices repeat="rbp in rbPrimary.objects | filter: $select.search">
                                     <div ng-bind-html="rbp.name | highlight: $select.search"></div>
-                                </choices>
+                                </ui-select-choices>
                             </ui-select>
                         </div>
                         <div class="col-md-4"
@@ -112,10 +112,10 @@
                             <label for="order">Порядок</label>
                             <ui-select id="order" name="order" theme="select2"
                                        ng-model="event.info.order" ng-required="true" ng-disabled="formcnf.order.disabled">
-                                <match placeholder="Порядок">[[$select.selected.name]]</match>
-                                <choices repeat="rbo in rbOrder.objects | filter: $select.search ">
+                                <ui-select-match placeholder="Порядок">[[$select.selected.name]]</ui-select-match>
+                                <ui-select-choices repeat="rbo in rbOrder.objects | filter: $select.search ">
                                     <div ng-bind-html="rbo.name | highlight: $select.search"></div>
-                                </choices>
+                                </ui-select-choices>
                             </ui-select>
                         </div>
                     </div>

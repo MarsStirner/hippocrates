@@ -17,8 +17,8 @@
                 <div class="col-md-9">
                     <dl class="dl-horizontal novmargin">
                         <dt>Контактный телефон:</dt><dd>[[event.info.client.phones]]</dd>
-                        <dt>Адрес регистрации:</dt><dd>[[event.info.client.reg_address]]</dd>
-                        <dt>Адрес проживания:</dt><dd>[[event.info.client.loc_address]]</dd>
+                        <dt>Адрес регистрации:</dt><dd>[[event.info.client.reg_address ? event.info.client.reg_address.text_summary : '']]</dd>
+                        <dt>Адрес проживания:</dt><dd>[[event.info.client.loc_address ? event.info.client.loc_address.text_summary : '']]</dd>
                         <dt>Медицинский полис:</dt><dd>[[event.info.client.comp_policy.policyText]]</dd>
                     </dl>
                 </div>
