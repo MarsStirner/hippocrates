@@ -336,6 +336,10 @@ class ClientVisualizer(object):
         direct_relations = [self.make_relation_info(relation) for relation in client.direct_relations]
         reversed_relations = [self.make_relation_info(relation) for relation in client.reversed_relations]
         contacts = [self.make_contact_info(contact) for contact in client.contacts]
+        reg_addr = client.reg_address
+        live_addr = client.loc_address
+        if reg_addr and live_addr:
+            setattr(live_addr, 'same_as_reg', client.has_identical_addresses())
 
         return {
             'id': client.id,
@@ -349,8 +353,8 @@ class ClientVisualizer(object):
             'document': pers_document,
             'documentText': safe_unicode(client.document),
             'birthDate': client.birthDate,
-            'regAddress': client.reg_address,
-            'liveAddress': client.loc_address,
+            'regAddress': reg_addr,
+            'liveAddress': live_addr,
             'contact': client.phones,
             'compulsoryPolicy': compulsoryPolicy,
             'voluntaryPolicy': voluntaryPolicy,

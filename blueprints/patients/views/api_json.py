@@ -151,12 +151,12 @@ def api_patient_save():
                 address = get_address_matched_copy(client, actual_reg_address)
                 client.addresses.append(address)
             elif live_address.get('address') or live_address.get('free_input'):
-                reg_address['type'] = 0
-                if not client.reg_address:
-                    address = get_new_address(reg_address)
+                live_address['type'] = 1
+                if not client.loc_address:
+                    address = get_new_address(live_address)
                     client.addresses.append(address)
                 else:
-                    addresses = get_modified_address(client, reg_address)
+                    addresses = get_modified_address(client, live_address)
                     db.session.add(addresses[0])
                     if addresses[1]:
                         client.addresses.append(addresses[1])

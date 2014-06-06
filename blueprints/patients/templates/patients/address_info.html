@@ -1,11 +1,22 @@
-<dl class="dl-horizontal" ng-hide="editing_is_active()">
-    Адреса
-</dl>
+<div ng-hide="editing_is_active()">
+    <div class="panel panel-default" ng-if="client.client_info.regAddress">
+        <div class="panel-body">
+            <legend>Адрес регистрации</legend>
+            <h4>[[client.client_info.regAddress.text_summary]]</h4>
+        </div>
+    </div>
+    <div class="panel panel-default" ng-if="client.client_info.liveAddress">
+        <div class="panel-body">
+            <legend>Адрес проживания</legend>
+            <h4>[[client.client_info.liveAddress.text_summary]]</h4>
+        </div>
+    </div>
+</div>
 
 <div id="addresses_tab" ng-show="editing_is_active()">
     <legend>Адрес регистрации</legend>
     <wm-kladr-address>
-        <ng-form ng-attr-name="regAddressForm">
+        <ng-form name="regAddressForm">
         <wm-kladr-base-layout prefix='reg'
             locality-model="client.client_info.regAddress.address.locality"
             locality-type-model="client.client_info.regAddress.locality_type"
@@ -21,7 +32,7 @@
 
     <legend>Адрес проживания</legend>
     <wm-kladr-address>
-        <ng-form ng-attr-name="locAddressForm">
+        <ng-form name="locAddressForm">
         <wm-kladr-base-layout prefix='loc'
             locality-model="client.client_info.liveAddress.address.locality"
             locality-type-model="client.client_info.liveAddress.locality_type"
@@ -33,7 +44,8 @@
             <div class="checkbox">
                 <label>
                     <input type="checkbox" id="copy_addr" name="copy_addr"
-                           ng-model="scos" ng-click="copy_address(scos, client.client_info.regAddress)"/> {# ищи меня в скоупе patient_info :( #}
+                           ng-model="client.client_info.liveAddress.same_as_reg"
+                           ng-click="copy_address(scos, client.client_info.regAddress)"/> {# ищи меня в скоупе patient_info :( #}
                     Совпадает с адресом регистрации
                 </label>
             </div>
@@ -41,7 +53,4 @@
         </ng-form>
     </wm-kladr-address>
     <div>[[client.client_info.liveAddress | json]]</div>
-
 </div>
-
-

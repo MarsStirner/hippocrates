@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import datetime
-import json
 from application.lib.agesex import calcAgeTuple
 from application.models.enums import Gender, LocalityType
 from application.models.exists import rbDocumentTypeGroup
@@ -204,6 +203,17 @@ class Client(db.Model):
             for phone in contacts
         ])
 
+    def has_identical_addresses(self):
+        # TODO: fix this
+        reg = self.reg_address
+        live = self.loc_address
+        if reg and live:
+            if reg.address and live.address:
+                return reg.address.id == live.address.id
+            else:
+                return reg.freeInput == live.freeInput
+        return False
+
     def __unicode__(self):
         return self.nameText
 
@@ -318,7 +328,9 @@ class ClientAddress(db.Model):
             'address_id': self.address_id,
             'address': self.address,
             'free_input': self.freeInput,
-            'locality_type': LocalityType(self.localityType)
+            'locality_type': LocalityType(self.localityType),
+            'text_summary': self.__unicode__(),
+            'same_as_reg': getattr(self, 'same_as_reg', False)
         }
 
     def __int__(self):
@@ -894,12 +906,11 @@ class Address(db.Model):
 
     @property
     def city(self):
-        from application.views import kladr_city
+        from application.lib.data import get_kladr_city  # TODO: fix?
         text = ''
         if self.KLADRCode:
-            city_info = json.loads(kladr_city(self.KLADRCode)[0])
-            if city_info:
-                text = city_info['result'][0]['name']
+            city_info = get_kladr_city(self.KLADRCode)
+            text = city_info.get('name', u'-код региона не найден в кладр-')
         return text
 
     @property
@@ -943,12 +954,11 @@ class Address(db.Model):
 
     @property
     def street(self):
-        from application.views import kladr_street
+        from application.lib.data import get_kladr_street  # TODO: fix?
         text = ''
         if self.KLADRStreetCode:
-            street_info = json.loads(kladr_street(self.KLADRCode, self.KLADRStreetCode)[0])
-            if street_info:
-                text = street_info['result'][0]['name']
+            street_info = get_kladr_street(self.KLADRStreetCode)
+            text = street_info.get('name', u'-код улицы не найден в кладр-')
         return text
 
     @property

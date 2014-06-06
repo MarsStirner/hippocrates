@@ -102,7 +102,7 @@ angular.module('WebMis20.kladrDirectives', ['ui.bootstrap']).
             },
             controller: function($scope) {
                 $scope.getCity = function(search_q) {
-                    return $http.get(kladr_city + search_q + '/', {}).then(function(res) {
+                    return $http.get(kladr_city + 'search/' + search_q + '/', {}).then(function(res) {
                         $scope.items = res.data.result;
                         return $scope.items;
                     });
@@ -198,7 +198,7 @@ angular.module('WebMis20.kladrDirectives', ['ui.bootstrap']).
             },
             controller: function($scope) {
                 $scope.getStreet = function(search_q) {
-                    var url = [kladr_street, $scope.getSelectedLocation(), '/', search_q, '/' ].join('')
+                    var url = [kladr_street, 'search/', $scope.getSelectedLocation(), '/', search_q, '/' ].join('')
                     return $http.get(url, {}).then(function(res) {
                         $scope.items = res.data.result;
                         return $scope.items;
