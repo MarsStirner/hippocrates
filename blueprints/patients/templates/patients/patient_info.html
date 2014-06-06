@@ -20,20 +20,21 @@
             <a class="btn btn-primary" href="{{ url_for('event.new_event') }}?event_id=new&client_id={{ request.args['client_id'] }}"
                ng-if="client_id != 'new'">
                 Создать обращение</a>
-            <span class="dropdown">
-                <button class="btn dropdown-toggle" type="button" id="print_dropdownMenu"
-                        ng-disabled="!ps.templates" data-toggle="dropdown">
-                    <span class="glyphicon glyphicon-print"></span>
-                    <span class="caret"></span>
-                </button>
-                <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="print_dropdownMenu">
-                    <li role="presentation" ng-repeat="template in ps.templates">
-                        <a role="menuitem" tabindex="-1" href="" class="print_template"
-                           ng-click="ps.print_template(template.id)" ng-bind="template.name">
-                        </a>
-                    </li>
-                </ul>
-            </span>
+            <ui-print-button ps="ps" resolve="print_context_resolve()" ng-if="client.id"></ui-print-button>
+{#            <span class="dropdown">#}
+{#                <button class="btn dropdown-toggle" type="button" id="print_dropdownMenu"#}
+{#                        ng-disabled="!ps.templates" data-toggle="dropdown">#}
+{#                    <span class="glyphicon glyphicon-print"></span>#}
+{#                    <span class="caret"></span>#}
+{#                </button>#}
+{#                <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="print_dropdownMenu">#}
+{#                    <li role="presentation" ng-repeat="template in ps.templates">#}
+{#                        <a role="menuitem" tabindex="-1" href="" class="print_template"#}
+{#                           ng-click="ps.print_template(template.id)" ng-bind="template.name">#}
+{#                        </a>#}
+{#                    </li>#}
+{#                </ul>#}
+{#            </span>#}
         </div>
         <div ui-alert-list="alerts"></div>
         <div class="marginal">
@@ -70,6 +71,8 @@
         </tabset>
         </div>
     </div>
+    <script type="text/ng-template" id="modal-print-dialog.html">{% include "_modal-print-dialog.html" %}</script>
+
 {% endblock %}
 
 {% block modules_js %}
@@ -99,25 +102,28 @@
 
             $scope.client_id = $scope.params.client_id;
             $scope.client = new Client($scope.client_id);
-            $scope.ps = new PrintingService('registry', function (template_id) {
+            $scope.ps = new PrintingService('registry');
+            $scope.print_context_resolve = function () {
                 return {
                     client_id: $scope.client_id
                 }
-            });
+            };
             $scope.ps.set_context('token');
 
-            $scope.ps_amb = new PrintingService('preliminary_records', function (template_id, client_ticket_id) {
+            $scope.ps_amb = new PrintingService('preliminary_records');
+            $scope.ps_amb_resolve = function (client_ticket_id) {
                 return {
                     client_id: $scope.client_id,
                     ticket_id: client_ticket_id
                 }
-            });
-            $scope.ps_home = new PrintingService('preliminary_records', function (template_id, client_ticket_id) {
+            }
+            $scope.ps_home = new PrintingService('preliminary_records');
+            $ps_home_resolve = function (client_ticket_id) {
                 return {
                     client_id: $scope.client_id,
                     ticket_id: client_ticket_id
                 }
-            });
+            }
             $scope.ps_amb.set_context('orderAmb');
             $scope.ps_home.set_context('orderHome');
 

@@ -1,0 +1,43 @@
+<div class="modal-header" xmlns="http://www.w3.org/1999/html">
+    <button type="button" class="close" ng-click="cancel()">&times;</button>
+    <h4 class="modal-title" id="myModalLabel">Печать документов</h4>
+</div>
+<table ng-show="page == 0" class="table modal-body">
+    <thead>
+    <tr>
+        <th>
+            <input type="checkbox" ng-checked="ps.templates.length == selected_templates.length" ng-click="select_all_templates()">
+        </th>
+        <th>Наименование</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr ng-repeat="template in ps.templates">
+        <td>
+            <input type="checkbox" ng-checked="aux.inArray(selected_templates, template)" id="template-id-[[template.id]]" ng-click="toggle_select_template(template)">
+        </td>
+        <td>
+            <label for="template-id-[[template.id]]" ng-bind="template.name"></label>
+        </td>
+    </tr>
+    </tbody>
+</table>
+<div ng-show="page == 1">
+    <div class="modal-body" ng-repeat="template in selected_templates">
+        <p ng-bind="template.name"></p>
+        <div class="row" ng-repeat="var_meta in template.meta">
+            <div class="col-md-6">
+                <label ng-bind="var_meta.title"></label>
+            </div>
+            <div class="col-md-6">
+                <input ng-model="mega_model[template.id][var_meta.name]" class="form-control">
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-primary" ng-click="btn_next()" ng-if="page == 0">Далее &gt;&gt;</button>
+    <button type="button" class="btn btn-primary" ng-click="btn_prev()" ng-if="page == 1">&lt;&lt; Назад</button>
+    <button type="button" class="btn btn-primary" ng-click="print_separated()">Печать</button>
+    <button type="button" class="btn btn-default" ng-click="cancel()">Отмена</button>
+</div>

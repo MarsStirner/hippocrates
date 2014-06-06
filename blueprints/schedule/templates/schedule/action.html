@@ -70,21 +70,22 @@
 <div class="row">
     <div class="col-md-6">&nbsp;</div>
     <div class="col-md-2">
-    <div class="dropdown" ng-if="action.id">
-        <button class="btn btn-block dropdown-toggle" type="button" id="print_dropdownMenu" data-toggle="dropdown"
-                ng-disabled="!ps.templates">
-            <span class="glyphicon glyphicon-print"></span>
-            Печать
-            <span class="caret"></span>
-        </button>
-        <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="print_dropdownMenu">
-            <li role="presentation" ng-repeat="template in ps.templates">
-                <a role="menuitem" tabindex="-1" href="" class="print_template"
-                   ng-click="ps.print_template(template.id)" ng-bind="template.name">
-                </a>
-            </li>
-        </ul>
-    </div>
+        <ui-print-button ps="ps" resolve="ps_resolve()" ng-if="action.id"></ui-print-button>
+{#    <div class="dropdown" ng-if="action.id">#}
+{#        <button class="btn btn-block dropdown-toggle" type="button" id="print_dropdownMenu" data-toggle="dropdown"#}
+{#                ng-disabled="!ps.templates">#}
+{#            <span class="glyphicon glyphicon-print"></span>#}
+{#            Печать#}
+{#            <span class="caret"></span>#}
+{#        </button>#}
+{#        <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="print_dropdownMenu">#}
+{#            <li role="presentation" ng-repeat="template in ps.templates">#}
+{#                <a role="menuitem" tabindex="-1" href="" class="print_template"#}
+{#                   ng-click="ps.print_template(template.id)" ng-bind="template.name">#}
+{#                </a>#}
+{#            </li>#}
+{#        </ul>#}
+{#    </div>#}
     </div>
     <div class="col-md-2">
         <button class="btn btn-block btn-success" ng-click="action.save()">Сохранить</button>
@@ -94,6 +95,7 @@
     </div>
 </div>
 </div>
+<script type="text/ng-template" id="modal-print-dialog.html">{% include "_modal-print-dialog.html" %}</script>
 {% endblock %}
 
 {% block modules_js %}
@@ -103,11 +105,12 @@
             ['$scope', '$http', '$window', 'WMAction', 'PrintingService',
                 function ($scope, $http, $window, WMAction, PrintingService) {
         var params = aux.getQueryParams(location.search);
-        $scope.ps = new PrintingService("action", function () {
+        $scope.ps = new PrintingService("action");
+        $scope.ps_resolve = function () {
             return {
                 action_id: $scope.action.id
            }
-        });
+        }
         $scope.ckEditorOptions = {
             language: 'ru',
             removeButtons: 'Cut,Copy,Paste,Undo,Redo,Anchor,Strike',

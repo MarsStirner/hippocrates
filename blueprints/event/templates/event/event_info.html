@@ -80,18 +80,19 @@
         </ng-form>
         <div class="row">
             <div class="col-md-6 text-left">
-                <div class="dropup" ng-if="!event.is_new()">
-                    <button class="btn btn-lg btn-default dropdown-toggle" type="button" id="print_dropdownMenu"
-                            data-toggle="dropdown" ng-disabled="!ps.templates">
-                        <span class="glyphicon glyphicon-print"></span> Печать <span class="caret"></span>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu" role="menu" aria-labelledby="print_dropdownMenu">
-                        <li role="presentation" ng-repeat="template in ps.templates">
-                            <a role="menuitem" tabindex="-1" href="" class="print_template"
-                               ng-click="ps.print_template(template.id)" ng-bind="template.name"></a>
-                        </li>
-                    </ul>
-                </div>
+                <ui-print-button ps="ps" resolve="ps_resolve()" ng-if="!event.is_new()"></ui-print-button>
+{#                <div class="dropup" ng-if="!event.is_new()">#}
+{#                    <button class="btn btn-lg btn-default dropdown-toggle" type="button" id="print_dropdownMenu"#}
+{#                            data-toggle="dropdown" ng-disabled="!ps.templates">#}
+{#                        <span class="glyphicon glyphicon-print"></span> Печать <span class="caret"></span>#}
+{#                    </button>#}
+{#                    <ul class="dropdown-menu dropdown-menu" role="menu" aria-labelledby="print_dropdownMenu">#}
+{#                        <li role="presentation" ng-repeat="template in ps.templates">#}
+{#                            <a role="menuitem" tabindex="-1" href="" class="print_template"#}
+{#                               ng-click="ps.print_template(template.id)" ng-bind="template.name"></a>#}
+{#                        </li>#}
+{#                    </ul>#}
+{#                </div>#}
             </div>
             <div class="col-md-6 text-right">
                 <button type="button" ng-click="cancel_editing();" class="btn btn-lg btn-danger">Назад</button>
@@ -104,6 +105,7 @@
 {#            <pre>[[event | json]]</pre>#}
 {#        </div>#}
     </div>
+    <script type="text/ng-template" id="modal-print-dialog.html">{% include "_modal-print-dialog.html" %}</script>
 {% endblock %}
 
 {% block modules_js %}
@@ -168,11 +170,12 @@
         };
 
 
-        $scope.ps = new PrintingService("event", function (template_id) {
+        $scope.ps = new PrintingService("event");
+        $scope.ps_resolve = function () {
             return {
                 event_id: $scope.event_id
             }
-        });
+        }
 
         $scope.print_template = function (template_id) {
             $http.post(

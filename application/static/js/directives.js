@@ -95,6 +95,100 @@ angular.module('WebMis20.directives', ['ui.bootstrap', 'ui.select', 'ngSanitize'
             }
         }
     }])
+    .directive('uiPrintButton', ['$modal', function ($modal) {
+        var ModalPrintDialogController = function ($scope, $modalInstance, ps, context_extender) {
+            $scope.aux = aux;
+            $scope.page = 0;
+            $scope.ps = ps;
+            $scope.selected_templates = [];
+            $scope.mega_model = {};
+            $scope.toggle_select_template = function (template) {
+                if (aux.inArray($scope.selected_templates, template)) {
+                    $scope.selected_templates.splice($scope.selected_templates.indexOf(template), 1)
+                } else {
+                    $scope.selected_templates.push(template)
+                }
+            };
+            $scope.select_all_templates = function () {
+                if ($scope.selected_templates.length == ps.templates.length) {
+                    $scope.selected_templates = [];
+                } else {
+                    $scope.selected_templates = aux.arrayCopy(ps.templates)
+                }
+            };
+            $scope.btn_next = function () {
+                $scope.mega_model = {};
+                $scope.selected_templates.map(function (template) {
+                    var desc = $scope.mega_model[template.id] = {};
+                    if (template.meta) {
+                        template.meta.map(function (variable) {
+                            desc[variable.name] = null;
+                        })
+                    }
+                });
+                $scope.page = 1;
+            };
+            $scope.btn_prev = function () {
+                $scope.mega_model = {};
+                $scope.page = 0;
+            };
+            function prepare_data () {
+                return $scope.selected_templates.map(function (template) {
+                    return {
+                        template_id: template.id,
+                        context: angular.extend({}, $scope.mega_model[template.id], context_extender)
+                    }
+                })
+            }
+            $scope.print_separated = function () {
+                ps.print_template(prepare_data(), true)
+            };
+            $scope.print_compact = function () {
+                ps.print_template(prepare_data(), false)
+            };
+            $scope.cancel = function () {
+                $modalInstance.dismiss('cancel');
+            }
+        };
+        return {
+            restrict: 'E',
+            replace: true,
+            template:
+                /* '<div class="dropup"">\
+                    <button class="btn btn-lg btn-default dropdown-toggle" type="button" id="print_dropdownMenu"\
+                            data-toggle="dropdown" ng-disabled="!$ps.templates">\
+                        <span class="glyphicon glyphicon-print"></span> Печать <span class="caret"></span>\
+                    </button>\
+                    <ul class="dropdown-menu dropdown-menu" role="menu" aria-labelledby="print_dropdownMenu">\
+                        <li role="presentation" ng-repeat="template in $ps.templates">\
+                            <a role="menuitem" tabindex="-1" href="" class="print_template"\
+                               ng-click="$ps.print_template(template.id)" ng-bind="template.name"></a>\
+                        </li>\
+                    </ul>\
+                </div>',*/
+                '<button class="btn" ng-click="open_print_window()">Печать</button>',
+            scope: {
+                $ps: '=ps'
+            },
+            link: function (scope, element, attrs) {
+                var resolver_call = attrs.resolve;
+                scope.open_print_window = function () {
+                    var modal = $modal.open({
+                        templateUrl: 'modal-print-dialog.html',
+                        controller: ModalPrintDialogController,
+                        resolve: {
+                            ps: function () {
+                                return scope.$ps;
+                            },
+                            context_extender: function () {
+                                return scope.$parent.$eval(resolver_call)
+                            }
+                        }
+                    })
+                }
+            }
+        }
+    }])
 ;
 angular.module('WebMis20.validators', [])
 .directive('enumValidator', function() {
