@@ -280,21 +280,21 @@ class ClientVisualizer(object):
                 'deleted': relation.deleted,
                 'relativeType': relation.relativeType,
                 'other_id': relation.other.id,
-                'other_text': relation.other.nameText + ' ({})'.format(relation.other.id)}
+                'other_text': relation.other.nameText + ' ({0})'.format(relation.other.id)}
 
     def make_contact_info(self, contact):
         return {'id': contact.id,
                 'deleted': contact.deleted,
-                'contactType_code': contact.contactType.code,
-                'contactType_name': contact.contactType.name,
+                'contactType_code': getattr(contact.contactType, 'code'),
+                'contactType_name': getattr(contact.contactType, 'name'),
                 'contact': contact.contact,
                 'notes': contact.notes}
 
     def make_client_info(self, client):
         socStatuses = [{'id': socStatus.id,
                         'deleted': socStatus.deleted,
-                        'className': socStatus.soc_status_class.name,
-                        'classCode': socStatus.soc_status_class.code,
+                        'className': getattr(socStatus.soc_status_class, 'name'),
+                        'classCode': getattr(socStatus.soc_status_class, 'code'),
                         'typeName': socStatus.name,
                         'typeCode': socStatus.code,
                         'begDate': socStatus.begDate or '',
