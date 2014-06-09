@@ -114,13 +114,16 @@ def api_refbook(name):
 
 @app.route('/api/kladr/city/search/')
 @app.route('/api/kladr/city/search/<search_query>/')
+@app.route('/api/kladr/city/search/<search_query>/<limit>/')
 @cache.memoize(86400)
-def kladr_search_city(search_query=None):
+def kladr_search_city(search_query=None, limit=20):
     result = []
     if search_query is None:
         return jsonify([])
     short_types = [u'г', u'п', u'с']
-    response = requests.get(u'{0}/kladr/city/search/{1}/'.format(app.config['VESTA_URL'], search_query))
+    response = requests.get(u'{0}kladr/city/search/{1}/{2}/'.format(app.config['VESTA_URL'],
+                                                                    search_query,
+                                                                    limit))
     for city in response.json()['data']:
         if city['shorttype'] in short_types:
             data = {'code': city['identcode'], 'name': u'{0}. {1}'.format(city['shorttype'], city['name'])}
@@ -133,12 +136,16 @@ def kladr_search_city(search_query=None):
 
 @app.route('/api/kladr/street/search/')
 @app.route('/api/kladr/street/search/<city_code>/<search_query>/')
+@app.route('/api/kladr/street/search/<city_code>/<search_query>/<limit>/')
 @cache.memoize(86400)
-def kladr_search_street(city_code=None, search_query=None):
+def kladr_search_street(city_code=None, search_query=None, limit=20):
     result = []
     if city_code is None or search_query is None:
         return jsonify([])
-    response = requests.get(u'{0}/kladr/street/search/{1}/{2}/'.format(app.config['VESTA_URL'], city_code, search_query))
+    response = requests.get(u'{0}kladr/street/search/{1}/{2}/{3}/'.format(app.config['VESTA_URL'],
+                                                                          city_code,
+                                                                          search_query,
+                                                                          limit))
     for street in response.json()['data']:
         data = {'code': street['identcode'], 'name': u'{0} {1}'.format(street['fulltype'], street['name'])}
         result.append(data)
@@ -147,30 +154,21 @@ def kladr_search_street(city_code=None, search_query=None):
 
 @app.route('/api/kladr/city/')
 @app.route('/api/kladr/city/<code>/')
-@app.route('/api/kladr/city/<code>/<limit>/')
 @cache.memoize(86400)
-def kladr_city(code=None, limit=None):
+def kladr_city(code=None):
     if code is None:
         return jsonify([])
-    if limit:
-        result = get_kladr_city(code, limit)
-    else:
-        result = get_kladr_city(code)
-    return jsonify([result])
+    return jsonify([get_kladr_city(code)])
 
 
 @app.route('/api/kladr/street/')
 @app.route('/api/kladr/street/<code>/')
-@app.route('/api/kladr/street/<code>/<limit>/')
 @cache.memoize(86400)
-def kladr_street(code=None, limit=None):
+def kladr_street(code=None):
     if code is None:
         return jsonify([])
-    if limit:
-        result = get_kladr_street(code, limit)
-    else:
-        result = get_kladr_street(code)
-    return jsonify([result])
+    return jsonify([get_kladr_street(code)])
+
 
 @app.errorhandler(403)
 def authorisation_failed(e):
