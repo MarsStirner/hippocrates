@@ -207,6 +207,8 @@ def get_planned_end_datetime(action_type_id):
 
 
 def get_kladr_city(code):
+    if len(code) == 13:  # убрать после конвертации уже записанных кодов кладр
+        code = code[:-2]
     result = dict()
     response = requests.get(u'{0}/kladr/city/{1}/'.format(VESTA_URL, code))
     city = response.json()['data']
@@ -218,6 +220,8 @@ def get_kladr_city(code):
 
 
 def get_kladr_street(code):
+    if len(code) == 17:  # убрать после конвертации уже записанных кодов кладр
+        code = code[:-2]
     data = dict()
     response = requests.get(u'{0}/kladr/street/{1}/'.format(VESTA_URL, code))
     street = response.json()['data']

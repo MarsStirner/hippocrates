@@ -1,5 +1,7 @@
 # -*- encoding: utf-8 -*-
+
 import requests
+
 from flask import render_template, abort, request, redirect, url_for, flash, session, current_app
 from flask.ext.principal import Identity, AnonymousIdentity, identity_changed
 from flask.ext.principal import identity_loaded, Permission, RoleNeed, UserNeed, ActionNeed
@@ -93,6 +95,11 @@ def logout():
 @app.route('/api/rb/<name>')
 @cache.memoize(600)  # 86400
 def api_refbook(name):
+    for mod in (enums,):
+        if hasattr(mod, name):
+            ref_book = getattr(mod, name)
+            res = jsonify(ref_book.rb()['objects'])
+            return res
     for mod in (exists, schedule, actions, client, event):
         if hasattr(mod, name):
             ref_book = getattr(mod, name)

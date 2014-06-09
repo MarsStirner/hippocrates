@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from application.models.kladr_models import Kladr
 
 from flask import abort, request
 from flask.helpers import make_response
@@ -128,6 +129,38 @@ def api_patient_save():
                 if policies[1]:
                     client.policies.append(policies[1])
 
+        reg_address = client_info['regAddress']
+        actual_reg_address = None
+        if reg_address is not None and (reg_address.get('address') or reg_address.get('free_input')):
+            reg_address['type'] = 0
+            if not client.reg_address:
+                actual_reg_address = address = get_new_address(reg_address)
+                client.addresses.append(address)
+            else:
+                addresses = get_modified_address(client, reg_address)
+                db.session.add(addresses[0])
+                if addresses[1]:
+                    actual_reg_address = addresses[1]
+                    client.addresses.append(actual_reg_address)
+
+        live_address = client_info['liveAddress']
+
+        if live_address is not None:
+            # TODO: check
+            if live_address.get('same_as_reg', False) and actual_reg_address:
+                address = get_address_matched_copy(client, actual_reg_address)
+                client.addresses.append(address)
+            elif live_address.get('address') or live_address.get('free_input'):
+                live_address['type'] = 1
+                if not client.loc_address:
+                    address = get_new_address(live_address)
+                    client.addresses.append(address)
+                else:
+                    addresses = get_modified_address(client, live_address)
+                    db.session.add(addresses[0])
+                    if addresses[1]:
+                        client.addresses.append(addresses[1])
+
         for ss_info in client_info['socStatuses']:
             if not 'id' in ss_info:
                 ss = get_new_soc_status(ss_info)
@@ -209,3 +242,18 @@ def api_patient_save():
         return abort(404)
 
     return jsonify(int(client))
+
+
+@module.route('/api/kladr_info.json', methods=['GET'])
+def api_kladr_city_get():
+    val = request.args['city']
+    res = Kladr.query.filter(Kladr.NAME.startswith(val)).all()
+    return jsonify([{'name': r.NAME,
+                    'code': '0000000000000000'} for r in res])
+    # name = [" ".join([record.NAME, record.SOCR])]
+    # parent = record.parent
+    # while parent:
+    #     record = Kladr.query.filter(Kladr.CODE == parent.ljust(13, "0")).first()
+    #     name.insert(0, " ".join([record.NAME, record.SOCR]))
+    #     parent = record.parent
+    # return ", ".join(name)

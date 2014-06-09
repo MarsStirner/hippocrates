@@ -15,10 +15,10 @@ angular.module('WebMis20.directives', ['ui.bootstrap', 'ui.select', 'ngSanitize'
             },
             template: '<div><ui-select id=id name="exec_person" theme="select2"' +
                       '    ng-model="ngModel" ng-required="true">' +
-                      '<match placeholder="Лечащий врач">[[$select.selected.name]]</match>' +
-                      '<choices repeat="item in rbObj.objects | filter: $select.search">' +
+                      '<ui-select-match placeholder="Лечащий врач">[[$select.selected.name]]</ui-select-match>' +
+                      '<ui-select-choices repeat="item in rbObj.objects | filter: $select.search">' +
                       '    <div ng-bind-html="item.name | highlight: $select.search"></div>' +
-                      '</choices>' +
+                      '</ui-select-choices>' +
                       '</ui-select></div>'
         };
     }]).

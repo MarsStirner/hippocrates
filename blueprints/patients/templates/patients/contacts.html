@@ -29,10 +29,10 @@
                         <td class="col-md-4" ng-hide="relation.deleted">
                             <ui-select ng-model="relation.relativeType"
                                     theme="select2">
-                                <match placeholder="Тип связи">[[$select.selected.leftName]] -> [[$select.selected.rightName]]</match>
-                                <choices repeat="rt in rbRelationType.objects| filter:directRelationFilter | filter: $select.search">
+                                <ui-select-match placeholder="Тип связи">[[$select.selected.leftName]] -> [[$select.selected.rightName]]</ui-select-match>
+                                <ui-select-choices repeat="rt in rbRelationType.objects| filter:directRelationFilter | filter: $select.search">
                                     <div ng-bind-html="(rt.leftName + ' -> ' + rt.rightName) | highlight: $select.search"></div>
-                                </choices>
+                                </ui-select-choices>
                             </ui-select>
                         </td>
                         <td class="col-md-3" ng-hide="relation.deleted">
@@ -84,10 +84,10 @@
                         <td class="col-md-4" ng-hide="relation.deleted">
                             <ui-select ng-model="relation['relativeType']"
                                     theme="select2">
-                                <match placeholder="Тип связи">[[$select.selected.rightName]] -> [[$select.selected.leftName]]</match>
-                                <choices repeat="rt in rbRelationType.objects| filter:reversedRelationFilter | filter: $select.search">
+                                <ui-select-match placeholder="Тип связи">[[$select.selected.rightName]] -> [[$select.selected.leftName]]</ui-select-match>
+                                <ui-select-choices repeat="rt in rbRelationType.objects| filter:reversedRelationFilter | filter: $select.search">
                                     <div ng-bind-html="(rt.rightName + ' -> ' + rt.leftName) | highlight: $select.search"></div>
-                                </choices>
+                                </ui-select-choices>
                             </ui-select>
                         </td>
                         <td class="col-md-3" ng-hide="relation.deleted">

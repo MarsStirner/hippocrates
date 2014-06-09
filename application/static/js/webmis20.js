@@ -4,6 +4,7 @@
 var WebMis20 = angular.module('WebMis20', [
     'WebMis20.services',
     'WebMis20.directives',
+    'WebMis20.kladrDirectives',
     'WebMis20.LoadingIndicator',
     'WebMis20.validators',
     'ngResource',

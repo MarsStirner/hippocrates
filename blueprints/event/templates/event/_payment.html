@@ -37,10 +37,10 @@
                         <label for="doc_type">Документ</label>
                         <ui-select class="form-control" id="doc_type" name="doc_type" theme="select2" autocomplete="off"
                                    ng-model="event.payment.local_contract.doc_type" ng-disabled="formcnf.payer_field.disabled">
-                            <match placeholder="Тип документа">[[$select.selected.name]]</match>
-                            <choices repeat="dt in rbDocumentType.objects | filter: $select.search">
+                            <ui-select-match placeholder="Тип документа">[[$select.selected.name]]</ui-select-match>
+                            <ui-select-choices repeat="dt in rbDocumentType.objects | filter: $select.search">
                                 <div ng-bind-html="dt.name | highlight: $select.search"></div>
-                            </choices>
+                            </ui-select-choices>
                         </ui-select>
                     </div>
                     <div class="form-group col-md-2">
@@ -100,10 +100,10 @@
                 <label for="payer_org">Организация</label>
                 <ui-select id="payer_org" name="payer_org" theme="select2" autocomplete="off"
                            ng-model="event.payment.local_contract.payer_org" ng-disabled="formcnf.payer_field.disabled">
-                    <match placeholder="Организация">[[$select.selected.short_name]]</match>
-                    <choices repeat="org in Organisation.objects | filter: $select.search">
+                    <ui-select-match placeholder="Организация">[[$select.selected.short_name]]</ui-select-match>
+                    <ui-select-choices repeat="org in Organisation.objects | filter: $select.search">
                         <div ng-bind-html="org.short_name | highlight: $select.search"></div>
-                    </choices>
+                    </ui-select-choices>
                 </ui-select>
             </div>
         </div>
