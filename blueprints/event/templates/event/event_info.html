@@ -226,6 +226,14 @@
         };
         {# action data end #}
 
+        $scope.$watch('event.info.event_type.finance.id', function(new_val, old_val) {
+            if (new_val && new_val != old_val) {
+              $scope.$broadcast('form_state_change', {
+                  finance_type: $scope.event.info.event_type.finance.code
+              });
+            }
+        }, true);
+
         $scope.initialize();
     }]);
 </script>
