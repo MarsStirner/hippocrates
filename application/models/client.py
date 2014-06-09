@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import datetime
 from application.lib.agesex import calcAgeTuple
-from application.models.enums import Gender
+from application.models.enums import Gender, LocalityType
 from application.models.exists import rbDocumentTypeGroup
 from application.models.kladr_models import Kladr, Street
 from application.systemwide import db
@@ -55,11 +55,14 @@ class Client(db.Model):
     policies_all = db.relationship('ClientPolicy',
                                    primaryjoin='and_(ClientPolicy.clientId==Client.id, ClientPolicy.deleted != 1)',
                                    order_by="desc(ClientPolicy.id)")
+    addresses = db.relationship('ClientAddress',
+                                primaryjoin="and_(Client.id==ClientAddress.client_id, ClientAddress.deleted==0)"
+                                )
     reg_address = db.relationship(u'ClientAddress',
-                                  primaryjoin="and_(Client.id==ClientAddress.client_id, ClientAddress.type==0)",
+                                  primaryjoin="and_(Client.id==ClientAddress.client_id, ClientAddress.type==0, ClientAddress.deleted==0)",
                                   order_by="desc(ClientAddress.id)", uselist=False)
     loc_address = db.relationship(u'ClientAddress',
-                                  primaryjoin="and_(Client.id==ClientAddress.client_id, ClientAddress.type==1)",
+                                  primaryjoin="and_(Client.id==ClientAddress.client_id, ClientAddress.type==1, ClientAddress.deleted==0)",
                                   order_by="desc(ClientAddress.id)", uselist=False)
     socStatuses = db.relationship(u'ClientSocStatus',
                                   primaryjoin='and_(ClientSocStatus.deleted == 0, ClientSocStatus.client_id==Client.id)',
@@ -200,6 +203,17 @@ class Client(db.Model):
             for phone in contacts
         ])
 
+    def has_identical_addresses(self):
+        # TODO: fix this
+        reg = self.reg_address
+        live = self.loc_address
+        if reg and live:
+            if reg.address and live.address:
+                return reg.address.id == live.address.id
+            else:
+                return reg.freeInput == live.freeInput
+        return False
+
     def __unicode__(self):
         return self.nameText
 
@@ -250,6 +264,28 @@ class ClientAddress(db.Model):
 
     address = db.relationship(u'Address')
 
+    @classmethod
+    def create_from_kladr(cls, addr_type, loc_type, loc_kladr_code, street_kladr_code,
+            house_number, corpus_number, flat_number):
+        ca = cls(addr_type, loc_type)
+        addr = Address.create_new(loc_kladr_code, street_kladr_code, house_number, corpus_number, flat_number)
+        ca.address = addr
+        ca.freeInput = ''
+        return ca
+
+    @classmethod
+    def create_from_free_input(cls, addr_type, loc_type, free_input):
+        ca = cls(addr_type, loc_type)
+        ca.address = None
+        ca.freeInput = free_input
+        return ca
+
+    def __init__(self, addr_type, loc_type):
+        self.createDatetime = self.modifyDatetime = datetime.datetime.now()
+        self.deleted = self.version = 0
+        self.type = addr_type
+        self.localityType = loc_type
+
     @property
     def KLADRCode(self):
         return self.address.house.KLADRCode if self.address else ''
@@ -283,6 +319,19 @@ class ClientAddress(db.Model):
             return self.text
         else:
             return self.freeInput
+
+    def __json__(self):
+        return {
+            'id': self.id,
+            'deleted': self.deleted,
+            'type': self.type,
+            'address_id': self.address_id,
+            'address': self.address,
+            'free_input': self.freeInput,
+            'locality_type': LocalityType(self.localityType),
+            'text_summary': self.__unicode__(),
+            'same_as_reg': getattr(self, 'same_as_reg', False)
+        }
 
     def __int__(self):
         return self.id
@@ -330,7 +379,7 @@ class ClientContact(db.Model):
 
     @property
     def name(self):
-        return self.contactType.name
+        return self.contactType.name if self.contactType else None
 
     def __int__(self):
         return self.id
@@ -380,7 +429,7 @@ class ClientDocument(db.Model):
         return sr
 
     def __unicode__(self):
-        return (' '.join([self.documentType.name, self.serial, self.number])).strip()
+        return (' '.join([getattr(self.documentType, 'name', ''), self.serial, self.number])).strip()
 
     def __json__(self):
         return {
@@ -787,7 +836,10 @@ class ClientPolicy(db.Model):
     policyType = db.relationship(u'rbPolicyType', lazy=False)
 
     def __unicode__(self):
-        return (' '.join([self.policyType.name, unicode(self.insurer), self.serial, self.number])).strip()
+        return (' '.join([self.policyType.name,
+                          unicode(self.insurer) if self.insurer else '',
+                          self.serial,
+                          self.number])).strip()
 
     def __int__(self):
         return self.id
@@ -799,6 +851,8 @@ class ClientPolicy(db.Model):
             'policyType': self.policyType,
             'serial': self.serial,
             'number': self.number,
+            'begDate': self.begDate,
+            'endDate': self.endDate,
             'policyText': self.__unicode__()
         }
 
@@ -836,6 +890,17 @@ class Address(db.Model):
 
     house = db.relationship(u'AddressHouse')
 
+    @classmethod
+    def create_new(cls, loc_kladr_code, street_kladr_code, house_number, corpus_number, flat_number):
+        addr = cls()
+        addr.createDatetime = addr.modifyDatetime = datetime.datetime.now()
+        addr.deleted = 0
+        addr.flat = flat_number
+
+        addr_house = AddressHouse(loc_kladr_code, street_kladr_code, house_number, corpus_number)
+        addr.house = addr_house
+        return addr
+
     @property
     def KLADRCode(self):
         return self.house.KLADRCode
@@ -846,6 +911,15 @@ class Address(db.Model):
 
     @property
     def city(self):
+        from application.lib.data import get_kladr_city  # TODO: fix?
+        text = ''
+        if self.KLADRCode:
+            city_info = get_kladr_city(self.KLADRCode)
+            text = city_info.get('name', u'-код региона не найден в кладр-')
+        return text
+
+    @property
+    def city_old(self):
         if self.KLADRCode:
             record = Kladr.query.filter(Kladr.CODE == self.KLADRCode).first()
             name = [" ".join([record.NAME, record.SOCR])]
@@ -885,6 +959,15 @@ class Address(db.Model):
 
     @property
     def street(self):
+        from application.lib.data import get_kladr_street  # TODO: fix?
+        text = ''
+        if self.KLADRStreetCode:
+            street_info = get_kladr_street(self.KLADRStreetCode)
+            text = street_info.get('name', u'-код улицы не найден в кладр-')
+        return text
+
+    @property
+    def street_old(self):
         if self.KLADRStreetCode:
             record = Street.query.filter(Street.CODE == self.KLADRStreetCode).first()
             return record.NAME + " " + record.SOCR
@@ -893,6 +976,24 @@ class Address(db.Model):
 
     def __unicode__(self):
         return self.text
+
+    def __json__(self):
+        return {
+            'id': self.id,
+            'deleted': self.deleted,
+            'house_id': self.house_id,
+            'locality': {
+                'code': self.KLADRCode,
+                'name': self.city
+            },
+            'street': {
+                'code': self.KLADRStreetCode,
+                'name': self.street
+            },
+            'house_number': self.number,
+            'corpus_number': self.corpus,
+            'flat_number': self.flat
+        }
 
     def __int__(self):
         return self.id
@@ -936,6 +1037,24 @@ class AddressHouse(db.Model):
     KLADRStreetCode = db.Column(db.String(17), nullable=False)
     number = db.Column(db.String(8), nullable=False)
     corpus = db.Column(db.String(8), nullable=False)
+
+    def __init__(self, loc_code, street_code, house_number, corpus_number):
+        self.createDatetime = self.modifyDatetime = datetime.datetime.now()
+        self.deleted = 0
+        self.KLADRCode = loc_code
+        self.KLADRStreetCode = street_code
+        self.number = house_number
+        self.corpus = corpus_number
+
+    def __json__(self):
+        return {
+            'id': self.id,
+            'deleted': self.deleted,
+            'locality_code': self.KLADRCode,
+            'street_code': self.KLADRStreetCode,
+            'number': self.number,
+            'corpus': self.corpus
+        }
 
     def __int__(self):
         return self.id

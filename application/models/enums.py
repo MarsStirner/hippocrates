@@ -31,3 +31,8 @@ class Gender(Enum):
     undefined = 0, u'Не выбрано'
     male = 1, u'М'
     female = 2, u'Ж'
+
+
+class LocalityType(Enum):
+    vilage = 0, u'Село'
+    city = 1, u'Город'

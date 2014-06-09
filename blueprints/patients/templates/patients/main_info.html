@@ -8,9 +8,9 @@
     <dt ng-if="client.client_info.sex">Пол</dt>
     <dd>[[ client.client_info.sex.name ]]</dd>
     <dt ng-if="client.client_info.regAddress">Адрес регистрации</dt>
-    <dd>[[ client.client_info.regAddress ]]</dd>
+    <dd>[[ client.client_info.regAddress.text_summary ]]</dd>
     <dt ng-if="client.client_info.liveAddress">Адрес проживания</dt>
-    <dd>[[ client.client_info.liveAddress ]]</dd>
+    <dd>[[ client.client_info.liveAddress.text_summary ]]</dd>
     <dt ng-if="client.client_info.documentText">Документ</dt>
     <dd>[[ client.client_info.documentText ]]</dd>
     <dt ng-if="client.client_info.compulsoryPolicy.policyText">Полис ОМС</dt>
@@ -69,10 +69,11 @@
             <div class="row">
                 <div class="form-group col-md-3"
                      ng-class="{'has-error': client_form.snils.$invalid && client_form.snils.$dirty}">
-                    <label for="snils">СНИЛС</label>
+                    <label for="snils">СНИЛС <span class="text-danger">*</span></label>
                     <input type="text" class="form-control" id="snils" name="snils" ui-mask="999-999-999 99"
                            ng-model="client.client_info.SNILS" placeholder="___-___-___ __"
-                           ng-pattern="/\d{3}-\d{3}-\d{3} \d\d/" snils-validator />
+                           ng-pattern="/\d{3}-\d{3}-\d{3} \d\d/" snils-validator
+                           popover="Введён невалидный СНИЛС" popover-placement="right" popover-trigger="show_popover" />
                 </div>
             </div>
         </div>
@@ -89,10 +90,10 @@
                         <ui-select class="form-control" id="doc_type" name="doc_type"
                                    ng-model="client.client_info['document']['documentType']"
                                    theme="select2" autocomplete="off">
-                            <match placeholder="Тип документа">[[$select.selected.name]]</match>
-                            <choices repeat="dt in rbDocumentType.objects | filter: $select.search">
+                            <ui-select-match placeholder="Тип документа">[[$select.selected.name]]</ui-select-match>
+                            <ui-select-choices repeat="dt in rbDocumentType.objects | filter: $select.search">
                                 <div ng-bind-html="dt.name | highlight: $select.search"></div>
-                            </choices>
+                            </ui-select-choices>
                         </ui-select>
                     </div>
                     <div class="form-group col-md-2"
@@ -157,10 +158,10 @@
                         <ui-select class="form-control" id="cpol_type" name="cpol_type"
                                    ng-model="client.client_info['compulsoryPolicy']['policyType']"
                                    theme="select2" autocomplete="off">
-                            <match placeholder="Тип полиса">[[$select.selected.name]]</match>
-                            <choices repeat="pt in rbPolicyType.objects | filter: filter_cpolicy | filter: $select.search">
+                            <ui-select-match placeholder="Тип полиса">[[$select.selected.name]]</ui-select-match>
+                            <ui-select-choices repeat="pt in rbPolicyType.objects | filter: filter_cpolicy | filter: $select.search">
                                 <div ng-bind-html="pt.name | highlight: $select.search"></div>
-                            </choices>
+                            </ui-select-choices>
                         </ui-select>
                     </div>
                     <div class="form-group col-md-2"
@@ -206,10 +207,10 @@
                         <ui-select class="form-control" id="ufms" name="ufms"
                                 ng-model="client.client_info.compulsoryPolicy.insurer"
                                 theme="select2" ng-required="cpolForm.cpol_type.$viewValue">
-                            <match placeholder="Тип документа">[[$select.selected.short_name]]</match>
-                            <choices repeat="org in rbOrganisation.objects | filter: $select.search">
+                            <ui-select-match placeholder="Тип документа">[[$select.selected.short_name]]</ui-select-match>
+                            <ui-select-choices repeat="org in rbOrganisation.objects | filter: $select.search">
                                 <div ng-bind-html="org.short_name | highlight: $select.search"></div>
-                            </choices>
+                            </ui-select-choices>
                         </ui-select>
                     </div>
                 </div>
@@ -227,10 +228,10 @@
                         <ui-select class="form-control" id="vpol_type" name="vpol_type"
                                    ng-model="client.client_info.voluntaryPolicy.policyType"
                                    theme="select2" autocomplete="off">
-                            <match placeholder="Тип полиса">[[$select.selected.name]]</match>
-                            <choices repeat="pt in rbPolicyType.objects | filter: filter_vpolicy | filter: $select.search">
+                            <ui-select-match placeholder="Тип полиса">[[$select.selected.name]]</ui-select-match>
+                            <ui-select-choices repeat="pt in rbPolicyType.objects | filter: filter_vpolicy | filter: $select.search">
                                 <div ng-bind-html="pt.name | highlight: $select.search"></div>
-                            </choices>
+                            </ui-select-choices>
                         </ui-select>
                     </div>
                     <div class="form-group col-md-2"
@@ -276,10 +277,10 @@
                         <ui-select class="form-control" id="ufms" name="ufms"
                                 ng-model="client.client_info['voluntaryPolicy']['insurer']"
                                 theme="select2" ng-required="vpolForm.vpol_type.$viewValue">
-                            <match placeholder="Тип документа">[[$select.selected.short_name]]</match>
-                            <choices repeat="org in rbOrganisation.objects | filter: $select.search">
+                            <ui-select-match placeholder="Тип документа">[[$select.selected.short_name]]</ui-select-match>
+                            <ui-select-choices repeat="org in rbOrganisation.objects | filter: $select.search">
                                 <div ng-bind-html="org.short_name | highlight: $select.search"></div>
-                            </choices>
+                            </ui-select-choices>
                         </ui-select>
                     </div>
                 </div>
