@@ -145,7 +145,7 @@ return {
         var evalue = null;
         scope.$watch(attrs.validatorRegexp, function (n, o) {
             evalue = n;
-            if (!evalue) {
+            if (!evalue && ctrl.$viewValue) {
                 ctrl.$setViewValue('');
                 ctrl.$render();
                 ctrl.$setValidity('text', true);
