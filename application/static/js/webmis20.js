@@ -271,7 +271,9 @@ var WebMis20 = angular.module('WebMis20', [
         var t = this;
         $http.get(url_print_templates + context + '.json')
         .success(function (data) {
-            t.templates = data.result;
+            t.templates = data.result.sort(function (left, right) {
+                return (left.code < right.code) ? -1 : (left.code > right.code ? 1 : 0)
+            });
         })
     };
     PrintingService.prototype.print_template = function(template_data_list, separated) { // [ {template_id, context}, ... ]

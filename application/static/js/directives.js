@@ -104,28 +104,30 @@ angular.module('WebMis20.directives', ['ui.bootstrap', 'ui.select', 'ngSanitize'
             $scope.mega_model = {};
             $scope.toggle_select_template = function (template) {
                 if (aux.inArray($scope.selected_templates, template)) {
-                    $scope.selected_templates.splice($scope.selected_templates.indexOf(template), 1)
+                    $scope.selected_templates.splice($scope.selected_templates.indexOf(template), 1);
+                    $scope.mega_model[template.id] = undefined;
                 } else {
-                    $scope.selected_templates.push(template)
+                    $scope.selected_templates.push(template);
+                    make_model(template);
                 }
+                $scope.selected_templates.sort(function (left, right) {
+                    return (left.code < right.code) ? -1 : (left.code > right.code ? 1 : 0)
+                });
             };
             $scope.select_all_templates = function () {
                 if ($scope.selected_templates.length == ps.templates.length) {
                     $scope.selected_templates = [];
+                    $scope.mega_model = {};
                 } else {
-                    $scope.selected_templates = aux.arrayCopy(ps.templates)
+                    $scope.selected_templates = ps.templates.map(function (template) {
+                        if (! aux.inArray($scope.selected_templates, template)) {
+                            make_model(template)
+                        }
+                        return template;
+                    })
                 }
             };
             $scope.btn_next = function () {
-                $scope.mega_model = {};
-                $scope.selected_templates.map(function (template) {
-                    var desc = $scope.mega_model[template.id] = {};
-                    if (template.meta) {
-                        template.meta.map(function (variable) {
-                            desc[variable.name] = null;
-                        })
-                    }
-                });
                 $scope.page = 1;
             };
             $scope.btn_prev = function () {
@@ -140,6 +142,14 @@ angular.module('WebMis20.directives', ['ui.bootstrap', 'ui.select', 'ngSanitize'
                     }
                 })
             }
+            function make_model (template) {
+                if (template.meta) {
+                    var desc = $scope.mega_model[template.id] = {};
+                    template.meta.map(function (variable) {
+                        desc[variable.name] = null;
+                    })
+                }
+            }
             $scope.print_separated = function () {
                 ps.print_template(prepare_data(), true)
             };
@@ -148,7 +158,19 @@ angular.module('WebMis20.directives', ['ui.bootstrap', 'ui.select', 'ngSanitize'
             };
             $scope.cancel = function () {
                 $modalInstance.dismiss('cancel');
-            }
+            };
+            $scope.instant_print = function () {
+                return ! $scope.selected_templates.filter(function (template) {
+                    return Boolean(template.meta.length)
+                }).length;
+            };
+            $scope.can_print = function () {
+                return $scope.selected_templates.length > 0;
+            };
+            $scope.template_has_meta = function (template) {
+                return Boolean(template.meta.length);
+            };
+            $scope.select_all_templates();
         };
         return {
             restrict: 'E',

@@ -20,7 +20,7 @@
             <a class="btn btn-primary" href="{{ url_for('event.new_event') }}?event_id=new&client_id={{ request.args['client_id'] }}"
                ng-if="client_id != 'new'">
                 Создать обращение</a>
-            <ui-print-button ps="ps" resolve="print_context_resolve()" ng-if="client.id"></ui-print-button>
+            <ui-print-button ps="ps" resolve="print_context_resolve()" ng-if="client_id != 'new'"></ui-print-button>
 {#            <span class="dropdown">#}
 {#                <button class="btn dropdown-toggle" type="button" id="print_dropdownMenu"#}
 {#                        ng-disabled="!ps.templates" data-toggle="dropdown">#}
