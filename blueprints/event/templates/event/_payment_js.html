@@ -21,15 +21,16 @@ WebMis20.controller('EventPaymentCtrl', ['$scope', 'RefBookService', 'Settings',
         $scope.integration1CODVD_enabled = function() {
             return $scope.Settings.get_string('Event.Payment.1CODVD') == '1';
         };
+        $scope.finance_is_oms = function(){return $scope.finance_type == '2'};
 
         $scope.formcnf = {
             tab_payer_person: {
-                disabled: event_created && $scope.payer_is_org,
-                active: $scope.person_tab_active()
+                disabled: (event_created && $scope.payer_is_org) || $scope.finance_is_oms,
+                active: $scope.person_tab_active() && !$scope.finance_is_oms()
             },
             tab_payer_org: {
                 disabled: event_created && $scope.payer_is_person,
-                active: $scope.org_tab_active()
+                active: $scope.org_tab_active() || $scope.finance_is_oms()
             },
             payer_field: {
                 disabled: event_created
@@ -43,6 +44,20 @@ WebMis20.controller('EventPaymentCtrl', ['$scope', 'RefBookService', 'Settings',
             $scope.formcnf.tab_payer_person.active = $scope.person_tab_active();
             $scope.formcnf.tab_payer_org.active = $scope.org_tab_active();
             $scope.formcnf.contract_field.disabled = event_created || $scope.integration1CODVD_enabled();
+        });
+
+        $scope.$on('form_state_change', function(event, arg) {
+            $scope.finance_type = arg['finance_type'];
+            $scope.formcnf.tab_payer_person.active = !$scope.finance_is_oms();
+            $scope.formcnf.tab_payer_org.active = $scope.finance_is_oms();
+            var lc = $scope.event.payment.local_contract;
+            if ($scope.finance_is_oms() && $scope.event.info.client.comp_policy){
+                $scope.event.payment.local_contract = {payer_org: $scope.Organisation.get($scope.event.info.client.comp_policy.insurer_id)};
+            } else{
+                if (lc && lc.payer_org) {
+                    $scope.event.payment.local_contract.payer_org = null;
+                }
+            }
         });
 
         $scope.switch_tab = function(from_tab) {
@@ -120,7 +135,6 @@ WebMis20.controller('EventPaymentCtrl', ['$scope', 'RefBookService', 'Settings',
                 }
             });
         };
-
 }]);
 
 RelativesModalCtrl = function ($scope, $modalInstance) {

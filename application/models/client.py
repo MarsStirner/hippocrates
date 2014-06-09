@@ -379,7 +379,7 @@ class ClientContact(db.Model):
 
     @property
     def name(self):
-        return self.contactType.name
+        return self.contactType.name if self.contactType else None
 
     def __int__(self):
         return self.id
@@ -429,7 +429,7 @@ class ClientDocument(db.Model):
         return sr
 
     def __unicode__(self):
-        return (' '.join([self.documentType.name, self.serial, self.number])).strip()
+        return (' '.join([getattr(self.documentType, 'name', ''), self.serial, self.number])).strip()
 
     def __json__(self):
         return {
@@ -836,7 +836,10 @@ class ClientPolicy(db.Model):
     policyType = db.relationship(u'rbPolicyType', lazy=False)
 
     def __unicode__(self):
-        return (' '.join([self.policyType.name, unicode(self.insurer), self.serial, self.number])).strip()
+        return (' '.join([self.policyType.name,
+                          unicode(self.insurer) if self.insurer else '',
+                          self.serial,
+                          self.number])).strip()
 
     def __int__(self):
         return self.id
@@ -848,6 +851,8 @@ class ClientPolicy(db.Model):
             'policyType': self.policyType,
             'serial': self.serial,
             'number': self.number,
+            'begDate': self.begDate,
+            'endDate': self.endDate,
             'policyText': self.__unicode__()
         }
 

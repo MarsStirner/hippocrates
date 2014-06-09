@@ -16,17 +16,17 @@
             <div class="row">
                 <div class="col-md-9">
                     <dl class="dl-horizontal novmargin">
-                        <dt>Контактный телефон:</dt><dd>[[event.info.client.phones]]</dd>
-                        <dt>Адрес регистрации:</dt><dd>[[event.info.client.reg_address ? event.info.client.reg_address.text_summary : '']]</dd>
-                        <dt>Адрес проживания:</dt><dd>[[event.info.client.loc_address ? event.info.client.loc_address.text_summary : '']]</dd>
-                        <dt>Медицинский полис:</dt><dd>[[event.info.client.comp_policy.policyText]]</dd>
+                        <dt>Контактный телефон:</dt><dd>[[event.info.client.phones]]&nbsp;</dd>
+                        <dt>Адрес регистрации:</dt><dd>[[event.info.client.reg_address ? event.info.client.reg_address.text_summary : '']]&nbsp;</dd>
+                        <dt>Адрес проживания:</dt><dd>[[event.info.client.loc_address ? event.info.client.loc_address.text_summary : '']]&nbsp;</dd>
+                        <dt>Медицинский полис:</dt><dd>[[event.info.client.comp_policy.policyText]]&nbsp;</dd>
                     </dl>
                 </div>
                 <div class="col-md-3">
                     <dl class="dl-horizontal novmargin pull-right">
-                        <dt>Код пациента:</dt><dd>[[event.info.client.id]]</dd>
-                        <dt>Дата рождения:</dt><dd>[[event.info.client.birthDate_formated]]</dd>
-                        <dt>Пол:</dt><dd>[[event.info.client.sex.name]]</dd>
+                        <dt>Код пациента:</dt><dd>[[event.info.client.id]]&nbsp;</dd>
+                        <dt>Дата рождения:</dt><dd>[[event.info.client.birthDate_formated]]&nbsp;</dd>
+                        <dt>Пол:</dt><dd>[[event.info.client.sex.name]]&nbsp;</dd>
                     </dl>
                 </div>
             </div>
@@ -225,6 +225,14 @@
             window.open('{{ url_for('schedule.html_action') }}?action_id=' + action_id);
         };
         {# action data end #}
+
+        $scope.$watch('event.info.event_type.finance.id', function(new_val, old_val) {
+            if (new_val && new_val != old_val) {
+              $scope.$broadcast('form_state_change', {
+                  finance_type: $scope.event.info.event_type.finance.code
+              });
+            }
+        }, true);
 
         $scope.initialize();
     }]);
