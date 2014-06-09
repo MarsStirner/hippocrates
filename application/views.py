@@ -147,20 +147,30 @@ def kladr_search_street(city_code=None, search_query=None):
 
 @app.route('/api/kladr/city/')
 @app.route('/api/kladr/city/<code>/')
+@app.route('/api/kladr/city/<code>/<limit>/')
 @cache.memoize(86400)
-def kladr_city(code=None):
+def kladr_city(code=None, limit=None):
     if code is None:
         return jsonify([])
-    return jsonify([get_kladr_city(code)])
+    if limit:
+        result = get_kladr_city(code, limit)
+    else:
+        result = get_kladr_city(code)
+    return jsonify([result])
 
 
 @app.route('/api/kladr/street/')
 @app.route('/api/kladr/street/<code>/')
+@app.route('/api/kladr/street/<code>/<limit>/')
 @cache.memoize(86400)
-def kladr_street(code=None):
+def kladr_street(code=None, limit=None):
     if code is None:
         return jsonify([])
-    return jsonify([get_kladr_street(code)])
+    if limit:
+        result = get_kladr_street(code, limit)
+    else:
+        result = get_kladr_street(code)
+    return jsonify([result])
 
 @app.errorhandler(403)
 def authorisation_failed(e):
