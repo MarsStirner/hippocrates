@@ -210,7 +210,7 @@ def get_kladr_city(code, limit=20):
     if len(code) == 13:  # убрать после конвертации уже записанных кодов кладр
         code = code[:-2]
     result = dict()
-    response = requests.get(u'{0}/kladr/city/{1}/{2}/'.format(VESTA_URL, code, limit))
+    response = requests.get(u'{0}kladr/city/{1}/{2}/'.format(VESTA_URL, code, limit))
     city = response.json()['data']
     if city:
         result = city[0]
@@ -223,7 +223,7 @@ def get_kladr_street(code, limit=20):
     if len(code) == 17:  # убрать после конвертации уже записанных кодов кладр
         code = code[:-2]
     data = dict()
-    response = requests.get(u'{0}/kladr/street/{1}/{2}/'.format(VESTA_URL, code, limit))
+    response = requests.get(u'{0}kladr/street/{1}/{2}/'.format(VESTA_URL, code, limit))
     street = response.json()['data']
     if street:
         data = street[0]
