@@ -50,6 +50,14 @@ WebMis20.controller('EventPaymentCtrl', ['$scope', 'RefBookService', 'Settings',
             $scope.finance_type = arg['finance_type'];
             $scope.formcnf.tab_payer_person.active = !$scope.finance_is_oms();
             $scope.formcnf.tab_payer_org.active = $scope.finance_is_oms();
+            var lc = $scope.event.payment.local_contract;
+            if ($scope.finance_is_oms() && $scope.event.info.client.comp_policy){
+                $scope.event.payment.local_contract = {payer_org: $scope.Organisation.get($scope.event.info.client.comp_policy.insurer_id)};
+            } else{
+                if (lc && lc.payer_org) {
+                    $scope.event.payment.local_contract.payer_org = null;
+                }
+            }
         });
 
         $scope.switch_tab = function(from_tab) {
