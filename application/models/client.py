@@ -903,11 +903,13 @@ class Address(db.Model):
 
     @property
     def KLADRCode(self):
-        return self.house.KLADRCode
+        # todo: потом убрать?
+        return self.house.KLADRCode[:-2] if len(self.house.KLADRCode) == 13 else self.house.KLADRCode
 
     @property
     def KLADRStreetCode(self):
-        return self.house.KLADRStreetCode
+        # todo: потом убрать?
+        return self.house.KLADRStreetCode[:-2] if len(self.house.KLADRStreetCode) == 17 else self.house.KLADRStreetCode
 
     @property
     def city(self):
