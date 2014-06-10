@@ -147,7 +147,7 @@ angular.module('WebMis20.directives', ['ui.bootstrap', 'ui.select', 'ngSanitize'
                             context[name] = parseFloat(value);
                         else if (typeName == 'Boolean')
                             context[name] = Boolean(value);
-                        else if (aux.inArray(['RefBook','Organisation', 'OrgStructure', 'Person', 'Service'], typeName))
+                        else if (aux.inArray(['Organisation', 'OrgStructure', 'Person', 'Service'], typeName))
                             context[name] = value ? value.id : null;
                         else context[name] = value
                     });
