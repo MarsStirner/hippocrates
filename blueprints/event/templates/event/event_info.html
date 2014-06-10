@@ -32,7 +32,7 @@
                 </div>
             </div>
         </div>
-        <ng-form name="event_form">
+        <ng-form name="event_form" form-safe-close>
         {# В зависимости от ролей и прав разный лейаут #}
         {% if form_role == 'admin' %}
             <tabset>

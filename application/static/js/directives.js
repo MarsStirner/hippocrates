@@ -351,4 +351,31 @@ return {
         });
     }
 }
+}]).directive('formSafeClose', [function () {
+return {
+    restrict: 'A',
+    require: 'form',
+    link: function($scope, element, attrs, form) {
+        var message = "Вы уверены, что хотите закрыть вкладку? Форма может содержать несохранённые данные.";
+        $scope.$on('$locationChangeStart', function(event, next, current) {
+            if (form.$dirty) {
+                if(!confirm(message)) {
+                    event.preventDefault();
+                }
+            }
+        });
+
+        window.onbeforeunload = function(evt){
+            if (form.$dirty) {
+                if (typeof evt == "undefined") {
+                    evt = window.event;
+                }
+                if (evt) {
+                    evt.returnValue = message;
+                }
+                return message;
+            }
+        };
+    }
+}
 }]);
