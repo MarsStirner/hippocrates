@@ -146,9 +146,9 @@ def api_patient_save():
         live_address = client_info['liveAddress']
 
         if live_address is not None:
-            # TODO: check
+            # TODO: check AND FIX!
             if live_address.get('same_as_reg', False) and actual_reg_address:
-                address = get_address_matched_copy(client, actual_reg_address)
+                address = get_reg_address_copy(client, actual_reg_address)
                 client.addresses.append(address)
             elif live_address.get('address') or live_address.get('free_input'):
                 live_address['type'] = 1

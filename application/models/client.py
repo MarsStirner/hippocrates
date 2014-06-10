@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import datetime
 from application.lib.agesex import calcAgeTuple
+from application.models.utils import safe_current_user_id
 from application.models.enums import Gender, LocalityType
 from application.models.exists import rbDocumentTypeGroup
 from application.models.kladr_models import Kladr, Street
@@ -249,18 +250,39 @@ class ClientAddress(db.Model):
         db.Index(u'client_id', u'client_id', u'type', u'address_id')
     )
 
-    id = db.Column(db.Integer, primary_key=True)
-    createDatetime = db.Column(db.DateTime, nullable=False)
-    createPerson_id = db.Column(db.Integer, index=True)
-    modifyDatetime = db.Column(db.DateTime, nullable=False)
-    modifyPerson_id = db.Column(db.Integer, index=True)
-    deleted = db.Column(db.Integer, nullable=False, server_default=u"'0'")
-    client_id = db.Column(db.ForeignKey('Client.id'), nullable=False)
-    type = db.Column(db.Integer, nullable=False)
-    address_id = db.Column(db.Integer, db.ForeignKey('Address.id'))
-    freeInput = db.Column(db.String(200), nullable=False)
-    version = db.Column(db.Integer, nullable=False)
-    localityType = db.Column(db.Integer, nullable=False)
+    id = db.Column(db.Integer,
+                   primary_key=True)
+    createDatetime = db.Column(db.DateTime,
+                               nullable=False,
+                               default=datetime.datetime.now)
+    createPerson_id = db.Column(db.Integer,
+                                index=True,
+                                default=safe_current_user_id)
+    modifyDatetime = db.Column(db.DateTime,
+                               nullable=False,
+                               default=datetime.datetime.now,
+                               onupdate=datetime.datetime.now)
+    modifyPerson_id = db.Column(db.Integer,
+                                index=True,
+                                default=safe_current_user_id,
+                                onupdate=safe_current_user_id)
+    deleted = db.Column(db.Integer,
+                        nullable=False,
+                        default=0,
+                        server_default=u"'0'")
+    client_id = db.Column(db.ForeignKey('Client.id'),
+                          nullable=False)
+    type = db.Column(db.Integer,
+                     nullable=False)
+    address_id = db.Column(db.Integer,
+                           db.ForeignKey('Address.id'))
+    freeInput = db.Column(db.String(200),
+                          nullable=False)
+    version = db.Column(db.Integer,
+                        nullable=False,
+                        default=0)
+    localityType = db.Column(db.Integer,
+                             nullable=False)
 
     address = db.relationship(u'Address')
 
@@ -281,8 +303,6 @@ class ClientAddress(db.Model):
         return ca
 
     def __init__(self, addr_type, loc_type):
-        self.createDatetime = self.modifyDatetime = datetime.datetime.now()
-        self.deleted = self.version = 0
         self.type = addr_type
         self.localityType = loc_type
 
@@ -313,6 +333,13 @@ class ClientAddress(db.Model):
     @property
     def corpus(self):
         return self.address.corpus if self.address else ''
+
+    def set_deleted(self, val):
+        self.deleted = val
+        if self.address:
+            self.address.deleted = val
+            if self.address.house:
+                self.address.house.deleted = val
 
     def __unicode__(self):
         if self.text:
@@ -879,22 +906,37 @@ class Address(db.Model):
         db.Index(u'house_id', u'house_id', u'flat'),
     )
 
-    id = db.Column(db.Integer, primary_key=True)
-    createDatetime = db.Column(db.DateTime, nullable=False)
-    createPerson_id = db.Column(db.Integer, index=True)
-    modifyDatetime = db.Column(db.DateTime, nullable=False)
-    modifyPerson_id = db.Column(db.Integer, index=True)
-    deleted = db.Column(db.Integer, nullable=False, server_default=u"'0'")
-    house_id = db.Column(db.Integer, db.ForeignKey('AddressHouse.id'), nullable=False)
-    flat = db.Column(db.String(6), nullable=False)
+    id = db.Column(db.Integer,
+                   primary_key=True)
+    createDatetime = db.Column(db.DateTime,
+                               nullable=False,
+                               default=datetime.datetime.now)
+    createPerson_id = db.Column(db.Integer,
+                                index=True,
+                                default=safe_current_user_id)
+    modifyDatetime = db.Column(db.DateTime,
+                               nullable=False,
+                               default=datetime.datetime.now,
+                               onupdate=datetime.datetime.now)
+    modifyPerson_id = db.Column(db.Integer,
+                                index=True,
+                                default=safe_current_user_id,
+                                onupdate=safe_current_user_id)
+    deleted = db.Column(db.Integer,
+                        nullable=False,
+                        default=0,
+                        server_default=u"'0'")
+    house_id = db.Column(db.Integer,
+                         db.ForeignKey('AddressHouse.id'),
+                         nullable=False)
+    flat = db.Column(db.String(6),
+                     nullable=False)
 
     house = db.relationship(u'AddressHouse')
 
     @classmethod
     def create_new(cls, loc_kladr_code, street_kladr_code, house_number, corpus_number, flat_number):
         addr = cls()
-        addr.createDatetime = addr.modifyDatetime = datetime.datetime.now()
-        addr.deleted = 0
         addr.flat = flat_number
 
         addr_house = AddressHouse(loc_kladr_code, street_kladr_code, house_number, corpus_number)
@@ -917,7 +959,7 @@ class Address(db.Model):
         text = ''
         if self.KLADRCode:
             city_info = get_kladr_city(self.KLADRCode)
-            text = city_info.get('name', u'-код региона не найден в кладр-')
+            text = city_info.get('fullname', u'-код региона не найден в кладр-')
         return text
 
     @property
@@ -1029,20 +1071,36 @@ class AddressHouse(db.Model):
         db.Index(u'KLADRCode', u'KLADRCode', u'KLADRStreetCode', u'number', u'corpus'),
     )
 
-    id = db.Column(db.Integer, primary_key=True)
-    createDatetime = db.Column(db.DateTime, nullable=False)
-    createPerson_id = db.Column(db.Integer, index=True)
-    modifyDatetime = db.Column(db.DateTime, nullable=False)
-    modifyPerson_id = db.Column(db.Integer, index=True)
-    deleted = db.Column(db.Integer, nullable=False, server_default=u"'0'")
-    KLADRCode = db.Column(db.String(13), nullable=False)
-    KLADRStreetCode = db.Column(db.String(17), nullable=False)
-    number = db.Column(db.String(8), nullable=False)
-    corpus = db.Column(db.String(8), nullable=False)
+    id = db.Column(db.Integer,
+                   primary_key=True)
+    createDatetime = db.Column(db.DateTime,
+                               nullable=False,
+                               default=datetime.datetime.now)
+    createPerson_id = db.Column(db.Integer,
+                                index=True,
+                                default=safe_current_user_id)
+    modifyDatetime = db.Column(db.DateTime,
+                               nullable=False,
+                               default=datetime.datetime.now,
+                               onupdate=datetime.datetime.now)
+    modifyPerson_id = db.Column(db.Integer,
+                                index=True,
+                                default=safe_current_user_id,
+                                onupdate=safe_current_user_id)
+    deleted = db.Column(db.Integer,
+                        nullable=False,
+                        default=0,
+                        server_default=u"'0'")
+    KLADRCode = db.Column(db.String(13),
+                          nullable=False)
+    KLADRStreetCode = db.Column(db.String(17),
+                                nullable=False)
+    number = db.Column(db.String(8),
+                       nullable=False)
+    corpus = db.Column(db.String(8),
+                       nullable=False)
 
     def __init__(self, loc_code, street_code, house_number, corpus_number):
-        self.createDatetime = self.modifyDatetime = datetime.datetime.now()
-        self.deleted = 0
         self.KLADRCode = loc_code
         self.KLADRStreetCode = street_code
         self.number = house_number

@@ -208,6 +208,7 @@
 
             $scope.copy_address = function(state, addr_from) {
                 // fixme: как бы эту штуку связать с директивами, как изначально задумывалось...
+                // и тут есть баг, который надо фиксить, переделав все это
                 if (!state) {
                     $scope.client.client_info.liveAddress = angular.copy(addr_from);
                     $scope.client.client_info.liveAddress.same_as_reg = true;
@@ -215,8 +216,7 @@
                     $scope.client.client_info.liveAddress = {};
                     $scope.client.client_info.liveAddress.same_as_reg = false;
                 }
-
-            }
+            };
         }]);
     </script>
 {% endblock %}
