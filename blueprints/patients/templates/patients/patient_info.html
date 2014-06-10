@@ -52,7 +52,7 @@
                         <tab heading="Идентификаторы">{% include "patients/identifiers.html" %}</tab>
                         <tab heading="Связи и контакты">{% include "patients/contacts.html" %}</tab>
                         <tab heading="История документов">{% include "patients/documents.html" %}</tab>
-                        <tab heading="Debug"><pre>[[client.client_info | json]]</pre></tab>
+{#                        <tab heading="Debug"><pre>[[client.client_info | json]]</pre></tab>#}
                     </tabset>
                     <div class="row" ng-show="editing_is_active()"> {# wtf... FIXME: layout #}
                         <div class="col-md-12">
@@ -139,11 +139,11 @@
 
             $scope.directRelationFilter = function (relationType) {
                 return (relationType.leftSex == 0 || relationType.leftSex == $scope.client.client_info.sex.id);
-            }
+            };
 
             $scope.reversedRelationFilter = function (relationType) {
                 return (relationType.rightSex == 0 || relationType.rightSex == $scope.client.client_info.sex.id);
-            }
+            };
 
             $scope.start_editing = function() {
                 $scope.editing.active = true;

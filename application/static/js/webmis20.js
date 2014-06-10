@@ -511,7 +511,7 @@ var WebMis20 = angular.module('WebMis20', [
             return el.request_type && el.finance &&
                 el.request_type.id === rt_id && el.finance.id === fin_id;
         });
-    }
+    };
     return EventType;
     }
 ])
