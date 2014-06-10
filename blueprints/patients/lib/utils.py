@@ -168,7 +168,6 @@ def get_new_address(addr_info):
 
 
 def get_modified_address(client, addr_info):
-    now = datetime.datetime.now()
     addr = filter(lambda a: a.id == addr_info['id'], client.addresses)[0]
 
     if addr_info['deleted'] == 1:
@@ -194,20 +193,18 @@ def get_modified_address(client, addr_info):
 
     if _big_changes(addr):
         new_addr = get_new_address(addr_info)
-        addr.deleted = 2
-        addr.modifyDatetime = now
+        addr.set_deleted(2)
         return (addr, new_addr)
     else:
         addr.localityType = loc_type
         addr.freeInput = free_input
-        addr.modifyDatetime = now
         return (addr, None)
 
 
-def get_address_matched_copy(client, matched_address):
+def get_reg_address_copy(client, reg_address):
     # todo: check prev record and mark deleted
-    live_ca = ClientAddress(1, matched_address.localityType)  # todo: enum
-    live_ca.address = matched_address.address
+    live_ca = ClientAddress(1, reg_address.localityType)  # todo: enum
+    live_ca.address = reg_address.address
     live_ca.freeInput = ''
     return live_ca
 
