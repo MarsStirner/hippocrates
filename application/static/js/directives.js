@@ -152,9 +152,11 @@ return {
         var evalue = null;
         scope.$watch(attrs.validatorRegexp, function (n, o) {
             evalue = n;
-            if (!evalue && ctrl.$viewValue) {
-                ctrl.$setViewValue('');
-                ctrl.$render();
+            if (!evalue) {
+                if (ctrl.$viewValue) {
+                    ctrl.$setViewValue('');
+                    ctrl.$render();
+                };
                 ctrl.$setValidity('text', true);
                 $(element).attr('disabled', true);
             } else {
