@@ -232,22 +232,22 @@ angular.module('WebMis20.directives', ['ui.bootstrap', 'ui.select', 'ngSanitize'
     }])
     .directive('uiPrintVariable', ['$compile', 'RefBookService', function ($compile, RefBookService) {
         var ui_select_template =
-            '<div fs-select="" items="$refBook.objects" ng-model="model" class="validatable">[[item.name]]</div>';
+            '<div fs-select="" items="$refBook.objects" ng-required="true" ng-model="model" class="validatable">[[item.name]]</div>';
         var templates = {
-            Integer: '<input ng-required="true" class="validatable form-control" type="number" ng-pattern="/^[1-9]\\d*$/" ng-model="model"></input>',
+            Integer: '<input ng-required="true" class="validatable form-control" type="text" ng-pattern="/^([1-9]\\d*|0)$/" ng-model="model"></input>',
             String:  '<input ng-required="true" class="validatable form-control" type="text" ng-model="model"></input>',
-            Float:   '<input ng-required="true" class="validatable form-control" type="number" ng-pattern="/^[1-9]\\d*(.\\d+)?$/" ng-model="model"></input>',
+            Float:   '<input ng-required="true" class="validatable form-control" type="text" ng-pattern="/^([1-9]\\d*|0)(.\\d+)?$/" ng-model="model"></input>',
             Boolean:
                 '<div class="fs-checkbox fs-racheck">\
                     <a class="fs-racheck-item" href="javascript:void(0)" ng-click="model = !model" fs-space="model = !model">\
                 <span class="fs-check-outer"><span ng-show="model" class="fs-check-inner"></span></span>[[ metadata.title ]]</a></input>',
-            Date:    '<div fs-date ng-model="model"></div>',
-            Time:    '<div fs-time ng-model="model"></div>',
-            List:    '<div fs-select="" items="metadata.arguments" ng-model="model" class="validatable">[[ item ]]</select>',
+            Date:    '<div fs-date ng-required="true" ng-model="model" class="validatable"></div>',
+            Time:    '<div fs-time ng-required="true" ng-model="model" class="validatable"></div>',
+            List:    '<div fs-select items="metadata.arguments" ng-model="model" ng-required="true" class="validatable">[[ item ]]</select>',
             Multilist: '<div fs-checkbox items="metadata.arguments" ng-model="model" class="validatable">[[ item ]]</div>',
             RefBook: ui_select_template,
             Organisation:
-                '<div fs-select="" items="$refBook.objects" ng-model="model">[[item.short_name]]</div>',
+                '<div fs-select="" items="$refBook.objects" ng-required="true" ng-model="model" class="validatable">[[item.short_name]]</div>',
             OrgStructure: ui_select_template,
             Person:  ui_select_template,
             Service: ui_select_template,
