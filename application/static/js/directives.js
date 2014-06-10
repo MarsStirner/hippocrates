@@ -136,9 +136,24 @@ angular.module('WebMis20.directives', ['ui.bootstrap', 'ui.select', 'ngSanitize'
             };
             function prepare_data () {
                 return $scope.selected_templates.map(function (template) {
+                    var context = {};
+                    template.meta.map(function (meta) {
+                        var name = meta.name;
+                        var typeName = meta['type'];
+                        var value = $scope.mega_model[template.id][name];
+                        if (typeName == 'Integer')
+                            context[name] = parseInt(value);
+                        else if (typeName == 'Float')
+                            context[name] = parseFloat(value);
+                        else if (typeName == 'Boolean')
+                            context[name] = Boolean(value);
+                        else if (aux.inArray(['RefBook','Organisation', 'OrgStructure', 'Person', 'Service'], typeName))
+                            context[name] = value ? value.id : null;
+                        else context[name] = value
+                    });
                     return {
                         template_id: template.id,
-                        context: angular.extend({}, $scope.mega_model[template.id], context_extender)
+                        context: angular.extend(context, context_extender)
                     }
                 })
             }
@@ -146,7 +161,7 @@ angular.module('WebMis20.directives', ['ui.bootstrap', 'ui.select', 'ngSanitize'
                 if (template.meta) {
                     var desc = $scope.mega_model[template.id] = {};
                     template.meta.map(function (variable) {
-                        desc[variable.name] = null;
+                        desc[variable.name] = variable.default;
                     })
                 }
             }
@@ -175,20 +190,7 @@ angular.module('WebMis20.directives', ['ui.bootstrap', 'ui.select', 'ngSanitize'
         return {
             restrict: 'E',
             replace: true,
-            template:
-                /* '<div class="dropup"">\
-                    <button class="btn btn-lg btn-default dropdown-toggle" type="button" id="print_dropdownMenu"\
-                            data-toggle="dropdown" ng-disabled="!$ps.templates">\
-                        <span class="glyphicon glyphicon-print"></span> Печать <span class="caret"></span>\
-                    </button>\
-                    <ul class="dropdown-menu dropdown-menu" role="menu" aria-labelledby="print_dropdownMenu">\
-                        <li role="presentation" ng-repeat="template in $ps.templates">\
-                            <a role="menuitem" tabindex="-1" href="" class="print_template"\
-                               ng-click="$ps.print_template(template.id)" ng-bind="template.name"></a>\
-                        </li>\
-                    </ul>\
-                </div>',*/
-                '<button class="btn" ng-click="open_print_window()">Печать</button>',
+            template: '<button class="btn" ng-click="open_print_window()">Печать</button>',
             scope: {
                 $ps: '=ps'
             },
@@ -198,6 +200,7 @@ angular.module('WebMis20.directives', ['ui.bootstrap', 'ui.select', 'ngSanitize'
                     var modal = $modal.open({
                         templateUrl: 'modal-print-dialog.html',
                         controller: ModalPrintDialogController,
+                        size: 'lg',
                         resolve: {
                             ps: function () {
                                 return scope.$ps;
@@ -208,6 +211,65 @@ angular.module('WebMis20.directives', ['ui.bootstrap', 'ui.select', 'ngSanitize'
                         }
                     })
                 }
+            }
+        }
+    }])
+    .directive('refBookSelect', ['RefBookService', function (RefBookService) {
+        return {
+            restrict: 'E',
+            replace: true,
+            template:
+                '<ui-select ng-model="model" theme="select2">\
+                    <choices repeat="rt in $refBook.objects">\
+                        <div ng-bind-html="rt.name | highlight: $select.search"></div>\
+                    </chioces>\
+                </ui-select>',
+            link: function (scope, element, attributes) {
+                scope.$refBook = RefBookService.get(attributes.refBook);
+                scope.model = attributes.model;
+            }
+        }
+    }])
+    .directive('uiPrintVariable', ['$compile', 'RefBookService', function ($compile, RefBookService) {
+        var ui_select_template =
+            '<div fs-select="" items="$refBook.objects" ng-model="model" class="validatable">[[item.name]]</div>';
+        var templates = {
+            Integer: '<input ng-required="true" class="validatable form-control" type="number" ng-pattern="/^[1-9]\\d*$/" ng-model="model"></input>',
+            String:  '<input ng-required="true" class="validatable form-control" type="text" ng-model="model"></input>',
+            Float:   '<input ng-required="true" class="validatable form-control" type="number" ng-pattern="/^[1-9]\\d*(.\\d+)?$/" ng-model="model"></input>',
+//            Boolean: '<input ng-required="true" class="form-control" type="checkbox" ng-model="model"></input>',
+            Boolean: '<div class="fs-checkbox fs-racheck">' +
+                '<a class="fs-racheck-item" href="javascript:void(0)" ng-click="model = !model" fs-space="model = !model">' +
+                '<span class="fs-check-outer"><span ng-show="model" class="fs-check-inner"></span></span>[[ metadata.title ]]</a></input>',
+            Date:    '<div fs-date ng-model="model"></div>',
+            Time:    '<div fs-time ng-model="model"></div>',
+            List:    '<div fs-select="" items="metadata.arguments" ng-model="model" class="validatable">[[ item ]]</select>',
+            Multilist: '<div fs-checkbox items="metadata.arguments" ng-model="model" class="validatable">[[ item ]]</div>',
+            RefBook: ui_select_template,
+            Organisation:
+                '<div fs-select="" items="$refBook.objects" ng-model="model">[[item.short_name]]</div>',
+            OrgStructure: ui_select_template,
+            Person:  ui_select_template,
+            Service: ui_select_template,
+            SpecialVariable: 'Special Variable'
+        };
+        return {
+            restrict: 'A',
+            scope: {
+                metadata: '=meta',
+                model: '=model'
+            },
+            link: function (scope, element, attributes) {
+                var typeName = scope.metadata['type'];
+                if (typeName == "RefBook") scope.$refBook = RefBookService.get(scope.metadata['arguments'][0]);
+                if (typeName == "Organisation") scope.$refBook = RefBookService.get('Organisation');
+                if (typeName == "OrgStructure") scope.$refBook = RefBookService.get('OrgStructure');
+                if (typeName == "Person") scope.$refBook = RefBookService.get('Person');
+                if (typeName == "Service") scope.$refBook = RefBookService.get('rbService');
+                var template = templates[typeName];
+                var child = $(template);
+                $(element).append(child);
+                $compile(child)(scope);
             }
         }
     }])

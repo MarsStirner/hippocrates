@@ -23,22 +23,28 @@
     </tbody>
 </table>
 <div ng-show="page == 1">
+    <form name="printing_meta">
     <div class="modal-body" ng-repeat="template in selected_templates | filter:template_has_meta">
         <p ng-bind="template.name"></p>
         <div class="row" ng-repeat="var_meta in template.meta">
-            <div class="col-md-6">
+            <div class="col-md-3">
                 <label ng-bind="var_meta.title"></label>
             </div>
-            <div class="col-md-6">
-                <input ng-model="mega_model[template.id][var_meta.name]" class="form-control">
+            <div class="col-md-9" ui-print-variable meta="var_meta" model="mega_model[template.id][var_meta.name]">
+{#                <input ng-model="mega_model[template.id][var_meta.name]" class="form-control">#}
             </div>
         </div>
     </div>
+    </form>
 </div>
 <div class="modal-footer">
-    <button type="button" class="btn btn-primary" ng-click="btn_next()" ng-if="page == 0 && !instant_print()">Далее &gt;&gt;</button>
-    <button type="button" class="btn btn-primary" ng-click="btn_prev()" ng-if="page == 1 && !instant_print()">&lt;&lt; Назад</button>
-    <button type="button" class="btn btn-primary" ng-click="print_separated()" ng-if="page == 1 || instant_print()">Печать</button>
-    <button type="button" class="btn btn-primary" ng-click="print_compact()" ng-if="page == 1 || instant_print()">Печать компактно</button>
+    <button type="button" class="btn btn-success" ng-click="btn_next()" ng-if="page == 0 && !instant_print()">
+        Далее &gt;&gt;</button>
+    <button type="button" class="btn btn-default" ng-click="btn_prev()" ng-if="page == 1 && !instant_print()">
+        &lt;&lt; Назад</button>
+    <button type="button" class="btn btn-primary" ng-click="print_separated()" ng-if="page == 1 || instant_print()"
+            ng-disabled="printing_meta.$invalid">Печать</button>
+    <button type="button" class="btn btn-primary" ng-click="print_compact()" ng-if="page == 1 || instant_print()"
+            ng-disabled="printing_meta.$invalid">Печать компактно</button>
     <button type="button" class="btn btn-default" ng-click="cancel()">Отмена</button>
 </div>

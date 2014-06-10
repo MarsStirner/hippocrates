@@ -12,7 +12,8 @@ var WebMis20 = angular.module('WebMis20', [
     'ngSanitize',
     'ngCkeditor',
     'sf.treeRepeat',
-    'ui.mask'
+    'ui.mask',
+    'formstamp'
 ])
 .config(function ($interpolateProvider, datepickerConfig, datepickerPopupConfig) {
     $interpolateProvider.startSymbol('[[');
