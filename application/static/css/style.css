@@ -32,6 +32,14 @@ body{
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.7);
     border-radius: 6px;
 }
+.loader .overlay{
+    position:   fixed;
+    z-index:    900;
+    top:        0;
+    left:       0;
+    height:     100%;
+    width:      100%;
+}
 /* When the body has the loading class, we turn
    the scrollbar off with overflow:hidden */
 body.loading {
