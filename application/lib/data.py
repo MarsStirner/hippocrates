@@ -215,7 +215,11 @@ def get_kladr_city(code):
     if city:
         result = city[0]
         result['code'] = result['identcode']
-        result['name'] = u'{0}. {1}'.format(result['shorttype'], result['name'])
+        result['fullname'] = result['name'] = u'{0}. {1}'.format(result['shorttype'], result['name'])
+        if result['parents']:
+            for parent in result['parents']:
+                result['fullname'] = u'{0}, {1}. {2}'.format(result['fullname'], parent['shorttype'], parent['name'])
+            del result['parents']
     return result
 
 
