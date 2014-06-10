@@ -220,7 +220,7 @@ angular.module('WebMis20.directives', ['ui.bootstrap', 'ui.select', 'ngSanitize'
             replace: true,
             template:
                 '<ui-select ng-model="model" theme="select2">\
-                    <choices repeat="rt in $refBook.objects">\
+                    <choices repeat="rt in $refBook.objects |filter: $select:search | limit: 100">\
                         <div ng-bind-html="rt.name | highlight: $select.search"></div>\
                     </chioces>\
                 </ui-select>',
@@ -237,10 +237,10 @@ angular.module('WebMis20.directives', ['ui.bootstrap', 'ui.select', 'ngSanitize'
             Integer: '<input ng-required="true" class="validatable form-control" type="number" ng-pattern="/^[1-9]\\d*$/" ng-model="model"></input>',
             String:  '<input ng-required="true" class="validatable form-control" type="text" ng-model="model"></input>',
             Float:   '<input ng-required="true" class="validatable form-control" type="number" ng-pattern="/^[1-9]\\d*(.\\d+)?$/" ng-model="model"></input>',
-//            Boolean: '<input ng-required="true" class="form-control" type="checkbox" ng-model="model"></input>',
-            Boolean: '<div class="fs-checkbox fs-racheck">' +
-                '<a class="fs-racheck-item" href="javascript:void(0)" ng-click="model = !model" fs-space="model = !model">' +
-                '<span class="fs-check-outer"><span ng-show="model" class="fs-check-inner"></span></span>[[ metadata.title ]]</a></input>',
+            Boolean:
+                '<div class="fs-checkbox fs-racheck">\
+                    <a class="fs-racheck-item" href="javascript:void(0)" ng-click="model = !model" fs-space="model = !model">\
+                <span class="fs-check-outer"><span ng-show="model" class="fs-check-inner"></span></span>[[ metadata.title ]]</a></input>',
             Date:    '<div fs-date ng-model="model"></div>',
             Time:    '<div fs-time ng-model="model"></div>',
             List:    '<div fs-select="" items="metadata.arguments" ng-model="model" class="validatable">[[ item ]]</select>',
