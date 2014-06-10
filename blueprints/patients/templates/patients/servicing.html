@@ -65,19 +65,20 @@
                 <button class="btn btn-primary" ng-click="modal_create_event()"
                         ng-if="client.appointments.length > 0">Создать обращение</button>
                 <button class="btn btn-primary" ng-click="open_client(client_id)">Редактировать данные пациента</button>
-            <div class="btn-group">
-                <button class="btn btn-primary dropdown-toggle" type="button" id="print_dropdownMenu" ng-disabled="!ps.templates" data-toggle="dropdown">
-                    <span class="glyphicon glyphicon-print"></span>
-                    <span class="caret"></span>
-                </button>
-                <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="print_dropdownMenu">
-                    <li role="presentation" ng-repeat="template in ps.templates">
-                        <a role="menuitem" tabindex="-1" href="" class="print_template"
-                           ng-click="ps.print_template(template.id, client.id)" ng-bind="template.name">
-                        </a>
-                    </li>
-                </ul>
-            </div>
+            <ui-print-button ps="ps" resolve="ps_resolve()"></ui-print-button>
+{#            <div class="btn-group">#}
+{#                <button class="btn btn-primary dropdown-toggle" type="button" id="print_dropdownMenu" ng-disabled="!ps.templates" data-toggle="dropdown">#}
+{#                    <span class="glyphicon glyphicon-print"></span>#}
+{#                    <span class="caret"></span>#}
+{#                </button>#}
+{#                <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="print_dropdownMenu">#}
+{#                    <li role="presentation" ng-repeat="template in ps.templates">#}
+{#                        <a role="menuitem" tabindex="-1" href="" class="print_template"#}
+{#                           ng-click="ps.print_template(template.id, client.id)" ng-bind="template.name">#}
+{#                        </a>#}
+{#                    </li>#}
+{#                </ul>#}
+{#            </div>#}
         </div>
         <tabset  ng-if="client">
             <tab heading="Предварительные записи">{% include "patients/appointments.html" %}</tab>
@@ -85,6 +86,7 @@
         </tabset>
         {#        <pre>[[schedule|json]]</pre>#}
     </div>
+    <script type="text/ng-template" id="modal-print-dialog.html">{% include "_modal-print-dialog.html" %}</script>
 {% endblock %}
 
 {% block modules_js %}
@@ -98,23 +100,26 @@
         };
         WebMis20.controller('ClientSearch', ['$scope', '$http', '$timeout', '$window', 'PrintingService', 'Client', '$modal',
             function ($scope, $http, $timeout, $window, PrintingService, Client, $modal) {
-                $scope.ps = new PrintingService('registry', function (template_id, client_id) {
+                $scope.ps = new PrintingService('registry');
+                $scope.ps_resolve = function () {
                     return {
                         client_id: $scope.client_id
                     }
-                });
-                $scope.ps_amb = new PrintingService('preliminary_records', function (template_id, client_ticket_id) {
+                }
+                $scope.ps_amb = new PrintingService('preliminary_records');
+                $scope.ps_amb_resolve = function (client_ticket_id) {
                     return {
                         client_id: $scope.client_id,
                         ticket_id: client_ticket_id
                     }
-                });
-                $scope.ps_home = new PrintingService('preliminary_records', function (template_id, client_ticket_id) {
+                }
+                $scope.ps_home = new PrintingService('preliminary_records');
+                $scope.ps_home_resolve = function (client_ticket_id) {
                     return {
                         client_id: $scope.client_id,
                         ticket_id: client_ticket_id
                     }
-                });
+                }
                 $scope.ps_amb.set_context('orderAmb');
                 $scope.ps_home.set_context('orderHome');
                 $scope.ps.set_context('token');

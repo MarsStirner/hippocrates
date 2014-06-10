@@ -13,7 +13,8 @@ var WebMis20 = angular.module('WebMis20', [
     'ngSanitize',
     'ngCkeditor',
     'sf.treeRepeat',
-    'ui.mask'
+    'ui.mask',
+    'formstamp'
 ])
 .config(function ($interpolateProvider, datepickerConfig, datepickerPopupConfig) {
     $interpolateProvider.startSymbol('[[');
@@ -257,14 +258,13 @@ var WebMis20 = angular.module('WebMis20', [
     return Settings;
 }])
 .factory('PrintingService', ['$window', '$http', '$rootScope', function ($window, $http, $rootScope) {
-    var PrintingService = function (context_type, resolver) {
+    var PrintingService = function (context_type) {
         if (arguments.length >= 3) {
             this.target = arguments[2]
         } else {
             this.target = '_blank'
         }
         this.context_type = context_type;
-        this.resolver = resolver;
         this.context = null;
         this.templates = [];
     };
@@ -273,19 +273,30 @@ var WebMis20 = angular.module('WebMis20', [
         var t = this;
         $http.get(url_print_templates + context + '.json')
         .success(function (data) {
-            t.templates = data.result;
+            t.templates = data.result.sort(function (left, right) {
+                return (left.code < right.code) ? -1 : (left.code > right.code ? 1 : 0)
+            });
         })
     };
-    PrintingService.prototype.print_template = function(template_id) {
-        return $http.post(url_print_template, angular.extend({
-                id: template_id,
-                context_type: this.context_type,
-                additional_context: {
-                    'currentOrgStructure': "",
-                    'currentOrganisation': 3479,
-                    'currentPerson': current_user_id
+    PrintingService.prototype.print_template = function(template_data_list, separated) { // [ {template_id, context}, ... ]
+        var self = this;
+        var send_data = {
+            separated: separated,
+            documents: template_data_list.map(function (item) {
+                return {
+                    id: item.template_id,
+                    context_type: self.context_type,
+                    context: angular.extend(
+                        {}, item.context, {
+                            'currentOrgStructure': "",
+                            'currentOrganisation': 3479,
+                            'currentPerson': current_user_id
+                        }
+                    )
                 }
-            }, this.resolver.apply(this, arguments)))
+            }
+        )};
+        return $http.post(url_print_template, send_data)
         .success(function (data) {
             var w = $window.open();
             w.document.open();

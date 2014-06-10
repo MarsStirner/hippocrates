@@ -44,26 +44,28 @@
                 <td ng-click="open_client(result.id)" ng-bind="result.compulsoryPolicy.policyText"></td>
                 <td ng-click="open_client(result.id)" ng-bind="result.voluntaryPolicy.policyText"></td>
                 <td>
-                    <div class="dropdown">
-                        <button class="btn dropdown-toggle" type="button" id="print_dropdownMenu"
-                                ng-disabled="!ps.templates" data-toggle="dropdown">
-                            <span class="glyphicon glyphicon-print"></span>
-                            <span class="caret"></span>
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="print_dropdownMenu">
-                            <li role="presentation" ng-repeat="template in ps.templates">
-                                <a role="menuitem" tabindex="-1" href="" class="print_template"
-                                   ng-click="ps.print_template(template.id, result.id)" ng-bind="template.name">
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
+                    <ui-print-button ps="ps" resolve="ps_resolve(result.id)"></ui-print-button>
+{#                    <div class="dropdown">#}
+{#                        <button class="btn dropdown-toggle" type="button" id="print_dropdownMenu"#}
+{#                                ng-disabled="!ps.templates" data-toggle="dropdown">#}
+{#                            <span class="glyphicon glyphicon-print"></span>#}
+{#                            <span class="caret"></span>#}
+{#                        </button>#}
+{#                        <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="print_dropdownMenu">#}
+{#                            <li role="presentation" ng-repeat="template in ps.templates">#}
+{#                                <a role="menuitem" tabindex="-1" href="" class="print_template"#}
+{#                                   ng-click="ps.print_template(template.id, result.id)" ng-bind="template.name">#}
+{#                                </a>#}
+{#                            </li>#}
+{#                        </ul>#}
+{#                    </div>#}
                 </td>
             </tr>
             </tbody>
         </table>
 {#        <pre>[[schedule|json]]</pre>#}
     </div>
+    <script type="text/ng-template" id="modal-print-dialog.html">{% include "_modal-print-dialog.html" %}</script>
 {% endblock %}
 
 {% block modules_js %}
@@ -71,11 +73,12 @@
     <script type="text/javascript">
         WebMis20.controller('ClientSearch', ['$scope', '$http', '$timeout', '$window', 'PrintingService',
         function ($scope, $http, $timeout, $window, PrintingService) {
-            $scope.ps = new PrintingService('registry', function (template_id, client_id) {
+            $scope.ps = new PrintingService('registry');
+            $scope.ps_resolve = function (client_id) {
                 return {
                     client_id: client_id
                 }
-            });
+            }
             $scope.ps.set_context('token');
             $scope.aux = aux;
             $scope.params = aux.getQueryParams(document.location.search);
