@@ -101,12 +101,13 @@ WebMis20.controller('EventMainInfoCtrl', [
             $scope.policy_errors = [];
             if (!policy){
                 $scope.policy_errors.push('У пациента не указан полис ОМС');
-            }
-            if (!policy.begDate || moment(policy.begDate).isAfter($scope.event.info.set_date)){
-                $scope.policy_errors.push('Дата начала действия полиса не установлена или превышает дату создания обращения');
-            }
-            if (!policy.endDate || moment($scope.event.info.set_date).isAfter(policy.endDate)){
-                $scope.policy_errors.push('Не установлена дата окончания действия полиса или дата создания обращения превышает её');
+            } else {
+                if (!policy.begDate || moment(policy.begDate).isAfter($scope.event.info.set_date)) {
+                    $scope.policy_errors.push('Дата начала действия полиса не установлена или превышает дату создания обращения');
+                }
+                if (!policy.endDate || moment($scope.event.info.set_date).isAfter(policy.endDate)) {
+                    $scope.policy_errors.push('Не установлена дата окончания действия полиса или дата создания обращения превышает её');
+                }
             }
             return $scope.policy_errors.length == 0;
         };

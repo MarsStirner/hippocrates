@@ -72,7 +72,7 @@
                     <div class="row">
                         <div class="col-md-4"
                              ng-class="{'has-error': event_maininfo_form.exec_person.$invalid && editing.submit_attempt}">
-                            <label for="exec_person">Лечащий врач</label>
+                            <label for="exec_person" class="control-label">Лечащий врач</label>
                             <ui-select id="exec_person" name="exec_person" theme="select2"
                                        ng-model="event.info.exec_person" ng-required="true" ng-change="exec_person_changed()"
                                        ng-disabled="formcnf.exec_person.disabled">
@@ -84,7 +84,7 @@
                         </div>
                         <div class="col-md-4"
                              ng-class="{'has-error': event_maininfo_form.org_structure.$invalid && editing.submit_attempt}">
-                            <label for="org_structure">Подразделение</label>
+                            <label for="org_structure" class="control-label">Подразделение</label>
                             <ui-select id="org_structure" name="org_structure" theme="select2"
                                        ng-model="event.info.org_structure" ng-required="true" ng-disabled="formcnf.org_structure.disabled">
                                 <ui-select-match placeholder="Подразделение">[[$select.selected.name]]</ui-select-match>
@@ -99,7 +99,7 @@
                     <div class="row">
                         <div class="col-md-4"
                              ng-class="{'has-error': event_maininfo_form.primacy.$invalid && editing.submit_attempt}">
-                            <label for="primacy">Первичность</label>
+                            <label for="primacy" class="control-label">Первичность</label>
                             <ui-select id="primacy" name="primacy" theme="select2"
                                        ng-model="event.info.is_primary" ng-required="true" ng-disabled="formcnf.primacy.disabled">
                                 <ui-select-match placeholder="Первичность">[[$select.selected.name]]</ui-select-match>
@@ -110,7 +110,7 @@
                         </div>
                         <div class="col-md-4"
                              ng-class="{'has-error': event_maininfo_form.order.$invalid && editing.submit_attempt}">
-                            <label for="order">Порядок</label>
+                            <label for="order" class="control-label">Порядок</label>
                             <ui-select id="order" name="order" theme="select2"
                                        ng-model="event.info.order" ng-required="true" ng-disabled="formcnf.order.disabled">
                                 <ui-select-match placeholder="Порядок">[[$select.selected.name]]</ui-select-match>
@@ -124,14 +124,14 @@
                     <div class="row">
                         <div class="col-md-3"
                              ng-class="{'has-error': event_maininfo_form.set_date.$invalid && editing.submit_attempt}">
-                            <label for="set_date">Дата начала</label>
+                            <label for="set_date" class="control-label">Дата начала</label>
                             <wm-date id="set_date" name="set_date" ng-model="event.info.set_date" ng-required="true"
                                      ng-disabled="formcnf.set_date.disabled">
                             </wm-date>
                         </div>
                         <div class="col-md-2"
                              ng-class="{'has-error': event_maininfo_form.set_time.$invalid && editing.submit_attempt}">
-                            <label for="set_time">Время начала</label>
+                            <label for="set_time" class="control-label">Время начала</label>
                             <wm-time id="set_time" name="set_time" ng-model="event.info.set_date" ng-required="true"
                                      ng-disabled="formcnf.set_date.disabled">
                             </wm-time>

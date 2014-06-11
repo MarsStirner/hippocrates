@@ -378,4 +378,45 @@ return {
         };
     }
 }
-}]);
+}]).directive('validNumber', function() {
+  return {
+    require: '?ngModel',
+    link: function(scope, element, attrs, ngModelCtrl) {
+      if(!ngModelCtrl) {
+        return;
+      }
+      function clear_char_duplicates(string, char){
+        var arr = string.split(char);
+        var res;
+        if (arr.length > 1){
+            res = arr.shift();
+            res += char + arr.shift();
+            res += arr.join('');
+        }else{
+            res = arr[0];
+        }
+          return res;
+      }
+      ngModelCtrl.$parsers.push(function(val) {
+//        var clean = val.replace( /[^0-9\.\-]+/g, ''); Если вдруг захотим отрицательные
+        var clean = val.replace( /[^0-9\.]+/g, '');
+        clean = clear_char_duplicates(clean, '.');
+        if (val !== clean) {
+          ngModelCtrl.$setViewValue(clean);
+          ngModelCtrl.$render();
+        }
+        return clean;
+      });
+
+      element.bind('keypress', function(event) {
+        if(event.keyCode === 32) {
+          event.preventDefault();
+        }
+      });
+
+      element.bind('blur', function(event) {
+          this.value = parseFloat(this.value);
+      });
+    }
+  };
+});

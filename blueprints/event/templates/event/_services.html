@@ -63,9 +63,9 @@
                         <td ng-bind="service.at_name"></td>
                         <td ng-bind="service.price" class="text-right" ng-hide="event.info.event_type.finance.code == 2"></td>
                         <td class="col-md-1">
-                            <input type="number" class="form-control input-sm" min="[[service.paid_count || 1]]"
+                            <input type="text" class="form-control input-sm" min="[[service.paid_count || 1]]"
                                    ng-disabled="service.fully_paid"
-                                   ng-model="service.amount" ng-change="service.sum = service.price * service.amount"/>
+                                   ng-model="service.amount" valid-number ng-change="service.sum = service.price * service.amount"/>
                         </td>
                         <td ng-bind="service.paid_count" class="text-right" ng-hide="event.info.event_type.finance.code == 2"></td>
                         <td ng-bind="service.sum" class="text-right" ng-hide="event.info.event_type.finance.code == 2"></td>
