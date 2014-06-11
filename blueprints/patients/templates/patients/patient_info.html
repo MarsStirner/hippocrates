@@ -2,15 +2,10 @@
 
 {% block title %}> {{ module_name }}{% endblock %}
 
-{% block modules_css %}
-    <style>
-    </style>
-{%  endblock %}
-
 {% block main %}
     <div ng-controller="ClientCtrl" class="ng-cloak">
         {% include "_breadcrumbs.html" %}
-        <script type="text/ng-template" id="modal-deleteRecord.html">{% include "patients/_modal_delete_record.html" %}</script>
+
         <legend xmlns="http://www.w3.org/1999/html" wm-page-header><h2>Пациент: [[ client.client_info.nameText ]]</h2></legend>
         <div class="marginal">
             <button class="btn btn-default" onclick="history.back()">Назад к результатам поиска</button>
@@ -36,48 +31,61 @@
 {#                </ul>#}
 {#            </span>#}
         </div>
+
         <div ui-alert-list="alerts"></div>
         <div class="marginal">
-        <tabset>
-            <tab>
-                <tab-heading>
-                    Информация о пациенте
-                    <a ng-click="start_editing();" class="btn btn-sm btn-default glyphicon glyphicon-pencil" href="" title="Редактировать"></a>
-                </tab-heading>
-                <form name="client_form" role="form" novalidate ng-submit="save_client(client_form)" >
-                    <tabset justified="false" class="marginal">
-                        <tab heading="Основная информация">{% include "patients/main_info.html" %}</tab>
-                        <tab heading="Адреса">{% include "patients/address_info.html" %}</tab>
-                        <tab heading="Соц. статус">{% include "patients/soc_status.html" %}</tab>
-                        <tab heading="Особенности">{% include "patients/characteristics.html" %}</tab>
-                        <tab heading="Идентификаторы">{% include "patients/identifiers.html" %}</tab>
-                        <tab heading="Связи и контакты">{% include "patients/contacts.html" %}</tab>
-                        <tab heading="История документов">{% include "patients/documents.html" %}</tab>
-{#                        <tab heading="Debug"><pre>[[client.client_info | json]]</pre></tab>#}
-                    </tabset>
-                    <div class="row" ng-show="editing_is_active()"> {# wtf... FIXME: layout #}
-                        <div class="col-md-12">
-                            <div class="pull-right">
-                                <button ng-click="cancel_editing()" class="btn btn-lg btn-danger">Отменить</button>
-                                <button type="submit" class="btn btn-lg btn-success"
-                                        tooltip="[[client_form.$invalid ? 'Заполните все обязательные поля': '']]">Сохранить</button>
-                            </div>
+            <form name="clientForm" role="form" novalidate ng-submit="save_client(clientForm)">
+                <legend>Основная информация</legend>
+                {% include "patients/main_info.html" %}
+
+                <legend>Документ удостоверяющий личность</legend>
+                {% include "patients/_primary_doc.html" %}
+
+                <legend>Адрес регистрации и проживания</legend>
+                {% include "patients/_address.html" %}
+
+                <legend>Медицинские полисы</legend>
+                {% include "patients/_policy.html" %}
+
+                <legend>Примечания</legend>
+                {% include "patients/_notes.html" %}
+
+                <legend>Особенности пациента</legend>
+                {% include "patients/characteristics.html" %}
+
+                <legend>Контактная информация и родственники</legend>
+                {% include "patients/contacts.html" %}
+
+                <legend>Социальный статус</legend>
+                {% include "patients/soc_status.html" %}
+
+                <legend>Связи с внешними системами</legend>
+                {% include "patients/identifiers.html" %}
+
+                <legend>История изменений документов</legend>
+                {% include "patients/documents.html" %}
+
+{#                <legend>Debug</legend>#}
+{#                <pre>[[client.client_info | json]]</pre>#}
+
+                <div class="row" ng-show="editing_is_active()">
+                    <div class="col-md-12">
+                        <div class="pull-right">
+                            <button ng-click="cancel_editing()" class="btn btn-lg btn-danger">Отменить</button>
+                            <button type="submit" class="btn btn-lg btn-success"
+                                    tooltip="[[clientForm.$invalid ? 'Заполните все обязательные поля': '']]">Сохранить</button>
                         </div>
-                        <span ng-show="submitted">Errors!</span>
                     </div>
-                </form>
-            </tab>
-            <tab heading="Предварительные записи">{% include "patients/appointments.html" %}</tab>
-            <tab heading="Обращения">{% include "patients/event_list.html" %}</tab>
-        </tabset>
+                </div>
+            </form>
         </div>
     </div>
-    <script type="text/ng-template" id="modal-print-dialog.html">{% include "_modal-print-dialog.html" %}</script>
-
 {% endblock %}
 
 {% block modules_js %}
     {{ super() }}
+    <script type="text/ng-template" id="modal-deleteRecord.html">{% include "patients/_modal_delete_record.html" %}</script>
+    <script type="text/ng-template" id="modal-print-dialog.html">{% include "_modal-print-dialog.html" %}</script>
     <script type="text/javascript">
         DeleteRecordModalCtrl = function ($scope, $modalInstance) {
             $scope.accept = function () {
@@ -89,8 +97,8 @@
         };
 
         WebMis20.controller('ClientCtrl',
-                ['$scope', '$http', '$modal', 'Client', 'PrintingService', 'RefBookService', '$window',
-                function ($scope, $http, $modal, Client, PrintingService, RefBookService, $window) {
+                ['$scope', '$http', '$modal', 'WMClient', 'PrintingService', 'RefBookService', '$window',
+                function ($scope, $http, $modal, WMClient, PrintingService, RefBookService, $window) {
             $scope.records = [];
             $scope.aux = aux;
             $scope.params = aux.getQueryParams(document.location.search);
@@ -102,7 +110,7 @@
             $scope.rbRelationType = RefBookService.get('rbRelationType');
 
             $scope.client_id = $scope.params.client_id;
-            $scope.client = new Client($scope.client_id);
+            $scope.client = new WMClient($scope.client_id);
             $scope.ps = new PrintingService('registry');
             $scope.print_context_resolve = function () {
                 return {
@@ -117,20 +125,20 @@
                     client_id: $scope.client_id,
                     ticket_id: client_ticket_id
                 }
-            }
+            };
             $scope.ps_home = new PrintingService('preliminary_records');
             $ps_home_resolve = function (client_ticket_id) {
                 return {
                     client_id: $scope.client_id,
                     ticket_id: client_ticket_id
                 }
-            }
+            };
             $scope.ps_amb.set_context('orderAmb');
             $scope.ps_home.set_context('orderHome');
 
             $scope.alerts = [];
             $scope.editing = {
-                active: false,
+                active: true,
                 submit_attempt: false
             };
 
@@ -165,10 +173,7 @@
             };
 
             $scope.editing_is_active = function() {
-                return $scope.editing.active;
-            };
-            $scope.editing_is_activex = function() {
-                return $scope.editing.active;
+                return $scope.editing.active || true;
             };
 
             $scope.save_client = function(form) {
