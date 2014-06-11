@@ -190,7 +190,7 @@ angular.module('WebMis20.directives', ['ui.bootstrap', 'ui.select', 'ngSanitize'
         return {
             restrict: 'E',
             replace: true,
-            template: '<button class="btn" ng-click="open_print_window()">Печать</button>',
+            template: '<button class="btn btn-default" ng-click="open_print_window()" title="Печать"><i class="glyphicon glyphicon-print"></i></button>',
             scope: {
                 $ps: '=ps'
             },
