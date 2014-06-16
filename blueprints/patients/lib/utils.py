@@ -17,8 +17,8 @@ from application.lib.utils import string_to_datetime, safe_date, safe_traverse
 #         return u''
 #
 #
-# def unformat_snils(snils):
-#     return snils.replace('-', '').replace(' ', '')
+def unformat_snils(snils):
+    return snils.replace('-', '').replace(' ', '')
 #
 #
 # def calc_snils_сheck_сode(snils):

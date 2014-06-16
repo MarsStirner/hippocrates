@@ -1,0 +1,60 @@
+<div class="panel panel-default">
+    <div class="panel-body">
+        <div class="row">
+            <div class="form-group col-md-6"
+                 ng-class="{'has-error': policyForm.$dirty && policyForm.pol_type.$invalid}">
+                <label for="pol_type[[idPostfix]]">Тип</label>
+                <ui-select class="form-control" id="pol_type[[idPostfix]]" name="pol_type" theme="select2"
+                           ng-model="intmd_models.type" ng-disabled="!edit_mode()" ng-required="policyForm.$dirty">
+                    <ui-select-match placeholder="Тип полиса">[[$select.selected.name]]</ui-select-match>
+                    <ui-select-choices repeat="pt in rbPolicyType.objects | filter: filter_policy(pType) | filter: $select.search">
+                        <div ng-bind-html="pt.name | highlight: $select.search"></div>
+                    </ui-select-choices>
+                </ui-select>
+            </div>
+            <div class="form-group col-md-3"
+                 ng-class="{'has-error': policyForm.$dirty && policyForm.pol_serial.$error.required && policyForm.pol_serial.$invalid}"> {# "{'has-error': policyForm.pol_serial.$invalid && policyForm.pol_serial.$dirty}" #}
+                <label for="pol_serial[[idPostfix]]" class="control-label">Серия</label>
+                <input type="text" class="form-control" id="pol_serial[[idPostfix]]" name="pol_serial"
+                       autocomplete="off" placeholder="серия" validator-regexp="serialValidator"
+                       ng-model="modelSerial" ng-disabled="!edit_mode()" ng-required="serialValidator && policyForm.$dirty"/>
+            </div>
+            <div class="form-group col-md-3"
+                 ng-class="{'has-error': policyForm.$dirty && policyForm.pol_number.$invalid}">
+                <label for="pol_number[[idPostfix]]" class="control-label">Номер</label>
+                <input type="text" class="form-control" id="pol_number[[idPostfix]]" name="pol_number"
+                       autocomplete="off" placeholder="номер" validator-regexp="numberValidator"
+                       ng-model="modelNumber" ng-required="policyForm.$dirty" ng-disabled="!edit_mode()"/>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="form-group col-md-3"
+                 ng-class="{'has-error': policyForm.$dirty && policyForm.pol_begdate.$invalid}">
+                <label for="pol_begdate[[idPostfix]]" class="control-label">Дата выдачи</label>
+                <wm-date id="pol_begdate[[idPostfix]]" name="pol_begdate"
+                         ng-model="modelBegDate" ng-disabled="!edit_mode()"
+                         ng-required="policyForm.$dirty">
+                </wm-date>
+            </div>
+            <div class="form-group col-md-3"
+                 ng-class="{'has-error': policyForm.pol_enddate.$invalid }">
+                <label for="pol_enddate[[idPostfix]]" class="control-label">Действителен до</label>
+                <wm-date id="pol_enddate[[idPostfix]]" name="pol_enddate"
+                         ng-model="modelEndDate" ng-disabled="!edit_mode()">
+                </wm-date>
+            </div>
+            <div class="form-group col-md-6"
+                 ng-class="{'has-error': policyForm.$dirty && policyForm.pol_insurer.$invalid}">
+                <label for="pol_insurer[[idPostfix]]" class="control-label">Выдан</label>
+                <ui-select class="form-control" id="pol_insurer[[idPostfix]]" name="pol_insurer" theme="select2"
+                           ng-model="intmd_models.insurer" ng-disabled="!edit_mode()" ng-required="policyForm.$dirty">
+                    <ui-select-match placeholder="Тип документа">[[$select.selected.short_name]]</ui-select-match>
+                    <ui-select-choices repeat="org in rbOrganisation.objects | filter: $select.search">
+                        <div ng-bind-html="org.short_name | highlight: $select.search"></div>
+                    </ui-select-choices>
+                </ui-select>
+            </div>
+        </div>
+    </div>
+</div>

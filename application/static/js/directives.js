@@ -1,6 +1,8 @@
 'use strict';
 
-angular.module('WebMis20.directives', ['ui.bootstrap', 'ui.select', 'ngSanitize']).
+angular.module('WebMis20.directives', ['ui.bootstrap', 'ui.select', 'ngSanitize']);
+
+angular.module('WebMis20.directives').
     directive('rbSelect', ['RefBookService', function(RefBookService) {
         return {
             restrict: 'A',

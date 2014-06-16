@@ -5,19 +5,34 @@ angular.module('WebMis20.services', []).
         function($http, $q, $rootScope) {
             var WMClient = function(client_id) {
                 this.client_id = client_id;
-                this.reload();
             };
 
             WMClient.prototype.reload = function() {
                 var t = this;
+                var deferred = $q.defer();
                 $http.get(url_client_get, {
                     params: {
                         client_id: this.client_id
                     }
                 }).success(function(data) {
-                    t.client_info = data.result.clientData;
+                    t.info = data.result.client_data.client;
+                    t.id_doc = data.result.client_data.id_document;
+                    t.reg_address = data.result.client_data.reg_address;
+                    t.live_addr = data.result.client_data.live_addr;
+                    var cpol = data.result.client_data.compulsory_policy;
+                    t.compulsory_policies = cpol !== null ? [cpol] : [];
+                    t.voluntary_policies = data.result.client_data.voluntary_policies;
+//                    t.id_doc = data.result.client_data.id_document;
+//                    t.id_doc = data.result.client_data.id_document;
+//                    t.id_doc = data.result.client_data.id_document;
+//                    t.id_doc = data.result.client_data.id_document;
+//                    t.id_doc = data.result.client_data.id_document;
+//                    t.id_doc = data.result.client_data.id_document;
+//                    t.id_doc = data.result.client_data.id_document;
+
                     t.appointments = data.result.appointments;
                     t.events = data.result.events;
+                    deferred.resolve();
     //              $rootScope.$broadcast('client_loaded');
                 }).error(function(data, status) {
                     $rootScope.$broadcast('load_error', {
@@ -26,8 +41,10 @@ angular.module('WebMis20.services', []).
                         code: status,
                         type: 'danger'
                     });
-                    throw 'Error requesting Client, id = ' + t.client_id;
+                    deferred.reject();
+//                    throw 'Error requesting Client, id = ' + t.client_id;
                 });
+                return deferred.promise;
             };
 
             WMClient.prototype.save = function() {
@@ -43,6 +60,38 @@ angular.module('WebMis20.services', []).
                     deferred.reject(message);
                 });
                 return deferred.promise;
+            };
+
+            WMClient.prototype.is_new = function() {
+                return this.client_id === 'new';
+            };
+
+            WMClient.prototype.add_cpolicy = function() {
+                this.compulsory_policies.push({
+                    "id": null,
+                    "deleted": 0,
+                    "policy_type": null,
+                    "serial": null,
+                    "number": null,
+                    "beg_date": null,
+                    "end_date": null,
+                    "insurer": null,
+                    "policy_text": null
+                });
+            };
+
+            WMClient.prototype.add_vpolicy = function() {
+                this.voluntary_policies.push({
+                    "id": null,
+                    "deleted": 0,
+                    "policy_type": null,
+                    "serial": null,
+                    "number": null,
+                    "beg_date": null,
+                    "end_date": null,
+                    "insurer": null,
+                    "policy_text": null
+                });
             };
 
             WMClient.prototype.add_allergy = function() {
@@ -104,11 +153,11 @@ angular.module('WebMis20.services', []).
             };
 
             WMClient.prototype.delete_record = function(entity, record) {
-                if ('id' in record) {
-                    record['deleted'] = 1;
+                if (record.id) {
+                    record.deleted = 1;
                 } else {
-                    var idx = this.client_info[entity].indexOf(record);
-                    this.client_info[entity].splice(idx, 1);
+                    var idx = this[entity].indexOf(record);
+                    this[entity].splice(idx, 1);
                 }
             };
 
