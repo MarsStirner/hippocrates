@@ -773,6 +773,10 @@ var aux = {
     inArray: function (array, item) {
         return array.indexOf(item) !== -1;
     },
+    removeFromArray: function (array, item) {
+        if (aux.inArray(array, item))
+            array.splice(array.indexOf(item), 1)
+    },
     forEach: function (object, callback) {
         var result = {};
         var key;
