@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import datetime
 from application.lib.agesex import calcAgeTuple
+from application.lib.const import ID_DOC_GROUP_CODE, VOL_POLICY_CODES
 from application.models.utils import safe_current_user_id
 from application.models.enums import Gender, LocalityType
 from application.models.exists import rbDocumentTypeGroup
@@ -166,7 +167,7 @@ class Client(db.Model):
     def id_document(self):
         if not self._id_document:
             self._id_document = (self.documents.filter(ClientDocument.deleted == 0).
-                filter(rbDocumentTypeGroup.code == '1').order_by(ClientDocument.date.desc()).first())
+                filter(rbDocumentTypeGroup.code == ID_DOC_GROUP_CODE).order_by(ClientDocument.date.desc()).first())
         return self._id_document
 
     def get_actual_document_by_code(self, doc_type_code):
@@ -181,7 +182,7 @@ class Client(db.Model):
 
     @property
     def policyDMS(self):
-        return self.voluntaryPolicy
+        return self.voluntaryPolicies
 
     @property
     def compulsoryPolicy(self):
@@ -190,10 +191,8 @@ class Client(db.Model):
                 return policy
 
     @property
-    def voluntaryPolicy(self):
-        for policy in self.policies:
-            if policy.policyType and policy.policyType.name.startswith(u"ДМС"):
-                return policy
+    def voluntaryPolicies(self):
+        return filter(lambda p: p.policyType is not None and p.policyType.code in VOL_POLICY_CODES, self.policies)
 
     @property
     def phones(self):
@@ -224,22 +223,23 @@ class Client(db.Model):
     def __json__(self):
         return {
             'id': self.id,
-            'firstName': self.firstName,
-            'lastName': self.lastName,
-            'patrName': self.patrName,
-            'birthDate': self.birthDate,
-            'sex': Gender(self.sexCode),
-            'SNILS': self.SNILS,
-            'fullName': self.nameText,
-            'work_org_id': self.works[0].org_id if self.works else None,
-            'comp_policy': self.compulsoryPolicy,
-            'vol_policy': self.voluntaryPolicy,
-            'direct_relations': self.direct_relations.all(),
-            'reversed_relations': self.reversed_relations.all(),  # todo: more
-            'phones': self.phones,
-            'reg_address': self.reg_address,
-            'loc_address': self.loc_address,
-            'document': self.document,
+            'first_name': self.firstName,
+            'last_name': self.lastName,
+            'patr_name': self.patrName,
+            'birth_date': self.birthDate,
+            'sex': Gender(self.sexCode),  # if self.sexCode else None,
+            'snils': self.SNILS,
+            'full_name': self.nameText,
+            'notes': self.notes,
+            # 'work_org_id': self.works[0].org_id if self.works else None,
+            # 'comp_policy': self.compulsoryPolicy,
+            # 'vol_policy': self.voluntaryPolicy,
+            # 'direct_relations': self.direct_relations.all(),
+            # 'reversed_relations': self.reversed_relations.all(),
+            # 'phones': self.phones,
+            # 'reg_address': self.reg_address,
+            # 'loc_address': self.loc_address,
+            # 'document': self.document,
         }
 
 
@@ -461,14 +461,14 @@ class ClientDocument(db.Model):
     def __json__(self):
         return {
             'id': self.id,
-            'documentType': self.documentType,
+            'doc_type': self.documentType,
             'deleted': self.deleted,
             'serial': self.serial,
             'number': self.number,
-            'begDate': self.date,
-            'endDate': self.endDate,
+            'beg_date': self.date,
+            'end_date': self.endDate,
             'origin': self.origin,
-            'documentText': self.__unicode__(),
+            'doc_text': self.__unicode__(),
         }
 
     def __int__(self):
@@ -874,13 +874,14 @@ class ClientPolicy(db.Model):
     def __json__(self):
         return {
             'id': self.id,
-            'insurer_id': self.insurer_id,
-            'policyType': self.policyType,
+            'policy_type': self.policyType,
+            'deleted': self.deleted,
             'serial': self.serial,
             'number': self.number,
-            'begDate': self.begDate,
-            'endDate': self.endDate,
-            'policyText': self.__unicode__()
+            'beg_date': self.begDate,
+            'end_date': self.endDate,
+            'insurer': self.insurer,
+            'policy_text': self.__unicode__()
         }
 
 

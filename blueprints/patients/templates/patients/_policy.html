@@ -1,139 +1,68 @@
-<div class="panel panel-default">
-    <div class="panel-heading panel-title">Полис ОМС</div>
-    <div class="panel-body">
-        <ng-form name="cpolForm">
-            <div class="row">
-                <div class="form-group col-md-4">
-                    <label for="cpol_type">Тип</label>
-                    <ui-select class="form-control" id="cpol_type" name="cpol_type"
-                               ng-model="client.client_info['compulsoryPolicy']['policyType']"
-                               theme="select2" autocomplete="off">
-                        <ui-select-match placeholder="Тип полиса">[[$select.selected.name]]</ui-select-match>
-                        <ui-select-choices repeat="pt in rbPolicyType.objects | filter: filter_cpolicy | filter: $select.search">
-                            <div ng-bind-html="pt.name | highlight: $select.search"></div>
-                        </ui-select-choices>
-                    </ui-select>
+<h3>Полис ОМС</h3>
+<div ng-repeat="cpol in client.compulsory_policies | filter: flt_not_deleted()">
+    <ng-form name="cpolForm">
+        dirty:[[cpolForm.$dirty]], valid:[[cpolForm.$valid]]
+        <div class="row">
+            <div class="col-md-8">
+                <wm-policy p-type="0" id-postfix="c[[$index]]"
+                    model-type="cpol.policy_type"
+                    model-serial="cpol.serial"
+                    serial-validator="cpol.policy_type.validators.serial"
+                    model-number="cpol.number"
+                    number-validator="cpol.policy_type.validators.number"
+                    model-beg-date="cpol.beg_date"
+                    model-end-date="cpol.end_date"
+                    model-insurer="cpol.insurer"
+                    edit-mode="cpol.id ? edit.activated : true">
+                </wm-policy>
+            </div>
+            <div class="col-md-1">
+                <div class="row" ng-show="cpol.id">
+                    <button type="button" class="btn btn-primary btn-block marginal"
+                            ng-click="edit.activated=true">Редактировать</button>
                 </div>
-                <div class="form-group col-md-2"
-                     ng-class="{'has-error': cpolForm.cpol_serial.$invalid && cpolForm.cpol_serial.$dirty}">
-                    <label for="cpol_serial">Серия</label>
-                    <input type="text" class="form-control" id="cpol_serial" name="cpol_serial"
-                           autocomplete="off" placeholder="серия"
-                           ng-model="client.client_info.compulsoryPolicy.serial"
-                           validator-regexp="client.client_info.compulsoryPolicy.policyType.validators.serial"/>
-                </div>
-                <div class="form-group col-md-2"
-                     ng-class="{'has-error': cpolForm.cpol_type.$viewValue && cpolForm.cpol_number.$invalid}">
-                    <label for="cpol_number">Номер</label>
-                    <input type="text" class="form-control" id="cpol_number" name="cpol_number"
-                           autocomplete="off" placeholder="номер"
-                           ng-model="client.client_info.compulsoryPolicy.number"
-                           ng-required="cpolForm.cpol_type.$viewValue"
-                           validator-regexp="client.client_info.compulsoryPolicy.policyType.validators.number"/>
+                <div class="row">
+                    <button type="button" class="btn btn-danger btn-block marginal"
+                            ng-click="delete_policy('compulsory_policies', cpol)">Удалить</button>
                 </div>
             </div>
-
-            <div class="row">
-                <div class="form-group col-md-2"
-                     ng-class="{'has-error': cpolForm.cpol_type.$viewValue && cpolForm.cpol_begDate.$invalid}">
-                    <label for="cpol_begDate">Дата выдачи</label>
-                    <wm-date id="cpol_begDate" name="cpol_begDate"
-                             ng-model="client.client_info.compulsoryPolicy.begDate"
-                             ng-required="cpolForm.cpol_type.$viewValue">
-                    </wm-date>
-                </div>
-                <div class="form-group col-md-2"
-                     ng-class="{'has-error': cpolForm.cpol_endDate.$invalid }">
-                    <label for="cpol_endDate">Действителен до</label>
-                    {# TODO: неправильная установка даты, если в модели сейчас null #}
-                    <wm-date id="cpol_endDate" name="cpol_endDate"
-                             ng-model="client.client_info.compulsoryPolicy.endDate">
-                             {# TODO: валидация для необязательной даты - только для введенного#}
-                    </wm-date>
-                </div>
-                <div class="form-group col-md-4"
-                     ng-class="{'has-error': cpolForm.cpol_type.$viewValue && cpolForm.ufms.$invalid}">
-                    <label for="ufms">Выдан</label>
-                    <ui-select class="form-control" id="ufms" name="ufms"
-                            ng-model="client.client_info.compulsoryPolicy.insurer"
-                            theme="select2" ng-required="cpolForm.cpol_type.$viewValue">
-                        <ui-select-match placeholder="Тип документа">[[$select.selected.short_name]]</ui-select-match>
-                        <ui-select-choices repeat="org in rbOrganisation.objects | filter: $select.search">
-                            <div ng-bind-html="org.short_name | highlight: $select.search"></div>
-                        </ui-select-choices>
-                    </ui-select>
-                </div>
-            </div>
-        </ng-form>
-    </div>
+        </div>
+    </ng-form>
+</div>
+<div>
+    <button type="button" class="btn btn-primary marginal"
+            ng-click="add_new_cpolicy()">Добавить новый</button>
 </div>
 
-<div class="panel panel-default">
-    <div class="panel-heading panel-title">Полис ДМС</div>
-    <div class="panel-body">
-        <ng-form name="vpolForm">
-            <div class="row">
-                <div class="form-group col-md-4">
-                    <label for="vpol_type">Тип</label>
-                    <ui-select class="form-control" id="vpol_type" name="vpol_type"
-                               ng-model="client.client_info.voluntaryPolicy.policyType"
-                               theme="select2" autocomplete="off">
-                        <ui-select-match placeholder="Тип полиса">[[$select.selected.name]]</ui-select-match>
-                        <ui-select-choices repeat="pt in rbPolicyType.objects | filter: filter_vpolicy | filter: $select.search">
-                            <div ng-bind-html="pt.name | highlight: $select.search"></div>
-                        </ui-select-choices>
-                    </ui-select>
+<h3>Полиса ДМС</h3>
+<div ng-repeat="vpol in client.voluntary_policies">
+    <ng-form name="vpolForm">
+        <div class="row">
+            <div class="col-md-8">
+                <wm-policy p-type="1" id-postfix="v[[$index]]"
+                    model-type="vpol.policy_type"
+                    model-serial="vpol.serial"
+                    serial-validator="vpol.policy_type.validators.serial"
+                    model-number="vpol.number"
+                    number-validator="vpol.policy_type.validators.number"
+                    model-beg-date="vpol.beg_date"
+                    model-end-date="vpol.end_date"
+                    model-insurer="vpol.insurer"
+                    edit-mode="vpol.id ? edit.activated : true">
+                </wm-policy>
+            </div>
+            <div class="col-md-1">
+                <div class="row" ng-show="vpol.id">
+                    <button type="button" class="btn btn-primary btn-block marginal"
+                            ng-click="edit.activated=true">Редактировать</button>
                 </div>
-                <div class="form-group col-md-2"
-                     ng-class="{'has-error': vpolForm.vpol_serial.$invalid && vpolForm.vpol_serial.$dirty}">
-                    <label for="vpol_serial">Серия</label>
-                    <input type="text" class="form-control" id="vpol_serial" name="vpol_serial"
-                           autocomplete="off" placeholder="серия" ng-pattern="/^[\d\s]+$/" {# FIXME: its ok? #}
-                           ng-model="client.client_info['voluntaryPolicy']['serial']"
-                           validator-regexp="client.client_info.voluntaryPolicy.policyType.validators.serial"/>
-                </div>
-                <div class="form-group col-md-2"
-                     ng-class="{'has-error': vpolForm.vpol_type.$viewValue && vpolForm.vpol_number.$invalid}">
-                    <label for="vpol_number">Номер</label>
-                    <input type="text" class="form-control" id="vpol_number" name="vpol_number"
-                           autocomplete="off" placeholder="номер" ng-pattern="/^\d+$/" {# FIXME: allows whitespace as first char #}
-                           ng-model="client.client_info['voluntaryPolicy']['number']"
-                           ng-required="vpolForm.vpol_type.$viewValue"
-                           validator-regexp="client.client_info.voluntaryPolicy.policyType.validators.number"/>
+                <div class="row">
+                    <button type="button" class="btn btn-danger btn-block marginal"
+                            ng-click="delete_policy('voluntary_policies', vpol)">Удалить</button>
                 </div>
             </div>
-
-            <div class="row">
-                <div class="form-group col-md-2"
-                     ng-class="{'has-error': vpolForm.vpol_type.$viewValue && vpolForm.vpol_begDate.$invalid}">
-                    <label for="vpol_begDate">Дата выдачи</label>
-                    <wm-date id="vpol_begDate" name="vpol_begDate"
-                             ng-model="client.client_info['voluntaryPolicy']['begDate']"
-                             ng-required="vpolForm.vpol_type.$viewValue">
-                    </wm-date>
-                </div>
-                <div class="form-group col-md-2"
-                     ng-class="{'has-error': vpolForm.vpol_endDate.$invalid }">
-                    <label for="vpol_endDate">Действителен до</label>
-                    {# TODO: неправильная установка даты, если в модели сейчас null #}
-                    <wm-date id="vpol_endDate" name="vpol_endDate"
-                             ng-model="client.client_info['voluntaryPolicy']['endDate']">
-                             {# TODO: валидация для необязательной даты - только для введенного#}
-                    </wm-date>
-                </div>
-                <div class="form-group col-md-4"
-                     ng-class="{'has-error': vpolForm.vpol_type.$viewValue && vpolForm.ufms.$invalid}">
-                    <label for="ufms">Выдан</label>
-                    <ui-select class="form-control" id="ufms" name="ufms"
-                            ng-model="client.client_info['voluntaryPolicy']['insurer']"
-                            theme="select2" ng-required="vpolForm.vpol_type.$viewValue">
-                        <ui-select-match placeholder="Тип документа">[[$select.selected.short_name]]</ui-select-match>
-                        <ui-select-choices repeat="org in rbOrganisation.objects | filter: $select.search">
-                            <div ng-bind-html="org.short_name | highlight: $select.search"></div>
-                        </ui-select-choices>
-                    </ui-select>
-                </div>
-            </div>
-        </ng-form>
-    </div>
+        </div>
+    </ng-form>
 </div>
+<button type="button" class="btn btn-primary"
+        ng-click="client.add_vpolicy()">Добавить новый</button>

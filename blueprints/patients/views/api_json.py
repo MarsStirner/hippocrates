@@ -16,7 +16,7 @@ __author__ = 'mmalkov'
 
 
 class ClientSaveException(Exception):
-    def __init__(self, message, data):
+    def __init__(self, message, data=None):
         super(ClientSaveException, self).__init__(message)
         self.data = data
 
@@ -64,7 +64,7 @@ def api_patient_get():
         if not client:
             return abort(404)
         return jsonify({
-            'clientData': context.make_client_info(client),
+            'client_data': context.make_client_info(client),
             'appointments': context.make_appointments(client),
             'events': context.make_events(client)
         })
@@ -72,32 +72,58 @@ def api_patient_get():
         client = Client()
         db.session.add(client)
         return jsonify({
-            'clientData': context.make_client_info(client)
+            'client_data': context.make_client_info(client)
         })
+
+
+def parse_id(request_data, identifier, allow_empty=False):
+    """
+    :param request_data:
+    :param identifier:
+    :param allow_empty:
+    :return: None - empty identifier (new entity), False - parse error, int - correct identifier
+    """
+    _id = request_data.get(identifier)
+    if _id is None and allow_empty or _id == 'new':
+        return None
+    elif _id is None and not allow_empty:
+        return False
+    else:
+        try:
+            _id = int(_id)
+        except ValueError:
+            return False
+    return _id
 
 
 @module.route('/api/save_patient_info.json', methods=['POST'])
 def api_patient_save():
-    j = request.json
-    try:
-        client_info = j['client_info']
-        client_id = client_info.get('id')
-        if client_id:
-            client = Client.query.get(int(client_id))
-        else:
-            client = create_new_client()
+    client_data = request.json
+    client_id = parse_id(client_data, 'id', True)
+    if client_id is False:
+        return abort(404)
 
-        client.lastName = client_info['lastName']
-        client.firstName = client_info['firstName']
-        client.patrName = client_info['patrName'] or ''
-        client.sexCode = client_info['sex']['id'] if client_info['sex']['id'] != 0 else 1 # todo: fix
-        client.SNILS = client_info['SNILS'].replace(" ", "").replace("-", "") if client_info['SNILS'] else ''
+    if client_id:
+        client = Client.query.get(client_id)
+    else:
+        client = create_new_client()
+        client_info = client_data.get('info')
+        if not client_info:
+            raise ClientSaveException(u'Client main info is empty')
+        # TODO: validation
+        client.lastName = client_info['last_name']
+        client.firstName = client_info['first_name']
+        client.patrName = client_info['patr_name'] or ''
+        client.sexCode = client_info['sex']['id']
+        client.SNILS = unformat_snils(client_info['snils']) if client_info['snils'] else ''
         client.notes = client_info['notes'] if client_info['notes'] else ''
-        client.birthDate = safe_date(client_info['birthDate'])
+        client.birthDate = safe_date(client_info['birth_date'])
         if not client.uuid:
             client.uuid = get_new_uuid()
-
         db.session.add(client)
+
+
+    try:
 
         if client_info['document'].get('documentType'):
             if not client.document:
