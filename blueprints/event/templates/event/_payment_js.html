@@ -22,15 +22,16 @@ WebMis20.controller('EventPaymentCtrl', ['$scope', 'RefBookService', 'Settings',
             return $scope.Settings.get_string('Event.Payment.1CODVD') == '1';
         };
         $scope.finance_is_oms = function(){return $scope.finance_type == '2'};
+        $scope.finance_is_dms = function(){return $scope.finance_type == '3'};
 
         $scope.formcnf = {
             tab_payer_person: {
-                disabled: (event_created && $scope.payer_is_org) || $scope.finance_is_oms,
-                active: $scope.person_tab_active() && !$scope.finance_is_oms()
+                disabled: (event_created && $scope.payer_is_org) || $scope.finance_is_oms || $scope.finance_is_dms,
+                active: $scope.person_tab_active() && !$scope.finance_is_oms() && !$scope.finance_is_dms()
             },
             tab_payer_org: {
                 disabled: event_created && $scope.payer_is_person,
-                active: $scope.org_tab_active() || $scope.finance_is_oms()
+                active: $scope.org_tab_active() || $scope.finance_is_oms() || $scope.finance_is_dms()
             },
             payer_field: {
                 disabled: event_created
@@ -48,13 +49,17 @@ WebMis20.controller('EventPaymentCtrl', ['$scope', 'RefBookService', 'Settings',
 
         $scope.$on('form_state_change', function(event, arg) {
             $scope.finance_type = arg['finance_type'];
-            $scope.formcnf.tab_payer_person.active = !$scope.finance_is_oms();
-            $scope.formcnf.tab_payer_org.active = $scope.finance_is_oms();
+            $scope.formcnf.tab_payer_person.active = !$scope.finance_is_oms() && !$scope.finance_is_dms();
+            $scope.formcnf.tab_payer_org.active = $scope.finance_is_oms() || $scope.finance_is_dms();
             var lc = $scope.event.payment.local_contract;
             if ($scope.finance_is_oms() && $scope.event.info.client.comp_policy){
                 $scope.event.payment.local_contract = {payer_org: $scope.Organisation.get($scope.event.info.client.comp_policy.insurer_id)};
                 $scope.formcnf.payer_field.disabled = true;
-            } else{
+            } else if ($scope.finance_is_dms() && $scope.event.info.client.vol_policy){
+                // TODO: get current policy
+                $scope.event.payment.local_contract = {payer_org: $scope.Organisation.get($scope.event.info.client.vol_policy.insurer_id)};
+                $scope.formcnf.payer_field.disabled = true;
+            } else {
                 if (lc && lc.payer_org) {
                     $scope.event.payment.local_contract.payer_org = null;
                 }

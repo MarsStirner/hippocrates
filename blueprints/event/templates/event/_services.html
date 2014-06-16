@@ -67,7 +67,7 @@
                                    ng-disabled="service.fully_paid"
                                    ng-model="service.amount" valid-number ng-change="service.sum = service.price * service.amount"/>
                         </td>
-                        <td ng-bind="service.paid_count" class="text-right" ng-hide="event.info.event_type.finance.code == 2"></td>
+                        <td ng-bind="service.paid_count" class="text-right" ng-hide="event.info.event_type.finance.code == 2 || event.info.event_type.finance.code == 3"></td>
                         <td ng-bind="service.sum" class="text-right" ng-hide="event.info.event_type.finance.code == 2"></td>
                         <td>
                             <button type="button" class="btn btn-sm btn-danger" title="Убрать из списка услуг"
@@ -86,7 +86,7 @@
             </table>
         </div>
     </div>
-    <blockquote class="novmargin" ng-show="event.services.length && event.info.event_type.finance.code != 2">
+    <blockquote class="novmargin" ng-show="event.services.length && event.info.event_type.finance.code != 2 && event.info.event_type.finance.code != 3">
         <div class="row">
         <div class="col-md-12">
             <span class="text-muted">Итого к оплате: </span>
