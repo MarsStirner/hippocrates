@@ -17,7 +17,8 @@ angular.module('WebMis20.services', []).
                     }
                 }).success(function(data) {
                     t.info = data.result.client_data.client;
-                    t.id_doc = data.result.client_data.id_document;
+                    var id_doc = data.result.client_data.id_document;
+                    t.id_docs = id_doc !== null ? [id_doc] : [];
                     t.reg_address = data.result.client_data.reg_address;
                     t.live_addr = data.result.client_data.live_addr;
                     var cpol = data.result.client_data.compulsory_policy;
@@ -85,6 +86,20 @@ angular.module('WebMis20.services', []).
 
             WMClient.prototype.is_new = function() {
                 return this.client_id === 'new';
+            };
+
+            WMClient.prototype.add_id_doc = function() {
+                this.id_docs.push({
+                    "id": null,
+                    "deleted": 0,
+                    "doc_type": null,
+                    "serial": null,
+                    "number": null,
+                    "beg_date": null,
+                    "end_date": null,
+                    "origin": null,
+                    "doc_text": null
+                });
             };
 
             WMClient.prototype.add_cpolicy = function() {

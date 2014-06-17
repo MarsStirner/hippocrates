@@ -7,8 +7,8 @@ angular.module('WebMis20.controllers').
             $scope.aux = aux;
             $scope.params = aux.getQueryParams(document.location.search);
             $scope.rbGender = RefBookService.get('Gender'); // {{ Enum.get_class_by_name('Gender').rb() | tojson }};
-            $scope.rbDocumentType = RefBookService.get('rbDocumentType');
-            $scope.rbUFMS = RefBookService.get('rbUFMS');
+//            $scope.rbDocumentType = RefBookService.get('rbDocumentType');
+//            $scope.rbUFMS = RefBookService.get('rbUFMS');
 //            $scope.rbPolicyType = RefBookService.get('rbPolicyType');
 //            $scope.rbOrganisation = RefBookService.get('Organisation');
             $scope.rbRelationType = RefBookService.get('rbRelationType');
@@ -43,6 +43,13 @@ angular.module('WebMis20.controllers').
             $scope.editing = {
                 active: true,
                 submit_attempt: false
+            };
+
+            $scope.delete_document = function(entity, doc) {
+                if (confirm('Документ будет удален. Продолжить?')) {
+                    client.delete_record(entity, doc);
+                    client.add_id_doc();
+                }
             };
 
             $scope.add_new_cpolicy = function() {
@@ -118,24 +125,20 @@ angular.module('WebMis20.controllers').
                 });
             };
 
-            $scope.delete_record = function(entity, record) {
-                var modalInstance = $modal.open({
-                    templateUrl: 'modal-deleteRecord.html',
-                    controller: DeleteRecordModalCtrl
-                });
-
-                modalInstance.result.then(function () {
-                    $scope.client.delete_record(entity, record);
-                });
-            };
+//            $scope.delete_record = function(entity, record) {
+//                var modalInstance = $modal.open({
+//                    templateUrl: 'modal-deleteRecord.html',
+//                    controller: DeleteRecordModalCtrl
+//                });
+//
+//                modalInstance.result.then(function () {
+//                    $scope.client.delete_record(entity, record);
+//                });
+//            };
 
             $scope.$on('printing_error', function (event, error) {
                 $scope.alerts.push(error);
             });
-
-            if ($scope.client_id == 'new') {
-                $scope.start_editing();
-            }
 
             $scope.copy_address = function(state, addr_from) {
                 // fixme: как бы эту штуку связать с директивами, как изначально задумывалось...
@@ -149,12 +152,19 @@ angular.module('WebMis20.controllers').
                 }
             };
 
-            client.reload().then(function() {
-                if (!client.compulsory_policies.length) {
-                    client.add_cpolicy();
-                }
-            }, function() {
-                // todo: onerror?
-            });
+            $scope.initialize = function() {
+                client.reload().then(function() {
+                    if (!client.compulsory_policies.length) {
+                        client.add_cpolicy();
+                    }
+                    if (!client.id_docs.length) {
+                        client.add_id_doc();
+                    }
+                }, function() {
+                    // todo: onerror?
+                });
+            };
+
+            $scope.initialize();
         }
     ]);

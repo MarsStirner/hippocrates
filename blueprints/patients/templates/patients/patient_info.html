@@ -32,52 +32,57 @@
 {#            </span>#}
         </div>
 
-        <div ui-alert-list="alerts"></div>
-        <div class="marginal">
-            <form name="clientForm" role="form" novalidate ng-submit="save_client(clientForm)">
-                <legend>Основная информация</legend>
-                {% include "patients/main_info.html" %}
+        <div class="col-md-2">
 
-                <legend>Документ удостоверяющий личность</legend>
-                {% include "patients/_id_doc.html" %}
+        </div>
+        <div class="col-md-10">
+            <div ui-alert-list="alerts"></div>
+            <div class="marginal">
+                <form name="clientForm" role="form" novalidate ng-submit="save_client(clientForm)">
+                    <legend>Основная информация</legend>
+                    {% include "patients/main_info.html" %}
 
-                <legend>Адрес регистрации и проживания</legend>
-                {% include "patients/_address.html" %}
+                    <legend>Документ удостоверяющий личность</legend>
+                    {% include "patients/_id_doc.html" %}
 
-                <legend>Медицинские полисы</legend>
-                {% include "patients/_policy.html" %}
+                    <legend>Адрес регистрации и проживания</legend>
+                    {% include "patients/_address.html" %}
 
-                <legend>Примечания</legend>
-                {% include "patients/_notes.html" %}
+                    <legend>Медицинские полисы</legend>
+                    {% include "patients/_policy.html" %}
 
-                <legend>Особенности пациента</legend>
-                {% include "patients/characteristics.html" %}
+                    <legend>Примечания</legend>
+                    {% include "patients/_notes.html" %}
 
-                <legend>Контактная информация и родственники</legend>
-                {% include "patients/contacts.html" %}
+                    <legend>Особенности пациента</legend>
+                    {% include "patients/characteristics.html" %}
 
-                <legend>Социальный статус</legend>
-                {% include "patients/soc_status.html" %}
+                    <legend>Контактная информация и родственники</legend>
+                    {% include "patients/contacts.html" %}
 
-                <legend>Связи с внешними системами</legend>
-                {% include "patients/identifiers.html" %}
+                    <legend>Социальный статус</legend>
+                    {% include "patients/soc_status.html" %}
 
-                <legend>История изменений документов</legend>
-                {% include "patients/documents.html" %}
+                    <legend>Связи с внешними системами</legend>
+                    {% include "patients/identifiers.html" %}
 
-                <legend>Debug</legend>
-                <pre>[[client | json]]</pre>
+                    <legend>История изменений документов</legend>
+                    {% include "patients/documents.html" %}
 
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="pull-right">
-                            <button ng-click="cancel_editing()" class="btn btn-lg btn-danger">Отменить</button>
-                            <button type="submit" class="btn btn-lg btn-success"
-                                    tooltip="[[clientForm.$invalid ? 'Заполните все обязательные поля': '']]">Сохранить</button>
+                    <legend>Debug</legend>
+                    <pre>[[client | json]]</pre>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="pull-right">
+                                <button ng-click="cancel_editing()" class="btn btn-lg btn-danger">Отменить</button>
+                                <button type="submit" class="btn btn-lg btn-success"
+                                        tooltip="[[clientForm.$invalid ? 'Заполните все обязательные поля': '']]">Сохранить</button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
     </div>
 {% endblock %}

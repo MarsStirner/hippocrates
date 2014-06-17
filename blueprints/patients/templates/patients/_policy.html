@@ -1,9 +1,8 @@
 <h3>Полис ОМС</h3>
 <div ng-repeat="cpol in client.compulsory_policies | filter: flt_not_deleted()">
     <ng-form name="cpolForm">
-        dirty:[[cpolForm.$dirty]], valid:[[cpolForm.$valid]]
         <div class="row">
-            <div class="col-md-8">
+            <div class="col-md-10">
                 <wm-policy p-type="0" id-postfix="c[[$index]]"
                     model-type="cpol.policy_type"
                     model-serial="cpol.serial"
