@@ -297,7 +297,7 @@ class ClientVisualizer(object):
             setattr(live_addr, 'same_as_reg', client.has_identical_addresses())
 
         return {
-            'client': client,
+            'info': client,
             'id_document': client.id_document,
             'reg_address': reg_addr,
             'live_address': live_addr,
