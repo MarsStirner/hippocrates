@@ -29,7 +29,7 @@ class ClientSaveException(Exception):
 
 
 def is_valid_name(name):
-    # todo: ...
+    # todo: только допустимые символы - русские буквы и тире
     return True, ''
 
 
@@ -101,44 +101,37 @@ def set_client_main_info(client, data):
     return client
 
 
-def get_new_document(document_info):
-    doc = ClientDocument()
-    doc.createDatetime = doc.modifyDatetime = datetime.datetime.now()
-    doc.version = 0
-    doc.serial = document_info['serial']
-    doc.number = document_info['number']
-    doc.date = safe_date(document_info['begDate'])
-    doc.endDate = safe_date(document_info['endDate'])
-    doc.origin = document_info['origin']
-    doc.documentType = rbDocumentType.query.filter(
-        rbDocumentType.code == document_info['documentType']['code']).first()
-    return doc
+def add_or_update_doc(client, data):
+    # todo: check for existing records ?
+    doc_id = data.get('id')
+    doc_type = safe_traverse(data, 'doc_type', 'id')
+    if not doc_type:
+        raise ClientSaveException(u'Ошибка сохранения документа: Отсутствует обязательное поле Тип документа')
+    serial = data.get('serial')
+    number = data.get('number')
+    if not number:
+        raise ClientSaveException(u'Ошибка сохранения документа: Отсутствует обязательное поле Номер документа')
+    beg_date = data.get('beg_date')
+    if not beg_date:
+        raise ClientSaveException(u'Ошибка сохранения документа: Отсутствует обязательное поле Дата выдачи')
+    end_date = data.get('end_date')
+    origin = data.get('origin')
+    if not origin:
+        raise ClientSaveException(u'Ошибка сохранения документа: Отсутствует обязательное поле Выдан')
+    deleted = data.get('deleted', 0)
 
-
-def get_modified_document(client, document_info):
-    now = datetime.datetime.now()
-    doc = client.documents.filter(ClientDocument.id == document_info['id']).first()
-
-    def _big_changes(d, d_info):
-        if (d.documentType.code != d_info['documentType']['code']
-                or d.serial != d_info['serial']
-                or d.number != d_info['number']):
-            return True
-        return False
-
-    if _big_changes(doc, document_info):
-        new_doc = get_new_document(document_info)
-        doc.deleted = 2
-        doc.modifyDatetime = now
-        return (doc, new_doc)
+    if doc_id:
+        doc = ClientDocument.query.get(doc_id)
+        doc.serial = serial
+        doc.number = number
+        doc.date = beg_date
+        doc.endDate = end_date
+        doc.origin = origin
+        doc.client = client
+        doc.deleted = deleted
     else:
-        doc.serial = document_info['serial']
-        doc.number = document_info['number']
-        doc.date = safe_date(document_info['begDate'])
-        doc.endDate = safe_date(document_info['endDate'])
-        doc.origin = document_info['origin']
-        doc.modifyDatetime = now
-        return (doc, None)
+        doc = ClientDocument(doc_type, serial, number, beg_date, end_date, origin, client)
+    return doc
 
 
 def add_or_update_policy(client, data):
@@ -157,15 +150,16 @@ def add_or_update_policy(client, data):
     end_date = data.get('end_date')
     insurer = safe_traverse(data, 'insurer', 'id')
     if not insurer:
-        raise ClientSaveException(u'Ошибка сохранения полиса: Отсутствует обязательное поле Выдан')
+        raise ClientSaveException(u'Ошибка сохранения полиса: Отсутствует обязательное поле Страховая '
+                                  u'медицинская организация')
     deleted = data.get('deleted', 0)
 
     if policy_id:
         policy = ClientPolicy.query.get(policy_id)
         policy.serial = serial
         policy.number = number
-        policy.beg_date = beg_date
-        policy.end_date = end_date
+        policy.begDate = beg_date
+        policy.endDate = end_date
         policy.insurer_id = insurer
         policy.client = client
         policy.deleted = deleted
