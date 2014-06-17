@@ -20,13 +20,13 @@
                         <dt>Адрес регистрации:</dt><dd>[[event.info.client.reg_address ? event.info.client.reg_address.text_summary : '']]&nbsp;</dd>
                         <dt>Адрес проживания:</dt><dd>[[event.info.client.loc_address ? event.info.client.loc_address.text_summary : '']]&nbsp;</dd>
                         <dt>Документ:</dt><dd>[[event.info.client.document ? event.info.client.document.documentText : '']]&nbsp;</dd>
-                        <dt>Медицинский полис:</dt><dd>[[event.info.client.comp_policy.policyText]]&nbsp;</dd>
+                        <dt>Медицинский полис:</dt><dd ng-repeat="policy_text in policies">[[policy_text]]&nbsp;</dd>
                     </dl>
                 </div>
                 <div class="col-md-3">
                     <dl class="dl-horizontal novmargin pull-right">
                         <dt>Код пациента:</dt><dd>[[event.info.client.id]]&nbsp;</dd>
-                        <dt>Дата рождения:</dt><dd>[[event.info.client.birthDate_formated]]&nbsp;</dd>
+                        <dt>Дата рождения:</dt><dd>[[event.info.client.birthDate|asDate]]&nbsp;</dd>
                         <dt>Пол:</dt><dd>[[event.info.client.sex.name]]&nbsp;</dd>
                     </dl>
                 </div>
@@ -112,8 +112,8 @@
 {% block modules_js %}
 {{ super() }}
 <script>
-    WebMis20.controller('EventInfoCtrl', ['$scope', 'WMEvent', '$http', 'RefBookService', '$window', 'PrintingService', 'Settings',
-        function ($scope, WMEvent, $http, RefBookService, $window, PrintingService, Settings) {
+    WebMis20.controller('EventInfoCtrl', ['$scope', 'WMEvent', '$http', 'RefBookService', '$window', 'PrintingService', 'Settings', '$filter',
+        function ($scope, WMEvent, $http, RefBookService, $window, PrintingService, Settings, $filter) {
 
         $scope.aux = aux;
         $scope.Organisation = RefBookService.get('Organisation');
@@ -128,6 +128,7 @@
         $scope.editing = {
             submit_attempt: false
         };
+        $scope.policies = [];
 
         $scope.initialize = function() {
             $scope.event.reload().
@@ -137,6 +138,15 @@
 
                     } else {
                         $scope.ps.set_context($scope.event.info.event_type.print_context)
+                    }
+
+                    if ($scope.event.info.client.comp_policy.policyText) {
+                        $scope.policies.push($scope.event.info.client.comp_policy.policyText + ' ('+ $filter('asDate')($scope.event.info.client.comp_policy.begDate) + '-' + $filter('asDate')($scope.event.info.client.comp_policy.endDate) +')');
+                    }
+                    if ($scope.event.info.client.vol_policy.length>0) {
+                        angular.forEach($scope.event.info.client.vol_policy, function (value, key) {
+                            $scope.policies.push(value.policyText + ' ('+ $filter('asDate')(value.begDate) + '-' + $filter('asDate')(value.endDate) + ')');
+                        });
                     }
                 });
             {% if form_role == 'doctor' or form_role == 'admin' %}

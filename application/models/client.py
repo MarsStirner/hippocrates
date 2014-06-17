@@ -191,9 +191,11 @@ class Client(db.Model):
 
     @property
     def voluntaryPolicy(self):
+        policies = []
         for policy in self.policies:
             if policy.policyType and policy.policyType.name.startswith(u"ДМС"):
-                return policy
+                policies.append(policy)
+        return policies
 
     @property
     def phones(self):
