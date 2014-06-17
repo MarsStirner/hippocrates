@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 
 import datetime
+import re
+
 from application.models.client import Client, ClientAllergy, ClientContact, ClientDocument, ClientIdentification, \
     ClientIntoleranceMedicament, DirectClientRelation, ReversedClientRelation, ClientSocStatus, ClientPolicy, \
     BloodHistory, ClientAddress, Address, AddressHouse
 from application.models.exists import (rbDocumentType, rbPolicyType, rbSocStatusClass, rbSocStatusType,
                                        rbBloodType, rbAccountingSystem, rbContactType, rbRelationType)
-from application.lib.utils import string_to_datetime, safe_date, safe_traverse
+from application.lib.utils import string_to_datetime, safe_date, safe_traverse, get_new_uuid
 
 
 # def format_snils(SNILS):
@@ -15,54 +17,88 @@ from application.lib.utils import string_to_datetime, safe_date, safe_traverse
 #         return s[0:3]+'-'+s[3:6]+'-'+s[6:9]+' '+s[9:11]
 #     else:
 #         return u''
-#
-#
+
 def unformat_snils(snils):
     return snils.replace('-', '').replace(' ', '')
-#
-#
-# def calc_snils_сheck_сode(snils):
-#     result = 0
-#     for i in xrange(9):
-#         result += (9-i)*int(snils[i])
-#     result = result % 101
-#     if result == 100:
-#         result = 0
-#     return '%02.2d' % result
-#
-#
-# def check_snils(snils):
-#     raw = unformat_snils(snils)
-#     if len(raw) == 11:
-#         return raw[:9] <= '001001998' or raw[-2:] == calc_snils_сheck_сode(raw)
-#     return False
-#
-#
-# def fix_snils(SNILS):
-#     raw = unformat_snils(SNILS)
-#     return (raw+'0'*11)[:9] + calc_snils_сheck_сode(raw)
-#
-#
-# def check_snils_entered(snils):
-#     SNILS = unformat_snils(snils)
-#     if SNILS:
-#         if len(SNILS) != 11:
-#             result = u'СНИЛС указан с ошибкой. Необходимо ввести 11 цифр!'
-#             return result
-#         elif not check_snils(SNILS):
-#             fixedSNILS = format_snils(fix_snils(SNILS))
-#             result = u'СНИЛС указан с ошибкой.\nПравильный СНИЛС %s\nИсправить?' % fixedSNILS
-#             return result
-#     return True
 
-def create_new_client():
-    new_client = Client()
-    new_client.createDatetime = new_client.modifyDatetime = datetime.datetime.now()
-    new_client.version = 0
-    new_client.bloodNotes = ''
-    new_client.growth = 0
-    new_client.weight = 0
-    return new_client
+
+class ClientSaveException(Exception):
+    def __init__(self, message, data=None):
+        super(ClientSaveException, self).__init__(message)
+        self.data = data
+
+
+def is_valid_name(name):
+    # todo: ...
+    return True, ''
+
+
+def check_correct_snils_code(snils):
+    def calc_snils_check_code(snils):
+        result = 0
+        for i in xrange(9):
+            result += (9-i)*int(snils[i])
+        result = result % 101
+        if result == 100:
+            result = 0
+        return '%02.2d' % result
+
+    return snils[:9] <= '001001998' or snils[-2:] == calc_snils_check_code(snils)
+
+
+def check_snils(snils):
+    if len(snils) != 11:
+        return False, u'Код СНИЛС должен состоять из 11 цифр'
+    elif not check_correct_snils_code(snils):
+        return False, u'Введен некорректный код СНИЛС'
+    return True, ''
+
+
+def set_client_main_info(client, data):
+    # TODO: re validation
+    last_name = data.get('last_name')
+    if not last_name:
+        raise ClientSaveException(u'Отсутствует обязательное поле Фамилия')
+    ok, msg = is_valid_name(last_name)
+    if not ok:
+        raise ClientSaveException(u'Фамилия содержит недопустимые символы: %s' % msg)
+    client.lastName = last_name
+
+    first_name = data.get('first_name')
+    if not first_name:
+        raise ClientSaveException(u'Отсутствует обязательное поле Имя')
+    ok, msg = is_valid_name(first_name)
+    if not ok:
+        raise ClientSaveException(u'Имя содержит недопустимые символы: %s' % msg)
+    client.firstName = first_name
+
+    patr_name = data.get('patr_name', '')
+    ok, msg = is_valid_name(patr_name)
+    if not ok:
+        raise ClientSaveException(u'Отчество содержит недопустимые символы: %s' % msg)
+    client.patrName = patr_name
+
+    birth_date = safe_date(data.get('birth_date'))
+    if not birth_date:
+        raise ClientSaveException(u'Отсутствует обязательное поле Дата рождения')
+    client.birthDate = birth_date
+
+    sex = safe_traverse(data, 'sex', 'id')
+    if not sex:
+        raise ClientSaveException(u'Отсутствует обязательное поле Пол')
+    client.sexCode = sex
+
+    snils = unformat_snils(data.get('snils', ''))
+    if snils:
+        ok, msg = check_snils(snils)
+        if not ok:
+            raise ClientSaveException(u'Ошибка сохранения поля СНИЛС: %s' % msg)
+    client.SNILS = snils
+
+    client.notes = data.get('notes', '')
+    if not client.uuid:
+        client.uuid = get_new_uuid()
+    return client
 
 
 def get_new_document(document_info):
@@ -105,45 +141,37 @@ def get_modified_document(client, document_info):
         return (doc, None)
 
 
-def get_new_policy(policy_info):
-    policy = ClientPolicy()
-    policy.createDatetime = policy.modifyDatetime = datetime.datetime.now()
-    policy.version = 0
-    policy.policyType = rbPolicyType.query.filter(rbPolicyType.code == policy_info['policyType']['code']).first()
-    policy.serial = policy_info.get('serial')
-    policy.number = policy_info['number']
-    policy.begDate = policy_info.get('begDate')
-    policy.endDate = policy_info.get('endDate')
-    policy.insurer_id = policy_info['insurer']['id']
-    return policy
+def add_or_update_policy(client, data):
+    # todo: check for existing records ?
+    policy_id = data.get('id')
+    pol_type = safe_traverse(data, 'policy_type', 'id')
+    if not pol_type:
+        raise ClientSaveException(u'Ошибка сохранения полиса: Отсутствует обязательное поле Тип полиса')
+    serial = data.get('serial')
+    number = data.get('number')
+    if not number:
+        raise ClientSaveException(u'Ошибка сохранения полиса: Отсутствует обязательное поле Номер полиса')
+    beg_date = data.get('beg_date')
+    if not beg_date:
+        raise ClientSaveException(u'Ошибка сохранения полиса: Отсутствует обязательное поле Дата выдачи')
+    end_date = data.get('end_date')
+    insurer = safe_traverse(data, 'insurer', 'id')
+    if not insurer:
+        raise ClientSaveException(u'Ошибка сохранения полиса: Отсутствует обязательное поле Выдан')
+    deleted = data.get('deleted', 0)
 
-
-def get_modified_policy(client, policy_info):
-    now = datetime.datetime.now()
-    policy = client.policies.filter(ClientPolicy.id == policy_info['id']).first()
-
-    if policy_info['deleted'] == 1:
-        policy.deleted = 1
-        return [policy, ]
-
-    def _big_changes(p, p_info):
-        if (p.policyType.code != p_info['policyType']['code']
-                or p.serial != p_info['serial']
-                or p.number != p_info['number']):
-            return True
-        return False
-
-    if _big_changes(policy, policy_info):
-        new_policy = get_new_policy(policy_info)
-        policy.deleted = 2
-        policy.modifyDatetime = now
-        return (policy, new_policy)
+    if policy_id:
+        policy = ClientPolicy.query.get(policy_id)
+        policy.serial = serial
+        policy.number = number
+        policy.beg_date = beg_date
+        policy.end_date = end_date
+        policy.insurer_id = insurer
+        policy.client = client
+        policy.deleted = deleted
     else:
-        policy.begDate = policy_info['begDate']
-        policy.endDate = policy_info['endDate']
-        policy.insurer_id = policy_info['insurer']['id']
-        policy.modifyDatetime = now
-        return (policy, None)
+        policy = ClientPolicy(pol_type, serial, number, beg_date, end_date, insurer, client)
+    return policy
 
 
 def get_new_address(addr_info):
