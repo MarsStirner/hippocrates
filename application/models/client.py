@@ -66,10 +66,9 @@ class Client(db.Model):
     loc_address = db.relationship(u'ClientAddress',
                                   primaryjoin="and_(Client.id==ClientAddress.client_id, ClientAddress.type==1, ClientAddress.deleted==0)",
                                   order_by="desc(ClientAddress.id)", uselist=False)
-    socStatuses = db.relationship(u'ClientSocStatus',
-                                  primaryjoin='and_(ClientSocStatus.deleted == 0, ClientSocStatus.client_id==Client.id)',
-                                  backref=db.backref('client'),
-                                  lazy='dynamic') #todo: filter_by_date
+    soc_statuses = db.relationship(u'ClientSocStatus',
+                                   primaryjoin='and_(ClientSocStatus.deleted == 0, ClientSocStatus.client_id==Client.id)',
+                                   backref=db.backref('client')) #todo: filter_by_date
     #  primaryjoin='and_(ClientSocStatus.deleted == 0, ClientSocStatus.client_id==Client.id,'
     #                                           'or_(ClientSocStatus.endDate == None, ClientSocStatus.endDate>={0}))'.format(
     #                                   datetime.date.today()))
@@ -833,6 +832,17 @@ class ClientSocStatus(db.Model):
 
     def __int__(self):
         return self.id
+
+    def __json__(self):
+        return {
+            'id': self.id,
+            'ss_type': self.socStatusType,
+            'ss_class': self.soc_status_class,
+            'deleted': self.deleted,
+            'beg_date': self.begDate,
+            'end_date': self.endDate,
+            'self_document': self.self_document
+        }
 
 
 class ClientPolicy(db.Model):

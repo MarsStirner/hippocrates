@@ -1,59 +1,90 @@
-<table class="table table-condensed" ng-if="client.client_info['socStatuses']" ng-hide="editing_is_active()">
-    <thead>
-    <tr>
-        <th>Класс</th>
-        <th>Тип</th>
-        <th>Дата начала</th>
-        <th>Дата окончания</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr ng-repeat="status in client.client_info['socStatuses']">
-        <td>[[status.className]]</td>
-        <td>[[status.typeName]]</td>
-        <td>[[status.begDate]]</td>
-        <td>[[status.endDate]]</td>
-    </tr>
-    </tbody>
-</table>
-
-<div id="soc_status_subform" ng-show="editing_is_active()">
-    <table class="table table-condensed">
-        <thead>
-        <tr>
-            <th>Класс</th>
-            <th>Тип</th>
-            <th>Дата начала</th>
-            <th>Дата окончания</th>
-            <th></th>
-        </tr>
-        </thead>
-        <tbody>
-            <tr ng-repeat="status in client.client_info.socStatuses">
-                <td class="col-md-4" ng-hide="status.deleted">
-                    {{ form.soc_status_class(class="form-control", autocomplete="off", ng_model="status.classCode") }}
-                </td>
-                <td class="col-md-4" ng-hide="status.deleted">
-                    {{ form.soc_status_type(class="form-control", autocomplete="off", ng_model="status.typeCode") }}
-                </td>
-                <td class="col-md-2" ng-hide="status.deleted">
-                    {{ form.soc_status_begDate(class="form-control", autocomplete="off", datepicker_popup="dd.MM.yyyy",
-                    ng_model="status.begDate") }}
-                </td>
-                <td class="col-md-2" ng-hide="status.deleted">
-                    {{ form.soc_status_endDate(class="form-control", autocomplete="off", datepicker_popup="dd.MM.yyyy",
-                    ng_model="status.endDate") }}
-                </td>
-                <td class="col-md-1" ng-hide="status.deleted">
-                    <a class="btn btn-sm btn-default" href="" title="Удалить текущую строку"
-                       ng-click="delete_record('socStatuses', status)">
-                        <span class="glyphicon glyphicon-trash"></span>
-                    </a>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-    <button type="button" ng-click="client.add_soc_status()" class="btn btn-primary btn-sm pull-right">
-        <span class="glyphicon glyphicon-plus" title="Добавить новую запись"></span>Добавить
-    </button>
+<h4>Инвалидность</h4>
+<div ng-repeat="socstat in client.invalidities | filter: flt_not_deleted()">
+    <ng-form name="socStatInvalidityForm">
+        dirty:[[socStatInvalidityForm.$dirty]], valid:[[socStatInvalidityForm.$valid]]
+        <div class="row">
+            <div class="col-md-8">
+                <wm-soc-status ss-class="2" id-postfix="i[[$index]]"
+                    model-type="socstat.ss_type"
+                    model-beg-date="socstat.beg_date"
+                    model-end-date="socstat.end_date"
+                    edit-mode="socstat.id ? edit.activated : true">
+                </wm-soc-status>
+            </div>
+            <div class="col-md-1">
+                <div class="row" ng-show="socstat.id">
+                    <button type="button" class="btn btn-primary btn-block marginal"
+                            ng-click="edit.activated=true">Редактировать</button>
+                </div>
+                <div class="row">
+                    <button type="button" class="btn btn-danger btn-block marginal"
+                            ng-click="delete_record('invalidities', socstat)">Удалить</button>
+                </div>
+            </div>
+        </div>
+    </ng-form>
+</div>
+<div>
+    <button type="button" class="btn btn-primary marginal"
+            ng-click="client.add_soc_status('invalidities', 2)">Добавить инвалидность</button>
+</div>
+<h4>Занятость</h4>
+<div ng-repeat="socstat in client.works | filter: flt_not_deleted()">
+    <ng-form name="socStatWorkForm">
+        dirty:[[socStatWorkForm.$dirty]], valid:[[socStatWorkForm.$valid]]
+        <div class="row">
+            <div class="col-md-8">
+                <wm-soc-status ss-class="3" id-postfix="w[[$index]]"
+                    model-type="socstat.ss_type"
+                    model-beg-date="socstat.beg_date"
+                    model-end-date="socstat.end_date"
+                    edit-mode="socstat.id ? edit.activated : true">
+                </wm-soc-status>
+            </div>
+            <div class="col-md-1">
+                <div class="row" ng-show="socstat.id">
+                    <button type="button" class="btn btn-primary btn-block marginal"
+                            ng-click="edit.activated=true">Редактировать</button>
+                </div>
+                <div class="row">
+                    <button type="button" class="btn btn-danger btn-block marginal"
+                            ng-click="delete_record('works', socstat)">Удалить</button>
+                </div>
+            </div>
+        </div>
+    </ng-form>
+</div>
+<div>
+    <button type="button" class="btn btn-primary marginal"
+            ng-click="client.add_soc_status('works', 3)">Добавить занятость</button>
+</div>
+<h4>Гражданство</h4>
+<div ng-repeat="socstat in client.nationalities | filter: flt_not_deleted()">
+    <ng-form name="socStatNationalityForm">
+        dirty:[[socStatNationalityForm.$dirty]], valid:[[socStatNationalityForm.$valid]]
+        <div class="row">
+            <div class="col-md-8">
+                <wm-soc-status ss-class="4" id-postfix="n[[$index]]"
+                    model-type="socstat.ss_type"
+                    model-beg-date="socstat.beg_date"
+                    model-end-date="socstat.end_date"
+                    edit-mode="socstat.id ? edit.activated : true">
+                </wm-soc-status>
+            </div>
+            <div class="col-md-1">
+                <div class="row" ng-show="socstat.id">
+                    <button type="button" class="btn btn-primary btn-block marginal"
+                            ng-click="edit.activated=true">Редактировать</button>
+                </div>
+                <div class="row">
+                    <button type="button" class="btn btn-danger btn-block marginal"
+                            ng-click="delete_record('nationalities', socstat)">Удалить</button>
+                </div>
+            </div>
+        </div>
+    </ng-form>
+</div>
+<div>
+    <button type="button" class="btn btn-primary marginal"
+            ng-click="client.add_soc_status('nationalities', 4)">Добавить гражданство</button>
 </div>

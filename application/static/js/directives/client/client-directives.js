@@ -72,5 +72,45 @@ angular.module('WebMis20.directives').
                 templateUrl: 'policy-ui.html'
             };
         }
+    ]).
+    directive('wmSocStatus', ['RefBookService',
+        function(RefBookService) {
+            return {
+                restrict: 'E',
+                require: '^form',
+                scope: {
+                    ssClass: '@',
+                    idPostfix: '@',
+                    modelType: '=',
+                    modelBegDate: '=',
+                    modelEndDate: '=',
+                    edit_mode: '&editMode'
+                },
+                link: function(scope, elm, attrs, formCtrl) {
+                    scope.socStatusForm = formCtrl;
+                    scope.rbSocStatusType = RefBookService.get('rbSocStatusType');
+
+                    scope.filter_soc_status = function(s_class) {
+                        return function(elem) {
+                            var classes_codes = elem.classes.map(function(s_class){
+                                return s_class.code;
+                                })
+                            return classes_codes.indexOf(s_class) != -1;
+                        };
+                    };
+
+                    // todo: fix? промежуточные модели для ui-select...
+                    // вероятно проблема в том, что ui-select в качестве модели нужен объект в скоупе
+                    scope.intmd_models = {};
+                    scope.intmd_models.type = scope.modelType;
+                    scope.$watch('intmd_models.type', function(n, o) {
+                        if (n !== o) {
+                            scope.modelType = n;
+                        }
+                    });
+                },
+                templateUrl: 'socstatus-ui.html'
+            };
+        }
     ])
 ;
