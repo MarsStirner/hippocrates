@@ -57,7 +57,7 @@ angular.module('WebMis20.controllers').
                         '. Продолжить?'
                     ].join('');
                     if (confirm(msg)) {
-                        client.delete_record('compulsory_policies', cur_cpol);
+                        client.delete_record('compulsory_policies', cur_cpol, 2);
                         client.add_cpolicy();
                     }
                 } else {
@@ -67,7 +67,7 @@ angular.module('WebMis20.controllers').
 
             $scope.delete_policy = function(entity, policy) {
                 if (confirm('Полис будет удален. Продолжить?')) {
-                    client.delete_record(entity, policy)
+                    client.delete_record(entity, policy);
                 }
             };
 
@@ -107,13 +107,11 @@ angular.module('WebMis20.controllers').
                 if (form.$invalid) {
                     return false;
                 }
-                $scope.client.save()
-                .then(function(new_client_id) {
+                $scope.client.save().then(function(new_client_id) {
                     if ($scope.client_id == 'new') {
                         window.open(url_client_html + '?client_id=' + new_client_id, '_self');
                     } else {
                         $scope.client.reload();
-                        $scope.editing.active = false;
                     }
                 }, function(reason) {
                     alert(reason);

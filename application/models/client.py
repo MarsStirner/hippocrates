@@ -16,28 +16,69 @@ class Client(db.Model):
         db.Index(u'lastName', u'lastName', u'firstName', u'patrName', u'birthDate', u'id'),
     )
 
-    id = db.Column(db.Integer, primary_key=True)
-    createDatetime = db.Column(db.DateTime, nullable=False)
-    createPerson_id = db.Column(db.Integer, index=True)
-    modifyDatetime = db.Column(db.DateTime, nullable=False)
-    modifyPerson_id = db.Column(db.Integer, index=True)
-    deleted = db.Column(db.Integer, nullable=False, server_default=u"'0'")
-    lastName = db.Column(db.Unicode(30), nullable=False)
-    firstName = db.Column(db.Unicode(30), nullable=False)
-    patrName = db.Column(db.Unicode(30), nullable=False)
-    birthDate = db.Column(db.Date, nullable=False, index=True)
-    sexCode = db.Column("sex", db.Integer, nullable=False)
-    SNILS = db.Column(db.String(11), nullable=False, index=True)
-    bloodType_id = db.Column(db.ForeignKey('rbBloodType.id'), index=True)
+    id = db.Column(db.Integer,
+                   primary_key=True)
+    createDatetime = db.Column(db.DateTime,
+                               nullable=False,
+                               default=datetime.datetime.now)
+    createPerson_id = db.Column(db.Integer,
+                                index=True,
+                                default=safe_current_user_id)
+    modifyDatetime = db.Column(db.DateTime,
+                               nullable=False,
+                               default=datetime.datetime.now,
+                               onupdate=datetime.datetime.now)
+    modifyPerson_id = db.Column(db.Integer,
+                                index=True,
+                                default=safe_current_user_id,
+                                onupdate=safe_current_user_id)
+    deleted = db.Column(db.Integer,
+                        nullable=False,
+                        server_default=u"'0'",
+                        default=0)
+    lastName = db.Column(db.Unicode(30),
+                         nullable=False)
+    firstName = db.Column(db.Unicode(30),
+                          nullable=False)
+    patrName = db.Column(db.Unicode(30),
+                         nullable=False)
+    birthDate = db.Column(db.Date,
+                          nullable=False,
+                          index=True)
+    sexCode = db.Column("sex",
+                        db.Integer,
+                        nullable=False)
+    SNILS = db.Column(db.String(11),
+                      nullable=False,
+                      index=True)
+    bloodType_id = db.Column(db.ForeignKey('rbBloodType.id'),
+                             index=True)
     bloodDate = db.Column(db.Date)
-    bloodNotes = db.Column(db.String, nullable=False)
-    growth = db.Column(db.String(16), nullable=False)
-    weight = db.Column(db.String(16), nullable=False)
-    notes = db.Column(db.String, nullable=False)
-    version = db.Column(db.Integer, nullable=False)
-    birthPlace = db.Column(db.String(128), nullable=False, server_default=u"''")
-    embryonalPeriodWeek = db.Column(db.String(16), nullable=False, server_default=u"''")
-    uuid_id = db.Column(db.Integer, db.ForeignKey('UUID.id'), nullable=False, index=True,
+    bloodNotes = db.Column(db.String,
+                           nullable=False,
+                           default='')
+    growth = db.Column(db.String(16),
+                       nullable=False,
+                       default='0')
+    weight = db.Column(db.String(16),
+                       nullable=False,
+                       default='0')
+    notes = db.Column(db.String,
+                      nullable=False,
+                      default='')
+    version = db.Column(db.Integer,
+                        nullable=False,
+                        default=0)
+    birthPlace = db.Column(db.String(128),
+                           nullable=False,
+                           server_default=u"''")
+    embryonalPeriodWeek = db.Column(db.String(16),
+                                    nullable=False,
+                                    server_default=u"''")
+    uuid_id = db.Column(db.Integer,
+                        db.ForeignKey('UUID.id'),
+                        nullable=False,
+                        index=True,
                         server_default=u"'0'")
 
     uuid = db.relationship('UUID')
@@ -842,25 +883,66 @@ class ClientPolicy(db.Model):
         db.Index(u'client_insurer', u'client_id', u'insurer_id')
     )
 
-    id = db.Column(db.Integer, primary_key=True)
-    createDatetime = db.Column(db.DateTime, nullable=False)
-    createPerson_id = db.Column(db.Integer, index=True)
-    modifyDatetime = db.Column(db.DateTime, nullable=False)
-    modifyPerson_id = db.Column(db.Integer, index=True)
-    deleted = db.Column(db.Integer, nullable=False, server_default=u"'0'")
-    clientId = db.Column("client_id", db.ForeignKey('Client.id'), nullable=False)
-    insurer_id = db.Column(db.Integer, db.ForeignKey('Organisation.id'), index=True)
-    policyType_id = db.Column(db.Integer, db.ForeignKey('rbPolicyType.id'), index=True)
-    serial = db.Column(db.String(16), nullable=False)
-    number = db.Column(db.String(16), nullable=False)
-    begDate = db.Column(db.Date, nullable=False)
+    id = db.Column(db.Integer,
+                   primary_key=True)
+    createDatetime = db.Column(db.DateTime,
+                               nullable=False,
+                               default=datetime.datetime.now)
+    createPerson_id = db.Column(db.Integer,
+                                index=True,
+                                default=safe_current_user_id)
+    modifyDatetime = db.Column(db.DateTime,
+                               nullable=False,
+                               default=datetime.datetime.now,
+                               onupdate=datetime.datetime.now)
+    modifyPerson_id = db.Column(db.Integer,
+                                index=True,
+                                default=safe_current_user_id,
+                                onupdate=safe_current_user_id)
+    deleted = db.Column(db.Integer,
+                        nullable=False,
+                        server_default=u"'0'",
+                        default=0)
+    clientId = db.Column("client_id",
+                         db.ForeignKey('Client.id'),
+                         nullable=False)
+    insurer_id = db.Column(db.Integer,
+                           db.ForeignKey('Organisation.id'),
+                           index=True)
+    policyType_id = db.Column(db.Integer,
+                              db.ForeignKey('rbPolicyType.id'),
+                              index=True)
+    serial = db.Column(db.String(16),
+                       nullable=False)
+    number = db.Column(db.String(16),
+                       nullable=False)
+    begDate = db.Column(db.Date,
+                        nullable=False)
     endDate = db.Column(db.Date)
-    name = db.Column(db.Unicode(64), nullable=False, server_default=u"''")
-    note = db.Column(db.Unicode(200), nullable=False, server_default=u"''")
-    version = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    name = db.Column(db.Unicode(64),
+                     nullable=False,
+                     server_default=u"''",
+                     default=u'')
+    note = db.Column(db.Unicode(200),
+                     nullable=False,
+                     server_default=u"''",
+                     default=u'')
+    version = db.Column(db.Integer,
+                        nullable=False,
+                        server_default=u"'0'",
+                        default=0)
 
     insurer = db.relationship(u'Organisation', lazy=False)
     policyType = db.relationship(u'rbPolicyType', lazy=False)
+
+    def __init__(self, pol_type, serial, number, beg_date, end_date, insurer, client):
+        self.policyType_id = int(pol_type) if pol_type else None
+        self.serial = serial
+        self.number = number
+        self.begDate = beg_date
+        self.endDate = end_date
+        self.insurer_id = int(insurer) if insurer else None
+        self.client = client
 
     def __unicode__(self):
         return (' '.join([self.policyType.name,

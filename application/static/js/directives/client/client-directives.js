@@ -35,7 +35,8 @@ angular.module('WebMis20.directives').
                     modelBegDate: '=',
                     modelEndDate: '=',
                     modelInsurer: '=',
-                    edit_mode: '&editMode'
+                    edit_mode: '&editMode',
+                    modelPolicy: '='
                 },
                 link: function(scope, elm, attrs, formCtrl) {
                     scope.policyForm = formCtrl;
@@ -52,6 +53,12 @@ angular.module('WebMis20.directives').
                             return codes.indexOf(elem.code) != -1;
                         };
                     };
+
+                    scope.$watch('policyForm.$dirty', function(n, o) {
+                        if (n !== o) {
+                            scope.modelPolicy.dirty = n;
+                        }
+                    });
 
                     // todo: fix? промежуточные модели для ui-select...
                     // вероятно проблема в том, что ui-select в качестве модели нужен объект в скоупе
