@@ -271,7 +271,7 @@ class Client(db.Model):
             'snils': self.SNILS,
             'full_name': self.nameText,
             'notes': self.notes,
-            # 'work_org_id': self.works[0].org_id if self.works else None,
+            'work_org_id': self.works[0].org_id if self.works else None,
             # 'comp_policy': self.compulsoryPolicy,
             # 'vol_policy': self.voluntaryPolicy,
             # 'direct_relations': self.direct_relations.all(),
