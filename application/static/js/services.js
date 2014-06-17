@@ -71,6 +71,11 @@ angular.module('WebMis20.services', []).
                 };
                 if (this.info.dirty) { data.info = this.info; }
 
+                var changed_id_docs = this.id_docs.filter(function(el) {
+                    return el.dirty;
+                }).concat(this.changes.id_docs || []);
+                data.id_docs = changed_id_docs.length ? changed_id_docs : undefined;
+
                 var changed_cpolicies = this.compulsory_policies.filter(function(el) {
                     return el.dirty;
                 }).concat(this.changes.compulsory_policies || []);
