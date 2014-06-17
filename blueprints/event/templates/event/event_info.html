@@ -7,7 +7,7 @@
         {% include "_breadcrumbs.html" %}
         <legend xmlns="http://www.w3.org/1999/html" wm-page-header>
             <h2>[[event.is_new() ? 'Создание обращения' : 'Обращение № ' + event.info.external_id]], пациент
-                <a href="{{ url_for('patients.patient') }}?client_id=[[event.info.client_id]]">[[ event.info.client.fullName ]]</a>
+                <a href="{{ url_for('patients.patient') }}?client_id=[[event.info.client_id]]">[[ event.info.client.client.full_name ]]</a>
             </h2>
         </legend>
 
@@ -140,12 +140,12 @@
                         $scope.ps.set_context($scope.event.info.event_type.print_context)
                     }
 
-                    if ($scope.event.info.client.comp_policy.policyText) {
-                        $scope.policies.push($scope.event.info.client.comp_policy.policyText + ' ('+ $filter('asDate')($scope.event.info.client.comp_policy.begDate) + '-' + $filter('asDate')($scope.event.info.client.comp_policy.endDate) +')');
+                    if ($scope.event.info.client.compulsory_policy.policy_text) {
+                        $scope.policies.push($scope.event.info.client.compulsory_policy.policy_text + ' ('+ $filter('asDate')($scope.event.info.client.compulsory_policy.beg_date) + '-' + $filter('asDate')($scope.event.info.client.compulsory_policy.end_date) +')');
                     }
-                    if ($scope.event.info.client.vol_policy.length>0) {
-                        angular.forEach($scope.event.info.client.vol_policy, function (value, key) {
-                            $scope.policies.push(value.policyText + ' ('+ $filter('asDate')(value.begDate) + '-' + $filter('asDate')(value.endDate) + ')');
+                    if ($scope.event.info.client.voluntary_policies.length>0) {
+                        angular.forEach($scope.event.info.client.voluntary_policies, function (value, key) {
+                            $scope.policies.push(value.policy_text + ' ('+ $filter('asDate')(value.beg_date) + '-' + $filter('asDate')(value.end_date) + ')');
                         });
                     }
                 });
