@@ -5,6 +5,7 @@ angular.module('WebMis20.services', []).
         function($http, $q, $rootScope) {
             var WMClient = function(client_id) {
                 this.client_id = client_id;
+                this.changes = {}; // deleted items to save
             };
 
             WMClient.prototype.reload = function() {
@@ -16,7 +17,8 @@ angular.module('WebMis20.services', []).
                     }
                 }).success(function(data) {
                     t.info = data.result.client_data.client;
-                    t.id_doc = data.result.client_data.id_document;
+                    var id_doc = data.result.client_data.id_document;
+                    t.id_docs = id_doc !== null ? [id_doc] : [];
                     t.reg_address = data.result.client_data.reg_address;
                     t.live_addr = data.result.client_data.live_addr;
                     var cpol = data.result.client_data.compulsory_policy;
@@ -35,35 +37,69 @@ angular.module('WebMis20.services', []).
                     deferred.resolve();
     //              $rootScope.$broadcast('client_loaded');
                 }).error(function(data, status) {
-                    $rootScope.$broadcast('load_error', {
-                        text: 'Ошибка при загрузке клиента ' + t.id,
-                        data: data,
-                        code: status,
-                        type: 'danger'
-                    });
-                    deferred.reject();
+//                    $rootScope.$broadcast('load_error', {
+//                        text: 'Ошибка при загрузке клиента ' + t.id,
+//                        data: data,
+//                        code: status,
+//                        type: 'danger'
+//                    });
+                    var message = data.result;
+                    deferred.reject(message);
 //                    throw 'Error requesting Client, id = ' + t.client_id;
                 });
                 return deferred.promise;
             };
 
             WMClient.prototype.save = function() {
+                var data = this.get_changed_data();
                 var t = this;
                 var deferred = $q.defer();
-                $http.post(url_client_save, {
-                    client_info: this.client_info
-                }).success(function(value, headers) {
-                    deferred.resolve(value['result']);
-                }).error(function(httpResponse) {
-                    var r = httpResponse.data;
-                    var message = [r['result']['name'], ':\nНе заполнено поле ', r['result']['data']].join('');
-                    deferred.reject(message);
-                });
+                $http.post(url_client_save, data).
+                    success(function(value, headers) {
+                        deferred.resolve(value['result']);
+                    }).
+                    error(function(httpResponse) {
+                        var message = httpResponse.result.name;
+                        deferred.reject(message);
+                    });
                 return deferred.promise;
+            };
+
+            WMClient.prototype.get_changed_data = function() {
+                var data = {
+                    client_id: this.client_id
+                };
+                if (this.info.dirty) { data.info = this.info; }
+
+                var changed_cpolicies = this.compulsory_policies.filter(function(el) {
+                    return el.dirty;
+                }).concat(this.changes.compulsory_policies || []);
+                data.compulsory_policies = changed_cpolicies.length ? changed_cpolicies : undefined;
+
+                var changed_vpolicies = this.voluntary_policies.filter(function(el) {
+                    return el.dirty;
+                }).concat(this.changes.voluntary_policies || []);
+                data.voluntary_policies = changed_vpolicies.length ? changed_vpolicies : undefined;
+
+                return data;
             };
 
             WMClient.prototype.is_new = function() {
                 return this.client_id === 'new';
+            };
+
+            WMClient.prototype.add_id_doc = function() {
+                this.id_docs.push({
+                    "id": null,
+                    "deleted": 0,
+                    "doc_type": null,
+                    "serial": null,
+                    "number": null,
+                    "beg_date": null,
+                    "end_date": null,
+                    "origin": null,
+                    "doc_text": null
+                });
             };
 
             WMClient.prototype.add_cpolicy = function() {
@@ -152,9 +188,13 @@ angular.module('WebMis20.services', []).
                 });
             };
 
-            WMClient.prototype.delete_record = function(entity, record) {
+            WMClient.prototype.delete_record = function(entity, record, deleted) {
+                if (arguments.length < 3) {
+                    deleted = 1;
+                }
                 if (record.id) {
-                    record.deleted = 1;
+                    record.deleted = deleted;
+                    this.changes[entity] = record;
                 } else {
                     var idx = this[entity].indexOf(record);
                     this[entity].splice(idx, 1);

@@ -5,7 +5,7 @@ from flask import abort, request
 from flask.helpers import make_response
 
 from application.systemwide import db
-from application.lib.utils import jsonify, get_new_uuid, string_to_datetime, safe_date
+from application.lib.utils import jsonify, string_to_datetime, safe_date
 from blueprints.patients.app import module
 from application.lib.sphinx_search import SearchPatient
 from application.lib.jsonify import ClientVisualizer
@@ -13,12 +13,6 @@ from blueprints.patients.lib.utils import *
 
 
 __author__ = 'mmalkov'
-
-
-class ClientSaveException(Exception):
-    def __init__(self, message, data=None):
-        super(ClientSaveException, self).__init__(message)
-        self.data = data
 
 
 @module.errorhandler(ClientSaveException)
@@ -99,169 +93,163 @@ def parse_id(request_data, identifier, allow_empty=False):
 @module.route('/api/save_patient_info.json', methods=['POST'])
 def api_patient_save():
     client_data = request.json
-    client_id = parse_id(client_data, 'id', True)
+    client_id = parse_id(client_data, 'client_id', True)
     if client_id is False:
         return abort(404)
 
-    if client_id:
-        client = Client.query.get(client_id)
-    else:
-        client = create_new_client()
-        client_info = client_data.get('info')
-        if not client_info:
-            raise ClientSaveException(u'Client main info is empty')
-        # TODO: validation
-        client.lastName = client_info['last_name']
-        client.firstName = client_info['first_name']
-        client.patrName = client_info['patr_name'] or ''
-        client.sexCode = client_info['sex']['id']
-        client.SNILS = unformat_snils(client_info['snils']) if client_info['snils'] else ''
-        client.notes = client_info['notes'] if client_info['notes'] else ''
-        client.birthDate = safe_date(client_info['birth_date'])
-        if not client.uuid:
-            client.uuid = get_new_uuid()
-        db.session.add(client)
-
-
     try:
+        if client_id:
+            client = Client.query.get(client_id)
+            client_info = client_data.get('info')
+            if client_info:
+                client = set_client_main_info(client, client_info)
+                db.session.add(client)
 
-        if client_info['document'].get('documentType'):
-            if not client.document:
-                client_document = get_new_document(client_info['document'])
-                client.documents.append(client_document)
-            else:
-                docs = get_modified_document(client, client_info['document'])
-                db.session.add(docs[0])
-                if docs[1]:
-                    client.documents.append(docs[1])
+            cpol_info = client_data.get('compulsory_policies')
+            if cpol_info:
+                for cpol in cpol_info:
+                    pol = add_or_update_policy(client, cpol)
+                    db.session.add(pol)
 
-        if client_info['compulsoryPolicy'].get('policyType'):
-            if not client.compulsoryPolicy:
-                policy = get_new_policy(client_info['compulsoryPolicy'])
-                client.policies.append(policy)
-            else:
-                policies = get_modified_policy(client, client_info['compulsoryPolicy'])
-                db.session.add(policies[0])
-                if policies[1]:
-                    client.policies.append(policies[1])
+            vpol_info = client_data.get('voluntary_policies')
+            if vpol_info:
+                for vpol in vpol_info:
+                    pol = add_or_update_policy(client, vpol)
+                    db.session.add(pol)
+        else:
+            client = Client()
+            client_info = client_data.get('info')
+            if not client_info:
+                raise ClientSaveException(u'Client main info is empty')
+            client = set_client_main_info(client, client_info)
+            db.session.add(client)
 
-        if client_info['voluntaryPolicy'].get('policyType'):
-            if not client.voluntaryPolicy:
-                policy = get_new_policy(client_info['voluntaryPolicy'])
-                client.policies.append(policy)
-            else:
-                policies = get_modified_policy(client, client_info['voluntaryPolicy'])
-                db.session.add(policies[0])
-                if policies[1]:
-                    client.policies.append(policies[1])
+            cpol_info = client_data.get('compulsory_policies')
+            if cpol_info:
+                for cpol in cpol_info:
+                    pol = add_or_update_policy(client, cpol)
+                    db.session.add(pol)
 
-        reg_address = client_info['regAddress']
-        actual_reg_address = None
-        if reg_address is not None and (reg_address.get('address') or reg_address.get('free_input')):
-            reg_address['type'] = 0
-            if not client.reg_address:
-                actual_reg_address = address = get_new_address(reg_address)
-                client.addresses.append(address)
-            else:
-                addresses = get_modified_address(client, reg_address)
-                db.session.add(addresses[0])
-                if addresses[1]:
-                    actual_reg_address = addresses[1]
-                    client.addresses.append(actual_reg_address)
+            vpol_info = client_data.get('voluntary_policies')
+            if vpol_info:
+                for vpol in vpol_info:
+                    pol = add_or_update_policy(client, vpol)
+                    db.session.add(pol)
 
-        live_address = client_info['liveAddress']
 
-        if live_address is not None:
-            # TODO: check AND FIX!
-            if live_address.get('same_as_reg', False) and actual_reg_address:
-                address = get_reg_address_copy(client, actual_reg_address)
-                client.addresses.append(address)
-            elif live_address.get('address') or live_address.get('free_input'):
-                live_address['type'] = 1
-                if not client.loc_address:
-                    address = get_new_address(live_address)
-                    client.addresses.append(address)
-                else:
-                    addresses = get_modified_address(client, live_address)
-                    db.session.add(addresses[0])
-                    if addresses[1]:
-                        client.addresses.append(addresses[1])
 
-        for ss_info in client_info['socStatuses']:
-            if not 'id' in ss_info:
-                ss = get_new_soc_status(ss_info)
-                client.socStatuses.append(ss)
-            else:
-                ss = get_modified_soc_status(client, ss_info)
-                db.session.add(ss)
-
-        for blood_info in client_info['bloodHistory']:
-            if not 'id' in blood_info:
-                blood = get_new_blood(blood_info)
-                client.blood_history.append(blood)
-
-        for allergy_info in client_info['allergies']:
-            if not 'id' in allergy_info:
-                allergy = get_new_allergy(allergy_info)
-                client.allergies.append(allergy)
-            else:
-                allergy = get_modified_allergy(client, allergy_info)
-                db.session.add(allergy)
-
-        for intolerance_info in client_info['intolerances']:
-            if not 'id' in intolerance_info:
-                intolerance = get_new_intolerance(intolerance_info)
-                client.intolerances.append(intolerance)
-            else:
-                intolerance = get_modified_intolerance(client, intolerance_info)
-                db.session.add(intolerance)
-
-        for id_info in client_info['identifications']:
-            if not 'id' in id_info:
-                id_ext = get_new_identification(id_info)
-                client.identifications.append(id_ext)
-            else:
-                id_ext = get_modified_identification(client, id_info)
-                db.session.add(id_ext)
-
-        for relation_info in client_info['direct_relations']:
-            if not 'id' in relation_info:
-                rel = get_new_direct_relation(relation_info)
-                client.direct_relations.append(rel)
-            else:
-                rel = get_modified_direct_relation(client, relation_info)
-                db.session.add(rel)
-
-        for relation_info in client_info['reversed_relations']:
-            if not 'id' in relation_info:
-                rel = get_new_reversed_relation(relation_info)
-                client.reversed_relations.append(rel)
-            else:
-                rel = get_modified_reversed_relation(client, relation_info)
-                db.session.add(rel)
-
-        for contact_info in client_info['contacts']:
-            if not 'id' in contact_info:
-                contact = get_new_contact(contact_info)
-                client.contacts.append(contact)
-            else:
-                contact = get_modified_contact(client, contact_info)
-                db.session.add(contact)
-
-        for doc_info in client_info['documentHistory']:
-            if doc_info['deleted'] == 1:
-                doc = get_deleted_document(client, doc_info)
-                db.session.add(doc)
+    # try:
+    #
+    #     if client_info['document'].get('documentType'):
+    #         if not client.document:
+    #             client_document = get_new_document(client_info['document'])
+    #             client.documents.append(client_document)
+    #         else:
+    #             docs = get_modified_document(client, client_info['document'])
+    #             db.session.add(docs[0])
+    #             if docs[1]:
+    #                 client.documents.append(docs[1])
+    #
+    #
+    #     reg_address = client_info['regAddress']
+    #     actual_reg_address = None
+    #     if reg_address is not None and (reg_address.get('address') or reg_address.get('free_input')):
+    #         reg_address['type'] = 0
+    #         if not client.reg_address:
+    #             actual_reg_address = address = get_new_address(reg_address)
+    #             client.addresses.append(address)
+    #         else:
+    #             addresses = get_modified_address(client, reg_address)
+    #             db.session.add(addresses[0])
+    #             if addresses[1]:
+    #                 actual_reg_address = addresses[1]
+    #                 client.addresses.append(actual_reg_address)
+    #
+    #     live_address = client_info['liveAddress']
+    #
+    #     if live_address is not None:
+    #         # TODO: check AND FIX!
+    #         if live_address.get('same_as_reg', False) and actual_reg_address:
+    #             address = get_reg_address_copy(client, actual_reg_address)
+    #             client.addresses.append(address)
+    #         elif live_address.get('address') or live_address.get('free_input'):
+    #             live_address['type'] = 1
+    #             if not client.loc_address:
+    #                 address = get_new_address(live_address)
+    #                 client.addresses.append(address)
+    #             else:
+    #                 addresses = get_modified_address(client, live_address)
+    #                 db.session.add(addresses[0])
+    #                 if addresses[1]:
+    #                     client.addresses.append(addresses[1])
+    #
+    #     for ss_info in client_info['socStatuses']:
+    #         if not 'id' in ss_info:
+    #             ss = get_new_soc_status(ss_info)
+    #             client.socStatuses.append(ss)
+    #         else:
+    #             ss = get_modified_soc_status(client, ss_info)
+    #             db.session.add(ss)
+    #
+    #     for blood_info in client_info['bloodHistory']:
+    #         if not 'id' in blood_info:
+    #             blood = get_new_blood(blood_info)
+    #             client.blood_history.append(blood)
+    #
+    #     for allergy_info in client_info['allergies']:
+    #         if not 'id' in allergy_info:
+    #             allergy = get_new_allergy(allergy_info)
+    #             client.allergies.append(allergy)
+    #         else:
+    #             allergy = get_modified_allergy(client, allergy_info)
+    #             db.session.add(allergy)
+    #
+    #     for intolerance_info in client_info['intolerances']:
+    #         if not 'id' in intolerance_info:
+    #             intolerance = get_new_intolerance(intolerance_info)
+    #             client.intolerances.append(intolerance)
+    #         else:
+    #             intolerance = get_modified_intolerance(client, intolerance_info)
+    #             db.session.add(intolerance)
+    #
+    #     for id_info in client_info['identifications']:
+    #         if not 'id' in id_info:
+    #             id_ext = get_new_identification(id_info)
+    #             client.identifications.append(id_ext)
+    #         else:
+    #             id_ext = get_modified_identification(client, id_info)
+    #             db.session.add(id_ext)
+    #
+    #     for relation_info in client_info['direct_relations']:
+    #         if not 'id' in relation_info:
+    #             rel = get_new_direct_relation(relation_info)
+    #             client.direct_relations.append(rel)
+    #         else:
+    #             rel = get_modified_direct_relation(client, relation_info)
+    #             db.session.add(rel)
+    #
+    #     for relation_info in client_info['reversed_relations']:
+    #         if not 'id' in relation_info:
+    #             rel = get_new_reversed_relation(relation_info)
+    #             client.reversed_relations.append(rel)
+    #         else:
+    #             rel = get_modified_reversed_relation(client, relation_info)
+    #             db.session.add(rel)
+    #
+    #     for contact_info in client_info['contacts']:
+    #         if not 'id' in contact_info:
+    #             contact = get_new_contact(contact_info)
+    #             client.contacts.append(contact)
+    #         else:
+    #             contact = get_modified_contact(client, contact_info)
+    #             db.session.add(contact)
+    #
+    #     for doc_info in client_info['documentHistory']:
+    #         if doc_info['deleted'] == 1:
+    #             doc = get_deleted_document(client, doc_info)
+    #             db.session.add(doc)
 
         db.session.commit()
-    except KeyError, e:
-        db.session.rollback()
-        raise
-        raise ClientSaveException(u'Ошибка сохранения данных клиента', str(e))
-    # except ValueError:
-    #     db.session.rollback()
-    #     raise
-    #     return abort(404)
     except:
         db.session.rollback()
         raise
