@@ -1,0 +1,30 @@
+<div ng-repeat="doc in client.id_docs | filter: flt_not_deleted()">
+    <ng-form name="idDocForm">
+        <div class="row">
+            <div class="col-md-10">
+                <wm-document id-postfix="c[[$index]]"
+                    model-type="doc.doc_type"
+                    model-serial="doc.serial"
+                    serial-validator="doc.doc_type.validators.serial"
+                    model-number="doc.number"
+                    number-validator="doc.doc_type.validators.number"
+                    model-beg-date="doc.beg_date"
+                    model-end-date="doc.end_date"
+                    model-origin="doc.origin"
+                    model-document="doc"
+                    edit-mode="doc.id ? edit.activated : true">
+                </wm-document>
+            </div>
+            <div class="col-md-1">
+                <div class="row" ng-show="doc.id">
+                    <button type="button" class="btn btn-primary btn-block marginal"
+                            ng-click="edit.activated=true">Редактировать</button>
+                </div>
+                <div class="row">
+                    <button type="button" class="btn btn-danger btn-block marginal"
+                            ng-click="delete_document('id_docs', doc)">Удалить</button>
+                </div>
+            </div>
+        </div>
+    </ng-form>
+</div>
