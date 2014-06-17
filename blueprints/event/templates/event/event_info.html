@@ -7,7 +7,7 @@
         {% include "_breadcrumbs.html" %}
         <legend xmlns="http://www.w3.org/1999/html" wm-page-header>
             <h2>[[event.is_new() ? 'Создание обращения' : 'Обращение № ' + event.info.external_id]], пациент
-                <a href="{{ url_for('patients.patient') }}?client_id=[[event.info.client_id]]">[[ event.info.client.client.full_name ]]</a>
+                <a href="{{ url_for('patients.patient') }}?client_id=[[event.info.client_id]]">[[ event.info.client.info.full_name ]]</a>
             </h2>
         </legend>
 
@@ -16,18 +16,18 @@
             <div class="row">
                 <div class="col-md-9">
                     <dl class="dl-horizontal novmargin">
-                        <dt>Контактный телефон:</dt><dd>[[event.info.client.phones]]&nbsp;</dd>
+                        <dt>Контактный телефон:</dt><dd>[[event.info.client.contact]]&nbsp;</dd>
                         <dt>Адрес регистрации:</dt><dd>[[event.info.client.reg_address ? event.info.client.reg_address.text_summary : '']]&nbsp;</dd>
-                        <dt>Адрес проживания:</dt><dd>[[event.info.client.loc_address ? event.info.client.loc_address.text_summary : '']]&nbsp;</dd>
-                        <dt>Документ:</dt><dd>[[event.info.client.document ? event.info.client.document.documentText : '']]&nbsp;</dd>
+                        <dt>Адрес проживания:</dt><dd>[[event.info.client.live_address ? event.info.client.live_address.text_summary : '']]&nbsp;</dd>
+                        <dt>Документ:</dt><dd>[[event.info.client.id_document ? event.info.client.id_document.doc_text : '']]&nbsp;</dd>
                         <dt>Медицинский полис:</dt><dd ng-repeat="policy_text in policies">[[policy_text]]&nbsp;</dd>
                     </dl>
                 </div>
                 <div class="col-md-3">
                     <dl class="dl-horizontal novmargin pull-right">
-                        <dt>Код пациента:</dt><dd>[[event.info.client.id]]&nbsp;</dd>
-                        <dt>Дата рождения:</dt><dd>[[event.info.client.birthDate|asDate]]&nbsp;</dd>
-                        <dt>Пол:</dt><dd>[[event.info.client.sex.name]]&nbsp;</dd>
+                        <dt>Код пациента:</dt><dd>[[event.info.client.info.id]]&nbsp;</dd>
+                        <dt>Дата рождения:</dt><dd>[[event.info.client.info.birth_date|asDate]]&nbsp;</dd>
+                        <dt>Пол:</dt><dd>[[event.info.client.info.sex.name]]&nbsp;</dd>
                     </dl>
                 </div>
             </div>

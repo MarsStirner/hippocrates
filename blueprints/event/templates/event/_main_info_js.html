@@ -98,7 +98,7 @@ WebMis20.controller('EventMainInfoCtrl', [
             return true;
         };
         $scope.check_oms = function(){
-            var policy = $scope.event.info.client.comp_policy;
+            var policy = $scope.event.info.client.compulsory_policy;
             $scope.policy_errors = [];
             if (!policy){
                 $scope.policy_errors.push('У пациента не указан полис ОМС');
@@ -115,14 +115,14 @@ WebMis20.controller('EventMainInfoCtrl', [
         $scope.check_dms = function (policy) {
             $scope.policy_errors = [];
             if (policy != undefined){
-                if (!policy.begDate || moment(policy.begDate).isAfter($scope.event.info.set_date)) {
+                if (!policy.beg_date || moment(policy.beg_date).isAfter($scope.event.info.set_date)) {
                     $scope.policy_errors.push('Дата начала действия полиса не установлена или превышает дату создания обращения');
                 }
-                if (!policy.endDate || moment($scope.event.info.set_date).isAfter(policy.endDate)) {
+                if (!policy.end_date || moment($scope.event.info.set_date).isAfter(policy.end_date)) {
                     $scope.policy_errors.push('Не установлена дата окончания действия полиса или дата создания обращения превышает её');
                 }
             } else {
-                var policies = $scope.event.info.client.vol_policy;
+                var policies = $scope.event.info.client.voluntary_policies;
                 if (policies.length == 0){
                     $scope.policy_errors.push('У пациента не указан действующий полис ДМС');
                 }
