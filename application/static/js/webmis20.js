@@ -133,6 +133,7 @@ var WebMis20 = angular.module('WebMis20', [
         var out = [];
         if (angular.isArray(items) && event_info) {
             var client_info = event_info.client;
+
             items.forEach(function(item) {
                 var itemMatches = false;
                 if (item.finance.id == event_info.event_type.finance.id && item.recipient.id == event_info.organisation.id){
@@ -145,11 +146,18 @@ var WebMis20 = angular.module('WebMis20', [
                         item.contingent.forEach(function(cont){
                             if((!cont.sex || cont.sex == client_info.info.sex.id) &&
                                (!cont.org_id || cont.org_id == client_info.info.work_org_id) &&
-                               ((!cont.insurer_id || cont.insurer_id == client_info.compulsory_policy.insurer_id) &&
-                                 (!cont.policyType_id || cont.policyType_id == client_info.compulsory_policy.policyType_id)) &&
-                               ((!cont.insurer_id || cont.insurer_id == client_info.vol_policy.insurer_id) &&
-                                 (!cont.policyType_id || cont.policyType_id == client_info.vol_policy.policyType_id))){
+                               (!cont.insurer_id || cont.insurer_id == client_info.compulsory_policy.insurer_id) &&
+                                 (!cont.policyType_id || cont.policyType_id == client_info.compulsory_policy.policyType_id)){
                                 itemMatches = true;
+                                if (client_info.voluntary_policies.length > 0){
+                                    itemMatches = false;
+                                    client_info.voluntary_policies.forEach(function(vol_policy){
+                                        if(!itemMatches && (!cont.insurer_id || cont.insurer_id == vol_policy.insurer_id) &&
+                                            (!cont.policyType_id || cont.policyType_id == vol_policy.policyType_id)) {
+                                            itemMatches = true;
+                                        }
+                                    });
+                                }
                             }
                         });
                     }
