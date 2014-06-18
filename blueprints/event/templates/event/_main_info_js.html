@@ -125,6 +125,16 @@ WebMis20.controller('EventMainInfoCtrl', [
                 var policies = $scope.event.info.client.voluntary_policies;
                 if (policies.length == 0){
                     $scope.policy_errors.push('У пациента не указан действующий полис ДМС');
+                } else{
+                    var has_valid_dms = false;
+                    angular.forEach(policies, function (value) {
+                        if (!has_valid_dms && $scope.check_dms(value)){
+                            has_valid_dms = true;
+                        }
+                    });
+                    if (!has_valid_dms){
+                        $scope.policy_errors.push('У пациента нет ни одного валидного полиса ДМС');
+                    }
                 }
             }
             return $scope.policy_errors.length == 0;
