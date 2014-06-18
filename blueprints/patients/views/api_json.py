@@ -19,7 +19,7 @@ __author__ = 'mmalkov'
 def handle_client_error(err):
     return make_response(jsonify({'name': err.message,
                                   'data': err.data},
-                                 422, 'error')[0],
+                                 422, 'save client data error')[0],
                          422)
 
 
@@ -122,6 +122,12 @@ def api_patient_save():
                 for vpol in vpol_info:
                     pol = add_or_update_policy(client, vpol)
                     db.session.add(pol)
+
+            blood_type_info = client_data.get('blood_types')
+            if blood_type_info:
+                for bt in blood_type_info:
+                    bt = add_or_update_blood_type(client, bt)
+                    db.session.add(bt)
         else:
             client = Client()
             client_info = client_data.get('info')
@@ -148,21 +154,16 @@ def api_patient_save():
                     pol = add_or_update_policy(client, vpol)
                     db.session.add(pol)
 
+            blood_type_info = client_data.get('blood_types')
+            if blood_type_info:
+                for bt in blood_type_info:
+                    bt = add_or_update_blood_type(client, bt)
+                    db.session.add(bt)
+
+
 
 
     # try:
-    #
-    #     if client_info['document'].get('documentType'):
-    #         if not client.document:
-    #             client_document = get_new_document(client_info['document'])
-    #             client.documents.append(client_document)
-    #         else:
-    #             docs = get_modified_document(client, client_info['document'])
-    #             db.session.add(docs[0])
-    #             if docs[1]:
-    #                 client.documents.append(docs[1])
-    #
-    #
     #     reg_address = client_info['regAddress']
     #     actual_reg_address = None
     #     if reg_address is not None and (reg_address.get('address') or reg_address.get('free_input')):
@@ -202,11 +203,6 @@ def api_patient_save():
     #         else:
     #             ss = get_modified_soc_status(client, ss_info)
     #             db.session.add(ss)
-    #
-    #     for blood_info in client_info['bloodHistory']:
-    #         if not 'id' in blood_info:
-    #             blood = get_new_blood(blood_info)
-    #             client.blood_history.append(blood)
     #
     #     for allergy_info in client_info['allergies']:
     #         if not 'id' in allergy_info:
@@ -262,10 +258,17 @@ def api_patient_save():
     #             db.session.add(doc)
 
         db.session.commit()
-    except:
+    except Exception, e:
+        # TODO: LOG!!
         db.session.rollback()
         raise
-        return abort(404)
+        return make_response(jsonify({'name': u'Ошибка сохранения данных пациента',
+                                      'data': {
+                                          'err_msg': 'INTERNAL SERVER ERROR'
+                                       }
+                                      },
+                                     500, 'save client data error')[0],
+                             500)
 
     return jsonify(int(client))
 

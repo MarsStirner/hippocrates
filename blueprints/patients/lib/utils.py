@@ -72,7 +72,7 @@ def set_client_main_info(client, data):
         raise ClientSaveException(u'Имя содержит недопустимые символы: %s' % msg)
     client.firstName = first_name
 
-    patr_name = data.get('patr_name', '')
+    patr_name = data.get('patr_name') or ''
     ok, msg = is_valid_name(patr_name)
     if not ok:
         raise ClientSaveException(u'Отчество содержит недопустимые символы: %s' % msg)
@@ -111,10 +111,10 @@ def add_or_update_doc(client, data):
     number = data.get('number')
     if not number:
         raise ClientSaveException(u'Ошибка сохранения документа: Отсутствует обязательное поле Номер документа')
-    beg_date = data.get('beg_date')
+    beg_date = safe_date(data.get('beg_date'))
     if not beg_date:
         raise ClientSaveException(u'Ошибка сохранения документа: Отсутствует обязательное поле Дата выдачи')
-    end_date = data.get('end_date')
+    end_date = safe_date(data.get('end_date'))
     origin = data.get('origin')
     if not origin:
         raise ClientSaveException(u'Ошибка сохранения документа: Отсутствует обязательное поле Выдан')
@@ -140,14 +140,14 @@ def add_or_update_policy(client, data):
     pol_type = safe_traverse(data, 'policy_type', 'id')
     if not pol_type:
         raise ClientSaveException(u'Ошибка сохранения полиса: Отсутствует обязательное поле Тип полиса')
-    serial = data.get('serial')
+    serial = data.get('serial') or ''
     number = data.get('number')
     if not number:
         raise ClientSaveException(u'Ошибка сохранения полиса: Отсутствует обязательное поле Номер полиса')
-    beg_date = data.get('beg_date')
+    beg_date = safe_date(data.get('beg_date'))
     if not beg_date:
         raise ClientSaveException(u'Ошибка сохранения полиса: Отсутствует обязательное поле Дата выдачи')
-    end_date = data.get('end_date')
+    end_date = safe_date(data.get('end_date'))
     insurer = safe_traverse(data, 'insurer', 'id')
     if not insurer:
         raise ClientSaveException(u'Ошибка сохранения полиса: Отсутствует обязательное поле Страховая '
@@ -166,6 +166,30 @@ def add_or_update_policy(client, data):
     else:
         policy = ClientPolicy(pol_type, serial, number, beg_date, end_date, insurer, client)
     return policy
+
+
+def add_or_update_blood_type(client, data):
+    # todo: check for existing records ?
+    bt_id = data.get('id')
+    bt_type = safe_traverse(data, 'blood_type', 'id')
+    if not bt_type:
+        raise ClientSaveException(u'Ошибка сохранения группы крови: Отсутствует обязательное поле Группа крови')
+    date = safe_date(data.get('date'))
+    if not date:
+        raise ClientSaveException(u'Ошибка сохранения группы крови: Отсутствует обязательное поле Дата установления')
+    person = safe_traverse(data, 'person', 'id')
+    if not person:
+        raise ClientSaveException(u'Ошибка сохранения группы крови: Отсутствует обязательное поле '
+                                  u'Врач, установивший группу крови')
+
+    if bt_id:
+        bt = BloodHistory.query.get(bt_id)
+        bt.bloodDate = date
+        bt.bloodType_id = bt_type
+        bt.person_id = person
+    else:
+        bt = BloodHistory(bt_type, date, person, client)
+    return bt
 
 
 def get_new_address(addr_info):
@@ -261,16 +285,6 @@ def get_modified_soc_status(client, ss_info):
     ss.endDate = ss_info['endDate']
     ss.modifyDatetime = now
     return ss
-
-
-def get_new_blood(blood_info):
-    b = BloodHistory()
-    b.createDatetime = b.modifyDatetime = datetime.datetime.now()
-    b.version = 0
-    b.bloodType = rbBloodType.query.filter(rbBloodType.code == blood_info['bloodGroup_code']).first()
-    b.bloodDate = blood_info['bloodDate']
-    b.person_id = blood_info['person_id']
-    return b
 
 
 def get_new_allergy(allergy_info):

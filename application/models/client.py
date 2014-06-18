@@ -130,6 +130,7 @@ class Client(db.Model):
                                 lazy='dynamic')
     blood_history = db.relationship(u'BloodHistory',
                                     backref=db.backref('client'),
+                                    order_by='desc(BloodHistory.id)',
                                     lazy='dynamic')
     direct_relations = db.relationship(u'DirectClientRelation',
                                        primaryjoin='and_(ClientRelation.client_id==Client.id,'
@@ -272,8 +273,6 @@ class Client(db.Model):
             'full_name': self.nameText,
             'notes': self.notes,
             'work_org_id': self.works[0].org_id if self.works else None,
-            # 'comp_policy': self.compulsoryPolicy,
-            # 'vol_policy': self.voluntaryPolicy,
             # 'direct_relations': self.direct_relations.all(),
             # 'reversed_relations': self.reversed_relations.all(),
             # 'phones': self.phones,
@@ -1004,17 +1003,39 @@ class ClientPolicy(db.Model):
 class BloodHistory(db.Model):
     __tablename__ = u'BloodHistory'
 
-    id = db.Column(db.Integer, primary_key=True)
-    bloodDate = db.Column(db.Date, nullable=False)
-    client_id = db.Column(db.Integer, db.ForeignKey('Client.id'), nullable=False)
-    bloodType_id = db.Column(db.Integer, db.ForeignKey('rbBloodType.id'), nullable=False)
-    person_id = db.Column(db.Integer, db.ForeignKey('Person.id'), nullable=False)
+    id = db.Column(db.Integer,
+                   primary_key=True)
+    bloodDate = db.Column(db.Date,
+                          nullable=False)
+    client_id = db.Column(db.Integer,
+                          db.ForeignKey('Client.id'),
+                          nullable=False)
+    bloodType_id = db.Column(db.Integer,
+                             db.ForeignKey('rbBloodType.id'),
+                             nullable=False)
+    person_id = db.Column(db.Integer,
+                          db.ForeignKey('Person.id'),
+                          nullable=False)
 
     bloodType = db.relationship("rbBloodType")
     person = db.relationship('Person')
 
+    def __init__(self, blood_type, date, person, client):
+        self.bloodType_id = int(blood_type) if blood_type else None
+        self.bloodDate = date
+        self.person_id = int(person) if person else None
+        self.client = client
+
     def __int__(self):
         return self.id
+
+    def __json__(self):
+        return {
+            'id': self.id,
+            'blood_type': self.bloodType,
+            'date': self.bloodDate,
+            'person': self.person
+        }
 
 
 class Address(db.Model):

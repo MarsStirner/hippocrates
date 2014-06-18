@@ -16,7 +16,7 @@ angular.module('WebMis20.services', []).
                         client_id: this.client_id
                     }
                 }).success(function(data) {
-                    t.info = data.result.client_data.client;
+                    t.info = data.result.client_data.info;
                     var id_doc = data.result.client_data.id_document;
                     t.id_docs = id_doc !== null ? [id_doc] : [];
                     t.reg_address = data.result.client_data.reg_address;
@@ -24,6 +24,8 @@ angular.module('WebMis20.services', []).
                     var cpol = data.result.client_data.compulsory_policy;
                     t.compulsory_policies = cpol !== null ? [cpol] : [];
                     t.voluntary_policies = data.result.client_data.voluntary_policies;
+                    var blood_types = data.result.client_data.blood_history;
+                    t.blood_types = blood_types !== null ? blood_types : [];
 //                    t.id_doc = data.result.client_data.id_document;
 //                    t.id_doc = data.result.client_data.id_document;
 //                    t.id_doc = data.result.client_data.id_document;
@@ -58,8 +60,9 @@ angular.module('WebMis20.services', []).
                     success(function(value, headers) {
                         deferred.resolve(value['result']);
                     }).
-                    error(function(httpResponse) {
-                        var message = httpResponse.result.name;
+                    error(function(response) {
+                        var rr = response.result;
+                        var message = rr.name + ': ' + (rr.data ? rr.data.err_msg : '');
                         deferred.reject(message);
                     });
                 return deferred.promise;
@@ -85,6 +88,11 @@ angular.module('WebMis20.services', []).
                     return el.dirty;
                 }).concat(this.changes.voluntary_policies || []);
                 data.voluntary_policies = changed_vpolicies.length ? changed_vpolicies : undefined;
+
+                var changed_blood_types = this.blood_types.filter(function(el) {
+                    return el.dirty;
+                }).concat(this.changes.blood_types || []);
+                data.blood_types = changed_blood_types;
 
                 return data;
             };
@@ -135,6 +143,15 @@ angular.module('WebMis20.services', []).
                 });
             };
 
+            WMClient.prototype.add_blood_type = function () {
+                this.blood_types.unshift({
+                    'id': null,
+                    'blood_type': null,
+                    'date': null,
+                    'person': null
+                });
+            };
+
             WMClient.prototype.add_allergy = function() {
                 this.client_info['allergies'].push({
                     'nameSubstance': '',
@@ -167,13 +184,6 @@ angular.module('WebMis20.services', []).
                     'contactType_code': '',
                     'contact': '',
                     'notes': ''});
-            };
-
-            WMClient.prototype.add_blood = function () {
-                this.client_info['bloodHistory'].push({'bloodGroup_code': '',
-                    'bloodDate': '',
-                    'person_id': 0
-                });
             };
 
             WMClient.prototype.add_relation = function (entity) {

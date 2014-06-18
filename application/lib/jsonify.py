@@ -274,13 +274,6 @@ class ClientVisualizer(object):
                          'createDate': intolerance.createDate or '',
                          'notes': intolerance.notes
                          } for intolerance in client.intolerances]
-        bloodHistory = [{'id': blood.id,
-                         'bloodGroup_name': blood.bloodType.name,
-                         'bloodGroup_code': blood.bloodType.code,
-                         'bloodDate': blood.bloodDate or '',
-                         'person_id': safe_int(blood.person),
-                         'person_name': safe_unicode(blood.person)
-                         } for blood in client.blood_history]
 
         documents = [doc.__json__() for doc in client.documents_all]
         policies = [policy.__json__() for policy in client.policies_all]
@@ -303,12 +296,13 @@ class ClientVisualizer(object):
             'live_address': live_addr,
             'compulsory_policy': client.compulsoryPolicy,
             'voluntary_policies': client.voluntaryPolicies,
+            'blood_history': client.blood_history.all(),
 
             'contact': client.phones,
             'socStatuses': socStatuses,
             'allergies': allergies,
             'intolerances': intolerances,
-            'bloodHistory': bloodHistory,
+
             'identifications': identifications,
             'direct_relations': direct_relations,
             'reversed_relations': reversed_relations,

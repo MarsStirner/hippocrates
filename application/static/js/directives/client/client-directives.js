@@ -167,5 +167,84 @@ angular.module('WebMis20.directives').
 </div>'
             };
         }
+    ]).
+    directive('wmClientBloodType', ['RefBookService',
+        function(RefBookService) {
+            return {
+                restrict: 'E',
+                require: '^form',
+                scope: {
+                    idPostfix: '@',
+                    modelType: '=',
+                    modelDate: '=',
+                    modelPerson: '=',
+                    edit_mode: '&editMode',
+                    modelBloodType: '='
+                },
+                link: function(scope, elm, attrs, formCtrl) {
+                    scope.cbtForm = formCtrl;
+                    scope.rbBloodType = RefBookService.get('rbBloodType');
+                    scope.rbPerson = RefBookService.get('vrbPersonWithSpeciality');
+
+                    scope.$watch('cbtForm.$dirty', function(n, o) {
+                        if (n !== o) {
+                            scope.modelBloodType.dirty = n;
+                        }
+                    });
+
+                    // todo: fix? промежуточные модели для ui-select...
+                    // вероятно проблема в том, что ui-select в качестве модели нужен объект в скоупе
+                    scope.intmd_models = {};
+                    scope.intmd_models.type = scope.modelType;
+                    scope.intmd_models.person = scope.modelPerson;
+                    scope.$watch('intmd_models.type', function(n, o) {
+                        if (n !== o) {
+                            scope.modelType = n;
+                        }
+                    });
+                    scope.$watch('intmd_models.person', function(n, o) {
+                        if (n !== o) {
+                            scope.modelPerson = n;
+                        }
+                    });
+                },
+                template:
+'<div class="panel panel-default">\
+    <div class="panel-body">\
+        <div class="row">\
+            <div class="form-group col-md-3"\
+                 ng-class="{\'has-error\': cbtForm.$dirty && cbtForm.cbt_date.$invalid}">\
+                <label for="cbt_date[[idPostfix]]" class="control-label">Дата установления</label>\
+                <wm-date id="cbt_date[[idPostfix]]" name="cbt_date"\
+                         ng-model="modelDate" ng-disabled="!edit_mode()" ng-required="cbtForm.$dirty">\
+                </wm-date>\
+            </div>\
+            <div class="form-group col-md-4"\
+                 ng-class="{\'has-error\': cbtForm.$dirty && cbtForm.cbt_type.$invalid}">\
+                <label for="cbt_type[[idPostfix]]" class="control-label">Тип</label>\
+                <ui-select class="form-control" id="cbt_type[[idPostfix]]" name="cbt_type" theme="select2"\
+                           ng-model="intmd_models.type" ng-disabled="!edit_mode()" ng-required="cbtForm.$dirty">\
+                    <ui-select-match placeholder="Группа крови">[[$select.selected.name]]</ui-select-match>\
+                    <ui-select-choices repeat="bt in rbBloodType.objects | filter: $select.search">\
+                        <div ng-bind-html="bt.name | highlight: $select.search"></div>\
+                    </ui-select-choices>\
+                </ui-select>\
+            </div>\
+            <div class="form-group col-md-5"\
+                 ng-class="{\'has-error\': cbtForm.$dirty && cbtForm.cbt_person.$invalid}">\
+                <label for="cbt_person[[idPostfix]]" class="control-label">Врач, установивший группу крови</label>\
+                <ui-select class="form-control" id="cbt_person[[idPostfix]]" name="cbt_person" theme="select2"\
+                           ng-model="intmd_models.person" ng-disabled="!edit_mode()" ng-required="cbtForm.$dirty">\
+                    <ui-select-match placeholder="">[[$select.selected.name]]</ui-select-match>\
+                    <ui-select-choices repeat="p in rbPerson.objects | filter: $select.search">\
+                        <div ng-bind-html="p.name | highlight: $select.search"></div>\
+                    </ui-select-choices>\
+                </ui-select>\
+            </div>\
+        </div>\
+    </div>\
+</div>'
+            };
+        }
     ])
 ;

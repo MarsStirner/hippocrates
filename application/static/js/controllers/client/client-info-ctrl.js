@@ -7,6 +7,7 @@ angular.module('WebMis20.controllers').
             $scope.aux = aux;
             $scope.params = aux.getQueryParams(document.location.search);
             $scope.rbGender = RefBookService.get('Gender'); // {{ Enum.get_class_by_name('Gender').rb() | tojson }};
+            $scope.rbPerson = RefBookService.get('vrbPersonWithSpeciality');
 //            $scope.rbDocumentType = RefBookService.get('rbDocumentType');
 //            $scope.rbUFMS = RefBookService.get('rbUFMS');
 //            $scope.rbPolicyType = RefBookService.get('rbPolicyType');
@@ -53,7 +54,7 @@ angular.module('WebMis20.controllers').
 
             $scope.flt_not_deleted = function() {
                 return function(item) {
-                    return item.deleted === 0;
+                    return item.hasOwnProperty('deleted') ? item.deleted === 0 : true;
                 };
             }; // TODO: application level
 
@@ -96,6 +97,24 @@ angular.module('WebMis20.controllers').
                 }
             };
 
+            $scope.add_new_blood_type = function(person_id) {
+                var bt = client.blood_types;
+                if (bt.length && !bt[0].id) {
+                    bt.splice(0, 1);
+                }
+                client.add_blood_type();
+                bt[0].person = $scope.rbPerson.get(person_id);
+            };
+
+            $scope.delete_blood_type = function(bt) {
+                client.delete_record('blood_types', bt);
+            };
+
+            $scope.bt_history_visible = function() {
+                return client.blood_types && client.blood_types.filter(function(el) {
+                    return el.id;
+                }).length > 1;
+            };
 
             $scope.directRelationFilter = function (relationType) {
                 return (relationType.leftSex == 0 || relationType.leftSex == $scope.client.client_info.sex.id);
@@ -166,6 +185,7 @@ angular.module('WebMis20.controllers').
             };
 
             $scope.refresh_form = function() {
+                $scope.mainInfoForm.$setPristine(true);
                 if (!client.compulsory_policies.length) {
                     client.add_cpolicy();
                 }

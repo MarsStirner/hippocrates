@@ -100,10 +100,6 @@ class ClientForm(Form):
         if not self.soc_status_type.choices:
             self.soc_status_type.choices = [(status_class.code, status_class.name)
                                             for status_class in rbSocStatusType.query.all()]
-        if not self.blood_group.choices:
-            self.blood_group.choices = [(blood_type.code, blood_type.name) for blood_type in rbBloodType.query.all()]
-        if not self.blood_group.choices:
-            self.blood_group.choices = [(person.id, person.nameText) for person in Person.query.all()]
         if not self.identification_accountingSystem.choices:
             self.identification_accountingSystem.choices = [(system.code, system.name)
                                                             for system in rbAccountingSystem.query.all()]
