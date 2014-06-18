@@ -26,11 +26,11 @@ WebMis20.controller('EventPaymentCtrl', ['$scope', 'RefBookService', 'Settings',
 
         $scope.formcnf = {
             tab_payer_person: {
-                disabled: (event_created && $scope.payer_is_org) || $scope.finance_is_oms || $scope.finance_is_dms,
+                disabled: function() { return (event_created && $scope.payer_is_org()) || $scope.finance_is_oms() || $scope.finance_is_dms()},
                 active: $scope.person_tab_active() && !$scope.finance_is_oms() && !$scope.finance_is_dms()
             },
             tab_payer_org: {
-                disabled: event_created && $scope.payer_is_person,
+                disabled: function () {return event_created && $scope.payer_is_person},
                 active: $scope.org_tab_active() || $scope.finance_is_oms() || $scope.finance_is_dms()
             },
             payer_field: {
@@ -49,15 +49,17 @@ WebMis20.controller('EventPaymentCtrl', ['$scope', 'RefBookService', 'Settings',
 
         $scope.$on('form_state_change', function(event, arg) {
             $scope.finance_type = arg['finance_type'];
+            $scope.contract = arg['contract'];
             $scope.formcnf.tab_payer_person.active = !$scope.finance_is_oms() && !$scope.finance_is_dms();
             $scope.formcnf.tab_payer_org.active = $scope.finance_is_oms() || $scope.finance_is_dms();
             var lc = $scope.event.payment.local_contract;
-            if ($scope.finance_is_oms() && $scope.event.info.client.comp_policy){
-                $scope.event.payment.local_contract = {payer_org: $scope.Organisation.get($scope.event.info.client.comp_policy.insurer_id)};
+            if ($scope.finance_is_oms() && $scope.event.info.client.compulsory_policy){
+                $scope.event.payment.local_contract = {payer_org: $scope.Organisation.get($scope.event.info.client.compulsory_policy.insurer.id)};
                 $scope.formcnf.payer_field.disabled = true;
-            } else if ($scope.finance_is_dms() && $scope.event.info.client.vol_policy){
-                // TODO: get current policy
-                $scope.event.payment.local_contract = {payer_org: $scope.Organisation.get($scope.event.info.client.vol_policy.insurer_id)};
+            } else if ($scope.finance_is_dms()){
+                if ($scope.contract && $scope.contract.payer){
+                    $scope.event.payment.local_contract = {payer_org: $scope.Organisation.get($scope.contract.payer.id)};
+                }
                 $scope.formcnf.payer_field.disabled = true;
             } else {
                 if (lc && lc.payer_org) {
