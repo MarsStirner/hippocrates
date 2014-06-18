@@ -44,6 +44,8 @@ ORGANISATION_INFIS_CODE = 500
 PRINT_SUBSYSTEM_URL = ''
 VESTA_URL = ''
 
+COPYRIGHT_COMPANY = u'КОРУС Консалтинг ИТ'
+
 try:
     from config_local import *
 except ImportError:
