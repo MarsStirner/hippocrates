@@ -21,8 +21,8 @@ WebMis20.controller('EventPaymentCtrl', ['$scope', 'RefBookService', 'Settings',
         $scope.integration1CODVD_enabled = function() {
             return $scope.Settings.get_string('Event.Payment.1CODVD') == '1';
         };
-        $scope.finance_is_oms = function(){return $scope.finance_type == '2'};
-        $scope.finance_is_dms = function(){return $scope.finance_type == '3'};
+        $scope.finance_is_oms = function(){return $scope._finance && $scope._finance.code == '2'};
+        $scope.finance_is_dms = function(){return $scope._finance && $scope._finance.code == '3'};
 
         $scope.formcnf = {
             tab_payer_person: {
@@ -48,8 +48,8 @@ WebMis20.controller('EventPaymentCtrl', ['$scope', 'RefBookService', 'Settings',
         });
 
         $scope.$on('form_state_change', function(event, arg) {
-            $scope.finance_type = arg['finance_type'];
-            $scope.contract = arg['contract'];
+            $scope._finance = arg['finance'];
+            $scope._contract = arg['contract'];
             $scope.formcnf.tab_payer_person.active = !$scope.finance_is_oms() && !$scope.finance_is_dms();
             $scope.formcnf.tab_payer_org.active = $scope.finance_is_oms() || $scope.finance_is_dms();
             var lc = $scope.event.payment.local_contract;
@@ -57,8 +57,8 @@ WebMis20.controller('EventPaymentCtrl', ['$scope', 'RefBookService', 'Settings',
                 $scope.event.payment.local_contract = {payer_org: $scope.Organisation.get($scope.event.info.client.compulsory_policy.insurer.id)};
                 $scope.formcnf.payer_field.disabled = true;
             } else if ($scope.finance_is_dms()){
-                if ($scope.contract && $scope.contract.payer){
-                    $scope.event.payment.local_contract = {payer_org: $scope.Organisation.get($scope.contract.payer.id)};
+                if ($scope._contract && $scope._contract.payer){
+                    $scope.event.payment.local_contract = {payer_org: $scope.Organisation.get($scope._contract.payer.id)};
                 }
                 $scope.formcnf.payer_field.disabled = true;
             } else {
