@@ -70,7 +70,6 @@ angular.module('WebMis20.directives').
                 scope: {
                     ssClass: '@',
                     idPostfix: '@',
-                    groupCode:'@',
                     modelType: '=',
                     modelBegDate: '=',
                     modelEndDate: '=',

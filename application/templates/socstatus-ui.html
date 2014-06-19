@@ -28,20 +28,5 @@
                 </wm-date>
             </div>
         </div>
-        <ng-form name="[[ssClass]]DocForm">
-        <wm-document id-postfix="c[[$index]]"
-                group-code="[[groupCode]]"
-                model-type="[[modelDocument.doc_type]]"
-                model-serial="[[modelDocument.serial]]"
-                serial-validator="[[modelDocument.doc_type.validators.serial]]"
-                model-number="[[modelDocument.number]]"
-                number-validator="[[modelDocument.doc_type.validators.number]]"
-                model-beg-date="[[modelDocument.beg_date]]"
-                model-end-date="[[modelDocument.end_date]]"
-                model-origin="[[modelDocument.origin]]"
-                model-document="[[modelDocument]]"
-                edit-mode="[[modelDocument.id]] ? edit_mode() : true">
-            </wm-document>
-        <ng-form>
     </div>
 </div>
