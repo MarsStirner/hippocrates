@@ -259,22 +259,6 @@ class ClientVisualizer(object):
                         'endDate': socStatus.endDate or ''
                         } for socStatus in client.socStatuses]
 
-        allergies = [{'id': allergy.id,
-                      'nameSubstance': allergy.name,
-                      'power': allergy.power,
-                      'deleted': allergy.deleted,
-                      'createDate': allergy.createDate or '',
-                      'notes': allergy.notes
-                      } for allergy in client.allergies]
-
-        intolerances = [{'id': intolerance.id,
-                         'nameMedicament': intolerance.name,
-                         'power': intolerance.power,
-                         'deleted': intolerance.deleted,
-                         'createDate': intolerance.createDate or '',
-                         'notes': intolerance.notes
-                         } for intolerance in client.intolerances]
-
         documents = [doc.__json__() for doc in client.documents_all]
         policies = [policy.__json__() for policy in client.policies_all]
         document_history = documents + policies
@@ -297,11 +281,11 @@ class ClientVisualizer(object):
             'compulsory_policy': client.compulsoryPolicy,
             'voluntary_policies': client.voluntaryPolicies,
             'blood_history': client.blood_history.all(),
+            'allergies': client.allergies.all(),
+            'intolerances': client.intolerances.all(),
 
             'contact': client.phones,
             'socStatuses': socStatuses,
-            'allergies': allergies,
-            'intolerances': intolerances,
 
             'identifications': identifications,
             'direct_relations': direct_relations,

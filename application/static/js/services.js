@@ -26,13 +26,11 @@ angular.module('WebMis20.services', []).
                     t.voluntary_policies = data.result.client_data.voluntary_policies;
                     var blood_types = data.result.client_data.blood_history;
                     t.blood_types = blood_types !== null ? blood_types : [];
-//                    t.id_doc = data.result.client_data.id_document;
-//                    t.id_doc = data.result.client_data.id_document;
-//                    t.id_doc = data.result.client_data.id_document;
-//                    t.id_doc = data.result.client_data.id_document;
-//                    t.id_doc = data.result.client_data.id_document;
-//                    t.id_doc = data.result.client_data.id_document;
-//                    t.id_doc = data.result.client_data.id_document;
+                    var allergies = data.result.client_data.allergies;
+                    t.allergies = allergies !== null ? allergies : [];
+                    var intolerances = data.result.client_data.intolerances;
+                    t.intolerances = intolerances !== null ? intolerances : [];
+
 
                     t.appointments = data.result.appointments;
                     t.events = data.result.events;
@@ -47,7 +45,6 @@ angular.module('WebMis20.services', []).
 //                    });
                     var message = data.result;
                     deferred.reject(message);
-//                    throw 'Error requesting Client, id = ' + t.client_id;
                 });
                 return deferred.promise;
             };
@@ -93,6 +90,16 @@ angular.module('WebMis20.services', []).
                     return el.dirty;
                 }).concat(this.changes.blood_types || []);
                 data.blood_types = changed_blood_types;
+
+                var changed_allergies = this.allergies.filter(function(el) {
+                    return el.dirty;
+                }).concat(this.changes.allergies || []);
+                data.allergies = changed_allergies;
+
+                var changed_intolerances = this.intolerances.filter(function(el) {
+                    return el.dirty;
+                }).concat(this.changes.intolerances || []);
+                data.intolerances = changed_intolerances;
 
                 return data;
             };
@@ -153,21 +160,25 @@ angular.module('WebMis20.services', []).
             };
 
             WMClient.prototype.add_allergy = function() {
-                this.client_info['allergies'].push({
-                    'nameSubstance': '',
-                    'power': 0,
-                    'createDate': '',
-                    'deleted':0,
-                    'notes': '' });
+                this.allergies.push({
+                    'id': null,
+                    'deleted': 0,
+                    'name': null,
+                    'power': null,
+                    'date': null,
+                    'notes': null
+                });
             };
 
-            WMClient.prototype.add_medicament = function() {
-                this.client_info['intolerances'].push({
-                    'nameMedicament': '',
-                    'power': 0,
-                    'createDate': '',
-                    'deleted':0,
-                    'notes': '' });
+            WMClient.prototype.add_med_intolerance = function() {
+                this.intolerances.push({
+                    'id': null,
+                    'deleted': 0,
+                    'name': null,
+                    'power': null,
+                    'date': null,
+                    'notes': null
+                });
             };
 
             WMClient.prototype.add_identification = function() {

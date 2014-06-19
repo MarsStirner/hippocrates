@@ -128,6 +128,18 @@ def api_patient_save():
                 for bt in blood_type_info:
                     bt = add_or_update_blood_type(client, bt)
                     db.session.add(bt)
+
+            allergy_info = client_data.get('allergies')
+            if allergy_info:
+                for allergy in allergy_info:
+                    alg = add_or_update_allergy(client, allergy)
+                    db.session.add(alg)
+
+            intolerance_info = client_data.get('intolerances')
+            if intolerance_info:
+                for intolerance in intolerance_info:
+                    intlr = add_or_update_intolerance(client, intolerance)
+                    db.session.add(intlr)
         else:
             client = Client()
             client_info = client_data.get('info')
@@ -160,8 +172,17 @@ def api_patient_save():
                     bt = add_or_update_blood_type(client, bt)
                     db.session.add(bt)
 
+            allergy_info = client_data.get('allergies')
+            if allergy_info:
+                for allergy in allergy_info:
+                    alg = add_or_update_allergy(client, allergy)
+                    db.session.add(alg)
 
-
+            intolerance_info = client_data.get('intolerances')
+            if intolerance_info:
+                for intolerance in intolerance_info:
+                    intlr = add_or_update_intolerance(client, intolerance)
+                    db.session.add(intlr)
 
     # try:
     #     reg_address = client_info['regAddress']
@@ -203,22 +224,6 @@ def api_patient_save():
     #         else:
     #             ss = get_modified_soc_status(client, ss_info)
     #             db.session.add(ss)
-    #
-    #     for allergy_info in client_info['allergies']:
-    #         if not 'id' in allergy_info:
-    #             allergy = get_new_allergy(allergy_info)
-    #             client.allergies.append(allergy)
-    #         else:
-    #             allergy = get_modified_allergy(client, allergy_info)
-    #             db.session.add(allergy)
-    #
-    #     for intolerance_info in client_info['intolerances']:
-    #         if not 'id' in intolerance_info:
-    #             intolerance = get_new_intolerance(intolerance_info)
-    #             client.intolerances.append(intolerance)
-    #         else:
-    #             intolerance = get_modified_intolerance(client, intolerance_info)
-    #             db.session.add(intolerance)
     #
     #     for id_info in client_info['identifications']:
     #         if not 'id' in id_info:

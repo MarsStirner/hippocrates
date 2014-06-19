@@ -246,5 +246,70 @@ angular.module('WebMis20.directives').
 </div>'
             };
         }
+    ]).
+    directive('wmClientAllergy', ['RefBookService',
+        function(RefBookService) {
+            return {
+                restrict: 'E',
+                require: '^form',
+                scope: {
+                    idPostfix: '@',
+                    type: '@',
+                    modelName: '=',
+                    modelPower: '=',
+                    modelDate: '=',
+                    modelNote: '=',
+                    edit_mode: '&editMode',
+                    modelAllergy: '='
+                },
+                link: function(scope, elm, attrs, formCtrl) {
+                    scope.algForm = formCtrl;
+                    scope.rbAllergyPower = RefBookService.get('AllergyPower');
+
+                    scope.$watch('algForm.$dirty', function(n, o) {
+                        if (n !== o) {
+                            scope.modelAllergy.dirty = n;
+                        }
+                    });
+                },
+                template:
+'<div class="panel panel-default">\
+    <div class="panel-body">\
+        <div class="row">\
+            <div class="form-group col-md-4"\
+                 ng-class="{\'has-error\': algForm.$dirty && algForm.alg_name.$invalid}">\
+                <label for="alg_name[[idPostfix]]" class="control-label">[[type === \'allergy\' ? \'Вещество\' : \'Медикамент\']]</label>\
+                <input type="text" class="form-control" id="alg_name[[idPostfix]]" name="alg_name"\
+                       autocomplete="off" placeholder=""\
+                       ng-model="modelName" ng-disabled="!edit_mode()" ng-required="algForm.$dirty"/>\
+            </div>\
+            <div class="form-group col-md-3"\
+                 ng-class="{\'has-error\': algForm.$dirty && algForm.alg_power.$invalid}">\
+                <label for="alg_power[[idPostfix]]" class="control-label">Степень</label>\
+                <select class="form-control" id="alg_power[[idPostfix]]" name="alg_power"\
+                        ng-model="modelPower"\
+                        ng-options="pow as pow.name for pow in rbAllergyPower.objects track by pow.id"\
+                        ng-disabled="!edit_mode()" ng-required="algForm.$dirty">\
+                </select>\
+            </div>\
+            <div class="form-group col-md-3"\
+                 ng-class="{\'has-error\': algForm.$dirty && algForm.alg_date.$invalid}">\
+                <label for="alg_date[[idPostfix]]" class="control-label">Дата установления</label>\
+                <wm-date id="alg_date[[idPostfix]]" name="alg_date"\
+                         ng-model="modelDate" ng-disabled="!edit_mode()" ng-required="algForm.$dirty">\
+                </wm-date>\
+            </div>\
+        </div>\
+        <div class="row">\
+            <div class="form-group col-md-12">\
+                <label for="alg_notes[idPostfix]">Примечание</label>\
+                <textarea class="form-control" id="alg_notes" name="alg_notes" rows="2" autocomplete="off"\
+                    ng-model="modelNote" ng-disabled="!edit_mode()"></textarea>\
+            </div>\
+        </div>\
+    </div>\
+</div>'
+            };
+        }
     ])
 ;

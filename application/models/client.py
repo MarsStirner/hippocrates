@@ -3,7 +3,7 @@ import datetime
 from application.lib.agesex import calcAgeTuple
 from application.lib.const import ID_DOC_GROUP_CODE, VOL_POLICY_CODES, COMP_POLICY_CODES
 from application.models.utils import safe_current_user_id
-from application.models.enums import Gender, LocalityType
+from application.models.enums import Gender, LocalityType, AllergyPower
 from application.models.exists import rbDocumentTypeGroup
 from application.models.kladr_models import Kladr, Street
 from application.systemwide import db
@@ -202,7 +202,6 @@ class Client(db.Model):
 
     @property
     def document(self):
-        # TODO: get rid of
         return self.id_document
 
     @property
@@ -278,7 +277,6 @@ class Client(db.Model):
             # 'phones': self.phones,
             # 'reg_address': self.reg_address,
             # 'loc_address': self.loc_address,
-            # 'document': self.document,
         }
 
 
@@ -406,18 +404,121 @@ class ClientAddress(db.Model):
 class ClientAllergy(db.Model):
     __tablename__ = u'ClientAllergy'
 
-    id = db.Column(db.Integer, primary_key=True)
-    createDatetime = db.Column(db.DateTime, nullable=False)
-    createPerson_id = db.Column(db.Integer, index=True)
-    modifyDatetime = db.Column(db.DateTime, nullable=False)
-    modifyPerson_id = db.Column(db.Integer, index=True)
-    deleted = db.Column(db.Integer, nullable=False, server_default=u"'0'")
-    client_id = db.Column(db.ForeignKey('Client.id'), nullable=False, index=True)
-    name = db.Column("nameSubstance", db.Unicode(128), nullable=False)
-    power = db.Column(db.Integer, nullable=False)
+    id = db.Column(db.Integer,
+                   primary_key=True)
+    createDatetime = db.Column(db.DateTime,
+                               nullable=False,
+                               default=datetime.datetime.now)
+    createPerson_id = db.Column(db.Integer,
+                                index=True,
+                                default=safe_current_user_id)
+    modifyDatetime = db.Column(db.DateTime,
+                               nullable=False,
+                               default=datetime.datetime.now,
+                               onupdate=datetime.datetime.now)
+    modifyPerson_id = db.Column(db.Integer,
+                                index=True,
+                                default=safe_current_user_id,
+                                onupdate=safe_current_user_id)
+    deleted = db.Column(db.Integer,
+                        nullable=False,
+                        server_default=u"'0'",
+                        default=0)
+    client_id = db.Column(db.ForeignKey('Client.id'),
+                          nullable=False,
+                          index=True)
+    name = db.Column("nameSubstance",
+                     db.Unicode(128),
+                     nullable=False)
+    power = db.Column(db.Integer,
+                      nullable=False)
     createDate = db.Column(db.Date)
-    notes = db.Column(db.String, nullable=False)
-    version = db.Column(db.Integer, nullable=False)
+    notes = db.Column(db.String,
+                      nullable=False,
+                      default='')
+    version = db.Column(db.Integer,
+                        nullable=False,
+                        default=0)
+
+    def __init__(self, name, power, date, notes, client):
+        self.name = name
+        self.power = power
+        self.createDate = date
+        self.notes = notes
+        self.client = client
+
+    def __json__(self):
+        return {
+            'id': self.id,
+            'deleted': self.deleted,
+            'name': self.name,
+            'power': AllergyPower(self.power),
+            'date': self.createDate,
+            'notes': self.notes
+        }
+
+    def __unicode__(self):
+        return self.name
+
+    def __int__(self):
+        return self.id
+
+
+class ClientIntoleranceMedicament(db.Model):
+    __tablename__ = u'ClientIntoleranceMedicament'
+
+    id = db.Column(db.Integer,
+                   primary_key=True)
+    createDatetime = db.Column(db.DateTime,
+                               nullable=False,
+                               default=datetime.datetime.now)
+    createPerson_id = db.Column(db.Integer,
+                                index=True,
+                                default=safe_current_user_id)
+    modifyDatetime = db.Column(db.DateTime,
+                               nullable=False,
+                               default=datetime.datetime.now,
+                               onupdate=datetime.datetime.now)
+    modifyPerson_id = db.Column(db.Integer,
+                                index=True,
+                                default=safe_current_user_id,
+                                onupdate=safe_current_user_id)
+    deleted = db.Column(db.Integer,
+                        nullable=False,
+                        server_default=u"'0'",
+                        default=0)
+    client_id = db.Column(db.ForeignKey('Client.id'),
+                          nullable=False,
+                          index=True)
+    name = db.Column("nameMedicament",
+                     db.Unicode(128),
+                     nullable=False)
+    power = db.Column(db.Integer,
+                      nullable=False)
+    createDate = db.Column(db.Date)
+    notes = db.Column(db.String,
+                      nullable=False,
+                      default='')
+    version = db.Column(db.Integer,
+                        nullable=False,
+                        default=0)
+
+    def __init__(self, name, power, date, notes, client):
+        self.name = name
+        self.power = power
+        self.createDate = date
+        self.notes = notes
+        self.client = client
+
+    def __json__(self):
+        return {
+            'id': self.id,
+            'deleted': self.deleted,
+            'name': self.name,
+            'power': AllergyPower(self.power),
+            'date': self.createDate,
+            'notes': self.notes
+        }
 
     def __unicode__(self):
         return self.name
@@ -584,29 +685,6 @@ class ClientIdentification(db.Model):
             'identifier': self.identifier,
             'chechDate': self.checkDate,
         }
-
-    def __int__(self):
-        return self.id
-
-
-class ClientIntoleranceMedicament(db.Model):
-    __tablename__ = u'ClientIntoleranceMedicament'
-
-    id = db.Column(db.Integer, primary_key=True)
-    createDatetime = db.Column(db.DateTime, nullable=False)
-    createPerson_id = db.Column(db.Integer, index=True)
-    modifyDatetime = db.Column(db.DateTime, nullable=False)
-    modifyPerson_id = db.Column(db.Integer, index=True)
-    deleted = db.Column(db.Integer, nullable=False, server_default=u"'0'")
-    client_id = db.Column(db.ForeignKey('Client.id'), nullable=False, index=True)
-    name = db.Column("nameMedicament", db.Unicode(128), nullable=False)
-    power = db.Column(db.Integer, nullable=False)
-    createDate = db.Column(db.Date)
-    notes = db.Column(db.String, nullable=False)
-    version = db.Column(db.Integer, nullable=False)
-
-    def __unicode__(self):
-        return self.name
 
     def __int__(self):
         return self.id

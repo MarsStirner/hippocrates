@@ -192,6 +192,59 @@ def add_or_update_blood_type(client, data):
     return bt
 
 
+def add_or_update_allergy(client, data):
+    # todo: check for existing records ?
+    alg_id = data.get('id')
+    alg_name = data.get('name')
+    if not alg_name:
+        raise ClientSaveException(u'Ошибка сохранения аллергии: Отсутствует обязательное поле Вещество')
+    alg_power = safe_traverse(data, 'power', 'id')
+    if alg_power is None:
+        raise ClientSaveException(u'Ошибка сохранения аллергии: Отсутствует обязательное поле Степень')
+    date = safe_date(data.get('date'))
+    if not date:
+        raise ClientSaveException(u'Ошибка сохранения аллергии: Отсутствует обязательное поле Дата установления')
+    notes = data.get('notes', '')
+
+    if alg_id:
+        alg = ClientAllergy.query.get(alg_id)
+        alg.name = alg_name
+        alg.power = alg_power
+        alg.createDate = date
+        alg.notes = notes
+    else:
+        alg = ClientAllergy(alg_name, alg_power, date, notes, client)
+    return alg
+
+
+def add_or_update_intolerance(client, data):
+    # todo: check for existing records ?
+    intlr_id = data.get('id')
+    intlr_name = data.get('name')
+    if not intlr_name:
+        raise ClientSaveException(u'Ошибка сохранения медикаментозной непереносимости: Отсутствует '
+                                  u'обязательное поле Вещество')
+    intlr_power = safe_traverse(data, 'power', 'id')
+    if intlr_power is None:
+        raise ClientSaveException(u'Ошибка сохранения медикаментозной непереносимости: Отсутствует '
+                                  u'обязательное поле Степень')
+    date = safe_date(data.get('date'))
+    if not date:
+        raise ClientSaveException(u'Ошибка сохранения медикаментозной непереносимости: Отсутствует '
+                                  u'обязательное поле Дата установления')
+    notes = data.get('notes', '')
+
+    if intlr_id:
+        intlr = ClientIntoleranceMedicament.query.get(intlr_id)
+        intlr.name = intlr_name
+        intlr.power = intlr_power
+        intlr.createDate = date
+        intlr.notes = notes
+    else:
+        intlr = ClientIntoleranceMedicament(intlr_name, intlr_power, date, notes, client)
+    return intlr
+
+
 def get_new_address(addr_info):
     addr_type = addr_info['type']
     loc_type = safe_traverse(addr_info, 'locality_type', 'id')
@@ -285,66 +338,6 @@ def get_modified_soc_status(client, ss_info):
     ss.endDate = ss_info['endDate']
     ss.modifyDatetime = now
     return ss
-
-
-def get_new_allergy(allergy_info):
-    a = ClientAllergy()
-    a.createDatetime = a.modifyDatetime = datetime.datetime.now()
-    a.version = 0
-    a.deleted = allergy_info['deleted']
-    a.name = allergy_info['nameSubstance']
-    a.createDate = allergy_info['createDate']#.split('T')[0]
-    a.power = allergy_info['power']
-    a.notes = allergy_info['notes']
-    a.deleted = allergy_info['deleted']
-    return a
-
-
-def get_modified_allergy(client, allergy_info):
-    now = datetime.datetime.now()
-    a = client.allergies.filter(ClientAllergy.id == allergy_info['id']).first()
-
-    if allergy_info['deleted'] == 1:
-        a.deleted = 1
-        return a
-
-    a.name = allergy_info['nameSubstance']
-    a.createDate = allergy_info['createDate']#.split('T')[0]
-    a.power = allergy_info['power']
-    a.notes = allergy_info['notes']
-    a.deleted = allergy_info['deleted']
-    a.modifyDatetime = now
-    return a
-
-
-def get_new_intolerance(intolerance_info):
-    i = ClientIntoleranceMedicament()
-    i.createDatetime = i.modifyDatetime = datetime.datetime.now()
-    i.version = 0
-    i.deleted = intolerance_info['deleted']
-    i.name = intolerance_info['nameMedicament']
-    i.createDate = intolerance_info['createDate']
-    i.power = intolerance_info['power']
-    i.notes = intolerance_info['notes']
-    i.deleted = intolerance_info['deleted']
-    return i
-
-
-def get_modified_intolerance(client, intolerance_info):
-    now = datetime.datetime.now()
-    i = client.allergies.filter(ClientIntoleranceMedicament.id == intolerance_info['id']).first()
-
-    if intolerance_info['deleted'] == 1:
-        i.deleted = 1
-        return i
-
-    i.name = intolerance_info['nameMedicament']
-    i.createDate = intolerance_info['createDate']
-    i.power = intolerance_info['power']
-    i.notes = intolerance_info['notes']
-    i.deleted = intolerance_info['deleted']
-    i.modifyDatetime = now
-    return i
 
 
 def get_new_identification(id_info):
