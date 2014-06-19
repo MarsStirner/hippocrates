@@ -284,6 +284,9 @@ class ClientVisualizer(object):
             'allergies': client.allergies.all(),
             'intolerances': client.intolerances.all(),
 
+
+            'document_history': document_history,
+
             'contact': client.phones,
             'socStatuses': socStatuses,
 
@@ -291,7 +294,7 @@ class ClientVisualizer(object):
             'direct_relations': direct_relations,
             'reversed_relations': reversed_relations,
             'contacts': contacts,
-            'document_history': document_history,
+
         }
 
     def make_appointments(self, client):

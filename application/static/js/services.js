@@ -32,6 +32,8 @@ angular.module('WebMis20.services', []).
                     t.intolerances = intolerances !== null ? intolerances : [];
 
 
+                    t.document_history = data.result.client_data.document_history;
+
                     t.appointments = data.result.appointments;
                     t.events = data.result.events;
                     deferred.resolve();
