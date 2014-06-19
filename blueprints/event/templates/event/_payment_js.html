@@ -59,6 +59,8 @@ WebMis20.controller('EventPaymentCtrl', ['$scope', 'RefBookService', 'Settings',
             } else if ($scope.finance_is_dms()){
                 if ($scope._contract && $scope._contract.payer){
                     $scope.event.payment.local_contract = {payer_org: $scope.Organisation.get($scope._contract.payer.id)};
+                } else {
+                    $scope.event.payment.local_contract.payer_org = null;
                 }
                 $scope.formcnf.payer_field.disabled = true;
             } else {

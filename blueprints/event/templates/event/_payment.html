@@ -98,7 +98,7 @@
         <div class="row">
             <div class="col-md-6">
                 <label for="payer_org">Организация</label>
-                <ui-select id="payer_org" name="payer_org" theme="select2" autocomplete="off"
+                <ui-select id="payer_org" name="payer_org" theme="select2" autocomplete="off" ng-required="formcnf.tab_payer_org.active"
                            ng-model="event.payment.local_contract.payer_org" ng-disabled="formcnf.payer_field.disabled">
                     <ui-select-match placeholder="Организация">[[$select.selected.short_name]]</ui-select-match>
                     <ui-select-choices repeat="org in Organisation.objects | filter: $select.search">

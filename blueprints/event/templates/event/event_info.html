@@ -241,7 +241,7 @@
         {# action data end #}
 
         $scope.$watch('event.info.contract', function(new_val, old_val) {
-            if (new_val && new_val != old_val) {
+            if (new_val != old_val) {
               $scope.$broadcast('form_state_change', {
                   finance: $scope.event.info.event_type.finance,
                   contract: $scope.event.info.contract

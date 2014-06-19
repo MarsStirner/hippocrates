@@ -91,12 +91,10 @@ WebMis20.controller('EventMainInfoCtrl', [
             if (new_val) {
                 $scope.event.info.event_type = $scope.event_type_init || $scope.rbEventType.get_filtered_by_rtf($scope.request_type.selected.id, new_val.id)[0];
                 $scope.event_type_init = undefined;
-                $scope.contracts = $filter('contract_filter')($scope.Contract.objects, $scope.event.info);
             }
         });
 
         $scope.$watch('dms.selected', function(new_val, old_val) {
-            $scope.clear_policy_errors();
             if (new_val && new_val != old_val) {
                 $scope.event.info.contract = undefined;
                 var _break = false;
@@ -115,10 +113,17 @@ WebMis20.controller('EventMainInfoCtrl', [
             }
         });
 
+        $scope.$watch('event.info.event_type', function(new_val, old_val) {
+            if (new_val != old_val) {
+                $scope.contracts = $filter('contract_filter')($scope.Contract.objects, $scope.event.info);
+            }
+        });
+
         $scope.$on('form_state_change', function(event, arg) {
             $scope._finance = arg['finance'];
             $scope._contract = arg['contract'];
             $scope.process_policies($scope._finance, $scope._contract);
+            $scope.contracts = $filter('contract_filter')($scope.Contract.objects, $scope.event.info);
         });
 
         $scope.process_policies = function (_finance, _contract) {
@@ -154,7 +159,6 @@ WebMis20.controller('EventMainInfoCtrl', [
 
         $scope.check_oms = function(){
             var policy = $scope.event.info.client.compulsory_policy;
-{#            $scope.clear_policy_errors();#}
             if (!policy){
                 $scope.add_policy_error('У пациента не указан полис ОМС');
             } else {
@@ -169,13 +173,14 @@ WebMis20.controller('EventMainInfoCtrl', [
         };
 
         $scope.check_dms = function (policy) {
-            $scope.clear_policy_errors();
             if (policy != undefined){
                 if (!policy.beg_date || moment(policy.beg_date).isAfter($scope.event.info.set_date)) {
-                    $scope.add_policy_error('Дата начала действия полиса не установлена или превышает дату создания обращения');
+{#                    $scope.add_policy_error('Дата начала действия полиса не установлена или превышает дату создания обращения');#}
+                    return false;
                 }
                 if (!policy.end_date || moment($scope.event.info.set_date).isAfter(policy.end_date)) {
-                    $scope.add_policy_error('Не установлена дата окончания действия полиса или дата создания обращения превышает её');
+{#                    $scope.add_policy_error('Не установлена дата окончания действия полиса или дата создания обращения превышает её');#}
+                    return false;
                 }
             } else {
                 var policies = $scope.event.info.client.voluntary_policies;
@@ -191,6 +196,7 @@ WebMis20.controller('EventMainInfoCtrl', [
                     });
                     if (!has_valid_dms){
                         $scope.add_policy_error('У пациента нет ни одного валидного полиса ДМС');
+                        $scope.dms.selected = undefined;
                     }
                 }
             }
