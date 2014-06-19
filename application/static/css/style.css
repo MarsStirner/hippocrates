@@ -452,26 +452,33 @@ blockquote.danger{
 }
 
 div.toc-affix {
+    top: 0;
+    margin-top: 20px;
     width: 200px;
 }
 
-.toc-affix .wrap-btn {
+.toc .wrap-btn {
     display: block;
     white-space: normal !important;
     text-align: left;
-    margin-bottom: 5px;
+    border-radius: 4px;
     text-decoration: underline;
 }
-.toc-affix .nav > li > a {
+.toc .nav > li > a {
     padding: 5px;
 }
-.toc-affix ul,
-.toc-affix li {
+.toc .nav > li > a:hover {
+    text-decoration: underline;
+}
+.toc ul,
+.toc li {
     margin-left: 0;
     padding: 0;
     list-style: none;
 }
-
-.toc-affix li > ul {
+.toc li > ul {
     margin-left: 24px;
+}
+.affix-holder {
+    padding: 0;
 }

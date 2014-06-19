@@ -16,57 +16,26 @@
                ng-if="client_id != 'new'">
                 Создать обращение</a>
             <ui-print-button ps="ps" resolve="print_context_resolve()" ng-if="!client.is_new()"></ui-print-button>
-{#            <span class="dropdown">#}
-{#                <button class="btn dropdown-toggle" type="button" id="print_dropdownMenu"#}
-{#                        ng-disabled="!ps.templates" data-toggle="dropdown">#}
-{#                    <span class="glyphicon glyphicon-print"></span>#}
-{#                    <span class="caret"></span>#}
-{#                </button>#}
-{#                <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="print_dropdownMenu">#}
-{#                    <li role="presentation" ng-repeat="template in ps.templates">#}
-{#                        <a role="menuitem" tabindex="-1" href="" class="print_template"#}
-{#                           ng-click="ps.print_template(template.id)" ng-bind="template.name">#}
-{#                        </a>#}
-{#                    </li>#}
-{#                </ul>#}
-{#            </span>#}
         </div>
 
-        <div class="col-md-2">
-
+        <div class="col-md-2 affix-holder">
+            <div class="toc-affix" bs-affix>
+                <toc-affix toc-name="tocClientForm"></toc-affix>
+            </div>
         </div>
         <div class="col-md-10">
             <div ui-alert-list="alerts"></div>
             <div class="marginal">
-                <form name="clientForm" role="form" novalidate ng-submit="save_client(clientForm)">
-                    <legend>Основная информация</legend>
+                <form name="clientForm" role="form" novalidate ng-submit="save_client(clientForm)" toc-element toc-name="tocClientForm">
                     {% include "patients/main_info.html" %}
-
-                    <legend>Документ удостоверяющий личность</legend>
                     {% include "patients/_id_doc.html" %}
-
-                    <legend>Адрес регистрации и проживания</legend>
                     {% include "patients/_address.html" %}
-
-                    <legend>Медицинские полисы</legend>
                     {% include "patients/_policy.html" %}
-
-                    <legend>Примечания</legend>
                     {% include "patients/_notes.html" %}
-
-                    <legend>Особенности пациента</legend>
                     {% include "patients/characteristics.html" %}
-
-                    <legend>Контактная информация и родственники</legend>
                     {% include "patients/contacts.html" %}
-
-                    <legend>Социальный статус</legend>
                     {% include "patients/soc_status.html" %}
-
-{#                    <legend>Связи с внешними системами</legend>#}
 {#                    {% include "patients/identifiers.html" %}#}
-
-                    <legend>История изменений документов</legend>
                     {% include "patients/documents.html" %}
 
                     <legend>Debug</legend>

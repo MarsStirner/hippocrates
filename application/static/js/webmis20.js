@@ -14,7 +14,8 @@ var WebMis20 = angular.module('WebMis20', [
     'ngCkeditor',
     'sf.treeRepeat',
     'ui.mask',
-    'formstamp'
+    'formstamp',
+    'mgcrea.ngStrap.affix'
 ])
 .config(function ($interpolateProvider, datepickerConfig, datepickerPopupConfig) {
     $interpolateProvider.startSymbol('[[');

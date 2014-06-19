@@ -1,3 +1,5 @@
+<ng-form name="_idDocForm" toc-element="Документы">
+<legend>Документ удостоверяющий личность</legend>
 <div ng-repeat="doc in client.id_docs | filter: flt_not_deleted()">
     <ng-form name="idDocForm">
         <div class="row">
@@ -28,3 +30,4 @@
         </div>
     </ng-form>
 </div>
+</ng-form>
