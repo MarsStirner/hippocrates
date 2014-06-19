@@ -73,11 +73,18 @@ angular.module('WebMis20.directives').
                     modelType: '=',
                     modelBegDate: '=',
                     modelEndDate: '=',
-                    edit_mode: '&editMode'
+                    edit_mode: '&editMode',
+                    modelSocStatus: '='
                 },
                 link: function(scope, elm, attrs, formCtrl) {
                     scope.socStatusForm = formCtrl;
                     scope.rbSocStatusType = RefBookService.get('rbSocStatusType');
+
+                    scope.$watch('socStatusForm.$dirty', function(n, o) {
+                        if (n !== o) {
+                            scope.modelSocStatus.dirty = n;
+                        }
+                    });
 
                     scope.filter_soc_status = function(s_class) {
                         return function(elem) {

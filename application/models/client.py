@@ -823,19 +823,38 @@ class ClientSocStatus(db.Model):
     __tablename__ = u'ClientSocStatus'
 
     id = db.Column(db.Integer, primary_key=True)
-    createDatetime = db.Column(db.DateTime, nullable=False)
-    createPerson_id = db.Column(db.Integer, index=True)
-    modifyDatetime = db.Column(db.DateTime, nullable=False)
-    modifyPerson_id = db.Column(db.Integer, index=True)
-    deleted = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    createDatetime = db.Column(db.DateTime,
+                               nullable=False,
+                               default=datetime.datetime.now)
+    createPerson_id = db.Column(db.Integer,
+                                index=True,
+                                default=safe_current_user_id)
+    modifyDatetime = db.Column(db.DateTime,
+                               nullable=False,
+                               default=datetime.datetime.now,
+                               onupdate=datetime.datetime.now)
+    modifyPerson_id = db.Column(db.Integer,
+                                index=True,
+                                default=safe_current_user_id,
+                                onupdate=safe_current_user_id)
+    deleted = db.Column(db.Integer,
+                        nullable=False,
+                        server_default=u"'0'",
+                        default=0)
     client_id = db.Column(db.ForeignKey('Client.id'), nullable=False, index=True)
     socStatusClass_id = db.Column(db.ForeignKey('rbSocStatusClass.id'), index=True)
     socStatusType_id = db.Column(db.ForeignKey('rbSocStatusType.id'), nullable=False, index=True)
     begDate = db.Column(db.Date, nullable=False)
     endDate = db.Column(db.Date)
     document_id = db.Column(db.ForeignKey('ClientDocument.id'), index=True)
-    version = db.Column(db.Integer, nullable=False)
-    note = db.Column(db.String(256), nullable=False, server_default=u"''")
+    note = db.Column(db.Unicode(200),
+                     nullable=False,
+                     server_default=u"''",
+                     default=u'')
+    version = db.Column(db.Integer,
+                        nullable=False,
+                        server_default=u"'0'",
+                        default=0)
     benefitCategory_id = db.Column(db.Integer)
 
     soc_status_class = db.relationship(u'rbSocStatusClass', lazy=False)
@@ -860,6 +879,13 @@ class ClientSocStatus(db.Model):
             return self.self_document
         else:
             return self.getClientDocument()
+
+    def __init__(self, soc_stat_class, soc_stat_type, beg_date, client):
+        self.socStatusClass_id = int(soc_stat_class) if soc_stat_class else None
+        self.socStatusType_id = int(soc_stat_type) if soc_stat_type else None
+        self.begDate = beg_date
+        # self.endDate = end_date
+        self.client = client
 
     def getClientDocument(self):
         documents = ClientDocument.query().filter(ClientDocument.clientId == self.client_id).\

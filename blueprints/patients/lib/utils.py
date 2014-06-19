@@ -174,6 +174,30 @@ def add_or_update_policy(client, data):
     return policy
 
 
+def add_or_update_soc_status(client, data):
+    soc_status_id = data.get('id')
+    soc_status_type = safe_traverse(data, 'ss_type', 'id')
+    soc_status_class_code = safe_traverse(data, 'ss_class', 'code')
+    if not soc_status_type:
+        raise ClientSaveException(u'Ошибка сохранения полиса: Отсутствует обязательное поле Тип соц. статуса')
+    beg_date = data.get('beg_date')
+    if not beg_date:
+        raise ClientSaveException(u'Ошибка сохранения полиса: Отсутствует обязательное поле Дата начала')
+    # end_date = data.get('end_date')
+    deleted = data.get('deleted', 0)
+
+    if soc_status_id:
+        soc_status = ClientSocStatus.query.get(soc_status_id)
+        soc_status.socStatusType_id = soc_status_type
+        soc_status.beg_date = beg_date
+        soc_status.client = client
+        soc_status.deleted = deleted
+    else:
+        soc_status_class = rbSocStatusClass.query.filter(rbSocStatusClass.code == soc_status_class_code).first().id
+        soc_status = ClientSocStatus(soc_status_class, soc_status_type, beg_date, client)
+    return soc_status
+
+
 def get_new_address(addr_info):
     addr_type = addr_info['type']
     loc_type = safe_traverse(addr_info, 'locality_type', 'id')

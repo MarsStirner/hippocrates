@@ -92,6 +92,12 @@ angular.module('WebMis20.services', []).
                 }).concat(this.changes.voluntary_policies || []);
                 data.voluntary_policies = changed_vpolicies.length ? changed_vpolicies : undefined;
 
+                var soc_statuses = this.invalidities.concat(this.works).concat(this.nationalities);
+                var changed_soc_statuses = soc_statuses.filter(function(el) {
+                    return el.dirty;
+                }).concat(this.changes.invalidities || []).concat(this.changes.works || []).concat(this.changes.nationalities || []);
+                data.soc_statuses = changed_soc_statuses.length ? changed_soc_statuses : undefined;
+
                 return data;
             };
 
@@ -192,10 +198,10 @@ angular.module('WebMis20.services', []).
 
             WMClient.prototype.add_soc_status = function (class_name, class_code) {
                 this[class_name].push({'deleted': 0,
-                    'classCode': class_code,
-                    'typeCode': null,
-                    'begDate': null,
-                    'endDate': null
+                    'ss_class': {'code':class_code},
+                    'ss_type': null,
+                    'beg_date': null,
+                    'end_date': null
                 });
             };
 
