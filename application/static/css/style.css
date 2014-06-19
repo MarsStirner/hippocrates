@@ -450,3 +450,28 @@ blockquote.danger{
     border-radius: 4px;
     box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 6px #d59392;
 }
+
+div.toc-affix {
+    width: 200px;
+}
+
+.toc-affix .wrap-btn {
+    display: block;
+    white-space: normal !important;
+    text-align: left;
+    margin-bottom: 5px;
+    text-decoration: underline;
+}
+.toc-affix .nav > li > a {
+    padding: 5px;
+}
+.toc-affix ul,
+.toc-affix li {
+    margin-left: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.toc-affix li > ul {
+    margin-left: 24px;
+}
