@@ -409,6 +409,7 @@ class rbDocumentType(db.Model):
     def __json__(self):
         return {
             'id': self.id,
+            'group': self.group,
             'code': self.code,
             'name': self.name,
             'regional_code': self.regionalCode,

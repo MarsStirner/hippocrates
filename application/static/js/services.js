@@ -201,7 +201,18 @@ angular.module('WebMis20.services', []).
                     'ss_class': {'code':class_code},
                     'ss_type': null,
                     'beg_date': null,
-                    'end_date': null
+                    'end_date': null,
+                    'self_document': {
+                                        "id": null,
+                                        "deleted": 0,
+                                        "doc_type": null,
+                                        "serial": null,
+                                        "number": null,
+                                        "beg_date": null,
+                                        "end_date": null,
+                                        "origin": null,
+                                        "doc_text": null
+                                    }
                 });
             };
 
