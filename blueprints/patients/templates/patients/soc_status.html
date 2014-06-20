@@ -51,7 +51,6 @@
 <h4>Занятость</h4>
 <div ng-repeat="socstat in client.works | filter: flt_not_deleted()">
     <ng-form name="socStatWorkForm">
-        dirty:[[socStatWorkForm.$dirty]], valid:[[socStatWorkForm.$valid]]
         <div class="row">
             <div class="col-md-11">
                 <wm-soc-status ss-class="3" id-postfix="w[[$index]]"

@@ -180,7 +180,7 @@ def add_or_update_soc_status(client, data):
     end_date = data.get('end_date')
     deleted = data.get('deleted', 0)
     doc_info = data.get('self_document')
-    doc = add_or_update_doc(client, doc_info)
+    doc = add_or_update_doc(client, doc_info) if doc_info else None
 
     if soc_status_id:
         soc_status = ClientSocStatus.query.get(soc_status_id)
