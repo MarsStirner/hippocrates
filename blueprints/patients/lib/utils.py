@@ -177,18 +177,22 @@ def add_or_update_soc_status(client, data):
     beg_date = data.get('beg_date')
     if not beg_date:
         raise ClientSaveException(u'Ошибка сохранения полиса: Отсутствует обязательное поле Дата начала')
-    # end_date = data.get('end_date')
+    end_date = data.get('end_date')
     deleted = data.get('deleted', 0)
+    doc_info = data.get('self_document')
+    doc = add_or_update_doc(client, doc_info)
 
     if soc_status_id:
         soc_status = ClientSocStatus.query.get(soc_status_id)
         soc_status.socStatusType_id = soc_status_type
         soc_status.beg_date = beg_date
+        soc_status.end_date = end_date
         soc_status.client = client
         soc_status.deleted = deleted
+        soc_status.self_document = doc
     else:
         soc_status_class = rbSocStatusClass.query.filter(rbSocStatusClass.code == soc_status_class_code).first().id
-        soc_status = ClientSocStatus(soc_status_class, soc_status_type, beg_date, client)
+        soc_status = ClientSocStatus(soc_status_class, soc_status_type, beg_date, end_date, client, doc)
     return soc_status
 
 

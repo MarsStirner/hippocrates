@@ -16,7 +16,7 @@ angular.module('WebMis20.services', []).
                         client_id: this.client_id
                     }
                 }).success(function(data) {
-                    t.info = data.result.client_data.client;
+                    t.info = data.result.client_data.info;
                     var id_doc = data.result.client_data.id_document;
                     t.id_docs = id_doc !== null ? [id_doc] : [];
                     t.reg_address = data.result.client_data.reg_address;

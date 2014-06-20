@@ -914,11 +914,12 @@ class ClientSocStatus(db.Model):
         else:
             return self.getClientDocument()
 
-    def __init__(self, soc_stat_class, soc_stat_type, beg_date, client):
+    def __init__(self, soc_stat_class, soc_stat_type, beg_date, end_date, client, document):
         self.socStatusClass_id = int(soc_stat_class) if soc_stat_class else None
         self.socStatusType_id = int(soc_stat_type) if soc_stat_type else None
         self.begDate = beg_date
-        # self.endDate = end_date
+        self.self_document = document
+        self.endDate = end_date
         self.client = client
 
     def getClientDocument(self):
