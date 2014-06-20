@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import datetime
 from application.lib.agesex import calcAgeTuple
-from application.lib.const import ID_DOC_GROUP_CODE, VOL_POLICY_CODES
+from application.lib.const import ID_DOC_GROUP_CODE, VOL_POLICY_CODES, COMP_POLICY_CODES
 from application.models.utils import safe_current_user_id
 from application.models.enums import Gender, LocalityType
 from application.models.exists import rbDocumentTypeGroup
@@ -226,9 +226,8 @@ class Client(db.Model):
 
     @property
     def compulsoryPolicy(self):
-        for policy in self.policies:
-            if not policy.policyType or u"ОМС" in policy.policyType.name:
-                return policy
+        cpols = filter(lambda p: p.policyType is not None and p.policyType.code in COMP_POLICY_CODES, self.policies)
+        return cpols[0] if cpols else None
 
     @property
     def voluntaryPolicies(self):
@@ -271,7 +270,7 @@ class Client(db.Model):
             'snils': self.SNILS,
             'full_name': self.nameText,
             'notes': self.notes,
-            # 'work_org_id': self.works[0].org_id if self.works else None,
+            'work_org_id': self.works[0].org_id if self.works else None,
             # 'comp_policy': self.compulsoryPolicy,
             # 'vol_policy': self.voluntaryPolicy,
             # 'direct_relations': self.direct_relations.all(),
@@ -458,22 +457,57 @@ class ClientDocument(db.Model):
         db.Index(u'Ser_Numb', u'serial', u'number'),
     )
 
-    id = db.Column("id", db.Integer, primary_key=True)
-    createDatetime = db.Column(db.DateTime, nullable=False)
-    createPerson_id = db.Column(db.Integer, index=True)
-    modifyDatetime = db.Column(db.DateTime, nullable=False)
-    modifyPerson_id = db.Column(db.Integer, index=True)
-    deleted = db.Column(db.Integer, nullable=False, server_default=u"'0'")
-    clientId = db.Column("client_id", db.ForeignKey('Client.id'), nullable=False, index=True)
-    documentType_id = db.Column(db.Integer, db.ForeignKey('rbDocumentType.id'), nullable=False, index=True)
-    serial = db.Column(db.String(8), nullable=False)
-    number = db.Column(db.String(16), nullable=False)
-    date = db.Column(db.Date, nullable=False)
-    origin = db.Column(db.String(256), nullable=False)
-    version = db.Column(db.Integer, nullable=False)
+    id = db.Column(db.Integer,
+                   primary_key=True)
+    createDatetime = db.Column(db.DateTime,
+                               nullable=False,
+                               default=datetime.datetime.now)
+    createPerson_id = db.Column(db.Integer,
+                                index=True,
+                                default=safe_current_user_id)
+    modifyDatetime = db.Column(db.DateTime,
+                               nullable=False,
+                               default=datetime.datetime.now,
+                               onupdate=datetime.datetime.now)
+    modifyPerson_id = db.Column(db.Integer,
+                                index=True,
+                                default=safe_current_user_id,
+                                onupdate=safe_current_user_id)
+    deleted = db.Column(db.Integer,
+                        nullable=False,
+                        server_default=u"'0'",
+                        default=0)
+    clientId = db.Column("client_id",
+                         db.ForeignKey('Client.id'),
+                         nullable=False,
+                         index=True)
+    documentType_id = db.Column(db.Integer,
+                                db.ForeignKey('rbDocumentType.id'),
+                                nullable=False,
+                                index=True)
+    serial = db.Column(db.String(8),
+                       nullable=False)
+    number = db.Column(db.String(16),
+                       nullable=False)
+    date = db.Column(db.Date,
+                     nullable=False)
+    origin = db.Column(db.String(256),
+                       nullable=False)
+    version = db.Column(db.Integer,
+                        nullable=False,
+                        default=0)
     endDate = db.Column(db.Date)
 
     documentType = db.relationship(u'rbDocumentType', lazy=False)
+
+    def __init__(self, doc_type, serial, number, beg_date, end_date, origin, client):
+        self.documentType_id = int(doc_type) if doc_type else None
+        self.serial = serial
+        self.number = number
+        self.date = beg_date
+        self.endDate = end_date
+        self.origin = origin
+        self.client = client
 
     @property
     def documentTypeCode(self):

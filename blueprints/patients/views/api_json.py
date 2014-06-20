@@ -105,6 +105,12 @@ def api_patient_save():
                 client = set_client_main_info(client, client_info)
                 db.session.add(client)
 
+            id_doc_info = client_data.get('id_docs')
+            if id_doc_info:
+                for id_doc in id_doc_info:
+                    doc = add_or_update_doc(client, id_doc)
+                    db.session.add(doc)
+
             cpol_info = client_data.get('compulsory_policies')
             if cpol_info:
                 for cpol in cpol_info:
@@ -129,6 +135,12 @@ def api_patient_save():
                 raise ClientSaveException(u'Client main info is empty')
             client = set_client_main_info(client, client_info)
             db.session.add(client)
+
+            id_doc_info = client_data.get('id_docs')
+            if id_doc_info:
+                for id_doc in id_doc_info:
+                    doc = add_or_update_doc(client, id_doc)
+                    db.session.add(doc)
 
             cpol_info = client_data.get('compulsory_policies')
             if cpol_info:
