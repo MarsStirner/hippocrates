@@ -462,13 +462,13 @@ div.toc-affix {
     white-space: normal !important;
     text-align: left;
     border-radius: 4px;
-    text-decoration: underline;
+    /*text-decoration: underline;*/
 }
 .toc .nav > li > a {
     padding: 5px;
 }
 .toc .nav > li > a:hover {
-    text-decoration: underline;
+    /*text-decoration: underline;*/
 }
 .toc ul,
 .toc li {
