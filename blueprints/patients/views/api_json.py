@@ -170,6 +170,12 @@ def api_patient_save():
                 for intolerance in intolerance_info:
                     intlr = add_or_update_intolerance(client, intolerance)
                     db.session.add(intlr)
+
+            ss_info = client_data.get('soc_statuses')
+            if ss_info:
+                for ss in ss_info:
+                    sstat = add_or_update_soc_status(client, ss)
+                    db.session.add(sstat)
         else:
             client = Client()
             client_info = client_data.get('info')

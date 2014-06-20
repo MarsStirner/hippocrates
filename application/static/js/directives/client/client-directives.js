@@ -62,6 +62,54 @@ angular.module('WebMis20.directives').
             };
         }
     ]).
+    directive('wmSocStatus', ['RefBookService',
+        function(RefBookService) {
+            return {
+                restrict: 'E',
+                require: '^form',
+                scope: {
+                    ssClass: '@',
+                    idPostfix: '@',
+                    modelType: '=',
+                    modelBegDate: '=',
+                    modelEndDate: '=',
+                    modelDocument: '=',
+                    edit_mode: '&editMode',
+                    modelSocStatus: '='
+                },
+                link: function(scope, elm, attrs, formCtrl) {
+                    scope.socStatusForm = formCtrl;
+                    scope.rbSocStatusType = RefBookService.get('rbSocStatusType');
+
+                    scope.$watch('socStatusForm.$dirty', function(n, o) {
+                        if (n !== o) {
+                            scope.modelSocStatus.dirty = n;
+                        }
+                    });
+
+                    scope.filter_soc_status = function(s_class) {
+                        return function(elem) {
+                            var classes_codes = elem.classes.map(function(s_class){
+                                return s_class.code;
+                                })
+                            return classes_codes.indexOf(s_class) != -1;
+                        };
+                    };
+
+                    // todo: fix? промежуточные модели для ui-select...
+                    // вероятно проблема в том, что ui-select в качестве модели нужен объект в скоупе
+                    scope.intmd_models = {};
+                    scope.intmd_models.type = scope.modelType;
+                    scope.$watch('intmd_models.type', function(n, o) {
+                        if (n !== o) {
+                            scope.modelType = n;
+                        }
+                    });
+                },
+                templateUrl: 'socstatus-ui.html'
+            };
+        }
+    ]).
     directive('wmDocument', ['RefBookService',
         function(RefBookService) {
             return {
@@ -69,6 +117,7 @@ angular.module('WebMis20.directives').
                 require: '^form',
                 scope: {
                     idPostfix: '@',
+                    groupCode:'@',
                     modelType: '=',
                     modelSerial: '=',
                     serialValidator: '=',
@@ -91,6 +140,12 @@ angular.module('WebMis20.directives').
                         }
                     });
 
+                    scope.filter_document = function(group_code) {
+                        return function(elem) {
+                            return elem.group.code == group_code;
+                        };
+                    };
+
                     // todo: fix? промежуточные модели для ui-select...
                     // вероятно проблема в том, что ui-select в качестве модели нужен объект в скоупе
                     scope.intmd_models = {};
@@ -101,6 +156,7 @@ angular.module('WebMis20.directives').
                             scope.modelType = n;
                         }
                     });
+
                     scope.$watch('intmd_models.origin', function(n, o) {
                         if (n !== o) {
                             scope.modelOrigin = n;
@@ -117,12 +173,12 @@ angular.module('WebMis20.directives').
                 <ui-select class="form-control" id="doc_type[[idPostfix]]" name="doc_type" theme="select2"\
                            ng-model="intmd_models.type" ng-disabled="!edit_mode()" ng-required="docForm.$dirty">\
                     <ui-select-match placeholder="Тип документа">[[$select.selected.name]]</ui-select-match>\
-                    <ui-select-choices repeat="dt in rbDocumentType.objects | filter: $select.search">\
+                    <ui-select-choices repeat="dt in rbDocumentType.objects | filter: filter_document(groupCode) | filter: $select.search">\
                         <div ng-bind-html="dt.name | highlight: $select.search"></div>\
                     </ui-select-choices>\
                 </ui-select>\
             </div>\
-            <div class="form-group col-md-1"\
+            <div class="form-group col-md-2"\
                  ng-class="{\'has-error\': docForm.$dirty && docForm.doc_serial.$error.required && docForm.doc_serial.$invalid}">\
                 <label for="doc_serial[[idPostfix]]" class="control-label">Серия</label>\
                 <input type="text" class="form-control" id="doc_serial[[idPostfix]]" name="doc_serial"\
@@ -136,7 +192,7 @@ angular.module('WebMis20.directives').
                        autocomplete="off" placeholder="номер" validator-regexp="numberValidator"\
                        ng-model="modelNumber" ng-required="docForm.$dirty" ng-disabled="!edit_mode()"/>\
             </div>\
-            <div class="form-group col-md-offset-1 col-md-2"\
+            <div class="form-group col-md-2"\
                  ng-class="{\'has-error\': docForm.$dirty && docForm.doc_begdate.$invalid}">\
                 <label for="doc_begdate[[idPostfix]]" class="control-label">Дата выдачи</label>\
                 <wm-date id="doc_begdate[[idPostfix]]" name="doc_begdate"\

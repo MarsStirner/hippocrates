@@ -242,10 +242,10 @@ angular.module('WebMis20.directives').
             Boolean:
                 '<div class="fs-checkbox fs-racheck">\
                     <a class="fs-racheck-item" href="javascript:void(0)" ng-click="model = !model" fs-space="model = !model">\
-                <span class="fs-check-outer"><span ng-show="model" class="fs-check-inner"></span></span>[[ metadata.title ]]</a></input>',
+                <span class="fs-check-outer"><span ng-show="model" class="fs-check-inner"></span></span>[[ metadata.title ]]</a></div>',
             Date:    '<div fs-date ng-required="true" ng-model="model" class="validatable"></div>',
             Time:    '<div fs-time ng-required="true" ng-model="model" class="validatable"></div>',
-            List:    '<div fs-select items="metadata.arguments" ng-model="model" ng-required="true" class="validatable">[[ item ]]</select>',
+            List:    '<div fs-select items="metadata.arguments" ng-model="model" ng-required="true" class="validatable">[[ item ]]</div>',
             Multilist: '<div fs-checkbox items="metadata.arguments" ng-model="model" class="validatable">[[ item ]]</div>',
             RefBook: ui_select_template,
             Organisation:
@@ -272,6 +272,91 @@ angular.module('WebMis20.directives').
                 var child = $(template);
                 $(element).append(child);
                 $compile(child)(scope);
+            }
+        }
+    }])
+    .directive('tocElement', [function () {
+        var merr = angular.$$minErr('tocElement');
+        return {
+            restrict: 'A',
+            require: ['tocElement', '?form'],
+            controller: ['$element', '$attrs', function ($element, $attrs) {
+                var self = this;
+                this.$name = $attrs.name;
+                this.$children = [];
+                this.$title = $attrs.tocElement;
+                this.$form = null;
+                this.$parent = $element.parent().controller('tocElement') || null;
+                this.$registerChild = function (childElement) {
+                    self.$children.push(childElement);
+                };
+                this.$unregisterChild = function (childElement) {
+                    aux.removeFromArray(self.$children, childElement);
+                };
+                this.$invalid = function () {
+                    if (self.$form) {
+                        return self.$form.$invalid;
+                    } else {
+                        return false;
+                    }
+                };
+                console.log('controller for tocElement (' + this.$name + ') created')
+            }],
+            link: function (scope, element, attrs, ctrls) {
+                if (!attrs.name) {
+                    merr('name', 'tocElement directive must have "name" attribute')
+                }
+                var self_ctrl = ctrls[0],
+                    form_ctrl = self_ctrl.$form = ctrls[1],
+                    parent_ctrl = element.parent().controller('tocElement');
+
+                if (parent_ctrl) {
+                    parent_ctrl.$registerChild(self_ctrl);
+                    element.on('$destroy', function () {
+                        parent_ctrl.$unregisterChild(self_ctrl)
+                    })
+                }
+                if (attrs.tocName) {
+                    scope[attrs.tocName] = self_ctrl;
+                }
+                var jElement = $(element);
+                if (!form_ctrl) {
+                    jElement.prepend($('<a name="'+ attrs.name +'">'));
+                }
+                jElement.attr('id', attrs.name);
+                console.log('link for tocElement (' + attrs.name + ') created')
+            }
+        }
+    }])
+    .directive('tocAffix', ['$compile', '$timeout', function ($compile, $timeout) {
+        return {
+            restrict: 'E',
+            link: function (scope, element, attrs) {
+                $timeout(function () {
+                    console.log('Link for tocAffix creating...');
+                    var current = $(element);
+                    var template =
+                        '<div class="toc">\
+                            <ul class="nav">\
+                                <li ng-repeat="node in ' + attrs.tocName + '.$children">\
+                                    <a ng-href="#[[node.$name]]" class="wrap-btn" ng-class="{\'text-danger bg-danger\': node.$invalid()}">\
+                                        [[ node.$title ]]\
+                                    </a>\
+                                    <ul ng-if="node.$children" class="nav">\
+                                        <li ng-repeat="node in node.$children">\
+                                            <a ng-href="#[[node.$name]]" class="wrap-btn" ng-class="{\'text-danger bg-danger\': node.$invalid()}">\
+                                                [[ node.$title ]]\
+                                            </a>\
+                                        </li>\
+                                    </ul>\
+                                </li>\
+                            </ul>' + current.html() + '\
+                        </div>';
+                    var replace = $(template);
+                    current.replaceWith(replace);
+                    $compile(replace)(scope);
+                    console.log('Link for tocAffix created');
+                })
             }
         }
     }])

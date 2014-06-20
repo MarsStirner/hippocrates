@@ -1,8 +1,11 @@
+<ng-form name="_idDocForm" toc-element="Документы">
+<legend>Документ удостоверяющий личность</legend>
 <div ng-repeat="doc in client.id_docs | filter: flt_not_deleted()">
     <ng-form name="idDocForm">
         <div class="row">
             <div class="col-md-10">
                 <wm-document id-postfix="c[[$index]]"
+                    group-code="1"
                     model-type="doc.doc_type"
                     model-serial="doc.serial"
                     serial-validator="doc.doc_type.validators.serial"
@@ -28,3 +31,4 @@
         </div>
     </ng-form>
 </div>
+</ng-form>

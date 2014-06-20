@@ -33,6 +33,16 @@ angular.module('WebMis20.services', []).
                     var intolerances = data.result.client_data.intolerances;
                     t.intolerances = intolerances !== null ? intolerances : [];
 
+                    t.soc_statuses = data.result.client_data.soc_statuses;
+                    t.invalidities = t.soc_statuses.filter(function(status){
+                        return status.ss_class.code == 2;
+                    });
+                    t.works = t.soc_statuses.filter(function(status){
+                        return status.ss_class.code == 3;
+                    });
+                    t.nationalities = t.soc_statuses.filter(function(status){
+                        return status.ss_class.code == 4;
+                    });
 
                     t.document_history = data.result.client_data.document_history;
 
@@ -114,6 +124,12 @@ angular.module('WebMis20.services', []).
                     return el.dirty;
                 }).concat(this.changes.intolerances || []);
                 data.intolerances = changed_intolerances;
+                var soc_statuses = this.invalidities.concat(this.works).concat(this.nationalities);
+
+                var changed_soc_statuses = soc_statuses.filter(function(el) {
+                    return el.dirty;
+                }).concat(this.changes.invalidities || []).concat(this.changes.works || []).concat(this.changes.nationalities || []);
+                data.soc_statuses = changed_soc_statuses.length ? changed_soc_statuses : undefined;
 
                 return data;
             };
@@ -232,12 +248,27 @@ angular.module('WebMis20.services', []).
                 });
             };
 
-            WMClient.prototype.add_soc_status = function () {
-                this.client_info['socStatuses'].push({'deleted': 0,
-                    'classCode': '',
-                    'typeCode': '',
-                    'begDate': '',
-                    'endDate': ''
+            WMClient.prototype.add_soc_status = function (class_name, class_code) {
+                var document = null
+                if (class_code != 4){
+                    document = {
+                                        "id": null,
+                                        "deleted": 0,
+                                        "doc_type": null,
+                                        "serial": null,
+                                        "number": null,
+                                        "beg_date": null,
+                                        "end_date": null,
+                                        "origin": null,
+                                        "doc_text": null
+                                    }
+                }
+                this[class_name].push({'deleted': 0,
+                    'ss_class': {'code':class_code},
+                    'ss_type': null,
+                    'beg_date': null,
+                    'end_date': null,
+                    'self_document': document
                 });
             };
 

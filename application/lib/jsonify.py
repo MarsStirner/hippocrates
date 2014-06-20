@@ -249,15 +249,6 @@ class ClientVisualizer(object):
                 'notes': contact.notes}
 
     def make_client_info(self, client):
-        socStatuses = [{'id': socStatus.id,
-                        'deleted': socStatus.deleted,
-                        'className': getattr(socStatus.soc_status_class, 'name', None),
-                        'classCode': getattr(socStatus.soc_status_class, 'code', None),
-                        'typeName': socStatus.name,
-                        'typeCode': socStatus.code,
-                        'begDate': socStatus.begDate or '',
-                        'endDate': socStatus.endDate or ''
-                        } for socStatus in client.socStatuses]
 
         documents = [doc.__json__() for doc in client.documents_all]
         policies = [policy.__json__() for policy in client.policies_all]
@@ -283,13 +274,11 @@ class ClientVisualizer(object):
             'blood_history': client.blood_history.all(),
             'allergies': client.allergies.all(),
             'intolerances': client.intolerances.all(),
-
+            'soc_statuses': client.soc_statuses,
 
             'document_history': document_history,
 
             'contact': client.phones,
-            'socStatuses': socStatuses,
-
             'identifications': identifications,
             'direct_relations': direct_relations,
             'reversed_relations': reversed_relations,
