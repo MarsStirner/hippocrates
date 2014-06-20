@@ -53,6 +53,7 @@
                         <th ng-hide="event.info.event_type.finance.code == 2">Кол-во оплаченных</th>
                         <th class="nowrap" ng-hide="event.info.event_type.finance.code == 2">Сумма к оплате (руб.)</th>
                         <th></th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -70,6 +71,10 @@
                         <td ng-bind="service.paid_count" class="text-right" ng-hide="event.info.event_type.finance.code == 2 || event.info.event_type.finance.code == 3"></td>
                         <td ng-bind="service.sum" class="text-right" ng-hide="event.info.event_type.finance.code == 2"></td>
                         <td>
+                            <button type="button" class="btn btn-sm" ng-attr-title="{'Согласовать': service.is_new || }"
+                                    ng-if="!(service.fully_paid || service.partially_paid)"
+                                    ng-click="remove_service(index)"><span class="glyphicon glyphicon-check"></span>
+                            </button>
                             <button type="button" class="btn btn-sm btn-danger" title="Убрать из списка услуг"
                                     ng-if="!(service.fully_paid || service.partially_paid)"
                                     ng-click="remove_service(index)"><span class="glyphicon glyphicon-trash"></span>

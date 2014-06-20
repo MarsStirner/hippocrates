@@ -111,7 +111,9 @@ def get_event_services(event_id):
             'service_name': service_name,
             'price': price,
             'action_id': a.id,
-            'service_id': service_id
+            'service_id': service_id,
+            'coord': {'date': a.coordDate, 'person': {'id': a.coordPerson_id,
+                                                      'fio': a.shortNameText} if a.coordPerson_id else None}
         }
         services_by_at[(at_id, service_id)].append(s)
     services_grouped = [dict(service_group[0],
