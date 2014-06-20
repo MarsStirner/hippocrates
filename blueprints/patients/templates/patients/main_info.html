@@ -26,9 +26,10 @@
 {#</dl>#}
 
 
-<div class="panel panel-default">
-    <div class="panel-body">
-        <ng-form name="mainInfoForm">
+<ng-form name="mainInfoForm" toc-element="Основная информация">
+    <legend>Основная информация</legend>
+    <div class="panel panel-default">
+        <div class="panel-body">
             <div class="row">
                 <div class="form-group col-md-3"
                      ng-class="{'has-error': mainInfoForm.lastname.$invalid && (mainInfoForm.lastname.$dirty || editing.submit_attempt)}">
@@ -73,6 +74,6 @@
                            popover="Введён невалидный СНИЛС" popover-placement="right" popover-trigger="show_popover" />
                 </div>
             </div>
-        </ng-form>
+        </div>
     </div>
-</div>
+</ng-form>
