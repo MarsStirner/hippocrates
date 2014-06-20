@@ -16,145 +16,125 @@ class Client(db.Model):
         db.Index(u'lastName', u'lastName', u'firstName', u'patrName', u'birthDate', u'id'),
     )
 
-    id = db.Column(db.Integer,
-                   primary_key=True)
-    createDatetime = db.Column(db.DateTime,
-                               nullable=False,
-                               default=datetime.datetime.now)
-    createPerson_id = db.Column(db.Integer,
-                                index=True,
-                                default=safe_current_user_id)
-    modifyDatetime = db.Column(db.DateTime,
-                               nullable=False,
-                               default=datetime.datetime.now,
-                               onupdate=datetime.datetime.now)
-    modifyPerson_id = db.Column(db.Integer,
-                                index=True,
-                                default=safe_current_user_id,
-                                onupdate=safe_current_user_id)
-    deleted = db.Column(db.Integer,
-                        nullable=False,
-                        server_default=u"'0'",
-                        default=0)
-    lastName = db.Column(db.Unicode(30),
-                         nullable=False)
-    firstName = db.Column(db.Unicode(30),
-                          nullable=False)
-    patrName = db.Column(db.Unicode(30),
-                         nullable=False)
-    birthDate = db.Column(db.Date,
-                          nullable=False,
-                          index=True)
-    sexCode = db.Column("sex",
-                        db.Integer,
-                        nullable=False)
-    SNILS = db.Column(db.String(11),
-                      nullable=False,
-                      index=True)
-    bloodType_id = db.Column(db.ForeignKey('rbBloodType.id'),
-                             index=True)
+    id = db.Column(db.Integer, primary_key=True)
+    createDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now)
+    createPerson_id = db.Column(db.Integer, index=True, default=safe_current_user_id)
+    modifyDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now, onupdate=datetime.datetime.now)
+    modifyPerson_id = db.Column(db.Integer, index=True, default=safe_current_user_id, onupdate=safe_current_user_id)
+    deleted = db.Column(db.Integer, nullable=False, server_default=u"'0'", default=0)
+    lastName = db.Column(db.Unicode(30), nullable=False)
+    firstName = db.Column(db.Unicode(30), nullable=False)
+    patrName = db.Column(db.Unicode(30), nullable=False)
+    birthDate = db.Column(db.Date, nullable=False, index=True)
+    sexCode = db.Column("sex", db.Integer, nullable=False)
+    SNILS = db.Column(db.String(11), nullable=False, index=True)
+    bloodType_id = db.Column(db.ForeignKey('rbBloodType.id'), index=True)
     bloodDate = db.Column(db.Date)
-    bloodNotes = db.Column(db.String,
-                           nullable=False,
-                           default='')
-    growth = db.Column(db.String(16),
-                       nullable=False,
-                       default='0')
-    weight = db.Column(db.String(16),
-                       nullable=False,
-                       default='0')
-    notes = db.Column(db.String,
-                      nullable=False,
-                      default='')
-    version = db.Column(db.Integer,
-                        nullable=False,
-                        default=0)
-    birthPlace = db.Column(db.String(128),
-                           nullable=False,
-                           server_default=u"''")
-    embryonalPeriodWeek = db.Column(db.String(16),
-                                    nullable=False,
-                                    server_default=u"''")
-    uuid_id = db.Column(db.Integer,
-                        db.ForeignKey('UUID.id'),
-                        nullable=False,
-                        index=True,
-                        server_default=u"'0'")
+    bloodNotes = db.Column(db.String, nullable=False, default='')
+    growth = db.Column(db.String(16), nullable=False, default='0')
+    weight = db.Column(db.String(16), nullable=False, default='0')
+    notes = db.Column(db.String, nullable=False, default='')
+    version = db.Column(db.Integer, nullable=False, default=0)
+    birthPlace = db.Column(db.String(128), nullable=False, server_default=u"''")
+    embryonalPeriodWeek = db.Column(db.String(16), nullable=False, server_default=u"''")
+    uuid_id = db.Column(db.ForeignKey('UUID.id'), nullable=False, index=True, server_default=u"'0'")
 
     uuid = db.relationship('UUID')
-    documents = db.relationship(u'ClientDocument',
-                                primaryjoin='and_(ClientDocument.clientId==Client.id, ClientDocument.deleted == 0)',
-                                order_by="desc(ClientDocument.id)",
-                                backref=db.backref('client'),
-                                lazy='dynamic')
-    documents_all = db.relationship('ClientDocument',
-                                    primaryjoin='and_(ClientDocument.clientId==Client.id, ClientDocument.deleted != 1)',
-                                    order_by="desc(ClientDocument.id)")
-    policies = db.relationship(u'ClientPolicy',
-                               primaryjoin='and_(ClientPolicy.clientId==Client.id, ClientPolicy.deleted == 0)',
-                               order_by="desc(ClientPolicy.id)",
-                               backref=db.backref('client'),
-                               lazy='dynamic')
-    policies_all = db.relationship('ClientPolicy',
-                                   primaryjoin='and_(ClientPolicy.clientId==Client.id, ClientPolicy.deleted != 1)',
-                                   order_by="desc(ClientPolicy.id)")
-    addresses = db.relationship('ClientAddress',
-                                primaryjoin="and_(Client.id==ClientAddress.client_id, ClientAddress.deleted==0)"
-                                )
-    reg_address = db.relationship(u'ClientAddress',
-                                  primaryjoin="and_(Client.id==ClientAddress.client_id, ClientAddress.type==0, ClientAddress.deleted==0)",
-                                  order_by="desc(ClientAddress.id)", uselist=False)
-    loc_address = db.relationship(u'ClientAddress',
-                                  primaryjoin="and_(Client.id==ClientAddress.client_id, ClientAddress.type==1, ClientAddress.deleted==0)",
-                                  order_by="desc(ClientAddress.id)", uselist=False)
-    socStatuses = db.relationship(u'ClientSocStatus',
-                                  primaryjoin='and_(ClientSocStatus.deleted == 0, ClientSocStatus.client_id==Client.id)',
-                                  backref=db.backref('client'),
-                                  lazy='dynamic') #todo: filter_by_date
+    documents = db.relationship(
+        u'ClientDocument',
+        primaryjoin='and_(ClientDocument.clientId==Client.id, ClientDocument.deleted == 0)',
+        order_by="desc(ClientDocument.id)",
+        backref=db.backref('client'),
+        lazy='dynamic'
+    )
+    documents_all = db.relationship(
+        'ClientDocument',
+        primaryjoin='and_(ClientDocument.clientId==Client.id, ClientDocument.deleted != 1)',
+        order_by="desc(ClientDocument.id)"
+    )
+    policies = db.relationship(
+        u'ClientPolicy',
+        primaryjoin='and_(ClientPolicy.clientId==Client.id, ClientPolicy.deleted == 0)',
+        order_by="desc(ClientPolicy.id)",
+        backref=db.backref('client'),
+        lazy='dynamic'
+    )
+    policies_all = db.relationship(
+        'ClientPolicy',
+        primaryjoin='and_(ClientPolicy.clientId==Client.id, ClientPolicy.deleted != 1)',
+        order_by="desc(ClientPolicy.id)"
+    )
+    addresses = db.relationship(
+        'ClientAddress',
+        primaryjoin="and_(Client.id==ClientAddress.client_id, ClientAddress.deleted==0)"
+    )
+    reg_address = db.relationship(
+        u'ClientAddress',
+        primaryjoin="and_(Client.id==ClientAddress.client_id, ClientAddress.type==0, ClientAddress.deleted==0)",
+        order_by="desc(ClientAddress.id)", uselist=False
+    )
+    loc_address = db.relationship(
+        u'ClientAddress',
+        primaryjoin="and_(Client.id==ClientAddress.client_id, ClientAddress.type==1, ClientAddress.deleted==0)",
+        order_by="desc(ClientAddress.id)", uselist=False
+    )
+    socStatuses = db.relationship(
+        u'ClientSocStatus',
+        primaryjoin='and_(ClientSocStatus.deleted == 0, ClientSocStatus.client_id==Client.id)',
+        backref=db.backref('client'),
+        lazy='dynamic') #todo: filter_by_date
     #  primaryjoin='and_(ClientSocStatus.deleted == 0, ClientSocStatus.client_id==Client.id,'
     #                                           'or_(ClientSocStatus.endDate == None, ClientSocStatus.endDate>={0}))'.format(
     #                                   datetime.date.today()))
-    intolerances = db.relationship(u'ClientIntoleranceMedicament',
-                                   primaryjoin='and_(ClientIntoleranceMedicament.client_id==Client.id,'
-                                               'ClientIntoleranceMedicament.deleted == 0)',
-                                   backref=db.backref('client'),
-                                   lazy='dynamic')
-    identifications = db.relationship(u'ClientIdentification',
-                                      primaryjoin='and_(ClientIdentification.client_id==Client.id,'
-                                                  'ClientIdentification.deleted == 0)',
-                                      backref=db.backref('client'),
-                                      lazy='dynamic')
-    allergies = db.relationship(u'ClientAllergy',
-                                primaryjoin='and_(ClientAllergy.client_id==Client.id, ClientAllergy.deleted == 0)',
-                                backref=db.backref('client'),
-                                lazy='dynamic')
-    blood_history = db.relationship(u'BloodHistory',
-                                    backref=db.backref('client'),
-                                    lazy='dynamic')
-    direct_relations = db.relationship(u'DirectClientRelation',
-                                       primaryjoin='and_(ClientRelation.client_id==Client.id,'
-                                                   'ClientRelation.deleted == 0)',
-                                       foreign_keys='ClientRelation.client_id',
-                                       backref=db.backref('client'),
-                                       lazy='dynamic')
-    reversed_relations = db.relationship(u'ReversedClientRelation',
-                                         primaryjoin='and_(ClientRelation.relative_id==Client.id,'
-                                                     'ClientRelation.deleted == 0)',
-                                         foreign_keys='ClientRelation.relative_id',
-                                         backref=db.backref('client'),
-                                         lazy='dynamic')
-    contacts = db.relationship('ClientContact',
-                               primaryjoin='and_(ClientContact.client_id==Client.id, ClientContact.deleted == 0)',
-                               backref=db.backref('client'),
-                               lazy='dynamic')
-    works = db.relationship(u'ClientWork', primaryjoin='and_(ClientWork.client_id==Client.id, ClientWork.deleted == 0)',
-                            order_by="desc(ClientWork.id)")
+    intolerances = db.relationship(
+        u'ClientIntoleranceMedicament',
+        primaryjoin='and_(ClientIntoleranceMedicament.client_id==Client.id, ClientIntoleranceMedicament.deleted == 0)',
+        backref=db.backref('client'),
+        lazy='dynamic'
+    )
+    identifications = db.relationship(
+        u'ClientIdentification',
+        primaryjoin='and_(ClientIdentification.client_id==Client.id, ClientIdentification.deleted == 0)',
+        backref=db.backref('client'),
+        lazy='dynamic'
+    )
+    allergies = db.relationship(
+        u'ClientAllergy',
+        primaryjoin='and_(ClientAllergy.client_id==Client.id, ClientAllergy.deleted == 0)',
+        backref=db.backref('client'),
+        lazy='dynamic'
+    )
+    blood_history = db.relationship(
+        u'BloodHistory',
+        backref=db.backref('client'),
+        lazy='dynamic'
+    )
+    client_relations = db.relationship(
+        u'ClientRelation',
+        primaryjoin='and_(ClientRelation.deleted == 0, or_(ClientRelation.client_id == Client.id, ClientRelation.relative_id == Client.id)) ',
+        lazy='dynamic'
+    )
+    contacts = db.relationship(
+        'ClientContact',
+        primaryjoin='and_(ClientContact.client_id==Client.id, ClientContact.deleted == 0)',
+        backref=db.backref('client'),
+        lazy='dynamic'
+    )
+    works = db.relationship(
+        u'ClientWork',
+        primaryjoin='and_(ClientWork.client_id==Client.id, ClientWork.deleted == 0)',
+        order_by="desc(ClientWork.id)"
+    )
 
     events = db.relationship(
-        u'Event', lazy='dynamic', order_by='desc(Event.createDatetime)',
-        primaryjoin='and_(Event.deleted == 0, Event.client_id == Client.id)')
+        u'Event',
+        lazy='dynamic',
+        order_by='desc(Event.createDatetime)',
+        primaryjoin='and_(Event.deleted == 0, Event.client_id == Client.id)'
+    )
     appointments = db.relationship(
-        u'ScheduleClientTicket', lazy='dynamic',  #order_by='desc(ScheduleTicket.begDateTime)',
+        u'ScheduleClientTicket',
+        lazy='dynamic',  #order_by='desc(ScheduleTicket.begDateTime)',
         primaryjoin='and_('
                     'ScheduleClientTicket.deleted == 0, '
                     'ScheduleClientTicket.client_id == Client.id, '
@@ -628,6 +608,8 @@ class ClientRelation(db.Model):
     version = db.Column(db.Integer, nullable=False)
 
     relativeType = db.relationship(u'rbRelationType', lazy=False)
+    client = db.relationship(u'Client', primaryjoin='Client.id == ClientRelation.client_id', lazy=False)
+    relative = db.relationship(u'Client', primaryjoin='Client.id == ClientRelation.relative_id', lazy=False)
 
     @property
     def leftName(self):
@@ -740,118 +722,6 @@ class ClientWork(db.Model):
         if self.OKVED:
             parts.append(u'ОКВЭД: '+self._OKVED)
         return ', '.join(parts)
-
-
-class DirectClientRelation(ClientRelation):
-
-    other = db.relationship(u'Client', foreign_keys='ClientRelation.relative_id')
-
-    @property
-    def role(self):
-        return self.leftName
-
-    @property
-    def otherRole(self):
-        return self.rightName
-
-    @property
-    def regionalCode(self):
-        return self.relativeType.regionalCode
-
-    @property
-    def clientId(self):
-        return self.relative_id
-
-    @property
-    def isDirectGenetic(self):
-        return self.relativeType.isDirectGenetic
-
-    @property
-    def isBackwardGenetic(self):
-        return self.relativeType.isBackwardGenetic
-
-    @property
-    def isDirectRepresentative(self):
-        return self.relativeType.isDirectRepresentative
-
-    @property
-    def isBackwardRepresentative(self):
-        return self.relativeType.isBackwardRepresentative
-
-    @property
-    def isDirectEpidemic(self):
-        return self.relativeType.isDirectEpidemic
-
-    @property
-    def isBackwardEpidemic(self):
-        return self.relativeType.isBackwardEpidemic
-
-    @property
-    def isDirectDonation(self):
-        return self.relativeType.isDirectDonation
-
-    @property
-    def isBackwardDonation(self):
-        return self.relativeType.isBackwardDonation
-
-    def __unicode__(self):
-        return self.name + ' ' + self.other
-
-
-class ReversedClientRelation(ClientRelation):
-
-    other = db.relationship(u'Client', foreign_keys='ClientRelation.client_id')
-
-    @property
-    def role(self):
-        return self.rightName
-
-    @property
-    def otherRole(self):
-        return self.leftName
-
-    @property
-    def regionalCode(self):
-        return self.relativeType.regionalReverseCode
-
-    @property
-    def clientId(self):
-        return self.client_id
-
-    @property
-    def isDirectGenetic(self):
-        return self.relativeType.isBackwardGenetic
-
-    @property
-    def isBackwardGenetic(self):
-        return self.relativeType.isDirectGenetic
-
-    @property
-    def isDirectRepresentative(self):
-        return self.relativeType.isBackwardRepresentative
-
-    @property
-    def isBackwardRepresentative(self):
-        return self.relativeType.isDirectRepresentative
-
-    @property
-    def isDirectEpidemic(self):
-        return self.relativeType.isBackwardEpidemic
-
-    @property
-    def isBackwardEpidemic(self):
-        return self.relativeType.isDirectEpidemic
-
-    @property
-    def isDirectDonation(self):
-        return self.relativeType.isBackwardDonation
-
-    @property
-    def isBackwardDonation(self):
-        return self.relativeType.isDirectDonation
-
-    def __unicode__(self):
-        return self.name + ' ' + self.other
 
 
 class ClientSocStatus(db.Model):

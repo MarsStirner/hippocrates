@@ -232,6 +232,51 @@ angular.module('WebMis20.directives').
             }
         }
     }])
+    .directive('wmRelationTypeRb', ['RefBookService', function (RefBookService) {
+        return {
+            restrict: 'E',
+            replace: true,
+            require: 'ngModel',
+            scope: {
+                $client: '=client',
+                $relative: '=relative',
+                $direct: '=direct'
+//                $model: '=model'
+            },
+            template:
+                '<select class="form-control" ng-options="item as $fmt(item) for item in ($rb.objects | filter: $sexFilter) track by item.id"></select>',
+            link: function (scope, element, attrs, ngModel) {
+                scope.$rb = RefBookService.get('rbRelationType');
+                scope.$model = ngModel;
+                scope.$sexFilter = function (item) {
+                    return scope.$client &&
+                        ! (scope.$direct && ((item.leftSex != 0 && item.leftSex != scope.$client.sex.id) || (item.rightSex != 0 && item.rightSex != scope.$relative.sex.id)) ||
+                         (!scope.$direct && ((item.leftSex != 0 && item.leftSex != scope.$relative.sex.id) || (item.rightSex != 0 && item.rightSex != scope.$client.sex.id)) ))
+                };
+                scope.$fmt = function (item) {
+                    return scope.$direct ? item.leftName + ' → ' + item.rightName : item.rightName + ' ← ' + item.leftName;
+                }
+            }
+        }
+    }])
+//    .directive('wmClientsShort', [function () {
+//        return {
+//            restrict: 'E',
+//            replace: true,
+//            require: 'ngModel',
+//            scope: {},
+//            template:
+//                '<ui-select ng-model="model" theme="select2">\
+//                    <choices repeat="rt in $clients |filter: $select:search | limit: 100">\
+//                        <div ng-bind-html="rt.name | highlight: $select.search"></div>\
+//                    </chioces>\
+//                </ui-select>',
+//            link: function (scope, element, attributes, ngModel) {
+//                scope.$refBook = RefBookService.get(attributes.refBook);
+//                scope.model = attributes.model;
+//            }
+//        }
+//    }])
     .directive('uiPrintVariable', ['$compile', 'RefBookService', function ($compile, RefBookService) {
         var ui_select_template =
             '<div fs-select="" items="$refBook.objects" ng-required="true" ng-model="model" class="validatable">[[item.name]]</div>';

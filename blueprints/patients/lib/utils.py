@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 
 import datetime
-import re
 
 from application.models.client import Client, ClientAllergy, ClientContact, ClientDocument, ClientIdentification, \
-    ClientIntoleranceMedicament, DirectClientRelation, ReversedClientRelation, ClientSocStatus, ClientPolicy, \
-    BloodHistory, ClientAddress, Address, AddressHouse
-from application.models.exists import (rbDocumentType, rbPolicyType, rbSocStatusClass, rbSocStatusType,
+    ClientIntoleranceMedicament, ClientSocStatus, ClientPolicy, \
+    BloodHistory, ClientAddress
+from application.models.exists import (rbSocStatusClass, rbSocStatusType,
                                        rbBloodType, rbAccountingSystem, rbContactType, rbRelationType)
-from application.lib.utils import string_to_datetime, safe_date, safe_traverse, get_new_uuid
+from application.lib.utils import safe_date, safe_traverse, get_new_uuid
 
 
 # def format_snils(SNILS):

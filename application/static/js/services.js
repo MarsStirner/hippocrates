@@ -16,7 +16,8 @@ angular.module('WebMis20.services', []).
                         client_id: this.client_id
                     }
                 }).success(function(data) {
-                    t.info = data.result.client_data.client;
+                    t.info = data.result.client_data.info;
+                    t.relations = data.result.client_data.relations;
                     var id_doc = data.result.client_data.id_document;
                     t.id_docs = id_doc !== null ? [id_doc] : [];
                     t.reg_address = data.result.client_data.reg_address;
@@ -177,10 +178,11 @@ angular.module('WebMis20.services', []).
             };
 
             WMClient.prototype.add_relation = function (entity) {
-                this.client_info[entity].push({'deleted': 0,
-                    'relativeType_name': '',
-                    'relativeType_code': '',
-                    'other_id': 0
+                this.info[entity].push({
+                    deleted: 0,
+                    relativeType_name: '',
+                    relativeType_code: '',
+                    other_id: 0
                 });
             };
 
