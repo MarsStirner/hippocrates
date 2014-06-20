@@ -300,6 +300,7 @@ angular.module('WebMis20.services', []).
                 this.fully_paid = this.amount === this.actions.length && unpaid.length === 0;
                 this.partially_paid = unpaid.length > 0 && unpaid.length < this.actions.length;
                 this.paid_count = this.actions.length - unpaid.length;
+                this.coord_count = this.coord_actions.length;
             };
 
             return WMEventService;

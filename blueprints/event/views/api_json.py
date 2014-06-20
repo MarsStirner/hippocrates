@@ -292,6 +292,40 @@ def api_service_make_payment():
     })
 
 
+@module.route('/api/event_payment/service_remove_coord.json', methods=['POST'])
+def api_service_remove_coord():
+    data = request.json
+    if data['action_id']:
+        actions = Action.query.filter(Action.id.in_(data['action_id']))
+        actions.update({Action.coordDate: None, Action.coordPerson_id: None},
+                       synchronize_session=False)
+        db.session.commit()
+
+    return jsonify({
+        'result': 'ok'
+    })
+
+
+@module.route('/api/event_payment/service_add_coord.json', methods=['POST'])
+def api_service_add_coord():
+    data = request.json
+    service_data = data['service']
+    result = data['action_id']
+    if data['action_id'] and data['coord_person_id']:
+        actions = Action.query.filter(Action.id.in_(data['action_id']))
+        actions.update({Action.coordDate: datetime.datetime.now(), Action.coordPerson_id: data['coord_person_id']},
+                       synchronize_session=False)
+        db.session.commit()
+
+    if len(data['action_id']) < service_data['amount']:
+        result.extend(create_services(data['event_id'], [service_data], data['finance_id']))
+
+    return jsonify({
+        'result': 'ok',
+        'data': result
+    })
+
+
 @module.route('/api/event_payment/delete_service.json', methods=['POST'])
 def api_service_delete_service():
     # TODO: validations

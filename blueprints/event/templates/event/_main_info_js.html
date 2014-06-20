@@ -96,14 +96,16 @@ WebMis20.controller('EventMainInfoCtrl', [
 
         $scope.$watch('dms.selected', function(new_val, old_val) {
             if (new_val && new_val != old_val) {
-                $scope.event.info.contract = undefined;
-                var _break = false;
-                angular.forEach($scope.contracts, function (contract, key) {
-                    if (!_break && $scope.check_dms_contract_dependency(new_val, contract)){
-                        $scope.event.info.contract = contract;
-                        _break = true;
-                    }
-                });
+                if (!$scope.check_dms_contract_dependency(new_val, contract)) {
+                    $scope.event.info.contract = undefined;
+                    var _break = false;
+                    angular.forEach($scope.contracts, function (contract, key) {
+                        if (!_break && $scope.check_dms_contract_dependency(new_val, contract)) {
+                            $scope.event.info.contract = contract;
+                            _break = true;
+                        }
+                    });
+                }
                 if (!$scope.check_dms(new_val)){
                     $scope.show_policy_errors();
                 }else if (!$scope.event.info.contract){
@@ -123,7 +125,7 @@ WebMis20.controller('EventMainInfoCtrl', [
             $scope._finance = arg['finance'];
             $scope._contract = arg['contract'];
             $scope.process_policies($scope._finance, $scope._contract);
-            $scope.contracts = $filter('contract_filter')($scope.Contract.objects, $scope.event.info);
+{#            $scope.contracts = $filter('contract_filter')($scope.Contract.objects, $scope.event.info);#}
         });
 
         $scope.process_policies = function (_finance, _contract) {
