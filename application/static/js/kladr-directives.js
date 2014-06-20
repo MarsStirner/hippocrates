@@ -5,7 +5,7 @@ angular.module('WebMis20.kladrDirectives', ['ui.bootstrap']).
         return {
             restrict: 'E',
             transclude: true,
-            scope: { },
+            scope: {},
             controller: function ($scope) {
                 var widgets = $scope.widgets = {};
                 var params = $scope.params = {};
@@ -43,25 +43,30 @@ angular.module('WebMis20.kladrDirectives', ['ui.bootstrap']).
                 };
 
                 this.clearStreet = function() {
-                    widgets.street.model = undefined;
+                    widgets.street.reset();
                 };
 
                 $scope.setFreeInputText = function(accepted) {
                     var text = '';
                     if (accepted) {
-                        var locality_model = widgets.locality.model,
-                            street_model = widgets.street.model;
+                        var locality_model = widgets.locality.model || '',
+                            street_model = widgets.street.model || '';
                         text = [
                             locality_model.hasOwnProperty('name') ? locality_model.name : locality_model,
                             street_model.hasOwnProperty('name') ? street_model.name : street_model,
-                            'д. ' + widgets.housenumber.model,
+                            'д. ' + (widgets.housenumber.model || ''),
                             widgets.corpusnumber.model ? 'к. ' + widgets.corpusnumber.model : '',
-                            'кв. ' + widgets.flatnumber.model
+                            'кв. ' + (widgets.flatnumber.model || '')
                         ].join(', ');
                     }
                     widgets.freeinput.model = text;
                     widgets.locality.onFreeInputStateChanged(accepted);
                     widgets.street.onFreeInputStateChanged(accepted);
+                };
+
+                this.handle_copy_address = function() {
+                    widgets.locality.reset();
+                    widgets.street.reset();
                 };
 
                 $scope.$watch('params.accept_free_input', function(n, o) {
@@ -80,7 +85,6 @@ angular.module('WebMis20.kladrDirectives', ['ui.bootstrap']).
         return {
             restrict: 'E',
             require: ['^wmKladrAddress', '^form'],
-            transclude: true,
             scope: {
                 prefix: '@',
                 localityModel: '=',
@@ -89,13 +93,30 @@ angular.module('WebMis20.kladrDirectives', ['ui.bootstrap']).
                 houseModel: '=',
                 corpusModel: '=',
                 flatModel: '=',
-                freeInputModel: '='
+                freeInputModel: '=',
+                addressModel: '=',
+                copyFromModel: '='
             },
             link: function(scope, elm, attrs, ctrls) {
                 var kladrCtrl = ctrls[0],
                     formCtrl = ctrls[1];
                 scope.addressForm = formCtrl;
                 scope.inFreeInputMode = kladrCtrl.inFreeInputMode;
+                scope.copy_address = function() {
+                    var same = !scope.addressModel.same_as_reg;
+                    if (same) {
+                        kladrCtrl.handle_copy_address();
+                        var copy_from = scope.copyFromModel;
+                        angular.copy(copy_from, scope.addressModel);
+                    } else {
+                        angular.copy({}, scope.addressModel);
+                    }
+                };
+                scope.$watch('addressForm.$dirty', function(n, o) {
+                    if (n !== o) {
+                        scope.addressModel.dirty = n;
+                    }
+                });
             },
             templateUrl: 'kladr-ui.html'
         };
@@ -130,10 +151,11 @@ angular.module('WebMis20.kladrDirectives', ['ui.bootstrap']).
                 kladrCtrl.registerWidget('locality', scope);
                 scope.inFreeInputMode = kladrCtrl.inFreeInputMode;
                 scope.inputStarted = kladrCtrl.inputStarted;
+                scope.edit_mode = kladrCtrl.edit_mode;
 
                 scope.onFreeInputStateChanged = function(enabled) {
                     if (enabled) {
-                        scope.prev_validity = modelctrl.$valid;
+                        scope.prev_validity = modelCtrl.$valid;
                         modelCtrl.$setValidity('addrFromKladr', true);
                     } else {
                         modelCtrl.$setValidity('addrFromKladr', scope.prev_validity !== undefined ? scope.prev_validity : true);
@@ -152,17 +174,21 @@ angular.module('WebMis20.kladrDirectives', ['ui.bootstrap']).
                             modelCtrl.$setValidity('addrFromKladr', true);
                             kladrCtrl.clearStreet();
                         }
-                    } else {
+                    } else if (!n && o !== undefined) {
                         kladrCtrl.clearStreet();
                     }
                 });
+
+                scope.reset =  function() {
+                    scope.model = undefined;
+                    scope.items = [];
+                };
             },
-            // todo: evaluate name in compile ?
             template: '<input type="text" class="form-control"' +
                       'autocomplete="off" placeholder="Населенный пункт"' +
                       'ng-model="model" typeahead="city as city.name for city in getCity($viewValue)"' +
                       'typeahead-wait-ms="1000" typeahead-min-length="2"' +
-                      'ng-required="inputStarted() && !inFreeInputMode()" ng-disabled="inFreeInputMode()"/>'
+                      'ng-required="inputStarted() && !inFreeInputMode() && !edit_mode()" ng-disabled="inFreeInputMode()"/>'
         }
     }]).
     directive('wmKladrLocalityType', ['RefBookService', function(RefBookService) {
@@ -173,9 +199,6 @@ angular.module('WebMis20.kladrDirectives', ['ui.bootstrap']).
             scope: {
                 model: '='
             },
-//            controller: function($scope) {
-//                $scope.rbLocalityType = RefBookService.get('LocalityType');
-//            },
             link: function(scope, elm, attrs, ctrls) {
                 var kladrctrl = ctrls[0],
                     modelctrl = ctrls[1];
@@ -210,7 +233,11 @@ angular.module('WebMis20.kladrDirectives', ['ui.bootstrap']).
             },
             controller: function($scope) {
                 $scope.getStreet = function(search_q) {
-                    var url = [kladr_street, 'search/', $scope.getSelectedLocation(), '/', search_q, '/' ].join('');
+                    var loc = $scope.getSelectedLocation();
+                    if (!loc) {
+                        return [];
+                    }
+                    var url = [kladr_street, 'search/', loc, '/', search_q, '/' ].join('');
                     return $http.get(url, {}).then(function(res) {
                         $scope.items = res.data.result;
                         return $scope.items;
@@ -231,7 +258,8 @@ angular.module('WebMis20.kladrDirectives', ['ui.bootstrap']).
                 scope.inFreeInputMode = kladrctrl.inFreeInputMode;
                 scope.inputStarted = kladrctrl.inputStarted;
                 scope.getSelectedLocation = function() {
-                    return kladrctrl.getLocation().code;
+                    var loc = kladrctrl.getLocation();
+                    return loc ? loc.code : undefined;
                 };
 
                 scope.onFreeInputStateChanged = function(enabled) {
@@ -256,6 +284,11 @@ angular.module('WebMis20.kladrDirectives', ['ui.bootstrap']).
                         }
                     }
                 });
+
+                scope.reset =  function() {
+                    scope.model = undefined;
+                    scope.items = [];
+                };
             },
             template: '<input type="text" class="form-control"' +
                       'autocomplete="off" placeholder="Улица"' +

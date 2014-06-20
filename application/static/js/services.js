@@ -19,8 +19,10 @@ angular.module('WebMis20.services', []).
                     t.info = data.result.client_data.info;
                     var id_doc = data.result.client_data.id_document;
                     t.id_docs = id_doc !== null ? [id_doc] : [];
-                    t.reg_address = data.result.client_data.reg_address;
-                    t.live_addr = data.result.client_data.live_addr;
+                    var reg_addr = data.result.client_data.reg_address;
+                    t.reg_addresses = reg_addr !== null ? [reg_addr] : [];
+                    var live_addr = data.result.client_data.live_address;
+                    t.live_addresses = live_addr !== null ? [live_addr] : [];
                     var cpol = data.result.client_data.compulsory_policy;
                     t.compulsory_policies = cpol !== null ? [cpol] : [];
                     t.voluntary_policies = data.result.client_data.voluntary_policies;
@@ -78,6 +80,16 @@ angular.module('WebMis20.services', []).
                 }).concat(this.changes.id_docs || []);
                 data.id_docs = changed_id_docs.length ? changed_id_docs : undefined;
 
+                var changed_reg_addresses = this.reg_addresses.filter(function(el) {
+                    return el.dirty;
+                }).concat(this.changes.reg_addresses || []);
+                data.reg_addresses = changed_reg_addresses.length ? changed_reg_addresses : undefined;
+
+                var changed_live_addresses = this.live_addresses.filter(function(el) {
+                    return el.dirty;
+                }).concat(this.changes.live_addresses || []);
+                data.live_addresses = changed_live_addresses.length ? changed_live_addresses : undefined;
+
                 var changed_cpolicies = this.compulsory_policies.filter(function(el) {
                     return el.dirty;
                 }).concat(this.changes.compulsory_policies || []);
@@ -121,6 +133,19 @@ angular.module('WebMis20.services', []).
                     "end_date": null,
                     "origin": null,
                     "doc_text": null
+                });
+            };
+
+            WMClient.prototype.add_address = function(type) {
+                var entity = type === 0 ? 'reg_addresses' : 'live_addresses';
+                this[entity].push({
+                    "id": null,
+                    "deleted": 0,
+                    "type": type,
+                    "address": null,
+                    "free_input": null,
+                    "locality_type": null,
+                    "text_summary": null
                 });
             };
 

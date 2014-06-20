@@ -116,6 +116,39 @@ angular.module('WebMis20.controllers').
                 }).length > 1;
             };
 
+            $scope.delete_address = function(entity, addr) {
+                if (confirm('Адрес будет удален. Продолжить?')) {
+                    client.delete_record(entity, addr);
+                }
+            };
+
+            $scope.get_actual_reg_address = function() {
+                var addrs =  client.reg_addresses.filter(function(el) {
+                    return el.deleted === 0;
+                });
+                return addrs.length === 1 ? addrs[0] : null;
+            };
+
+            $scope.add_new_address = function(entity, addr_type) {
+                var addrs = client[entity].filter(function(el) {
+                    return el.deleted === 0;
+                });
+                var cur_addr = addrs[addrs.length - 1];
+                if (addrs.length) {
+                    var msg = [
+                        'При добавлении нового адреса старый адрес будет удален',
+                        cur_addr.id ? ' и станет доступен для просмотра в истории' : '',
+                        '. Продолжить?'
+                    ].join('');
+                    if (confirm(msg)) {
+                        client.delete_record(entity, cur_addr, 2);
+                        client.add_address(addr_type);
+                    }
+                } else {
+                    client.add_address(addr_type);
+                }
+            };
+
             $scope.directRelationFilter = function (relationType) {
                 return (relationType.leftSex == 0 || relationType.leftSex == $scope.client.client_info.sex.id);
             };
@@ -186,6 +219,12 @@ angular.module('WebMis20.controllers').
 
             $scope.refresh_form = function() {
                 $scope.mainInfoForm.$setPristine(true);
+                if (!client.reg_addresses.length) {
+                    client.add_address(0);
+                }
+                if (!client.live_addresses.length) {
+                    client.add_address(1);
+                }
                 if (!client.compulsory_policies.length) {
                     client.add_cpolicy();
                 }

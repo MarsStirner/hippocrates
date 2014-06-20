@@ -1,41 +1,77 @@
-<div id="addresses_tab">
-    <legend>Адрес регистрации</legend>
-    <wm-kladr-address>
-        <ng-form name="regAddressForm">
-        <wm-kladr-base-layout prefix='reg'
-            locality-model="client.reg_address.address.locality"
-            locality-type-model="client.reg_address.locality_type"
-            street-model="client.reg_address.address.street"
-            house-model="client.reg_address.address.house_number"
-            corpus-model="client.reg_address.address.corpus_number"
-            flat-model="client.reg_address.address.flat_number"
-            free-input-model="client.reg_address.free_input">
-        </wm-kladr-base-layout>
-        </ng-form>
-    </wm-kladr-address>
-{#    <div>[[client.reg_address | json]]</div>#}
-
-    <legend>Адрес проживания</legend>
-    <wm-kladr-address>
-        <ng-form name="locAddressForm">
-        <wm-kladr-base-layout prefix='loc'
-            locality-model="client.live_address.address.locality"
-            locality-type-model="client.live_address.locality_type"
-            street-model="client.live_address.address.street"
-            house-model="client.live_address.address.house_number"
-            corpus-model="client.live_address.address.corpus_number"
-            flat-model="client.live_address.address.flat_number"
-            free-input-model="client.live_address.free_input">
-            <div class="checkbox">
-                <label>
-                    <input type="checkbox" id="copy_addr" name="copy_addr"
-                           ng-model="client.live_address.same_as_reg"
-                           ng-click="copy_address(client.live_address.same_as_reg, client.reg_address)"/> {# ищи меня в скоупе patient_info :( #}
-                    Совпадает с адресом регистрации
-                </label>
+<ng-form name="addressForm">
+<legend>Адрес регистрации</legend>
+<div ng-repeat="reg_addr in client.reg_addresses | filter: flt_not_deleted()">
+    <div class="row">
+        <div class="col-md-10">
+            <wm-kladr-address>
+                <ng-form name="regAddressForm">
+                    <wm-kladr-base-layout prefix='reg'
+                        locality-model="reg_addr.address.locality"
+                        locality-type-model="reg_addr.locality_type"
+                        street-model="reg_addr.address.street"
+                        house-model="reg_addr.address.house_number"
+                        corpus-model="reg_addr.address.corpus_number"
+                        flat-model="reg_addr.address.flat_number"
+                        free-input-model="reg_addr.free_input"
+                        address-model="reg_addr"
+                        copy-from-model="null"
+                    </wm-kladr-base-layout>
+                </ng-form>
+            </wm-kladr-address>
+        </div>
+        <div class="col-md-1">
+            <div class="row" ng-show="reg_addr.id">
+                <button type="button" class="btn btn-primary btn-block marginal"
+                        ng-click="edit.activated=true">Редактировать</button>
             </div>
-        </wm-kladr-base-layout>
-        </ng-form>
-    </wm-kladr-address>
-{#    <div>[[client.live_address | json]]</div>#}
+            <div class="row">
+                <button type="button" class="btn btn-danger btn-block marginal"
+                        ng-click="delete_address('reg_addresses', reg_addr)">Удалить</button>
+            </div>
+        </div>
+    </div>
+    <div>[[reg_addr | json]]</div>
 </div>
+<div>
+    <button type="button" class="btn btn-primary marginal"
+            ng-click="add_new_address('reg_addresses', 0)">Добавить новый</button>
+</div>
+
+<legend>Адрес проживания</legend>
+<div ng-repeat="live_addr in client.live_addresses | filter: flt_not_deleted()">
+    <div class="row">
+        <div class="col-md-10">
+            <wm-kladr-address>
+                <ng-form name="locAddressForm">
+                    <wm-kladr-base-layout prefix='loc'
+                        locality-model="live_addr.address.locality"
+                        locality-type-model="live_addr.locality_type"
+                        street-model="live_addr.address.street"
+                        house-model="live_addr.address.house_number"
+                        corpus-model="live_addr.address.corpus_number"
+                        flat-model="live_addr.address.flat_number"
+                        free-input-model="live_addr.free_input"
+                        address-model="live_addr"
+                        copy-from-model="get_actual_reg_address()"
+                    </wm-kladr-base-layout>
+                </ng-form>
+            </wm-kladr-address>
+        </div>
+        <div class="col-md-1">
+            <div class="row" ng-show="live_addr.id">
+                <button type="button" class="btn btn-primary btn-block marginal"
+                        ng-click="edit.activated=true">Редактировать</button>
+            </div>
+            <div class="row">
+                <button type="button" class="btn btn-danger btn-block marginal"
+                        ng-click="delete_address('live_addresses', live_addr)">Удалить</button>
+            </div>
+        </div>
+    </div>
+    <div>[[live_addr | json]]</div>
+</div>
+<div>
+    <button type="button" class="btn btn-primary marginal"
+            ng-click="add_new_address('live_addresses', 1)">Добавить новый</button>
+</div>
+</ng-form>

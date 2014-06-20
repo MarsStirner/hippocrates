@@ -111,6 +111,36 @@ def api_patient_save():
                     doc = add_or_update_doc(client, id_doc)
                     db.session.add(doc)
 
+            reg_addr_info = client_data.get('reg_addresses')
+            actual_reg_address = None
+            if reg_addr_info:
+                for reg_addr in reg_addr_info:
+                    ra = add_or_update_address(client, reg_addr)
+                    db.session.add(ra)
+
+            live_addr_info = client_data.get('live_addresses')
+            if live_addr_info:
+                for live_addr in live_addr_info:
+                    la = add_or_update_address(client, live_addr)
+                    db.session.add(la)
+
+            # if live_address is not None:
+            #     # TODO: check AND FIX!
+            #     if live_address.get('same_as_reg', False) and actual_reg_address:
+            #         address = get_reg_address_copy(client, actual_reg_address)
+            #         client.addresses.append(address)
+            #     elif live_address.get('address') or live_address.get('free_input'):
+            #         live_address['type'] = 1
+            #         if not client.loc_address:
+            #             address = get_new_address(live_address)
+            #             client.addresses.append(address)
+            #         else:
+            #             addresses = get_modified_address(client, live_address)
+            #             db.session.add(addresses[0])
+            #             if addresses[1]:
+            #                 client.addresses.append(addresses[1])
+
+
             cpol_info = client_data.get('compulsory_policies')
             if cpol_info:
                 for cpol in cpol_info:
@@ -185,38 +215,6 @@ def api_patient_save():
                     db.session.add(intlr)
 
     # try:
-    #     reg_address = client_info['regAddress']
-    #     actual_reg_address = None
-    #     if reg_address is not None and (reg_address.get('address') or reg_address.get('free_input')):
-    #         reg_address['type'] = 0
-    #         if not client.reg_address:
-    #             actual_reg_address = address = get_new_address(reg_address)
-    #             client.addresses.append(address)
-    #         else:
-    #             addresses = get_modified_address(client, reg_address)
-    #             db.session.add(addresses[0])
-    #             if addresses[1]:
-    #                 actual_reg_address = addresses[1]
-    #                 client.addresses.append(actual_reg_address)
-    #
-    #     live_address = client_info['liveAddress']
-    #
-    #     if live_address is not None:
-    #         # TODO: check AND FIX!
-    #         if live_address.get('same_as_reg', False) and actual_reg_address:
-    #             address = get_reg_address_copy(client, actual_reg_address)
-    #             client.addresses.append(address)
-    #         elif live_address.get('address') or live_address.get('free_input'):
-    #             live_address['type'] = 1
-    #             if not client.loc_address:
-    #                 address = get_new_address(live_address)
-    #                 client.addresses.append(address)
-    #             else:
-    #                 addresses = get_modified_address(client, live_address)
-    #                 db.session.add(addresses[0])
-    #                 if addresses[1]:
-    #                     client.addresses.append(addresses[1])
-    #
     #     for ss_info in client_info['socStatuses']:
     #         if not 'id' in ss_info:
     #             ss = get_new_soc_status(ss_info)

@@ -134,6 +134,113 @@ def add_or_update_doc(client, data):
     return doc
 
 
+def add_or_update_address(client, data):
+    # todo: check for existing records ?
+    addr_id = data.get('id')
+    addr_type = data.get('type')
+    if addr_type is None:
+        raise ClientSaveException(u'Ошибка сохранения адреса: Отсутствует обязательное поле Тип')
+    loc_type = safe_traverse(data, 'locality_type', 'id')
+    loc_kladr = safe_traverse(data, 'address', 'locality')
+    loc_kladr_code = loc_kladr.get('code') if isinstance(loc_kladr, dict) else loc_kladr
+    street_kladr = safe_traverse(data, 'address', 'street')
+    street_kladr_code = street_kladr.get('code') if isinstance(street_kladr, dict) else street_kladr
+    free_input = safe_traverse(data, 'free_input')
+    house_number = safe_traverse(data, 'address', 'house_number', default='')
+    corpus_number = safe_traverse(data, 'address', 'corpus_number', default='')
+    flat_number = safe_traverse(data, 'address', 'flat_number', default='')
+    deleted = data.get('deleted', 0)
+
+    if addr_id:
+        # TODO: проверять какой был вид адреса
+        client_addr = ClientAddress.query.get(addr_id)
+        client_addr.localityType = loc_type
+        client_addr.freeInput = free_input
+        client_addr.deleted = deleted
+        try:
+            client_addr.address.flat = flat_number
+            client_addr.address.house.KLADRCode = loc_kladr_code
+            client_addr.address.house.KLADRStreetCode = street_kladr_code
+            client_addr.address.house.number = house_number
+            client_addr.address.house.corpus = corpus_number
+        except:
+            raise
+            raise ClientSaveException(u'Ошибка сохранения адреса: добавьте новую запись адреса')
+    else:
+        if loc_kladr_code and street_kladr_code:
+            client_addr = ClientAddress.create_from_kladr(addr_type, loc_type, loc_kladr_code, street_kladr_code,
+                                                          house_number, corpus_number, flat_number, client)
+        elif free_input:
+            client_addr = ClientAddress.create_from_free_input(addr_type, loc_type, free_input, client)
+        else:
+            raise ClientSaveException(u'Ошибка сохранения адреса: Отсутствуют обязательные поля: '
+                                      u'Населенный пунтк и Улица или Адрес в свободном виде')
+    return client_addr
+
+
+def get_new_address(addr_info):
+    addr_type = addr_info['type']
+    loc_type = safe_traverse(addr_info, 'locality_type', 'id')
+    loc_kladr_code = safe_traverse(addr_info, 'address', 'locality', 'code')
+    street_kladr_code = safe_traverse(addr_info, 'address', 'street', 'code')
+    free_input = safe_traverse(addr_info, 'free_input')
+
+    if (loc_kladr_code and street_kladr_code):
+        house_number = safe_traverse(addr_info, 'address', 'house_number', default='')
+        corpus_number = safe_traverse(addr_info, 'address', 'corpus_number', default='')
+        flat_number = safe_traverse(addr_info, 'address', 'flat_number', default='')
+        client_addr = ClientAddress.create_from_kladr(addr_type, loc_type, loc_kladr_code, street_kladr_code,
+            house_number, corpus_number, flat_number)
+    elif free_input:
+        client_addr = ClientAddress.create_from_free_input(addr_type, loc_type, free_input)
+    else:
+        raise ValueError
+
+    return client_addr
+
+
+def get_modified_address(client, addr_info):
+    addr = filter(lambda a: a.id == addr_info['id'], client.addresses)[0]
+
+    if addr_info['deleted'] == 1:
+        addr.deleted = 1
+        return [addr, ]
+
+    loc_type = safe_traverse(addr_info, 'locality_type', 'id')
+    loc_kladr_code = safe_traverse(addr_info, 'address', 'locality', 'code')
+    street_kladr_code = safe_traverse(addr_info, 'address', 'street', 'code')
+    free_input = safe_traverse(addr_info, 'free_input')
+    house_number = safe_traverse(addr_info, 'address', 'house_number', default='')
+    corpus_number = safe_traverse(addr_info, 'address', 'corpus_number', default='')
+    flat_number = safe_traverse(addr_info, 'address', 'flat_number', default='')
+
+    def _big_changes(a):
+        if ((a.address and a.address.KLADRCode) != loc_kladr_code or
+                (a.address and a.address.KLADRStreetCode) != street_kladr_code or
+                (a.address and a.address.number) != house_number or
+                (a.address and a.address.corpus) != corpus_number or
+                (a.address and a.address.flat) != flat_number):
+            return True
+        return False
+
+    if _big_changes(addr):
+        new_addr = get_new_address(addr_info)
+        addr.set_deleted(2)
+        return (addr, new_addr)
+    else:
+        addr.localityType = loc_type
+        addr.freeInput = free_input
+        return (addr, None)
+
+
+def get_reg_address_copy(client, reg_address):
+    # todo: check prev record and mark deleted
+    live_ca = ClientAddress(1, reg_address.localityType)  # todo: enum
+    live_ca.address = reg_address.address
+    live_ca.freeInput = ''
+    return live_ca
+
+
 def add_or_update_policy(client, data):
     # todo: check for existing records ?
     policy_id = data.get('id')
@@ -243,70 +350,6 @@ def add_or_update_intolerance(client, data):
     else:
         intlr = ClientIntoleranceMedicament(intlr_name, intlr_power, date, notes, client)
     return intlr
-
-
-def get_new_address(addr_info):
-    addr_type = addr_info['type']
-    loc_type = safe_traverse(addr_info, 'locality_type', 'id')
-    loc_kladr_code = safe_traverse(addr_info, 'address', 'locality', 'code')
-    street_kladr_code = safe_traverse(addr_info, 'address', 'street', 'code')
-    free_input = safe_traverse(addr_info, 'free_input')
-
-    if (loc_kladr_code and street_kladr_code):
-        house_number = safe_traverse(addr_info, 'address', 'house_number', default='')
-        corpus_number = safe_traverse(addr_info, 'address', 'corpus_number', default='')
-        flat_number = safe_traverse(addr_info, 'address', 'flat_number', default='')
-        client_addr = ClientAddress.create_from_kladr(addr_type, loc_type, loc_kladr_code, street_kladr_code,
-            house_number, corpus_number, flat_number)
-    elif free_input:
-        client_addr = ClientAddress.create_from_free_input(addr_type, loc_type, free_input)
-    else:
-        raise ValueError
-
-    return client_addr
-
-
-def get_modified_address(client, addr_info):
-    addr = filter(lambda a: a.id == addr_info['id'], client.addresses)[0]
-
-    if addr_info['deleted'] == 1:
-        addr.deleted = 1
-        return [addr, ]
-
-    loc_type = safe_traverse(addr_info, 'locality_type', 'id')
-    loc_kladr_code = safe_traverse(addr_info, 'address', 'locality', 'code')
-    street_kladr_code = safe_traverse(addr_info, 'address', 'street', 'code')
-    free_input = safe_traverse(addr_info, 'free_input')
-    house_number = safe_traverse(addr_info, 'address', 'house_number', default='')
-    corpus_number = safe_traverse(addr_info, 'address', 'corpus_number', default='')
-    flat_number = safe_traverse(addr_info, 'address', 'flat_number', default='')
-
-    def _big_changes(a):
-        if ((a.address and a.address.KLADRCode) != loc_kladr_code or
-                (a.address and a.address.KLADRStreetCode) != street_kladr_code or
-                (a.address and a.address.number) != house_number or
-                (a.address and a.address.corpus) != corpus_number or
-                (a.address and a.address.flat) != flat_number):
-            return True
-        return False
-
-    if _big_changes(addr):
-        new_addr = get_new_address(addr_info)
-        addr.set_deleted(2)
-        return (addr, new_addr)
-    else:
-        addr.localityType = loc_type
-        addr.freeInput = free_input
-        return (addr, None)
-
-
-def get_reg_address_copy(client, reg_address):
-    # todo: check prev record and mark deleted
-    live_ca = ClientAddress(1, reg_address.localityType)  # todo: enum
-    live_ca.address = reg_address.address
-    live_ca.freeInput = ''
-    return live_ca
-
 
 def get_new_soc_status(ss_info):
     ss = ClientSocStatus()

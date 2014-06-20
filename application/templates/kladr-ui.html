@@ -1,7 +1,14 @@
 <div>
     <div class="panel panel-default">
         <div class="panel-body">
-            <div ng-transclude></div>
+            <div class="checkbox" ng-if="copyFromModel !== null">
+                <label>
+                    <input type="checkbox" id="[[prefix]]_copy_addr" name="copy_addr"
+                           ng-model="addressModel.same_as_reg"
+                           ng-click="copy_address()"/>
+                    Совпадает с адресом регистрации
+                </label>
+            </div>
             <div class="row">
                 <div class="form-group col-md-9"
                      ng-class="{'has-error': addressForm.locality.$invalid}">

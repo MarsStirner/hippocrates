@@ -99,8 +99,8 @@ class Client(db.Model):
                                    primaryjoin='and_(ClientPolicy.clientId==Client.id, ClientPolicy.deleted != 1)',
                                    order_by="desc(ClientPolicy.id)")
     addresses = db.relationship('ClientAddress',
-                                primaryjoin="and_(Client.id==ClientAddress.client_id, ClientAddress.deleted==0)"
-                                )
+                                primaryjoin="and_(Client.id==ClientAddress.client_id, ClientAddress.deleted==0)",
+                                backref=db.backref('client'))
     reg_address = db.relationship(u'ClientAddress',
                                   primaryjoin="and_(Client.id==ClientAddress.client_id, ClientAddress.type==0, ClientAddress.deleted==0)",
                                   order_by="desc(ClientAddress.id)", uselist=False)
@@ -325,23 +325,24 @@ class ClientAddress(db.Model):
 
     @classmethod
     def create_from_kladr(cls, addr_type, loc_type, loc_kladr_code, street_kladr_code,
-            house_number, corpus_number, flat_number):
-        ca = cls(addr_type, loc_type)
+            house_number, corpus_number, flat_number, client):
+        ca = cls(addr_type, loc_type, client)
         addr = Address.create_new(loc_kladr_code, street_kladr_code, house_number, corpus_number, flat_number)
         ca.address = addr
         ca.freeInput = ''
         return ca
 
     @classmethod
-    def create_from_free_input(cls, addr_type, loc_type, free_input):
-        ca = cls(addr_type, loc_type)
+    def create_from_free_input(cls, addr_type, loc_type, free_input, client):
+        ca = cls(addr_type, loc_type, client)
         ca.address = None
         ca.freeInput = free_input
         return ca
 
-    def __init__(self, addr_type, loc_type):
+    def __init__(self, addr_type, loc_type, client):
         self.type = addr_type
         self.localityType = loc_type
+        self.client = client
 
     @property
     def KLADRCode(self):
