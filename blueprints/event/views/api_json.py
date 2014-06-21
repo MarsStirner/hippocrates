@@ -312,7 +312,7 @@ def api_service_add_coord():
     service_data = data['service']
     result = data['action_id']
     if data['action_id'] and data['coord_person_id']:
-        actions = Action.query.filter(Action.id.in_(data['action_id']))
+        actions = Action.query.filter(db.and_(Action.id.in_(data['action_id']), Action.coordPerson_id==None))
         actions.update({Action.coordDate: datetime.datetime.now(), Action.coordPerson_id: data['coord_person_id']},
                        synchronize_session=False)
         db.session.commit()
