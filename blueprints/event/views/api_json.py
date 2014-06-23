@@ -309,16 +309,16 @@ def api_service_remove_coord():
 @module.route('/api/event_payment/service_add_coord.json', methods=['POST'])
 def api_service_add_coord():
     data = request.json
-    service_data = data['service']
-    result = data['action_id']
-    if data['action_id'] and data['coord_person_id']:
-        actions = Action.query.filter(Action.id.in_(data['action_id']))
-        actions.update({Action.coordDate: datetime.datetime.now(), Action.coordPerson_id: data['coord_person_id']},
+    service = data['service']
+    result = service['actions']
+    if service['actions'] and service['coord_person_id']:
+        actions = Action.query.filter(db.and_(Action.id.in_(service['actions']), Action.coordPerson_id==None))
+        actions.update({Action.coordDate: datetime.datetime.now(), Action.coordPerson_id: service['coord_person_id']},
                        synchronize_session=False)
         db.session.commit()
 
-    if len(data['action_id']) < service_data['amount']:
-        result.extend(create_services(data['event_id'], [service_data], data['finance_id']))
+    if len(service['actions']) < service['amount']:
+        result.extend(create_services(data['event_id'], [service], data['finance_id']))
 
     return jsonify({
         'result': 'ok',

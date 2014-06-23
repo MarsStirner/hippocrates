@@ -244,7 +244,7 @@
             if (new_val != old_val) {
               $scope.$broadcast('form_state_change', {
                   finance: $scope.event.info.event_type.finance,
-                  contract: $scope.event.info.contract
+                  contract: new_val
               });
             }
         }, true);

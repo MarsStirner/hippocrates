@@ -120,21 +120,20 @@ WebMis20.controller('EventServicesCtrl', ['$scope', '$http', 'WMEventService',
 
         $scope.apply_coord_service = function(service) {
             if ($scope.event.info.id){
+                service.coord_person_id = current_user_id;
                 $http.post(
                     '{{ url_for('.api_service_add_coord') }}', {
-                        action_id: service.actions,
-                        coord_person_id: current_user_id,
                         event_id: $scope.event.info.id,
                         finance_id: $scope.event.info.contract.finance.id,
                         service: service
                     }
                 ).success(function(result) {
-                    service.coord_person_id = current_user_id;
-                    service.actions = result['data'];
+                    service.actions = result['result']['data'];
                     service.coord_actions = result['result']['data'];
                     service.coord_count = service.coord_actions.length;
 {#                    alert('ok');#}
                 }).error(function() {
+                    service.coord_person_id = undefined;
                     alert('error');
                 });
             } else {

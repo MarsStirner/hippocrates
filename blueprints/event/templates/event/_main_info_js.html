@@ -96,7 +96,7 @@ WebMis20.controller('EventMainInfoCtrl', [
 
         $scope.$watch('dms.selected', function(new_val, old_val) {
             if (new_val && new_val != old_val) {
-                if (!$scope.check_dms_contract_dependency(new_val, contract)) {
+                if (!$scope.check_dms_contract_dependency(new_val, $scope.event.info.contract)) {
                     $scope.event.info.contract = undefined;
                     var _break = false;
                     angular.forEach($scope.contracts, function (contract, key) {
@@ -205,8 +205,8 @@ WebMis20.controller('EventMainInfoCtrl', [
             return $scope.no_policy_errors();
         };
 
-        $scope.check_dms_contract_dependency = function(policy, contract){
-            return policy.insurer.id == contract.payer.id;
+        $scope.check_dms_contract_dependency = function(_policy, _contract){
+            return _policy.insurer.id == _contract.payer.id;
         };
 
         $scope.exec_person_changed = function () {
