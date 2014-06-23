@@ -178,11 +178,10 @@ angular.module('WebMis20.services', []).
             };
 
             WMClient.prototype.add_relation = function (entity) {
-                this.info[entity].push({
-                    deleted: 0,
-                    relativeType_name: '',
-                    relativeType_code: '',
-                    other_id: 0
+                this.relations.push({
+                    direct: true,
+                    relative: null,
+                    type: null
                 });
             };
 

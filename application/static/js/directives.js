@@ -241,7 +241,6 @@ angular.module('WebMis20.directives').
                 $client: '=client',
                 $relative: '=relative',
                 $direct: '=direct'
-//                $model: '=model'
             },
             template:
                 '<select class="form-control" ng-options="item as $fmt(item) for item in ($rb.objects | filter: $sexFilter) track by item.id"></select>',
@@ -250,8 +249,8 @@ angular.module('WebMis20.directives').
                 scope.$model = ngModel;
                 scope.$sexFilter = function (item) {
                     return scope.$client &&
-                        ! (scope.$direct && ((item.leftSex != 0 && item.leftSex != scope.$client.sex.id) || (item.rightSex != 0 && item.rightSex != scope.$relative.sex.id)) ||
-                         (!scope.$direct && ((item.leftSex != 0 && item.leftSex != scope.$relative.sex.id) || (item.rightSex != 0 && item.rightSex != scope.$client.sex.id)) ))
+                        ! (scope.$direct && ((item.leftSex != 0 && item.leftSex != scope.$client.sex.id) || (item.rightSex != 0 && scope.$relative && item.rightSex != scope.$relative.sex.id)) ||
+                         (!scope.$direct && ((item.rightSex != 0 && item.rightSex != scope.$client.sex.id) || (item.leftSex != 0 && scope.$relative && item.leftSex != scope.$relative.sex.id)) ))
                 };
                 scope.$fmt = function (item) {
                     return scope.$direct ? item.leftName + ' → ' + item.rightName : item.rightName + ' ← ' + item.leftName;
