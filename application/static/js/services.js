@@ -16,7 +16,7 @@ angular.module('WebMis20.services', []).
                         client_id: this.client_id
                     }
                 }).success(function(data) {
-                    t.info = data.result.client_data.client;
+                    t.info = data.result.client_data.info;
                     var id_doc = data.result.client_data.id_document;
                     t.id_docs = id_doc !== null ? [id_doc] : [];
                     t.reg_address = data.result.client_data.reg_address;
@@ -24,6 +24,17 @@ angular.module('WebMis20.services', []).
                     var cpol = data.result.client_data.compulsory_policy;
                     t.compulsory_policies = cpol !== null ? [cpol] : [];
                     t.voluntary_policies = data.result.client_data.voluntary_policies;
+                    t.soc_statuses = data.result.client_data.soc_statuses;
+                    t.invalidities = t.soc_statuses.filter(function(status){
+                        return status.ss_class.code == 2;
+                    });
+                    t.works = t.soc_statuses.filter(function(status){
+                        return status.ss_class.code == 3;
+                    });
+                    t.nationalities = t.soc_statuses.filter(function(status){
+                        return status.ss_class.code == 4;
+                    });
+
 //                    t.id_doc = data.result.client_data.id_document;
 //                    t.id_doc = data.result.client_data.id_document;
 //                    t.id_doc = data.result.client_data.id_document;
@@ -85,6 +96,12 @@ angular.module('WebMis20.services', []).
                     return el.dirty;
                 }).concat(this.changes.voluntary_policies || []);
                 data.voluntary_policies = changed_vpolicies.length ? changed_vpolicies : undefined;
+
+                var soc_statuses = this.invalidities.concat(this.works).concat(this.nationalities);
+                var changed_soc_statuses = soc_statuses.filter(function(el) {
+                    return el.dirty;
+                }).concat(this.changes.invalidities || []).concat(this.changes.works || []).concat(this.changes.nationalities || []);
+                data.soc_statuses = changed_soc_statuses.length ? changed_soc_statuses : undefined;
 
                 return data;
             };
@@ -184,12 +201,27 @@ angular.module('WebMis20.services', []).
                 });
             };
 
-            WMClient.prototype.add_soc_status = function () {
-                this.client_info['socStatuses'].push({'deleted': 0,
-                    'classCode': '',
-                    'typeCode': '',
-                    'begDate': '',
-                    'endDate': ''
+            WMClient.prototype.add_soc_status = function (class_name, class_code) {
+                var document = null
+                if (class_code != 4){
+                    document = {
+                                        "id": null,
+                                        "deleted": 0,
+                                        "doc_type": null,
+                                        "serial": null,
+                                        "number": null,
+                                        "beg_date": null,
+                                        "end_date": null,
+                                        "origin": null,
+                                        "doc_text": null
+                                    }
+                }
+                this[class_name].push({'deleted': 0,
+                    'ss_class': {'code':class_code},
+                    'ss_type': null,
+                    'beg_date': null,
+                    'end_date': null,
+                    'self_document': document
                 });
             };
 

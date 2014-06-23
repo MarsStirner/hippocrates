@@ -4,7 +4,7 @@ from application.lib.agesex import calcAgeTuple
 from application.lib.const import ID_DOC_GROUP_CODE, VOL_POLICY_CODES, COMP_POLICY_CODES
 from application.models.utils import safe_current_user_id
 from application.models.enums import Gender, LocalityType
-from application.models.exists import rbDocumentTypeGroup
+from application.models.exists import rbDocumentTypeGroup, rbDocumentType
 from application.models.kladr_models import Kladr, Street
 from application.systemwide import db
 from sqlalchemy import orm
@@ -107,10 +107,9 @@ class Client(db.Model):
     loc_address = db.relationship(u'ClientAddress',
                                   primaryjoin="and_(Client.id==ClientAddress.client_id, ClientAddress.type==1, ClientAddress.deleted==0)",
                                   order_by="desc(ClientAddress.id)", uselist=False)
-    socStatuses = db.relationship(u'ClientSocStatus',
-                                  primaryjoin='and_(ClientSocStatus.deleted == 0, ClientSocStatus.client_id==Client.id)',
-                                  backref=db.backref('client'),
-                                  lazy='dynamic') #todo: filter_by_date
+    soc_statuses = db.relationship(u'ClientSocStatus',
+                                   primaryjoin='and_(ClientSocStatus.deleted == 0, ClientSocStatus.client_id==Client.id)',
+                                   backref=db.backref('client')) #todo: filter_by_date
     #  primaryjoin='and_(ClientSocStatus.deleted == 0, ClientSocStatus.client_id==Client.id,'
     #                                           'or_(ClientSocStatus.endDate == None, ClientSocStatus.endDate>={0}))'.format(
     #                                   datetime.date.today()))
@@ -207,8 +206,8 @@ class Client(db.Model):
     @property
     def id_document(self):
         if not self._id_document:
-            self._id_document = (self.documents.filter(ClientDocument.deleted == 0).
-                filter(rbDocumentTypeGroup.code == ID_DOC_GROUP_CODE).order_by(ClientDocument.date.desc()).first())
+            self._id_document = (self.documents.join(rbDocumentType).join(rbDocumentTypeGroup).filter(ClientDocument.deleted == 0).
+                                 filter(rbDocumentTypeGroup.code == ID_DOC_GROUP_CODE).order_by(ClientDocument.date.desc()).first())
         return self._id_document
 
     def get_actual_document_by_code(self, doc_type_code):
@@ -858,19 +857,38 @@ class ClientSocStatus(db.Model):
     __tablename__ = u'ClientSocStatus'
 
     id = db.Column(db.Integer, primary_key=True)
-    createDatetime = db.Column(db.DateTime, nullable=False)
-    createPerson_id = db.Column(db.Integer, index=True)
-    modifyDatetime = db.Column(db.DateTime, nullable=False)
-    modifyPerson_id = db.Column(db.Integer, index=True)
-    deleted = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    createDatetime = db.Column(db.DateTime,
+                               nullable=False,
+                               default=datetime.datetime.now)
+    createPerson_id = db.Column(db.Integer,
+                                index=True,
+                                default=safe_current_user_id)
+    modifyDatetime = db.Column(db.DateTime,
+                               nullable=False,
+                               default=datetime.datetime.now,
+                               onupdate=datetime.datetime.now)
+    modifyPerson_id = db.Column(db.Integer,
+                                index=True,
+                                default=safe_current_user_id,
+                                onupdate=safe_current_user_id)
+    deleted = db.Column(db.Integer,
+                        nullable=False,
+                        server_default=u"'0'",
+                        default=0)
     client_id = db.Column(db.ForeignKey('Client.id'), nullable=False, index=True)
     socStatusClass_id = db.Column(db.ForeignKey('rbSocStatusClass.id'), index=True)
     socStatusType_id = db.Column(db.ForeignKey('rbSocStatusType.id'), nullable=False, index=True)
     begDate = db.Column(db.Date, nullable=False)
     endDate = db.Column(db.Date)
     document_id = db.Column(db.ForeignKey('ClientDocument.id'), index=True)
-    version = db.Column(db.Integer, nullable=False)
-    note = db.Column(db.String(256), nullable=False, server_default=u"''")
+    note = db.Column(db.Unicode(200),
+                     nullable=False,
+                     server_default=u"''",
+                     default=u'')
+    version = db.Column(db.Integer,
+                        nullable=False,
+                        server_default=u"'0'",
+                        default=0)
     benefitCategory_id = db.Column(db.Integer)
 
     soc_status_class = db.relationship(u'rbSocStatusClass', lazy=False)
@@ -896,6 +914,14 @@ class ClientSocStatus(db.Model):
         else:
             return self.getClientDocument()
 
+    def __init__(self, soc_stat_class, soc_stat_type, beg_date, end_date, client, document):
+        self.socStatusClass_id = int(soc_stat_class) if soc_stat_class else None
+        self.socStatusType_id = int(soc_stat_type) if soc_stat_type else None
+        self.begDate = beg_date
+        self.self_document = document
+        self.endDate = end_date
+        self.client = client
+
     def getClientDocument(self):
         documents = ClientDocument.query().filter(ClientDocument.clientId == self.client_id).\
             filter(ClientDocument.deleted == 0).all()
@@ -908,6 +934,17 @@ class ClientSocStatus(db.Model):
 
     def __int__(self):
         return self.id
+
+    def __json__(self):
+        return {
+            'id': self.id,
+            'ss_type': self.socStatusType,
+            'ss_class': self.soc_status_class,
+            'deleted': self.deleted,
+            'beg_date': self.begDate,
+            'end_date': self.endDate,
+            'self_document': self.self_document
+        }
 
 
 class ClientPolicy(db.Model):
