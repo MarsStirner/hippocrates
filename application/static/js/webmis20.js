@@ -704,7 +704,7 @@ var WebMis20 = angular.module('WebMis20', [
     return {
         link: function (scope, element, attr) {
             if (window.opener){
-                element.prepend('<div class="pull-right"><button class="btn btn-danger" onclick="window.opener.focus();window.close();"><span class="glyphicon glyphicon-remove"></span> Закрыть</button></div>');
+                element.prepend('<div class="pull-right"><button class="btn btn-danger" onclick="window.opener.focus();window.close();" title="Закрыть"><span class="glyphicon glyphicon-remove"></span></button></div>');
             }
         }
     }

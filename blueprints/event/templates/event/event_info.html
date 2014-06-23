@@ -6,6 +6,7 @@
     <div ng-controller="EventInfoCtrl" class="ng-cloak">
         {% include "_breadcrumbs.html" %}
         <legend xmlns="http://www.w3.org/1999/html" wm-page-header>
+            <div class="pull-right text-right col-md-1"><button type="button" ng-click="save_event();" ng-hide="event.is_new();" class="btn btn-success" title="Сохранить"><span class="glyphicon glyphicon-ok"></span></button></div>
             <h2>[[event.is_new() ? 'Создание обращения' : 'Обращение № ' + event.info.external_id]], пациент
                 <a href="{{ url_for('patients.patient') }}?client_id=[[event.info.client_id]]">[[ event.info.client.info.full_name ]]</a>
             </h2>
@@ -96,9 +97,9 @@
 {#                </div>#}
             </div>
             <div class="col-md-6 text-right">
-                <button type="button" ng-click="cancel_editing();" class="btn btn-lg btn-danger">Назад</button>
                 <button type="button" ng-click="save_event();" class="btn btn-lg btn-success"
                         ng-bind="event.is_new() ? 'Создать' : 'Сохранить'">Создать</button>
+                <button type="button" ng-click="cancel_editing();" class="btn btn-lg btn-danger">Закрыть</button>
             </div>
         </div>
 {#        <div>#}
@@ -180,6 +181,12 @@
             }
         };
 
+        $scope.cancel_editing = function(){
+          if (window.opener){
+              window.opener.focus();
+              window.close();
+          }
+        };
 
         $scope.ps = new PrintingService("event");
         $scope.ps_resolve = function () {
