@@ -44,7 +44,7 @@
                                        ng-disabled="formcnf.contract.disabled || (event.is_new() && event.services.length)">
                                 <ui-select-match placeholder="Договор">[[$select.selected.number]] [[$select.selected.date]]
                                                              [[$select.selected.resolution]]</ui-select-match>
-                                <ui-select-choices repeat="c in Contract.objects | contract_filter: event.info | filter: $select.search">
+                                <ui-select-choices repeat="c in contracts | filter: $select.search">
                                     <div ng-bind-html="(c.number+' '+c.date+' '+c.resolution) | highlight: $select.search"></div>
                                 </ui-select-choices>
                             </ui-select>
@@ -63,6 +63,20 @@
                                                  | event_type_filter: rbEventType.objects && rbEventType.get_filtered_by_rtf(request_type.selected.id, finance.selected.id)
                                                  | filter: $select.search '>
                                     <div ng-bind-html="et.name | highlight: $select.search"></div>
+                                </ui-select-choices>
+                            </ui-select>
+                        </div>
+                        <div class="col-md-4" ng-if="finance.selected.code == '3'"
+                             ng-class="{'has-error': event_maininfo_form.dms.$invalid && editing.submit_attempt}">
+                            <label for="dms">Полис ДМС</label>
+                            <ui-select id="dms" name="dms" theme="select2"
+                                       ng-model="dms.selected" ng-required="finance.selected.code == '3'"
+                                       ng-disabled="!event.is_new() || (event.is_new() && event.services.length)">
+                                <ui-select-match placeholder="Полис ДМС">[[$select.selected.policy_text]]</ui-select-match>
+                                <ui-select-choices repeat='policy in event.info.client.voluntary_policies
+                                                 | filter: check_dms
+                                                 | filter: $select.search '>
+                                    <div ng-bind-html="policy.policy_text | highlight: $select.search"></div>
                                 </ui-select-choices>
                             </ui-select>
                         </div>

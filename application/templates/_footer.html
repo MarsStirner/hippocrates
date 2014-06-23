@@ -3,8 +3,9 @@
 <!-- Placed at the end of the document so the pages load faster -->
 <script>
     var rb_root = '{{ url_for('api_refbook') }}',
-        url_client_get = '{{ url_for('patients.api_patient_get') }}' + '?client_id=:client_id',
+        url_client_get = '{{ url_for('patients.api_patient_get') }}',
         url_client_save = '{{ url_for('patients.api_patient_save') }}',
+        url_client_html = '{{ url_for('patients.patient') }}',
         url_action_get = '{{ url_for('schedule.api_action_get') }}',
         url_action_new = '{{ url_for('schedule.api_action_new_get') }}',
         url_action_save = '{{ url_for('schedule.api_action_post') }}',
@@ -14,7 +15,7 @@
         url_print_templates = '{{ print_subsystem_templates }}',
         url_print_subsystem = '{{ print_subsystem_url }}',
         url_print_template = '{{ print_subsystem_print_template }}',
-        url_kladr_get = '{{ url_for('patients.api_kladr_city_get') }}', // for tests
+{#        url_kladr_get = '{{ url_for('patients.api_kladr_city_get') }}', // for tests#}
         kladr_city = '{{ url_for('kladr_city') }}',
         kladr_street = '{{ url_for('kladr_street') }}',
         current_user_id = {{ current_user.id|default('undefined') }};
@@ -38,11 +39,14 @@
 <script src="{{ url_for('static', filename='angular-ui-select/select.js') }}"></script>
 <script src="{{ url_for('static', filename='angular.js/angular-tree-repeat.js') }}"></script>
 <script src="{{ url_for('static', filename='angular-ui-utils/mask.js') }}"></script>
+<script src="{{ url_for('static', filename='js/angular-strap.js') }}"></script>
+<script src="{{ url_for('static', filename='js/angular-strap.tpl.js') }}"></script>
 
 <script src="{{ url_for('static', filename='js/webmis20.js') }}"></script>
 <script src="{{ url_for('static', filename='js/directives.js') }}"></script>
 <script src="{{ url_for('static', filename='js/kladr-directives.js') }}"></script>
 <script src="{{ url_for('static', filename='js/services.js') }}"></script>
+<script src="{{ url_for('static', filename='js/controllers.js') }}"></script>
 <script src="{{ url_for('static', filename='js/loader.js') }}"></script>
 <script type="text/ng-template" id="_timePicker.html">
     <div class="input-group">
@@ -64,4 +68,10 @@
 </script>
 <script type="text/ng-template" id="kladr-ui.html">
     {% include "kladr-ui.html" %}
+</script>
+<script type="text/ng-template" id="policy-ui.html">
+    {% include "policy-ui.html" %}
+</script>
+<script type="text/ng-template" id="socstatus-ui.html">
+    {% include "socstatus-ui.html" %}
 </script>

@@ -44,7 +44,7 @@ angular.module('WebMis20.kladrDirectives', ['ui.bootstrap']).
 
                 this.clearStreet = function() {
                     widgets.street.model = undefined;
-                }
+                };
 
                 $scope.setFreeInputText = function(accepted) {
                     var text = '';

@@ -409,6 +409,7 @@ class rbDocumentType(db.Model):
     def __json__(self):
         return {
             'id': self.id,
+            'group': self.group,
             'code': self.code,
             'name': self.name,
             'regional_code': self.regionalCode,
@@ -642,6 +643,12 @@ class rbSocStatusClass(db.Model):
     def __int__(self):
         return self.id
 
+    def __json__(self):
+        return {
+            'id': self.id,
+            'code': self.code,
+            'name': self.name
+        }
 
 rbSocStatusClassTypeAssoc = db.Table('rbSocStatusClassTypeAssoc', db.Model.metadata,
                                      db.Column('class_id', db.Integer, db.ForeignKey('rbSocStatusClass.id')),
@@ -660,6 +667,15 @@ class rbSocStatusType(db.Model):
     regionalCode = db.Column(db.String(8), nullable=False)
 
     classes = db.relationship(u'rbSocStatusClass', secondary=rbSocStatusClassTypeAssoc)
+
+    def __json__(self):
+        return {
+            'id': self.id,
+            'code': self.code,
+            'name': self.name,
+            'classes': self.classes,
+            'TFOMS_code': self.TFOMSCode,
+        }
 
     def __int__(self):
         return self.id

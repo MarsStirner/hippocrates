@@ -45,15 +45,15 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr ng-repeat="result in results" style="cursor: pointer" ng-click="set_patient_id(result.id)"
+                <tr ng-repeat="result in results" style="cursor: pointer" ng-click="set_patient_id(result.info.id)"
                         ng-class="{'bg-info text-info': result.id === client_id}">
-                    <td ng-bind="result.nameText"></td>
-                    <td ng-bind="result.birthDate | asDate"></td>
-                    <td ng-bind="result.sex.name"></td>
-                    <td ng-bind="result.documentText"></td>
-                    <td><nobr>[[ result.SNILS ]]</nobr></td>
-                    <td ng-bind="result.compulsoryPolicy.policyText"></td>
-                    <td ng-bind="result.voluntaryPolicy.policyText"></td>
+                    <td ng-bind="result.info.full_name"></td>
+                    <td ng-bind="result.info.birth_date | asDate"></td>
+                    <td ng-bind="result.info.sex.name"></td>
+                    <td ng-bind="result.id_document.doc_text"></td>
+                    <td><nobr>[[ result.info.snils ]]</nobr></td>
+                    <td ng-bind="result.compulsory_policy.policyText"></td>
+{#                    <td ng-bind="result.voluntaryPolicy.policyText"></td>#}
                 </tr>
                 </tbody>
             </table>
@@ -98,8 +98,8 @@
             };
             $scope.client_id = client_id;
         };
-        WebMis20.controller('ClientSearch', ['$scope', '$http', '$timeout', '$window', 'PrintingService', 'Client', '$modal',
-            function ($scope, $http, $timeout, $window, PrintingService, Client, $modal) {
+        WebMis20.controller('ClientSearch', ['$scope', '$http', '$timeout', '$window', 'PrintingService', 'WMClient', '$modal',
+            function ($scope, $http, $timeout, $window, PrintingService, WMClient, $modal) {
                 $scope.ps = new PrintingService('registry');
                 $scope.ps_resolve = function () {
                     return {
@@ -133,7 +133,7 @@
 
                 $scope.set_patient_id = function (patient_id) {
                     $scope.client_id = patient_id;
-                    $scope.client = new Client(patient_id);
+                    $scope.client = new WMClient(patient_id);
                 };
 
                 $scope.clear_results = function () {

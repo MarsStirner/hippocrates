@@ -1,0 +1,44 @@
+<ng-form name="_addresses" toc-element="Адреса">
+<legend>Адрес регистрации и проживания</legend>
+<div id="addresses_tab">
+    <legend>Адрес регистрации</legend>
+    <wm-kladr-address>
+        <ng-form name="regAddressForm">
+        <wm-kladr-base-layout prefix='reg'
+            locality-model="client.reg_address.address.locality"
+            locality-type-model="client.reg_address.locality_type"
+            street-model="client.reg_address.address.street"
+            house-model="client.reg_address.address.house_number"
+            corpus-model="client.reg_address.address.corpus_number"
+            flat-model="client.reg_address.address.flat_number"
+            free-input-model="client.reg_address.free_input">
+        </wm-kladr-base-layout>
+        </ng-form>
+    </wm-kladr-address>
+{#    <div>[[client.reg_address | json]]</div>#}
+
+    <legend>Адрес проживания</legend>
+    <wm-kladr-address>
+        <ng-form name="locAddressForm">
+        <wm-kladr-base-layout prefix='loc'
+            locality-model="client.live_address.address.locality"
+            locality-type-model="client.live_address.locality_type"
+            street-model="client.live_address.address.street"
+            house-model="client.live_address.address.house_number"
+            corpus-model="client.live_address.address.corpus_number"
+            flat-model="client.live_address.address.flat_number"
+            free-input-model="client.live_address.free_input">
+            <div class="checkbox">
+                <label>
+                    <input type="checkbox" id="copy_addr" name="copy_addr"
+                           ng-model="client.live_address.same_as_reg"
+                           ng-click="copy_address(client.live_address.same_as_reg, client.reg_address)"/> {# ищи меня в скоупе patient_info :( #}
+                    Совпадает с адресом регистрации
+                </label>
+            </div>
+        </wm-kladr-base-layout>
+        </ng-form>
+    </wm-kladr-address>
+{#    <div>[[client.live_address | json]]</div>#}
+</div>
+</ng-form>

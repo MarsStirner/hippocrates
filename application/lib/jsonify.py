@@ -225,48 +225,6 @@ class ClientVisualizer(object):
     def __init__(self, mode=Format.JSON):
         self.__mode = mode
 
-    def make_document_info(self, document):
-        if document:
-            return {'id': document.id,
-                    'deleted': document.deleted,
-                    'number': document.number,
-                    'serial': document.serial,
-                    'begDate': document.date,
-                    'endDate': document.endDate,
-                    'documentType': document.documentType,
-                    'origin': document.origin,
-                    'documentText': unicode(document)}
-        else:
-            return {'number': '',
-                    'serial': '',
-                    'begDate': '',
-                    'endDate': '',
-                    'documentType': None,
-                    'origin': '',
-                    'documentText': '',
-                    'deleted': 0}
-
-    def make_policy_info(self, policy):
-        if policy:
-            return {'id': policy.id,
-                    'deleted': policy.deleted,
-                    'number': policy.number,
-                    'serial': policy.serial,
-                    'begDate': policy.begDate or '',
-                    'endDate': policy.endDate or '',
-                    'policyType': policy.policyType,
-                    'insurer': policy.insurer,
-                    'policyText': unicode(policy)}
-        else:
-            return {'number': '',
-                    'serial': '',
-                    'begDate': '',
-                    'endDate': '',
-                    'policyType': None,
-                    'insurer': None,
-                    'policyText': '',
-                    'deleted': 0}
-
     def make_identification_info(self, identification):
         return {'id': identification.id,
                 'deleted': identification.deleted,
@@ -291,15 +249,6 @@ class ClientVisualizer(object):
                 'notes': contact.notes}
 
     def make_client_info(self, client):
-        socStatuses = [{'id': socStatus.id,
-                        'deleted': socStatus.deleted,
-                        'className': getattr(socStatus.soc_status_class, 'name', None),
-                        'classCode': getattr(socStatus.soc_status_class, 'code', None),
-                        'typeName': socStatus.name,
-                        'typeCode': socStatus.code,
-                        'begDate': socStatus.begDate or '',
-                        'endDate': socStatus.endDate or ''
-                        } for socStatus in client.socStatuses]
 
         allergies = [{'id': allergy.id,
                       'nameSubstance': allergy.name,
@@ -324,49 +273,38 @@ class ClientVisualizer(object):
                          'person_name': safe_unicode(blood.person)
                          } for blood in client.blood_history]
 
-        pers_document = self.make_document_info(client.document)
+        documents = [doc.__json__() for doc in client.documents_all]
+        policies = [policy.__json__() for policy in client.policies_all]
+        document_history = documents + policies
 
-        compulsoryPolicy = self.make_policy_info(client.compulsoryPolicy)
-        voluntaryPolicy = self.make_policy_info(client.voluntaryPolicy)
-
-        documents = [self.make_document_info(document) for document in client.documents_all]
-        policies = [self.make_policy_info(policy) for policy in client.policies_all]
-        documentHistory = documents + policies
         identifications = [self.make_identification_info(identification) for identification in client.identifications]
         direct_relations = [self.make_relation_info(relation) for relation in client.direct_relations]
         reversed_relations = [self.make_relation_info(relation) for relation in client.reversed_relations]
         contacts = [self.make_contact_info(contact) for contact in client.contacts]
+
         reg_addr = client.reg_address
         live_addr = client.loc_address
         if reg_addr and live_addr:
             setattr(live_addr, 'same_as_reg', client.has_identical_addresses())
 
         return {
-            'id': client.id,
-            'lastName': client.lastName,
-            'firstName': client.firstName,
-            'patrName': client.patrName,
-            'nameText': client.nameText,
-            'sex': Gender(client.sexCode) if client.sexCode else None,
-            'SNILS': client.formatted_SNILS or None,
-            'notes': client.notes,
-            'document': pers_document,
-            'documentText': safe_unicode(client.document),
-            'birthDate': client.birthDate,
-            'regAddress': reg_addr,
-            'liveAddress': live_addr,
+            'info': client,
+            'id_document': client.id_document,
+            'reg_address': reg_addr,
+            'live_address': live_addr,
+            'compulsory_policy': client.compulsoryPolicy,
+            'voluntary_policies': client.voluntaryPolicies,
+
             'contact': client.phones,
-            'compulsoryPolicy': compulsoryPolicy,
-            'voluntaryPolicy': voluntaryPolicy,
-            'socStatuses': socStatuses,
+            'soc_statuses': client.soc_statuses,
             'allergies': allergies,
             'intolerances': intolerances,
             'bloodHistory': bloodHistory,
-            'documentHistory': documentHistory,
             'identifications': identifications,
             'direct_relations': direct_relations,
             'reversed_relations': reversed_relations,
-            'contacts': contacts
+            'contacts': contacts,
+            'document_history': document_history,
         }
 
     def make_appointments(self, client):
@@ -465,6 +403,7 @@ class EventVisualizer(object):
         """
         @type event: Event
         """
+        cvis = ClientVisualizer()
         return {
             'id': event.id,
             'deleted': event.deleted,
@@ -473,7 +412,7 @@ class EventVisualizer(object):
             'order_': event.order,
             'is_primary': EventPrimary(event.isPrimaryCode),
             'is_primary_': event.isPrimaryCode,
-            'client': event.client,
+            'client': cvis.make_client_info(event.client),
             'client_id': event.client.id,
             'set_date': event.setDate,
             'exec_date': event.execDate,

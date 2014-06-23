@@ -1,7 +1,7 @@
 <script>
 WebMis20.controller('EventMainInfoCtrl', [
-    '$scope', '$http', 'RefBookService', 'EventType', '$window', '$timeout', 'Settings', '$modal',
-    function ($scope, $http, RefBookService, EventType, $window, $timeout, Settings, $modal) {
+    '$scope', '$http', 'RefBookService', 'EventType', '$window', '$timeout', 'Settings', '$modal', '$filter',
+    function ($scope, $http, RefBookService, EventType, $window, $timeout, Settings, $modal, $filter) {
 
         $scope.Organisation = RefBookService.get('Organisation');
         $scope.Person = RefBookService.get('vrbPersonWithSpeciality');
@@ -58,6 +58,15 @@ WebMis20.controller('EventMainInfoCtrl', [
             }
         };
 
+        $scope.finance_is_oms = function(){return $scope._finance.code == '2'};
+        $scope.finance_is_dms = function(){return $scope._finance.code == '3'};
+
+        $scope.request_type = {};
+        $scope.finance = {};
+        $scope.dms = {};
+        $scope.contracts = [];
+        $scope.policy_errors = [];
+
         $scope.$on('event_loaded', function() {
             if ($scope.event.is_new()) $scope.event.info.set_date = new Date($scope.event.info.set_date);
 
@@ -67,53 +76,160 @@ WebMis20.controller('EventMainInfoCtrl', [
 
             $scope.request_type.selected = $scope.request_type_init;
             $scope.finance.selected = $scope.finance_init;
-            $scope.event.info.client.birthDate_formated = moment($scope.event.info.client.birthDate).format('DD.MM.YYYY');
+            $scope.$on('rb_load_success_Contract', function (){
+                $scope.contracts = $filter('contract_filter')($scope.Contract.objects, $scope.event.info);
+            });
         });
-
-        $scope.request_type = {};
-        $scope.finance = {};
         $scope.$watch('request_type.selected', function(new_val, old_val) {
             if (new_val) {
                 $scope.finance.selected = $scope.finance_init || $scope.rbEventType.get_finances_by_rt(new_val.id)[0];
                 $scope.finance_init = undefined;
             }
         });
+
         $scope.$watch('finance.selected', function(new_val, old_val) {
             if (new_val) {
-                $scope.event.info.event_type = $scope.event_type_init || $scope.rbEventType.get_filtered_by_rtf(
-                    $scope.request_type.selected.id, new_val.id)[0];
+                $scope.event.info.event_type = $scope.event_type_init || $scope.rbEventType.get_filtered_by_rtf($scope.request_type.selected.id, new_val.id)[0];
                 $scope.event_type_init = undefined;
-                if(!$scope.check_policy($scope.finance.selected.code)) {
-                    $scope.modal_policy_error($scope.policy_errors);
-                    $scope.finance.selected = $scope.rbFinance.get_by_code(4);
+            }
+        });
+
+        $scope.$watch('dms.selected', function(new_val, old_val) {
+            if (new_val && new_val != old_val) {
+                if (!$scope.check_dms_contract_dependency(new_val, $scope.event.info.contract)) {
+                    $scope.event.info.contract = undefined;
+                    var _break = false;
+                    angular.forEach($scope.contracts, function (contract, key) {
+                        if (!_break && $scope.check_dms_contract_dependency(new_val, contract)) {
+                            $scope.event.info.contract = contract;
+                            _break = true;
+                        }
+                    });
+                }
+                if (!$scope.check_dms(new_val)){
+                    $scope.show_policy_errors();
+                }else if (!$scope.event.info.contract){
+                    $scope.add_policy_error('Не заведено договора, соответствующего выбранному полису ДМС');
+                    $scope.show_policy_errors();
                 }
             }
         });
 
-        $scope.check_policy = function (finance_code){
-            if (finance_code == '2'){
+        $scope.$watch('event.info.event_type', function(new_val, old_val) {
+            if (new_val != old_val) {
+                $scope.contracts = $filter('contract_filter')($scope.Contract.objects, $scope.event.info);
+            }
+        });
+
+        $scope.$on('form_state_change', function(event, arg) {
+            $scope._finance = arg['finance'];
+            $scope._contract = arg['contract'];
+            $scope.process_policies($scope._finance, $scope._contract);
+{#            $scope.contracts = $filter('contract_filter')($scope.Contract.objects, $scope.event.info);#}
+        });
+
+        $scope.process_policies = function (_finance, _contract) {
+            if(!$scope.check_policy()) {
+                $scope.show_policy_errors();
+                $scope.finance.selected = $scope.rbFinance.get_by_code(4);
+            } else {
+                if($scope.finance_is_dms() && _contract){
+                    var _break = false;
+                    $scope.dms.selected = undefined;
+                    angular.forEach($scope.event.info.client.voluntary_policies, function (policy, key) {
+                        if (!_break && $scope.check_dms_contract_dependency(policy, _contract)){
+                            $scope.dms.selected = policy;
+                            _break = true;
+                        }
+                    });
+                    if (!$scope.dms.selected){
+                        $scope.add_policy_error('У пациента нет полиса ДМС, связанного с выбранным договором');
+                        $scope.show_policy_errors();
+                    }
+                }
+            }
+        };
+
+        $scope.check_policy = function (){
+            if ($scope.finance_is_oms()){
                 return $scope.check_oms();
+            } else if($scope.finance_is_dms()){
+                return $scope.check_dms();
             }
             return true;
         };
+
         $scope.check_oms = function(){
-            var policy = $scope.event.info.client.comp_policy;
-            $scope.policy_errors = [];
+            var policy = $scope.event.info.client.compulsory_policy;
             if (!policy){
-                $scope.policy_errors.push('У пациента не указан полис ОМС');
+                $scope.add_policy_error('У пациента не указан полис ОМС');
             } else {
-                if (!policy.begDate || moment(policy.begDate).isAfter($scope.event.info.set_date)) {
-                    $scope.policy_errors.push('Дата начала действия полиса не установлена или превышает дату создания обращения');
+                if (!policy.beg_date || moment(policy.beg_date).isAfter($scope.event.info.set_date)) {
+                    $scope.add_policy_error('Дата начала действия полиса не установлена или превышает дату создания обращения');
                 }
-                if (!policy.endDate || moment($scope.event.info.set_date).isAfter(policy.endDate)) {
-                    $scope.policy_errors.push('Не установлена дата окончания действия полиса или дата создания обращения превышает её');
+                if (!policy.end_date || moment($scope.event.info.set_date).isAfter(policy.end_date)) {
+                    $scope.add_policy_error('Не установлена дата окончания действия полиса или дата создания обращения превышает её');
                 }
             }
-            return $scope.policy_errors.length == 0;
+            return $scope.no_policy_errors();
+        };
+
+        $scope.check_dms = function (policy) {
+            if (policy != undefined){
+                if (!policy.beg_date || moment(policy.beg_date).isAfter($scope.event.info.set_date)) {
+{#                    $scope.add_policy_error('Дата начала действия полиса не установлена или превышает дату создания обращения');#}
+                    return false;
+                }
+                if (!policy.end_date || moment($scope.event.info.set_date).isAfter(policy.end_date)) {
+{#                    $scope.add_policy_error('Не установлена дата окончания действия полиса или дата создания обращения превышает её');#}
+                    return false;
+                }
+            } else {
+                var policies = $scope.event.info.client.voluntary_policies;
+                if (policies.length == 0){
+                    $scope.add_policy_error('У пациента не указан действующий полис ДМС');
+                } else{
+                    var has_valid_dms = false;
+                    angular.forEach(policies, function (value) {
+                        if (!has_valid_dms && $scope.check_dms(value)){
+                            $scope.clear_policy_errors();
+                            has_valid_dms = true;
+                        }
+                    });
+                    if (!has_valid_dms){
+                        $scope.add_policy_error('У пациента нет ни одного валидного полиса ДМС');
+                        $scope.dms.selected = undefined;
+                    }
+                }
+            }
+            return $scope.no_policy_errors();
+        };
+
+        $scope.check_dms_contract_dependency = function(_policy, _contract){
+            return _policy.insurer.id == _contract.payer.id;
         };
 
         $scope.exec_person_changed = function () {
             $scope.event.info.org_structure = $scope.event.info.exec_person.org_structure;
+        };
+
+        $scope.clear_policy_errors = function () {
+          $scope.policy_errors = [];
+        };
+
+        $scope.add_policy_error = function (msg) {
+            if ($scope.policy_errors.indexOf(msg) == -1) {
+                $scope.policy_errors.push(msg);
+            }
+        };
+
+        $scope.no_policy_errors = function () {
+          return $scope.policy_errors.length == 0;
+        };
+
+        $scope.show_policy_errors = function () {
+          $scope.modal_policy_error($scope.policy_errors);
+          $scope.clear_policy_errors();
         };
 
         $scope.modal_policy_error = function(policy_errors) {
