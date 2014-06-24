@@ -666,7 +666,7 @@ class rbSocStatusType(db.Model):
     TFOMSCode = db.Column(db.Integer)
     regionalCode = db.Column(db.String(8), nullable=False)
 
-    classes = db.relationship(u'rbSocStatusClass', secondary=rbSocStatusClassTypeAssoc)
+    classes = db.relationship(u'rbSocStatusClass', secondary=rbSocStatusClassTypeAssoc, lazy='joined')
 
     def __json__(self):
         return {

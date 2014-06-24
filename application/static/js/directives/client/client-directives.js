@@ -180,7 +180,7 @@ angular.module('WebMis20.directives').
             </div>\
             <div class="form-group col-md-2"\
                  ng-class="{\'has-error\': (docForm.$dirty && docForm.doc_serial.$invalid) || docForm.doc_serial.$error.required}">\
-                <label for="doc_serial[[idPostfix]]" class="control-label">Серия [[!docForm.doc_serial.$error.required]]</label>\
+                <label for="doc_serial[[idPostfix]]" class="control-label">Серия</label>\
                 <input type="text" class="form-control" id="doc_serial[[idPostfix]]" name="doc_serial"\
                        autocomplete="off" placeholder="серия" validator-regexp="serialValidator"\
                        ng-model="modelSerial" ng-disabled="!edit_mode()" ng-required="serialValidator && docForm.$dirty"/>\
