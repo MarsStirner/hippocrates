@@ -7,6 +7,7 @@ angular.module('WebMis20.controllers').
             $scope.aux = aux;
             $scope.params = aux.getQueryParams(document.location.search);
             $scope.rbGender = RefBookService.get('Gender'); // {{ Enum.get_class_by_name('Gender').rb() | tojson }};
+            $scope.rbPerson = RefBookService.get('vrbPersonWithSpeciality');
 //            $scope.rbDocumentType = RefBookService.get('rbDocumentType');
 //            $scope.rbUFMS = RefBookService.get('rbUFMS');
 //            $scope.rbPolicyType = RefBookService.get('rbPolicyType');
@@ -53,7 +54,7 @@ angular.module('WebMis20.controllers').
 
             $scope.flt_not_deleted = function() {
                 return function(item) {
-                    return item.deleted === 0;
+                    return item.hasOwnProperty('deleted') ? item.deleted === 0 : true;
                 };
             }; // TODO: application level
 
@@ -96,6 +97,57 @@ angular.module('WebMis20.controllers').
                 }
             };
 
+            $scope.add_new_blood_type = function(person_id) {
+                var bt = client.blood_types;
+                if (bt.length && !bt[0].id) {
+                    bt.splice(0, 1);
+                }
+                client.add_blood_type();
+                bt[0].person = $scope.rbPerson.get(person_id);
+            };
+
+            $scope.delete_blood_type = function(bt) {
+                client.delete_record('blood_types', bt);
+            };
+
+            $scope.bt_history_visible = function() {
+                return client.blood_types && client.blood_types.filter(function(el) {
+                    return el.id;
+                }).length > 1;
+            };
+
+            $scope.delete_address = function(entity, addr) {
+                if (confirm('Адрес будет удален. Продолжить?')) {
+                    client.delete_record(entity, addr);
+                }
+            };
+
+            $scope.get_actual_reg_address = function() {
+                var addrs =  client.reg_addresses.filter(function(el) {
+                    return el.deleted === 0;
+                });
+                return addrs.length === 1 ? addrs[0] : null;
+            };
+
+            $scope.add_new_address = function(entity, addr_type) {
+                var addrs = client[entity].filter(function(el) {
+                    return el.deleted === 0;
+                });
+                var cur_addr = addrs[addrs.length - 1];
+                if (addrs.length) {
+                    var msg = [
+                        'При добавлении нового адреса старый адрес будет удален',
+                        cur_addr.id ? ' и станет доступен для просмотра в истории' : '',
+                        '. Продолжить?'
+                    ].join('');
+                    if (confirm(msg)) {
+                        client.delete_record(entity, cur_addr, 2);
+                        client.add_address(addr_type);
+                    }
+                } else {
+                    client.add_address(addr_type);
+                }
+            };
 
             $scope.directRelationFilter = function (relationType) {
                 return (relationType.leftSex == 0 || relationType.leftSex == $scope.client.client_info.sex.id);
@@ -105,10 +157,6 @@ angular.module('WebMis20.controllers').
                 return (relationType.rightSex == 0 || relationType.rightSex == $scope.client.client_info.sex.id);
             };
 
-//            $scope.start_editing = function() {
-//                $scope.editing.active = true;
-//            };
-
 //            $scope.cancel_editing = function() {
 //                if ($scope.client_id == 'new') {
 //                    $window.history.back();
@@ -116,10 +164,6 @@ angular.module('WebMis20.controllers').
 //                    $scope.editing.active = false;
 //                    $scope.client.reload();
 //                }
-//            };
-
-//            $scope.editing_is_active = function() {
-//                return $scope.editing.active || true;
 //            };
 
             $scope.save_client = function(form) {
@@ -153,19 +197,14 @@ angular.module('WebMis20.controllers').
 //                });
 //            };
 
-            $scope.copy_address = function(state, addr_from) {
-                // fixme: как бы эту штуку связать с директивами, как изначально задумывалось...
-                // и тут есть баг, который надо фиксить, переделав все это
-                if (!state) {
-                    $scope.client.client_info.liveAddress = angular.copy(addr_from);
-                    $scope.client.client_info.liveAddress.same_as_reg = true;
-                } else {
-                    $scope.client.client_info.liveAddress = {};
-                    $scope.client.client_info.liveAddress.same_as_reg = false;
-                }
-            };
-
             $scope.refresh_form = function() {
+                $scope.mainInfoForm.$setPristine(true);
+                if (!client.reg_addresses.length) {
+                    client.add_address(0);
+                }
+                if (!client.live_addresses.length) {
+                    client.add_address(1);
+                }
                 if (!client.compulsory_policies.length) {
                     client.add_cpolicy();
                 }
