@@ -157,10 +157,6 @@ angular.module('WebMis20.controllers').
                 return (relationType.rightSex == 0 || relationType.rightSex == $scope.client.client_info.sex.id);
             };
 
-//            $scope.start_editing = function() {
-//                $scope.editing.active = true;
-//            };
-
 //            $scope.cancel_editing = function() {
 //                if ($scope.client_id == 'new') {
 //                    $window.history.back();
@@ -168,10 +164,6 @@ angular.module('WebMis20.controllers').
 //                    $scope.editing.active = false;
 //                    $scope.client.reload();
 //                }
-//            };
-
-//            $scope.editing_is_active = function() {
-//                return $scope.editing.active || true;
 //            };
 
             $scope.save_client = function(form) {
@@ -204,18 +196,6 @@ angular.module('WebMis20.controllers').
 //                    $scope.client.delete_record(entity, record);
 //                });
 //            };
-
-            $scope.copy_address = function(state, addr_from) {
-                // fixme: как бы эту штуку связать с директивами, как изначально задумывалось...
-                // и тут есть баг, который надо фиксить, переделав все это
-                if (!state) {
-                    $scope.client.client_info.liveAddress = angular.copy(addr_from);
-                    $scope.client.client_info.liveAddress.same_as_reg = true;
-                } else {
-                    $scope.client.client_info.liveAddress = {};
-                    $scope.client.client_info.liveAddress.same_as_reg = false;
-                }
-            };
 
             $scope.refresh_form = function() {
                 $scope.mainInfoForm.$setPristine(true);

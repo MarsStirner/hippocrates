@@ -13,7 +13,7 @@
                     flat-model="reg_addr.address.flat_number"
                     free-input-model="reg_addr.free_input"
                     address-model="reg_addr"
-                    edit-mode="reg_addr.id ? edit.activated : true"
+                    edit-mode="reg_addr.id ? edit.activated : true">
                 </wm-kladr-address>
             </ng-form>
         </div>
@@ -49,8 +49,16 @@
                     flat-model="live_addr.address.flat_number"
                     free-input-model="live_addr.free_input"
                     address-model="live_addr"
-                    edit-mode="live_addr.id ? edit.activated : true"
-                    copy-from-model="get_actual_reg_address()"
+                    edit-mode="live_addr.id ? edit.activated : true">
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkbox" id="[[prefix]]_copy_addr" name="copy_addr"
+                                   ng-model="live_addr.same_as_reg"
+                                   ng-change="client.copy_address(live_addr, get_actual_reg_address(), live_addr.same_as_reg)"
+                                   ng-disabled="live_addr.id ? !edit.activated : false"/>
+                            Совпадает с адресом регистрации
+                        </label>
+                    </div>
                 </wm-kladr-address>
             </ng-form>
         </div>

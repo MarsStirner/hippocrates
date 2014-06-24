@@ -5,6 +5,7 @@ angular.module('WebMis20.kladrDirectives', ['ui.bootstrap']).
         return {
             restrict: 'E',
             require: '^form',
+            transclude: true,
             scope: {
                 prefix: '@',
                 localityModel: '=',
@@ -15,8 +16,7 @@ angular.module('WebMis20.kladrDirectives', ['ui.bootstrap']).
                 flatModel: '=',
                 freeInputModel: '=',
                 addressModel: '=',
-                editMode: '&',
-                copyFromModel: '='
+                editMode: '&'
             },
             controller: function ($scope) {
                 var widgets = $scope.widgets = {};
@@ -30,6 +30,10 @@ angular.module('WebMis20.kladrDirectives', ['ui.bootstrap']).
 
                 $scope.inFreeInputMode = function() {
                     return mode.switch_to_free_input;
+                };
+
+                $scope.sameAddress = function() {
+                    return $scope.addressModel.same_as_reg;
                 };
 
                 $scope.setFreeInputText = function(switched) {
@@ -54,39 +58,39 @@ angular.module('WebMis20.kladrDirectives', ['ui.bootstrap']).
                     widgets.street.reset();
                 };
 
-                $scope.copy_address = function(same) {
-                    var cur_id = $scope.addressModel.id;
-                    if (same) {
-                        var copy_from = $scope.copyFromModel;
-                        if (copy_from.free_input) {
-                            mode.switch_to_free_input = true;
-                        }
-                        angular.copy(copy_from, $scope.addressModel);
-                        $scope.addressModel.id = cur_id;
-                        // если что-то изменится в совпадающем адресе, то убрать галочку и прекратить слежение
-                        // timeout - чтобы сначала прошли предыдущие watch со смены $scope.addressModel
-                        $timeout(function() {
-                            var unregister_watcher = $scope.$watchCollection(function() {
-                                var col = [];
-                                angular.forEach(widgets, function(w) {
-                                    col.push(w.model);
-                                });
-                                return col;
-                            }, function(n, o) {
-                                if (n !== o) {
-                                    $scope.addressModel.same_as_reg = false;
-                                    unregister_watcher();
-                                }
-                            });
-                        });
-                    } else {
-                        var copy_from = {};
-                        mode.switch_to_free_input = false;
-                        angular.copy(copy_from, $scope.addressModel);
-                    }
-                    $scope.addressModel.same_as_reg = same;
-                    $scope.addressModel.copy_from_id = copy_from.id;
-                };
+//                $scope.copy_address = function(same) {
+//                    var cur_id = $scope.addressModel.id;
+//                    if (same) {
+//                        var copy_from = $scope.copyFromModel;
+//                        if (copy_from.free_input) {
+//                            mode.switch_to_free_input = true;
+//                        }
+//                        angular.copy(copy_from, $scope.addressModel);
+//                        $scope.addressModel.id = cur_id;
+//                        // если что-то изменится в совпадающем адресе, то убрать галочку и прекратить слежение
+//                        // timeout - чтобы сначала прошли предыдущие watch со смены $scope.addressModel
+//                        $timeout(function() {
+//                            var unregister_watcher = $scope.$watchCollection(function() {
+//                                var col = [];
+//                                angular.forEach(widgets, function(w) {
+//                                    col.push(w.model);
+//                                });
+//                                return col;
+//                            }, function(n, o) {
+//                                if (n !== o) {
+//                                    $scope.addressModel.same_as_reg = false;
+//                                    unregister_watcher();
+//                                }
+//                            });
+//                        });
+//                    } else {
+//                        var copy_from = {};
+//                        mode.switch_to_free_input = false;
+//                        angular.copy(copy_from, $scope.addressModel);
+//                    }
+//                    $scope.addressModel.same_as_reg = same;
+//                    $scope.addressModel.copy_from_id = copy_from.id;
+//                };
             },
             link: function(scope, elm, attrs, formCtrl) {
                 scope.addressForm = formCtrl;
@@ -115,10 +119,34 @@ angular.module('WebMis20.kladrDirectives', ['ui.bootstrap']).
                         scope.addressModel.dirty = n;
                     }
                 });
+//                scope.$watch(function() {
+//                    return scope.widgets.locality.getText();
+//                }, function(n, o) {
+//                    if (n !== o && !n) { scope.clearStreet(); }
+//                });
                 scope.$watch(function() {
-                    return scope.widgets.locality.getText();
+                    return scope.widgets.locality.model;
                 }, function(n, o) {
-                    if (n !== o && o) { scope.clearStreet(); }
+                    if (n !== o) { scope.clearStreet(); }
+                });
+                scope.$watch('addressModel.copy_from_id', function(n, o) {
+                    if (angular.isDefined(n)) {
+                        //если что-то изменится в совпадающем адресе, то убрать галочку и прекратить слежение
+                        // timeout - чтобы сначала прошли предыдущие watch со смены $scope.addressModel
+                        var unregister_watcher = scope.$watchCollection(function() {
+                            var col = [];
+                            angular.forEach(scope.widgets, function(w) {
+                                col.push(w.model);
+                            });
+                            return col;
+                        }, function(n, o) {
+                            if (n !== o) {
+                                scope.addressModel.same_as_reg = false;
+                                unregister_watcher();
+                                scope.addressModel.copy_from_id = undefined;
+                            }
+                        });
+                    }
                 });
             },
             templateUrl: 'kladr-ui.html'

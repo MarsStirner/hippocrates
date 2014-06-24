@@ -5,7 +5,6 @@ angular.module('WebMis20.services', []).
         function($http, $q, $rootScope) {
             var WMClient = function(client_id) {
                 this.client_id = client_id;
-                this.changes = {}; // deleted items to save
             };
 
             WMClient.prototype.reload = function() {
@@ -48,6 +47,7 @@ angular.module('WebMis20.services', []).
 
                     t.appointments = data.result.appointments;
                     t.events = data.result.events;
+                    t.changes = {}; // deleted items to save
                     deferred.resolve();
     //              $rootScope.$broadcast('client_loaded');
                 }).error(function(data, status) {
@@ -92,12 +92,18 @@ angular.module('WebMis20.services', []).
 
                 var changed_reg_addresses = this.reg_addresses.filter(function(el) {
                     return el.dirty;
-                }).concat(this.changes.reg_addresses || []);
+                });
+                if (!aux.inArray(changed_reg_addresses, this.changes.reg_addresses)) {
+                    changed_reg_addresses.concat(this.changes.reg_addresses);
+                }
                 data.reg_addresses = changed_reg_addresses.length ? changed_reg_addresses : undefined;
 
                 var changed_live_addresses = this.live_addresses.filter(function(el) {
                     return el.dirty;
-                }).concat(this.changes.live_addresses || []);
+                });
+                if (!aux.inArray(changed_live_addresses, this.changes.live_addresses)) {
+                    changed_live_addresses.concat(this.changes.live_addresses);
+                }
                 data.live_addresses = changed_live_addresses.length ? changed_live_addresses : undefined;
 
                 var changed_cpolicies = this.compulsory_policies.filter(function(el) {
@@ -154,7 +160,7 @@ angular.module('WebMis20.services', []).
 
             WMClient.prototype.add_address = function(type) {
                 var entity = type === 0 ? 'reg_addresses' : 'live_addresses';
-                this[entity].push({
+                var obj = {
                     "id": null,
                     "deleted": 0,
                     "type": type,
@@ -162,7 +168,35 @@ angular.module('WebMis20.services', []).
                     "free_input": null,
                     "locality_type": null,
                     "text_summary": null
-                });
+                };
+                this[entity].push(obj);
+                return obj;
+            };
+
+            WMClient.prototype.copy_address = function(addr, from_addr, same) {
+                if (!from_addr.id && !from_addr.dirty) {
+                    alert('Для копирования адреса заполните сначала адрес регистрации');
+                    addr.same_as_reg = undefined;
+                    return;
+                }
+                var cur_id = addr.id;
+                if (cur_id) {
+                    var msg = 'При копировании адреса текущая запись адреса будет удалена и станет доступна\
+                        для просмотра в истории. Продолжить?';
+                    if (!confirm(msg)) {
+                        addr.same_as_reg = !addr.same_as_reg;
+                        return;
+                    }
+                }
+                this.delete_record('live_addresses', addr, 2);
+                addr = this.add_address(1);
+                if (same) {
+                    angular.copy(from_addr, addr);
+                    addr.id = null;
+                    addr.copy_from_id = from_addr.id;
+                    addr.dirty = true;
+                }
+                addr.same_as_reg = same;
             };
 
             WMClient.prototype.add_cpolicy = function() {
@@ -249,7 +283,7 @@ angular.module('WebMis20.services', []).
             };
 
             WMClient.prototype.add_soc_status = function (class_name, class_code) {
-                var document = null
+                var document = null;
                 if (class_code != 4){
                     document = {
                                         "id": null,

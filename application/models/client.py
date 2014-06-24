@@ -402,7 +402,8 @@ class ClientAddress(db.Model):
             'free_input': self.freeInput,
             'locality_type': LocalityType(self.localityType),
             'text_summary': self.__unicode__(),
-            'same_as_reg': getattr(self, 'same_as_reg', False)
+            'same_as_reg': getattr(self, 'same_as_reg', False),
+            'copy_from_id': getattr(self, 'copy_from_id', None)
         }
 
     def __int__(self):

@@ -141,6 +141,12 @@ def add_or_update_address(client, data):
     msg_err = u'Ошибка сохранения адреса %s' % {0: u'регистрации', 1: u'проживания'}.get(addr_type)
     if addr_type is None:
         raise ClientSaveException(msg_err, u'Отсутствует обязательное поле Тип')
+    deleted = data.get('deleted', 0)
+    if deleted:
+        client_addr = ClientAddress.query.get(addr_id)
+        client_addr.deleted = deleted
+        return client_addr
+
     loc_type = safe_traverse(data, 'locality_type', 'id')
     loc_kladr = safe_traverse(data, 'address', 'locality')
     loc_kladr_code = loc_kladr.get('code') if isinstance(loc_kladr, dict) else loc_kladr
@@ -150,7 +156,6 @@ def add_or_update_address(client, data):
     house_number = safe_traverse(data, 'address', 'house_number', default='')
     corpus_number = safe_traverse(data, 'address', 'corpus_number', default='')
     flat_number = safe_traverse(data, 'address', 'flat_number', default='')
-    deleted = data.get('deleted', 0)
 
     if addr_id:
         client_addr = ClientAddress.query.get(addr_id)
@@ -191,15 +196,21 @@ def add_or_update_address(client, data):
 
 def add_or_update_copy_address(client, data, copy_from):
     # todo: check for existing records ?
-    # todo: check prev record and mark deleted
     msg_err = u'Ошибка сохранения адреса проживания'
+    addr_id = data.get('id')
+    deleted = data.get('deleted')
+    if deleted:
+        client_addr = ClientAddress.query.get(addr_id)
+        client_addr.deleted = deleted
+        return client_addr
+
     from_id = data.get('copy_from_id')
     from_addr = ClientAddress.query.get(from_id) if from_id else copy_from
     if from_addr is None:
         raise ClientSaveException(msg_err, u'отсутствует совпадающий адрес. Свяжитесь с администратором.')
 
-    addr_id = data.get('id')
-    if addr_id:
+    if addr_id:  # TODO: delete this after test
+        raise ClientSaveException(msg_err, u'how did you get there?')
         client_addr = ClientAddress.query.get(addr_id)
         client_addr.type = 1  # todo: enum
         client_addr.address = from_addr.address

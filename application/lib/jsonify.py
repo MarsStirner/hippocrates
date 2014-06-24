@@ -262,7 +262,9 @@ class ClientVisualizer(object):
         reg_addr = client.reg_address
         live_addr = client.loc_address
         if reg_addr and live_addr:
-            setattr(live_addr, 'same_as_reg', client.has_identical_addresses())
+            if client.has_identical_addresses():
+                setattr(live_addr, 'same_as_reg', True)
+                setattr(live_addr, 'copy_from_id', reg_addr.id)
 
         return {
             'info': client,
