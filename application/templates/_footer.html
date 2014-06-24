@@ -15,7 +15,7 @@
         url_print_templates = '{{ print_subsystem_templates }}',
         url_print_subsystem = '{{ print_subsystem_url }}',
         url_print_template = '{{ print_subsystem_print_template }}',
-{#        url_kladr_get = '{{ url_for('patients.api_kladr_city_get') }}', // for tests#}
+        url_kladr_get = '{{ url_for('patients.api_kladr_city_get') }}', // for tests
         kladr_city = '{{ url_for('kladr_city') }}',
         kladr_street = '{{ url_for('kladr_street') }}',
         current_user_id = {{ current_user.id|default('undefined') }};
@@ -44,7 +44,6 @@
 
 <script src="{{ url_for('static', filename='js/webmis20.js') }}"></script>
 <script src="{{ url_for('static', filename='js/directives.js') }}"></script>
-<script src="{{ url_for('static', filename='js/kladr-directives.js') }}"></script>
 <script src="{{ url_for('static', filename='js/services.js') }}"></script>
 <script src="{{ url_for('static', filename='js/controllers.js') }}"></script>
 <script src="{{ url_for('static', filename='js/loader.js') }}"></script>

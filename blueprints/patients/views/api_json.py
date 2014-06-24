@@ -18,7 +18,10 @@ __author__ = 'mmalkov'
 @module.errorhandler(ClientSaveException)
 def handle_client_error(err):
     return make_response(jsonify({'name': err.message,
-                                  'data': err.data},
+                                  'data': {
+                                      'err_msg':err.data
+                                  }
+                                 },
                                  422, 'save client data error')[0],
                          422)
 
@@ -116,30 +119,19 @@ def api_patient_save():
             if reg_addr_info:
                 for reg_addr in reg_addr_info:
                     ra = add_or_update_address(client, reg_addr)
+                    if ra.deleted != 1 and ra.deleted != 2:
+                        actual_reg_address = ra
                     db.session.add(ra)
 
             live_addr_info = client_data.get('live_addresses')
             if live_addr_info:
                 for live_addr in live_addr_info:
-                    la = add_or_update_address(client, live_addr)
+                    same_as_reg = live_addr.get('same_as_reg', False)
+                    if same_as_reg:
+                        la = add_or_update_copy_address(client, live_addr, actual_reg_address)
+                    else:
+                        la = add_or_update_address(client, live_addr)
                     db.session.add(la)
-
-            # if live_address is not None:
-            #     # TODO: check AND FIX!
-            #     if live_address.get('same_as_reg', False) and actual_reg_address:
-            #         address = get_reg_address_copy(client, actual_reg_address)
-            #         client.addresses.append(address)
-            #     elif live_address.get('address') or live_address.get('free_input'):
-            #         live_address['type'] = 1
-            #         if not client.loc_address:
-            #             address = get_new_address(live_address)
-            #             client.addresses.append(address)
-            #         else:
-            #             addresses = get_modified_address(client, live_address)
-            #             db.session.add(addresses[0])
-            #             if addresses[1]:
-            #                 client.addresses.append(addresses[1])
-
 
             cpol_info = client_data.get('compulsory_policies')
             if cpol_info:
@@ -180,7 +172,7 @@ def api_patient_save():
             client = Client()
             client_info = client_data.get('info')
             if not client_info:
-                raise ClientSaveException(u'Client main info is empty')
+                raise ClientSaveException(u'Отсутствует основная информация о пациенте.')
             client = set_client_main_info(client, client_info)
             db.session.add(client)
 
@@ -189,6 +181,25 @@ def api_patient_save():
                 for id_doc in id_doc_info:
                     doc = add_or_update_doc(client, id_doc)
                     db.session.add(doc)
+
+            reg_addr_info = client_data.get('reg_addresses')
+            actual_reg_address = None
+            if reg_addr_info:
+                for reg_addr in reg_addr_info:
+                    ra = add_or_update_address(client, reg_addr)
+                    if ra.deleted != 1 and ra.deleted != 2:
+                        actual_reg_address = ra
+                    db.session.add(ra)
+
+            live_addr_info = client_data.get('live_addresses')
+            if live_addr_info:
+                for live_addr in live_addr_info:
+                    same_as_reg = live_addr.get('same_as_reg', False)
+                    if same_as_reg:
+                        la = add_or_update_copy_address(client, live_addr, actual_reg_address)
+                    else:
+                        la = add_or_update_address(client, live_addr)
+                    db.session.add(la)
 
             cpol_info = client_data.get('compulsory_policies')
             if cpol_info:

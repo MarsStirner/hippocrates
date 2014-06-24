@@ -3,21 +3,19 @@
 <div ng-repeat="reg_addr in client.reg_addresses | filter: flt_not_deleted()">
     <div class="row">
         <div class="col-md-10">
-            <wm-kladr-address>
-                <ng-form name="regAddressForm">
-                    <wm-kladr-base-layout prefix='reg'
-                        locality-model="reg_addr.address.locality"
-                        locality-type-model="reg_addr.locality_type"
-                        street-model="reg_addr.address.street"
-                        house-model="reg_addr.address.house_number"
-                        corpus-model="reg_addr.address.corpus_number"
-                        flat-model="reg_addr.address.flat_number"
-                        free-input-model="reg_addr.free_input"
-                        address-model="reg_addr"
-                        copy-from-model="null"
-                    </wm-kladr-base-layout>
-                </ng-form>
-            </wm-kladr-address>
+            <ng-form name="regAddressForm" toc-element="регистрации">
+                <wm-kladr-address prefix='reg'
+                    locality-model="reg_addr.address.locality"
+                    locality-type-model="reg_addr.locality_type"
+                    street-model="reg_addr.address.street"
+                    house-model="reg_addr.address.house_number"
+                    corpus-model="reg_addr.address.corpus_number"
+                    flat-model="reg_addr.address.flat_number"
+                    free-input-model="reg_addr.free_input"
+                    address-model="reg_addr"
+                    edit-mode="reg_addr.id ? edit.activated : true"
+                </wm-kladr-address>
+            </ng-form>
         </div>
         <div class="col-md-1">
             <div class="row" ng-show="reg_addr.id">
@@ -41,21 +39,20 @@
 <div ng-repeat="live_addr in client.live_addresses | filter: flt_not_deleted()">
     <div class="row">
         <div class="col-md-10">
-            <wm-kladr-address>
-                <ng-form name="locAddressForm">
-                    <wm-kladr-base-layout prefix='loc'
-                        locality-model="live_addr.address.locality"
-                        locality-type-model="live_addr.locality_type"
-                        street-model="live_addr.address.street"
-                        house-model="live_addr.address.house_number"
-                        corpus-model="live_addr.address.corpus_number"
-                        flat-model="live_addr.address.flat_number"
-                        free-input-model="live_addr.free_input"
-                        address-model="live_addr"
-                        copy-from-model="get_actual_reg_address()"
-                    </wm-kladr-base-layout>
-                </ng-form>
-            </wm-kladr-address>
+            <ng-form name="locAddressForm" toc-element="проживания">
+                <wm-kladr-address prefix='loc'
+                    locality-model="live_addr.address.locality"
+                    locality-type-model="live_addr.locality_type"
+                    street-model="live_addr.address.street"
+                    house-model="live_addr.address.house_number"
+                    corpus-model="live_addr.address.corpus_number"
+                    flat-model="live_addr.address.flat_number"
+                    free-input-model="live_addr.free_input"
+                    address-model="live_addr"
+                    edit-mode="live_addr.id ? edit.activated : true"
+                    copy-from-model="get_actual_reg_address()"
+                </wm-kladr-address>
+            </ng-form>
         </div>
         <div class="col-md-1">
             <div class="row" ng-show="live_addr.id">
