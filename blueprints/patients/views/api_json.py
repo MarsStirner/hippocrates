@@ -213,13 +213,12 @@ def api_patient_save():
                     pol = add_or_update_policy(client, vpol)
                     db.session.add(pol)
 
-<<<<<<< HEAD
             ss_info = client_data.get('soc_statuses')
             if ss_info:
                 for ss in ss_info:
                     sstat = add_or_update_soc_status(client, ss)
                     db.session.add(sstat)
-=======
+
             blood_type_info = client_data.get('blood_types')
             if blood_type_info:
                 for bt in blood_type_info:
@@ -231,7 +230,6 @@ def api_patient_save():
                 for allergy in allergy_info:
                     alg = add_or_update_allergy(client, allergy)
                     db.session.add(alg)
->>>>>>> feature-client
 
             intolerance_info = client_data.get('intolerances')
             if intolerance_info:
@@ -240,14 +238,6 @@ def api_patient_save():
                     db.session.add(intlr)
 
     # try:
-    #     for ss_info in client_info['socStatuses']:
-    #         if not 'id' in ss_info:
-    #             ss = get_new_soc_status(ss_info)
-    #             client.socStatuses.append(ss)
-    #         else:
-    #             ss = get_modified_soc_status(client, ss_info)
-    #             db.session.add(ss)
-    #
     #     for id_info in client_info['identifications']:
     #         if not 'id' in id_info:
     #             id_ext = get_new_identification(id_info)

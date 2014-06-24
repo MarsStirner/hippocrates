@@ -360,37 +360,6 @@ def add_or_update_intolerance(client, data):
         intlr = ClientIntoleranceMedicament(intlr_name, intlr_power, date, notes, client)
     return intlr
 
-def get_new_soc_status(ss_info):
-    ss = ClientSocStatus()
-    ss.createDatetime = ss.modifyDatetime = datetime.datetime.now()
-    ss.version = 0
-    ss.deleted = ss_info['deleted']
-    ss.soc_status_class = rbSocStatusClass.query.filter(
-        rbSocStatusClass.code == ss_info['classCode']).first()
-    ss.socStatusType = rbSocStatusType.query.filter(
-        rbSocStatusType.code == ss_info['typeCode']).first()
-    ss.begDate = ss_info['begDate']#.split('T')[0]
-    ss.endDate = ss_info['endDate']
-    return ss
-
-
-def get_modified_soc_status(client, ss_info):
-    now = datetime.datetime.now()
-    ss = client.socStatuses.filter(ClientSocStatus.id == ss_info['id']).first()
-
-    if ss_info['deleted'] == 1:
-        ss.deleted = 1
-        return ss
-
-    ss.soc_status_class = rbSocStatusClass.query.filter(
-        rbSocStatusClass.code == ss_info['classCode']).first()
-    ss.socStatusType = rbSocStatusType.query.filter(
-        rbSocStatusType.code == ss_info['typeCode']).first()
-    ss.begDate = ss_info['begDate']#.split('T')[0]
-    ss.endDate = ss_info['endDate']
-    ss.modifyDatetime = now
-    return ss
-
 
 def get_new_identification(id_info):
     id_ext = ClientIdentification()
