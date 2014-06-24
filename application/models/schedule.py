@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from datetime import datetime
 from application.models.client import Client
 from application.systemwide import db
 from exists import Person, rbReasonOfAbsence, Organisation
@@ -108,8 +109,8 @@ class ScheduleTicket(db.Model):
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     schedule_id = db.Column(db.Integer, db.ForeignKey('Schedule.id'), nullable=False)
-    begDateTime = db.Column(db.DateTime)
-    endDateTime = db.Column(db.DateTime)
+    begTime = db.Column(db.Time)
+    endTime = db.Column(db.Time)
     attendanceType_id = db.Column(db.Integer, db.ForeignKey('rbAttendanceType.id'), nullable=False)
     createDatetime = db.Column(db.DateTime, nullable=False)
     createPerson_id = db.Column(db.Integer, db.ForeignKey('Person.id'), index=True)
@@ -133,6 +134,14 @@ class ScheduleTicket(db.Model):
     def client(self):
         ct = self.client_ticket
         return ct.client if ct else None
+
+    @property
+    def begDateTime(self):
+        return datetime.combine(self.schedule.date, self.begTime)
+
+    @property
+    def endDateTime(self):
+        return datetime.combine(self.schedule.date, self.endTime)
 
 
 class ScheduleClientTicket(db.Model):
