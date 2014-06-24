@@ -122,13 +122,15 @@ def api_schedule_description_post():
 
     def make_tickets(schedule, planned, extra, cito):
         # here cometh another math
-        dt = (schedule.endTime - schedule.begTime) / planned
+        dt = (datetime.datetime.combine(schedule.date.date(), schedule.endTime.time())
+              - datetime.datetime.combine(schedule.date.date(), schedule.begTime.time())) / planned
         it = schedule.begTime
         attendanceType = rbAttendanceType.query.filter(rbAttendanceType.code == 'planned').first()
         for i in xrange(planned):
             ticket = make_default_ticket(schedule)
-            ticket.begDateTime = datetime.datetime.combine(schedule.date, it.time())
-            ticket.endDateTime = ticket.begDateTime + dt
+            begDateTime = datetime.datetime.combine(schedule.date, it.time())
+            ticket.begTime = begDateTime.time()
+            ticket.endTime = (begDateTime + dt).time()
             ticket.attendanceType = attendanceType
             it += dt
             db.session.add(ticket)

@@ -246,7 +246,7 @@
                         return day.altered;
                     }),
                     start_date: $scope.monthDate.format('YYYY-MM')
-                }).success(function () {
+                }).success(function (data) {
                     $scope.editing = false;
                     $scope.selected_days = [];
                     make_schedule(data);
