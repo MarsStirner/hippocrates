@@ -36,3 +36,11 @@ class Gender(Enum):
 class LocalityType(Enum):
     vilage = 0, u'Село'
     city = 1, u'Город'
+
+
+class AllergyPower(Enum):
+    undefined = 0, u'не известно'
+    low = 1, u'малая'
+    medium = 2, u'средняя'
+    high = 3, u'высокая'
+    strict = 4, u'строгая'

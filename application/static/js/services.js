@@ -5,7 +5,6 @@ angular.module('WebMis20.services', []).
         function($http, $q, $rootScope) {
             var WMClient = function(client_id) {
                 this.client_id = client_id;
-                this.changes = {}; // deleted items to save
             };
 
             WMClient.prototype.reload = function() {
@@ -19,11 +18,20 @@ angular.module('WebMis20.services', []).
                     t.info = data.result.client_data.info;
                     var id_doc = data.result.client_data.id_document;
                     t.id_docs = id_doc !== null ? [id_doc] : [];
-                    t.reg_address = data.result.client_data.reg_address;
-                    t.live_addr = data.result.client_data.live_addr;
+                    var reg_addr = data.result.client_data.reg_address;
+                    t.reg_addresses = reg_addr !== null ? [reg_addr] : [];
+                    var live_addr = data.result.client_data.live_address;
+                    t.live_addresses = live_addr !== null ? [live_addr] : [];
                     var cpol = data.result.client_data.compulsory_policy;
                     t.compulsory_policies = cpol !== null ? [cpol] : [];
                     t.voluntary_policies = data.result.client_data.voluntary_policies;
+                    var blood_types = data.result.client_data.blood_history;
+                    t.blood_types = blood_types !== null ? blood_types : [];
+                    var allergies = data.result.client_data.allergies;
+                    t.allergies = allergies !== null ? allergies : [];
+                    var intolerances = data.result.client_data.intolerances;
+                    t.intolerances = intolerances !== null ? intolerances : [];
+
                     t.soc_statuses = data.result.client_data.soc_statuses;
                     t.invalidities = t.soc_statuses.filter(function(status){
                         return status.ss_class.code == 2;
@@ -35,16 +43,11 @@ angular.module('WebMis20.services', []).
                         return status.ss_class.code == 4;
                     });
 
-//                    t.id_doc = data.result.client_data.id_document;
-//                    t.id_doc = data.result.client_data.id_document;
-//                    t.id_doc = data.result.client_data.id_document;
-//                    t.id_doc = data.result.client_data.id_document;
-//                    t.id_doc = data.result.client_data.id_document;
-//                    t.id_doc = data.result.client_data.id_document;
-//                    t.id_doc = data.result.client_data.id_document;
+                    t.document_history = data.result.client_data.document_history;
 
                     t.appointments = data.result.appointments;
                     t.events = data.result.events;
+                    t.changes = {}; // deleted items to save
                     deferred.resolve();
     //              $rootScope.$broadcast('client_loaded');
                 }).error(function(data, status) {
@@ -56,7 +59,6 @@ angular.module('WebMis20.services', []).
 //                    });
                     var message = data.result;
                     deferred.reject(message);
-//                    throw 'Error requesting Client, id = ' + t.client_id;
                 });
                 return deferred.promise;
             };
@@ -69,8 +71,9 @@ angular.module('WebMis20.services', []).
                     success(function(value, headers) {
                         deferred.resolve(value['result']);
                     }).
-                    error(function(httpResponse) {
-                        var message = httpResponse.result.name;
+                    error(function(response) {
+                        var rr = response.result;
+                        var message = rr.name + ': ' + (rr.data ? rr.data.err_msg : '');
                         deferred.reject(message);
                     });
                 return deferred.promise;
@@ -87,6 +90,22 @@ angular.module('WebMis20.services', []).
                 }).concat(this.changes.id_docs || []);
                 data.id_docs = changed_id_docs.length ? changed_id_docs : undefined;
 
+                var changed_reg_addresses = this.reg_addresses.filter(function(el) {
+                    return el.dirty;
+                });
+                if (!aux.inArray(changed_reg_addresses, this.changes.reg_addresses)) {
+                    changed_reg_addresses.concat(this.changes.reg_addresses);
+                }
+                data.reg_addresses = changed_reg_addresses.length ? changed_reg_addresses : undefined;
+
+                var changed_live_addresses = this.live_addresses.filter(function(el) {
+                    return el.dirty;
+                });
+                if (!aux.inArray(changed_live_addresses, this.changes.live_addresses)) {
+                    changed_live_addresses.concat(this.changes.live_addresses);
+                }
+                data.live_addresses = changed_live_addresses.length ? changed_live_addresses : undefined;
+
                 var changed_cpolicies = this.compulsory_policies.filter(function(el) {
                     return el.dirty;
                 }).concat(this.changes.compulsory_policies || []);
@@ -97,7 +116,22 @@ angular.module('WebMis20.services', []).
                 }).concat(this.changes.voluntary_policies || []);
                 data.voluntary_policies = changed_vpolicies.length ? changed_vpolicies : undefined;
 
+                var changed_blood_types = this.blood_types.filter(function(el) {
+                    return el.dirty;
+                }).concat(this.changes.blood_types || []);
+                data.blood_types = changed_blood_types;
+
+                var changed_allergies = this.allergies.filter(function(el) {
+                    return el.dirty;
+                }).concat(this.changes.allergies || []);
+                data.allergies = changed_allergies;
+
+                var changed_intolerances = this.intolerances.filter(function(el) {
+                    return el.dirty;
+                }).concat(this.changes.intolerances || []);
+                data.intolerances = changed_intolerances;
                 var soc_statuses = this.invalidities.concat(this.works).concat(this.nationalities);
+
                 var changed_soc_statuses = soc_statuses.filter(function(el) {
                     return el.dirty;
                 }).concat(this.changes.invalidities || []).concat(this.changes.works || []).concat(this.changes.nationalities || []);
@@ -122,6 +156,47 @@ angular.module('WebMis20.services', []).
                     "origin": null,
                     "doc_text": null
                 });
+            };
+
+            WMClient.prototype.add_address = function(type) {
+                var entity = type === 0 ? 'reg_addresses' : 'live_addresses';
+                var obj = {
+                    "id": null,
+                    "deleted": 0,
+                    "type": type,
+                    "address": null,
+                    "free_input": null,
+                    "locality_type": null,
+                    "text_summary": null
+                };
+                this[entity].push(obj);
+                return obj;
+            };
+
+            WMClient.prototype.copy_address = function(addr, from_addr, same) {
+                if (!from_addr.id && !from_addr.dirty) {
+                    alert('Для копирования адреса заполните сначала адрес регистрации');
+                    addr.same_as_reg = undefined;
+                    return;
+                }
+                var cur_id = addr.id;
+                if (cur_id) {
+                    var msg = 'При копировании адреса текущая запись адреса будет удалена и станет доступна\
+                        для просмотра в истории. Продолжить?';
+                    if (!confirm(msg)) {
+                        addr.same_as_reg = !addr.same_as_reg;
+                        return;
+                    }
+                }
+                this.delete_record('live_addresses', addr, 2);
+                addr = this.add_address(1);
+                if (same) {
+                    angular.copy(from_addr, addr);
+                    addr.id = null;
+                    addr.copy_from_id = from_addr.id;
+                    addr.dirty = true;
+                }
+                addr.same_as_reg = same;
             };
 
             WMClient.prototype.add_cpolicy = function() {
@@ -152,22 +227,35 @@ angular.module('WebMis20.services', []).
                 });
             };
 
-            WMClient.prototype.add_allergy = function() {
-                this.client_info['allergies'].push({
-                    'nameSubstance': '',
-                    'power': 0,
-                    'createDate': '',
-                    'deleted':0,
-                    'notes': '' });
+            WMClient.prototype.add_blood_type = function () {
+                this.blood_types.unshift({
+                    'id': null,
+                    'blood_type': null,
+                    'date': null,
+                    'person': null
+                });
             };
 
-            WMClient.prototype.add_medicament = function() {
-                this.client_info['intolerances'].push({
-                    'nameMedicament': '',
-                    'power': 0,
-                    'createDate': '',
-                    'deleted':0,
-                    'notes': '' });
+            WMClient.prototype.add_allergy = function() {
+                this.allergies.push({
+                    'id': null,
+                    'deleted': 0,
+                    'name': null,
+                    'power': null,
+                    'date': null,
+                    'notes': null
+                });
+            };
+
+            WMClient.prototype.add_med_intolerance = function() {
+                this.intolerances.push({
+                    'id': null,
+                    'deleted': 0,
+                    'name': null,
+                    'power': null,
+                    'date': null,
+                    'notes': null
+                });
             };
 
             WMClient.prototype.add_identification = function() {
@@ -186,13 +274,6 @@ angular.module('WebMis20.services', []).
                     'notes': ''});
             };
 
-            WMClient.prototype.add_blood = function () {
-                this.client_info['bloodHistory'].push({'bloodGroup_code': '',
-                    'bloodDate': '',
-                    'person_id': 0
-                });
-            };
-
             WMClient.prototype.add_relation = function (entity) {
                 this.client_info[entity].push({'deleted': 0,
                     'relativeType_name': '',
@@ -202,7 +283,7 @@ angular.module('WebMis20.services', []).
             };
 
             WMClient.prototype.add_soc_status = function (class_name, class_code) {
-                var document = null
+                var document = null;
                 if (class_code != 4){
                     document = {
                                         "id": null,
