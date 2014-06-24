@@ -4,7 +4,7 @@ from application.lib.agesex import calcAgeTuple
 from application.lib.const import ID_DOC_GROUP_CODE, VOL_POLICY_CODES, COMP_POLICY_CODES
 from application.models.utils import safe_current_user_id
 from application.models.enums import Gender, LocalityType, AllergyPower
-from application.models.exists import rbDocumentTypeGroup
+from application.models.exists import rbDocumentTypeGroup, rbDocumentType
 from application.models.kladr_models import Kladr, Street
 from application.systemwide import db
 from sqlalchemy import orm
@@ -206,8 +206,8 @@ class Client(db.Model):
     @property
     def id_document(self):
         if not self._id_document:
-            self._id_document = (self.documents.filter(ClientDocument.deleted == 0).
-                filter(rbDocumentTypeGroup.code == ID_DOC_GROUP_CODE).order_by(ClientDocument.date.desc()).first())
+            self._id_document = (self.documents.join(rbDocumentType).join(rbDocumentTypeGroup).filter(ClientDocument.deleted == 0).
+                                 filter(rbDocumentTypeGroup.code == ID_DOC_GROUP_CODE).order_by(ClientDocument.date.desc()).first())
         return self._id_document
 
     def get_actual_document_by_code(self, doc_type_code):
