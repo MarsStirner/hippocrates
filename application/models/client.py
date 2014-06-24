@@ -216,11 +216,11 @@ class Client(db.Model):
 
     @property
     def phones(self):
-        contacts = [(contact.name, contact.contact, contact.notes) for contact in self.contacts]
         return ', '.join([
-            (u'%s: %s (%s)' % (phone[0], phone[1], phone[2])) if phone[2]
-            else (u'%s: %s' % (phone[0], phone[1]))
-            for phone in contacts
+            (u'%s: %s (%s)' % (contact.name, contact.contact, contact.notes))
+            if contact.notes
+            else (u'%s: %s' % (contact.name, contact.contact))
+            for contact in self.contacts
         ])
 
     def has_identical_addresses(self):

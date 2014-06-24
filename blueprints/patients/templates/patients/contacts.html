@@ -1,4 +1,4 @@
-<a name="_contacts" toc-element="Контакты"></a>
+<ng-form name="_contacts" toc-element="Контакты" ng-model="client.relations">
 <legend>Контактная информация и родственники</legend>
 
 <div class="row" ng-repeat="relation in client.relations">
@@ -22,10 +22,10 @@
         </button>
     </div>
 </div>
-
+<ng-form name="_contact_info" toc-element="Телефоны">
 <div class="row">
     <div class="col-md-12">
-        <table class="table table-condensed" ng-hide="!client.info['contacts'].length">
+        <table class="table table-condensed" ng-hide="!client.contacts.length">
             <caption>Контакты</caption>
             <thead>
                 <tr>
@@ -35,8 +35,8 @@
                 </tr>
             </thead>
             <tbody>
-                <tr ng-repeat="contact in  client.info['contacts']">
-                    <td>[[contact.contactType_name]]</td>
+                <tr ng-repeat="contact in  client.contacts">
+                    <td>[[contact.contactType.name]]</td>
                     <td>[[contact.contact]]</td>
                     <td>[[contact.notes]]</td>
                 </tr>
@@ -53,13 +53,17 @@
                 </tr>
                 </thead>
                 <tbody>
-                    <tr ng-repeat="contact in  client.info['contacts']">
-                        <td class="col-md-4" ng-hide="contact.deleted">{{ form.contact_contactType(class="form-control",
-                            autocomplete="off", ng_model="contact.contactType_code") }}</td>
-                        <td class="col-md-3" ng-hide="contact.deleted">{{ form.contact_contact(class="form-control",
-                            autocomplete="off", ng_model="contact.contact") }}</td>
-                        <td class="col-md-2" ng-hide="contact.deleted">{{ form.contact_notes(class="form-control",
-                            autocomplete="off", ng_model="contact.notes") }}</td>
+                    <tr ng-repeat="contact in client.contacts">
+                        <td class="col-md-4" ng-hide="contact.deleted">
+                            <ui-select ng-model="contact.contactType" theme="select2" ref-book="rbContactType">
+                                <ui-select-match placeholder="не выбрано">[[ $select.selected.name ]]</ui-select-match>
+                                <ui-select-choices repeat="rt in ($refBook.objects | filter: $select.search) track by rt.id">
+                                    <span ng-bind-html="rt.name | highlight: $select.search"></span>
+                                </ui-select-choices>
+                            </ui-select>
+                        </td>
+                        <td class="col-md-3" ng-hide="contact.deleted"><input type="text" class="form-control" ng_model="contact.contact"></td>
+                        <td class="col-md-2" ng-hide="contact.deleted"><input type="text" class="form-control" ng_model="contact.notes"></td>
                         <td class="col-md-1" ng-hide="contact.deleted">
                             <a class="btn btn-sm btn-default" href="" title="Удалить текущую строку"
                                ng-click="delete_record('contacts', contact)" >
@@ -75,3 +79,5 @@
         </div>
     </div>
 </div>
+</ng-form>
+</ng-form>

@@ -216,20 +216,17 @@ angular.module('WebMis20.directives').
             }
         }
     }])
-    .directive('refBookSelect', ['RefBookService', function (RefBookService) {
+    .directive('refBook', ['RefBookService', function (RefBookService) {
         return {
-            restrict: 'E',
-            replace: true,
-            template:
-                '<ui-select ng-model="model" theme="select2">\
-                    <choices repeat="rt in $refBook.objects |filter: $select:search | limit: 100">\
-                        <div ng-bind-html="rt.name | highlight: $select.search"></div>\
-                    </chioces>\
-                </ui-select>',
-            link: function (scope, element, attributes) {
-                scope.$refBook = RefBookService.get(attributes.refBook);
-                scope.model = attributes.model;
-            }
+            restrict: 'A',
+//            require: 'uiSelect',
+//            scope: true,
+            controller: ['$scope', '$attrs', function ($scope, $attrs) {
+                $scope.$refBook = RefBookService.get($attrs.refBook);
+            }]
+//            link: function (scope, elem, attr) {
+//                scope.$refBook = RefBookService.get(attr.refBook);
+//            }
         }
     }])
     .directive('wmRelationTypeRb', ['RefBookService', function (RefBookService) {

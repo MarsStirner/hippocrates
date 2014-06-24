@@ -250,8 +250,7 @@ class ClientVisualizer(object):
     def make_contact_info(self, contact):
         return {'id': contact.id,
                 'deleted': contact.deleted,
-                'contactType_code': getattr(contact.contactType, 'code', None),
-                'contactType_name': getattr(contact.contactType, 'name', None),
+                'contactType': contact.contactType,
                 'contact': contact.contact,
                 'notes': contact.notes}
 

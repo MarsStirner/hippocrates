@@ -17,6 +17,7 @@ angular.module('WebMis20.services', []).
                     }
                 }).success(function(data) {
                     t.info = data.result.client_data.info;
+                    t.contacts = data.result.client_data.contacts;
                     t.relations = data.result.client_data.relations;
                     var id_doc = data.result.client_data.id_document;
                     t.id_docs = id_doc !== null ? [id_doc] : [];
@@ -163,11 +164,12 @@ angular.module('WebMis20.services', []).
             };
 
             WMClient.prototype.add_contact = function() {
-                this.client_info['contacts'].push({
-                    'deleted': 0,
-                    'contactType_code': '',
-                    'contact': '',
-                    'notes': ''});
+                this.contacts.push({
+                    deleted: 0,
+                    contactType: {},
+                    contact: '',
+                    notes: ''
+                });
             };
 
             WMClient.prototype.add_blood = function () {
@@ -177,7 +179,7 @@ angular.module('WebMis20.services', []).
                 });
             };
 
-            WMClient.prototype.add_relation = function (entity) {
+            WMClient.prototype.add_relation = function () {
                 this.relations.push({
                     direct: true,
                     relative: null,
