@@ -32,25 +32,15 @@
                     {% include "patients/_address.html" %}
                     {% include "patients/_policy.html" %}
                     {% include "patients/_notes.html" %}
-
-                    <legend>Особенности пациента</legend>
                     {% include "patients/_characteristics.html" %}
-
                     {% include "patients/soc_status.html" %}
 
-                    <legend>Контактная информация и родственники</legend>
                     {% include "patients/contacts.html" %}
 
 {#                    {% include "patients/identifiers.html" %}#}
-
-                    <legend>История изменений документов</legend>
                     {% include "patients/_doc_history.html" %}
-
-                    {% include "patients/documents.html" %}
-
-                    <legend>Debug</legend>
-                    <pre>[[client | json]]</pre>
-
+{#                    <legend>Debug</legend>#}
+{#                    <pre>[[client | json]]</pre>#}
                     <div class="row">
                         <div class="col-md-12">
                             <div class="pull-right">
