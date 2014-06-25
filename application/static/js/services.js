@@ -250,13 +250,6 @@ angular.module('WebMis20.services', []).
                 });
             };
 
-            WMClient.prototype.add_blood = function () {
-                this.client_info['bloodHistory'].push({'bloodGroup_code': '',
-                    'bloodDate': '',
-                    'person_id': 0
-                });
-            };
-
             WMClient.prototype.add_relation = function () {
                 this.relations.push({
                     direct: true,

@@ -18,7 +18,9 @@ __author__ = 'mmalkov'
 def handle_client_error(err):
     return jsonify({
         'name': err.message,
-        'data': err.data
+        'data': {
+            'err_msg': err.data
+        }
     }, 422, 'error')
 
 

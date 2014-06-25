@@ -66,7 +66,8 @@ class Client(db.Model):
     )
     addresses = db.relationship(
         'ClientAddress',
-        primaryjoin="and_(Client.id==ClientAddress.client_id, ClientAddress.deleted==0)"
+        primaryjoin="and_(Client.id==ClientAddress.client_id, ClientAddress.deleted==0)",
+        backref=db.backref('client')
     )
     reg_address = db.relationship(
         u'ClientAddress',
