@@ -47,7 +47,7 @@ angular.module('WebMis20.services', []).
 
                     t.appointments = data.result.appointments;
                     t.events = data.result.events;
-                    t.changes = {}; // deleted items to save
+                    t.deleted_entities = {}; // deleted items to save
                     deferred.resolve();
     //              $rootScope.$broadcast('client_loaded');
                 }).error(function(data, status) {
@@ -84,60 +84,33 @@ angular.module('WebMis20.services', []).
                     client_id: this.client_id
                 };
                 if (this.info.dirty) { data.info = this.info; }
+                data.id_docs = this._get_entity_changes('id_docs');
+                data.reg_addresses = this._get_entity_changes('reg_addresses');
+                data.live_addresses = this._get_entity_changes('live_addresses');
+                data.compulsory_policies = this._get_entity_changes('compulsory_policies');
+                data.voluntary_policies = this._get_entity_changes('voluntary_policies');
+                data.blood_types = this._get_entity_changes('blood_types');
+                data.allergies = this._get_entity_changes('allergies');
+                data.intolerances = this._get_entity_changes('intolerances');
 
-                var changed_id_docs = this.id_docs.filter(function(el) {
-                    return el.dirty;
-                }).concat(this.changes.id_docs || []);
-                data.id_docs = changed_id_docs.length ? changed_id_docs : undefined;
-
-                var changed_reg_addresses = this.reg_addresses.filter(function(el) {
-                    return el.dirty;
-                });
-                if (!aux.inArray(changed_reg_addresses, this.changes.reg_addresses)) {
-                    changed_reg_addresses.concat(this.changes.reg_addresses);
-                }
-                data.reg_addresses = changed_reg_addresses.length ? changed_reg_addresses : undefined;
-
-                var changed_live_addresses = this.live_addresses.filter(function(el) {
-                    return el.dirty;
-                });
-                if (!aux.inArray(changed_live_addresses, this.changes.live_addresses)) {
-                    changed_live_addresses.concat(this.changes.live_addresses);
-                }
-                data.live_addresses = changed_live_addresses.length ? changed_live_addresses : undefined;
-
-                var changed_cpolicies = this.compulsory_policies.filter(function(el) {
-                    return el.dirty;
-                }).concat(this.changes.compulsory_policies || []);
-                data.compulsory_policies = changed_cpolicies.length ? changed_cpolicies : undefined;
-
-                var changed_vpolicies = this.voluntary_policies.filter(function(el) {
-                    return el.dirty;
-                }).concat(this.changes.voluntary_policies || []);
-                data.voluntary_policies = changed_vpolicies.length ? changed_vpolicies : undefined;
-
-                var changed_blood_types = this.blood_types.filter(function(el) {
-                    return el.dirty;
-                }).concat(this.changes.blood_types || []);
-                data.blood_types = changed_blood_types;
-
-                var changed_allergies = this.allergies.filter(function(el) {
-                    return el.dirty;
-                }).concat(this.changes.allergies || []);
-                data.allergies = changed_allergies;
-
-                var changed_intolerances = this.intolerances.filter(function(el) {
-                    return el.dirty;
-                }).concat(this.changes.intolerances || []);
-                data.intolerances = changed_intolerances;
                 var soc_statuses = this.invalidities.concat(this.works).concat(this.nationalities);
-
                 var changed_soc_statuses = soc_statuses.filter(function(el) {
                     return el.dirty;
-                }).concat(this.changes.invalidities || []).concat(this.changes.works || []).concat(this.changes.nationalities || []);
+                }).concat(this.deleted_entities.invalidities || []).concat(this.deleted_entities.works || []).concat(this.deleted_entities.nationalities || []);
                 data.soc_statuses = changed_soc_statuses.length ? changed_soc_statuses : undefined;
 
                 return data;
+            };
+
+            WMClient.prototype._get_entity_changes = function(entity) {
+                var dirty_elements = this[entity].filter(function(el) {
+                    return el.dirty;
+                });
+                var deleted_elements = this.deleted_entities[entity] || [];
+                var changes = dirty_elements.concat(deleted_elements.filter(function(del_elmnt) {
+                    return dirty_elements.indexOf(del_elmnt) === -1;
+                }));
+                return changes.length ? changes : undefined;
             };
 
             WMClient.prototype.is_new = function() {
@@ -312,7 +285,9 @@ angular.module('WebMis20.services', []).
                 }
                 if (record.id) {
                     record.deleted = deleted;
-                    this.changes[entity] = record;
+                    angular.isArray(this.deleted_entities[entity]) ?
+                        this.deleted_entities[entity].push(record) :
+                        this.deleted_entities[entity] = [record];
                 } else {
                     var idx = this[entity].indexOf(record);
                     this[entity].splice(idx, 1);

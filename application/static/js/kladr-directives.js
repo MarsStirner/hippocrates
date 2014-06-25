@@ -119,11 +119,6 @@ angular.module('WebMis20.directives').
                         scope.addressModel.dirty = n;
                     }
                 });
-//                scope.$watch(function() {
-//                    return scope.widgets.locality.getText();
-//                }, function(n, o) {
-//                    if (n !== o && !n) { scope.clearStreet(); }
-//                });
                 scope.$watch(function() {
                     return scope.widgets.locality.model;
                 }, function(n, o) {
