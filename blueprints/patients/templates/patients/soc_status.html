@@ -1,127 +1,138 @@
-<a name="_socStatuses" toc-element="Соц. статус"></a>
-<legend>Социальные статусы</legend>
-<h4>Инвалидность</h4>
-<div ng-repeat="socstat in client.invalidities | filter: flt_not_deleted()">
-    <ng-form name="socStatInvalidityForm">
-        <div class="row">
-            <div class="col-md-11">
-                <wm-soc-status ss-class="2" id-postfix="i[[$index]]"
-                    model-type="socstat.ss_type"
-                    model-beg-date="socstat.beg_date"
-                    model-end-date="socstat.end_date"
-                    model-document="socstat.self_document"
-                    model-soc-status="socstat"
-                    edit-mode="socstat.id ? edit.activated : true">
-                </wm-soc-status>
-            </div>
-            <div class="col-md-1">
-                <div class="row" ng-show="socstat.id">
-                    <button type="button" class="btn btn-primary marginal" title="Редактировать"
-                            ng-click="edit.activated=true"><span class="glyphicon glyphicon-pencil"></span></button>
-                </div>
-                <div class="row">
-                    <button type="button" class="btn btn-danger marginal" title="Удалить"
-                            ng-click="client.delete_record('invalidities', socstat)"><span class="glyphicon glyphicon-trash"></span></button>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-11">
-                <wm-document id-postfix="c[[$index]]"
-                        group-code="7"
-                        model-type="socstat.self_document.doc_type"
-                        model-serial="socstat.self_document.serial"
-                        serial-validator="socstat.self_document.doc_type.validators.serial"
-                        model-number="socstat.self_document.number"
-                        number-validator="socstat.self_document.doc_type.validators.number"
-                        model-beg-date="socstat.self_document.beg_date"
-                        model-end-date="socstat.self_document.end_date"
-                        model-origin="socstat.self_document.origin"
+<div class="marginal">
+<ng-form name="_socStatuses" toc-element="Соц. статус">
+    <legend>Социальные статусы</legend>
+    <h4>Инвалидность</h4>
+    <div ng-repeat="socstat in client.invalidities | filter: flt_not_deleted()">
+        <ng-form name="socStatInvalidityForm">
+            <div class="row">
+                <div class="col-md-11">
+                    <wm-soc-status ss-class="2" id-postfix="i[[$index]]"
+                        model-type="socstat.ss_type"
+                        model-beg-date="socstat.beg_date"
+                        model-end-date="socstat.end_date"
                         model-document="socstat.self_document"
-                        edit-mode="socstat.self_document.id ? edit.activated : true">
-                </wm-document>
-            </div>
-        </div>
-    </ng-form>
-</div>
-<div>
-    <button type="button" class="btn btn-primary marginal"
-            ng-click="client.add_soc_status('invalidities', 2)">Добавить инвалидность</button>
-</div>
-<h4>Занятость</h4>
-<div ng-repeat="socstat in client.works | filter: flt_not_deleted()">
-    <ng-form name="socStatWorkForm">
-        <div class="row">
-            <div class="col-md-11">
-                <wm-soc-status ss-class="3" id-postfix="w[[$index]]"
-                    model-type="socstat.ss_type"
-                    model-beg-date="socstat.beg_date"
-                    model-end-date="socstat.end_date"
-                    model-soc-status="socstat"
-                    edit-mode="socstat.id ? edit.activated : true">
-                </wm-soc-status>
-            </div>
-            <div class="col-md-1">
-                <div class="row" ng-show="socstat.id">
-                    <button type="button" class="btn btn-primary marginal" title="Редактировать"
-                            ng-click="edit.activated=true"><span class="glyphicon glyphicon-pencil"></span></button>
+                        model-soc-status="socstat"
+                        edit-mode="socstat.id ? edit.activated : true">
+                    </wm-soc-status>
                 </div>
-                <div class="row">
-                    <button type="button" class="btn btn-danger marginal" title="Удалить"
-                            ng-click="client.delete_record('works', socstat)"><span class="glyphicon glyphicon-trash"></span></button>
+                <div class="col-md-1">
+                    <div class="row" ng-show="socstat.id">
+                        <button type="button" class="btn btn-primary marginal" title="Редактировать"
+                                ng-click="edit.activated=true"><span class="glyphicon glyphicon-pencil"></span></button>
+                    </div>
+                    <div class="row">
+                        <button type="button" class="btn btn-danger marginal" title="Удалить"
+                                ng-click="client.delete_record('invalidities', socstat)"><span class="glyphicon glyphicon-trash"></span></button>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="row">
-            <div class="col-md-11">
-                <wm-document id-postfix="c[[$index]]"
-                        group-code="4"
-                        model-type="socstat.self_document.doc_type"
-                        model-serial="socstat.self_document.serial"
-                        serial-validator="socstat.self_document.doc_type.validators.serial"
-                        model-number="socstat.self_document.number"
-                        number-validator="socstat.self_document.doc_type.validators.number"
-                        model-beg-date="socstat.self_document.beg_date"
-                        model-end-date="socstat.self_document.end_date"
-                        model-origin="socstat.self_document.origin"
-                        model-document="socstat.self_document"
-                        edit-mode="socstat.self_document.id ? edit.activated : true">
-                </wm-document>
-            </div>
-        </div>
-    </ng-form>
-</div>
-<div>
-    <button type="button" class="btn btn-primary marginal"
-            ng-click="client.add_soc_status('works', 3)">Добавить занятость</button>
-</div>
-<h4>Гражданство</h4>
-<div ng-repeat="socstat in client.nationalities | filter: flt_not_deleted()">
-    <ng-form name="socStatNationalityForm">
-        <div class="row">
-            <div class="col-md-11">
-                <wm-soc-status ss-class="4" id-postfix="n[[$index]]"
-                    model-type="socstat.ss_type"
-                    model-beg-date="socstat.beg_date"
-                    model-end-date="socstat.end_date"
-                    model-soc-status="socstat"
-                    edit-mode="socstat.id ? edit.activated : true">
-                </wm-soc-status>
-            </div>
-            <div class="col-md-1">
-                <div class="row" ng-show="socstat.id">
-                    <button type="button" class="btn btn-primary marginal" title="Редактировать"
-                            ng-click="edit.activated=true"><span class="glyphicon glyphicon-pencil"></span></button>
-                </div>
-                <div class="row">
-                    <button type="button" class="btn btn-danger marginal" title="Удалить"
-                            ng-click="client.delete_record('nationalities', socstat)"><span class="glyphicon glyphicon-trash"></span></button>
+            <div class="row">
+                <div class="col-md-11">
+                    <wm-document id-postfix="c[[$index]]"
+                            group-code="7"
+                            model-type="socstat.self_document.doc_type"
+                            model-serial="socstat.self_document.serial"
+                            serial-validator="socstat.self_document.doc_type.validators.serial"
+                            model-number="socstat.self_document.number"
+                            number-validator="socstat.self_document.doc_type.validators.number"
+                            model-beg-date="socstat.self_document.beg_date"
+                            model-end-date="socstat.self_document.end_date"
+                            model-origin="socstat.self_document.origin"
+                            model-document="socstat.self_document"
+                            edit-mode="socstat.self_document.id ? edit.activated : true">
+                    </wm-document>
                 </div>
             </div>
-        </div>
-    </ng-form>
-</div>
-<div>
-    <button type="button" class="btn btn-primary marginal"
-            ng-click="client.add_soc_status('nationalities', 4)">Добавить гражданство</button>
+        </ng-form>
+        <hr class="no-top-margin">
+    </div>
+    <div>
+        <button type="button" class="btn btn-primary"
+                ng-click="client.add_soc_status('invalidities', 2)">Добавить инвалидность</button>
+    </div>
+
+    <hr>
+
+    <h4>Занятость</h4>
+    <div ng-repeat="socstat in client.works | filter: flt_not_deleted()">
+        <ng-form name="socStatWorkForm">
+            <div class="row">
+                <div class="col-md-11">
+                    <wm-soc-status ss-class="3" id-postfix="w[[$index]]"
+                        model-type="socstat.ss_type"
+                        model-beg-date="socstat.beg_date"
+                        model-end-date="socstat.end_date"
+                        model-soc-status="socstat"
+                        edit-mode="socstat.id ? edit.activated : true">
+                    </wm-soc-status>
+                </div>
+                <div class="col-md-1">
+                    <div class="row" ng-show="socstat.id">
+                        <button type="button" class="btn btn-primary marginal" title="Редактировать"
+                                ng-click="edit.activated=true"><span class="glyphicon glyphicon-pencil"></span></button>
+                    </div>
+                    <div class="row">
+                        <button type="button" class="btn btn-danger marginal" title="Удалить"
+                                ng-click="client.delete_record('works', socstat)"><span class="glyphicon glyphicon-trash"></span></button>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-11">
+                    <wm-document id-postfix="c[[$index]]"
+                            group-code="4"
+                            model-type="socstat.self_document.doc_type"
+                            model-serial="socstat.self_document.serial"
+                            serial-validator="socstat.self_document.doc_type.validators.serial"
+                            model-number="socstat.self_document.number"
+                            number-validator="socstat.self_document.doc_type.validators.number"
+                            model-beg-date="socstat.self_document.beg_date"
+                            model-end-date="socstat.self_document.end_date"
+                            model-origin="socstat.self_document.origin"
+                            model-document="socstat.self_document"
+                            edit-mode="socstat.self_document.id ? edit.activated : true">
+                    </wm-document>
+                </div>
+            </div>
+        </ng-form>
+        <hr class="no-top-margin">
+    </div>
+    <div>
+        <button type="button" class="btn btn-primary"
+                ng-click="client.add_soc_status('works', 3)">Добавить занятость</button>
+    </div>
+
+    <hr>
+
+    <h4>Гражданство</h4>
+    <div ng-repeat="socstat in client.nationalities | filter: flt_not_deleted()">
+        <ng-form name="socStatNationalityForm">
+            <div class="row">
+                <div class="col-md-11">
+                    <wm-soc-status ss-class="4" id-postfix="n[[$index]]"
+                        model-type="socstat.ss_type"
+                        model-beg-date="socstat.beg_date"
+                        model-end-date="socstat.end_date"
+                        model-soc-status="socstat"
+                        edit-mode="socstat.id ? edit.activated : true">
+                    </wm-soc-status>
+                </div>
+                <div class="col-md-1">
+                    <div class="row" ng-show="socstat.id">
+                        <button type="button" class="btn btn-primary marginal" title="Редактировать"
+                                ng-click="edit.activated=true"><span class="glyphicon glyphicon-pencil"></span></button>
+                    </div>
+                    <div class="row">
+                        <button type="button" class="btn btn-danger marginal" title="Удалить"
+                                ng-click="client.delete_record('nationalities', socstat)"><span class="glyphicon glyphicon-trash"></span></button>
+                    </div>
+                </div>
+            </div>
+        </ng-form>
+    </div>
+    <div>
+        <button type="button" class="btn btn-primary"
+                ng-click="client.add_soc_status('nationalities', 4)">Добавить гражданство</button>
+    </div>
+</ng-form>
 </div>
