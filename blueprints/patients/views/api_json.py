@@ -100,6 +100,7 @@ def api_patient_save():
     if client_id is False:
         return abort(404)
 
+    err_msg = u'Ошибка сохранения данных пациента'
     try:
         if client_id:
             client = Client.query.get(client_id)
@@ -172,7 +173,7 @@ def api_patient_save():
             client = Client()
             client_info = client_data.get('info')
             if not client_info:
-                raise ClientSaveException(u'Отсутствует основная информация о пациенте.')
+                raise ClientSaveException(err_msg, u'Отсутствует основная информация о пациенте.')
             client = set_client_main_info(client, client_info)
             db.session.add(client)
 
@@ -280,7 +281,7 @@ def api_patient_save():
         # TODO: LOG!!
         db.session.rollback()
         raise
-        return make_response(jsonify({'name': u'Ошибка сохранения данных пациента',
+        return make_response(jsonify({'name': err_msg,
                                       'data': {
                                           'err_msg': 'INTERNAL SERVER ERROR'
                                        }

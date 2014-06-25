@@ -56,43 +56,44 @@ def check_snils(snils):
 
 def set_client_main_info(client, data):
     # TODO: re validation
+    err_msg = u'Ошибка сохранения основной информации пациента'
     last_name = data.get('last_name')
     if not last_name:
-        raise ClientSaveException(u'Отсутствует обязательное поле Фамилия')
+        raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Фамилия')
     ok, msg = is_valid_name(last_name)
     if not ok:
-        raise ClientSaveException(u'Фамилия содержит недопустимые символы: %s' % msg)
+        raise ClientSaveException(err_msg, u'Фамилия содержит недопустимые символы: %s' % msg)
     client.lastName = last_name
 
     first_name = data.get('first_name')
     if not first_name:
-        raise ClientSaveException(u'Отсутствует обязательное поле Имя')
+        raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Имя')
     ok, msg = is_valid_name(first_name)
     if not ok:
-        raise ClientSaveException(u'Имя содержит недопустимые символы: %s' % msg)
+        raise ClientSaveException(err_msg, u'Имя содержит недопустимые символы: %s' % msg)
     client.firstName = first_name
 
     patr_name = data.get('patr_name') or ''
     ok, msg = is_valid_name(patr_name)
     if not ok:
-        raise ClientSaveException(u'Отчество содержит недопустимые символы: %s' % msg)
+        raise ClientSaveException(err_msg, u'Отчество содержит недопустимые символы: %s' % msg)
     client.patrName = patr_name
 
     birth_date = safe_date(data.get('birth_date'))
     if not birth_date:
-        raise ClientSaveException(u'Отсутствует обязательное поле Дата рождения')
+        raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Дата рождения')
     client.birthDate = birth_date
 
     sex = safe_traverse(data, 'sex', 'id')
     if not sex:
-        raise ClientSaveException(u'Отсутствует обязательное поле Пол')
+        raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Пол')
     client.sexCode = sex
 
     snils = unformat_snils(data.get('snils', '') or '')
     if snils:
         ok, msg = check_snils(snils)
         if not ok:
-            raise ClientSaveException(u'Ошибка сохранения поля СНИЛС: %s' % msg)
+            raise ClientSaveException(err_msg, u'Ошибка сохранения поля СНИЛС: %s' % msg)
     client.SNILS = snils
 
     client.notes = data.get('notes', '')
@@ -103,21 +104,22 @@ def set_client_main_info(client, data):
 
 def add_or_update_doc(client, data):
     # todo: check for existing records ?
+    err_msg = u'Ошибка сохранения документа'
     doc_id = data.get('id')
     doc_type = safe_traverse(data, 'doc_type', 'id')
     if not doc_type:
-        raise ClientSaveException(u'Ошибка сохранения документа: Отсутствует обязательное поле Тип документа')
+        raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Тип документа')
     serial = data.get('serial')
     number = data.get('number')
     if not number:
-        raise ClientSaveException(u'Ошибка сохранения документа: Отсутствует обязательное поле Номер документа')
+        raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Номер документа')
     beg_date = safe_date(data.get('beg_date'))
     if not beg_date:
-        raise ClientSaveException(u'Ошибка сохранения документа: Отсутствует обязательное поле Дата выдачи')
+        raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Дата выдачи')
     end_date = safe_date(data.get('end_date'))
     origin = data.get('origin')
     if not origin:
-        raise ClientSaveException(u'Ошибка сохранения документа: Отсутствует обязательное поле Выдан')
+        raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Выдан')
     deleted = data.get('deleted', 0)
 
     if doc_id:
@@ -222,52 +224,24 @@ def add_or_update_copy_address(client, data, copy_from):
     return client_addr
 
 
-def add_or_update_soc_status(client, data):
-    soc_status_id = data.get('id')
-    soc_status_type = safe_traverse(data, 'ss_type', 'id')
-    soc_status_class_code = safe_traverse(data, 'ss_class', 'code')
-    if not soc_status_type:
-        raise ClientSaveException(u'Ошибка сохранения полиса: Отсутствует обязательное поле Тип соц. статуса')
-    beg_date = data.get('beg_date')
-    if not beg_date:
-        raise ClientSaveException(u'Ошибка сохранения полиса: Отсутствует обязательное поле Дата начала')
-    end_date = data.get('end_date')
-    deleted = data.get('deleted', 0)
-    doc_info = data.get('self_document')
-    doc = add_or_update_doc(client, doc_info) if doc_info else None
-
-    if soc_status_id:
-        soc_status = ClientSocStatus.query.get(soc_status_id)
-        soc_status.socStatusType_id = soc_status_type
-        soc_status.beg_date = beg_date
-        soc_status.end_date = end_date
-        soc_status.client = client
-        soc_status.deleted = deleted
-        soc_status.self_document = doc
-    else:
-        soc_status_class = rbSocStatusClass.query.filter(rbSocStatusClass.code == soc_status_class_code).first().id
-        soc_status = ClientSocStatus(soc_status_class, soc_status_type, beg_date, end_date, client, doc)
-    return soc_status
-
-
 def add_or_update_policy(client, data):
     # todo: check for existing records ?
+    err_msg = u'Ошибка сохранения полиса'
     policy_id = data.get('id')
     pol_type = safe_traverse(data, 'policy_type', 'id')
     if not pol_type:
-        raise ClientSaveException(u'Ошибка сохранения полиса: Отсутствует обязательное поле Тип полиса')
+        raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Тип полиса')
     serial = data.get('serial') or ''
     number = data.get('number')
     if not number:
-        raise ClientSaveException(u'Ошибка сохранения полиса: Отсутствует обязательное поле Номер полиса')
+        raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Номер полиса')
     beg_date = safe_date(data.get('beg_date'))
     if not beg_date:
-        raise ClientSaveException(u'Ошибка сохранения полиса: Отсутствует обязательное поле Дата выдачи')
+        raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Дата выдачи')
     end_date = safe_date(data.get('end_date'))
     insurer = safe_traverse(data, 'insurer', 'id')
     if not insurer:
-        raise ClientSaveException(u'Ошибка сохранения полиса: Отсутствует обязательное поле Страховая '
-                                  u'медицинская организация')
+        raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Страховая медицинская организация')
     deleted = data.get('deleted', 0)
 
     if policy_id:
@@ -286,17 +260,17 @@ def add_or_update_policy(client, data):
 
 def add_or_update_blood_type(client, data):
     # todo: check for existing records ?
+    err_msg = u'Ошибка сохранения группы крови'
     bt_id = data.get('id')
     bt_type = safe_traverse(data, 'blood_type', 'id')
     if not bt_type:
-        raise ClientSaveException(u'Ошибка сохранения группы крови: Отсутствует обязательное поле Группа крови')
+        raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Группа крови')
     date = safe_date(data.get('date'))
     if not date:
-        raise ClientSaveException(u'Ошибка сохранения группы крови: Отсутствует обязательное поле Дата установления')
+        raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Дата установления')
     person = safe_traverse(data, 'person', 'id')
     if not person:
-        raise ClientSaveException(u'Ошибка сохранения группы крови: Отсутствует обязательное поле '
-                                  u'Врач, установивший группу крови')
+        raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Врач, установивший группу крови')
 
     if bt_id:
         bt = BloodHistory.query.get(bt_id)
@@ -310,16 +284,17 @@ def add_or_update_blood_type(client, data):
 
 def add_or_update_allergy(client, data):
     # todo: check for existing records ?
+    err_msg = u'Ошибка сохранения аллергии'
     alg_id = data.get('id')
     alg_name = data.get('name')
     if not alg_name:
-        raise ClientSaveException(u'Ошибка сохранения аллергии: Отсутствует обязательное поле Вещество')
+        raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Вещество')
     alg_power = safe_traverse(data, 'power', 'id')
     if alg_power is None:
-        raise ClientSaveException(u'Ошибка сохранения аллергии: Отсутствует обязательное поле Степень')
+        raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Степень')
     date = safe_date(data.get('date'))
     if not date:
-        raise ClientSaveException(u'Ошибка сохранения аллергии: Отсутствует обязательное поле Дата установления')
+        raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Дата установления')
     notes = data.get('notes', '')
 
     if alg_id:
@@ -335,19 +310,17 @@ def add_or_update_allergy(client, data):
 
 def add_or_update_intolerance(client, data):
     # todo: check for existing records ?
+    err_msg = u'Ошибка сохранения медикаментозной непереносимости'
     intlr_id = data.get('id')
     intlr_name = data.get('name')
     if not intlr_name:
-        raise ClientSaveException(u'Ошибка сохранения медикаментозной непереносимости: Отсутствует '
-                                  u'обязательное поле Вещество')
+        raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Вещество')
     intlr_power = safe_traverse(data, 'power', 'id')
     if intlr_power is None:
-        raise ClientSaveException(u'Ошибка сохранения медикаментозной непереносимости: Отсутствует '
-                                  u'обязательное поле Степень')
+        raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Степень')
     date = safe_date(data.get('date'))
     if not date:
-        raise ClientSaveException(u'Ошибка сохранения медикаментозной непереносимости: Отсутствует '
-                                  u'обязательное поле Дата установления')
+        raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Дата установления')
     notes = data.get('notes', '')
 
     if intlr_id:
@@ -359,6 +332,35 @@ def add_or_update_intolerance(client, data):
     else:
         intlr = ClientIntoleranceMedicament(intlr_name, intlr_power, date, notes, client)
     return intlr
+
+
+def add_or_update_soc_status(client, data):
+    err_msg = u'Ошибка сохранения соц. статуса'
+    soc_status_id = data.get('id')
+    soc_status_type = safe_traverse(data, 'ss_type', 'id')
+    soc_status_class_code = safe_traverse(data, 'ss_class', 'code')
+    if not soc_status_type:
+        raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Тип соц. статуса')
+    beg_date = data.get('beg_date')
+    if not beg_date:
+        raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Дата начала')
+    end_date = data.get('end_date')
+    deleted = data.get('deleted', 0)
+    doc_info = data.get('self_document')
+    doc = add_or_update_doc(client, doc_info) if doc_info else None
+
+    if soc_status_id:
+        soc_status = ClientSocStatus.query.get(soc_status_id)
+        soc_status.socStatusType_id = soc_status_type
+        soc_status.beg_date = beg_date
+        soc_status.end_date = end_date
+        soc_status.client = client
+        soc_status.deleted = deleted
+        soc_status.self_document = doc
+    else:
+        soc_status_class = rbSocStatusClass.query.filter(rbSocStatusClass.code == soc_status_class_code).first().id
+        soc_status = ClientSocStatus(soc_status_class, soc_status_type, beg_date, end_date, client, doc)
+    return soc_status
 
 
 def get_new_identification(id_info):

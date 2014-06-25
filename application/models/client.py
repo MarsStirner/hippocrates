@@ -266,7 +266,7 @@ class Client(db.Model):
             'last_name': self.lastName,
             'patr_name': self.patrName,
             'birth_date': self.birthDate,
-            'sex': Gender(self.sexCode),  # if self.sexCode else None,
+            'sex': Gender(self.sexCode) if self.sexCode else None,
             'snils': self.SNILS,
             'full_name': self.nameText,
             'notes': self.notes,
@@ -400,7 +400,7 @@ class ClientAddress(db.Model):
             'address_id': self.address_id,
             'address': self.address,
             'free_input': self.freeInput,
-            'locality_type': LocalityType(self.localityType),
+            'locality_type': LocalityType(self.localityType) if self.localityType else None,
             'text_summary': self.__unicode__(),
             'same_as_reg': getattr(self, 'same_as_reg', False),
             'copy_from_id': getattr(self, 'copy_from_id', None)
@@ -461,7 +461,7 @@ class ClientAllergy(db.Model):
             'id': self.id,
             'deleted': self.deleted,
             'name': self.name,
-            'power': AllergyPower(self.power),
+            'power': AllergyPower(self.power) if self.power else None,
             'date': self.createDate,
             'notes': self.notes
         }
@@ -524,7 +524,7 @@ class ClientIntoleranceMedicament(db.Model):
             'id': self.id,
             'deleted': self.deleted,
             'name': self.name,
-            'power': AllergyPower(self.power),
+            'power': AllergyPower(self.power) if self.power else None,
             'date': self.createDate,
             'notes': self.notes
         }
