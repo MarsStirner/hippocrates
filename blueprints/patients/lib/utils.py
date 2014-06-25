@@ -416,7 +416,7 @@ def get_new_contact(contact_info):
     con = ClientContact()
     con.createDatetime = con.modifyDatetime = datetime.datetime.now()
     con.version = 0
-    con.contactType = rbContactType.query.filter(rbContactType.code == contact_info['contactType_code']).first()
+    con.contactType = rbContactType.query.get(contact_info['contactType']['id']) if contact_info['contactType'] else None
     con.contact = contact_info['contact']
     con.deleted = contact_info['deleted']
     con.notes = contact_info['notes']
@@ -431,7 +431,7 @@ def get_modified_contact(client, contact_info):
         con.deleted = 1
         return con
 
-    con.contactType = rbContactType.query.filter(rbContactType.code == contact_info['contactType_code']).first()
+    con.contactType = rbContactType.query.get(contact_info['contactType']['id']) if contact_info['contactType'] else None
     con.contact = contact_info['contact']
     con.deleted = contact_info['deleted']
     con.notes = contact_info['notes']

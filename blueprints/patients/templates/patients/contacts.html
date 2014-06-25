@@ -1,83 +1,74 @@
-<ng-form name="_contacts" toc-element="Контакты" ng-model="client.relations">
-<legend>Контактная информация и родственники</legend>
+<ng-form name="_contacts" toc-element="Контакты">
+    <legend>Контактная информация и родственники</legend>
+    <ng-form name="_relations" toc-element="Связи" ng-model="client.relations">
 
-<div class="row" ng-repeat="relation in client.relations">
-    <div class="col-md-4">
-        <wm-relation-type-rb ng-model="relation.type" client="client.info" relative="relation.relative" direct="relation.direct"></wm-relation-type-rb>
-    </div>
-    <div class="col-md-1">
-        <button type="button" class="btn btn-primary" ng-model="relation.direct" btn-checkbox>
-            [[ (relation.direct) ? '→' : '←' ]]
-        </button>
-    </div>
-    <div class="col-md-7">
-{#        [[ relation.relative.full_name ]] - [[ relation.relative ]]#}
-        <wm-clients-short ng-model="relation.relative"></wm-clients-short>
-    </div>
-</div>
-<div class="row">
-    <div class="col-md-12">
-        <button type="button" ng-click="client.add_relation()" class="btn btn-primary btn-sm">
-            <span class="glyphicon glyphicon-plus" title="Добавить новую запись"></span>Добавить
-        </button>
-    </div>
-</div>
-<ng-form name="_contact_info" toc-element="Телефоны">
-<div class="row">
-    <div class="col-md-12">
-        <table class="table table-condensed" ng-hide="!client.contacts.length">
-            <caption>Контакты</caption>
-            <thead>
-                <tr>
-                    <th>Тип</th>
-                    <th>Номер</th>
-                    <th>Примечение</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr ng-repeat="contact in  client.contacts">
-                    <td>[[contact.contactType.name]]</td>
-                    <td>[[contact.contact]]</td>
-                    <td>[[contact.notes]]</td>
-                </tr>
-            </tbody>
-        </table>
-        <div id="client_contacts_subform">
-            <table class="table table-condensed">
-                <thead>
-                <tr>
-                    <th>Тип</th>
-                    <th>Номер</th>
-                    <th>Примечение</th>
-                    <th></th>
-                </tr>
-                </thead>
-                <tbody>
-                    <tr ng-repeat="contact in client.contacts">
-                        <td class="col-md-4" ng-hide="contact.deleted">
-                            <ui-select ng-model="contact.contactType" theme="select2" ref-book="rbContactType">
-                                <ui-select-match placeholder="не выбрано">[[ $select.selected.name ]]</ui-select-match>
-                                <ui-select-choices repeat="rt in ($refBook.objects | filter: $select.search) track by rt.id">
-                                    <span ng-bind-html="rt.name | highlight: $select.search"></span>
-                                </ui-select-choices>
-                            </ui-select>
-                        </td>
-                        <td class="col-md-3" ng-hide="contact.deleted"><input type="text" class="form-control" ng_model="contact.contact"></td>
-                        <td class="col-md-2" ng-hide="contact.deleted"><input type="text" class="form-control" ng_model="contact.notes"></td>
-                        <td class="col-md-1" ng-hide="contact.deleted">
-                            <a class="btn btn-sm btn-default" href="" title="Удалить текущую строку"
-                               ng-click="delete_record('contacts', contact)" >
-                                <span class="glyphicon glyphicon-trash"></span>
-                            </a>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-            <button type="button" ng-click="client.add_contact()" class="btn btn-primary btn-sm">
-                <span class="glyphicon glyphicon-plus" title="Добавить новую запись"></span>Добавить
-            </button>
+        <div class="row" ng-repeat="relation in client.relations">
+            <div class="col-md-4">
+                <wm-relation-type-rb ng-model="relation.type"
+                        client="client.info" relative="relation.relative" direct="relation.direct" />
+            </div>
+            <div class="col-md-1">
+                <button type="button" class="btn btn-primary" ng-model="relation.direct" btn-checkbox>
+                    [[ (relation.direct) ? '→' : '←' ]]
+                </button>
+            </div>
+            <div class="col-md-6">
+                <wm-clients-short ng-model="relation.relative" />
+            </div>
+            <div class="col-md-1">
+                <a class="btn btn-sm btn-default" href="" title="Удалить текущую строку"
+                   ng-click="client.delete_record('relations', relation)">
+                    <span class="glyphicon glyphicon-trash"></span>
+                </a>
+            </div>
         </div>
-    </div>
-</div>
-</ng-form>
+        <div class="row">
+            <div class="col-md-12">
+                <button type="button" ng-click="client.add_relation()" class="btn btn-primary btn-sm">
+                    <span class="glyphicon glyphicon-plus" title="Добавить новую запись"></span>Добавить
+                </button>
+            </div>
+        </div>
+    </ng-form>
+    <ng-form name="_contact_info" toc-element="Телефоны">
+        <div class="row">
+            <div class="col-md-12">
+                <div id="client_contacts_subform">
+                    <table class="table table-condensed">
+                        <thead>
+                        <tr>
+                            <th class="col-md-4">Тип</th>
+                            <th class="col-md-3">Номер</th>
+                            <th class="col-md-2">Примечение</th>
+                            <th class="col-md-1"></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="contact in client.contacts" ng-hide="contact.deleted">
+                                <td>
+                                    <ui-select ng-model="contact.contactType" theme="select2" ref-book="rbContactType">
+                                        <ui-select-match placeholder="не выбрано">[[ $select.selected.name ]]</ui-select-match>
+                                        <ui-select-choices repeat="rt in ($refBook.objects | filter: $select.search) track by rt.id">
+                                            <span ng-bind-html="rt.name | highlight: $select.search"></span>
+                                        </ui-select-choices>
+                                    </ui-select>
+                                </td>
+                                <td><input type="text" class="form-control" ng_model="contact.contact"></td>
+                                <td><input type="text" class="form-control" ng_model="contact.notes"></td>
+                                <td>
+                                    <a class="btn btn-sm btn-default" href="" title="Удалить текущую строку"
+                                       ng-click="client.delete_record('contacts', contact)">
+                                        <span class="glyphicon glyphicon-trash"></span>
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <button type="button" ng-click="client.add_contact()" class="btn btn-primary btn-sm">
+                        <span class="glyphicon glyphicon-plus" title="Добавить новую запись"></span>Добавить
+                    </button>
+                </div>
+            </div>
+        </div>
+    </ng-form>
 </ng-form>

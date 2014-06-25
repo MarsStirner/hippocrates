@@ -219,14 +219,9 @@ angular.module('WebMis20.directives').
     .directive('refBook', ['RefBookService', function (RefBookService) {
         return {
             restrict: 'A',
-//            require: 'uiSelect',
-//            scope: true,
             controller: ['$scope', '$attrs', function ($scope, $attrs) {
                 $scope.$refBook = RefBookService.get($attrs.refBook);
             }]
-//            link: function (scope, elem, attr) {
-//                scope.$refBook = RefBookService.get(attr.refBook);
-//            }
         }
     }])
     .directive('wmRelationTypeRb', ['RefBookService', function (RefBookService) {
@@ -240,10 +235,8 @@ angular.module('WebMis20.directives').
                 $direct: '=direct'
             },
             template:
-                '<select class="form-control" ng-options="item as $fmt(item) for item in ($rb.objects | filter: $sexFilter) track by item.id"></select>',
+                '<select class="form-control" ng-options="item as $fmt(item) for item in ($refBook.objects | filter: $sexFilter) track by item.id" ref-book="rbRelationType"></select>',
             link: function (scope, element, attrs, ngModel) {
-                scope.$rb = RefBookService.get('rbRelationType');
-                scope.$model = ngModel;
                 scope.$sexFilter = function (item) {
                     if (scope.$client) {
                         if (scope.$relative && scope.$relative.sex) {
