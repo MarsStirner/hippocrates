@@ -86,7 +86,6 @@ angular.module('WebMis20.directives').
             restrict: 'A',
             link: function (scope, element, attrs) {
                 var e = $(element);
-                e.addClass('marginal');
                 var subelement = $(
                     '<alert ng-repeat="alert in ' + attrs.uiAlertList + '" type="alert.type" close="alerts.splice(index, 1)">\
                         <span ng-bind="alert.text"></span> [<span ng-bind="alert.code"></span>]\
