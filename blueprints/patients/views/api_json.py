@@ -200,6 +200,12 @@ def api_patient_save():
                 for ss in ss_info:
                     sstat = add_or_update_soc_status(client, ss)
                     db.session.add(sstat)
+
+            contact_info = client_data.get('contacts')
+            if contact_info:
+                for contact in contact_info:
+                    cont = add_or_update_contact(client, contact)
+                    db.session.add(cont)
         else:
             client = Client()
             client_info = client_data.get('info')
@@ -245,12 +251,6 @@ def api_patient_save():
                     pol = add_or_update_policy(client, vpol)
                     db.session.add(pol)
 
-            ss_info = client_data.get('soc_statuses')
-            if ss_info:
-                for ss in ss_info:
-                    sstat = add_or_update_soc_status(client, ss)
-                    db.session.add(sstat)
-
             blood_type_info = client_data.get('blood_types')
             if blood_type_info:
                 for bt in blood_type_info:
@@ -268,6 +268,18 @@ def api_patient_save():
                 for intolerance in intolerance_info:
                     intlr = add_or_update_intolerance(client, intolerance)
                     db.session.add(intlr)
+
+            ss_info = client_data.get('soc_statuses')
+            if ss_info:
+                for ss in ss_info:
+                    sstat = add_or_update_soc_status(client, ss)
+                    db.session.add(sstat)
+
+            contact_info = client_data.get('contacts')
+            if contact_info:
+                for contact in contact_info:
+                    cont = add_or_update_contact(client, contact)
+                    db.session.add(cont)
 
     # try:
     #     for id_info in client_info['identifications']:
@@ -293,20 +305,6 @@ def api_patient_save():
     #         else:
     #             rel = get_modified_reversed_relation(client, relation_info)
     #             db.session.add(rel)
-    #
-    #     for contact_info in client_info['contacts']:
-    #         if not 'id' in contact_info:
-    #             contact = get_new_contact(contact_info)
-    #             client.contacts.append(contact)
-    #         else:
-    #             contact = get_modified_contact(client, contact_info)
-    #             db.session.add(contact)
-    #
-    #     for doc_info in client_info['documentHistory']:
-    #         if doc_info['deleted'] == 1:
-    #             doc = get_deleted_document(client, doc_info)
-    #             db.session.add(doc)
-
         db.session.commit()
     except Exception, e:
         # TODO: LOG!!

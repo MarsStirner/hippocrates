@@ -382,5 +382,118 @@ angular.module('WebMis20.directives').
 </div>'
             };
         }
-    ])
+    ]).
+    directive('wmClientContact', [
+        function() {
+            return {
+                restrict: 'E',
+                require: '^form',
+                scope: {
+                    idPostfix: '@',
+                    modelContact: '=',
+                    edit_mode: '&editMode'
+                },
+                link: function(scope, elm, attrs, formCtrl) {
+                    scope.contactForm = formCtrl;
+
+                    scope.$watch('contactForm.$dirty', function(n, o) {
+                        if (n !== o) {
+                            scope.modelContact.dirty = n;
+                        }
+                    });
+                },
+                template:
+'<div class="panel panel-default">\
+    <div class="panel-body">\
+        <div class="row">\
+            <div class="form-group col-md-3"\
+                 ng-class="{\'has-error\': contactForm.$dirty && contactForm.contact_type.$invalid}">\
+                <label for="contact_type[[idPostfix]]" class="control-label">Тип</label>\
+                <ui-select class="form-control" id="contact_type[[idPostfix]]" name="contact_type" theme="select2"\
+                    ng-model="modelContact.contact_type" ng-disabled="!edit_mode()" ng-required="contactForm.$dirty"\
+                    ref-book="rbContactType">\
+                    <ui-select-match placeholder="не выбрано">[[ $select.selected.name ]]</ui-select-match>\
+                    <ui-select-choices repeat="rt in ($refBook.objects | filter: $select.search) track by rt.id">\
+                        <span ng-bind-html="rt.name | highlight: $select.search"></span>\
+                    </ui-select-choices>\
+                </ui-select>\
+            </div>\
+            <div class="form-group col-md-4"\
+                 ng-class="{\'has-error\': contactForm.$dirty && contactForm.contact_text.$invalid}">\
+                <label for="contact_text[[idPostfix]]" class="control-label">Номер</label>\
+                <input type="text" class="form-control" id="contact_text[[idPostfix]]" name="contact_text"\
+                       autocomplete="off" placeholder=""\
+                       ng-model="modelContact.contact_text" ng-disabled="!edit_mode()" ng-required="contactForm.$dirty"/>\
+            </div>\
+            <div class="form-group col-md-5"\
+                 ng-class="{\'has-error\': algForm.$dirty && algForm.contact_notes.$invalid}">\
+                <label for="contact_notes[[idPostfix]]" class="control-label">Примечание</label>\
+                <input type="text" class="form-control" id="contact_notes[[idPostfix]]" name="contact_notes"\
+                       autocomplete="off" placeholder=""\
+                       ng-model="modelContact.notes" ng-disabled="!edit_mode()" ng-required="false"/>\
+            </div>\
+        </div>\
+    </div>\
+</div>'
+            };
+        }
+    ]).
+    directive('wmRelationTypeRb', ['RefBookService', function (RefBookService) {
+        return {
+            restrict: 'E',
+            replace: true,
+            require: 'ngModel',
+            scope: {
+                $client: '=client',
+                $relative: '=relative',
+                $direct: '=direct'
+            },
+            template:
+                '<select class="form-control" ref-book="rbRelationType"\
+                    ng-options="item as $fmt(item) for item in ($refBook.objects | filter: $sexFilter) track by item.id">\
+                 </select>',
+            link: function (scope, element, attrs, ngModel) {
+                scope.$sexFilter = function (item) {
+                    if (scope.$client && scope.$client.sex) {
+                        if (scope.$relative && scope.$relative.sex) {
+                            return !(scope.$direct && ((item.leftSex != 0 && item.leftSex != scope.$client.sex.id) || (item.rightSex != 0 && item.rightSex != scope.$relative.sex.id)) ||
+                                (!scope.$direct && ((item.rightSex != 0 && item.rightSex != scope.$client.sex.id) || (item.leftSex != 0 && item.leftSex != scope.$relative.sex.id)) ))
+                        } else {
+                            return !(scope.$direct && (item.leftSex != 0 && item.leftSex != scope.$client.sex.id) ||
+                                (!scope.$direct && (item.rightSex != 0 && item.rightSex != scope.$client.sex.id) ))
+                        }
+                    }
+                };
+                scope.$fmt = function (item) {
+                    return scope.$direct ? item.leftName + ' → ' + item.rightName : item.rightName + ' ← ' + item.leftName;
+                }
+            }
+        }
+    }])
+    .directive('wmClientsShort', ['$http', function ($http) {
+        return {
+            restrict: 'E',
+            replace: true,
+            require: '^ngModel',
+            template:
+                '<input type="text" class="form-control" autocomplete="off" placeholder="Пациент" \
+                  typeahead="client as $fmt(client) for client in search_clients($viewValue)" \
+                  typeahead-wait-ms="1000" typeahead-min-length="2" />',
+            link: function (scope, element, attributes, ngModel) {
+                scope.$fmt = function (client) {
+                    return (client) ? (client.full_name + ' (' + client.birth_date + ')') : ('-');
+                };
+                scope.search_clients = function (query) {
+                    return $http.get(url_client_search, {
+                        params: {
+                            q:query,
+                            short: true
+                        }
+                    }).then(function (res) {
+                        return res.data.result;
+                    })
+                }
+            }
+        }
+    }])
 ;

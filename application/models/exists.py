@@ -1522,7 +1522,7 @@ class vrbPersonWithSpeciality(db.Model):
     name = db.Column(db.String(101), nullable=False, index=True)
     orgStructure_id = db.Column(db.ForeignKey('OrgStructure.id'))
 
-    orgStructure = db.relationship('OrgStructure')
+    orgStructure = db.relationship('OrgStructure', lazy='joined')
 
     def __json__(self):
         return {

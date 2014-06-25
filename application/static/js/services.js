@@ -16,8 +16,6 @@ angular.module('WebMis20.services', []).
                     }
                 }).success(function(data) {
                     t.info = data.result.client_data.info;
-                    t.contacts = data.result.client_data.contacts;
-                    t.relations = data.result.client_data.relations;
                     var id_doc = data.result.client_data.id_document;
                     t.id_docs = id_doc !== null ? [id_doc] : [];
                     var reg_addr = data.result.client_data.reg_address;
@@ -33,7 +31,6 @@ angular.module('WebMis20.services', []).
                     t.allergies = allergies !== null ? allergies : [];
                     var intolerances = data.result.client_data.intolerances;
                     t.intolerances = intolerances !== null ? intolerances : [];
-
                     t.soc_statuses = data.result.client_data.soc_statuses;
                     t.invalidities = t.soc_statuses.filter(function(status){
                         return status.ss_class.code == 2;
@@ -44,7 +41,8 @@ angular.module('WebMis20.services', []).
                     t.nationalities = t.soc_statuses.filter(function(status){
                         return status.ss_class.code == 4;
                     });
-
+                    t.contacts = data.result.client_data.contacts;
+                    t.relations = data.result.client_data.relations;
                     t.document_history = data.result.client_data.document_history;
 
                     t.appointments = data.result.appointments;
@@ -127,12 +125,12 @@ angular.module('WebMis20.services', []).
                 data.blood_types = this._get_entity_changes('blood_types');
                 data.allergies = this._get_entity_changes('allergies');
                 data.intolerances = this._get_entity_changes('intolerances');
-
                 var soc_statuses = this.invalidities.concat(this.works).concat(this.nationalities);
                 var changed_soc_statuses = soc_statuses.filter(function(el) {
                     return el.dirty;
                 }).concat(this.deleted_entities.invalidities || []).concat(this.deleted_entities.works || []).concat(this.deleted_entities.nationalities || []);
                 data.soc_statuses = changed_soc_statuses.length ? changed_soc_statuses : undefined;
+                data.contacts = this._get_entity_changes('contacts');
 
                 return data;
             };
@@ -276,10 +274,11 @@ angular.module('WebMis20.services', []).
 
             WMClient.prototype.add_contact = function() {
                 this.contacts.push({
+                    'id': null,
                     deleted: 0,
-                    contactType: {},
-                    contact: '',
-                    notes: ''
+                    contact_type: null,
+                    contact_text: null,
+                    notes: null
                 });
             };
 

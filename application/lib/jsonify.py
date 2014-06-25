@@ -247,22 +247,13 @@ class ClientVisualizer(object):
                 'direct': False,
             }
 
-    def make_contact_info(self, contact):
-        return {'id': contact.id,
-                'deleted': contact.deleted,
-                'contactType': contact.contactType,
-                'contact': contact.contact,
-                'notes': contact.notes}
-
     def make_client_info(self, client):
-
         documents = [doc.__json__() for doc in client.documents_all]
         policies = [policy.__json__() for policy in client.policies_all]
         document_history = documents + policies
 
         identifications = [self.make_identification_info(identification) for identification in client.identifications]
         relations = [self.make_relation_info(client.id, relation) for relation in client.client_relations]
-        contacts = [self.make_contact_info(contact) for contact in client.contacts]
 
         reg_addr = client.reg_address
         live_addr = client.loc_address
@@ -282,13 +273,13 @@ class ClientVisualizer(object):
             'allergies': client.allergies.all(),
             'intolerances': client.intolerances.all(),
             'soc_statuses': client.soc_statuses,
+            'relations': relations,
+            'contacts': client.contacts.all(),
 
             'document_history': document_history,
+            # 'contact': client.phones,
+            # 'identifications': identifications,
 
-            'contact': client.phones,
-            'identifications': identifications,
-            'relations': relations,
-            'contacts': contacts,
 
         }
 

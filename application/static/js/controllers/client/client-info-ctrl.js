@@ -6,7 +6,7 @@ angular.module('WebMis20.controllers').
             $scope.records = [];
             $scope.aux = aux;
             $scope.params = aux.getQueryParams(document.location.search);
-            $scope.rbGender = RefBookService.get('Gender'); // {{ Enum.get_class_by_name('Gender').rb() | tojson }};
+            $scope.rbGender = RefBookService.get('Gender');
             $scope.rbPerson = RefBookService.get('vrbPersonWithSpeciality');
 //            $scope.rbDocumentType = RefBookService.get('rbDocumentType');
 //            $scope.rbUFMS = RefBookService.get('rbUFMS');
@@ -149,21 +149,12 @@ angular.module('WebMis20.controllers').
                 }
             };
 
-            $scope.directRelationFilter = function (relationType) {
-                return (relationType.leftSex == 0 || relationType.leftSex == $scope.client.client_info.sex.id);
-            };
-
-            $scope.reversedRelationFilter = function (relationType) {
-                return (relationType.rightSex == 0 || relationType.rightSex == $scope.client.client_info.sex.id);
-            };
-
-//            $scope.cancel_editing = function() {
-//                if ($scope.client_id == 'new') {
-//                    $window.history.back();
-//                } else {
-//                    $scope.editing.active = false;
-//                    $scope.client.reload();
-//                }
+//            $scope.directRelationFilter = function (relationType) {
+//                return (relationType.leftSex == 0 || relationType.leftSex == $scope.client.client_info.sex.id);
+//            };
+//
+//            $scope.reversedRelationFilter = function (relationType) {
+//                return (relationType.rightSex == 0 || relationType.rightSex == $scope.client.client_info.sex.id);
 //            };
 
             $scope.save_client = function(form) {
