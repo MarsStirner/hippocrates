@@ -322,7 +322,57 @@ angular.module('WebMis20.directives').
             }
         }
     }])
-    .directive('tocElement', [function () {
+    .service('TocSpy', ['$window', function ($window) {
+        var cache = [];
+        var toc = null;
+        var self = this;
+        this.register = function (ctrl, element) {
+            cache.push([ctrl, $(element)]);
+            var parent = element.parent().controller('tocElement');
+            if (parent) {
+                parent.$children.push(ctrl);
+            }
+            element.on('$destroy', function () {
+                self.unregister(ctrl);
+            });
+            $($window).scroll(function () {
+                if (!toc) return;
+                var i = cache.length;
+                var something_changed = false;
+                while (i--) {
+                    var ctrl = cache[i][0];
+                    var elem = cache[i][1];
+                    var offset = elem.offset();
+                    if (!offset) return false;
+                    var shift = $window.pageYOffset - offset.top;
+                    var new_active = 0 < shift && shift < elem.height();
+                    if (new_active != ctrl.tocIsActive) {
+                        ctrl.tocIsActive = new_active;
+                        something_changed = true;
+                    }
+                }
+                if (something_changed) {
+                    toc.$digest();
+                }
+            })
+        };
+        this.unregister = function (ctrl) {
+            var i = cache.length;
+            while (i--) {
+                if (cache[i][0] === ctrl) {
+                    cache.splice(i, 1);
+                    return;
+                }
+            }
+            if (ctrl.$parent) {
+                aux.removeFromArray(ctrl.$parent, ctrl)
+            }
+        };
+        this.registerToc = function (the_toc) {
+            toc = the_toc;
+        }
+    }])
+    .directive('tocElement', ['TocSpy', function (TocSpy) {
         var merr = angular.$$minErr('tocElement');
         return {
             restrict: 'A',
@@ -334,12 +384,6 @@ angular.module('WebMis20.directives').
                 this.$title = $attrs.tocElement;
                 this.$form = null;
                 this.$parent = $element.parent().controller('tocElement') || null;
-                this.$registerChild = function (childElement) {
-                    self.$children.push(childElement);
-                };
-                this.$unregisterChild = function (childElement) {
-                    aux.removeFromArray(self.$children, childElement);
-                };
                 this.$invalid = function () {
                     if (self.$form) {
                         return self.$form.$invalid;
@@ -347,6 +391,7 @@ angular.module('WebMis20.directives').
                         return false;
                     }
                 };
+                this.tocIsActive = false;
                 console.log('controller for tocElement (' + this.$name + ') created')
             }],
             link: function (scope, element, attrs, ctrls) {
@@ -354,56 +399,51 @@ angular.module('WebMis20.directives').
                     merr('name', 'tocElement directive must have "name" attribute')
                 }
                 var self_ctrl = ctrls[0],
-                    form_ctrl = self_ctrl.$form = ctrls[1],
                     parent_ctrl = element.parent().controller('tocElement');
+                self_ctrl.$form = ctrls[1];
 
                 if (parent_ctrl) {
-                    parent_ctrl.$registerChild(self_ctrl);
-                    element.on('$destroy', function () {
-                        parent_ctrl.$unregisterChild(self_ctrl)
-                    })
+                    TocSpy.register(self_ctrl, element);
                 }
                 if (attrs.tocName) {
                     scope[attrs.tocName] = self_ctrl;
                 }
                 var jElement = $(element);
-                if (!form_ctrl) {
-                    jElement.prepend($('<a name="'+ attrs.name +'">'));
-                }
                 jElement.attr('id', attrs.name);
+                self_ctrl.element = jElement;
                 console.log('link for tocElement (' + attrs.name + ') created')
             }
         }
     }])
-    .directive('tocAffix', ['$compile', '$timeout', function ($compile, $timeout) {
+    .directive('tocAffix', ['$compile', 'TocSpy', function ($compile, TocSpy) {
         return {
             restrict: 'E',
+            scope: true,
             link: function (scope, element, attrs) {
-                $timeout(function () {
-                    console.log('Link for tocAffix creating...');
-                    var current = $(element);
-                    var template =
-                        '<div class="toc">\
-                            <ul class="nav">\
-                                <li ng-repeat="node in ' + attrs.tocName + '.$children">\
-                                    <a ng-href="#[[node.$name]]" class="wrap-btn" ng-class="{\'text-danger bg-danger\': node.$invalid()}">\
-                                        [[ node.$title ]]\
-                                    </a>\
-                                    <ul ng-if="node.$children" class="nav">\
-                                        <li ng-repeat="node in node.$children">\
-                                            <a ng-href="#[[node.$name]]" class="wrap-btn" ng-class="{\'text-danger bg-danger\': node.$invalid()}">\
-                                                [[ node.$title ]]\
-                                            </a>\
-                                        </li>\
-                                    </ul>\
-                                </li>\
-                            </ul>' + current.html() + '\
-                        </div>';
-                    var replace = $(template);
-                    current.replaceWith(replace);
-                    $compile(replace)(scope);
-                    console.log('Link for tocAffix created');
-                })
+                console.log('Link for tocAffix creating...');
+                var current = $(element);
+                var template =
+                    '<div class="toc">\
+                        <ul class="nav">\
+                            <li ng-repeat="node in ' + attrs.tocName + '.$children">\
+                                <a ng-href="#[[node.$name]]" class="wrap-btn" ng-class="{\'text-danger bg-danger\': node.$invalid(), \'bg-primary\': node.tocIsActive}">\
+                                    [[ node.$title ]]\
+                                </a>\
+                                <ul ng-if="node.$children" class="nav">\
+                                    <li ng-repeat="node in node.$children">\
+                                        <a ng-href="#[[node.$name]]" class="wrap-btn" ng-class="{\'text-danger bg-danger\': node.$invalid()}">\
+                                            [[ node.$title ]]\
+                                        </a>\
+                                    </li>\
+                                </ul>\
+                            </li>\
+                        </ul>' + current.html() + '\
+                    </div>';
+                var replace = $(template);
+                current.replaceWith(replace);
+                $compile(replace)(scope);
+                TocSpy.registerToc(scope);
+                console.log('Link for tocAffix created');
             }
         }
     }])
