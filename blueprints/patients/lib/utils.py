@@ -295,6 +295,7 @@ def add_or_update_allergy(client, data):
     if not date:
         raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Дата установления')
     notes = data.get('notes', '')
+    deleted = data.get('deleted', 0)
 
     if alg_id:
         alg = ClientAllergy.query.get(alg_id)
@@ -302,6 +303,7 @@ def add_or_update_allergy(client, data):
         alg.power = alg_power
         alg.createDate = date
         alg.notes = notes
+        alg.deleted = deleted
     else:
         alg = ClientAllergy(alg_name, alg_power, date, notes, client)
     return alg
@@ -321,6 +323,7 @@ def add_or_update_intolerance(client, data):
     if not date:
         raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Дата установления')
     notes = data.get('notes', '')
+    deleted = data.get('deleted', 0)
 
     if intlr_id:
         intlr = ClientIntoleranceMedicament.query.get(intlr_id)
@@ -328,6 +331,7 @@ def add_or_update_intolerance(client, data):
         intlr.power = intlr_power
         intlr.createDate = date
         intlr.notes = notes
+        intlr.deleted = deleted
     else:
         intlr = ClientIntoleranceMedicament(intlr_name, intlr_power, date, notes, client)
     return intlr
