@@ -27,16 +27,16 @@
                        ng-model="modelNumber" ng-required="policyForm.$dirty" ng-disabled="!edit_mode()"/>
             </div>
             <div class="form-group col-md-offset-1 col-md-2"
-                 ng-class="{'has-error': policyForm.$dirty && policyForm.pol_begdate.$invalid}">
+                 ng-class="{'has-error': policyForm.$dirty && policyForm.pol_begdate[[idPostfix]].$invalid}">
                 <label for="pol_begdate[[idPostfix]]" class="control-label">Дата выдачи</label>
-                <wm-date id="pol_begdate[[idPostfix]]" name="pol_begdate"
+                <wm-date id="pol_begdate[[idPostfix]]"
                          ng-model="modelBegDate" ng-disabled="!edit_mode()" ng-required="policyForm.$dirty">
                 </wm-date>
             </div>
             <div class="form-group col-md-2"
-                 ng-class="{'has-error': policyForm.pol_enddate.$invalid }">
+                 ng-class="{'has-error': policyForm.pol_enddate[[idPostfix]].$invalid }">
                 <label for="pol_enddate[[idPostfix]]" class="control-label">Действителен до</label>
-                <wm-date id="pol_enddate[[idPostfix]]" name="pol_enddate"
+                <wm-date id="pol_enddate[[idPostfix]]"
                          ng-model="modelEndDate" ng-disabled="!edit_mode()">
                 </wm-date>
             </div>
