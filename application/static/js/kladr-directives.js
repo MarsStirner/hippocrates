@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('WebMis20.kladrDirectives', ['ui.bootstrap']).
+angular.module('WebMis20.directives').
     directive('wmKladrAddress', ['$timeout', function($timeout) {
         return {
             restrict: 'E',
