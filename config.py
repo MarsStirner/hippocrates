@@ -4,6 +4,7 @@ import os
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 DEBUG = False
+PROFILE = False
 PROJECT_NAME = 'Hippocrates'
 
 # DB connecting params

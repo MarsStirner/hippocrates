@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 DEBUG = True
+PROFILE = False
 
 DB_DRIVER = 'mysql'
 DB_HOST = 'localhost'

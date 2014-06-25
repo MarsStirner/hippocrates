@@ -30,7 +30,6 @@ angular.module('WebMis20.directives').
             replace: true,
             scope: {
                 id: '@',
-                name: '@',
                 ngModel: '=',
                 ngRequired: '=',
                 ngDisabled: '='
@@ -47,7 +46,7 @@ angular.module('WebMis20.directives').
                 };
             },
             template: ['<div class="input-group">',
-                        '<input type="text" id="[[id]]_inner" name="[[name]]_inner" class="form-control"',
+                        '<input type="text" id="[[id]]_inner" name="[[id]]" class="form-control"',
                         'is-open="popup.opened" ng-model="ngModel" autocomplete="off"',
                         'datepicker_popup="dd.MM.yyyy" ng-required="ngRequired" ng-disabled="ngDisabled" manual-date/>',
                         '<span class="input-group-btn">',

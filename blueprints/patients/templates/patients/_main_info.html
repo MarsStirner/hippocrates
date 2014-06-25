@@ -1,0 +1,82 @@
+{#<dl class="dl-horizontal" ng-hide="editing_is_active()">#}
+{#    <dt ng-if="client.client_info.id">Код пациента</dt>#}
+{#    <dd>[[ client.client_info.id ]]</dd>#}
+{#    <dt ng-if="client.client_info.nameText">ФИО</dt>#}
+{#    <dd>[[ client.client_info.nameText ]]</dd>#}
+{#    <dt ng-if="client.client_info.birthDate">Дата рождения</dt>#}
+{#    <dd>[[ client.client_info.birthDate | asDate ]]</dd>#}
+{#    <dt ng-if="client.client_info.sex">Пол</dt>#}
+{#    <dd>[[ client.client_info.sex.name ]]</dd>#}
+{#    <dt ng-if="client.client_info.regAddress">Адрес регистрации</dt>#}
+{#    <dd>[[ client.client_info.regAddress.text_summary ]]</dd>#}
+{#    <dt ng-if="client.client_info.liveAddress">Адрес проживания</dt>#}
+{#    <dd>[[ client.client_info.liveAddress.text_summary ]]</dd>#}
+{#    <dt ng-if="client.client_info.documentText">Документ</dt>#}
+{#    <dd>[[ client.client_info.documentText ]]</dd>#}
+{#    <dt ng-if="client.client_info.compulsoryPolicy.policyText">Полис ОМС</dt>#}
+{#    <dd>[[ client.client_info.compulsoryPolicy.policyText ]]</dd>#}
+{#    <dt ng-if="client.client_info.voluntaryPolicy.policyText">Полис ДМС</dt>#}
+{#    <dd>[[ client.client_info.voluntaryPolicy.policyText ]]</dd>#}
+{#    <dt ng-if="client.client_info.SNILS">СНИЛС</dt>#}
+{#    <dd>[[ client.client_info.SNILS ]]</dd>#}
+{#    <dt ng-if="client.client_info.contact">Контакты</dt>#}
+{#    <dd>[[ client.client_info.contact ]]</dd>#}
+{#    <dt ng-if="client.client_info.notes">Примечания</dt>#}
+{#    <dd>[[ client.client_info.notes ]]</dd>#}
+{#</dl>#}
+<ng-form name="mainInfoForm" toc-element="Основная информация">
+    <legend>Основная информация</legend>
+    <div class="row">
+    <div class="col-md-10">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div class="row">
+                    <div class="form-group col-md-3"
+                         ng-class="{'has-error': mainInfoForm.lastname.$invalid && (mainInfoForm.lastname.$dirty || editing.submit_attempt)}">
+                        <label for="lastname" class="control-label">Фамилия <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" autocomplete="off" placeholder="Фамилия"
+                               id="lastname" name="lastname" ng-model="client.info.last_name" ng-required="true"/>
+                    </div>
+                    <div class="form-group col-md-3"
+                         ng-class="{'has-error': mainInfoForm.firstname.$invalid && (mainInfoForm.firstname.$dirty || editing.submit_attempt)}">
+                        <label for="lastname" class="control-label">Имя <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" autocomplete="off" placeholder="Имя"
+                                id="firstname" name="firstname" ng-model="client.info.first_name" ng-required="true"/>
+                    </div>
+                    <div class="form-group col-md-3">
+                        <label for="patronymic">Отчество</label>
+                        <input type="text" class="form-control" autocomplete="off" placeholder="Отчество"
+                               id="patronymic" name="patronymic" ng-model="client.info.patr_name"/>
+                    </div>
+                    <div class="form-group col-md-offset-1 col-md-2"
+                         ng-class="{'has-error': mainInfoForm.gender.$invalid && (mainInfoForm.gender.$dirty || editing.submit_attempt)}">
+                        <label for="gender" class="control-label">Пол <span class="text-danger">*</span></label>
+                        <select class="form-control" id="gender" name="gender"
+                                ng-model="client.info.sex"
+                                ng-options="item as item.name for item in rbGender.objects track by item.id"
+                                ng-required="true">
+                            <option value="">Не выбрано</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group col-md-3"
+                         ng-class="{'has-error': mainInfoForm.birthdate.$invalid && (mainInfoForm.birthdate.$dirty || editing.submit_attempt)}">
+                        <label for="birthdate" class="control-label">Дата рождения <span class="text-danger">*</span></label>
+                        <wm-date id="birthdate" ng-model="client.info.birth_date" ng-required="true">
+                        </wm-date>
+                    </div>
+                    <div class="form-group col-md-3"
+                         ng-class="{'has-error': mainInfoForm.snils.$invalid && mainInfoForm.snils.$dirty}">
+                        <label for="snils" class="control-label">СНИЛС <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="snils" name="snils" ui-mask="999-999-999 99"
+                               ng-model="client.info.snils" placeholder="___-___-___ __"
+                               ng-pattern="/\d{3}-\d{3}-\d{3} \d\d/" snils-validator
+                               popover="Введён невалидный СНИЛС" popover-placement="right" popover-trigger="show_popover" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+</ng-form>

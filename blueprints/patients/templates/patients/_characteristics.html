@@ -19,8 +19,8 @@
                 </div>
                 <div class="col-md-1">
                     <div class="row">
-                        <button type="button" class="btn btn-danger btn-block marginal"
-                                ng-click="delete_blood_type(bt)">Удалить</button>
+                        <button type="button" class="btn btn-danger marginal" title="Удалить"
+                                ng-click="delete_blood_type(bt)"><span class="glyphicon glyphicon-trash"></span></button>
                     </div>
                 </div>
             </div>
@@ -74,12 +74,12 @@
                 </div>
                 <div class="col-md-1">
                     <div class="row" ng-show="alg.id">
-                        <button type="button" class="btn btn-primary btn-block marginal"
-                                ng-click="edit.activated=true">Редактировать</button>
+                        <button type="button" class="btn btn-primary marginal" title="Редактировать"
+                                ng-click="edit.activated=true"><span class="glyphicon glyphicon-pencil"></span></button>
                     </div>
                     <div class="row">
-                        <button type="button" class="btn btn-danger btn-block marginal"
-                                ng-click="client.delete_record('allergies', alg)">Удалить</button>
+                        <button type="button" class="btn btn-danger marginal" title="Удалить"
+                                ng-click="client.delete_record('allergies', alg)"><span class="glyphicon glyphicon-trash"></span></button>
                     </div>
                 </div>
             </div>
@@ -113,12 +113,12 @@
                 </div>
                 <div class="col-md-1">
                     <div class="row" ng-show="intlr.id">
-                        <button type="button" class="btn btn-primary btn-block marginal"
-                                ng-click="edit.activated=true">Редактировать</button>
+                        <button type="button" class="btn btn-primary marginal" title="Редактировать"
+                                ng-click="edit.activated=true"><span class="glyphicon glyphicon-pencil"></span></button>
                     </div>
                     <div class="row">
-                        <button type="button" class="btn btn-danger btn-block marginal"
-                                ng-click="client.delete_record('intolerances', intlr)">Удалить</button>
+                        <button type="button" class="btn btn-danger marginal" title="Удалить"
+                                ng-click="client.delete_record('intolerances', intlr)"><span class="glyphicon glyphicon-trash"></span></button>
                     </div>
                 </div>
             </div>
