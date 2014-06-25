@@ -522,22 +522,37 @@ class ClientContact(db.Model):
     __tablename__ = 'ClientContact'
 
     id = db.Column(db.Integer, primary_key=True)
-    createDatetime = db.Column(db.DateTime, nullable=False)
-    createPerson_id = db.Column(db.Integer, index=True)
-    modifyDatetime = db.Column(db.DateTime, nullable=False)
-    modifyPerson_id = db.Column(db.Integer, index=True)
-    deleted = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    createDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now)
+    createPerson_id = db.Column(db.Integer, index=True, default=safe_current_user_id)
+    modifyDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now, onupdate=datetime.datetime.now)
+    modifyPerson_id = db.Column(db.Integer, index=True, default=safe_current_user_id, onupdate=safe_current_user_id)
+    deleted = db.Column(db.Integer, nullable=False, server_default=u"'0'", default=0)
     client_id = db.Column(db.ForeignKey('Client.id'), nullable=False, index=True)
     contactType_id = db.Column(db.Integer, db.ForeignKey('rbContactType.id'), nullable=False, index=True)
     contact = db.Column(db.String(32), nullable=False)
-    notes = db.Column(db.Unicode(64), nullable=False)
-    version = db.Column(db.Integer, nullable=False)
+    notes = db.Column(db.Unicode(64), nullable=False, default=u'')
+    version = db.Column(db.Integer, nullable=False, default=0)
 
     contactType = db.relationship(u'rbContactType', lazy=False)
+
+    def __init__(self, cont_type, text, notes, client):
+        self.contactType_id = int(cont_type) if cont_type else None
+        self.contact = text
+        self.notes = notes
+        self.client = client
 
     @property
     def name(self):
         return self.contactType.name if self.contactType else None
+
+    def __json__(self):
+        return {
+            'id': self.id,
+            'deleted': self.deleted,
+            'contact_type': self.contactType,
+            'contact_text': self.contact,
+            'notes': self.notes
+        }
 
     def __int__(self):
         return self.id
@@ -549,45 +564,19 @@ class ClientDocument(db.Model):
         db.Index(u'Ser_Numb', u'serial', u'number'),
     )
 
-    id = db.Column(db.Integer,
-                   primary_key=True)
-    createDatetime = db.Column(db.DateTime,
-                               nullable=False,
-                               default=datetime.datetime.now)
-    createPerson_id = db.Column(db.Integer,
-                                index=True,
-                                default=safe_current_user_id)
-    modifyDatetime = db.Column(db.DateTime,
-                               nullable=False,
-                               default=datetime.datetime.now,
-                               onupdate=datetime.datetime.now)
-    modifyPerson_id = db.Column(db.Integer,
-                                index=True,
-                                default=safe_current_user_id,
-                                onupdate=safe_current_user_id)
-    deleted = db.Column(db.Integer,
-                        nullable=False,
-                        server_default=u"'0'",
-                        default=0)
-    clientId = db.Column("client_id",
-                         db.ForeignKey('Client.id'),
-                         nullable=False,
-                         index=True)
-    documentType_id = db.Column(db.Integer,
-                                db.ForeignKey('rbDocumentType.id'),
-                                nullable=False,
-                                index=True)
-    serial = db.Column(db.String(8),
-                       nullable=False)
-    number = db.Column(db.String(16),
-                       nullable=False)
-    date = db.Column(db.Date,
-                     nullable=False)
-    origin = db.Column(db.String(256),
-                       nullable=False)
-    version = db.Column(db.Integer,
-                        nullable=False,
-                        default=0)
+    id = db.Column(db.Integer, primary_key=True)
+    createDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now)
+    createPerson_id = db.Column(db.Integer, index=True, default=safe_current_user_id)
+    modifyDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now, onupdate=datetime.datetime.now)
+    modifyPerson_id = db.Column(db.Integer, index=True, default=safe_current_user_id, onupdate=safe_current_user_id)
+    deleted = db.Column(db.Integer, nullable=False, server_default=u"'0'", default=0)
+    clientId = db.Column("client_id", db.ForeignKey('Client.id'), nullable=False, index=True)
+    documentType_id = db.Column(db.Integer, db.ForeignKey('rbDocumentType.id'), nullable=False, index=True)
+    serial = db.Column(db.String(8), nullable=False)
+    number = db.Column(db.String(16), nullable=False)
+    date = db.Column(db.Date, nullable=False)
+    origin = db.Column(db.String(256), nullable=False)
+    version = db.Column(db.Integer, nullable=False, default=0)
     endDate = db.Column(db.Date)
 
     documentType = db.relationship(u'rbDocumentType', lazy=False)

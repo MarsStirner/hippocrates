@@ -123,6 +123,7 @@ def add_or_update_doc(client, data):
 
     if doc_id:
         doc = ClientDocument.query.get(doc_id)
+        doc.documentType_id = doc_type
         doc.serial = serial
         doc.number = number
         doc.date = beg_date
@@ -245,6 +246,7 @@ def add_or_update_policy(client, data):
 
     if policy_id:
         policy = ClientPolicy.query.get(policy_id)
+        policy.policyType_id = pol_type
         policy.serial = serial
         policy.number = number
         policy.begDate = beg_date
@@ -294,7 +296,7 @@ def add_or_update_allergy(client, data):
     date = safe_date(data.get('date'))
     if not date:
         raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Дата установления')
-    notes = data.get('notes', '')
+    notes = data.get('notes', '') or ''
     deleted = data.get('deleted', 0)
 
     if alg_id:
@@ -322,7 +324,7 @@ def add_or_update_intolerance(client, data):
     date = safe_date(data.get('date'))
     if not date:
         raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Дата установления')
-    notes = data.get('notes', '')
+    notes = data.get('notes', '') or ''
     deleted = data.get('deleted', 0)
 
     if intlr_id:
@@ -364,6 +366,31 @@ def add_or_update_soc_status(client, data):
         soc_status_class = rbSocStatusClass.query.filter(rbSocStatusClass.code == soc_status_class_code).first().id
         soc_status = ClientSocStatus(soc_status_class, soc_status_type, beg_date, end_date, client, doc)
     return soc_status
+
+
+def add_or_update_contact(client, data):
+    # todo: check for existing records ?
+    err_msg = u'Ошибка сохранения контакта'
+    cont_id = data.get('id')
+    cont_type = safe_traverse(data, 'contact_type', 'id')
+    if not cont_type:
+        raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Тип')
+    text = data.get('contact_text')
+    if not text:
+        raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Номер')
+    notes = data.get('notes', '') or ''
+    deleted = data.get('deleted', 0)
+
+    if cont_id:
+        cont = ClientContact.query.get(cont_id)
+        cont.contactType_id = cont_type
+        cont.contact = text
+        cont.notes = notes
+        cont.client = client
+        cont.deleted = deleted
+    else:
+        cont = ClientContact(cont_type, text, notes, client)
+    return cont
 
 
 def get_new_identification(id_info):
@@ -444,39 +471,3 @@ def get_modified_reversed_relation(client, relation_info):
     rel.other = Client.query.filter(Client.id == relation_info['other_id']).first()
     rel.modifyDatetime = now
     return rel
-
-
-def get_new_contact(contact_info):
-    con = ClientContact()
-    con.createDatetime = con.modifyDatetime = datetime.datetime.now()
-    con.version = 0
-    con.contactType = rbContactType.query.get(contact_info['contactType']['id']) if contact_info['contactType'] else None
-    con.contact = contact_info['contact']
-    con.deleted = contact_info['deleted']
-    con.notes = contact_info['notes']
-    return con
-
-
-def get_modified_contact(client, contact_info):
-    now = datetime.datetime.now()
-    con = client.contacts.filter(ClientContact.id == contact_info['id']).first()
-
-    if contact_info['deleted'] == 1:
-        con.deleted = 1
-        return con
-
-    con.contactType = rbContactType.query.get(contact_info['contactType']['id']) if contact_info['contactType'] else None
-    con.contact = contact_info['contact']
-    con.deleted = contact_info['deleted']
-    con.notes = contact_info['notes']
-    con.modifyDatetime = now
-    return con
-
-
-def get_deleted_document(client, doc_info):
-    if 'documentText' in doc_info:
-        doc = ClientDocument.query.get(doc_info['id'])
-    elif 'policyText' in doc_info:
-        doc = ClientPolicy.query.get(doc_info['id'])
-    doc.deleted = 1
-    return doc

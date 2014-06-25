@@ -223,62 +223,6 @@ angular.module('WebMis20.directives').
             }]
         }
     }])
-    .directive('wmRelationTypeRb', ['RefBookService', function (RefBookService) {
-        return {
-            restrict: 'E',
-            replace: true,
-            require: 'ngModel',
-            scope: {
-                $client: '=client',
-                $relative: '=relative',
-                $direct: '=direct'
-            },
-            template:
-                '<select class="form-control" ng-options="item as $fmt(item) for item in ($refBook.objects | filter: $sexFilter) track by item.id" ref-book="rbRelationType"></select>',
-            link: function (scope, element, attrs, ngModel) {
-                scope.$sexFilter = function (item) {
-                    if (scope.$client) {
-                        if (scope.$relative && scope.$relative.sex) {
-                            return !(scope.$direct && ((item.leftSex != 0 && item.leftSex != scope.$client.sex.id) || (item.rightSex != 0 && item.rightSex != scope.$relative.sex.id)) ||
-                                (!scope.$direct && ((item.rightSex != 0 && item.rightSex != scope.$client.sex.id) || (item.leftSex != 0 && item.leftSex != scope.$relative.sex.id)) ))
-                        } else {
-                            return !(scope.$direct && (item.leftSex != 0 && item.leftSex != scope.$client.sex.id) ||
-                                (!scope.$direct && (item.rightSex != 0 && item.rightSex != scope.$client.sex.id) ))
-                        }
-                    }
-                };
-                scope.$fmt = function (item) {
-                    return scope.$direct ? item.leftName + ' → ' + item.rightName : item.rightName + ' ← ' + item.leftName;
-                }
-            }
-        }
-    }])
-    .directive('wmClientsShort', ['$http', function ($http) {
-        return {
-            restrict: 'E',
-            replace: true,
-            require: '^ngModel',
-            template:
-                '<input type="text" class="form-control" autocomplete="off" placeholder="Пациент" \
-                  typeahead="client as $fmt(client) for client in search_clients($viewValue)" \
-                  typeahead-wait-ms="1000" typeahead-min-length="2" />',
-            link: function (scope, element, attributes, ngModel) {
-                scope.$fmt = function (client) {
-                    return (client) ? (client.full_name + ' (' + client.birth_date + ')') : ('-');
-                };
-                scope.search_clients = function (query) {
-                    return $http.get(url_client_search, {
-                        params: {
-                            q:query,
-                            short: true
-                        }
-                    }).then(function (res) {
-                        return res.data.result;
-                    })
-                }
-            }
-        }
-    }])
     .directive('uiPrintVariable', ['$compile', 'RefBookService', function ($compile, RefBookService) {
         var ui_select_template =
             '<div fs-select="" items="$refBook.objects" ng-required="true" ng-model="model" class="validatable">[[item.name]]</div>';
