@@ -83,9 +83,6 @@ class Client(db.Model):
         u'ClientSocStatus',
         primaryjoin='and_(ClientSocStatus.deleted == 0, ClientSocStatus.client_id==Client.id)',
         backref=db.backref('client')) #todo: filter_by_date
-    #  primaryjoin='and_(ClientSocStatus.deleted == 0, ClientSocStatus.client_id==Client.id,'
-    #                                           'or_(ClientSocStatus.endDate == None, ClientSocStatus.endDate>={0}))'.format(
-    #                                   datetime.date.today()))
     intolerances = db.relationship(
         u'ClientIntoleranceMedicament',
         primaryjoin='and_(ClientIntoleranceMedicament.client_id==Client.id, ClientIntoleranceMedicament.deleted == 0)',
@@ -196,6 +193,10 @@ class Client(db.Model):
         return (self.documents.filter(ClientDocument.deleted == 0).
                 filter(rbDocumentTypeGroup.code == doc_type_code).
                 order_by(ClientDocument.date.desc()).first())
+
+    @property
+    def actual_soc_statuses(self):
+        return filter(lambda s: not s.endDate or s.endDate >= datetime.date.today(), self.soc_statuses)
 
     @property
     def policy(self):
