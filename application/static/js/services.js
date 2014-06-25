@@ -16,6 +16,8 @@ angular.module('WebMis20.services', []).
                     }
                 }).success(function(data) {
                     t.info = data.result.client_data.info;
+                    t.contacts = data.result.client_data.contacts;
+                    t.relations = data.result.client_data.relations;
                     var id_doc = data.result.client_data.id_document;
                     t.id_docs = id_doc !== null ? [id_doc] : [];
                     var reg_addr = data.result.client_data.reg_address;
@@ -240,18 +242,26 @@ angular.module('WebMis20.services', []).
             };
 
             WMClient.prototype.add_contact = function() {
-                this.client_info['contacts'].push({
-                    'deleted': 0,
-                    'contactType_code': '',
-                    'contact': '',
-                    'notes': ''});
+                this.contacts.push({
+                    deleted: 0,
+                    contactType: {},
+                    contact: '',
+                    notes: ''
+                });
             };
 
-            WMClient.prototype.add_relation = function (entity) {
-                this.client_info[entity].push({'deleted': 0,
-                    'relativeType_name': '',
-                    'relativeType_code': '',
-                    'other_id': 0
+            WMClient.prototype.add_blood = function () {
+                this.client_info['bloodHistory'].push({'bloodGroup_code': '',
+                    'bloodDate': '',
+                    'person_id': 0
+                });
+            };
+
+            WMClient.prototype.add_relation = function () {
+                this.relations.push({
+                    direct: true,
+                    relative: null,
+                    type: null
                 });
             };
 

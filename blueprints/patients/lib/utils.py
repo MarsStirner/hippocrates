@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 
 import datetime
-import re
 
 from application.models.client import Client, ClientAllergy, ClientContact, ClientDocument, ClientIdentification, \
-    ClientIntoleranceMedicament, DirectClientRelation, ReversedClientRelation, ClientSocStatus, ClientPolicy, \
+    ClientIntoleranceMedicament, ClientSocStatus, ClientPolicy, \
     BloodHistory, ClientAddress
-from application.models.exists import (rbDocumentType, rbPolicyType, rbSocStatusClass, rbSocStatusType,
-                                       rbBloodType, rbAccountingSystem, rbContactType, rbRelationType)
-from application.lib.utils import string_to_datetime, safe_date, safe_traverse, get_new_uuid
+from application.models.exists import rbSocStatusClass, rbAccountingSystem, \
+    rbRelationType
+from application.lib.utils import safe_date, safe_traverse, get_new_uuid
 
 
 # def format_snils(SNILS):
@@ -445,7 +444,7 @@ def get_new_contact(contact_info):
     con = ClientContact()
     con.createDatetime = con.modifyDatetime = datetime.datetime.now()
     con.version = 0
-    con.contactType = rbContactType.query.filter(rbContactType.code == contact_info['contactType_code']).first()
+    con.contactType = rbContactType.query.get(contact_info['contactType']['id']) if contact_info['contactType'] else None
     con.contact = contact_info['contact']
     con.deleted = contact_info['deleted']
     con.notes = contact_info['notes']
@@ -460,7 +459,7 @@ def get_modified_contact(client, contact_info):
         con.deleted = 1
         return con
 
-    con.contactType = rbContactType.query.filter(rbContactType.code == contact_info['contactType_code']).first()
+    con.contactType = rbContactType.query.get(contact_info['contactType']['id']) if contact_info['contactType'] else None
     con.contact = contact_info['contact']
     con.deleted = contact_info['deleted']
     con.notes = contact_info['notes']

@@ -216,19 +216,67 @@ angular.module('WebMis20.directives').
             }
         }
     }])
-    .directive('refBookSelect', ['RefBookService', function (RefBookService) {
+    .directive('refBook', ['RefBookService', function (RefBookService) {
+        return {
+            restrict: 'A',
+            controller: ['$scope', '$attrs', function ($scope, $attrs) {
+                $scope.$refBook = RefBookService.get($attrs.refBook);
+            }]
+        }
+    }])
+    .directive('wmRelationTypeRb', ['RefBookService', function (RefBookService) {
         return {
             restrict: 'E',
             replace: true,
+            require: 'ngModel',
+            scope: {
+                $client: '=client',
+                $relative: '=relative',
+                $direct: '=direct'
+            },
             template:
-                '<ui-select ng-model="model" theme="select2">\
-                    <choices repeat="rt in $refBook.objects |filter: $select:search | limit: 100">\
-                        <div ng-bind-html="rt.name | highlight: $select.search"></div>\
-                    </chioces>\
-                </ui-select>',
-            link: function (scope, element, attributes) {
-                scope.$refBook = RefBookService.get(attributes.refBook);
-                scope.model = attributes.model;
+                '<select class="form-control" ng-options="item as $fmt(item) for item in ($refBook.objects | filter: $sexFilter) track by item.id" ref-book="rbRelationType"></select>',
+            link: function (scope, element, attrs, ngModel) {
+                scope.$sexFilter = function (item) {
+                    if (scope.$client) {
+                        if (scope.$relative && scope.$relative.sex) {
+                            return !(scope.$direct && ((item.leftSex != 0 && item.leftSex != scope.$client.sex.id) || (item.rightSex != 0 && item.rightSex != scope.$relative.sex.id)) ||
+                                (!scope.$direct && ((item.rightSex != 0 && item.rightSex != scope.$client.sex.id) || (item.leftSex != 0 && item.leftSex != scope.$relative.sex.id)) ))
+                        } else {
+                            return !(scope.$direct && (item.leftSex != 0 && item.leftSex != scope.$client.sex.id) ||
+                                (!scope.$direct && (item.rightSex != 0 && item.rightSex != scope.$client.sex.id) ))
+                        }
+                    }
+                };
+                scope.$fmt = function (item) {
+                    return scope.$direct ? item.leftName + ' → ' + item.rightName : item.rightName + ' ← ' + item.leftName;
+                }
+            }
+        }
+    }])
+    .directive('wmClientsShort', ['$http', function ($http) {
+        return {
+            restrict: 'E',
+            replace: true,
+            require: '^ngModel',
+            template:
+                '<input type="text" class="form-control" autocomplete="off" placeholder="Пациент" \
+                  typeahead="client as $fmt(client) for client in search_clients($viewValue)" \
+                  typeahead-wait-ms="1000" typeahead-min-length="2" />',
+            link: function (scope, element, attributes, ngModel) {
+                scope.$fmt = function (client) {
+                    return (client) ? (client.full_name + ' (' + client.birth_date + ')') : ('-');
+                };
+                scope.search_clients = function (query) {
+                    return $http.get(url_client_search, {
+                        params: {
+                            q:query,
+                            short: true
+                        }
+                    }).then(function (res) {
+                        return res.data.result;
+                    })
+                }
             }
         }
     }])

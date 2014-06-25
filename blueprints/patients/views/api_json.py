@@ -2,9 +2,8 @@
 from application.models.kladr_models import Kladr
 
 from flask import abort, request
-from flask.helpers import make_response
 
-from application.systemwide import db
+from application.systemwide import db, cache
 from application.lib.utils import jsonify, string_to_datetime, safe_date
 from blueprints.patients.app import module
 from application.lib.sphinx_search import SearchPatient
@@ -17,13 +16,10 @@ __author__ = 'mmalkov'
 
 @module.errorhandler(ClientSaveException)
 def handle_client_error(err):
-    return make_response(jsonify({'name': err.message,
-                                  'data': {
-                                      'err_msg':err.data
-                                  }
-                                 },
-                                 422, 'save client data error')[0],
-                         422)
+    return jsonify({
+        'name': err.message,
+        'data': err.data
+    }, 422, 'error')
 
 
 @module.route('/api/search_clients.json')
@@ -44,7 +40,10 @@ def api_search_clients():
             return jsonify([])
     clients = base_query.order_by(Client.lastName, Client.firstName, Client.patrName).limit(100).all()
     context = ClientVisualizer()
-    return jsonify(map(context.make_client_info, clients))
+    if 'short' in request.args:
+        return jsonify(map(context.make_short_client_info, clients))
+    else:
+        return jsonify(map(context.make_client_info, clients))
 
 
 @module.route('/api/patient.json')
@@ -60,6 +59,8 @@ def api_patient_get():
         client = Client.query.get(client_id)
         if not client:
             return abort(404)
+        if 'short' in request.args:
+            return jsonify(context.make_short_client_info(client))
         return jsonify({
             'client_data': context.make_client_info(client),
             'appointments': context.make_appointments(client),
