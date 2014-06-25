@@ -134,7 +134,7 @@
                 $scope.set_patient_id = function (patient_id) {
                     $scope.client_id = patient_id;
                     $scope.client = new WMClient(patient_id);
-                    $scope.client.reload();
+                    $scope.client.get_events_appointments();
                 };
 
                 $scope.clear_results = function () {

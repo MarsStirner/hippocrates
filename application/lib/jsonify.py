@@ -292,6 +292,21 @@ class ClientVisualizer(object):
 
         }
 
+    def make_search_client_info(self, client):
+        reg_addr = client.reg_address
+        live_addr = client.loc_address
+        if reg_addr and live_addr:
+            if client.has_identical_addresses():
+                setattr(live_addr, 'same_as_reg', True)
+                setattr(live_addr, 'copy_from_id', reg_addr.id)
+
+        return {
+            'info': client,
+            'id_document': client.id_document,
+            'compulsory_policy': client.compulsoryPolicy,
+            'voluntary_policies': client.voluntaryPolicies
+        }
+
     def make_short_client_info(self, client):
         """
         :type client: application.models.client.Client

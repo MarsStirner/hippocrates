@@ -65,6 +65,39 @@ angular.module('WebMis20.services', []).
                 return deferred.promise;
             };
 
+            WMClient.prototype.get_events_appointments = function() {
+                var t = this;
+                var deferred = $q.defer();
+                $http.get(url_client_events_appointments, {
+                    params: {
+                        client_id: this.client_id
+                    }
+                }).success(function(data) {
+                    t.info = data.result.client_data.info;
+                    var id_doc = data.result.client_data.id_document;
+                    t.id_docs = id_doc !== null ? [id_doc] : [];
+                    var cpol = data.result.client_data.compulsory_policy;
+                    t.compulsory_policies = cpol !== null ? [cpol] : [];
+                    t.voluntary_policies = data.result.client_data.voluntary_policies;
+
+                    t.appointments = data.result.appointments;
+                    t.events = data.result.events;
+                    t.deleted_entities = {}; // deleted items to save
+                    deferred.resolve();
+    //              $rootScope.$broadcast('client_loaded');
+                }).error(function(data, status) {
+//                    $rootScope.$broadcast('load_error', {
+//                        text: 'Ошибка при загрузке клиента ' + t.id,
+//                        data: data,
+//                        code: status,
+//                        type: 'danger'
+//                    });
+                    var message = data.result;
+                    deferred.reject(message);
+                });
+                return deferred.promise;
+            };
+
             WMClient.prototype.save = function() {
                 var data = this.get_changed_data();
                 var t = this;
