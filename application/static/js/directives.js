@@ -377,9 +377,13 @@ angular.module('WebMis20.directives').
         return {
             restrict: 'A',
             require: ['tocElement', '?form'],
-            controller: ['$element', '$attrs', function ($element, $attrs) {
+            controller: ['$scope', '$element', '$attrs', function ($scope, $element, $attrs) {
                 var self = this;
-                this.$name = $attrs.name;
+                if ($scope.hasOwnProperty('$index')) {
+                    this.$name = $attrs.name + '_' + $scope.$index;
+                } else {
+                    this.$name = $attrs.name;
+                }
                 this.$children = [];
                 this.$title = $attrs.tocElement;
                 this.$form = null;
@@ -409,39 +413,45 @@ angular.module('WebMis20.directives').
                     scope[attrs.tocName] = self_ctrl;
                 }
                 var jElement = $(element);
-                jElement.attr('id', attrs.name);
+                jElement.attr('id', self_ctrl.$name);
                 self_ctrl.element = jElement;
+                if (attrs.tocDynamic) {
+                    scope.$watch(attrs.tocDynamic, function (new_name) {
+                        self_ctrl.$title = new_name;
+                    })
+                }
                 console.log('link for tocElement (' + attrs.name + ') created')
             }
         }
     }])
-    .directive('tocAffix', ['$compile', 'TocSpy', function ($compile, TocSpy) {
+    .directive('tocAffix', ['TocSpy', function (TocSpy) {
         return {
             restrict: 'E',
-            scope: true,
+            scope: {
+                tocName: '='
+            },
+            replace: true,
+            transclude: true,
+            template:
+                '<div class="toc">\
+                    <ul class="nav">\
+                        <li ng-repeat="node in tocName.$children">\
+                            <a ng-href="#[[node.$name]]" class="wrap-btn" ng-class="{\'text-danger bg-danger\': node.$invalid(), \'toc-selected-top\': node.tocIsActive}">\
+                                [[ node.$title ]]\
+                            </a>\
+                            <ul ng-if="node.$children.length" class="nav">\
+                                <li ng-repeat="node in node.$children">\
+                                    <a ng-href="#[[node.$name]]" class="wrap-btn" ng-class="{\'text-danger bg-danger\': node.$invalid(), \'toc-selected-bottom\': node.tocIsActive}">\
+                                        [[ node.$title ]]\
+                                    </a>\
+                                </li>\
+                            </ul>\
+                        </li>\
+                    </ul>\
+                    <div ng-transclude></div>\
+                </div>',
             link: function (scope, element, attrs) {
                 console.log('Link for tocAffix creating...');
-                var current = $(element);
-                var template =
-                    '<div class="toc">\
-                        <ul class="nav">\
-                            <li ng-repeat="node in ' + attrs.tocName + '.$children">\
-                                <a ng-href="#[[node.$name]]" class="wrap-btn" ng-class="{\'text-danger bg-danger\': node.$invalid(), \'bg-primary\': node.tocIsActive}">\
-                                    [[ node.$title ]]\
-                                </a>\
-                                <ul ng-if="node.$children" class="nav">\
-                                    <li ng-repeat="node in node.$children">\
-                                        <a ng-href="#[[node.$name]]" class="wrap-btn" ng-class="{\'text-danger bg-danger\': node.$invalid()}">\
-                                            [[ node.$title ]]\
-                                        </a>\
-                                    </li>\
-                                </ul>\
-                            </li>\
-                        </ul>' + current.html() + '\
-                    </div>';
-                var replace = $(template);
-                current.replaceWith(replace);
-                $compile(replace)(scope);
                 TocSpy.registerToc(scope);
                 console.log('Link for tocAffix created');
             }

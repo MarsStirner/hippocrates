@@ -3,7 +3,7 @@
     <legend>Медицинские полисы</legend>
     <h4>Полис ОМС</h4>
     <div ng-repeat="cpol in client.compulsory_policies | filter: flt_not_deleted()">
-        <ng-form name="cpolForm" toc-element="[[cpol.insurer.name]]">
+        <ng-form name="cpolForm" toc-element toc-dynamic="cpol.insurer.short_name">
             <div class="row">
                 <div class="col-md-10">
                     <wm-policy p-type="0" id-postfix="c[[$index]]"
@@ -41,7 +41,7 @@
 
     <h4>Полисы ДМС</h4>
     <div ng-repeat="vpol in client.voluntary_policies | filter: flt_not_deleted()">
-        <ng-form name="vpolForm" toc-element="[[vpol.insurer.name]]">
+        <ng-form name="vpolForm" toc-element toc-dynamic="vpol.insurer.short_name">
             <div class="row">
                 <div class="col-md-10">
                     <wm-policy p-type="1" id-postfix="v[[$index]]"
