@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 DEBUG = True
+PROFILE = False
 
 DB_DRIVER = 'postgresql+psycopg2'
 DB_HOST = 'localhost'

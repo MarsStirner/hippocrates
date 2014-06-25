@@ -19,12 +19,12 @@
         </div>
         <div class="col-md-1">
             <div class="row" ng-show="reg_addr.id">
-                <button type="button" class="btn btn-primary btn-block marginal"
-                        ng-click="edit.activated=true">Редактировать</button>
+                <button type="button" class="btn btn-primary marginal" title="Редактировать"
+                        ng-click="edit.activated=true"><span class="glyphicon glyphicon-pencil"></span></button>
             </div>
             <div class="row">
-                <button type="button" class="btn btn-danger btn-block marginal"
-                        ng-click="delete_address('reg_addresses', reg_addr)">Удалить</button>
+                <button type="button" class="btn btn-danger marginal" title="Удалить"
+                        ng-click="delete_address('reg_addresses', reg_addr)"><span class="glyphicon glyphicon-trash"></span></button>
             </div>
         </div>
     </div>
@@ -64,12 +64,12 @@
         </div>
         <div class="col-md-1">
             <div class="row" ng-show="live_addr.id">
-                <button type="button" class="btn btn-primary btn-block marginal"
-                        ng-click="edit.activated=true">Редактировать</button>
+                <button type="button" class="btn btn-primary marginal" title="Редактировать"
+                        ng-click="edit.activated=true"><span class="glyphicon glyphicon-pencil"></span></button>
             </div>
             <div class="row">
-                <button type="button" class="btn btn-danger btn-block marginal"
-                        ng-click="delete_address('live_addresses', live_addr)">Удалить</button>
+                <button type="button" class="btn btn-danger marginal" title="Удалить"
+                        ng-click="delete_address('live_addresses', live_addr)"><span class="glyphicon glyphicon-trash"></span></button>
             </div>
         </div>
     </div>
