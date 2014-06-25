@@ -1,9 +1,8 @@
+<div class="marginal">
 <ng-form name="_characteristics" toc-element="Особенности пациента">
-<legend>Особенности пациента</legend>
-<ng-form name="clientBloodTypeForm">
-<h4>Группа крови и резус фактор</h4>
-<div class="panel panel-default">
-    <div class="panel-body">
+    <legend>Особенности пациента</legend>
+    <ng-form name="clientBloodTypeForm">
+        <h4>Группа крови и резус фактор</h4>
         <div ng-repeat="bt in client.blood_types.slice(0, 1) | filter: flt_not_deleted()">
             <div class="row">
                 <div class="col-md-10">
@@ -26,7 +25,7 @@
             </div>
         </div>
         <div>
-            <button type="button" class="btn btn-primary marginal"
+            <button type="button" class="btn btn-primary"
                     ng-click="add_new_blood_type({{ current_user.get_id() }})">Добавить новую</button>
         </div>
 
@@ -49,14 +48,12 @@
                 </tbody>
             </table>
         </div>
-    </div>
-</div>
-</ng-form>
+    </ng-form>
 
-<ng-form name="clientAllergyForm">
-<h4>Аллергия</h4>
-<div class="panel panel-default">
-    <div class="panel-body">
+    <hr>
+
+    <ng-form name="clientAllergyForm">
+        <h4>Аллергия</h4>
         <div ng-repeat="alg in client.allergies | filter: flt_not_deleted()">
             <div class="row">
                 <div class="col-md-10">
@@ -85,17 +82,15 @@
             </div>
         </div>
         <div>
-            <button type="button" class="btn btn-primary marginal"
+            <button type="button" class="btn btn-primary"
                     ng-click="client.add_allergy()">Добавить новую</button>
         </div>
-    </div>
-</div>
-</ng-form>
+    </ng-form>
 
-<ng-form name="clientIntoleranceForm">
-<h4>Медикаментозная непереносимость</h4>
-<div class="panel panel-default">
-    <div class="panel-body">
+    <hr>
+
+    <ng-form name="clientIntoleranceForm">
+        <h4>Медикаментозная непереносимость</h4>
         <div ng-repeat="intlr in client.intolerances | filter: flt_not_deleted()">
             <div class="row">
                 <div class="col-md-10">
@@ -124,10 +119,9 @@
             </div>
         </div>
         <div>
-            <button type="button" class="btn btn-primary marginal"
+            <button type="button" class="btn btn-primary"
                     ng-click="client.add_med_intolerance()">Добавить новую</button>
         </div>
-    </div>
+    </ng-form>
+</ng-form>
 </div>
-</ng-form>
-</ng-form>

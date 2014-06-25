@@ -27,11 +27,10 @@
             <div ui-alert-list="alerts"></div>
             <div class="marginal">
                 <form name="clientForm" role="form" novalidate ng-submit="save_client(clientForm)" toc-element toc-name="tocClientForm">
-                    {% include "patients/main_info.html" %}
+                    {% include "patients/_main_info.html" %}
                     {% include "patients/_id_doc.html" %}
                     {% include "patients/_address.html" %}
                     {% include "patients/_policy.html" %}
-                    {% include "patients/_notes.html" %}
                     {% include "patients/_characteristics.html" %}
                     {% include "patients/soc_status.html" %}
 

@@ -205,14 +205,14 @@ angular.module('WebMis20.directives').
             <div class="form-group col-md-2"\
                  ng-class="{\'has-error\': docForm.$dirty && docForm.doc_begdate.$invalid}">\
                 <label for="doc_begdate[[idPostfix]]" class="control-label">Дата выдачи</label>\
-                <wm-date id="doc_begdate[[idPostfix]]" name="doc_begdate"\
+                <wm-date id="doc_begdate"\
                          ng-model="modelBegDate" ng-disabled="!edit_mode()" ng-required="docForm.$dirty">\
                 </wm-date>\
             </div>\
             <div class="form-group col-md-2"\
-                 ng-class="{\'has-error\': docForm.pol_enddate.$invalid }">\
+                 ng-class="{\'has-error\': docForm.doc_enddate.$invalid }">\
                 <label for="doc_enddate[[idPostfix]]" class="control-label">Действителен до</label>\
-                <wm-date id="doc_enddate" name="doc_enddate" ng-model="modelEndDate" ng-disabled="!edit_mode()">\
+                <wm-date id="doc_enddate" ng-model="modelEndDate" ng-disabled="!edit_mode()">\
                 </wm-date>\
             </div>\
         </div>\
