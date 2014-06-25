@@ -91,7 +91,7 @@ angular.module('WebMis20.directives').
                         return function(elem) {
                             var classes_codes = elem.classes.map(function(s_class){
                                 return s_class.code;
-                                })
+                                });
                             return classes_codes.indexOf(s_class) != -1;
                         };
                     };
@@ -132,7 +132,17 @@ angular.module('WebMis20.directives').
                 link: function(scope, elm, attrs, formCtrl) {
                     scope.docForm = formCtrl;
                     scope.rbDocumentType = RefBookService.get('rbDocumentType');
-                    scope.rbUFMS = RefBookService.get('rbUFMS')
+                    scope.rbUFMS = RefBookService.get('rbUFMS');
+                    scope.ufmsItems = scope.rbUFMS.objects.map(function(o) {
+                        return o.name;
+                    });
+                    scope.$watch('rbUFMS.objects', function(n, o) {
+                        if (n !== o) {
+                            scope.ufmsItems = n.map(function(o) {
+                                return o.name;
+                            });
+                        }
+                    });
 
                     scope.$watch('docForm.$dirty', function(n, o) {
                         if (n !== o) {
@@ -211,12 +221,17 @@ angular.module('WebMis20.directives').
             <div class="form-group col-md-12"\
                  ng-class="{\'has-error\': docForm.$dirty && docForm.doc_ufms.$invalid}">\
                 <label for="doc_ufms[[idPostfix]]" class="control-label">Выдан</label>\
-                <select class="form-control" id="doc_ufms[[idPostfix]]" name="doc_ufms"\
+                <div ng-class="form-control" id="doc_ufms[[idPostfix]]" name="doc_ufms"\
+                     fs-select="" freetext="true" items="ufmsItems"\
+                     ng-disabled="!edit_mode()" ng-required="docForm.$dirty" ng-model="intmd_models.origin">\
+                    {{item}}\
+                </div>\
+                <!-- <select class="form-control" id="doc_ufms[[idPostfix]]" name="doc_ufms"\
                         ng-model="intmd_models.origin"\
                         ng-options="org.name as org.name for org in rbUFMS.objects"\
                         ng-disabled="!edit_mode()" ng-required="docForm.$dirty">\
-                </select>\
-                <!-- TODO: manual-input --!>\
+                </select> -->\
+                <!-- TODO: manual-input -->\
             </div>\
         </div>\
     </div>\

@@ -284,18 +284,18 @@ angular.module('WebMis20.services', []).
 
             WMClient.prototype.add_soc_status = function (class_name, class_code) {
                 var document = null;
-                if (class_code != 4){
+                if (class_code != 4) {
                     document = {
-                                        "id": null,
-                                        "deleted": 0,
-                                        "doc_type": null,
-                                        "serial": null,
-                                        "number": null,
-                                        "beg_date": null,
-                                        "end_date": null,
-                                        "origin": null,
-                                        "doc_text": null
-                                    }
+                        "id": null,
+                        "deleted": 0,
+                        "doc_type": null,
+                        "serial": null,
+                        "number": null,
+                        "beg_date": null,
+                        "end_date": null,
+                        "origin": null,
+                        "doc_text": null
+                    }
                 }
                 this[class_name].push({'deleted': 0,
                     'ss_class': {'code':class_code},

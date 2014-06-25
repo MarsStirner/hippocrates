@@ -6,14 +6,14 @@
                 <label for="ss_type_[[idPostfix]]">Тип</label>
                 <ui-select class="form-control" id="ss_type_[[idPostfix]]" name="ss_type" theme="select2"
                            ng-model="intmd_models.type" ng-disabled="!edit_mode()" ng-required="socStatusForm.$dirty">
-                    <ui-select-match placeholder="Тип полиса">[[$select.selected.name]]</ui-select-match>
+                    <ui-select-match placeholder="">[[$select.selected.name]]</ui-select-match>
                     <ui-select-choices repeat="sst in rbSocStatusType.objects | filter: filter_soc_status(ssClass) | filter: $select.search">
                         <div ng-bind-html="sst.name | highlight: $select.search"></div>
                     </ui-select-choices>
                 </ui-select>
             </div>
             <div class="form-group col-md-3"
-                 ng-class="{'has-error': (socStatusForm.$dirty && socStatusForm.ss_begdate.$invalid) || socStatusForm.pol_serial.$error.required}">
+                 ng-class="{'has-error': (socStatusForm.$dirty && socStatusForm.ss_begdate.$invalid) || socStatusForm.ss_begdate.$error.required}">
                 <label for="ss_begdate[[idPostfix]]" class="control-label">Дата начала</label>
                 <wm-date id="ss_begdate[[idPostfix]]" name="ss_begdate"
                          ng-model="modelBegDate" ng-disabled="!edit_mode()"
