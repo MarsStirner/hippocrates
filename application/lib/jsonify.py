@@ -233,18 +233,24 @@ class ClientVisualizer(object):
                 'accountingSystem_name': identification.accountingSystems.name,
                 'checkDate': identification.checkDate or ''}
 
-    def make_relation_info(self, relation):
-        return {'id': relation.id,
-                'deleted': relation.deleted,
-                'relativeType': relation.relativeType,
-                'other_id': relation.other.id,
-                'other_text': relation.other.nameText + ' ({0})'.format(relation.other.id)}
+    def make_relation_info(self, client_id, relation):
+        if client_id == relation.client_id:
+            return {
+                'type': relation.relativeType,
+                'relative': self.make_short_client_info(relation.relative),
+                'direct': True,
+            }
+        else:
+            return {
+                'type': relation.relativeType,
+                'relative': self.make_short_client_info(relation.client),
+                'direct': False,
+            }
 
     def make_contact_info(self, contact):
         return {'id': contact.id,
                 'deleted': contact.deleted,
-                'contactType_code': getattr(contact.contactType, 'code', None),
-                'contactType_name': getattr(contact.contactType, 'name', None),
+                'contactType': contact.contactType,
                 'contact': contact.contact,
                 'notes': contact.notes}
 
@@ -255,8 +261,7 @@ class ClientVisualizer(object):
         document_history = documents + policies
 
         identifications = [self.make_identification_info(identification) for identification in client.identifications]
-        direct_relations = [self.make_relation_info(relation) for relation in client.direct_relations]
-        reversed_relations = [self.make_relation_info(relation) for relation in client.reversed_relations]
+        relations = [self.make_relation_info(client.id, relation) for relation in client.client_relations]
         contacts = [self.make_contact_info(contact) for contact in client.contacts]
 
         reg_addr = client.reg_address
@@ -282,10 +287,24 @@ class ClientVisualizer(object):
 
             'contact': client.phones,
             'identifications': identifications,
-            'direct_relations': direct_relations,
-            'reversed_relations': reversed_relations,
+            'relations': relations,
             'contacts': contacts,
 
+        }
+
+    def make_short_client_info(self, client):
+        """
+        :type client: application.models.client.Client
+        :return:
+        """
+        return {
+            'id': client.id,
+            'first_name': client.firstName,
+            'patr_name': client.patrName,
+            'last_name': client.lastName,
+            'birth_date': client.birthDate,
+            'sex': Gender(client.sexCode),
+            'full_name': u' '.join(u' '.join((client.firstName, client.patrName, client.lastName)).split())
         }
 
     def make_appointments(self, client):

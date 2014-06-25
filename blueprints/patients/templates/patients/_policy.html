@@ -1,74 +1,79 @@
-<ng-form name="_policies" toc-element="Полисы">
-<legend>Медицинские полисы</legend>
-<h4>Полис ОМС</h4>
-<div ng-repeat="cpol in client.compulsory_policies | filter: flt_not_deleted()">
-    <ng-form name="cpolForm" toc-element="[[cpol.insurer.name]]">
-        <div class="row">
-            <div class="col-md-10">
-                <wm-policy p-type="0" id-postfix="c[[$index]]"
-                    model-type="cpol.policy_type"
-                    model-serial="cpol.serial"
-                    serial-validator="cpol.policy_type.validators.serial"
-                    model-number="cpol.number"
-                    number-validator="cpol.policy_type.validators.number"
-                    model-beg-date="cpol.beg_date"
-                    model-end-date="cpol.end_date"
-                    model-insurer="cpol.insurer"
-                    model-policy="cpol"
-                    edit-mode="cpol.id ? edit.activated : true">
-                </wm-policy>
-            </div>
-            <div class="col-md-1">
-                <div class="row" ng-show="cpol.id">
-                    <button type="button" class="btn btn-primary marginal" title="Редактировать"
-                            ng-click="edit.activated=true"><span class="glyphicon glyphicon-pencil"></span></button>
+<div class="marginal">
+    <ng-form name="_policies" toc-element="Полисы">
+    <legend>Медицинские полисы</legend>
+    <h4>Полис ОМС</h4>
+    <div ng-repeat="cpol in client.compulsory_policies | filter: flt_not_deleted()">
+        <ng-form name="cpolForm" toc-element="[[cpol.insurer.name]]">
+            <div class="row">
+                <div class="col-md-10">
+                    <wm-policy p-type="0" id-postfix="c[[$index]]"
+                        model-type="cpol.policy_type"
+                        model-serial="cpol.serial"
+                        serial-validator="cpol.policy_type.validators.serial"
+                        model-number="cpol.number"
+                        number-validator="cpol.policy_type.validators.number"
+                        model-beg-date="cpol.beg_date"
+                        model-end-date="cpol.end_date"
+                        model-insurer="cpol.insurer"
+                        model-policy="cpol"
+                        edit-mode="cpol.id ? edit.activated : true">
+                    </wm-policy>
                 </div>
-                <div class="row">
-                    <button type="button" class="btn btn-danger marginal" title="Удалить"
-                            ng-click="delete_policy('compulsory_policies', cpol)"><span class="glyphicon glyphicon-trash"></span></button>
+                <div class="col-md-1">
+                    <div class="row" ng-show="cpol.id">
+                        <button type="button" class="btn btn-primary marginal" title="Редактировать"
+                                ng-click="edit.activated=true"><span class="glyphicon glyphicon-pencil"></span></button>
+                    </div>
+                    <div class="row">
+                        <button type="button" class="btn btn-danger marginal" title="Удалить"
+                                ng-click="delete_policy('compulsory_policies', cpol)"><span class="glyphicon glyphicon-trash"></span></button>
+                    </div>
                 </div>
             </div>
-        </div>
+        </ng-form>
+    </div>
+    <div>
+        <button type="button" class="btn btn-primary"
+                ng-click="add_new_cpolicy()">Добавить новый</button>
+    </div>
+
+    <hr>
+
+    <h4>Полисы ДМС</h4>
+    <div ng-repeat="vpol in client.voluntary_policies | filter: flt_not_deleted()">
+        <ng-form name="vpolForm" toc-element="[[vpol.insurer.name]]">
+            <div class="row">
+                <div class="col-md-10">
+                    <wm-policy p-type="1" id-postfix="v[[$index]]"
+                        model-type="vpol.policy_type"
+                        model-serial="vpol.serial"
+                        serial-validator="vpol.policy_type.validators.serial"
+                        model-number="vpol.number"
+                        number-validator="vpol.policy_type.validators.number"
+                        model-beg-date="vpol.beg_date"
+                        model-end-date="vpol.end_date"
+                        model-insurer="vpol.insurer"
+                        model-policy="vpol"
+                        edit-mode="vpol.id ? edit.activated : true">
+                    </wm-policy>
+                </div>
+                <div class="col-md-1">
+                    <div class="row" ng-show="vpol.id">
+                        <button type="button" class="btn btn-primary marginal" title="Редактировать"
+                                ng-click="edit.activated=true"><span class="glyphicon glyphicon-pencil"></span></button>
+                    </div>
+                    <div class="row">
+                        <button type="button" class="btn btn-danger marginal" title="Удалить"
+                                ng-click="delete_policy('voluntary_policies', vpol)"><span class="glyphicon glyphicon-trash"></span></button>
+                    </div>
+                </div>
+            </div>
+        </ng-form>
+    </div>
+    <div>
+    <button type="button" class="btn btn-primary"
+            ng-click="client.add_vpolicy()">Добавить новый</button>
+    </div>
     </ng-form>
-</div>
-<div>
-    <button type="button" class="btn btn-primary marginal"
-            ng-click="add_new_cpolicy()">Добавить новый</button>
 </div>
 
-<h4>Полисы ДМС</h4>
-<div ng-repeat="vpol in client.voluntary_policies">
-    <ng-form name="vpolForm" toc-element="[[vpol.insurer.name]]">
-        <div class="row">
-            <div class="col-md-10">
-                <wm-policy p-type="1" id-postfix="v[[$index]]"
-                    model-type="vpol.policy_type"
-                    model-serial="vpol.serial"
-                    serial-validator="vpol.policy_type.validators.serial"
-                    model-number="vpol.number"
-                    number-validator="vpol.policy_type.validators.number"
-                    model-beg-date="vpol.beg_date"
-                    model-end-date="vpol.end_date"
-                    model-insurer="vpol.insurer"
-                    model-policy="vpol"
-                    edit-mode="vpol.id ? edit.activated : true">
-                </wm-policy>
-            </div>
-            <div class="col-md-1">
-                <div class="row" ng-show="vpol.id">
-                    <button type="button" class="btn btn-primary marginal" title="Редактировать"
-                            ng-click="edit.activated=true"><span class="glyphicon glyphicon-pencil"></span></button>
-                </div>
-                <div class="row">
-                    <button type="button" class="btn btn-danger marginal" title="Удалить"
-                            ng-click="delete_policy('voluntary_policies', vpol)"><span class="glyphicon glyphicon-trash"></span></button>
-                </div>
-            </div>
-        </div>
-    </ng-form>
-</div>
-<div>
-<button type="button" class="btn btn-primary"
-        ng-click="client.add_vpolicy()">Добавить новый</button>
-</div>
-</ng-form>
