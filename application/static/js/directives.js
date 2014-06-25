@@ -343,7 +343,7 @@ angular.module('WebMis20.directives').
                     var elem = cache[i][1];
                     var offset = elem.offset();
                     if (!offset) return false;
-                    var shift = $window.pageYOffset - offset.top;
+                    var shift = $window.pageYOffset - offset.top + 20;
                     var new_active = 0 < shift && shift < elem.height();
                     if (new_active != ctrl.tocIsActive) {
                         ctrl.tocIsActive = new_active;
