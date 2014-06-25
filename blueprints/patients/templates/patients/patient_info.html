@@ -32,15 +32,15 @@
                     {% include "patients/_address.html" %}
                     {% include "patients/_policy.html" %}
                     {% include "patients/_notes.html" %}
-                    {% include "patients/characteristics.html" %}
-                    {% include "patients/contacts.html" %}
+                    {% include "patients/_characteristics.html" %}
                     {% include "patients/soc_status.html" %}
+
+                    {% include "patients/contacts.html" %}
+
 {#                    {% include "patients/identifiers.html" %}#}
-                    {% include "patients/documents.html" %}
-
-                    <legend>Debug</legend>
-                    <pre>[[client | json]]</pre>
-
+                    {% include "patients/_doc_history.html" %}
+{#                    <legend>Debug</legend>#}
+{#                    <pre>[[client | json]]</pre>#}
                     <div class="row">
                         <div class="col-md-12">
                             <div class="pull-right">
@@ -59,6 +59,7 @@
 {% block modules_js %}
     {{ super() }}
 
+    <script src="{{ url_for('static', filename='js/kladr-directives.js') }}"></script>
     <script src="{{ url_for('static', filename='js/controllers/client/client-info-ctrl.js') }}"></script>
     <script src="{{ url_for('static', filename='js/directives/client/client-directives.js') }}"></script>
 

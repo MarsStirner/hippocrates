@@ -250,29 +250,6 @@ class ClientVisualizer(object):
 
     def make_client_info(self, client):
 
-        allergies = [{'id': allergy.id,
-                      'nameSubstance': allergy.name,
-                      'power': allergy.power,
-                      'deleted': allergy.deleted,
-                      'createDate': allergy.createDate or '',
-                      'notes': allergy.notes
-                      } for allergy in client.allergies]
-
-        intolerances = [{'id': intolerance.id,
-                         'nameMedicament': intolerance.name,
-                         'power': intolerance.power,
-                         'deleted': intolerance.deleted,
-                         'createDate': intolerance.createDate or '',
-                         'notes': intolerance.notes
-                         } for intolerance in client.intolerances]
-        bloodHistory = [{'id': blood.id,
-                         'bloodGroup_name': blood.bloodType.name,
-                         'bloodGroup_code': blood.bloodType.code,
-                         'bloodDate': blood.bloodDate or '',
-                         'person_id': safe_int(blood.person),
-                         'person_name': safe_unicode(blood.person)
-                         } for blood in client.blood_history]
-
         documents = [doc.__json__() for doc in client.documents_all]
         policies = [policy.__json__() for policy in client.policies_all]
         document_history = documents + policies
@@ -285,7 +262,9 @@ class ClientVisualizer(object):
         reg_addr = client.reg_address
         live_addr = client.loc_address
         if reg_addr and live_addr:
-            setattr(live_addr, 'same_as_reg', client.has_identical_addresses())
+            if client.has_identical_addresses():
+                setattr(live_addr, 'same_as_reg', True)
+                setattr(live_addr, 'copy_from_id', reg_addr.id)
 
         return {
             'info': client,
@@ -294,17 +273,19 @@ class ClientVisualizer(object):
             'live_address': live_addr,
             'compulsory_policy': client.compulsoryPolicy,
             'voluntary_policies': client.voluntaryPolicies,
+            'blood_history': client.blood_history.all(),
+            'allergies': client.allergies.all(),
+            'intolerances': client.intolerances.all(),
+            'soc_statuses': client.soc_statuses,
+
+            'document_history': document_history,
 
             'contact': client.phones,
-            'soc_statuses': client.soc_statuses,
-            'allergies': allergies,
-            'intolerances': intolerances,
-            'bloodHistory': bloodHistory,
             'identifications': identifications,
             'direct_relations': direct_relations,
             'reversed_relations': reversed_relations,
             'contacts': contacts,
-            'document_history': document_history,
+
         }
 
     def make_appointments(self, client):

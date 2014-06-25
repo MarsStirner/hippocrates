@@ -91,7 +91,7 @@ angular.module('WebMis20.directives').
                         return function(elem) {
                             var classes_codes = elem.classes.map(function(s_class){
                                 return s_class.code;
-                                })
+                                });
                             return classes_codes.indexOf(s_class) != -1;
                         };
                     };
@@ -132,7 +132,17 @@ angular.module('WebMis20.directives').
                 link: function(scope, elm, attrs, formCtrl) {
                     scope.docForm = formCtrl;
                     scope.rbDocumentType = RefBookService.get('rbDocumentType');
-                    scope.rbUFMS = RefBookService.get('rbUFMS')
+                    scope.rbUFMS = RefBookService.get('rbUFMS');
+                    scope.ufmsItems = scope.rbUFMS.objects.map(function(o) {
+                        return o.name;
+                    });
+                    scope.$watch('rbUFMS.objects', function(n, o) {
+                        if (n !== o) {
+                            scope.ufmsItems = n.map(function(o) {
+                                return o.name;
+                            });
+                        }
+                    });
 
                     scope.$watch('docForm.$dirty', function(n, o) {
                         if (n !== o) {
@@ -211,12 +221,161 @@ angular.module('WebMis20.directives').
             <div class="form-group col-md-12"\
                  ng-class="{\'has-error\': docForm.$dirty && docForm.doc_ufms.$invalid}">\
                 <label for="doc_ufms[[idPostfix]]" class="control-label">Выдан</label>\
-                <select class="form-control" id="doc_ufms[[idPostfix]]" name="doc_ufms"\
+                <div ng-class="form-control" id="doc_ufms[[idPostfix]]" name="doc_ufms"\
+                     fs-select="" freetext="true" items="ufmsItems"\
+                     ng-disabled="!edit_mode()" ng-required="docForm.$dirty" ng-model="intmd_models.origin">\
+                    {{item}}\
+                </div>\
+                <!-- <select class="form-control" id="doc_ufms[[idPostfix]]" name="doc_ufms"\
                         ng-model="intmd_models.origin"\
                         ng-options="org.name as org.name for org in rbUFMS.objects"\
                         ng-disabled="!edit_mode()" ng-required="docForm.$dirty">\
+                </select> -->\
+                <!-- TODO: manual-input -->\
+            </div>\
+        </div>\
+    </div>\
+</div>'
+            };
+        }
+    ]).
+    directive('wmClientBloodType', ['RefBookService',
+        function(RefBookService) {
+            return {
+                restrict: 'E',
+                require: '^form',
+                scope: {
+                    idPostfix: '@',
+                    modelType: '=',
+                    modelDate: '=',
+                    modelPerson: '=',
+                    edit_mode: '&editMode',
+                    modelBloodType: '='
+                },
+                link: function(scope, elm, attrs, formCtrl) {
+                    scope.cbtForm = formCtrl;
+                    scope.rbBloodType = RefBookService.get('rbBloodType');
+                    scope.rbPerson = RefBookService.get('vrbPersonWithSpeciality');
+
+                    scope.$watch('cbtForm.$dirty', function(n, o) {
+                        if (n !== o) {
+                            scope.modelBloodType.dirty = n;
+                        }
+                    });
+
+                    // todo: fix? промежуточные модели для ui-select...
+                    // вероятно проблема в том, что ui-select в качестве модели нужен объект в скоупе
+                    scope.intmd_models = {};
+                    scope.intmd_models.type = scope.modelType;
+                    scope.intmd_models.person = scope.modelPerson;
+                    scope.$watch('intmd_models.type', function(n, o) {
+                        if (n !== o) {
+                            scope.modelType = n;
+                        }
+                    });
+                    scope.$watch('intmd_models.person', function(n, o) {
+                        if (n !== o) {
+                            scope.modelPerson = n;
+                        }
+                    });
+                },
+                template:
+'<div class="panel panel-default">\
+    <div class="panel-body">\
+        <div class="row">\
+            <div class="form-group col-md-3"\
+                 ng-class="{\'has-error\': cbtForm.$dirty && cbtForm.cbt_date.$invalid}">\
+                <label for="cbt_date[[idPostfix]]" class="control-label">Дата установления</label>\
+                <wm-date id="cbt_date[[idPostfix]]" name="cbt_date"\
+                         ng-model="modelDate" ng-disabled="!edit_mode()" ng-required="cbtForm.$dirty">\
+                </wm-date>\
+            </div>\
+            <div class="form-group col-md-4"\
+                 ng-class="{\'has-error\': cbtForm.$dirty && cbtForm.cbt_type.$invalid}">\
+                <label for="cbt_type[[idPostfix]]" class="control-label">Тип</label>\
+                <ui-select class="form-control" id="cbt_type[[idPostfix]]" name="cbt_type" theme="select2"\
+                           ng-model="intmd_models.type" ng-disabled="!edit_mode()" ng-required="cbtForm.$dirty">\
+                    <ui-select-match placeholder="Группа крови">[[$select.selected.name]]</ui-select-match>\
+                    <ui-select-choices repeat="bt in rbBloodType.objects | filter: $select.search">\
+                        <div ng-bind-html="bt.name | highlight: $select.search"></div>\
+                    </ui-select-choices>\
+                </ui-select>\
+            </div>\
+            <div class="form-group col-md-5"\
+                 ng-class="{\'has-error\': cbtForm.$dirty && cbtForm.cbt_person.$invalid}">\
+                <label for="cbt_person[[idPostfix]]" class="control-label">Врач, установивший группу крови</label>\
+                <ui-select class="form-control" id="cbt_person[[idPostfix]]" name="cbt_person" theme="select2"\
+                           ng-model="intmd_models.person" ng-disabled="!edit_mode()" ng-required="cbtForm.$dirty">\
+                    <ui-select-match placeholder="">[[$select.selected.name]]</ui-select-match>\
+                    <ui-select-choices repeat="p in rbPerson.objects | filter: $select.search">\
+                        <div ng-bind-html="p.name | highlight: $select.search"></div>\
+                    </ui-select-choices>\
+                </ui-select>\
+            </div>\
+        </div>\
+    </div>\
+</div>'
+            };
+        }
+    ]).
+    directive('wmClientAllergy', ['RefBookService',
+        function(RefBookService) {
+            return {
+                restrict: 'E',
+                require: '^form',
+                scope: {
+                    idPostfix: '@',
+                    type: '@',
+                    modelName: '=',
+                    modelPower: '=',
+                    modelDate: '=',
+                    modelNote: '=',
+                    edit_mode: '&editMode',
+                    modelAllergy: '='
+                },
+                link: function(scope, elm, attrs, formCtrl) {
+                    scope.algForm = formCtrl;
+                    scope.rbAllergyPower = RefBookService.get('AllergyPower');
+
+                    scope.$watch('algForm.$dirty', function(n, o) {
+                        if (n !== o) {
+                            scope.modelAllergy.dirty = n;
+                        }
+                    });
+                },
+                template:
+'<div class="panel panel-default">\
+    <div class="panel-body">\
+        <div class="row">\
+            <div class="form-group col-md-4"\
+                 ng-class="{\'has-error\': algForm.$dirty && algForm.alg_name.$invalid}">\
+                <label for="alg_name[[idPostfix]]" class="control-label">[[type === \'allergy\' ? \'Вещество\' : \'Медикамент\']]</label>\
+                <input type="text" class="form-control" id="alg_name[[idPostfix]]" name="alg_name"\
+                       autocomplete="off" placeholder=""\
+                       ng-model="modelName" ng-disabled="!edit_mode()" ng-required="algForm.$dirty"/>\
+            </div>\
+            <div class="form-group col-md-3"\
+                 ng-class="{\'has-error\': algForm.$dirty && algForm.alg_power.$invalid}">\
+                <label for="alg_power[[idPostfix]]" class="control-label">Степень</label>\
+                <select class="form-control" id="alg_power[[idPostfix]]" name="alg_power"\
+                        ng-model="modelPower"\
+                        ng-options="pow as pow.name for pow in rbAllergyPower.objects track by pow.id"\
+                        ng-disabled="!edit_mode()" ng-required="algForm.$dirty">\
                 </select>\
-                <!-- TODO: manual-input --!>\
+            </div>\
+            <div class="form-group col-md-3"\
+                 ng-class="{\'has-error\': algForm.$dirty && algForm.alg_date.$invalid}">\
+                <label for="alg_date[[idPostfix]]" class="control-label">Дата установления</label>\
+                <wm-date id="alg_date[[idPostfix]]" name="alg_date"\
+                         ng-model="modelDate" ng-disabled="!edit_mode()" ng-required="algForm.$dirty">\
+                </wm-date>\
+            </div>\
+        </div>\
+        <div class="row">\
+            <div class="form-group col-md-12">\
+                <label for="alg_notes[idPostfix]">Примечание</label>\
+                <textarea class="form-control" id="alg_notes" name="alg_notes" rows="2" autocomplete="off"\
+                    ng-model="modelNote" ng-disabled="!edit_mode()"></textarea>\
             </div>\
         </div>\
     </div>\

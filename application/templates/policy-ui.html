@@ -13,7 +13,7 @@
                 </ui-select>
             </div>
             <div class="form-group col-md-1"
-                 ng-class="{'has-error': (policyForm.$dirty && policyForm.pol_serial.$invalid) || policyForm.pol_serial.$error.required}"> {# "{'has-error': policyForm.pol_serial.$invalid && policyForm.pol_serial.$dirty}" #}
+                 ng-class="{'has-error': (policyForm.$dirty && policyForm.pol_serial.$invalid) || policyForm.pol_serial.$error.required}">
                 <label for="pol_serial[[idPostfix]]" class="control-label">Серия</label>
                 <input type="text" class="form-control" id="pol_serial[[idPostfix]]" name="pol_serial"
                        autocomplete="off" placeholder="серия" validator-regexp="serialValidator"

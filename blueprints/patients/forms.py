@@ -94,13 +94,9 @@ class ClientForm(Form):
 
     def __init__(self, *args, **kwargs):
         super(ClientForm, self).__init__(*args, **kwargs)
-        if not self.blood_group.choices:
-            self.blood_group.choices = [(blood_type.code, blood_type.name) for blood_type in rbBloodType.query.all()]
-        if not self.blood_group.choices:
-            self.blood_group.choices = [(person.id, person.nameText) for person in Person.query.all()]
-        if not self.identification_accountingSystem.choices:
-            self.identification_accountingSystem.choices = [(system.code, system.name)
-                                                            for system in rbAccountingSystem.query.all()]
+        # if not self.identification_accountingSystem.choices:
+        #     self.identification_accountingSystem.choices = [(system.code, system.name)
+        #                                                     for system in rbAccountingSystem.query.all()]
         if not self.direct_relation_other.choices:
             self.direct_relation_other.choices = [(client.id, client.nameText) for client in Client.query.all()]
         if not self.reversed_relation_other.choices:

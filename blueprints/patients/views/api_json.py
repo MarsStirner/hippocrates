@@ -18,8 +18,11 @@ __author__ = 'mmalkov'
 @module.errorhandler(ClientSaveException)
 def handle_client_error(err):
     return make_response(jsonify({'name': err.message,
-                                  'data': err.data},
-                                 422, 'error')[0],
+                                  'data': {
+                                      'err_msg':err.data
+                                  }
+                                 },
+                                 422, 'save client data error')[0],
                          422)
 
 
@@ -111,6 +114,25 @@ def api_patient_save():
                     doc = add_or_update_doc(client, id_doc)
                     db.session.add(doc)
 
+            reg_addr_info = client_data.get('reg_addresses')
+            actual_reg_address = None
+            if reg_addr_info:
+                for reg_addr in reg_addr_info:
+                    ra = add_or_update_address(client, reg_addr)
+                    if ra.deleted != 1 and ra.deleted != 2:
+                        actual_reg_address = ra
+                    db.session.add(ra)
+
+            live_addr_info = client_data.get('live_addresses')
+            if live_addr_info:
+                for live_addr in live_addr_info:
+                    same_as_reg = live_addr.get('same_as_reg', False)
+                    if same_as_reg:
+                        la = add_or_update_copy_address(client, live_addr, actual_reg_address)
+                    else:
+                        la = add_or_update_address(client, live_addr)
+                    db.session.add(la)
+
             cpol_info = client_data.get('compulsory_policies')
             if cpol_info:
                 for cpol in cpol_info:
@@ -122,6 +144,24 @@ def api_patient_save():
                 for vpol in vpol_info:
                     pol = add_or_update_policy(client, vpol)
                     db.session.add(pol)
+
+            blood_type_info = client_data.get('blood_types')
+            if blood_type_info:
+                for bt in blood_type_info:
+                    bt = add_or_update_blood_type(client, bt)
+                    db.session.add(bt)
+
+            allergy_info = client_data.get('allergies')
+            if allergy_info:
+                for allergy in allergy_info:
+                    alg = add_or_update_allergy(client, allergy)
+                    db.session.add(alg)
+
+            intolerance_info = client_data.get('intolerances')
+            if intolerance_info:
+                for intolerance in intolerance_info:
+                    intlr = add_or_update_intolerance(client, intolerance)
+                    db.session.add(intlr)
 
             ss_info = client_data.get('soc_statuses')
             if ss_info:
@@ -132,7 +172,7 @@ def api_patient_save():
             client = Client()
             client_info = client_data.get('info')
             if not client_info:
-                raise ClientSaveException(u'Client main info is empty')
+                raise ClientSaveException(u'Отсутствует основная информация о пациенте.')
             client = set_client_main_info(client, client_info)
             db.session.add(client)
 
@@ -141,6 +181,25 @@ def api_patient_save():
                 for id_doc in id_doc_info:
                     doc = add_or_update_doc(client, id_doc)
                     db.session.add(doc)
+
+            reg_addr_info = client_data.get('reg_addresses')
+            actual_reg_address = None
+            if reg_addr_info:
+                for reg_addr in reg_addr_info:
+                    ra = add_or_update_address(client, reg_addr)
+                    if ra.deleted != 1 and ra.deleted != 2:
+                        actual_reg_address = ra
+                    db.session.add(ra)
+
+            live_addr_info = client_data.get('live_addresses')
+            if live_addr_info:
+                for live_addr in live_addr_info:
+                    same_as_reg = live_addr.get('same_as_reg', False)
+                    if same_as_reg:
+                        la = add_or_update_copy_address(client, live_addr, actual_reg_address)
+                    else:
+                        la = add_or_update_address(client, live_addr)
+                    db.session.add(la)
 
             cpol_info = client_data.get('compulsory_policies')
             if cpol_info:
@@ -160,81 +219,25 @@ def api_patient_save():
                     sstat = add_or_update_soc_status(client, ss)
                     db.session.add(sstat)
 
+            blood_type_info = client_data.get('blood_types')
+            if blood_type_info:
+                for bt in blood_type_info:
+                    bt = add_or_update_blood_type(client, bt)
+                    db.session.add(bt)
+
+            allergy_info = client_data.get('allergies')
+            if allergy_info:
+                for allergy in allergy_info:
+                    alg = add_or_update_allergy(client, allergy)
+                    db.session.add(alg)
+
+            intolerance_info = client_data.get('intolerances')
+            if intolerance_info:
+                for intolerance in intolerance_info:
+                    intlr = add_or_update_intolerance(client, intolerance)
+                    db.session.add(intlr)
 
     # try:
-    #
-    #     if client_info['document'].get('documentType'):
-    #         if not client.document:
-    #             client_document = get_new_document(client_info['document'])
-    #             client.documents.append(client_document)
-    #         else:
-    #             docs = get_modified_document(client, client_info['document'])
-    #             db.session.add(docs[0])
-    #             if docs[1]:
-    #                 client.documents.append(docs[1])
-    #
-    #
-    #     reg_address = client_info['regAddress']
-    #     actual_reg_address = None
-    #     if reg_address is not None and (reg_address.get('address') or reg_address.get('free_input')):
-    #         reg_address['type'] = 0
-    #         if not client.reg_address:
-    #             actual_reg_address = address = get_new_address(reg_address)
-    #             client.addresses.append(address)
-    #         else:
-    #             addresses = get_modified_address(client, reg_address)
-    #             db.session.add(addresses[0])
-    #             if addresses[1]:
-    #                 actual_reg_address = addresses[1]
-    #                 client.addresses.append(actual_reg_address)
-    #
-    #     live_address = client_info['liveAddress']
-    #
-    #     if live_address is not None:
-    #         # TODO: check AND FIX!
-    #         if live_address.get('same_as_reg', False) and actual_reg_address:
-    #             address = get_reg_address_copy(client, actual_reg_address)
-    #             client.addresses.append(address)
-    #         elif live_address.get('address') or live_address.get('free_input'):
-    #             live_address['type'] = 1
-    #             if not client.loc_address:
-    #                 address = get_new_address(live_address)
-    #                 client.addresses.append(address)
-    #             else:
-    #                 addresses = get_modified_address(client, live_address)
-    #                 db.session.add(addresses[0])
-    #                 if addresses[1]:
-    #                     client.addresses.append(addresses[1])
-    #
-    #     for ss_info in client_info['socStatuses']:
-    #         if not 'id' in ss_info:
-    #             ss = get_new_soc_status(ss_info)
-    #             client.socStatuses.append(ss)
-    #         else:
-    #             ss = get_modified_soc_status(client, ss_info)
-    #             db.session.add(ss)
-    #
-    #     for blood_info in client_info['bloodHistory']:
-    #         if not 'id' in blood_info:
-    #             blood = get_new_blood(blood_info)
-    #             client.blood_history.append(blood)
-    #
-    #     for allergy_info in client_info['allergies']:
-    #         if not 'id' in allergy_info:
-    #             allergy = get_new_allergy(allergy_info)
-    #             client.allergies.append(allergy)
-    #         else:
-    #             allergy = get_modified_allergy(client, allergy_info)
-    #             db.session.add(allergy)
-    #
-    #     for intolerance_info in client_info['intolerances']:
-    #         if not 'id' in intolerance_info:
-    #             intolerance = get_new_intolerance(intolerance_info)
-    #             client.intolerances.append(intolerance)
-    #         else:
-    #             intolerance = get_modified_intolerance(client, intolerance_info)
-    #             db.session.add(intolerance)
-    #
     #     for id_info in client_info['identifications']:
     #         if not 'id' in id_info:
     #             id_ext = get_new_identification(id_info)
@@ -273,10 +276,17 @@ def api_patient_save():
     #             db.session.add(doc)
 
         db.session.commit()
-    except:
+    except Exception, e:
+        # TODO: LOG!!
         db.session.rollback()
         raise
-        return abort(404)
+        return make_response(jsonify({'name': u'Ошибка сохранения данных пациента',
+                                      'data': {
+                                          'err_msg': 'INTERNAL SERVER ERROR'
+                                       }
+                                      },
+                                     500, 'save client data error')[0],
+                             500)
 
     return jsonify(int(client))
 

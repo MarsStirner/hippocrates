@@ -6,7 +6,7 @@
                 <label for="ss_type_[[idPostfix]]">Тип</label>
                 <ui-select class="form-control" id="ss_type_[[idPostfix]]" name="ss_type" theme="select2"
                            ng-model="intmd_models.type" ng-disabled="!edit_mode()" ng-required="socStatusForm.$dirty">
-                    <ui-select-match placeholder="Тип полиса">[[$select.selected.name]]</ui-select-match>
+                    <ui-select-match placeholder="">[[$select.selected.name]]</ui-select-match>
                     <ui-select-choices repeat="sst in rbSocStatusType.objects | filter: filter_soc_status(ssClass) | filter: $select.search">
                         <div ng-bind-html="sst.name | highlight: $select.search"></div>
                     </ui-select-choices>
