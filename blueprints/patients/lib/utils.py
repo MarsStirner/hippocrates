@@ -1,12 +1,9 @@
 # -*- coding: utf-8 -*-
 
-import datetime
-
-from application.models.client import Client, ClientAllergy, ClientContact, ClientDocument, ClientIdentification, \
+from application.models.client import Client, ClientAllergy, ClientContact, ClientDocument, \
     ClientIntoleranceMedicament, ClientSocStatus, ClientPolicy, \
-    BloodHistory, ClientAddress
-from application.models.exists import rbSocStatusClass, rbAccountingSystem, \
-    rbRelationType
+    BloodHistory, ClientAddress, ClientRelation
+from application.models.exists import rbSocStatusClass
 from application.lib.utils import safe_date, safe_traverse, get_new_uuid
 
 
@@ -368,6 +365,46 @@ def add_or_update_soc_status(client, data):
     return soc_status
 
 
+def add_or_update_relation(client, data):
+    # todo: check for existing records ?
+    err_msg = u'Ошибка сохранения родственной связи'
+    rel_id = data.get('id')
+    rel_type = safe_traverse(data, 'rel_type', 'id')
+    if not rel_type:
+        raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Тип')
+    direct = data.get('direct')
+    if direct is None:
+        raise ClientSaveException(err_msg, u'Не указан вид связи - прямая или обратная')
+    relative_id = safe_traverse(data, 'relative', 'id')
+    if not relative_id:
+        raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Родственник')
+    deleted = data.get('deleted', 0)
+
+    if direct:
+        client = client
+        relative_id = relative_id
+        if rel_id:
+            rel = ClientRelation.query.get(rel_id)
+            rel.relativeType_id = rel_type
+            rel.relative_id = relative_id
+            rel.client = client
+            rel.deleted = deleted
+        else:
+            rel = ClientRelation.create_direct(rel_type, relative_id, client)
+    else:
+        client_id = relative_id
+        relative = client
+        if rel_id:
+            rel = ClientRelation.query.get(rel_id)
+            rel.relativeType_id = rel_type
+            rel.relative = relative
+            rel.client_id = client_id
+            rel.deleted = deleted
+        else:
+            rel = ClientRelation.create_reverse(rel_type, relative, client_id)
+    return rel
+
+
 def add_or_update_contact(client, data):
     # todo: check for existing records ?
     err_msg = u'Ошибка сохранения контакта'
@@ -393,81 +430,29 @@ def add_or_update_contact(client, data):
     return cont
 
 
-def get_new_identification(id_info):
-    id_ext = ClientIdentification()
-    id_ext.createDatetime = id_ext.modifyDatetime = datetime.datetime.now()
-    id_ext.version = 0
-    id_ext.deleted = id_info['deleted']
-    id_ext.accountingSystems = rbAccountingSystem.query.filter(
-        rbAccountingSystem.code == id_info['accountingSystem_code']).first()
-    id_ext.checkDate = id_info['checkDate']
-    id_ext.identifier = id_info['identifier']
-    return id_ext
-
-
-def get_modified_identification(client, id_info):
-    now = datetime.datetime.now()
-    id_ext = client.identifications.filter(ClientIdentification.id == id_info['id']).first()
-
-    if id_info['deleted'] == 1:
-        id_ext.deleted = 1
-        return id_ext
-
-    id_ext.accountingSystems = rbAccountingSystem.query.filter(
-        rbAccountingSystem.code == id_info['accountingSystem_code']).first()
-    id_ext.checkDate = id_info['checkDate']
-    id_ext.identifier = id_info['identifier']
-    id_ext.modifyDatetime = now
-    return id_ext
-
-
-def get_new_direct_relation(relation_info):
-    rel = DirectClientRelation()
-    rel.createDatetime = rel.modifyDatetime = datetime.datetime.now()
-    rel.version = 0
-    rel.deleted = relation_info['deleted']
-    rel.relativeType = rbRelationType.query.filter(
-        rbRelationType.code == relation_info['relativeType']['code']).first()
-    rel.other = Client.query.filter(Client.id == relation_info['other_id']).first()
-    return rel
-
-
-def get_modified_direct_relation(client, relation_info):
-    now = datetime.datetime.now()
-    rel = client.direct_relations.filter(DirectClientRelation.id == relation_info['id']).first()
-
-    if relation_info['deleted'] == 1:
-        rel.deleted = 1
-        return rel
-
-    rel.relativeType = rbRelationType.query.filter(
-        rbRelationType.code == relation_info['relativeType']['code']).first()
-    rel.other = Client.query.filter(Client.id == relation_info['other_id']).first()
-    rel.modifyDatetime = now
-    return rel
-
-
-def get_new_reversed_relation(relation_info):
-    rel = ReversedClientRelation()
-    rel.createDatetime = rel.modifyDatetime = datetime.datetime.now()
-    rel.version = 0
-    rel.deleted = relation_info['deleted']
-    rel.relativeType = rbRelationType.query.filter(
-        rbRelationType.code == relation_info['relativeType']['code']).first()
-    rel.other = Client.query.filter(Client.id == relation_info['other_id']).first()
-    return rel
-
-
-def get_modified_reversed_relation(client, relation_info):
-    now = datetime.datetime.now()
-    rel = client.reversed_relations.filter(ReversedClientRelation.id == relation_info['id']).first()
-
-    if relation_info['deleted'] == 1:
-        rel.deleted = 1
-        return rel
-
-    rel.relativeType = rbRelationType.query.filter(
-        rbRelationType.code == relation_info['relativeType']['code']).first()
-    rel.other = Client.query.filter(Client.id == relation_info['other_id']).first()
-    rel.modifyDatetime = now
-    return rel
+# def get_new_identification(id_info):
+#     id_ext = ClientIdentification()
+#     id_ext.createDatetime = id_ext.modifyDatetime = datetime.datetime.now()
+#     id_ext.version = 0
+#     id_ext.deleted = id_info['deleted']
+#     id_ext.accountingSystems = rbAccountingSystem.query.filter(
+#         rbAccountingSystem.code == id_info['accountingSystem_code']).first()
+#     id_ext.checkDate = id_info['checkDate']
+#     id_ext.identifier = id_info['identifier']
+#     return id_ext
+#
+#
+# def get_modified_identification(client, id_info):
+#     now = datetime.datetime.now()
+#     id_ext = client.identifications.filter(ClientIdentification.id == id_info['id']).first()
+#
+#     if id_info['deleted'] == 1:
+#         id_ext.deleted = 1
+#         return id_ext
+#
+#     id_ext.accountingSystems = rbAccountingSystem.query.filter(
+#         rbAccountingSystem.code == id_info['accountingSystem_code']).first()
+#     id_ext.checkDate = id_info['checkDate']
+#     id_ext.identifier = id_info['identifier']
+#     id_ext.modifyDatetime = now
+#     return id_ext

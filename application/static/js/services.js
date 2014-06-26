@@ -97,6 +97,7 @@ angular.module('WebMis20.services', []).
                     return el.dirty;
                 }).concat(this.deleted_entities.invalidities || []).concat(this.deleted_entities.works || []).concat(this.deleted_entities.nationalities || []);
                 data.soc_statuses = changed_soc_statuses.length ? changed_soc_statuses : undefined;
+                data.relations = this._get_entity_changes('relations');
                 data.contacts = this._get_entity_changes('contacts');
 
                 return data;
@@ -231,32 +232,6 @@ angular.module('WebMis20.services', []).
                 });
             };
 
-            WMClient.prototype.add_identification = function() {
-                this.client_info['identifications'].push({
-                    'deleted': 0,
-                    'identifier': '',
-                    'accountingSystem_code': '',
-                    'checkDate': ''});
-            };
-
-            WMClient.prototype.add_contact = function() {
-                this.contacts.push({
-                    'id': null,
-                    deleted: 0,
-                    contact_type: null,
-                    contact_text: null,
-                    notes: null
-                });
-            };
-
-            WMClient.prototype.add_relation = function () {
-                this.relations.push({
-                    direct: true,
-                    relative: null,
-                    type: null
-                });
-            };
-
             WMClient.prototype.add_soc_status = function (class_name, class_code) {
                 var document = null;
                 if (class_code != 4) {
@@ -281,6 +256,26 @@ angular.module('WebMis20.services', []).
                 });
             };
 
+            WMClient.prototype.add_relation = function () {
+                this.relations.push({
+                    id: null,
+                    deleted: 0,
+                    rel_type: null,
+                    direct: true,
+                    relative: null
+                });
+            };
+
+            WMClient.prototype.add_contact = function() {
+                this.contacts.push({
+                    'id': null,
+                    deleted: 0,
+                    contact_type: null,
+                    contact_text: null,
+                    notes: null
+                });
+            };
+
             WMClient.prototype.delete_record = function(entity, record, deleted) {
                 if (arguments.length < 3) {
                     deleted = 1;
@@ -296,6 +291,13 @@ angular.module('WebMis20.services', []).
                 }
             };
 
+//            WMClient.prototype.add_identification = function() {
+//                this.client_info['identifications'].push({
+//                    'deleted': 0,
+//                    'identifier': '',
+//                    'accountingSystem_code': '',
+//                    'checkDate': ''});
+//            };
             return WMClient;
         }
     ]).

@@ -173,6 +173,12 @@ def api_patient_save():
                     sstat = add_or_update_soc_status(client, ss)
                     db.session.add(sstat)
 
+            relation_info = client_data.get('relations')
+            if relation_info:
+                for relation in relation_info:
+                    rel = add_or_update_relation(client, relation)
+                    db.session.add(rel)
+
             contact_info = client_data.get('contacts')
             if contact_info:
                 for contact in contact_info:
@@ -247,6 +253,12 @@ def api_patient_save():
                     sstat = add_or_update_soc_status(client, ss)
                     db.session.add(sstat)
 
+            relation_info = client_data.get('relations')
+            if relation_info:
+                for relation in relation_info:
+                    rel = add_or_update_relation(client, relation)
+                    db.session.add(rel)
+
             contact_info = client_data.get('contacts')
             if contact_info:
                 for contact in contact_info:
@@ -261,22 +273,6 @@ def api_patient_save():
     #         else:
     #             id_ext = get_modified_identification(client, id_info)
     #             db.session.add(id_ext)
-    #
-    #     for relation_info in client_info['direct_relations']:
-    #         if not 'id' in relation_info:
-    #             rel = get_new_direct_relation(relation_info)
-    #             client.direct_relations.append(rel)
-    #         else:
-    #             rel = get_modified_direct_relation(client, relation_info)
-    #             db.session.add(rel)
-    #
-    #     for relation_info in client_info['reversed_relations']:
-    #         if not 'id' in relation_info:
-    #             rel = get_new_reversed_relation(relation_info)
-    #             client.reversed_relations.append(rel)
-    #         else:
-    #             rel = get_modified_reversed_relation(client, relation_info)
-    #             db.session.add(rel)
         db.session.commit()
     except Exception, e:
         # TODO: LOG!!

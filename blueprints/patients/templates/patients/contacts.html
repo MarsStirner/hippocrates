@@ -3,33 +3,35 @@
     <legend>Контактная информация и родственники</legend>
     <h4>Связи с другими пациентами</h4>
     <ng-form name="_relations" toc-element="Связи" ng-model="client.relations">
-        <div class="row" ng-repeat="relation in client.relations">
-            <div class="col-md-4">
-                <wm-relation-type-rb ng-model="relation.type"
-                        client="client.info" relative="relation.relative" direct="relation.direct" />
-            </div>
-            <div class="col-md-1">
-                <button type="button" class="btn btn-primary" ng-model="relation.direct" btn-checkbox>
-                    [[ (relation.direct) ? '→' : '←' ]]
-                </button>
-            </div>
-            <div class="col-md-6">
-                <wm-clients-short ng-model="relation.relative" />
-            </div>
-            <div class="col-md-1">
-                <button type="button" class="btn btn-danger marginal" title="Удалить"
-                    ng-click="client.delete_record('relations', relation)">
-                    <span class="glyphicon glyphicon-trash"></span>
-                </button>
+        <div ng-repeat="relation in client.relations | filter: flt_not_deleted()">
+            <div class="row">
+                <div class="col-md-10">
+                    <alert type="danger" ng-if="!client.info.sex">Для добавления родственной связи укажите пол пациента</alert>
+                    <ng-form name="contactForm">
+                        <wm-client-relation id-postfix="[[$index]]"
+                            model-relation="relation"
+                            model-client="client.info"
+                            edit-mode="contact.id ? edit.activated : true">
+                        </wm-client-relation>
+                    </ng-form>
+                </div>
+                <div class="col-md-1">
+                    <div class="row" ng-show="contact.id">
+                        <button type="button" class="btn btn-primary marginal" title="Редактировать"
+                                ng-click="edit.activated=true"><span class="glyphicon glyphicon-pencil"></span></button>
+                    </div>
+                    <div class="row">
+                        <button type="button" class="btn btn-danger marginal" title="Удалить"
+                                ng-click="client.delete_record('relations', relation)">
+                            <span class="glyphicon glyphicon-trash"></span>
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="row">
-            <div class="col-md-12">
-                <button type="button" ng-click="client.add_relation()" class="btn btn-primary">
-                    Добавить связь
-                </button>
-            </div>
-        </div>
+        <button type="button" ng-click="client.add_relation()" class="btn btn-primary">
+            Добавить связь
+        </button>
     </ng-form>
 
     <hr>

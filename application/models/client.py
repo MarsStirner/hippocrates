@@ -674,19 +674,36 @@ class ClientRelation(db.Model):
     __tablename__ = u'ClientRelation'
 
     id = db.Column(db.Integer, primary_key=True)
-    createDatetime = db.Column(db.DateTime, nullable=False)
-    createPerson_id = db.Column(db.Integer, index=True)
-    modifyDatetime = db.Column(db.DateTime, nullable=False)
-    modifyPerson_id = db.Column(db.Integer, index=True)
-    deleted = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    createDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now)
+    createPerson_id = db.Column(db.Integer, index=True, default=safe_current_user_id)
+    modifyDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now, onupdate=datetime.datetime.now)
+    modifyPerson_id = db.Column(db.Integer, index=True, default=safe_current_user_id, onupdate=safe_current_user_id)
+    deleted = db.Column(db.Integer, nullable=False, server_default=u"'0'", default=0)
     client_id = db.Column(db.ForeignKey('Client.id'), nullable=False, index=True)
     relativeType_id = db.Column(db.Integer, db.ForeignKey('rbRelationType.id'), index=True)
     relative_id = db.Column(db.Integer, db.ForeignKey('Client.id'), nullable=False, index=True)
-    version = db.Column(db.Integer, nullable=False)
+    version = db.Column(db.Integer, nullable=False, default=0)
 
     relativeType = db.relationship(u'rbRelationType', lazy=False)
     client = db.relationship(u'Client', primaryjoin='Client.id == ClientRelation.client_id', lazy=False)
     relative = db.relationship(u'Client', primaryjoin='Client.id == ClientRelation.relative_id', lazy=False)
+
+    @classmethod
+    def create_direct(cls, rel_type, relative_id, client):
+        rel = cls(rel_type)
+        rel.relative_id = relative_id
+        rel.client = client
+        return rel
+
+    @classmethod
+    def create_reverse(cls, rel_type, relative, client_id):
+        rel = cls(rel_type)
+        rel.relative = relative
+        rel.client_id = client_id
+        return rel
+
+    def __init__(self, rel_type):
+        self.relativeType_id = int(rel_type) if rel_type else None
 
     @property
     def leftName(self):

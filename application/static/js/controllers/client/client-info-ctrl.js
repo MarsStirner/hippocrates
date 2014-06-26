@@ -8,15 +8,14 @@ angular.module('WebMis20.controllers').
             $scope.params = aux.getQueryParams(document.location.search);
             $scope.rbGender = RefBookService.get('Gender');
             $scope.rbPerson = RefBookService.get('vrbPersonWithSpeciality');
-//            $scope.rbDocumentType = RefBookService.get('rbDocumentType');
-//            $scope.rbUFMS = RefBookService.get('rbUFMS');
-//            $scope.rbPolicyType = RefBookService.get('rbPolicyType');
-//            $scope.rbOrganisation = RefBookService.get('Organisation');
-            $scope.rbRelationType = RefBookService.get('rbRelationType');
             $scope.alerts = [];
 
             $scope.client_id = $scope.params.client_id;
             var client = $scope.client = new WMClient($scope.client_id);
+
+            $scope.editing = {
+                submit_attempt: false
+            };
 
             // printing stuff
             $scope.ps = new PrintingService('registry');
@@ -46,11 +45,6 @@ angular.module('WebMis20.controllers').
                 $scope.alerts.push(error);
             });
             // printing stuff end
-
-            $scope.editing = {
-                active: true,
-                submit_attempt: false
-            };
 
             $scope.flt_not_deleted = function() {
                 return function(item) {
@@ -149,14 +143,6 @@ angular.module('WebMis20.controllers').
                 }
             };
 
-//            $scope.directRelationFilter = function (relationType) {
-//                return (relationType.leftSex == 0 || relationType.leftSex == $scope.client.client_info.sex.id);
-//            };
-//
-//            $scope.reversedRelationFilter = function (relationType) {
-//                return (relationType.rightSex == 0 || relationType.rightSex == $scope.client.client_info.sex.id);
-//            };
-
             $scope.save_client = function() {
                 var form = $scope.clientForm;
                 $scope.editing.submit_attempt = true;
@@ -177,17 +163,6 @@ angular.module('WebMis20.controllers').
                     alert(reason);
                 });
             };
-
-//            $scope.delete_record = function(entity, record) {
-//                var modalInstance = $modal.open({
-//                    templateUrl: 'modal-deleteRecord.html',
-//                    controller: DeleteRecordModalCtrl
-//                });
-//
-//                modalInstance.result.then(function () {
-//                    $scope.client.delete_record(entity, record);
-//                });
-//            };
 
             $scope.refresh_form = function() {
                 $scope.mainInfoForm.$setPristine(true);
@@ -210,5 +185,16 @@ angular.module('WebMis20.controllers').
             }, function() {
                 // todo: onerror?
             });
+
+//            $scope.delete_record = function(entity, record) {
+//                var modalInstance = $modal.open({
+//                    templateUrl: 'modal-deleteRecord.html',
+//                    controller: DeleteRecordModalCtrl
+//                });
+//
+//                modalInstance.result.then(function () {
+//                    $scope.client.delete_record(entity, record);
+//                });
+//            };
         }
     ]);
