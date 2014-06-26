@@ -6,17 +6,18 @@
     <div ng-controller="ClientCtrl" class="ng-cloak">
         {% include "_breadcrumbs.html" %}
 
-        <legend xmlns="http://www.w3.org/1999/html" wm-page-header><h2>Пациент: [[ client.info.full_name ]]</h2></legend>
-        <div class="marginal">
-            <button class="btn btn-default" onclick="history.back()">Назад к результатам поиска</button>
-            <a class="btn btn-success" href="{{ url_for('schedule.appointment') }}?client_id={{ request.args['client_id'] }}"
-               ng-if="client_id != 'new'">
-                Записать на приём</a>
-            <a class="btn btn-primary" href="{{ url_for('event.new_event') }}?event_id=new&client_id={{ request.args['client_id'] }}"
-               ng-if="client_id != 'new'">
-                Создать обращение</a>
-            <ui-print-button ps="ps" resolve="print_context_resolve()" ng-if="!client.is_new()"></ui-print-button>
-        </div>
+        <legend xmlns="http://www.w3.org/1999/html">
+            <div class="pull-right">
+                <a class="btn btn-sm btn-success" href="{{ url_for('schedule.appointment') }}?client_id={{ request.args['client_id'] }}"
+                   ng-if="client_id != 'new'">
+                    Записать на приём</a>
+                <a class="btn btn-sm btn-primary" href="{{ url_for('event.new_event') }}?event_id=new&client_id={{ request.args['client_id'] }}"
+                   ng-if="client_id != 'new'">
+                    Создать обращение</a>
+                <ui-print-button ps="ps" class="btn-sm" resolve="print_context_resolve()" ng-if="!client.is_new()"></ui-print-button>
+            </div>
+        <h2>Пациент: [[ client.info.full_name ]]</h2>
+        </legend>
 
         <div class="col-md-2 affix-holder">
             <div class="toc-affix" bs-affix>
@@ -29,6 +30,7 @@
             </div>
         </div>
         <div class="col-md-10">
+
             <div ui-alert-list="alerts"></div>
             <div class="marginal">
                 <ng-form name="clientForm" role="form" novalidate toc-element toc-name="tocClientForm">

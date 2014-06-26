@@ -168,6 +168,8 @@ angular.module('WebMis20.controllers').
                 if (window.opener) {
                     window.opener.focus();
                     window.close();
+                } else {
+                    history.back();
                 }
             };
 
