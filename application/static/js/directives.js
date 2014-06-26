@@ -270,7 +270,7 @@ angular.module('WebMis20.directives').
         var toc = null;
         var self = this;
         this.register = function (ctrl, element) {
-            cache.push([ctrl, $(element)]);
+            cache.push([ctrl, element[0]]);
             var parent = element.parent().controller('tocElement');
             if (parent) {
                 parent.$children.push(ctrl);
@@ -285,10 +285,10 @@ angular.module('WebMis20.directives').
                 while (i--) {
                     var ctrl = cache[i][0];
                     var elem = cache[i][1];
-                    var offset = elem.offset();
-                    if (!offset) return false;
-                    var shift = $window.pageYOffset - offset.top + 20;
-                    var new_active = 0 < shift && shift < elem.height();
+                    var top = elem.getOffsetRect().top;
+                    var height = elem.getBoundingClientRect().height;
+                    var shift = $window.pageYOffset - top + 20;
+                    var new_active = 0 < shift && shift < height;
                     if (new_active != ctrl.tocIsActive) {
                         ctrl.tocIsActive = new_active;
                         something_changed = true;
