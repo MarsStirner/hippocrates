@@ -20,7 +20,11 @@
 
         <div class="col-md-2 affix-holder">
             <div class="toc-affix" bs-affix>
-                <toc-affix toc-name="tocClientForm"></toc-affix>
+                <toc-affix toc-name="tocClientForm">
+                    <button ng-click="cancel_editing()" class="btn btn-sm btn-danger">Отменить</button>
+                    <button type="submit" class="btn btn-sm btn-success"
+                            tooltip="[[clientForm.$invalid ? 'Заполните все обязательные поля': '']]">Сохранить</button>
+                </toc-affix>
             </div>
         </div>
         <div class="col-md-10">
@@ -37,16 +41,7 @@
 {#                    {% include "patients/identifiers.html" %}#}
 {#                    {% include "patients/_doc_history.html" %}#}
 {#                    <legend>Debug</legend>#}
-                    <pre>[[client | json]]</pre>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="pull-right">
-                                <button ng-click="cancel_editing()" class="btn btn-lg btn-danger">Отменить</button>
-                                <button type="submit" class="btn btn-lg btn-success"
-                                        tooltip="[[clientForm.$invalid ? 'Заполните все обязательные поля': '']]">Сохранить</button>
-                            </div>
-                        </div>
-                    </div>
+{#                    <pre>[[client | json]]</pre>#}
                 </form>
             </div>
         </div>
