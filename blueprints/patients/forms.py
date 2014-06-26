@@ -4,10 +4,9 @@ from wtforms import StringField, SelectField, TextAreaField, DateField
 from wtforms.widgets import TextInput, Select
 from wtforms.validators import DataRequired, Required
 
-from application.app import app
-from application.models.client import Client
-from application.models.exists import (rbDocumentType, rbUFMS, rbPolicyType, Organisation, rbSocStatusType,
-    rbSocStatusClass, rbBloodType, rbAccountingSystem, rbRelationType, rbContactType, Person)
+
+
+# deprecated
 
 
 class AngularJSTextInput(TextInput):
@@ -97,9 +96,3 @@ class ClientForm(Form):
         # if not self.identification_accountingSystem.choices:
         #     self.identification_accountingSystem.choices = [(system.code, system.name)
         #                                                     for system in rbAccountingSystem.query.all()]
-        if not self.direct_relation_other.choices:
-            self.direct_relation_other.choices = [(client.id, client.nameText) for client in Client.query.all()]
-        if not self.reversed_relation_other.choices:
-            self.reversed_relation_other.choices = [(client.id, client.nameText) for client in Client.query.all()]
-        if not self.contact_contactType.choices:
-            self.contact_contactType.choices = [(contact.code, contact.name) for contact in rbContactType.query.all()]

@@ -188,8 +188,8 @@ angular.module('WebMis20.controllers').
 
             client.reload().then(function() {
                 $scope.refresh_form();
-            }, function() {
-                // todo: onerror?
+            }, function(message) {
+                alert(message);
             });
 
 //            $scope.delete_record = function(entity, record) {

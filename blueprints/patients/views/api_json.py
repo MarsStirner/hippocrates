@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
-from application.models.kladr_models import Kladr
 
 from flask import abort, request
 
-from application.systemwide import db, cache
-from application.lib.utils import jsonify, string_to_datetime, safe_date, logger
+from application.systemwide import db
+from application.lib.utils import jsonify, logger, parse_id
 from blueprints.patients.app import module
 from application.lib.sphinx_search import SearchPatient
 from application.lib.jsonify import ClientVisualizer
+from application.models.client import Client
 from blueprints.patients.lib.utils import *
 
 
@@ -78,14 +78,11 @@ def api_patient_url_events_appointments():
 
 @module.route('/api/patient.json')
 def api_patient_get():
-    try:
-        client_id = request.args['client_id']
-        if client_id != 'new':
-            client_id = int(client_id)
-    except KeyError or ValueError:
+    client_id = parse_id(request.args, 'client_id')
+    if client_id is False:
         return abort(404)
     context = ClientVisualizer()
-    if client_id and client_id != 'new':
+    if client_id:
         client = Client.query.get(client_id)
         if not client:
             return abort(404)
@@ -102,26 +99,6 @@ def api_patient_get():
         return jsonify({
             'client_data': context.make_client_info(client)
         })
-
-
-def parse_id(request_data, identifier, allow_empty=False):
-    """
-    :param request_data:
-    :param identifier:
-    :param allow_empty:
-    :return: None - empty identifier (new entity), False - parse error, int - correct identifier
-    """
-    _id = request_data.get(identifier)
-    if _id is None and allow_empty or _id == 'new':
-        return None
-    elif _id is None and not allow_empty:
-        return False
-    else:
-        try:
-            _id = int(_id)
-        except ValueError:
-            return False
-    return _id
 
 
 @module.route('/api/save_patient_info.json', methods=['POST'])
@@ -316,6 +293,7 @@ def api_patient_save():
 
 @module.route('/api/kladr_info.json', methods=['GET'])
 def api_kladr_city_get():
+    from application.models.kladr_models import Kladr
     val = request.args['city']
     res = Kladr.query.filter(Kladr.NAME.startswith(val)).all()
     return jsonify([{'name': r.NAME,

@@ -146,6 +146,7 @@ class Client(db.Model):
 
     @orm.reconstructor
     def init_on_load(self):
+        # TODO: redo?
         self._id_document = None
 
     def age_tuple(self, moment=None):

@@ -57,7 +57,7 @@ angular.module('WebMis20.services', []).
 //                        code: status,
 //                        type: 'danger'
 //                    });
-                    var message = data.result;
+                    var message = status === 404 ? 'Пациент с id ' + t.client_id + ' не найден.' : data.result;
                     deferred.reject(message);
                 });
                 return deferred.promise;

@@ -118,7 +118,7 @@ class Organisation(db.Model):
             'full_name': self.fullName,
             'short_name': self.shortName,
             'title': self.title,
-            'net': self.net,
+            # 'net': self.net,
             'infis': self.infisCode,
         }
 

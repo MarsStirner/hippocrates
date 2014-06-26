@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 
-from application.models.client import Client, ClientAllergy, ClientContact, ClientDocument, \
+from application.models.client import ClientAllergy, ClientContact, ClientDocument, \
     ClientIntoleranceMedicament, ClientSocStatus, ClientPolicy, \
     BloodHistory, ClientAddress, ClientRelation
 from application.models.exists import rbSocStatusClass
 from application.lib.utils import safe_date, safe_traverse, get_new_uuid
 
 
-# def format_snils(SNILS):
-#     if SNILS:
-#         s = SNILS+' '*14
-#         return s[0:3]+'-'+s[3:6]+'-'+s[6:9]+' '+s[9:11]
+# def format_snils(snils):
+#     if snils:
+#         snils = '%s-%s-%s %s' % (snils[0:3], snils[3:6], snils[6:9], snils[9:11])
+#         return snils
 #     else:
 #         return u''
 
