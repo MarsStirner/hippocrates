@@ -379,13 +379,13 @@ angular.module('WebMis20.directives').
             template:
                 '<div class="toc">\
                     <ul class="nav">\
-                        <li ng-repeat="node in tocName.$children">\
-                            <a ng-href="#[[node.$name]]" class="wrap-btn" ng-class="{\'text-danger bg-danger\': node.$invalid(), \'toc-selected-top\': node.tocIsActive}">\
+                        <li ng-repeat="node in tocName.$children" ng-class="{\'toc-selected-top\': node.tocIsActive}">\
+                            <a ng-href="#[[node.$name]]" class="wrap-btn" ng-class="{\'text-danger bg-danger\': node.$invalid()}">\
                                 [[ node.$title ]]\
                             </a>\
                             <ul ng-if="node.$children.length" class="nav">\
-                                <li ng-repeat="node in node.$children">\
-                                    <a ng-href="#[[node.$name]]" class="wrap-btn" ng-class="{\'text-danger bg-danger\': node.$invalid(), \'toc-selected-bottom\': node.tocIsActive}">\
+                                <li ng-repeat="node in node.$children" ng-class="{\'toc-selected-bottom\': node.tocIsActive}">\
+                                    <a ng-href="#[[node.$name]]" class="wrap-btn" ng-class="{\'text-danger bg-danger\': node.$invalid()}">\
                                         [[ node.$title ]]\
                                     </a>\
                                 </li>\
