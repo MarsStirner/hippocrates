@@ -100,10 +100,6 @@ angular.module('WebMis20.controllers').
                 bt[0].person = $scope.rbPerson.get(person_id);
             };
 
-            $scope.delete_blood_type = function(bt) {
-                client.delete_record('blood_types', bt);
-            };
-
             $scope.bt_history_visible = function() {
                 return client.blood_types && client.blood_types.filter(function(el) {
                     return el.id;

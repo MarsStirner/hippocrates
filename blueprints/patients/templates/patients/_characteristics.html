@@ -5,7 +5,7 @@
         <h4>Группа крови и резус фактор</h4>
         <div ng-repeat="bt in client.blood_types.slice(0, 1) | filter: flt_not_deleted()">
             <div class="row">
-                <div class="col-md-10">
+                <div class="col-md-11">
                     <ng-form name="cbtForm">
                         <wm-client-blood-type id-postfix="$index"
                             model-type="bt.blood_type"
@@ -19,7 +19,9 @@
                 <div class="col-md-1">
                     <div class="row">
                         <button type="button" class="btn btn-danger marginal" title="Удалить"
-                                ng-click="delete_blood_type(bt)"><span class="glyphicon glyphicon-trash"></span></button>
+                                ng-click="client.delete_record('blood_types', bt)" ng-if="!bt.id">
+                            <span class="glyphicon glyphicon-trash"></span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -56,7 +58,7 @@
         <h4>Аллергия</h4>
         <div ng-repeat="alg in client.allergies | filter: flt_not_deleted()">
             <div class="row">
-                <div class="col-md-10">
+                <div class="col-md-11">
                     <ng-form name="allergyForm">
                         <wm-client-allergy id-postfix="[[$index]]"
                             type="allergy"
@@ -93,7 +95,7 @@
         <h4>Медикаментозная непереносимость</h4>
         <div ng-repeat="intlr in client.intolerances | filter: flt_not_deleted()">
             <div class="row">
-                <div class="col-md-10">
+                <div class="col-md-11">
                     <ng-form name="intoleranceForm">
                         <wm-client-allergy id-postfix="[[$index]]"
                             type="intolerance"

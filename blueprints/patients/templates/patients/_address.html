@@ -4,7 +4,7 @@
     <h4>Адрес регистрации</h4>
     <div ng-repeat="reg_addr in client.reg_addresses | filter: flt_not_deleted()">
         <div class="row">
-            <div class="col-md-10">
+            <div class="col-md-11">
                 <ng-form name="regAddressForm" toc-element="регистрации">
                     <wm-kladr-address prefix='reg'
                         locality-model="reg_addr.address.locality"
@@ -42,7 +42,7 @@
     <h4>Адрес проживания</h4>
     <div ng-repeat="live_addr in client.live_addresses | filter: flt_not_deleted()">
         <div class="row">
-            <div class="col-md-10">
+            <div class="col-md-11">
                 <ng-form name="locAddressForm" toc-element="проживания">
                     <wm-kladr-address prefix='loc'
                         locality-model="live_addr.address.locality"

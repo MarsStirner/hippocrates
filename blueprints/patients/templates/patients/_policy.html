@@ -5,7 +5,7 @@
     <div ng-repeat="cpol in client.compulsory_policies | filter: flt_not_deleted()">
         <ng-form name="cpolForm" toc-element toc-dynamic="cpol.insurer.short_name">
             <div class="row">
-                <div class="col-md-10">
+                <div class="col-md-11">
                     <wm-policy p-type="0" id-postfix="c[[$index]]"
                         model-type="cpol.policy_type"
                         model-serial="cpol.serial"
@@ -43,7 +43,7 @@
     <div ng-repeat="vpol in client.voluntary_policies | filter: flt_not_deleted()">
         <ng-form name="vpolForm" toc-element toc-dynamic="vpol.insurer.short_name">
             <div class="row">
-                <div class="col-md-10">
+                <div class="col-md-11">
                     <wm-policy p-type="1" id-postfix="v[[$index]]"
                         model-type="vpol.policy_type"
                         model-serial="vpol.serial"

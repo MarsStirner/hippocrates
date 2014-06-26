@@ -5,7 +5,7 @@
     <ng-form name="_relations" toc-element="Связи" ng-model="client.relations">
         <div ng-repeat="relation in client.relations | filter: flt_not_deleted()">
             <div class="row">
-                <div class="col-md-10">
+                <div class="col-md-11">
                     <alert type="danger" ng-if="!client.info.sex">Для добавления родственной связи укажите пол пациента</alert>
                     <ng-form name="contactForm">
                         <wm-client-relation id-postfix="[[$index]]"
@@ -40,7 +40,7 @@
     <ng-form name="_contacts" toc-element="Контакты">
         <div ng-repeat="contact in client.contacts | filter: flt_not_deleted()">
             <div class="row">
-                <div class="col-md-10">
+                <div class="col-md-11">
                     <ng-form name="contactForm">
                         <wm-client-contact id-postfix="[[$index]]"
                             model-contact="contact"
