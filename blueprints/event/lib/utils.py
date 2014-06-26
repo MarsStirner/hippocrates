@@ -46,7 +46,9 @@ def create_new_local_contract(lc_info):
 
 
 def get_local_contract(lc_info):
-    lc_id = lc_info.get('id')
+    lc_id = None
+    if lc_info:
+        lc_id = lc_info.get('id')
     if lc_id:
         def _has_changes(lc, lc_info):
             if (lc.numberContract != lc_info.get('number_contract', '')

@@ -168,6 +168,7 @@
             if ($scope.event_form.$valid) {
                 $scope.event.save().
                     then(function(event_id) {
+                        $scope.event_form.$setPristine();
                         if ($scope.event.is_new()) {
                             $window.open('{{ url_for('.html_event_info') }}' + '?event_id=' + event_id, '_self');
                         } else {
