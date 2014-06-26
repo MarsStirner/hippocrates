@@ -465,7 +465,7 @@ div.toc-affix {
     /*text-decoration: underline;*/
 }
 .toc .nav > li > a {
-    padding: 5px;
+    padding: 4px 0 0 10px;
 }
 .toc .nav > li > a:hover {
     /*text-decoration: underline;*/
@@ -477,14 +477,36 @@ div.toc-affix {
     list-style: none;
 }
 .toc li > ul {
-    margin-left: 24px;
+    margin-left: 12px;
+}
+.toc .nav .nav > li > a {
+    font-size: 13px;
+    margin-top: 1px;
+    margin-bottom: 1px;
+    padding-top: 0;
+    padding-bottom: 0;
 }
 .affix-holder {
     padding: 0;
 }
-.toc .toc-selected-top {
-    border-right: 3px solid #00A0C0;
+.toc .nav .nav {
+    display: none;
 }
-.toc .toc-selected-bottom {
-    border-right: 2px solid #00A0C0;
+.toc .nav > .toc-selected-top > ul {
+    display: block;
+}
+.toc .toc-selected-top > a {
+    border-left: 2px solid #2a6496;
+    color: #2a6496;
+    margin-left: -2px;
+}
+.toc .toc-selected-top > a {
+    border-left: 2px solid #2a6496;
+    color: #2a6496;
+    margin-left: -2px;
+}
+.toc .toc-selected-bottom > a {
+    border-left: 1px solid #2a6496;
+    color: #2a6496;
+    margin-left: -1px;
 }
