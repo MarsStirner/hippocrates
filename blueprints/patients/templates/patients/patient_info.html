@@ -22,8 +22,8 @@
             <div class="toc-affix" bs-affix>
                 <toc-affix toc-name="tocClientForm">
                 <hr>
-                    <button ng-click="cancel_editing()" class="btn btn-danger">Отменить</button>
-                    <button type="submit" class="btn btn-success"
+                    <button ng-click="clientForm.cancel_editing()" class="btn btn-danger">Отменить</button>
+                    <button ng-click="save_client()" class="btn btn-success"
                             tooltip="[[clientForm.$invalid ? 'Заполните все обязательные поля': '']]">Сохранить</button>
                 </toc-affix>
             </div>
@@ -31,7 +31,7 @@
         <div class="col-md-10">
             <div ui-alert-list="alerts"></div>
             <div class="marginal">
-                <form name="clientForm" role="form" novalidate ng-submit="save_client(clientForm)" toc-element toc-name="tocClientForm">
+                <ng-form name="clientForm" role="form" novalidate toc-element toc-name="tocClientForm">
                     {% include "patients/_main_info.html" %}
                     {% include "patients/_id_doc.html" %}
                     {% include "patients/_address.html" %}
@@ -43,7 +43,7 @@
 {#                    {% include "patients/_doc_history.html" %}#}
 {#                    <legend>Debug</legend>#}
 {#                    <pre>[[client | json]]</pre>#}
-                </form>
+                </ng-form>
             </div>
         </div>
     </div>

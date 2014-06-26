@@ -157,7 +157,8 @@ angular.module('WebMis20.controllers').
 //                return (relationType.rightSex == 0 || relationType.rightSex == $scope.client.client_info.sex.id);
 //            };
 
-            $scope.save_client = function(form) {
+            $scope.save_client = function() {
+                var form = $scope.clientForm;
                 $scope.editing.submit_attempt = true;
                 if (form.$invalid) {
                     return false;
