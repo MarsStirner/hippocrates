@@ -476,6 +476,10 @@ div.toc-affix {
     padding: 0;
     list-style: none;
 }
+.toc hr{
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
 .toc li > ul {
     margin-left: 12px;
 }
