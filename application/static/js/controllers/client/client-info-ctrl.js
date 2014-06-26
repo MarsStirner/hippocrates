@@ -164,6 +164,13 @@ angular.module('WebMis20.controllers').
                 });
             };
 
+            $scope.cancel_editing = function() {
+                if (window.opener) {
+                    window.opener.focus();
+                    window.close();
+                }
+            };
+
             $scope.refresh_form = function() {
                 $scope.mainInfoForm.$setPristine(true);
                 if (!client.reg_addresses.length) {
