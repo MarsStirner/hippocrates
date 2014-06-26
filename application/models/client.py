@@ -82,7 +82,8 @@ class Client(db.Model):
     soc_statuses = db.relationship(
         u'ClientSocStatus',
         primaryjoin='and_(ClientSocStatus.deleted == 0, ClientSocStatus.client_id==Client.id)',
-        backref=db.backref('client')) #todo: filter_by_date
+        backref=db.backref('client')
+    )
     intolerances = db.relationship(
         u'ClientIntoleranceMedicament',
         primaryjoin='and_(ClientIntoleranceMedicament.client_id==Client.id, ClientIntoleranceMedicament.deleted == 0)',
@@ -253,11 +254,6 @@ class Client(db.Model):
             'full_name': self.nameText,
             'notes': self.notes,
             'work_org_id': self.works[0].org_id if self.works else None,
-            # 'direct_relations': self.direct_relations.all(),
-            # 'reversed_relations': self.reversed_relations.all(),
-            # 'phones': self.phones,
-            # 'reg_address': self.reg_address,
-            # 'loc_address': self.loc_address,
         }
 
 
@@ -268,45 +264,24 @@ class ClientAddress(db.Model):
         db.Index(u'client_id', u'client_id', u'type', u'address_id')
     )
 
-    id = db.Column(db.Integer,
-                   primary_key=True)
-    createDatetime = db.Column(db.DateTime,
-                               nullable=False,
-                               default=datetime.datetime.now)
-    createPerson_id = db.Column(db.Integer,
-                                index=True,
-                                default=safe_current_user_id)
-    modifyDatetime = db.Column(db.DateTime,
-                               nullable=False,
-                               default=datetime.datetime.now,
-                               onupdate=datetime.datetime.now)
-    modifyPerson_id = db.Column(db.Integer,
-                                index=True,
-                                default=safe_current_user_id,
-                                onupdate=safe_current_user_id)
-    deleted = db.Column(db.Integer,
-                        nullable=False,
-                        default=0,
-                        server_default=u"'0'")
-    client_id = db.Column(db.ForeignKey('Client.id'),
-                          nullable=False)
-    type = db.Column(db.Integer,
-                     nullable=False)
-    address_id = db.Column(db.Integer,
-                           db.ForeignKey('Address.id'))
-    freeInput = db.Column(db.String(200),
-                          nullable=False)
-    version = db.Column(db.Integer,
-                        nullable=False,
-                        default=0)
-    localityType = db.Column(db.Integer,
-                             nullable=False)
+    id = db.Column(db.Integer, primary_key=True)
+    createDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now)
+    createPerson_id = db.Column(db.Integer, index=True, default=safe_current_user_id)
+    modifyDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now, onupdate=datetime.datetime.now)
+    modifyPerson_id = db.Column(db.Integer, index=True, default=safe_current_user_id, onupdate=safe_current_user_id)
+    deleted = db.Column(db.Integer, nullable=False, default=0, server_default=u"'0'")
+    client_id = db.Column(db.ForeignKey('Client.id'), nullable=False)
+    type = db.Column(db.Integer, nullable=False)
+    address_id = db.Column(db.Integer, db.ForeignKey('Address.id'))
+    freeInput = db.Column(db.String(200), nullable=False)
+    version = db.Column(db.Integer, nullable=False, default=0)
+    localityType = db.Column(db.Integer, nullable=False)
 
     address = db.relationship(u'Address')
 
     @classmethod
     def create_from_kladr(cls, addr_type, loc_type, loc_kladr_code, street_kladr_code,
-            house_number, corpus_number, flat_number, client):
+                          house_number, corpus_number, flat_number, client):
         ca = cls(addr_type, loc_type, client)
         addr = Address.create_new(loc_kladr_code, street_kladr_code, house_number, corpus_number, flat_number)
         ca.address = addr
@@ -822,38 +797,19 @@ class ClientSocStatus(db.Model):
     __tablename__ = u'ClientSocStatus'
 
     id = db.Column(db.Integer, primary_key=True)
-    createDatetime = db.Column(db.DateTime,
-                               nullable=False,
-                               default=datetime.datetime.now)
-    createPerson_id = db.Column(db.Integer,
-                                index=True,
-                                default=safe_current_user_id)
-    modifyDatetime = db.Column(db.DateTime,
-                               nullable=False,
-                               default=datetime.datetime.now,
-                               onupdate=datetime.datetime.now)
-    modifyPerson_id = db.Column(db.Integer,
-                                index=True,
-                                default=safe_current_user_id,
-                                onupdate=safe_current_user_id)
-    deleted = db.Column(db.Integer,
-                        nullable=False,
-                        server_default=u"'0'",
-                        default=0)
+    createDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now)
+    createPerson_id = db.Column(db.Integer, index=True, default=safe_current_user_id)
+    modifyDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now, onupdate=datetime.datetime.now)
+    modifyPerson_id = db.Column(db.Integer, index=True, default=safe_current_user_id, onupdate=safe_current_user_id)
+    deleted = db.Column(db.Integer, nullable=False, server_default=u"'0'", default=0)
     client_id = db.Column(db.ForeignKey('Client.id'), nullable=False, index=True)
     socStatusClass_id = db.Column(db.ForeignKey('rbSocStatusClass.id'), index=True)
     socStatusType_id = db.Column(db.ForeignKey('rbSocStatusType.id'), nullable=False, index=True)
     begDate = db.Column(db.Date, nullable=False)
     endDate = db.Column(db.Date)
     document_id = db.Column(db.ForeignKey('ClientDocument.id'), index=True)
-    note = db.Column(db.Unicode(200),
-                     nullable=False,
-                     server_default=u"''",
-                     default=u'')
-    version = db.Column(db.Integer,
-                        nullable=False,
-                        server_default=u"'0'",
-                        default=0)
+    note = db.Column(db.Unicode(200), nullable=False, server_default=u"''", default=u'')
+    version = db.Column(db.Integer, nullable=False, server_default=u"'0'", default=0)
     benefitCategory_id = db.Column(db.Integer)
 
     soc_status_class = db.relationship(u'rbSocStatusClass', lazy=False)

@@ -339,25 +339,32 @@ def add_or_update_intolerance(client, data):
 def add_or_update_soc_status(client, data):
     err_msg = u'Ошибка сохранения соц. статуса'
     soc_status_id = data.get('id')
+
+    deleted = data.get('deleted', 0)
+    if deleted:
+        soc_status = ClientSocStatus.query.get(soc_status_id)
+        soc_status.deleted = deleted
+        if soc_status.self_document:
+            soc_status.self_document.deleted = deleted
+        return soc_status
+
     soc_status_type = safe_traverse(data, 'ss_type', 'id')
     soc_status_class_code = safe_traverse(data, 'ss_class', 'code')
     if not soc_status_type:
         raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Тип соц. статуса')
-    beg_date = data.get('beg_date')
+    beg_date = safe_date(data.get('beg_date'))
     if not beg_date:
         raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Дата начала')
-    end_date = data.get('end_date')
-    deleted = data.get('deleted', 0)
+    end_date = safe_date(data.get('end_date'))
     doc_info = data.get('self_document')
     doc = add_or_update_doc(client, doc_info) if doc_info else None
 
     if soc_status_id:
         soc_status = ClientSocStatus.query.get(soc_status_id)
         soc_status.socStatusType_id = soc_status_type
-        soc_status.beg_date = beg_date
-        soc_status.end_date = end_date
+        soc_status.begDate = beg_date
+        soc_status.endDate = end_date
         soc_status.client = client
-        soc_status.deleted = deleted
         soc_status.self_document = doc
     else:
         soc_status_class = rbSocStatusClass.query.filter(rbSocStatusClass.code == soc_status_class_code).first().id

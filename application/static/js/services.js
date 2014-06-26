@@ -32,13 +32,13 @@ angular.module('WebMis20.services', []).
                     var intolerances = data.result.client_data.intolerances;
                     t.intolerances = intolerances !== null ? intolerances : [];
                     t.soc_statuses = data.result.client_data.soc_statuses;
-                    t.invalidities = t.soc_statuses.filter(function(status){
+                    t.invalidities = t.soc_statuses.filter(function(status) {
                         return status.ss_class.code == 2;
                     });
-                    t.works = t.soc_statuses.filter(function(status){
+                    t.works = t.soc_statuses.filter(function(status) {
                         return status.ss_class.code == 3;
                     });
-                    t.nationalities = t.soc_statuses.filter(function(status){
+                    t.nationalities = t.soc_statuses.filter(function(status) {
                         return status.ss_class.code == 4;
                     });
                     t.contacts = data.result.client_data.contacts;
@@ -125,11 +125,11 @@ angular.module('WebMis20.services', []).
                 data.blood_types = this._get_entity_changes('blood_types');
                 data.allergies = this._get_entity_changes('allergies');
                 data.intolerances = this._get_entity_changes('intolerances');
-                var soc_statuses = this.invalidities.concat(this.works).concat(this.nationalities);
-                var changed_soc_statuses = soc_statuses.filter(function(el) {
-                    return el.dirty;
-                }).concat(this.deleted_entities.invalidities || []).concat(this.deleted_entities.works || []).concat(this.deleted_entities.nationalities || []);
-                data.soc_statuses = changed_soc_statuses.length ? changed_soc_statuses : undefined;
+                var soc_status_changes = [].
+                    concat(this._get_entity_changes('invalidities') || []).
+                    concat(this._get_entity_changes('works') || []).
+                    concat(this._get_entity_changes('nationalities') || []);
+                data.soc_statuses = soc_status_changes.length ? soc_status_changes : undefined;
                 data.relations = this._get_entity_changes('relations');
                 data.contacts = this._get_entity_changes('contacts');
 
