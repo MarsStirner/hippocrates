@@ -137,11 +137,11 @@ class ScheduleTicket(db.Model):
 
     @property
     def begDateTime(self):
-        return datetime.combine(self.schedule.date, self.begTime)
+        return datetime.combine(self.schedule.date, self.begTime) if self.begTime is not None else None
 
     @property
     def endDateTime(self):
-        return datetime.combine(self.schedule.date, self.endTime)
+        return datetime.combine(self.schedule.date, self.endTime) if self.endTime is not None else None
 
 
 class ScheduleClientTicket(db.Model):
