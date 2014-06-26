@@ -56,7 +56,7 @@
                      ng-class="{'has-error': addressForm.$dirty && addressForm.flat_number.$error.required && addressForm.flat_number.$invalid}">
                     <label for="[[prefix]]_flat_number">Квартира</label>
                     <wm-kladr-flat-number id="[[prefix]]_flat_number" name="flat_number"
-                        model="flatModel" required="!inFreeInputMode() && addressForm.$dirty"
+                        model="flatModel" required="false"
                         disabled="sameAddress() || (mode.switch_to_free_input || !editMode())">
                     </wm-kladr-flat-number>
                 </div>

@@ -68,7 +68,7 @@
                     </div>
                     <div class="form-group col-md-3"
                          ng-class="{'has-error': mainInfoForm.snils.$invalid && mainInfoForm.snils.$dirty}">
-                        <label for="snils" class="control-label">СНИЛС <span class="text-danger">*</span></label>
+                        <label for="snils" class="control-label">СНИЛС</label>
                         <input type="text" class="form-control" id="snils" name="snils" ui-mask="999-999-999 99"
                                ng-model="client.info.snils" placeholder="___-___-___ __"
                                ng-pattern="/\d{3}-\d{3}-\d{3} \d\d/" snils-validator
