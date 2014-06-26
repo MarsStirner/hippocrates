@@ -8,7 +8,7 @@
 
         <legend xmlns="http://www.w3.org/1999/html">
             <div class="pull-right">
-                <a class="btn btn-sm btn-success" href="{{ url_for('schedule.appointment') }}?client_id={{ request.args['client_id'] }}"
+                <a class="btn btn-sm btn-primary" href="{{ url_for('schedule.appointment') }}?client_id={{ request.args['client_id'] }}"
                    ng-if="client_id != 'new'">
                     Записать на приём</a>
                 <a class="btn btn-sm btn-primary" href="{{ url_for('event.new_event') }}?event_id=new&client_id={{ request.args['client_id'] }}"
@@ -23,9 +23,9 @@
             <div class="toc-affix" bs-affix>
                 <toc-affix toc-name="tocClientForm">
                 <hr>
-                    <button ng-click="cancel_editing()" class="btn btn-danger">Отменить</button>
                     <button ng-click="save_client()" class="btn btn-success"
                             tooltip="[[clientForm.$invalid ? 'Заполните все обязательные поля': '']]">Сохранить</button>
+                    <button ng-click="cancel_editing()" class="btn btn-danger">Отменить</button>
                 </toc-affix>
             </div>
         </div>
@@ -33,7 +33,7 @@
 
             <div ui-alert-list="alerts"></div>
             <div class="marginal">
-                <ng-form name="clientForm" role="form" novalidate toc-element toc-name="tocClientForm">
+                <ng-form name="clientForm" role="form" novalidate toc-element toc-name="tocClientForm" form-safe-close>
                     {% include "patients/_main_info.html" %}
                     {% include "patients/_id_doc.html" %}
                     {% include "patients/_address.html" %}

@@ -147,6 +147,7 @@ angular.module('WebMis20.controllers').
                 }
                 $scope.client.save().then(function(new_client_id) {
                     if ($scope.client_id == 'new') {
+                        $scope.mainInfoForm.$setPristine(true);
                         window.open(url_client_html + '?client_id=' + new_client_id, '_self');
                     } else {
                         $scope.client.reload().then(function() {

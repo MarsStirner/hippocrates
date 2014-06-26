@@ -478,7 +478,7 @@ return {
         });
     }
 }
-}]).directive('formSafeClose', [function () {
+}]).directive('formSafeClose', ['$timeout', function ($timeout) {
 return {
     restrict: 'A',
     require: 'form',
@@ -491,15 +491,22 @@ return {
                 }
             }
         });
+        // Чтобы обойти баг FF с повторным вызовом onbeforeunload (http://stackoverflow.com/a/2295156/1748202)
+        $scope.onBeforeUnloadFired = false;
 
+        $scope.ResetOnBeforeUnloadFired = function () {
+           $scope.onBeforeUnloadFired = false;
+        };
         window.onbeforeunload = function(evt){
-            if (form.$dirty) {
+            if (form.$dirty && !$scope.onBeforeUnloadFired) {
+                $scope.onBeforeUnloadFired = true;
                 if (typeof evt == "undefined") {
                     evt = window.event;
                 }
                 if (evt) {
                     evt.returnValue = message;
                 }
+                $timeout($scope.ResetOnBeforeUnloadFired);
                 return message;
             }
         };
