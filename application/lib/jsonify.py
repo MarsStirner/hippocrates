@@ -236,25 +236,24 @@ class ClientVisualizer(object):
     def make_relation_info(self, client_id, relation):
         if client_id == relation.client_id:
             return {
-                'type': relation.relativeType,
+                'id': relation.id,
+                'deleted': relation.deleted,
+                'rel_type': relation.relativeType,
                 'relative': self.make_short_client_info(relation.relative),
                 'direct': True,
             }
-        else:
+        elif client_id == relation.relative_id:
             return {
-                'type': relation.relativeType,
+                'id': relation.id,
+                'deleted': relation.deleted,
+                'rel_type': relation.relativeType,
                 'relative': self.make_short_client_info(relation.client),
                 'direct': False,
             }
+        else:
+            raise ValueError('Relation info does not match Client')
 
     def make_client_info(self, client):
-        documents = [doc.__json__() for doc in client.documents_all]
-        policies = [policy.__json__() for policy in client.policies_all]
-        document_history = documents + policies
-
-        identifications = [self.make_identification_info(identification) for identification in client.identifications]
-        relations = [self.make_relation_info(client.id, relation) for relation in client.client_relations]
-
         reg_addr = client.reg_address
         live_addr = client.loc_address
         if reg_addr and live_addr:
@@ -262,6 +261,12 @@ class ClientVisualizer(object):
                 setattr(live_addr, 'same_as_reg', True)
                 setattr(live_addr, 'copy_from_id', reg_addr.id)
 
+        relations = [self.make_relation_info(client.id, relation) for relation in client.client_relations]
+
+        documents = [doc.__json__() for doc in client.documents_all]
+        policies = [policy.__json__() for policy in client.policies_all]
+        document_history = documents + policies
+        # identifications = [self.make_identification_info(identification) for identification in client.identifications]
         return {
             'info': client,
             'id_document': client.id_document,
@@ -275,12 +280,9 @@ class ClientVisualizer(object):
             'soc_statuses': client.soc_statuses,
             'relations': relations,
             'contacts': client.contacts.all(),
-
             'document_history': document_history,
             # 'contact': client.phones,
             # 'identifications': identifications,
-
-
         }
 
     def make_search_client_info(self, client):
