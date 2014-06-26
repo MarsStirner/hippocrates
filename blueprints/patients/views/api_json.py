@@ -4,7 +4,7 @@ from application.models.kladr_models import Kladr
 from flask import abort, request
 
 from application.systemwide import db, cache
-from application.lib.utils import jsonify, string_to_datetime, safe_date
+from application.lib.utils import jsonify, string_to_datetime, safe_date, logger
 from blueprints.patients.app import module
 from application.lib.sphinx_search import SearchPatient
 from application.lib.jsonify import ClientVisualizer
@@ -303,16 +303,13 @@ def api_patient_save():
     #             db.session.add(id_ext)
         db.session.commit()
     except Exception, e:
-        # TODO: LOG!!
+        logger.error(e, exc_info=True)
         db.session.rollback()
-        raise
-        return make_response(jsonify({'name': err_msg,
-                                      'data': {
-                                          'err_msg': 'INTERNAL SERVER ERROR'
-                                       }
-                                      },
-                                     500, 'save client data error')[0],
-                             500)
+        return jsonify({'name': err_msg,
+                        'data': {
+                            'err_msg': 'INTERNAL SERVER ERROR'
+                        }},
+                       500, 'save client data error')
 
     return jsonify(int(client))
 
