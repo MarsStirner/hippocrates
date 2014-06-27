@@ -302,13 +302,13 @@ angular.module('WebMis20.directives').
         this.unregister = function (ctrl) {
             var i = cache.length;
             while (i--) {
-                if (cache[i][0] === ctrl) {
+                if (cache[i][0] == ctrl) {
                     cache.splice(i, 1);
-                    return;
+                    break;
                 }
             }
             if (ctrl.$parent) {
-                aux.removeFromArray(ctrl.$parent, ctrl)
+                aux.removeFromArray(ctrl.$parent.$children, ctrl)
             }
         };
         this.registerToc = function (the_toc) {
