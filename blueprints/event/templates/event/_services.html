@@ -81,7 +81,7 @@
                                     ng-click="remove_coord_service(service)"><span class="glyphicon glyphicon-remove"></span>
                             </button>
                             <button type="button" class="btn btn-sm btn-danger" title="Убрать из списка услуг"
-                                    ng-if="!(service.fully_paid || service.partially_paid || service.coord_actions)"
+                                    ng-if="!(service.fully_paid || service.partially_paid || service.coord_actions.length)"
                                     ng-click="remove_service(index)"><span class="glyphicon glyphicon-trash"></span>
                             </button>
                             {% if form_role == 'admin' %}
