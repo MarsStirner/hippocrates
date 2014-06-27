@@ -286,13 +286,6 @@ class ClientVisualizer(object):
         }
 
     def make_search_client_info(self, client):
-        reg_addr = client.reg_address
-        live_addr = client.loc_address
-        if reg_addr and live_addr:
-            if client.has_identical_addresses():
-                setattr(live_addr, 'same_as_reg', True)
-                setattr(live_addr, 'copy_from_id', reg_addr.id)
-
         return {
             'info': client,
             'id_document': client.id_document,
@@ -305,20 +298,28 @@ class ClientVisualizer(object):
         :type client: application.models.client.Client
         :return:
         """
+        # TODO: replace with CLient.__json__
         return {
             'id': client.id,
             'first_name': client.firstName,
             'patr_name': client.patrName,
             'last_name': client.lastName,
             'birth_date': client.birthDate,
-            'sex': Gender(client.sexCode),
-            'full_name': u' '.join(u' '.join((client.firstName, client.patrName, client.lastName)).split())
+            'sex': Gender(client.sexCode) if client.sexCode is not None else None,
+            'full_name': client.nameText
+        }
+
+    def make_client_info_for_servicing(self, client):
+        return {
+            'client_data': self.make_search_client_info(client),
+            'appointments': self.make_appointments(client),
+            'events': self.make_events(client)
         }
 
     def make_appointments(self, client):
         return map(
             self.make_appointment,
-            client.appointments#.order_by(ScheduleTicket.begDateTime.desc())
+            client.appointments  # .order_by(ScheduleTicket.begDateTime.desc())
         )
 
     def make_appointment(self, apnt):

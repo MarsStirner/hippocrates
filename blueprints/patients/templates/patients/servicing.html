@@ -45,12 +45,12 @@
                 </thead>
                 <tbody>
                 <tr ng-repeat="result in results" style="cursor: pointer" ng-click="set_patient_id(result.info.id)"
-                        ng-class="{'bg-info text-info': result.id === client_id}">
+                        ng-class="{'bg-info text-info': result.info.id === client_id}">
                     <td ng-bind="result.info.full_name"></td>
                     <td ng-bind="result.info.birth_date | asDate"></td>
                     <td ng-bind="result.info.sex.name"></td>
                     <td ng-bind="result.id_document.doc_text"></td>
-                    <td><nobr>[[ result.info.snils ]]</nobr></td>
+                    <td><nobr>[[ clientService.formatSnils(result.info.snils) ]]</nobr></td>
                     <td ng-bind="result.compulsory_policy.policy_text"></td>
                     <td><div ng-repeat="policy in result.voluntary_policies">[[ policy.policy_text ]]</div></td>
                 </tr>
@@ -79,18 +79,19 @@
 {#                </ul>#}
 {#            </div>#}
         </div>
-        <tabset  ng-if="client">
-            <tab heading="Предварительные записи">{% include "patients/appointments.html" %}</tab>
-            <tab heading="Обращения">{% include "patients/event_list.html" %}</tab>
+        <tabset ng-if="client">
+            <tab heading="Предварительные записи">{% include "patients/_appointments.html" %}</tab>
+            <tab heading="Обращения">{% include "patients/_event_list.html" %}</tab>
         </tabset>
-        {#        <pre>[[schedule|json]]</pre>#}
+        {#        <pre>[[schedule|json]]</pre><pre>[[client | json]]</pre>#}
     </div>
-    <script type="text/ng-template" id="modal-print-dialog.html">{% include "_modal-print-dialog.html" %}</script>
+
 {% endblock %}
 
 {% block modules_js %}
     {{ super() }}
     <script type="text/ng-template" id="modal-createEvent.html">{% include "patients/_modal_create_event.html" %}</script>
+    <script type="text/ng-template" id="modal-print-dialog.html">{% include "_modal-print-dialog.html" %}</script>
     <script type="text/javascript">
         CreateEventModalCtrl = function ($scope, $modalInstance, client_id) {
             $scope.cancel = function () {
@@ -98,28 +99,29 @@
             };
             $scope.client_id = client_id;
         };
-        WebMis20.controller('ClientSearch', ['$scope', '$http', '$timeout', '$window', 'PrintingService', 'WMClient', '$modal',
-            function ($scope, $http, $timeout, $window, PrintingService, WMClient, $modal) {
+        WebMis20.controller('ClientSearch',
+            ['$scope', '$http', '$timeout', '$window', 'PrintingService', 'WMClient', 'WMClientService', '$modal',
+            function ($scope, $http, $timeout, $window, PrintingService, WMClient, WMClientService, $modal) {
                 $scope.ps = new PrintingService('registry');
                 $scope.ps_resolve = function () {
                     return {
                         client_id: $scope.client_id
                     }
-                }
+                };
                 $scope.ps_amb = new PrintingService('preliminary_records');
                 $scope.ps_amb_resolve = function (client_ticket_id) {
                     return {
                         client_id: $scope.client_id,
                         ticket_id: client_ticket_id
                     }
-                }
+                };
                 $scope.ps_home = new PrintingService('preliminary_records');
                 $scope.ps_home_resolve = function (client_ticket_id) {
                     return {
                         client_id: $scope.client_id,
                         ticket_id: client_ticket_id
                     }
-                }
+                };
                 $scope.ps_amb.set_context('orderAmb');
                 $scope.ps_home.set_context('orderHome');
                 $scope.ps.set_context('token');
@@ -129,17 +131,19 @@
                 $scope.results = null;
                 $scope.client_id = null;
                 $scope.client = null;
+                $scope.clientService = WMClientService;
                 $scope.alerts = [];
 
                 $scope.set_patient_id = function (patient_id) {
                     $scope.client_id = patient_id;
                     $scope.client = new WMClient(patient_id);
-                    $scope.client.get_events_appointments();
+                    $scope.client.reload('for_servicing');
                 };
 
                 $scope.clear_results = function () {
                     $scope.results = null;
                     $scope.client = null;
+                    $scope.client_id = null;
                 };
 
                 $scope.perform_search = function () {
@@ -152,7 +156,7 @@
                             }
                         ).success(function (data) {
                             $scope.results = data.result;
-                        })
+                        });
                     }
                 };
 

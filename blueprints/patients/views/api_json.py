@@ -40,40 +40,12 @@ def api_search_clients():
             base_query = base_query.filter(Client.id.in_(id_list))
         else:
             return jsonify([])
-    clients = base_query.order_by(Client.lastName, Client.firstName, Client.patrName).limit(100).all()
+    clients = base_query.order_by(Client.lastName, Client.firstName, Client.patrName, Client.SNILS).limit(100).all()
     context = ClientVisualizer()
     if 'short' in request.args:
         return jsonify(map(context.make_short_client_info, clients))
     else:
         return jsonify(map(context.make_search_client_info, clients))
-
-
-@module.route('/api/patient_events_appointments.json')
-def api_patient_url_events_appointments():
-    try:
-        client_id = request.args['client_id']
-        if client_id != 'new':
-            client_id = int(client_id)
-    except KeyError or ValueError:
-        return abort(404)
-    context = ClientVisualizer()
-    if client_id and client_id != 'new':
-        client = Client.query.get(client_id)
-        if not client:
-            return abort(404)
-        if 'short' in request.args:
-            return jsonify(context.make_short_client_info(client))
-        return jsonify({
-            'client_data': context.make_search_client_info(client),
-            'appointments': context.make_appointments(client),
-            'events': context.make_events(client)
-        })
-    else:
-        client = Client()
-        db.session.add(client)
-        return jsonify({
-            'client_data': context.make_search_client_info(client)
-        })
 
 
 @module.route('/api/patient.json')
@@ -86,16 +58,16 @@ def api_patient_get():
         client = Client.query.get(client_id)
         if not client:
             return abort(404)
-        if 'short' in request.args:
+
+        if 'for_servicing' in request.args:
+            return jsonify(context.make_client_info_for_servicing(client))
+        elif 'short' in request.args:
             return jsonify(context.make_short_client_info(client))
         return jsonify({
-            'client_data': context.make_client_info(client),
-            'appointments': context.make_appointments(client),
-            'events': context.make_events(client)
+            'client_data': context.make_client_info(client)
         })
     else:
         client = Client()
-        db.session.add(client)
         return jsonify({
             'client_data': context.make_client_info(client)
         })
