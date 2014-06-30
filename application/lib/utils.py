@@ -35,7 +35,8 @@ def breadcrumb(view_title):
                 if client_id == u'new':
                     title = u"Новый пациент"
                 else:
-                    title = Client.query.get(client_id).nameText
+                    client = Client.query.get(client_id)
+                    title = client.nameText if client else ''
             elif request.path == u'/event/event.html':
                 title = u"Редактирование обращения"
             session_crumbs = session.setdefault('crumbs', [])
@@ -354,3 +355,23 @@ def _get_external_id_from_counter(prefix, value, separator, client_id):
 def request_wants_json():
     best = request.accept_mimetypes.best_match(['application/json', 'text/html'])
     return best == 'application/json' and request.accept_mimetypes[best] > request.accept_mimetypes['text/html']
+
+
+def parse_id(request_data, identifier, allow_empty=False):
+    """
+    :param request_data:
+    :param identifier:
+    :param allow_empty:
+    :return: None - empty identifier (new entity), False - parse error, int - correct identifier
+    """
+    _id = request_data.get(identifier)
+    if _id is None and allow_empty or _id == 'new':
+        return None
+    elif _id is None and not allow_empty:
+        return False
+    else:
+        try:
+            _id = int(_id)
+        except ValueError:
+            return False
+    return _id

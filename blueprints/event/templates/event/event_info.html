@@ -6,16 +6,34 @@
     <div ng-controller="EventInfoCtrl" class="ng-cloak">
         {% include "_breadcrumbs.html" %}
         <legend xmlns="http://www.w3.org/1999/html" wm-page-header>
+            <div class="pull-right text-right col-md-1"><button type="button" ng-click="save_event();" ng-hide="event.is_new();" class="btn btn-success" title="Сохранить"><span class="glyphicon glyphicon-ok"></span></button></div>
             <h2>[[event.is_new() ? 'Создание обращения' : 'Обращение № ' + event.info.external_id]], пациент
-                <a href="{{ url_for('patients.patient') }}?client_id=[[event.info.client_id]]">[[ event.info.client.fullName ]]</a>
+                <a href="{{ url_for('patients.patient') }}?client_id=[[event.info.client_id]]">[[ event.info.client.info.full_name ]]</a>
             </h2>
         </legend>
 
-        <div class="marginal">
-            <alert ng-repeat="alert in alerts" type="alert.type" close="alerts.splice(index, 1)">[[ alert.text ]] [ [[alert.code]] ]</alert>
+        <div ui-alert-list="alerts"></div>
+        <div class="well well-sm">
+            <div class="row">
+                <div class="col-md-9">
+                    <dl class="dl-horizontal novmargin">
+                        <dt>Контактный телефон:</dt><dd>[[event.info.client.contact]]&nbsp;</dd>
+                        <dt>Адрес регистрации:</dt><dd>[[event.info.client.reg_address ? event.info.client.reg_address.text_summary : '']]&nbsp;</dd>
+                        <dt>Адрес проживания:</dt><dd>[[event.info.client.live_address ? event.info.client.live_address.text_summary : '']]&nbsp;</dd>
+                        <dt>Документ:</dt><dd>[[event.info.client.id_document ? event.info.client.id_document.doc_text : '']]&nbsp;</dd>
+                        <dt>Медицинский полис:</dt><dd ng-repeat="policy_text in policies">[[policy_text]]&nbsp;</dd>
+                    </dl>
+                </div>
+                <div class="col-md-3">
+                    <dl class="dl-horizontal novmargin pull-right">
+                        <dt>Код пациента:</dt><dd>[[event.info.client.info.id]]&nbsp;</dd>
+                        <dt>Дата рождения:</dt><dd>[[event.info.client.info.birth_date|asDate]]&nbsp;</dd>
+                        <dt>Пол:</dt><dd>[[event.info.client.info.sex.name]]&nbsp;</dd>
+                    </dl>
+                </div>
+            </div>
         </div>
-
-        <ng-form name="event_form">
+        <ng-form name="event_form" form-safe-close>
         {# В зависимости от ролей и прав разный лейаут #}
         {% if form_role == 'admin' %}
             <tabset>
@@ -64,23 +82,24 @@
         </ng-form>
         <div class="row">
             <div class="col-md-6 text-left">
-                <div class="dropup" ng-if="!event.is_new()">
-                    <button class="btn btn-lg btn-default dropdown-toggle" type="button" id="print_dropdownMenu"
-                            data-toggle="dropdown" ng-disabled="!ps.templates">
-                        <span class="glyphicon glyphicon-print"></span> Печать <span class="caret"></span>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu" role="menu" aria-labelledby="print_dropdownMenu">
-                        <li role="presentation" ng-repeat="template in ps.templates">
-                            <a role="menuitem" tabindex="-1" href="" class="print_template"
-                               ng-click="ps.print_template(template.id)" ng-bind="template.name"></a>
-                        </li>
-                    </ul>
-                </div>
+                <ui-print-button ps="ps" resolve="ps_resolve()" ng-if="!event.is_new()"></ui-print-button>
+{#                <div class="dropup" ng-if="!event.is_new()">#}
+{#                    <button class="btn btn-lg btn-default dropdown-toggle" type="button" id="print_dropdownMenu"#}
+{#                            data-toggle="dropdown" ng-disabled="!ps.templates">#}
+{#                        <span class="glyphicon glyphicon-print"></span> Печать <span class="caret"></span>#}
+{#                    </button>#}
+{#                    <ul class="dropdown-menu dropdown-menu" role="menu" aria-labelledby="print_dropdownMenu">#}
+{#                        <li role="presentation" ng-repeat="template in ps.templates">#}
+{#                            <a role="menuitem" tabindex="-1" href="" class="print_template"#}
+{#                               ng-click="ps.print_template(template.id)" ng-bind="template.name"></a>#}
+{#                        </li>#}
+{#                    </ul>#}
+{#                </div>#}
             </div>
             <div class="col-md-6 text-right">
-                <button type="button" ng-click="cancel_editing();" class="btn btn-lg btn-danger">Назад</button>
                 <button type="button" ng-click="save_event();" class="btn btn-lg btn-success"
                         ng-bind="event.is_new() ? 'Создать' : 'Сохранить'">Создать</button>
+                <button type="button" ng-click="cancel_editing();" class="btn btn-lg btn-danger">Закрыть</button>
             </div>
         </div>
 {#        <div>#}
@@ -88,24 +107,29 @@
 {#            <pre>[[event | json]]</pre>#}
 {#        </div>#}
     </div>
+    <script type="text/ng-template" id="modal-print-dialog.html">{% include "_modal-print-dialog.html" %}</script>
 {% endblock %}
 
 {% block modules_js %}
 {{ super() }}
 <script>
-    WebMis20.controller('EventInfoCtrl', ['$scope', 'WMEvent', '$http', 'RefBookService', '$window', 'PrintingService', 'Settings',
-        function ($scope, WMEvent, $http, RefBookService, $window, PrintingService, Settings) {
+    WebMis20.controller('EventInfoCtrl', ['$scope', 'WMEvent', '$http', 'RefBookService', '$window', 'PrintingService', 'Settings', '$filter',
+        function ($scope, WMEvent, $http, RefBookService, $window, PrintingService, Settings, $filter) {
 
         $scope.aux = aux;
         $scope.Organisation = RefBookService.get('Organisation');
         $scope.Settings = new Settings();
+        $scope.alerts = [];
 
-        $scope.event_id = aux.getQueryParams(location.search).event_id;
-        $scope.client_id = aux.getQueryParams(location.search).client_id;
-        $scope.event = new WMEvent($scope.event_id, $scope.client_id);
+        var params = aux.getQueryParams(location.search);
+        $scope.event_id = params.event_id;
+        $scope.client_id = params.client_id;
+        $scope.ticket_id = params.ticket_id;
+        $scope.event = new WMEvent($scope.event_id, $scope.client_id, $scope.ticket_id);
         $scope.editing = {
             submit_attempt: false
         };
+        $scope.policies = [];
 
         $scope.initialize = function() {
             $scope.event.reload().
@@ -115,6 +139,15 @@
 
                     } else {
                         $scope.ps.set_context($scope.event.info.event_type.print_context)
+                    }
+
+                    if ($scope.event.info.client.compulsory_policy && $scope.event.info.client.compulsory_policy.policy_text) {
+                        $scope.policies.push($scope.event.info.client.compulsory_policy.policy_text + ' ('+ $filter('asDate')($scope.event.info.client.compulsory_policy.beg_date) + '-' + $filter('asDate')($scope.event.info.client.compulsory_policy.end_date) +')');
+                    }
+                    if ($scope.event.info.client.voluntary_policies.length>0) {
+                        angular.forEach($scope.event.info.client.voluntary_policies, function (value, key) {
+                            $scope.policies.push(value.policy_text + ' ('+ $filter('asDate')(value.beg_date) + '-' + $filter('asDate')(value.end_date) + ')');
+                        });
                     }
                 });
             {% if form_role == 'doctor' or form_role == 'admin' %}
@@ -135,6 +168,7 @@
             if ($scope.event_form.$valid) {
                 $scope.event.save().
                     then(function(event_id) {
+                        $scope.event_form.$setPristine();
                         if ($scope.event.is_new()) {
                             $window.open('{{ url_for('.html_event_info') }}' + '?event_id=' + event_id, '_self');
                         } else {
@@ -148,12 +182,19 @@
             }
         };
 
+        $scope.cancel_editing = function(){
+          if (window.opener){
+              window.opener.focus();
+              window.close();
+          }
+        };
 
-        $scope.ps = new PrintingService("event", function (template_id) {
+        $scope.ps = new PrintingService("event");
+        $scope.ps_resolve = function () {
             return {
                 event_id: $scope.event_id
             }
-        });
+        }
 
         $scope.print_template = function (template_id) {
             $http.post(
@@ -167,11 +208,11 @@
                         currentPerson:"1"
                     }
                 }).success(function (data) {
-                    $scope.w = $window.open();
-                    $scope.w.document.open();
-                    $scope.w.document.write(data);
-                    $scope.w.document.close();
-                    $scope.w.print();
+                    var w = $window.open();
+                    w.document.open();
+                    w.document.write(data);
+                    w.document.close();
+                    w.print();
                })
         };
 
@@ -206,6 +247,15 @@
             window.open('{{ url_for('schedule.html_action') }}?action_id=' + action_id);
         };
         {# action data end #}
+
+        $scope.$watch('event.info.contract', function(new_val, old_val) {
+            if (new_val != old_val) {
+              $scope.$broadcast('form_state_change', {
+                  finance: $scope.event.info.event_type.finance,
+                  contract: new_val
+              });
+            }
+        }, true);
 
         $scope.initialize();
     }]);

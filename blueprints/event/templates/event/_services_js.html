@@ -6,6 +6,9 @@ WebMis20.controller('EventServicesCtrl', ['$scope', '$http', 'WMEventService',
         $scope.search_processed = false;
         $scope.full_sum = 0;
 
+        $scope.finance_is_oms = function(){return $scope._finance && $scope._finance.code == '2'};
+        $scope.finance_is_dms = function(){return $scope._finance && $scope._finance.code == '3'};
+
         $scope.perform_search = function(val) {
             $scope.search_processed = false;
             if (!val) {
@@ -39,7 +42,9 @@ WebMis20.controller('EventServicesCtrl', ['$scope', '$http', 'WMEventService',
                     amount: 1,
                     is_new: true,
                     sum: service.price,
-                    actions: []
+                    actions: [],
+                    coord_actions: [],
+                    coord_count: 0
                 });
                 $scope.event.services.push(new WMEventService(service_data, $scope.event.payment.payments));
             }
@@ -80,15 +85,10 @@ WebMis20.controller('EventServicesCtrl', ['$scope', '$http', 'WMEventService',
             }
         }, true);
 
-        $scope.$watch('event.info.event_type.finance.id', function(new_val, old_val) {
-            if (new_val && new_val != old_val) {
-              $scope.query_clear();
-            }
-        });
-        $scope.$watch('event.info.contract', function(new_val, old_val) {
-            if (new_val && new_val != old_val) {
-              $scope.query_clear();
-            }
+        $scope.$on('form_state_change', function(event, arg) {
+            $scope._finance = arg['finance'];
+            $scope._contract = arg['contract'];
+            $scope.query_clear();
         });
 
         $scope.pay = function(service) {
@@ -116,6 +116,54 @@ WebMis20.controller('EventServicesCtrl', ['$scope', '$http', 'WMEventService',
                 });
             }
             $scope.event.reload();
+        };
+
+        $scope.apply_coord_service = function(service) {
+            if ($scope.event.info.id){
+                service.coord_person_id = current_user_id;
+                $http.post(
+                    '{{ url_for('.api_service_add_coord') }}', {
+                        event_id: $scope.event.info.id,
+                        finance_id: $scope.event.info.contract.finance.id,
+                        service: service
+                    }
+                ).success(function(result) {
+                    service.actions = result['result']['data'];
+                    service.coord_actions = result['result']['data'];
+                    service.coord_count = service.coord_actions.length;
+{#                    alert('ok');#}
+                }).error(function() {
+                    service.coord_person_id = undefined;
+                    alert('error');
+                });
+            } else {
+                service.coord_person_id = current_user_id;
+                service.coord_count = service.amount;
+            }
+{#            $scope.event.reload();#}
+        };
+
+        $scope.remove_coord_service = function(service) {
+            if ($scope.event.info.id){
+                $http.post(
+                    '{{ url_for('.api_service_remove_coord') }}', {
+                        action_id: service.coord_actions,
+                        coord_person_id: null
+                    }
+                ).success(function() {
+                    service.coord_actions = [];
+                    service.coord_person_id = null;
+                    service.coord_count = service.coord_actions.length;
+{#                    alert('ok');#}
+                }).error(function() {
+                    alert('error');
+                });
+            } else {
+                service.coord_actions = [];
+                service.coord_person_id = null;
+                service.coord_count = service.coord_actions.length;
+            }
+{#            $scope.event.reload();#}
         };
 
 }]);

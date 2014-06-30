@@ -5,7 +5,6 @@
 {% block main %}
     <legend xmlns="http://www.w3.org/1999/html"><h2>Обслуживание пациентов</h2></legend>
     <div ng-controller="ClientSearch" class="ng-cloak">
-        <script type="text/ng-template" id="modal-createEvent.html">{% include "patients/_modal_create_event.html" %}</script>
         <form class="form-horizontal marginal" role="form">
             <div class="input-group">
                 <span class="input-group-addon"><span class="glyphicon glyphicon-search"></span></span>
@@ -13,14 +12,11 @@
                        ng-change="clear_results()" wm-slow-change="perform_search()"
                        placeholder="Поиск пациента по коду, ФИО, полису или документу, удостоверяющему личность">
                 <span class="input-group-btn">
-                    <button class="btn btn-default" ng-click="query_clear()"><span class="glyphicon glyphicon-remove"></span></button>
+                    <button class="btn btn-danger" ng-click="query_clear()"><span class="glyphicon glyphicon-remove"></span></button>
                 </span>
             </div>
         </form>
-        <div class="marginal">
-            <alert ng-repeat="alert in alerts" type="[[alert.type]]" close="alerts.splice(index, 1)">[[ alert.text ]] [ [[alert.code]] ]
-            </alert>
-        </div>
+        <div ui-alert-list="alerts"></div>
         <div class="panel panel-default" ng-class="{'panel-danger': results.length === 0, 'panel-success': results.length > 0}">
             <div class="panel-heading">
                 <div class="row">
@@ -48,50 +44,54 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr ng-repeat="result in results" style="cursor: pointer" ng-click="set_patient_id(result.id)"
-                        ng-class="{'bg-info text-info': result.id === client_id}">
-                    <td ng-bind="result.nameText"></td>
-                    <td ng-bind="result.birthDate | asDate"></td>
-                    <td ng-bind="result.sex.name"></td>
-                    <td ng-bind="result.documentText"></td>
-                    <td><nobr>[[ result.SNILS ]]</nobr></td>
-                    <td ng-bind="result.compulsoryPolicy.policyText"></td>
-                    <td ng-bind="result.voluntaryPolicy.policyText"></td>
+                <tr ng-repeat="result in results" style="cursor: pointer" ng-click="set_patient_id(result.info.id)"
+                        ng-class="{'bg-info text-info': result.info.id === client_id}">
+                    <td ng-bind="result.info.full_name"></td>
+                    <td ng-bind="result.info.birth_date | asDate"></td>
+                    <td ng-bind="result.info.sex.name"></td>
+                    <td ng-bind="result.id_document.doc_text"></td>
+                    <td><nobr>[[ clientService.formatSnils(result.info.snils) ]]</nobr></td>
+                    <td ng-bind="result.compulsory_policy.policy_text"></td>
+                    <td><div ng-repeat="policy in result.voluntary_policies">[[ policy.policy_text ]]</div></td>
                 </tr>
                 </tbody>
             </table>
         </div>
         <div class="marginal" ng-if="client">
+                <a class="btn btn-primary" target="_blank" ng-href="{{ url_for('schedule.appointment') }}?client_id=[[ client_id ]]">Записать на приём</a>
                 <a class="btn btn-primary" target="_blank" ng-href="{{ url_for('event.new_event') }}?client_id=[[ client_id ]]"
                         ng-if="client.appointments.length == 0">Создать обращение</a>
                 <button class="btn btn-primary" ng-click="modal_create_event()"
                         ng-if="client.appointments.length > 0">Создать обращение</button>
-                <a class="btn btn-primary" target="_blank" ng-href="{{ url_for('schedule.appointment') }}?client_id=[[ client_id ]]">Записать на приём</a>
                 <button class="btn btn-primary" ng-click="open_client(client_id)">Редактировать данные пациента</button>
-            <div class="btn-group">
-                <button class="btn btn-primary dropdown-toggle" type="button" id="print_dropdownMenu" ng-disabled="!ps.templates" data-toggle="dropdown">
-                    <span class="glyphicon glyphicon-print"></span>
-                    <span class="caret"></span>
-                </button>
-                <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="print_dropdownMenu">
-                    <li role="presentation" ng-repeat="template in ps.templates">
-                        <a role="menuitem" tabindex="-1" href="" class="print_template"
-                           ng-click="ps.print_template(template.id, client.id)" ng-bind="template.name">
-                        </a>
-                    </li>
-                </ul>
-            </div>
+            <ui-print-button ps="ps" resolve="ps_resolve()"></ui-print-button>
+{#            <div class="btn-group">#}
+{#                <button class="btn btn-primary dropdown-toggle" type="button" id="print_dropdownMenu" ng-disabled="!ps.templates" data-toggle="dropdown">#}
+{#                    <span class="glyphicon glyphicon-print"></span>#}
+{#                    <span class="caret"></span>#}
+{#                </button>#}
+{#                <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="print_dropdownMenu">#}
+{#                    <li role="presentation" ng-repeat="template in ps.templates">#}
+{#                        <a role="menuitem" tabindex="-1" href="" class="print_template"#}
+{#                           ng-click="ps.print_template(template.id, client.id)" ng-bind="template.name">#}
+{#                        </a>#}
+{#                    </li>#}
+{#                </ul>#}
+{#            </div>#}
         </div>
-        <tabset  ng-if="client">
-            <tab heading="Предварительные записи">{% include "patients/appointments.html" %}</tab>
-            <tab heading="Обращения">{% include "patients/event_list.html" %}</tab>
+        <tabset ng-if="client">
+            <tab heading="Предварительные записи">{% include "patients/_appointments.html" %}</tab>
+            <tab heading="Обращения">{% include "patients/_event_list.html" %}</tab>
         </tabset>
-        {#        <pre>[[schedule|json]]</pre>#}
+        {#        <pre>[[schedule|json]]</pre><pre>[[client | json]]</pre>#}
     </div>
+
 {% endblock %}
 
 {% block modules_js %}
     {{ super() }}
+    <script type="text/ng-template" id="modal-createEvent.html">{% include "patients/_modal_create_event.html" %}</script>
+    <script type="text/ng-template" id="modal-print-dialog.html">{% include "_modal-print-dialog.html" %}</script>
     <script type="text/javascript">
         CreateEventModalCtrl = function ($scope, $modalInstance, client_id) {
             $scope.cancel = function () {
@@ -99,25 +99,29 @@
             };
             $scope.client_id = client_id;
         };
-        WebMis20.controller('ClientSearch', ['$scope', '$http', '$timeout', '$window', 'PrintingService', 'Client', '$modal',
-            function ($scope, $http, $timeout, $window, PrintingService, Client, $modal) {
-                $scope.ps = new PrintingService('registry', function (template_id, client_id) {
+        WebMis20.controller('ClientSearch',
+            ['$scope', '$http', '$timeout', '$window', 'PrintingService', 'WMClient', 'WMClientService', '$modal',
+            function ($scope, $http, $timeout, $window, PrintingService, WMClient, WMClientService, $modal) {
+                $scope.ps = new PrintingService('registry');
+                $scope.ps_resolve = function () {
                     return {
                         client_id: $scope.client_id
                     }
-                });
-                $scope.ps_amb = new PrintingService('preliminary_records', function (template_id, client_ticket_id) {
+                };
+                $scope.ps_amb = new PrintingService('preliminary_records');
+                $scope.ps_amb_resolve = function (client_ticket_id) {
                     return {
                         client_id: $scope.client_id,
                         ticket_id: client_ticket_id
                     }
-                });
-                $scope.ps_home = new PrintingService('preliminary_records', function (template_id, client_ticket_id) {
+                };
+                $scope.ps_home = new PrintingService('preliminary_records');
+                $scope.ps_home_resolve = function (client_ticket_id) {
                     return {
                         client_id: $scope.client_id,
                         ticket_id: client_ticket_id
                     }
-                });
+                };
                 $scope.ps_amb.set_context('orderAmb');
                 $scope.ps_home.set_context('orderHome');
                 $scope.ps.set_context('token');
@@ -127,16 +131,19 @@
                 $scope.results = null;
                 $scope.client_id = null;
                 $scope.client = null;
+                $scope.clientService = WMClientService;
                 $scope.alerts = [];
 
                 $scope.set_patient_id = function (patient_id) {
                     $scope.client_id = patient_id;
-                    $scope.client = new Client(patient_id);
+                    $scope.client = new WMClient(patient_id);
+                    $scope.client.reload('for_servicing');
                 };
 
                 $scope.clear_results = function () {
                     $scope.results = null;
                     $scope.client = null;
+                    $scope.client_id = null;
                 };
 
                 $scope.perform_search = function () {
@@ -149,7 +156,7 @@
                             }
                         ).success(function (data) {
                             $scope.results = data.result;
-                        })
+                        });
                     }
                 };
 

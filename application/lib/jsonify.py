@@ -197,8 +197,9 @@ class ScheduleVisualizer(object):
         result = dict((rt, new_rt()) for rt in self.reception_types)
 
         for schedule in schedules:
-            if schedule.receptionType.code in result:
-                result[schedule.receptionType.code]['schedule'][(schedule.date - date_start).days]['scheds'].\
+            rtcode = schedule.receptionType.code if schedule.receptionType else 'amb'
+            if rtcode in result:
+                result[rtcode]['schedule'][(schedule.date - date_start).days]['scheds'].\
                     append(self.make_sched_description(schedule))
 
         for group in result.itervalues():
@@ -224,48 +225,6 @@ class ClientVisualizer(object):
     def __init__(self, mode=Format.JSON):
         self.__mode = mode
 
-    def make_document_info(self, document):
-        if document:
-            return {'id': document.id,
-                    'deleted': document.deleted,
-                    'number': document.number,
-                    'serial': document.serial,
-                    'begDate': document.date,
-                    'endDate': document.endDate,
-                    'documentType': document.documentType,
-                    'origin': document.origin,
-                    'documentText': unicode(document)}
-        else:
-            return {'number': '',
-                    'serial': '',
-                    'begDate': '',
-                    'endDate': '',
-                    'documentType': None,
-                    'origin': '',
-                    'documentText': '',
-                    'deleted': 0}
-
-    def make_policy_info(self, policy):
-        if policy:
-            return {'id': policy.id,
-                    'deleted': policy.deleted,
-                    'number': policy.number,
-                    'serial': policy.serial,
-                    'begDate': policy.begDate or '',
-                    'endDate': policy.endDate or '',
-                    'policyType': policy.policyType,
-                    'insurer': policy.insurer,
-                    'policyText': unicode(policy)}
-        else:
-            return {'number': '',
-                    'serial': '',
-                    'begDate': '',
-                    'endDate': '',
-                    'policyType': None,
-                    'insurer': None,
-                    'policyText': '',
-                    'deleted': 0}
-
     def make_identification_info(self, identification):
         return {'id': identification.id,
                 'deleted': identification.deleted,
@@ -274,100 +233,93 @@ class ClientVisualizer(object):
                 'accountingSystem_name': identification.accountingSystems.name,
                 'checkDate': identification.checkDate or ''}
 
-    def make_relation_info(self, relation):
-        return {'id': relation.id,
+    def make_relation_info(self, client_id, relation):
+        if client_id == relation.client_id:
+            return {
+                'id': relation.id,
                 'deleted': relation.deleted,
-                'relativeType': relation.relativeType,
-                'other_id': relation.other.id,
-                'other_text': relation.other.nameText + ' ({})'.format(relation.other.id)}
-
-    def make_contact_info(self, contact):
-        return {'id': contact.id,
-                'deleted': contact.deleted,
-                'contactType_code': contact.contactType.code,
-                'contactType_name': contact.contactType.name,
-                'contact': contact.contact,
-                'notes': contact.notes}
+                'rel_type': relation.relativeType,
+                'relative': self.make_short_client_info(relation.relative),
+                'direct': True,
+            }
+        elif client_id == relation.relative_id:
+            return {
+                'id': relation.id,
+                'deleted': relation.deleted,
+                'rel_type': relation.relativeType,
+                'relative': self.make_short_client_info(relation.client),
+                'direct': False,
+            }
+        else:
+            raise ValueError('Relation info does not match Client')
 
     def make_client_info(self, client):
-        socStatuses = [{'id': socStatus.id,
-                        'deleted': socStatus.deleted,
-                        'className': socStatus.soc_status_class.name,
-                        'classCode': socStatus.soc_status_class.code,
-                        'typeName': socStatus.name,
-                        'typeCode': socStatus.code,
-                        'begDate': socStatus.begDate or '',
-                        'endDate': socStatus.endDate or ''
-                        } for socStatus in client.socStatuses]
+        reg_addr = client.reg_address
+        live_addr = client.loc_address
+        if reg_addr and live_addr:
+            if client.has_identical_addresses():
+                setattr(live_addr, 'same_as_reg', True)
+                setattr(live_addr, 'copy_from_id', reg_addr.id)
 
-        allergies = [{'id': allergy.id,
-                      'nameSubstance': allergy.name,
-                      'power': allergy.power,
-                      'deleted': allergy.deleted,
-                      'createDate': allergy.createDate or '',
-                      'notes': allergy.notes
-                      } for allergy in client.allergies]
+        relations = [self.make_relation_info(client.id, relation) for relation in client.client_relations]
 
-        intolerances = [{'id': intolerance.id,
-                         'nameMedicament': intolerance.name,
-                         'power': intolerance.power,
-                         'deleted': intolerance.deleted,
-                         'createDate': intolerance.createDate or '',
-                         'notes': intolerance.notes
-                         } for intolerance in client.intolerances]
-        bloodHistory = [{'id': blood.id,
-                         'bloodGroup_name': blood.bloodType.name,
-                         'bloodGroup_code': blood.bloodType.code,
-                         'bloodDate': blood.bloodDate or '',
-                         'person_id': safe_int(blood.person),
-                         'person_name': safe_unicode(blood.person)
-                         } for blood in client.blood_history]
+        documents = [doc.__json__() for doc in client.documents_all]
+        policies = [policy.__json__() for policy in client.policies_all]
+        document_history = documents + policies
+        # identifications = [self.make_identification_info(identification) for identification in client.identifications]
+        return {
+            'info': client,
+            'id_document': client.id_document,
+            'reg_address': reg_addr,
+            'live_address': live_addr,
+            'compulsory_policy': client.compulsoryPolicy,
+            'voluntary_policies': client.voluntaryPolicies,
+            'blood_history': client.blood_history.all(),
+            'allergies': client.allergies.all(),
+            'intolerances': client.intolerances.all(),
+            'soc_statuses': client.soc_statuses,
+            'relations': relations,
+            'contacts': client.contacts.all(),
+            'document_history': document_history,
+            # 'contact': client.phones,
+            # 'identifications': identifications,
+        }
 
-        pers_document = self.make_document_info(client.document)
+    def make_search_client_info(self, client):
+        return {
+            'info': client,
+            'id_document': client.id_document,
+            'compulsory_policy': client.compulsoryPolicy,
+            'voluntary_policies': client.voluntaryPolicies
+        }
 
-        compulsoryPolicy = self.make_policy_info(client.compulsoryPolicy)
-        voluntaryPolicy = self.make_policy_info(client.voluntaryPolicy)
-
-        documents = [self.make_document_info(document) for document in client.documents_all]
-        policies = [self.make_policy_info(policy) for policy in client.policies_all]
-        documentHistory = documents + policies
-        identifications = [self.make_identification_info(identification) for identification in client.identifications]
-        direct_relations = [self.make_relation_info(relation) for relation in client.direct_relations]
-        reversed_relations = [self.make_relation_info(relation) for relation in client.reversed_relations]
-        contacts = [self.make_contact_info(contact) for contact in client.contacts]
-
+    def make_short_client_info(self, client):
+        """
+        :type client: application.models.client.Client
+        :return:
+        """
+        # TODO: replace with CLient.__json__
         return {
             'id': client.id,
-            'lastName': client.lastName,
-            'firstName': client.firstName,
-            'patrName': client.patrName,
-            'nameText': client.nameText,
-            'sex': Gender(client.sexCode) if client.sexCode else None,
-            'SNILS': client.formatted_SNILS or None,
-            'notes': client.notes,
-            'document': pers_document,
-            'documentText': safe_unicode(client.document),
-            'birthDate': client.birthDate,
-            'regAddress': client.reg_address,
-            'liveAddress': client.loc_address,
-            'contact': client.phones,
-            'compulsoryPolicy': compulsoryPolicy,
-            'voluntaryPolicy': voluntaryPolicy,
-            'socStatuses': socStatuses,
-            'allergies': allergies,
-            'intolerances': intolerances,
-            'bloodHistory': bloodHistory,
-            'documentHistory': documentHistory,
-            'identifications': identifications,
-            'direct_relations': direct_relations,
-            'reversed_relations': reversed_relations,
-            'contacts': contacts
+            'first_name': client.firstName,
+            'patr_name': client.patrName,
+            'last_name': client.lastName,
+            'birth_date': client.birthDate,
+            'sex': Gender(client.sexCode) if client.sexCode is not None else None,
+            'full_name': client.nameText
+        }
+
+    def make_client_info_for_servicing(self, client):
+        return {
+            'client_data': self.make_search_client_info(client),
+            'appointments': self.make_appointments(client),
+            'events': self.make_events(client)
         }
 
     def make_appointments(self, client):
         return map(
             self.make_appointment,
-            client.appointments#.order_by(ScheduleTicket.begDateTime.desc())
+            client.appointments  # .order_by(ScheduleTicket.begDateTime.desc())
         )
 
     def make_appointment(self, apnt):
@@ -460,6 +412,7 @@ class EventVisualizer(object):
         """
         @type event: Event
         """
+        cvis = ClientVisualizer()
         return {
             'id': event.id,
             'deleted': event.deleted,
@@ -468,7 +421,7 @@ class EventVisualizer(object):
             'order_': event.order,
             'is_primary': EventPrimary(event.isPrimaryCode),
             'is_primary_': event.isPrimaryCode,
-            'client': event.client,
+            'client': cvis.make_client_info(event.client),
             'client_id': event.client.id,
             'set_date': event.setDate,
             'exec_date': event.execDate,

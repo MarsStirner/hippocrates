@@ -46,7 +46,9 @@ def create_new_local_contract(lc_info):
 
 
 def get_local_contract(lc_info):
-    lc_id = lc_info.get('id')
+    lc_id = None
+    if lc_info:
+        lc_id = lc_info.get('id')
     if lc_id:
         def _has_changes(lc, lc_info):
             if (lc.numberContract != lc_info.get('number_contract', '')
@@ -111,25 +113,42 @@ def get_event_services(event_id):
             'service_name': service_name,
             'price': price,
             'action_id': a.id,
-            'service_id': service_id
+            'service_id': service_id,
+            'is_coord': a.coordDate and a.coordPerson_id
         }
         services_by_at[(at_id, service_id)].append(s)
-    services_grouped = [dict(service_group[0],
-                             amount=len(service_group),
-                             sum=service_group[0]['price'] * len(service_group),
-                             actions=[s['action_id'] for s in service_group])
-                        for k, service_group in services_by_at.iteritems()]
+    services_grouped = []
+    for k, service_group in services_by_at.iteritems():
+        actions = []
+        coord_actions = []
+        for s in service_group:
+            actions.append(s['action_id'])
+            if s['is_coord']:
+                coord_actions.append(s['action_id'])
+        services_grouped.append(
+            dict(service_group[0],
+                 amount=len(service_group),
+                 sum=service_group[0]['price'] * len(service_group),
+                 actions=actions,
+                 coord_actions=coord_actions))
+
     return services_grouped
 
 
 def create_services(event_id, services_data, cfinance_id):
+    result = []
     for service in services_data:
         created_count = len(service['actions'])
-        new_count = service['amount']
+        new_count = int(float(service['amount']))
         # TODO: отработать случай уменьшения количества услуг при редактировании обращения (created_count > new_count)
         if created_count < new_count:
             for i in xrange(1, new_count - created_count + 1):
-                result = create_action(event_id,
-                                       service['at_id'],
-                                       current_user.id,
-                                       {'finance_id': cfinance_id})
+                action = create_action(
+                    event_id,
+                    service['at_id'],
+                    current_user.id,
+                    {'finance_id': cfinance_id,
+                     'coordDate': datetime.datetime.now() if service.get('coord_person_id') else None,
+                     'coordPerson_id': service.get('coord_person_id')})
+                result.append(action.id)
+    return result

@@ -4,6 +4,7 @@ from collections import defaultdict
 import datetime
 
 from flask import abort, request
+from flask.ext.login import current_user
 
 from application.models.event import Event
 from application.systemwide import db, cache
@@ -121,13 +122,15 @@ def api_schedule_description_post():
 
     def make_tickets(schedule, planned, extra, cito):
         # here cometh another math
-        dt = (schedule.endTime - schedule.begTime) / planned
+        dt = (datetime.datetime.combine(schedule.date.date(), schedule.endTime.time())
+              - datetime.datetime.combine(schedule.date.date(), schedule.begTime.time())) / planned
         it = schedule.begTime
         attendanceType = rbAttendanceType.query.filter(rbAttendanceType.code == 'planned').first()
         for i in xrange(planned):
             ticket = make_default_ticket(schedule)
-            ticket.begDateTime = datetime.datetime.combine(schedule.date, it.time())
-            ticket.endDateTime = ticket.begDateTime + dt
+            begDateTime = datetime.datetime.combine(schedule.date, it.time())
+            ticket.begTime = begDateTime.time()
+            ticket.endTime = (begDateTime + dt).time()
             ticket.attendanceType = attendanceType
             it += dt
             db.session.add(ticket)
@@ -173,7 +176,7 @@ def api_schedule_description_post():
         new_sched.createDatetime = datetime.datetime.now()
         new_sched.modifyDatetime = datetime.datetime.now()
         new_sched.receptionType = rbReceptionType.query.filter(rbReceptionType.code == reception_type).first()
-        new_sched.office = day_desc['office']
+        new_sched.office_id = safe_traverse(day_desc, 'office', 'id')
         if day_desc['roa']:
             new_sched.reasonOfAbsence = rbReasonOfAbsence.query.\
                 filter(rbReasonOfAbsence.code == day_desc['roa']['code']).first()
@@ -198,7 +201,7 @@ def api_schedule_description_post():
                 add_sched.receptionType = rbReceptionType.query.filter(rbReceptionType.code == reception_type).first()
                 add_sched.begTime = datetime.datetime.strptime(day_desc['scheds'][1]['begTime'], '%H:%M:%S')
                 add_sched.endTime = datetime.datetime.strptime(day_desc['scheds'][1]['endTime'], '%H:%M:%S')
-                add_sched.office = day_desc['office']
+                add_sched.office_id = safe_traverse(day_desc, 'office', 'id')
 
                 # Here cometh thy math
 
@@ -309,6 +312,7 @@ def api_appointment_make():
     client_ticket.client_id = client_id
     client_ticket.ticket_id = ticket_id
     client_ticket.createDatetime = datetime.datetime.now()
+    client_ticket.createPerson_id = client_ticket.modifyPerson_id = current_user.get_id()
     client_ticket.modifyDatetime = datetime.datetime.now()
     db.session.add(client_ticket)
     client_ticket.appointmentType = rbAppointmentType.query.filter(rbAppointmentType.code == 'amb').first()
@@ -342,25 +346,25 @@ def api_schedule_lock():
 
 @module.route('/api/move_client.json', methods=['POST'])
 def api_move_client():
-    j = request.json
+    j = request.get_json()
     try:
         ticket_id = int(j['ticket_id'])
         destination_tid = j['destination_ticket_id']
     except ValueError or KeyError:
-        return abort(418)
+        return jsonify(None, 418, 'Both ticket_id and destination_ticket_id must be specified')
     source = ScheduleTicket.query.get(ticket_id)
     oldCT = source.client_ticket
 
     dest = ScheduleTicket.query.get(destination_tid)
     if dest.client:
-        return abort(512)
+        return jsonify(None, 418, 'Destination ticket is busy')
     ct = ScheduleClientTicket()
     ct.appointmentType_id = oldCT.appointmentType_id
     ct.client_id = oldCT.client_id
     ct.createDatetime = datetime.datetime.now()
     ct.modifyDatetime = ct.createDatetime
     ct.isUrgent = oldCT.isUrgent
-    ct.orgFrom_id = oldCT.orgFrom_id
+    ct.infisFrom = oldCT.infisFrom
     ct.ticket_id = destination_tid
     oldCT.deleted = 1
 
@@ -368,7 +372,7 @@ def api_move_client():
     db.session.add(oldCT)
 
     db.session.commit()
-    return ''
+    return jsonify(None)
 
 
 @module.route('/api/actions', methods=['GET'])
@@ -401,7 +405,7 @@ def api_action_new_get():
 
     action = Action()
     action.createDatetime = action.modifyDatetime = action.begDate = now
-    action.createPerson = action.modifyPerson = action.setPerson = Person.query.get(1)  # TODO: current User
+    action.createPerson = action.modifyPerson = action.setPerson = Person.query.get(current_user.get_id())
     action.office = actionType.office or u''
     action.amount = actionType.amount if actionType.amountEvaluation in (0, 7) else 1
     action.uet = 0  # TODO: calculate UET
@@ -438,7 +442,7 @@ def api_action_new_get():
     elif actionType.defaultPersonInEvent == 3:
         action.person = event.execPerson
     elif actionType.defaultPersonInEvent == 4:
-        action.person = None  # TODO: current User
+        action.person = Person.query.get(current_user.get_id())
 
     action.event = event
     action.event_id = event.id

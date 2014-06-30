@@ -4,6 +4,7 @@ import os
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 DEBUG = False
+PROFILE = False
 PROJECT_NAME = 'Hippocrates'
 
 # DB connecting params
@@ -42,6 +43,9 @@ SEARCHD_CONNECTION = {
 
 ORGANISATION_INFIS_CODE = 500
 PRINT_SUBSYSTEM_URL = ''
+VESTA_URL = ''
+
+COPYRIGHT_COMPANY = u'КОРУС Консалтинг ИТ'
 
 try:
     from config_local import *

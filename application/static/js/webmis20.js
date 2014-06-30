@@ -1,8 +1,21 @@
 /**
  * Created by mmalkov on 10.02.14.
  */
-var WebMis20 = angular.module('WebMis20', ['WebMis20.services', 'WebMis20.directives', 'WebMis20.LoadingIndicator', 'ngResource', 'ui.bootstrap', 'ui.select', 'ngSanitize',
-            'ngCkeditor', 'sf.treeRepeat', 'ui.mask'])
+var WebMis20 = angular.module('WebMis20', [
+    'WebMis20.services',
+    'WebMis20.directives',
+    'WebMis20.controllers',
+    'WebMis20.LoadingIndicator',
+    'WebMis20.validators',
+    'ui.bootstrap',
+    'ui.select',
+    'ngSanitize',
+    'ngCkeditor',
+    'sf.treeRepeat',
+    'ui.mask',
+    'formstamp',
+    'mgcrea.ngStrap.affix'
+])
 .config(function ($interpolateProvider, datepickerConfig, datepickerPopupConfig) {
     $interpolateProvider.startSymbol('[[');
     $interpolateProvider.endSymbol(']]');
@@ -13,7 +26,46 @@ var WebMis20 = angular.module('WebMis20', ['WebMis20.services', 'WebMis20.direct
     datepickerPopupConfig.clearText = 'Убрать';
     datepickerPopupConfig.closeText = 'Готово';
 //    datepickerPopupConfig.appendToBody=true;
-})
+}).config(['$tooltipProvider', function($tooltipProvider){
+    $tooltipProvider.setTriggers({
+        'mouseenter': 'mouseleave',
+        'click': 'click',
+        'focus': 'blur',
+        'never': 'mouseleave',
+        'show_popover': 'hide_popover'
+    })
+}])
+// Workaround for bug #1404
+// https://github.com/angular/angular.js/issues/1404
+// Source: http://plnkr.co/edit/hSMzWC?p=preview
+    .config(['$provide', function($provide) {
+    $provide.decorator('ngModelDirective', ['$delegate', function($delegate) {
+        var ngModel = $delegate[0], controller = ngModel.controller;
+        ngModel.controller = ['$scope', '$element', '$attrs', '$injector', function(scope, element, attrs, $injector) {
+            var $interpolate = $injector.get('$interpolate');
+            attrs.$set('name', $interpolate(attrs.name || '')(scope));
+            $injector.invoke(controller, this, {
+                '$scope': scope,
+                '$element': element,
+                '$attrs': attrs
+            });
+        }];
+        return $delegate;
+    }]);
+    $provide.decorator('formDirective', ['$delegate', function($delegate) {
+        var form = $delegate[0], controller = form.controller;
+        form.controller = ['$scope', '$element', '$attrs', '$injector', function(scope, element, attrs, $injector) {
+            var $interpolate = $injector.get('$interpolate');
+            attrs.$set('name', $interpolate(attrs.name || attrs.ngForm || '')(scope));
+            $injector.invoke(controller, this, {
+                '$scope': scope,
+                '$element': element,
+                '$attrs': attrs
+            });
+        }];
+        return $delegate;
+    }]);
+}])
 .filter('asDateTime', function ($filter) {
     return function (data) {
         if (!data) return data;
@@ -112,6 +164,7 @@ var WebMis20 = angular.module('WebMis20', ['WebMis20.services', 'WebMis20.direct
         var out = [];
         if (angular.isArray(items) && event_info) {
             var client_info = event_info.client;
+
             items.forEach(function(item) {
                 var itemMatches = false;
                 if (item.finance.id == event_info.event_type.finance.id && item.recipient.id == event_info.organisation.id){
@@ -122,13 +175,20 @@ var WebMis20 = angular.module('WebMis20', ['WebMis20.services', 'WebMis20.direct
                     });
                     if (item.contingent && itemMatches){
                         item.contingent.forEach(function(cont){
-                            if((!cont.sex || cont.sex == client_info.sex.id) &&
-                               (!cont.org_id || cont.org_id == client_info.work_org_id) &&
-                               ((!cont.insurer_id || cont.insurer_id == client_info.comp_policy.insurer_id) &&
-                                 (!cont.policyType_id || cont.policyType_id == client_info.comp_policy.policyType_id)) &&
-                               ((!cont.insurer_id || cont.insurer_id == client_info.vol_policy.insurer_id) &&
-                                 (!cont.policyType_id || cont.policyType_id == client_info.vol_policy.policyType_id))){
+                            if((!cont.sex || cont.sex == client_info.info.sex.id) &&
+                               (!cont.org_id || cont.org_id == client_info.info.work_org_id) &&
+                               (!cont.insurer_id || cont.insurer_id == client_info.compulsory_policy.insurer_id) &&
+                                 (!cont.policyType_id || cont.policyType_id == client_info.compulsory_policy.policyType_id)){
                                 itemMatches = true;
+                                if (client_info.voluntary_policies.length > 0){
+                                    itemMatches = false;
+                                    client_info.voluntary_policies.forEach(function(vol_policy){
+                                        if(!itemMatches && (!cont.insurer_id || cont.insurer_id == vol_policy.insurer_id) &&
+                                            (!cont.policyType_id || cont.policyType_id == vol_policy.policyType_id)) {
+                                            itemMatches = true;
+                                        }
+                                    });
+                                }
                             }
                         });
                     }
@@ -237,14 +297,13 @@ var WebMis20 = angular.module('WebMis20', ['WebMis20.services', 'WebMis20.direct
     return Settings;
 }])
 .factory('PrintingService', ['$window', '$http', '$rootScope', function ($window, $http, $rootScope) {
-    var PrintingService = function (context_type, resolver) {
+    var PrintingService = function (context_type) {
         if (arguments.length >= 3) {
             this.target = arguments[2]
         } else {
             this.target = '_blank'
         }
         this.context_type = context_type;
-        this.resolver = resolver;
         this.context = null;
         this.templates = [];
     };
@@ -253,19 +312,30 @@ var WebMis20 = angular.module('WebMis20', ['WebMis20.services', 'WebMis20.direct
         var t = this;
         $http.get(url_print_templates + context + '.json')
         .success(function (data) {
-            t.templates = data.result;
+            t.templates = data.result.sort(function (left, right) {
+                return (left.code < right.code) ? -1 : (left.code > right.code ? 1 : 0)
+            });
         })
     };
-    PrintingService.prototype.print_template = function(template_id) {
-        return $http.post(url_print_template, angular.extend({
-                id: template_id,
-                context_type: this.context_type,
-                additional_context: {
-                    'currentOrgStructure': "",
-                    'currentOrganisation': 3479,
-                    'currentPerson': current_user_id
+    PrintingService.prototype.print_template = function(template_data_list, separated) { // [ {template_id, context}, ... ]
+        var self = this;
+        var send_data = {
+            separated: separated,
+            documents: template_data_list.map(function (item) {
+                return {
+                    id: item.template_id,
+                    context_type: self.context_type,
+                    context: angular.extend(
+                        {}, item.context, {
+                            'currentOrgStructure': "",
+                            'currentOrganisation': 3479,
+                            'currentPerson': current_user_id
+                        }
+                    )
                 }
-            }, this.resolver.apply(this, arguments)))
+            }
+        )};
+        return $http.post(url_print_template, send_data)
         .success(function (data) {
             var w = $window.open();
             w.document.open();
@@ -338,136 +408,6 @@ var WebMis20 = angular.module('WebMis20', ['WebMis20.services', 'WebMis20.direct
     };
     return Action;
 }])
-.factory('ClientResource',
-    function($resource) {
-        return $resource(url_client_get, {}, {
-            save: {
-                url: url_client_save,
-                method: 'POST',
-                params: {
-                    client_info: {}
-                }
-            }
-        });
-    }
-)
-.factory('Client',
-    ['ClientResource', '$q', '$rootScope', function(ClientResource, $q, $rootScope) {
-        var Client = function(client_id) {
-            this.client_id = client_id;
-            this.reload();
-        };
-
-        Client.prototype.reload = function() {
-            var t = this;
-            ClientResource.get({
-                    client_id: this.client_id
-                },
-                function(data) {
-                    t.client_info = data.result.clientData;
-                    t.appointments = data.result.appointments;
-                    t.events = data.result.events;
-//                    $rootScope.$broadcast('client_loaded');
-                },
-                function(data, status) {
-                    $rootScope.$broadcast('load_error', {
-                        text: 'Ошибка при загрузке клиента ' + t.id,
-                        data: data,
-                        code: status,
-                        type: 'danger'
-                    });
-                    throw 'Error requesting Client, id = ' + t.client_id;
-                });
-        };
-
-        Client.prototype.save = function() {
-            var t = this;
-            var deferred = $q.defer();
-            ClientResource.save({
-                    client_info: this.client_info
-                },
-                function(value, headers) {
-                    deferred.resolve(value['result']);
-                },
-                function(httpResponse) {
-                    var r = httpResponse.data;
-                    var message = [r['result']['name'], ':\nНе заполнено поле ', r['result']['data']].join('');
-                    deferred.reject(message);
-                }
-            );
-            return deferred.promise;
-        };
-
-        Client.prototype.add_allergy = function() {
-            this.client_info['allergies'].push({
-                'nameSubstance': '',
-                'power': 0,
-                'createDate': '',
-                'deleted':0,
-                'notes': '' });
-        };
-
-        Client.prototype.add_medicament = function() {
-            this.client_info['intolerances'].push({
-                'nameMedicament': '',
-                'power': 0,
-                'createDate': '',
-                'deleted':0,
-                'notes': '' });
-        };
-
-        Client.prototype.add_identification = function() {
-            this.client_info['identifications'].push({
-                'deleted': 0,
-                'identifier': '',
-                'accountingSystem_code': '',
-                'checkDate': ''});
-        };
-
-        Client.prototype.add_contact = function() {
-            this.client_info['contacts'].push({
-                'deleted': 0,
-                'contactType_code': '',
-                'contact': '',
-                'notes': ''});
-        };
-
-        Client.prototype.add_blood = function () {
-            this.client_info['bloodHistory'].push({'bloodGroup_code': '',
-                'bloodDate': '',
-                'person_id': 0
-            });
-        };
-
-        Client.prototype.add_relation = function (entity) {
-            this.client_info[entity].push({'deleted': 0,
-                'relativeType_name': '',
-                'relativeType_code': '',
-                'other_id': 0
-            });
-        };
-
-        Client.prototype.add_soc_status = function () {
-            this.client_info['socStatuses'].push({'deleted': 0,
-                'classCode': '',
-                'typeCode': '',
-                'begDate': '',
-                'endDate': ''
-            });
-        };
-
-        Client.prototype.delete_record = function(entity, record) {
-            if ('id' in record) {
-                record['deleted'] = 1;
-            } else {
-                var idx = this.client_info[entity].indexOf(record);
-                this.client_info[entity].splice(idx, 1);
-            }
-        };
-
-        return Client;
-    }
-])
 .factory('EventType', ['RefBook', function (RefBook) {
     var EventType = function () {
         RefBook.call(this, 'EventType')
@@ -491,7 +431,7 @@ var WebMis20 = angular.module('WebMis20', ['WebMis20.services', 'WebMis20.direct
             return el.request_type && el.finance &&
                 el.request_type.id === rt_id && el.finance.id === fin_id;
         });
-    }
+    };
     return EventType;
     }
 ])
@@ -646,23 +586,6 @@ var WebMis20 = angular.module('WebMis20', ['WebMis20.services', 'WebMis20.direct
         }
     }
 }])
-.directive('enumValidator', function() {
-    return {
-        restrict: 'A',
-        require: 'ngModel',
-        link: function(scope, elm, attrs, ctrl) {
-            ctrl.$parsers.unshift(function(viewValue) {
-                if (viewValue && viewValue.id > 0) {
-                    ctrl.$setValidity('text', true);
-                    return viewValue;
-                } else {
-                    ctrl.$setValidity('text', false);
-                    return undefined;
-                }
-            });
-        }
-    };
-})
 .directive('wmTime', ['$document',
     function ($document) {
         return {
@@ -811,7 +734,7 @@ var WebMis20 = angular.module('WebMis20', ['WebMis20.services', 'WebMis20.direct
     return {
         link: function (scope, element, attr) {
             if (window.opener){
-                element.prepend('<div class="pull-right"><button class="btn btn-danger" onclick="window.opener.focus();window.close();"><span class="glyphicon glyphicon-remove"></span> Закрыть</button></div>');
+                element.prepend('<div class="pull-right"><button class="btn btn-danger" onclick="window.opener.focus();window.close();" title="Закрыть"><span class="glyphicon glyphicon-remove"></span></button></div>');
             }
         }
     }
@@ -890,6 +813,10 @@ var aux = {
     inArray: function (array, item) {
         return array.indexOf(item) !== -1;
     },
+    removeFromArray: function (array, item) {
+        if (aux.inArray(array, item))
+            array.splice(array.indexOf(item), 1)
+    },
     forEach: function (object, callback) {
         var result = {};
         var key;
@@ -899,3 +826,22 @@ var aux = {
         return result
     }
 };
+if (!HTMLElement.prototype.hasOwnProperty('getOffsetRect')) {
+    HTMLElement.prototype.getOffsetRect = function () {
+        // (1)
+        var box = this.getBoundingClientRect();
+        // (2)
+        var body = document.body;
+        var docElem = document.documentElement;
+        // (3)
+        var scrollTop = window.pageYOffset || docElem.scrollTop || body.scrollTop;
+        var scrollLeft = window.pageXOffset || docElem.scrollLeft || body.scrollLeft;
+        // (4)
+        var clientTop = docElem.clientTop || body.clientTop || 0;
+        var clientLeft = docElem.clientLeft || body.clientLeft || 0;
+        // (5)
+        var top  = box.top +  scrollTop - clientTop;
+        var left = box.left + scrollLeft - clientLeft;
+        return { top: Math.round(top), left: Math.round(left) }
+    }
+}

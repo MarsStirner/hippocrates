@@ -118,7 +118,7 @@ class Organisation(db.Model):
             'full_name': self.fullName,
             'short_name': self.shortName,
             'title': self.title,
-            'net': self.net,
+            # 'net': self.net,
             'infis': self.infisCode,
         }
 
@@ -401,18 +401,25 @@ class rbDocumentType(db.Model):
     federalCode = db.Column(db.String(16), nullable=False)
     socCode = db.Column(db.String(8), nullable=False, index=True)
     TFOMSCode = db.Column(db.Integer)
+    serial_regexp = db.Column(db.Unicode(256))
+    number_regexp = db.Column(db.Unicode(256))
 
     group = db.relationship(u'rbDocumentTypeGroup', lazy=False)
 
     def __json__(self):
         return {
             'id': self.id,
+            'group': self.group,
             'code': self.code,
             'name': self.name,
             'regional_code': self.regionalCode,
             'federal_code': self.federalCode,
             'soc_code': self.socCode,
-            'TFOMS_code': self.TFOMSCode
+            'TFOMS_code': self.TFOMSCode,
+            'validators': {
+                'serial': self.serial_regexp,
+                'number': self.number_regexp,
+            },
         }
 
     def __int__(self):
@@ -489,6 +496,8 @@ class rbPolicyType(db.Model):
     code = db.Column(db.String(64), nullable=False, unique=True)
     name = db.Column(db.Unicode(256), nullable=False, index=True)
     TFOMSCode = db.Column(db.String(8))
+    serial_regexp = db.Column(db.Unicode(256))
+    number_regexp = db.Column(db.Unicode(256))
 
     def __json__(self):
         return {
@@ -496,6 +505,10 @@ class rbPolicyType(db.Model):
             'code': self.code,
             'name': self.name,
             'TFOMS_code': self.TFOMSCode,
+            'validators': {
+                'serial': self.serial_regexp,
+                'number': self.number_regexp,
+            },
         }
 
     def __int__(self):
@@ -630,6 +643,12 @@ class rbSocStatusClass(db.Model):
     def __int__(self):
         return self.id
 
+    def __json__(self):
+        return {
+            'id': self.id,
+            'code': self.code,
+            'name': self.name
+        }
 
 rbSocStatusClassTypeAssoc = db.Table('rbSocStatusClassTypeAssoc', db.Model.metadata,
                                      db.Column('class_id', db.Integer, db.ForeignKey('rbSocStatusClass.id')),
@@ -647,7 +666,16 @@ class rbSocStatusType(db.Model):
     TFOMSCode = db.Column(db.Integer)
     regionalCode = db.Column(db.String(8), nullable=False)
 
-    classes = db.relationship(u'rbSocStatusClass', secondary=rbSocStatusClassTypeAssoc)
+    classes = db.relationship(u'rbSocStatusClass', secondary=rbSocStatusClassTypeAssoc, lazy='joined')
+
+    def __json__(self):
+        return {
+            'id': self.id,
+            'code': self.code,
+            'name': self.name,
+            'classes': self.classes,
+            'TFOMS_code': self.TFOMSCode,
+        }
 
     def __int__(self):
         return self.id
@@ -783,9 +811,9 @@ class rbService(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     code = db.Column(db.String(31), nullable=False, index=True)
     name = db.Column(db.String(255), nullable=False, index=True)
-    eisLegacy = db.Column(db.Boolean, nullable=False)
+    eisLegacy = db.Column(db.Integer, nullable=False)
     nomenclatureLegacy = db.Column(db.Integer, nullable=False, server_default=u"'0'")
-    license = db.Column(db.Boolean, nullable=False)
+    license = db.Column(db.Integer, nullable=False)
     infis = db.Column(db.String(31), nullable=False)
     begDate = db.Column(db.Date, nullable=False)
     endDate = db.Column(db.Date, nullable=False)
@@ -1494,7 +1522,7 @@ class vrbPersonWithSpeciality(db.Model):
     name = db.Column(db.String(101), nullable=False, index=True)
     orgStructure_id = db.Column(db.ForeignKey('OrgStructure.id'))
 
-    orgStructure = db.relationship('OrgStructure')
+    orgStructure = db.relationship('OrgStructure', lazy='joined')
 
     def __json__(self):
         return {

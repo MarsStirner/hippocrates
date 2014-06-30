@@ -1,4 +1,7 @@
 # -*- encoding: utf-8 -*-
+
+import requests
+
 from flask import render_template, abort, request, redirect, url_for, flash, session, current_app
 from flask.ext.principal import Identity, AnonymousIdentity, identity_changed
 from flask.ext.principal import identity_loaded, Permission, RoleNeed, UserNeed, ActionNeed
@@ -6,8 +9,9 @@ from flask.ext.login import login_user, logout_user, login_required, current_use
 
 from application.app import app, db, login_manager, cache
 from application.context_processors import *
+from application.lib.data import get_kladr_city, get_kladr_street
 from application.models.exists import rbPrintTemplate
-from .lib.utils import public_endpoint, jsonify, roles_require, rights_require, request_wants_json
+from application.lib.utils import public_endpoint, jsonify, roles_require, rights_require, request_wants_json
 from application.models import *
 from lib.user import UserAuth, AnonymousUser
 from forms import LoginForm, RoleForm
@@ -71,7 +75,7 @@ def select_role():
     if form.is_submitted():
         current_user.current_role = form.roles.data
         identity_changed.send(current_app._get_current_object(), identity=Identity(current_user.id))
-        return redirect(request.args.get('next') or url_for('index'))
+        return redirect(request.args.get('next') or request.referrer or url_for('index'))
     return render_template('user/select_role.html', form=form, errors=errors)
 
 
@@ -91,6 +95,11 @@ def logout():
 @app.route('/api/rb/<name>')
 @cache.memoize(600)  # 86400
 def api_refbook(name):
+    for mod in (enums,):
+        if hasattr(mod, name):
+            ref_book = getattr(mod, name)
+            res = jsonify(ref_book.rb()['objects'])
+            return res
     for mod in (exists, schedule, actions, client, event):
         if hasattr(mod, name):
             ref_book = getattr(mod, name)
@@ -101,6 +110,64 @@ def api_refbook(name):
                 res = jsonify(res)
             return res
     return abort(404)
+
+
+@app.route('/api/kladr/city/search/')
+@app.route('/api/kladr/city/search/<search_query>/')
+@app.route('/api/kladr/city/search/<search_query>/<limit>/')
+@cache.memoize(86400)
+def kladr_search_city(search_query=None, limit=20):
+    result = []
+    if search_query is None:
+        return jsonify([])
+    short_types = [u'г', u'п', u'с']
+    response = requests.get(u'{0}kladr/psg/search/{1}/{2}/'.format(app.config['VESTA_URL'],
+                                                                   search_query,
+                                                                   limit))
+    for city in response.json()['data']:
+        if city['shorttype'] in short_types:
+            data = {'code': city['identcode'], 'name': u'{0}. {1}'.format(city['shorttype'], city['name'])}
+            if city['parents']:
+                for parent in city['parents']:
+                    data['name'] = u'{0}, {1}. {2}'.format(data['name'], parent['shorttype'], parent['name'])
+            result.append(data)
+    return jsonify(result)
+
+
+@app.route('/api/kladr/street/search/')
+@app.route('/api/kladr/street/search/<city_code>/<search_query>/')
+@app.route('/api/kladr/street/search/<city_code>/<search_query>/<limit>/')
+@cache.memoize(86400)
+def kladr_search_street(city_code=None, search_query=None, limit=20):
+    result = []
+    if city_code is None or search_query is None:
+        return jsonify([])
+    response = requests.get(u'{0}kladr/street/search/{1}/{2}/{3}/'.format(app.config['VESTA_URL'],
+                                                                          city_code,
+                                                                          search_query,
+                                                                          limit))
+    for street in response.json()['data']:
+        data = {'code': street['identcode'], 'name': u'{0} {1}'.format(street['fulltype'], street['name'])}
+        result.append(data)
+    return jsonify(result)
+
+
+@app.route('/api/kladr/city/')
+@app.route('/api/kladr/city/<code>/')
+@cache.memoize(86400)
+def kladr_city(code=None):
+    if code is None:
+        return jsonify([])
+    return jsonify([get_kladr_city(code)])
+
+
+@app.route('/api/kladr/street/')
+@app.route('/api/kladr/street/<code>/')
+@cache.memoize(86400)
+def kladr_street(code=None):
+    if code is None:
+        return jsonify([])
+    return jsonify([get_kladr_street(code)])
 
 
 @app.errorhandler(403)
