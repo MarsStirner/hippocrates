@@ -805,7 +805,6 @@ class rbService(db.Model):
     __tablename__ = u'rbService'
     __table_args__ = (
         db.Index(u'infis', u'infis', u'eisLegacy'),
-        db.Index(u'group_id_idx', u'group_id', u'idx')
     )
 
     id = db.Column(db.Integer, primary_key=True)
@@ -825,10 +824,7 @@ class rbService(db.Model):
     rbMedicalKind_id = db.Column(db.ForeignKey('rbMedicalKind.id'), index=True)
     UET = db.Column(db.Float(asdecimal=True), nullable=False, server_default=u"'0'")
     departCode = db.Column(db.String(3))
-    group_id = db.Column(db.ForeignKey('rbService.id'))
-    idx = db.Column(db.Integer, nullable=False, server_default=u"'0'")
 
-    group = db.relationship(u'rbService', remote_side=[id])
     medicalAidProfile = db.relationship(u'rbMedicalAidProfile')
     rbMedicalKind = db.relationship(u'rbMedicalKind')
 
@@ -1072,6 +1068,8 @@ class ContractTariff(db.Model):
     eventType_id = db.Column(db.Integer, index=True)
     tariffType = db.Column(db.Integer, nullable=False)
     service_id = db.Column(db.Integer, index=True)
+    code = db.Column(db.Unicode(64), nullable=True)
+    name = db.Column(db.Unicode(256), nullable=True)
     tariffCategory_id = db.Column(db.Integer, index=True)
     begDate = db.Column(db.Date, nullable=False)
     endDate = db.Column(db.Date, nullable=False)
