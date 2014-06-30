@@ -325,12 +325,31 @@ angular.module('WebMis20.services', []).
     ]).
     service('WMClientService', [function() {
         return {
-            formatSnils: function (snils) {
+            formatSnils: function(snils) {
                 return snils && snils.length === 11 ?
                     [snils.substr(0, 3), '-',
                      snils.substr(3, 3), '-',
                      snils.substr(6, 3), ' ', snils.substr(9, 2)].join('') :
                     '';
+            },
+            add_new_invalidity: function(client) {
+                var invld = client.invalidities.filter(function(i) {
+                    return i.deleted === 0;
+                });
+                var cur_invld = invld[invld.length - 1];
+                if (invld.length) {
+                    var msg = [
+                        'При добавлении новой инвалидности старая запись будет удалена',
+                        cur_invld.id ? ' и станет доступна для просмотра в истории' : '',
+                        '. Продолжить?'
+                    ].join('');
+                    if (confirm(msg)) {
+                        client.delete_record('invalidities', cur_invld, 2);
+                        client.add_soc_status('invalidities', 2);
+                    }
+                } else {
+                    client.add_soc_status('invalidities', 2);
+                }
             }
         };
     }]).

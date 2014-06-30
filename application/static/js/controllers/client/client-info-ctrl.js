@@ -1,14 +1,16 @@
 'use strict';
 
 angular.module('WebMis20.controllers').
-    controller('ClientCtrl', ['$scope', '$http', '$modal', 'WMClient', 'PrintingService', 'RefBookService', '$window',
-        function ($scope, $http, $modal, WMClient, PrintingService, RefBookService, $window) {
+    controller('ClientCtrl',
+        ['$scope', '$http', '$modal', 'WMClient', 'WMClientService', 'PrintingService', 'RefBookService', '$window',
+        function ($scope, $http, $modal, WMClient, WMClientService, PrintingService, RefBookService, $window) {
             $scope.records = [];
             $scope.aux = aux;
             $scope.params = aux.getQueryParams(document.location.search);
             $scope.rbGender = RefBookService.get('Gender');
             $scope.rbPerson = RefBookService.get('vrbPersonWithSpeciality');
             $scope.alerts = [];
+            $scope.clientService = WMClientService;
 
             $scope.client_id = $scope.params.client_id;
             var client = $scope.client = new WMClient($scope.client_id);

@@ -28,18 +28,19 @@
             </div>
             <div class="row">
                 <div class="col-md-11">
+                    <h4 class="text-muted">Документ</h4>
                     <wm-document id-postfix="c[[$index]]"
-                            group-code="7"
-                            model-type="socstat.self_document.doc_type"
-                            model-serial="socstat.self_document.serial"
-                            serial-validator="socstat.self_document.doc_type.validators.serial"
-                            model-number="socstat.self_document.number"
-                            number-validator="socstat.self_document.doc_type.validators.number"
-                            model-beg-date="socstat.self_document.beg_date"
-                            model-end-date="socstat.self_document.end_date"
-                            model-origin="socstat.self_document.origin"
-                            model-document="socstat.self_document"
-                            edit-mode="socstat.self_document.id ? edit.activated : true">
+                        group-code="7"
+                        model-type="socstat.self_document.doc_type"
+                        model-serial="socstat.self_document.serial"
+                        serial-validator="socstat.self_document.doc_type.validators.serial"
+                        model-number="socstat.self_document.number"
+                        number-validator="socstat.self_document.doc_type.validators.number"
+                        model-beg-date="socstat.self_document.beg_date"
+                        model-end-date="socstat.self_document.end_date"
+                        model-origin="socstat.self_document.origin"
+                        model-document="socstat.self_document"
+                        edit-mode="socstat.self_document.id ? edit.activated : true">
                     </wm-document>
                 </div>
             </div>
@@ -48,7 +49,7 @@
     </div>
     <div>
         <button type="button" class="btn btn-primary"
-                ng-click="client.add_soc_status('invalidities', 2)">Добавить инвалидность</button>
+                ng-click="clientService.add_new_invalidity(client)">Добавить инвалидность</button>
     </div>
 
     <hr>
@@ -79,18 +80,19 @@
             </div>
             <div class="row">
                 <div class="col-md-11">
+                    <h4 class="text-muted">Документ</h4>
                     <wm-document id-postfix="c[[$index]]"
-                            group-code="4"
-                            model-type="socstat.self_document.doc_type"
-                            model-serial="socstat.self_document.serial"
-                            serial-validator="socstat.self_document.doc_type.validators.serial"
-                            model-number="socstat.self_document.number"
-                            number-validator="socstat.self_document.doc_type.validators.number"
-                            model-beg-date="socstat.self_document.beg_date"
-                            model-end-date="socstat.self_document.end_date"
-                            model-origin="socstat.self_document.origin"
-                            model-document="socstat.self_document"
-                            edit-mode="socstat.self_document.id ? edit.activated : true">
+                        group-code="4"
+                        model-type="socstat.self_document.doc_type"
+                        model-serial="socstat.self_document.serial"
+                        serial-validator="socstat.self_document.doc_type.validators.serial"
+                        model-number="socstat.self_document.number"
+                        number-validator="socstat.self_document.doc_type.validators.number"
+                        model-beg-date="socstat.self_document.beg_date"
+                        model-end-date="socstat.self_document.end_date"
+                        model-origin="socstat.self_document.origin"
+                        model-document="socstat.self_document"
+                        edit-mode="socstat.self_document.id ? edit.activated : true">
                     </wm-document>
                 </div>
             </div>

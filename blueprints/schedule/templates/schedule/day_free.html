@@ -4,6 +4,20 @@
 {% block main %}
     <div ng-controller="DayFree">
         <div class="row">
+            <div class="col-md-2">
+                <button class="btn btn-block btn-success" ng-click="back2monthview()" style="margin-bottom: 20px;">
+                    Вернуться в распсиание
+                </button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-8">
+                <div class="alert alert-warning">{#  #}
+                    Выберите пациента, запись которого хотите перенести. Затем выберите врача и новое время приема.
+                </div>
+            </div>
+        </div>
+        <div class="row">
             <div class="col-md-4">
                 <div class="panel panel-default panel-info">
                     <div class="panel-heading">
@@ -15,11 +29,11 @@
                             <button ui-schedule-ticket="ticket" day="day" show-name="true"
                                     ng-click="selectSourceTicket(ticket)"></button>
                         </li>
-                        <li class="list-group-item" ng-if="!filtered_tickets.length">
-                            <button class="btn btn-block btn-success" ng-click="back2monthview()">
-                                Вернуться в распсиание
-                            </button>
-                        </li>
+{#                        <li class="list-group-item" ng-if="!filtered_tickets.length">#}
+{#                            <button class="btn btn-block btn-success" ng-click="back2monthview()">#}
+{#                                Вернуться в расписание#}
+{#                            </button>#}
+{#                        </li>#}
                     </ul>
                 </div>
             </div>

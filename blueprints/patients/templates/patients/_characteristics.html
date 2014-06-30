@@ -27,7 +27,7 @@
             </div>
         </div>
         <div>
-            <button type="button" class="btn btn-primary"
+            <button type="button" class="btn btn-primary" ng-if="!client.blood_types.length"
                     ng-click="add_new_blood_type({{ current_user.get_id() }})">Добавить новую</button>
         </div>
 
