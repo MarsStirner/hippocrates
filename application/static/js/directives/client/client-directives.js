@@ -221,17 +221,11 @@ angular.module('WebMis20.directives').
             <div class="form-group col-md-12"\
                  ng-class="{\'has-error\': docForm.$dirty && docForm.doc_ufms.$invalid}">\
                 <label for="doc_ufms[[idPostfix]]" class="control-label">Выдан</label>\
-                <div ng-class="form-control" id="doc_ufms[[idPostfix]]" name="doc_ufms"\
+                <div ng-class="form-control" class="validatable" id="doc_ufms[[idPostfix]]" name="doc_ufms"\
                      fs-select="" freetext="true" items="ufmsItems"\
                      ng-disabled="!edit_mode()" ng-required="docForm.$dirty" ng-model="intmd_models.origin">\
                     {{item}}\
                 </div>\
-                <!-- <select class="form-control" id="doc_ufms[[idPostfix]]" name="doc_ufms"\
-                        ng-model="intmd_models.origin"\
-                        ng-options="org.name as org.name for org in rbUFMS.objects"\
-                        ng-disabled="!edit_mode()" ng-required="docForm.$dirty">\
-                </select> -->\
-                <!-- TODO: manual-input -->\
             </div>\
         </div>\
     </div>\
@@ -349,7 +343,7 @@ angular.module('WebMis20.directives').
         <div class="row">\
             <div class="form-group col-md-4"\
                  ng-class="{\'has-error\': algForm.$dirty && algForm.alg_name.$invalid}">\
-                <label for="alg_name[[idPostfix]]" class="control-label">[[type === \'allergy\' ? \'Вещество\' : \'Медикамент\']]</label>\
+                <label for="alg_name[[idPostfix]]" class="control-label">[[type === \'allergy\' ? \'Вещество\' : \'Препарат\']]</label>\
                 <input type="text" class="form-control" id="alg_name[[idPostfix]]" name="alg_name"\
                        autocomplete="off" placeholder=""\
                        ng-model="modelName" ng-disabled="!edit_mode()" ng-required="algForm.$dirty"/>\
