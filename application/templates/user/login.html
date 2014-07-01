@@ -33,16 +33,21 @@
             {%- endfor -%}
         </div>
         {% endif %}
+        <div class="control-group">
+            <div class="controls">
+                <input type="text" value="" title="Необходимо заполнить это поле!" required="required" placeholder="Логин" name="login" id="login" class="form-control">
+            </div>
+        </div>
 
-        {% for field in form %}
-            {% if field.type != "CSRFTokenField" %}
-                <div class="control-group">
-                    <div class="controls">
-                        {{ field(value=field.value, placeholder=field.label.text, required="required", title="Необходимо заполнить это поле!", class="form-control") }}
-                    </div>
-                </div>
-            {% endif %}
-        {% endfor %}
+        <div class="control-group">
+            <div class="controls">
+                {%- if request.user_agent.platform == 'macos' and request.user_agent.browser in ('chrome', 'webkit', 'google') -%}
+                <input type="text" value="" title="Необходимо заполнить это поле!" required="required" placeholder="Пароль" name="password" id="password" class="form-control" style="-webkit-text-security: disc;">
+                {%- else -%}
+                <input type="password" value="" title="Необходимо заполнить это поле!" required="required" placeholder="Пароль" name="password" id="password" class="form-control">
+                {%- endif -%}
+            </div>
+        </div>
 
         <div class="control-group">
             <div class="controls">
