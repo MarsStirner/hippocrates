@@ -475,6 +475,7 @@ class EventVisualizer(object):
         return {
             'id': action.id,
             'name': action.actionType.name,
+            'status': action.status,
             'begDate': action.begDate,
             'endDate': action.endDate,
             'person_text': safe_unicode(action.person)
