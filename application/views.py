@@ -52,10 +52,12 @@ def login():
         user = UserAuth.auth_user(form.login.data.strip(), form.password.data.strip())
         if user:
             # Keep the user info in the session using Flask-Login
-            login_user(user)
-            # Tell Flask-Principal the identity changed
-            identity_changed.send(current_app._get_current_object(), identity=Identity(user.id))
-            return redirect(url_for('select_role', next=request.args.get('next')))
+            if login_user(user):
+                # Tell Flask-Principal the identity changed
+                identity_changed.send(current_app._get_current_object(), identity=Identity(user.id))
+                return redirect(url_for('select_role', next=request.args.get('next')))
+            else:
+                errors.append(u'Аккаунт неактивен')
         else:
             errors.append(u'Неверная пара логин/пароль')
 
