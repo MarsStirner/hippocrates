@@ -46,5 +46,5 @@ def get_event_form(**kwargs):
     elif current_user.role_in(('rRegistartor', 'clinicRegistrator')):
         form_role = 'receptionist'
     else:
-        raise
+        return abort(403)
     return render_template('event/event_info.html', form_role=form_role, **kwargs)
