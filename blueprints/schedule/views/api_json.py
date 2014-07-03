@@ -10,8 +10,10 @@ from application.models.event import Event
 from application.systemwide import db, cache
 from application.lib.sphinx_search import SearchPerson
 from application.lib.agesex import recordAcceptableEx
-from application.lib.utils import (jsonify, safe_traverse, get_new_uuid, parse_id)
+from application.lib.utils import (jsonify, safe_traverse, get_new_uuid, parse_id, safe_date, safe_time,
+                                   string_to_datetime, safe_time_as_dt)
 from blueprints.schedule.app import module
+from blueprints.schedule.lib.data import delete_schedules
 from application.models.exists import (rbSpeciality, rbReasonOfAbsence, rbPrintTemplate, Person)
 from application.models.actions import Action, ActionType, ActionProperty, ActionPropertyType
 from application.models.schedule import Schedule, ScheduleTicket, ScheduleClientTicket, rbAppointmentType, \
@@ -101,18 +103,17 @@ def api_schedule_description():
 @module.route('/api/schedule-description.json', methods=['POST'])
 def api_schedule_description_post():
     # TODO: validations
+
     def make_default_ticket(schedule):
         ticket = ScheduleTicket()
         ticket.schedule = schedule
-        ticket.createDatetime = datetime.datetime.now()
-        ticket.modifyDatetime = datetime.datetime.now()
         return ticket
 
     def make_tickets(schedule, planned, extra, cito):
         # here cometh another math
-        dt = (datetime.datetime.combine(schedule.date.date(), schedule.endTime.time())
-              - datetime.datetime.combine(schedule.date.date(), schedule.begTime.time())) / planned
-        it = schedule.begTime
+        dt = (datetime.datetime.combine(schedule.date, schedule.endTime) -
+              datetime.datetime.combine(schedule.date, schedule.begTime)) / planned
+        it = schedule.begTimeAsDt
         attendanceType = rbAttendanceType.query.filter(rbAttendanceType.code == 'planned').first()
         for i in xrange(planned):
             ticket = make_default_ticket(schedule)
@@ -137,86 +138,188 @@ def api_schedule_description_post():
                 ticket.attendanceType = attendanceType
                 db.session.add(ticket)
 
-    json = request.json
-    schedule = request.json['schedule']
-    person_id = json['person_id']
-    reception_type = json['receptionType']
-    dates = [
-        day['date'] for day in schedule
-    ]
-    schedules = Schedule.query.join(rbReceptionType).filter(
-        Schedule.receptionType_id == rbReceptionType.id,
-        Schedule.deleted == 0, Schedule.person_id == person_id,
-        Schedule.date.in_(dates), rbReceptionType.code == reception_type
-    )
-    schedules_with_clients = schedules.join(ScheduleTicket, ScheduleClientTicket).filter(
-        ScheduleClientTicket.client_id is not None
-    ).all()
-    if schedules_with_clients:
-        return jsonify({}, 401, u'Пациенты успели записаться на приём')
-    schedules.update({
-        Schedule.deleted: 1
-    }, synchronize_session=False)
+    schedule_data = request.json
+    schedule = schedule_data['schedule']
+    person_id = schedule_data['person_id']
+    dates = [day['date'] for day in schedule]
+
+    ok = delete_schedules(dates, person_id)
+
     for day_desc in schedule:
-        new_sched = Schedule()
-        new_sched.person_id = person_id
-        new_sched.date = datetime.datetime.strptime(day_desc['date'], '%Y-%m-%d')
-        new_sched.createDatetime = datetime.datetime.now()
-        new_sched.modifyDatetime = datetime.datetime.now()
-        new_sched.receptionType = rbReceptionType.query.filter(rbReceptionType.code == reception_type).first()
-        new_sched.office_id = safe_traverse(day_desc, 'office', 'id')
-        if day_desc['roa']:
+        date = safe_date(day_desc['date'])
+        roa = day_desc['roa']
+
+        if roa:
+            new_sched = Schedule()
+            new_sched.person_id = person_id
+            new_sched.date = date
             new_sched.reasonOfAbsence = rbReasonOfAbsence.query.\
-                filter(rbReasonOfAbsence.code == day_desc['roa']['code']).first()
+                filter(rbReasonOfAbsence.code == roa['code']).first()
             new_sched.begTime = '00:00'
             new_sched.endTime = '00:00'
             new_sched.numTickets = 0
             db.session.add(new_sched)
         else:
-            new_sched.begTime = datetime.datetime.strptime(day_desc['scheds'][0]['begTime'], '%H:%M:%S')
-            new_sched.endTime = datetime.datetime.strptime(day_desc['scheds'][0]['endTime'], '%H:%M:%S')
-            new_sched.numTickets = int(day_desc['planned'])
+            new_scheds_by_rt = defaultdict(list)
+            for sub_sched in day_desc['scheds']:
+                new_sched = Schedule()
+                new_sched.person_id = person_id
+                new_sched.date = date
+                new_sched.begTimeAsDt = safe_time_as_dt(sub_sched['begTime'])
+                new_sched.begTime = new_sched.begTimeAsDt.time()
+                new_sched.endTimeAsDt = safe_time_as_dt(sub_sched['endTime'])
+                new_sched.endTime = new_sched.endTimeAsDt.time()
+                new_sched.receptionType_id = safe_traverse(sub_sched, 'reception_type', 'id')
+                new_sched.office_id = safe_traverse(sub_sched, 'office', 'id')
 
-            if len(day_desc['scheds']) == 1:
-                db.session.add(new_sched)
-                make_tickets(new_sched, int(day_desc['planned']), int(day_desc['extra']), int(day_desc['CITO']))
-            if len(day_desc['scheds']) == 2:
-                add_sched = Schedule()
-                add_sched.person_id = person_id
-                add_sched.date = datetime.datetime.strptime(day_desc['date'], '%Y-%m-%d')
-                add_sched.createDatetime = datetime.datetime.now()
-                add_sched.modifyDatetime = datetime.datetime.now()
-                add_sched.receptionType = rbReceptionType.query.filter(rbReceptionType.code == reception_type).first()
-                add_sched.begTime = datetime.datetime.strptime(day_desc['scheds'][1]['begTime'], '%H:%M:%S')
-                add_sched.endTime = datetime.datetime.strptime(day_desc['scheds'][1]['endTime'], '%H:%M:%S')
-                add_sched.office_id = safe_traverse(day_desc, 'office', 'id')
+                rt_code = safe_traverse(sub_sched, 'reception_type', 'code')
+                new_scheds_by_rt[rt_code].append(new_sched)
 
-                # Here cometh thy math
+            sched_info = day_desc['info']
+            for rec_type_code, sched_list in new_scheds_by_rt.iteritems():
+                total_time = sum([(sch.endTimeAsDt - sch.begTimeAsDt).seconds for sch in sched_list])
+                planned = sched_info[rec_type_code]['planned']
+                cito = sched_info[rec_type_code]['CITO']
+                extra = sched_info[rec_type_code]['extra']
 
-                qt = int(day_desc['planned'])
-                M = new_sched.endTime - new_sched.begTime
-                N = add_sched.endTime - add_sched.begTime
-                qt1 = int(round(float(M.seconds * qt) / (M + N).seconds))
-                qt2 = int(round(float(N.seconds * qt) / (M + N).seconds))
-
-                new_sched.numTickets = qt1
-                add_sched.numTickets = qt2
-
-                make_tickets(new_sched, qt1, int(day_desc['extra']), int(day_desc['CITO']))
-                make_tickets(add_sched, qt2, 0, 0)
-                db.session.add(new_sched)
-                db.session.add(add_sched)
+                for idx, sched in enumerate(sched_list):
+                    # Here cometh thy math
+                    num_tickets = int(round(float((sch.endTimeAsDt - sch.begTimeAsDt).seconds * planned) / total_time))
+                    sched.numTickets = num_tickets
+                    if idx == 0:
+                        make_tickets(sched, num_tickets, extra, cito)
+                    else:
+                        make_tickets(sched, num_tickets, 0, 0)
+                    db.session.add(sched)
 
     db.session.commit()
 
-    start_date_s = json.get('start_date')
+    start_date_s = schedule_data.get('start_date')
     start_date = datetime.datetime.strptime(start_date_s, '%Y-%m').date()
     end_date = start_date + datetime.timedelta(calendar.monthrange(start_date.year, start_date.month)[1])
     context = ScheduleVisualizer()
-    persons = Person.query.filter(Person.id == person_id)
-    return jsonify({
-        'schedules': context.make_persons_schedule_description(persons, start_date, end_date)
-    })
+    person = Person.query.get(person_id)
+    return jsonify(context.make_person_schedule_description(person, start_date, end_date))
+
+
+# def api_schedule_description_post_():
+#     # TODO: validations
+#     def make_default_ticket(schedule):
+#         ticket = ScheduleTicket()
+#         ticket.schedule = schedule
+#         ticket.createDatetime = datetime.datetime.now()
+#         ticket.modifyDatetime = datetime.datetime.now()
+#         return ticket
+#
+#     def make_tickets(schedule, planned, extra, cito):
+#         # here cometh another math
+#         dt = (datetime.datetime.combine(schedule.date.date(), schedule.endTime.time())
+#               - datetime.datetime.combine(schedule.date.date(), schedule.begTime.time())) / planned
+#         it = schedule.begTime
+#         attendanceType = rbAttendanceType.query.filter(rbAttendanceType.code == 'planned').first()
+#         for i in xrange(planned):
+#             ticket = make_default_ticket(schedule)
+#             begDateTime = datetime.datetime.combine(schedule.date, it.time())
+#             ticket.begTime = begDateTime.time()
+#             ticket.endTime = (begDateTime + dt).time()
+#             ticket.attendanceType = attendanceType
+#             it += dt
+#             db.session.add(ticket)
+#
+#         if extra:
+#             attendanceType = rbAttendanceType.query.filter(rbAttendanceType.code == 'extra').first()
+#             for i in xrange(extra):
+#                 ticket = make_default_ticket(schedule)
+#                 ticket.attendanceType = attendanceType
+#                 db.session.add(ticket)
+#
+#         if cito:
+#             attendanceType = rbAttendanceType.query.filter(rbAttendanceType.code == 'CITO').first()
+#             for i in xrange(cito):
+#                 ticket = make_default_ticket(schedule)
+#                 ticket.attendanceType = attendanceType
+#                 db.session.add(ticket)
+#
+#     json = request.json
+#     schedule = request.json['schedule']
+#     person_id = json['person_id']
+#     reception_type = json['receptionType']
+#     dates = [
+#         day['date'] for day in schedule
+#     ]
+#     schedules = Schedule.query.join(rbReceptionType).filter(
+#         Schedule.receptionType_id == rbReceptionType.id,
+#         Schedule.deleted == 0, Schedule.person_id == person_id,
+#         Schedule.date.in_(dates), rbReceptionType.code == reception_type
+#     )
+#     schedules_with_clients = schedules.join(ScheduleTicket, ScheduleClientTicket).filter(
+#         ScheduleClientTicket.client_id is not None
+#     ).all()
+#     if schedules_with_clients:
+#         return jsonify({}, 401, u'Пациенты успели записаться на приём')
+#     schedules.update({
+#         Schedule.deleted: 1
+#     }, synchronize_session=False)
+#     for day_desc in schedule:
+#         new_sched = Schedule()
+#         new_sched.person_id = person_id
+#         new_sched.date = datetime.datetime.strptime(day_desc['date'], '%Y-%m-%d')
+#         new_sched.createDatetime = datetime.datetime.now()
+#         new_sched.modifyDatetime = datetime.datetime.now()
+#         new_sched.receptionType = rbReceptionType.query.filter(rbReceptionType.code == reception_type).first()
+#         new_sched.office_id = safe_traverse(day_desc, 'office', 'id')
+#         if day_desc['roa']:
+#             new_sched.reasonOfAbsence = rbReasonOfAbsence.query.\
+#                 filter(rbReasonOfAbsence.code == day_desc['roa']['code']).first()
+#             new_sched.begTime = '00:00'
+#             new_sched.endTime = '00:00'
+#             new_sched.numTickets = 0
+#             db.session.add(new_sched)
+#         else:
+#             new_sched.begTime = datetime.datetime.strptime(day_desc['scheds'][0]['begTime'], '%H:%M:%S')
+#             new_sched.endTime = datetime.datetime.strptime(day_desc['scheds'][0]['endTime'], '%H:%M:%S')
+#             new_sched.numTickets = int(day_desc['planned'])
+#
+#             if len(day_desc['scheds']) == 1:
+#                 db.session.add(new_sched)
+#                 make_tickets(new_sched, int(day_desc['planned']), int(day_desc['extra']), int(day_desc['CITO']))
+#             if len(day_desc['scheds']) == 2:
+#                 add_sched = Schedule()
+#                 add_sched.person_id = person_id
+#                 add_sched.date = datetime.datetime.strptime(day_desc['date'], '%Y-%m-%d')
+#                 add_sched.createDatetime = datetime.datetime.now()
+#                 add_sched.modifyDatetime = datetime.datetime.now()
+#                 add_sched.receptionType = rbReceptionType.query.filter(rbReceptionType.code == reception_type).first()
+#                 add_sched.begTime = datetime.datetime.strptime(day_desc['scheds'][1]['begTime'], '%H:%M:%S')
+#                 add_sched.endTime = datetime.datetime.strptime(day_desc['scheds'][1]['endTime'], '%H:%M:%S')
+#                 add_sched.office_id = safe_traverse(day_desc, 'office', 'id')
+#
+#                 # Here cometh thy math
+#
+#                 qt = int(day_desc['planned'])
+#                 M = new_sched.endTime - new_sched.begTime
+#                 N = add_sched.endTime - add_sched.begTime
+#                 qt1 = int(round(float(M.seconds * qt) / (M + N).seconds))
+#                 qt2 = int(round(float(N.seconds * qt) / (M + N).seconds))
+#
+#                 new_sched.numTickets = qt1
+#                 add_sched.numTickets = qt2
+#
+#                 make_tickets(new_sched, qt1, int(day_desc['extra']), int(day_desc['CITO']))
+#                 make_tickets(add_sched, qt2, 0, 0)
+#                 db.session.add(new_sched)
+#                 db.session.add(add_sched)
+#
+#     db.session.commit()
+#
+#     start_date_s = json.get('start_date')
+#     start_date = datetime.datetime.strptime(start_date_s, '%Y-%m').date()
+#     end_date = start_date + datetime.timedelta(calendar.monthrange(start_date.year, start_date.month)[1])
+#     context = ScheduleVisualizer()
+#     persons = Person.query.filter(Person.id == person_id)
+#     return jsonify({
+#         'schedules': context.make_persons_schedule_description(persons, start_date, end_date)
+#     })
 
 
 @module.route('/api/all_persons_tree.json')

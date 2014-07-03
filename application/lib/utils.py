@@ -239,7 +239,7 @@ def string_to_datetime(date_string, fmt='%Y-%m-%dT%H:%M:%S.%fZ'):
         try:
             date = datetime.datetime.strptime(date_string, fmt)
         except ValueError:
-            date = datetime.datetime.strptime(date_string, '%Y-%m-%dT%H:%M:%S+00:00') # ffs
+            date = datetime.datetime.strptime(date_string, '%Y-%m-%dT%H:%M:%S+00:00')  # ffs
         return timezone('UTC').localize(date).astimezone(tz=timezone(TIME_ZONE)).replace(tzinfo=None)
     else:
         return date_string
@@ -260,6 +260,34 @@ def safe_date(val):
         return val
     else:
         return None
+
+
+def safe_time_as_dt(val):
+    if not val:
+        return None
+    if isinstance(val, basestring):
+        for fmt in ('%H:%M:%S', '%H:%M'):
+            try:
+                val = datetime.datetime.strptime(val, fmt)
+                break
+            except ValueError:
+                continue
+        return val
+    elif isinstance(val, datetime.datetime):
+        return val
+    else:
+        return None
+
+
+def safe_time(val):
+    if not val:
+        return None
+    val = safe_time_as_dt(val)
+    if isinstance(val, datetime.datetime):
+        return val.time()
+    else:
+        return None
+
 
 def safe_traverse(obj, *args, **kwargs):
     """Безопасное копание вглубь dict'а

@@ -294,9 +294,8 @@
             $scope.finish_editing = function () {
                 $http.post(
                     '{{ url_for('.api_schedule_description_post') }}', {
-                    receptionType: $scope.reception_type,
                     person_id: $scope.person_id,
-                    schedule: $scope.grouped[$scope.reception_type]['schedule'].filter(function (day) {
+                    schedule: $scope.schedules.filter(function (day) {
                         return day.altered;
                     }),
                     start_date: $scope.monthDate.format('YYYY-MM')
