@@ -17,6 +17,10 @@ div.person-schedule-day ul.list-group li.list-group-item {
     padding-bottom: 0;
 }
 
+div.person-schedule-day ul.list-group li.list-group-item h5 {
+    margin-top: 0;
+}
+
 div.person-schedule-day div.panel-heading {
     padding-top: 5px;
     padding-bottom: 5px;

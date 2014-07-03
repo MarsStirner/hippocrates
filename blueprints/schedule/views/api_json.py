@@ -10,7 +10,7 @@ from application.models.event import Event
 from application.systemwide import db, cache
 from application.lib.sphinx_search import SearchPerson
 from application.lib.agesex import recordAcceptableEx
-from application.lib.utils import (jsonify, safe_traverse, get_new_uuid)
+from application.lib.utils import (jsonify, safe_traverse, get_new_uuid, parse_id)
 from blueprints.schedule.app import module
 from application.models.exists import (rbSpeciality, rbReasonOfAbsence, rbPrintTemplate, Person)
 from application.models.actions import Action, ActionType, ActionProperty, ActionPropertyType
@@ -83,7 +83,9 @@ def api_schedule():
 
 @module.route('/api/schedule-description.json', methods=['GET'])
 def api_schedule_description():
-    person_id_s = request.args.get('person_ids')
+    person_id = parse_id(request.args, 'person_id')
+    if person_id is False:
+        return abort(400)
     start_date_s = request.args.get('start_date')
     try:
         start_date = datetime.datetime.strptime(start_date_s, '%Y-%m').date()
@@ -91,23 +93,9 @@ def api_schedule_description():
     except ValueError:
         return abort(400)
 
-    result = {
-        'schedules': [],
-    }
-
     context = ScheduleVisualizer()
-
-    try:
-        person_ids = {int(person_id_s)}
-    except ValueError:
-        person_ids = set()
-
-    if person_ids:
-        persons = Person.query.filter(Person.id.in_(person_ids))
-        schedules = context.make_persons_schedule_description(persons, start_date, end_date)
-        result['schedules'] = schedules
-
-    return jsonify(result)
+    person = Person.query.get(person_id)
+    return jsonify(context.make_person_schedule_description(person, start_date, end_date))
 
 
 @module.route('/api/schedule-description.json', methods=['POST'])

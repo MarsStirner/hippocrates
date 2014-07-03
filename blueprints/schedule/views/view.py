@@ -20,14 +20,6 @@ def index():
         abort(404)
 
 
-@module.route('/doctors/')
-def doctors():
-    try:
-        return render_template('schedule/doctors.html')
-    except TemplateNotFound:
-        abort(404)
-
-
 @module.route('/appointment/')
 @breadcrumb(u'Запись на прием')
 def appointment():
