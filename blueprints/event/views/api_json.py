@@ -4,12 +4,14 @@ import datetime
 from flask import request, abort
 from flask.ext.login import current_user
 from application.models.schedule import ScheduleClientTicket
+from application.models.utils import safe_current_user_id
 
 from config import ORGANISATION_INFIS_CODE
 from application.models.actions import ActionType, Action
 from application.models.client import Client
 from application.models.enums import EventPrimary, EventOrder
-from application.models.event import (Event, EventType, EventType_Action, Diagnosis, Diagnostic, EventPayment)
+from application.models.event import (Event, EventType, EventType_Action, Diagnosis, Diagnostic, EventPayment, Visit,
+                                      rbVisitType, rbScene, Event_Persons)
 from application.models.exists import Person, OrgStructure
 from application.systemwide import db
 from application.lib.utils import (jsonify, safe_traverse, get_new_uuid,
@@ -57,13 +59,17 @@ def api_event_new_get():
         client_id = ticket.client_id
         setDate = ticket.ticket.begDateTime
         note = ticket.note
+        exec_person_id = ticket.ticket.schedule.person_id
     else:
         client_id = int(request.args['client_id'])
         setDate = datetime.datetime.now()
         note = ''
+        exec_person_id = safe_current_user_id()
+    event.execPerson_id = exec_person_id
     event.client = Client.query.get(client_id)
     event.setDate = setDate
     event.note = note
+    db.session.add(event)
     v = EventVisualizer()
     return jsonify({
         'event': v.make_event(event),
@@ -76,13 +82,14 @@ def api_event_save():
     now = datetime.datetime.now()
     event_data = request.json['event']
     event_id = event_data.get('id')
+    execPerson = Person.query.get(event_data['exec_person']['id'])
     if event_id:
         event = Event.query.get(event_id)
         event.modifyDatetime = now
         event.modifyPerson_id = current_user.get_id() or 1  # todo: fix
         event.deleted = event_data['deleted']
         event.eventType = EventType.query.get(event_data['event_type']['id'])
-        event.execPerson_id = event_data['exec_person']['id']
+        event.execPerson = execPerson
         event.setDate = string_to_datetime(event_data['set_date'])
         event.execDate = string_to_datetime(event_data['exec_date'])
         event.contract_id = event_data['contract']['id']
@@ -92,6 +99,7 @@ def api_event_save():
         event.result_id = event_data['result']['id'] if event_data.get('result') else None
         event.rbAcheResult_id = event_data['ache_result']['id'] if event_data.get('ache_result') else None
         event.note = ''
+        db.session.add(event)
     else:
         event = Event()
         event.createDatetime = event.modifyDatetime = now
@@ -100,7 +108,7 @@ def api_event_save():
         event.version = 0
         event.eventType = EventType.query.get(event_data['event_type']['id'])
         event.client_id = event_data['client_id']
-        event.execPerson_id = event_data['exec_person']['id']
+        event.execPerson = execPerson
         event.setDate = string_to_datetime(event_data['set_date'])
         event.execDate = string_to_datetime(event_data['exec_date'])
         event.externalId = get_new_event_ext_id(event.eventType.id, event.client_id)
@@ -117,9 +125,16 @@ def api_event_save():
         if payment_data and payment_data['local_contract']:
             lcon = get_local_contract(payment_data['local_contract'])
             event.localContract = lcon
+        db.session.add(event)
 
-    # todo: Event_Persons, Visit, ...
-    db.session.add(event)
+        visit = Visit.make_default(event)
+        db.session.add(visit)
+        executives = Event_Persons()
+        executives.person = event.execPerson
+        executives.event = event
+        executives.begDate = event.setDate
+        db.session.add(executives)
+
     try:
         db.session.commit()
     except:

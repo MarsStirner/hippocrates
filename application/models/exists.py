@@ -600,7 +600,7 @@ class rbSpeciality(db.Model):
     name = db.Column(db.Unicode(64), nullable=False, index=True)
     OKSOName = db.Column(db.Unicode(60), nullable=False)
     OKSOCode = db.Column(db.String(8), nullable=False)
-    service_id = db.Column(db.Integer, index=True)
+    service_id = db.Column(db.ForeignKey('rbService.id'), index=True)
     sex = db.Column(db.Integer, nullable=False)
     age = db.Column(db.String(9), nullable=False)
     age_bu = db.Column(db.Integer)
@@ -610,6 +610,8 @@ class rbSpeciality(db.Model):
     mkbFilter = db.Column(db.String(32), nullable=False)
     regionalCode = db.Column(db.String(16), nullable=False)
     quotingEnabled = db.Column(db.Integer, server_default=u"'0'")
+
+    service = db.relationship('rbService')
 
     def __json__(self):
         return {
