@@ -75,6 +75,7 @@ def api_event_new_get():
 def api_event_save():
     now = datetime.datetime.now()
     event_data = request.json['event']
+    close_event = request.json['close_event']
     event_id = event_data.get('id')
     if event_id:
         event = Event.query.get(event_id)
@@ -84,7 +85,6 @@ def api_event_save():
         event.eventType = EventType.query.get(event_data['event_type']['id'])
         event.execPerson_id = event_data['exec_person']['id']
         event.setDate = string_to_datetime(event_data['set_date'])
-        event.execDate = string_to_datetime(event_data['exec_date'])
         event.contract_id = event_data['contract']['id']
         event.isPrimaryCode = event_data['is_primary']['id']
         event.order = event_data['order']['id']
@@ -102,7 +102,6 @@ def api_event_save():
         event.client_id = event_data['client_id']
         event.execPerson_id = event_data['exec_person']['id']
         event.setDate = string_to_datetime(event_data['set_date'])
-        event.execDate = string_to_datetime(event_data['exec_date'])
         event.externalId = get_new_event_ext_id(event.eventType.id, event.client_id)
         event.contract_id = event_data['contract']['id']
         event.isPrimaryCode = event_data['is_primary']['id']
@@ -117,6 +116,10 @@ def api_event_save():
         if payment_data and payment_data['local_contract']:
             lcon = get_local_contract(payment_data['local_contract'])
             event.localContract = lcon
+
+    if close_event:
+        exec_date = event_data['exec_date']
+        event.execDate = string_to_datetime(exec_date) if exec_date else now
 
     # todo: Event_Persons, Visit, ...
     db.session.add(event)
