@@ -6,7 +6,7 @@ from application.lib.utils import safe_unicode, safe_int
 from application.models.enums import EventPrimary, EventOrder, ActionStatus, Gender
 from application.models.event import Event, EventType, Diagnosis, Diagnostic
 
-from application.models.schedule import Schedule, rbReceptionType
+from application.models.schedule import Schedule, rbReceptionType, ScheduleClientTicket
 from application.models.actions import Action, ActionProperty
 from application.models.exists import rbRequestType
 
@@ -24,14 +24,27 @@ class ScheduleVisualizer(object):
         self.client_id = None
         self.reception_types = [at.code for at in rbReceptionType.query]
 
+    def make_client_ticket_record(self, client_ticket):
+        return {
+            'id': client_ticket.id,
+            'client_id': client_ticket.client_id,
+            'event_id': client_ticket.event_id,
+            'finance': client_ticket.event.finance if client_ticket.event else None,
+            'appointment_type': client_ticket.appointmentType,
+            'note': client_ticket.note,
+        }
+
     def make_ticket(self, ticket):
-        client_id = ticket.client_ticket.client_id if ticket.client_ticket else None
+        client_ticket = ticket.client_ticket
+        client_id = client_ticket.client_id if client_ticket else None
         return {
             'id': ticket.id,
             'begDateTime': ticket.begDateTime,
             'status': 'busy' if client_id else 'free',
             'client': ticket.client.shortNameText if client_id else None,
             'attendance_type': ticket.attendanceType,
+            'office': ticket.schedule.office.name if ticket.schedule.office else None,
+            'record': self.make_client_ticket_record(client_ticket) if client_ticket else None
         }
 
     def make_day(self, schedule):
@@ -53,7 +66,10 @@ class ScheduleVisualizer(object):
         return {
             'id': person.id,
             'name': person.nameText,
-            'speciality': person.speciality.name if speciality else None
+            'speciality': {
+                'id': speciality.id,
+                'name': speciality.name
+            } if speciality else None
         }
 
     def make_schedule(self, schedules, date_start, date_end):
@@ -103,6 +119,9 @@ class ScheduleVisualizer(object):
                     if not roa and sched['roa']:
                         roa = sched['roa']
                     del sched['roa']
+                day['beg_time'] = min(sched['begTime'] for sched in day['scheds']) if day['scheds'] else None
+                day['end_time'] = max(sched['endTime'] for sched in day['scheds']) if day['scheds'] else None
+                day['planned_count'] = len(planned_tickets) or None
                 day['roa'] = roa
                 del day['scheds']
         return result
@@ -316,11 +335,17 @@ class ClientVisualizer(object):
             'events': self.make_events(client)
         }
 
-    def make_appointments(self, client):
-        return map(
-            self.make_appointment,
-            client.appointments  # .order_by(ScheduleTicket.begDateTime.desc())
-        )
+    def make_appointments(self, client, every=False):
+        if every:
+            return map(
+                self.make_appointment,
+                client.appointments
+            )
+        else:
+            return map(
+                self.make_appointment,
+                client.appointments.filter(ScheduleClientTicket.event_id.is_(None))
+            )
 
     def make_appointment(self, apnt):
         return {
@@ -331,7 +356,12 @@ class ClientVisualizer(object):
             'person': safe_unicode(apnt.ticket.schedule.person),
             'createPerson': apnt.createPerson,
             'note': apnt.note,
-            'receptionType': apnt.ticket.schedule.receptionType
+            'receptionType': apnt.ticket.schedule.receptionType,
+            'person_id': apnt.ticket.schedule.person_id,
+            'org_from': apnt.org_from,
+            'event_id': apnt.event_id,
+            'attendance_type': apnt.ticket.attendanceType,
+            'ticket_id': apnt.ticket_id
         }
 
     def make_events(self, client):

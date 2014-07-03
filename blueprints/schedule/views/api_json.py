@@ -11,6 +11,7 @@ from application.systemwide import db, cache
 from application.lib.sphinx_search import SearchPerson
 from application.lib.agesex import recordAcceptableEx
 from application.lib.utils import (jsonify, safe_traverse, get_new_uuid)
+from application.lib.utils import public_endpoint
 from blueprints.schedule.app import module
 from application.models.exists import (rbSpeciality, rbReasonOfAbsence, rbPrintTemplate, Person)
 from application.models.actions import Action, ActionType, ActionProperty, ActionPropertyType
@@ -24,6 +25,7 @@ __author__ = 'mmalkov'
 
 
 @module.route('/api/schedule.json')
+@public_endpoint
 def api_schedule():
     person_id_s = request.args.get('person_ids')
     client_id_s = request.args.get('client_id')
@@ -279,6 +281,50 @@ def api_search_persons():
 
 
     # Следующие 2 функции следует привести к приличному виду - записывать id создавших, проверки, ответы
+
+
+@module.route('/api/appointment.json', methods=['POST'])
+@public_endpoint
+def api_appointment():
+    """
+    Запись (отмена записи) пациента на приём.
+    Параметры:
+        client_id (int) - id пациента
+        ticket_id (int) - ScheduleTicket.id
+        [opt] appointment_type_code (str) - rbAppointmentType.code
+        [opt] delete (bool) - удалять ли запись
+        [opt] note (str) - жалобы
+    """
+    data = request.get_json()
+    client_id = int(data['client_id'])
+    ticket_id = int(data['ticket_id'])
+    appointment_type_code = data.get('appointment_type_code', 'amb')
+    delete = bool(data.get('delete', False))
+    ticket = ScheduleTicket.query.get(ticket_id)
+    if not ticket:
+        return abort(404)
+    client_ticket = ticket.client_ticket
+    if client_ticket and client_ticket.client_id != client_id:
+        return jsonify(None, 400, u'Талончик занят другим пациентом (%d)' % client_ticket.client_id)
+    if delete:
+        if not client_ticket:
+            return abort(404)
+        client_ticket.deleted = 1
+        db.session.commit()
+        return jsonify(None)
+    if not client_ticket:
+        client_ticket = ScheduleClientTicket()
+        client_ticket.client_id = client_id
+        client_ticket.ticket_id = ticket_id
+        client_ticket.createDatetime = client_ticket.modifyDatetime = datetime.datetime.now()
+        client_ticket.createPerson_id = client_ticket.modifyPerson_id = current_user.get_id()
+        db.session.add(client_ticket)
+        client_ticket.appointmentType = rbAppointmentType.query.filter(rbAppointmentType.code == appointment_type_code).first()
+    if 'note' in data:
+        client_ticket.note = data['note']
+    db.session.commit()
+    return jsonify(None)
+
 
 @module.route('/api/appointment_cancel.json')
 def api_appointment_cancel():
