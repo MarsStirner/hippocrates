@@ -3,6 +3,7 @@
     <h4 class="modal-title" id="myModalLabel">[[client.info.full_name]]</h4>
 </div>
 <div class="modal-body">
+    <div ui-alert-list="alerts"></div>
     <tabset ng-if="client">
         <tab heading="Предварительные записи">{% include "patients/_appointments.html" %}</tab>
         <tab heading="Обращения">{% include "patients/_event_list.html" %}</tab>
