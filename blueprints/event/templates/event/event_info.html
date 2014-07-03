@@ -206,6 +206,13 @@
             };
             return true;
         };
+        $scope.event_check_final_diagnosis = function() {
+            if (!$scope.event.get_final_diagnosis()){
+                alert("Необходимо указать заключительный диагноз");
+                return false
+            };
+            return true
+        };
 
         $scope.open_unclosed_actions_modal = function(unclosed_actions) {
             var modalInstance = $modal.open({
@@ -227,6 +234,8 @@
             if (!$scope.event.is_closed){
                 var unclosed_actions = $scope.event.get_unclosed_actions();
                 if (!$scope.event_check_results()){
+                    return false;
+                } else if (!$scope.event_check_final_diagnosis()){
                     return false;
                 } else if (unclosed_actions.length){
                     $scope.open_unclosed_actions_modal(unclosed_actions);

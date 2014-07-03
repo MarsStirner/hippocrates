@@ -405,6 +405,13 @@ angular.module('WebMis20.services', []).
                 return unclosed_actions
             };
 
+            WMEvent.prototype.get_final_diagnosis = function() {
+                var final_diagnosis = this.diagnoses.filter(function(item){
+                    return item.diagnosis_type.code == 1;
+                })
+                return final_diagnosis[0] ? final_diagnosis.length : null
+            };
+
             WMEvent.prototype.is_new = function() {
                 return !this.event_id;
             };
