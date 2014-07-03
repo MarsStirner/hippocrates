@@ -250,6 +250,12 @@
             }
         }
 
+        $scope.filter_results = function(event_purpose) {
+            return function(elem) {
+                return elem.eventPurpose_id == event_purpose;
+            };
+        };
+
         $scope.print_template = function (template_id) {
             $http.post(
                 '{{ print_subsystem_url }}', {

@@ -888,6 +888,7 @@ class rbResult(db.Model):
     def __json__(self):
         return {
             'id': self.id,
+            'eventPurpose_id': self.eventPurpose_id,
             'code': self.code,
             'name': self.name,
             'continued': bool(self.continued),
@@ -911,6 +912,7 @@ class rbAcheResult(db.Model):
     def __json__(self):
         return {
             'id': self.id,
+            'eventPurpose_id': self.eventPurpose_id,
             'code': self.code,
             'name': self.name,
         }

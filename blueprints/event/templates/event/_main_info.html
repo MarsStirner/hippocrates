@@ -172,7 +172,8 @@
                             <ui-select id="result" name="result" theme="select2"
                                        ng-model="event.info.result">
                                 <ui-select-match placeholder="Результат обращения">[[$select.selected.name]]</ui-select-match>
-                                <ui-select-choices repeat="rbr in rbResult.objects | filter: $select.search">
+                                <ui-select-choices repeat="rbr in rbResult.objects | filter: $select.search |
+                                filter: filter_results(event.info.event_type.purpose.id)">
                                     <div ng-bind-html="rbr.name | highlight: $select.search"></div>
                                 </ui-select-choices>
                             </ui-select>
@@ -182,7 +183,8 @@
                             <ui-select id="result" name="result" theme="select2"
                                        ng-model="event.info.ache_result">
                                 <ui-select-match placeholder="Исход заболевания">[[$select.selected.name]]</ui-select-match>
-                                <ui-select-choices repeat="rbar in rbAcheResult.objects | filter: $select.search">
+                                <ui-select-choices repeat="rbar in rbAcheResult.objects | filter: $select.search |
+                                filter: filter_results(event.info.event_type.purpose.id)">
                                     <div ng-bind-html="rbar.name | highlight: $select.search"></div>
                                 </ui-select-choices>
                             </ui-select>
