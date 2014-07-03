@@ -57,32 +57,6 @@
                 </tbody>
             </table>
         </div>
-        <div class="marginal" ng-if="client">
-                <a class="btn btn-primary" target="_blank" ng-href="{{ url_for('schedule.appointment') }}?client_id=[[ client_id ]]">Записать на приём</a>
-                <a class="btn btn-primary" target="_blank" ng-href="{{ url_for('event.new_event') }}?client_id=[[ client_id ]]"
-                        ng-if="client.appointments.length == 0">Создать обращение</a>
-                <button class="btn btn-primary" ng-click="modal_create_event()"
-                        ng-if="client.appointments.length > 0">Создать обращение</button>
-                <button class="btn btn-primary" ng-click="open_client(client_id)">Редактировать данные пациента</button>
-            <ui-print-button ps="ps" resolve="ps_resolve()"></ui-print-button>
-{#            <div class="btn-group">#}
-{#                <button class="btn btn-primary dropdown-toggle" type="button" id="print_dropdownMenu" ng-disabled="!ps.templates" data-toggle="dropdown">#}
-{#                    <span class="glyphicon glyphicon-print"></span>#}
-{#                    <span class="caret"></span>#}
-{#                </button>#}
-{#                <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="print_dropdownMenu">#}
-{#                    <li role="presentation" ng-repeat="template in ps.templates">#}
-{#                        <a role="menuitem" tabindex="-1" href="" class="print_template"#}
-{#                           ng-click="ps.print_template(template.id, client.id)" ng-bind="template.name">#}
-{#                        </a>#}
-{#                    </li>#}
-{#                </ul>#}
-{#            </div>#}
-        </div>
-        <tabset ng-if="client">
-            <tab heading="Предварительные записи">{% include "patients/_appointments.html" %}</tab>
-            <tab heading="Обращения">{% include "patients/_event_list.html" %}</tab>
-        </tabset>
         {#        <pre>[[schedule|json]]</pre><pre>[[client | json]]</pre>#}
     </div>
 
@@ -91,6 +65,7 @@
 {% block modules_js %}
     {{ super() }}
     <script type="text/ng-template" id="modal-createEvent.html">{% include "patients/_modal_create_event.html" %}</script>
+    <script type="text/ng-template" id="modal-client.html">{% include "patients/_modal_client.html" %}</script>
     <script type="text/ng-template" id="modal-print-dialog.html">{% include "_modal-print-dialog.html" %}</script>
     <script type="text/javascript">
         CreateEventModalCtrl = function ($scope, $modalInstance, client_id) {
@@ -99,32 +74,40 @@
             };
             $scope.client_id = client_id;
         };
+        ClientModalCtrl = function ($scope, $modalInstance, client, PrintingService) {
+            $scope.client = client;
+            $scope.client_id = client.client_id;
+
+            $scope.ps = new PrintingService('registry');
+            $scope.ps_resolve = function () {
+                return {
+                    client_id: $scope.client_id
+                }
+            };
+            $scope.ps_amb = new PrintingService('preliminary_records');
+            $scope.ps_amb_resolve = function (client_ticket_id) {
+                return {
+                    client_id: $scope.client_id,
+                    ticket_id: client_ticket_id
+                }
+            };
+            $scope.ps_home = new PrintingService('preliminary_records');
+            $scope.ps_home_resolve = function (client_ticket_id) {
+                return {
+                    client_id: $scope.client_id,
+                    ticket_id: client_ticket_id
+                }
+            };
+            $scope.ps_amb.set_context('orderAmb');
+            $scope.ps_home.set_context('orderHome');
+            $scope.ps.set_context('token');
+            $scope.cancel = function () {
+                $modalInstance.dismiss('cancel');
+            };
+        };
         WebMis20.controller('ClientSearch',
             ['$scope', '$http', '$timeout', '$window', 'PrintingService', 'WMClient', 'WMClientService', '$modal',
             function ($scope, $http, $timeout, $window, PrintingService, WMClient, WMClientService, $modal) {
-                $scope.ps = new PrintingService('registry');
-                $scope.ps_resolve = function () {
-                    return {
-                        client_id: $scope.client_id
-                    }
-                };
-                $scope.ps_amb = new PrintingService('preliminary_records');
-                $scope.ps_amb_resolve = function (client_ticket_id) {
-                    return {
-                        client_id: $scope.client_id,
-                        ticket_id: client_ticket_id
-                    }
-                };
-                $scope.ps_home = new PrintingService('preliminary_records');
-                $scope.ps_home_resolve = function (client_ticket_id) {
-                    return {
-                        client_id: $scope.client_id,
-                        ticket_id: client_ticket_id
-                    }
-                };
-                $scope.ps_amb.set_context('orderAmb');
-                $scope.ps_home.set_context('orderHome');
-                $scope.ps.set_context('token');
                 $scope.aux = aux;
                 $scope.params = aux.getQueryParams(document.location.search);
                 $scope.query = "";
@@ -177,6 +160,12 @@
                     $scope.clear_results();
                 };
 
+                $scope.$watch('client.info', function(n, o){
+                    if (n && o != n){
+                        $scope.modal_client();
+                    }
+                });
+
                 $scope.modal_create_event = function() {
                     var modalInstance = $modal.open({
                         templateUrl: 'modal-createEvent.html',
@@ -186,6 +175,19 @@
                             }
                         },
                         controller: CreateEventModalCtrl
+                    });
+                };
+
+                $scope.modal_client = function() {
+                    var modalInstance = $modal.open({
+                        templateUrl: 'modal-client.html',
+                        resolve: {
+                            client: function () {
+                                return $scope.client;
+                            }
+                        },
+                        controller: ClientModalCtrl,
+                        size: 'lg'
                     });
                 };
             }]);
