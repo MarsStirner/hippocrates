@@ -326,46 +326,6 @@ def api_appointment():
     return jsonify(None)
 
 
-@module.route('/api/appointment_cancel.json')
-def api_appointment_cancel():
-    try:
-        client_id = int(request.args['client_id'])
-        ticket_id = int(request.args['ticket_id'])
-    except KeyError or ValueError:
-        return abort(404)
-    ticket = ScheduleTicket.query.get(ticket_id)
-    client_ticket = ticket.client_ticket
-    if client_ticket and client_ticket.client.id == client_id:
-        client_ticket.deleted = 1
-        db.session.commit()
-        return ''
-    else:
-        return abort(400)
-
-
-@module.route('/api/appointment_make.json')
-def api_appointment_make():
-    try:
-        client_id = int(request.args['client_id'])
-        ticket_id = int(request.args['ticket_id'])
-    except KeyError or ValueError:
-        return abort(404)
-    ticket = ScheduleTicket.query.get(ticket_id)
-    client_ticket = ticket.client_ticket
-    if client_ticket:
-        return abort(400)
-    client_ticket = ScheduleClientTicket()
-    client_ticket.client_id = client_id
-    client_ticket.ticket_id = ticket_id
-    client_ticket.createDatetime = datetime.datetime.now()
-    client_ticket.createPerson_id = client_ticket.modifyPerson_id = current_user.get_id()
-    client_ticket.modifyDatetime = datetime.datetime.now()
-    db.session.add(client_ticket)
-    client_ticket.appointmentType = rbAppointmentType.query.filter(rbAppointmentType.code == 'amb').first()
-    db.session.commit()
-    return ''
-
-
 @module.route('/api/schedule_lock.json', methods=['POST'])
 def api_schedule_lock():
     j = request.json
