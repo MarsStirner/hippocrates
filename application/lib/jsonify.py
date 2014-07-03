@@ -300,7 +300,7 @@ class ClientVisualizer(object):
             'relations': relations,
             'contacts': client.contacts.all(),
             'document_history': document_history,
-            # 'contact': client.phones,
+            'phones': client.phones,
             # 'identifications': identifications,
         }
 

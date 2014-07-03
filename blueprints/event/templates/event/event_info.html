@@ -17,7 +17,7 @@
             <div class="row">
                 <div class="col-md-9">
                     <dl class="dl-horizontal novmargin">
-                        <dt>Контактный телефон:</dt><dd>[[event.info.client.contact]]&nbsp;</dd>
+                        <dt>Контактный телефон:</dt><dd>[[event.info.client.phones]]&nbsp;</dd>
                         <dt>Адрес регистрации:</dt><dd>[[event.info.client.reg_address ? event.info.client.reg_address.text_summary : '']]&nbsp;</dd>
                         <dt>Адрес проживания:</dt><dd>[[event.info.client.live_address ? event.info.client.live_address.text_summary : '']]&nbsp;</dd>
                         <dt>Документ:</dt><dd>[[event.info.client.id_document ? event.info.client.id_document.doc_text : '']]&nbsp;</dd>
@@ -28,6 +28,7 @@
                     <dl class="dl-horizontal novmargin pull-right">
                         <dt>Код пациента:</dt><dd>[[event.info.client.info.id]]&nbsp;</dd>
                         <dt>Дата рождения:</dt><dd>[[event.info.client.info.birth_date|asDate]]&nbsp;</dd>
+                        <dt>Возраст:</dt><dd>[[event.info.client.info.age]]&nbsp;</dd>
                         <dt>Пол:</dt><dd>[[event.info.client.info.sex.name]]&nbsp;</dd>
                     </dl>
                 </div>
@@ -141,6 +142,9 @@
                         $scope.ps.set_context($scope.event.info.event_type.print_context)
                     }
 
+                    if ($scope.event.info.client.info.birth_date) {
+                        $scope.event.info.client.info.age = moment().diff(moment($scope.event.info.client.info.birth_date), 'years');
+                    }
                     if ($scope.event.info.client.compulsory_policy && $scope.event.info.client.compulsory_policy.policy_text) {
                         $scope.policies.push($scope.event.info.client.compulsory_policy.policy_text + ' ('+ $filter('asDate')($scope.event.info.client.compulsory_policy.beg_date) + '-' + $filter('asDate')($scope.event.info.client.compulsory_policy.end_date) +')');
                     }
