@@ -173,3 +173,13 @@ class ScheduleClientTicket(db.Model):
                     'ScheduleTicket.deleted == 0, '
                     'ScheduleClientTicket.ticket_id == ScheduleTicket.id)'
     )
+
+    @property
+    def org_from(self):
+        if not self.infisFrom:
+            return
+        from .exists import Organisation
+        org = Organisation.query.filter(Organisation.infisCode == self.infisFrom).first()
+        if not org:
+            return self.infisFrom
+        return org.title

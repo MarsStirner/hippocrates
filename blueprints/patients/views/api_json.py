@@ -3,7 +3,7 @@
 from flask import abort, request
 
 from application.systemwide import db
-from application.lib.utils import jsonify, logger, parse_id
+from application.lib.utils import jsonify, logger, parse_id, public_endpoint
 from blueprints.patients.app import module
 from application.lib.sphinx_search import SearchPatient
 from application.lib.jsonify import ClientVisualizer
@@ -72,6 +72,23 @@ def api_patient_get():
         return jsonify({
             'client_data': context.make_client_info(client)
         })
+
+@module.route('/api/appointments.json')
+@public_endpoint
+def api_patient_appointments():
+    client_id = parse_id(request.args, 'client_id')
+    every = request.args.get('every', False)
+    if client_id is False:
+        return abort(404)
+    context = ClientVisualizer()
+    if client_id:
+        client = Client.query.get(client_id)
+        if not client:
+            return abort(404)
+        return jsonify(
+            context.make_appointments(client, every)
+        )
+    return jsonify(None, 400, 'Can\'t!')
 
 
 @module.route('/api/save_patient_info.json', methods=['POST'])

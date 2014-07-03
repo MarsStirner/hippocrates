@@ -104,6 +104,9 @@
             $scope.cancel = function () {
                 $modalInstance.dismiss('cancel');
             };
+            $scope.open_event = function(event) {
+                window.open('{{ url_for('event.html_event_info') }}?event_id=' + event.id, '_blank')
+            };
         };
         WebMis20.controller('ClientSearch',
             ['$scope', '$http', '$timeout', '$window', 'PrintingService', 'WMClient', 'WMClientService', '$modal',
@@ -145,10 +148,6 @@
 
                 $scope.open_client = function (client_id) {
                     window.open('{{ url_for('patients.patient') }}?client_id=' + client_id, '_blank');
-                };
-
-                $scope.open_event = function(event) {
-                    window.open('{{ url_for('event.html_event_info') }}?event_id=' + event.id, '_blank')
                 };
 
                 $scope.$on('printing_error', function (event, error) {
