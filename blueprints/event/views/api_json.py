@@ -81,6 +81,7 @@ def api_event_new_get():
 def api_event_save():
     now = datetime.datetime.now()
     event_data = request.json['event']
+    close_event = request.json['close_event']
     event_id = event_data.get('id')
     execPerson = Person.query.get(event_data['exec_person']['id'])
     if event_id:
@@ -91,7 +92,6 @@ def api_event_save():
         event.eventType = EventType.query.get(event_data['event_type']['id'])
         event.execPerson = execPerson
         event.setDate = string_to_datetime(event_data['set_date'])
-        event.execDate = string_to_datetime(event_data['exec_date'])
         event.contract_id = event_data['contract']['id']
         event.isPrimaryCode = event_data['is_primary']['id']
         event.order = event_data['order']['id']
@@ -110,7 +110,6 @@ def api_event_save():
         event.client_id = event_data['client_id']
         event.execPerson = execPerson
         event.setDate = string_to_datetime(event_data['set_date'])
-        event.execDate = string_to_datetime(event_data['exec_date'])
         event.externalId = get_new_event_ext_id(event.eventType.id, event.client_id)
         event.contract_id = event_data['contract']['id']
         event.isPrimaryCode = event_data['is_primary']['id']
@@ -134,6 +133,10 @@ def api_event_save():
         executives.event = event
         executives.begDate = event.setDate
         db.session.add(executives)
+
+    if close_event:
+        exec_date = event_data['exec_date']
+        event.execDate = string_to_datetime(exec_date) if exec_date else now
 
     try:
         db.session.commit()
