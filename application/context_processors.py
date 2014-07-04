@@ -1,13 +1,17 @@
 # -*- coding: utf-8 -*-
 from application.app import app
-from werkzeug.utils import import_string
 from datetime import datetime
-from flask.ext.login import current_user
+from version import version as _version
 
 
 @app.context_processor
 def copyright():
-    return dict(copy_year=datetime.now())
+    return dict(copy_year=datetime.today().year)
+
+
+@app.context_processor
+def version():
+    return dict(version=_version)
 
 
 @app.context_processor

@@ -43,11 +43,11 @@
 <script src="{{ url_for('static', filename='js/angular-strap.js') }}"></script>
 <script src="{{ url_for('static', filename='js/angular-strap.tpl.js') }}"></script>
 
-<script src="{{ url_for('static', filename='js/webmis20.js') }}"></script>
-<script src="{{ url_for('static', filename='js/directives.js') }}"></script>
-<script src="{{ url_for('static', filename='js/services.js') }}"></script>
-<script src="{{ url_for('static', filename='js/controllers.js') }}"></script>
-<script src="{{ url_for('static', filename='js/loader.js') }}"></script>
+<script src="{{ url_for('static', filename='js/webmis20.js', v=version) }}"></script>
+<script src="{{ url_for('static', filename='js/directives.js', v=version) }}"></script>
+<script src="{{ url_for('static', filename='js/services.js', v=version) }}"></script>
+<script src="{{ url_for('static', filename='js/controllers.js', v=version) }}"></script>
+<script src="{{ url_for('static', filename='js/loader.js', v=version) }}"></script>
 <script type="text/ng-template" id="_timePicker.html">
     <div class="input-group">
         <input type="text" id="{{id}}" name="{{name}}" class="form-control"
