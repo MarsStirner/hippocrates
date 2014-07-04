@@ -23,10 +23,13 @@ def print_subsystem():
 @app.context_processor
 def general_menu():
     menu_items = list()
-    menu_items.append(dict(module='patients',
+    menu_items.append(dict(module='patients.',
                            link='patients.index',
                            title=u'Обслуживание пациентов'))
-    menu_items.append(dict(module='schedule',
+    menu_items.append(dict(module='schedule.',
                            link='schedule.person_schedule_monthview',
                            title=u'Формирование графика врача'))
+    menu_items.append(dict(module='schedule',
+                           link='schedule.index',
+                           title=u'Просмотр графика работы'))
     return dict(main_menu=menu_items)

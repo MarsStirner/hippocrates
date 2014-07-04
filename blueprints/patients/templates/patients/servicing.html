@@ -177,6 +177,10 @@
                     });
                 };
 
+                $scope.open_client = function (client_id) {
+                    window.open('{{ url_for('patients.patient') }}?client_id=' + client_id, '_blank');
+                };
+
                 $scope.modal_client = function() {
                     var modalInstance = $modal.open({
                         templateUrl: 'modal-client.html',
