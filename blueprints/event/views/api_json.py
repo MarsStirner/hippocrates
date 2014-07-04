@@ -224,7 +224,7 @@ def api_search_services():
 
     def make_response(_item):
         return {
-            'at_id': _item['id'],
+            'at_id': _item['action_type_id'],
             'at_code': _item['code'],
             'at_name': _item['name'],
             'service_name': _item['service'],
