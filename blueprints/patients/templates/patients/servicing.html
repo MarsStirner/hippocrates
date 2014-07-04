@@ -74,7 +74,7 @@
             };
             $scope.client_id = client_id;
         };
-        ClientModalCtrl = function ($scope, $modalInstance, client, PrintingService) {
+        ClientModalCtrl = function ($scope, $modalInstance, client, PrintingService, $modal) {
             $scope.client = client;
             $scope.client_id = client.client_id;
 
@@ -110,6 +110,18 @@
 
             $scope.open_client = function (client_id) {
                 window.open('{{ url_for('patients.patient') }}?client_id=' + client_id, '_blank');
+            };
+
+            $scope.modal_create_event = function() {
+                var modalInstance = $modal.open({
+                    templateUrl: 'modal-createEvent.html',
+                    resolve: {
+                        client_id: function () {
+                            return $scope.client_id;
+                        }
+                    },
+                    controller: CreateEventModalCtrl
+                });
             };
 
             $scope.$on('printing_error', function (event, error) {
@@ -164,18 +176,6 @@
                         $scope.modal_client();
                     }
                 });
-
-                $scope.modal_create_event = function() {
-                    var modalInstance = $modal.open({
-                        templateUrl: 'modal-createEvent.html',
-                        resolve: {
-                            client_id: function () {
-                                return $scope.client_id;
-                            }
-                        },
-                        controller: CreateEventModalCtrl
-                    });
-                };
 
                 $scope.open_client = function (client_id) {
                     window.open('{{ url_for('patients.patient') }}?client_id=' + client_id, '_blank');
