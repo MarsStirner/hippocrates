@@ -78,7 +78,7 @@ class ScheduleVisualizer(object):
             result = dict((rt, new_rt()) for rt in self.reception_types)
 
         for schedule in schedules:
-            if schedule.receptionType.code in result:
+            if schedule.receptionType and schedule.receptionType.code in result:
                 result[schedule.receptionType.code]['schedule'][(schedule.date - date_start).days]['scheds'].\
                     append(self.make_day(schedule))
 
@@ -144,7 +144,7 @@ class ScheduleVisualizer(object):
             'begTime': schedule.begTime,
             'endTime': schedule.endTime,
             'roa': schedule.reasonOfAbsence,
-            'reception_type': schedule.receptionType.__json__()
+            'reception_type': schedule.receptionType.__json__() if schedule.receptionType else None
         }
 
     def collapse_scheds_description(self, scheds):
@@ -155,6 +155,8 @@ class ScheduleVisualizer(object):
         for sub_sched in scheds:
             if not roa and sub_sched['roa']:
                 roa = sub_sched['roa']
+                # На день установлена причина отсутствия - не может быть приема
+                break
             if not busy and sub_sched['busy']:
                 busy = True
 
