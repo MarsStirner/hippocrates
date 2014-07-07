@@ -12,9 +12,9 @@
 <div class="modal-footer">
     <div class="pull-right"><button type="button" class="btn btn-default" ng-click="cancel()">Отмена</button></div>
     <div class="text-left" ng-if="client">
-        <a class="btn btn-primary" target="_blank" ng-href="{{ url_for('schedule.appointment') }}?client_id=[[ client.client_id ]]">Записать на приём</a>
-        <a class="btn btn-primary" target="_blank" ng-href="{{ url_for('event.new_event') }}?client_id=[[ client.client_id ]]"
-                ng-if="client.appointments.length == 0">Создать обращение</a>
+        <button class="btn btn-primary" ng-click="new_appointment(client.client_id)">Записать на приём</button>
+        <button class="btn btn-primary" ng-click="new_event(client.client_id)"
+                ng-if="client.appointments.length == 0">Создать обращение</button>
         <button class="btn btn-primary" ng-click="modal_create_event()"
                 ng-if="client.appointments.length > 0">Создать обращение</button>
         <button class="btn btn-primary" ng-click="open_client(client.client_id)">Редактировать данные пациента</button>

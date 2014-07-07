@@ -74,9 +74,10 @@
             };
             $scope.client_id = client_id;
         };
-        ClientModalCtrl = function ($scope, $modalInstance, client, PrintingService, $modal) {
+        ClientModalCtrl = function ($scope, $modalInstance, client, PrintingService, $modal, $interval) {
             $scope.client = client;
             $scope.client_id = client.client_id;
+            $scope.child_window = {};
 
             $scope.ps = new PrintingService('registry');
             $scope.ps_resolve = function () {
@@ -104,12 +105,25 @@
             $scope.cancel = function () {
                 $modalInstance.dismiss('cancel');
             };
+
+            $scope.new_event = function(client_id, ticket_id) {
+                var query = '?client_id=' + client_id;
+                if (ticket_id){
+                    query += '&ticket_id=' + ticket_id;
+                }
+                $scope.child_window = window.open('{{ url_for('event.new_event') }}' + query, '_blank');
+            };
+
+            $scope.new_appointment = function(client_id) {
+                $scope.child_window = window.open('{{ url_for('schedule.appointment') }}?client_id=' + client_id, '_blank');
+            };
+
             $scope.open_event = function(event) {
-                window.open('{{ url_for('event.html_event_info') }}?event_id=' + event.id, '_blank');
+                $scope.child_window = window.open('{{ url_for('event.html_event_info') }}?event_id=' + event.id, '_blank');
             };
 
             $scope.open_client = function (client_id) {
-                window.open('{{ url_for('patients.patient') }}?client_id=' + client_id, '_blank');
+                $scope.child_window = window.open('{{ url_for('patients.patient') }}?client_id=' + client_id, '_blank');
             };
 
             $scope.modal_create_event = function() {
@@ -118,6 +132,9 @@
                     resolve: {
                         client_id: function () {
                             return $scope.client_id;
+                        },
+                        new_event: function () {
+                            return $scope.new_event;
                         }
                     },
                     controller: CreateEventModalCtrl
@@ -126,6 +143,30 @@
 
             $scope.$on('printing_error', function (event, error) {
                 $scope.alerts.push(error);
+            });
+
+            var interval;
+            $scope.clearInterval = function() {
+                $interval.cancel(interval);
+                interval = undefined;
+            }
+            $scope.$watch('child_window.document', function (n, o) {
+                if (n && n!=o) {
+                    $scope.clearInterval();
+                    interval = $interval(function () {
+                        if ($scope.child_window.closed) {
+                            $scope.client.reload('for_servicing');
+                            $scope.clearInterval();
+                            $scope.child_window = {};
+                        }
+                    }, 500);
+                }
+            });
+
+            $modalInstance.result.then(function () {
+              $scope.client = null;
+            }, function () {
+              $scope.client = null;
             });
         };
         WebMis20.controller('ClientSearch',
@@ -171,8 +212,8 @@
                     $scope.clear_results();
                 };
 
-                $scope.$watch('client.info', function(n, o){
-                    if (n && o != n){
+                $scope.$watch('client.info.id', function(n, o){
+                    if (n && o != n) {
                         $scope.modal_client();
                     }
                 });

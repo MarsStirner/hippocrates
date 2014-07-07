@@ -19,7 +19,7 @@ body{
 .loader {
     display:    none;
     position:   fixed;
-    z-index:    1000;
+    z-index:    2010;
     top:        30%;
     left:       40%;
     height:     120px;
@@ -34,7 +34,7 @@ body{
 }
 .loader .overlay{
     position:   fixed;
-    z-index:    900;
+    z-index:    2000;
     top:        0;
     left:       0;
     height:     100%;
