@@ -353,6 +353,32 @@ angular.module('WebMis20.services', []).
             }
         };
     }]).
+    service('WMAppointment', ['$http', function ($http) {
+        return {
+            make: function (ticket, client_id) {
+                var appointment_type_code = arguments[2];
+                return $http.post('/schedule/api/appointment.json', {
+                    client_id: client_id,
+                    ticket_id: ticket.id,
+                    appointment_type_code: appointment_type_code // Это может настраиваться
+                })
+            },
+            cancel: function (ticket, client_id) {
+                return $http.post('/schedule/api/appointment.json', {
+                    client_id: client_id,
+                    ticket_id: ticket.id,
+                    delete: true
+                })
+            },
+            change_notes: function (ticket_client_id, notes) {
+                return $http.post('/schedule/api/appointment.json', {
+                    client_id: client_id,
+                    ticket_id: ticket.id,
+                    note: notes
+                })
+            }
+        }
+    }]).
     factory('WMEvent', ['$http', '$q', 'WMEventService',
         function($http, $q, WMEventService) {
             var WMEvent = function(event_id, client_id, ticket_id) {
@@ -385,6 +411,7 @@ angular.module('WebMis20.services', []).
                         self.services = data.result.services && data.result.services.map(function(service) {
                             return new WMEventService(service, self.payment.payments); //todo mb null
                         }) || [];
+                        self.is_closed = self.closed();
                         deferred.resolve();
                     }).
                     error(function(data) {
@@ -393,14 +420,15 @@ angular.module('WebMis20.services', []).
                 return deferred.promise;
             };
 
-            WMEvent.prototype.save = function() {
+            WMEvent.prototype.save = function(close_event) {
                 var self = this;
                 var deferred = $q.defer();
                 $http.post(url_event_save, {
                     event: this.info,
                     payment: this.payment,
                     services: this.services,
-                    ticket_id: this.ticket_id
+                    ticket_id: this.ticket_id,
+                    close_event: close_event
                 }).
                     success(function(data) {
                         deferred.resolve(data.result.id);
@@ -409,6 +437,24 @@ angular.module('WebMis20.services', []).
                         deferred.reject('error save event');
                     });
                 return deferred.promise;
+            };
+
+            WMEvent.prototype.get_unclosed_actions = function() {
+                var unclosed_actions = [];
+                var actions = this.info['med_doc_actions'].concat(this.info['diag_actions']).concat(this.info['cure_actions']);
+                actions.forEach(function(item){
+                    if (item.status < 2){
+                        unclosed_actions.push(item);
+                    }
+                });
+                return unclosed_actions
+            };
+
+            WMEvent.prototype.get_final_diagnosis = function() {
+                var final_diagnosis = this.diagnoses.filter(function(item){
+                    return item.diagnosis_type.code == 1;
+                })
+                return final_diagnosis[0] ? final_diagnosis.length : null
             };
 
             WMEvent.prototype.is_new = function() {

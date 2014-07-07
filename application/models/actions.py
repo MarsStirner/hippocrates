@@ -319,8 +319,6 @@ class ActionProperty_RLS(ActionProperty_Integer):
     def get_value(self):
         return v_Nomen.query.get(self.value).first() if self.value else None
 
-    property_object = db.relationship('ActionProperty')
-
 
 class ActionProperty_OperationType(ActionProperty_Integer):
 

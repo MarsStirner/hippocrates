@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 import datetime
+import re
 from application.lib.agesex import AgeSex
 from application.models.client import ClientDocument
-from application.models.exists import Person, rbPost, rbCashOperation
+from application.models.exists import Person, rbPost, rbCashOperation, rbService
+from application.models.utils import safe_current_user_id
 from application.systemwide import db
 
 
@@ -109,7 +111,7 @@ class EventType(db.Model):
     name = db.Column(db.String(64), nullable=False)
     purpose_id = db.Column(db.Integer, db.ForeignKey('rbEventTypePurpose.id'), index=True)
     finance_id = db.Column(db.Integer, db.ForeignKey('rbFinance.id'), index=True)
-    scene_id = db.Column(db.Integer, index=True)
+    scene_id = db.Column(db.ForeignKey('rbScene.id'), index=True)
     visitServiceModifier = db.Column(db.String(128), nullable=False)
     visitServiceFilter = db.Column(db.String(32), nullable=False)
     visitFinance = db.Column(db.Integer, nullable=False, server_default=u"'0'")
@@ -160,6 +162,7 @@ class EventType(db.Model):
     finance = db.relationship(u'rbFinance')
     service = db.relationship(u'rbService')
     requestType = db.relationship(u'rbRequestType', lazy=False)
+    scene = db.relationship(u'rbScene')
 
     @classmethod
     def get_default_et(cls):
@@ -438,3 +441,107 @@ class Diagnostic(db.Model):
 
     def __int__(self):
         return self.id
+
+
+def modify_service_code(original, *args):
+    def apply_modifier(o, m):
+        if not m:
+            return o
+        elif m.startswith('-'):
+            return u''
+        elif m.startswith('+'):
+            return m[1:]
+        elif m.startswith('~'):
+            return m[1:] + o[1:]
+        else:
+            parts = m.split(m[0]) if m else []
+            if len(parts) != 4:
+                raise Exception(u'invalid service regexp modifier (%s)' % m)
+            return re.sub(parts[1], parts[2], o, flags=re.I if 'I' in parts[3].upper() else 0)
+    # for modifier in args:
+    #     original = apply_modifier(original, modifier)
+    return reduce(apply_modifier, args, original)
+
+
+class Visit(db.Model):
+    __tablename__ = u'Visit'
+
+    id = db.Column(db.Integer, primary_key=True)
+    createDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.utcnow)
+    createPerson_id = db.Column(db.Integer, index=True, default=safe_current_user_id)
+    modifyDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.utcnow)
+    modifyPerson_id = db.Column(db.Integer, index=True, default=safe_current_user_id)
+    deleted = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    event_id = db.Column(db.ForeignKey('Event.id'), nullable=False, index=True)
+    scene_id = db.Column(db.ForeignKey('rbScene.id'), nullable=False, index=True)
+    date = db.Column(db.DateTime, nullable=False)
+    visitType_id = db.Column(db.ForeignKey('rbVisitType.id'), nullable=False, index=True)
+    person_id = db.Column(db.ForeignKey('Person.id'), nullable=False, index=True)
+    isPrimary = db.Column(db.Integer, nullable=False)
+    finance_id = db.Column(db.ForeignKey('rbFinance.id'), nullable=False, index=True)
+    service_id = db.Column(db.ForeignKey('rbService.id'), index=True)
+    payStatus = db.Column(db.Integer, nullable=False)
+
+    service = db.relationship(u'rbService')
+    person = db.relationship(u'Person')
+    finance = db.relationship(u'rbFinance')
+    scene = db.relationship(u'rbScene')
+    visitType = db.relationship(u'rbVisitType')
+    event = db.relationship(u'Event')
+
+    @classmethod
+    def make_default(cls, event):
+        from application.lib.utils import safe_traverse_attrs
+        visit = cls()
+        visit.date = event.setDate
+        visit.event = event
+        visit.person = event.execPerson
+        visit.scene = event.eventType.scene or rbScene.query.filter(rbScene.code == '1').first()
+        visit.visitType = rbVisitType.query.filter(rbVisitType.code == '').first()
+        if event.eventType.visitFinance:
+            visit.finance = event.execPerson.finance
+        else:
+            visit.finance = event.eventType.finance
+        base_service = event.eventType.service or safe_traverse_attrs(event.execPerson, 'speciality', 'service')
+        if base_service:
+            bsc = modify_service_code(
+                base_service.code,
+                event.eventType.visitServiceModifier,
+                visit.visitType.serviceModifier,
+                visit.scene.serviceModifier
+            )
+            visit.service = rbService.query.filter(rbService.code == bsc).first()
+        visit.payStatus = 0
+        visit.isPrimary = 0
+        return visit
+
+
+class rbScene(db.Model):
+    __tablename__ = u'rbScene'
+
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(8), nullable=False, index=True)
+    name = db.Column(db.Unicode(64), nullable=False, index=True)
+    serviceModifier = db.Column(db.Unicode(128), nullable=False)
+
+
+class rbVisitType(db.Model):
+    __tablename__ = u'rbVisitType'
+
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.Unicode(8), nullable=False, index=True)
+    name = db.Column(db.Unicode(64), nullable=False, index=True)
+    serviceModifier = db.Column(db.Unicode(128), nullable=False)
+
+
+class Event_Persons(db.Model):
+    __tablename__ = u'Event_Persons'
+
+    id = db.Column(db.Integer, primary_key=True)
+    event_id = db.Column(db.ForeignKey('Event.id'), nullable=False, index=True)
+    person_id = db.Column(db.ForeignKey('Person.id'), nullable=False, index=True)
+    begDate = db.Column(db.DateTime, nullable=False)
+    endDate = db.Column(db.DateTime)
+
+    event = db.relationship('Event')
+    person = db.relationship('Person')

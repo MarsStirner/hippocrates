@@ -25,7 +25,7 @@
                 <hr>
                     <button ng-click="save_client()" class="btn btn-success"
                             tooltip="[[clientForm.$invalid ? 'Заполните все обязательные поля': '']]">Сохранить</button>
-                    <button ng-click="cancel_editing()" class="btn btn-danger">Отменить</button>
+                    <button ng-click="cancel_editing()" class="btn btn-default">Отмена</button>
                 </toc-affix>
             </div>
         </div>
@@ -55,9 +55,9 @@
 {% block modules_js %}
     {{ super() }}
 
-    <script src="{{ url_for('static', filename='js/kladr-directives.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/controllers/client/client-info-ctrl.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/directives/client/client-directives.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/kladr-directives.js', v=version) }}"></script>
+    <script src="{{ url_for('static', filename='js/controllers/client/client-info-ctrl.js', v=version) }}"></script>
+    <script src="{{ url_for('static', filename='js/directives/client/client-directives.js', v=version) }}"></script>
 
     <script type="text/ng-template" id="modal-deleteRecord.html">{% include "patients/_modal_delete_record.html" %}</script>
     <script type="text/ng-template" id="modal-print-dialog.html">{% include "_modal-print-dialog.html" %}</script>

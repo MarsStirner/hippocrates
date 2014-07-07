@@ -136,8 +136,7 @@ class Client(db.Model):
         lazy='dynamic',  #order_by='desc(ScheduleTicket.begDateTime)',
         primaryjoin='and_('
                     'ScheduleClientTicket.deleted == 0, '
-                    'ScheduleClientTicket.client_id == Client.id, '
-                    'ScheduleClientTicket.event_id.is_(None))',
+                    'ScheduleClientTicket.client_id == Client.id)',
         innerjoin=True
     )
 

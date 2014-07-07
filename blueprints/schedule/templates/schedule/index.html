@@ -4,7 +4,7 @@
 {% block title %}> {{ module_name }}{% endblock %}
 
 {% block main %}
-    <legend xmlns="http://www.w3.org/1999/html"><h2>График врача</h2></legend>
+    <legend xmlns="http://www.w3.org/1999/html"><h2>График работы</h2></legend>
     <div ng-controller="Schedule">
         <div class="row marginal">
             <div class="col-md-2">
@@ -41,7 +41,7 @@
                     <table class="table table-condensed person-schedule">
                         <caption><span ng-if="grouped[reception_type].max_tickets == 0" class="no-schedule-label">Нет расписания</span>
                             [[ person.name ]]
-                            <small>, [[ person.speciality ]]</small>
+                            <small>, [[ person.speciality.name ]]</small>
                         </caption>
                         <thead ng-if="grouped[reception_type].max_tickets > 0">
                         <tr>
