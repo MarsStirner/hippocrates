@@ -33,7 +33,7 @@ class Gender(Enum):
 
 
 class LocalityType(Enum):
-    vilage = 0, u'Село'
+    vilage = 2, u'Село'
     city = 1, u'Город'
 
 
