@@ -5,8 +5,6 @@
 {% block main %}
     <legend xmlns="http://www.w3.org/1999/html"><h2>График врача</h2></legend>
     <div ng-controller="Schedule">
-        <script type="text/ng-template" id="modal-DaysSetup.html">{% include "schedule/_daysetup.html" %}</script>
-        <script type="text/ng-template" id="modal-DayFree.html">{% include "schedule/_day_free.html" %}</script>
         <div class="row marginal">
             <div class="col-md-2">
                 <select class="form-control" name="year" ng-model="year" ng-disabled="editing"
@@ -21,15 +19,6 @@
             </div>
         </div>
         <div ng-show="person">
-            <div class="row marginal">
-                <div class="col-md-12">
-                    <ul class="nav nav-tabs nav-justified" ng-model="reception_type">
-                        <li ng-class="{active: (rt.code == reception_type), disabled: editing}" ng-repeat="rt in reception_types.objects"
-                            ng-click="changeReceptionType(rt.code)"><a href="#" ng-disabled="editing">[[ rt.name ]]</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
             <div class="btn-group">
                 <button class="btn btn-primary" ng-click="start_editing()" ng-if="!editing">Редактировать</button>
                 <button class="btn btn-success" ng-click="finish_editing()" ng-if="editing">Сохранить</button>
@@ -67,21 +56,30 @@
                                      ng-class="get_day_class(day, $index)"
                                      ng-click="select.day(day)">
                                     <div class="panel-heading">[[ day.date | asDate ]]
-                                        <i class="pull-right glyphicon glyphicon-edit day-selectable" ng-if="day.busy"
-                                                ng-click="free_up_day(day)"></i>
+                                        <i class="pull-right glyphicon glyphicon-edit day-selectable" ng-if="day.busy" ng-click="free_up_day(day)"></i>
                                     </div>
                                     <ul class="panel-body list-group" ng-switch="person_schedule_day_switch(day)">
                                         <li class="list-group-item list-group-item-danger" ng-if="day.busy">Есть записи</li>
+
                                         <li class="list-group-item list-group-item-info" ng-repeat="sched in day.scheds">
-                                            <p><nobr>[[ (day.date + 'T' + sched.begTime) | asTime ]] - [[ (day.date + 'T' + sched.endTime) | asTime ]]</nobr></p>
+                                            <p class="interval-title" ng-bind-html="getRecTypeText(sched.reception_type.code, true)"></p>
+                                            <p><span class="glyphicon glyphicon-time"></span>
+                                                <nobr>&nbsp;[[ (day.date + 'T' + sched.begTime) | asTime ]] - [[ (day.date + 'T' + sched.endTime) | asTime ]]</nobr></p>
+                                            <p ng-if="sched.reception_type.code !== 'home'"><span class="glyphicon glyphicon-tag"></span>
+                                                <nobr>&nbsp;Кабинет:&nbsp;[[ sched.office.code ]]</nobr></p>
                                         </li>
+
                                         <li class="list-group-item list-group-item-info" ng-switch-when="normal">
-                                            <p><nobr>Кабинет:&nbsp;[[ day.office.code ]]</nobr></p>
-                                            <p><nobr>План:&nbsp;[[ day.planned ]]</nobr></p>
-                                            <p><nobr>Сверх плана:&nbsp;[[ day.extra ]]</nobr></p>
-                                            <p><nobr>Вне очереди:&nbsp;[[ day.CITO ]]</nobr></p>
+                                            <div class="text-right text-muted" ng-repeat="(rt_code, info) in day.info">
+                                                <p class="interval-title" ng-if="show_day_info_title(day.info)" ng-bind-html="getRecTypeText(rt_code)"></p>
+                                                <p><nobr>План:&nbsp;[[ info.planned ]]</nobr></p>
+                                                <p><nobr>Сверх плана:&nbsp;[[ info.extra ]]</nobr></p>
+                                                <p><nobr>Вне очереди:&nbsp;[[ info.CITO ]]</nobr></p>
+                                            </div>
                                         </li>
+
                                         <li class="list-group-item" ng-switch-when="empty">Не&nbsp;заполнено</li>
+
                                         <li class="list-group-item list-group-item-danger" ng-switch-when="absent">Причина отсутствия:<br/>[[ day.roa.name ]]</li>
                                     </ul>
                                 </div>
@@ -92,48 +90,127 @@
                 </div>
             </div>
         </div>
+{#    <pre>Schedules: [[schedules | json]]</pre>#}
     </div>
 {% endblock %}
 {% block modules_js %}
     {{ super() }}
+
+    <script type="text/ng-template" id="modal-DaysSetup.html">{% include "schedule/_daysetup.html" %}</script>
+    <script type="text/ng-template" id="modal-DayFree.html">{% include "schedule/_day_free.html" %}</script>
+
     <script type="text/javascript">
         {{ person_tree.js() }}
-        DaySetupModalCtrl = function ($scope, $modalInstance, model, roas, offices) {
+        DaySetupModalCtrl = function ($scope, $modalInstance, selected_days, model, rec_types, roas, offices) {
+            function unique_rectypes(array) {
+                var used_rts =  array.map(function(interval) {
+                    return interval.reception_type && interval.reception_type.code;
+                });
+                var unique_used_rts = used_rts.filter(function(rt_code, pos) {
+                    return used_rts.indexOf(rt_code) === pos;
+                });
+                return unique_used_rts;
+            }
+
+            $scope.rec_types = rec_types;
+            $scope.roas = roas;
+            $scope.offices = offices;
+
+            $scope.selected_days = selected_days;
             $scope.model = model;
-            $scope.absent = model.roa !== null;
+            $scope.absent = {
+                checked: model.roa !== null
+            };
+
             $scope.accept = function () {
-                $modalInstance.close($scope.model);
+                var selected_days = $scope.selected_days.map(function(day) {
+                    return day.selected ? day.date : undefined;
+                }),
+                    result = {
+                        selected_days: selected_days,
+                        model: $scope.model
+                    };
+                $modalInstance.close(result);
             };
             $scope.cancel = function () {
                 $modalInstance.dismiss('cancel');
             };
             $scope.absent_checked = function () {
-                {# не спрашивайте почему так. Если стучаться через $scope, то не работает #}
-                if (!this.absent) {
-                    this.model.roa = null;
+                if (!$scope.absent.checked) {
+                    $scope.model.roa = null;
                 }
             };
+            $scope.add_new_interval = function() {
+                $scope.model.intervals.push({
+                    begTime: moment('09:00', "HH:mm:ss").toDate(),
+                    endTime: moment('15:00', "HH:mm:ss").toDate(),
+                    office: null,
+                    reception_type: null
+                });
+                $scope.sync_times();
+            };
+            $scope.delete_interval = function(interval) {
+                aux.removeFromArray($scope.model.intervals, interval);
+                $scope.sync_times();
+            };
 
+            $scope.used_rts = unique_rectypes($scope.model.intervals);
+            $scope.$watch(function() {
+                return unique_rectypes($scope.model.intervals);
+            }, function(used_codes, o) {
+                if (used_codes !== o) {
+                    $scope.used_rts = used_codes;
+                    $scope.rec_types.forEach(function(rec_type) {
+                        var code = rec_type.code;
+                        if (aux.inArray(used_codes, code)) {
+                            if (!$scope.model.info[code]) {
+                                $scope.model.info[code] = {
+                                    'CITO': 0,
+                                    'extra': 0,
+                                    'planned': 0
+                                };
+                            }
+                        } else {
+                            delete $scope.model.info[code];
+                        }
+                    });
+                }
+            }, true);
+            $scope.flt_rec_type = function() {
+                return function(item) {
+                    return $scope.used_rts.indexOf(item.code) !== -1;
+                };
+            };
             // timepicker validation, TODO: directive
             $scope.times_valid = true;
             $scope.sync_times = function() {
-                var m = $scope.model;
-                if (m.begTime1 < m.endTime1 &&
-                        (!m.pause ||
-                                (m.pause &&
-                                        m.begTime1 < m.begTime2 &&
-                                        m.begTime2 < m.endTime1 &&
-                                        m.begTime2 < m.endTime2 &&
-                                        m.endTime2 < m.endTime1)
-                                )
-                    ) {
-                    $scope.times_valid = true;
-                } else {
-                    $scope.times_valid = false;
+                var i_list = $scope.model.intervals.map(function (interval) {
+                    return {
+                        begTime: interval.begTime,
+                        endTime: interval.endTime
+                    };
+                }).sort(function (a, b) {
+                    if (a.begTime < b.begTime) { return -1; }
+                    else if (a.begTime > b.begTime) { return 1; }
+                    else { return 0; }
+                });
+                var cur_interval,
+                    prev_interval,
+                    valid = true;
+                for (var i = 0; i < i_list.length; i += 1) {
+                    cur_interval = i_list[i];
+                    prev_interval = i !== 0 ? i_list[i - 1] : undefined;
+                    valid = (
+                        (cur_interval.begTime < cur_interval.endTime) &&
+                            (prev_interval === undefined ? true :
+                                !((prev_interval.begTime <= cur_interval.begTime && cur_interval.begTime <= prev_interval.endTime) ||
+                                  (cur_interval.endTime <= prev_interval.endTime && prev_interval.begTime <= cur_interval.endTime))
+                            )
+                    );
+                    if (!valid) break;
                 }
+                $scope.times_valid = valid;
             };
-            $scope.roas = roas;
-            $scope.offices = offices
         };
         DayFreeModalCtrl = function ($scope, $modalInstance, day, roas) {
             $scope.day = day;
@@ -147,12 +224,12 @@
             $scope.roas = roas;
         };
         WebMis20.controller('Schedule', ['$scope', '$http', '$modal', 'RefBook', function ($scope, $http, $modal, RefBook) {
+            $scope.reception_types = new RefBook('rbReceptionType');
             $scope.rbReasonOfAbsence = new RefBook('rbReasonOfAbsence');
             $scope.offices = new RefBook('Office');
             $scope.editing = false;
             $scope.weekends_selectable = false;
             $scope.selected_days = [];
-            $scope.data = {};
             $scope.aux = aux;
             $scope.params = aux.getQueryParams(document.location.search);
             $scope.person_id = $scope.params.person_id;
@@ -167,8 +244,6 @@
             $scope.weekdays = ['Пн', "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
             $scope.week_data = [];
 
-            $scope.reception_types = new RefBook('rbReceptionType');
-            $scope.reception_type = 'amb';
 
             $scope.reloadSchedule = function () {
                 if ($scope.person_id) {
@@ -176,7 +251,7 @@
                         '{{ url_for('.api_schedule_description') }}',
                         {
                             params: {
-                                person_ids: $scope.person_id,
+                                person_id: $scope.person_id,
                                 start_date: $scope.monthDate.format('YYYY-MM'),
                                 expand: 1
                             }
@@ -186,16 +261,15 @@
             };
 
             function make_schedule (data) {
-                var d = data.result['schedules'][0];
-                $scope.person = d.person;
-                $scope.grouped = d.grouped;
+                $scope.person = data.result['person'];
+                $scope.schedules = data.result['schedules'];
                 make_week();
             }
 
             var make_week = function () {
                 var first_weekday = $scope.monthDate.weekday();
                 var day_iter = 0;
-                var schedule = $scope.grouped[$scope.reception_type]['schedule'];
+                var schedule = $scope.schedules;
                 var result = [];
                 for (var week_n = 0; ; week_n++) {
                     var week = [];
@@ -226,13 +300,6 @@
                 $scope.reloadSchedule();
             };
 
-            $scope.changeReceptionType = function (code) {
-                if ($scope.editing) return;
-                $scope.reception_type = code;
-                $scope.selected_days = [];
-                make_week();
-            };
-
             $scope.start_editing = function () {
                 $scope.editing = true;
             };
@@ -240,9 +307,8 @@
             $scope.finish_editing = function () {
                 $http.post(
                     '{{ url_for('.api_schedule_description_post') }}', {
-                    receptionType: $scope.reception_type,
                     person_id: $scope.person_id,
-                    schedule: $scope.grouped[$scope.reception_type]['schedule'].filter(function (day) {
+                    schedule: $scope.schedules.filter(function (day) {
                         return day.altered;
                     }),
                     start_date: $scope.monthDate.format('YYYY-MM')
@@ -303,17 +369,15 @@
                     }
                 },
                 odd: function () {
-                    $scope.selected_days = $scope.grouped[$scope.reception_type]['schedule'].
-                            filter(day_selectable).filter(function (day) {
+                    $scope.selected_days = $scope.schedules.filter(day_selectable).filter(function (day) {
                         return moment(day.date).date() % 2 !== 0
                     })
                 },
                 invert: function () {
-                    $scope.selected_days = $scope.grouped[$scope.reception_type]['schedule'].
-                            filter(aux.func_not_in($scope.selected_days)).filter(day_selectable);
+                    $scope.selected_days = $scope.schedules.filter(aux.func_not_in($scope.selected_days)).filter(day_selectable);
                 },
                 all: function () {
-                    $scope.selected_days = $scope.grouped[$scope.reception_type]['schedule'].filter(day_selectable)
+                    $scope.selected_days = $scope.schedules.filter(day_selectable);
                 },
                 none: function () {
                     $scope.selected_days = [];
@@ -323,44 +387,34 @@
             $scope.fill_selection = function () {
                 var modalInstance = $modal.open({
                     templateUrl: 'modal-DaysSetup.html',
+                    size: 'lg',
                     controller: DaySetupModalCtrl,
                     resolve: {
+                        selected_days: function() {
+                            return $scope.selected_days.map(function(day) {
+                                return {
+                                    date: day.date,
+                                    selected: true
+                                };
+                            });
+                        },
                         model: function () {
-                            var primary = $scope.selected_days[0];
-                            var secondary = {
-                                office: primary.office,
-                                planned: primary.planned,
-                                extra: primary.extra,
-                                CITO: primary.CITO,
-                                roa: primary.roa ? primary.roa.code : null
+                            var first_day_shedule = $scope.selected_days[0];
+                            return {
+                                info: angular.copy(first_day_shedule.info),
+                                roa: first_day_shedule.roa,
+                                intervals: first_day_shedule.scheds.map(function(interval) {
+                                    return {
+                                        begTime: moment(interval.begTime, "HH:mm:ss").toDate(), // utc dates in model, local on screen
+                                        endTime: moment(interval.endTime, "HH:mm:ss").toDate(),
+                                        office: interval.office, // copy? why no need?
+                                        reception_type: interval.reception_type
+                                    }
+                                })
                             };
-                            // This is the hack - we concat ephemeral date with our time to produce Date object
-                            if (primary.scheds.length > 1) {
-                                var begTime1 = primary.scheds[0].begTime.split(':');
-                                var endTime1 = primary.scheds[primary.scheds.length - 1].endTime.split(':');
-                                var begTime2 = primary.scheds[0].endTime.split(':');
-                                var endTime2 = primary.scheds[primary.scheds.length - 1].begTime.split(':');
-                                secondary.begTime1 = new Date("1970", "1", "1", begTime1[0], begTime1[1], begTime1[2]);
-                                secondary.endTime1 = new Date("1970", "1", "1", endTime1[0], endTime1[1], endTime1[2]);
-                                secondary.begTime2 = new Date("1970", "1", "1", begTime2[0], begTime2[1], begTime2[2]);
-                                secondary.endTime2 = new Date("1970", "1", "1", endTime2[0], endTime2[1], endTime2[2]);
-                                secondary.pause = true;
-                            } else if (primary.scheds.length == 1) {
-                                var begTime = primary.scheds[0].begTime.split(':');
-                                var endTime = primary.scheds[0].endTime.split(':');
-                                secondary.begTime1 = new Date("1970", "1", "1", begTime[0], begTime[1], begTime[2]);
-                                secondary.endTime1 = new Date("1970", "1", "1", endTime[0], endTime[1], endTime[2]);
-                                secondary.begTime2 = new Date("1970", "1", "1", "0", "0", "0", "0");
-                                secondary.endTime2 = new Date("1970", "1", "1", "0", "0", "0", "0");
-                                secondary.pause = false;
-                            } else {
-                                secondary.begTime1 = new Date("1970", "1", "1", "8", "0", "0", "0");
-                                secondary.endTime1 = new Date("1970", "1", "1", "18", "0", "0", "0");
-                                secondary.begTime2 = new Date("1970", "1", "1", "0", "0", "0", "0");
-                                secondary.endTime2 = new Date("1970", "1", "1", "0", "0", "0", "0");
-                                secondary.pause = false;
-                            }
-                            return secondary;
+                        },
+                        rec_types: function() {
+                            return $scope.reception_types.objects;
                         },
                         roas: function () {
                             return $scope.rbReasonOfAbsence.objects;
@@ -370,35 +424,29 @@
                         }
                     }
                 });
-                modalInstance.result.then(function (model) {
-                    $scope.selected_days.map(function (day) {
-                        day.roa = $scope.rbReasonOfAbsence.get_by_code(model.roa);
+                modalInstance.result.then(function(result) {
+                    var processed_days = $scope.selected_days.filter(function(day_schedule) {
+                        return aux.inArray(result.selected_days, day_schedule.date); // strings
+                    });
+
+                    var model = result.model;
+                    processed_days.forEach(function(day) {
+                        day.roa = model.roa;
                         day.altered = true;
                         if (model.roa) {
-                            day.office = null;
-                            day.planned = 0;
-                            day.extra = 0;
-                            day.CITO = 0;
+                            day.info = null;
                             day.scheds = [];
                         } else {
-                            day.office = model.office;
-                            day.planned = model.planned;
-                            day.extra = model.extra;
-                            day.CITO = model.CITO;
-                            if (model.pause) {
-                                day.scheds = [{
-                                    begTime: moment(model.begTime1).format('HH:mm:ss'),
-                                    endTime: moment(model.begTime2).format('HH:mm:ss')
-                                } , {
-                                    begTime: moment(model.endTime2).format('HH:mm:ss'),
-                                    endTime: moment(model.endTime1).format('HH:mm:ss')
-                                }]
-                            } else {
-                                day.scheds = [{
-                                    begTime: moment(model.begTime1).format('HH:mm:ss'),
-                                    endTime: moment(model.endTime1).format('HH:mm:ss')
-                                }]
-                            }
+                            day.info = model.info;
+
+                            day.scheds = model.intervals.map(function(interval) {
+                                return {
+                                    begTime: moment(interval.begTime).format("HH:mm:ss"),
+                                    endTime: moment(interval.endTime).format("HH:mm:ss"),
+                                    office: interval.office,
+                                    reception_type: interval.reception_type
+                                };
+                            });
                         }
                     });
                     $scope.select.none();
@@ -431,7 +479,6 @@
                                 '&date=' + day.date,
                                 '_self');
                     });
-
                 })
             };
 
@@ -462,12 +509,38 @@
 
             $scope.person_schedule_day_switch = function (day) {
                 if (day.roa) {
-                    return 'absent'
+                    return 'absent';
                 } else if (day.scheds.length > 0) {
-                    return 'normal'
+                    return 'normal';
                 } else {
-                    return 'empty'
+                    return 'empty';
                 }
+            };
+
+            $scope.getRecTypeText = function(rt_code, icon) {
+                if (arguments.length < 2) {
+                    icon = false;
+                }
+                var text = '',
+                    rt_text = '',
+                    icon_text = '';
+                switch(rt_code) {
+                    case 'amb':
+                        rt_text = 'Амбулаторный приём';
+                        icon_text = 'plus';
+                        break;
+                    case 'home':
+                        rt_text = 'Приём на дому';
+                        icon_text = 'home';
+                        break;
+                }
+                text = [icon ? '<span class="glyphicon glyphicon-' + icon_text + '"></span>' : '',
+                        '<nobr>' + '&nbsp;' + rt_text + '</nobr>'].join('');
+                return text;
+            };
+
+            $scope.show_day_info_title = function(day_info) {
+                return Object.keys(day_info).length > 1;
             };
         }]);
     </script>

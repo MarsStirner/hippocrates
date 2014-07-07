@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
-from datetime import datetime
+
+import datetime
+
 from application.models.client import Client
 from application.systemwide import db
 from exists import Person, rbReasonOfAbsence, Organisation
+from application.models.utils import safe_current_user_id
 
 
 class rbReceptionType(db.Model):
@@ -17,6 +20,7 @@ class rbReceptionType(db.Model):
 
     def __json__(self):
         return {
+            'id': self.id,
             'code': self.code,
             'name': self.name,
         }
@@ -71,6 +75,7 @@ class Office(db.Model):
 
     def __json__(self):
         return {
+            'id': self.id,
             'code': self.code,
             'name': self.name,
             'org_structure': self.orgStructure
@@ -89,18 +94,19 @@ class Schedule(db.Model):
     office_id = db.Column(db.ForeignKey('Office.id'))
     reasonOfAbsence_id = db.Column(db.Integer, db.ForeignKey('rbReasonOfAbsence.id'))
     receptionType_id = db.Column(db.Integer, db.ForeignKey('rbReceptionType.id'))
-    createDatetime = db.Column(db.DateTime, nullable=False)
-    createPerson_id = db.Column(db.Integer, db.ForeignKey('Person.id'), index=True)
-    modifyDatetime = db.Column(db.DateTime, nullable=False)
-    modifyPerson_id = db.Column(db.Integer, db.ForeignKey('Person.id'), index=True)
-    deleted = db.Column(db.SmallInteger, nullable=False, server_default='0')
+    createDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now)
+    createPerson_id = db.Column(db.Integer, db.ForeignKey('Person.id'), index=True, default=safe_current_user_id)
+    modifyDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now, onupdate=datetime.datetime.now)
+    modifyPerson_id = db.Column(db.Integer, db.ForeignKey('Person.id'), index=True, default=safe_current_user_id, onupdate=safe_current_user_id)
+    deleted = db.Column(db.SmallInteger, nullable=False, server_default='0', default=0)
 
     person = db.relationship('Person', foreign_keys=person_id)
     reasonOfAbsence = db.relationship('rbReasonOfAbsence', lazy='joined')
     receptionType = db.relationship('rbReceptionType', lazy='joined')
     tickets = db.relationship(
         'ScheduleTicket', lazy=False, primaryjoin=
-        "and_(ScheduleTicket.schedule_id == Schedule.id, ScheduleTicket.deleted == 0)")
+        "and_(ScheduleTicket.schedule_id == Schedule.id, ScheduleTicket.deleted == 0)"
+    )
     office = db.relationship('Office', lazy='joined')
     
 
@@ -112,11 +118,11 @@ class ScheduleTicket(db.Model):
     begTime = db.Column(db.Time)
     endTime = db.Column(db.Time)
     attendanceType_id = db.Column(db.Integer, db.ForeignKey('rbAttendanceType.id'), nullable=False)
-    createDatetime = db.Column(db.DateTime, nullable=False)
-    createPerson_id = db.Column(db.Integer, db.ForeignKey('Person.id'), index=True)
-    modifyDatetime = db.Column(db.DateTime, nullable=False)
-    modifyPerson_id = db.Column(db.Integer, db.ForeignKey('Person.id'), index=True)
-    deleted = db.Column(db.SmallInteger, nullable=False, server_default='0')
+    createDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now)
+    createPerson_id = db.Column(db.Integer, db.ForeignKey('Person.id'), index=True, default=safe_current_user_id)
+    modifyDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now, onupdate=datetime.datetime.now)
+    modifyPerson_id = db.Column(db.Integer, db.ForeignKey('Person.id'), index=True, default=safe_current_user_id, onupdate=safe_current_user_id)
+    deleted = db.Column(db.SmallInteger, nullable=False, server_default='0', default=0)
 
     attendanceType = db.relationship('rbAttendanceType', lazy=False)
     client_ticket = db.relationship(
@@ -137,11 +143,11 @@ class ScheduleTicket(db.Model):
 
     @property
     def begDateTime(self):
-        return datetime.combine(self.schedule.date, self.begTime) if self.begTime is not None else None
+        return datetime.datetime.combine(self.schedule.date, self.begTime) if self.begTime is not None else None
 
     @property
     def endDateTime(self):
-        return datetime.combine(self.schedule.date, self.endTime) if self.endTime is not None else None
+        return datetime.datetime.combine(self.schedule.date, self.endTime) if self.endTime is not None else None
 
 
 class ScheduleClientTicket(db.Model):
@@ -151,14 +157,14 @@ class ScheduleClientTicket(db.Model):
     client_id = db.Column(db.Integer, db.ForeignKey('Client.id'), nullable=False)
     ticket_id = db.Column(db.Integer, db.ForeignKey('ScheduleTicket.id'), nullable=False)
     isUrgent = db.Column(db.Boolean)
-    note = db.Column(db.Unicode(256))
+    note = db.Column(db.Unicode(256), default=u'')
     appointmentType_id = db.Column(db.Integer, db.ForeignKey('rbAppointmentType.id'))
     infisFrom = db.Column(db.Unicode(20))
-    createDatetime = db.Column(db.DateTime, nullable=False)
-    createPerson_id = db.Column(db.Integer, db.ForeignKey('Person.id'), index=True)
-    modifyDatetime = db.Column(db.DateTime, nullable=False)
-    modifyPerson_id = db.Column(db.Integer, db.ForeignKey('Person.id'), index=True)
-    deleted = db.Column(db.SmallInteger, nullable=False, server_default='0')
+    createDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now)
+    createPerson_id = db.Column(db.Integer, db.ForeignKey('Person.id'), index=True, default=safe_current_user_id)
+    modifyDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now, onupdate=datetime.datetime.now)
+    modifyPerson_id = db.Column(db.Integer, db.ForeignKey('Person.id'), index=True, default=safe_current_user_id, onupdate=safe_current_user_id)
+    deleted = db.Column(db.SmallInteger, nullable=False, server_default='0', default=0)
     event_id = db.Column(db.ForeignKey('Event.id'))
     
     client = db.relationship('Client', lazy='joined', uselist=False)

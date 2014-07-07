@@ -5,15 +5,15 @@
     <div ng-controller="DayFree">
         <div class="row">
             <div class="col-md-2">
-                <button class="btn btn-block btn-success" ng-click="back2monthview()" style="margin-bottom: 20px;">
-                    Вернуться в распсиание
+                <button class="btn btn-block btn-success marginal" ng-click="back2monthview()">
+                    Вернуться в расписание
                 </button>
             </div>
         </div>
         <div class="row">
             <div class="col-md-8">
-                <div class="alert alert-warning">{#  #}
-                    Выберите пациента, запись которого хотите перенести. Затем выберите врача и новое время приема.
+                <div class="alert alert-warning">
+                    Выберите пациента, запись которого хотите перенести. Затем выберите врача, день и новое время приема.
                 </div>
             </div>
         </div>
@@ -29,11 +29,6 @@
                             <button ui-schedule-ticket="ticket" day="day" show-name="true"
                                     ng-click="selectSourceTicket(ticket)"></button>
                         </li>
-{#                        <li class="list-group-item" ng-if="!filtered_tickets.length">#}
-{#                            <button class="btn btn-block btn-success" ng-click="back2monthview()">#}
-{#                                Вернуться в расписание#}
-{#                            </button>#}
-{#                        </li>#}
                     </ul>
                 </div>
             </div>
@@ -59,7 +54,6 @@
                 {{ person_tree.html() }}
             </div>
         </div>
-    <pre>[[ data | json ]]</pre>
     </div>
 {% endblock %}
 
@@ -103,7 +97,7 @@
                         $scope.roa |= Boolean(group.schedule[0].roa);
                         return group.schedule[0].tickets;
                     });
-                })
+                });
             };
 
             var loadSchedule = function () {
@@ -124,7 +118,7 @@
                     });
                 }).then(function () {
                     $scope.selectedSourceTicket = null;
-                })
+                });
             };
 
             $scope.selectSourceTicket = function (ticket) {
