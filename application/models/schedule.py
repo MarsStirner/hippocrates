@@ -105,7 +105,8 @@ class Schedule(db.Model):
     receptionType = db.relationship('rbReceptionType', lazy='joined')
     tickets = db.relationship(
         'ScheduleTicket', lazy=False, primaryjoin=
-        "and_(ScheduleTicket.schedule_id == Schedule.id, ScheduleTicket.deleted == 0)"
+        "and_(ScheduleTicket.schedule_id == Schedule.id, ScheduleTicket.deleted == 0)",
+        backref=db.backref('schedule')
     )
     office = db.relationship('Office', lazy='joined')
     
@@ -130,11 +131,11 @@ class ScheduleTicket(db.Model):
         "and_(ScheduleClientTicket.ticket_id == ScheduleTicket.id, ScheduleClientTicket.deleted == 0)",
         uselist=False)
 
-    schedule = db.relationship(
-        'Schedule', lazy=True, innerjoin=True, uselist=False,
-        primaryjoin='and_('
-                    'Schedule.deleted == 0, ScheduleTicket.deleted == 0, ScheduleTicket.schedule_id == Schedule.id)'
-    )
+    # schedule = db.relationship(
+    #     'Schedule', lazy=True, innerjoin=True, uselist=False,
+    #     primaryjoin='and_('
+    #                 'Schedule.deleted == 0, ScheduleTicket.deleted == 0, ScheduleTicket.schedule_id == Schedule.id)'
+    # )
 
     @property
     def client(self):

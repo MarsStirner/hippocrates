@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-from collections import defaultdict
+
 import datetime
 import itertools
+
+from collections import defaultdict
+from application.systemwide import db
+
 from application.lib.utils import safe_unicode, safe_int
 from application.models.enums import EventPrimary, EventOrder, ActionStatus, Gender
 from application.models.event import Event, EventType, Diagnosis, Diagnostic
@@ -130,11 +134,11 @@ class ScheduleVisualizer(object):
         return [{
             'person': self.make_person(person),
             'grouped': self.make_schedule(
-                Schedule.query.filter(
+                Schedule.query.join(Schedule.tickets).filter(
                     Schedule.person_id == person.id,
                     start_date <= Schedule.date, Schedule.date < end_date,
                     Schedule.deleted == 0
-                ).order_by(Schedule.date),
+                ).order_by(Schedule.date).options(db.contains_eager(Schedule.tickets).contains_eager('schedule')),
                 start_date, end_date
             )} for person in persons]
 
