@@ -248,8 +248,7 @@
                         params: {
                             client_id: $scope.client_id,
                             person_ids: person.id,
-                            start_date: $scope.pages[$scope.page].format('YYYY-MM-DD'),
-                            reception_type: 'amb'
+                            start_date: $scope.pages[$scope.page].format('YYYY-MM-DD')
                         }
                     }).success(function (data) {
                         $scope.user_schedules.push(data.result['schedules'][0]);

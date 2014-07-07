@@ -62,16 +62,16 @@
                                         <li class="list-group-item list-group-item-danger" ng-if="day.busy">Есть записи</li>
 
                                         <li class="list-group-item list-group-item-info" ng-repeat="sched in day.scheds">
-                                            <h5 ng-bind-html="getRecTypeText(sched.reception_type.code, true)"></h5>
+                                            <p class="interval-title" ng-bind-html="getRecTypeText(sched.reception_type.code, true)"></p>
                                             <p><span class="glyphicon glyphicon-time"></span>
-                                                <nobr>[[ (day.date + 'T' + sched.begTime) | asTime ]] - [[ (day.date + 'T' + sched.endTime) | asTime ]]</nobr></p>
+                                                <nobr>&nbsp;[[ (day.date + 'T' + sched.begTime) | asTime ]] - [[ (day.date + 'T' + sched.endTime) | asTime ]]</nobr></p>
                                             <p ng-if="sched.reception_type.code !== 'home'"><span class="glyphicon glyphicon-tag"></span>
-                                                <nobr>Кабинет:&nbsp;[[ sched.office.code ]]</nobr></p>
+                                                <nobr>&nbsp;Кабинет:&nbsp;[[ sched.office.code ]]</nobr></p>
                                         </li>
 
                                         <li class="list-group-item list-group-item-info" ng-switch-when="normal">
-                                            <div ng-repeat="(rt_code, info) in day.info">
-                                                <p ng-if="show_day_info_title(day.info)" ng-bind-html="getRecTypeText(rt_code)"></p>
+                                            <div class="text-right text-muted" ng-repeat="(rt_code, info) in day.info">
+                                                <p class="interval-title" ng-if="show_day_info_title(day.info)" ng-bind-html="getRecTypeText(rt_code)"></p>
                                                 <p><nobr>План:&nbsp;[[ info.planned ]]</nobr></p>
                                                 <p><nobr>Сверх плана:&nbsp;[[ info.extra ]]</nobr></p>
                                                 <p><nobr>Вне очереди:&nbsp;[[ info.CITO ]]</nobr></p>
@@ -90,8 +90,7 @@
                 </div>
             </div>
         </div>
-    <pre>Schedules: [[schedules | json]]</pre>
-    <pre>Weeks: [[week_data | json]]</pre>
+{#    <pre>Schedules: [[schedules | json]]</pre>#}
     </div>
 {% endblock %}
 {% block modules_js %}
@@ -231,7 +230,6 @@
             $scope.editing = false;
             $scope.weekends_selectable = false;
             $scope.selected_days = [];
-{#            $scope.data = {};#}
             $scope.aux = aux;
             $scope.params = aux.getQueryParams(document.location.search);
             $scope.person_id = $scope.params.person_id;
@@ -245,7 +243,6 @@
 
             $scope.weekdays = ['Пн', "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
             $scope.week_data = [];
-
 
 
             $scope.reloadSchedule = function () {
@@ -482,7 +479,6 @@
                                 '&date=' + day.date,
                                 '_self');
                     });
-
                 })
             };
 
@@ -539,7 +535,7 @@
                         break;
                 }
                 text = [icon ? '<span class="glyphicon glyphicon-' + icon_text + '"></span>' : '',
-                        '<nobr>' + rt_text + '</nobr>'].join('');
+                        '<nobr>' + '&nbsp;' + rt_text + '</nobr>'].join('');
                 return text;
             };
 

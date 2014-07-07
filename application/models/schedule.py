@@ -75,6 +75,7 @@ class Office(db.Model):
 
     def __json__(self):
         return {
+            'id': self.id,
             'code': self.code,
             'name': self.name,
             'org_structure': self.orgStructure
@@ -104,7 +105,8 @@ class Schedule(db.Model):
     receptionType = db.relationship('rbReceptionType', lazy='joined')
     tickets = db.relationship(
         'ScheduleTicket', lazy=False, primaryjoin=
-        "and_(ScheduleTicket.schedule_id == Schedule.id, ScheduleTicket.deleted == 0)")
+        "and_(ScheduleTicket.schedule_id == Schedule.id, ScheduleTicket.deleted == 0)"
+    )
     office = db.relationship('Office', lazy='joined')
     
 

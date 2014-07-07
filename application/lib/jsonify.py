@@ -172,12 +172,13 @@ class ScheduleVisualizer(object):
         busy = False
         sub_scheds = []
         for sub_sched in scheds:
+            if not busy and sub_sched['busy']:
+                busy = True
+
             if not roa and sub_sched['roa']:
                 roa = sub_sched['roa']
                 # На день установлена причина отсутствия - не может быть приема
-                break
-            if not busy and sub_sched['busy']:
-                busy = True
+                continue
 
             rec_type = sub_sched['reception_type']
             info_rt = info.setdefault(rec_type['code'], {'planned': 0, 'CITO': 0, 'extra': 0})

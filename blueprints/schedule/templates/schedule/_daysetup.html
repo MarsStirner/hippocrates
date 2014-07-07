@@ -6,8 +6,10 @@
     <ng-form name="daySetupForm">
     <div class="row">
         <div class="col-md-4">
-            <label for="absent"><h4>Причина отсутствия</h4></label>
-            <input type="checkbox" id="absent" ng-model="absent.checked" ng-change="absent_checked()">
+            <button type="button" id="absent" class="btn btn-primary btn-block btn-sm marginal" ng-model="absent.checked"
+                btn-checkbox btn-checkbox-true="true" btn-checkbox-false="false" ng-change="absent_checked()">
+                [[absent.checked ? 'Убрать причину отсутствия' : 'Установить причину отсутствия' ]]
+            </button>
             <select class="form-control" ng-options="item as item.name for item in roas track by item.code"
                     ng-model="model.roa" ng-show="absent.checked"></select>
         </div>
@@ -15,7 +17,7 @@
             <h4>Выбранные дни</h4>
             <span ng-repeat="day in selected_days">
                 <span class="label" ng-class="{'label-primary': day.selected, 'label-default': !day.selected}"
-                      ng-click="day.selected = !day.selected" ng-bind="day.date"></span>
+                      ng-click="day.selected = !day.selected" ng-bind="day.date | asShortDate"></span>
             </span>
         </div>
     </div>
