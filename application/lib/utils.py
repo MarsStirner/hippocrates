@@ -279,6 +279,18 @@ def safe_traverse(obj, *args, **kwargs):
         return safe_traverse(obj.get(args[0]), *args[1:], **kwargs)
 
 
+def safe_traverse_attrs(obj, *args, **kwargs):
+    default = kwargs.get('default', None)
+    if obj is None:
+        return default
+    if len(args) == 0:
+        raise ValueError(u'len(args) must be > 0')
+    elif len(args) == 1:
+        return getattr(obj, args[0], default)
+    else:
+        return safe_traverse_attrs(getattr(obj, args[0]), *args[1:], **kwargs)
+
+
 def get_new_uuid():
     """Сгенерировать новый uuid уникальный в пределах бд.
     @rtype: application.models.exist.UUID

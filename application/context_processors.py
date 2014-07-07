@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from application.app import app
 from datetime import datetime
-from version import version as _version
+from version import version as _version, last_change_date
 
 
 @app.context_processor
@@ -11,7 +11,7 @@ def copyright():
 
 @app.context_processor
 def version():
-    return dict(version=_version)
+    return dict(version=_version, change_date=last_change_date)
 
 
 @app.context_processor
