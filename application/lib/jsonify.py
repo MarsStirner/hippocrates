@@ -345,6 +345,7 @@ class ClientVisualizer(object):
         return {
             'id': apnt.id,
             'mark': None,
+            'date': apnt.ticket.schedule.date,
             'begDateTime': apnt.ticket.begDateTime,
             'office': apnt.ticket.schedule.office,
             'person': safe_unicode(apnt.ticket.schedule.person),
