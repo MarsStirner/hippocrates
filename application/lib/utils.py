@@ -344,7 +344,6 @@ def get_new_event_ext_id(event_type_id, client_id):
         return ''
 
     counter = rbCounter.query.filter_by(id=et.counter_id).with_for_update().first()
-    # todo: check for update
     if not counter:
         return ''
     external_id = _get_external_id_from_counter(counter.prefix,
@@ -368,7 +367,7 @@ def _get_external_id_from_counter(prefix, value, separator, client_id):
             date_val = datetime.date.today().strftime(format_)
             check = datetime.datetime.strptime(date_val, format_)
         except ValueError, e:
-            print e
+            logger.error(e, exc_info=True)
             return None
         return date_val
 

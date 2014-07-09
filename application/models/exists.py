@@ -211,7 +211,7 @@ class OrgStructure(db.Model):
         return {
             'id': self.id,
             'code': self.code,
-            'name': self.name,  # TODO: more
+            'name': self.name,
         }
 
 

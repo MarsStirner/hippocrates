@@ -4,12 +4,14 @@ import requests
 
 from config import VESTA_URL
 from application.systemwide import db
+from application.app import cache
 from application.lib.utils import logger, get_new_uuid
 from application.models.actions import Action, ActionType, ActionPropertyType, ActionProperty
-from application.models.exists import Person, UUID
+from application.models.exists import Person
 from application.models.event import Event
 from application.lib.agesex import recordAcceptableEx
 from application.lib.calendar import calendar
+
 
 # планируемая дата выполнения (default planned end date)
 DPED_UNDEFINED = 0  # Не определено
@@ -206,6 +208,7 @@ def get_planned_end_datetime(action_type_id):
     return datetime.combine(plannedEndDate, plannedEndTime)
 
 
+@cache.memoize(86400)
 def get_kladr_city(code):
     if len(code) == 13:  # убрать после конвертации уже записанных кодов кладр
         code = code[:-2]
@@ -228,6 +231,7 @@ def get_kladr_city(code):
     return result
 
 
+@cache.memoize(86400)
 def get_kladr_street(code):
     if len(code) == 17:  # убрать после конвертации уже записанных кодов кладр
         code = code[:-2]

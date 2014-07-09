@@ -226,7 +226,6 @@ class Client(db.Model):
         ])
 
     def has_identical_addresses(self):
-        # TODO: fix this
         reg = self.reg_address
         live = self.loc_address
         if reg and live:
@@ -1052,7 +1051,7 @@ class Address(db.Model):
 
     @property
     def city(self):
-        from application.lib.data import get_kladr_city  # TODO: fix?
+        from application.lib.data import get_kladr_city
         text = ''
         if self.KLADRCode:
             city_info = get_kladr_city(self.KLADRCode)
@@ -1100,7 +1099,7 @@ class Address(db.Model):
 
     @property
     def street(self):
-        from application.lib.data import get_kladr_street  # TODO: fix?
+        from application.lib.data import get_kladr_street
         text = ''
         if self.KLADRStreetCode:
             street_info = get_kladr_street(self.KLADRStreetCode)

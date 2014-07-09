@@ -50,7 +50,7 @@ def api_event_new_get():
     event = Event()
     event.eventType = EventType.get_default_et()
     event.organisation = Organisation.query.filter_by(infisCode=str(ORGANISATION_INFIS_CODE)).first()
-    event.isPrimaryCode = EventPrimary.primary[0]  # TODO: check previous events
+    event.isPrimaryCode = EventPrimary.primary[0]  # TODO: check previous events TMIS-165
     event.order = EventOrder.planned[0]
 
     ticket_id = request.args.get('ticket_id')
@@ -79,15 +79,12 @@ def api_event_new_get():
 
 @module.route('api/event_save.json', methods=['POST'])
 def api_event_save():
-    now = datetime.datetime.now()
     event_data = request.json['event']
     close_event = request.json['close_event']
     event_id = event_data.get('id')
     execPerson = Person.query.get(event_data['exec_person']['id'])
     if event_id:
         event = Event.query.get(event_id)
-        event.modifyDatetime = now
-        event.modifyPerson_id = current_user.get_id() or 1  # todo: fix
         event.deleted = event_data['deleted']
         event.eventType = EventType.query.get(event_data['event_type']['id'])
         event.execPerson = execPerson
@@ -98,14 +95,11 @@ def api_event_save():
         event.orgStructure_id = event_data['org_structure']['id']
         event.result_id = event_data['result']['id'] if event_data.get('result') else None
         event.rbAcheResult_id = event_data['ache_result']['id'] if event_data.get('ache_result') else None
-        event.note = ''
+        event.note = event_data['note']
         db.session.add(event)
     else:
         event = Event()
-        event.createDatetime = event.modifyDatetime = now
-        event.createPerson_id = event.modifyPerson_id = event.setPerson_id = current_user.get_id() or 1  # todo: fix
-        event.deleted = 0
-        event.version = 0
+        event.setPerson_id = current_user.get_id()
         event.eventType = EventType.query.get(event_data['event_type']['id'])
         event.client_id = event_data['client_id']
         event.execPerson = execPerson
@@ -116,8 +110,8 @@ def api_event_save():
         event.order = event_data['order']['id']
         event.org_id = event_data['organisation']['id']
         event.orgStructure_id = event_data['org_structure']['id']
-        event.note = ''
         event.payStatus = 0
+        event.note = event_data['note']
         event.uuid = get_new_uuid()
         # TODO: обязательность в зависимости от типа события?
         payment_data = request.json['payment']
@@ -136,7 +130,7 @@ def api_event_save():
 
     if close_event:
         exec_date = event_data['exec_date']
-        event.execDate = string_to_datetime(exec_date) if exec_date else now
+        event.execDate = string_to_datetime(exec_date) if exec_date else datetime.datetime.now()
 
     try:
         db.session.commit()

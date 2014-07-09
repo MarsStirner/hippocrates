@@ -311,7 +311,6 @@ class ClientVisualizer(object):
         :type client: application.models.client.Client
         :return:
         """
-        # TODO: replace with CLient.__json__
         return {
             'id': client.id,
             'first_name': client.firstName,
@@ -456,6 +455,7 @@ class EventVisualizer(object):
             'event_type': event.eventType,
             'organisation': event.organisation,
             'org_structure': event.orgStructure,
+            'note': event.note,
             'med_doc_actions': [self.make_action(action) for action in event.actions if action.actionType.class_ == 0],
             'diag_actions': [self.make_action(action) for action in event.actions if action.actionType.class_ == 1],
             'cure_actions': [self.make_action(action) for action in event.actions if action.actionType.class_ == 2]

@@ -61,7 +61,7 @@
                     <div class="form-group col-md-4">
                         <label for="doc_number">Номер</label>
                         <input type="text" class="form-control" id="doc_number" name="doc_number"
-                               autocomplete="off" placeholder="номер" ng-pattern="/^\d+$/" {# FIXME: allows whitespace as first char #}
+                               autocomplete="off" placeholder="номер" ng-pattern="/^\d+$/" {# TODO: add doctype regexp validation #}
                                ng-model="event.payment.local_contract.number" ng-disabled="formcnf.payer_field.disabled"/>
                     </div>
                 </div>

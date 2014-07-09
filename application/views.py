@@ -95,7 +95,7 @@ def logout():
 
 @app.route('/api/rb/')
 @app.route('/api/rb/<name>')
-@cache.memoize(600)  # 86400
+@cache.memoize(86400)
 def api_refbook(name):
     for mod in (enums,):
         if hasattr(mod, name):
