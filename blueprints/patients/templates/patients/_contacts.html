@@ -1,8 +1,8 @@
 <div class="marginal">
 <ng-form name="contactsForm" toc-element="Связи и контакты">
     <legend>Контактная информация и родственники</legend>
-    <h4>Связи с другими пациентами</h4>
-    <ng-form name="_relations" toc-element="Связи" ng-model="client.relations">
+    <ng-form name="_relations" toc-element="Связи">
+        <h4>Связи с другими пациентами</h4>
         <div ng-repeat="relation in client.relations | filter: flt_not_deleted()">
             <div class="row">
                 <div class="col-md-11">
@@ -36,8 +36,8 @@
 
     <hr>
 
-    <h4>Контакты пациента</h4>
     <ng-form name="_contacts" toc-element="Контакты">
+        <h4>Контакты пациента</h4>
         <div ng-repeat="contact in client.contacts | filter: flt_not_deleted()">
             <div class="row">
                 <div class="col-md-11">
