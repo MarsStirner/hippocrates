@@ -269,6 +269,8 @@ def api_patient_save():
     #             id_ext = get_modified_identification(client, id_info)
     #             db.session.add(id_ext)
         db.session.commit()
+    except ClientSaveException:
+        raise
     except Exception, e:
         logger.error(e, exc_info=True)
         db.session.rollback()

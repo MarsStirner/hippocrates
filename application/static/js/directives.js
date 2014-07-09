@@ -48,7 +48,8 @@ angular.module('WebMis20.directives').
             template: ['<div class="input-group">',
                         '<input type="text" id="[[id]]_inner" name="[[id]]" class="form-control"',
                         'is-open="popup.opened" ng-model="ngModel" autocomplete="off"',
-                        'datepicker_popup="dd.MM.yyyy" ng-required="ngRequired" ng-disabled="ngDisabled" manual-date/>',
+                        'datepicker_popup="dd.MM.yyyy" ng-required="ngRequired" ng-disabled="ngDisabled"' +
+                        'manual-date ui-mask="99.99.9999" date-mask />',
                         '<span class="input-group-btn">',
                         '<button type="button" class="btn btn-default" ng-click="open_datepicker_popup(popup.opened)" ng-disabled="ngDisabled">',
                         '<i class="glyphicon glyphicon-calendar"></i></button>',
@@ -64,13 +65,13 @@ angular.module('WebMis20.directives').
             link: function(scope, elm, attrs, ctrl) {
                 ctrl.$parsers.unshift(function(viewValue) {
                     var viewValue = ctrl.$viewValue;
-                    if (!viewValue || viewValue instanceof Date) return viewValue;
-                    var parts = viewValue.split('.');
-                    var d = new Date(parseInt(parts[2]), parseInt(parts[1] - 1),
-                        parseInt(parts[0]));
+                    if (!viewValue || viewValue instanceof Date) {
+                        return viewValue;
+                    }
+                    var d = moment(viewValue.replace('_', ''), "DD.MM.YYYY", true);
                     if (moment(d).isValid()) {
                         ctrl.$setValidity('date', true);
-                        ctrl.$setViewValue(d);
+                        ctrl.$setViewValue(d.toDate());
                         return d;
                     } else {
                         ctrl.$setValidity('date', false);

@@ -1,7 +1,7 @@
 <div class="marginal">
 <ng-form name="_characteristics" toc-element="Особенности пациента">
     <legend>Особенности пациента</legend>
-    <ng-form name="clientBloodTypeForm">
+    <ng-form name="_bloodtype" toc-element="Группа крови">
         <h4>Группа крови и резус фактор</h4>
         <div ng-repeat="bt in client.blood_types.slice(0, 1) | filter: flt_not_deleted()">
             <div class="row">
@@ -54,7 +54,7 @@
 
     <hr>
 
-    <ng-form name="clientAllergyForm">
+    <ng-form name="_allergies" toc-element="Аллергия">
         <h4>Аллергия</h4>
         <div ng-repeat="alg in client.allergies | filter: flt_not_deleted()">
             <div class="row">
@@ -91,7 +91,7 @@
 
     <hr>
 
-    <ng-form name="clientIntoleranceForm">
+    <ng-form name="_intolerances" toc-element="Непереносимость">
         <h4>Медикаментозная непереносимость</h4>
         <div ng-repeat="intlr in client.intolerances | filter: flt_not_deleted()">
             <div class="row">
@@ -125,5 +125,6 @@
                     ng-click="client.add_med_intolerance()">Добавить новую</button>
         </div>
     </ng-form>
+
 </ng-form>
 </div>
