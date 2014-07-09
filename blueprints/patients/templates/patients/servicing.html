@@ -68,11 +68,12 @@
     <script type="text/ng-template" id="modal-client.html">{% include "patients/_modal_client.html" %}</script>
     <script type="text/ng-template" id="modal-print-dialog.html">{% include "_modal-print-dialog.html" %}</script>
     <script type="text/javascript">
-        CreateEventModalCtrl = function ($scope, $modalInstance, client_id) {
+        CreateEventModalCtrl = function ($scope, $modalInstance, client_id, parent_scope) {
             $scope.cancel = function () {
                 $modalInstance.dismiss('cancel');
             };
             $scope.client_id = client_id;
+            $scope.parent_scope = parent_scope;  {# TODO: отрефакторить, сделать более грамотно и красиво (через сервисы?) #}
         };
         ClientModalCtrl = function ($scope, $modalInstance, client, PrintingService, $modal, $interval) {
             $scope.client = client;
@@ -133,8 +134,8 @@
                         client_id: function () {
                             return $scope.client_id;
                         },
-                        new_event: function () {
-                            return $scope.new_event;
+                        parent_scope: function () {
+                            return $scope;
                         }
                     },
                     controller: CreateEventModalCtrl

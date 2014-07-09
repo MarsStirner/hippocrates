@@ -7,7 +7,7 @@
     соответствующей строке в таблице предварительных записей
 </div>
 <div class="modal-footer">
-    <button class="btn btn-danger" ng-click="new_event(client_id);cancel();" ng-if="client_id != 'new'" >
+    <button class="btn btn-danger" ng-click="parent_scope.new_event(client_id); cancel();" ng-if="client_id != 'new'" >
         Всё равно продолжить
     </button>
     <button type="button" class="btn btn-default" ng-click="cancel()">Отмена</button>
