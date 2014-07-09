@@ -252,7 +252,10 @@ def safe_date(val):
         try:
             val = string_to_datetime(val)
         except ValueError:
-            val = string_to_datetime(val, '%Y-%m-%d')
+            try:
+                val = string_to_datetime(val, '%Y-%m-%d')
+            except ValueError:
+                return None
         return val.date()
     elif isinstance(val, datetime.datetime):
         return val.date()
