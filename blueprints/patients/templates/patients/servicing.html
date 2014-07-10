@@ -131,7 +131,6 @@
             $scope.modal_create_event = function() {
                 var modalInstance = $modal.open({
                     templateUrl: 'modal-createEvent.html',
-                    scope: $scope,
                     controller: CreateEventModalCtrl
                 });
                 modalInstance.result.then(function (accept) {
