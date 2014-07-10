@@ -1,6 +1,19 @@
 <div class="modal-header" xmlns="http://www.w3.org/1999/html">
-    <button type="button" class="close" ng-click="cancel()">&times;</button>
-    <h4 class="modal-title" id="myModalLabel">[[client.info.full_name]]</h4>
+    <div class="row">
+        <div class="col-md-5"><h4 class="modal-title" id="myModalLabel">[[client.info.full_name]]</h4></div>
+        <div class="col-md-6 text-right">
+            <button class="btn btn-sm btn-primary" ng-click="new_appointment(client.client_id)">Записать на приём</button>
+            <button class="btn btn-sm btn-primary" ng-click="new_event(client.client_id)"
+                    ng-if="client.appointments.length == 0">Создать обращение</button>
+            <button class="btn btn-sm btn-primary" ng-click="modal_create_event()"
+                    ng-if="client.appointments.length > 0">Создать обращение</button>
+            <button class="btn btn-sm btn-primary" ng-click="open_client(client.client_id)">Редактировать данные пациента</button>
+            <ui-print-button class="btn-sm" ps="ps" resolve="ps_resolve()"></ui-print-button>
+        </div>
+        <div class="col-md-1">
+            <button type="button" class="close" ng-click="cancel()">&times;</button>
+        </div>
+    </div>
 </div>
 <div class="modal-body">
     <div ui-alert-list="alerts"></div>
