@@ -6,7 +6,7 @@ import itertools
 from collections import defaultdict
 from application.systemwide import db
 
-from application.lib.utils import safe_unicode, safe_int
+from application.lib.utils import safe_unicode, safe_int, safe_dict
 from application.models.enums import EventPrimary, EventOrder, ActionStatus, Gender
 from application.models.event import Event, EventType, Diagnosis, Diagnostic
 
@@ -159,7 +159,7 @@ class ScheduleVisualizer(object):
                 busy = True
         return {
             'id': schedule.id,
-            'office': schedule.office.__json__() if schedule.office else None,
+            'office': safe_dict(schedule.office),
             'planned': planned,
             'CITO': CITO,
             'extra': extra,
@@ -167,7 +167,7 @@ class ScheduleVisualizer(object):
             'begTime': schedule.begTime,
             'endTime': schedule.endTime,
             'roa': schedule.reasonOfAbsence,
-            'reception_type': schedule.receptionType.__json__() if schedule.receptionType else None
+            'reception_type': safe_dict(schedule.receptionType)
         }
 
     def collapse_scheds_description(self, scheds):
@@ -253,7 +253,7 @@ class ClientVisualizer(object):
             if client.has_identical_addresses():
                 setattr(live_addr, 'same_as_reg', True)
                 setattr(live_addr, 'copy_from_id', reg_addr.id)
-        return reg_addr.__json__(), live_addr.__json__()
+        return safe_dict(reg_addr), safe_dict(live_addr)
 
     def make_relation_info(self, client_id, relation):
         if client_id == relation.client_id:
@@ -280,8 +280,8 @@ class ClientVisualizer(object):
 
         relations = [self.make_relation_info(client.id, relation) for relation in client.client_relations]
 
-        documents = [doc.__json__() for doc in client.documents_all]
-        policies = [policy.__json__() for policy in client.policies_all]
+        documents = [safe_dict(doc) for doc in client.documents_all]
+        policies = [safe_dict(policy) for policy in client.policies_all]
         document_history = documents + policies
         # identifications = [self.make_identification_info(identification) for identification in client.identifications]
         return {
@@ -410,12 +410,12 @@ class ClientVisualizer(object):
             'last_name': client.lastName,
             'patr_name': client.patrName,
             'birth_date': client.birthDate,
-            'doc_type': id_doc.documentType.__json__() if id_doc else None,
+            'doc_type': safe_dict(id_doc.documentType) if id_doc else None,
             'doc_type_id': id_doc.id if id_doc else None,
             'serial_left': id_doc.serial_left if id_doc else None,
             'serial_right': id_doc.serial_right if id_doc else None,
             'number': id_doc.number if id_doc else None,
-            'reg_address': client.reg_address.__unicode__(),
+            'reg_address': safe_unicode(client.reg_address),
         }
 
 

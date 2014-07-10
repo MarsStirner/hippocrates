@@ -233,6 +233,12 @@ def safe_int(obj):
     return int(obj)
 
 
+def safe_dict(obj):
+    if obj is None or not hasattr(obj, '__json__'):
+        return None
+    return obj.__json__()
+
+
 def string_to_datetime(date_string, fmt='%Y-%m-%dT%H:%M:%S.%fZ'):
     if date_string:
         try:
