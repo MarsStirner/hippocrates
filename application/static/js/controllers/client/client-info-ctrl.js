@@ -158,8 +158,8 @@ angular.module('WebMis20.controllers').
                             // todo: onerror?
                         });
                     }
-                }, function(reason) {
-                    alert(reason);
+                }, function(message) {
+                    alert(message);
                 });
             };
 

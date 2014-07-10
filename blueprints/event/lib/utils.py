@@ -12,6 +12,12 @@ from application.lib.settings import Settings
 from application.systemwide import db
 
 
+class EventSaveException(Exception):
+    def __init__(self, message, data=None):
+        super(EventSaveException, self).__init__(message)
+        self.data = data
+
+
 def create_new_local_contract(lc_info):
     lcon = EventLocalContract()
     lcon.coordAgent = lc_info.get('coord_agent', '')

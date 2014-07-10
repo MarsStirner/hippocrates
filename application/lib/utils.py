@@ -10,7 +10,6 @@ from flask import g, current_app, request, abort
 from flask.ext.principal import Permission, RoleNeed, ActionNeed, PermissionDenied
 from flask.ext.login import current_user
 from application.models.client import ClientIdentification
-from application.models.event import EventType
 from application.systemwide import db
 from application.models.exists import rbUserProfile, UUID, rbCounter, rbAccountingSystem
 from application.models.client import Client
@@ -339,6 +338,7 @@ def get_new_uuid():
 
 def get_new_event_ext_id(event_type_id, client_id):
     """Формирование externalId (номер обращения/истории болезни)."""
+    from application.models.event import EventType
     et = EventType.query.get(event_type_id)
     if not et.counter_id:
         return ''

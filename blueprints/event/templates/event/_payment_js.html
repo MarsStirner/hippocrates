@@ -8,9 +8,14 @@ WebMis20.controller('EventPaymentCtrl', ['$scope', 'RefBookService', 'Settings',
 
         var event_created = !$scope.event.is_new();
         $scope.payer_is_person = function() {
+            function isDefined(element) {
+                return element !== undefined && element !== null;
+            }
             var lc = $scope.event.payment && $scope.event.payment.local_contract || null;
-            return lc !== null && !!(lc.first_name || lc.last_name || lc.patr_name || lc.birth_date || lc.doc_type ||
-                    lc.serial_left || lc.serial_right || lc.number || lc.reg_address);
+            return (lc !== null &&
+                    [lc.first_name, lc.last_name, lc.patr_name, lc.birth_date, lc.doc_type,
+                    lc.serial_left, lc.serial_right, lc.number, lc.reg_address].some(isDefined)
+            );
         };
         $scope.payer_is_org = function() {
             var lc = $scope.event.payment && $scope.event.payment.local_contract || null;
@@ -123,21 +128,19 @@ WebMis20.controller('EventPaymentCtrl', ['$scope', 'RefBookService', 'Settings',
 
 RelativesModalCtrl = function ($scope, $modalInstance) {
     $scope.initialize = function() {
-        var relatives_direct = $scope.event.info.client.direct_relations.map(function(rel) {
-            return {
-                name: rel.other_text,
-                rel_type: rel.relativeType.rightName,
-                rel_id: rel.other_id
-            };
+        $scope.relatives = $scope.event.info.client.relations.map(function (rel) {
+            return rel.direct ?
+                {
+                    name: rel.relative.full_name,
+                    rel_id: rel.relative.id,
+                    rel_type: rel.rel_type.rightName
+                } :
+                {
+                    name: rel.relative.full_name,
+                    rel_id: rel.relative.id,
+                    rel_type: rel.rel_type.leftName
+                };
         });
-        var relatives_reverse = $scope.event.info.client.reversed_relations.map(function(rel) {
-            return {
-                name: rel.other_text,
-                rel_type: rel.relativeType.leftName,
-                rel_id: rel.other_id
-            };
-        });
-        $scope.relatives = relatives_direct.concat(relatives_reverse);
         $scope.selected = {
             client_id: null
         };

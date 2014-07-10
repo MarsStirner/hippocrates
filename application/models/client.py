@@ -252,7 +252,6 @@ class Client(db.Model):
             'snils': self.SNILS,
             'full_name': self.nameText,
             'notes': self.notes,
-            'work_org_id': self.works[0].org_id if self.works else None,
         }
 
 

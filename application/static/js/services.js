@@ -55,14 +55,7 @@ angular.module('WebMis20.services', []).
                     }
 
                     deferred.resolve();
-//                  $rootScope.$broadcast('client_loaded');
                 }).error(function(data, status) {
-//                    $rootScope.$broadcast('load_error', {
-//                        text: 'Ошибка при загрузке клиента ' + t.id,
-//                        data: data,
-//                        code: status,
-//                        type: 'danger'
-//                    });
                     var message = status === 404 ? 'Пациент с id ' + t.client_id + ' не найден.' : data.result;
                     deferred.reject(message);
                 });
@@ -433,8 +426,10 @@ angular.module('WebMis20.services', []).
                     success(function(data) {
                         deferred.resolve(data.result.id);
                     }).
-                    error(function(data) {
-                        deferred.reject('error save event');
+                    error(function(response) {
+                        var rr = response.result;
+                        var message = rr.name + ': ' + (rr.data ? rr.data.err_msg : '');
+                        deferred.reject(message);
                     });
                 return deferred.promise;
             };

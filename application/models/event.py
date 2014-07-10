@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
+
 import datetime
 import re
+
+from application.lib.const import PAID_EVENT_CODES
 from application.lib.agesex import AgeSex
 from application.models.client import ClientDocument
 from application.models.exists import Person, rbPost, rbCashOperation, rbService
@@ -69,6 +72,13 @@ class Event(db.Model):
         "and_(Event.id == Diagnostic.event_id, Diagnostic.deleted == 0)"
     )
     uuid = db.relationship('UUID')
+
+    @property
+    def isPaid(self):
+        # FIXME: перенести из application.lib.utils загрузку ролей и прав в app.py
+        # тогда должны заработать нормальные импорты из utils.py
+        from application.lib.utils import safe_traverse_attrs
+        return safe_traverse_attrs(self.eventType, 'finance', 'code') in PAID_EVENT_CODES
 
     @property
     def isPrimary(self):

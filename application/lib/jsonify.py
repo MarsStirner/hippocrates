@@ -246,6 +246,15 @@ class ClientVisualizer(object):
                 'accountingSystem_name': identification.accountingSystems.name,
                 'checkDate': identification.checkDate or ''}
 
+    def make_addresses_info(self, client):
+        reg_addr = client.reg_address
+        live_addr = client.loc_address
+        if reg_addr and live_addr:
+            if client.has_identical_addresses():
+                setattr(live_addr, 'same_as_reg', True)
+                setattr(live_addr, 'copy_from_id', reg_addr.id)
+        return reg_addr.__json__(), live_addr.__json__()
+
     def make_relation_info(self, client_id, relation):
         if client_id == relation.client_id:
             return {
@@ -267,12 +276,7 @@ class ClientVisualizer(object):
             raise ValueError('Relation info does not match Client')
 
     def make_client_info(self, client):
-        reg_addr = client.reg_address
-        live_addr = client.loc_address
-        if reg_addr and live_addr:
-            if client.has_identical_addresses():
-                setattr(live_addr, 'same_as_reg', True)
-                setattr(live_addr, 'copy_from_id', reg_addr.id)
+        reg_addr, live_addr = self.make_addresses_info(client)
 
         relations = [self.make_relation_info(client.id, relation) for relation in client.client_relations]
 
@@ -294,8 +298,22 @@ class ClientVisualizer(object):
             'relations': relations,
             'contacts': client.contacts.all(),
             'document_history': document_history,
-            'phones': client.phones,
             # 'identifications': identifications,
+        }
+
+    def make_client_info_for_event(self, client):
+        reg_addr, live_addr = self.make_addresses_info(client)
+        relations = [self.make_relation_info(client.id, relation) for relation in client.client_relations]
+        return {
+            'info': client,
+            'id_document': client.id_document,
+            'reg_address': reg_addr,
+            'live_address': live_addr,
+            'compulsory_policy': client.compulsoryPolicy,
+            'voluntary_policies': client.voluntaryPolicies,
+            'relations': relations,
+            'phones': client.phones,
+            'work_org_id': client.works[0].org_id if client.works else None,  # FIXME: ...
         }
 
     def make_search_client_info(self, client):
@@ -397,7 +415,7 @@ class ClientVisualizer(object):
             'serial_left': id_doc.serial_left if id_doc else None,
             'serial_right': id_doc.serial_right if id_doc else None,
             'number': id_doc.number if id_doc else None,
-            'reg_address': client.reg_address,
+            'reg_address': client.reg_address.__unicode__(),
         }
 
 
@@ -444,7 +462,7 @@ class EventVisualizer(object):
             'order_': event.order,
             'is_primary': EventPrimary(event.isPrimaryCode),
             'is_primary_': event.isPrimaryCode,
-            'client': cvis.make_client_info(event.client),
+            'client': cvis.make_client_info_for_event(event.client),
             'client_id': event.client.id,
             'set_date': event.setDate,
             'exec_date': event.execDate,

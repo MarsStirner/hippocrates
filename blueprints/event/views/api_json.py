@@ -14,15 +14,25 @@ from application.models.event import (Event, EventType, EventType_Action, Diagno
                                       rbVisitType, rbScene, Event_Persons)
 from application.models.exists import Person, OrgStructure
 from application.systemwide import db
-from application.lib.utils import (jsonify, safe_traverse, get_new_uuid,
+from application.lib.utils import (jsonify, safe_traverse, get_new_uuid, logger,
                                    string_to_datetime, get_new_event_ext_id)
 from blueprints.event.app import module
 from application.models.exists import (Organisation, )
 from application.lib.jsonify import EventVisualizer, ClientVisualizer
-from blueprints.event.lib.utils import get_local_contract, get_prev_event_payment, create_new_local_contract, \
-    get_event_services, create_services
+from blueprints.event.lib.utils import (EventSaveException, get_local_contract, get_prev_event_payment,
+    create_new_local_contract, get_event_services, create_services)
 from application.lib.sphinx_search import SearchEventService
 from application.lib.data import create_action
+
+
+@module.errorhandler(EventSaveException)
+def handle_event_error(err):
+    return jsonify({
+        'name': err.message,
+        'data': {
+            'err_msg': err.data
+        }
+    }, 422, 'error')
 
 
 @module.route('/api/event_info.json')
@@ -83,6 +93,7 @@ def api_event_save():
     close_event = request.json['close_event']
     event_id = event_data.get('id')
     execPerson = Person.query.get(event_data['exec_person']['id'])
+    err_msg = u'Ошибка сохранения данных обращения'
     if event_id:
         event = Event.query.get(event_id)
         event.deleted = event_data['deleted']
@@ -113,12 +124,15 @@ def api_event_save():
         event.payStatus = 0
         event.note = event_data['note']
         event.uuid = get_new_uuid()
+
         # TODO: обязательность в зависимости от типа события?
-        payment_data = request.json['payment']
-        if payment_data and payment_data['local_contract']:
-            lcon = get_local_contract(payment_data['local_contract'])
+        local_contract = safe_traverse(request.json, 'payment', 'local_contract')
+        if not local_contract and event.isPaid:
+            raise EventSaveException(err_msg, u'Не заполнена информация о плательщике.')
+        if local_contract:
+            lcon = get_local_contract(local_contract)
             event.localContract = lcon
-        db.session.add(event)
+            db.session.add(event)
 
         visit = Visit.make_default(event)
         db.session.add(visit)
@@ -134,9 +148,16 @@ def api_event_save():
 
     try:
         db.session.commit()
-    except:
-        db.session.rollback()
+    except EventSaveException:
         raise
+    except Exception, e:
+        logger.error(e, exc_info=True)
+        db.session.rollback()
+        return jsonify({'name': err_msg,
+                        'data': {
+                            'err_msg': 'INTERNAL SERVER ERROR'
+                        }},
+                       500, 'save event data error')
     else:
         services_data = request.json.get('services', [])
         cfinance_id = event_data['contract']['finance']['id']
