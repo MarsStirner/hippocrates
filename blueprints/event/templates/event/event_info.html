@@ -161,7 +161,7 @@
                 });
             {% if form_role == 'doctor' or form_role == 'admin' %}
             aux.range(3).map(function (at_class) {
-                $http.get('{{ url_for('schedule.api_atl_get') }}', {
+                $http.get(url_for_schedule_api_atl_get, {
                     params: {
                         at_class: at_class
                     }
@@ -181,7 +181,7 @@
                     then(function (event_id) {
                         $scope.event_form.$setPristine();
                         if ($scope.event.is_new()) {
-                            $window.open('{{ url_for('.html_event_info') }}' + '?event_id=' + event_id, '_self');
+                            $window.open(url_for_event_html_event_info + '?event_id=' + event_id, '_self');
                         } else {
                             $scope.event.reload().then(function () {
                                 $scope.$broadcast('event_loaded');
@@ -319,7 +319,7 @@
         };
 
         $scope.open_action = function (action_id) {
-            window.open('{{ url_for('schedule.html_action') }}?action_id=' + action_id);
+            window.open(url_for_schedule_html_action + '?action_id=' + action_id);
         };
         {# action data end #}
 

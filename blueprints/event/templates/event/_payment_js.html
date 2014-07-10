@@ -97,7 +97,7 @@ WebMis20.controller('EventPaymentCtrl', ['$scope', 'RefBookService', 'Settings',
         };
 
         $scope.get_payer = function(source, client_id) {
-            $http.get('{{ url_for('.api_new_event_payment_info_get') }}', {
+            $http.get(url_for_event_api_new_event_payment_info_get, {
                 params: {
                     event_type_id: $scope.event.info.event_type.id,
                     client_id: client_id,

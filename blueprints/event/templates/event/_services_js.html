@@ -15,7 +15,7 @@ WebMis20.controller('EventServicesCtrl', ['$scope', '$http', 'WMEventService',
                 $scope.found_services = null;
             } else {
                 $http.get(
-                    '{{ url_for('.api_search_services') }}', {
+                    url_for_event_api_search_services, {
                         params: {
                             q: val,
                             client_id: $scope.event.info.client_id,
@@ -54,7 +54,7 @@ WebMis20.controller('EventServicesCtrl', ['$scope', '$http', 'WMEventService',
             var service = $scope.event.services[index];
             if (service.actions.length) {
                 $http.post(
-                    '{{ url_for('.api_service_delete_service') }}', {
+                    url_for_event_api_service_delete_service, {
                         event_id: $scope.event.info.id,
                         action_id_list: service.actions
                     }
@@ -103,7 +103,7 @@ WebMis20.controller('EventServicesCtrl', ['$scope', '$http', 'WMEventService',
             });
             if (act_to_pay) {
                 $http.post(
-                    '{{ url_for('.api_service_make_payment') }}', {
+                    url_for_event_api_service_make_payment, {
                         event_id: $scope.event.info.id,
                         service_id: service.service_id,
                         action_id: act_to_pay,
@@ -122,7 +122,7 @@ WebMis20.controller('EventServicesCtrl', ['$scope', '$http', 'WMEventService',
             if ($scope.event.info.id){
                 service.coord_person_id = current_user_id;
                 $http.post(
-                    '{{ url_for('.api_service_add_coord') }}', {
+                    url_for_event_api_service_add_coord, {
                         event_id: $scope.event.info.id,
                         finance_id: $scope.event.info.contract.finance.id,
                         service: service
@@ -146,7 +146,7 @@ WebMis20.controller('EventServicesCtrl', ['$scope', '$http', 'WMEventService',
         $scope.remove_coord_service = function(service) {
             if ($scope.event.info.id){
                 $http.post(
-                    '{{ url_for('.api_service_remove_coord') }}', {
+                    url_for_event_api_service_remove_coord, {
                         action_id: service.coord_actions,
                         coord_person_id: null
                     }

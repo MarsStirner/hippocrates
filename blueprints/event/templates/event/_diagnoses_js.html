@@ -26,7 +26,7 @@ WebMis20.controller('EventDiagnosesCtrl', ['$scope', 'RefBookService', '$http',
                 $scope.diagnoses[index]._dirty = true;
                 $scope.diagnoses[index].client_id = $scope.event.info.client_id;
                 $scope.diagnoses[index].event_id = $scope.event.info.id;
-                $http.post('{{ url_for('.api_diagnosis_save') }}', $scope.diagnoses[index]).then(function () {
+                $http.post(url_for_event_api_diagnosis_save, $scope.diagnoses[index]).then(function () {
                     $scope.diag_edit[index] = undefined;
                     delete $scope.diagnoses[index]._first;
                 });
