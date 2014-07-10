@@ -72,6 +72,9 @@
             $scope.cancel = function () {
                 $modalInstance.dismiss('cancel');
             };
+            $scope.accept = function () {
+                $modalInstance.close(true);
+            }
         };
         ClientModalCtrl = function ($scope, $modalInstance, client, PrintingService, $modal, $interval) {
             $scope.client = client;
@@ -130,6 +133,11 @@
                     templateUrl: 'modal-createEvent.html',
                     scope: $scope,
                     controller: CreateEventModalCtrl
+                });
+                modalInstance.result.then(function (accept) {
+                    if (accept){
+                        $scope.new_event($scope.client_id);
+                    }
                 });
             };
 
