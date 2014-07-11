@@ -29,6 +29,7 @@
         url_for_schedule_api_atl_get = '{{ url_for('schedule.api_atl_get') }}',
         url_for_event_html_event_info = '{{ url_for('event.html_event_info') }}',
         url_for_schedule_html_action = '{{ url_for('schedule.html_action') }}',
+        current_user = {{ current_user.export_js() | tojson | safe }},
         current_user_id = {{ current_user.id|default('undefined') }};
 </script>
 <script src="{{ url_for('static', filename='jquery-ui/js/jquery-1.10.2.js') }}"></script>
@@ -78,4 +79,16 @@
 </script>
 <script type="text/ng-template" id="kladr-ui.html">
     {% include "kladr-ui.html" %}
+</script>
+<script>
+    'use strict';
+    current_user.has_role = function () {
+        return aux.arrayCopy(arguments).filter(aux.func_in(current_user.roles)).length > 0;
+    };
+    current_user.has_right = function () {
+        return aux.arrayCopy(arguments).filter(aux.func_in(current_user.rights)).length > 0;
+    };
+    current_user.current_role_maybe = function () {
+        return aux.inArray(aux.arrayCopy(arguments), current_user.current_role);
+    };
 </script>
