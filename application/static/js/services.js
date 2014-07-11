@@ -145,49 +145,6 @@ angular.module('WebMis20.services', []).
                 });
             };
 
-            WMClient.prototype.add_address = function(type) {
-                var entity = type === 0 ? 'reg_addresses' : 'live_addresses';
-                var obj = {
-                    "id": null,
-                    "deleted": 0,
-                    "type": type,
-                    "address": null,
-                    "free_input": null,
-                    "locality_type": null,
-                    "text_summary": null
-                };
-                this[entity].push(obj);
-                return obj;
-            };
-
-            WMClient.prototype.copy_address = function(addr, from_addr, same) {
-                if (!from_addr.id && !from_addr.dirty) {
-                    alert('Для копирования адреса заполните сначала адрес регистрации');
-                    addr.same_as_reg = undefined;
-                    return;
-                }
-                var cur_id = addr.id;
-                if (cur_id) {
-                    var msg = same ?
-                        'При копировании адреса текущая запись адреса будет удалена и станет доступна\
-                         для просмотра в истории. Продолжить?' :
-                        'Текущий адрес будет удален. Продолжить?';
-                    if (!confirm(msg)) {
-                        addr.same_as_reg = !addr.same_as_reg;
-                        return;
-                    }
-                }
-                this.delete_record('live_addresses', addr, 2);
-                addr = this.add_address(1);
-                if (same) {
-                    angular.copy(from_addr, addr);
-                    addr.id = null;
-                    addr.copy_from_id = from_addr.id;
-                    addr.dirty = true;
-                }
-                addr.same_as_reg = same;
-            };
-
             WMClient.prototype.add_cpolicy = function() {
                 this.compulsory_policies.push({
                     "id": null,
@@ -316,14 +273,120 @@ angular.module('WebMis20.services', []).
             return WMClient;
         }
     ]).
-    service('WMClientService', [function() {
+    service('WMClientController', [function () {
         return {
-            formatSnils: function(snils) {
+            formatSnils: function (snils) {
                 return snils && snils.length === 11 ?
                     [snils.substr(0, 3), '-',
                      snils.substr(3, 3), '-',
                      snils.substr(6, 3), ' ', snils.substr(9, 2)].join('') :
                     '';
+            },
+            add_new_address: function (client, entity, addr_type) {
+                var addrs = client[entity].filter(function(el) {
+                    return el.deleted === 0;
+                });
+                var cur_addr = addrs[addrs.length - 1];
+                if (addrs.length) {
+                    var msg = [
+                        'При добавлении нового адреса старый адрес будет удален',
+                        cur_addr.id ? ' и станет доступен для просмотра в истории' : '',
+                        '. Продолжить?'
+                    ].join('');
+                    if (confirm(msg)) {
+                        this.delete_record(client, entity, cur_addr, 2);
+                        this.push_address(client, addr_type);
+                    }
+                } else {
+                    this.push_address(client, addr_type);
+                }
+            },
+            push_address: function (client, type) {
+                var entity = type === 0 ? 'reg_addresses' : 'live_addresses';
+                var obj = {
+                    "id": null,
+                    "deleted": 0,
+                    "type": type,
+                    "address": null,
+                    "free_input": null,
+                    "locality_type": null,
+                    "text_summary": null
+                };
+                client[entity].push(obj);
+                return obj;
+            },
+            sync_live_address: function (client, live_addr, same) {
+                function get_actual_reg_address (client) {
+                    var addrs =  client.reg_addresses.filter(function (el) {
+                        return el.deleted === 0;
+                    });
+                    return addrs.length === 1 ? addrs[0] : null;
+                }
+                var from_addr = get_actual_reg_address(client);
+                if (!from_addr || (!from_addr.id && !from_addr.dirty)) {
+                    alert('Для копирования адреса заполните сначала адрес регистрации');
+                    live_addr.same_as_reg = undefined;
+                    return;
+                }
+                var cur_id = live_addr.id;
+                if (cur_id) {
+                    var msg = same ?
+                        'При копировании адреса текущая запись адреса будет удалена и станет доступна\
+                         для просмотра в истории. Продолжить?' :
+                        'Текущий адрес будет удален. Продолжить?';
+                    if (!confirm(msg)) {
+                        live_addr.same_as_reg = !live_addr.same_as_reg;
+                        return;
+                    }
+                }
+                this.delete_record(client, 'live_addresses', live_addr, 2);
+                live_addr = this.push_address(client, 1);
+                if (same) {
+                    angular.copy(from_addr, live_addr);
+                    live_addr.id = null;
+                    live_addr.copy_from_id = from_addr.id;
+                    live_addr.dirty = true;
+                }
+                live_addr.same_as_reg = same;
+            },
+//            sync_live_address: function (client, live_addr, same) {
+//                function get_actual_reg_address (client) {
+//                    var addrs =  client.reg_addresses.filter(function (el) {
+//                        return el.deleted === 0;
+//                    });
+//                    return addrs.length === 1 ? addrs[0] : null;
+//                }
+//                var from_addr = get_actual_reg_address(client);
+//                if (!from_addr || (!from_addr.id && !from_addr.dirty)) {
+//                    alert('Для копирования адреса заполните сначала адрес регистрации');
+//                    live_addr.same_as_reg = undefined;
+//                    return;
+//                }
+//                var cur_id = live_addr.id;
+//                if (cur_id) {
+//                    var msg = same ?
+//                        'При копировании адреса текущая запись адреса будет удалена и станет доступна\
+//                         для просмотра в истории. Продолжить?' :
+//                        'Текущий адрес будет удален. Продолжить?';
+//                    if (!confirm(msg)) {
+//                        live_addr.same_as_reg = !live_addr.same_as_reg;
+//                        return;
+//                    }
+//                }
+//                this.delete_record(client, 'live_addresses', live_addr, 2);
+//                live_addr = this.push_address(client, 1);
+//                if (same) {
+//                    angular.copy(from_addr, live_addr);
+//                    live_addr.id = null;
+//                    live_addr.copy_from_id = from_addr.id;
+//                    live_addr.dirty = true;
+//                }
+//                live_addr.same_as_reg = same;
+//            },
+            delete_address: function (client, entity, addr) {
+                if (confirm('Адрес будет удален. Продолжить?')) {
+                    this.delete_record(client, entity, addr);
+                }
             },
             add_new_invalidity: function(client) {
                 var invld = client.invalidities.filter(function(i) {
@@ -342,6 +405,20 @@ angular.module('WebMis20.services', []).
                     }
                 } else {
                     client.add_soc_status('invalidities', 2);
+                }
+            },
+            delete_record: function(client, entity, record, deleted) {
+                if (arguments.length < 3) {
+                    deleted = 1;
+                }
+                if (record.id) {
+                    record.deleted = deleted;
+                    angular.isArray(client.deleted_entities[entity]) ?
+                        client.deleted_entities[entity].push(record) :
+                        client.deleted_entities[entity] = [record];
+                } else {
+                    var idx = client[entity].indexOf(record);
+                    client[entity].splice(idx, 1);
                 }
             }
         };

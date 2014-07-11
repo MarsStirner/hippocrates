@@ -27,15 +27,16 @@
                     </div>
                     <div class="row">
                         <button type="button" class="btn btn-danger marginal" title="Удалить"
-                                ng-click="delete_address('reg_addresses', reg_addr)"><span class="glyphicon glyphicon-trash"></span></button>
+                                ng-click="wmClientCtrl.delete_address(client, 'reg_addresses', reg_addr)">
+                            <span class="glyphicon glyphicon-trash"></span></button>
                     </div>
                 </div>
             </div>
-        {#    <div>[[reg_addr | json]]</div>#}
+            <div>[[reg_addr | json]]</div>
         </div>
         <div>
             <button type="button" class="btn btn-primary"
-                    ng-click="add_new_address('reg_addresses', 0)">Добавить новый</button>
+                    ng-click="wmClientCtrl.add_new_address(client, 'reg_addresses', 0)">Добавить новый</button>
         </div>
     </ng-form>
 
@@ -61,7 +62,7 @@
                                 <label>
                                     <input type="checkbox" id="[[prefix]]_copy_addr" name="copy_addr"
                                            ng-model="live_addr.same_as_reg"
-                                           ng-change="client.copy_address(live_addr, get_actual_reg_address(), live_addr.same_as_reg)"
+                                           ng-change="wmClientCtrl.sync_live_address(client, live_addr, live_addr.same_as_reg)"
                                            ng-disabled="live_addr.id ? !edit.activated : false"/>
                                     Совпадает с адресом регистрации
                                 </label>
@@ -76,15 +77,16 @@
                     </div>
                     <div class="row">
                         <button type="button" class="btn btn-danger marginal" title="Удалить"
-                                ng-click="delete_address('live_addresses', live_addr)"><span class="glyphicon glyphicon-trash"></span></button>
+                                ng-click="wmClientCtrl.delete_address(client, 'live_addresses', live_addr)">
+                            <span class="glyphicon glyphicon-trash"></span></button>
                     </div>
                 </div>
             </div>
-    {#        <div>[[live_addr | json]]</div>#}
+            <div>[[live_addr | json]]</div>
         </div>
         <div>
             <button type="button" class="btn btn-primary"
-                    ng-click="add_new_address('live_addresses', 1)">Добавить новый</button>
+                    ng-click="wmClientCtrl.add_new_address(client, 'live_addresses', 1)">Добавить новый</button>
         </div>
     </ng-form>
 </ng-form>

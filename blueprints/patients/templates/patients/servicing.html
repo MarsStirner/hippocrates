@@ -50,7 +50,7 @@
                     <td ng-bind="result.info.birth_date | asDate"></td>
                     <td ng-bind="result.info.sex.name"></td>
                     <td ng-bind="result.id_document.doc_text"></td>
-                    <td><nobr>[[ clientService.formatSnils(result.info.snils) ]]</nobr></td>
+                    <td><nobr>[[ wmClientCtrl.formatSnils(result.info.snils) ]]</nobr></td>
                     <td ng-bind="result.compulsory_policy.policy_text"></td>
                     <td><div ng-repeat="policy in result.voluntary_policies">[[ policy.policy_text ]]</div></td>
                 </tr>
@@ -169,15 +169,15 @@
             });
         };
         WebMis20.controller('ClientSearch',
-            ['$scope', '$http', '$timeout', '$window', 'PrintingService', 'WMClient', 'WMClientService', '$modal',
-            function ($scope, $http, $timeout, $window, PrintingService, WMClient, WMClientService, $modal) {
+            ['$scope', '$http', '$timeout', '$window', 'PrintingService', 'WMClient', 'WMClientController', '$modal',
+            function ($scope, $http, $timeout, $window, PrintingService, WMClient, WMClientController, $modal) {
                 $scope.aux = aux;
                 $scope.params = aux.getQueryParams(document.location.search);
                 $scope.query = "";
                 $scope.results = null;
                 $scope.client_id = null;
                 $scope.client = null;
-                $scope.clientService = WMClientService;
+                $scope.wmClientCtrl = WMClientController;
                 $scope.alerts = [];
 
                 $scope.set_patient_id = function (patient_id) {

@@ -108,10 +108,10 @@ angular.module('WebMis20.directives').
                         unregister_init_mode_set();
                     }
                 });
-                var unregister_init_after_copy = scope.$watch('addressModel.dirty', function(n, o) {
+                var unregister_after_sync = scope.$watch('addressModel.dirty', function(n, o) {
                     if (n !== undefined && o !== undefined) {
                         scope.addressForm.$setDirty(n);
-                        unregister_init_after_copy();
+                        unregister_after_sync();
                     }
                 });
                 scope.$watch('mode.switch_to_free_input', function(n, o) {
