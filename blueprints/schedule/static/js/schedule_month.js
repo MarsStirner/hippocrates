@@ -226,10 +226,9 @@ var ScheduleMonthCtrl = function ($scope, $http, $modal, RefBook) {
 
     $scope.monthChanged();
 
-    $scope.$on('PersonSelected', function (event, person) {
-        $scope.person_id = person.id;
-        // location.search = '?person_id=' + person.id;
-        history.pushState(null, document.title, location.origin + location.pathname + '?person_id=' + person.id);
+    $scope.$watch('person_id', function (new_value, old_value) {
+        if (!new_value) return;
+        history.pushState(null, document.title, location.origin + location.pathname + '?person_id=' + new_value);
         $scope.reloadSchedule();
     });
 

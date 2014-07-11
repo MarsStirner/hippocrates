@@ -79,7 +79,6 @@ var PersonAppointmentCtrl = function ($scope, $http, $modal, RefBook) {
                     return item.person.id;
                 });
                 $scope.refreshSchedules();
-                $scope.$root.$broadcast('DataSelectedChanged', $scope.data_selected);
             });
     };
 
@@ -158,14 +157,13 @@ var PersonAppointmentCtrl = function ($scope, $http, $modal, RefBook) {
         $scope.refreshSchedules();
     };
 
-
-    $scope.$on('UserSelectionChanged', function (event, person, user_selected) {
-        $scope.user_selected = user_selected;
-        if (person.checked) {
+    $scope.$watch('user_selected', function (new_value, old_value) {
+        var new_ids = new_value.filter(aux.func_not_in(old_value));
+        if (new_ids.length) {
             $http.get(url_schedule_api_schedule, {
                 params: {
                     client_id: $scope.client_id,
-                    person_ids: person.id,
+                    person_ids: new_ids[0],
                     start_date: $scope.pages[$scope.page].format('YYYY-MM-DD')
                 }
             }).success(function (data) {
@@ -173,10 +171,14 @@ var PersonAppointmentCtrl = function ($scope, $http, $modal, RefBook) {
                 $scope.refreshSchedules();
             })
         } else {
-            $scope.user_schedules = $scope.user_schedules.filter(function (sched_group) {
-                return sched_group.person.id != person.id;
-            });
-            $scope.refreshSchedules();
+            var del_ids = old_value.filter(aux.func_not_in(new_value));
+            if (del_ids.length) {
+                var del_id = del_ids[0];
+                $scope.user_schedules = $scope.user_schedules.filter(function (sched_group) {
+                    return sched_group.person.id != del_id;
+                });
+                $scope.refreshSchedules();
+            }
         }
     });
 

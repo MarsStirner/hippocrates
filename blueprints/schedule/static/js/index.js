@@ -74,13 +74,10 @@ var ScheduleCtrl = function ($scope, $http, RefBook) {
 
     $scope.monthChanged();
 
-    $scope.$on('PersonSelected', function (event, person) {
-        history.pushState(null, null, window.location.origin + window.location.pathname + '?person_id=' + person.id);
-        $scope.person_id = person.id;
+    $scope.$watch('person_id', function (new_value, old_value) {
+        if (!new_value) return;
+        history.pushState(null, null, window.location.origin + window.location.pathname + '?person_id=' + new_value);
         $scope.reloadSchedule();
     });
-    if ($scope.params.person_id) {
-        $scope.$root.$broadcast('ManuallySelectedPersonId', $scope.params.person_id)
-    }
 };
 WebMis20.controller('ScheduleCtrl', ['$scope', '$http', 'RefBook', ScheduleCtrl]);

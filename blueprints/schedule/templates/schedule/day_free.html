@@ -1,57 +1,53 @@
 {% extends 'schedule/base.html' %}
-{% import 'schedule/_person_tree.html' as person_tree %}
 
 {% block main %}
     <div ng-controller="DayFreeCtrl">
         <div class="row">
-            <div class="col-md-2">
-                <button class="btn btn-block btn-success marginal" ng-click="back2monthview()">
+            <div class="col-md-8">
+                <button class="btn btn-success marginal" ng-click="back2monthview()">
                     Вернуться в расписание
                 </button>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-8">
-                <div class="alert alert-warning">
+                <div class="alert alert-warning alert-dismissible">
                     Выберите пациента, запись которого хотите перенести. Затем выберите врача, день и новое время приема.
+                    <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
                 </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-4">
-                <div class="panel panel-default panel-info">
-                    <div class="panel-heading">
-                        [[ sourcePerson.name ]] ([[ sourceDate | asMomentFormat:'DD-MM-YYYY' ]])
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="panel panel-default panel-info">
+                            <div class="panel-heading">
+                                [[ sourcePerson.name ]] ([[ sourceDate | asMomentFormat:'DD-MM-YYYY' ]])
+                            </div>
+                            <ul class="list-group" ng-if="source">
+                                <li class="list-group-item" ng-repeat="ticket in filtered_tickets = (source[reception_type] | filter:'busy':true)"
+                                    ng-class="{'list-group-item-info': (ticket == selectedSourceTicket)}">
+                                    <button ui-schedule-ticket="ticket" day="day" show-name="true"
+                                            ng-click="selectSourceTicket(ticket)"></button>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
-                    <ul class="list-group" ng-if="source">
-                        <li class="list-group-item" ng-repeat="ticket in filtered_tickets = (source[reception_type] | filter:'busy':true)"
-                                ng-class="{'list-group-item-info': (ticket == selectedSourceTicket)}">
-                            <button ui-schedule-ticket="ticket" day="day" show-name="true"
-                                    ng-click="selectSourceTicket(ticket)"></button>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="panel panel-default panel-success">
-                    <div class="panel-heading">
-                        [[ destinationPerson.nameFull | join:' ' ]] ([[ destinationDate | asMomentFormat:'DD-MM-YYYY' ]])
+                    <div class="col-md-6">
+                        <div class="panel panel-default panel-success">
+                            <div class="panel-heading">
+                                [[ destinationPerson.nameFull | join:' ' ]] ([[ destinationDate | asMomentFormat:'DD-MM-YYYY' ]])
+                            </div>
+                            <ul class="list-group" ng-if="destination">
+                                <li class="list-group-item" ng-repeat="ticket in destination[reception_type]">
+                                    <button ui-schedule-ticket="ticket" day="day" show-name="true"
+                                            ng-click="pasteSourceTicket(ticket)"></button>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
-                    <ul class="list-group" ng-if="destination">
-                        <li class="list-group-item" ng-repeat="ticket in destination[reception_type]">
-                            <button ui-schedule-ticket="ticket" day="day" show-name="true"
-                                    ng-click="pasteSourceTicket(ticket)"></button>
-                        </li>
-                    </ul>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="center-block">
-                    <div class="static-calendar text-center" ng-model="destinationDate" ng-change="reloadSchedule()">
+            <div class="col-sm-4">
+                <div class="center-block marginal">
+                    <div class="static-calendar" ng-model="destinationDate" ng-change="reloadSchedule()">
                         <datepicker show-weeks="false"></datepicker>
                     </div>
                 </div>
-                {{ person_tree.html() }}
+                <person-tree person-id="destinationPerson"></person-tree>
             </div>
         </div>
     </div>
@@ -59,8 +55,5 @@
 
 {% block modules_js %}
     {{ super() }}
-    <script type="text/javascript">
-        {{ person_tree.js() }}
-    </script>
     <script src="{{ url_for('.static', filename='js/day_free.js', v=version) }}"></script>
 {% endblock %}

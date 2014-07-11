@@ -19,10 +19,10 @@ var DayFreeCtrl = function ($scope, $http) {
     $scope.selectedSourceTicket = null;
 
     $scope.reloadSchedule = function () {
-        if ($scope.destinationPerson == null) return;
+        if (! $scope.destinationPerson) return;
         $http.get(url_schedule_api_schedule, {
             params: {
-                person_ids: $scope.destinationPerson.id,
+                person_ids: $scope.destinationPerson,
                 start_date: moment($scope.destinationDate).format('YYYY-MM-DD'),
                 one_day: true
             }
@@ -76,8 +76,7 @@ var DayFreeCtrl = function ($scope, $http) {
             .success(loadSchedule)
     };
 
-    $scope.$on('PersonSelected', function (event, person) {
-        $scope.destinationPerson = person;
+    $scope.$watch('destinationPerson', function (new_value, old_value) {
         $scope.reloadSchedule();
     });
 

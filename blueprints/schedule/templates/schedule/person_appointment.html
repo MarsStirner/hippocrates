@@ -1,14 +1,13 @@
 {%- extends 'schedule/base.html' -%}
 {%- import "schedule/_appointment.html" as appointment -%}
-{%- import "schedule/_person_tree.html" as person_tree -%}
 {% block title %}> {{ module_name }}{% endblock %}
 
 {% block main %}
     {% include "_breadcrumbs.html" %}
-    <div>
+    <div ng-controller="PersonAppointmentCtrl">
         <legend xmlns="http://www.w3.org/1999/html" wm-page-header><h2>Запись пациента на прием - <a href="{{ url_for('patients.patient', client_id=client.id) }}">{{ client.nameText }}</a></h2></legend>
         <div class="row">
-            <div class="col-md-9" ng-controller="PersonAppointmentCtrl">
+            <div class="col-md-9">
                 <script type="text/ng-template" id="makeAppointment.html">{{ appointment.html_make() }}</script>
                 <script type="text/ng-template" id="cancelAppointment.html">{{ appointment.html_cancel() }}</script>
                 <div class="row marginal">
@@ -72,7 +71,8 @@
                 </div>
             </div>
             <div class="col-md-3">
-                {{ person_tree.html(checkbox=True) }}
+                <person-tree checkboxed="true" locked-persons="data_selected" user-selected="user_selected"></person-tree>
+{#                {{ person_tree.html(checkbox=True) }}#}
             </div>
         </div>
 {#        <pre>[[schedule|json]]</pre>#}
@@ -81,7 +81,7 @@
 {% block modules_js %}
     {{ super() }}
     <script type="text/javascript">
-        {{ person_tree.js() }}
+{#        {{ person_tree.js() }}#}
         {{ appointment.js() }}
     </script>
     <script src="{{ url_for('.static', filename="js/appointment.js", v=version) }}"></script>

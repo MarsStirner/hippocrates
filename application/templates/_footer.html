@@ -38,6 +38,7 @@
         url_schedule_api_schedule_description_post = '{{ url_for('schedule.api_schedule_description_post') }}',
         url_schedule_api_schedule_lock = '{{ url_for('schedule.api_schedule_lock') }}',
         url_schedule_api_html_day_free = '{{ url_for('schedule.html_day_free') }}',
+        url_schedule_all_persons_tree = '{{ url_for('schedule.api_all_persons_tree') }}',
         current_user = {{ current_user.export_js() | tojson | safe }},
         current_user_id = {{ current_user.id|default('undefined') }};
 </script>
@@ -65,6 +66,7 @@
 
 <script src="{{ url_for('static', filename='js/webmis20.js', v=version) }}"></script>
 <script src="{{ url_for('static', filename='js/directives.js', v=version) }}"></script>
+<script src="{{ url_for('static', filename='js/directives/person_tree.js', v=version) }}"></script>
 <script src="{{ url_for('static', filename='js/services.js', v=version) }}"></script>
 <script src="{{ url_for('static', filename='js/controllers.js', v=version) }}"></script>
 <script src="{{ url_for('static', filename='js/loader.js', v=version) }}"></script>

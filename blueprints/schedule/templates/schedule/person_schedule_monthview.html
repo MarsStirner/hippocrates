@@ -1,5 +1,4 @@
 {% extends 'schedule/base.html' %}
-{% import "schedule/_person_tree.html" as person_tree %}
 {% block title %}> {{ module_name }}{% endblock %}
 
 {% block main %}
@@ -15,7 +14,7 @@
                         ng-options="item.value as item.name for item in aux.months" ng-change="monthChanged()"></select>
             </div>
             <div class="col-md-8">
-                {{ person_tree.html(popup=True) }}
+                <person-tree popupable="true" person-id="person_id"></person-tree>
             </div>
         </div>
         <div ng-show="person">
@@ -98,9 +97,5 @@
 
     <script type="text/ng-template" id="modal-DaysSetup.html">{% include "schedule/_daysetup.html" %}</script>
     <script type="text/ng-template" id="modal-DayFree.html">{% include "schedule/_day_free.html" %}</script>
-
-    <script type="text/javascript">
-        {{ person_tree.js() }}
-    </script>
     <script src="{{ url_for('.static', filename='js/schedule_month.js', v=version) }}"></script>
 {% endblock %}

@@ -1,5 +1,4 @@
 {% extends 'schedule/base.html' %}
-{% import "schedule/_person_tree.html" as person_tree %}
 
 {% block title %}> {{ module_name }}{% endblock %}
 
@@ -16,7 +15,7 @@
                         ng-options="item.value as item.name for item in aux.months" ng-change="monthChanged()"></select>
             </div>
             <div class="col-md-8">
-                {{ person_tree.html(popup=True) }}
+                <person-tree popupable="true" person-id="person_id"></person-tree>
             </div>
         </div>
         <ul class="nav nav-tabs nav-justified" ng-model="reception_type" ng-if="person">
@@ -65,8 +64,5 @@
 {% endblock %}
 {% block modules_js %}
     {{ super() }}
-    <script type="text/javascript">
-        {{ person_tree.js() }}
-    </script>
-    <script src="{{ url_for('.static', filename='js/index.js', v=version) }}"
+    <script src="{{ url_for('.static', filename='js/index.js', v=version) }}"></script>
 {% endblock %}
