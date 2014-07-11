@@ -29,6 +29,8 @@
         url_for_schedule_api_atl_get = '{{ url_for('schedule.api_atl_get') }}',
         url_for_event_html_event_info = '{{ url_for('event.html_event_info') }}',
         url_for_schedule_html_action = '{{ url_for('schedule.html_action') }}',
+        url_event_new_event_html = '{{ url_for('event.new_event') }}',
+        url_schedule_appointment_html = '{{ url_for('schedule.appointment') }}',
         current_user = {{ current_user.export_js() | tojson | safe }},
         current_user_id = {{ current_user.id|default('undefined') }};
 </script>
