@@ -77,6 +77,5 @@
 {% endblock %}
 {% block modules_js %}
     {{ super() }}
-    <script type="text/javascript" src="{{ url_for('static', filename='js/services/appointment_dialog.js', v=version) }}"></script>
     <script src="{{ url_for('.static', filename="js/appointment.js", v=version) }}"></script>
 {% endblock %}
