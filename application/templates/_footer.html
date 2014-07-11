@@ -31,6 +31,13 @@
         url_for_schedule_html_action = '{{ url_for('schedule.html_action') }}',
         url_event_new_event_html = '{{ url_for('event.new_event') }}',
         url_schedule_appointment_html = '{{ url_for('schedule.appointment') }}',
+        url_schedule_api_schedule = '{{ url_for('schedule.api_schedule') }}',
+        url_schedule_api_move_client = '{{ url_for('schedule.api_move_client') }}',
+        url_schedule_html_person_schedule_monthview = '{{ url_for('schedule.person_schedule_monthview') }}',
+        url_schedule_api_schedule_description = '{{ url_for('schedule.api_schedule_description') }}',
+        url_schedule_api_schedule_description_post = '{{ url_for('schedule.api_schedule_description_post') }}',
+        url_schedule_api_schedule_lock = '{{ url_for('schedule.api_schedule_lock') }}',
+        url_schedule_api_html_day_free = '{{ url_for('schedule.html_day_free') }}',
         current_user = {{ current_user.export_js() | tojson | safe }},
         current_user_id = {{ current_user.id|default('undefined') }};
 </script>
