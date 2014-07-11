@@ -5,6 +5,9 @@ var CreateEventModalCtrl = function ($scope, $modalInstance) {
     $scope.cancel = function () {
         $modalInstance.dismiss('cancel');
     };
+    $scope.accept = function () {
+        $modalInstance.close(true);
+    };
 };
 var ClientModalCtrl = function ($scope, $modalInstance, client, PrintingService, $modal, $interval) {
     $scope.client = client;
@@ -61,9 +64,13 @@ var ClientModalCtrl = function ($scope, $modalInstance, client, PrintingService,
     $scope.modal_create_event = function() {
         var modalInstance = $modal.open({
             templateUrl: 'modal-createEvent.html',
-            scope: $scope,
             controller: CreateEventModalCtrl
         });
+        modalInstance.result.then(function (accept) {
+            if (accept) {
+                $scope.new_event($scope.client_id)
+            }
+        })
     };
 
     $scope.$on('printing_error', function (event, error) {
