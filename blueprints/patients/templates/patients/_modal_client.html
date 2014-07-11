@@ -1,17 +1,14 @@
 <div class="modal-header" xmlns="http://www.w3.org/1999/html">
     <div class="row">
-        <div class="col-md-5"><h4 class="modal-title" id="myModalLabel">[[client.info.full_name]]</h4></div>
-        <div class="col-md-6 text-right">
-            <button class="btn btn-sm btn-primary" ng-click="new_appointment(client.client_id)">Записать на приём</button>
+        <div class="col-md-7"><h4 class="modal-title" id="myModalLabel">[[client.info.full_name]]</h4></div>
+        <div class="col-md-5 text-right">
+            <button class="btn btn-sm btn-primary" ng-click="new_appointment(client.client_id)" title="Записать на приём"><span class="glyphicon glyphicon-tag"></span></button>
             <button class="btn btn-sm btn-primary" ng-click="new_event(client.client_id)"
-                    ng-if="client.appointments.length == 0">Создать обращение</button>
+                    ng-if="client.appointments.length == 0" title="Создать обращение"><span class="glyphicon glyphicon-plus"></span></button>
             <button class="btn btn-sm btn-primary" ng-click="modal_create_event()"
-                    ng-if="client.appointments.length > 0">Создать обращение</button>
-            <button class="btn btn-sm btn-primary" ng-click="open_client(client.client_id)">Редактировать данные пациента</button>
+                    ng-if="client.appointments.length > 0" title="Создать обращение"><span class="glyphicon glyphicon-plus"></span></button>
+            <button class="btn btn-sm btn-primary" ng-click="open_client(client.client_id)" title="Редактировать данные пациента"><span class="glyphicon glyphicon-pencil"></span></button>
             <ui-print-button class="btn-sm" ps="ps" resolve="ps_resolve()"></ui-print-button>
-        </div>
-        <div class="col-md-1">
-            <button type="button" class="close" ng-click="cancel()">&times;</button>
         </div>
     </div>
 </div>
