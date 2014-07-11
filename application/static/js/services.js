@@ -350,21 +350,21 @@ angular.module('WebMis20.services', []).
         return {
             make: function (ticket, client_id) {
                 var appointment_type_code = arguments[2];
-                return $http.post('/schedule/api/appointment.json', {
+                return $http.post(url_schedule_api_appointment, {
                     client_id: client_id,
                     ticket_id: ticket.id,
                     appointment_type_code: appointment_type_code // Это может настраиваться
                 })
             },
             cancel: function (ticket, client_id) {
-                return $http.post('/schedule/api/appointment.json', {
+                return $http.post(url_schedule_api_appointment, {
                     client_id: client_id,
                     ticket_id: ticket.id,
                     delete: true
                 })
             },
             change_notes: function (ticket_client_id, notes) {
-                return $http.post('/schedule/api/appointment.json', {
+                return $http.post(url_schedule_api_appointment, {
                     client_id: client_id,
                     ticket_id: ticket.id,
                     note: notes

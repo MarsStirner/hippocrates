@@ -1,7 +1,7 @@
 /**
  * Created by mmalkov on 11.07.14.
  */
-var PersonAppointmentCtrl = function ($scope, $http, $modal, RefBook) {
+var PersonAppointmentCtrl = function ($scope, $http, RefBook, WMAppointmentDialog) {
     $scope.modal = {};
     $scope.max_tickets = [];
     $scope.person_schedules = [];
@@ -117,25 +117,9 @@ var PersonAppointmentCtrl = function ($scope, $http, $modal, RefBook) {
     $scope.appointment_toggle = function (ticket, person) {
         var instance;
         if (ticket.status == 'busy') {
-            instance = $modal.open({
-                templateUrl: 'cancelAppointment.html',
-                controller: CancelAppointmentModalInstanceCtrl,
-                resolve: {
-                    person: function () {return person},
-                    ticket: function () {return ticket},
-                    client_id: function () {return $scope.client_id}
-                }
-            });
+            instance = WMAppointmentDialog.cancel(ticket, person, $scope.client_id)
         } else {
-            instance = $modal.open({
-                templateUrl: 'makeAppointment.html',
-                controller: MakeAppointmentModalInstanceCtrl,
-                resolve: {
-                    person: function () {return person},
-                    ticket: function () {return ticket},
-                    client_id: function () {return $scope.client_id}
-                }
-            });
+            instance = WMAppointmentDialog.make(ticket, person, $scope.client_id)
         }
         instance.result.then(function () {
             $scope.loadData();
@@ -184,4 +168,4 @@ var PersonAppointmentCtrl = function ($scope, $http, $modal, RefBook) {
 
     $scope.monthChanged();
 };
-WebMis20.controller('PersonAppointmentCtrl', ['$scope', '$http', '$modal', 'RefBook', PersonAppointmentCtrl]);
+WebMis20.controller('PersonAppointmentCtrl', ['$scope', '$http' , 'RefBook', 'WMAppointmentDialog', PersonAppointmentCtrl]);

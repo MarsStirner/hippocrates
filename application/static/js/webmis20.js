@@ -3,6 +3,7 @@
  */
 var WebMis20 = angular.module('WebMis20', [
     'WebMis20.services',
+    'WebMis20.services.dialogs',
     'WebMis20.directives',
     'WebMis20.directives.personTree',
     'WebMis20.controllers',
