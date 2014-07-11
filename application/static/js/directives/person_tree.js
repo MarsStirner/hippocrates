@@ -27,7 +27,7 @@ angular.module('WebMis20.directives.personTree', [])
                                 <label class="group" for="spec-[[spec_group.speciality.id]]" ng-bind="spec_group.speciality.name" ></label>\
                                 <ul>\
                                     <li ng-repeat="person in spec_group.persons">\
-                                        <a href="#" class="leaf" ng-bind="person.nameFull" ng-click="person_selected(person)" ng-if="!checkboxed"></a>\
+                                        <a class="leaf" ng-bind="person.nameFull" ng-click="person_selected(person)" ng-if="!checkboxed"></a>\
                                         <input type="checkbox" id="doc-[[person.id]]" ng-model="person.checked" ng-disabled="person.disabled" ng-change="selection_change(person)" class="leaf" ng-if="checkboxed">\
                                         <label class="leaf" for="doc-[[person.id]]" ng-bind="person.name" ng-if="checkboxed"></label>\
                                     </li>\
