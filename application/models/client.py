@@ -357,8 +357,7 @@ class ClientAddress(db.Model):
             'free_input': self.freeInput,
             'locality_type': LocalityType(self.localityType) if self.localityType is not None else None,
             'text_summary': self.__unicode__(),
-            'same_as_reg': getattr(self, 'same_as_reg', False),
-            'copy_from_id': getattr(self, 'copy_from_id', None)
+            'synced': getattr(self, 'synced', False)
         }
 
     def __int__(self):
@@ -1001,31 +1000,14 @@ class Address(db.Model):
         db.Index(u'house_id', u'house_id', u'flat'),
     )
 
-    id = db.Column(db.Integer,
-                   primary_key=True)
-    createDatetime = db.Column(db.DateTime,
-                               nullable=False,
-                               default=datetime.datetime.now)
-    createPerson_id = db.Column(db.Integer,
-                                index=True,
-                                default=safe_current_user_id)
-    modifyDatetime = db.Column(db.DateTime,
-                               nullable=False,
-                               default=datetime.datetime.now,
-                               onupdate=datetime.datetime.now)
-    modifyPerson_id = db.Column(db.Integer,
-                                index=True,
-                                default=safe_current_user_id,
-                                onupdate=safe_current_user_id)
-    deleted = db.Column(db.Integer,
-                        nullable=False,
-                        default=0,
-                        server_default=u"'0'")
-    house_id = db.Column(db.Integer,
-                         db.ForeignKey('AddressHouse.id'),
-                         nullable=False)
-    flat = db.Column(db.String(6),
-                     nullable=False)
+    id = db.Column(db.Integer, primary_key=True)
+    createDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now)
+    createPerson_id = db.Column(db.Integer, index=True, default=safe_current_user_id)
+    modifyDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now, onupdate=datetime.datetime.now)
+    modifyPerson_id = db.Column(db.Integer, index=True, default=safe_current_user_id, onupdate=safe_current_user_id)
+    deleted = db.Column(db.Integer, nullable=False, default=0, server_default=u"'0'")
+    house_id = db.Column(db.Integer, db.ForeignKey('AddressHouse.id'), nullable=False)
+    flat = db.Column(db.String(6), nullable=False)
 
     house = db.relationship(u'AddressHouse')
 
