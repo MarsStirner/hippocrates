@@ -251,8 +251,10 @@ class ClientVisualizer(object):
         live_addr = client.loc_address
         if reg_addr and live_addr:
             if client.has_identical_addresses():
-                setattr(live_addr, 'same_as_reg', True)
-                setattr(live_addr, 'copy_from_id', reg_addr.id)
+                live_addr = {
+                    'id': live_addr.id,
+                    'synced': True,
+                }
         return safe_dict(reg_addr), safe_dict(live_addr)
 
     def make_relation_info(self, client_id, relation):
