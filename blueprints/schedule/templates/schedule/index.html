@@ -20,7 +20,7 @@
         </div>
         <ul class="nav nav-tabs nav-justified" ng-model="reception_type" ng-if="person">
             <li ng-class="{active: (rt.code == reception_type)}" ng-repeat="rt in reception_types.objects"
-                ng-click="changeReceptionType(rt.code)"><a href="#">[[ rt.name ]]</a>
+                ng-click="changeReceptionType(rt.code)"><a>[[ rt.name ]]</a>
             </li>
         </ul>
         <div class="tab-content" ng-if="person">
@@ -28,7 +28,7 @@
                 <div class="col-md-12">
                     <ul class="nav nav-pills">
                         <li ng-class="{active: ($index == page)}" ng-repeat="p in pages">
-                            <a ng-click="setDatePage($index)" href="#">
+                            <a ng-click="setDatePage($index)">
                                 [[ p | asShortDate ]] - [[ aux.moment(p).add(6, 'd') | asShortDate ]]
                             </a>
                         </li>
