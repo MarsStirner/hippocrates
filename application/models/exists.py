@@ -376,12 +376,14 @@ class rbContactType(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     code = db.Column(db.String(8), nullable=False, index=True)
     name = db.Column(db.Unicode(64), nullable=False, index=True)
-    
+    idx = db.Column(db.Integer, nullable=False, default=0)
+
     def __json__(self):
         return {
             'id': self.id,
             'code': self.code,
             'name': self.name,
+            'idx': self.idx,
         }
 
     def __int__(self):
