@@ -4,7 +4,7 @@ from application.lib.agesex import calcAgeTuple
 from application.lib.const import ID_DOC_GROUP_CODE, VOL_POLICY_CODES, COMP_POLICY_CODES
 from application.models.utils import safe_current_user_id
 from application.models.enums import Gender, LocalityType, AllergyPower
-from application.models.exists import rbDocumentTypeGroup, rbDocumentType
+from application.models.exists import rbDocumentTypeGroup, rbDocumentType, rbContactType
 from application.models.kladr_models import Kladr, Street
 from application.systemwide import db
 from sqlalchemy import orm
@@ -218,12 +218,10 @@ class Client(db.Model):
 
     @property
     def phones(self):
-        return ', '.join([
-            (u'%s: %s (%s)' % (contact.name, contact.contact, contact.notes))
-            if contact.notes
-            else (u'%s: %s' % (contact.name, contact.contact))
-            for contact in self.contacts
-        ])
+        return [(u'%s: %s (%s)' % (contact.name, contact.contact, contact.notes))
+                if contact.notes
+                else (u'%s: %s' % (contact.name, contact.contact))
+                for contact in self.contacts]
 
     def has_identical_addresses(self):
         reg = self.reg_address
