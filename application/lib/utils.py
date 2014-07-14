@@ -234,7 +234,11 @@ def safe_int(obj):
 
 
 def safe_dict(obj):
-    if obj is None or not hasattr(obj, '__json__'):
+    if obj is None:
+        return None
+    elif isinstance(obj, dict):
+        return obj
+    elif not hasattr(obj, '__json__'):
         return None
     return obj.__json__()
 

@@ -125,7 +125,7 @@ def api_patient_save():
             live_addr_info = client_data.get('live_addresses')
             if live_addr_info:
                 for live_addr in live_addr_info:
-                    same_as_reg = live_addr.get('same_as_reg', False)
+                    same_as_reg = live_addr.get('synced', False)
                     if same_as_reg:
                         la = add_or_update_copy_address(client, live_addr, actual_reg_address)
                     else:
@@ -205,7 +205,7 @@ def api_patient_save():
             live_addr_info = client_data.get('live_addresses')
             if live_addr_info:
                 for live_addr in live_addr_info:
-                    same_as_reg = live_addr.get('same_as_reg', False)
+                    same_as_reg = live_addr.get('synced', False)
                     if same_as_reg:
                         la = add_or_update_copy_address(client, live_addr, actual_reg_address)
                     else:
@@ -260,7 +260,6 @@ def api_patient_save():
                     cont = add_or_update_contact(client, contact)
                     db.session.add(cont)
 
-    # try:
     #     for id_info in client_info['identifications']:
     #         if not 'id' in id_info:
     #             id_ext = get_new_identification(id_info)
@@ -274,26 +273,34 @@ def api_patient_save():
     except Exception, e:
         logger.error(e, exc_info=True)
         db.session.rollback()
-        return jsonify({'name': err_msg,
-                        'data': {
-                            'err_msg': 'INTERNAL SERVER ERROR'
-                        }},
-                       500, 'save client data error')
+        return jsonify(
+            {
+                'name': err_msg,
+                'data': {
+                    'err_msg': 'INTERNAL SERVER ERROR'
+                }
+            },
+            500,
+            'save client data error'
+        )
 
     return jsonify(int(client))
 
-
-@module.route('/api/kladr_info.json', methods=['GET'])
+# for tests without external kladr
+@module.route('/api/kladr_city.json', methods=['GET'])
 def api_kladr_city_get():
     from application.models.kladr_models import Kladr
     val = request.args['city']
     res = Kladr.query.filter(Kladr.NAME.startswith(val)).all()
     return jsonify([{'name': r.NAME,
-                    'code': '0000000000000000'} for r in res])
-    # name = [" ".join([record.NAME, record.SOCR])]
-    # parent = record.parent
-    # while parent:
-    #     record = Kladr.query.filter(Kladr.CODE == parent.ljust(13, "0")).first()
-    #     name.insert(0, " ".join([record.NAME, record.SOCR]))
-    #     parent = record.parent
-    # return ", ".join(name)
+                    'code': r.CODE} for r in res])
+
+
+@module.route('/api/kladr_street.json', methods=['GET'])
+def api_kladr_street_get():
+    from application.models.kladr_models import Street
+    city = request.args['city']
+    street = request.args['street']
+    res = Street.query.filter(Street.CODE.startswith(city[:-2]), Street.NAME.startswith(street)).all()
+    return jsonify([{'name': r.NAME,
+                    'code': r.CODE} for r in res])

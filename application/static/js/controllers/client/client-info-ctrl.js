@@ -2,15 +2,15 @@
 
 angular.module('WebMis20.controllers').
     controller('ClientCtrl',
-        ['$scope', '$http', '$modal', 'WMClient', 'WMClientService', 'PrintingService', 'RefBookService', '$window',
-        function ($scope, $http, $modal, WMClient, WMClientService, PrintingService, RefBookService, $window) {
+        ['$scope', '$http', '$modal', 'WMClient', 'WMClientController', 'PrintingService', 'RefBookService', '$window',
+        function ($scope, $http, $modal, WMClient, WMClientController, PrintingService, RefBookService, $window) {
             $scope.records = [];
             $scope.aux = aux;
             $scope.params = aux.getQueryParams(document.location.search);
             $scope.rbGender = RefBookService.get('Gender');
             $scope.rbPerson = RefBookService.get('vrbPersonWithSpeciality');
             $scope.alerts = [];
-            $scope.clientService = WMClientService;
+            $scope.wmClientCtrl = WMClientController;
 
             $scope.client_id = $scope.params.client_id;
             var client = $scope.client = new WMClient($scope.client_id);
@@ -108,39 +108,6 @@ angular.module('WebMis20.controllers').
                 }).length > 1;
             };
 
-            $scope.delete_address = function(entity, addr) {
-                if (confirm('Адрес будет удален. Продолжить?')) {
-                    client.delete_record(entity, addr);
-                }
-            };
-
-            $scope.get_actual_reg_address = function() {
-                var addrs =  client.reg_addresses.filter(function(el) {
-                    return el.deleted === 0;
-                });
-                return addrs.length === 1 ? addrs[0] : null;
-            };
-
-            $scope.add_new_address = function(entity, addr_type) {
-                var addrs = client[entity].filter(function(el) {
-                    return el.deleted === 0;
-                });
-                var cur_addr = addrs[addrs.length - 1];
-                if (addrs.length) {
-                    var msg = [
-                        'При добавлении нового адреса старый адрес будет удален',
-                        cur_addr.id ? ' и станет доступен для просмотра в истории' : '',
-                        '. Продолжить?'
-                    ].join('');
-                    if (confirm(msg)) {
-                        client.delete_record(entity, cur_addr, 2);
-                        client.add_address(addr_type);
-                    }
-                } else {
-                    client.add_address(addr_type);
-                }
-            };
-
             $scope.save_client = function() {
                 var form = $scope.clientForm;
                 $scope.editing.submit_attempt = true;
@@ -175,10 +142,10 @@ angular.module('WebMis20.controllers').
             $scope.refresh_form = function() {
                 $scope.mainInfoForm.$setPristine(true);
                 if (!client.reg_addresses.length) {
-                    client.add_address(0);
+                    $scope.wmClientCtrl.push_address(client, 0);
                 }
                 if (!client.live_addresses.length) {
-                    client.add_address(1);
+                    $scope.wmClientCtrl.push_address(client, 1);
                 }
                 if (!client.compulsory_policies.length) {
                     client.add_cpolicy();

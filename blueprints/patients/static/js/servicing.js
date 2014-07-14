@@ -102,14 +102,14 @@ var ClientModalCtrl = function ($scope, $modalInstance, client, PrintingService,
         $scope.client = null;
     });
 };
-var ClientSearch = function ($scope, $http, $timeout, $window, PrintingService, WMClient, WMClientService, $modal) {
+var ClientSearch = function ($scope, $http, $timeout, $window, PrintingService, WMClient, WMClientController, $modal) {
     $scope.aux = aux;
     $scope.params = aux.getQueryParams(document.location.search);
     $scope.query = "";
     $scope.results = null;
     $scope.client_id = null;
     $scope.client = null;
-    $scope.clientService = WMClientService;
+    $scope.wmClientCtrl = WMClientController;
     $scope.alerts = [];
 
     $scope.set_patient_id = function (patient_id) {
@@ -166,4 +166,4 @@ var ClientSearch = function ($scope, $http, $timeout, $window, PrintingService, 
         });
     };
 };
-WebMis20.controller('ClientSearch', ['$scope', '$http', '$timeout', '$window', 'PrintingService', 'WMClient', 'WMClientService', '$modal', ClientSearch]);
+WebMis20.controller('ClientSearch', ['$scope', '$http', '$timeout', '$window', 'PrintingService', 'WMClient', 'WMClientController', '$modal', ClientSearch]);
