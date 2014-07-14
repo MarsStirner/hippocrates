@@ -221,7 +221,7 @@ class Client(db.Model):
         return [(u'%s: %s (%s)' % (contact.name, contact.contact, contact.notes))
                 if contact.notes
                 else (u'%s: %s' % (contact.name, contact.contact))
-                for contact in self.contacts]
+                for contact in self.contacts.join(rbContactType).order_by(rbContactType.idx)]
 
     def has_identical_addresses(self):
         reg = self.reg_address
