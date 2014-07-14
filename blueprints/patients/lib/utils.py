@@ -3,6 +3,7 @@
 from application.models.client import ClientAllergy, ClientContact, ClientDocument, \
     ClientIntoleranceMedicament, ClientSocStatus, ClientPolicy, \
     BloodHistory, ClientAddress, ClientRelation
+from application.models.enums import AddressType
 from application.models.exists import rbSocStatusClass
 from application.lib.utils import safe_date, safe_traverse, get_new_uuid
 
@@ -199,28 +200,26 @@ def add_or_update_address(client, data):
 def add_or_update_copy_address(client, data, copy_from):
     # todo: check for existing records ?
     msg_err = u'Ошибка сохранения адреса проживания'
-    addr_id = data.get('id')
+    addr_id = data.get('live_id')
     deleted = data.get('deleted')
     if deleted:
         client_addr = ClientAddress.query.get(addr_id)
         client_addr.deleted = deleted
         return client_addr
 
-    from_id = data.get('copy_from_id')
+    from_id = data.get('id')
     from_addr = ClientAddress.query.get(from_id) if from_id else copy_from
     if from_addr is None:
-        raise ClientSaveException(msg_err, u'отсутствует совпадающий адрес. Свяжитесь с администратором.')
+        raise ClientSaveException(msg_err, u'Для адреса проживания указано, что он совпадает с адресом регистрации, '
+                                           u'но соответствующий адрес не найден. Свяжитесь с администратором.')
 
-    if addr_id:  # TODO: delete this after test
-        raise ClientSaveException(msg_err, u'how did you get there?')
+    if addr_id:
         client_addr = ClientAddress.query.get(addr_id)
-        client_addr.type = 1  # todo: enum
         client_addr.address = from_addr.address
         client_addr.freeInput = from_addr.freeInput
         client_addr.localityType = from_addr.localityType
-        client_addr.deleted = from_addr.deleted
     else:
-        client_addr = ClientAddress.create_from_copy(1, from_addr, client)  # todo: enum
+        client_addr = ClientAddress.create_from_copy(AddressType.live[0], from_addr, client)
     return client_addr
 
 

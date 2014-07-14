@@ -3,7 +3,9 @@
  */
 var WebMis20 = angular.module('WebMis20', [
     'WebMis20.services',
+    'WebMis20.services.dialogs',
     'WebMis20.directives',
+    'WebMis20.directives.personTree',
     'WebMis20.controllers',
     'WebMis20.LoadingIndicator',
     'WebMis20.validators',
@@ -176,7 +178,7 @@ var WebMis20 = angular.module('WebMis20', [
                     if (item.contingent && itemMatches){
                         item.contingent.forEach(function(cont){
                             if((!cont.sex || cont.sex == client_info.info.sex.id) &&
-                               (!cont.org_id || cont.org_id == client_info.info.work_org_id) &&
+                               (!cont.org_id || cont.org_id == client_info.work_org_id) &&
                                (!cont.insurer_id || cont.insurer_id == client_info.compulsory_policy.insurer_id) &&
                                  (!cont.policyType_id || cont.policyType_id == client_info.compulsory_policy.policyType_id)){
                                 itemMatches = true;

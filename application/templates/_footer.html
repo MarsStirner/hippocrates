@@ -16,9 +16,32 @@
         url_print_templates = '{{ print_subsystem_templates }}',
         url_print_subsystem = '{{ print_subsystem_url }}',
         url_print_template = '{{ print_subsystem_print_template }}',
-        url_kladr_get = '{{ url_for('patients.api_kladr_city_get') }}', // for tests
+        url_kladr_city_get = '{{ url_for('patients.api_kladr_city_get') }}',  // for tests
+        url_kladr_street_get = '{{ url_for('patients.api_kladr_street_get') }}',  // for tests
         kladr_city = '{{ url_for('kladr_city') }}',
         kladr_street = '{{ url_for('kladr_street') }}',
+        url_for_event_api_diagnosis_save = '{{ url_for('event.api_diagnosis_save') }}',
+        url_for_event_api_new_event_payment_info_get = '{{ url_for('event.api_new_event_payment_info_get') }}',
+        url_for_event_api_search_services = '{{ url_for('event.api_search_services') }}',
+        url_for_event_api_service_delete_service = '{{ url_for('event.api_service_delete_service') }}',
+        url_for_event_api_service_make_payment = '{{ url_for('event.api_service_make_payment') }}',
+        url_for_event_api_service_add_coord = '{{ url_for('event.api_service_add_coord') }}',
+        url_for_event_api_service_remove_coord = '{{ url_for('event.api_service_remove_coord') }}',
+        url_for_schedule_api_atl_get = '{{ url_for('schedule.api_atl_get') }}',
+        url_for_event_html_event_info = '{{ url_for('event.html_event_info') }}',
+        url_for_schedule_html_action = '{{ url_for('schedule.html_action') }}',
+        url_event_new_event_html = '{{ url_for('event.new_event') }}',
+        url_schedule_appointment_html = '{{ url_for('schedule.appointment') }}',
+        url_schedule_api_appointment = '{{ url_for('schedule.api_appointment') }}',
+        url_schedule_api_schedule = '{{ url_for('schedule.api_schedule') }}',
+        url_schedule_api_move_client = '{{ url_for('schedule.api_move_client') }}',
+        url_schedule_html_person_schedule_monthview = '{{ url_for('schedule.person_schedule_monthview') }}',
+        url_schedule_api_schedule_description = '{{ url_for('schedule.api_schedule_description') }}',
+        url_schedule_api_schedule_description_post = '{{ url_for('schedule.api_schedule_description_post') }}',
+        url_schedule_api_schedule_lock = '{{ url_for('schedule.api_schedule_lock') }}',
+        url_schedule_api_html_day_free = '{{ url_for('schedule.html_day_free') }}',
+        url_schedule_all_persons_tree = '{{ url_for('schedule.api_all_persons_tree') }}',
+        current_user = {{ current_user.export_js() | tojson | safe }},
         current_user_id = {{ current_user.id|default('undefined') }};
 </script>
 <script src="{{ url_for('static', filename='jquery-ui/js/jquery-1.10.2.js') }}"></script>
@@ -45,7 +68,9 @@
 
 <script src="{{ url_for('static', filename='js/webmis20.js', v=version) }}"></script>
 <script src="{{ url_for('static', filename='js/directives.js', v=version) }}"></script>
+<script src="{{ url_for('static', filename='js/directives/person_tree.js', v=version) }}"></script>
 <script src="{{ url_for('static', filename='js/services.js', v=version) }}"></script>
+<script src="{{ url_for('static', filename='js/services/appointment_dialog.js', v=version) }}"></script>
 <script src="{{ url_for('static', filename='js/controllers.js', v=version) }}"></script>
 <script src="{{ url_for('static', filename='js/loader.js', v=version) }}"></script>
 <script type="text/ng-template" id="_timePicker.html">
@@ -68,4 +93,16 @@
 </script>
 <script type="text/ng-template" id="kladr-ui.html">
     {% include "kladr-ui.html" %}
+</script>
+<script>
+    'use strict';
+    current_user.has_role = function () {
+        return aux.arrayCopy(arguments).filter(aux.func_in(current_user.roles)).length > 0;
+    };
+    current_user.has_right = function () {
+        return aux.arrayCopy(arguments).filter(aux.func_in(current_user.rights)).length > 0;
+    };
+    current_user.current_role_maybe = function () {
+        return aux.inArray(aux.arrayCopy(arguments), current_user.current_role);
+    };
 </script>

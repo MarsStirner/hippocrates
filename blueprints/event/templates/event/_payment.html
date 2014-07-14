@@ -1,4 +1,5 @@
 <div ng-controller="EventPaymentCtrl">
+<ng-form name="payerForm">
 <legend xmlns="http://www.w3.org/1999/html">Плательщик</legend>
 <tabset justified="false" class="marginal">
     <tab id="tab_payer_person" heading="Физ. лицо" disabled="formcnf.tab_payer_person.disabled()"
@@ -27,16 +28,19 @@
                 </div>
 
                 <div class="row">
-                    <div class="form-group col-md-2">
-                        <label for="birthdate">Дата рождения</label>
-                        <wm-date id="birthdate" name="birthdate" ng-model="event.payment.local_contract.birth_date"
+                    <div class="form-group col-md-2"
+                         ng-class="{'has-error': payerForm.birthdate.$invalid}">
+                        <label for="birthdate" class="control-label">Дата рождения</label>
+                        <wm-date id="birthdate" ng-model="event.payment.local_contract.birth_date"
                                  ng-disabled="formcnf.payer_field.disabled">
                         </wm-date>
                     </div>
-                    <div class="form-group col-md-4">
+                    <div class="form-group col-md-4"
+                         ng-class="{'has-error': payerForm.doc_type.$invalid}">
                         <label for="doc_type">Документ</label>
                         <ui-select class="form-control" id="doc_type" name="doc_type" theme="select2" autocomplete="off"
-                                   ng-model="event.payment.local_contract.doc_type" ng-disabled="formcnf.payer_field.disabled">
+                                   ng-model="event.payment.local_contract.doc_type" ng-disabled="formcnf.payer_field.disabled"
+                                   ng-required="payerForm.doc_number.$viewValue || payerForm.doc_serial_left.$viewValue || payerForm.doc_serial_right.$viewValue">
                             <ui-select-match placeholder="Тип документа">[[$select.selected.name]]</ui-select-match>
                             <ui-select-choices repeat="dt in rbDocumentType.objects | filter: $select.search">
                                 <div ng-bind-html="dt.name | highlight: $select.search"></div>
@@ -45,7 +49,7 @@
                     </div>
                     <div class="form-group col-md-2">
                         <label for="doc_serial">Серия</label>
-                        <div class="row">
+                        <div class="row">{# TODO: add serial regexp validators from doctype #}
                             <div class="col-md-6">
                                 <input type="text" class="form-control" id="doc_serial_left" name="doc_serial_left"
                                        autocomplete="off" ng-pattern="/^[\d]+$/"
@@ -58,10 +62,11 @@
                             </div>
                         </div>
                     </div>
-                    <div class="form-group col-md-4">
-                        <label for="doc_number">Номер</label>
+                    <div class="form-group col-md-4"
+                         ng-class="{'has-error': payerForm.doc_number.$invalid}">
+                        <label for="doc_number">Номер</label>{# TODO: add number regexp validators from doctype. Conflicts in disabled. #}
                         <input type="text" class="form-control" id="doc_number" name="doc_number"
-                               autocomplete="off" placeholder="номер" ng-pattern="/^\d+$/" {# FIXME: allows whitespace as first char #}
+                               autocomplete="off" placeholder="номер" ng-pattern="/^\d+$/"
                                ng-model="event.payment.local_contract.number" ng-disabled="formcnf.payer_field.disabled"/>
                     </div>
                 </div>
@@ -70,24 +75,22 @@
                     <div class="form-group col-md-12">
                         <label for="reg_address">Адрес</label>
                         <input type="text" class="form-control" id="reg_address" name="reg_address" autocomplete="off"
-                               placeholder="Адрес регистрации" ng-model="event.payment.local_contract.reg_address.text_summary"
+                               placeholder="Адрес регистрации" ng-model="event.payment.local_contract.reg_address"
                                ng-disabled="formcnf.payer_field.disabled"/>
                     </div>
                 </div>
             </div>
 
             <div class="col-md-2">
-                <blockquote>
-                    Заполнить из:
+                <div>
+                    <label>Заполнить из:</label>
                     <button type="button" class="btn btn-info btn-block" ng-disabled="formcnf.payer_field.disabled"
                             ng-click="get_payer('client', event.info.client_id)">карты пациента</button>
-
                     <button type="button" class="btn btn-info btn-block" ng-disabled="formcnf.payer_field.disabled"
                             ng-click="open_relatives_modal()">карты родственника</button>
-
                     <button type="button" class="btn btn-info btn-block" ng-disabled="formcnf.payer_field.disabled"
                             ng-click="get_payer('prev_event', event.info.client_id)">предыдущего</button>
-                </blockquote>
+                </div>
             </div>
         </div>
 
@@ -130,4 +133,5 @@
         </div>
     </div>
 </div>
+</ng-form>
 </div>

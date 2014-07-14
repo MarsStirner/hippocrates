@@ -32,6 +32,11 @@ class Gender(Enum):
     female = 2, u'Ж'
 
 
+class AddressType(Enum):
+    reg = 0, u'Регистрации'
+    live = 1, u'Проживания'
+
+
 class LocalityType(Enum):
     vilage = 2, u'Село'
     city = 1, u'Город'

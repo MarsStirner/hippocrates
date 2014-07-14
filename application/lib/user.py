@@ -55,12 +55,28 @@ class User(UserMixin):
                     for right in role.rights:
                         self.rights[role.code].append(right.code)
 
+    def export_js(self):
+        return {
+            'id': self.get_id(),
+            'roles': self.roles,
+            'is_admin': self.is_admin(),
+            'current_role': self.current_role,
+            'rights': self.rights,
+        }
 
 class AnonymousUser(AnonymousUserMixin):
 
     def is_admin(self):
         return False
 
+    def export_js(self):
+        return {
+            'id': None,
+            'roles': [],
+            'is_admin': self.is_admin(),
+            'current_role': None,
+            'rights': [],
+        }
 
 class UserAuth():
 

@@ -12,17 +12,19 @@ from application.lib.settings import Settings
 from application.systemwide import db
 
 
+class EventSaveException(Exception):
+    def __init__(self, message, data=None):
+        super(EventSaveException, self).__init__(message)
+        self.data = data
+
+
 def create_new_local_contract(lc_info):
-    now = datetime.datetime.now()
     lcon = EventLocalContract()
-    lcon.createDatetime = lcon.modifyDatetime = now
-    lcon.createPerson_id = lcon.modifyPerson_id = current_user.get_id() or 1  # todo: fix
-    lcon.deleted = 0
     lcon.coordAgent = lc_info.get('coord_agent', '')
     lcon.coordInspector = lc_info.get('coord_inspector', '')
     lcon.coordText = lc_info.get('coord_text', '')
 
-    if Settings.getBool('Event.Payment.1CODVD', True):  # TODO: default val = enabled, change to disabled
+    if Settings.getBool('Event.Payment.1CODVD'):
         lcon.dateContract = lc_info.get('date_contract') or datetime.date.today()
         lcon.numberContract = lc_info.get('number_contract') or ''
     else:

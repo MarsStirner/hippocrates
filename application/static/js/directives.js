@@ -2,8 +2,8 @@
 
 angular.module('WebMis20.directives', ['ui.bootstrap', 'ui.select', 'ngSanitize']);
 
-angular.module('WebMis20.directives').
-    directive('rbSelect', ['RefBookService', function(RefBookService) {
+angular.module('WebMis20.directives')
+    .directive('rbSelect', ['RefBookService', function(RefBookService) {
         return {
             restrict: 'A',
             replace: true,
@@ -23,8 +23,8 @@ angular.module('WebMis20.directives').
                       '</ui-select-choices>' +
                       '</ui-select></div>'
         };
-    }]).
-    directive('wmDate', ['$timeout', function ($timeout) {
+    }])
+    .directive('wmDate', ['$timeout', function ($timeout) {
         return {
             restrict: 'E',
             replace: true,
@@ -57,8 +57,8 @@ angular.module('WebMis20.directives').
                         '</div>'
             ].join('\n')
         };
-    }]).
-    directive('manualDate', [function() {
+    }])
+    .directive('manualDate', [function() {
         return {
             restrict: 'A',
             require: 'ngModel',
@@ -199,7 +199,7 @@ angular.module('WebMis20.directives').
                 var resolver_call = attrs.resolve;
                 scope.open_print_window = function () {
                     var modal = $modal.open({
-                        templateUrl: 'modal-print-dialog.html',
+                        templateUrl: '/WebMis20/modal-print-dialog.html',
                         controller: ModalPrintDialogController,
                         size: 'lg',
                         resolve: {
@@ -401,6 +401,58 @@ angular.module('WebMis20.directives').
             }
         }
     }])
+    .run(['$templateCache', function ($templateCache) {
+        $templateCache.put('/WebMis20/modal-print-dialog.html',
+            '<div class="modal-header" xmlns="http://www.w3.org/1999/html">\
+                <button type="button" class="close" ng-click="cancel()">&times;</button>\
+            <h4 class="modal-title" id="myModalLabel">Печать документов</h4>\
+        </div>\
+        <table ng-show="page == 0" class="table table-condensed modal-body">\
+            <thead>\
+                <tr>\
+                    <th>\
+                        <input type="checkbox" ng-checked="ps.templates.length == selected_templates.length" ng-click="select_all_templates()">\
+                        </th>\
+                        <th>Наименование</th>\
+                    </tr>\
+                </thead>\
+                <tbody>\
+                    <tr ng-repeat="template in ps.templates">\
+                        <td>\
+                            <input type="checkbox" ng-checked="aux.inArray(selected_templates, template)" id="template-id-[[template.id]]" ng-click="toggle_select_template(template)">\
+                            </td>\
+                            <td>\
+                                <label for="template-id-[[template.id]]" ng-bind="template.name"></label>\
+                            </td>\
+                        </tr>\
+                    </tbody>\
+                </table>\
+                <div ng-show="page == 1">\
+                    <form name="printing_meta">\
+                        <div class="modal-body" ng-repeat="template in selected_templates | filter:template_has_meta">\
+                            <p ng-bind="template.name"></p>\
+                            <div class="row" ng-repeat="var_meta in template.meta">\
+                                <div class="col-md-3">\
+                                    <label ng-bind="var_meta.title"></label>\
+                                </div>\
+                                <div class="col-md-9" ui-print-variable meta="var_meta" model="mega_model[template.id][var_meta.name]">\
+                                </div>\
+                            </div>\
+                        </div>\
+                    </form>\
+                </div>\
+                <div class="modal-footer">\
+                    <button type="button" class="btn btn-success" ng-click="btn_next()" ng-if="page == 0 && !instant_print()">\
+                    Далее &gt;&gt;</button>\
+                    <button type="button" class="btn btn-default" ng-click="btn_prev()" ng-if="page == 1 && !instant_print()">\
+                    &lt;&lt; Назад</button>\
+                    <button type="button" class="btn btn-primary" ng-click="print_separated()" ng-if="page == 1 || instant_print()"\
+                    ng-disabled="printing_meta.$invalid">Печать</button>\
+                    <button type="button" class="btn btn-primary" ng-click="print_compact()" ng-if="page == 1 || instant_print()"\
+                    ng-disabled="printing_meta.$invalid">Печать компактно</button>\
+                    <button type="button" class="btn btn-default" ng-click="cancel()">Отмена</button>\
+                </div>')
+    }])
 ;
 angular.module('WebMis20.validators', [])
 .directive('enumValidator', function() {
@@ -450,70 +502,72 @@ angular.module('WebMis20.validators', [])
     };
 }])
 .directive('validatorRegexp', [function () {
-return {
-    restrict: 'A',
-    require: 'ngModel',
-    link: function(scope, element, attrs, ctrl) {
-        var regexp = null;
-        var evalue = null;
-        scope.$watch(attrs.validatorRegexp, function (n, o) {
-            evalue = n;
-            if (!evalue) {
-                if (ctrl.$viewValue) {
-                    ctrl.$setViewValue('');
-                    ctrl.$render();
-                };
-                ctrl.$setValidity('text', true);
-                $(element).attr('disabled', true);
-            } else {
-                $(element).removeAttr('disabled');
-                regexp = new RegExp(evalue);
-                ctrl.$setValidity('text', ctrl.$viewValue && regexp.test(ctrl.$viewValue));
-            }
-        });
-        ctrl.$parsers.unshift(function(viewValue) {
-            if (evalue && regexp) {
-                ctrl.$setValidity('text', viewValue && regexp.test(viewValue));
-            }
-            return viewValue
-        });
-    }
-}
-}]).directive('formSafeClose', ['$timeout', function ($timeout) {
-return {
-    restrict: 'A',
-    require: 'form',
-    link: function($scope, element, attrs, form) {
-        var message = "Вы уверены, что хотите закрыть вкладку? Форма может содержать несохранённые данные.";
-        $scope.$on('$locationChangeStart', function(event, next, current) {
-            if (form.$dirty) {
-                if(!confirm(message)) {
-                    event.preventDefault();
+    return {
+        restrict: 'A',
+        require: 'ngModel',
+        link: function(scope, element, attrs, ctrl) {
+            var regexp = null;
+            var evalue = null;
+            scope.$watch(attrs.validatorRegexp, function (n, o) {
+                evalue = n;
+                if (!evalue) {
+                    if (ctrl.$viewValue) {
+                        ctrl.$setViewValue('');
+                        ctrl.$render();
+                    };
+                    ctrl.$setValidity('text', true);
+                    $(element).attr('disabled', true);
+                } else {
+                    $(element).removeAttr('disabled');
+                    regexp = new RegExp(evalue);
+                    ctrl.$setValidity('text', ctrl.$viewValue && regexp.test(ctrl.$viewValue));
                 }
-            }
-        });
-        // Чтобы обойти баг FF с повторным вызовом onbeforeunload (http://stackoverflow.com/a/2295156/1748202)
-        $scope.onBeforeUnloadFired = false;
+            });
+            ctrl.$parsers.unshift(function(viewValue) {
+                if (evalue && regexp) {
+                    ctrl.$setValidity('text', viewValue && regexp.test(viewValue));
+                }
+                return viewValue
+            });
+        }
+    }
+}])
+.directive('formSafeClose', ['$timeout', function ($timeout) {
+    return {
+        restrict: 'A',
+        require: 'form',
+        link: function($scope, element, attrs, form) {
+            var message = "Вы уверены, что хотите закрыть вкладку? Форма может содержать несохранённые данные.";
+            $scope.$on('$locationChangeStart', function(event, next, current) {
+                if (form.$dirty) {
+                    if(!confirm(message)) {
+                        event.preventDefault();
+                    }
+                }
+            });
+            // Чтобы обойти баг FF с повторным вызовом onbeforeunload (http://stackoverflow.com/a/2295156/1748202)
+            $scope.onBeforeUnloadFired = false;
 
-        $scope.ResetOnBeforeUnloadFired = function () {
-           $scope.onBeforeUnloadFired = false;
-        };
-        window.onbeforeunload = function(evt){
-            if (form.$dirty && !$scope.onBeforeUnloadFired) {
-                $scope.onBeforeUnloadFired = true;
-                if (typeof evt == "undefined") {
-                    evt = window.event;
+            $scope.ResetOnBeforeUnloadFired = function () {
+               $scope.onBeforeUnloadFired = false;
+            };
+            window.onbeforeunload = function(evt){
+                if (form.$dirty && !$scope.onBeforeUnloadFired) {
+                    $scope.onBeforeUnloadFired = true;
+                    if (typeof evt == "undefined") {
+                        evt = window.event;
+                    }
+                    if (evt) {
+                        evt.returnValue = message;
+                    }
+                    $timeout($scope.ResetOnBeforeUnloadFired);
+                    return message;
                 }
-                if (evt) {
-                    evt.returnValue = message;
-                }
-                $timeout($scope.ResetOnBeforeUnloadFired);
-                return message;
-            }
-        };
+            };
+        }
     }
-}
-}]).directive('validNumber', function() {
+}])
+.directive('validNumber', function() {
   return {
     require: '?ngModel',
     link: function(scope, element, attrs, ngModelCtrl) {

@@ -2,7 +2,7 @@
     <div class="panel panel-default">
         <div class="panel-body">
             <div ng-transclude></div>
-            <alert ng-show="!mode.kladr_addr_valid && addressForm.$dirty" type="danger">Введенный адрес не найден в справочнике адресов Кладр.
+            <alert ng-show="show_warning()" type="danger">Введенный адрес не найден в справочнике адресов Кладр.
                 <a ng-click="mode.switch_to_free_input = !mode.switch_to_free_input">
                 [[mode.switch_to_free_input ? "Выбрать из Кладр" : "Ввести адрес вручную?"]]</a>
             </alert>
@@ -13,7 +13,7 @@
                     <label for="[[prefix]]_locality">Населенный пункт</label>
                     <wm-kladr-locality id="[[prefix]]_locality" name="locality"
                         model="localityModel" required="!inFreeInputMode() && addressForm.$dirty"
-                        disabled="sameAddress() || (mode.switch_to_free_input || !editMode())">
+                        disabled="mode.switch_to_free_input || !editMode()">
                     </wm-kladr-locality>
                 </div>
                 <div class="form-group col-md-3"
@@ -21,7 +21,7 @@
                     <label for="[[prefix]]_locality_type">Тип населенного пункта</label>
                     <wm-kladr-locality-type id="[[prefix]]_locality_type" name="locality_type"
                         model="localityTypeModel" required="addressForm.$dirty"
-                        disabled="sameAddress() || !editMode()">
+                        disabled="!editMode()">
                     </wm-kladr-locality-type>
                 </div>
             </div>
@@ -33,7 +33,7 @@
                     <label for="[[prefix]]_street">Улица</label>
                     <wm-kladr-street id="[[prefix]]_street" name="street"
                         model="streetModel" required="!inFreeInputMode() && addressForm.$dirty"
-                        disabled="sameAddress() || (mode.switch_to_free_input || !editMode())">
+                        disabled="mode.switch_to_free_input || !editMode()">
                     </wm-kladr-street>
                 </div>
                 <div class="form-group col-md-1"
@@ -41,7 +41,7 @@
                     <label for="[[prefix]]_house_number">Дом</label>
                     <wm-kladr-house-number id="[[prefix]]_house_number" name="house_number"
                         model="houseModel" required="!inFreeInputMode() && addressForm.$dirty"
-                        disabled="sameAddress() || (mode.switch_to_free_input || !editMode())">
+                        disabled="mode.switch_to_free_input || !editMode()">
                     </wm-kladr-house-number>
                 </div>
                 <div class="form-group col-md-1"
@@ -49,7 +49,7 @@
                     <label for="[[prefix]]_corpus_number">Корпус</label>
                     <wm-kladr-corpus-number id="[[prefix]]_corpus_number" name="corpus_number"
                         model="corpusModel" required="false"
-                        disabled="sameAddress() || (mode.switch_to_free_input || !editMode())">
+                        disabled="mode.switch_to_free_input || !editMode()">
                     </wm-kladr-corpus-number>
                 </div>
                 <div class="form-group col-md-1"
@@ -57,7 +57,7 @@
                     <label for="[[prefix]]_flat_number">Квартира</label>
                     <wm-kladr-flat-number id="[[prefix]]_flat_number" name="flat_number"
                         model="flatModel" required="false"
-                        disabled="sameAddress() || (mode.switch_to_free_input || !editMode())">
+                        disabled="mode.switch_to_free_input || !editMode()">
                     </wm-kladr-flat-number>
                 </div>
             </div>
@@ -68,7 +68,7 @@
                     <label for="[[prefix]]_free_input">В свободном виде</label>
                     <wm-kladr-free-input id="[[prefix]]_free_input" name="free_input"
                         model="freeInputModel" required="inFreeInputMode() && addressForm.$dirty"
-                        disabled="sameAddress() || (!mode.switch_to_free_input || !editMode())">
+                        disabled="!mode.switch_to_free_input || !editMode()">
                     </wm-kladr-free-input>
                 </div>
             </div>

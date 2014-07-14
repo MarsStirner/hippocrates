@@ -3,11 +3,11 @@
     <h4 class="modal-title" id="myModalLabel">У пациента есть предварительные записи</h4>
 </div>
 <div class="modal-body">
-    Если пациент обратился на основе предварительной записи, то нажмите кнопку "Отмена", затем нажмите на знак "+" в
+    Если пациент обратился на основе предварительной записи, то нажмите кнопку "Отмена", затем нажмите на <button class="btn btn-xs btn-success"><span class="glyphicon glyphicon-plus"></span></button> в
     соответствующей строке в таблице предварительных записей
 </div>
 <div class="modal-footer">
-    <button class="btn btn-danger" ng-click="parent_scope.new_event(client_id); cancel();" ng-if="client_id != 'new'" >
+    <button class="btn btn-danger" ng-click="accept();" >
         Всё равно продолжить
     </button>
     <button type="button" class="btn btn-default" ng-click="cancel()">Отмена</button>
