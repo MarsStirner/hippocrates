@@ -436,7 +436,7 @@ angular.module('WebMis20.validators', [])
                 else return '' + result;
             }
             ctrl.$parsers.unshift(function(viewValue) {
-                ctrl.$setValidity('text', viewValue && viewValue.substring(12, 14) == snilsCRC(viewValue));
+                ctrl.$setValidity('text', viewValue == "" || viewValue && viewValue.substring(12, 14) == snilsCRC(viewValue));
                 $timeout(function(){
                     if (ctrl.$invalid){
                         elm.trigger('show_popover');
