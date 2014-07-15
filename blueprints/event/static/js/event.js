@@ -850,7 +850,7 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, P
     $scope.initialize();
 };
 
-UnclosedActionsModalCtrl = function ($scope, $modalInstance, unclosed_actions) {
+var UnclosedActionsModalCtrl = function ($scope, $modalInstance, unclosed_actions) {
     $scope.unclosed_actions = unclosed_actions;
     $scope.accept = function() {
         $modalInstance.close();

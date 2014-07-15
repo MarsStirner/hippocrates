@@ -592,3 +592,24 @@ def api_atl_get():
     result = int_get_atl(at_class)
 
     return jsonify(result)
+
+
+@cache.memoize(86400)
+def int_get_atl_flat(at_class):
+    atypes = ActionType.query.filter(ActionType.class_ == at_class, ActionType.deleted == 0, ActionType.hidden == 0)
+    at = dict((item.id, (item.name, item.group_id, item.code, set())) for item in atypes)
+    for item_id, (name, gid, code, children) in at.iteritems():
+        if gid in at:
+            at[gid][3].add(item_id)
+    return at
+
+
+@module.route('/api/action-type-list-flat.json')
+def api_atl_get_flat():
+    at_class = int(request.args['at_class'])
+    if not (0 <= at_class < 4):
+        return abort(401)
+
+    result = [(id_, name, gid, code, list(children)) for id_, (name, gid, code, children) in int_get_atl_flat(at_class).iteritems()]
+
+    return jsonify(result)
