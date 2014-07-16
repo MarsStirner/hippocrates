@@ -636,8 +636,9 @@ var EventServicesCtrl = function($scope, $http, WMEventService) {
     };
 };
 
-var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, PrintingService, Settings, $filter, $modal) {
+var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, PrintingService, Settings, $filter, $modal, ActionTypeTreeModal) {
     $scope.aux = aux;
+    $scope.current_role_maybe = current_user.current_role_maybe;
     $scope.Organisation = RefBookService.get('Organisation');
     $scope.Settings = new Settings();
     $scope.alerts = [];
@@ -674,17 +675,10 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, P
                     });
                 }
             });
-        if (current_user.current_role_maybe('doctor', 'admin')) {
-            aux.range(3).map(function (at_class) {
-                $http.get(url_for_schedule_api_atl_get, {
-                    params: {
-                        at_class: at_class
-                    }
-                }).success(function (data) {
-                    $scope.action_type_tree[at_class] = data.result;
-                })
-            });
-        }
+    };
+
+    $scope.open_action_tree = function (at_class) {
+        ActionTypeTreeModal.open(at_class, $scope.event_id);
     };
 
     $scope.save_event = function (close_event) {
@@ -864,4 +858,4 @@ WebMis20.controller('EventDiagnosesCtrl', ['$scope', 'RefBookService', '$http', 
 WebMis20.controller('EventMainInfoCtrl', ['$scope', '$http', 'RefBookService', 'EventType', '$window', '$timeout', 'Settings', '$modal', '$filter', EventMainInfoCtrl]);
 WebMis20.controller('EventPaymentCtrl', ['$scope', 'RefBookService', 'Settings', '$http', '$modal', EventPaymentCtrl]);
 WebMis20.controller('EventServicesCtrl', ['$scope', '$http', 'WMEventService', EventServicesCtrl]);
-WebMis20.controller('EventInfoCtrl', ['$scope', 'WMEvent', '$http', 'RefBookService', '$window', 'PrintingService', 'Settings', '$filter', '$modal', EventInfoCtrl]);
+WebMis20.controller('EventInfoCtrl', ['$scope', 'WMEvent', '$http', 'RefBookService', '$window', 'PrintingService', 'Settings', '$filter', '$modal', 'ActionTypeTreeModal', EventInfoCtrl]);

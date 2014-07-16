@@ -82,61 +82,66 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
         return trees[at_class];
     }
 }])
-.directive('actionTypeTree', ['ActionTypeTreeService', function (ActionTypeTreeService) {
+.service('ActionTypeTreeModal', ['$modal', 'ActionTypeTreeService', function ($modal, ActionTypeTreeService) {
     return {
-        restrict: 'E',
-        scope: {
-            eventId: '='
-        },
-        template:
-            '<button class="btn btn-info" ng-click="pop_toggle()">Создать...</button>\
-            <div class="well popupable" style="overflow-y: auto; max-height: 400px" ng-if="popped">\
-                <input class="form-control" type="text" ng-model="query" wm-slow-change="set_filter(query)"></input>\
-                <div class="ui-treeview">\
-                    <ul ng-repeat="root in tree.children">\
-                        <li sf-treepeat="node in children of root">\
-                            <div ng-if="node.children.length" class="tree-label"\
-                            ng-class="{\'collapsed\': !subtree_shown(node.id),\
-                                        \'expanded\': subtree_shown(node.id)}"\
-                            ng-click="toggle_vis(node.id)">&nbsp;</div>\
-                            <div ng-if="!node.children.length" class="tree-label leaf">&nbsp;</div>\
-                            <a ng-href="[[ url_for_schedule_html_action ]]?action_type_id=[[ node.id ]]&event_id=[[ eventId ]]" ng-if="!node.children.length">\
-                            [ [[node.code]] ] [[ node.name ]]\
-                            </a>\
-                            <span ng-if="node.children.length">[ [[node.code]] ] [[ node.name ]]</span>\
-                            <ul ng-if="node.children.length && subtree_shown(node.id)">\
-                                <li sf-treecurse></li>\
+        open: function (at_class, event_id) {
+            return $modal.open({
+                template:
+                    '<div class="modal-header" xmlns="http://www.w3.org/1999/html">\
+                        <button type="button" class="close" ng-click="cancel()">&times;</button>\
+                        <h4 class="modal-title" id="myModalLabel">Новое действие</h4>\
+                    </div>\
+                    <div class="modal-body">\
+                        <input class="form-control" type="text" ng-model="query" wm-slow-change="set_filter(query)"></input>\
+                        <div class="ui-treeview">\
+                            <ul ng-repeat="root in tree.children">\
+                                <li sf-treepeat="node in children of root">\
+                                    <div ng-if="node.children.length" class="tree-label"\
+                                    ng-class="{\'collapsed\': !subtree_shown(node.id),\
+                                                \'expanded\': subtree_shown(node.id)}"\
+                                    ng-click="toggle_vis(node.id)">&nbsp;</div>\
+                                    <div ng-if="!node.children.length" class="tree-label leaf">&nbsp;</div>\
+                                    <a ng-href="[[ url_for_schedule_html_action ]]?action_type_id=[[ node.id ]]&event_id=[[ event_id ]]" ng-if="!node.children.length" target="_blank">\
+                                        [ [[node.code]] ] [[ node.name ]]\
+                                    </a>\
+                                    <span ng-if="node.children.length">[ [[node.code]] ] [[ node.name ]]</span>\
+                                    <ul ng-if="node.children.length && subtree_shown(node.id)">\
+                                        <li sf-treecurse></li>\
+                                    </ul>\
+                                </li>\
                             </ul>\
-                        </li>\
-                    </ul>\
-                </div>\
-            </div>',
-        link: function (scope, element, attrs) {
-            var service = ActionTypeTreeService.get(parseInt(attrs.atClass));
-            scope.query = '';
-            scope.tree = undefined;
-            scope.popped = false;
-            scope.pop_toggle = function () {
-                scope.popped = ! scope.popped;
-            };
-            scope.set_filter = function (query) {
-                scope.tree = service.filter(query);
-            };
-            scope.hidden_nodes = [];
-            scope.toggle_vis = function (node_id) {
-                if (aux.inArray(scope.hidden_nodes, node_id)) {
-                    scope.hidden_nodes.splice(scope.hidden_nodes.indexOf(node_id), 1);
-                } else {
-                    scope.hidden_nodes.push(node_id);
+                        </div>\
+                    </div>\
+                    <div class="modal-footer">\
+                        <button type="button" class="btn btn-default" ng-click="cancel()">Отмена</button>\
+                    </div>',
+                size: 'lg',
+                controller: function ($scope, $modalInstance) {
+                    var service = ActionTypeTreeService.get(at_class);
+                    $scope.event_id = event_id;
+                    $scope.query = '';
+                    $scope.tree = undefined;
+                    $scope.set_filter = function (query) {
+                        $scope.tree = service.filter(query);
+                    };
+                    $scope.hidden_nodes = [];
+                    $scope.toggle_vis = function (node_id) {
+                        if (aux.inArray($scope.hidden_nodes, node_id)) {
+                            $scope.hidden_nodes.splice($scope.hidden_nodes.indexOf(node_id), 1);
+                        } else {
+                            $scope.hidden_nodes.push(node_id);
+                        }
+                    };
+                    $scope.subtree_shown = function (node_id) {
+                        return !aux.inArray($scope.hidden_nodes, node_id);
+                    };
+                    $scope.cancel = function () {
+                        $modalInstance.dismiss('close');
+                    };
+                    $scope.set_filter($scope.query)
                 }
-            };
-            scope.subtree_shown = function (node_id) {
-                return !aux.inArray(scope.hidden_nodes, node_id);
-            };
-
-            scope.open_action = function (action_id) {
-                window.open(url_for_schedule_html_action + '?action_id=' + action_id);
-            };
+            })
         }
     }
-}]);
+}])
+;
