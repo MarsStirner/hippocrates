@@ -186,7 +186,7 @@ angular.module('formstamp', []).run(['$templateCache', function($templateCache) 
     "    <div class=\"fs-calendar-header\">\n" +
     "      <span class=\"fs-calendar-prev\" data-ng-click=\"prevYearRange()\"></span>\n" +
     "      <span class=\"fs-calendar-title\" data-ng-click=\"switchSelectionMode()\">\n" +
-    "        {{years[0]}}-{{years[years.length-1]}}\n" +
+    "        {{ years[0] }}-{{ years[years.length-1] }}\n" +
     "      </span>\n" +
     "      <span class=\"fs-calendar-next\" data-ng-click=\"nextYearRange()\"></span>\n" +
     "    </div>\n" +
