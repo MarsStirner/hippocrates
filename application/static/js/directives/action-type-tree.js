@@ -118,6 +118,7 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
                 size: 'lg',
                 controller: function ($scope, $modalInstance) {
                     var service = ActionTypeTreeService.get(at_class);
+                    $scope.url_for_schedule_html_action = url_for_schedule_html_action;
                     $scope.event_id = event_id;
                     $scope.query = '';
                     $scope.tree = undefined;
