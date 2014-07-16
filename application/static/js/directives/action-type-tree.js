@@ -15,7 +15,7 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
                     name: item[1],
                     gid:item[2],
                     code: item[3],
-                    children: item[4],
+                    children: [],
                     clone: function () {
                         return {
                             id: this.id,
@@ -28,7 +28,21 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
                 }
             })
         };
+        function is_acceptable(keywords, item) {
+            return Boolean(
+                ! item.children.length
+                    // TODO: AgeSex is acceptable
+                    // TODO: Check allowed for OrgStructure
+                    // TODO: Check allowed for Person
+                    // TODO: Check for MES
+                && keywords.filter(function (keyword) {
+                    return (item.name.toLowerCase() + ' ' + item.code.toLowerCase()).indexOf(keyword) !== -1
+                }).length == keywords.length
+            )
+        }
         self.filter = function (query) {
+            var keywords = query.toLowerCase().split(/\s+/i);
+            console.log(keywords);
             var filtered = {
                 root: {
                     id: null,
@@ -39,7 +53,7 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
                 }
             };
             angular.forEach(self.lookup, function (value, key) {
-                if (value.name.indexOf(query) != -1 || value.code.indexOf(query) != -1) {
+                if (is_acceptable(keywords, value)) {
                     filtered[key] = value.clone();
                     for (var id = value.gid; id; value = self.lookup[id], id = value.gid) {
                         if (id && !filtered.hasOwnProperty(id)) {

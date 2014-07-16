@@ -594,14 +594,23 @@ def api_atl_get():
     return jsonify(result)
 
 
+prescriptionFlatCodes = (
+    u'prescription',
+    u'infusion',
+    u'analgesia',
+    u'chemotherapy',
+)
+
+
 @cache.memoize(86400)
 def int_get_atl_flat(at_class):
-    atypes = ActionType.query.filter(ActionType.class_ == at_class, ActionType.deleted == 0, ActionType.hidden == 0)
-    at = dict((item.id, (item.name, item.group_id, item.code, set())) for item in atypes)
-    for item_id, (name, gid, code, children) in at.iteritems():
-        if gid in at:
-            at[gid][3].add(item_id)
-    return at
+    atypes = ActionType.query.filter(
+        ActionType.class_ == at_class,
+        ActionType.deleted == 0,
+        ActionType.hidden == 0,
+        ActionType.flatCode.notin_(prescriptionFlatCodes)
+    )
+    return [(item.id, item.name, item.group_id, item.code) for item in atypes]
 
 
 @module.route('/api/action-type-list-flat.json')
@@ -610,6 +619,4 @@ def api_atl_get_flat():
     if not (0 <= at_class < 4):
         return abort(401)
 
-    result = [(id_, name, gid, code, list(children)) for id_, (name, gid, code, children) in int_get_atl_flat(at_class).iteritems()]
-
-    return jsonify(result)
+    return jsonify(int_get_atl_flat(at_class))
