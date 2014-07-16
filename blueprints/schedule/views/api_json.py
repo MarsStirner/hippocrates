@@ -592,3 +592,31 @@ def api_atl_get():
     result = int_get_atl(at_class)
 
     return jsonify(result)
+
+
+prescriptionFlatCodes = (
+    u'prescription',
+    u'infusion',
+    u'analgesia',
+    u'chemotherapy',
+)
+
+
+@cache.memoize(86400)
+def int_get_atl_flat(at_class):
+    atypes = ActionType.query.filter(
+        ActionType.class_ == at_class,
+        ActionType.deleted == 0,
+        ActionType.hidden == 0,
+        ActionType.flatCode.notin_(prescriptionFlatCodes)
+    )
+    return [(item.id, item.name, item.group_id, item.code) for item in atypes]
+
+
+@module.route('/api/action-type-list-flat.json')
+def api_atl_get_flat():
+    at_class = int(request.args['at_class'])
+    if not (0 <= at_class < 4):
+        return abort(401)
+
+    return jsonify(int_get_atl_flat(at_class))
