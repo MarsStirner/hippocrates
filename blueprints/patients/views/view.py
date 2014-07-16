@@ -22,6 +22,17 @@ def index():
         abort(404)
 
 
+@module.route('/search/')
+def search():
+    session.pop('crumbs', None)
+    session_crumbs = session.setdefault('crumbs', [])
+    session_crumbs.append((request.path, u"Поиск пациентов"))
+    try:
+        return render_template('patients/servicing.html')
+    except TemplateNotFound:
+        abort(404)
+
+
 @module.route('/patient')
 @breadcrumb(u'Пациент')
 def patient():

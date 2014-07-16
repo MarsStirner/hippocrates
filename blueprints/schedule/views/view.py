@@ -38,7 +38,17 @@ def appointment():
 
 @module.route('/person_month/')
 @roles_require('clinicRegistrator')
+@breadcrumb(u'Приём пациентов')
 def person_schedule_monthview():
+    try:
+        return render_template('schedule/person_schedule_monthview.html')
+    except TemplateNotFound:
+        abort(404)
+
+
+@module.route('/doctor/')
+@roles_require('clinicDoctor')
+def doctor_schedule_day():
     try:
         return render_template('schedule/person_schedule_monthview.html')
     except TemplateNotFound:
