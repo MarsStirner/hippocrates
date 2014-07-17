@@ -147,14 +147,20 @@ class ScheduleVisualizer(object):
         CITO = 0
         extra = 0
         busy = False
+        planned_tickets = []
+        extra_tickets = []
+        CITO_tickets = []
         for ticket in schedule.tickets:
             at = ticket.attendanceType.code
             if at == 'planned':
                 planned += 1
+                planned_tickets.append(self.make_ticket(ticket))
             elif at == 'CITO':
                 CITO += 1
+                CITO_tickets.append(self.make_ticket(ticket))
             elif at == 'extra':
                 extra += 1
+                extra_tickets.append(self.make_ticket(ticket))
             if not busy and ticket.client_ticket:
                 busy = True
         return {
@@ -168,11 +174,7 @@ class ScheduleVisualizer(object):
             'endTime': schedule.endTime,
             'roa': schedule.reasonOfAbsence,
             'reception_type': safe_dict(schedule.receptionType),
-            'tickets': [
-                self.make_ticket(ticket)
-                for ticket in schedule.tickets
-                if not (self.client_id and ticket.client_ticket and ticket.client_ticket.client_id != self.client_id)
-            ]
+            'tickets': CITO_tickets + planned_tickets + extra_tickets
         }
 
     def collapse_scheds_description(self, scheds):
