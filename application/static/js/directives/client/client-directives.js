@@ -25,8 +25,8 @@ angular.module('WebMis20.directives').
                     scope.rbPolicyType = RefBookService.get('rbPolicyType');
                     scope.rbOrganisation = RefBookService.get('Organisation');
                     var cpolicy_codes = ['cmiOld', 'cmiTmp', 'cmiCommonPaper', 'cmiCommonElectron',
-                        'cmiUEC', 'cmiFnkcIndustrial', 'cmiFnkcLocal', '1', '2'];
-                    var vpolicy_codes = ['vmi', '3'];
+                        'cmiUEC', 'cmiFnkcIndustrial', 'cmiFnkcLocal'];
+                    var vpolicy_codes = ['vmi'];
                     scope.filter_policy = function(type) {
                         return function(elem) {
                             var codes;
