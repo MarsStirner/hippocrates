@@ -1,0 +1,31 @@
+{% extends 'schedule/base.html' %}
+{% block title %}> {{ module_name }}{% endblock %}
+
+{% block main %}
+    <div ng-controller="ScheduleDayCtrl">
+        <div class="col-md-2">
+            <div class="well">
+                <datepicker ng-model="date" show-weeks="false" ng-change="dateChanged();"></datepicker>
+            </div>
+            <div class="well-sm alert alert-info" ng-if="schedules[0].scheds">
+                <strong>График работы:</strong>
+                <ul class="list-unstyled novmargin">
+                    <li ng-repeat="schedule in schedules[0].scheds"><small class="glyphicon" ng-class="{'glyphicon-plus': (schedule.reception_type.code == 'amb'), 'glyphicon-home': (schedule.reception_type.code == 'home')}"></small> [[ (schedules[0].date + ' ' + schedule.begTime|asTime) | asTime ]] - [[ (schedules[0].date + ' ' + schedule.endTime) | asTime ]] <span class="text-muted" ng-if="schedule.office">каб. [[schedule.office.code]]</span></li>
+                </ul>
+            </div>
+            <p ng-repeat="schedule in schedules[0].scheds">
+                <button ng-repeat="ticket in schedule.tickets" ui-schedule-ticket="ticket" day="schedules[0].date" show-name="true"></button>
+            </p>
+        </div>
+        <div class="col-md-10">
+        {% include "_breadcrumbs.html" %}
+            <div ng-show="client">
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block modules_js %}
+    {{ super() }}
+
+    <script src="{{ url_for('.static', filename='js/schedule_day.js', v=version) }}"></script>
+{% endblock %}

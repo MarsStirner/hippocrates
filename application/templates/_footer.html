@@ -41,6 +41,7 @@
         url_schedule_api_schedule_lock = '{{ url_for('schedule.api_schedule_lock') }}',
         url_schedule_api_html_day_free = '{{ url_for('schedule.html_day_free') }}',
         url_schedule_all_persons_tree = '{{ url_for('schedule.api_all_persons_tree') }}',
+        url_schedule_api_day_schedule = '{{ url_for('schedule.api_day_schedule') }}',
         current_user = {{ current_user.export_js() | tojson | safe }},
         current_user_id = {{ current_user.id|default('undefined') }};
 </script>

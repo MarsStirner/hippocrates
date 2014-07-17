@@ -102,6 +102,22 @@ def api_schedule_description():
     return jsonify(context.make_person_schedule_description(person, start_date, end_date))
 
 
+@module.route('/api/day_schedule.json', methods=['GET'])
+def api_day_schedule():
+    person_id = parse_id(request.args, 'person_id')
+    if person_id is False:
+        return abort(400)
+    try:
+        start_date = datetime.datetime.strptime(request.args.get('start_date'), '%Y-%m-%d').date()
+        end_date = start_date + datetime.timedelta(days=1)
+    except ValueError:
+        return abort(400)
+
+    context = ScheduleVisualizer()
+    person = Person.query.get(person_id)
+    return jsonify(context.make_person_schedule_description(person, start_date, end_date))
+
+
 @module.route('/api/schedule-description.json', methods=['POST'])
 def api_schedule_description_post():
     # TODO: validations
