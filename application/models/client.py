@@ -153,7 +153,7 @@ class Client(db.Model):
         @type moment: datetime.datetime
         """
         if not moment:
-            moment = datetime.datetime.now()
+            moment = datetime.date.today()
         return calcAgeTuple(self.birthDate, moment)
 
     @property
@@ -250,6 +250,8 @@ class Client(db.Model):
             'snils': self.SNILS,
             'full_name': self.nameText,
             'notes': self.notes,
+            'age_tuple': self.age_tuple(),
+            'sex_raw': self.sexCode
         }
 
 

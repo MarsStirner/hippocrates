@@ -750,6 +750,16 @@ var aux = {
     inArray: function (array, item) {
         return array.indexOf(item) !== -1;
     },
+    any_in: function (what, where) {
+        for (var i = what.length-1; i >= 0; i--) {
+            for (var j = where.length-1; j >= 0; j--) {
+                if (what[i] == what[j]) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    },
     removeFromArray: function (array, item) {
         if (aux.inArray(array, item))
             array.splice(array.indexOf(item), 1)
