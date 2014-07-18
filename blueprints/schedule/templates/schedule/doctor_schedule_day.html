@@ -21,6 +21,12 @@
         {% include "_breadcrumbs.html" %}
             <div ng-if="client">
                 <legend xmlns="http://www.w3.org/1999/html">
+                    <div class="pull-right" ng-if="client.info.full_name">
+                        <button class="btn btn-sm btn-primary" ng-click="new_appointment(ticket.record.client_id)" title="Записать на приём"><span class="glyphicon glyphicon-tag"></span></button>
+                        <button class="btn btn-sm btn-primary" ng-if="!ticket.record.event_id" ng-click="new_event(client.id, ticket.record.id)" title="Создать обращение"><span class="glyphicon glyphicon-plus"></span></button>
+                        <button class="btn btn-sm btn-primary" ng-if="ticket.record.event_id" ng-click="open_event(ticket.record.event_id)" title="Открыть обращение #[[icket.record.event_id]]"><span class="glyphicon glyphicon-pencil"></span></button>
+                        <ui-print-button ps="ps_amb" class="btn-sm" resolve="ps_amb_resolve(ticket.record.client_id, ticket.record.id)"></ui-print-button>
+                    </div>
                     <h2>[[ client.info.full_name ]] <small ng-if="client.info.full_name">(запись на [[ticket.begDateTime|asTime]])</small></h2>
                 </legend>
                 <div class="well well-sm">

@@ -5,7 +5,7 @@ from jinja2 import TemplateNotFound
 
 from application.models.client import Client
 from blueprints.patients.app import module
-from application.lib.utils import breadcrumb, parse_id
+from application.lib.utils import breadcrumb, parse_id, roles_require
 
 # noinspection PyUnresolvedReferences
 from . import api_html, api_json
@@ -35,6 +35,7 @@ def search():
 
 @module.route('/patient')
 @breadcrumb(u'Пациент')
+@roles_require('clinicRegistrator')
 def patient():
     client_id = parse_id(request.args, 'client_id')
     if client_id is False:
