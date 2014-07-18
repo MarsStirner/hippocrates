@@ -678,7 +678,7 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, P
     };
 
     $scope.open_action_tree = function (at_class) {
-        ActionTypeTreeModal.open(at_class, $scope.event_id);
+        ActionTypeTreeModal.open(at_class, $scope.event_id, $scope.event.info.client.info);
     };
 
     $scope.save_event = function (close_event) {
