@@ -5,7 +5,7 @@
                 <div>
                     <a class="btn navbar-btn {% if request.endpoint == 'index' %}active btn-info{% else %}btn-default{% endif %}" href="/" title="Главная страница"><span class="glyphicon glyphicon-home"></span></a>
                     {%- for item in main_menu -%}
-                        {% if not item.roles or current_user.role_in(item.roles) %}
+                        {% if not item.roles or (current_user.roles and current_user.role_in(item.roles)) %}
                         <a class="btn navbar-btn {% if request.endpoint == item.link %}active btn-info{% else %}btn-default{% endif %}" href="{{ url_for(item.link) }}" title="{{ item.title }}">{{ item.title }}</a>
                         {% endif %}
                     {%- endfor -%}

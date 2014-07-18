@@ -23,7 +23,7 @@ angular.module('WebMis20.services', []).
                     t.compulsory_policies = cpol !== null ? [cpol] : [];
                     t.voluntary_policies = data.result.client_data.voluntary_policies;
 
-                    if (info_type === undefined) {
+                    if (info_type === undefined || info_type == 'for_event') {
                         var reg_addr = data.result.client_data.reg_address;
                         t.reg_addresses = reg_addr !== null ? [reg_addr] : [];
                         var live_addr = data.result.client_data.live_address;
@@ -50,6 +50,7 @@ angular.module('WebMis20.services', []).
                             return status.ss_class.code == 4;
                         });
                         t.contacts = data.result.client_data.contacts;
+                        t.phones = data.result.client_data.phones;
                         t.relations = data.result.client_data.relations;
                         t.document_history = data.result.client_data.document_history;
 
@@ -480,7 +481,7 @@ angular.module('WebMis20.services', []).
                 this.event_id = parseInt(event_id);
                 this.client_id = client_id;
                 this.ticket_id = ticket_id;
-                this.info = null;
+                this.info = null;  //TODO: в качестве info.client заиспользовать WMClient?
                 this.payment = null;
                 this.diagnoses = [];
                 this.services = [];

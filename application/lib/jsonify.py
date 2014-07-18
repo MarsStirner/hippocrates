@@ -303,6 +303,7 @@ class ClientVisualizer(object):
             'soc_statuses': client.soc_statuses,
             'relations': relations,
             'contacts': client.contacts.all(),
+            'phones': client.phones,
             'document_history': document_history,
             # 'identifications': identifications,
         }

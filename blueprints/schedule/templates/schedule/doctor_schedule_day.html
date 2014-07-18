@@ -8,18 +8,46 @@
                 <datepicker ng-model="date" show-weeks="false" ng-change="dateChanged();"></datepicker>
             </div>
             <div class="well-sm alert alert-info" ng-if="schedules[0].scheds">
-                <strong>График работы:</strong>
+                <a href="{{ url_for('schedule.index', person_id=current_user.id) }}" target="_blank" class="pull-right" title="Посмотреть полный график"><h4 class="glyphicon glyphicon-calendar novmargin"></h4></a>
                 <ul class="list-unstyled novmargin">
-                    <li ng-repeat="schedule in schedules[0].scheds"><small class="glyphicon" ng-class="{'glyphicon-plus': (schedule.reception_type.code == 'amb'), 'glyphicon-home': (schedule.reception_type.code == 'home')}"></small> [[ (schedules[0].date + ' ' + schedule.begTime|asTime) | asTime ]] - [[ (schedules[0].date + ' ' + schedule.endTime) | asTime ]] <span class="text-muted" ng-if="schedule.office">каб. [[schedule.office.code]]</span></li>
+                    <li ng-repeat="schedule in schedules[0].scheds" title="[[schedule.reception_type.name]]"><small class="glyphicon" ng-class="{'glyphicon-plus': (schedule.reception_type.code == 'amb'), 'glyphicon-home': (schedule.reception_type.code == 'home')}"></small> [[ (schedules[0].date + ' ' + schedule.begTime|asTime) | asTime ]] - [[ (schedules[0].date + ' ' + schedule.endTime) | asTime ]] <small class="text-danger" ng-if="schedule.office">каб. [[schedule.office.code]]</small></li>
                 </ul>
             </div>
             <p ng-repeat="schedule in schedules[0].scheds">
-                <button ng-repeat="ticket in schedule.tickets" ui-schedule-ticket="ticket" day="schedules[0].date" show-name="true"></button>
+                <button ng-repeat="ticket in schedule.tickets" ng-if="schedule.reception_type.code=='amb'" ui-schedule-ticket="ticket" day="schedules[0].date" show-name="true" ng-click="ticket_choose(ticket);"></button>
             </p>
         </div>
         <div class="col-md-10">
         {% include "_breadcrumbs.html" %}
-            <div ng-show="client">
+            <div ng-if="client">
+                <legend xmlns="http://www.w3.org/1999/html">
+                    <h2>[[ client.info.full_name ]] <small ng-if="client.info.full_name">(запись на [[ticket.begDateTime|asTime]])</small></h2>
+                </legend>
+                <div class="well well-sm">
+                    <div class="row">
+                        <div class="col-md-9">
+                            <dl class="dl-horizontal novmargin">
+                                <dt ng-if="client.phones.length">Контакты:</dt><dd ng-init="showAllPhones=false"><span ng-repeat="phone in client.phones" ng-show="$first || showAllPhones"> [[phone]]</span> <a href="javascript:void(0);" ng-show="client.phones.length && !showAllPhones" ng-click="showAllPhones = !showAllPhones">[ещё]</a><a href="javascript:void(0);" ng-show="client.phones.length && showAllPhones" ng-click="showAllPhones = !showAllPhones">[скрыть]</a></dd>
+                                <dt>Адрес регистрации:</dt><dd>[[client.reg_addresses ? client.reg_addresses[0].text_summary : '']]&nbsp;</dd>
+                                <dt>Адрес проживания:</dt><dd>[[client.live_addresses ? client.live_addresses[0].text_summary : '']]&nbsp;</dd>
+                                <dt>Документ:</dt><dd>[[client.id_docs ? client.id_docs[0].doc_text : '']]&nbsp;</dd>
+                                <dt>Медицинский полис:</dt><dd ng-repeat="policy_text in client.policies">[[policy_text]]</dd>
+                            </dl>
+                        </div>
+                        <div class="col-md-3">
+                            <dl class="dl-horizontal novmargin pull-right">
+                                <dt>Код пациента:</dt><dd>[[client.info.id]]&nbsp;</dd>
+                                <dt>Дата рождения:</dt><dd>[[client.info.birth_date|asDate]]&nbsp;</dd>
+                                <dt>Возраст:</dt><dd>[[client.age]]&nbsp;</dd>
+                                <dt>Пол:</dt><dd>[[client.info.sex.name]]&nbsp;</dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+                <tabset>
+                    <tab heading="Предварительные записи">{% include "patients/_appointments.html" %}</tab>
+                    <tab heading="Обращения">{% include "patients/_event_list.html" %}</tab>
+                </tabset>
             </div>
         </div>
     </div>
