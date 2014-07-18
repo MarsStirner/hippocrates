@@ -160,8 +160,8 @@ def add_or_update_address(client, data):
     if addr_id:
         client_addr = ClientAddress.query.get(addr_id)
 
-        if client_addr.address and client_addr.address.house and\
-                (client_addr.address.house.KLADRCode and client_addr.address.house.KLADRStreetCode):
+        #TODO: проверить еще раз условие (client_addr.address.house.KLADRCode and client_addr.address.house.KLADRStreetCode)
+        if client_addr.address and client_addr.address.house:
             if free_input:
                 raise ClientSaveException(msg_err, u'попытка сохранения адреса в свободном виде для '
                                           u'записи адреса из справочника адресов. Добавьте новую запись адреса.')
