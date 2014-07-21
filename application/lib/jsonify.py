@@ -147,14 +147,20 @@ class ScheduleVisualizer(object):
         CITO = 0
         extra = 0
         busy = False
+        planned_tickets = []
+        extra_tickets = []
+        CITO_tickets = []
         for ticket in schedule.tickets:
             at = ticket.attendanceType.code
             if at == 'planned':
                 planned += 1
+                planned_tickets.append(self.make_ticket(ticket))
             elif at == 'CITO':
                 CITO += 1
+                CITO_tickets.append(self.make_ticket(ticket))
             elif at == 'extra':
                 extra += 1
+                extra_tickets.append(self.make_ticket(ticket))
             if not busy and ticket.client_ticket:
                 busy = True
         return {
@@ -167,7 +173,8 @@ class ScheduleVisualizer(object):
             'begTime': schedule.begTime,
             'endTime': schedule.endTime,
             'roa': schedule.reasonOfAbsence,
-            'reception_type': safe_dict(schedule.receptionType)
+            'reception_type': safe_dict(schedule.receptionType),
+            'tickets': CITO_tickets + planned_tickets + extra_tickets
         }
 
     def collapse_scheds_description(self, scheds):
@@ -190,12 +197,7 @@ class ScheduleVisualizer(object):
             info_rt['planned'] += sub_sched['planned']
             info_rt['CITO'] += sub_sched['CITO']
             info_rt['extra'] += sub_sched['extra']
-            sub_scheds.append({
-                'begTime': sub_sched['begTime'],
-                'endTime': sub_sched['endTime'],
-                'office': sub_sched['office'],
-                'reception_type': rec_type
-            })
+            sub_scheds.append(sub_sched)
         return {
             'scheds': sub_scheds if not roa else [],
             'info': info,
@@ -223,11 +225,13 @@ class ScheduleVisualizer(object):
         return result
 
     def make_person_schedule_description(self, person, start_date, end_date):
-        schedules_by_date = Schedule.query.filter(
-            Schedule.person_id == person.id,
-            start_date <= Schedule.date, Schedule.date < end_date,
-            Schedule.deleted == 0
-        ).order_by(Schedule.date).order_by(Schedule.begTime).all()
+        schedules_by_date = (Schedule.query.join(Schedule.tickets)
+                             .filter(Schedule.person_id == person.id,
+                                     start_date <= Schedule.date, Schedule.date < end_date,
+                                     Schedule.deleted == 0)
+                             .order_by(Schedule.date)
+                             .order_by(Schedule.begTime)
+                             .options(db.contains_eager(Schedule.tickets).contains_eager('schedule')))
         return {
             'person': self.make_person(person),
             'schedules': self.make_schedule_description(schedules_by_date, start_date, end_date)
@@ -299,6 +303,7 @@ class ClientVisualizer(object):
             'soc_statuses': client.soc_statuses,
             'relations': relations,
             'contacts': client.contacts.all(),
+            'phones': client.phones,
             'document_history': document_history,
             # 'identifications': identifications,
         }

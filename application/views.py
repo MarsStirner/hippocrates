@@ -176,7 +176,7 @@ def kladr_street(code=None):
 def authorisation_failed(e):
     if request_wants_json():
         return jsonify(unicode(e), result_code=403, result_name=u'Forbidden')
-    flash(u'У вас недостаточно привилегий для доступа к функционалу')
+    flash(u'У вас недостаточно прав для доступа к функционалу')
     return render_template('user/denied.html'), 403
 
 
