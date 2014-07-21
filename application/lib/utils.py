@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import datetime
 import functools
-from flask import json, session
+from flask import json, session, make_response
 import uuid
 from functools import wraps
 from decimal import Decimal
@@ -172,53 +172,60 @@ class WebMisJsonEncoder(json.JSONEncoder):
 app.json_encoder = WebMisJsonEncoder
 
 
-def jsonify(obj, result_code=200, result_name='OK', extra_headers=None):
-    """Creates a :class:`~flask.Response` with the JSON representation of
-    the given arguments with an `application/json` mimetype.  The arguments
-    to this function are the same as to the :class:`dict` constructor.
-
-    Example usage::
-
-        from flask import jsonify
-
-        @app.route('/_get_current_user')
-        def get_current_user():
-            return jsonify(username=g.user.username,
-                           email=g.user.email,
-                           id=g.user.id)
-
-    This will send a JSON response like this to the browser::
-
-        {
-            "username": "admin",
-            "email": "admin@localhost",
-            "id": 42
-        }
-
-    For security reasons only objects are supported toplevel.  For more
-    information about this, have a look at :ref:`json-security`.
-
-    This function's response will be pretty printed if it was not requested
-    with ``X-Requested-With: XMLHttpRequest`` to simplify debugging unless
-    the ``JSONIFY_PRETTYPRINT_REGULAR`` config parameter is set to false.
-
-    .. versionadded:: 0.2
+def jsonify_int(obj, result_code=200, result_name='OK', indent=None):
     """
-    indent = 2
+    Преобразование объекта к стандартному json-ответу с данными и метаданными без формирования http-ответа
+    :param obj: сериализуемый объект
+    :param result_code: код результата
+    :param result_name: наименование результата
+    :return: json-строка
+    :type obj: any
+    :type result_code: int
+    :type result_name: str|unicode
+    :rtype: str
+    """
+    return json.dumps({
+        'result': obj,
+        'meta': {
+            'code': result_code,
+            'name': result_name,
+        }
+    }, indent=indent, cls=WebMisJsonEncoder, encoding='utf-8', ensure_ascii=False)
+
+
+def jsonify_response(body, result_code=200, extra_headers=None):
+    """
+    Формирование http-ответа из json-ифицированного тела
+    :param body: json-ифицированное тело (jsonify_int)
+    :param result_code: http-код результата
+    :param extra_headers: дополнительные http-заголовки
+    :return: flask response
+    :type body: str
+    :type result_code: int
+    :type extra_headers: list
+    :rtype: flask.wrappers.Response
+    """
     headers = [('content-type', 'application/json; charset=utf-8')]
     if extra_headers:
         headers.extend(extra_headers)
-    return (
-        json.dumps({
-            'result': obj,
-            'meta': {
-                'code': result_code,
-                'name': result_name,
-            }
-        }, indent=indent, cls=WebMisJsonEncoder, encoding='utf-8', ensure_ascii=False),
-        result_code,
-        headers
-    )
+    return make_response((body, result_code, headers))
+
+
+def jsonify(obj, result_code=200, result_name='OK', extra_headers=None, indent=None):
+    """
+    Convenience-функция, преобразуцющая объект к стандартному http-json-ответу
+    :param obj: сериализуемый объект
+    :param result_code: код результата, http-код
+    :param result_name: наименование результата
+    :param extra_headers: дополнительные заголовки
+    :return: flask response
+    :type obj: any
+    :type result_code: int
+    :type result_name: str|unicode
+    :type extra_headers: list
+    :rtype: flask.wrappers.Response
+    """
+    return jsonify_response(jsonify_int(obj, result_code, result_name, indent), result_code, extra_headers)
 
 
 def safe_unicode(obj):

@@ -15,7 +15,7 @@ class User(UserMixin):
                                   for key, value in person.__dict__.iteritems()
                                   if not callable(value) and not key.startswith('__')))
         self.roles = list()
-        self.current_role = None
+        self._current_role = None
         self.rights = dict()
         self.post = dict()
         if person.post:
@@ -23,6 +23,31 @@ class User(UserMixin):
                              for key, value in person.post.__dict__.iteritems()
                              if not callable(value) and not key.startswith('__')))
         self.set_roles_rights(person)
+
+        orgStructure = person.OrgStructure
+        atos = set()
+        while orgStructure:
+            atos.add(orgStructure.id)
+            orgStructure = orgStructure.parent if orgStructure.inheritActionTypes else None
+        self.action_type_org_structures = atos
+        self.action_type_personally = []
+
+    @property
+    def current_role(self):
+        return self._current_role
+
+    @current_role.setter
+    def current_role(self, value):
+        self._current_role = value
+        from ..models.actions import ActionType_User
+        from ..models.exists import rbUserProfile
+        self.action_type_personally = [
+            record.actionType_id
+            for record in ActionType_User.query.outerjoin(rbUserProfile).filter(db.or_(
+                ActionType_User.person_id == self.id,
+                rbUserProfile.code == value
+            ))
+        ]
 
     def is_active(self):
         return self.deleted == 0
@@ -62,6 +87,8 @@ class User(UserMixin):
             'is_admin': self.is_admin(),
             'current_role': self.current_role,
             'rights': self.rights,
+            'action_type_org_structures': sorted(self.action_type_org_structures),
+            'action_type_personally': sorted(self.action_type_personally),
         }
 
 class AnonymousUser(AnonymousUserMixin):

@@ -608,3 +608,43 @@ def api_atl_get():
     result = int_get_atl(at_class)
 
     return jsonify(result)
+
+
+prescriptionFlatCodes = (
+    u'prescription',
+    u'infusion',
+    u'analgesia',
+    u'chemotherapy',
+)
+
+
+@cache.memoize(86400)
+def int_get_atl_flat(at_class):
+    from application.lib.agesex import parseAgeSelector
+
+    def schwing(t):
+        t = list(t)
+        t[5] = list(parseAgeSelector(t[7]))
+        t[7] = t[7].split() if t[7] else None
+        return t
+
+    raw = db.text(
+        ur'''SELECT
+            ActionType.id, ActionType.name, ActionType.code, ActionType.flatCode, ActionType.group_id,
+            ActionType.age, ActionType.sex,
+            GROUP_CONCAT(OrgStructure_ActionType.master_id SEPARATOR ' ')
+            FROM ActionType
+            LEFT JOIN OrgStructure_ActionType ON OrgStructure_ActionType.actionType_id = ActionType.id
+            WHERE ActionType.class = {at_class} AND ActionType.deleted = 0 AND ActionType.hidden = 0
+            GROUP BY ActionType.id'''.format(at_class=at_class))
+        # This was goddamn unsafe, but I can't get it working other way
+    return map(schwing, db.session.execute(raw))
+
+
+@module.route('/api/action-type-list-flat.json')
+def api_atl_get_flat():
+    at_class = int(request.args['at_class'])
+    if not (0 <= at_class < 4):
+        return abort(401)
+
+    return jsonify(int_get_atl_flat(at_class))
