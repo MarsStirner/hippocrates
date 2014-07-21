@@ -1,6 +1,7 @@
-var ScheduleDayCtrl = function ($scope, $http, $modal, $filter, WMClient, PrintingService, $interval) {
+var ScheduleDayCtrl = function ($scope, $http, $modal, $filter, WMClient, PrintingService, $interval, WMAppointmentDialog) {
     $scope.client_id = null;
     $scope.client = null;
+//    $scope.show_past_tickets = false;
     $scope.today = function () {
         $scope.date = new Date();
     };
@@ -17,6 +18,8 @@ var ScheduleDayCtrl = function ($scope, $http, $modal, $filter, WMClient, Printi
             }
         ).success(function (data) {
                 $scope.schedules = data.result.schedules;
+                $scope.person = data.result.person;
+                $scope.show_past_tickets = false;
             });
     };
 
@@ -25,6 +28,10 @@ var ScheduleDayCtrl = function ($scope, $http, $modal, $filter, WMClient, Printi
     };
 
     $scope.dateChanged();
+
+    $scope.show_time = function (date_time) {
+        return moment(date_time).isAfter(moment().subtract(1, 'hours'));
+    };
 
     $scope.ticket_choose = function (ticket) {
         if (ticket.record && ticket.record.client_id) {
@@ -47,9 +54,18 @@ var ScheduleDayCtrl = function ($scope, $http, $modal, $filter, WMClient, Printi
                     }
                 });
             $scope.client.reload('for_servicing');
+        } else if ($scope.client) {
+            var instance;
+            if (ticket.status != 'busy') {
+                instance = WMAppointmentDialog.make(ticket, $scope.person, $scope.client.info.id, $scope.client.info.full_name);
+            }
+            instance.result.then(function () {
+                $scope.client.reload('for_servicing');
+            })
         }
     };
     $scope.ps_amb = new PrintingService('preliminary_records');
+    $scope.ps_amb.set_context('orderAmb');
     $scope.ps_amb_resolve = function (client_id, ticket_id) {
         return {
             client_id: client_id,
@@ -65,8 +81,8 @@ var ScheduleDayCtrl = function ($scope, $http, $modal, $filter, WMClient, Printi
         $scope.child_window = window.open(url_event_new_event_html + query, '_blank');
     };
 
-    $scope.open_event = function(event_id) {
-        $scope.child_window = window.open(url_for_event_html_event_info + '?event_id=' + event_id, '_blank');
+    $scope.open_event = function(event) {
+        $scope.child_window = window.open(url_for_event_html_event_info + '?event_id=' + event.id, '_blank');
     };
 
     $scope.new_appointment = function(client_id) {
@@ -92,4 +108,4 @@ var ScheduleDayCtrl = function ($scope, $http, $modal, $filter, WMClient, Printi
         }
     });
 };
-WebMis20.controller('ScheduleDayCtrl', ['$scope', '$http', '$modal', '$filter', 'WMClient', 'PrintingService', '$interval', ScheduleDayCtrl]);
+WebMis20.controller('ScheduleDayCtrl', ['$scope', '$http', '$modal', '$filter', 'WMClient', 'PrintingService', '$interval', 'WMAppointmentDialog', ScheduleDayCtrl]);

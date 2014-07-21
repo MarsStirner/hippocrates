@@ -19,8 +19,10 @@
             <caption>
                 <span ng-if="results.length > 0">Результаты поиска</span>
                 <span ng-if="results.length === 0 && query">Нет результатов</span>
+                {% if current_user.role_in(('rRegistartor', 'clinicRegistrator')) %}
                 <button ng-click="open_client('new');" class="btn btn-primary pull-right"
                         ng-show="!results.length">Зарегистрировать пациента</button>
+                {% endif %}
             </caption>
             <thead ng-if="results.length > 0">
             <tr>

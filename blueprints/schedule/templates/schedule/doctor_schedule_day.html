@@ -14,7 +14,8 @@
                 </ul>
             </div>
             <p ng-repeat="schedule in schedules[0].scheds">
-                <button ng-repeat="ticket in schedule.tickets" ng-if="schedule.reception_type.code=='amb'" ui-schedule-ticket="ticket" day="schedules[0].date" show-name="true" ng-click="ticket_choose(ticket);"></button>
+                <legend><a href="javascript:;" title="Показать/скрыть прошедшие записи" class="pull-right small" ng-click="show_past_tickets=!show_past_tickets"><span class="glyphicon" ng-class="{'glyphicon-resize-full': !show_past_tickets, 'glyphicon-resize-small': show_past_tickets}"></span></a><small>[[schedule.reception_type.name]]: [[ (schedules[0].date + ' ' + schedule.begTime|asTime) | asTime ]] - [[ (schedules[0].date + ' ' + schedule.endTime) | asTime ]]</small></legend>
+                <button ng-repeat="ticket in schedule.tickets" ui-schedule-ticket="ticket" day="schedules[0].date" show-name="true" ng-click="ticket_choose(ticket);" ng-show="show_past_tickets || ticket.attendance_type.code == 'CITO' || ticket.attendance_type.code == 'extra' || show_time(ticket.begDateTime)"></button>
             </p>
         </div>
         <div class="col-md-10">
@@ -23,7 +24,7 @@
                 <legend xmlns="http://www.w3.org/1999/html">
                     <div class="pull-right" ng-if="client.info.full_name">
                         <button class="btn btn-sm btn-primary" ng-click="new_appointment(ticket.record.client_id)" title="Записать на приём"><span class="glyphicon glyphicon-tag"></span></button>
-                        <button class="btn btn-sm btn-primary" ng-if="!ticket.record.event_id" ng-click="new_event(client.id, ticket.record.id)" title="Создать обращение"><span class="glyphicon glyphicon-plus"></span></button>
+                        <button class="btn btn-sm btn-primary" ng-if="!ticket.record.event_id" ng-click="new_event(client.info.id, ticket.record.id)" title="Создать обращение"><span class="glyphicon glyphicon-plus"></span></button>
                         <button class="btn btn-sm btn-primary" ng-if="ticket.record.event_id" ng-click="open_event(ticket.record.event_id)" title="Открыть обращение #[[icket.record.event_id]]"><span class="glyphicon glyphicon-pencil"></span></button>
                         <ui-print-button ps="ps_amb" class="btn-sm" resolve="ps_amb_resolve(ticket.record.client_id, ticket.record.id)"></ui-print-button>
                     </div>
@@ -60,6 +61,5 @@
 {% endblock %}
 {% block modules_js %}
     {{ super() }}
-
     <script src="{{ url_for('.static', filename='js/schedule_day.js', v=version) }}"></script>
 {% endblock %}
