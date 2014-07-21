@@ -949,7 +949,13 @@ class ClientPolicy(db.Model):
             'number': self.number,
             'beg_date': self.begDate,
             'end_date': self.endDate,
-            'insurer': self.insurer,
+            'insurer': self.insurer if self.insurer else {
+                'id': None,
+                'full_name': self.name,
+                'short_name': self.name,
+                'infis': None,
+                'title': None
+            },
             'policy_text': self.__unicode__()
         }
 

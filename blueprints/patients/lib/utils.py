@@ -238,8 +238,8 @@ def add_or_update_policy(client, data):
     if not beg_date:
         raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Дата выдачи')
     end_date = safe_date(data.get('end_date'))
-    insurer = safe_traverse(data, 'insurer', 'id')
-    if not insurer:
+    insurer = data['insurer']
+    if not (insurer['id'] or insurer['full_name']):
         raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Страховая медицинская организация')
     deleted = data.get('deleted', 0)
 
@@ -250,7 +250,8 @@ def add_or_update_policy(client, data):
         policy.number = number
         policy.begDate = beg_date
         policy.endDate = end_date
-        policy.insurer_id = insurer
+        policy.insurer_id = insurer['id']
+        policy.name = insurer['full_name'] if not insurer['id'] else None
         policy.client = client
         policy.deleted = deleted
     else:
