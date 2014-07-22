@@ -78,7 +78,11 @@ WebMis20.controller('PersonTree', ['$scope', '$http', function($scope, $http) {
         })
     };
     $scope.selection_change = function (person) {
-        var user_selected = [];
+        var user_selected = $scope.user_selected;
+        var index = user_selected.indexOf(person.id);
+        if (index > -1) {
+            user_selected.splice(index, 1);
+        }
         $scope.tree.map(function (spec_group) {
             spec_group.persons.filter(function (person) {
                 return person.checked;
