@@ -32,6 +32,7 @@ def api_search_clients():
         return abort(404)
 
     base_query = Client.query
+    id_list = []
 
     if query_string:
         result = SearchPatient.search(query_string)
@@ -40,7 +41,7 @@ def api_search_clients():
             base_query = base_query.filter(Client.id.in_(id_list))
         else:
             return jsonify([])
-    clients = base_query.order_by(Client.lastName, Client.firstName, Client.patrName, Client.SNILS).limit(100).all()
+    clients = base_query.order_by(db.func.field(Client.id, *id_list)).limit(100).all()
     context = ClientVisualizer()
     if 'short' in request.args:
         return jsonify(map(context.make_short_client_info, clients))

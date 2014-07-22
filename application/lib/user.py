@@ -28,7 +28,7 @@ class User(UserMixin):
         return self.deleted == 0
 
     def is_admin(self):
-        return self.current_role == 'admin'
+        return getattr(self, 'current_role', None) == 'admin'
 
     def role_in(self, roles):
         if not isinstance(roles, (list, tuple)):

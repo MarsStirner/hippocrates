@@ -29,6 +29,13 @@ class SearchPatient():
     def search(name):
         search = Search(indexes=['patient'], config=SearchConfig)
         search = search.match(name).limit(0, 100)
+        search = search.options(field_weights={'code': 100,
+                                               'lastName': 90,
+                                               'firstName': 80,
+                                               'patrName': 70,
+                                               'SNILS': 60,
+                                               'document': 60,
+                                               'policy': 60})
         result = search.ask()
         return result
 
