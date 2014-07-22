@@ -528,3 +528,7 @@ div.toc-affix {
 .modal-lg{
     width: 70%;
 }
+mark, .mark {
+    background-color: #fcf8e3;
+    padding: 0.2em 0;
+}

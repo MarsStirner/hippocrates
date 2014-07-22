@@ -17,7 +17,7 @@
             <div class="row">
                 <div class="col-md-9">
                     <dl class="dl-horizontal novmargin">
-                        <dt ng-if="event.info.client.phones.length">Контактный телефон:</dt><dd ng-init="showAllPhones=false"><span ng-repeat="phone in event.info.client.phones" ng-show="$first || showAllPhones"> [[phone]]</span> <a href="javascript:void(0);" ng-show="event.info.client.phones.length && !showAllPhones" ng-click="showAllPhones = !showAllPhones">[ещё]</a><a href="javascript:void(0);" ng-show="event.info.client.phones.length && showAllPhones" ng-click="showAllPhones = !showAllPhones">[скрыть]</a></dd>
+                        <dt ng-if="event.info.client.phones.length">Контакты:</dt><dd ng-init="showAllPhones=false"><span ng-repeat="phone in event.info.client.phones" ng-show="$first || showAllPhones"> [[phone]]</span> <a href="javascript:void(0);" ng-show="event.info.client.phones.length && !showAllPhones" ng-click="showAllPhones = !showAllPhones">[ещё]</a><a href="javascript:void(0);" ng-show="event.info.client.phones.length && showAllPhones" ng-click="showAllPhones = !showAllPhones">[скрыть]</a></dd>
                         <dt>Адрес регистрации:</dt><dd>[[event.info.client.reg_address ? event.info.client.reg_address.text_summary : '']]&nbsp;</dd>
                         <dt>Адрес проживания:</dt><dd>[[event.info.client.live_address ? event.info.client.live_address.text_summary : '']]&nbsp;</dd>
                         <dt>Документ:</dt><dd>[[event.info.client.id_document ? event.info.client.id_document.doc_text : '']]&nbsp;</dd>
