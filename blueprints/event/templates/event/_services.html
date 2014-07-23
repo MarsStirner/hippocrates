@@ -1,115 +1,117 @@
 <div ng-controller="EventServicesCtrl">
-<legend id="services">Услуги</legend>
-<div class="panel panel-default">
-<div class="panel-body">
-    <form role="form">
-        <div class="form-group">
-            <div class="input-group">
-                <span class="input-group-addon"><span class="glyphicon glyphicon-search"></span></span>
-                <input type="text" id="service_search" name="service_search" class="form-control"
-                       autocomplete="off" placeholder="Введите код или наименование услуги"
-                       ng-change="search_processed=false" ng-model="query" wm-slow-change="perform_search(query)">
-                <span class="input-group-btn">
-                    <button class="btn btn-danger" ng-click="query_clear()" title="Очистить поле">
-                        <span class="glyphicon glyphicon-remove"></span>
-                    </button>
-                </span>
+<ng-form name="eventServicesForm" role="form"toc-element="Услуги" toc-name="tocEventForm">
+    <legend id="services">Услуги</legend>
+    <div class="panel panel-default">
+    <div class="panel-body">
+        <form role="form">
+            <div class="form-group">
+                <div class="input-group">
+                    <span class="input-group-addon"><span class="glyphicon glyphicon-search"></span></span>
+                    <input type="text" id="service_search" name="service_search" class="form-control"
+                           autocomplete="off" placeholder="Введите код или наименование услуги"
+                           ng-change="search_processed=false" ng-model="query" wm-slow-change="perform_search(query)">
+                    <span class="input-group-btn">
+                        <button class="btn btn-danger" ng-click="query_clear()" title="Очистить поле">
+                            <span class="glyphicon glyphicon-remove"></span>
+                        </button>
+                    </span>
+                </div>
+            </div>
+            <div ng-show="query && search_processed && !found_services.length" class="alert alert-danger novmargin">Нет услуг, удовлетворяющих запросу <strong>"[[query]]"</strong></div>
+            <div ng-show="found_services" class="panel panel-default">
+                <table class="table table-condensed table-striped table-hover table-clickable table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Код</th>
+                            <th>Услуга</th>
+                            <th>Тип действия</th>
+                            <th class="text-right nowrap" ng-hide="event.info.event_type.finance.code == 2">Цена (руб.)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="result in found_services" ng-click="add_service(result)">
+                            <td ng-bind="result.at_code"></td>
+                            <td ng-bind="result.service_name"></td>
+                            <td ng-bind="result.at_name"></td>
+                            <td ng-bind="result.price" class="text-right" ng-hide="event.info.event_type.finance.code == 2"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </form>
+
+        <div id="selected_services" ng-show="event.services.length">
+            <div class="panel panel-default">
+                <div class="panel-heading"><strong>Выбранные услуги</strong></div>
+                <table class="table table-condensed table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Код</th>
+                            <th>Услуга</th>
+                            <th class="nowrap">Тип действия</th>
+                            <th class="nowrap" ng-hide="finance_is_oms() || finance_is_dms()">Цена (руб.)</th>
+                            <th>Количество</th>
+                            <th ng-show="finance_is_dms()">Согласовано</th>
+                            <th ng-hide="finance_is_oms() || finance_is_dms()">Оплачено</th>
+                            <th class="nowrap" ng-hide="finance_is_oms() || finance_is_dms()">Сумма к оплате (руб.)</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="(index, service) in event.services"
+                            ng-class="{'success': service.fully_paid || (service.is_new && service.coord_person_id) || (!service.is_new && service.coord_actions && service.coord_actions.length==service.amount), 'warning': service.partially_paid || (!service.is_new && service.coord_actions && service.coord_actions.length<service.amount), 'info': service.is_new && !(service.is_new && service.coord_person_id), 'danger': !service.fully_paid && !service.partially_paid && !service.is_new && !service.coord_actions.length}">
+                            <td ng-bind="service.at_code"></td>
+                            <td ng-bind="service.service_name"></td>
+                            <td ng-bind="service.at_name"></td>
+                            <td ng-bind="service.price" class="text-right" ng-hide="finance_is_oms() || finance_is_dms()"></td>
+                            <td class="col-md-1">
+                                <input type="text" class="form-control input-sm" min="[[service.paid_count || service.coord_actions.length || 1]]"
+                                       ng-disabled="service.fully_paid || (!service.is_new && service.coord_actions && service.coord_actions.length==service.actions.length)"
+                                       ng-model="service.amount" valid-number ng-change="service.sum = service.price * service.amount"/>
+                            </td>
+                            <td ng-bind="service.coord_count" class="text-right" ng-show="finance_is_dms()"></td>
+                            <td ng-bind="service.paid_count" class="text-right" ng-hide="finance_is_oms() || finance_is_dms()"></td>
+                            <td ng-bind="service.sum" class="text-right" ng-hide="finance_is_oms() || finance_is_dms()"></td>
+                            <td nowrap>
+                                <button type="button" class="btn btn-sm btn-default" title="Согласовать"
+                                        ng-show="finance_is_dms() && (event.is_new() && !service.coord_person_id || (!event.is_new() && (!service.coord_actions || service.coord_actions.length!=service.amount)))"
+                                        ng-click="apply_coord_service(service)"><span class="glyphicon glyphicon-check"></span>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-default" title="Отменить согласование"
+                                        ng-show="finance_is_dms() && (event.is_new() && service.coord_person_id || (!event.is_new() && service.coord_actions && service.coord_actions.length==service.amount))"
+                                        ng-click="remove_coord_service(service)"><span class="glyphicon glyphicon-remove"></span>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-danger" title="Убрать из списка услуг"
+                                        ng-if="!(service.fully_paid || service.partially_paid || service.coord_actions.length)"
+                                        ng-click="remove_service(index)"><span class="glyphicon glyphicon-trash"></span>
+                                </button>
+                                {% if form_role == 'admin' %}
+                                <button type="button" class="btn btn-sm btn-success" title="Оплатить"
+                                        ng-if="!service.fully_paid && !(finance_is_oms() && finance_is_dms())"
+                                        ng-click="pay(service)"><span class="glyphicon glyphicon-credit-card"></span>
+                                </button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
-        <div ng-show="query && search_processed && !found_services.length" class="alert alert-danger novmargin">Нет услуг, удовлетворяющих запросу <strong>"[[query]]"</strong></div>
-        <div ng-show="found_services" class="panel panel-default">
-            <table class="table table-condensed table-striped table-hover table-clickable table-bordered">
-                <thead>
-                    <tr>
-                        <th>Код</th>
-                        <th>Услуга</th>
-                        <th>Тип действия</th>
-                        <th class="text-right nowrap" ng-hide="event.info.event_type.finance.code == 2">Цена (руб.)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr ng-repeat="result in found_services" ng-click="add_service(result)">
-                        <td ng-bind="result.at_code"></td>
-                        <td ng-bind="result.service_name"></td>
-                        <td ng-bind="result.at_name"></td>
-                        <td ng-bind="result.price" class="text-right" ng-hide="event.info.event_type.finance.code == 2"></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </form>
-
-    <div id="selected_services" ng-show="event.services.length">
-        <div class="panel panel-default">
-            <div class="panel-heading"><strong>Выбранные услуги</strong></div>
-            <table class="table table-condensed table-bordered">
-                <thead>
-                    <tr>
-                        <th>Код</th>
-                        <th>Услуга</th>
-                        <th class="nowrap">Тип действия</th>
-                        <th class="nowrap" ng-hide="finance_is_oms() || finance_is_dms()">Цена (руб.)</th>
-                        <th>Количество</th>
-                        <th ng-show="finance_is_dms()">Согласовано</th>
-                        <th ng-hide="finance_is_oms() || finance_is_dms()">Оплачено</th>
-                        <th class="nowrap" ng-hide="finance_is_oms() || finance_is_dms()">Сумма к оплате (руб.)</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr ng-repeat="(index, service) in event.services"
-                        ng-class="{'success': service.fully_paid || (service.is_new && service.coord_person_id) || (!service.is_new && service.coord_actions && service.coord_actions.length==service.amount), 'warning': service.partially_paid || (!service.is_new && service.coord_actions && service.coord_actions.length<service.amount), 'info': service.is_new && !(service.is_new && service.coord_person_id), 'danger': !service.fully_paid && !service.partially_paid && !service.is_new && !service.coord_actions.length}">
-                        <td ng-bind="service.at_code"></td>
-                        <td ng-bind="service.service_name"></td>
-                        <td ng-bind="service.at_name"></td>
-                        <td ng-bind="service.price" class="text-right" ng-hide="finance_is_oms() || finance_is_dms()"></td>
-                        <td class="col-md-1">
-                            <input type="text" class="form-control input-sm" min="[[service.paid_count || service.coord_actions.length || 1]]"
-                                   ng-disabled="service.fully_paid || (!service.is_new && service.coord_actions && service.coord_actions.length==service.actions.length)"
-                                   ng-model="service.amount" valid-number ng-change="service.sum = service.price * service.amount"/>
-                        </td>
-                        <td ng-bind="service.coord_count" class="text-right" ng-show="finance_is_dms()"></td>
-                        <td ng-bind="service.paid_count" class="text-right" ng-hide="finance_is_oms() || finance_is_dms()"></td>
-                        <td ng-bind="service.sum" class="text-right" ng-hide="finance_is_oms() || finance_is_dms()"></td>
-                        <td nowrap>
-                            <button type="button" class="btn btn-sm btn-default" title="Согласовать"
-                                    ng-show="finance_is_dms() && (event.is_new() && !service.coord_person_id || (!event.is_new() && (!service.coord_actions || service.coord_actions.length!=service.amount)))"
-                                    ng-click="apply_coord_service(service)"><span class="glyphicon glyphicon-check"></span>
-                            </button>
-                            <button type="button" class="btn btn-sm btn-default" title="Отменить согласование"
-                                    ng-show="finance_is_dms() && (event.is_new() && service.coord_person_id || (!event.is_new() && service.coord_actions && service.coord_actions.length==service.amount))"
-                                    ng-click="remove_coord_service(service)"><span class="glyphicon glyphicon-remove"></span>
-                            </button>
-                            <button type="button" class="btn btn-sm btn-danger" title="Убрать из списка услуг"
-                                    ng-if="!(service.fully_paid || service.partially_paid || service.coord_actions.length)"
-                                    ng-click="remove_service(index)"><span class="glyphicon glyphicon-trash"></span>
-                            </button>
-                            {% if form_role == 'admin' %}
-                            <button type="button" class="btn btn-sm btn-success" title="Оплатить"
-                                    ng-if="!service.fully_paid && !(finance_is_oms() && finance_is_dms())"
-                                    ng-click="pay(service)"><span class="glyphicon glyphicon-credit-card"></span>
-                            </button>
-                            {% endif %}
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+        <blockquote class="novmargin blockquote-reverse" ng-show="event.services.length && event.info.event_type.finance.code == 4">
+            <div class="row">
+            <div class="col-md-12">
+                <span class="text-muted">Итого к оплате: </span>
+                <span class="text-primary" ng-bind="full_sum"></span><span class="text-primary"> руб.</span>
+                <span class="text-muted"> Оплачено: </span>
+                <span class="text-success" ng-bind="paid_sum"></span><span class="text-success"> руб.</span>
+                <span class="text-muted"> Долг: </span>
+                <span class="text-danger" ng-bind="full_sum - paid_sum"></span><span class="text-danger"> руб.</span>
+            </div>
+            </div>
+        </blockquote>
     </div>
-    <blockquote class="novmargin blockquote-reverse" ng-show="event.services.length && event.info.event_type.finance.code == 4">
-        <div class="row">
-        <div class="col-md-12">
-            <span class="text-muted">Итого к оплате: </span>
-            <span class="text-primary" ng-bind="full_sum"></span><span class="text-primary"> руб.</span>
-            <span class="text-muted"> Оплачено: </span>
-            <span class="text-success" ng-bind="paid_sum"></span><span class="text-success"> руб.</span>
-            <span class="text-muted"> Долг: </span>
-            <span class="text-danger" ng-bind="full_sum - paid_sum"></span><span class="text-danger"> руб.</span>
-        </div>
-        </div>
-    </blockquote>
-</div>
-</div>
+    </div>
+</ng-form>
 {#<div>#}
 {#    <pre>[[event.services]]</pre>#}
 {#</div>#}
