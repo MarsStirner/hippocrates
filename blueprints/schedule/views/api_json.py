@@ -202,7 +202,7 @@ def api_schedule_description_post():
 
                 for idx, sched in enumerate(sched_list):
                     # Here cometh thy math
-                    num_tickets = int(round(float((sch.endTimeAsDt - sch.begTimeAsDt).seconds * planned) / total_time))
+                    num_tickets = int(round(float((sched.endTimeAsDt - sched.begTimeAsDt).seconds * planned) / total_time))
                     sched.numTickets = num_tickets
                     if idx == 0:
                         make_tickets(sched, num_tickets, extra, cito)
