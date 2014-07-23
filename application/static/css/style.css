@@ -322,6 +322,11 @@ div.select2-container {
     margin-bottom: 20px;
 }
 
+.vmargin10 {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
 .nomarpad {
     margin: 0;
     padding: 0;
