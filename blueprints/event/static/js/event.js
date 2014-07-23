@@ -84,7 +84,7 @@ var EventMainInfoCtrl = function ($scope, $http, RefBookService, EventType, $win
             disabled: event_created
         },
         exec_person: {
-            disabled: event_created || current_user.current_role_maybe('admin', 'rRegistartor', 'clinicRegistrator')
+            disabled: event_created || !current_user.current_role_maybe('admin', 'rRegistartor', 'clinicRegistrator')
         },
         org_structure: {
             disabled: event_created
