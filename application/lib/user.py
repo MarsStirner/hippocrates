@@ -34,7 +34,7 @@ class User(UserMixin):
 
     @property
     def current_role(self):
-        return self._current_role
+        return getattr(self, '_current_role', None)
 
     @current_role.setter
     def current_role(self, value):
@@ -53,7 +53,7 @@ class User(UserMixin):
         return self.deleted == 0
 
     def is_admin(self):
-        return self.current_role == 'admin'
+        return getattr(self, 'current_role', None) == 'admin'
 
     def role_in(self, roles):
         if not isinstance(roles, (list, tuple)):
@@ -87,8 +87,8 @@ class User(UserMixin):
             'is_admin': self.is_admin(),
             'current_role': self.current_role,
             'rights': self.rights,
-            'action_type_org_structures': sorted(self.action_type_org_structures),
-            'action_type_personally': sorted(self.action_type_personally),
+            'action_type_org_structures': sorted(getattr(self, 'action_type_org_structures', set())),
+            'action_type_personally': sorted(getattr(self, 'action_type_personally', [])),
         }
 
 class AnonymousUser(AnonymousUserMixin):

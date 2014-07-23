@@ -31,9 +31,10 @@
                     </div>
                 </div>
             </div>
-            <table class="table table-condensed table-clickable table-hover" ng-if="results.length > 0">
+            <table id="result_tbl" class="table table-condensed table-clickable table-hover" ng-if="results.length > 0">
                 <thead>
                 <tr>
+                    <th>Код</th>
                     <th>ФИО</th>
                     <th>Дата рождения</th>
                     <th>Пол</th>
@@ -46,13 +47,14 @@
                 <tbody>
                 <tr ng-repeat="result in results" style="cursor: pointer" ng-click="set_patient_id(result.info.id)"
                         ng-class="{'bg-info text-info': result.info.id === client_id}">
-                    <td ng-bind="result.info.full_name"></td>
+                    <td ng-bind-html="result.info.id | highlight: query"></td>
+                    <td ng-bind-html="result.info.full_name | highlight: query"></td>
                     <td ng-bind="result.info.birth_date | asDate"></td>
                     <td ng-bind="result.info.sex.name"></td>
-                    <td ng-bind="result.id_document.doc_text"></td>
-                    <td><nobr>[[ wmClientCtrl.formatSnils(result.info.snils) ]]</nobr></td>
-                    <td ng-bind="result.compulsory_policy.policy_text"></td>
-                    <td><div ng-repeat="policy in result.voluntary_policies">[[ policy.policy_text ]]</div></td>
+                    <td ng-bind-html="result.id_document.doc_text | highlight: query"></td>
+                    <td ng-bind-html="wmClientCtrl.formatSnils(result.info.snils) | highlight: query"></td>
+                    <td ng-bind-html="result.compulsory_policy.policy_text | highlight: query"></td>
+                    <td><div ng-repeat="policy in result.voluntary_policies"><span ng-bind-html="policy.policy_text | highlight: query"></span></div></td>
                 </tr>
                 </tbody>
             </table>

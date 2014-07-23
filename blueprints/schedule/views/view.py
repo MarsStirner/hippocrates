@@ -45,6 +45,16 @@ def person_schedule_monthview():
         abort(404)
 
 
+@module.route('/doctor/')
+@roles_require('clinicDoctor')
+@breadcrumb(u'Приём пациентов')
+def doctor_schedule_day():
+    try:
+        return render_template('schedule/doctor_schedule_day.html')
+    except TemplateNotFound:
+        abort(404)
+
+
 @module.route('/day_free.html')
 def html_day_free():
     return render_template('schedule/day_free.html')

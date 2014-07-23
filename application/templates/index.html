@@ -13,42 +13,33 @@
       <blockquote class="danger">
           <h2>Добро пожаловать, {% if current_user.firstName %}{{ current_user.firstName }}{% else %}{{ current_user.lastName }}{% endif %}!<small> Для продолжения работы выберите нужный пункт</small> </h2>
       </blockquote>
-        {% if current_user.current_role == 'clinicDoctor' %}
-        <div class="row lander">
-          <div class="col-md-4">
-            <div class="thumbnail">
-              <a href="{{ url_for('patients.index') }}" title="К поиску пациентов"><img alt="300x200" data-src="holder.js/300x200" style="width: 100%; height: 200px;" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMjAwIj48cmVjdCB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2VlZSIvPjx0ZXh0IHRleHQtYW5jaG9yPSJtaWRkbGUiIHg9IjE1MCIgeT0iMTAwIiBzdHlsZT0iZmlsbDojYWFhO2ZvbnQtd2VpZ2h0OmJvbGQ7Zm9udC1zaXplOjE5cHg7Zm9udC1mYW1pbHk6QXJpYWwsSGVsdmV0aWNhLHNhbnMtc2VyaWY7ZG9taW5hbnQtYmFzZWxpbmU6Y2VudHJhbCI+MzAweDIwMDwvdGV4dD48L3N2Zz4="></a>
-              <div class="caption">
-                <h3>Пациенты</h3>
-                <p>У вас сегодня назначен приём пациентов <h4><span class="label label-warning">15 пациентов</span> <span class="label label-danger">3 экстренных</span></h4></p>
-                <p><a role="button" class="btn btn-primary btn-lg btn-block" href="{{ url_for('patients.index') }}">К поиску пациентов</a></p>
-              </div>
-            </div>
-          </div>
+        {% if current_user.role_in('clinicDoctor') %}
+          <div class="row lander">
             <div class="col-md-4">
-            <div class="thumbnail">
-              <a href="{{ url_for('schedule.index') }}" title="К расписанию"><img alt="300x200" data-src="holder.js/300x200" style="width: 100%; height: 200px;" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMjAwIj48cmVjdCB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2VlZSIvPjx0ZXh0IHRleHQtYW5jaG9yPSJtaWRkbGUiIHg9IjE1MCIgeT0iMTAwIiBzdHlsZT0iZmlsbDojYWFhO2ZvbnQtd2VpZ2h0OmJvbGQ7Zm9udC1zaXplOjE5cHg7Zm9udC1mYW1pbHk6QXJpYWwsSGVsdmV0aWNhLHNhbnMtc2VyaWY7ZG9taW5hbnQtYmFzZWxpbmU6Y2VudHJhbCI+MzAweDIwMDwvdGV4dD48L3N2Zz4="></a>
-              <div class="caption">
-                <h3>Расписание</h3>
-                <p>График приёма на сегодня <h4><span class="label label-warning">10:00 - 17:00</span></h4></p>
-                <p><a role="button" class="btn btn-primary btn-lg btn-block" href="{{ url_for('schedule.index') }}">К расписанию</a></p>
-              </div>
+              <a href="{{ url_for('schedule.doctor_schedule_day') }}" title="Обслуживание пациентов" class="btn btn-primary btn-block">
+                <h3>Приём пациентов</h3>
+                <strong>Вы сможете:</strong>
+                <ul>
+                  <li>Посмотреть свой график </li>
+                  <li>Произвести приём пациента </li>
+                  <li>Записать пациента  </li>
+                </ul>
+              </a>
+            </div>
+            <div class="col-md-4">
+              <a href="{{ url_for('patients.search') }}" title="К расписанию" class="btn btn-success btn-block">
+                <h3>Поиск пациентов</h3>
+                <strong>Вы сможете:</strong>
+                <ul>
+                  <li>Найти пациента </li>
+                  <li>Создать предварительную запись </li>
+                  <li>Создать обращение </li>
+                </ul>
+              </a>
             </div>
           </div>
-          <div class="col-md-4">
-            <div class="thumbnail">
-              <a href="{{ url_for('schedule.person_schedule_monthview') }}" title="К формированию расписания"><img alt="300x200" data-src="holder.js/300x200" style="width: 100%; height: 200px;" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMjAwIj48cmVjdCB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2VlZSIvPjx0ZXh0IHRleHQtYW5jaG9yPSJtaWRkbGUiIHg9IjE1MCIgeT0iMTAwIiBzdHlsZT0iZmlsbDojYWFhO2ZvbnQtd2VpZ2h0OmJvbGQ7Zm9udC1zaXplOjE5cHg7Zm9udC1mYW1pbHk6QXJpYWwsSGVsdmV0aWNhLHNhbnMtc2VyaWY7ZG9taW5hbnQtYmFzZWxpbmU6Y2VudHJhbCI+MzAweDIwMDwvdGV4dD48L3N2Zz4="></a>
-              <div class="caption">
-                <h3>Формировать расписание</h3>
-                <p>Расписание заведено на период</p>
-                <h4><span class="label label-warning">07.04.14 - 31.05.14</span></h4>
-                <p><a role="button" class="btn btn-primary btn-lg btn-block" href="{{ url_for('schedule.person_schedule_monthview') }}">К формированию расписания</a></p>
-              </div>
-            </div>
-          </div>
-        </div>
         {% endif %}
-        {% if current_user.current_role == 'clinicRegistrator' %}
+        {% if current_user.role_in(('rRegistartor', 'clinicRegistrator')) %}
           <div class="row lander">
             <div class="col-md-4">
               <a href="{{ url_for('patients.index') }}" title="Обслуживание пациентов" class="btn btn-primary btn-block">
@@ -64,7 +55,7 @@
             </div>
             <div class="col-md-4">
               <a href="{{ url_for('schedule.person_schedule_monthview') }}" title="К расписанию" class="btn btn-success btn-block">
-                <h3>Графики работы врачей</h3>
+                <h3>Формирование графиков</h3>
                 <strong>Вы сможете:</strong>
                 <ul>
                   <li>Создать новый график работы врача</li>
@@ -72,6 +63,18 @@
                   <li>Установить причину отсутствия врача</li>
                   <li>Перенести записи пациентов между врачами</li>
                 </ul>
+              </a>
+            </div>
+            <div class="col-md-4">
+              <a href="{{ url_for('schedule.index') }}" title="К расписанию" class="btn btn-warning btn-block">
+                <h3>Просмотр графиков</h3>
+                <strong>Вы сможете:</strong>
+                <ul>
+                  <li>Посмотреть графики работы врачей</li>
+                  <li>Посмотреть записанных пациентов</li>
+                </ul>
+                  <br/>
+                  <br/>
               </a>
             </div>
           </div>

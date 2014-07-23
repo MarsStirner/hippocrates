@@ -85,6 +85,11 @@ angular.module('WebMis20.directives.personTree', [])
             };
             $scope.selection_change = function (person) {
                 var userSelected = [];
+                angular.copy($scope.userSelected, userSelected);
+                var index = userSelected.indexOf(person.id);
+                if (index > -1) {
+                    userSelected.splice(index, 1);
+                }
                 $scope.tree.map(function (spec_group) {
                     spec_group.persons.filter(function (person) {
                         return person.checked;

@@ -43,6 +43,7 @@ var PersonAppointmentCtrl = function ($scope, $http, RefBook, WMAppointmentDialo
             month: $scope.month,
             day: 1
         });
+        start_date = start_date.subtract(start_date.isoWeekday() - 1, 'days');
         var end_date = moment(start_date).add(1, 'M').subtract(1, 'd');
         var chosen_page = -1;
         var pages = [];

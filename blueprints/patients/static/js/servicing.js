@@ -102,7 +102,7 @@ var ClientModalCtrl = function ($scope, $modalInstance, client, PrintingService,
         $scope.client = null;
     });
 };
-var ClientSearch = function ($scope, $http, $timeout, $window, PrintingService, WMClient, WMClientController, $modal) {
+var ClientSearch = function ($scope, $http, $timeout, $window, PrintingService, WMClient, WMClientController, $modal, $q) {
     $scope.aux = aux;
     $scope.params = aux.getQueryParams(document.location.search);
     $scope.query = "";
@@ -124,13 +124,17 @@ var ClientSearch = function ($scope, $http, $timeout, $window, PrintingService, 
         $scope.client_id = null;
     };
 
+    var canceler = $q.defer();
     $scope.perform_search = function () {
+        canceler.resolve();
+        canceler = $q.defer();
         if ($scope.query) {
             $http.get(
                 url_client_search, {
                     params: {
                         q: $scope.query
-                    }
+                    },
+                    timeout: canceler.promise
                 }
             ).success(function (data) {
                     $scope.results = data.result;
@@ -166,4 +170,4 @@ var ClientSearch = function ($scope, $http, $timeout, $window, PrintingService, 
         });
     };
 };
-WebMis20.controller('ClientSearch', ['$scope', '$http', '$timeout', '$window', 'PrintingService', 'WMClient', 'WMClientController', '$modal', ClientSearch]);
+WebMis20.controller('ClientSearch', ['$scope', '$http', '$timeout', '$window', 'PrintingService', 'WMClient', 'WMClientController', '$modal', '$q', ClientSearch]);

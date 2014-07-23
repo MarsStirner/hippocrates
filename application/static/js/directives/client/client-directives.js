@@ -24,9 +24,19 @@ angular.module('WebMis20.directives').
                     scope.policyForm = formCtrl;
                     scope.rbPolicyType = RefBookService.get('rbPolicyType');
                     scope.rbOrganisation = RefBookService.get('Organisation');
+                    scope.insurerItems = scope.rbOrganisation.objects.map(function(o) {
+                        return o;
+                    });
+                    scope.$watch('rbOrganisation.objects', function(n, o) {
+                        if (n !== o) {
+                            scope.insurerItems = n.map(function(o) {
+                                return o;
+                            });
+                        }
+                    });
                     var cpolicy_codes = ['cmiOld', 'cmiTmp', 'cmiCommonPaper', 'cmiCommonElectron',
-                        'cmiUEC', 'cmiFnkcIndustrial', 'cmiFnkcLocal', '1', '2'];
-                    var vpolicy_codes = ['vmi', '3'];
+                        'cmiUEC', 'cmiFnkcIndustrial', 'cmiFnkcLocal'];
+                    var vpolicy_codes = ['vmi'];
                     scope.filter_policy = function(type) {
                         return function(elem) {
                             var codes;
@@ -34,6 +44,16 @@ angular.module('WebMis20.directives').
                             else codes = vpolicy_codes;
                             return codes.indexOf(elem.code) != -1;
                         };
+                    };
+
+                    scope.builder_organisation = function(name) {
+                        return {
+                                'id': null,
+                                'full_name': name,
+                                'short_name': name,
+                                'infis': null,
+                                'title': null
+                            };
                     };
 
                     scope.$watch('policyForm.$dirty', function(n, o) {
@@ -107,13 +127,11 @@ angular.module('WebMis20.directives').
             <div class="form-group col-md-12"\
                  ng-class="{\'has-error\': (policyForm.$dirty || modelPolicy.id) && policyForm.pol_insurer.$invalid}">\
                 <label for="pol_insurer[[idPostfix]]" class="control-label">Страховая медицинская организация</label>\
-                <ui-select class="form-control" id="pol_insurer[[idPostfix]]" name="pol_insurer" theme="select2"\
-                           ng-model="intmd_models.insurer" ng-disabled="!edit_mode()" ng-required="policyForm.$dirty">\
-                    <ui-select-match placeholder="">[[$select.selected.short_name]]</ui-select-match>\
-                    <ui-select-choices repeat="org in rbOrganisation.objects | filter: $select.search">\
-                        <div ng-bind-html="org.short_name | highlight: $select.search"></div>\
-                    </ui-select-choices>\
-                </ui-select>\
+                <div ng-class="form-control" class="validatable" id="pol_insurer[[idPostfix]]" name="pol_insurer"\
+                     free-input-select="" freetext="true" items="insurerItems" builder="builder_organisation"\
+                     ng-disabled="!edit_mode()" ng-required="policyForm.$dirty" ng-model="intmd_models.insurer">\
+                    {{item.short_name}}\
+                </div>\
             </div>\
         </div>\
     </div>\

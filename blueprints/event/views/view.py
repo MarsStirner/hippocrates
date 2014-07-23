@@ -41,7 +41,7 @@ def get_event_form(**kwargs):
     # В зависимости от ролей и прав разный лейаут
     if current_user.role_in('admin'):
         form_role = 'admin'
-    elif current_user.role_in('doctor'):
+    elif current_user.role_in(('doctor', 'clinicDoctor')):
         form_role = 'doctor'
     elif current_user.role_in(('rRegistartor', 'clinicRegistrator')):
         return render_template('event/event_info_receptionist.html', **kwargs)
