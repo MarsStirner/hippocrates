@@ -930,7 +930,8 @@ class ClientPolicy(db.Model):
         self.number = number
         self.begDate = beg_date
         self.endDate = end_date
-        self.insurer_id = int(insurer) if insurer else None
+        self.insurer_id = int(insurer['id']) if insurer['id'] else None
+        self.name = insurer['full_name'] if not insurer['id'] else None
         self.client = client
 
     def __unicode__(self):
