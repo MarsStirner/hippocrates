@@ -2,8 +2,8 @@
 {% block title %}> {{ module_name }}{% endblock %}
 
 {% block main %}
-    <legend xmlns="http://www.w3.org/1999/html"><h2>График врача</h2></legend>
     <div ng-controller="ScheduleMonthCtrl">
+        <legend xmlns="http://www.w3.org/1999/html"><h2>График врача <span ng-if="person" class="bg-success">[[ person.name ]]<small>, [[ person.speciality.name ]]</small></span></h2></legend>
         <div class="row marginal">
             <div class="col-md-2">
                 <select class="form-control" name="year" ng-model="year" ng-disabled="editing"
@@ -18,21 +18,21 @@
             </div>
         </div>
         <div ng-show="person">
-            <div class="btn-group">
-                <button class="btn btn-primary" ng-click="start_editing()" ng-if="!editing">Редактировать</button>
-                <button class="btn btn-success" ng-click="finish_editing()" ng-if="editing">Сохранить</button>
-                <button class="btn btn-danger" ng-click="cancel_editing()" ng-if="editing">Отменить</button>
-            </div>
-            <button class="btn btn-warning" ng-click="fill_selection()" ng-if="editing" ng-disabled="selected_days.length == 0">Заполнить</button>
-            <div class="btn-group" ng-if="editing">
-                <button class="btn btn-primary disabled"><span class="glyphicon glyphicon-ok"></span></button>
-                <button class="btn btn-primary" ng-click="select.odd()">Нечет дни</button>
-                <button class="btn btn-primary" ng-click="select.invert()">Инверсия</button>
-                <button class="btn btn-primary" ng-click="select.all()">Все</button>
-                <button class="btn btn-primary" ng-click="select.none()">Снять</button>
-            </div>
-            <div ng-show="editing">
-                <input type="checkbox" id="weekendCheckBox" ng-model="weekends_selectable" /><label for="weekendCheckBox">Выбирать выходные</label>
+            <div class="well well-sm">
+                <div class="btn-group">
+                    <button class="btn btn-primary" ng-click="start_editing()" ng-if="!editing">Редактировать</button>
+                    <button class="btn btn-success" ng-click="finish_editing()" ng-if="editing">Сохранить</button>
+                    <button class="btn btn-danger" ng-click="cancel_editing()" ng-if="editing">Отменить</button>
+                </div>
+                <button class="btn btn-warning" ng-click="fill_selection()" ng-if="editing" ng-disabled="selected_days.length == 0">Заполнить</button>
+                <div ng-if="editing" class="btn-group">
+                    <button class="btn btn-primary disabled"><span class="glyphicon glyphicon-ok"></span></button>
+                    <button class="btn btn-primary" ng-click="select.odd()">Нечет дни</button>
+                    <button class="btn btn-primary" ng-click="select.invert()">Инверсия</button>
+                    <button class="btn btn-primary" ng-click="select.all()">Все</button>
+                    <button class="btn btn-primary" ng-click="select.none()">Снять</button>
+                </div>
+                <label  ng-if="editing" for="weekendCheckBox"><input type="checkbox" id="weekendCheckBox" ng-model="weekends_selectable"> Выбирать выходные</label>
             </div>
             <div class="row">
                 <div class="col-md-12">
@@ -61,19 +61,19 @@
                                         <li class="list-group-item list-group-item-danger" ng-if="day.busy">Есть записи</li>
 
                                         <li class="list-group-item list-group-item-info" ng-repeat="sched in day.scheds">
-                                            <p class="interval-title" ng-bind-html="getRecTypeText(sched.reception_type.code, true)"></p>
-                                            <p><span class="glyphicon glyphicon-time"></span>
-                                                <nobr>&nbsp;[[ (day.date + 'T' + sched.begTime) | asTime ]] - [[ (day.date + 'T' + sched.endTime) | asTime ]]</nobr></p>
-                                            <p ng-if="sched.reception_type.code !== 'home'"><span class="glyphicon glyphicon-tag"></span>
-                                                <nobr>&nbsp;Кабинет:&nbsp;[[ sched.office.code ]]</nobr></p>
-                                        </li>
-
-                                        <li class="list-group-item list-group-item-info" ng-switch-when="normal">
-                                            <div class="text-right text-muted" ng-repeat="(rt_code, info) in day.info">
-                                                <p class="interval-title" ng-if="show_day_info_title(day.info)" ng-bind-html="getRecTypeText(rt_code)"></p>
-                                                <p><nobr>План:&nbsp;[[ info.planned ]]</nobr></p>
-                                                <p><nobr>Сверх плана:&nbsp;[[ info.extra ]]</nobr></p>
-                                                <p><nobr>Вне очереди:&nbsp;[[ info.CITO ]]</nobr></p>
+                                            <div class="row">
+                                                <div class="col-md-7">
+                                                    <p class="interval-title" ng-bind-html="getRecTypeText(sched.reception_type.code, true)"></p>
+                                                    <p><span class="glyphicon glyphicon-time"></span>
+                                                        <nobr>&nbsp;[[ (day.date + 'T' + sched.begTime) | asTime ]] - [[ (day.date + 'T' + sched.endTime) | asTime ]]</nobr></p>
+                                                    <p ng-if="sched.reception_type.code !== 'home'"><span class="glyphicon glyphicon-tag"></span>
+                                                        <nobr>&nbsp;Кабинет:&nbsp;[[ sched.office.code ]]</nobr></p>
+                                                </div>
+                                                <div class="col-md-5 text-right text-muted">
+                                                    <p><nobr>План:&nbsp;[[ sched.planned ]]</nobr></p>
+                                                    <p><nobr>Сверх плана:&nbsp;[[ sched.extra ]]</nobr></p>
+                                                    <p><nobr>Вне очереди:&nbsp;[[ sched.CITO ]]</nobr></p>
+                                                </div>
                                             </div>
                                         </li>
 

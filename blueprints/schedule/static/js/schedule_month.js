@@ -44,7 +44,10 @@ var DaySetupModalCtrl = function ($scope, $modalInstance, selected_days, model, 
             begTime: moment('09:00', "HH:mm:ss").toDate(),
             endTime: moment('15:00', "HH:mm:ss").toDate(),
             office: null,
-            reception_type: null
+            reception_type: null,
+            CITO: 0,
+            planned: 0,
+            extra: 0
         });
         $scope.sync_times();
     };
@@ -227,7 +230,7 @@ var ScheduleMonthCtrl = function ($scope, $http, $modal, RefBook) {
     $scope.monthChanged();
 
     $scope.$watch('person_id', function (new_value, old_value) {
-        if (!new_value) return;
+        if (!new_value || new_value == old_value) return;
         history.pushState(null, document.title, location.origin + location.pathname + '?person_id=' + new_value);
         $scope.reloadSchedule();
     });
@@ -306,7 +309,10 @@ var ScheduleMonthCtrl = function ($scope, $http, $modal, RefBook) {
                                 begTime: moment(interval.begTime, "HH:mm:ss").toDate(), // utc dates in model, local on screen
                                 endTime: moment(interval.endTime, "HH:mm:ss").toDate(),
                                 office: interval.office, // copy? why no need?
-                                reception_type: interval.reception_type
+                                reception_type: interval.reception_type,
+                                CITO: interval.CITO,
+                                planned: interval.planned,
+                                extra: interval.extra
                             }
                         })
                     };
@@ -342,7 +348,10 @@ var ScheduleMonthCtrl = function ($scope, $http, $modal, RefBook) {
                             begTime: moment(interval.begTime).format("HH:mm:ss"),
                             endTime: moment(interval.endTime).format("HH:mm:ss"),
                             office: interval.office,
-                            reception_type: interval.reception_type
+                            reception_type: interval.reception_type,
+                            CITO: interval.CITO,
+                            planned: interval.planned,
+                            extra: interval.extra
                         };
                     });
                 }

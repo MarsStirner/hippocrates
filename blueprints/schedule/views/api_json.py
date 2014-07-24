@@ -189,26 +189,12 @@ def api_schedule_description_post():
                 new_sched.endTime = new_sched.endTimeAsDt.time()
                 new_sched.receptionType_id = safe_traverse(sub_sched, 'reception_type', 'id')
                 new_sched.office_id = safe_traverse(sub_sched, 'office', 'id')
+                new_sched.numTickets = sub_sched.get('planned', 0)
 
-                rt_code = safe_traverse(sub_sched, 'reception_type', 'code')
-                new_scheds_by_rt[rt_code].append(new_sched)
-
-            sched_info = day_desc['info']
-            for rec_type_code, sched_list in new_scheds_by_rt.iteritems():
-                total_time = sum([(sch.endTimeAsDt - sch.begTimeAsDt).seconds for sch in sched_list])
-                planned = sched_info[rec_type_code]['planned']
-                cito = sched_info[rec_type_code]['CITO']
-                extra = sched_info[rec_type_code]['extra']
-
-                for idx, sched in enumerate(sched_list):
-                    # Here cometh thy math
-                    num_tickets = int(round(float((sched.endTimeAsDt - sched.begTimeAsDt).seconds * planned) / total_time))
-                    sched.numTickets = num_tickets
-                    if idx == 0:
-                        make_tickets(sched, num_tickets, extra, cito)
-                    else:
-                        make_tickets(sched, num_tickets, 0, 0)
-                    db.session.add(sched)
+                make_tickets(new_sched,
+                             sub_sched.get('planned', 0),
+                             sub_sched.get('extra', 0),
+                             sub_sched.get('CITO', 0))
 
     db.session.commit()
 
