@@ -120,6 +120,7 @@ class Organisation(db.Model):
             'title': self.title,
             # 'net': self.net,
             'infis': self.infisCode,
+            'is_insurer': bool(self.isInsurer)
         }
 
     def __int__(self):

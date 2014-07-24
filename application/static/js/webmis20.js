@@ -137,6 +137,28 @@ var WebMis20 = angular.module('WebMis20', [
         return data
     }
 })
+.filter('attribute', function ($filter) {
+    return function (array, attribute) {
+        var value = arguments[2];
+        if (array instanceof Array) {
+            if (value === undefined) {
+                return array.filter(function (item) {
+                    return Boolean(item[attribute]);
+                })
+            } else if (value instanceof Array) {
+                return array.filter(function (item) {
+                    return aux.inArray(value, item[attribute]);
+                })
+            } else {
+                return array.filter(function (item) {
+                    return item[attribute] == value;
+                })
+            }
+        } else {
+            return array;
+        }
+    }
+})
 .filter('event_type_filter', function() {
     return function(items, props) {
         var out = [];

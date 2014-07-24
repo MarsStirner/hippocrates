@@ -22,29 +22,8 @@ angular.module('WebMis20.directives').
                 },
                 link: function(scope, elm, attrs, formCtrl) {
                     scope.policyForm = formCtrl;
-                    scope.rbPolicyType = RefBookService.get('rbPolicyType');
-                    scope.rbOrganisation = RefBookService.get('Organisation');
-                    scope.insurerItems = scope.rbOrganisation.objects.map(function(o) {
-                        return o;
-                    });
-                    scope.$watch('rbOrganisation.objects', function(n, o) {
-                        if (n !== o) {
-                            scope.insurerItems = n.map(function(o) {
-                                return o;
-                            });
-                        }
-                    });
-                    var cpolicy_codes = ['cmiOld', 'cmiTmp', 'cmiCommonPaper', 'cmiCommonElectron',
-                        'cmiUEC', 'cmiFnkcIndustrial', 'cmiFnkcLocal'];
-                    var vpolicy_codes = ['vmi'];
-                    scope.filter_policy = function(type) {
-                        return function(elem) {
-                            var codes;
-                            if (type === '0') codes = cpolicy_codes;
-                            else codes = vpolicy_codes;
-                            return codes.indexOf(elem.code) != -1;
-                        };
-                    };
+                    scope.policy_codes = (scope.pType == 0)?(['cmiOld', 'cmiTmp', 'cmiCommonPaper', 'cmiCommonElectron',
+                        'cmiUEC', 'cmiFnkcIndustrial', 'cmiFnkcLocal']):(['vmi']);
 
                     scope.builder_organisation = function(name) {
                         return {
@@ -85,10 +64,10 @@ angular.module('WebMis20.directives').
             <div class="form-group col-md-4"\
                  ng-class="{\'has-error\': (policyForm.$dirty || modelPolicy.id) && policyForm.pol_type.$invalid}">\
                 <label for="pol_type[[idPostfix]]" class="control-label">Тип</label>\
-                <ui-select class="form-control" id="pol_type[[idPostfix]]" name="pol_type" theme="select2"\
+                <ui-select class="form-control" id="pol_type[[idPostfix]]" name="pol_type" theme="select2" ref-book="rbPolicyType"\
                            ng-model="intmd_models.type" ng-disabled="!edit_mode()" ng-required="policyForm.$dirty">\
                     <ui-select-match placeholder="Тип полиса">[[$select.selected.name]]</ui-select-match>\
-                    <ui-select-choices repeat="pt in rbPolicyType.objects | filter: filter_policy(pType) | filter: $select.search">\
+                    <ui-select-choices repeat="pt in $refBook.objects | attribute:\'code\':policy_codes | filter: $select.search">\
                         <div ng-bind-html="pt.name | highlight: $select.search"></div>\
                     </ui-select-choices>\
                 </ui-select>\
@@ -122,15 +101,14 @@ angular.module('WebMis20.directives').
                 </wm-date>\
             </div>\
         </div>\
-\
         <div class="row">\
             <div class="form-group col-md-12"\
                  ng-class="{\'has-error\': (policyForm.$dirty || modelPolicy.id) && policyForm.pol_insurer.$invalid}">\
                 <label for="pol_insurer[[idPostfix]]" class="control-label">Страховая медицинская организация</label>\
-                <div ng-class="form-control" class="validatable" id="pol_insurer[[idPostfix]]" name="pol_insurer"\
-                     free-input-select="" freetext="true" items="insurerItems" builder="builder_organisation"\
+                <div ng-class="form-control" class="validatable" id="pol_insurer[[idPostfix]]" name="pol_insurer" ref-book="Organisation"\
+                     free-input-select="" freetext="true" items="$refBook.objects | attribute:\'is_insurer\'" builder="builder_organisation"\
                      ng-disabled="!edit_mode()" ng-required="policyForm.$dirty" ng-model="intmd_models.insurer">\
-                    {{item.short_name}}\
+                    [[ item.short_name ]]\
                 </div>\
             </div>\
         </div>\
