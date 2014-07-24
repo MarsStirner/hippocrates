@@ -28,6 +28,7 @@ def handle_client_error(err):
 def api_search_clients():
     try:
         query_string = request.args['q']
+        limit = int(request.args.get('limit', 100))
     except KeyError or ValueError:
         return abort(404)
 
@@ -41,7 +42,7 @@ def api_search_clients():
             base_query = base_query.filter(Client.id.in_(id_list))
         else:
             return jsonify([])
-    clients = base_query.order_by(db.func.field(Client.id, *id_list)).limit(100).all()
+    clients = base_query.order_by(db.func.field(Client.id, *id_list)).limit(limit).all()
     context = ClientVisualizer()
     if 'short' in request.args:
         return jsonify(map(context.make_short_client_info, clients))

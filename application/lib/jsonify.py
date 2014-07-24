@@ -457,6 +457,16 @@ class PrintTemplateVisualizer(object):
 
 
 class EventVisualizer(object):
+    def make_short_event(self, event):
+        return {
+            'id': event.id,
+            'client_id': event.client_id,
+            'client_full_name': event.client.nameText,
+            'beg_date': event.setDate,
+            'end_date': event.execDate,
+            'type_name': event.eventType.name,
+            'person_short_name': event.execPerson.shortNameText if event.execPerson else u'Нет',
+        }
     def make_event(self, event):
         """
         @type event: Event

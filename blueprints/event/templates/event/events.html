@@ -1,0 +1,103 @@
+{% extends "event/base.html" %}
+{% block main %}
+    <div class="row" ng-controller="EventListCtrl">
+        <div class="col-md-8">
+            <!-- Main -->
+            <table class="table table-condensed">
+                <thead>
+                <tr>
+                    <th>№</th>
+                    <th>ФИО</th>
+                    <th>Начато</th>
+                    <th>Закончено</th>
+                    <th>Тип</th>
+                    <th>Врач</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="event in results">
+                    <td><a ng-href="[[ url_event_get ]]?event_id=[[ event.id ]]" target="_blank">[[ event.id ]]</a></td>
+                    <td><a ng-href="[[ url_client_get ]]?client_id=[[ event.client_id ]]" target="_blank">[[ event.client_full_name
+                        ]]</a>
+                    </td>
+                    <td>[[ event.beg_date | asDate ]]</td>
+                    <td>[[ event.end_date | asDate ]]</td>
+                    <td>[[ event.type_name ]]</td>
+                    <td>[[ event.person_short_name ]]</td>
+                </tr>
+                </tbody>
+            </table>
+            <div class="center-block">
+                <pagination page="page" ng-model="page" total-items="pages" items-per-page="1" max-size="max_size" ng-change="get_data()" ng-show="pages > 1" boundary-links="true"></pagination>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <!-- Filter -->
+            <div class="affix-wrapper" bs-affix>
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        Фильтр
+                    </div>
+                    <div class="panel-body">
+                        <label for="filter-id">Идентификатор обращения</label>
+                        <input class="form-control" id="filter-id" type="text" valid-number ng-model="flt.id" placeholder="Идентификатор">
+
+                        <label for="filter-client">Пациент</label>
+                        <ui-select id="filter-client" ng-model="flt.client" theme="select2">
+                            <ui-select-match placeholder="ФИО пациента">[[ $select.selected.full_name ]]</ui-select-match>
+                            <ui-select-choices repeat="client in clients" refresh="get_clients($select.search)">
+                                <div>
+                                    <small>[[ client.id ]]</small>
+                                    <span ng-bind-html="client.full_name | highlight: $select.search"></span>
+                                </div>
+                                <div>
+                                    <small>[[ client.birth_date | asDate ]], [[ client.sex.name ]]</small>
+                                </div>
+                            </ui-select-choices>
+                        </ui-select>
+
+                        <label for="filter-beg-date">Начало</label>
+                        <wm-date id="filter-beg-date" ng-model="flt.beg_date"></wm-date>
+
+                        <label style="display: block"><input type="checkbox" ng-model="flt.unfinished">Только незавершённые</label>
+                        <label for="filter-end-date">Конец</label>
+                        <wm-date id="filter-end-date" ng-model="flt.end_date" ng-disabled="flt.unfinished"></wm-date>
+
+                        <label for="filter-finance">Тип финансирования</label>
+                        <rb-select id="filter-finance" ng-model="flt.finance_type" placeholder="Тип финансирования" ref-book="rbFinance"></rb-select>
+
+                        <label for="filter-request">Тип обращения</label>
+                        <rb-select id="filter-request" ng-model="flt.request_type" placeholder="Тип обращения" ref-book="rbRequestType"></rb-select>
+                    </div>
+                    <div class="panel-footer panel-default">
+                        <div class="btn-group">
+                            <button class="btn btn-default" ng-click="get_data(1)">Получить данные</button>
+                            <button class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                                <span class="caret"></span>
+                                <span class="sr-only">Toggle Dropdown</span>
+                            </button>
+                            <ul class="dropdown-menu" role="menu">
+                                <li><a ng-click="diurnal()">Незакрытые сегодня</a></li>
+                                <li class="divider"></li>
+                            </ul>
+                        </div>
+                        <div class="btn-group">
+                            <button class="btn btn-default" ng-click="clear()">Сбросить</button>
+                            <button class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                                <span class="caret"></span>
+                                <span class="sr-only">Toggle Dropdown</span>
+                            </button>
+                            <ul class="dropdown-menu" role="menu">
+                                <li><a ng-click="clear_all()">Сбросить и очистить результаты</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+{#    <pre>[[ flt | json ]]</pre>#}
+    </div>
+{% endblock %}
+{% block modules_js %}
+    <script src="{{ url_for('.static', filename='js/events.js', v=version) }}"></script>
+{% endblock %}

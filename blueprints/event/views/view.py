@@ -48,3 +48,8 @@ def get_event_form(**kwargs):
     else:
         return abort(403)
     return render_template('event/event_info.html', form_role=form_role, **kwargs)
+
+
+@module.route('/events.html')
+def get_events():
+    return render_template('event/events.html')
