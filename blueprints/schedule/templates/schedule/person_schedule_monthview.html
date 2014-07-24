@@ -3,8 +3,8 @@
 {% block title %}> {{ module_name }}{% endblock %}
 
 {% block main %}
-    <legend xmlns="http://www.w3.org/1999/html"><h2>График врача</h2></legend>
     <div ng-controller="Schedule">
+        <legend xmlns="http://www.w3.org/1999/html"><h2>График врача <span ng-if="person" class="bg-success">[[ person.name ]]<small>, [[ person.speciality.name ]]</small></span></h2></legend>
         <div class="row marginal">
             <div class="col-md-2">
                 <select class="form-control" name="year" ng-model="year" ng-disabled="editing"
@@ -19,26 +19,25 @@
             </div>
         </div>
         <div ng-show="person">
-            <div class="btn-group">
-                <button class="btn btn-primary" ng-click="start_editing()" ng-if="!editing">Редактировать</button>
-                <button class="btn btn-success" ng-click="finish_editing()" ng-if="editing">Сохранить</button>
-                <button class="btn btn-danger" ng-click="cancel_editing()" ng-if="editing">Отменить</button>
-            </div>
-            <button class="btn btn-warning" ng-click="fill_selection()" ng-if="editing" ng-disabled="selected_days.length == 0">Заполнить</button>
-            <div class="btn-group" ng-if="editing">
-                <button class="btn btn-primary disabled"><span class="glyphicon glyphicon-ok"></span></button>
-                <button class="btn btn-primary" ng-click="select.odd()">Нечет дни</button>
-                <button class="btn btn-primary" ng-click="select.invert()">Инверсия</button>
-                <button class="btn btn-primary" ng-click="select.all()">Все</button>
-                <button class="btn btn-primary" ng-click="select.none()">Снять</button>
-            </div>
-            <div ng-show="editing">
-                <input type="checkbox" id="weekendCheckBox" ng-model="weekends_selectable" /><label for="weekendCheckBox">Выбирать выходные</label>
+            <div class="well well-sm">
+                <div class="btn-group">
+                    <button class="btn btn-primary" ng-click="start_editing()" ng-if="!editing">Редактировать</button>
+                    <button class="btn btn-success" ng-click="finish_editing()" ng-if="editing">Сохранить</button>
+                    <button class="btn btn-danger" ng-click="cancel_editing()" ng-if="editing">Отменить</button>
+                </div>
+                <button class="btn btn-warning" ng-click="fill_selection()" ng-if="editing" ng-disabled="selected_days.length == 0">Заполнить</button>
+                <div ng-if="editing" class="btn-group">
+                    <button class="btn btn-primary disabled"><span class="glyphicon glyphicon-ok"></span></button>
+                    <button class="btn btn-primary" ng-click="select.odd()">Нечет дни</button>
+                    <button class="btn btn-primary" ng-click="select.invert()">Инверсия</button>
+                    <button class="btn btn-primary" ng-click="select.all()">Все</button>
+                    <button class="btn btn-primary" ng-click="select.none()">Снять</button>
+                </div>
+                <label  ng-if="editing" for="weekendCheckBox"><input type="checkbox" id="weekendCheckBox" ng-model="weekends_selectable"> Выбирать выходные</label>
             </div>
             <div class="row">
                 <div class="col-md-12">
                     <table class="table table-condensed person-schedule">
-                        <caption>[[ person.name ]]<small>, [[ person.speciality.name ]]</small></caption>
                         <thead>
                         <tr>
                             <th class="text-center" ng-if="editing">&raquo;</th>
@@ -62,19 +61,19 @@
                                         <li class="list-group-item list-group-item-danger" ng-if="day.busy">Есть записи</li>
 
                                         <li class="list-group-item list-group-item-info" ng-repeat="sched in day.scheds">
-                                            <p class="interval-title" ng-bind-html="getRecTypeText(sched.reception_type.code, true)"></p>
-                                            <p><span class="glyphicon glyphicon-time"></span>
-                                                <nobr>&nbsp;[[ (day.date + 'T' + sched.begTime) | asTime ]] - [[ (day.date + 'T' + sched.endTime) | asTime ]]</nobr></p>
-                                            <p ng-if="sched.reception_type.code !== 'home'"><span class="glyphicon glyphicon-tag"></span>
-                                                <nobr>&nbsp;Кабинет:&nbsp;[[ sched.office.code ]]</nobr></p>
-                                        </li>
-
-                                        <li class="list-group-item list-group-item-info" ng-switch-when="normal">
-                                            <div class="text-right text-muted" ng-repeat="(rt_code, info) in day.info">
-                                                <p class="interval-title" ng-if="show_day_info_title(day.info)" ng-bind-html="getRecTypeText(rt_code)"></p>
-                                                <p><nobr>План:&nbsp;[[ info.planned ]]</nobr></p>
-                                                <p><nobr>Сверх плана:&nbsp;[[ info.extra ]]</nobr></p>
-                                                <p><nobr>Вне очереди:&nbsp;[[ info.CITO ]]</nobr></p>
+                                            <div class="row">
+                                                <div class="col-md-7">
+                                                    <p class="interval-title" ng-bind-html="getRecTypeText(sched.reception_type.code, true)"></p>
+                                                    <p><span class="glyphicon glyphicon-time"></span>
+                                                        <nobr>&nbsp;[[ (day.date + 'T' + sched.begTime) | asTime ]] - [[ (day.date + 'T' + sched.endTime) | asTime ]]</nobr></p>
+                                                    <p ng-if="sched.reception_type.code !== 'home'"><span class="glyphicon glyphicon-tag"></span>
+                                                        <nobr>&nbsp;Кабинет:&nbsp;[[ sched.office.code ]]</nobr></p>
+                                                </div>
+                                                <div class="col-md-5 text-right text-muted">
+                                                    <p><nobr>План:&nbsp;[[ sched.planned ]]</nobr></p>
+                                                    <p><nobr>Сверх плана:&nbsp;[[ sched.extra ]]</nobr></p>
+                                                    <p><nobr>Вне очереди:&nbsp;[[ sched.CITO ]]</nobr></p>
+                                                </div>
                                             </div>
                                         </li>
 
@@ -102,16 +101,6 @@
     <script type="text/javascript">
         {{ person_tree.js() }}
         DaySetupModalCtrl = function ($scope, $modalInstance, selected_days, model, rec_types, roas, offices) {
-            function unique_rectypes(array) {
-                var used_rts =  array.map(function(interval) {
-                    return interval.reception_type && interval.reception_type.code;
-                });
-                var unique_used_rts = used_rts.filter(function(rt_code, pos) {
-                    return used_rts.indexOf(rt_code) === pos;
-                });
-                return unique_used_rts;
-            }
-
             $scope.rec_types = rec_types;
             $scope.roas = roas;
             $scope.offices = offices;
@@ -145,41 +134,16 @@
                     begTime: moment('09:00', "HH:mm:ss").toDate(),
                     endTime: moment('15:00', "HH:mm:ss").toDate(),
                     office: null,
-                    reception_type: null
+                    reception_type: null,
+                    CITO: 0,
+                    planned: 0,
+                    extra: 0
                 });
                 $scope.sync_times();
             };
             $scope.delete_interval = function(interval) {
                 aux.removeFromArray($scope.model.intervals, interval);
                 $scope.sync_times();
-            };
-
-            $scope.used_rts = unique_rectypes($scope.model.intervals);
-            $scope.$watch(function() {
-                return unique_rectypes($scope.model.intervals);
-            }, function(used_codes, o) {
-                if (used_codes !== o) {
-                    $scope.used_rts = used_codes;
-                    $scope.rec_types.forEach(function(rec_type) {
-                        var code = rec_type.code;
-                        if (aux.inArray(used_codes, code)) {
-                            if (!$scope.model.info[code]) {
-                                $scope.model.info[code] = {
-                                    'CITO': 0,
-                                    'extra': 0,
-                                    'planned': 0
-                                };
-                            }
-                        } else {
-                            delete $scope.model.info[code];
-                        }
-                    });
-                }
-            }, true);
-            $scope.flt_rec_type = function() {
-                return function(item) {
-                    return $scope.used_rts.indexOf(item.code) !== -1;
-                };
             };
             // timepicker validation, TODO: directive
             $scope.times_valid = true;
@@ -210,6 +174,9 @@
                     if (!valid) break;
                 }
                 $scope.times_valid = valid;
+            };
+            $scope.recalculate_tickets = function() {
+                $scope.model.info
             };
         };
         DayFreeModalCtrl = function ($scope, $modalInstance, day, roas) {
@@ -408,7 +375,10 @@
                                         begTime: moment(interval.begTime, "HH:mm:ss").toDate(), // utc dates in model, local on screen
                                         endTime: moment(interval.endTime, "HH:mm:ss").toDate(),
                                         office: interval.office, // copy? why no need?
-                                        reception_type: interval.reception_type
+                                        reception_type: interval.reception_type,
+                                        CITO: interval.CITO,
+                                        planned: interval.planned,
+                                        extra: interval.extra
                                     }
                                 })
                             };
@@ -444,7 +414,10 @@
                                     begTime: moment(interval.begTime).format("HH:mm:ss"),
                                     endTime: moment(interval.endTime).format("HH:mm:ss"),
                                     office: interval.office,
-                                    reception_type: interval.reception_type
+                                    reception_type: interval.reception_type,
+                                    CITO: interval.CITO,
+                                    planned: interval.planned,
+                                    extra: interval.extra
                                 };
                             });
                         }

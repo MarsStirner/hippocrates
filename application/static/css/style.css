@@ -322,6 +322,11 @@ div.select2-container {
     margin-bottom: 20px;
 }
 
+.vmargin10 {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
 .nomarpad {
     margin: 0;
     padding: 0;
@@ -525,4 +530,13 @@ div.toc-affix {
 mark, .mark {
     background-color: #fcf8e3;
     padding: 0.2em 0;
+}
+.list-inline > li.schedule_label {
+    margin-bottom: 8px;
+    padding-left: 0;
+}
+.list-inline > li.schedule_label > span.label{
+    cursor: pointer;
+    font-size: 100%;
+    font-weight: normal;
 }
