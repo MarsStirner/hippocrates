@@ -359,6 +359,19 @@ def api_service_add_coord():
     })
 
 
+@module.route('/api/event_payment/service_change_account.json', methods=['POST'])
+def api_service_change_account():
+    data = request.json
+    if data['actions']:
+        actions = Action.query.filter(Action.id.in_(data['actions']))
+        actions.update({Action.account: data['account']}, synchronize_session=False)
+        db.session.commit()
+
+    return jsonify({
+        'result': 'ok'
+    })
+
+
 @module.route('/api/event_payment/delete_service.json', methods=['POST'])
 def api_service_delete_service():
     # TODO: validations

@@ -59,7 +59,7 @@ def create_action(event_id, action_type_id, current_user_id, data):
     action.status = 0
     action.note = ''
     action.payStatus = 0
-    action.account = 0
+    action.account = int(data.get('account', 1))
     action.coordText = ''
     action.AppointmentType = 0
     action.uuid = get_new_uuid()

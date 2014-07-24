@@ -109,6 +109,7 @@ def get_event_services(event_id):
     services_by_at = defaultdict(list)
     for a, at_id, service_id, at_code, at_name, service_name, price in query:
         s = {
+            'account': a.account,
             'at_id': at_id,
             'at_code': at_code,
             'at_name': at_name,
@@ -151,6 +152,7 @@ def create_services(event_id, services_data, cfinance_id):
                     current_user.id,
                     {'finance_id': cfinance_id,
                      'coordDate': datetime.datetime.now() if service.get('coord_person_id') else None,
-                     'coordPerson_id': service.get('coord_person_id')})
+                     'coordPerson_id': service.get('coord_person_id'),
+                     'account': service['account']})
                 result.append(action.id)
     return result
