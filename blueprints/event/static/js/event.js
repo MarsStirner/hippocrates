@@ -685,10 +685,10 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, P
         if (typeof (close_event) === 'undefined') {
             close_event = false;}
         $scope.editing.submit_attempt = true;
-        if ($scope.event_form.$valid) {
+        if ($scope.eventForm.$valid) {
             $scope.event.save(close_event).
                 then(function (event_id) {
-                    $scope.event_form.$setPristine();
+                    $scope.eventForm.$setPristine();
                     if ($scope.event.is_new()) {
                         $window.open(url_for_event_html_event_info + '?event_id=' + event_id, '_self');
                     } else {

@@ -1,6 +1,8 @@
 {% import "_macros.html" as macros %}
 
 <div ng-controller="EventDiagnosesCtrl">
+<ng-form name="eventDiagnosesForm" toc-element="Диагнозы">
+<legend>Диагнозы</legend>
 <div class="row" ng-hide="diag_edit[0]._first">
     <div class="col-md-12 marginal"><button class="btn btn-primary" ng-click="diag_edit_new()">Новый диагноз</button></div>
 </div>
@@ -76,4 +78,5 @@
         </div>
     </div>
 </div>
+</ng-form>
 </div>
