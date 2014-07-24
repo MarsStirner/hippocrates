@@ -532,3 +532,10 @@ mark, .mark {
     background-color: #fcf8e3;
     padding: 0.2em 0;
 }
+.affix-wrapper {
+    margin-top: 20px;
+}
+.affix-wrapper.affix {
+    width: inherit;
+    padding-right: 30px;
+}

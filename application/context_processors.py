@@ -27,24 +27,22 @@ def print_subsystem():
 @app.context_processor
 def general_menu():
     menu_items = list()
-    menu_items.append(dict(module='patients.',
-                           link='patients.index',
+    menu_items.append(dict(link='patients.index',
                            title=u'Обслуживание пациентов',
                            roles=('admin', 'rRegistartor', 'clinicRegistrator')))
-    menu_items.append(dict(module='schedule.',
-                           link='schedule.person_schedule_monthview',
+    menu_items.append(dict(link='schedule.person_schedule_monthview',
                            title=u'Формирование графика врача',
                            roles=('admin', 'rRegistartor', 'clinicRegistrator')))
-    menu_items.append(dict(module='schedule',
-                           link='schedule.index',
+    menu_items.append(dict(link='schedule.index',
                            title=u'Просмотр графика работы',
                            roles=('admin', 'rRegistartor', 'clinicRegistrator')))
-    menu_items.append(dict(module='schedule',
-                           link='schedule.doctor_schedule_day',
+    menu_items.append(dict(link='schedule.doctor_schedule_day',
                            title=u'Приём пациентов',
                            roles=('admin', 'clinicDoctor')))
-    menu_items.append(dict(module='patients.',
-                           link='patients.search',
+    menu_items.append(dict(link='patients.search',
                            title=u'Поиск пациентов',
                            roles=('admin', 'clinicDoctor')))
+    menu_items.append(dict(link='event.get_events',
+                           title=u'Обращения',
+                           roles=('admin', 'rRegistartor', 'clinicRegistrator', 'clinicDoctor')))
     return dict(main_menu=menu_items)

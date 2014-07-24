@@ -3,25 +3,36 @@
 angular.module('WebMis20.directives', ['ui.bootstrap', 'ui.select', 'ngSanitize']);
 
 angular.module('WebMis20.directives')
-    .directive('rbSelect', ['RefBookService', function(RefBookService) {
+    .directive('rbSelect', ['$compile', function($compile) {
         return {
-            restrict: 'A',
-            replace: true,
-            scope: {
-                id: '=',
-                rb: '=',
-                ngModel: '='
-            },
-            link: function ($scope, f, attrs) {
-                $scope.rbObj = RefBookService.get(attrs.rb);
-            },
-            template: '<div><ui-select id=id name="exec_person" theme="select2"' +
-                      '    ng-model="ngModel" ng-required="true">' +
-                      '<ui-select-match placeholder="Лечащий врач">[[$select.selected.name]]</ui-select-match>' +
-                      '<ui-select-choices repeat="item in rbObj.objects | filter: $select.search">' +
-                      '    <div ng-bind-html="item.name | highlight: $select.search"></div>' +
-                      '</ui-select-choices>' +
-                      '</ui-select></div>'
+            restrict: 'E',
+            link: function (scope, element, attrs) {
+                var _id = attrs.id,
+                    name = attrs.name,
+                    theme = attrs.theme || "select2",
+                    ngDisabled = attrs.ngDisabled,
+                    placeholder = attrs.placeholder,
+                    ngModel = attrs.ngModel,
+                    refBook = attrs.refBook;
+                if (!ngModel) throw new Error('<rb-select> must have ng-model attribute');
+                if (!refBook) throw new Error('<rb-select> must have rb attribute');
+                var uiSelect = $('<ui-select></ui-select>');
+                var uiSelectMatch = $('<ui-select-match>[[ $select.selected.name ]]</ui-select-match>');
+                var uiSelectChoices = $(
+                    '<ui-select-choices repeat="item in $refBook.objects | filter: $select.search">' +
+                        '<div ng-bind-html="item.name | highlight: $select.search"></div></ui-select-choices>');
+                if (_id) uiSelect.attr('id', _id);
+                if (name) uiSelect.attr('name', name);
+                if (theme) uiSelect.attr('theme', theme);
+                if (ngDisabled) uiSelect.attr('ng-disabled', ngDisabled);
+                if (ngModel) uiSelect.attr('ng-model', ngModel);
+                if (placeholder) uiSelectMatch.attr('placeholder', placeholder);
+                if (refBook) uiSelect.attr('ref-book', refBook);
+                uiSelect.append(uiSelectMatch);
+                uiSelect.append(uiSelectChoices);
+                $(element).replaceWith(uiSelect);
+                $compile(uiSelect)(scope);
+            }
         };
     }])
     .directive('wmDate', ['$timeout', function ($timeout) {
@@ -61,9 +72,9 @@ angular.module('WebMis20.directives')
     .directive('manualDate', [function() {
         return {
             restrict: 'A',
-            require: 'ngModel',
+            require: '^ngModel',
             link: function(scope, elm, attrs, ctrl) {
-                ctrl.$parsers.unshift(function(viewValue) {
+                ctrl.$parsers.unshift(function(_) {
                     var viewValue = ctrl.$viewValue;
                     if (!viewValue || viewValue instanceof Date) {
                         return viewValue;
@@ -604,7 +615,12 @@ angular.module('WebMis20.validators', [])
       });
 
       element.bind('blur', function(event) {
-          this.value = parseFloat(this.value);
+          var value = parseFloat(this.value);
+          if (isNaN(value)) {
+              this.value = null;
+          } else {
+              this.value = value;
+          }
       });
     }
   };

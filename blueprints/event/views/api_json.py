@@ -359,6 +359,19 @@ def api_service_add_coord():
     })
 
 
+@module.route('/api/event_payment/service_change_account.json', methods=['POST'])
+def api_service_change_account():
+    data = request.json
+    if data['actions']:
+        actions = Action.query.filter(Action.id.in_(data['actions']))
+        actions.update({Action.account: data['account']}, synchronize_session=False)
+        db.session.commit()
+
+    return jsonify({
+        'result': 'ok'
+    })
+
+
 @module.route('/api/event_payment/delete_service.json', methods=['POST'])
 def api_service_delete_service():
     # TODO: validations
@@ -371,4 +384,40 @@ def api_service_delete_service():
 
     return jsonify({
         'result': 'ok'
+    })
+
+
+@module.route('/api/events.json', methods=["POST"])
+def api_get_events():
+    from application.models.event import Event
+    from application.models.exists import Contract
+    flt = request.get_json()
+    base_query = Event.query.join(Client)
+    if 'id' in flt:
+        return jsonify([base_query.get(flt['id'])])
+    if 'client_id' in flt:
+        base_query = base_query.filter(Event.client_id == flt['client_id'])
+    if 'exec_person_id' in flt:
+        base_query = base_query.filter(Event.execPerson_id == flt['exec_person_id'])
+    if 'beg_date' in flt:
+        base_query = base_query.filter(Event.setDate >= datetime.datetime.strptime(flt['beg_date'], '%Y-%m-%d').date())
+    if 'unfinished' in flt:
+        base_query = base_query.filter(Event.execDate.is_(None))
+    elif 'end_date' in flt:
+        base_query = base_query.filter(Event.execDate <= datetime.datetime.strptime(flt['end_date'], '%Y-%m-%d').date())
+    if 'request_type_id' in flt:
+        base_query = base_query.join(EventType).filter(EventType.requestType_id == flt['request_type_id'])
+    if 'finance_id' in flt:
+        base_query = base_query.join(Contract).filter(Contract.finance_id == flt['finance_id'])
+    per_page = int(flt.get('per_page', 20))
+    page = int(flt.get('page', 1))
+    base_query = base_query.order_by(Event.setDate)
+    paginate = base_query.paginate(page, per_page, False)
+    context = EventVisualizer()
+    return jsonify({
+        'pages': paginate.pages,
+        'items': [
+            context.make_short_event(event)
+            for event in paginate.items
+        ]
     })

@@ -39,7 +39,6 @@
                 </table>
             </div>
         </form>
-
         <div id="selected_services" ng-show="event.services.length">
             <div class="panel panel-default">
                 <div class="panel-heading"><strong>Выбранные услуги</strong></div>
@@ -80,6 +79,10 @@
                                 <button type="button" class="btn btn-sm btn-default" title="Отменить согласование"
                                         ng-show="finance_is_dms() && (event.is_new() && service.coord_person_id || (!event.is_new() && service.coord_actions && service.coord_actions.length==service.amount))"
                                         ng-click="remove_coord_service(service)"><span class="glyphicon glyphicon-remove"></span>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-default" title="Считать"
+                                        ng-show="finance_is_paid()"
+                                        ng-click="change_account_service(service)"><span class="glyphicon" ng-class="{'glyphicon-unchecked': !service.account, 'glyphicon-check': service.account}"></span>
                                 </button>
                                 <button type="button" class="btn btn-sm btn-danger" title="Убрать из списка услуг"
                                         ng-if="!(service.fully_paid || service.partially_paid || service.coord_actions.length)"
