@@ -79,4 +79,4 @@ var EventListCtrl = function ($scope, $http) {
 
     $scope.clear_all();
 };
-angular.controller('EventListCtrl', ['$scope', '$http', EventListCtrl]);
+WebMis20.controller('EventListCtrl', ['$scope', '$http', EventListCtrl]);
