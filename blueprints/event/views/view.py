@@ -40,11 +40,11 @@ def new_event():
 def get_event_form(**kwargs):
     # В зависимости от ролей и прав разный лейаут
     if current_user.role_in('admin'):
-        form_role = 'admin'
+        return render_template('event/event_info_admin.html', **kwargs)
     elif current_user.role_in(('doctor', 'clinicDoctor')):
         return render_template('event/event_info_doctor.html', **kwargs)
     elif current_user.role_in(('rRegistartor', 'clinicRegistrator')):
         return render_template('event/event_info_receptionist.html', **kwargs)
     else:
         return abort(403)
-    return render_template('event/event_info.html', form_role=form_role, **kwargs)
+    return render_template('event/event_info.html', **kwargs)
