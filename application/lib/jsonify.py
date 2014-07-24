@@ -194,6 +194,9 @@ class ScheduleVisualizer(object):
                 'begTime': sub_sched['begTime'],
                 'endTime': sub_sched['endTime'],
                 'office': sub_sched['office'],
+                'planned': sub_sched['planned'],
+                'CITO': sub_sched['CITO'],
+                'extra': sub_sched['extra'],
                 'reception_type': rec_type
             })
         return {
