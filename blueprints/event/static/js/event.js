@@ -477,6 +477,7 @@ var EventServicesCtrl = function($scope, $http, WMEventService) {
 
     $scope.finance_is_oms = function(){return $scope._finance && $scope._finance.code == '2'};
     $scope.finance_is_dms = function(){return $scope._finance && $scope._finance.code == '3'};
+    $scope.finance_is_paid = function(){return $scope._finance && $scope._finance.code == '4'};
 
     $scope.perform_search = function(val) {
         $scope.search_processed = false;
@@ -513,7 +514,8 @@ var EventServicesCtrl = function($scope, $http, WMEventService) {
                 sum: service.price,
                 actions: [],
                 coord_actions: [],
-                coord_count: 0
+                coord_count: 0,
+                account: true
             });
             $scope.event.services.push(new WMEventService(service_data, $scope.event.payment.payments));
         }
@@ -633,6 +635,20 @@ var EventServicesCtrl = function($scope, $http, WMEventService) {
             service.coord_count = service.coord_actions.length;
         }
         // $scope.event.reload();#}
+    };
+
+    $scope.change_account_service = function(service) {
+        service.account = !service.account
+        if ($scope.event.info.id && service.actions.length){
+            $http.post(
+                url_for_event_api_service_change_account, {
+                    actions: service.actions,
+                    account: service.account
+                }
+            ).error(function() {
+                    alert('error');
+                });
+        }
     };
 };
 
