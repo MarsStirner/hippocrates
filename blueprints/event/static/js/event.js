@@ -669,6 +669,19 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, P
     };
     $scope.policies = [];
 
+    $scope.action_type_class = function(class_code) {
+        switch (class_code){
+            case 0:
+                return 'med_doc_actions'
+            case 1:
+                return 'diag_actions'
+            case 2:
+                return 'cure_actions'
+            default:
+                return null
+        }
+    }
+
     $scope.initialize = function() {
         $scope.event.reload().
             then(function() {
@@ -761,6 +774,22 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, P
         });
     };
 
+    $scope.open_delete_action_modal = function(action_type_class, index, message) {
+        var modalInstance = $modal.open({
+            templateUrl: 'modal-delete-record.html',
+            controller: DeleteRecordModalCtrl,
+            resolve: {
+                message: function(){
+                    return 'действие "' + message +'"';
+                }
+            },
+            scope: $scope
+        });
+        modalInstance.result.then(function () {
+            $scope.delete_action(action_type_class, index);
+        });
+    };
+
     $scope.close_event = function(){
         if (!$scope.event.is_closed){
             var unclosed_actions = $scope.event.get_unclosed_actions();
@@ -846,6 +875,20 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, P
     $scope.open_action = function (action_id) {
         window.open(url_for_schedule_html_action + '?action_id=' + action_id);
     };
+
+    $scope.delete_action = function (action_type_class, index) {
+        var action_type_class_name =  $scope.action_type_class(action_type_class);
+        var action_id = $scope.event.info[action_type_class_name][index].id
+        $http.post(
+            url_for_event_api_delete_action, {
+                action_id: action_id
+            }
+        ).success(function() {
+                $scope.event.info[action_type_class_name].splice(index, 1);
+            }).error(function() {
+                alert('error');
+            });
+    };
     // action data end
 
     $scope.$watch('event.info.contract', function(new_val, old_val) {
@@ -862,6 +905,16 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, P
 
 var UnclosedActionsModalCtrl = function ($scope, $modalInstance, unclosed_actions) {
     $scope.unclosed_actions = unclosed_actions;
+    $scope.accept = function() {
+        $modalInstance.close();
+    };
+    $scope.cancel = function() {
+        $modalInstance.dismiss('cancel');
+    };
+};
+
+var DeleteRecordModalCtrl = function ($scope, $modalInstance, message) {
+    $scope.message = message;
     $scope.accept = function() {
         $modalInstance.close();
     };

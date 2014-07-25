@@ -387,6 +387,19 @@ def api_service_delete_service():
     })
 
 
+@module.route('api/delete_action.json', methods=['POST'])
+def api_delete_action():
+    action_id = request.json['action_id']
+    if action_id:
+        action = Action.query.filter(Action.id == action_id)
+        action.update({Action.deleted: 1}, synchronize_session=False)
+        db.session.commit()
+
+    return jsonify({
+        'result': 'ok'
+    })
+
+
 @module.route('/api/events.json', methods=["POST"])
 def api_get_events():
     from application.models.event import Event

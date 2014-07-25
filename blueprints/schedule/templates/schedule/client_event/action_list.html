@@ -6,14 +6,20 @@
             <th>Начало</th>
             <th>Конец</th>
             <th>Исполнитель</th>
+            <th></th>
         </tr>
         </thead>
         <tbody>
-        <tr ng-repeat="action in {{ model }}" ng-click="open_action(action.id)">
-            <td>[[ action.name ]]</td>
-            <td>[[ action.begDate | asDate ]]</td>
-            <td>[[ action.endDate | asDateTime ]]</td>
-            <td>[[ action.person_text ]]</td>
+        <tr ng-repeat="(index, action) in {{ model }}">
+            <td ng-click="open_action(action.id)">[[ action.name ]]</td>
+            <td ng-click="open_action(action.id)">[[ action.begDate | asDate ]]</td>
+            <td ng-click="open_action(action.id)">[[ action.endDate | asDateTime ]]</td>
+            <td ng-click="open_action(action.id)">[[ action.person_text ]]</td>
+            <td>
+                <button type="button" class="btn btn-sm btn-danger" title="Удалить"
+                        ng-click="open_delete_action_modal({{ action_type_class }}, index, action.name)"><span class="glyphicon glyphicon-trash"></span>
+                </button>
+            </td>
         </tr>
         </tbody>
     </table>

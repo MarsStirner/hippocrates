@@ -21,7 +21,6 @@ from application.models.schedule import Schedule, ScheduleTicket, ScheduleClient
     rbReceptionType, rbAttendanceType
 from application.lib.jsonify import ScheduleVisualizer, PrintTemplateVisualizer, \
     ActionVisualizer
-from config import TIME_ZONE
 
 __author__ = 'mmalkov'
 
@@ -516,9 +515,9 @@ def api_action_post():
             db.session.add(prop)
 
     action.modifyDatetime = now
-    action.begDate = string_to_datetime(action_desc['begDate'])
-    action.endDate = string_to_datetime(action_desc['endDate'])
-    #TODO:plannedEndDate, directionDate другой формат дат
+    #TODO:begDate, endDate, plannedEndDate, directionDate другой формат дат
+    action.begDate = action_desc['begDate']
+    action.endDate = action_desc['endDate']
     action.plannedEndDate = action_desc['planned_endDate'] or now
     action.status = action_desc['status']['id']
     action.setPerson_id = safe_traverse(action_desc, 'set_person', 'id')
