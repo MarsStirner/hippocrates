@@ -32,7 +32,7 @@
                     <button class="btn btn-primary" ng-click="select.all()">Все</button>
                     <button class="btn btn-primary" ng-click="select.none()">Снять</button>
                 </div>
-                <label  ng-if="editing" for="weekendCheckBox"><input type="checkbox" id="weekendCheckBox" ng-model="weekends_selectable"> Выбирать выходные</label>
+                <label ng-show="editing" for="weekendCheckBox"><input type="checkbox" id="weekendCheckBox" ng-model="weekends_selectable"> Выбирать выходные</label>
             </div>
             <div class="row">
                 <div class="col-md-12">
