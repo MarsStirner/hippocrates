@@ -10,7 +10,7 @@ from application.lib.utils import safe_unicode, safe_int, safe_dict
 from application.models.enums import EventPrimary, EventOrder, ActionStatus, Gender
 from application.models.event import Event, EventType, Diagnosis, Diagnostic
 
-from application.models.schedule import Schedule, rbReceptionType, ScheduleClientTicket
+from application.models.schedule import Schedule, rbReceptionType, ScheduleClientTicket, ScheduleTicket
 from application.models.actions import Action, ActionProperty
 from application.models.exists import rbRequestType
 
@@ -360,9 +360,12 @@ class ClientVisualizer(object):
                 client.appointments
             )
         else:
+            appointments = (client.appointments.join(ScheduleClientTicket.ticket).join(ScheduleTicket.schedule).
+                            filter(ScheduleClientTicket.event_id.is_(None)).
+                            order_by(Schedule.date.desc(), ScheduleTicket.begTime.desc()))
             return map(
                 self.make_appointment,
-                client.appointments.filter(ScheduleClientTicket.event_id.is_(None))
+                appointments
             )
 
     def make_appointment(self, apnt):
@@ -386,7 +389,9 @@ class ClientVisualizer(object):
     def make_events(self, client):
         return map(
             self.make_event,
-            client.events.join(EventType).join(rbRequestType).filter(rbRequestType.code == u'policlinic')
+            (client.events.join(EventType).join(rbRequestType)
+             .filter(rbRequestType.code == u'policlinic')
+             .order_by(Event.setDate.desc()))
         )
 
     def make_person(self, person):
