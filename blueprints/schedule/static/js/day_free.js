@@ -33,7 +33,7 @@ var DayFreeCtrl = function ($scope, $http) {
             }
             $scope.roa = false;
             $scope.day = data.result.schedules[0].grouped[$scope.reception_type].schedule[0];
-            $scope.destination = aux.forEach(data.result.schedules[0].grouped, function (group) {
+            $scope.destination = data.result.schedules[0].grouped.forEach(function (group) {
                 $scope.roa |= Boolean(group.schedule[0].roa);
                 return group.schedule[0].tickets;
             });
@@ -53,7 +53,7 @@ var DayFreeCtrl = function ($scope, $http) {
                 return;
             }
             $scope.sourcePerson = data.result.schedules[0].person;
-            $scope.source = aux.forEach(data.result.schedules[0].grouped, function (group) {
+            $scope.source = data.result.schedules[0].grouped.forEach(function (group) {
                 return group.schedule[0].tickets;
             });
         }).then(function () {

@@ -53,7 +53,7 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
             return !orgstructures || aux.any_in(current_user.action_type_org_structures, orgstructures)
         }
         function personally_acceptable(id) {
-            return !current_user.action_type_personally.length || aux.inArray(current_user.action_type_personally, id)
+            return !current_user.action_type_personally.length || current_user.action_type_personally.has(id)
         }
         function keywords_acceptable(keywords, item) {
             return keywords.filter(function (keyword) {
@@ -192,14 +192,14 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
                     };
                     $scope.hidden_nodes = [];
                     $scope.toggle_vis = function (node_id) {
-                        if (aux.inArray($scope.hidden_nodes, node_id)) {
+                        if ($scope.hidden_nodes.has(node_id)) {
                             $scope.hidden_nodes.splice($scope.hidden_nodes.indexOf(node_id), 1);
                         } else {
                             $scope.hidden_nodes.push(node_id);
                         }
                     };
                     $scope.subtree_shown = function (node_id) {
-                        return !aux.inArray($scope.hidden_nodes, node_id);
+                        return !$scope.hidden_nodes.has(node_id);
                     };
                     $scope.cancel = function () {
                         $modalInstance.dismiss('close');

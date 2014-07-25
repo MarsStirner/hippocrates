@@ -52,7 +52,7 @@ var DaySetupModalCtrl = function ($scope, $modalInstance, selected_days, model, 
         $scope.sync_times();
     };
     $scope.delete_interval = function(interval) {
-        aux.removeFromArray($scope.model.intervals, interval);
+        $scope.model.intervals.remove(interval);
         $scope.sync_times();
     };
 
@@ -64,7 +64,7 @@ var DaySetupModalCtrl = function ($scope, $modalInstance, selected_days, model, 
             $scope.used_rts = used_codes;
             $scope.rec_types.forEach(function(rec_type) {
                 var code = rec_type.code;
-                if (aux.inArray(used_codes, code)) {
+                if (used_codes.has(code)) {
                     if (!$scope.model.info[code]) {
                         $scope.model.info[code] = {
                             'CITO': 0,
@@ -330,7 +330,7 @@ var ScheduleMonthCtrl = function ($scope, $http, $modal, RefBook) {
         });
         modalInstance.result.then(function(result) {
             var processed_days = $scope.selected_days.filter(function(day_schedule) {
-                return aux.inArray(result.selected_days, day_schedule.date); // strings
+                return result.selected_days.has(day_schedule.date); // strings
             });
 
             var model = result.model;

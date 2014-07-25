@@ -507,7 +507,7 @@ var EventServicesCtrl = function($scope, $http, WMEventService) {
     };
 
     $scope.add_service = function(service) {
-        if (!aux.inArray($scope.event.services, service)) {
+        if (!$scope.event.services.has(service)) {
             var service_data = angular.extend(service, {
                 amount: 1,
                 is_new: true,
@@ -833,14 +833,14 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, P
 
     $scope.hidden_nodes = [];
     $scope.toggle_vis = function (node_id) {
-        if (aux.inArray($scope.hidden_nodes, node_id)) {
+        if ($scope.hidden_nodes.has(node_id)) {
             $scope.hidden_nodes.splice($scope.hidden_nodes.indexOf(node_id), 1);
         } else {
             $scope.hidden_nodes.push(node_id);
         }
     };
     $scope.subtree_shown = function (node_id) {
-        return !aux.inArray($scope.hidden_nodes, node_id);
+        return !$scope.hidden_nodes.has(node_id);
     };
 
     $scope.open_action = function (action_id) {

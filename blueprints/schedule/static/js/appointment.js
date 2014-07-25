@@ -94,7 +94,7 @@ var PersonAppointmentCtrl = function ($scope, $http, RefBook, WMAppointmentDialo
             if ($scope.is_folded(person_schedule.person.id)) {
                 return {
                     person: person_schedule.person,
-                    grouped: aux.forEach(person_schedule.grouped, function (grouped_schedule) {
+                    grouped: person_schedule.grouped.forEach(function (grouped_schedule) {
                         var max_tickets = 0;
                         var schedule = grouped_schedule.schedule.map(function (day) {
                             var result = {
@@ -128,7 +128,7 @@ var PersonAppointmentCtrl = function ($scope, $http, RefBook, WMAppointmentDialo
     };
 
     $scope.is_folded = function (person_id) {
-        return aux.inArray($scope.foldedArray, person_id);
+        return $scope.foldedArray.has(person_id);
     };
 
     $scope.person_fold = function (person_id) {

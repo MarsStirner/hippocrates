@@ -115,7 +115,7 @@ angular.module('WebMis20.directives')
             $scope.selected_templates = [];
             $scope.mega_model = {};
             $scope.toggle_select_template = function (template) {
-                if (aux.inArray($scope.selected_templates, template)) {
+                if ($scope.selected_templates.has(template)) {
                     $scope.selected_templates.splice($scope.selected_templates.indexOf(template), 1);
                     $scope.mega_model[template.id] = undefined;
                 } else {
@@ -132,7 +132,7 @@ angular.module('WebMis20.directives')
                     $scope.mega_model = {};
                 } else {
                     $scope.selected_templates = ps.templates.map(function (template) {
-                        if (! aux.inArray($scope.selected_templates, template)) {
+                        if (!$scope.selected_templates.has(template)) {
                             make_model(template)
                         }
                         return template;
@@ -159,7 +159,7 @@ angular.module('WebMis20.directives')
                             context[name] = parseFloat(value);
                         else if (typeName == 'Boolean')
                             context[name] = Boolean(value);
-                        else if (aux.inArray(['Organisation', 'OrgStructure', 'Person', 'Service'], typeName))
+                        else if (['Organisation', 'OrgStructure', 'Person', 'Service'].has(typeName))
                             context[name] = value ? value.id : null;
                         else context[name] = value
                     });
@@ -320,7 +320,7 @@ angular.module('WebMis20.directives')
                 }
             }
             if (ctrl.$parent) {
-                aux.removeFromArray(ctrl.$parent.$children, ctrl)
+                ctrl.$parent.$children.remove(ctrl)
             }
         };
         this.registerToc = function (the_toc) {

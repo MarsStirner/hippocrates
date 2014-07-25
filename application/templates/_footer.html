@@ -103,12 +103,12 @@
 <script>
     'use strict';
     current_user.has_role = function () {
-        return aux.arrayCopy(arguments).filter(aux.func_in(current_user.roles)).length > 0;
+        return Array.prototype.filter(arguments, aux.func_in(current_user.roles)).length > 0;
     };
     current_user.has_right = function () {
-        return aux.arrayCopy(arguments).filter(aux.func_in(current_user.rights)).length > 0;
+        return Array.prototype.filter(arguments, aux.func_in(current_user.rights)).length > 0;
     };
     current_user.current_role_maybe = function () {
-        return aux.inArray(aux.arrayCopy(arguments), current_user.current_role);
+        return Array.prototype.has(arguments, current_user.current_role);
     };
 </script>
