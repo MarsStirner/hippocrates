@@ -5,7 +5,8 @@
     <div ng-controller="ScheduleDayCtrl">
         <div class="col-md-2">
             <div class="well">
-                <datepicker ng-model="date" show-weeks="false" ng-change="dateChanged();"></datepicker>
+                <datepicker class="vbmargin10" ng-model="date" show-weeks="false" ng-change="dateChanged();"></datepicker>
+                <button ng-click="today()" class="btn btn-sm btn-block btn-info ng-binding" type="button">Сегодня</button>
             </div>
             <div class="well-sm alert alert-info" ng-if="schedules[0].scheds">
                 <a href="{{ url_for('schedule.index', person_id=current_user.id) }}" target="_blank" class="pull-right" title="Посмотреть полный график"><h4 class="glyphicon glyphicon-calendar novmargin"></h4></a>
@@ -15,10 +16,10 @@
             </div>
             <p ng-repeat="schedule in schedules[0].scheds">
                 <legend><a href="javascript:;" title="Показать/скрыть прошедшие записи" class="pull-right small" ng-click="show_past_tickets=!show_past_tickets"><span class="glyphicon" ng-class="{'glyphicon-resize-full': !show_past_tickets, 'glyphicon-resize-small': show_past_tickets}"></span></a><small>[[schedule.reception_type.name]]: [[ (schedules[0].date + ' ' + schedule.begTime|asTime) | asTime ]] - [[ (schedules[0].date + ' ' + schedule.endTime) | asTime ]]</small></legend>
-                <button ng-repeat="ticket in schedule.tickets" ui-schedule-ticket="ticket" day="schedules[0].date" show-name="true" ng-click="ticket_choose(ticket);" ng-show="show_past_tickets || ticket.attendance_type.code == 'CITO' || ticket.attendance_type.code == 'extra' || show_time(ticket.begDateTime)"></button>
+                <button ng-repeat="ticket in schedule.tickets" ui-schedule-ticket="ticket" day="schedules[0].date" show-name="true" ng-click="ticket_choose(ticket);" ng-show="show_past_tickets || ticket.attendance_type.code == 'CITO' || ticket.attendance_type.code == 'extra' || show_time(ticket.begDateTime)" ng-class="{'disabled': !client || ticket.disabled}"></button>
             </p>
         </div>
-        <div class="col-md-10">
+        <div class="col-md-10" id="client_top">
         {% include "_breadcrumbs.html" %}
             <div ng-if="client">
                 <legend xmlns="http://www.w3.org/1999/html">

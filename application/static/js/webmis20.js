@@ -560,7 +560,7 @@ var WebMis20 = angular.module('WebMis20', [
                 }
                 if (n == 'busy') {
                     elem.removeClass('btn-success btn-warning btn-gray disabled');
-                    elem.addClass('btn-danger');
+                    elem.addClass('btn-primary');
                     if (scope.showName) {
                         text += ' - ' + scope.ticket.client
                     }
@@ -572,9 +572,10 @@ var WebMis20 = angular.module('WebMis20', [
                         case 'extra': elem.addClass('btn-gray'); break;
                     }
                     var now = moment();
-                    if (scope.day.roa ||
+                    scope.ticket.disabled = scope.day.roa ||
                         scope.ticket.begDateTime && (moment(scope.ticket.begDateTime) < now) ||
-                                                     moment(scope.day.date) < now.startOf('day')) {
+                                                     moment(scope.day.date) < now.startOf('day');
+                    if (scope.ticket.disabled) {
                         elem.addClass('disabled');
                     }
                 }

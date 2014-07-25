@@ -1,11 +1,7 @@
-var ScheduleDayCtrl = function ($scope, $http, $modal, $filter, WMClient, PrintingService, $interval, WMAppointmentDialog) {
+var ScheduleDayCtrl = function ($scope, $http, $modal, $filter, WMClient, PrintingService, $interval, WMAppointmentDialog, $location, $anchorScroll) {
     $scope.client_id = null;
     $scope.client = null;
 //    $scope.show_past_tickets = false;
-    $scope.today = function () {
-        $scope.date = new Date();
-    };
-    $scope.today();
 
     $scope.loadData = function () {
         $http.get(
@@ -27,7 +23,11 @@ var ScheduleDayCtrl = function ($scope, $http, $modal, $filter, WMClient, Printi
         $scope.loadData();
     };
 
-    $scope.dateChanged();
+    $scope.today = function () {
+        $scope.date = new Date();
+        $scope.dateChanged();
+    };
+    $scope.today();
 
     $scope.show_time = function (date_time) {
         return moment(date_time).isAfter(moment().subtract(1, 'hours'));
@@ -52,6 +52,8 @@ var ScheduleDayCtrl = function ($scope, $http, $modal, $filter, WMClient, Printi
                             $scope.client.policies.push(value.policy_text + ' (' + $filter('asDate')(value.beg_date) + '-' + $filter('asDate')(value.end_date) + ')');
                         });
                     }
+                    $location.hash('client_top');
+                    $anchorScroll();
                 });
             $scope.client.reload('for_servicing');
         } else if ($scope.client) {
@@ -108,4 +110,4 @@ var ScheduleDayCtrl = function ($scope, $http, $modal, $filter, WMClient, Printi
         }
     });
 };
-WebMis20.controller('ScheduleDayCtrl', ['$scope', '$http', '$modal', '$filter', 'WMClient', 'PrintingService', '$interval', 'WMAppointmentDialog', ScheduleDayCtrl]);
+WebMis20.controller('ScheduleDayCtrl', ['$scope', '$http', '$modal', '$filter', 'WMClient', 'PrintingService', '$interval', 'WMAppointmentDialog', '$location', '$anchorScroll', ScheduleDayCtrl]);
