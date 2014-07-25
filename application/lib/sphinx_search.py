@@ -31,11 +31,13 @@ class SearchPatient():
         search = search.match(name).limit(0, 100)
         search = search.options(field_weights={'code': 100,
                                                'lastName': 90,
-                                               'firstName': 80,
-                                               'patrName': 70,
-                                               'SNILS': 60,
-                                               'document': 60,
-                                               'policy': 60})
+                                               'birthDate_f1': 80,
+                                               'birthDate_f2': 80,
+                                               'firstName': 70,
+                                               'patrName': 60,
+                                               'SNILS': 50,
+                                               'document': 50,
+                                               'policy': 50})
         result = search.ask()
         return result
 
