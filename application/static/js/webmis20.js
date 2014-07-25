@@ -115,11 +115,11 @@ var WebMis20 = angular.module('WebMis20', [
         var value = data[key];
         if (!value) return value;
         var result = moment(value);
-        if (aux.endswith(key, 'Date')) {
+        if (key.endswith('Date')) {
             return result.format('DD.MM.YYYY');
-        } else if (aux.endswith(key, 'DateTime')) {
+        } else if (key.endswith('DateTime')) {
             return result.format('DD.MM.YYYY HH:mm');
-        } else if (aux.endswith(key, 'Time')) {
+        } else if (key.endswith('Time')) {
             return result.format('HH:mm');
         } else {
             if (result.isValid()) {
@@ -147,7 +147,7 @@ var WebMis20 = angular.module('WebMis20', [
                 })
             } else if (value instanceof Array) {
                 return array.filter(function (item) {
-                    return aux.inArray(value, item[attribute]);
+                    return value.has(item[attribute]);
                 })
             } else {
                 return array.filter(function (item) {
@@ -525,7 +525,7 @@ var WebMis20 = angular.module('WebMis20', [
             };
             scope.search = function (actual, expected) {
                 return actual.split(' ').filter(function (part) {
-                    return aux.startswith(part, expected)
+                    return part.startswith(expected)
                 }).length > 0;
             };
             function to_hide () {
@@ -834,30 +834,6 @@ var aux = {
         {name: 'Ноябрь', value: 10},
         {name: 'Декабрь', value: 11}
     ],
-    endswith: function (str, suffix) {
-        return str.indexOf(suffix, str.length - suffix.length) !== -1;
-    },
-    startswith: function (str, prefix) {
-        return str.indexOf(prefix) === 0;
-    },
-    format: function (record, key) {
-        if (typeof (record) === 'undefined') {
-            return null;
-        } else if (aux.endswith(key, 'DateTime')) {
-            return moment(record[key]).format('DD-MM-YYYY HH:mm');
-        } else if (aux.endswith(key, 'Date')) {
-            return moment(record[key]).format('DD-MM-YYYY');
-        } else {
-            return record[key];
-        }
-    },
-    arrayCopy: function (source) {
-        // proven fastest copy mechanism http://jsperf.com/new-array-vs-splice-vs-slice/28
-        var b = [];
-        var i = source.length;
-        while (i--) {b[i] = source[i]}
-        return b;
-    },
     func_in: function (against) {
         return function (item) {
             return against.indexOf(item) !== -1;
@@ -868,15 +844,6 @@ var aux = {
             return against.indexOf(item) === -1;
         }
     },
-    find_by_code: function (where, code, field) {
-        if (typeof (field) === 'undefined') field = 'code';
-        var subresult = where.filter(function (item) {return item[field] == code});
-        if (subresult.length === 0) return null;
-        return subresult[0]
-    },
-    inArray: function (array, item) {
-        return array.indexOf(item) !== -1;
-    },
     any_in: function (what, where) {
         for (var i = what.length-1; i >= 0; i--) {
             for (var j = where.length-1; j >= 0; j--) {
@@ -886,18 +853,6 @@ var aux = {
             }
         }
         return false;
-    },
-    removeFromArray: function (array, item) {
-        if (aux.inArray(array, item))
-            array.splice(array.indexOf(item), 1)
-    },
-    forEach: function (object, callback) {
-        var result = {};
-        var key;
-        for (key in object) {
-            result[key] = callback(object[key]);
-        }
-        return result
     }
 };
 if (!HTMLElement.prototype.hasOwnProperty('getOffsetRect')) {
@@ -917,5 +872,58 @@ if (!HTMLElement.prototype.hasOwnProperty('getOffsetRect')) {
         var top  = box.top +  scrollTop - clientTop;
         var left = box.left + scrollLeft - clientLeft;
         return { top: Math.round(top), left: Math.round(left) }
+    }
+}
+if (!String.prototype.format) {
+    String.prototype.format = function() {
+        var args = arguments;
+        return this.replace(/{(\d+)}/g, function(match, number) {
+            return typeof args[number] != 'undefined'
+                ? args[number]
+                : match
+                ;
+        });
+    };
+}
+if (!String.prototype.startswith) {
+    String.prototype.startswith = function (prefix) {
+        return this.indexOf(prefix) === 0;
+    }
+}
+if (!String.prototype.endswith) {
+    String.prototype.endswith = function (suffix) {
+        return this.indexOf(suffix, this.length - suffix.length) !== -1;
+    }
+}
+if (!Array.prototype.clone) {
+    Array.prototype.clone = function () {
+        var b = [];
+        var i = this.length;
+        while (i--) {b[i] = this[i]}
+        return b;
+    }
+}
+if (!Array.prototype.has) {
+    Array.prototype.has = function (item) {
+        return this.indexOf(item) !== -1
+    }
+}
+if (!Array.prototype.remove) {
+    Array.prototype.remove = function (item) {
+        var index = this.indexOf(item);
+        if (index !== -1) {
+            return this.splice(index, 1)
+        } else {
+            if (arguments[1]) {
+                throw Error('Array doesn\'t have element')
+            } else {
+                return undefined
+            }
+        }
+    }
+}
+if (!Array.range) {
+    Array.range = function (num) {
+        return Array.apply(null, new Array(num)).map(function(_, i) {return i;})
     }
 }

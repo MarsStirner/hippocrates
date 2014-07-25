@@ -10,7 +10,7 @@
                 <span class="input-group-addon"><span class="glyphicon glyphicon-search"></span></span>
                 <input id="search" class="form-control" type="text" ng-model="query" autocomplete="off"
                        ng-change="clear_results()" wm-slow-change="perform_search()"
-                       placeholder="Поиск пациента по коду, ФИО, полису или документу, удостоверяющему личность">
+                       placeholder="Поиск пациента по коду, ФИО, дате рождения, полису или документу, удостоверяющему личность">
                 <span class="input-group-btn">
                     <button class="btn btn-danger" ng-click="query_clear()"><span class="glyphicon glyphicon-remove"></span></button>
                 </span>
@@ -49,7 +49,7 @@
                         ng-class="{'bg-info text-info': result.info.id === client_id}">
                     <td ng-bind-html="result.info.id | highlight: query"></td>
                     <td ng-bind-html="result.info.full_name | highlight: query"></td>
-                    <td ng-bind="result.info.birth_date | asDate"></td>
+                    <td ng-bind-html="result.info.birth_date | asDate | highlight: query"></td>
                     <td ng-bind="result.info.sex.name"></td>
                     <td ng-bind-html="result.id_document.doc_text | highlight: query"></td>
                     <td ng-bind-html="wmClientCtrl.formatSnils(result.info.snils) | highlight: query"></td>

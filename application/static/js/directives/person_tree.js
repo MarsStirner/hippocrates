@@ -42,8 +42,6 @@ angular.module('WebMis20.directives.personTree', [])
             $scope.data = [];
             $scope.query = '';
             $scope.tree = [];
-//            $scope.lockedPersons = [];
-//            $scope.userSelected = [];
             $scope.reloadTree = function() {
                 $http.get(
                     url_schedule_all_persons_tree
@@ -54,7 +52,6 @@ angular.module('WebMis20.directives.personTree', [])
             };
             $scope.reset = function () {
                 $scope.query = '';
-//                $scope.userSelected = [];
                 $scope.reloadTree();
             };
             $scope.compose = function () {
@@ -66,7 +63,7 @@ angular.module('WebMis20.directives.personTree', [])
                             return $scope.query == '' || words.filter(function (word) {
                                 var data = [].concat(person.nameFull, [spec_group.speciality.name]);
                                 return data.filter(function (namePart) {
-                                    return aux.startswith(namePart.toLocaleLowerCase(), word.toLocaleLowerCase())
+                                    return namePart.toLocaleLowerCase().startswith(word.toLocaleLowerCase())
                                 }).length > 0;
                             }).length == words.length;
                         }).map(function (person) {
@@ -74,8 +71,8 @@ angular.module('WebMis20.directives.personTree', [])
                                 id: person.id,
                                 name: person.name,
                                 nameFull: person.nameFull.join(' '),
-                                disabled: $.inArray(person.id, $scope.lockedPersons) !== -1,
-                                checked: $.inArray(person.id, [].concat($scope.lockedPersons, $scope.userSelected)) !== -1
+                                disabled: ($scope.lockedPersons || []).has(person.id),
+                                checked: [].concat($scope.lockedPersons, $scope.userSelected).has(person.id)
                             }
                         })
                     }
@@ -98,7 +95,6 @@ angular.module('WebMis20.directives.personTree', [])
                     })
                 });
                 $scope.userSelected = userSelected;
-//                $scope.$root.$broadcast('UserSelectionChanged', person, userSelected);
             };
             $scope.clear = function () {
                 $scope.query = '';
@@ -110,16 +106,6 @@ angular.module('WebMis20.directives.personTree', [])
             $scope.$watch('personId', function (new_value, old_value) {
                 $scope.compose();
             });
-//            $scope.$on('DataSelectedChanged', function (event, lockedPersons) {
-//                $scope.lockedPersons = lockedPersons;
-//                $scope.compose();
-//            });
-//            $scope.$on('UserSelectionChanged', function (event) {
-//                $scope.compose();
-//            });
-//            $scope.$on('Reset', function () {
-//                $scope.reset();
-//            });
             var we = $(element);
             var person_input = we.find('input#person_query');
             var person_query_group = we.find('#person-query-group');
@@ -143,19 +129,7 @@ angular.module('WebMis20.directives.personTree', [])
                 $scope.query = person.nameFull;
                 $scope.hide_tree();
                 $scope.personId = person.id;
-//                $scope.$root.$broadcast('PersonSelected', person);
             };
-//            $scope.$on('ManuallySelectedPersonId', function (event, id) {
-//                var name = null;
-//                $scope.data.map(function (spec_group) {
-//                    spec_group.map(function (person) {
-//                        if (person.id == id) {
-//                            name = person.nameFull.join(' ')
-//                        }
-//                    })
-//                });
-//                $scope.query = name;
-//            });
             $scope.reset();
         }
     }
