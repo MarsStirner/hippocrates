@@ -10,6 +10,7 @@ var CreateEventModalCtrl = function ($scope, $modalInstance) {
     };
 };
 var ClientModalCtrl = function ($scope, $modalInstance, client, PrintingService, $modal, $interval) {
+    $scope.current_user = current_user;
     $scope.client = client;
     $scope.client_id = client.client_id;
     $scope.child_window = {};

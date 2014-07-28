@@ -116,7 +116,7 @@ angular.module('WebMis20.directives')
             $scope.mega_model = {};
             $scope.toggle_select_template = function (template) {
                 if ($scope.selected_templates.has(template)) {
-                    $scope.selected_templates.splice($scope.selected_templates.indexOf(template), 1);
+                    $scope.selected_templates.remove(template);
                     $scope.mega_model[template.id] = undefined;
                 } else {
                     $scope.selected_templates.push(template);
@@ -430,7 +430,7 @@ angular.module('WebMis20.directives')
                 <tbody>\
                     <tr ng-repeat="template in ps.templates">\
                         <td>\
-                            <input type="checkbox" ng-checked="aux.inArray(selected_templates, template)" id="template-id-[[template.id]]" ng-click="toggle_select_template(template)">\
+                            <input type="checkbox" ng-checked="selected_templates.has(template)" id="template-id-[[template.id]]" ng-click="toggle_select_template(template)">\
                             </td>\
                             <td>\
                                 <label for="template-id-[[template.id]]" ng-bind="template.name"></label>\

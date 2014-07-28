@@ -104,12 +104,12 @@
 <script>
     'use strict';
     current_user.has_role = function () {
-        return Array.prototype.filter(arguments, aux.func_in(current_user.roles)).length > 0;
+        return [].clone.call(arguments).filter(aux.func_in(current_user.roles)).length > 0;
     };
     current_user.has_right = function () {
-        return Array.prototype.filter(arguments, aux.func_in(current_user.rights)).length > 0;
+        return [].clone.call(arguments).filter(aux.func_in(current_user.rights)).length > 0;
     };
     current_user.current_role_maybe = function () {
-        return Array.prototype.has(arguments, current_user.current_role);
+        return [].clone.call(arguments).has(current_user.current_role);
     };
 </script>
