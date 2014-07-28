@@ -3,9 +3,9 @@
 
 {% block main %}
     <div ng-controller="ScheduleDayCtrl">
-        <div class="col-md-2">
+        <div class="col-lg-3 col-md-3">
             <div class="well">
-                <datepicker class="vbmargin10" ng-model="date" show-weeks="false" ng-change="dateChanged();"></datepicker>
+                <datepicker class="vbmargin10" style="width: 100%" ng-model="date" show-weeks="false" ng-change="dateChanged();"></datepicker>
                 <button ng-click="today()" class="btn btn-sm btn-block btn-info ng-binding" type="button">Сегодня</button>
             </div>
             <div class="well-sm alert alert-info" ng-if="schedules[0].scheds">
@@ -19,18 +19,18 @@
                 <button ng-repeat="ticket in schedule.tickets" ui-schedule-ticket="ticket" day="schedules[0].date" show-name="true" ng-click="ticket_choose(ticket);" ng-show="show_past_tickets || ticket.attendance_type.code == 'CITO' || ticket.attendance_type.code == 'extra' || show_time(ticket.begDateTime)" ng-class="{'disabled': !client || ticket.disabled}"></button>
             </p>
         </div>
-        <div class="col-md-10" id="client_top">
+        <div class="col-lg-9 col-md-9" id="client_top">
         {% include "_breadcrumbs.html" %}
             <div ng-if="client">
-                <legend xmlns="http://www.w3.org/1999/html">
-                    <div class="pull-right" ng-if="client.info.full_name">
-                        <button class="btn btn-sm btn-primary" ng-click="new_appointment(ticket.record.client_id)" title="Записать на приём"><span class="glyphicon glyphicon-tag"></span></button>
-                        <button class="btn btn-sm btn-primary" ng-if="!ticket.record.event_id" ng-click="new_event(client.info.id, ticket.record.id)" title="Создать обращение"><span class="glyphicon glyphicon-plus"></span></button>
-                        <button class="btn btn-sm btn-primary" ng-if="ticket.record.event_id" ng-click="open_event(ticket.record.event_id)" title="Открыть обращение #[[icket.record.event_id]]"><span class="glyphicon glyphicon-pencil"></span></button>
-                        <ui-print-button ps="ps_amb" class="btn-sm" resolve="ps_amb_resolve(ticket.record.client_id, ticket.record.id)"></ui-print-button>
-                    </div>
+                <legend class="vbmargin10">
                     <h2>[[ client.info.full_name ]] <small ng-if="client.info.full_name">(запись на [[ticket.begDateTime|asTime]])</small></h2>
                 </legend>
+                <div ng-if="client.info.full_name" class="vbmargin10">
+                    <button class="btn btn-lg btn-success" ng-if="!ticket.record.event_id" ng-click="new_event(client.info.id, ticket.record.id)" title="Создать обращение">Создать обращение</button>
+                    <button class="btn btn-lg btn-success" ng-if="ticket.record.event_id" ng-click="open_event(ticket.record.event_id)" title="Открыть обращение #[[icket.record.event_id]]">Открыть обращение #[[icket.record.event_id]]</button>
+                    <button class="btn btn-lg btn-primary" ng-click="new_appointment(ticket.record.client_id)" title="Записать на приём к другому специалисту">Записать на приём</button>
+                    <ui-print-button ps="ps_amb" class="btn-lg" resolve="ps_amb_resolve(ticket.record.client_id, ticket.record.id)"></ui-print-button>
+                </div>
                 <div class="well well-sm">
                     <div class="row">
                         <div class="col-md-9">
