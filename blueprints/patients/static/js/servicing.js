@@ -14,6 +14,7 @@ var ClientModalCtrl = function ($scope, $modalInstance, client, PrintingService,
     $scope.client = client;
     $scope.client_id = client.client_id;
     $scope.child_window = {};
+    $scope.alerts = [];
 
     $scope.ps = new PrintingService('registry');
     $scope.ps_resolve = function () {

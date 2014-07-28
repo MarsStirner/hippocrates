@@ -152,6 +152,8 @@ class Client(db.Model):
         """
         @type moment: datetime.datetime
         """
+        if not self.birthDate:
+            return None
         if not moment:
             moment = datetime.date.today()
         return calcAgeTuple(self.birthDate, moment)
