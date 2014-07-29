@@ -13,12 +13,12 @@
         <tbody>
         <tr ng-repeat="(index, action) in {{ model }}">
             <td ng-click="open_action(action.id)">[[ action.name ]]</td>
-            <td>[[action.status.name]]</td>
+            <td ng-click="open_action(action.id)">[[action.status.name]]</td>
             <td ng-click="open_action(action.id)">[[ action.begDate | asDate ]]</td>
             <td ng-click="open_action(action.id)">[[ action.endDate | asDateTime ]]</td>
             <td ng-click="open_action(action.id)">[[ action.person_text ]]</td>
             <td>
-                <button type="button" class="btn btn-sm btn-danger" title="Удалить"
+                <button type="button" class="btn btn-sm btn-danger" title="Удалить" ng-show="action.status.code != 'finished'"
                         ng-click="open_delete_action_modal({{ action_type_class }}, index, action.name)"><span class="glyphicon glyphicon-trash"></span>
                 </button>
             </td>
