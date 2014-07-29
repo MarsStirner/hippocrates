@@ -80,27 +80,6 @@
 <script src="{{ url_for('static', filename='js/services/appointment_dialog.js', v=version) }}"></script>
 <script src="{{ url_for('static', filename='js/controllers.js', v=version) }}"></script>
 <script src="{{ url_for('static', filename='js/loader.js', v=version) }}"></script>
-<script type="text/ng-template" id="_timePicker.html">
-    <div class="input-group">
-        <input type="text" id="{{id}}" name="{{name}}" class="form-control"
-               ng-model="ngModel" autocomplete="off"
-               ng-required="ngRequired" show-time ng-disabled="ngDisabled"/>
-        <span class="input-group-btn">
-            <button class="btn btn-default" type="button" ng-click="open_timepicker_popup()" ng-disabled="ngDisabled">
-                <i class="glyphicon glyphicon-time"></i>
-            </button>
-            <div class="timepicker_popup" ng-show="isPopupVisible">
-                <div ng-model="ngModel" style="display:inline-block;">
-                    <timepicker show-meridian="false"></timepicker>
-                </div>
-            </div>
-        </span>
-
-    </div>
-</script>
-<script type="text/ng-template" id="kladr-ui.html">
-    {% include "kladr-ui.html" %}
-</script>
 <script>
     'use strict';
     current_user.has_role = function () {

@@ -23,13 +23,13 @@ def create_new_local_contract(lc_info):
     lcon.coordAgent = lc_info.get('coord_agent', '')
     lcon.coordInspector = lc_info.get('coord_inspector', '')
     lcon.coordText = lc_info.get('coord_text', '')
-
+    # FIXME: contracts!
     if Settings.getBool('Event.Payment.1CODVD'):
         lcon.dateContract = lc_info.get('date_contract') or datetime.date.today()
         lcon.numberContract = lc_info.get('number_contract') or ''
     else:
-        lcon.dateContract = lc_info['date_contract']
-        lcon.numberContract = lc_info['number_contract']
+        lcon.dateContract = lc_info.get('date_contract') or datetime.date.today()  # lc_info['date_contract']
+        lcon.numberContract = lc_info.get('number_contract') or ''  # lc_info['number_contract']
     lcon.sumLimit = lc_info.get('sum_limit', 0.0)
     lcon.lastName = lc_info.get('last_name')
     lcon.firstName = lc_info.get('first_name')
