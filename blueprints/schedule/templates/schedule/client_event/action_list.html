@@ -3,6 +3,7 @@
         <thead>
         <tr>
             <th>Тип действия</th>
+            <th>Состояние</th>
             <th>Начало</th>
             <th>Конец</th>
             <th>Исполнитель</th>
@@ -12,6 +13,7 @@
         <tbody>
         <tr ng-repeat="(index, action) in {{ model }}">
             <td ng-click="open_action(action.id)">[[ action.name ]]</td>
+            <td>[[action.status.name]]</td>
             <td ng-click="open_action(action.id)">[[ action.begDate | asDate ]]</td>
             <td ng-click="open_action(action.id)">[[ action.endDate | asDateTime ]]</td>
             <td ng-click="open_action(action.id)">[[ action.person_text ]]</td>

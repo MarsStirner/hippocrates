@@ -540,7 +540,8 @@ class EventVisualizer(object):
         return {
             'id': action.id,
             'name': action.actionType.name,
-            'status': action.status,
+            'status': ActionStatus(action.status),
+            'status_': action.status,
             'begDate': action.begDate,
             'endDate': action.endDate,
             'person_text': safe_unicode(action.person)

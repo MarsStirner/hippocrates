@@ -9,6 +9,7 @@ from application.lib.utils import logger, get_new_uuid
 from application.models.actions import Action, ActionType, ActionPropertyType, ActionProperty
 from application.models.exists import Person
 from application.models.event import Event
+from application.models.enums import ActionStatus
 from application.lib.agesex import recordAcceptableEx
 from application.lib.calendar import calendar
 
@@ -56,7 +57,7 @@ def create_action(event_id, action_type_id, current_user_id, data):
     action.office = actionType.office or u''
     # action.amount = actionType.amount if actionType.amountEvaluation in (0, 7) else 1
     action.amount = 1
-    action.status = 0
+    action.status = ActionStatus.started[0]
     action.note = ''
     action.payStatus = 0
     action.account = int(data.get('account', 1))
