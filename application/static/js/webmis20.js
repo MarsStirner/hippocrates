@@ -636,12 +636,27 @@ var WebMis20 = angular.module('WebMis20', [
                 ngRequired: '=',
                 ngDisabled: '='
             },
-            templateUrl: "_timePicker.html",
+            template:
+'<div class="input-group">\
+    <input type="text" id="{{id}}" name="{{name}}" class="form-control"\
+           ng-model="ngModel" autocomplete="off"\
+           ng-required="ngRequired" show-time ng-disabled="ngDisabled"/>\
+    <span class="input-group-btn">\
+        <button class="btn btn-default" type="button" ng-click="open_timepicker_popup()" ng-disabled="ngDisabled">\
+            <i class="glyphicon glyphicon-time"></i>\
+        </button>\
+        <div class="timepicker_popup" ng-show="isPopupVisible">\
+            <div ng-model="ngModel" style="display:inline-block;">\
+                <timepicker show-meridian="false"></timepicker>\
+            </div>\
+        </div>\
+    </span>\
+</div>',
             link: function(scope, element, attr){
                 scope.isPopupVisible = false;
                 scope.open_timepicker_popup = function(){
                     scope.isPopupVisible = !scope.isPopupVisible;
-                }
+                };
 
                 $document.bind('click', function(event){
                     var isClickedElementChildOfPopup = element
@@ -655,7 +670,6 @@ var WebMis20 = angular.module('WebMis20', [
                     scope.$apply();
                   });
             }
-
         };
     }
 ])

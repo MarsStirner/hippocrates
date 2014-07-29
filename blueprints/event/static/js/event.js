@@ -495,9 +495,9 @@ var EventServicesCtrl = function($scope, $http, WMEventService) {
                     }
                 }
             ).success(function (data) {
-                    $scope.found_services = data.result;
-                    $scope.search_processed = true;
-                });
+                $scope.found_services = data.result;
+                $scope.search_processed = true;
+            });
         }
     };
 
@@ -652,7 +652,8 @@ var EventServicesCtrl = function($scope, $http, WMEventService) {
     };
 };
 
-var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, PrintingService, Settings, $filter, $modal, ActionTypeTreeModal) {
+var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, PrintingService, Settings,
+        $filter, $modal, ActionTypeTreeModal) {
     $scope.aux = aux;
     $scope.current_role_maybe = current_user.current_role_maybe;
     $scope.Organisation = RefBookService.get('Organisation');
@@ -672,15 +673,15 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, P
     $scope.action_type_class = function(class_code) {
         switch (class_code){
             case 0:
-                return 'med_doc_actions'
+                return 'med_doc_actions';
             case 1:
-                return 'diag_actions'
+                return 'diag_actions';
             case 2:
-                return 'cure_actions'
+                return 'cure_actions';
             default:
-                return null
+                return null;
         }
-    }
+    };
 
     $scope.initialize = function() {
         $scope.event.reload().
@@ -712,7 +713,8 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, P
 
     $scope.save_event = function (close_event) {
         if (typeof (close_event) === 'undefined') {
-            close_event = false;}
+            close_event = false;
+        }
         $scope.editing.submit_attempt = true;
         if ($scope.eventForm.$valid) {
             $scope.event.save(close_event).
@@ -731,7 +733,6 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, P
                 }, function (message) {
                     alert(message);
                 });
-
         }
     };
 
