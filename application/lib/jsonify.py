@@ -225,7 +225,7 @@ class ScheduleVisualizer(object):
         return result
 
     def make_person_schedule_description(self, person, start_date, end_date):
-        schedules_by_date = (Schedule.query.join(Schedule.tickets)
+        schedules_by_date = (Schedule.query.outerjoin(Schedule.tickets)
                              .filter(Schedule.person_id == person.id,
                                      start_date <= Schedule.date, Schedule.date < end_date,
                                      Schedule.deleted == 0)
