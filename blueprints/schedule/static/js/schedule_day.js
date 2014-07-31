@@ -63,6 +63,7 @@ var ScheduleDayCtrl = function ($scope, $http, $modal, $filter, WMClient, Printi
             }
             instance.result.then(function () {
                 $scope.client.reload('for_servicing');
+                $scope.loadData();
             })
         }
     };

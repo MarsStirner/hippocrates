@@ -231,6 +231,7 @@ class ScheduleVisualizer(object):
                                      Schedule.deleted == 0)
                              .order_by(Schedule.date)
                              .order_by(Schedule.begTime)
+                             .order_by(ScheduleTicket.begTime)
                              .options(db.contains_eager(Schedule.tickets).contains_eager('schedule')))
         return {
             'person': self.make_person(person),
