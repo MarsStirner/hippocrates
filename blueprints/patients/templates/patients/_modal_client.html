@@ -24,9 +24,9 @@
     <div class="text-left" ng-if="client">
         <button class="btn btn-primary" ng-click="new_appointment(client.client_id)">Записать на приём</button>
         <button class="btn btn-primary" ng-click="new_event(client.client_id)"
-                ng-if="client.appointments.length == 0">Создать обращение</button>
+                ng-if="client.appointments.length == 0 || current_user.current_role_maybe('clinicDoctor')">Создать обращение</button>
         <button class="btn btn-primary" ng-click="modal_create_event()"
-                ng-if="client.appointments.length > 0">Создать обращение</button>
+                ng-if="client.appointments.length > 0 && !current_user.current_role_maybe('clinicDoctor')">Создать обращение</button>
         <button class="btn btn-primary" ng-click="open_client(client.client_id)">Редактировать данные пациента</button>
         <ui-print-button ps="ps" resolve="ps_resolve()"></ui-print-button>
     </div>
