@@ -539,8 +539,7 @@ angular.module('WebMis20.services', []).
 
             WMEvent.prototype.get_unclosed_actions = function() {
                 var unclosed_actions = [];
-                var actions = this.info['med_doc_actions'].concat(this.info['diag_actions']).concat(this.info['cure_actions']);
-                actions.forEach(function(item){
+                this.info.actions.forEach(function(item){
                     if (item.status < 2){
                         unclosed_actions.push(item);
                     }

@@ -434,3 +434,25 @@ def parse_id(request_data, identifier, allow_empty=False):
         except ValueError:
             return False
     return _id
+
+from sqlalchemy.sql import expression
+from sqlalchemy.ext import compiler
+
+
+class group_concat(expression.FunctionElement):
+    name = "group_concat"
+
+
+@compiler.compiles(group_concat) # , 'mysql'
+def _group_concat_mysql(element, cmplr, **kw):
+    if len(element.clauses) == 2:
+        separator = cmplr.process(element.clauses.clauses[1])
+    elif len(element.clauses) == 1:
+        separator = ','
+    else:
+        raise SyntaxError(u'group_concat must have 1 or 2 arguments!')
+
+    return 'GROUP_CONCAT({0} SEPARATOR {1})'.format(
+        cmplr.process(element.clauses.clauses[0]),
+        separator,
+        )

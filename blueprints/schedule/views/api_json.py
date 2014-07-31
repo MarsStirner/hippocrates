@@ -446,6 +446,36 @@ def api_action_new_get():
     return jsonify(result)
 
 
+def aux_create_JT(date_time, job_type_id, orgstructure_id):
+    """
+    :type date_time: datetime.datetime
+    :type job_type_id: int
+    :param date_time:
+    :param job_type_id:
+    :return:
+    """
+    from application.models.actions import Job, JobTicket
+    jt_date = date_time.date()
+    job = Job.query.filter(
+        Job.jobType_id == job_type_id,
+        Job.date == jt_date,
+        Job.orgStructure_id == orgstructure_id,
+    )
+    if not job:
+        job = Job()
+        job.date = jt_date
+        job.begTime = '00:00:00'
+        job.endTime = '23:59:59'
+        job.jobType_id = job_type_id
+        job.orgStructure_id = orgstructure_id
+        db.session.add(job)
+    jt = JobTicket()
+    jt.job = job
+    jt.begDateTime = date_time
+    db.session.add(jt)
+    return jt
+
+
 @module.route('/api/actions', methods=['POST'])
 def api_action_post():
     now = datetime.datetime.now()
@@ -492,6 +522,7 @@ def api_action_post():
         action.createDatetime = now
         action.actionType = ActionType.query.get(action_desc['action_type']['id'])
         action.event = Event.query.get(action_desc['event_id'])
+        orgStructure = action.event.current_org_structure if action.actionType.isRequiredTissue else None
         for prop_desc in action_desc['properties']:
             prop_type = ActionPropertyType.query.get(prop_desc['type']['id'])
             prop = ActionProperty()
@@ -504,13 +535,16 @@ def api_action_post():
             if prop_desc['type']['vector']:
                 # Идите в жопу со своими векторными значениями
                 continue
-            if prop_desc['value'] is not None:
+            pd_value = prop_desc['value']
+            if pd_value is not None:
                 prop_value = prop.valueTypeClass()
                 prop_value.property_object = prop
-                if isinstance(prop_desc['value'], dict):
-                    prop_value.value = prop_desc['value']['id']
-                else:
-                    prop_value.value = prop_desc['value']
+                prop_value.value = pd_value['id'] if isinstance(pd_value, dict) else pd_value
+                db.session.add(prop_value)
+            elif prop_type.typeName == 'JobTicket' and orgStructure:
+                prop_value = prop.valueTypeClass()
+                prop_value.property_object = prop
+                prop_value.value = aux_create_JT(action_desc['planned_endDate'] or now, ActionType.jobType_id, orgStructure.id)
                 db.session.add(prop_value)
             db.session.add(prop)
 
@@ -612,13 +646,15 @@ def int_get_atl_flat(at_class):
         t = list(t)
         t[5] = list(parseAgeSelector(t[7]))
         t[7] = t[7].split() if t[7] else None
+        t[8] = bool(t[8])
         return t
 
     raw = db.text(
         ur'''SELECT
             ActionType.id, ActionType.name, ActionType.code, ActionType.flatCode, ActionType.group_id,
             ActionType.age, ActionType.sex,
-            GROUP_CONCAT(OrgStructure_ActionType.master_id SEPARATOR ' ')
+            GROUP_CONCAT(OrgStructure_ActionType.master_id SEPARATOR ' '),
+            ActionType.isRequiredTissue
             FROM ActionType
             LEFT JOIN OrgStructure_ActionType ON OrgStructure_ActionType.actionType_id = ActionType.id
             WHERE ActionType.class = {at_class} AND ActionType.deleted = 0 AND ActionType.hidden = 0

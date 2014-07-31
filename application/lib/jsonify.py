@@ -498,9 +498,7 @@ class EventVisualizer(object):
             'organisation': event.organisation,
             'org_structure': event.orgStructure,
             'note': event.note,
-            'med_doc_actions': [self.make_action(action) for action in event.actions if action.actionType.class_ == 0],
-            'diag_actions': [self.make_action(action) for action in event.actions if action.actionType.class_ == 1],
-            'cure_actions': [self.make_action(action) for action in event.actions if action.actionType.class_ == 2]
+            'actions': map(self.make_action, event.actions),
         }
 
     def make_diagnoses(self, event):
@@ -534,6 +532,19 @@ class EventVisualizer(object):
             'notes': diagnostic.notes,
         }
 
+    def make_action_type(self, action_type):
+        """
+        :type action_type: application.models.actions.ActionType
+        """
+        return {
+            'id': action_type.id,
+            'name': action_type.name,
+            'code': action_type.code,
+            'flat_code': action_type.flatCode,
+            'class': action_type.class_,
+            'is_required_tissue': action_type.isRequiredTissue,
+        }
+
     def make_action(self, action):
         """
         @type action: Action
@@ -541,8 +552,8 @@ class EventVisualizer(object):
         return {
             'id': action.id,
             'name': action.actionType.name,
-            'status': ActionStatus(action.status),
-            'status_': action.status,
+            'type': self.make_action_type(action.actionType),
+            'status': action.status,
             'begDate': action.begDate,
             'endDate': action.endDate,
             'person_text': safe_unicode(action.person)

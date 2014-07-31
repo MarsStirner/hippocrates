@@ -582,13 +582,14 @@ class ActionType(db.Model):
     isRequiredCoordination = db.Column(db.Integer, nullable=False, server_default=u"'0'")
     isRequiredTissue = db.Column(db.Integer, nullable=False, server_default=u"'0'")
     testTubeType_id = db.Column(db.Integer, index=True)
-    jobType_id = db.Column(db.Integer, index=True)
+    jobType_id = db.Column(db.ForeignKey('rbJobType.id'), index=True)
     mnem = db.Column(db.String(32), server_default=u"''")
 
     service = db.relationship(u'rbService', foreign_keys='ActionType.service_id')
     nomenclatureService = db.relationship(u'rbService', foreign_keys='ActionType.nomenclativeService_id')
     property_types = db.relationship(u'ActionPropertyType', lazy='dynamic')
     group = db.relationship(u'ActionType', remote_side=[id])
+    jobType = db.relationship(u'rbJobType', lazy=False)
 
     def get_property_type_by_name(self, name):
         return self.property_types.filter(ActionPropertyType.name == name).first()

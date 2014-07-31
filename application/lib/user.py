@@ -55,9 +55,15 @@ class User(UserMixin):
     def is_admin(self):
         return getattr(self, 'current_role', None) == 'admin'
 
-    def role_in(self, roles):
-        if not isinstance(roles, (list, tuple)):
-            roles = [roles]
+    def role_in(self, *args):
+        roles = []
+        for arg in args:
+            if isinstance(arg, list):
+                roles.extend(arg)
+            elif isinstance(arg, tuple):
+                roles.extend(list(arg))
+            else:
+                roles.append(arg)
         return self.current_role in roles
 
     def has_role(self, role):

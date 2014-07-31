@@ -96,6 +96,25 @@ class Event(db.Model):
         ).first()
 
     @property
+    def current_org_structure(self):
+        """ Get OrgStructure
+        :return: current location of patient
+        :rtype: application.models.exists.OrgStructure
+        """
+        from .actions import ActionProperty_OrgStructure, ActionProperty, ActionType, Action
+        from .exists import OrgStructure
+        if self.orgStructure_id:
+            return self.orgStructure
+        prop = ActionProperty_OrgStructure.query.join(ActionProperty, ActionType, Action).filter(
+            Action.event == self,
+            Action.status < 2,
+            ActionType.flatCode == 'moving',
+        ).orderby(Action.begDate.desc()).first()
+        if not prop:
+            return None
+        return OrgStructure.query.get(prop.value)
+
+    @property
     def date(self):
         date = self.execDate if self.execDate is not None else datetime.date.today()
         return date
