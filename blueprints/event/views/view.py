@@ -43,9 +43,11 @@ def get_event_form(**kwargs):
         form_role = 'admin'
         return render_template('event/event_info_admin.html', form_role=form_role, **kwargs)
     elif current_user.role_in(('doctor', 'clinicDoctor')):
-        return render_template('event/event_info_doctor.html', **kwargs)
+        form_role = 'doctor'
+        return render_template('event/event_info_doctor.html', form_role=form_role, **kwargs)
     elif current_user.role_in(('rRegistartor', 'clinicRegistrator')):
-        return render_template('event/event_info_receptionist.html', **kwargs)
+        form_role = 'receptionist'
+        return render_template('event/event_info_receptionist.html', form_role=form_role, **kwargs)
     else:
         return abort(403)
 
