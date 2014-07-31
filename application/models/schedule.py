@@ -106,7 +106,8 @@ class Schedule(db.Model):
     tickets = db.relationship(
         'ScheduleTicket', lazy=False, primaryjoin=
         "and_(ScheduleTicket.schedule_id == Schedule.id, ScheduleTicket.deleted == 0)",
-        backref=db.backref('schedule')
+        backref=db.backref('schedule'),
+        order_by='ScheduleTicket.begTime'
     )
     office = db.relationship('Office', lazy='joined')
     
