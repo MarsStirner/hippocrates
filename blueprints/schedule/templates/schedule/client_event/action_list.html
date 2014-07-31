@@ -26,5 +26,5 @@
         </tbody>
     </table>
     <button type="button" class="btn btn-primary" ng-click="open_action_tree({{ action_type_class }}, event_id)"
-            ng-if="current_role_maybe('doctor', 'admin')">Создать...</button>
+            ng-if="current_role_maybe('doctor', 'clinicDoctor', 'admin')">Создать...</button>
 {% endmacro %}
