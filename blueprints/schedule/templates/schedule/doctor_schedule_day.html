@@ -8,11 +8,15 @@
                 <datepicker class="vbmargin10" style="width: 100%" ng-model="date" show-weeks="false" ng-change="dateChanged();"></datepicker>
                 <button ng-click="today()" class="btn btn-sm btn-block btn-info ng-binding" type="button">Сегодня</button>
             </div>
-            <div class="well-sm alert alert-info" ng-if="schedules[0].scheds">
+            <div class="well-sm alert alert-info" ng-if="schedules[0].scheds.length">
                 <a href="{{ url_for('schedule.index', person_id=current_user.id) }}" target="_blank" class="pull-right" title="Посмотреть полный график"><h4 class="glyphicon glyphicon-calendar novmargin"></h4></a>
                 <ul class="list-unstyled novmargin">
                     <li ng-repeat="schedule in schedules[0].scheds" title="[[schedule.reception_type.name]]"><small class="glyphicon" ng-class="{'glyphicon-plus': (schedule.reception_type.code == 'amb'), 'glyphicon-home': (schedule.reception_type.code == 'home')}"></small> [[ (schedules[0].date + ' ' + schedule.begTime|asTime) | asTime ]] - [[ (schedules[0].date + ' ' + schedule.endTime) | asTime ]] <small class="text-danger" ng-if="schedule.office">каб. [[schedule.office.code]]</small></li>
                 </ul>
+            </div>
+            <div class="well-sm alert alert-danger" ng-if="schedules && !schedules[0].scheds.length">
+                <strong ng-if="!schedules[0].roa">Нет расписания на [[ date | asMomentFormat : 'DD.MM.YYYY' ]]</strong>
+                <span ng-if="schedules[0].roa">Причина отсутсвия: <strong>[[ schedules[0].roa.name ]]</strong></span>
             </div>
             <p ng-repeat="schedule in schedules[0].scheds">
                 <legend><a href="javascript:;" title="Показать/скрыть прошедшие записи" class="pull-right small" ng-click="show_past_tickets=!show_past_tickets"><span class="glyphicon" ng-class="{'glyphicon-resize-full': !show_past_tickets, 'glyphicon-resize-small': show_past_tickets}"></span></a><small>[[schedule.reception_type.name]]: [[ (schedules[0].date + ' ' + schedule.begTime|asTime) | asTime ]] - [[ (schedules[0].date + ' ' + schedule.endTime) | asTime ]]</small></legend>
@@ -27,7 +31,7 @@
                 </legend>
                 <div ng-if="client.info.full_name" class="vbmargin10">
                     <button class="btn btn-lg btn-success" ng-if="!ticket.record.event_id" ng-click="new_event(client.info.id, ticket.record.id)" title="Создать обращение">Создать обращение</button>
-                    <button class="btn btn-lg btn-success" ng-if="ticket.record.event_id" ng-click="open_event(ticket.record.event_id)" title="Открыть обращение #[[icket.record.event_id]]">Открыть обращение #[[icket.record.event_id]]</button>
+                    <button class="btn btn-lg btn-success" ng-if="ticket.record.event_id" ng-click="open_event(ticket.record.event_id)" title="Открыть обращение #[[ticket.record.event_id]]">Открыть обращение #[[ticket.record.event_id]]</button>
                     <button class="btn btn-lg btn-primary" ng-click="new_appointment(ticket.record.client_id)" title="Записать на приём к другому специалисту">Записать на приём</button>
                     <ui-print-button ps="ps_amb" class="btn-lg" resolve="ps_amb_resolve(ticket.record.client_id, ticket.record.id)"></ui-print-button>
                 </div>

@@ -83,8 +83,8 @@ var ScheduleDayCtrl = function ($scope, $http, $modal, $filter, WMClient, Printi
         $scope.child_window = window.open(url_event_new_event_html + query, '_blank');
     };
 
-    $scope.open_event = function(event) {
-        $scope.child_window = window.open(url_for_event_html_event_info + '?event_id=' + event.id, '_blank');
+    $scope.open_event = function(event_id) {
+        $scope.child_window = window.open(url_for_event_html_event_info + '?event_id=' + event_id, '_blank');
     };
 
     $scope.new_appointment = function(client_id) {
