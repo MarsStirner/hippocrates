@@ -693,7 +693,10 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, P
     };
 
     $scope.open_action_tree = function (at_class) {
-        ActionTypeTreeModal.open(at_class, $scope.event_id, $scope.event.info.client.info);
+        ActionTypeTreeModal.open(at_class, $scope.event_id, $scope.event.info.client.info)
+            .result.then(function (_) {
+                $scope.event.reload();
+            });
     };
 
     $scope.save_event = function (close_event) {

@@ -201,7 +201,9 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
                             event_id: event_id,
                             directions: $scope.prepared2create
                         }
-                    )
+                    ).success(function (data) {
+                        $scope.$close('created')
+                    })
                 }
             };
             return $modal.open({
@@ -310,7 +312,7 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
                     <tbody>\
                         <tr ng-repeat="action in prepared2create">\
                             <td ng-bind="action.type.name"></td>\
-                            <td><fs-datetime ng-model="action.planned_end_date"></fs-datetime></td>\
+                            <td><div fs-datetime ng-model="action.planned_end_date"></div></td>\
                             <td><button class="btn btn-danger btn-sm" ng-click="prepared2create.splice($index, 1)"><i class="glyphicon glyphicon-trash"></i></button></td>\
                         </tr>\
                     </tbody>\
