@@ -124,7 +124,7 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
         return trees[at_class];
     }
 }])
-.service('ActionTypeTreeModal', ['$modal', 'ActionTypeTreeService', function ($modal, ActionTypeTreeService) {
+.service('ActionTypeTreeModal', ['$modal', '$http', 'ActionTypeTreeService', function ($modal, $http, ActionTypeTreeService) {
     return {
         open: function (at_group, event_id, client_info) {
             var at_class = undefined, tissue = undefined, templateUrl;
@@ -193,6 +193,15 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
                         assigned: [],
                         planned_end_date: new Date()
                     })
+                };
+                $scope.create_actions = function () {
+                    $http.post(
+                        url_schedule_api_create_lab_direction,
+                        {
+                            event_id: event_id,
+                            directions: $scope.prepared2create
+                        }
+                    )
                 }
             };
             return $modal.open({
@@ -311,6 +320,7 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
         </div>\
         <div class="modal-footer">\
             <button type="button" class="btn btn-default" ng-click="cancel()">Закрыть</button>\
+            <button type="button" class="btn btn-success" ng-click="create_actions()">Создать направления</button>\
         </div>'
     )
 }])

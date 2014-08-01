@@ -580,6 +580,10 @@ class EventVisualizer(object):
         return map(make_service, event.actions)
 
 
+class Undefined:
+    pass
+
+
 class ActionVisualizer(object):
     def make_action(self, action):
         """
@@ -609,22 +613,16 @@ class ActionVisualizer(object):
             ]
         }
     
-    def make_property(self, prop):
+    def make_property(self, prop, value=Undefined):
         """
         @type prop: ActionProperty
         """
-        action_property_type = prop.type
-        if action_property_type.isVector:
-            values = [item.get_value() for item in prop.raw_values_query.all()]
-        else:
-            value = prop.raw_values_query.first()
-            values = value.get_value() if value else None
         return {
             'id': prop.id,
             'idx': prop.type.idx,
             'type': prop.type,
             'is_assigned': prop.isAssigned,
-            'value': values
+            'value': value if value != Undefined else prop.value
         }
 
     def make_abstract_property(self, prop, value):
