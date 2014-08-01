@@ -637,18 +637,13 @@ var EventServicesCtrl = function($scope, $http, WMEventService) {
         // $scope.event.reload();#}
     };
 
-    $scope.change_account_service = function(service) {
-        service.account = !service.account
-        if ($scope.event.info.id && service.actions.length){
-            $http.post(
-                url_for_event_api_service_change_account, {
-                    actions: service.actions,
-                    account: service.account
-                }
-            ).error(function() {
-                    alert('error');
-                });
+    $scope.change_print_service = function(service) {
+        if (service.print){
+            service.print = !service.print
+        } else {
+            service.print = 1
         }
+
     };
 };
 
@@ -690,7 +685,8 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, P
                 if ($scope.event.is_new()) {
 
                 } else {
-                    $scope.ps.set_context($scope.event.info.event_type.print_context)
+                    $scope.ps.set_context($scope.event.info.event_type.print_context);
+                    $scope.ps_services.set_context('services');
                 }
 
                 if ($scope.event.info.client.info.birth_date) {
@@ -819,6 +815,21 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, P
             event_id: $scope.event_id
         }
     };
+
+    $scope.ps_services = new PrintingService("services");
+    $scope.ps_services_resolve = function () {
+        var actions_ids = []
+        var services_for_print = $scope.event.services.filter(function(service) {return service.print})
+        if (services_for_print.length){
+            actions_ids = services_for_print.reduce(function (prev, curr){ return prev.concat(curr.actions)}, [])
+        }
+        return {
+            event_id: $scope.event_id,
+            actions_ids: actions_ids
+        }
+    };
+    $scope.ps_services.set_context("services");
+
 
     $scope.filter_results = function(event_purpose) {
         return function(elem) {
