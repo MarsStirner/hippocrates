@@ -475,8 +475,8 @@ angular.module('WebMis20.services', []).
             }
         }
     }]).
-    factory('WMEvent', ['$http', '$q', 'WMEventService',
-        function($http, $q, WMEventService) {
+    factory('WMEvent', ['$http', '$q', 'WMEventServiceGroup',
+        function($http, $q, WMEventServiceGroup) {
             var WMEvent = function(event_id, client_id, ticket_id) {
                 this.event_id = parseInt(event_id);
                 this.client_id = client_id;
@@ -499,20 +499,19 @@ angular.module('WebMis20.services', []).
                 var deferred = $q.defer();
                 $http.get(url, {
                     params: params
+                }).success(function (data) {
+                    self.info = data.result.event;
+                    self.payment = data.result.payment || { payments: [] };
+                    self.diagnoses = data.result.diagnoses || [];
+                    self.services = data.result.services && data.result.services.map(function(service) {
+                        return new WMEventServiceGroup(service, self.payment.payments);
+                    }) || [];
+                    self.is_closed = self.closed();
+                    deferred.resolve();
                 }).
-                    success(function(data) {
-                        self.info = data.result.event;
-                        self.payment = data.result.payment || { payments: [] };
-                        self.diagnoses = data.result.diagnoses || [];
-                        self.services = data.result.services && data.result.services.map(function(service) {
-                            return new WMEventService(service, self.payment.payments); //todo mb null
-                        }) || [];
-                        self.is_closed = self.closed();
-                        deferred.resolve();
-                    }).
-                    error(function(data) {
-                        deferred.reject('error load event');
-                    });
+                error(function(data) {
+                    deferred.reject('error load event');
+                });
                 return deferred.promise;
             };
 
@@ -551,7 +550,7 @@ angular.module('WebMis20.services', []).
             WMEvent.prototype.get_final_diagnosis = function() {
                 var final_diagnosis = this.diagnoses.filter(function(item){
                     return item.diagnosis_type.code == 1;
-                })
+                });
                 return final_diagnosis[0] ? final_diagnosis.length : null
             };
 
@@ -566,18 +565,70 @@ angular.module('WebMis20.services', []).
             return WMEvent;
         }
     ]).
-    factory('WMEventService', [
+    factory('WMEventServiceGroup', [
         function() {
-            var WMEventService = function(service_data, payments) {
-                angular.extend(this, service_data);
-                var self = this;
-                this.payments = payments.filter(function(p) {
-                    return p.service_id === self.service_id && self.actions.indexOf(p.action_id) != -1;
-                });
-                this.refresh();
+            var WMSimpleAction = function (action) {
+                angular.extend(this, action);
+            };
+            WMSimpleAction.prototype.is_paid_for = function () {
+                return false;
+            };
+            WMSimpleAction.prototype.is_confirmed = function () {
+                return this.coord_person && this.coord_date;
             };
 
-            WMEventService.prototype.refresh = function() {
+            var WMEventServiceGroup = function(service_data, payments) {
+                this.at_id = null;
+                this.at_code = null;
+                this.at_name = null;
+                this.service_id = null;
+                this.service_name = null;
+                this.actions = [];
+
+                this.total_amount = null;
+                this.price = undefined;
+                this.fully_paid = undefined;
+                this.partially_paid = undefined;
+                this.paid_count = undefined;
+                this.total_sum = undefined;
+                this.confirmed_count = undefined;
+
+//                this.coord_actions = [];
+                this.initialize(service_data, payments);
+            };
+
+            WMEventServiceGroup.prototype.initialize = function (service_data, payments) {
+                var self = this;
+                if (service_data) {
+                    angular.extend(this, service_data);
+                    this.actions = this.actions.map(function (act) {
+                        return new WMSimpleAction(act);
+                    });
+                }
+                if (payments) {
+                    this.payments = payments.filter(function(p) {
+                        return p.service_id === self.service_id && self.actions.has(p.action_id);
+                    });
+                    this.refresh_payments();
+                }
+            };
+
+            WMEventServiceGroup.prototype.is_new = function () {
+                return this.actions.some(function (a) {
+                    return !a.id;
+                });
+            };
+
+            WMEventServiceGroup.prototype.recalculate_sum = function () {
+                this.total_sum = this.actions.map(function (a) {
+                    return a.sum;
+                }).reduce(function (sum, cur_sum) {
+                    return sum + cur_sum;
+                }, 0);
+            };
+
+            WMEventServiceGroup.prototype.refresh_payments = function() {
+                return;
                 var self = this;
                 var unpaid = this.actions.filter(function(a_id) {
                     return self.payments.filter(function(p) {
@@ -591,6 +642,77 @@ angular.module('WebMis20.services', []).
                 this.coord_count = this.coord_actions.length;
             };
 
-            return WMEventService;
+            return WMEventServiceGroup;
         }
-    ]);
+    ]).
+    service('WMEventFormState', [function () {
+        var rt = {},
+            fin = {},
+            is_new = null;
+        return {
+            set_state: function (request_type, finance, is_new) {
+                rt = request_type;
+                fin = finance;
+                is_new = is_new
+            },
+            is_policlinic: function () {
+                return rt.code === 'policlinic';
+            },
+            is_paid: function () {
+                return fin.code === '4';
+            },
+            is_oms: function (client, type) {
+                return fin.code === '2';
+            },
+            is_dms: function (client, type) {
+                return fin.code === '3';
+            }
+        };
+    }]).
+    service('WMEventController', ['$http', function ($http) {
+
+        return {
+            confirm_service: function (event, service) {
+                service.coord_person = current_user_id;
+                service.coord_date = new Date();
+                if (!event.is_new()) {
+                    $http.post(
+                        url_for_event_api_service_add_coord, {
+                            event_id: event.info.id,
+                            finance_id: event.info.contract.finance.id,
+                            service: service
+                        }
+                    ).success(function(result) {
+                        service.actions = result['result']['data'];
+                        service.coord_actions = result['result']['data'];
+                        service.coord_count = service.coord_actions.length;
+                    }).error(function() {
+                        service.coord_person_id = undefined;
+                        alert('error');
+                    });
+                } else {
+                    service.coord_count = service.amount;
+                }
+            },
+            unconfirm_service: function(event, service) {
+                if (event.info.id){
+                    $http.post(
+                        url_for_event_api_service_remove_coord, {
+                            action_id: service.coord_actions,
+                            coord_person_id: null
+                        }
+                    ).success(function() {
+                        service.coord_actions = [];
+                        service.coord_person_id = null;
+                        service.coord_count = service.coord_actions.length;
+                    }).error(function() {
+                        alert('error');
+                    });
+                } else {
+                    service.coord_actions = [];
+                    service.coord_person_id = null;
+                    service.coord_count = service.coord_actions.length;
+                }
+            }
+        };
+    }]);

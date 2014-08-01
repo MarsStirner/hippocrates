@@ -469,15 +469,11 @@ var SwitchPayerModalCtrl = function ($scope, $modalInstance, from_tab) {
         $modalInstance.dismiss('cancel');
     };
 };
-var EventServicesCtrl = function($scope, $http, WMEventService) {
+var EventServicesCtrl = function($scope, $http, WMEventServiceGroup) {
     $scope.query = "";
     $scope.found_services = null;
     $scope.search_processed = false;
     $scope.full_sum = 0;
-
-    $scope.finance_is_oms = function(){return $scope._finance && $scope._finance.code == '2'};
-    $scope.finance_is_dms = function(){return $scope._finance && $scope._finance.code == '3'};
-    $scope.finance_is_paid = function(){return $scope._finance && $scope._finance.code == '4'};
 
     $scope.perform_search = function(val) {
         $scope.search_processed = false;
@@ -517,7 +513,7 @@ var EventServicesCtrl = function($scope, $http, WMEventService) {
                 coord_count: 0,
                 account: true
             });
-            $scope.event.services.push(new WMEventService(service_data, $scope.event.payment.payments));
+            $scope.event.services.push(new WMEventServiceGroup(service_data, $scope.event.payment.payments));
         }
     };
 
@@ -562,109 +558,49 @@ var EventServicesCtrl = function($scope, $http, WMEventService) {
         $scope.query_clear();
     });
 
-    $scope.pay = function(service) {
-        var act_to_pay = null;
-        var paid_actions = $scope.event.payment.payments.map(function(p) {
-            return p.action_id;
-        });
-        service.actions.forEach(function(a_id) {
-            if (act_to_pay === null && (paid_actions.indexOf(a_id) == -1)) {
-                act_to_pay = a_id;
-            }
-        });
-        if (act_to_pay) {
-            $http.post(
-                url_for_event_api_service_make_payment, {
-                    event_id: $scope.event.info.id,
-                    service_id: service.service_id,
-                    action_id: act_to_pay,
-                    sum: service.price
-                }
-            ).success(function() {
-                    // alert('ok');#}
-                }).error(function() {
-                    alert('error');
-                });
-        }
-        $scope.event.reload();
-    };
-
-    $scope.apply_coord_service = function(service) {
-        if ($scope.event.info.id){
-            service.coord_person_id = current_user_id;
-            $http.post(
-                url_for_event_api_service_add_coord, {
-                    event_id: $scope.event.info.id,
-                    finance_id: $scope.event.info.contract.finance.id,
-                    service: service
-                }
-            ).success(function(result) {
-                    service.actions = result['result']['data'];
-                    service.coord_actions = result['result']['data'];
-                    service.coord_count = service.coord_actions.length;
-                    // alert('ok');#}
-                }).error(function() {
-                    service.coord_person_id = undefined;
-                    alert('error');
-                });
-        } else {
-            service.coord_person_id = current_user_id;
-            service.coord_count = service.amount;
-        }
-        // $scope.event.reload();#}
-    };
-
-    $scope.remove_coord_service = function(service) {
-        if ($scope.event.info.id){
-            $http.post(
-                url_for_event_api_service_remove_coord, {
-                    action_id: service.coord_actions,
-                    coord_person_id: null
-                }
-            ).success(function() {
-                    service.coord_actions = [];
-                    service.coord_person_id = null;
-                    service.coord_count = service.coord_actions.length;
-                    // alert('ok');#}
-                }).error(function() {
-                    alert('error');
-                });
-        } else {
-            service.coord_actions = [];
-            service.coord_person_id = null;
-            service.coord_count = service.coord_actions.length;
-        }
-        // $scope.event.reload();#}
-    };
-
-    $scope.change_account_service = function(service) {
-        service.account = !service.account
-        if ($scope.event.info.id && service.actions.length){
-            $http.post(
-                url_for_event_api_service_change_account, {
-                    actions: service.actions,
-                    account: service.account
-                }
-            ).error(function() {
-                    alert('error');
-                });
-        }
-    };
+//    $scope.pay = function(service) {
+//        var act_to_pay = null;
+//        var paid_actions = $scope.event.payment.payments.map(function(p) {
+//            return p.action_id;
+//        });
+//        service.actions.forEach(function(a_id) {
+//            if (act_to_pay === null && (paid_actions.indexOf(a_id) == -1)) {
+//                act_to_pay = a_id;
+//            }
+//        });
+//        if (act_to_pay) {
+//            $http.post(
+//                url_for_event_api_service_make_payment, {
+//                    event_id: $scope.event.info.id,
+//                    service_id: service.service_id,
+//                    action_id: act_to_pay,
+//                    sum: service.price
+//                }
+//            ).success(function() {
+//                    // alert('ok');#}
+//                }).error(function() {
+//                    alert('error');
+//                });
+//        }
+//        $scope.event.reload();
+//    };
 };
 
 var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, PrintingService, Settings,
-        $filter, $modal, ActionTypeTreeModal) {
+        $filter, $modal, ActionTypeTreeModal, WMEventController, WMEventFormState) {
     $scope.aux = aux;
     $scope.current_role_maybe = current_user.current_role_maybe;
     $scope.Organisation = RefBookService.get('Organisation');
     $scope.Settings = new Settings();
     $scope.alerts = [];
+    $scope.eventctrl = WMEventController;
+    $scope.formstate = WMEventFormState;
 
     var params = aux.getQueryParams(location.search);
     $scope.event_id = params.event_id;
     $scope.client_id = params.client_id;
     $scope.ticket_id = params.ticket_id;
-    $scope.event = new WMEvent($scope.event_id, $scope.client_id, $scope.ticket_id);
+    var event = $scope.event = new WMEvent($scope.event_id, $scope.client_id, $scope.ticket_id);
     $scope.editing = {
         submit_attempt: false
     };
@@ -686,6 +622,7 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, P
     $scope.initialize = function() {
         $scope.event.reload().
             then(function() {
+                $scope.formstate.set_state(event.info.event_type.request_type, event.info.event_type.finance, event.is_new());
                 $scope.$broadcast('event_loaded');
                 if ($scope.event.is_new()) {
 
@@ -704,6 +641,20 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, P
                         $scope.policies.push(value.policy_text + ' ('+ $filter('asDate')(value.beg_date) + '-' + $filter('asDate')(value.end_date) + ')');
                     });
                 }
+
+                $scope.$watch(function () {
+                    return [event.info.request_type, event.info.finance];
+                }, function (n, o) {
+                    if (n !== o) {
+                        var rt = n[0],
+                            fin = n[1];
+                        $scope.formstate.set_state(rt, fin, event.is_new());
+                        $scope.$broadcast('eventFormStateChanged', {
+                            request_type: rt,
+                            finance: fin
+                        });
+                    }
+                }, true);
             });
     };
 
@@ -927,5 +878,5 @@ var DeleteRecordModalCtrl = function ($scope, $modalInstance, message) {
 WebMis20.controller('EventDiagnosesCtrl', ['$scope', 'RefBookService', '$http', EventDiagnosesCtrl]);
 WebMis20.controller('EventMainInfoCtrl', ['$scope', '$http', 'RefBookService', 'EventType', '$window', '$timeout', 'Settings', '$modal', '$filter', EventMainInfoCtrl]);
 WebMis20.controller('EventPaymentCtrl', ['$scope', 'RefBookService', 'Settings', '$http', '$modal', EventPaymentCtrl]);
-WebMis20.controller('EventServicesCtrl', ['$scope', '$http', 'WMEventService', EventServicesCtrl]);
-WebMis20.controller('EventInfoCtrl', ['$scope', 'WMEvent', '$http', 'RefBookService', '$window', 'PrintingService', 'Settings', '$filter', '$modal', 'ActionTypeTreeModal', EventInfoCtrl]);
+WebMis20.controller('EventServicesCtrl', ['$scope', '$http', 'WMEventServiceGroup', EventServicesCtrl]);
+WebMis20.controller('EventInfoCtrl', ['$scope', 'WMEvent', '$http', 'RefBookService', '$window', 'PrintingService', 'Settings', '$filter', '$modal', 'ActionTypeTreeModal', 'WMEventController', 'WMEventFormState', EventInfoCtrl]);

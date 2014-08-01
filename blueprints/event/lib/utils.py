@@ -87,57 +87,6 @@ def get_prev_event_payment(client_id, event_type_id):
     return event
 
 
-def get_event_services(event_id):
-    query = db.session.query(Action,
-                             ActionType.id,
-                             ActionType.service_id,
-                             ActionType.code,
-                             ActionType.name,
-                             rbService.name,
-                             ContractTariff.price).\
-        join(Event,
-             EventType,
-             Contract,
-             ContractTariff,
-             ActionType).\
-        join(rbService, ActionType.service_id == rbService.id).\
-        filter(Action.event_id == event_id,
-               ContractTariff.eventType_id == EventType.id,
-               ContractTariff.service_id == ActionType.service_id,
-               Action.deleted == 0,
-               ContractTariff.deleted == 0).all()
-    services_by_at = defaultdict(list)
-    for a, at_id, service_id, at_code, at_name, service_name, price in query:
-        s = {
-            'account': a.account,
-            'at_id': at_id,
-            'at_code': at_code,
-            'at_name': at_name,
-            'service_name': service_name,
-            'price': price,
-            'action_id': a.id,
-            'service_id': service_id,
-            'is_coord': a.coordDate and a.coordPerson_id
-        }
-        services_by_at[(at_id, service_id)].append(s)
-    services_grouped = []
-    for k, service_group in services_by_at.iteritems():
-        actions = []
-        coord_actions = []
-        for s in service_group:
-            actions.append(s['action_id'])
-            if s['is_coord']:
-                coord_actions.append(s['action_id'])
-        services_grouped.append(
-            dict(service_group[0],
-                 amount=len(service_group),
-                 sum=service_group[0]['price'] * len(service_group),
-                 actions=actions,
-                 coord_actions=coord_actions))
-
-    return services_grouped
-
-
 def create_services(event_id, services_data, cfinance_id):
     result = []
     for service in services_data:
