@@ -427,55 +427,69 @@ var WebMis20 = angular.module('WebMis20', [
     return PrintingService;
 }])
 .factory('WMAction', ['$http', '$rootScope', function ($http, $rootScope) {
+        // FIXME: На данный момент это ломает функциональность действий, но пока пофиг.
     var Action = function () {
         this.action = null;
-        this.action_culumns = {};
-        this.event_id = null;
-        this.action_type_id = null;
+        this.action_columns = {};
+        this.properties_by_id = {};
+        this.properties_by_code = {};
     };
-    function success_wrapper(t) {
+    function success_wrapper(self) {
         return function (data) {
-            angular.extend(t, data.result);
-            t.action_columns = {
+            angular.extend(self.action, data.result);
+            self.action_columns = {
                 assignable: false,
                 unit: false
             };
             angular.forEach(data.result.properties, function (item) {
-                t.action_columns.assignable |= item.type.is_assignable;
-                t.action_columns.unit |= item.type.unit;
+                self.action_columns.assignable |= item.type.is_assignable;
+                self.action_columns.unit |= item.type.unit;
+
+                self.properties_by_id = {};
+                self.properties_by_id[item.type.id] = item;
+
+                self.properties_by_code = {};
+                if (item.type.code) {
+                    self.properties_by_code[item.type.code] = item;
+                }
             });
-            $rootScope.$broadcast('action_loaded', t);
+            $rootScope.$broadcast('action_loaded', self);
         }
     }
     Action.prototype.get = function (id) {
-        var t = this;
         return $http.get(url_action_get, {
             params: {
                 action_id: id
             }
-        }).success(success_wrapper(t));
+        }).success(success_wrapper(this));
     };
     Action.prototype.get_new = function (event_id, action_type_id) {
-        this.event_id = event_id;
-        this.action_type_id = action_type_id;
-        var t = this;
+        this.action.event_id = event_id;
+        this.action.action_type_id = action_type_id;
         return $http.get(url_action_new, {
             params: {
                 action_type_id: action_type_id,
                 event_id: event_id
             }
-        }).success(success_wrapper(t));
+        }).success(success_wrapper(this));
     };
     Action.prototype.save = function () {
-        var t = this;
-        $http.post(url_action_save, this).success(success_wrapper(t));
+        $http.post(
+            url_action_save, this.action).success(success_wrapper(this));
         return this;
     };
     Action.prototype.cancel = function () {
         if (this.action.id) {
             this.get(this.action.id)
         } else {
-            this.get_new(this.event_id, this.action_type_id)
+            this.get_new(this.action.event_id, this.action.action_type_id)
+        }
+    };
+    Action.prototype.get_property = function (id) {
+        if (id instanceof String) {
+            return this.properties_by_code[id];
+        } else {
+            return this.properties_by_id[id];
         }
     };
     return Action;
@@ -657,45 +671,6 @@ var WebMis20 = angular.module('WebMis20', [
 
         }
     };
-}])
-.directive('uiActionProperty', ['$compile', function ($compile) {
-    return {
-        restrict: 'A',
-        replace: true,
-        link: function (scope, element, attributes) {
-            var property = scope.$property = scope.$eval(attributes.uiActionProperty);
-            var typeName = property.type.type_name;
-            var element_code = null;
-            switch (typeName) {
-                case 'Text':
-                case 'Html':
-                case 'Жалобы':
-                case 'Constructor':
-                    element_code = '<textarea ckeditor="ckEditorOptions" ng-model="$property.value"></textarea>';
-                    break;
-                case 'Date':
-                    element_code = '<input type="text" class="form-control" datepicker-popup="dd-MM-yyyy" ng-model="$property.value" />';
-                    break;
-                case 'Integer':
-                case 'Double':
-                case 'Time':
-                    element_code = '<input class="form-control" type="text" ng-model="$property.value">';
-                    break;
-                case 'String':
-                    if (property.type.domain) {
-                        element_code = '<select class="form-control" ng-model="$property.value" ng-options="val for val in $property.type.values"></select>'
-                    } else {
-                        element_code = '<input class="form-control" type="text" ng-model="$property.value">';
-                    }
-                    break;
-                default:
-                    element_code = '<span ng-bind="$property.value">';
-            }
-            var el = angular.element(element_code);
-            $(element[0]).append(el);
-            $compile(el)(scope);
-        }
-    }
 }])
 .directive('wmTime', ['$document',
     function ($document) {
