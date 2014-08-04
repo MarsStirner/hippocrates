@@ -507,6 +507,44 @@ var WebMis20 = angular.module('WebMis20', [
     return EventType;
     }
 ])
+.factory('SelectAll', function () {
+    var SelectAll = function (source) {
+        this._source = source;
+        this._selected = source.clone();
+    };
+    SelectAll.prototype.selected = function () {
+        var item = arguments[0];
+        if (item === undefined) {
+            return this._selected;
+        } else {
+            return this._selected.has(item);
+        }
+    };
+    SelectAll.prototype.selectAll = function () {
+        this._selected = this._source.clone();
+    };
+    SelectAll.prototype.selectNone = function () {
+        this._selected = [];
+    };
+    SelectAll.prototype.select = function (item) {
+        var checked = arguments[1];
+        if (checked === false) {
+            this._selected.remove(item);
+        } else {
+            if (!this._selected.has(item)) {
+                this._selected.push(item);
+            }
+        }
+    };
+    SelectAll.prototype.toggle = function (item) {
+        var index = this._selected.indexOf(item);
+        if (index === -1) {
+            this._selected.push(item);
+        } else {
+            this._selected.splice(index, 1);
+        }
+    }
+})
 // end services
 .directive('uiMkb', function ($timeout, RefBookService) {
     return {
