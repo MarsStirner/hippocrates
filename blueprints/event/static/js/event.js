@@ -685,6 +685,20 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, P
                         $scope.policies.push(value.policy_text + ' ('+ $filter('asDate')(value.beg_date) + '-' + $filter('asDate')(value.end_date) + ')');
                     });
                 }
+
+                $scope.$watch(function () {
+                    return [event.info.request_type, event.info.finance];
+                }, function (n, o) {
+                    if (n !== o) {
+                        var rt = n[0],
+                            fin = n[1];
+                        $scope.formstate.set_state(rt, fin, event.is_new());
+                        $scope.$broadcast('eventFormStateChanged', {
+                            request_type: rt,
+                            finance: fin
+                        });
+                    }
+                }, true);
             });
     };
 
