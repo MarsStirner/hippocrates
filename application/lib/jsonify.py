@@ -553,7 +553,7 @@ class EventVisualizer(object):
             'id': action.id,
             'name': action.actionType.name,
             'type': self.make_action_type(action.actionType),
-            'status': action.status,
+            'status': ActionStatus(action.status),
             'begDate': action.begDate,
             'endDate': action.endDate,
             'person_text': safe_unicode(action.person)

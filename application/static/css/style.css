@@ -505,9 +505,6 @@ div.toc-affix {
     padding-top: 0;
     padding-bottom: 0;
 }
-.affix-holder {
-    padding: 0;
-}
 .toc .nav .nav {
     display: none;
 }
