@@ -592,4 +592,28 @@ angular.module('WebMis20.services', []).
 
             return WMEventService;
         }
-    ]);
+    ]).
+    service('WMEventFormState', [function () {
+        var rt = {},
+            fin = {},
+            is_new = null;
+        return {
+            set_state: function (request_type, finance, is_new) {
+                rt = request_type;
+                fin = finance;
+                is_new = is_new
+            },
+            is_policlinic: function () {
+                return rt.code === 'policlinic';
+            },
+            is_paid: function () {
+                return fin.code === '4';
+            },
+            is_oms: function (client, type) {
+                return fin.code === '2';
+            },
+            is_dms: function (client, type) {
+                return fin.code === '3';
+            }
+        };
+    }]);
