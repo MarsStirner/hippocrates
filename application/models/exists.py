@@ -1433,6 +1433,16 @@ class rbUserRight(db.Model):
     name = db.Column(db.String(128), nullable=False, index=True)
 
 
+class rbBloodComponentType(db.Model):
+    __tablename__ = u'rbTrfuBloodComponentType'
+
+    id = db.Column(db.Integer, primary_key=True)
+    trfu_id = db.Column(db.Integer)
+    code = db.Column(db.String(32))
+    name = db.Column(db.String(256))
+    unused = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+
+
 class FDField(db.Model):
     __tablename__ = u'FDField'
 

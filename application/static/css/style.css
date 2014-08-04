@@ -387,9 +387,10 @@ table.table-clickable tbody tr {
 .ui-treeview div.tree-label.leaf {
 
 }
-
-.ui-treeview a.node {
+.ui-treeview a {
     cursor: pointer;
+}
+.ui-treeview a.node {
     color: inherit;
     text-decoration: none;
 }

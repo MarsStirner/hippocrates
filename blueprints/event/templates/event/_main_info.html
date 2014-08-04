@@ -164,7 +164,7 @@
                         </div>
                     </div>
                 </li>
-                {% if form_role == 'doctor' or form_role == 'admin'%}
+                {% if current_user.role_in('admin', 'doctor', 'clinicDoctor') %}
                 <li class="list-group-item">
                     <div class="row">
                         <div class="col-md-3">

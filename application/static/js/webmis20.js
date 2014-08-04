@@ -140,23 +140,58 @@ var WebMis20 = angular.module('WebMis20', [
 .filter('attribute', function ($filter) {
     return function (array, attribute) {
         var value = arguments[2];
+        var func = arguments[3];
+        var attrs = attribute.split('.');
+        var item_attribute;
+        if (func === undefined) {
+            item_attribute = function (item) {
+                return safe_traverse(item, attrs)
+            }
+        } else if (typeof(func) == 'function') {
+            item_attribute = function (item) {
+                return func(safe_traverse(item, attrs))
+            }
+        } else {
+            throw 'Ну что это за ерунда?'
+        }
         if (array instanceof Array) {
             if (value === undefined) {
                 return array.filter(function (item) {
-                    return Boolean(item[attribute]);
+                    return Boolean(item_attribute(item));
                 })
             } else if (value instanceof Array) {
                 return array.filter(function (item) {
-                    return value.has(item[attribute]);
+                    return value.has(item_attribute(item));
                 })
             } else {
                 return array.filter(function (item) {
-                    return item[attribute] == value;
+                    return item_attribute(item) == value;
                 })
             }
         } else {
             return array;
         }
+    }
+})
+.filter('action_group_filter', function ($filter) {
+    return function (items, group) {
+        if (items instanceof Array) {
+            var ff;
+            switch (group) {
+                case 'medical_documents':
+                    ff = function (item) {return item.type.class == 0}; break;
+                case 'treatments':
+                    ff = function (item) {return item.type.class == 2}; break;
+                case 'diagnostics':
+                    ff = function (item) {return item.type.class == 1 && item.type.is_required_tissue == false}; break;
+                case 'lab':
+                    ff = function (item) {return item.type.class == 1 && item.type.is_required_tissue == true}; break;
+                default:
+                    throw 'action_group_filter'
+            }
+            return items.filter(ff)
+        }
+        return items;
     }
 })
 .filter('event_type_filter', function() {
@@ -869,6 +904,17 @@ var aux = {
         return false;
     }
 };
+function safe_traverse(object, attrs) {
+    var o = object, attr;
+    for (var i = 0; i < attrs.length; ++i) {
+        attr = attrs[i];
+        o = o[attr];
+        if (o === undefined) {
+            return undefined
+        }
+    }
+    return o;
+}
 if (!HTMLElement.prototype.hasOwnProperty('getOffsetRect')) {
     HTMLElement.prototype.getOffsetRect = function () {
         // (1)

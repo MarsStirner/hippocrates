@@ -2,6 +2,7 @@
 import calendar
 from collections import defaultdict
 import datetime
+from dateutil.parser import parse as dateutil_parse
 
 from flask import abort, request
 from flask.ext.login import current_user
@@ -362,24 +363,19 @@ def api_action_get():
     return jsonify(v.make_action(action))
 
 
-@module.route('/api/actions/new.json', methods=['GET'])
-def api_action_new_get():
-
-    # Preparación de datos de entrada
-
+def aux_create_new_action(actionType, event, given_datetime=None, src_action=None, assigned=[]):
+    """
+    :type actionType: ActionType
+    :type event: Event
+    :type given_datetime: datetime.datetime
+    :type src_action: Action
+    :param actionType:
+    :param event:
+    :param given_datetime:
+    :param src_action:
+    :return:
+    """
     now = datetime.datetime.now()
-    src_action = Action.query.get(int(request.args['src_action_id'])) \
-        if 'src_action_id' in request.args else None
-    """@type: Action | None"""
-    src_props = dict((prop.type_id, prop) for prop in src_action.properties) if src_action else {}
-    given_datetime = datetime.datetime.strptime(request.args['datetime'], '%Y-%m-%dT%H:%M') \
-        if 'datetime' in request.args else None
-    actionType = ActionType.query.get(int(request.args['action_type_id']))
-    """@type: ActionType"""
-    event = Event.query.get(int(request.args['event_id']))
-    """@type: Event"""
-
-    # Action creation starts
 
     action = Action()
     action.createDatetime = action.modifyDatetime = action.begDate = now
@@ -387,6 +383,15 @@ def api_action_new_get():
     action.office = actionType.office or u''
     action.amount = actionType.amount if actionType.amountEvaluation in (0, 7) else 1
     action.uet = 0  # TODO: calculate UET
+    action.event = event
+    action.event_id = event.id
+    action.actionType = actionType
+    action.status = actionType.defaultStatus
+    action.note = u''
+    action.payStatus = 0
+    action.account = 0
+    action.coordText = u''
+    action.AppointmentType = u'0'
 
     if given_datetime:
         action.plannedEndDate = given_datetime or now
@@ -422,69 +427,85 @@ def api_action_new_get():
     elif actionType.defaultPersonInEvent == 4:
         action.person = Person.query.get(current_user.get_id())
 
-    action.event = event
-    action.event_id = event.id
-    action.actionType = actionType
-    action.status = actionType.defaultStatus
-    prop_types = actionType.property_types.filter(ActionPropertyType.deleted == 0)
-    v = ActionVisualizer()
-
-    result = v.make_action(action)
-
-    # アクションプロパティを作成する
+    src_props = dict((prop.type_id, prop) for prop in src_action.properties) if src_action else {}
 
     now_date = now.date()
+    prop_types = actionType.property_types.filter(ActionPropertyType.deleted == 0)
+
     for prop_type in prop_types:
         if recordAcceptableEx(event.client.sex, event.client.age_tuple(now_date), prop_type.sex, prop_type.age):
             prop = ActionProperty()
+            prop.norm = ''
+            prop.evaluation = ''
             prop.type = prop_type
             prop.action = action
-            value = src_props[prop_type.id].value if src_props.get(prop_type.id) else None
-            result['properties'].append(v.make_abstract_property(prop, value))
-    db.session.rollback()
+            prop.isAssigned = prop_type.id in assigned
+            prop.value = src_props[prop_type.id].value if src_props.get(prop_type.id) else None
+            action.properties.append(prop)
 
+    return action
+
+@module.route('/api/actions/new.json', methods=['GET'])
+def api_action_new_get():
+    src_action = Action.query.get(int(request.args['src_action_id'])) \
+        if 'src_action_id' in request.args else None
+    given_datetime = datetime.datetime.strptime(request.args['datetime'], '%Y-%m-%dT%H:%M') \
+        if 'datetime' in request.args else None
+    actionType = ActionType.query.get(int(request.args['action_type_id']))
+    event = Event.query.get(int(request.args['event_id']))
+
+    action = aux_create_new_action(actionType, event, given_datetime, src_action)
+
+    v = ActionVisualizer()
+    result = v.make_action(action)
+    db.session.rollback()
     return jsonify(result)
+
+
+def aux_create_JT(date_time, job_type_id, orgstructure_id):
+    """
+    :type date_time: datetime.datetime
+    :type job_type_id: int
+    :param date_time:
+    :param job_type_id:
+    :return:
+    """
+    from application.models.actions import Job, JobTicket
+    jt_date = date_time.date()
+    job = Job.query.filter(
+        Job.jobType_id == job_type_id,
+        Job.date == jt_date,
+        Job.orgStructure_id == orgstructure_id,
+    ).first()
+    if not job:
+        job = Job()
+        job.date = jt_date
+        job.begTime = '00:00:00'
+        job.endTime = '23:59:59'
+        job.jobType_id = job_type_id
+        job.orgStructure_id = orgstructure_id
+        job.quantity = 0
+        db.session.add(job)
+    jt = JobTicket()
+    jt.job = job
+    jt.datetime = date_time
+    db.session.add(jt)
+    return jt
 
 
 @module.route('/api/actions', methods=['POST'])
 def api_action_post():
     now = datetime.datetime.now()
-    action_desc = request.json
+    action_desc = request.get_json()
     if action_desc['id']:
         action = Action.query.get(action_desc['id'])
         for prop_desc in action_desc['properties']:
-            prop_type = ActionPropertyType.query.get(prop_desc['type']['id'])
             prop = ActionProperty.query.get(prop_desc['id'])
-            prop.action = action
-            prop.isAssigned = prop_desc['is_assigned']
-            prop.type = prop_type
-            if prop_desc['type']['vector']:
-                # Идите в жопу со своими векторными значениями
-                continue
-            if prop_desc['value'] is not None:
-                prop_value = prop.raw_values_query.first()
-                if isinstance(prop_desc['value'], dict):
-                    if prop_value:
-                        if prop_desc['value']['id'] != prop_value.value:
-                            prop_value.value = prop_desc['value']['id']
-                            db.session.add(prop_value)
-                    else:
-                        prop_value = prop.valueTypeClass()
-                        prop_value.property_object = prop
-                        prop_value.value = prop_desc['value']['id']
-                        db.session.add(prop_value)
-                else:
-                    if prop_value:
-                        if prop_value.value != prop_desc['value']:
-                            prop_value.value = prop_desc['value']
-                            db.session.add(prop_value)
-                    else:
-                        prop_value = prop.valueTypeClass()
-                        prop_value.property_object = prop
-                        prop_value.value = prop_desc['value']
-                        db.session.add(prop_value)
+            if isinstance(prop_desc['value'], dict):
+                prop.set_value(safe_traverse(prop_desc, 'value', 'id'), True)
             else:
-                prop.raw_values_query.delete()
+                prop.set_value(prop_desc['value'])
+            prop.isAssigned = prop_desc['is_assigned']
             db.session.add(prop)
     else:
         # new action
@@ -492,6 +513,7 @@ def api_action_post():
         action.createDatetime = now
         action.actionType = ActionType.query.get(action_desc['action_type']['id'])
         action.event = Event.query.get(action_desc['event_id'])
+        # orgStructure = action.event.current_org_structure if action.actionType.isRequiredTissue else None
         for prop_desc in action_desc['properties']:
             prop_type = ActionPropertyType.query.get(prop_desc['type']['id'])
             prop = ActionProperty()
@@ -501,17 +523,11 @@ def api_action_post():
             prop.action = action
             prop.isAssigned = prop_desc['is_assigned']
             prop.type = prop_type
-            if prop_desc['type']['vector']:
-                # Идите в жопу со своими векторными значениями
-                continue
-            if prop_desc['value'] is not None:
-                prop_value = prop.valueTypeClass()
-                prop_value.property_object = prop
-                if isinstance(prop_desc['value'], dict):
-                    prop_value.value = prop_desc['value']['id']
-                else:
-                    prop_value.value = prop_desc['value']
-                db.session.add(prop_value)
+            pd_value = prop_desc['value']
+            if pd_value is not None:
+                prop.set_value(pd_value)
+            # elif prop_type.typeName == 'JobTicket' and orgStructure:
+            #     prop.value = aux_create_JT(action_desc['planned_endDate'] or now, ActionType.jobType_id, orgStructure.id)
             db.session.add(prop)
 
     action.modifyDatetime = now
@@ -612,13 +628,15 @@ def int_get_atl_flat(at_class):
         t = list(t)
         t[5] = list(parseAgeSelector(t[7]))
         t[7] = t[7].split() if t[7] else None
+        t[8] = bool(t[8])
         return t
 
     raw = db.text(
         ur'''SELECT
             ActionType.id, ActionType.name, ActionType.code, ActionType.flatCode, ActionType.group_id,
             ActionType.age, ActionType.sex,
-            GROUP_CONCAT(OrgStructure_ActionType.master_id SEPARATOR ' ')
+            GROUP_CONCAT(OrgStructure_ActionType.master_id SEPARATOR ' '),
+            ActionType.isRequiredTissue
             FROM ActionType
             LEFT JOIN OrgStructure_ActionType ON OrgStructure_ActionType.actionType_id = ActionType.id
             WHERE ActionType.class = {at_class} AND ActionType.deleted = 0 AND ActionType.hidden = 0
@@ -634,3 +652,31 @@ def api_atl_get_flat():
         return abort(401)
 
     return jsonify(int_get_atl_flat(at_class))
+
+
+@module.route('/api/create-lab-direction.json', methods=['POST'])
+def api_create_lab_direction():
+
+    ja = request.get_json()
+    event_id = ja['event_id']
+    event = Event.query.get(event_id)
+    orgStructure = event.current_org_structure
+    for j in ja['directions']:
+        action_type_id = j['type']['id']
+        actionType = ActionType.query.get(action_type_id)
+        planned_end_date = dateutil_parse(j['planned_end_date'])
+        assigned = j['assigned']
+        action = aux_create_new_action(
+            actionType,
+            event,
+            planned_end_date,
+            assigned=assigned,
+        )
+        db.session.add(action)
+
+        if action.actionType.isRequiredTissue and orgStructure:
+            for prop in action.properties:
+                if prop.type.typeName == 'JobTicket' and orgStructure:
+                    prop.value = aux_create_JT(planned_end_date, actionType.jobType_id, orgStructure.id)
+    db.session.commit()
+    return jsonify(None)

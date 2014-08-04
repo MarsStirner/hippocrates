@@ -6,38 +6,77 @@
     <div ng-controller="EventInfoCtrl" class="ng-cloak">
         {% include "_breadcrumbs.html" %}
         <legend xmlns="http://www.w3.org/1999/html" wm-page-header>
-            <div class="pull-right text-right col-md-1">
+            <div class="pull-right text-right col-md-4">
                 <ui-print-button ps="ps" resolve="ps_resolve()" ng-if="!event.is_new()"></ui-print-button>
+                {% if current_user.role_in('admin', 'doctor', 'clinicDoctor') -%}
+                <button type="button" ng-click="close_event();" class="btn btn-info"
+                        tooltip="[[event.is_closed ? 'Обращение уже закрыто': '']]">Закрыть обращение</button>
+                {%- endif %}
                 <button type="button" ng-click="save_event();" ng-hide="event.is_new();" class="btn btn-success" title="Сохранить"><span class="glyphicon glyphicon-ok"></span></button>
             </div>
             <h2>[[event.is_new() ? 'Создание обращения' : 'Обращение № ' + event.info.external_id]], пациент
                 <a href="{{ url_for('patients.patient') }}?client_id=[[event.info.client_id]]">[[ event.info.client.info.full_name ]]</a>
             </h2>
         </legend>
-        <div class="col-md-2 affix-holder">
-            <div class="toc-affix" bs-affix>
-                <toc-affix toc-name="tocEventForm">
-                <hr>
-                <button type="button" ng-click="save_event();" class="btn btn-default btn-success"
-                        ng-bind="event.is_new() ? 'Создать' : 'Сохранить'">Создать</button>
-                <button type="button" ng-click="cancel_editing();" class="btn btn-default btn-danger">Закрыть</button>
-                </toc-affix>
+        <div class="row">
+            <div class="col-md-2 affix-holder">
+                <div class="toc-affix" bs-affix>
+                    <toc-affix toc-name="tocEventForm">
+                    <hr>
+                    <button type="button" ng-click="save_event();" class="btn btn-default btn-success"
+                            ng-bind="event.is_new() ? 'Создать' : 'Сохранить'">Создать</button>
+                    <button type="button" ng-click="cancel_editing();" class="btn btn-default btn-danger">Закрыть</button>
+                    </toc-affix>
+                </div>
+            </div>
+            <div class="col-md-10">
+                <div ui-alert-list="alerts"></div>
+                <div class="marginal">
+                    <ng-form name="eventForm" role="form" novalidate toc-element toc-name="tocEventForm" form-safe-close>
+                        {% include "event/_patient_info.html" %}
+                        {% include "event/_main_info.html" %}
+                        {% if current_user.role_in('admin', 'doctor', 'clinicDoctor') %}
+                            {% include "event/_diagnoses.html" %}
+                        {% endif %}
+                        {% if current_user.role_in('admin', 'rRegistartor', 'clinicRegistrator') %}
+                            {% include "event/_services.html" %}
+                            {% include "event/_payment.html" %}
+                        {% endif %}
+                        {% if current_user.role_in('admin', 'doctor', 'clinicDoctor') %}
+                            <div class="marginal">
+                                <ng-form name="eventMedDocActionsForm" toc-element="Медицинские документы">
+                                    <legend>Медицинские документы</legend>
+                                    {{ action_list.action_list('event.info.actions', 'medical_documents') }}
+                                </ng-form>
+                            </div>
+                            <div class="marginal">
+                                <ng-form name="eventDiagActionsForm" toc-element="Диагностика">
+                                    <legend>Диагностика</legend>
+                                    {{ action_list.action_list('event.info.actions', 'diagnostics') }}
+                                </ng-form>
+                            </div>
+                            <div class="marginal">
+                                <ng-form name="eventLabActionsForm" toc-element="Лаб.исследования">
+                                    <legend>Лаб.исследования</legend>
+                                    {{ action_list.action_list('event.info.actions', 'lab') }}
+                                </ng-form>
+                            </div>
+                            <div class="marginal">
+                                <ng-form name="eventCureActionsForm" toc-element="Лечение">
+                                    <legend>Лечение</legend>
+                                    {{ action_list.action_list('event.info.actions', 'treatments') }}
+                                </ng-form>
+                            </div>
+                        {% endif %}
+                    </ng-form>
+                </div>
             </div>
         </div>
-        <div class="col-md-10">
-            <div ui-alert-list="alerts"></div>
-            <div class="marginal">
-                <ng-form name="eventForm" role="form" novalidate toc-element toc-name="tocEventForm" form-safe-close>
-                    {% include "event/_patient_info.html" %}
-                </ng-form>
-            </div>
-        </div>
-{#        <div>#}
-{#            <p>debug:</p>#}
-{#            <pre>[[event | json]]</pre>#}
-{#        </div>#}
     </div>
     <script type="text/ng-template" id="modal-unclosed-actions.html">{% include "event/_modal_unclosed_actions.html" %}</script>
+    {% if current_user.role_in('admin', 'doctor', 'clinicDoctor') %}
+        <script type="text/ng-template" id="modal-delete-record.html">{% include "event/_modal_delete_record.html" %}</script>
+    {% endif %}
 {% endblock %}
 
 {% block modules_js %}

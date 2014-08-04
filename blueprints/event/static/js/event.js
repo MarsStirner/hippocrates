@@ -643,7 +643,6 @@ var EventServicesCtrl = function($scope, $http, WMEventService) {
         } else {
             service.print = 1
         }
-
     };
 };
 
@@ -665,26 +664,11 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, P
     };
     $scope.policies = [];
 
-    $scope.action_type_class = function(class_code) {
-        switch (class_code){
-            case 0:
-                return 'med_doc_actions';
-            case 1:
-                return 'diag_actions';
-            case 2:
-                return 'cure_actions';
-            default:
-                return null;
-        }
-    };
-
     $scope.initialize = function() {
         $scope.event.reload().
             then(function() {
                 $scope.$broadcast('event_loaded');
-                if ($scope.event.is_new()) {
-
-                } else {
+                if (!$scope.event.is_new()) {
                     $scope.ps.set_context($scope.event.info.event_type.print_context);
                     $scope.ps_services.set_context('services');
                 }
@@ -704,7 +688,10 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, P
     };
 
     $scope.open_action_tree = function (at_class) {
-        ActionTypeTreeModal.open(at_class, $scope.event_id, $scope.event.info.client.info);
+        ActionTypeTreeModal.open(at_class, $scope.event_id, $scope.event.info.client.info)
+            .result.then(function (_) {
+                $scope.event.reload();
+            });
     };
 
     $scope.save_event = function (close_event) {
@@ -771,19 +758,19 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, P
         });
     };
 
-    $scope.open_delete_action_modal = function(action_type_class, index, message) {
+    $scope.open_delete_action_modal = function(action) {
         var modalInstance = $modal.open({
             templateUrl: 'modal-delete-record.html',
             controller: DeleteRecordModalCtrl,
             resolve: {
                 message: function(){
-                    return 'действие "' + message +'"';
+                    return 'действие "' + action.name +'"';
                 }
             },
             scope: $scope
         });
         modalInstance.result.then(function () {
-            $scope.delete_action(action_type_class, index);
+            $scope.delete_action(action);
         });
     };
 
@@ -837,26 +824,6 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, P
         };
     };
 
-    $scope.print_template = function (template_id) {
-        $http.post(
-            url_print_subsystem, {
-                id: template_id,
-                context_type: "event",
-                event_id: $scope.event_id,
-                additional_context: {
-                    currentOrgStructure: "",
-                    currentOrganisation: 3479,
-                    currentPerson:"1"
-                }
-            }).success(function (data) {
-                var w = $window.open();
-                w.document.open();
-                w.document.write(data);
-                w.document.close();
-                w.print();
-            })
-    };
-
     $scope.$on('printing_error', function (event, error) {
         $scope.alerts.push(error);
     });
@@ -888,18 +855,16 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, P
         window.open(url_for_schedule_html_action + '?action_id=' + action_id);
     };
 
-    $scope.delete_action = function (action_type_class, index) {
-        var action_type_class_name =  $scope.action_type_class(action_type_class);
-        var action_id = $scope.event.info[action_type_class_name][index].id
+    $scope.delete_action = function (action) {
         $http.post(
             url_for_event_api_delete_action, {
-                action_id: action_id
+                action_id: action.id
             }
         ).success(function() {
-                $scope.event.info[action_type_class_name].splice(index, 1);
-            }).error(function() {
-                alert('error');
-            });
+            $scope.event.info.actions.remove(action);
+        }).error(function() {
+            alert('error');
+        });
     };
     // action data end
 
