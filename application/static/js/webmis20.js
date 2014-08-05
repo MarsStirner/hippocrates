@@ -272,7 +272,8 @@ var WebMis20 = angular.module('WebMis20', [
         }
         return out;
     }
-}).filter('highlight', function() {
+})
+.filter('highlight', function() {
     return function (input, query) {
         if (input) {
             var query_array = query.split(' ');
@@ -798,14 +799,14 @@ var WebMis20 = angular.module('WebMis20', [
     }
 })
 .directive("freeInputSelect", [
-    '$compile', function($compile) {
+    '$timeout', function($timeout) {
       return {
         restrict: "A",
         scope: {
           items: '=',
           disabled: '=ngDisabled',
           freetext: '@',
-          builder: '=',
+          builder: '&',
           "class": '@'
         },
         require: '?ngModel',

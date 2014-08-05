@@ -5,7 +5,7 @@
 {% block main %}
     <div ng-controller="EventInfoCtrl" class="ng-cloak">
         {% include "_breadcrumbs.html" %}
-        <legend xmlns="http://www.w3.org/1999/html" wm-page-header>
+        <legend xmlns="http://www.w3.org/1999/html">
             <div class="pull-right text-right col-md-4">
                 <ui-print-button ps="ps" resolve="ps_resolve()" ng-if="!event.is_new()"></ui-print-button>
                 <button type="button" ng-click="save_event();" ng-hide="event.is_new();" class="btn btn-success" title="Сохранить"><span class="glyphicon glyphicon-ok"></span></button>

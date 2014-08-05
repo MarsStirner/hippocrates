@@ -17,8 +17,8 @@
                     <td>[[doc.hasOwnProperty('doc_type') ? doc.doc_type.name : doc.policy_type.name]]</td>
                     <td>[[doc.serial]]</td>
                     <td>[[doc.number]]</td>
-                    <td>[[doc.beg_date]]</td>
-                    <td>[[doc.end_date]]</td>
+                    <td>[[doc.beg_date|asDate]]</td>
+                    <td>[[doc.end_date|asDate]]</td>
 {#                    <td>#}
 {#                        <a class="btn btn-sm btn-default" href="" title="Удалить документ"#}
 {#                           ng-click="delete_record('documentHistory', document)" ng-show="editing">#}
