@@ -136,7 +136,7 @@ def api_event_save():
         if local_contract:
             lcon = get_local_contract(local_contract)
             event.localContract = lcon
-            db.session.add(event)
+        db.session.add(event)
 
         if not is_diagnostic:
             visit = Visit.make_default(event)

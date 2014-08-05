@@ -152,7 +152,6 @@ def create_services(event_id, services_data, cfinance_id):
                     current_user.id,
                     {'finance_id': cfinance_id,
                      'coordDate': datetime.datetime.now() if service.get('coord_person_id') else None,
-                     'coordPerson_id': service.get('coord_person_id'),
-                     'account': service['account']})
+                     'coordPerson_id': service.get('coord_person_id')})
                 result.append(action.id)
     return result
