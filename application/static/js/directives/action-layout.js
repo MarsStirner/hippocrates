@@ -11,6 +11,8 @@ angular.module('WebMis20.ActionLayout', [])
             action: '='
         },
         link: function (scope, element, attributes, ctrl) {
+            var original_element = element,
+                current_element = element;
 
             function build(tag) {
                 var inner_template;
@@ -56,7 +58,7 @@ angular.module('WebMis20.ActionLayout', [])
                         }).join('');
                         return '<div class="panel panel-default">\
                                 <div class="panel-heading">{0}</div>\
-                                <ul class="panel-body list-group">\
+                                <ul class="list-group">\
                                     {1}\
                                 </ul>\
                             </div>'.format(title, inner_template);
@@ -70,7 +72,7 @@ angular.module('WebMis20.ActionLayout', [])
                             throw 'Incorrect cols number'
                         }
                         inner_template = tag.children.map(function (child) {
-                            return '<div class="col-md-{0}" ng-repeat="child in tag.children">{1}</div>'.format(w, build(child))
+                            return '<div class="col-md-{0}">{1}</div>'.format(w, build(child))
                         }).join('');
                         return '<div class="row">{0}</div>'.format(inner_template);
                     case 'root':
@@ -83,14 +85,13 @@ angular.module('WebMis20.ActionLayout', [])
                 }
             }
 
-            scope.$watchCollection('action', function (action, old) {
-                if (!angular.equals(action, old)) {
-                    var template = build(action.layout);
-                    var replace = $(template);
-                    $(element).replaceWith(replace);
-                    $compile(replace)(scope);
-                }
-                return action;
+            scope.$watch('action.layout', function (layout, old) {
+                var template = build(layout);
+                var replace = $(template);
+                $(current_element).replaceWith(replace);
+                current_element = replace;
+                $compile(replace)(scope);
+                return layout;
             })
         }
     }
