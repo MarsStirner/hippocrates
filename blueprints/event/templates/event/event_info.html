@@ -8,13 +8,6 @@
         <legend xmlns="http://www.w3.org/1999/html" wm-page-header>
             <div class="pull-right text-right col-md-4">
                 <ui-print-button ps="ps" resolve="ps_resolve()" ng-if="!event.is_new()"></ui-print-button>
-                {% if current_user.role_in('admin', 'doctor', 'clinicDoctor') -%}
-                <button type="button" ng-click="close_event();" class="btn btn-info"
-                        tooltip="[[event.is_closed ? 'Обращение уже закрыто': '']]">Закрыть обращение</button>
-                {% elif current_user.role_in('rRegistartor', 'clinicRegistrator') %}
-                <button ng-if="formstate.is_diagnostic()" type="button" ng-click="close_event();" class="btn btn-info"
-                        tooltip="[[event.is_closed ? 'Обращение уже закрыто': '']]">Закрыть обращение</button>
-                {%- endif %}
                 <button type="button" ng-click="save_event();" ng-hide="event.is_new();" class="btn btn-success" title="Сохранить"><span class="glyphicon glyphicon-ok"></span></button>
             </div>
             <h2>[[event.is_new() ? 'Создание обращения' : 'Обращение № ' + event.info.external_id]], пациент
@@ -26,9 +19,30 @@
                 <div class="toc-affix" bs-affix>
                     <toc-affix toc-name="tocEventForm">
                     <hr>
-                    <button type="button" ng-click="save_event();" class="btn btn-default btn-success"
+                    <div class="row">
+                        <div class="col-md-6">
+                            <button type="button" ng-click="save_event();" class="btn btn-block btn-success"
                             ng-bind="event.is_new() ? 'Создать' : 'Сохранить'">Создать</button>
-                    <button type="button" ng-click="cancel_editing();" class="btn btn-default btn-danger">Закрыть</button>
+                        </div>
+                        <div class="col-md-6">
+                            <button type="button" ng-click="cancel_editing();" class="btn btn-block btn-default">Отмена</button>
+                        </div>
+                    </div>
+                    {% if current_user.role_in('admin', 'doctor', 'clinicDoctor') %}
+                    <div class="row vmargin10">
+                        <div class="col-md-12">
+                            <button type="button" ng-click="close_event();" ng-show="!event.is_closed" class="btn btn-block btn-info"
+                                    tooltip="[[event.is_closed ? 'Обращение уже закрыто': '']]">Закрыть обращение</button>
+                        </div>
+                    </div>
+                    {% elif current_user.role_in('rRegistartor', 'clinicRegistrator') %}
+                    <div class="row vmargin10">
+                        <div class="col-md-12">
+                            <button ng-show="!event.is_closed && formstate.is_diagnostic()" type="button" ng-click="close_event();" class="btn btn-block btn-info"
+                                tooltip="[[event.is_closed ? 'Обращение уже закрыто': '']]">Закрыть обращение</button>
+                        </div>
+                    </div>
+                    {%- endif %}
                     </toc-affix>
                 </div>
             </div>
