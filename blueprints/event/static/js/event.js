@@ -120,6 +120,12 @@ var EventMainInfoCtrl = function ($scope, $http, RefBookService, EventType, $win
     $scope.contracts = [];
     $scope.policy_errors = [];
 
+    $scope.filter_rb_request_type = function() {
+        return function(elem) {
+            return elem.code == 'policlinic' || elem.code == '4' ;
+        };
+    };
+
     $scope.$on('event_loaded', function() {
         if ($scope.event.is_new()) $scope.event.info.set_date = new Date($scope.event.info.set_date);
 
@@ -659,7 +665,7 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, P
     $scope.event_id = params.event_id;
     $scope.client_id = params.client_id;
     $scope.ticket_id = params.ticket_id;
-    $scope.event = new WMEvent($scope.event_id, $scope.client_id, $scope.ticket_id);
+    var event = $scope.event = new WMEvent($scope.event_id, $scope.client_id, $scope.ticket_id);
     $scope.editing = {
         submit_attempt: false
     };
@@ -669,6 +675,7 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, P
         $scope.event.reload().
             then(function() {
                 $scope.$broadcast('event_loaded');
+                $scope.formstate.set_state(event.info.event_type.request_type, event.info.event_type.finance, event.is_new());
                 if (!$scope.event.is_new()) {
                     $scope.ps.set_context($scope.event.info.event_type.print_context);
                     $scope.ps_services.set_context('services');
@@ -687,7 +694,7 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, P
                 }
 
                 $scope.$watch(function () {
-                    return [event.info.request_type, event.info.finance];
+                    return [event.info.event_type.request_type, event.info.event_type.finance];
                 }, function (n, o) {
                     if (n !== o) {
                         var rt = n[0],
@@ -743,7 +750,7 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, P
             alert("Необходимо задать результат");
             return false
         }
-        if (!$scope.event.info.ache_result && $scope.event_mandatoryResult()){
+        if (!$scope.formstate.is_diagnostic() && !$scope.event.info.ache_result && $scope.event_mandatoryResult()){
             alert("Необходимо задать исход заболевания/госпитализации");
             return false
         }
@@ -794,7 +801,7 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, P
             var unclosed_actions = $scope.event.get_unclosed_actions();
             if (!$scope.event_check_results()){
                 return false;
-            } else if (!$scope.event_check_final_diagnosis()){
+            } else if (!$scope.formstate.is_diagnostic() && !$scope.event_check_final_diagnosis()){
                 return false;
             } else if (unclosed_actions.length){
                 $scope.open_unclosed_actions_modal(unclosed_actions);

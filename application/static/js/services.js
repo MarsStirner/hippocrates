@@ -606,6 +606,9 @@ angular.module('WebMis20.services', []).
             is_policlinic: function () {
                 return rt.code === 'policlinic';
             },
+            is_diagnostic: function () {
+                return rt.code === '4';
+            },
             is_paid: function () {
                 return fin.code === '4';
             },

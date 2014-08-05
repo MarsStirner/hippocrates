@@ -17,7 +17,7 @@
                                        ng-disabled="formcnf.request_type.disabled || (event.is_new() && event.services.length)">
                                 <ui-select-match placeholder="Тип обращения">[[$select.selected.name]]</ui-select-match>
                                 <ui-select-choices repeat="rt in rbRequestType.objects
-                                                 | filter: rbRequestType.objects && rbRequestType.get_by_code('policlinic')
+                                                 | filter: filter_rb_request_type()
                                                  | filter: $select.search">
                                     <div ng-bind-html="rt.name | highlight: $select.search"></div>
                                 </ui-select-choices>
@@ -84,7 +84,7 @@
                 </li>
                 <li class="list-group-item">
                     <div class="row">
-                        <div class="col-md-4"
+                        <div class="col-md-4" ng-if="!formstate.is_diagnostic()"
                              ng-class="{'has-error': event_maininfo_form.exec_person.$invalid && editing.submit_attempt}">
                             <label for="exec_person" class="control-label">Лечащий врач</label>
                             <ui-select id="exec_person" name="exec_person" theme="select2"
@@ -178,7 +178,7 @@
                                 </ui-select-choices>
                             </ui-select>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-3" ng-if="!formstate.is_diagnostic()">
                             <label for="ache_result">Исход заболевания</label>
                             <ui-select id="result" name="result" theme="select2"
                                        ng-model="event.info.ache_result">
@@ -186,6 +186,22 @@
                                 <ui-select-choices repeat="rbar in rbAcheResult.objects | filter: $select.search |
                                 filter: filter_results(event.info.event_type.purpose.id)">
                                     <div ng-bind-html="rbar.name | highlight: $select.search"></div>
+                                </ui-select-choices>
+                            </ui-select>
+                        </div>
+                    </div>
+                </li>
+                {% elif current_user.role_in('rRegistartor', 'clinicRegistrator') %}
+                <li class="list-group-item" ng-if="formstate.is_diagnostic()">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label for="result" class="control-label">Результат обращения</label>
+                            <ui-select id="result" name="result" theme="select2"
+                                       ng-model="event.info.result">
+                                <ui-select-match placeholder="Результат обращения">[[$select.selected.name]]</ui-select-match>
+                                <ui-select-choices repeat="rbr in rbResult.objects | filter: $select.search |
+                                filter: filter_results(event.info.event_type.purpose.id)">
+                                    <div ng-bind-html="rbr.name | highlight: $select.search"></div>
                                 </ui-select-choices>
                             </ui-select>
                         </div>

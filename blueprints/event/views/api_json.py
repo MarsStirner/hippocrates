@@ -92,7 +92,11 @@ def api_event_save():
     event_data = request.json['event']
     close_event = request.json['close_event']
     event_id = event_data.get('id')
-    execPerson = Person.query.get(event_data['exec_person']['id'])
+    is_diagnostic = event_data['event_type']['request_type']['code'] == '4'
+    if is_diagnostic:
+        execPerson = None
+    else:
+        execPerson = Person.query.get(event_data['exec_person']['id'])
     err_msg = u'Ошибка сохранения данных обращения'
     if event_id:
         event = Event.query.get(event_id)
@@ -134,13 +138,14 @@ def api_event_save():
             event.localContract = lcon
             db.session.add(event)
 
-        visit = Visit.make_default(event)
-        db.session.add(visit)
-        executives = Event_Persons()
-        executives.person = event.execPerson
-        executives.event = event
-        executives.begDate = event.setDate
-        db.session.add(executives)
+        if not is_diagnostic:
+            visit = Visit.make_default(event)
+            db.session.add(visit)
+            executives = Event_Persons()
+            executives.person = event.execPerson
+            executives.event = event
+            executives.begDate = event.setDate
+            db.session.add(executives)
 
     if close_event:
         exec_date = event_data['exec_date']

@@ -11,6 +11,9 @@
                 {% if current_user.role_in('admin', 'doctor', 'clinicDoctor') -%}
                 <button type="button" ng-click="close_event();" class="btn btn-info"
                         tooltip="[[event.is_closed ? 'Обращение уже закрыто': '']]">Закрыть обращение</button>
+                {% elif current_user.role_in('rRegistartor', 'clinicRegistrator') %}
+                <button ng-if="formstate.is_diagnostic()" type="button" ng-click="close_event();" class="btn btn-info"
+                        tooltip="[[event.is_closed ? 'Обращение уже закрыто': '']]">Закрыть обращение</button>
                 {%- endif %}
                 <button type="button" ng-click="save_event();" ng-hide="event.is_new();" class="btn btn-success" title="Сохранить"><span class="glyphicon glyphicon-ok"></span></button>
             </div>
@@ -43,7 +46,7 @@
                             {% include "event/_payment.html" %}
                         {% endif %}
                         {% if current_user.role_in('admin', 'doctor', 'clinicDoctor') %}
-                            <div class="marginal">
+                            <div class="marginal" ng-if="!formstate.is_diagnostic()">
                                 <ng-form name="eventMedDocActionsForm" toc-element="Медицинские документы">
                                     <legend>Медицинские документы</legend>
                                     {{ action_list.action_list('event.info.actions', 'medical_documents') }}
@@ -61,7 +64,7 @@
                                     {{ action_list.action_list('event.info.actions', 'lab') }}
                                 </ng-form>
                             </div>
-                            <div class="marginal">
+                            <div class="marginal" ng-if="!formstate.is_diagnostic()">
                                 <ng-form name="eventCureActionsForm" toc-element="Лечение">
                                     <legend>Лечение</legend>
                                     {{ action_list.action_list('event.info.actions', 'treatments') }}
