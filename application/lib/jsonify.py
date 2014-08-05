@@ -580,60 +580,61 @@ class EventVisualizer(object):
         return map(make_service, event.actions)
 
 
-class Undefined:
-    pass
-
-
 class ActionVisualizer(object):
     def make_action(self, action):
         """
         @type action: Action
         """
         return {
-            'id': action.id,
-            'action_type': action.actionType,
-            'event_id': action.event_id,
-            'client': action.event.client,
-            'direction_date': action.directionDate,
-            'begDate': action.begDate,
-            'endDate': action.endDate,
-            'planned_endDate': action.plannedEndDate,
-            'status': ActionStatus(action.status),
-            'set_person': action.setPerson,
-            'person': action.person,
-            'note': action.note,
-            'office': action.office,
-            'amount': action.amount,
-            'uet': action.uet,
-            'pay_status': action.payStatus,
-            'account': action.account,
-            'properties': [
-                self.make_property(prop)
-                for prop in action.properties
-            ]
-        }
-    
-    def make_property(self, prop, value=Undefined):
-        """
-        @type prop: ActionProperty
-        """
-        return {
-            'id': prop.id,
-            'idx': prop.type.idx,
-            'type': prop.type,
-            'is_assigned': prop.isAssigned,
-            'value': value if value != Undefined else prop.value
+            'action': {
+                'id': action.id,
+                'action_type': action.actionType,
+                'event_id': action.event_id,
+                'client': action.event.client,
+                'direction_date': action.directionDate,
+                'begDate': action.begDate,
+                'endDate': action.endDate,
+                'planned_endDate': action.plannedEndDate,
+                'status': ActionStatus(action.status),
+                'set_person': action.setPerson,
+                'person': action.person,
+                'note': action.note,
+                'office': action.office,
+                'amount': action.amount,
+                'uet': action.uet,
+                'pay_status': action.payStatus,
+                'account': action.account,
+                'properties': [
+                    self.make_property(prop)
+                    for prop in action.properties
+                ]
+            },
+            'layout': self.make_action_layout(action)
         }
 
-    def make_abstract_property(self, prop, value):
+    def make_action_layout(self, action):
+        """
+        :type action_type: Action
+        :param action_type:
+        :return:
+        """
+        return {
+            'tagName': 'root',
+            'children': [{
+                'tagName': 'ap',
+                'id': ap.type_id
+            } for ap in action.properties]
+        }
+    
+    def make_property(self, prop):
         """
         @type prop: ActionProperty
-        @type value: any
         """
         return {
             'id': prop.id,
             'idx': prop.type.idx,
             'type': prop.type,
             'is_assigned': prop.isAssigned,
-            'value': value
+            'value': prop.value
         }
+

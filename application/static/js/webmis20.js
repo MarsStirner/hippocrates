@@ -7,6 +7,7 @@ var WebMis20 = angular.module('WebMis20', [
     'WebMis20.directives',
     'WebMis20.directives.personTree',
     'WebMis20.directives.ActionTypeTree',
+    'WebMis20.ActionLayout',
     'WebMis20.directives.goodies',
     'WebMis20.controllers',
     'WebMis20.LoadingIndicator',
@@ -430,25 +431,30 @@ var WebMis20 = angular.module('WebMis20', [
         // FIXME: На данный момент это ломает функциональность действий, но пока пофиг.
     var Action = function () {
         this.action = null;
+        this.layout = {};
         this.action_columns = {};
         this.properties_by_id = {};
         this.properties_by_code = {};
     };
     function success_wrapper(self) {
         return function (data) {
-            angular.extend(self.action, data.result);
+            self.action = {};
+            angular.extend(self.action, data.result.action);
+            self.layout = data.result.layout;
             self.action_columns = {
                 assignable: false,
                 unit: false
             };
-            angular.forEach(data.result.properties, function (item) {
+            self.properties_by_id = {};
+            self.properties_by_code = {};
+
+            angular.forEach(data.result.action.properties, function (item) {
                 self.action_columns.assignable |= item.type.is_assignable;
                 self.action_columns.unit |= item.type.unit;
 
-                self.properties_by_id = {};
+
                 self.properties_by_id[item.type.id] = item;
 
-                self.properties_by_code = {};
                 if (item.type.code) {
                     self.properties_by_code[item.type.code] = item;
                 }

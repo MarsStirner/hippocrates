@@ -4,98 +4,94 @@
 'use strict';
 
 angular.module('WebMis20.ActionLayout', [])
-.service('ActionLayoutService', function () {
+.directive('wmActionLayout', ['$compile', function ($compile) {
+    return {
+        restrict: 'E',
+        scope: {
+            action: '='
+        },
+        link: function (scope, element, attributes, ctrl) {
 
-})
-.directive('uiActionProperty', ['$compile', function ($compile) {
-    return {
-        restrict: 'A',
-        replace: true,
-        scope: {
-            $property: '=uiActionProperty'
-        },
-        link: function (scope, element, attributes) {
-            var element_code = null;
-            switch (scope.$property.type.type_name) {
-                case 'Text':
-                case 'Html':
-                case 'Жалобы':
-                case 'Constructor':
-                    element_code = '<textarea ckeditor="ckEditorOptions" ng-model="$property.value"></textarea>';
-                    break;
-                case 'Date':
-                    element_code = '<input type="text" class="form-control" datepicker-popup="dd-MM-yyyy" ng-model="$property.value" />';
-                    break;
-                case 'Integer':
-                case 'Double':
-                case 'Time':
-                    element_code = '<input class="form-control" type="text" ng-model="$property.value">';
-                    break;
-                case 'String':
-                    if (scope.$property.type.domain) {
-                        element_code = '<select class="form-control" ng-model="$property.value" ng-options="val for val in $property.type.values"></select>'
-                    } else {
-                        element_code = '<input class="form-control" type="text" ng-model="$property.value">';
-                    }
-                    break;
-                default:
-                    element_code = '<span ng-bind="$property.value">';
+            function build(tag) {
+                var inner_template;
+                switch (tag.tagName) {
+                    case 'ap':
+                        var property = scope.action.get_property(tag.id);
+                        if (property === undefined) return '{' + tag.id + '}';
+                        var property_code = 'action.get_property(' + tag.id + ')';
+
+                        switch (property.type.type_name) {
+                            case 'Text':
+                            case 'Html':
+                            case 'Жалобы':
+                            case 'Constructor':
+                                inner_template = '<textarea ckeditor="ckEditorOptions" ng-model="{0}.value"></textarea>';
+                                break;
+                            case 'Date':
+                                inner_template = '<input type="text" class="form-control" datepicker-popup="dd-MM-yyyy" ng-model="{0}.value" />';
+                                break;
+                            case 'Integer':
+                            case 'Double':
+                                inner_template = '<input class="form-control" type="text" ng-model="{0}.value">';
+                                break;
+                            case 'Time':
+                                inner_template = '<div fs-time ng-model="{0}.value">';
+                                break;
+                            case 'String':
+                                if (property.type.domain) {
+                                    inner_template = '<select class="form-control" ng-model="{0}.value" ng-options="val for val in {0}.type.values"></select>'
+                                } else {
+                                    inner_template = '<input class="form-control" type="text" ng-model="{0}.value">';
+                                }
+                                break;
+                            default:
+                                inner_template = '<span ng-bind="{0}.value"></span>';
+                        }
+                        var property_name = tag.title || property.type.name;
+                        return '<div class="row"><div class="col-sm-3">{0}</div><div class="col-sm-9">{1}</div></div>'.format(property_name, inner_template.format(property_code));
+                    case 'vgroup':
+                        var title = tag.title;
+                        inner_template = tag.children.map(function (child) {
+                            return '<li class="list-group-item">{0}</li>'.format(build(child))
+                        }).join('');
+                        return '<div class="panel panel-default">\
+                                <div class="panel-heading">{0}</div>\
+                                <ul class="panel-body list-group">\
+                                    {1}\
+                                </ul>\
+                            </div>'.format(title, inner_template);
+                    case 'row':
+                        var valid_cols = [1, 2, 3, 4, 6, 12],
+                            col_widths = [12, 6, 4, 3, 2, 1],
+                            w;
+                        if (valid_cols.has(tag.cols)) {
+                            w = col_widths[valid_cols.indexOf(tag.cols)];
+                        } else {
+                            throw 'Incorrect cols number'
+                        }
+                        inner_template = tag.children.map(function (child) {
+                            return '<div class="col-md-{0}" ng-repeat="child in tag.children">{1}</div>'.format(w, build(child))
+                        }).join('');
+                        return '<div class="row">{0}</div>'.format(inner_template);
+                    case 'root':
+                        inner_template = tag.children.map(function (child) {
+                            return '<div class="col-md-12">{0}</div>'.format(build(child))
+                        }).join('');
+                        return '<div class="row">{0}</div>'.format(inner_template);
+                    default:
+                        return '<div>[[ action.layout | json ]]</div>';
+                }
             }
-            var el = angular.element(element_code);
-            $(element[0]).append(el);
-            $compile(el)(scope);
-        }
-    }
-}])
-.directive('wmActionLayoutItem', ['$compile', function ($compile) {
-    return {
-        scope: {
-            tag: '='
-        },
-        link: function (scope, element, attributes) {
-            var template;
-            switch (scope.tag.name) {
-                case 'ap':
-                    template = '<div ui-action-property="">'; // TODO: Это надо продумать!
-                    break;
-                case 'vgroup':
-                    template =
-                        '<div class="well well-sm">\
-                            <div class="row" ng-repeat="child in tag.children">\
-                                <div class="col-md-12">\
-                                    <wm-action-layout-item tag="child"></wm-action-layout-item>\
-                                </div>\
-                            </div>\
-                        </div>';
-                    break;
-                case 'row':
-                    var c = [1, 2, 3, 4, 6, 12],
-                        d = [12, 6, 4, 3, 2, 1],
-                        w;
-                    if (c.has(scope.tag.cols)) {
-                        w = d[c.indexOf(scope.tag.cols)];
-                    } else {
-                        throw 'Incorrect cols number'
-                    }
-                    template =
-                        '<div class="row">\
-                            <div class="col-md-{0}" ng-repeat="child in tag.children">\
-                                <wm-action-layout-item tag="child"></action-layout-item>\
-                            </div>\
-                        </div>'.format('' + w);
-                    break;
-                case 'root':
-                    template =
-                        '<div ng-repeat="child in tag.children">\
-                            <wm-action-layout-item tag="child"></wm-action-layout>\
-                        </div>';
-                    break;
-                default:
-                    template = '<div>[[ tag | json ]]</div>'
-            }
-            var replace = $(template);
-            $(element).replaceWith(replace);
-            $compile(replace)(scope);
+
+            scope.$watchCollection('action', function (action, old) {
+                if (!angular.equals(action, old)) {
+                    var template = build(action.layout);
+                    var replace = $(template);
+                    $(element).replaceWith(replace);
+                    $compile(replace)(scope);
+                }
+                return action;
+            })
         }
     }
 }])

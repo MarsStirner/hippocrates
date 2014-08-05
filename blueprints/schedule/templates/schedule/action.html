@@ -48,24 +48,25 @@
         </tr>
         </tbody>
     </table>
-    <table class="table table-condensed">
-        <thead>
-        <tr>
-            <th></th>
-            <th ng-if="action.action_columns.assignable">Назначено</th>
-            <th>Значение</th>
-            <th ng-if="action.action_columns.unit">ед.изм</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr ng-repeat="property in action.properties | orderBy:'idx'">
-            <td class="action-property-name-field"><strong ng-bind="property.type.name"><span class="label label-danger" ng-if="property.type.mandatory">&ast;</span></strong></td>
-            <td ng-if="action.action_columns.assignable"><input type="checkbox" ng-model="property.is_assigned" ng-if="property.type.is_assignable"></td>
-            <td ui-action-property="property"></td>
-            <td ng-if="action.action_columns.unit" ng-bind="property.type.unit.code"></td>
-        </tr>
-        </tbody>
-    </table>
+    <wm-action-layout action="action"></wm-action-layout>
+{#    <table class="table table-condensed">#}
+{#        <thead>#}
+{#        <tr>#}
+{#            <th></th>#}
+{#            <th ng-if="action.action_columns.assignable">Назначено</th>#}
+{#            <th>Значение</th>#}
+{#            <th ng-if="action.action_columns.unit">ед.изм</th>#}
+{#        </tr>#}
+{#        </thead>#}
+{#        <tbody>#}
+{#        <tr ng-repeat="property in action.properties | orderBy:'idx'">#}
+{#            <td class="action-property-name-field"><strong ng-bind="property.type.name"><span class="label label-danger" ng-if="property.type.mandatory">&ast;</span></strong></td>#}
+{#            <td ng-if="action.action_columns.assignable"><input type="checkbox" ng-model="property.is_assigned" ng-if="property.type.is_assignable"></td>#}
+{#            <td ui-action-property="property"></td>#}
+{#            <td ng-if="action.action_columns.unit" ng-bind="property.type.unit.code"></td>#}
+{#        </tr>#}
+{#        </tbody>#}
+{#    </table>#}
 </div>
 <div class="row">
     <div class="col-md-6">&nbsp;</div>
