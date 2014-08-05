@@ -1,60 +1,54 @@
 'use strict';
 
 angular.module('WebMis20.directives').
-    directive('wmPolicy', ['RefBookService',
-        function(RefBookService) {
+    directive('wmPolicy', ['RefBookService', '$filter',
+        function(RefBookService, $filter) {
             return {
                 restrict: 'E',
                 require: '^form',
                 scope: {
                     pType: '@',
                     idPostfix: '@',
-                    modelType: '=',
-                    modelSerial: '=',
-                    serialValidator: '=',
-                    modelNumber: '=',
-                    numberValidator: '=',
-                    modelBegDate: '=',
-                    modelEndDate: '=',
-                    modelInsurer: '=',
                     edit_mode: '&editMode',
                     modelPolicy: '='
                 },
                 link: function(scope, elm, attrs, formCtrl) {
+                    var policy_codes = (scope.pType == 0)?(['cmiOld', 'cmiTmp', 'cmiCommonPaper', 'cmiCommonElectron', 'cmiUEC', 'cmiFnkcIndustrial', 'cmiFnkcLocal']):(['vmi']);
+
+                    /* Здесь начинается костыль, который предотвращает бесконечный $digest */
+                    scope.rbPolicyType = RefBookService.get('rbPolicyType');
+                    scope.Organisation = RefBookService.get('Organisation');
+
+                    scope.rbPolicyObjects = [];
+                    scope.OrganisationObjects = [];
+
+                    scope.$watch('rbPolicyType.objects',
+                        function (n) {
+                            scope.rbPolicyObjects = $filter('attribute')(n, 'code', policy_codes);
+                        }
+                    );
+
+                    scope.$watch('Organisation.objects',
+                        function (n) {
+                            scope.OrganisationObjects = $filter('attribute')(n, 'is_insurer');
+                        }
+                    );
+                    /* А здесь заканчивается костыль */
+
                     scope.policyForm = formCtrl;
-                    scope.policy_codes = (scope.pType == 0)?(['cmiOld', 'cmiTmp', 'cmiCommonPaper', 'cmiCommonElectron',
-                        'cmiUEC', 'cmiFnkcIndustrial', 'cmiFnkcLocal']):(['vmi']);
 
                     scope.builder_organisation = function(name) {
                         return {
-                                'id': null,
-                                'full_name': name,
-                                'short_name': name,
-                                'infis': null,
-                                'title': null
-                            };
+                            'id': null,
+                            'full_name': name,
+                            'short_name': name,
+                            'infis': null,
+                            'title': null
+                        };
                     };
 
                     scope.$watch('policyForm.$dirty', function(n, o) {
-                        if (n !== o) {
-                            scope.modelPolicy.dirty = n;
-                        }
-                    });
-
-                    // todo: fix? промежуточные модели для ui-select...
-                    // вероятно проблема в том, что ui-select в качестве модели нужен объект в скоупе
-                    scope.intmd_models = {};
-                    scope.intmd_models.type = scope.modelType;
-                    scope.intmd_models.insurer = scope.modelInsurer;
-                    scope.$watch('intmd_models.type', function(n, o) {
-                        if (n !== o) {
-                            scope.modelType = n;
-                        }
-                    });
-                    scope.$watch('intmd_models.insurer', function(n, o) {
-                        if (n !== o) {
-                            scope.modelInsurer = n;
-                        }
+                        scope.modelPolicy.dirty = n;
                     });
                 },
                 template:
@@ -64,10 +58,10 @@ angular.module('WebMis20.directives').
             <div class="form-group col-md-4"\
                  ng-class="{\'has-error\': (policyForm.$dirty || modelPolicy.id) && policyForm.pol_type.$invalid}">\
                 <label for="pol_type[[idPostfix]]" class="control-label">Тип</label>\
-                <ui-select class="form-control" id="pol_type[[idPostfix]]" name="pol_type" theme="select2" ref-book="rbPolicyType"\
-                           ng-model="intmd_models.type" ng-disabled="!edit_mode()" ng-required="policyForm.$dirty">\
+                <ui-select class="form-control" id="pol_type[[idPostfix]]" name="pol_type" theme="select2"\
+                           ng-model="modelPolicy.policy_type" ng-disabled="!edit_mode()" ng-required="policyForm.$dirty">\
                     <ui-select-match placeholder="Тип полиса">[[$select.selected.name]]</ui-select-match>\
-                    <ui-select-choices repeat="pt in $refBook.objects | attribute:\'code\':policy_codes | filter: $select.search">\
+                    <ui-select-choices repeat="pt in rbPolicyObjects | filter: $select.search">\
                         <div ng-bind-html="pt.name | highlight: $select.search"></div>\
                     </ui-select-choices>\
                 </ui-select>\
@@ -76,28 +70,28 @@ angular.module('WebMis20.directives').
                  ng-class="{\'has-error\': ((policyForm.$dirty || modelPolicy.id) && policyForm.pol_serial.$invalid) || policyForm.pol_serial.$error.required}">\
                 <label for="pol_serial[[idPostfix]]" class="control-label">Серия</label>\
                 <input type="text" class="form-control" id="pol_serial[[idPostfix]]" name="pol_serial"\
-                       autocomplete="off" placeholder="серия" validator-regexp="serialValidator"\
-                       ng-model="modelSerial" ng-disabled="!edit_mode()" ng-required="serialValidator && policyForm.$dirty"/>\
+                       autocomplete="off" placeholder="серия" validator-regexp="modelPolicy.policy_type.validators.serial"\
+                       ng-model="modelPolicy.serial" ng-disabled="!edit_mode()" ng-required="modelPolicy.policy_type.validators.serial && policyForm.$dirty"/>\
             </div>\
             <div class="form-group col-md-2"\
                  ng-class="{\'has-error\': (policyForm.$dirty || modelPolicy.id) && policyForm.pol_number.$invalid}">\
                 <label for="pol_number[[idPostfix]]" class="control-label">Номер</label>\
                 <input type="text" class="form-control" id="pol_number[[idPostfix]]" name="pol_number"\
-                       autocomplete="off" placeholder="номер" validator-regexp="numberValidator"\
-                       ng-model="modelNumber" ng-required="policyForm.$dirty" ng-disabled="!edit_mode()"/>\
+                       autocomplete="off" placeholder="номер" validator-regexp="modelPolicy.policy_type.validators.number"\
+                       ng-model="modelPolicy.number" ng-required="policyForm.$dirty" ng-disabled="!edit_mode()"/>\
             </div>\
             <div class="form-group col-md-offset-1 col-md-2"\
                  ng-class="{\'has-error\': (policyForm.$dirty || modelPolicy.id) && policyForm.pol_begdate[[idPostfix]].$invalid}">\
                 <label for="pol_begdate[[idPostfix]]" class="control-label">Дата выдачи</label>\
                 <wm-date id="pol_begdate[[idPostfix]]"\
-                         ng-model="modelBegDate" ng-disabled="!edit_mode()" ng-required="policyForm.$dirty">\
+                         ng-model="modelPolicy.beg_date" ng-disabled="!edit_mode()" ng-required="policyForm.$dirty">\
                 </wm-date>\
             </div>\
             <div class="form-group col-md-2"\
                  ng-class="{\'has-error\': policyForm.pol_enddate[[idPostfix]].$invalid }">\
                 <label for="pol_enddate[[idPostfix]]" class="control-label">Действителен до</label>\
                 <wm-date id="pol_enddate[[idPostfix]]"\
-                         ng-model="modelEndDate" ng-disabled="!edit_mode()">\
+                         ng-model="modelPolicy.end_date" ng-disabled="!edit_mode()">\
                 </wm-date>\
             </div>\
         </div>\
@@ -105,9 +99,9 @@ angular.module('WebMis20.directives').
             <div class="form-group col-md-12"\
                  ng-class="{\'has-error\': (policyForm.$dirty || modelPolicy.id) && policyForm.pol_insurer.$invalid}">\
                 <label for="pol_insurer[[idPostfix]]" class="control-label">Страховая медицинская организация</label>\
-                <div ng-class="form-control" class="validatable" id="pol_insurer[[idPostfix]]" name="pol_insurer" ref-book="Organisation"\
-                     free-input-select="" freetext="true" items="$refBook.objects | attribute:\'is_insurer\'" builder="builder_organisation"\
-                     ng-disabled="!edit_mode()" ng-required="policyForm.$dirty" ng-model="intmd_models.insurer">\
+                <div ng-class="form-control" class="validatable" id="pol_insurer[[idPostfix]]" name="pol_insurer"\
+                     free-input-select="" freetext="true" items="OrganisationObjects" builder="builder_organisation"\
+                     ng-disabled="!edit_mode()" ng-required="policyForm.$dirty" ng-model="modelPolicy.insurer">\
                     [[ item.short_name ]]\
                 </div>\
             </div>\
