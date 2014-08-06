@@ -9,15 +9,6 @@ var ActionEditorCtrl = function ($scope, $http, $window, WMAction, PrintingServi
             action_id: $scope.action.id
         }
     };
-    $scope.ckEditorOptions = {
-        language: 'ru',
-        removeButtons: 'Cut,Copy,Paste,Undo,Redo,Anchor,Strike',
-        toolbarCanCollapse: true,
-        toolbarStartupExpanded: false,
-        autoGrow_minHeight: 50,
-        autoGrow_bottomSpace: 50,
-        height: 200
-    };
     $scope.action_id = params.action_id;
     $scope.action = new WMAction();
     if (params.action_id) {

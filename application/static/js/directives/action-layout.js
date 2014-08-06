@@ -4,7 +4,7 @@
 'use strict';
 
 angular.module('WebMis20.ActionLayout', [])
-.directive('wmActionLayout', ['$compile', function ($compile) {
+.directive('wmActionLayout', ['$compile', 'SelectAll', function ($compile, SelectAll) {
     return {
         restrict: 'E',
         scope: {
@@ -17,6 +17,7 @@ angular.module('WebMis20.ActionLayout', [])
             function build(tag) {
                 var inner_template;
                 switch (tag.tagName) {
+
                     case 'ap':
                         var property = scope.action.get_property(tag.id);
                         if (property === undefined) return '{' + tag.id + '}';
@@ -50,7 +51,18 @@ angular.module('WebMis20.ActionLayout', [])
                                 inner_template = '<span ng-bind="{0}.value"></span>';
                         }
                         var property_name = tag.title || property.type.name;
-                        return '<div class="row"><div class="col-sm-3">{0}</div><div class="col-sm-9">{1}</div></div>'.format(property_name, inner_template.format(property_code));
+                        return '<div class="row">\
+                            <div class="col-sm-3">\
+                                <wm-checkbox select-all="sas" key="{2}">{0}</wm-checkbox>\
+                            </div>\
+                            <div class="col-sm-9"><div ng-show="sas.selected({2})">{1}</div></div>\
+                        </div>'
+                        .format(
+                            property_name,
+                            inner_template.format(property_code),
+                            property.type.id
+                        );
+
                     case 'vgroup':
                         var title = tag.title;
                         inner_template = tag.children.map(function (child) {
@@ -62,6 +74,7 @@ angular.module('WebMis20.ActionLayout', [])
                                     {1}\
                                 </ul>\
                             </div>'.format(title, inner_template);
+
                     case 'row':
                         var valid_cols = [1, 2, 3, 4, 6, 12],
                             col_widths = [12, 6, 4, 3, 2, 1],
@@ -75,17 +88,41 @@ angular.module('WebMis20.ActionLayout', [])
                             return '<div class="col-md-{0}">{1}</div>'.format(w, build(child))
                         }).join('');
                         return '<div class="row">{0}</div>'.format(inner_template);
+
                     case 'root':
                         inner_template = tag.children.map(function (child) {
                             return '<div class="col-md-12">{0}</div>'.format(build(child))
                         }).join('');
                         return '<div class="row">{0}</div>'.format(inner_template);
+
                     default:
-                        return '<div>[[ action.layout | json ]]</div>';
+                        return '<div>[[ tag | json ]]</div>';
                 }
             }
 
-            scope.$watch('action.layout', function (layout, old) {
+            var sas = scope.sas = new SelectAll([]);
+
+            scope.$watch('action.action.properties', function (properties, old) {
+                if (angular.equals(properties, old)) return;
+                properties = properties || [];
+                sas.setSource(properties.map(function (item) {return item.type.id}));
+            });
+
+            scope.ckEditorOptions = {
+                language: 'ru',
+                toolbar: [
+                    { name: 'document', items: [ 'Source', '-', 'NewPage', 'Preview', '-', 'Templates' ] },	// Defines toolbar group with name (used to create voice label) and items in 3 subgroups.
+                    [ 'Cut', 'Copy', 'Paste', 'PasteText', 'PasteFromWord', '-', 'Undo', 'Redo' ],			// Defines toolbar group without name.
+                    { name: 'basicstyles', items: [ 'Bold', 'Italic', 'Underline' ] }
+                ],
+                autoGrow_minHeight: 50,
+                autoGrow_bottomSpace: 50,
+                autoGrow_onStartup: true,
+                height: 100,
+                autoParagraph: false
+            };
+
+            scope.$watch('action.layout', function (layout) {
                 var template = build(layout);
                 var replace = $(template);
                 $(current_element).replaceWith(replace);

@@ -532,6 +532,10 @@ var WebMis20 = angular.module('WebMis20', [
         this._source = source;
         this._selected = source.clone();
     };
+    SelectAll.prototype.setSource = function (source) {
+        this._source = source;
+        this._selected = source.clone();
+    };
     SelectAll.prototype.selected = function () {
         var item = arguments[0];
         if (item === undefined) {
@@ -563,8 +567,40 @@ var WebMis20 = angular.module('WebMis20', [
         } else {
             this._selected.splice(index, 1);
         }
-    }
+    };
+    return SelectAll
 })
+.directive('wmCheckbox', ['$compile', function ($compile) {
+    return {
+        restrict: 'E',
+        scope: {
+            selectAll: '=',
+            key: '='
+        },
+        link: function (scope, element, attributes) {
+            // Создаём элементы
+            var inputElement = $('<input type="checkbox"></input>');
+            var replace = $('<label></label>');
+            // Формируем элеменент для замены
+            replace.append(inputElement);
+            replace.append(element.html());
+
+            // 2-way binding
+            function select() {
+                scope.selectAll.select(scope.key, this.checked);
+                scope.$root.$digest(); // Это может негативно влиять на производительность, но оно нужно.
+            }
+            scope.$watch('selectAll._selected', function (n, o) {
+                inputElement[0].checked = scope.selectAll.selected(scope.key);
+                return n;
+            });
+
+            $(element).replaceWith(replace); // Заменяем исходный элемент
+            inputElement.change(select); // Цепляем хендл. Не могу сказать, как jQuery поступит при дестрое элемента
+            $compile(replace)(scope); // Компилируем
+        }
+    }
+}])
 // end services
 .directive('uiMkb', function ($timeout, RefBookService) {
     return {
