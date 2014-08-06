@@ -585,6 +585,10 @@ angular.module('WebMis20.validators', [])
       if(!ngModelCtrl) {
         return;
       }
+      var allowFloat = attrs.hasOwnProperty('validNumberFloat');
+      var allowNegative = attrs.hasOwnProperty('validNumberNegative');
+      var regex = new RegExp('[^0-9' + allowFloat?'\.':'' + allowNegative?'-':'' + ']+', 'g');
+
       function clear_char_duplicates(string, char){
         var arr = string.split(char);
         var res;
@@ -599,7 +603,8 @@ angular.module('WebMis20.validators', [])
       }
       ngModelCtrl.$parsers.push(function(val) {
 //        var clean = val.replace( /[^0-9\.\-]+/g, ''); Если вдруг захотим отрицательные
-        var clean = val.replace( /[^0-9\.]+/g, '');
+//        var clean = val.replace( /[^0-9\.]+/g, '');
+        var clean = val.replace(regex, '');
         clean = clear_char_duplicates(clean, '.');
         if (val !== clean) {
           ngModelCtrl.$setViewValue(clean);
@@ -624,4 +629,5 @@ angular.module('WebMis20.validators', [])
       });
     }
   };
-});
+})
+;

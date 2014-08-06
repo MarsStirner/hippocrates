@@ -66,7 +66,7 @@
                             <td class="col-md-1">
                                 <input type="text" class="form-control input-sm" min="[[service.paid_count || service.coord_actions.length || 1]]"
                                        ng-disabled="service.fully_paid || (!service.is_new && service.coord_actions && service.coord_actions.length==service.actions.length)"
-                                       ng-model="service.amount" valid-number ng-change="service.sum = service.price * service.amount"/>
+                                       ng-model="service.amount" valid-number allow-float ng-change="service.sum = service.price * service.amount"/>
                             </td>
                             <td ng-bind="service.coord_count" class="text-right" ng-show="finance_is_dms()"></td>
                             <td ng-bind="service.paid_count" class="text-right" ng-hide="finance_is_oms() || finance_is_dms()"></td>

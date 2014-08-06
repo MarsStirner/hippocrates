@@ -3,7 +3,7 @@
  */
 'use strict';
 
-angular.module('WebMis20.ActionLayout', [])
+angular.module('WebMis20.ActionLayout', ['WebMis20.validators'])
 .directive('wmActionLayout', ['$compile', 'SelectAll', function ($compile, SelectAll) {
     return {
         restrict: 'E',
@@ -34,11 +34,13 @@ angular.module('WebMis20.ActionLayout', [])
                                 inner_template = '<input type="text" class="form-control" datepicker-popup="dd-MM-yyyy" ng-model="{0}.value" />';
                                 break;
                             case 'Integer':
+                                inner_template = '<input class="form-control" type="number" ng-model="{0}.value" valid-number valid-number-negative>';
+                                break;
                             case 'Double':
-                                inner_template = '<input class="form-control" type="text" ng-model="{0}.value">';
+                                inner_template = '<input class="form-control" type="number" ng-model="{0}.value" valid-number valid-number-negative valid-number-float>';
                                 break;
                             case 'Time':
-                                inner_template = '<div fs-time ng-model="{0}.value">';
+                                inner_template = '<div fs-time ng-model="{0}.value"></div>';
                                 break;
                             case 'String':
                                 if (property.type.domain) {
@@ -46,6 +48,18 @@ angular.module('WebMis20.ActionLayout', [])
                                 } else {
                                     inner_template = '<input class="form-control" type="text" ng-model="{0}.value">';
                                 }
+                                break;
+                            case 'JobTicket':
+                                inner_template = '<span ng-bind="{0}.value.datetime | asDateTime"></span>';
+                                break;
+                            case 'AnalysisStatus':
+                                inner_template = '<rb-select ref-book="rbAnalysisStatus" ng-model="{0}.value"></rb-select>';
+                                break;
+                            case 'OperationType':
+                                inner_template = '<rb-select ref-book="rbOperationType" ng-model="{0}.value"></rb-select>';
+                                break;
+                            case 'HospitalBedProfile':
+                                inner_template = '<rb-select ref-book="rbHospitalBedProfile" ng-model="{0}.value"></rb-select>';
                                 break;
                             default:
                                 inner_template = '<span ng-bind="{0}.value"></span>';
