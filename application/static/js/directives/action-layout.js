@@ -79,6 +79,9 @@ angular.module('WebMis20.ActionLayout', ['WebMis20.validators', 'WebMis20.direct
                                         </ui-select-choices>\
                                     </ui-select>';
                                 break;
+                            case 'MKB':
+                                inner_template = '<ui-mkb ng-model="{0}.value"></ui-mkb>';
+                                break;
                             default:
                                 inner_template = '<span ng-bind="{0}.value"></span>';
                         }
