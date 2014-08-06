@@ -554,3 +554,6 @@ mark, .mark {
     font-size: 100%;
     font-weight: normal;
 }
+ng-form {
+    display: block;
+}
