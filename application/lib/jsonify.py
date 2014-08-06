@@ -622,7 +622,7 @@ class ActionVisualizer(object):
             'tagName': 'root',
             'children': [{
                 'tagName': 'ap',
-                'id': ap.type_id
+                'id': ap.type.id
             } for ap in action.properties]
         }
     

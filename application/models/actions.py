@@ -125,12 +125,15 @@ class ActionProperty(db.Model):
         # ActionProperty. Объекты этого класса мы будем создавать для значений
         value_class = getattr(self.__class__, self.__get_property_name()).property.mapper.class_
 
+        def set_value(val_object, value):
+            if raw and hasattr(val_object, 'value_'):
+                val_object.value_ = value
+            else:
+                val_object.value = value
+
         def make_value(value, index=0):
             val = value_class()
-            if raw and hasattr(val, 'value_'):
-                val.value_ = value
-            else:
-                val.value = value
+            set_value(val, value)
             val.index = index
             val.property_object = self
             db.session.add(val)
@@ -144,7 +147,7 @@ class ActionProperty(db.Model):
                 if value is None:
                     db.session.delete(value_object[0])
                 else:
-                    value_object[0].value = value
+                    set_value(value_object[0], value)
         else:
             m = min(len(value_object), len(value))
             for i in xrange(m):

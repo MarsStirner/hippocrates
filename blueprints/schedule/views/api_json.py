@@ -524,7 +524,9 @@ def api_action_post():
             prop.isAssigned = prop_desc['is_assigned']
             prop.type = prop_type
             pd_value = prop_desc['value']
-            if pd_value is not None:
+            if isinstance(pd_value, dict):
+                prop.set_value(safe_traverse(pd_value, 'id'), True)
+            elif pd_value is not None:
                 prop.set_value(pd_value)
             # elif prop_type.typeName == 'JobTicket' and orgStructure:
             #     prop.value = aux_create_JT(action_desc['planned_endDate'] or now, ActionType.jobType_id, orgStructure.id)

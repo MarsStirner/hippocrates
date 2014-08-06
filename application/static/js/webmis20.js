@@ -430,7 +430,7 @@ var WebMis20 = angular.module('WebMis20', [
 .factory('WMAction', ['$http', '$rootScope', function ($http, $rootScope) {
         // FIXME: На данный момент это ломает функциональность действий, но пока пофиг.
     var Action = function () {
-        this.action = null;
+        this.action = {};
         this.layout = {};
         this.action_columns = {};
         this.properties_by_id = {};

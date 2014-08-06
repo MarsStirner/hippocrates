@@ -3,7 +3,7 @@
  */
 'use strict';
 
-angular.module('WebMis20.ActionLayout', ['WebMis20.validators'])
+angular.module('WebMis20.ActionLayout', ['WebMis20.validators', 'WebMis20.directives.personTree'])
 .directive('wmActionLayout', ['$compile', 'SelectAll', function ($compile, SelectAll) {
     return {
         restrict: 'E',
@@ -61,6 +61,24 @@ angular.module('WebMis20.ActionLayout', ['WebMis20.validators'])
                             case 'HospitalBedProfile':
                                 inner_template = '<rb-select ref-book="rbHospitalBedProfile" ng-model="{0}.value"></rb-select>';
                                 break;
+                            case 'Person':
+                                inner_template =
+                                    '<ui-select ng-model="{0}.value"theme="select2" class="form-control" autocomplete="off" ref-book="Person">\
+                                        <ui-select-match placeholder="не выбрано">[[ $select.selected.name ]], [[ $select.selected.speciality.name ]]</ui-select-match>\
+                                        <ui-select-choices repeat="item in $refBook.objects | filter: $select.search | limitTo: 50">\
+                                            <span ng-bind-html="(item.name + \', \' + item.speciality.name) | highlight: $select.search"></span>\
+                                        </ui-select-choices>\
+                                    </ui-select>';
+                                break;
+                            case 'Organisation':
+                                inner_template =
+                                    '<ui-select ng-model="{0}.value"theme="select2" class="form-control" autocomplete="off" ref-book="Organisation">\
+                                        <ui-select-match placeholder="не выбрано">[[ $select.selected.full_name ]]</ui-select-match>\
+                                        <ui-select-choices repeat="item in $refBook.objects | filter: $select.search | limitTo: 50">\
+                                            <span ng-bind-html="item.full_name | highlight: $select.search"></span>\
+                                        </ui-select-choices>\
+                                    </ui-select>';
+                                break;
                             default:
                                 inner_template = '<span ng-bind="{0}.value"></span>';
                         }
@@ -107,7 +125,7 @@ angular.module('WebMis20.ActionLayout', ['WebMis20.validators'])
                         inner_template = tag.children.map(function (child) {
                             return '<div class="col-md-12">{0}</div>'.format(build(child))
                         }).join('');
-                        return '<div class="row">{0}</div>'.format(inner_template);
+                        return '<div class="row marginal">{0}</div>'.format(inner_template);
 
                     default:
                         return '<div>[[ tag | json ]]</div>';
