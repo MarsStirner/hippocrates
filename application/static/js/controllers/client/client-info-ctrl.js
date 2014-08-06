@@ -12,6 +12,8 @@ angular.module('WebMis20.controllers').
             $scope.alerts = [];
             $scope.wmClientCtrl = WMClientController;
 
+            $scope.currentDate= new Date();
+
             $scope.client_id = $scope.params.client_id;
             var client = $scope.client = new WMClient($scope.client_id);
 

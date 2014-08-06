@@ -48,7 +48,8 @@ angular.module('WebMis20.directives')
                 id: '@',
                 ngModel: '=',
                 ngRequired: '=',
-                ngDisabled: '='
+                ngDisabled: '=',
+                maxDate: '='
             },
             controller: function ($scope) {
                 $scope.popup = { opened: false };
@@ -63,7 +64,7 @@ angular.module('WebMis20.directives')
             },
             template: ['<div class="input-group">',
                         '<input type="text" id="[[id]]_inner" name="[[id]]" class="form-control"',
-                        'is-open="popup.opened" ng-model="ngModel" autocomplete="off"',
+                        'is-open="popup.opened" ng-model="ngModel" autocomplete="off" max="maxDate"',
                         'datepicker_popup="dd.MM.yyyy" ng-required="ngRequired" ng-disabled="ngDisabled"' +
                         'manual-date ui-mask="99.99.9999" date-mask />',
                         '<span class="input-group-btn">',
