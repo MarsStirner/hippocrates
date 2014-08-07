@@ -555,14 +555,8 @@ def api_action_post():
     db.session.add(action)
     db.session.commit()
 
-    context = action.actionType.context
-    print_templates = rbPrintTemplate.query.filter(rbPrintTemplate.context == context).all()
     v = ActionVisualizer()
-    print_context = PrintTemplateVisualizer()
-    return jsonify({
-        'action': v.make_action(action),
-        'print_templates': map(print_context.make_template_info, print_templates)
-    })
+    return jsonify(v.make_action(action))
 
 
 @cache.memoize(86400)

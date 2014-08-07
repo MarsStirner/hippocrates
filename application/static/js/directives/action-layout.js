@@ -10,9 +10,8 @@ angular.module('WebMis20.ActionLayout', ['WebMis20.validators', 'WebMis20.direct
         scope: {
             action: '='
         },
-        link: function (scope, element, attributes, ctrl) {
-            var original_element = element,
-                current_element = element;
+        link: function (scope, element) {
+            var current_element = element;
 
             function build(tag) {
                 var inner_template;
@@ -29,6 +28,7 @@ angular.module('WebMis20.ActionLayout', ['WebMis20.validators', 'WebMis20.direct
                             case 'Жалобы':
                             case 'Constructor':
                                 inner_template = '<textarea ckeditor="ckEditorOptions" ng-model="{0}.value"></textarea>';
+                                sas.select(tag.id, false);
                                 break;
                             case 'Date':
                                 inner_template = '<input type="text" class="form-control" datepicker-popup="dd-MM-yyyy" ng-model="{0}.value" />';
