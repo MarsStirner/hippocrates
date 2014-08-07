@@ -438,8 +438,7 @@ var WebMis20 = angular.module('WebMis20', [
     };
     function success_wrapper(self) {
         return function (data) {
-            self.action = {};
-            angular.extend(self.action, data.result.action);
+            self.action = data.result.action;
             self.layout = data.result.layout;
             self.action_columns = {
                 assignable: false,
@@ -957,6 +956,48 @@ var aux = {
             }
         }
         return false;
+    },
+    make_tree: function (array, masterField) {
+        /**
+         * @param array: Исходный массив данных
+         * @param masterField: Наименование поля указателя на родительский элемент
+         * @param idField: наименование поля идентификатора. (default: 'id')
+         * @param childrenField: наименование поля со списком детей (default: 'children')
+         * @param make_object: Функция, возвращающая элемент дерева по элементу массива
+         * @param filter_function: Функция, фильтрующая элементы массива
+         * @rtype {*}
+         */
+        var idField = arguments[2] || 'id',
+            childrenField = arguments[3] || 'children',
+            filter_function = arguments[5] || function (_) {return true;},
+            make_object = arguments[4] || function (item) {
+                if (item === null) {
+                    var result = {};
+                    result[masterField] = null;
+                    result[idField] = 'root';
+                    result[childrenField] = [];
+                    return result
+                }
+                return item
+            };
+        var idDict = {
+            root: make_object(null)
+        }, masterDict = {};
+        array.forEach(function (item) {
+            var id = item[idField];
+            idDict[id] = make_object(item);
+            var master = item[masterField] || 'root';
+            if (masterDict[master] === undefined) masterDict[master] = [];
+            if (filter_function(item)) {
+                masterDict[master].push(id);
+            }
+        });
+        function recurse(id) {
+            var childrenObject = {};
+            childrenObject[childrenField] = masterDict[id].map(recurse);
+            return angular.extend({}, idDict[id], childrenObject);
+        }
+        return recurse('root');
     }
 };
 function safe_traverse(object, attrs) {
