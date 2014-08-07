@@ -963,13 +963,13 @@ var aux = {
          * @param masterField: Наименование поля указателя на родительский элемент
          * @param idField: наименование поля идентификатора. (default: 'id')
          * @param childrenField: наименование поля со списком детей (default: 'children')
-         * @param make_object: Функция, возвращающая элемент дерева по элементу массива
-         * @param filter_function: Функция, фильтрующая элементы массива
+         * @param make_object: Функция, возвращающая элемент дерева по элементу массива function(item)
+         * @param filter_function: Функция, фильтрующая элементы массива function(item, lookup_dict)
          * @rtype {*}
          */
         var idField = arguments[2] || 'id',
             childrenField = arguments[3] || 'children',
-            filter_function = arguments[5] || function (_) {return true;},
+            filter_function = arguments[5] || function () {return true;},
             make_object = arguments[4] || function (item) {
                 if (item === null) {
                     var result = {};
@@ -988,7 +988,7 @@ var aux = {
             idDict[id] = make_object(item);
             var master = item[masterField] || 'root';
             if (masterDict[master] === undefined) masterDict[master] = [];
-            if (filter_function(item)) {
+            if (filter_function(item, idDict)) {
                 masterDict[master].push(id);
             }
         });
