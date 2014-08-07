@@ -86,6 +86,9 @@
             </div>
             </div>
         </blockquote>
+        <div class="pull-right">
+            <ui-print-button ps="ps_services" resolve="ps_services_resolve()" ng-if="!event.is_new() && formstate.is_paid()"></ui-print-button>
+        </div>
     </div>
     </div>
 </ng-form>

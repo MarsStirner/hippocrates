@@ -387,9 +387,10 @@ table.table-clickable tbody tr {
 .ui-treeview div.tree-label.leaf {
 
 }
-
-.ui-treeview a.node {
+.ui-treeview a {
     cursor: pointer;
+}
+.ui-treeview a.node {
     color: inherit;
     text-decoration: none;
 }
@@ -504,9 +505,6 @@ div.toc-affix {
     padding-top: 0;
     padding-bottom: 0;
 }
-.affix-holder {
-    padding: 0;
-}
 .toc .nav .nav {
     display: none;
 }
@@ -555,4 +553,7 @@ mark, .mark {
     cursor: pointer;
     font-size: 100%;
     font-weight: normal;
+}
+ng-form {
+    display: block;
 }

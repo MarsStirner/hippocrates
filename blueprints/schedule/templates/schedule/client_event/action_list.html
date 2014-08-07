@@ -1,4 +1,4 @@
-{% macro action_list(model, action_type_class) %}
+{% macro action_list(model, action_type_group) %}
     <table class="table table-condensed table-hover table-clickable">
         <thead>
         <tr>
@@ -11,7 +11,7 @@
         </tr>
         </thead>
         <tbody>
-        <tr ng-repeat="(index, action) in {{ model }}">
+        <tr ng-repeat="action in {{ model }} | action_group_filter:'{{ action_type_group }}'" ng-class="{'success': action.status.code == 'finished'}">
             <td ng-click="open_action(action.id)">[[ action.name ]]</td>
             <td ng-click="open_action(action.id)">[[action.status.name]]</td>
             <td ng-click="open_action(action.id)">[[ action.begDate | asDate ]]</td>
@@ -19,12 +19,17 @@
             <td ng-click="open_action(action.id)">[[ action.person_text ]]</td>
             <td>
                 <button type="button" class="btn btn-sm btn-danger" title="Удалить" ng-show="action.status.code != 'finished'"
-                        ng-click="open_delete_action_modal({{ action_type_class }}, index, action.name)"><span class="glyphicon glyphicon-trash"></span>
+                        ng-click="open_delete_action_modal(action)"><span class="glyphicon glyphicon-trash"></span>
                 </button>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="6">
+                <button type="button" class="btn btn-primary" ng-click="open_action_tree('{{ action_type_group }}')"
+                        ng-if="current_role_maybe('doctor', 'clinicDoctor', 'admin')">Создать</button>
             </td>
         </tr>
         </tbody>
     </table>
-    <button type="button" class="btn btn-primary" ng-click="open_action_tree({{ action_type_class }}, event_id)"
-            ng-if="current_role_maybe('doctor', 'admin')">Создать...</button>
+
 {% endmacro %}

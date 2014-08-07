@@ -64,6 +64,10 @@ angular.module('WebMis20.directives').
             ng-show="btn_cancel_confirm_visible()"\
             ng-click="eventctrl.unconfirm_service(service)"><span class="glyphicon glyphicon-remove"></span>\
     </button>\
+    <button type="button" class="btn btn-sm btn-default" title="Печатать"\
+            ng-show="formstate.is_paid()"\
+            ng-click="change_print_service(service)"><span class="glyphicon" ng-class="{\'glyphicon-unchecked\': !service.print, \'glyphicon-check\': service.print}"></span>\
+    </button>\
     <button type="button" class="btn btn-sm btn-danger" title="Убрать из списка услуг"\
             ng-show="btn_delete_visible()"\
             ng-click="eventctrl.remove_service(event, idx)"><span class="glyphicon glyphicon-trash"></span>\

@@ -120,6 +120,12 @@ var EventMainInfoCtrl = function ($scope, $http, RefBookService, EventType, $win
     $scope.contracts = [];
     $scope.policy_errors = [];
 
+    $scope.filter_rb_request_type = function() {
+        return function(elem) {
+            return elem.code == 'policlinic' || elem.code == '4' ;
+        };
+    };
+
     $scope.$on('event_loaded', function() {
         if ($scope.event.is_new()) $scope.event.info.set_date = new Date($scope.event.info.set_date);
 
@@ -545,6 +551,13 @@ var EventServicesCtrl = function($scope, $http) {
         $scope.query_clear();
     });
 
+    $scope.change_print_service = function(service) {
+        if (service.print){
+            service.print = !service.print
+        } else {
+            service.print = 1
+        }
+    };
 };
 
 var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, PrintingService, Settings,
@@ -567,28 +580,14 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, P
     };
     $scope.policies = [];
 
-    $scope.action_type_class = function(class_code) {
-        switch (class_code){
-            case 0:
-                return 'med_doc_actions';
-            case 1:
-                return 'diag_actions';
-            case 2:
-                return 'cure_actions';
-            default:
-                return null;
-        }
-    };
-
     $scope.initialize = function() {
         $scope.event.reload().
             then(function() {
-                $scope.formstate.set_state(event.info.event_type.request_type, event.info.event_type.finance, event.is_new());
                 $scope.$broadcast('event_loaded');
-                if ($scope.event.is_new()) {
-
-                } else {
-                    $scope.ps.set_context($scope.event.info.event_type.print_context)
+                $scope.formstate.set_state(event.info.event_type.request_type, event.info.event_type.finance, event.is_new());
+                if (!$scope.event.is_new()) {
+                    $scope.ps.set_context($scope.event.info.event_type.print_context);
+                    $scope.ps_services.set_context('services');
                 }
 
                 if ($scope.event.info.client.info.birth_date) {
@@ -620,7 +619,10 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, P
     };
 
     $scope.open_action_tree = function (at_class) {
-        ActionTypeTreeModal.open(at_class, $scope.event_id, $scope.event.info.client.info);
+        ActionTypeTreeModal.open(at_class, $scope.event_id, $scope.event.info.client.info)
+            .result.then(function (_) {
+                $scope.event.reload();
+            });
     };
 
     $scope.save_event = function (close_event) {
@@ -657,7 +659,7 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, P
             alert("Необходимо задать результат");
             return false
         }
-        if (!$scope.event.info.ache_result && $scope.event_mandatoryResult()){
+        if (!$scope.formstate.is_diagnostic() && !$scope.event.info.ache_result && $scope.event_mandatoryResult()){
             alert("Необходимо задать исход заболевания/госпитализации");
             return false
         }
@@ -687,19 +689,19 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, P
         });
     };
 
-    $scope.open_delete_action_modal = function(action_type_class, index, message) {
+    $scope.open_delete_action_modal = function(action) {
         var modalInstance = $modal.open({
             templateUrl: 'modal-delete-record.html',
             controller: DeleteRecordModalCtrl,
             resolve: {
                 message: function(){
-                    return 'действие "' + message +'"';
+                    return 'действие "' + action.name +'"';
                 }
             },
             scope: $scope
         });
         modalInstance.result.then(function () {
-            $scope.delete_action(action_type_class, index);
+            $scope.delete_action(action);
         });
     };
 
@@ -708,7 +710,7 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, P
             var unclosed_actions = $scope.event.get_unclosed_actions();
             if (!$scope.event_check_results()){
                 return false;
-            } else if (!$scope.event_check_final_diagnosis()){
+            } else if (!$scope.formstate.is_diagnostic() && !$scope.event_check_final_diagnosis()){
                 return false;
             } else if (unclosed_actions.length){
                 $scope.open_unclosed_actions_modal(unclosed_actions);
@@ -732,30 +734,25 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, P
         }
     };
 
+    $scope.ps_services = new PrintingService("services");
+    $scope.ps_services_resolve = function () {
+        var actions_ids = []
+        var services_for_print = $scope.event.services.filter(function(service) {return service.print})
+        if (services_for_print.length){
+            actions_ids = services_for_print.reduce(function (prev, curr){ return prev.concat(curr.actions)}, [])
+        }
+        return {
+            event_id: $scope.event_id,
+            actions_ids: actions_ids
+        }
+    };
+    $scope.ps_services.set_context("services");
+
+
     $scope.filter_results = function(event_purpose) {
         return function(elem) {
             return elem.eventPurpose_id == event_purpose;
         };
-    };
-
-    $scope.print_template = function (template_id) {
-        $http.post(
-            url_print_subsystem, {
-                id: template_id,
-                context_type: "event",
-                event_id: $scope.event_id,
-                additional_context: {
-                    currentOrgStructure: "",
-                    currentOrganisation: 3479,
-                    currentPerson:"1"
-                }
-            }).success(function (data) {
-                var w = $window.open();
-                w.document.open();
-                w.document.write(data);
-                w.document.close();
-                w.print();
-            })
     };
 
     $scope.$on('printing_error', function (event, error) {
@@ -789,18 +786,16 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, P
         window.open(url_for_schedule_html_action + '?action_id=' + action_id);
     };
 
-    $scope.delete_action = function (action_type_class, index) {
-        var action_type_class_name =  $scope.action_type_class(action_type_class);
-        var action_id = $scope.event.info[action_type_class_name][index].id
+    $scope.delete_action = function (action) {
         $http.post(
             url_for_event_api_delete_action, {
-                action_id: action_id
+                action_id: action.id
             }
         ).success(function() {
-                $scope.event.info[action_type_class_name].splice(index, 1);
-            }).error(function() {
-                alert('error');
-            });
+            $scope.event.info.actions.remove(action);
+        }).error(function() {
+            alert('error');
+        });
     };
     // action data end
 

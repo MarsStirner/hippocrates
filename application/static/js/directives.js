@@ -3,24 +3,29 @@
 angular.module('WebMis20.directives', ['ui.bootstrap', 'ui.select', 'ngSanitize']);
 
 angular.module('WebMis20.directives')
-    .directive('rbSelect', ['$compile', function($compile) {
+    .directive('rbSelect', ['$compile', '$timeout', function($compile, $timeout) {
         return {
             restrict: 'E',
-            link: function (scope, element, attrs) {
+            require: '^ngModel',
+            link: function (scope, element, attrs, ctrl) {
                 var _id = attrs.id,
                     name = attrs.name,
                     theme = attrs.theme || "select2",
                     ngDisabled = attrs.ngDisabled,
                     placeholder = attrs.placeholder,
                     ngModel = attrs.ngModel,
-                    refBook = attrs.refBook;
+                    refBook = attrs.refBook,
+                    extra_filter = attrs.extraFilter;
                 if (!ngModel) throw new Error('<rb-select> must have ng-model attribute');
                 if (!refBook) throw new Error('<rb-select> must have rb attribute');
                 var uiSelect = $('<ui-select></ui-select>');
                 var uiSelectMatch = $('<ui-select-match>[[ $select.selected.name ]]</ui-select-match>');
                 var uiSelectChoices = $(
-                    '<ui-select-choices repeat="item in $refBook.objects | filter: $select.search">' +
-                        '<div ng-bind-html="item.name | highlight: $select.search"></div></ui-select-choices>');
+                    '<ui-select-choices repeat="item in $refBook.objects | {0}filter: $select.search track by item.id">\
+                        <div ng-bind-html="item.name | highlight: $select.search"></div>\
+                    </ui-select-choices>'
+                    .format(extra_filter?(extra_filter + ' | '):'')
+                );
                 if (_id) uiSelect.attr('id', _id);
                 if (name) uiSelect.attr('name', name);
                 if (theme) uiSelect.attr('theme', theme);
@@ -43,7 +48,8 @@ angular.module('WebMis20.directives')
                 id: '@',
                 ngModel: '=',
                 ngRequired: '=',
-                ngDisabled: '='
+                ngDisabled: '=',
+                maxDate: '='
             },
             controller: function ($scope) {
                 $scope.popup = { opened: false };
@@ -58,7 +64,7 @@ angular.module('WebMis20.directives')
             },
             template: ['<div class="input-group">',
                         '<input type="text" id="[[id]]_inner" name="[[id]]" class="form-control"',
-                        'is-open="popup.opened" ng-model="ngModel" autocomplete="off"',
+                        'is-open="popup.opened" ng-model="ngModel" autocomplete="off" max="maxDate"',
                         'datepicker_popup="dd.MM.yyyy" ng-required="ngRequired" ng-disabled="ngDisabled"' +
                         'manual-date ui-mask="99.99.9999" date-mask />',
                         '<span class="input-group-btn">',
@@ -351,7 +357,6 @@ angular.module('WebMis20.directives')
                     }
                 };
                 this.tocIsActive = false;
-                console.log('controller for tocElement (' + this.$name + ') created')
             }],
             link: function (scope, element, attrs, ctrls) {
                 if (!attrs.name) {
@@ -375,7 +380,6 @@ angular.module('WebMis20.directives')
                         self_ctrl.$title = new_name;
                     })
                 }
-                console.log('link for tocElement (' + attrs.name + ') created')
             }
         }
     }])
@@ -406,9 +410,7 @@ angular.module('WebMis20.directives')
                     <div ng-transclude></div>\
                 </div>',
             link: function (scope, element, attrs) {
-                console.log('Link for tocAffix creating...');
                 TocSpy.registerToc(scope);
-                console.log('Link for tocAffix created');
             }
         }
     }])

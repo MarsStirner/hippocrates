@@ -1025,6 +1025,10 @@ class Address(db.Model):
         addr = cls()
         addr.flat = flat_number
 
+        # Для совместимости со старыми кодами КЛАДР в НТК добавляем 00
+        loc_kladr_code = '{0}00'.format(loc_kladr_code) if len(loc_kladr_code) == 11 else loc_kladr_code
+        street_kladr_code = '{0}00'.format(street_kladr_code) if len(street_kladr_code) == 15 else street_kladr_code
+
         addr_house = AddressHouse(loc_kladr_code, street_kladr_code, house_number, corpus_number)
         addr.house = addr_house
         return addr

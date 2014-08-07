@@ -63,15 +63,24 @@ var ScheduleDayCtrl = function ($scope, $http, $modal, $filter, WMClient, Printi
             }
             instance.result.then(function () {
                 $scope.client.reload('for_servicing');
+                $scope.loadData();
             })
         }
     };
     $scope.ps_amb = new PrintingService('preliminary_records');
     $scope.ps_amb.set_context('orderAmb');
-    $scope.ps_amb_resolve = function (client_id, ticket_id) {
+    $scope.ps_amb_resolve = function (client_ticket_id) {
         return {
-            client_id: client_id,
-            ticket_id: ticket_id
+            client_id: $scope.client.client_id,
+            ticket_id: client_ticket_id
+        }
+    };
+    $scope.ps_home = new PrintingService('preliminary_records');
+    $scope.ps_home.set_context('orderHome');
+    $scope.ps_home_resolve = function (client_ticket_id) {
+        return {
+            client_id: $scope.client.client_id,
+            ticket_id: client_ticket_id
         }
     };
 
@@ -83,8 +92,8 @@ var ScheduleDayCtrl = function ($scope, $http, $modal, $filter, WMClient, Printi
         $scope.child_window = window.open(url_event_new_event_html + query, '_blank');
     };
 
-    $scope.open_event = function(event) {
-        $scope.child_window = window.open(url_for_event_html_event_info + '?event_id=' + event.id, '_blank');
+    $scope.open_event = function(event_id) {
+        $scope.child_window = window.open(url_for_event_html_event_info + '?event_id=' + event_id, '_blank');
     };
 
     $scope.new_appointment = function(client_id) {

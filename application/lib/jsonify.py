@@ -231,6 +231,7 @@ class ScheduleVisualizer(object):
                                      Schedule.deleted == 0)
                              .order_by(Schedule.date)
                              .order_by(Schedule.begTime)
+                             .order_by(ScheduleTicket.begTime)
                              .options(db.contains_eager(Schedule.tickets).contains_eager('schedule')))
         return {
             'person': self.make_person(person),
@@ -390,7 +391,7 @@ class ClientVisualizer(object):
         return map(
             self.make_event,
             (client.events.join(EventType).join(rbRequestType)
-             .filter(rbRequestType.code == u'policlinic')
+             .filter(db.or_(rbRequestType.code == u'policlinic', rbRequestType.code == u'4'))
              .order_by(Event.setDate.desc()))
         )
 
@@ -497,9 +498,7 @@ class EventVisualizer(object):
             'organisation': event.organisation,
             'org_structure': event.orgStructure,
             'note': event.note,
-            'med_doc_actions': [self.make_action(action) for action in event.actions if action.actionType.class_ == 0],
-            'diag_actions': [self.make_action(action) for action in event.actions if action.actionType.class_ == 1],
-            'cure_actions': [self.make_action(action) for action in event.actions if action.actionType.class_ == 2]
+            'actions': map(self.make_action, event.actions),
         }
 
     def make_diagnoses(self, event):
@@ -533,6 +532,19 @@ class EventVisualizer(object):
             'notes': diagnostic.notes,
         }
 
+    def make_action_type(self, action_type):
+        """
+        :type action_type: application.models.actions.ActionType
+        """
+        return {
+            'id': action_type.id,
+            'name': action_type.name,
+            'code': action_type.code,
+            'flat_code': action_type.flatCode,
+            'class': action_type.class_,
+            'is_required_tissue': action_type.isRequiredTissue,
+        }
+
     def make_action(self, action):
         """
         @type action: Action
@@ -540,8 +552,8 @@ class EventVisualizer(object):
         return {
             'id': action.id,
             'name': action.actionType.name,
+            'type': self.make_action_type(action.actionType),
             'status': ActionStatus(action.status),
-            'status_': action.status,
             'begDate': action.begDate,
             'endDate': action.endDate,
             'person_text': safe_unicode(action.person)
@@ -630,6 +642,10 @@ class EventVisualizer(object):
 
 
 
+class Undefined:
+    pass
+
+
 class ActionVisualizer(object):
     def make_action(self, action):
         """
@@ -659,22 +675,16 @@ class ActionVisualizer(object):
             ]
         }
     
-    def make_property(self, prop):
+    def make_property(self, prop, value=Undefined):
         """
         @type prop: ActionProperty
         """
-        action_property_type = prop.type
-        if action_property_type.isVector:
-            values = [item.get_value() for item in prop.raw_values_query.all()]
-        else:
-            value = prop.raw_values_query.first()
-            values = value.get_value() if value else None
         return {
             'id': prop.id,
             'idx': prop.type.idx,
             'type': prop.type,
             'is_assigned': prop.isAssigned,
-            'value': values
+            'value': value if value != Undefined else prop.value
         }
 
     def make_abstract_property(self, prop, value):
