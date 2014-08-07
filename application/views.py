@@ -31,9 +31,9 @@ def check_valid_login():
             not getattr(app.view_functions[request.endpoint], 'is_public', False)):
 
         if not login_valid:
-            return redirect(url_for('login', next=url_for(request.endpoint)))
+            return redirect(url_for('login', next=request.url))
         if not getattr(current_user, 'current_role', None):
-            return redirect(url_for('select_role', next=url_for(request.endpoint)))
+            return redirect(url_for('select_role', next=request.url))
 
 
 @app.route('/')
