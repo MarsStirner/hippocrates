@@ -610,7 +610,7 @@ angular.module('WebMis20.services', []).
                 }
 
                 this.total_sum = undefined;
-                this.account_all = undefined;
+                this.account_all = undefined; // false - none, true - all, null - some
 
                 this.fully_paid = undefined;
                 this.partially_paid = undefined;
@@ -652,14 +652,10 @@ angular.module('WebMis20.services', []).
                     self.actions.forEach(function (act) {
                         if (act.account !== n) {
                             act.account = n;
-                            var ch = {
-                                action_id: act.action_id,
-                                sum: act.sum
-                            };
                             if (n) {
-                                self.payments.add_charge(ch);
+                                self.payments.add_charge(act);
                             } else {
-                                self.payments.remove_charge(ch);
+                                self.payments.remove_charge(act);
                             }
                         }
                     });
@@ -686,10 +682,7 @@ angular.module('WebMis20.services', []).
                     this.payments = payments;
                     this.actions.forEach(function (act) {
                         if (act.account) {
-                            self.payments.add_charge({
-                                action_id: act.action_id,
-                                sum: act.sum
-                            });
+                            self.payments.add_charge(act);
                         }
                     });
                     $rootScope.$watch(function () {
@@ -772,17 +765,17 @@ angular.module('WebMis20.services', []).
                     paid_actions = this.payments.charges.filter(function (ch) {
                         return ch.suffice;
                     }).map(function (ch) {
-                        return ch.action_id;
+                        return ch.action;
                     }),
                     paid_count = 0;
 
                 this.actions.forEach(function (act) {
-                    if (paid_actions.has(act.action_id)) { // todo: for new action_id === null
+                    if (paid_actions.has(act)) {
                         act._is_paid_for = true;
                         paid_count += act.amount;
                     } else {
                         act._is_paid_for = false;
-                    };
+                    }
                 });
 
                 this.paid_count = paid_count;
@@ -805,27 +798,21 @@ angular.module('WebMis20.services', []).
                 this.diff = null;
                 this.refresh();
             };
-            WMEventPaymentList.prototype.add_charge = function (charge) {
-//                charge.suffice = -this.diff > charge.sum;
-                this.charges.push(charge);
+            WMEventPaymentList.prototype.add_charge = function (action) {
+                this.charges.push({
+                    action: action
+                });
                 this.refresh();
             };
-            WMEventPaymentList.prototype.remove_charge = function (charge) {
+            WMEventPaymentList.prototype.remove_charge = function (action) {
                 var idx = -1,
                     i,
-                    cur_ch;
+                    cur_action;
                 for (i = 0; i < this.charges.length; i++) {
-                    cur_ch = this.charges[i];
-                    if (charge.action_id) { // remove charge from saved action
-                        if (cur_ch.action_id === charge.action_id) {
-                            idx = i;
-                            break;
-                        }
-                    } else { // remove charge from new action
-                        if (!cur_ch.action_id && cur_ch.sum === charge.sum) {
-                            idx = i;
-                            break;
-                        }
+                    cur_action = this.charges[i].action;
+                    if (cur_action === action) {
+                        idx = i;
+                        break;
                     }
                 }
                 if (idx !== -1) {
@@ -835,9 +822,22 @@ angular.module('WebMis20.services', []).
             };
             WMEventPaymentList.prototype.refresh = function () {
                 var bank = this.total_in;
-                this.charges.forEach(function (ch) {
-                    ch.suffice = bank > ch.sum;
-                    bank -= ch.sum;
+                this.charges.sort(function (a, b) {
+                    var a = a.action,
+                        b = b.action;
+                    if (a.action_id) {
+                        if (b.action_id) {
+                            return a.beg_date > b.beg_date ?
+                                1 :
+                                (a.beg_date === b.beg_date ? (a.action_id > b.action_id ? 1 : -1) : -1);
+                        }
+                    } else {
+                        return 1;
+                    }
+                    return 1;
+                }).forEach(function (ch) {
+                    ch.suffice = bank > ch.action.sum;
+                    bank -= ch.action.sum;
                 });
 
                 this.total_in = this.payments.reduce(function (sum, cur_pay) {
@@ -845,7 +845,7 @@ angular.module('WebMis20.services', []).
                 }, 0);
 
                 this.total_out = this.charges.reduce(function (sum, cur_ch) {
-                    return sum + cur_ch.sum;
+                    return sum + cur_ch.action.sum;
                 }, 0);
 
                 this.diff = this.total_out - this.total_in;

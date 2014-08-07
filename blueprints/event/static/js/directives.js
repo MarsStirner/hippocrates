@@ -99,23 +99,19 @@ angular.module('WebMis20.directives').
 //                        }
 
                         // then(...
-                        var ch = {
-                            action_id: scope.action.action_id,
-                            sum: scope.action.sum
-                        };
                         if (scope.action.account) {
-                            scope.service.payments.add_charge(ch);
+                            scope.service.payments.add_charge(scope.action);
                         } else {
-                            scope.service.payments.remove_charge(ch);
+                            scope.service.payments.remove_charge(scope.action);
                         }
                     };
 
                     scope.get_info_text = function () {
-                        return 'Осмотр: Дата {0}'.format(scope.action.beg_date);
+                        return 'Осмотр: Идентификатор {0}, Дата {1}'.format(scope.action.action_id, scope.action.beg_date);
                     };
 
                     scope.amount_disabled = function () {
-                        return scope.action.action_id && scope.action.is_paid_for();
+                        return scope.action.account;
                     };
                     scope.btn_confirm_visible = function () {
                         return scope.formstate.is_dms() && !scope.action.is_confirmed() && true; // todo: action not closed
@@ -147,8 +143,8 @@ angular.module('WebMis20.directives').
 </td>\
 <td ng-bind="action.is_confirmed()" class="text-right" ng-show="formstate.is_dms()"></td>\
 <td nowrap>\
-    <!-- <span class="glyphicon glyphicon-info-sign"\
-        tooltip-popup-delay=\'1000\' tooltip-placement="left" tooltip="[[get_info_text()]]"></span> -->\
+    <span class="glyphicon glyphicon-info-sign"\
+        popover-trigger="mouseenter" popover-popup-delay=\'1000\' popover-placement="left" popover="[[get_info_text()]]"></span>\
     <button type="button" class="btn btn-sm btn-default" title="Согласовать"\
             ng-show="btn_confirm_visible()"\
             ng-click="eventctrl.confirm_service(action)"><span class="glyphicon glyphicon-check"></span>\

@@ -603,7 +603,7 @@ angular.module('WebMis20.validators', [])
             return val;
         }
         var clean = val.replace( /[^0-9\.]+/g, ''); // /[^0-9\.\-]+/g Если вдруг захотим отрицательные
-        clean = parseInt(clear_char_duplicates(clean, '.'));
+        clean = parseFloat(clear_char_duplicates(clean, '.'));
         clean = clean >= minval ? clean : minval;
         if (val !== clean) {
           ngModelCtrl.$setViewValue(clean);
