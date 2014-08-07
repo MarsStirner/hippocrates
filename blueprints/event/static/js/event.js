@@ -349,6 +349,10 @@ var EventPaymentCtrl = function($scope, RefBookService, Settings, $http, $modal)
         }
     };
 
+    $scope.payment_box_visible = function () {
+        return current_user.current_role_maybe('admin');
+    };
+
     $scope.$on('event_loaded', function() {
         $scope.formcnf.tab_payer_person.active = $scope.person_tab_active();
         $scope.formcnf.tab_payer_org.active = $scope.org_tab_active();
