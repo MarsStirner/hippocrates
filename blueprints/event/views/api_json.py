@@ -250,13 +250,11 @@ def api_search_services():
     if person_id:
         doctor = Person.query.get(int(person_id))
         speciality_id = doctor.speciality_id
-    if 1:
-        result = find_services_direct(query, event_type_id, contract_id, speciality_id)
-    else:
-        result = SearchEventService.search(query,
-                                           eventType_id=event_type_id,
-                                           contract_id=contract_id,
-                                           speciality_id=speciality_id)
+    result = SearchEventService.search(query,
+                                       eventType_id=event_type_id,
+                                       contract_id=contract_id,
+                                       speciality_id=speciality_id)
+    # result = find_services_direct(query, event_type_id, contract_id, speciality_id)
 
     def make_response(_item):
         return {
@@ -270,6 +268,7 @@ def api_search_services():
 
 
 def find_services_direct(query, event_type_id, contract_id, speciality_id):
+    # for tests
     sql = u'''
 SELECT  at.id as action_type_id, ct.code, ct.name as service, at.name, at.service_id,
 	GROUP_CONCAT(DISTINCT e.eventType_id SEPARATOR ',') as eventType_id,
@@ -306,7 +305,7 @@ GROUP BY at.id, ct.code
         item['code'] = r[1]
         item['service'] = r[2]
         item['name'] = r[3]
-        item['price'] = r[7]
+        item['price'] = r[8]
         result['result']['items'].append(item)
     return result
 
@@ -349,26 +348,20 @@ def api_service_make_payment():
     event = Event.query.get(event_id)
 
     payment = EventPayment()
-    payment.createDatetime = payment.modifyDatetime = datetime.datetime.now()
-    payment.deleted = 0
     payment.master_id = event_id
     payment.date = datetime.date.today()
     payment.sum = pay_data['sum']
     payment.typePayment = 0
     payment.cashBox = ''
     payment.sumDiscount = 0
-    payment.action_id = pay_data['action_id']
-    payment.service_id = pay_data['service_id']
+    payment.action_id = None
+    payment.service_id = None
 
-    # check already paid
-    if not db.session.query(EventPayment.id).filter(EventPayment.action_id == pay_data['action_id']).all():
-        event.localContract.payments.append(payment)
-        db.session.add(event)
-        db.session.commit()
+    event.localContract.payments.append(payment)
+    db.session.add(event)
+    db.session.commit()
 
-    return jsonify({
-        'result': 'ok'
-    })
+    return jsonify(None)
 
 
 @module.route('/api/event_payment/service_remove_coord.json', methods=['POST'])

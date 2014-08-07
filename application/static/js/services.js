@@ -475,8 +475,8 @@ angular.module('WebMis20.services', []).
             }
         }
     }]).
-    factory('WMEvent', ['$http', '$q', 'WMEventServiceGroup',
-        function($http, $q, WMEventServiceGroup) {
+    factory('WMEvent', ['$http', '$q', 'WMEventServiceGroup', 'WMEventPaymentList',
+        function($http, $q, WMEventServiceGroup, WMEventPaymentList) {
             var WMEvent = function(event_id, client_id, ticket_id) {
                 this.event_id = parseInt(event_id);
                 this.client_id = client_id;
@@ -501,8 +501,14 @@ angular.module('WebMis20.services', []).
                     params: params
                 }).success(function (data) {
                     self.info = data.result.event;
-                    self.payment = data.result.payment || { payments: [] };
+
                     self.diagnoses = data.result.diagnoses || [];
+
+                    var p = data.result.payment;
+                    self.payment = {
+                        local_contract: p.local_contract ? p.local_contract : null,
+                        payments: new WMEventPaymentList(p.payments)
+                    };
                     self.services = data.result.services && data.result.services.map(function(service) {
                         return new WMEventServiceGroup(service, self.payment.payments);
                     }) || [];
@@ -565,84 +571,286 @@ angular.module('WebMis20.services', []).
             return WMEvent;
         }
     ]).
-    factory('WMEventServiceGroup', [
-        function() {
-            var WMSimpleAction = function (action) {
+    factory('WMEventServiceGroup', ['$rootScope',
+        function($rootScope) {
+            var WMSimpleAction = function (action, price) {
+                if (!action) {
+                    action = {
+                        action_id: null,
+                        account: null,
+                        amount: 1,
+                        beg_date: null,
+                        end_date: null,
+                        coord_date: null,
+                        coord_person: null,
+                        sum: price
+                    }
+                }
                 angular.extend(this, action);
+                this._is_paid_for = undefined;
             };
             WMSimpleAction.prototype.is_paid_for = function () {
-                return false;
+                return this._is_paid_for;
             };
             WMSimpleAction.prototype.is_confirmed = function () {
                 return this.coord_person && this.coord_date;
             };
 
             var WMEventServiceGroup = function(service_data, payments) {
-                this.at_id = null;
-                this.at_code = null;
-                this.at_name = null;
-                this.service_id = null;
-                this.service_name = null;
-                this.actions = [];
+                if (service_data === undefined) {
+                    service_data = {
+                        at_id: null,
+                        at_code: null,
+                        at_name: null,
+                        service_id: undefined,
+                        service_name: null,
+                        actions: [],
+                        price: undefined
+                    }
+                }
 
-                this.total_amount = null;
-                this.price = undefined;
+                this.total_sum = undefined;
+                this.account_all = undefined;
+
                 this.fully_paid = undefined;
                 this.partially_paid = undefined;
                 this.paid_count = undefined;
-                this.total_sum = undefined;
-                this.confirmed_count = undefined;
 
+//                this.confirmed_count = undefined;
 //                this.coord_actions = [];
                 this.initialize(service_data, payments);
             };
 
             WMEventServiceGroup.prototype.initialize = function (service_data, payments) {
                 var self = this;
-                if (service_data) {
-                    angular.extend(this, service_data);
-                    this.actions = this.actions.map(function (act) {
-                        return new WMSimpleAction(act);
+                angular.extend(this, service_data);
+                this.actions = this.actions.map(function (act) {
+                    return new WMSimpleAction(act, self.price);
+                });
+
+                $rootScope.$watch(function () {
+                    return self.total_amount;
+                }, function (n, o) {
+                    self.rearrange_actions();
+                    self.recalculate_sum();
+                });
+                $rootScope.$watch(function () {
+                    return self.actions.map(function (act) {
+                        return act.amount;
                     });
-                }
-                if (payments) {
-                    this.payments = payments.filter(function(p) {
-                        return p.service_id === self.service_id && self.actions.has(p.action_id);
+                }, function (n, o) {
+                    if (n !== o) {
+                        self.recalculate_amount();
+                    }
+                }, true);
+                $rootScope.$watch(function () {
+                    return self.account_all;
+                }, function (n, o) {
+                    if (o === undefined || n === null) {
+                        return;
+                    }
+                    self.actions.forEach(function (act) {
+                        if (act.account !== n) {
+                            act.account = n;
+                            var ch = {
+                                action_id: act.action_id,
+                                sum: act.sum
+                            };
+                            if (n) {
+                                self.payments.add_charge(ch);
+                            } else {
+                                self.payments.remove_charge(ch);
+                            }
+                        }
                     });
-                    this.refresh_payments();
+                });
+                $rootScope.$watch(function () {
+                    return self.actions.map(function (act) {
+                        return act.account;
+                    });
+                }, function (n, o) {
+                    var total_count = n.length,
+                        account_count = 0;
+                    n.forEach(function (acc) {
+                        if (acc) {
+                            account_count += 1;
+                        }
+                    });
+                    self.account_all = (account_count === total_count) ? true :
+                        (account_count === 0) ? false : null;
+                }, true);
+
+                this.recalculate_amount();
+
+                if (this.price && payments) {
+                    this.payments = payments;
+                    this.actions.forEach(function (act) {
+                        if (act.account) {
+                            self.payments.add_charge({
+                                action_id: act.action_id,
+                                sum: act.sum
+                            });
+                        }
+                    });
+                    $rootScope.$watch(function () {
+                        return self.payments.charges;
+                    }, function (n, o) {
+                        self.refresh_payments();
+                    }, true);
                 }
             };
 
             WMEventServiceGroup.prototype.is_new = function () {
                 return this.actions.some(function (a) {
-                    return !a.id;
+                    return !a.action_id;
                 });
             };
 
+            WMEventServiceGroup.prototype.check_payment = function (type) {
+                if (!arguments.length) {
+                    type = 'full';
+                }
+                if (type === 'full') {
+                    return this.actions.every(function (a) {
+                        return a.is_paid_for();
+                    });
+                } else if (type === 'partial') {
+                    return this.actions.some(function (a) {
+                        return a.is_paid_for();
+                    });
+                }
+                return false;
+            };
+
+            WMEventServiceGroup.prototype.rearrange_actions = function () {
+                var total_amount = this.total_amount,
+                    actions_amount = this.actions.reduce(function (sum, cur_act) {
+                        return sum + cur_act.amount;
+                    }, 0);
+                if (actions_amount < total_amount) {
+                    for (var i = 0; i < total_amount - actions_amount; i++) {
+                        this.actions.push(new WMSimpleAction(null, this.price));
+                    }
+                } else if (total_amount < actions_amount) {
+                    var i = actions_amount - total_amount,
+                        idx = this.actions.length - 1,
+                        cur_act;
+                    while (i--) {
+                        cur_act = this.actions[idx];
+                        if (cur_act.action_id || cur_act.account) {
+                            break;
+                        }
+                        if (cur_act.amount > 1) {
+                            cur_act.amount -= 1;
+                        } else {
+                            this.actions.splice(idx, 1);
+                            idx--;
+                        }
+                    }
+                }
+            };
+
+            WMEventServiceGroup.prototype.recalculate_amount = function () {
+                this.total_amount = this.actions.reduce(function (sum, cur_act) {
+                    return sum + cur_act.amount;
+                }, 0);
+            };
+
             WMEventServiceGroup.prototype.recalculate_sum = function () {
-                this.total_sum = this.actions.map(function (a) {
-                    return a.sum;
-                }).reduce(function (sum, cur_sum) {
-                    return sum + cur_sum;
+                var self = this;
+                this.actions.forEach(function (act) {
+                    act.sum = act.amount * self.price;
+                });
+                this.total_sum = this.actions.reduce(function (sum, cur_act) {
+                    return sum + cur_act.sum;
                 }, 0);
             };
 
             WMEventServiceGroup.prototype.refresh_payments = function() {
-                return;
                 var self = this;
-                var unpaid = this.actions.filter(function(a_id) {
-                    return self.payments.filter(function(p) {
-                        return p.action_id === a_id && p.service_id === self.service_id && (p.sum + p.sum_discount) === self.price;
-                    }).length === 1 ? undefined : true;
+                var total_count = this.total_amount,
+                    paid_actions = this.payments.charges.filter(function (ch) {
+                        return ch.suffice;
+                    }).map(function (ch) {
+                        return ch.action_id;
+                    }),
+                    paid_count = 0;
+
+                this.actions.forEach(function (act) {
+                    if (paid_actions.has(act.action_id)) { // todo: for new action_id === null
+                        act._is_paid_for = true;
+                        paid_count += act.amount;
+                    } else {
+                        act._is_paid_for = false;
+                    };
                 });
 
-                this.fully_paid = this.amount === this.actions.length && unpaid.length === 0;
-                this.partially_paid = unpaid.length > 0 && unpaid.length < this.actions.length;
-                this.paid_count = this.actions.length - unpaid.length;
-                this.coord_count = this.coord_actions.length;
+                this.paid_count = paid_count;
+                this.fully_paid = total_count === paid_count;
+                this.partially_paid = paid_count > 0 && paid_count < total_count;
+
+//                this.coord_count = this.coord_actions.length;
             };
 
             return WMEventServiceGroup;
+        }
+    ]).
+    factory('WMEventPaymentList', [
+        function() {
+            var WMEventPaymentList = function (payment_data) {
+                this.payments = payment_data;
+                this.charges = [];
+                this.total_in = null;
+                this.total_out = null;
+                this.diff = null;
+                this.refresh();
+            };
+            WMEventPaymentList.prototype.add_charge = function (charge) {
+//                charge.suffice = -this.diff > charge.sum;
+                this.charges.push(charge);
+                this.refresh();
+            };
+            WMEventPaymentList.prototype.remove_charge = function (charge) {
+                var idx = -1,
+                    i,
+                    cur_ch;
+                for (i = 0; i < this.charges.length; i++) {
+                    cur_ch = this.charges[i];
+                    if (charge.action_id) { // remove charge from saved action
+                        if (cur_ch.action_id === charge.action_id) {
+                            idx = i;
+                            break;
+                        }
+                    } else { // remove charge from new action
+                        if (!cur_ch.action_id && cur_ch.sum === charge.sum) {
+                            idx = i;
+                            break;
+                        }
+                    }
+                }
+                if (idx !== -1) {
+                    this.charges.splice(idx, 1);
+                    this.refresh();
+                }
+            };
+            WMEventPaymentList.prototype.refresh = function () {
+                var bank = this.total_in;
+                this.charges.forEach(function (ch) {
+                    ch.suffice = bank > ch.sum;
+                    bank -= ch.sum;
+                });
+
+                this.total_in = this.payments.reduce(function (sum, cur_pay) {
+                    return sum + cur_pay.sum;
+                }, 0);
+
+                this.total_out = this.charges.reduce(function (sum, cur_ch) {
+                    return sum + cur_ch.sum;
+                }, 0);
+
+                this.diff = this.total_out - this.total_in;
+            };
+            return WMEventPaymentList;
         }
     ]).
     service('WMEventFormState', [function () {
@@ -653,7 +861,7 @@ angular.module('WebMis20.services', []).
             set_state: function (request_type, finance, is_new) {
                 rt = request_type;
                 fin = finance;
-                is_new = is_new
+                is_new = is_new;
             },
             is_policlinic: function () {
                 return rt.code === 'policlinic';
@@ -669,9 +877,65 @@ angular.module('WebMis20.services', []).
             }
         };
     }]).
-    service('WMEventController', ['$http', function ($http) {
+    service('WMEventController', ['$http', 'WMEventServiceGroup', function ($http, WMEventServiceGroup) {
+        function contains_sg (event, at_id, service_id) {
+            return event.services.some(function (sg) {
+                return sg.at_id === at_id && (sg.service_id !== undefined ? sg.service_id === service_id : true);
+            });
+        }
 
         return {
+            add_service: function(event, service_group) {
+                if (!contains_sg(event, service_group.at_id, service_group.service_id)) {
+                    var service_data = angular.extend(service_group, {
+                        amount: 1,
+                        sum: service_group.price,
+                        actions: [undefined],
+                        account: true
+                    });
+                    event.services.push(new WMEventServiceGroup(service_data, event.payment.payments));
+                }
+            },
+            remove_service: function(event, sg_idx) {
+                var sg = event.services[sg_idx];
+                var action_id_list = sg.actions.map(function (a) {
+                    return a.action_id;
+                });
+                var group_saved = action_id_list.every(function (a_id) {
+                    return a_id !== undefined;
+                });
+                if (group_saved) {
+                    $http.post(
+                        url_for_event_api_service_delete_service, {
+                            event_id: event.info.id,
+                            action_id_list: action_id_list
+                        }
+                    ).success(function() {
+                        event.services.splice(sg_idx, 1);
+                    }).error(function() {
+                        alert('error');
+                    });
+                } else {
+                    event.services.splice(sg_idx, 1);
+                }
+            },
+            remove_action: function (event, action, sg) {
+                var sg_idx = event.services.indexOf(sg),
+                    action_idx = event.services[sg_idx].actions.indexOf(action);
+                if (action.action_id) {
+                    $http.post(
+                        url_for_event_api_service_delete_service, {
+                            action_id_list: [action.action_id]
+                        }
+                    ).success(function () {
+                        sg.actions.splice(action_idx, 1);
+                    }).error(function () {
+                        alert('error');
+                    });
+                } else {
+                    sg.actions.splice(action_idx, 1);
+                }
+            },
             confirm_service: function (event, service) {
                 service.coord_person = current_user_id;
                 service.coord_date = new Date();

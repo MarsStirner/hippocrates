@@ -8,6 +8,7 @@ angular.module('WebMis20.directives').
                 scope: {
                     service: '=model',
                     event: '=',
+                    idx: '=',
                     expanded: '='
                 },
                 link: function (scope, elm, attrs) {
@@ -33,9 +34,8 @@ angular.module('WebMis20.directives').
                             );
                     };
                     scope.btn_delete_visible = function () {
-                        return true; //todo
-                        return !scope.action.is_paid_for() && !scope.action.is_confirmed() && true; // todo: action not closed
-                        //!(service.fully_paid || service.partially_paid || service.coord_actions.length)
+                        var s = scope.service;
+                        return !s.fully_paid && !s.partially_paid && true; // todo: action not closed
                     };
                 },
                 template:
@@ -45,13 +45,13 @@ angular.module('WebMis20.directives').
 <td ng-bind="service.at_name"></td>\
 <td ng-bind="service.price" class="text-right" ng-show="formstate.is_paid()"></td>\
 <td class="col-md-1">\
-    <input type="text" class="form-control input-sm" min="[[service.paid_count || service.coord_actions.length || 1]]"\
+    <input type="text" class="form-control input-sm" min="[[service.paid_count || service.coord_actions.length || 1]]" max="100"\
            ng-disabled="amount_disabled()" ng-model="service.total_amount"\
-           valid-number ng-change="service.sum = service.price * service.amount"/>\
+           valid-number minval="1"/>\
 </td>\
-<td ng-bind="service.sum" class="text-right" ng-show="formstate.is_paid()"></td>\
+<td ng-bind="service.total_sum" class="text-right" ng-show="formstate.is_paid()"></td>\
 <td class="text-center" ng-show="formstate.is_paid()">\
-    <input type="checkbox" title="Выбрать услугу для оплаты" ng-model="action.account" ng-change="change_action_choice_for_payment()">\
+    <input type="checkbox" title="Выбрать для оплаты" ng-model="service.account_all">\
 </td>\
 <td ng-bind="service.coord_count" class="text-right" ng-show="formstate.is_dms()"></td>\
 <td ng-bind="service.paid_count" class="text-center" ng-show="formstate.is_paid()"></td>\
@@ -66,7 +66,7 @@ angular.module('WebMis20.directives').
     </button>\
     <button type="button" class="btn btn-sm btn-danger" title="Убрать из списка услуг"\
             ng-show="btn_delete_visible()"\
-            ng-click="remove_service(index)"><span class="glyphicon glyphicon-trash"></span>\
+            ng-click="eventctrl.remove_service(event, idx)"><span class="glyphicon glyphicon-trash"></span>\
     </button>\
 </td>'
             };
@@ -85,11 +85,8 @@ angular.module('WebMis20.directives').
                     scope.formstate = WMEventFormState;
                     scope.eventctrl = WMEventController;
 
-                    scope.recalculate_sum = function () {
-                        scope.action.sum = scope.service.price * scope.action.amount;
-                        scope.service.recalculate_sum();
-                    };
                     scope.change_action_choice_for_payment = function() {
+//                        scope.eventctrl.chose_action_for_payment(scope.action);
 //                        if ($scope.event.info.id && service.actions.length){
 //                            $http.post(
 //                                url_for_event_api_service_change_account, {
@@ -100,10 +97,25 @@ angular.module('WebMis20.directives').
 //                                alert('error');
 //                            });
 //                        }
+
+                        // then(...
+                        var ch = {
+                            action_id: scope.action.action_id,
+                            sum: scope.action.sum
+                        };
+                        if (scope.action.account) {
+                            scope.service.payments.add_charge(ch);
+                        } else {
+                            scope.service.payments.remove_charge(ch);
+                        }
+                    };
+
+                    scope.get_info_text = function () {
+                        return 'Осмотр: Дата {0}'.format(scope.action.beg_date);
                     };
 
                     scope.amount_disabled = function () {
-                        return false;
+                        return scope.action.action_id && scope.action.is_paid_for();
                     };
                     scope.btn_confirm_visible = function () {
                         return scope.formstate.is_dms() && !scope.action.is_confirmed() && true; // todo: action not closed
@@ -116,17 +128,16 @@ angular.module('WebMis20.directives').
                     };
                 },
                 template:
-'<td><span class="glyphicon glyphicon-question-sign"></span></td>\
+'<td></td>\
 <td ng-bind="service.at_code"></td>\
 <td ng-bind="service.service_name"></td>\
 <td ng-bind="service.at_name"></td>\
 <td ng-bind="service.price" class="text-right" ng-show="formstate.is_paid()"></td>\
 <td class="col-md-1">\
-    <input type="text" class="form-control input-sm" min="1"\
+    <input type="text" class="form-control input-sm"\
            ng-disabled="amount_disabled(action)" ng-model="action.amount"\
-           valid-number ng-change="recalculate_sum()"/>\
+           valid-number minval="1"/>\
 </td>\
-<td ng-bind="action.is_confirmed()" class="text-right" ng-show="formstate.is_dms()"></td>\
 <td ng-bind="action.sum" class="text-right" ng-show="formstate.is_paid()"></td>\
 <td class="text-center" ng-show="formstate.is_paid()">\
     <input type="checkbox" title="Выбрать услугу для оплаты" ng-model="action.account" ng-change="change_action_choice_for_payment()">\
@@ -134,7 +145,10 @@ angular.module('WebMis20.directives').
 <td class="text-center" ng-show="formstate.is_paid()">\
     <span class="glyphicon" ng-class="{\'glyphicon-ok\': action.is_paid_for(), \'glyphicon-remove\':!action.is_paid_for()}"></span>\
 </td>\
+<td ng-bind="action.is_confirmed()" class="text-right" ng-show="formstate.is_dms()"></td>\
 <td nowrap>\
+    <!-- <span class="glyphicon glyphicon-info-sign"\
+        tooltip-popup-delay=\'1000\' tooltip-placement="left" tooltip="[[get_info_text()]]"></span> -->\
     <button type="button" class="btn btn-sm btn-default" title="Согласовать"\
             ng-show="btn_confirm_visible()"\
             ng-click="eventctrl.confirm_service(action)"><span class="glyphicon glyphicon-check"></span>\
@@ -145,7 +159,7 @@ angular.module('WebMis20.directives').
     </button>\
     <button type="button" class="btn btn-sm btn-danger" title="Убрать из списка услуг"\
             ng-show="btn_delete_visible()"\
-            ng-click="remove_service(index)"><span class="glyphicon glyphicon-trash"></span>\
+            ng-click="eventctrl.remove_action(event, action, service)"><span class="glyphicon glyphicon-trash"></span>\
     </button>\
 </td>'
             };

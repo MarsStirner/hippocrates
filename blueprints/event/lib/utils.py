@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from collections import defaultdict
 
 import datetime
 from application.lib.data import create_action
@@ -87,21 +86,29 @@ def get_prev_event_payment(client_id, event_type_id):
     return event
 
 
-def create_services(event_id, services_data, cfinance_id):
+def create_services(event_id, service_groups, cfinance_id):
     result = []
-    for service in services_data:
-        created_count = len(service['actions'])
-        new_count = int(float(service['amount']))
-        # TODO: отработать случай уменьшения количества услуг при редактировании обращения (created_count > new_count)
-        if created_count < new_count:
-            for i in xrange(1, new_count - created_count + 1):
-                action = create_action(
+    for sg in service_groups:
+        for action in sg['actions']:
+            action_id = action['action_id']
+            if not action_id:
+                a = create_action(
                     event_id,
-                    service['at_id'],
+                    sg['at_id'],
                     current_user.id,
-                    {'finance_id': cfinance_id,
-                     'coordDate': datetime.datetime.now() if service.get('coord_person_id') else None,
-                     'coordPerson_id': service.get('coord_person_id'),
-                     'account': service['account']})
-                result.append(action.id)
+                    {
+                        'finance_id': cfinance_id,
+                        'coordDate': datetime.datetime.now() if action.get('coord_person_id') else None,
+                        'coordPerson_id': action.get('coord_person_id'),
+                        'account': action['account'] or 0,
+                        'amount': action['amount'] or 1
+                    }
+                )
+            else:
+                a = Action.query.get(action_id)
+                a.amount = action['amount']
+                a.account = action['account']
+                db.session.add(a)
+            result.append(a.id)
+    db.session.commit()
     return result

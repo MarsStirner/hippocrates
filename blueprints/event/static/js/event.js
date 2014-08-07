@@ -429,6 +429,22 @@ var EventPaymentCtrl = function($scope, RefBookService, Settings, $http, $modal)
         });
     };
 
+    $scope.payment_sum = null;
+    $scope.process_payment = function () {
+        $http.post(
+            url_for_event_api_service_make_payment, {
+                event_id: $scope.event.info.id,
+                sum: $scope.payment_sum
+            }
+        ).success(function() {
+            alert('ok');
+            $scope.payment_sum = null;
+        }).error(function() {
+            alert('error');
+        });
+//        $scope.event.reload();
+    }
+
 };
 
 var RelativesModalCtrl = function ($scope, $modalInstance) {
@@ -469,11 +485,10 @@ var SwitchPayerModalCtrl = function ($scope, $modalInstance, from_tab) {
         $modalInstance.dismiss('cancel');
     };
 };
-var EventServicesCtrl = function($scope, $http, WMEventServiceGroup) {
+var EventServicesCtrl = function($scope, $http) {
     $scope.query = "";
     $scope.found_services = null;
     $scope.search_processed = false;
-    $scope.full_sum = 0;
 
     $scope.perform_search = function(val) {
         $scope.search_processed = false;
@@ -502,88 +517,30 @@ var EventServicesCtrl = function($scope, $http, WMEventServiceGroup) {
         $scope.query = '';
     };
 
-    $scope.add_service = function(service) {
-        if (!$scope.event.services.has(service)) {
-            var service_data = angular.extend(service, {
-                amount: 1,
-                is_new: true,
-                sum: service.price,
-                actions: [],
-                coord_actions: [],
-                coord_count: 0,
-                account: true
-            });
-            $scope.event.services.push(new WMEventServiceGroup(service_data, $scope.event.payment.payments));
-        }
-    };
 
-    $scope.remove_service = function(index) {
-        var service = $scope.event.services[index];
-        if (service.actions.length) {
-            $http.post(
-                url_for_event_api_service_delete_service, {
-                    event_id: $scope.event.info.id,
-                    action_id_list: service.actions
-                }
-            ).success(function() {
-                    $scope.event.services.splice(index, 1);
-                }).error(function() {
-                    alert('error');
-                });
+    // ng-class="{'success': service.fully_paid || (service.is_new && service.coord_person_id) || (!service.is_new && service.coord_actions && service.coord_actions.length==service.amount),
+    // 'warning': service.partially_paid || (!service.is_new && service.coord_actions && service.coord_actions.length<service.amount),
+    // 'info': service.is_new && !(service.is_new && service.coord_person_id),
+    // 'danger': !service.fully_paid && !service.partially_paid && !service.is_new && !service.coord_actions.length}"
+    $scope.get_class = function (service) {
+        var result = [];
+        if (service.check_payment() || service.fully_coordinated) {
+            result.push('success');
+        } else if (service.check_payment('partial') || service.partially_coordinated) {
+            result.push('warning');
         } else {
-            $scope.event.services.splice(index, 1);
+            result.push(service.is_new() ? 'info' : 'danger');
         }
+        return result;
     };
 
-    $scope.$watch('event.services', function(new_val, old_val) {
-        if (new_val) {
-            $scope.full_sum = new_val.map(function(service) {
-                return service.price * service.amount;
-            }).reduce(function(prev_val, cur_val) {
-                return prev_val + cur_val;
-            }, 0);
-
-            var payment = $scope.event.payment;
-            $scope.paid_sum = payment && payment.payments.map(function(payment) {
-                return payment.sum + payment.sum_discount;
-            }).reduce(function(prev_val, cur_val) {
-                return prev_val + cur_val;
-            }, 0) || 0;
-        }
-    }, true);
-
-    $scope.$on('form_state_change', function(event, arg) {
-        $scope._finance = arg['finance'];
-        $scope._contract = arg['contract'];
+    $scope.$on('event_loaded', function() {
+        $scope.query_clear();
+    });
+    $scope.$on('eventFormStateChanged', function() {
         $scope.query_clear();
     });
 
-//    $scope.pay = function(service) {
-//        var act_to_pay = null;
-//        var paid_actions = $scope.event.payment.payments.map(function(p) {
-//            return p.action_id;
-//        });
-//        service.actions.forEach(function(a_id) {
-//            if (act_to_pay === null && (paid_actions.indexOf(a_id) == -1)) {
-//                act_to_pay = a_id;
-//            }
-//        });
-//        if (act_to_pay) {
-//            $http.post(
-//                url_for_event_api_service_make_payment, {
-//                    event_id: $scope.event.info.id,
-//                    service_id: service.service_id,
-//                    action_id: act_to_pay,
-//                    sum: service.price
-//                }
-//            ).success(function() {
-//                    // alert('ok');#}
-//                }).error(function() {
-//                    alert('error');
-//                });
-//        }
-//        $scope.event.reload();
-//    };
 };
 
 var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, PrintingService, Settings,
@@ -643,7 +600,7 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, P
                 }
 
                 $scope.$watch(function () {
-                    return [event.info.request_type, event.info.finance];
+                    return [event.info.event_type.request_type, event.info.event_type.finance];
                 }, function (n, o) {
                     if (n !== o) {
                         var rt = n[0],
@@ -878,5 +835,5 @@ var DeleteRecordModalCtrl = function ($scope, $modalInstance, message) {
 WebMis20.controller('EventDiagnosesCtrl', ['$scope', 'RefBookService', '$http', EventDiagnosesCtrl]);
 WebMis20.controller('EventMainInfoCtrl', ['$scope', '$http', 'RefBookService', 'EventType', '$window', '$timeout', 'Settings', '$modal', '$filter', EventMainInfoCtrl]);
 WebMis20.controller('EventPaymentCtrl', ['$scope', 'RefBookService', 'Settings', '$http', '$modal', EventPaymentCtrl]);
-WebMis20.controller('EventServicesCtrl', ['$scope', '$http', 'WMEventServiceGroup', EventServicesCtrl]);
+WebMis20.controller('EventServicesCtrl', ['$scope', '$http', EventServicesCtrl]);
 WebMis20.controller('EventInfoCtrl', ['$scope', 'WMEvent', '$http', 'RefBookService', '$window', 'PrintingService', 'Settings', '$filter', '$modal', 'ActionTypeTreeModal', 'WMEventController', 'WMEventFormState', EventInfoCtrl]);

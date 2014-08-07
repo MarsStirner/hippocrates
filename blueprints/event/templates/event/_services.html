@@ -31,7 +31,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr ng-repeat="result in found_services" ng-click="add_service(result)">
+                        <tr ng-repeat="result in found_services" ng-click="eventctrl.add_service(event, result)">
                             <td ng-bind="result.at_code"></td>
                             <td ng-bind="result.service_name"></td>
                             <td ng-bind="result.at_name"></td>
@@ -62,8 +62,9 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr wm-event-service-group model="service" event="event" expanded="expanded" ng-repeat-start="service in event.services"
-                            ng-class="{'success': service.fully_paid || (service.is_new && service.coord_person_id) || (!service.is_new && service.coord_actions && service.coord_actions.length==service.amount), 'warning': service.partially_paid || (!service.is_new && service.coord_actions && service.coord_actions.length<service.amount), 'info': service.is_new && !(service.is_new && service.coord_person_id), 'danger': !service.fully_paid && !service.partially_paid && !service.is_new && !service.coord_actions.length}">
+                        <tr wm-event-service-group model="service" event="event" idx="$index"
+                            expanded="expanded" ng-class="get_class(service)"
+                            ng-repeat-start="service in event.services">
                         </tr>
                         <tr wm-event-service-record ng-show="expanded" action="act" service="service" event="event"
                             ng-repeat="act in service.actions" ng-repeat-end>
@@ -77,11 +78,11 @@
             <div class="row">
             <div class="col-md-12">
                 <span class="text-muted">Итого к оплате: </span>
-                <span class="text-primary" ng-bind="full_sum"></span><span class="text-primary"> руб.</span>
+                <span class="text-primary" ng-bind="event.payment.payments.total_out"></span><span class="text-primary"> руб.</span>
                 <span class="text-muted"> Оплачено: </span>
-                <span class="text-success" ng-bind="paid_sum"></span><span class="text-success"> руб.</span>
+                <span class="text-success" ng-bind="event.payment.payments.total_in"></span><span class="text-success"> руб.</span>
                 <span class="text-muted"> Долг: </span>
-                <span class="text-danger" ng-bind="full_sum - paid_sum"></span><span class="text-danger"> руб.</span>
+                <span class="text-danger" ng-bind="event.payment.payments.diff"></span><span class="text-danger"> руб.</span>
             </div>
             </div>
         </blockquote>
@@ -90,5 +91,6 @@
 </ng-form>
 <div>
     <pre>[[event.services | json]]</pre>
+    <pre>[[event.payment | json]]</pre>
 </div>
 </div>
