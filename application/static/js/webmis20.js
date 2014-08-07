@@ -994,7 +994,8 @@ var aux = {
         });
         function recurse(id) {
             var childrenObject = {};
-            childrenObject[childrenField] = masterDict[id].map(recurse);
+            var children_list = masterDict[id] || [];
+            childrenObject[childrenField] = children_list.map(recurse);
             return angular.extend({}, idDict[id], childrenObject);
         }
         return recurse('root');
