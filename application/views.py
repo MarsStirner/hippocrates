@@ -30,10 +30,8 @@ def check_valid_login():
             not current_user.is_admin() and
             not getattr(app.view_functions[request.endpoint], 'is_public', False)):
 
-        if not login_valid:
+        if not login_valid or not getattr(current_user, 'current_role', None):
             return redirect(url_for('login', next=request.url))
-        if not getattr(current_user, 'current_role', None):
-            return redirect(url_for('select_role', next=request.url))
 
 
 @app.route('/')
@@ -52,10 +50,11 @@ def login():
         user = UserAuth.auth_user(form.login.data.strip(), form.password.data.strip())
         if user:
             # Keep the user info in the session using Flask-Login
+            current_user.current_role = request.form['role']
             if login_user(user):
                 # Tell Flask-Principal the identity changed
                 identity_changed.send(current_app._get_current_object(), identity=Identity(user.id))
-                return redirect(url_for('select_role', next=request.args.get('next')))
+                return redirect(request.args.get('next') or request.referrer or url_for('index'))
             else:
                 errors.append(u'Аккаунт неактивен')
         else:
@@ -112,6 +111,14 @@ def api_refbook(name):
                 res = jsonify(res)
             return res
     return abort(404)
+
+
+@app.route('/api/roles/')
+@app.route('/api/roles/<user_login>')
+@public_endpoint
+@cache.memoize(86400)
+def api_roles(user_login):
+    return jsonify(UserAuth.get_roles_by_login(user_login.strip()))
 
 
 @app.route('/api/kladr/city/search/')
