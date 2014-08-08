@@ -732,7 +732,8 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, P
         var actions_ids = []
         var services_for_print = $scope.event.services.filter(function(service) {return service.print})
         if (services_for_print.length){
-            actions_ids = services_for_print.reduce(function (prev, curr){ return prev.concat(curr.actions)}, [])
+            actions_ids = services_for_print.reduce(function (prev, curr){
+                return prev.concat(curr.actions.map(function(action){return action.action_id}))}, [])
         }
         return {
             event_id: $scope.event_id,
