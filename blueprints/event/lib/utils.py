@@ -4,7 +4,7 @@ import datetime
 from application.lib.data import create_action
 from application.models.actions import Action, ActionType
 from application.models.event import Event, EventType, EventLocalContract
-from application.lib.utils import safe_date
+from application.lib.utils import safe_date, safe_traverse, safe_datetime
 from flask.ext.login import current_user
 from application.models.exists import rbDocumentType, ContractTariff, Contract, rbService
 from application.lib.settings import Settings
@@ -98,16 +98,18 @@ def create_services(event_id, service_groups, cfinance_id):
                     current_user.id,
                     {
                         'finance_id': cfinance_id,
-                        'coordDate': datetime.datetime.now() if action.get('coord_person_id') else None,
-                        'coordPerson_id': action.get('coord_person_id'),
+                        'coordDate': action.get('coord_date'),
+                        'coordPerson_id': safe_traverse(action, 'coord_person', 'id'),
                         'account': action['account'] or 0,
                         'amount': action['amount'] or 1
                     }
                 )
             else:
                 a = Action.query.get(action_id)
-                a.amount = action['amount']
-                a.account = action['account']
+                a.amount = action.get('amount', 1)
+                a.account = action.get('account', 0)
+                a.coordPerson_id = safe_traverse(action, 'coord_person', 'id')
+                a.coordDate = safe_datetime(action['coord_date'])
                 db.session.add(a)
             result.append(a.id)
     db.session.commit()

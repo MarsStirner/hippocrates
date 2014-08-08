@@ -62,6 +62,7 @@ def create_action(event_id, action_type_id, current_user_id, data):
     action.payStatus = 0
     action.account = int(data.get('account', 1))
     action.coordText = ''
+    action.coordDate = data.get('coordDate')
     action.AppointmentType = 0
     action.uuid = get_new_uuid()
 

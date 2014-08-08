@@ -4,6 +4,8 @@ import datetime
 import itertools
 
 from collections import defaultdict
+from sqlalchemy.sql.functions import current_date
+from sqlalchemy.sql.expression import between
 from application.systemwide import db
 
 from application.lib.utils import safe_unicode, safe_int, safe_dict
@@ -588,7 +590,7 @@ class EventVisualizer(object):
                 'beg_date': a.begDate,
                 'end_date': a.endDate,
                 'coord_date': a.coordDate,
-                'coord_person': a.coordPerson_id,
+                'coord_person': person_vis.make_person(a.coordPerson) if a.coordPerson else None,
                 'sum': price * a.amount
             }
 
@@ -603,7 +605,7 @@ class EventVisualizer(object):
                 total_amount=total_amount,
                 sum=total_sum
             )
-
+        person_vis = PersonTreeVisualizer()
         query = db.session.query(
             Action,
             ActionType.service_id,
@@ -624,7 +626,8 @@ class EventVisualizer(object):
             ContractTariff.eventType_id == EventType.id,
             ContractTariff.service_id == ActionType.service_id,
             Action.deleted == 0,
-            ContractTariff.deleted == 0
+            ContractTariff.deleted == 0,
+            between(current_date(), ContractTariff.begDate, ContractTariff.endDate)
         )#.all()
 
         services_by_at = defaultdict(list)
