@@ -97,9 +97,9 @@
 {% endblock %}
 
 {% block modules_js %}
-{{ super() }}
-<script src="{{ url_for('.static', filename='js/event.js') }}"></script>
-<script type="text/ng-template" id="modal-relatives.html">{% include "event/_modal_relatives.html" %}</script>
-<script type="text/ng-template" id="modal-switch-payer.html">{% include "event/_modal_switch_payer_tab.html" %}</script>
-
+    {{ super() }}
+    <script src="{{ url_for('.static', filename='js/event.js') }}"></script>
+    <script src="{{ url_for('.static', filename='js/directives.js') }}"></script>
+    <script type="text/ng-template" id="modal-relatives.html">{% include "event/_modal_relatives.html" %}</script>
+    <script type="text/ng-template" id="modal-switch-payer.html">{% include "event/_modal_switch_payer_tab.html" %}</script>
 {% endblock %}

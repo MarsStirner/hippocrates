@@ -587,6 +587,7 @@ angular.module('WebMis20.validators', [])
       if(!ngModelCtrl) {
         return;
       }
+      var minval = parseInt(attrs.minval);
       function clear_char_duplicates(string, char){
         var arr = string.split(char);
         var res;
@@ -600,9 +601,12 @@ angular.module('WebMis20.validators', [])
           return res;
       }
       ngModelCtrl.$parsers.push(function(val) {
-//        var clean = val.replace( /[^0-9\.\-]+/g, ''); Если вдруг захотим отрицательные
-        var clean = val.replace( /[^0-9\.]+/g, '');
-        clean = clear_char_duplicates(clean, '.');
+        if (angular.isNumber(val)) {
+            return val;
+        }
+        var clean = val.replace( /[^0-9\.]+/g, ''); // /[^0-9\.\-]+/g Если вдруг захотим отрицательные
+        clean = parseFloat(clear_char_duplicates(clean, '.'));
+        clean = clean >= minval ? clean : minval;
         if (val !== clean) {
           ngModelCtrl.$setViewValue(clean);
           ngModelCtrl.$render();

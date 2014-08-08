@@ -11,8 +11,8 @@ from application.models.enums import EventPrimary, EventOrder, ActionStatus, Gen
 from application.models.event import Event, EventType, Diagnosis, Diagnostic
 
 from application.models.schedule import Schedule, rbReceptionType, ScheduleClientTicket, ScheduleTicket
-from application.models.actions import Action, ActionProperty
-from application.models.exists import rbRequestType
+from application.models.actions import Action, ActionProperty, ActionType
+from application.models.exists import rbRequestType, rbService, ContractTariff, Contract
 
 __author__ = 'mmalkov'
 
@@ -567,17 +567,79 @@ class EventVisualizer(object):
                          if payment.master_id == event_id] if local_contract else []
         }
 
-    def make_event_services(self, event):
-        def make_service(action):
+    def make_event_services(self, event_id):
+
+        def make_raw_service_group(action, service_id, at_code, at_name, service_name, price):
             return {
-                'at_id': action.actionType.id,
-                'at_code': action.actionType.code,
-                'at_name': action.actionType.name,
-                'service_name': action.actionType.service.name,
-                'price': action.price
+                'at_id': action.actionType_id,
+                'service_id': service_id,
+                'at_code': at_code,
+                'at_name': at_name,
+                'service_name': service_name,
+                'action': action,
+                'price': price,
             }
 
-        return map(make_service, event.actions)
+        def make_action_as_service(a, price):
+            return {
+                'action_id': a.id,
+                'account': a.account,
+                'amount': a.amount,
+                'beg_date': a.begDate,
+                'end_date': a.endDate,
+                'coord_date': a.coordDate,
+                'coord_person': a.coordPerson_id,
+                'sum': price * a.amount
+            }
+
+        def shrink_service_group(group):
+            actions = [make_action_as_service(act_serv.pop('action'), act_serv['price']) for act_serv in service_group]
+            total_amount = sum([act['amount'] for act in actions])
+            total_sum = sum([act['sum'] for act in actions])
+            common = group[0]
+            return dict(
+                common,
+                actions=actions,
+                total_amount=total_amount,
+                sum=total_sum
+            )
+
+        query = db.session.query(
+            Action,
+            ActionType.service_id,
+            ActionType.code,
+            ActionType.name,
+            rbService.name,
+            ContractTariff.price
+        ).join(
+            Event,
+            EventType,
+            Contract,
+            ContractTariff,
+            ActionType
+        ).join(
+            rbService, ActionType.service_id == rbService.id
+        ).filter(
+            Action.event_id == event_id,
+            ContractTariff.eventType_id == EventType.id,
+            ContractTariff.service_id == ActionType.service_id,
+            Action.deleted == 0,
+            ContractTariff.deleted == 0
+        )#.all()
+
+        services_by_at = defaultdict(list)
+        for a, service_id, at_code, at_name, service_name, price in query:
+            services_by_at[(a.actionType_id, service_id)].append(
+                make_raw_service_group(a, service_id, at_code, at_name, service_name, price)
+            )
+        services_grouped = []
+        for key, service_group in services_by_at.iteritems():
+            services_grouped.append(
+                shrink_service_group(service_group)
+            )
+
+        return services_grouped
+
 
 
 class Undefined:

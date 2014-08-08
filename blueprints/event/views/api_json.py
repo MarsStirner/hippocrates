@@ -20,7 +20,7 @@ from blueprints.event.app import module
 from application.models.exists import (Organisation, )
 from application.lib.jsonify import EventVisualizer, ClientVisualizer
 from blueprints.event.lib.utils import (EventSaveException, get_local_contract, get_prev_event_payment,
-    create_new_local_contract, get_event_services, create_services)
+    create_new_local_contract, create_services)
 from application.lib.sphinx_search import SearchEventService
 from application.lib.data import create_action
 
@@ -46,12 +46,12 @@ def api_event_info():
     if current_user.role_in('admin'):
         data['diagnoses'] = vis.make_diagnoses(event)
         data['payment'] = vis.make_event_payment(event.localContract, event_id)
-        data['services'] = get_event_services(event_id)
+        data['services'] = vis.make_event_services(event_id)
     elif current_user.role_in('doctor'):
         data['diagnoses'] = vis.make_diagnoses(event)
     elif current_user.role_in(('rRegistartor', 'clinicRegistrator')):
         data['payment'] = vis.make_event_payment(event.localContract, event_id)
-        data['services'] = get_event_services(event_id)
+        data['services'] = vis.make_event_services(event_id)
     return jsonify(data)
 
 
@@ -259,6 +259,7 @@ def api_search_services():
                                        eventType_id=event_type_id,
                                        contract_id=contract_id,
                                        speciality_id=speciality_id)
+    # result = find_services_direct(query, event_type_id, contract_id, speciality_id)
 
     def make_response(_item):
         return {
@@ -269,6 +270,50 @@ def api_search_services():
             'price': _item['price']
         }
     return jsonify([make_response(item) for item in result['result']['items']])
+
+
+def find_services_direct(query, event_type_id, contract_id, speciality_id):
+    # for tests
+    sql = u'''
+SELECT  at.id as action_type_id, ct.code, ct.name as service, at.name, at.service_id,
+	GROUP_CONCAT(DISTINCT e.eventType_id SEPARATOR ',') as eventType_id,
+	IF(e.speciality_id, GROUP_CONCAT(DISTINCT e.speciality_id SEPARATOR ','), 0) as speciality_id,
+	GROUP_CONCAT(DISTINCT ct.master_id SEPARATOR ',') as contract_id,
+	ct.price
+FROM ActionType at
+INNER JOIN EventType_Action e ON e.actionType_id=at.id
+INNER JOIN Contract_Tariff ct ON ct.service_id=at.service_id AND ct.eventType_id=e.eventType_id
+INNER JOIN rbService s ON s.id=at.service_id
+WHERE at.deleted=0 AND ct.deleted=0 AND (CURDATE() BETWEEN ct.begDate AND ct.endDate)
+AND e.eventType_id {0} AND ct.master_id {1} AND speciality_id {2} AND at.code like '%{3}%'
+GROUP BY at.id, ct.code
+'''
+    result = {
+        'result': {
+            'items': []
+        }
+    }
+    sr = db.session.execute(
+        db.text(
+            sql.format(
+                '= %s' % event_type_id if event_type_id else '!= -1',
+                '= %s' % contract_id if contract_id else '!= -1',
+                '!= %s' % speciality_id if speciality_id else '!= -1',
+                '%s' % query
+                )
+        )
+    )
+    for r in sr:
+        r = list(r)
+        item = {}
+        item['action_type_id'] = r[0]
+        item['code'] = r[1]
+        item['service'] = r[2]
+        item['name'] = r[3]
+        item['price'] = r[8]
+        result['result']['items'].append(item)
+    return result
+
 
 
 @module.route('/api/event_payment/local_contract.json', methods=['GET'])
@@ -308,26 +353,20 @@ def api_service_make_payment():
     event = Event.query.get(event_id)
 
     payment = EventPayment()
-    payment.createDatetime = payment.modifyDatetime = datetime.datetime.now()
-    payment.deleted = 0
     payment.master_id = event_id
     payment.date = datetime.date.today()
     payment.sum = pay_data['sum']
     payment.typePayment = 0
     payment.cashBox = ''
     payment.sumDiscount = 0
-    payment.action_id = pay_data['action_id']
-    payment.service_id = pay_data['service_id']
+    payment.action_id = None
+    payment.service_id = None
 
-    # check already paid
-    if not db.session.query(EventPayment.id).filter(EventPayment.action_id == pay_data['action_id']).all():
-        event.localContract.payments.append(payment)
-        db.session.add(event)
-        db.session.commit()
+    event.localContract.payments.append(payment)
+    db.session.add(event)
+    db.session.commit()
 
-    return jsonify({
-        'result': 'ok'
-    })
+    return jsonify(None)
 
 
 @module.route('/api/event_payment/service_remove_coord.json', methods=['POST'])
@@ -344,8 +383,8 @@ def api_service_remove_coord():
     })
 
 
-@module.route('/api/event_payment/service_add_coord.json', methods=['POST'])
-def api_service_add_coord():
+@module.route('/api/event_payment/service_coordinate.json', methods=['POST'])
+def api_service_coordinate():
     data = request.json
     service = data['service']
     result = service['actions']
