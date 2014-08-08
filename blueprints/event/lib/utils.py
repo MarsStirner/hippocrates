@@ -96,9 +96,19 @@ def create_services(event_id, service_groups, cfinance_id):
                     event_id,
                     sg['at_id'],
                     current_user.id,
-                    {'finance_id': cfinance_id,
-                     'coordDate': datetime.datetime.now() if service.get('coord_person_id') else None,
-                     'coordPerson_id': service.get('coord_person_id'),
-                     'account': service['account']})
-                result.append(action.id)
+                    {
+                        'finance_id': cfinance_id,
+                        'coordDate': datetime.datetime.now() if action.get('coord_person_id') else None,
+                        'coordPerson_id': action.get('coord_person_id'),
+                        'account': action['account'] or 0,
+                        'amount': action['amount'] or 1
+                    }
+                )
+            else:
+                a = Action.query.get(action_id)
+                a.amount = action['amount']
+                a.account = action['account']
+                db.session.add(a)
+            result.append(a.id)
+    db.session.commit()
     return result
