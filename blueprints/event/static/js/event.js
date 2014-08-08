@@ -551,13 +551,6 @@ var EventServicesCtrl = function($scope, $http) {
         $scope.query_clear();
     });
 
-    $scope.change_print_service = function(service) {
-        if (service.print){
-            service.print = !service.print
-        } else {
-            service.print = 1
-        }
-    };
 };
 
 var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, PrintingService, Settings,

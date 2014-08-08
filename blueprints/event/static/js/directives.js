@@ -15,6 +15,15 @@ angular.module('WebMis20.directives').
                     scope.formstate = WMEventFormState;
                     scope.eventctrl = WMEventController;
 
+                    scope.change_print_service = function() {
+                        var s = scope.service;
+                        if (s.print){
+                            s.print = !s.print;
+                        } else {
+                            s.print = 1;
+                        }
+                    };
+
                     scope.amount_disabled = function () {
                         var s = scope.service;
                         return s.fully_paid || (!s.is_new && s.coord_actions && s.coord_actions.length === s.actions.length);
@@ -66,7 +75,7 @@ angular.module('WebMis20.directives').
     </button>\
     <button type="button" class="btn btn-sm btn-default" title="Печатать"\
             ng-show="formstate.is_paid()"\
-            ng-click="change_print_service(service)"><span class="glyphicon" ng-class="{\'glyphicon-unchecked\': !service.print, \'glyphicon-check\': service.print}"></span>\
+            ng-click="change_print_service()"><span class="glyphicon" ng-class="{\'glyphicon-unchecked\': !service.print, \'glyphicon-check\': service.print}"></span>\
     </button>\
     <button type="button" class="btn btn-sm btn-danger" title="Убрать из списка услуг"\
             ng-show="btn_delete_visible()"\
