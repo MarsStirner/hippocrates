@@ -624,11 +624,15 @@ prescriptionFlatCodes = (
 def int_get_atl_flat(at_class):
     from application.lib.agesex import parseAgeSelector
 
+    id_list = {}
+
     def schwing(t):
         t = list(t)
         t[5] = list(parseAgeSelector(t[7]))
         t[7] = t[7].split() if t[7] else None
         t[8] = bool(t[8])
+        t.append([])
+        id_list[t[0]] = t
         return t
 
     raw = db.text(
@@ -642,7 +646,13 @@ def int_get_atl_flat(at_class):
             WHERE ActionType.class = {at_class} AND ActionType.deleted = 0 AND ActionType.hidden = 0
             GROUP BY ActionType.id'''.format(at_class=at_class))
         # This was goddamn unsafe, but I can't get it working other way
-    return map(schwing, db.session.execute(raw))
+    result = map(schwing, db.session.execute(raw))
+    raw = db.text(
+        ur'''SELECT actionType_id, id, name FROM ActionPropertyType
+        WHERE isAssignable != 0 AND actionType_id IN ('{0}')'''.format("','".join(map(str, id_list.keys())))
+    )
+    map(lambda (at_id, apt_id, name): id_list[at_id][9].append((apt_id, name)), db.session.execute(raw))
+    return result
 
 
 @module.route('/api/action-type-list-flat.json')
@@ -662,7 +672,7 @@ def api_create_lab_direction():
     event = Event.query.get(event_id)
     orgStructure = event.current_org_structure
     for j in ja['directions']:
-        action_type_id = j['type']['id']
+        action_type_id = j['type_id']
         actionType = ActionType.query.get(action_type_id)
         planned_end_date = dateutil_parse(j['planned_end_date'])
         assigned = j['assigned']

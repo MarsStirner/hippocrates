@@ -2,7 +2,7 @@
  * Created by mmalkov on 14.07.14.
  */
 angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodies'])
-.service('ActionTypeTreeService', ['$http', function ($http) {
+.service('ActionTypeTreeService', ['$http', '$q', function ($http, $q) {
     var trees = [];
     var Tree = function () {
         var TreeItem = function (source) {
@@ -16,6 +16,7 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
                 this.sex = null;
                 this.osids = [];
                 this.tissue_required = false;
+                this.assignable = [];
             } else if (angular.isArray(source)) {
                 this.id = source[0];
                 this.name = source[1];
@@ -26,6 +27,7 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
                 this.sex = source[6];
                 this.osids = source[7];
                 this.tissue_required = source[8];
+                this.assignable = source[9];
             } else {
                 angular.extend(this, source)
             }
@@ -100,17 +102,14 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
             });
             var render_node = function (id) {
                 var value = filtered[id];
-                return {
-                    id: value.id,
-                    name: value.name,
-                    code: value.code,
-                    children: value.children.map(render_node)
-                };
+                value.children = value.children.map(render_node);
+                return value;
             };
             return render_node('root');
         }
     };
     this.get = function (at_class) {
+        var deferred = $q.defer();
         if (! trees[at_class]) {
             trees[at_class] = new Tree();
             $http.get(url_for_schedule_api_atl_get_flat, {
@@ -119,9 +118,12 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
                 }
             }).success(function (data) {
                 trees[at_class].set_data(data.result);
+                deferred.resolve(trees[at_class]);
             })
+        } else {
+            deferred.resolve(trees[at_class])
         }
-        return trees[at_class];
+        return deferred.promise;
     }
 }])
 .service('ActionTypeTreeModal', ['$modal', '$http', 'ActionTypeTreeService', function ($modal, $http, ActionTypeTreeService) {
@@ -151,7 +153,7 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
                     throw 'bee-dah!'
             }
             var Controller = function ($scope, $modalInstance) {
-                var service = ActionTypeTreeService.get(at_class);
+                var service;
                 $scope.prepared2create = [];
                 $scope.url_for_schedule_html_action = url_for_schedule_html_action;
                 $scope.event_id = event_id;
@@ -165,6 +167,7 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
                 $scope.person_check = true;
                 $scope.tree = undefined;
                 $scope.set_filter = function () {
+                    if (typeof service === 'undefined') return;
                     $scope.tree = service.filter(
                         conditions.query,
                         client_info,
@@ -189,8 +192,10 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
                 };
                 $scope.add_prepared_action = function (node) {
                     $scope.prepared2create.push({
-                        type: node,
-                        assigned: [],
+                        type_id: node.id,
+                        type_name: node.name,
+                        assigned: node.assignable.map(function (prop) {return prop[0]}),
+                        assignable: Boolean(node.assignable.length),
                         planned_end_date: new Date()
                     })
                 };
@@ -199,16 +204,35 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
                         url_schedule_api_create_lab_direction,
                         {
                             event_id: event_id,
-                            directions: $scope.prepared2create
+                            directions: $scope.prepared2create.map(function (action) {
+                                return {
+                                    type_id: action.type_id,
+                                    assigned: action.assigned,
+                                    planned_end_date: action.planned_end_date
+                                }
+                            })
                         }
                     ).success(function (data) {
                         $scope.$close('created')
                     })
-                }
+                };
+
+                ActionTypeTreeService.get(at_class).then(function (tree) {
+                    service = tree;
+                    $scope.set_filter()
+                })
             };
             return $modal.open({
                 templateUrl: templateUrl,
                 size: 'lg',
+                controller: Controller
+            })
+        },
+        openAppointmentModal: function (at_id, date_required) {
+            var Controller = function ($scope, $modalInstance) {};
+            return $modal.open({
+                templateUrl: '/WebMis20/modal-action-assignments.html',
+                size: 'sm',
                 controller: Controller
             })
         }
@@ -311,7 +335,8 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
                     </thead>\
                     <tbody>\
                         <tr ng-repeat="action in prepared2create">\
-                            <td ng-bind="action.type.name"></td>\
+                            <td ng-if="!action.assignable" ng-bind="action.type_name"></td>\
+                            <td ng-if="action.assignable"><a ng-click="open_assignments(action)" ng-bind="action.type_name"></a></td>\
                             <td><div fs-datetime ng-model="action.planned_end_date"></div></td>\
                             <td><button class="btn btn-danger btn-sm" ng-click="prepared2create.splice($index, 1)"><i class="glyphicon glyphicon-trash"></i></button></td>\
                         </tr>\
