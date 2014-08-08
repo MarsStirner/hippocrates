@@ -13,7 +13,7 @@ angular.module('WebMis20.directives').
                     modelPolicy: '='
                 },
                 link: function(scope, elm, attrs, formCtrl) {
-                    var policy_codes = (scope.pType == 0)?(['cmiOld', 'cmiTmp', 'cmiCommonPaper', 'cmiCommonElectron', 'cmiUEC', 'cmiFnkcIndustrial', 'cmiFnkcLocal']):(['vmi']);
+                    var policy_codes = (scope.pType == 0)?(['cmiOld', 'cmiTmp', 'cmiCommonPaper', 'cmiCommonElectron', 'cmiUEC', 'cmiFnkcIndustrial', 'cmiFnkcLocal']):(['vmi', '3']);
 
                     /* Здесь начинается костыль, который предотвращает бесконечный $digest */
                     scope.rbPolicyType = RefBookService.get('rbPolicyType');
@@ -58,10 +58,10 @@ angular.module('WebMis20.directives').
             <div class="form-group col-md-4"\
                  ng-class="{\'has-error\': (policyForm.$dirty || modelPolicy.id) && policyForm.pol_type.$invalid}">\
                 <label for="pol_type[[idPostfix]]" class="control-label">Тип</label>\
-                <ui-select class="form-control" id="pol_type[[idPostfix]]" name="pol_type" theme="select2" ref-book="rbPolicyType"\
-                           ng-model="intmd_models.type" ng-disabled="!edit_mode()" ng-required="policyForm.$dirty">\
+                <ui-select class="form-control" id="pol_type[[idPostfix]]" name="pol_type" theme="select2"\
+                           ng-model="modelPolicy.policy_type" ng-disabled="!edit_mode()" ng-required="policyForm.$dirty">\
                     <ui-select-match placeholder="Тип полиса">[[$select.selected.name]]</ui-select-match>\
-                    <ui-select-choices repeat="pt in $refBook.objects | attribute:\'code\':policy_codes | filter: $select.search">\
+                    <ui-select-choices repeat="pt in rbPolicyObjects | filter: $select.search">\
                         <div ng-bind-html="pt.name | highlight: $select.search"></div>\
                     </ui-select-choices>\
                 </ui-select>\
