@@ -50,8 +50,9 @@ def login():
         user = UserAuth.auth_user(form.login.data.strip(), form.password.data.strip())
         if user:
             # Keep the user info in the session using Flask-Login
-            current_user.current_role = request.form['role']
+            user.current_role = request.form['role']
             if login_user(user):
+                session_save_user(user)
                 # Tell Flask-Principal the identity changed
                 identity_changed.send(current_app._get_current_object(), identity=Identity(user.id))
                 return redirect(request.args.get('next') or request.referrer or url_for('index'))
@@ -61,6 +62,10 @@ def login():
             errors.append(u'Неверная пара логин/пароль')
 
     return render_template('user/login.html', form=form, errors=errors)
+
+
+def session_save_user(user):
+    session['hippo_user'] = user
 
 
 @app.route('/select_role/', methods=['GET', 'POST'])
@@ -81,6 +86,7 @@ def select_role():
 
 
 @app.route('/logout/')
+@public_endpoint
 def logout():
     # Remove the user information from the session
     logout_user()
