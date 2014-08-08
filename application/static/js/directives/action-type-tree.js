@@ -84,7 +84,11 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
             };
             angular.forEach(self.lookup, function (value, key) {
                 if (is_acceptable(keywords, value)) {
-                    filtered[key] = value.clone();
+                    var clone = value.clone();
+                    clone.assignable = clone.assignable.filter(function (item) {
+                        return age_acceptable(client_info, item[2]) && sex_acceptable(client_info, item[3])
+                    });
+                    filtered[key] = clone;
                     for (var id = value.gid; id; value = self.lookup[id], id = value.gid) {
                         if (id && !filtered.hasOwnProperty(id)) {
                             filtered[id] =  self.lookup[id].clone();
@@ -129,6 +133,7 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
 .service('ActionTypeTreeModal', ['$modal', '$http', 'ActionTypeTreeService', function ($modal, $http, ActionTypeTreeService) {
     return {
         open: function (at_group, event_id, client_info) {
+            var self_service = this;
             var at_class = undefined, tissue = undefined, templateUrl;
             switch (at_group) {
                 case 'medical_documents':
@@ -195,7 +200,7 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
                         type_id: node.id,
                         type_name: node.name,
                         assigned: node.assignable.map(function (prop) {return prop[0]}),
-                        assignable: Boolean(node.assignable.length),
+                        assignable: node.assignable,
                         planned_end_date: new Date()
                     })
                 };
@@ -216,6 +221,9 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
                         $scope.$close('created')
                     })
                 };
+                $scope.open_assignments = function (action) {
+                    return self_service.openAppointmentModal(action, false);
+                };
 
                 ActionTypeTreeService.get(at_class).then(function (tree) {
                     service = tree;
@@ -228,13 +236,29 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
                 controller: Controller
             })
         },
-        openAppointmentModal: function (at_id, date_required) {
-            var Controller = function ($scope, $modalInstance) {};
-            return $modal.open({
+        openAppointmentModal: function (model, date_required) {
+            var assigned = {};
+            model.assignable.forEach(function (prop) {
+                assigned[prop[0]] = model.assigned.has(prop[0]);
+            });
+            var Controller = function ($scope, $modalInstance) {
+                $scope.model = model;
+                $scope.assigned = assigned;
+            };
+            var instance = $modal.open({
                 templateUrl: '/WebMis20/modal-action-assignments.html',
-                size: 'sm',
+//                size: 'sm',
                 controller: Controller
-            })
+            });
+            instance.result.then(function () {
+                var result = [];
+                for (var key in assigned) {
+                    if (! assigned.hasOwnProperty(key)) continue;
+                    if (assigned[key]) result.push(parseInt(key));
+                }
+                model.assigned = result;
+            });
+            return instance;
         }
     }
 }])
@@ -335,8 +359,8 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
                     </thead>\
                     <tbody>\
                         <tr ng-repeat="action in prepared2create">\
-                            <td ng-if="!action.assignable" ng-bind="action.type_name"></td>\
-                            <td ng-if="action.assignable"><a ng-click="open_assignments(action)" ng-bind="action.type_name"></a></td>\
+                            <td ng-if="!action.assignable.length" ng-bind="action.type_name"></td>\
+                            <td ng-if="action.assignable.length"><a ng-click="open_assignments(action)" ng-bind="action.type_name"></a></td>\
                             <td><div fs-datetime ng-model="action.planned_end_date"></div></td>\
                             <td><button class="btn btn-danger btn-sm" ng-click="prepared2create.splice($index, 1)"><i class="glyphicon glyphicon-trash"></i></button></td>\
                         </tr>\
@@ -349,6 +373,20 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
             <button type="button" class="btn btn-default" ng-click="cancel()">Закрыть</button>\
             <button type="button" class="btn btn-success" ng-click="create_actions()">Создать направления</button>\
         </div>'
-    )
+    );
+    $templateCache.put('/WebMis20/modal-action-assignments.html',
+        '<div class="modal-header" xmlns="http://www.w3.org/1999/html">\
+                <button type="button" class="close" ng-click="$dismiss()">&times;</button>\
+                <h4 class="modal-title">Назначаемые исследования</h4>\
+            </div>\
+            <div class="modal-body">\
+                <div ng-repeat="prop in model.assignable">\
+                <label><input type="checkbox" ng-model="assigned[prop[0]]">[[ prop[1] ]]</label>\
+                </div>\
+            </div>\
+            <div class="modal-footer">\
+                <button type="button" class="btn btn-default" ng-click="$dismiss()">Отмена</button>\
+                <button type="button" class="btn btn-success" ng-click="$close()">OK</button>\
+            </div>')
 }])
 ;

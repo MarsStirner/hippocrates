@@ -433,7 +433,7 @@ def aux_create_new_action(actionType, event, given_datetime=None, src_action=Non
     prop_types = actionType.property_types.filter(ActionPropertyType.deleted == 0)
 
     for prop_type in prop_types:
-        if recordAcceptableEx(event.client.sex, event.client.age_tuple(now_date), prop_type.sex, prop_type.age):
+        if recordAcceptableEx(event.client.sexCode, event.client.age_tuple(now_date), prop_type.sex, prop_type.age):
             prop = ActionProperty()
             prop.norm = ''
             prop.evaluation = ''
@@ -648,10 +648,14 @@ def int_get_atl_flat(at_class):
         # This was goddamn unsafe, but I can't get it working other way
     result = map(schwing, db.session.execute(raw))
     raw = db.text(
-        ur'''SELECT actionType_id, id, name FROM ActionPropertyType
+        ur'''SELECT actionType_id, id, name, age, sex FROM ActionPropertyType
         WHERE isAssignable != 0 AND actionType_id IN ('{0}')'''.format("','".join(map(str, id_list.keys())))
     )
-    map(lambda (at_id, apt_id, name): id_list[at_id][9].append((apt_id, name)), db.session.execute(raw))
+    map(lambda (at_id, apt_id, name, age, sex):
+        id_list[at_id][9].append(
+            (apt_id, name, list(parseAgeSelector(age)), sex)
+        ), db.session.execute(raw)
+    )
     return result
 
 
