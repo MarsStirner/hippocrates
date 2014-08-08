@@ -412,6 +412,93 @@ angular.module('WebMis20.directives')
             }
         }
     }])
+    .directive('wmOrgStructureTree', ['SelectAll', '$compile', '$http', function (SelectAll, $compile, $http) {
+        return {
+            restrict: 'E',
+            scope: {},
+            template:
+                '<div class="ui-treeview">\
+                    <ul ng-repeat="root in tree.children">\
+                        <li sf-treepeat="node in children of root">\
+                            <a ng-click="select(node)" ng-if="!node.is_node" class="leaf">\
+                                <div class="tree-label leaf">&nbsp;</div>\
+                                [[ node.name ]]\
+                            </a>\
+                            <a ng-if="node.is_node" ng-click="sas.toggle(node.id)" class="node">\
+                                <div class="tree-label"\
+                                     ng-class="{\'collapsed\': !sas.selected(node.id),\
+                                                \'expanded\': sas.selected(node.id)}">&nbsp;</div>\
+                                [[ node.name ]]\
+                            </a>\
+                            <ul ng-if="node.is_node && sas.selected(node.id)">\
+                                <li sf-treecurse></li>\
+                            </ul>\
+                        </li>\
+                    </ul>\
+                </div>',
+            link: function (scope, element, attributes, ctrls) {
+                var scope_query = '';
+                var sas = scope.sas = new SelectAll([]);
+                var der_tree = new Tree('parent_id');
+                var tree = scope.tree = {};
+
+                function doFilter() {
+                    var keywords = scope_query.toLowerCase().split();
+                    tree = der_tree.filter(function filter(item, idDict) {
+                        return !keywords.length || keywords.filter(function (keyword) {
+                            return (item.name.toLowerCase()).indexOf(keyword) !== -1
+                        }).length == keywords.length
+                    });
+                    doRender();
+                    sas.setSource(tree.masterDict.keys().map(function (key) {
+                        var result = parseInt(key);
+                        if (isNaN(result)) {
+                            return key
+                        } else {
+                            return result
+                        }
+                    }));
+                    sas.selectAll();
+                }
+
+                function doRender() {
+                    tree = der_tree.render(make_object);
+                    scope.tree.children = tree.root.children;
+                }
+
+                function make_object(item, is_node) {
+                    if (item === null) {
+                        var result = {};
+                        result.parent_id = null;
+                        result.id = 'root';
+                        result.children = [];
+                        result.is_node = true;
+                        return result
+                    }
+                    return angular.extend(item, {is_node: is_node});
+                }
+                $http.get(url_get_orgstructure, {
+                    params: {
+                        org_id: 3479
+                    }
+                })
+                .success(function (data) {
+                    der_tree.set_array(data.result);
+                    doFilter();
+
+
+                });
+                scope.$on('FilterChanged', function (event, query) {
+                    scope_query = query;
+                    doFilter()
+                });
+                scope.select = function (node) {
+                    scope.$parent.$query = node.name;
+                    scope.$parent.$select(node);
+                }
+            }
+        }
+    }])
     .run(['$templateCache', function ($templateCache) {
         $templateCache.put('/WebMis20/modal-print-dialog.html',
             '<div class="modal-header" xmlns="http://www.w3.org/1999/html">\

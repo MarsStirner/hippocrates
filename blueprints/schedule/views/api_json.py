@@ -650,6 +650,25 @@ def api_atl_get_flat():
     return jsonify(int_get_atl_flat(at_class))
 
 
+@cache.memoize(86400)
+def int_get_orgstructure(org_id):
+    from application.models.exists import OrgStructure
+    def schwing(t):
+        return {
+            'id': t.id,
+            'name': t.name,
+            'code': t.code,
+            'parent_id': t.parent_id,
+        }
+    return map(schwing, OrgStructure.query.filter(OrgStructure.organisation_id == org_id))
+
+
+@module.route('/api/org-structure.json')
+def api_org_structure():
+    org_id = int(request.args['org_id'])
+    return jsonify(int_get_orgstructure(org_id))
+
+
 @module.route('/api/create-lab-direction.json', methods=['POST'])
 def api_create_lab_direction():
 

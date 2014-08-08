@@ -2,7 +2,25 @@
  * Created by mmalkov on 15.07.14.
  */
 angular.module('WebMis20.directives.goodies', [])
-.directive('wmCustomDropdown', ['$timeout', '$compile', function ($timeout, $compile) {
+.factory('TimeoutCallback', ['$timeout', function ($timeout) {
+    var Timeout = function (callback, timeout) {
+        this.timeout = timeout;
+        this.hideki = null;
+        this.callback = callback;
+    };
+    Timeout.prototype.kill = function () {
+        if (this.hideki) {
+            $timeout.cancel(this.hideki)
+        }
+    };
+    Timeout.prototype.start = function () {
+        this.kill();
+        this.hideki = $timeout(this.callback, this.timeout)
+    };
+    return Timeout;
+}])
+.directive('wmCustomDropdown', ['$timeout', '$compile', 'TimeoutCallback', function ($timeout, $compile, TimeoutCallback) {
+
     return {
         restrict: 'E',
         require: ['ngModel', 'wmCustomDropdown'],
@@ -33,36 +51,35 @@ angular.module('WebMis20.directives.goodies', [])
             element.replaceWith(element_wrapper);
 
             // Handling popups...
-            var hide_timeout = null;
-            function ensure_timeout_killed () {
-                if (hide_timeout) {
-                    $timeout.cancel(hide_timeout);
-                    hide_timeout = null;
-                }
-            }
-            var hide_popup_int = function () {
-                ensure_timeout_killed();
-                element_popup.hide();
-            };
-            function show_popup () {
-                ensure_timeout_killed();
-                element_popup.width(Math.min(element_control.width() - 20, element_popup.width()));
-                element_popup.show();
-            }
+            var popupTimeoutObject = new TimeoutCallback(hide_popup, wmTimeout);
+            var changeTimeoutObject = new TimeoutCallback(function () {
+                scope.$broadcast('FilterChanged', scope.$query)
+            }, 400);
+            scope.$watch('$query', function (n, o) {
+                if (angular.equals(n, o)) return n;
+                changeTimeoutObject.start()
+            });
             function hide_popup () {
-                ensure_timeout_killed();
-                hide_timeout = $timeout(hide_popup_int, wmTimeout);
+                popupTimeoutObject.kill();
+                element_popup.hide();
+            }
+            function show_popup () {
+                popupTimeoutObject.kill();
+                element_popup.width(element_control.width() - 20);
+                element_popup.show();
             }
             element_input.focusin(show_popup);
             element_input.click(show_popup);
             element_popup.mouseenter(show_popup);
-            element_popup.mouseleave(hide_popup);
+            element_popup.mouseleave(function() {popupTimeoutObject.start()});
 
             var ngModel = ctrls[0], ctrl = ctrls[1];
             scope.$query = '';
-            ctrl.add(hide_popup_int);
+            ctrl.add(hide_popup);
             if (scope.onSelected) {ctrl.add(scope.onSelected)}
-            scope.select = ctrl.select;
+            scope.$select = ctrl.select;
+            scope.$add = ctrl.add;
+            scope.$setQuery = ctrl.setQuery;
 
             $compile(element_wrapper)(scope);
         }
