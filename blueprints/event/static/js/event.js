@@ -534,9 +534,9 @@ var EventServicesCtrl = function($scope, $http) {
     // 'danger': !service.fully_paid && !service.partially_paid && !service.is_new && !service.coord_actions.length}"
     $scope.get_class = function (service) {
         var result = [];
-        if (service.check_payment() || service.fully_coordinated) {
+        if (service.check_payment() || service.check_coord()) {
             result.push('success');
-        } else if (service.check_payment('partial') || service.partially_coordinated) {
+        } else if (service.check_payment('partial') || service.check_coord('partial')) {
             result.push('warning');
         } else {
             result.push(service.is_new() ? 'info' : 'danger');

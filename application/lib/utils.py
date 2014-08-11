@@ -261,6 +261,26 @@ def string_to_datetime(date_string, fmt='%Y-%m-%dT%H:%M:%S.%fZ'):
         return date_string
 
 
+def safe_datetime(val):
+    if not val:
+        return None
+    if isinstance(val, basestring):
+        try:
+            val = string_to_datetime(val)
+        except ValueError:
+            try:
+                val = string_to_datetime(val, '%Y-%m-%d')
+            except ValueError:
+                return None
+        return val
+    elif isinstance(val, datetime.datetime):
+        return val
+    elif isinstance(val, datetime.date):
+        return datetime.datetime(val.year, val.month, val.day)
+    else:
+        return None
+
+
 def safe_date(val):
     if not val:
         return None

@@ -31,11 +31,11 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr ng-repeat="result in found_services" ng-click="eventctrl.add_service(event, result)">
-                            <td ng-bind="result.at_code"></td>
-                            <td ng-bind="result.service_name"></td>
-                            <td ng-bind="result.at_name"></td>
-                            <td ng-bind="result.price" class="text-right" ng-show="formstate.is_paid()"></td>
+                        <tr ng-repeat="service in found_services" ng-click="eventctrl.add_service(event, service)">
+                            <td ng-bind="service.at_code"></td>
+                            <td ng-bind="service.service_name"></td>
+                            <td ng-bind="service.at_name"></td>
+                            <td ng-bind="service.price" class="text-right" ng-show="formstate.is_paid()"></td>
                         </tr>
                     </tbody>
                 </table>
@@ -55,9 +55,10 @@
                             <th class="nowrap" ng-show="formstate.is_paid()">Цена (руб.)</th>
                             <th>Количество</th>
                             <th class="nowrap" ng-show="formstate.is_paid()">Сумма к оплате (руб.)</th>
-                            <th>Считать</th>
-                            <th ng-show="formstate.is_dms()">Согласовано</th>
+                            <th ng-show="formstate.is_paid()">Считать</th>
                             <th ng-show="formstate.is_paid()">Оплачено</th>
+                            <th ng-show="formstate.is_dms()">Согласовать</th>
+                            <th ng-show="formstate.is_dms()">Согласовано</th>
                             <th></th>
                         </tr>
                     </thead>
