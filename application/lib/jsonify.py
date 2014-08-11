@@ -630,11 +630,27 @@ class ActionVisualizer(object):
         """
         @type prop: ActionProperty
         """
+        maker = getattr(self, 'make_ap_%s' % prop.type.typeName, lambda v: v)
         return {
             'id': prop.id,
             'idx': prop.type.idx,
             'type': prop.type,
             'is_assigned': prop.isAssigned,
-            'value': prop.value
+            'value': maker(prop.value),
         }
 
+    # Здесь будут кастомные мейкеры экшон пропертей.
+
+    @staticmethod
+    def make_ap_OrgStructure(value):
+        """
+        :type value: application.models.exists.OrgStructure
+        :param value:
+        :return:
+        """
+        return {
+            'id': value.id,
+            'name': value.name,
+            'code': value.code,
+            'parent_id': value.parent_id, # for compatibility with Reference
+        }

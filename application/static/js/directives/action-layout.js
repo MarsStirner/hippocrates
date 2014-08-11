@@ -82,11 +82,14 @@ angular.module('WebMis20.ActionLayout', ['WebMis20.validators', 'WebMis20.direct
                             case 'MKB':
                                 inner_template = '<ui-mkb ng-model="{0}.value"></ui-mkb>';
                                 break;
-                            case 'OrgStructure':
+                            case 'OrgStructure': // Без фильтров
                                 inner_template =
                                     '<wm-custom-dropdown ng-model="{0}.value">\
                                         <wm-org-structure-tree></wm-org-structure-tree>\
                                     </wm-custom-dropdown>';
+                                break;
+                            case 'ReferenceRb': // Без фильтров
+                                inner_template = '<rb-select ref-book="{1}" ng-model="{0}.value"></rb-select>'.format(undefined, property.type.domain);
                                 break;
                             default:
                                 inner_template = '<span ng-bind="{0}.value"></span>';
