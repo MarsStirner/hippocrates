@@ -82,6 +82,12 @@ angular.module('WebMis20.ActionLayout', ['WebMis20.validators', 'WebMis20.direct
                             case 'MKB':
                                 inner_template = '<ui-mkb ng-model="{0}.value"></ui-mkb>';
                                 break;
+                            case 'OrgStructure':
+                                inner_template =
+                                    '<wm-custom-dropdown ng-model="{0}.value">\
+                                        <wm-org-structure-tree></wm-org-structure-tree>\
+                                    </wm-custom-dropdown>';
+                                break;
                             default:
                                 inner_template = '<span ng-bind="{0}.value"></span>';
                         }

@@ -23,19 +23,12 @@ angular.module('WebMis20.directives.goodies', [])
 
     return {
         restrict: 'E',
-        require: ['ngModel', 'wmCustomDropdown'],
-        controller: ['$scope', function ($scope) {
-            var listeners = [];
-            this.clean = function () {listeners = []};
-            this.add = function (listener) {listeners.push(listener)};
-            this.select = function (item) {listeners.forEach(function (listener) {listener.call(null, item)})};
-            this.setQuery = function (query) {$scope.$query = query};
-        }],
+        require: 'ngModel',
         scope: {
             onSelected: '&',
             wmTimeout: '@'
         },
-        link: function (scope, original_element, attrs, ctrls) {
+        link: function (scope, original_element, attrs, ngModel) {
             var wmTimeout = scope.wmTimeout || 600;
             // Templating...
             var element = $(original_element);
@@ -73,13 +66,16 @@ angular.module('WebMis20.directives.goodies', [])
             element_popup.mouseenter(show_popup);
             element_popup.mouseleave(function() {popupTimeoutObject.start()});
 
-            var ngModel = ctrls[0], ctrl = ctrls[1];
+            scope.$ctrl = {
+                $set_query: function (query) {scope.$query = query},
+                $select: function (item) {
+                    ngModel.$setViewValue(item);
+                    ngModel.$render();
+                    if (scope.onSelected) scope.onSelected(item);
+                    hide_popup();
+                }
+            };
             scope.$query = '';
-            ctrl.add(hide_popup);
-            if (scope.onSelected) {ctrl.add(scope.onSelected)}
-            scope.$select = ctrl.select;
-            scope.$add = ctrl.add;
-            scope.$setQuery = ctrl.setQuery;
 
             $compile(element_wrapper)(scope);
         }

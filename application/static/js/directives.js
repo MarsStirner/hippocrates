@@ -413,9 +413,12 @@ angular.module('WebMis20.directives')
         }
     }])
     .directive('wmOrgStructureTree', ['SelectAll', '$compile', '$http', function (SelectAll, $compile, $http) {
+        // depends on wmCustomDropdown
         return {
             restrict: 'E',
-            scope: {},
+            scope: {
+                onSelect: '&'
+            },
             template:
                 '<div class="ui-treeview">\
                     <ul ng-repeat="root in tree.children">\
@@ -436,7 +439,7 @@ angular.module('WebMis20.directives')
                         </li>\
                     </ul>\
                 </div>',
-            link: function (scope, element, attributes, ctrls) {
+            link: function (scope) {
                 var scope_query = '';
                 var sas = scope.sas = new SelectAll([]);
                 var der_tree = new Tree('parent_id');
@@ -485,16 +488,19 @@ angular.module('WebMis20.directives')
                 .success(function (data) {
                     der_tree.set_array(data.result);
                     doFilter();
-
-
                 });
                 scope.$on('FilterChanged', function (event, query) {
                     scope_query = query;
                     doFilter()
                 });
                 scope.select = function (node) {
-                    scope.$parent.$query = node.name;
-                    scope.$parent.$select(node);
+                    if (scope.$parent.$ctrl) {
+                        scope.$parent.$ctrl.$set_query(node.name);
+                        scope.$parent.$ctrl.$select(node);
+                    }
+                    if (scope.onSelect) {
+                        scope.onSelect()(node);
+                    }
                 }
             }
         }
