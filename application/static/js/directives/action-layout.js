@@ -12,6 +12,7 @@ angular.module('WebMis20.ActionLayout', ['WebMis20.validators', 'WebMis20.direct
         },
         link: function (scope, element) {
             var current_element = element;
+            var v_groups_count = 0; // Must be set to zero before complete rebuild
 
             function build(tag) {
                 var inner_template;
@@ -112,12 +113,14 @@ angular.module('WebMis20.ActionLayout', ['WebMis20.validators', 'WebMis20.direct
                         inner_template = tag.children.map(function (child) {
                             return '<li class="list-group-item">{0}</li>'.format(build(child))
                         }).join('');
-                        return '<div class="panel panel-default">\
-                                <div class="panel-heading">{0}</div>\
-                                <ul class="list-group">\
+                        var result =  '<div class="panel panel-default">\
+                                <div class="panel-heading"><label><wm-checkbox select-all="sas_vgroup" key="{2}" />{0}</label></div>\
+                                <ul class="list-group" ng-show="sas_vgroup.selected({2})">\
                                     {1}\
                                 </ul>\
-                            </div>'.format(title, inner_template);
+                            </div>'.format(title, inner_template, v_groups_count);
+                        v_groups_count++;
+                        return result;
 
                     case 'row':
                         var valid_cols = [1, 2, 3, 4, 6, 12],
@@ -145,6 +148,7 @@ angular.module('WebMis20.ActionLayout', ['WebMis20.validators', 'WebMis20.direct
             }
 
             var sas = scope.sas = new SelectAll([]);
+            var sas_vgroup = scope.sas_vgroup = new SelectAll([]);
 
             scope.$watch('action.action.properties', function (properties, old) {
                 if (angular.equals(properties, old)) return;
@@ -168,7 +172,10 @@ angular.module('WebMis20.ActionLayout', ['WebMis20.validators', 'WebMis20.direct
             };
 
             scope.$watch('action.layout', function (layout) {
+                v_groups_count = 0;
                 var template = build(layout);
+                sas_vgroup.setSource(aux.range(v_groups_count));
+                sas_vgroup.selectAll();
                 var replace = $(template);
                 $(current_element).replaceWith(replace);
                 current_element = replace;
