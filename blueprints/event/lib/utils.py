@@ -98,7 +98,7 @@ def create_services(event_id, service_groups, cfinance_id):
                     current_user.id,
                     {
                         'finance_id': cfinance_id,
-                        'coordDate': action.get('coord_date'),
+                        'coordDate': safe_datetime(action.get('coord_date')),
                         'coordPerson_id': safe_traverse(action, 'coord_person', 'id'),
                         'account': action['account'] or 0,
                         'amount': action['amount'] or 1
