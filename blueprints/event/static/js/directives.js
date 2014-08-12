@@ -53,7 +53,7 @@ angular.module('WebMis20.directives').
 <td class="col-md-1">\
     <input type="text" class="form-control input-sm" min="[[service.paid_count || service.coord_actions.length || 1]]" max="100"\
            ng-disabled="amount_disabled()" ng-model="service.total_amount"\
-           valid-number minval="1"/>\
+           valid-number alow-float minval="1"/>\
 </td>\
 <td ng-bind="service.total_sum" class="text-right" ng-show="formstate.is_paid()"></td>\
 <td class="text-center" ng-show="formstate.is_paid()">\

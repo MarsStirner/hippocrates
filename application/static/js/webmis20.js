@@ -7,6 +7,7 @@ var WebMis20 = angular.module('WebMis20', [
     'WebMis20.directives',
     'WebMis20.directives.personTree',
     'WebMis20.directives.ActionTypeTree',
+    'WebMis20.ActionLayout',
     'WebMis20.directives.goodies',
     'WebMis20.controllers',
     'WebMis20.LoadingIndicator',
@@ -428,55 +429,73 @@ var WebMis20 = angular.module('WebMis20', [
     return PrintingService;
 }])
 .factory('WMAction', ['$http', '$rootScope', function ($http, $rootScope) {
+        // FIXME: На данный момент это ломает функциональность действий, но пока пофиг.
     var Action = function () {
-        this.action = null;
-        this.action_culumns = {};
-        this.event_id = null;
-        this.action_type_id = null;
+        this.action = {};
+        this.layout = {};
+        this.action_columns = {};
+        this.properties_by_id = {};
+        this.properties_by_code = {};
     };
-    function success_wrapper(t) {
+    function success_wrapper(self) {
         return function (data) {
-            angular.extend(t, data.result);
-            t.action_columns = {
+            self.action = data.result.action;
+            self.layout = data.result.layout;
+            self.action_columns = {
                 assignable: false,
                 unit: false
             };
-            angular.forEach(data.result.properties, function (item) {
-                t.action_columns.assignable |= item.type.is_assignable;
-                t.action_columns.unit |= item.type.unit;
+            self.properties_by_id = {};
+            self.properties_by_code = {};
+
+            angular.forEach(data.result.action.properties, function (item) {
+                self.action_columns.assignable |= item.type.is_assignable;
+                self.action_columns.unit |= item.type.unit;
+
+
+                self.properties_by_id[item.type.id] = item;
+
+                if (item.type.code) {
+                    self.properties_by_code[item.type.code] = item;
+                }
             });
-            $rootScope.$broadcast('action_loaded', t);
+            $rootScope.$broadcast('action_loaded', self);
         }
     }
     Action.prototype.get = function (id) {
-        var t = this;
         return $http.get(url_action_get, {
             params: {
                 action_id: id
             }
-        }).success(success_wrapper(t));
+        }).success(success_wrapper(this));
     };
     Action.prototype.get_new = function (event_id, action_type_id) {
-        this.event_id = event_id;
-        this.action_type_id = action_type_id;
-        var t = this;
+        this.action.event_id = event_id;
+        this.action.action_type_id = action_type_id;
         return $http.get(url_action_new, {
             params: {
                 action_type_id: action_type_id,
                 event_id: event_id
             }
-        }).success(success_wrapper(t));
+        }).success(success_wrapper(this));
     };
     Action.prototype.save = function () {
-        var t = this;
-        $http.post(url_action_save, this).success(success_wrapper(t));
+        $http.post(
+            url_action_save, this.action).success(success_wrapper(this));
         return this;
     };
     Action.prototype.cancel = function () {
         if (this.action.id) {
             this.get(this.action.id)
         } else {
-            this.get_new(this.event_id, this.action_type_id)
+            this.get_new(this.action.event_id, this.action.action_type_id)
+        }
+    };
+    Action.prototype.get_property = function (id) {
+        if (id instanceof String) {
+            return this.properties_by_code[id];
+        } else {
+            return this.properties_by_id[id];
         }
     };
     return Action;
@@ -513,6 +532,10 @@ var WebMis20 = angular.module('WebMis20', [
         this._source = source;
         this._selected = source.clone();
     };
+    SelectAll.prototype.setSource = function (source) {
+        this._source = source;
+        this._selected = source.clone();
+    };
     SelectAll.prototype.selected = function () {
         var item = arguments[0];
         if (item === undefined) {
@@ -544,8 +567,40 @@ var WebMis20 = angular.module('WebMis20', [
         } else {
             this._selected.splice(index, 1);
         }
-    }
+    };
+    return SelectAll
 })
+.directive('wmCheckbox', ['$compile', function ($compile) {
+    return {
+        restrict: 'E',
+        scope: {
+            selectAll: '=',
+            key: '='
+        },
+        link: function (scope, element, attributes) {
+            // Создаём элементы
+            var inputElement = $('<input type="checkbox"></input>');
+            var replace = $('<label></label>');
+            // Формируем элеменент для замены
+            replace.append(inputElement);
+            replace.append(element.html());
+
+            // 2-way binding
+            function select() {
+                scope.selectAll.select(scope.key, this.checked);
+                scope.$root.$digest(); // Это может негативно влиять на производительность, но оно нужно.
+            }
+            scope.$watch('selectAll._selected', function (n, o) {
+                inputElement[0].checked = scope.selectAll.selected(scope.key);
+                return n;
+            });
+
+            $(element).replaceWith(replace); // Заменяем исходный элемент
+            inputElement.change(select); // Цепляем хендл. Не могу сказать, как jQuery поступит при дестрое элемента
+            $compile(replace)(scope); // Компилируем
+        }
+    }
+}])
 // end services
 .directive('uiMkb', function ($timeout, RefBookService) {
     return {
@@ -658,45 +713,6 @@ var WebMis20 = angular.module('WebMis20', [
 
         }
     };
-}])
-.directive('uiActionProperty', ['$compile', function ($compile) {
-    return {
-        restrict: 'A',
-        replace: true,
-        link: function (scope, element, attributes) {
-            var property = scope.$property = scope.$eval(attributes.uiActionProperty);
-            var typeName = property.type.type_name;
-            var element_code = null;
-            switch (typeName) {
-                case 'Text':
-                case 'Html':
-                case 'Жалобы':
-                case 'Constructor':
-                    element_code = '<textarea ckeditor="ckEditorOptions" ng-model="$property.value"></textarea>';
-                    break;
-                case 'Date':
-                    element_code = '<input type="text" class="form-control" datepicker-popup="dd-MM-yyyy" ng-model="$property.value" />';
-                    break;
-                case 'Integer':
-                case 'Double':
-                case 'Time':
-                    element_code = '<input class="form-control" type="text" ng-model="$property.value">';
-                    break;
-                case 'String':
-                    if (property.type.domain) {
-                        element_code = '<select class="form-control" ng-model="$property.value" ng-options="val for val in $property.type.values"></select>'
-                    } else {
-                        element_code = '<input class="form-control" type="text" ng-model="$property.value">';
-                    }
-                    break;
-                default:
-                    element_code = '<span ng-bind="$property.value">';
-            }
-            var el = angular.element(element_code);
-            $(element[0]).append(el);
-            $compile(el)(scope);
-        }
-    }
 }])
 .directive('wmTime', ['$document',
     function ($document) {
@@ -941,7 +957,152 @@ var aux = {
             }
         }
         return false;
+    },
+    make_tree: function (array, masterField) {
+        /**
+         * @param array: Исходный массив данных
+         * @param masterField: Наименование поля указателя на родительский элемент
+         * @param idField: наименование поля идентификатора. (default: 'id')
+         * @param childrenField: наименование поля со списком детей (default: 'children')
+         * @param make_object: Функция, возвращающая элемент дерева по элементу массива function(item)
+         * @param filter_function: Функция, фильтрующая элементы массива function(item, lookup_dict)
+         * @rtype {*}
+         */
+        var idField = arguments[2] || 'id',
+            childrenField = arguments[3] || 'children',
+            filter_function = arguments[5] || function () {return true;},
+            make_object = arguments[4] || function (item) {
+                if (item === null) {
+                    var result = {};
+                    result[masterField] = null;
+                    result[idField] = 'root';
+                    result[childrenField] = [];
+                    return result
+                }
+                return item
+            };
+        var idDict = new dict({
+            root: null
+        });
+        var masterDict = new dict({
+            root: []
+        });
+        array.forEach(function (item) {
+            var id = item[idField];
+            idDict[id] = item;
+        });
+        var filtered = array.filter(function (item) {
+            return filter_function(item, idDict)
+        });
+        filtered.forEach(function (item) {
+            do {
+                var master = item[masterField] || 'root';
+                if (masterDict[master] === undefined) masterDict[master] = [];
+                if (masterDict[master].has(item[idField])) return;
+                masterDict[master].push(item[idField]);
+                item = idDict[master];
+            } while (item)
+        });
+        function recurse(id) {
+            var childrenObject = {};
+            var children_list = masterDict[id] || [];
+            childrenObject[childrenField] = children_list.map(recurse);
+            return angular.extend({}, make_object(idDict[id]), childrenObject);
+        }
+        return {
+            root: recurse('root'),
+            idDict: idDict,
+            masterDict: masterDict
+        };
     }
+};
+var Tree = function (masterField) {
+    this.nodes = [];
+    this.array = [];
+    this.masterField = masterField;
+    var idField = this.idField = arguments[1] || 'id';
+    var childrenField = this.childrenField = arguments[2] || 'children';
+    this.filter_function = arguments[4] || function () {return true};
+    this.make_object = arguments[3] || function (item) {
+        if (item === null) {
+            var result = {};
+            result[masterField] = null;
+            result[idField] = 'root';
+            result[childrenField] = [];
+            return result
+        }
+        return item
+    };
+    this.masterDict = dict({
+        root: []
+    })
+};
+Tree.prototype.set_array = function (array) {
+    var idField = this.idField,
+        masterField = this.masterField,
+        idDict = this.idDict = new dict({
+            root: null
+        });
+    this.array = array;
+    array.forEach(function (item) {
+        var id = item[idField];
+        idDict[id] = item;
+    });
+    var nodes = this.nodes = [];
+    array.forEach(function (item) {
+        var master = item[masterField] || 'root';
+        if (!nodes.has(master)) nodes.push(master);
+    });
+};
+Tree.prototype.filter = function (filter_function) {
+    var idDict = this.idDict,
+        masterField = this.masterField,
+        idField = this.idField;
+    var masterDict = this.masterDict = new dict({
+        root: []
+    });
+    var array = this.array;
+    var filtered = array.filter(function (item) {
+        return filter_function(item, idDict)
+    });
+    filtered.forEach(function (item) {
+        do {
+            var master = item[masterField] || 'root';
+            if (masterDict[master] === undefined) masterDict[master] = [];
+            if (masterDict[master].has(item[idField])) return;
+            masterDict[master].push(item[idField]);
+            item = idDict[master];
+        } while (item)
+    });
+};
+Tree.prototype.render = function (make_object) {
+    var masterDict = this.masterDict,
+        childrenField = this.childrenField,
+        idDict = this.idDict,
+        nodes = this.nodes;
+    function recurse(id) {
+        var childrenObject = {};
+        var children_list = masterDict[id] || [];
+        childrenObject[childrenField] = children_list.map(recurse);
+        return angular.extend({}, make_object(idDict[id], nodes.has(id)), childrenObject);
+    }
+    return {
+        root: recurse('root'),
+        idDict: idDict,
+        masterDict: masterDict
+    };
+};
+var dict = function () {
+    if (arguments[0]) {angular.extend(this, arguments[0])}
+};
+dict.prototype.keys = function () {
+    var result = [];
+    for (var key in this) {
+        if (this.hasOwnProperty(key) && !key.startswith('$') && ! (typeof this[key] === 'function')) {
+            result.push(key)
+        }
+    }
+    return result;
 };
 function safe_traverse(object, attrs) {
     var o = object, attr;

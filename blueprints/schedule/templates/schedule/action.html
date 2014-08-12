@@ -2,9 +2,9 @@
 {% import "_macros.html" as macros %}
 {% block main %}
 <div ng-controller="ActionEditorCtrl">
-<legend xmlns="http://www.w3.org/1999/html">[[ action.action_type.name ]] -
-    <a href="{{ url_for('patients.patient') }}?client_id=[[action.client.id]]">
-                [[ action.client.fullName ]]</a></legend>
+<legend xmlns="http://www.w3.org/1999/html">[[ action.action.action_type.name ]] -
+    <a href="{{ url_for('patients.patient') }}?client_id=[[action.action.client.id]]">
+                [[ action.action.client.full_name ]]</a></legend>
 <div>
     <table id="general_action_info" class="table table-condensed">
         <tbody>
@@ -13,10 +13,10 @@
                 <label for="begDate" class="control-label">Начато</label>
             </td>
             <td>
-                <input id="begDate" type="text" class="form-control" datepicker-popup="dd.MM.yyyy" ng-model="action.begDate"/>
+                <input id="begDate" type="text" class="form-control" datepicker-popup="dd.MM.yyyy" ng-model="action.action.begDate"/>
             </td>
             <td>
-                <div ng-model="action.begDate" style="display:inline-block;">
+                <div ng-model="action.action.begDate" style="display:inline-block;">
                       <timepicker show-meridian="false"></timepicker>
                 </div>
             </td>
@@ -24,10 +24,10 @@
                 <label for="endDate" class="control-label">Выполнено</label>
             </td>
             <td>
-                <input id="endDate" type="text" class="form-control" datepicker-popup="dd.MM.yyyy" ng-model="action.endDate"/>
+                <input id="endDate" type="text" class="form-control" datepicker-popup="dd.MM.yyyy" ng-model="action.action.endDate"/>
             </td>
             <td>
-                <div ng-model="action.endDate" style="display:inline-block;">
+                <div ng-model="action.action.endDate" style="display:inline-block;">
                       <timepicker show-meridian="false"></timepicker>
                 </div>{#ng-change="changed()"#}
             </td>
@@ -37,40 +37,41 @@
                 <label for="status" class="control-label">Статус</label>
             </td>
             <td colspan="2">
-                {{ macros.ui_select('action.status', 'ActionStatus', 'true') }}
+                {{ macros.ui_select('action.action.status', 'ActionStatus', 'true') }}
             </td>
             <td>
                 <label for="person" class="control-label">Примечания</label>
             </td>
             <td colspan="2">
-                <input class="form-control" type="text" ng-model="action.note">
+                <input class="form-control" type="text" ng-model="action.action.note">
             </td>
         </tr>
         </tbody>
     </table>
-    <table class="table table-condensed">
-        <thead>
-        <tr>
-            <th></th>
-            <th ng-if="action.action_columns.assignable">Назначено</th>
-            <th>Значение</th>
-            <th ng-if="action.action_columns.unit">ед.изм</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr ng-repeat="property in action.properties | orderBy:'idx'">
-            <td class="action-property-name-field"><strong ng-bind="property.type.name"><span class="label label-danger" ng-if="property.type.mandatory">&ast;</span></strong></td>
-            <td ng-if="action.action_columns.assignable"><input type="checkbox" ng-model="property.is_assigned" ng-if="property.type.is_assignable"></td>
-            <td ui-action-property="property"></td>
-            <td ng-if="action.action_columns.unit" ng-bind="property.type.unit.code"></td>
-        </tr>
-        </tbody>
-    </table>
+    <wm-action-layout action="action"></wm-action-layout>
+{#    <table class="table table-condensed">#}
+{#        <thead>#}
+{#        <tr>#}
+{#            <th></th>#}
+{#            <th ng-if="action.action_columns.assignable">Назначено</th>#}
+{#            <th>Значение</th>#}
+{#            <th ng-if="action.action_columns.unit">ед.изм</th>#}
+{#        </tr>#}
+{#        </thead>#}
+{#        <tbody>#}
+{#        <tr ng-repeat="property in action.properties | orderBy:'idx'">#}
+{#            <td class="action-property-name-field"><strong ng-bind="property.type.name"><span class="label label-danger" ng-if="property.type.mandatory">&ast;</span></strong></td>#}
+{#            <td ng-if="action.action_columns.assignable"><input type="checkbox" ng-model="property.is_assigned" ng-if="property.type.is_assignable"></td>#}
+{#            <td ui-action-property="property"></td>#}
+{#            <td ng-if="action.action_columns.unit" ng-bind="property.type.unit.code"></td>#}
+{#        </tr>#}
+{#        </tbody>#}
+{#    </table>#}
 </div>
 <div class="row">
     <div class="col-md-6">&nbsp;</div>
     <div class="col-md-2">
-        <ui-print-button ps="ps" resolve="ps_resolve()" ng-if="action.id"></ui-print-button>
+        <ui-print-button ps="ps" resolve="ps_resolve()" ng-if="action.action.id"></ui-print-button>
     </div>
     <div class="col-md-2">
         <button class="btn btn-block btn-success" ng-click="action.save()">Сохранить</button>
