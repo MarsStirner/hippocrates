@@ -60,6 +60,24 @@ class rbAppointmentType(db.Model):
         }
 
 
+class rbTimeQuotingType(db.Model):
+    __tablename__ = u'rbTimeQuotingType'
+
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.Integer, nullable=False, unique=True)
+    name = db.Column(db.Text(collation=u'utf8_unicode_ci'), nullable=False)
+
+    def __unicode__(self):
+        return u'(%d) %s' % (self.code, self.name)
+
+    def __json__(self):
+        return {
+            'id': self.id,
+            'code': self.code,
+            'name': self.name,
+        }
+
+
 class Office(db.Model):
     __tablename__ = 'Office'
 
@@ -110,7 +128,7 @@ class Schedule(db.Model):
         order_by='ScheduleTicket.begTime'
     )
     office = db.relationship('Office', lazy='joined')
-    
+
 
 class ScheduleTicket(db.Model):
     __tablename__ = 'ScheduleTicket'
@@ -191,3 +209,16 @@ class ScheduleClientTicket(db.Model):
         if not org:
             return self.infisFrom
         return org.title
+
+
+class QuotingByTime(db.Model):
+    __tablename__ = u'QuotingByTime'
+
+    id = db.Column(db.Integer, primary_key=True)
+    doctor_id = db.Column(db.Integer)
+    quoting_date = db.Column(db.Date, nullable=False)
+    QuotingTimeStart = db.Column(db.Time, nullable=False)
+    QuotingTimeEnd = db.Column(db.Time, nullable=False)
+    quotingType_id = db.Column("QuotingType", db.Integer, db.ForeignKey('rbTimeQuotingType.code'))
+
+    quotingType = db.relationship('rbTimeQuotingType', lazy='joined')

@@ -10,7 +10,7 @@ from application.lib.utils import safe_unicode, safe_int, safe_dict
 from application.models.enums import EventPrimary, EventOrder, ActionStatus, Gender
 from application.models.event import Event, EventType, Diagnosis, Diagnostic
 
-from application.models.schedule import Schedule, rbReceptionType, ScheduleClientTicket, ScheduleTicket
+from application.models.schedule import Schedule, rbReceptionType, ScheduleClientTicket, ScheduleTicket, QuotingByTime
 from application.models.actions import Action, ActionProperty
 from application.models.exists import rbRequestType
 
@@ -177,6 +177,14 @@ class ScheduleVisualizer(object):
             'tickets': CITO_tickets + planned_tickets + extra_tickets
         }
 
+    def make_quota_description(self, quota):
+        return {
+            'id': quota.id,
+            'time_start': quota.QuotingTimeStart,
+            'time_end': quota.QuotingTimeEnd,
+            'quoting_type': safe_dict(quota.quotingType),
+        }
+
     def collapse_scheds_description(self, scheds):
         info = {}
         roa = None
@@ -224,6 +232,22 @@ class ScheduleVisualizer(object):
 
         return result
 
+    def make_quotas_description(self, quotas, date_start, date_end):
+
+        def new_empty_day(offset):
+            return {
+                'date': date_start + datetime.timedelta(days=offset),
+                'day_quotas': []
+            }
+
+        result = [new_empty_day(day_offset) for day_offset in xrange((date_end - date_start).days)]
+
+        for quota in quotas:
+            idx = (quota.quoting_date - date_start).days
+            result[idx]['day_quotas'].append(self.make_quota_description(quota))
+
+        return result
+
     def make_person_schedule_description(self, person, start_date, end_date):
         schedules_by_date = (Schedule.query.outerjoin(Schedule.tickets)
                              .filter(Schedule.person_id == person.id,
@@ -233,9 +257,13 @@ class ScheduleVisualizer(object):
                              .order_by(Schedule.begTime)
                              .order_by(ScheduleTicket.begTime)
                              .options(db.contains_eager(Schedule.tickets).contains_eager('schedule')))
+        quoting_by_date = QuotingByTime.query.filter(QuotingByTime.doctor_id == person.id,
+                                                     QuotingByTime.quoting_date >= start_date,
+                                                     QuotingByTime.quoting_date < end_date)
         return {
             'person': self.make_person(person),
-            'schedules': self.make_schedule_description(schedules_by_date, start_date, end_date)
+            'schedules': self.make_schedule_description(schedules_by_date, start_date, end_date),
+            'quotas': self.make_quotas_description(quoting_by_date, start_date, end_date)
         }
 
 

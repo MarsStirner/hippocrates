@@ -25,7 +25,7 @@
                 </div>
             </div>
         </div>
-        <div ng-show="!absent.checked">
+        <ng-form name="intervalsSetupForm" ng-show="!absent.checked"  class="marginal">
             <div class="row">
                 <div class="col-md-12">
                     <legend>Интервалы</legend>
@@ -131,7 +131,72 @@
                     </button>
                 </div>
             </div>
-        </div>
+        </ng-form>
+        <ng-form name="quotingSetupForm">
+            <div class="row" >
+                <div class="col-md-12">
+                    <legend>Распределение времени для предварительной записи</legend>
+                    <div ng-repeat="quota in model.quotas">
+                        <ng-form name="timeQuotingForm">
+                            <div class="row">
+                                <div class="col-md-11">
+                                    <div class="panel panel-default">
+                                        <div class="panel-body">
+                                            <div class="row">
+                                                <div class="col-md-3">
+                                                    <div class="form-group"
+                                                         ng-class="{'has-error': timeQuotingForm.tqt.$invalid}">
+                                                        <label for="tqt[[$index]]" class="control-label">Тип</label>
+                                                        <select class="form-control" id="tqt[[$index]]" name="tqt"
+                                                                ng-model="quota.quoting_type"
+                                                                ng-options="tqt.name for tqt in tq_types track by tqt.code"
+                                                                ng-required="true">
+                                                            <option value="">Не выбрано</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group col-md-2 text-center">
+                                                    <label for="time_start[[$index]]">Начало периода</label>
+
+                                                    <div id="time_start[[$index]]" name="time_start"
+                                                         style="display: inline-block"
+                                                         ng-model="quota.time_start" ng-required="true"
+{#                                                         ng-change="sync_times()"#}
+                                                         ng-class="{'error-border': !times_valid}">
+                                                        <timepicker minute-step="15" show-meridian="false"></timepicker>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group col-md-3 text-center">
+                                                    <label for="time_end[[$index]]">Окончание периода</label>
+
+                                                    <div id="time_end[[$index]]" name="time_end"
+                                                         style="display: inline-block"
+                                                         ng-model="quota.time_end" ng-required="true"
+{#                                                         ng-change="sync_times()"#}
+                                                         ng-class="{'error-border': !times_valid}">
+                                                        <timepicker minute-step="15" show-meridian="false"></timepicker>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-1">
+                                    <div class="row">
+                                        <button ng-click="delete_quota(quota)" title="Удалить интервал"
+                                                class="btn btn-danger marginal" type="button">
+                                            <span class="glyphicon glyphicon-trash"></span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </ng-form>
+                    </div>
+                    <button type="button" class="btn btn-primary" ng-click="add_new_quota()">Добавить
+                    </button>
+                </div>
+            </div>
+        </ng-form>
         {#    <pre>Model: [[ model | json ]]</pre>#}
     </ng-form>
 </div>

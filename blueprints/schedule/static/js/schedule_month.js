@@ -1,7 +1,7 @@
 /**
  * Created by mmalkov on 11.07.14.
  */
-var DaySetupModalCtrl = function ($scope, $modalInstance, selected_days, model, rec_types, roas, offices) {
+var DaySetupModalCtrl = function ($scope, $modalInstance, selected_days, model, rec_types, roas, offices, tq_types) {
     function unique_rectypes(array) {
         var used_rts =  array.map(function(interval) {
             return interval.reception_type && interval.reception_type.code;
@@ -14,6 +14,7 @@ var DaySetupModalCtrl = function ($scope, $modalInstance, selected_days, model, 
     $scope.rec_types = rec_types;
     $scope.roas = roas;
     $scope.offices = offices;
+    $scope.tq_types = tq_types;
 
     $scope.selected_days = selected_days;
     $scope.model = model;
@@ -22,12 +23,17 @@ var DaySetupModalCtrl = function ($scope, $modalInstance, selected_days, model, 
     };
 
     $scope.accept = function () {
+        var interval_altered = true ? this.intervalsSetupForm.$dirty: false;
+        var quoting_altered = true ? this.quotingSetupForm.$dirty : false;
+
         var selected_days = $scope.selected_days.map(function(day) {
                 return day.selected ? day.date : undefined;
             }),
             result = {
                 selected_days: selected_days,
-                model: $scope.model
+                model: $scope.model,
+                interval_altered: interval_altered,
+                quoting_altered: quoting_altered
             };
         $modalInstance.close(result);
     };
@@ -53,9 +59,22 @@ var DaySetupModalCtrl = function ($scope, $modalInstance, selected_days, model, 
     };
     $scope.delete_interval = function(interval) {
         $scope.model.intervals.remove(interval);
+        this.intervalsSetupForm.$dirty = true;
         $scope.sync_times();
     };
-
+    $scope.add_new_quota = function() {
+        $scope.model.quotas.push({
+            time_start: moment('00:00', "HH:mm:ss").toDate(),
+            time_end: moment('00:00', "HH:mm:ss").toDate(),
+            reception_type: null
+        });
+//        $scope.sync_times();
+    };
+    $scope.delete_quota = function(quota) {
+        $scope.model.quotas.remove(quota);
+        this.quotingSetupForm.$dirty = true;
+//        $scope.sync_times();
+    };
     $scope.used_rts = unique_rectypes($scope.model.intervals);
     $scope.$watch(function() {
         return unique_rectypes($scope.model.intervals);
@@ -128,6 +147,7 @@ var DayFreeModalCtrl = function ($scope, $modalInstance, day, roas) {
 var ScheduleMonthCtrl = function ($scope, $http, $modal, RefBook) {
     $scope.reception_types = new RefBook('rbReceptionType');
     $scope.rbReasonOfAbsence = new RefBook('rbReasonOfAbsence');
+    $scope.rbTimeQuotingType = new RefBook('rbTimeQuotingType');
     $scope.offices = new RefBook('Office');
     $scope.editing = false;
     $scope.weekends_selectable = false;
@@ -164,6 +184,7 @@ var ScheduleMonthCtrl = function ($scope, $http, $modal, RefBook) {
     function make_schedule (data) {
         $scope.person = data.result['person'];
         $scope.schedules = data.result['schedules'];
+        $scope.quotas = data.result['quotas'];
         make_week();
     }
 
@@ -211,6 +232,9 @@ var ScheduleMonthCtrl = function ($scope, $http, $modal, RefBook) {
                 person_id: $scope.person_id,
                 schedule: $scope.schedules.filter(function (day) {
                     return day.altered;
+                }),
+                quotas: $scope.quotas.filter(function (quota) {
+                    return quota.altered;
                 }),
                 start_date: $scope.monthDate.format('YYYY-MM')
             }
@@ -301,6 +325,7 @@ var ScheduleMonthCtrl = function ($scope, $http, $modal, RefBook) {
                 },
                 model: function () {
                     var first_day_shedule = $scope.selected_days[0];
+                    var first_day_quotas = $scope.quotas.filter(function(day_quotas){return day_quotas.date == first_day_shedule.date})[0];
                     return {
                         info: angular.copy(first_day_shedule.info),
                         roa: first_day_shedule.roa,
@@ -314,6 +339,13 @@ var ScheduleMonthCtrl = function ($scope, $http, $modal, RefBook) {
                                 planned: interval.planned,
                                 extra: interval.extra
                             }
+                        }),
+                        quotas: first_day_quotas.day_quotas.map(function(quota) {
+                            return {
+                                time_start: moment(quota.time_start, "HH:mm:ss").toDate(), // utc dates in model, local on screen
+                                time_end: moment(quota.time_end, "HH:mm:ss").toDate(),
+                                quoting_type: quota.quoting_type
+                            }
                         })
                     };
                 },
@@ -325,6 +357,9 @@ var ScheduleMonthCtrl = function ($scope, $http, $modal, RefBook) {
                 },
                 offices: function () {
                     return $scope.offices.objects;
+                },
+                tq_types: function () {
+                    return $scope.rbTimeQuotingType.objects;
                 }
             }
         });
@@ -333,29 +368,50 @@ var ScheduleMonthCtrl = function ($scope, $http, $modal, RefBook) {
                 return result.selected_days.has(day_schedule.date); // strings
             });
 
-            var model = result.model;
-            processed_days.forEach(function(day) {
-                day.roa = model.roa;
-                day.altered = true;
-                if (model.roa) {
-                    day.info = null;
-                    day.scheds = [];
-                } else {
-                    day.info = model.info;
+            var prosessed_quotas = $scope.quotas.filter(function(day_quotas) {
+                return result.selected_days.has(day_quotas.date); // strings
+            });
 
-                    day.scheds = model.intervals.map(function(interval) {
+
+            var model = result.model;
+            if (result.interval_altered){
+                processed_days.forEach(function(day) {
+                    day.roa = model.roa;
+                    day.altered = true;
+                    if (model.roa) {
+                        day.info = null;
+                        day.scheds = [];
+                    } else {
+                        day.info = model.info;
+
+                        day.scheds = model.intervals.map(function(interval) {
+                            return {
+                                begTime: moment(interval.begTime).format("HH:mm:ss"),
+                                endTime: moment(interval.endTime).format("HH:mm:ss"),
+                                office: interval.office,
+                                reception_type: interval.reception_type,
+                                CITO: interval.CITO,
+                                planned: interval.planned,
+                                extra: interval.extra
+                            };
+                        });
+                    }
+                });
+            }
+
+            if (result.quoting_altered) {
+                prosessed_quotas.forEach(function(quota) {
+                    quota.altered = true;
+                    quota.day_quotas = model.quotas.map(function(quota) {
                         return {
-                            begTime: moment(interval.begTime).format("HH:mm:ss"),
-                            endTime: moment(interval.endTime).format("HH:mm:ss"),
-                            office: interval.office,
-                            reception_type: interval.reception_type,
-                            CITO: interval.CITO,
-                            planned: interval.planned,
-                            extra: interval.extra
+                            time_start: moment(quota.time_start).format("HH:mm:ss"),
+                            time_end: moment(quota.time_end).format("HH:mm:ss"),
+                            quoting_type: quota.quoting_type
                         };
                     });
-                }
-            });
+                });
+            }
+
             $scope.select.none();
         }, function () {
             console.log('dismissed!')

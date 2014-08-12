@@ -19,7 +19,7 @@ from blueprints.schedule.lib.data import delete_schedules
 from application.models.exists import (rbSpeciality, rbReasonOfAbsence, rbPrintTemplate, Person)
 from application.models.actions import Action, ActionType, ActionProperty, ActionPropertyType
 from application.models.schedule import Schedule, ScheduleTicket, ScheduleClientTicket, rbAppointmentType, \
-    rbReceptionType, rbAttendanceType
+    rbReceptionType, rbAttendanceType, QuotingByTime
 from application.lib.jsonify import ScheduleVisualizer, PrintTemplateVisualizer, \
     ActionVisualizer
 
@@ -158,10 +158,12 @@ def api_schedule_description_post():
 
     schedule_data = request.json
     schedule = schedule_data['schedule']
+    quotas = schedule_data['quotas']
     person_id = schedule_data['person_id']
     dates = [day['date'] for day in schedule]
 
-    ok = delete_schedules(dates, person_id)
+    if schedule:
+        ok = delete_schedules(dates, person_id)
 
     for day_desc in schedule:
         date = safe_date(day_desc['date'])
@@ -195,6 +197,20 @@ def api_schedule_description_post():
                              sub_sched.get('planned', 0),
                              sub_sched.get('extra', 0),
                              sub_sched.get('CITO', 0))
+
+    for quota_desc in quotas:
+        date = safe_date(quota_desc['date'])
+        QuotingByTime.query.filter(QuotingByTime.doctor_id == person_id,
+                                   QuotingByTime.quoting_date == date).delete()
+        new_quotas = quota_desc['day_quotas']
+        for quota in new_quotas:
+            quota_record = QuotingByTime()
+            quota_record.quoting_date = date
+            quota_record.doctor_id = person_id
+            quota_record.QuotingTimeStart = safe_time_as_dt(quota['time_start'])
+            quota_record.QuotingTimeEnd = safe_time_as_dt(quota['time_end'])
+            quota_record.quotingType_id = quota['quoting_type']['id']
+            db.session.add(quota_record)
 
     db.session.commit()
 
