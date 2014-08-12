@@ -271,6 +271,7 @@ def api_appointment():
     data = request.get_json()
     client_id = int(data['client_id'])
     ticket_id = int(data['ticket_id'])
+    create_person = data.get('create_person', current_user.get_id())
     appointment_type_code = data.get('appointment_type_code', 'amb')
     delete = bool(data.get('delete', False))
     ticket = ScheduleTicket.query.get(ticket_id)
@@ -290,7 +291,7 @@ def api_appointment():
         client_ticket.client_id = client_id
         client_ticket.ticket_id = ticket_id
         client_ticket.createDatetime = client_ticket.modifyDatetime = datetime.datetime.now()
-        client_ticket.createPerson_id = client_ticket.modifyPerson_id = current_user.get_id()
+        client_ticket.createPerson_id = client_ticket.modifyPerson_id = create_person
         db.session.add(client_ticket)
         client_ticket.appointmentType = rbAppointmentType.query.filter(rbAppointmentType.code == appointment_type_code).first()
     if 'note' in data:
