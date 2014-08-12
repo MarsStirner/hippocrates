@@ -1,5 +1,5 @@
 var LoginCtrl = function ($scope, $http) {
-    $scope.login = null;
+    $scope.login = $("#login").val();
     $scope.role = null;
     $scope.roles = [];
     $scope.get_roles = function () {
@@ -11,6 +11,9 @@ var LoginCtrl = function ($scope, $http) {
             $scope.roles = data.result;
         })
     };
+    if ($scope.login){
+        $scope.get_roles();
+    }
 };
 
 WebMis20.controller('LoginCtrl', ['$scope', '$http', LoginCtrl]);

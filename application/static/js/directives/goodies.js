@@ -2,52 +2,85 @@
  * Created by mmalkov on 15.07.14.
  */
 angular.module('WebMis20.directives.goodies', [])
-.directive('wmCustomDropdown', function ($timeout) {
+.factory('TimeoutCallback', ['$timeout', function ($timeout) {
+    var Timeout = function (callback, timeout) {
+        this.timeout = timeout;
+        this.hideki = null;
+        this.callback = callback;
+    };
+    Timeout.prototype.kill = function () {
+        if (this.hideki) {
+            $timeout.cancel(this.hideki)
+        }
+    };
+    Timeout.prototype.start = function () {
+        this.kill();
+        this.hideki = $timeout(this.callback, this.timeout)
+    };
+    return Timeout;
+}])
+.directive('wmCustomDropdown', ['$timeout', '$compile', 'TimeoutCallback', function ($timeout, $compile, TimeoutCallback) {
+
     return {
-        restrict: 'A',
-        scope: {},
-        link: function (scope, element) {
-            var element_control = $($(element).find('*[wm-cdd-control]')[0]);
-            var element_input = $($(element).find('*[wm-cdd-input]')[0]);
-            if (!element_control[0]) {
-                element_control = element_input;
-                console.info('assuming element with wm-cdd-input is also wm-cdd-contol');
+        restrict: 'E',
+        require: 'ngModel',
+        scope: {
+            onSelected: '&',
+            wmTimeout: '@'
+        },
+        link: function (scope, original_element, attrs, ngModel) {
+            var wmTimeout = scope.wmTimeout || 600;
+            // Templating...
+            var element = $(original_element);
+            var element_input = $('<input type="text" ng-model="$query" class="form-control">');
+            var element_control = $('<div class="input-group"></div>');
+            element_control.append('<span class="input-group-addon"><i class="glyphicon glyphicon-search"></i></span>');
+            element_control.append(element_input);
+            element_control.append('<span class="input-group-btn"><button class="btn btn-default" ng-click="$query=\'\'"><i class="glyphicon glyphicon-remove"></i></button></span>');
+            var element_popup = $('<div class="wm-popup well well-sm"></div>');
+            element_popup.append(element.html());
+            var element_wrapper = $('<div style="display: inline"></div>');
+            element_wrapper.append(element_control).append(element_popup);
+            element.replaceWith(element_wrapper);
+
+            // Handling popups...
+            var popupTimeoutObject = new TimeoutCallback(hide_popup, wmTimeout);
+            var changeTimeoutObject = new TimeoutCallback(function () {
+                scope.$broadcast('FilterChanged', scope.$query)
+            }, 400);
+            scope.$watch('$query', function (n, o) {
+                if (angular.equals(n, o)) return n;
+                changeTimeoutObject.start()
+            });
+            function hide_popup () {
+                popupTimeoutObject.kill();
+                element_popup.hide();
             }
-            if (!element_input[0]) {
-                throw 'wmCustomDropdown directive must have an element with wm-cdd-input attribute'
+            function show_popup () {
+                popupTimeoutObject.kill();
+                element_popup.width(element_control.width() - 20);
+                element_popup.show();
             }
             element_input.focusin(show_popup);
             element_input.click(show_popup);
-            var element_popup = $($(element).find('*[wm-cdd-popup]')[0]);
-            if (!element_input[0]) {
-                throw 'wmCustomDropdown directive must have an element with wm-cdd-popup attribute'
-            }
-            element_popup.addClass('wm-popup');
             element_popup.mouseenter(show_popup);
-            element_popup.mouseleave(hide_popup);
-            var hide_timeout = null;
-            function ensure_timeout_killed () {
-                if (hide_timeout) {
-                    $timeout.cancel(hide_timeout);
-                    hide_timeout = null;
+            element_popup.mouseleave(function() {popupTimeoutObject.start()});
+
+            scope.$ctrl = {
+                $set_query: function (query) {scope.$query = query},
+                $select: function (item) {
+                    ngModel.$setViewValue(item);
+                    ngModel.$render();
+                    if (scope.onSelected) scope.onSelected(item);
+                    hide_popup();
                 }
-            }
-            var hide_popup_int = scope.hide_popup = function () {
-                ensure_timeout_killed();
-                element_popup.hide();
             };
-            function show_popup () {
-                ensure_timeout_killed();
-                element_popup.width(Math.max(element_control.width(), element_popup.width()));
-                element_popup.show();
-            }
-            function hide_popup () {
-                ensure_timeout_killed();
-                hide_timeout = $timeout(hide_popup_int, element_popup.attr.wmCddPopup || 600);
-            }
+            scope.$query = '';
+
+            $compile(element_wrapper)(scope);
         }
     }
-})
+}])
 .directive('wmSlowChange', function ($timeout) {
     return {
         restrict: 'A',

@@ -524,7 +524,9 @@ def api_action_post():
             prop.isAssigned = prop_desc['is_assigned']
             prop.type = prop_type
             pd_value = prop_desc['value']
-            if pd_value is not None:
+            if isinstance(pd_value, dict):
+                prop.set_value(safe_traverse(pd_value, 'id'), True)
+            elif pd_value is not None:
                 prop.set_value(pd_value)
             # elif prop_type.typeName == 'JobTicket' and orgStructure:
             #     prop.value = aux_create_JT(action_desc['planned_endDate'] or now, ActionType.jobType_id, orgStructure.id)
@@ -553,14 +555,8 @@ def api_action_post():
     db.session.add(action)
     db.session.commit()
 
-    context = action.actionType.context
-    print_templates = rbPrintTemplate.query.filter(rbPrintTemplate.context == context).all()
     v = ActionVisualizer()
-    print_context = PrintTemplateVisualizer()
-    return jsonify({
-        'action': v.make_action(action),
-        'print_templates': map(print_context.make_template_info, print_templates)
-    })
+    return jsonify(v.make_action(action))
 
 
 @cache.memoize(86400)
@@ -666,6 +662,25 @@ def api_atl_get_flat():
         return abort(401)
 
     return jsonify(int_get_atl_flat(at_class))
+
+
+@cache.memoize(86400)
+def int_get_orgstructure(org_id):
+    from application.models.exists import OrgStructure
+    def schwing(t):
+        return {
+            'id': t.id,
+            'name': t.name,
+            'code': t.code,
+            'parent_id': t.parent_id,
+        }
+    return map(schwing, OrgStructure.query.filter(OrgStructure.organisation_id == org_id))
+
+
+@module.route('/api/org-structure.json')
+def api_org_structure():
+    org_id = int(request.args['org_id'])
+    return jsonify(int_get_orgstructure(org_id))
 
 
 @module.route('/api/create-lab-direction.json', methods=['POST'])
