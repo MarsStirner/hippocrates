@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 import datetime
 
 from flask import request, abort
@@ -22,7 +23,7 @@ from application.lib.jsonify import EventVisualizer, ClientVisualizer
 from blueprints.event.lib.utils import (EventSaveException, get_local_contract, get_prev_event_payment,
     create_new_local_contract, create_services)
 from application.lib.sphinx_search import SearchEventService
-from application.lib.data import create_action
+from application.lib.data import create_action, get_apt_assignable_small_info, get_planned_end_datetime
 
 
 @module.errorhandler(EventSaveException)
@@ -261,14 +262,24 @@ def api_search_services():
                                        speciality_id=speciality_id)
     # result = find_services_direct(query, event_type_id, contract_id, speciality_id)
 
-    def make_response(_item):
-        return {
-            'at_id': _item.get('action_type_id'),
-            'at_code': _item['code'],
-            'at_name': _item['name'],
-            'service_name': _item['service'],
-            'price': _item['price']
+    apts = get_apt_assignable_small_info()
+
+    def make_response(service_data):
+        service = {
+            'at_id': service_data.get('action_type_id'),
+            'at_code': service_data['code'],
+            'at_name': service_data['name'],
+            'service_name': service_data['service'],
+            'price': service_data['price']
         }
+        at_it = service['at_id']
+        if at_it in apts:
+            service['is_lab'] = True
+            service['assignable'] = apts[at_it]
+            service['all_assigned'] = map(lambda p: p[0], service['assignable'])
+            service['all_planned_end_date'] = get_planned_end_datetime(at_it)
+        return service
+
     return jsonify([make_response(item) for item in result['result']['items']])
 
 

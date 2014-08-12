@@ -941,6 +941,14 @@ var aux = {
             }
         }
         return false;
+    },
+    safe_date: function (val) {
+        if (!val) {
+            return null;
+        }
+        var date = moment(val);
+        return date.isValid() ? date.toDate() : null;
+
     }
 };
 function safe_traverse(object, attrs) {

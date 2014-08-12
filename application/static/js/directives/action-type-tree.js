@@ -237,28 +237,33 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
             })
         },
         openAppointmentModal: function (model, date_required) {
-            var assigned = {};
+            var assigned = {},
+                ped = {
+                    planned_end_date: model.planned_end_date
+                };
             model.assignable.forEach(function (prop) {
                 assigned[prop[0]] = model.assigned.has(prop[0]);
             });
             var Controller = function ($scope, $modalInstance) {
                 $scope.model = model;
                 $scope.assigned = assigned;
+                $scope.date_required = date_required;
+                $scope.ped = ped;
             };
             var instance = $modal.open({
                 templateUrl: '/WebMis20/modal-action-assignments.html',
 //                size: 'sm',
                 controller: Controller
             });
-            instance.result.then(function () {
+            return instance.result.then(function () {
                 var result = [];
                 for (var key in assigned) {
                     if (! assigned.hasOwnProperty(key)) continue;
                     if (assigned[key]) result.push(parseInt(key));
                 }
                 model.assigned = result;
+                model.planned_end_date = ped.planned_end_date;
             });
-            return instance;
         }
     }
 }])
@@ -376,17 +381,22 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
     );
     $templateCache.put('/WebMis20/modal-action-assignments.html',
         '<div class="modal-header" xmlns="http://www.w3.org/1999/html">\
-                <button type="button" class="close" ng-click="$dismiss()">&times;</button>\
-                <h4 class="modal-title">Назначаемые исследования</h4>\
-            </div>\
-            <div class="modal-body">\
-                <div ng-repeat="prop in model.assignable">\
-                <label><input type="checkbox" ng-model="assigned[prop[0]]">[[ prop[1] ]]</label>\
+            <button type="button" class="close" ng-click="$dismiss()">&times;</button>\
+            <h4 class="modal-title">Назначаемые исследования</h4>\
+        </div>\
+        <div class="modal-body">\
+            <div class="row" ng-if="date_required">\
+                <div class="col-md-6">\
+                    <label for="ped">Дата/время назначения</label><div fs-datetime id="ped" ng-model="ped.planned_end_date"></div>\
                 </div>\
             </div>\
-            <div class="modal-footer">\
-                <button type="button" class="btn btn-default" ng-click="$dismiss()">Отмена</button>\
-                <button type="button" class="btn btn-success" ng-click="$close()">OK</button>\
-            </div>')
+            <div class="checkbox" ng-repeat="prop in model.assignable">\
+                <label><input type="checkbox" ng-model="assigned[prop[0]]">[[ prop[1] ]]</label>\
+            </div>\
+        </div>\
+        <div class="modal-footer">\
+            <button type="button" class="btn btn-default" ng-click="$dismiss()">Отмена</button>\
+            <button type="button" class="btn btn-success" ng-click="$close()">OK</button>\
+        </div>')
 }])
 ;

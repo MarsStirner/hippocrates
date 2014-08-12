@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from collections import defaultdict
 from datetime import datetime, time, timedelta
 import requests
 
@@ -47,19 +48,17 @@ def create_action(event_id, action_type_id, current_user_id, data):
     now = datetime.now()
     actionType = ActionType.query.get(int(action_type_id))
     event = Event.query.get(int(event_id))
-    _current_user = Person.query.get(int(current_user_id))
+    # _current_user = Person.query.get(int(current_user_id))
 
     action = Action()
-    action.actionType_id = action_type_id
-    action.event_id = event_id
-    action.createDatetime = action.modifyDatetime = action.begDate = now
-    action.createPerson_id = action.modifyPerson_id = action.setPerson_id = current_user_id
+    action.actionType = actionType
+    action.event = event
+    action.begDate = now  # todo
+    action.setPerson = Person.query.get(int(current_user_id))
     action.office = actionType.office or u''
-    # action.amount = actionType.amount if actionType.amountEvaluation in (0, 7) else 1
-    action.amount = data.get('amount', 1)
-    action.status = ActionStatus.started[0]
-    action.note = ''
-    action.payStatus = 0
+    action.amount = actionType.amount if actionType.amountEvaluation in (0, 7) else 1
+    # action.amount = data.get('amount', 1)
+    action.status = actionType.defaultStatus
     action.account = int(data.get('account', 1))
     action.coordText = ''
     action.coordDate = data.get('coordDate')
@@ -250,3 +249,19 @@ def get_kladr_street(code):
             data['code'] = data['identcode']
             data['name'] = u'{0} {1}'.format(data['fulltype'], data['name'])
     return data
+
+
+@cache.memoize(86400)
+def get_apt_assignable_small_info():
+    at_apts = defaultdict(list)
+    raw = db.text(
+        ur'''SELECT ActionPropertyType.actionType_id, ActionPropertyType.id, ActionPropertyType.name
+        FROM ActionPropertyType
+        JOIN ActionType ON ActionPropertyType.actionType_id = ActionType.id
+        WHERE ActionType.isRequiredTissue = 1 AND ActionPropertyType.isAssignable != 0 AND
+        ActionType.deleted = 0 AND ActionType.hidden = 0'''
+    )
+    map(lambda (at_id, apt_id, apt_name): at_apts[at_id].append((apt_id, apt_name)),
+        db.session.execute(raw)
+    )
+    return at_apts

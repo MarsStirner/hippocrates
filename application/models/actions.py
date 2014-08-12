@@ -3,6 +3,7 @@ import datetime
 from application.systemwide import db
 from exists import FDRecord
 from sqlalchemy.orm.collections import InstrumentedList
+from application.models.utils import safe_current_user_id
 
 __author__ = 'mmalkov'
 
@@ -11,10 +12,10 @@ class Action(db.Model):
     __tablename__ = u'Action'
 
     id = db.Column(db.Integer, primary_key=True)
-    createDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now())
-    createPerson_id = db.Column(db.Integer, index=True)
-    modifyDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now())
-    modifyPerson_id = db.Column(db.Integer, index=True)
+    createDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now)
+    createPerson_id = db.Column(db.Integer, index=True, default=safe_current_user_id)
+    modifyDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now, onupdate=datetime.datetime.now)
+    modifyPerson_id = db.Column(db.Integer, index=True, default=safe_current_user_id, onupdate=safe_current_user_id)
     deleted = db.Column(db.Integer, nullable=False, server_default=u"'0'")
     actionType_id = db.Column(db.Integer, db.ForeignKey('ActionType.id'), nullable=False, index=True)
     event_id = db.Column(db.Integer, db.ForeignKey('Event.id'), index=True)
@@ -26,14 +27,14 @@ class Action(db.Model):
     begDate = db.Column(db.DateTime)
     plannedEndDate = db.Column(db.DateTime, nullable=False)
     endDate = db.Column(db.DateTime)
-    note = db.Column(db.Text, nullable=False)
+    note = db.Column(db.Text, nullable=False, default='')
     person_id = db.Column(db.Integer, db.ForeignKey('Person.id'), index=True)
-    office = db.Column(db.String(16), nullable=False)
+    office = db.Column(db.String(16), nullable=False, default='')
     amount = db.Column(db.Float(asdecimal=True), nullable=False)
     uet = db.Column(db.Float(asdecimal=True), server_default=u"'0'")
     expose = db.Column(db.Boolean, nullable=False, server_default=u"'1'")
-    payStatus = db.Column(db.Integer, nullable=False)
-    account = db.Column(db.Boolean, nullable=False)
+    payStatus = db.Column(db.Integer, nullable=False, default=0)
+    account = db.Column(db.Boolean, nullable=False, default=0)
     finance_id = db.Column(db.Integer, db.ForeignKey('rbFinance.id'), index=True)
     prescription_id = db.Column(db.Integer, index=True)
     takenTissueJournal_id = db.Column(db.ForeignKey('TakenTissueJournal.id'), index=True)
@@ -42,7 +43,7 @@ class Action(db.Model):
     coordPerson_id = db.Column(db.Integer, db.ForeignKey('Person.id'), index=True)
     coordAgent = db.Column(db.String(128), nullable=False, server_default=u"''")
     coordInspector = db.Column(db.String(128), nullable=False, server_default=u"''")
-    coordText = db.Column(db.String, nullable=False)
+    coordText = db.Column(db.String, nullable=False, default='')
     hospitalUidFrom = db.Column(db.String(128), nullable=False, server_default=u"'0'")
     pacientInQueueType = db.Column(db.Integer, server_default=u"'0'")
     AppointmentType = db.Column(

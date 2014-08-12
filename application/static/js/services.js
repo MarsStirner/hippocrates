@@ -572,7 +572,7 @@ angular.module('WebMis20.services', []).
     ]).
     factory('WMEventServiceGroup', ['$rootScope', 'WMEventController',
         function($rootScope, WMEventController) {
-            var WMSimpleAction = function (action, price) {
+            var WMSimpleAction = function (action, service_group) {
                 if (!action) {
                     action = {
                         action_id: null,
@@ -582,10 +582,14 @@ angular.module('WebMis20.services', []).
                         end_date: null,
                         coord_date: null,
                         coord_person: null,
-                        sum: price
+                        sum: service_group.price,
+                        assigned: service_group.all_assigned,
+                        planned_end_date: service_group.all_planned_end_date !== false ?
+                            service_group.all_planned_end_date : null
                     }
                 }
                 angular.extend(this, action);
+                this.planned_end_date = aux.safe_date(this.planned_end_date);
                 this._is_paid_for = undefined;
             };
             WMSimpleAction.prototype.is_paid_for = function () {
@@ -604,7 +608,11 @@ angular.module('WebMis20.services', []).
                         service_id: undefined,
                         service_name: null,
                         actions: [],
-                        price: undefined
+                        price: undefined,
+                        is_lab: null,
+                        assignable: [], // info list of assignable properties
+                        all_assigned: [], // [] - all have same assignments, False - have different assignments
+                        all_planned_end_date: null // date - all have same dates, False - have different dates
                     }
                 }
 
@@ -623,8 +631,11 @@ angular.module('WebMis20.services', []).
             WMEventServiceGroup.prototype.initialize = function (service_data, payments) {
                 var self = this;
                 angular.extend(this, service_data);
+                if (this.all_planned_end_date !== false) {
+                    this.all_planned_end_date = aux.safe_date(this.all_planned_end_date);
+                }
                 this.actions = this.actions.map(function (act) {
-                    return new WMSimpleAction(act, self.price);
+                    return new WMSimpleAction(act, self);
                 });
 
                 $rootScope.$watch(function () {
@@ -694,6 +705,28 @@ angular.module('WebMis20.services', []).
                     self.coord_all = (total_count === this.coord_count) ? true :
                         (this.coord_count === 0) ? false : null;
                 }, true);
+                $rootScope.$watch(function () {
+                    return self.actions.map(function (act) {
+                        return [act.assigned, act.planned_end_date];
+                    });
+                }, function (n, o) {
+                    var asgn_list = n.map(function (data) {
+                            return data[0];
+                        }),
+                        ref_asgn_list = asgn_list[0],
+                        ped = n.map(function (data) {
+                            return data[1];
+                        }),
+                        ref_ped = ped[0],
+                        all_same_asgn = asgn_list.every(function (asgn_list) {
+                            return angular.equals(asgn_list, ref_asgn_list);
+                        }),
+                        all_same_ped = ped.every(function (ped) {
+                            return ped === ref_ped;
+                        });
+                    self.all_assigned = all_same_asgn && ref_asgn_list;
+                    self.all_planned_end_date = all_same_ped && ref_ped;
+                }, true);
 
                 this.recalculate_amount();
 
@@ -751,13 +784,14 @@ angular.module('WebMis20.services', []).
             };
 
             WMEventServiceGroup.prototype.rearrange_actions = function () {
-                var total_amount = this.total_amount,
+                var self = this,
+                    total_amount = this.total_amount,
                     actions_amount = this.actions.reduce(function (sum, cur_act) {
                         return sum + cur_act.amount;
                     }, 0);
                 if (actions_amount < total_amount) {
                     for (var i = 0; i < total_amount - actions_amount; i++) {
-                        this.actions.push(new WMSimpleAction(null, this.price));
+                        this.actions.push(new WMSimpleAction(null, self));
                     }
                 } else if (total_amount < actions_amount) {
                     var i = actions_amount - total_amount,
@@ -940,8 +974,7 @@ angular.module('WebMis20.services', []).
                             {
                                 amount: 1,
                                 sum: service_group.price,
-                                actions: [undefined],
-                                account: true
+                                actions: [undefined]
                             }
                         ),
                         SgModel = $injector.get('WMEventServiceGroup');
@@ -954,7 +987,7 @@ angular.module('WebMis20.services', []).
                     return a.action_id;
                 });
                 var group_saved = action_id_list.every(function (a_id) {
-                    return a_id !== undefined;
+                    return a_id !== undefined && a_id !== null;
                 });
                 if (group_saved) {
                     $http.post(

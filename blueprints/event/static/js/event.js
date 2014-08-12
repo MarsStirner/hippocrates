@@ -729,7 +729,7 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, P
 
     $scope.ps_services = new PrintingService("services");
     $scope.ps_services_resolve = function () {
-        var actions_ids = []
+        var actions_ids = [];
         var services_for_print = $scope.event.services.filter(function(service) {return service.print})
         if (services_for_print.length){
             actions_ids = services_for_print.reduce(function (prev, curr){
