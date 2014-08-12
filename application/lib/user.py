@@ -97,6 +97,7 @@ class User(UserMixin):
             'action_type_personally': sorted(getattr(self, 'action_type_personally', [])),
         }
 
+
 class AnonymousUser(AnonymousUserMixin):
 
     def is_admin(self):
@@ -110,6 +111,7 @@ class AnonymousUser(AnonymousUserMixin):
             'current_role': None,
             'rights': [],
         }
+
 
 class UserAuth():
 
@@ -140,3 +142,15 @@ class UserAuth():
     @classmethod
     def get_by_id(cls, user_id):
         return User(db.session.query(Person).get(int(user_id)))
+
+    @classmethod
+    def get_roles_by_login(cls, login):
+        from ..models.exists import rbUserProfile, PersonProfiles
+        return [
+            {'code': role.code, 'name': role.name}
+            for role in (rbUserProfile.query
+                         .join(PersonProfiles)
+                         .join(Person)
+                         .filter(Person.login == login)
+                         .order_by(rbUserProfile.name))
+        ]

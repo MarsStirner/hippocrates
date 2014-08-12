@@ -134,4 +134,16 @@
     </div>
 </div>
 </ng-form>
+
+<div class="panel panel-default" ng-show="formstate.is_paid() && payment_box_visible()">
+    <div class="panel-body">
+        <div class="form-inline form-group">
+            <label for="paysum">Внести сумму на счет обращения</label>
+            <input type="text" class="form-control" id="paysum" autocomplete="off"
+                   ng-model="payment_sum"/>
+            <button type="button" class="btn btn-primary" ng-click="process_payment()">Внести</button>
+        </div>
+    </div>
+</div>
+
 </div>

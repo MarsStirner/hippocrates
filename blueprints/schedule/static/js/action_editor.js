@@ -9,15 +9,6 @@ var ActionEditorCtrl = function ($scope, $http, $window, WMAction, PrintingServi
             action_id: $scope.action.id
         }
     };
-    $scope.ckEditorOptions = {
-        language: 'ru',
-        removeButtons: 'Cut,Copy,Paste,Undo,Redo,Anchor,Strike',
-        toolbarCanCollapse: true,
-        toolbarStartupExpanded: false,
-        autoGrow_minHeight: 50,
-        autoGrow_bottomSpace: 50,
-        height: 200
-    };
     $scope.action_id = params.action_id;
     $scope.action = new WMAction();
     if (params.action_id) {
@@ -26,7 +17,7 @@ var ActionEditorCtrl = function ($scope, $http, $window, WMAction, PrintingServi
         $scope.action.get_new(params.event_id, params.action_type_id).success(update_print_templates);
     }
     function update_print_templates (data) {
-        $scope.ps.set_context(data.result.action_type.context_name)
+        $scope.ps.set_context(data.result.action.action_type.context_name)
     }
     $scope.ActionStatus = RefBookService.get('ActionStatus');
 };

@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
-from collections import defaultdict
 
 import datetime
 from application.lib.data import create_action
 from application.models.actions import Action, ActionType
 from application.models.event import Event, EventType, EventLocalContract
-from application.lib.utils import safe_date
+from application.lib.utils import safe_date, safe_traverse, safe_datetime
 from flask.ext.login import current_user
 from application.models.exists import rbDocumentType, ContractTariff, Contract, rbService
 from application.lib.settings import Settings
@@ -87,71 +86,31 @@ def get_prev_event_payment(client_id, event_type_id):
     return event
 
 
-def get_event_services(event_id):
-    query = db.session.query(Action,
-                             ActionType.id,
-                             ActionType.service_id,
-                             ActionType.code,
-                             ActionType.name,
-                             rbService.name,
-                             ContractTariff.price).\
-        join(Event,
-             EventType,
-             Contract,
-             ContractTariff,
-             ActionType).\
-        join(rbService, ActionType.service_id == rbService.id).\
-        filter(Action.event_id == event_id,
-               ContractTariff.eventType_id == EventType.id,
-               ContractTariff.service_id == ActionType.service_id,
-               Action.deleted == 0,
-               ContractTariff.deleted == 0).all()
-    services_by_at = defaultdict(list)
-    for a, at_id, service_id, at_code, at_name, service_name, price in query:
-        s = {
-            'account': a.account,
-            'at_id': at_id,
-            'at_code': at_code,
-            'at_name': at_name,
-            'service_name': service_name,
-            'price': price,
-            'action_id': a.id,
-            'service_id': service_id,
-            'is_coord': a.coordDate and a.coordPerson_id
-        }
-        services_by_at[(at_id, service_id)].append(s)
-    services_grouped = []
-    for k, service_group in services_by_at.iteritems():
-        actions = []
-        coord_actions = []
-        for s in service_group:
-            actions.append(s['action_id'])
-            if s['is_coord']:
-                coord_actions.append(s['action_id'])
-        services_grouped.append(
-            dict(service_group[0],
-                 amount=len(service_group),
-                 sum=service_group[0]['price'] * len(service_group),
-                 actions=actions,
-                 coord_actions=coord_actions))
-
-    return services_grouped
-
-
-def create_services(event_id, services_data, cfinance_id):
+def create_services(event_id, service_groups, cfinance_id):
     result = []
-    for service in services_data:
-        created_count = len(service['actions'])
-        new_count = int(float(service['amount']))
-        # TODO: отработать случай уменьшения количества услуг при редактировании обращения (created_count > new_count)
-        if created_count < new_count:
-            for i in xrange(1, new_count - created_count + 1):
-                action = create_action(
+    for sg in service_groups:
+        for action in sg['actions']:
+            action_id = action['action_id']
+            if not action_id:
+                a = create_action(
                     event_id,
-                    service['at_id'],
+                    sg['at_id'],
                     current_user.id,
-                    {'finance_id': cfinance_id,
-                     'coordDate': datetime.datetime.now() if service.get('coord_person_id') else None,
-                     'coordPerson_id': service.get('coord_person_id')})
-                result.append(action.id)
+                    {
+                        'finance_id': cfinance_id,
+                        'coordDate': safe_datetime(action.get('coord_date')),
+                        'coordPerson_id': safe_traverse(action, 'coord_person', 'id'),
+                        'account': action['account'] or 0,
+                        'amount': action['amount'] or 1
+                    }
+                )
+            else:
+                a = Action.query.get(action_id)
+                a.amount = action.get('amount', 1)
+                a.account = action.get('account', 0)
+                a.coordPerson_id = safe_traverse(action, 'coord_person', 'id')
+                a.coordDate = safe_datetime(action['coord_date'])
+                db.session.add(a)
+            result.append(a.id)
+    db.session.commit()
     return result

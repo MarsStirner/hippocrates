@@ -287,6 +287,7 @@ def api_appointment():
     data = request.get_json()
     client_id = int(data['client_id'])
     ticket_id = int(data['ticket_id'])
+    create_person = data.get('create_person', current_user.get_id())
     appointment_type_code = data.get('appointment_type_code', 'amb')
     delete = bool(data.get('delete', False))
     ticket = ScheduleTicket.query.get(ticket_id)
@@ -306,7 +307,7 @@ def api_appointment():
         client_ticket.client_id = client_id
         client_ticket.ticket_id = ticket_id
         client_ticket.createDatetime = client_ticket.modifyDatetime = datetime.datetime.now()
-        client_ticket.createPerson_id = client_ticket.modifyPerson_id = current_user.get_id()
+        client_ticket.createPerson_id = client_ticket.modifyPerson_id = create_person
         db.session.add(client_ticket)
         client_ticket.appointmentType = rbAppointmentType.query.filter(rbAppointmentType.code == appointment_type_code).first()
     if 'note' in data:
@@ -449,7 +450,7 @@ def aux_create_new_action(actionType, event, given_datetime=None, src_action=Non
     prop_types = actionType.property_types.filter(ActionPropertyType.deleted == 0)
 
     for prop_type in prop_types:
-        if recordAcceptableEx(event.client.sex, event.client.age_tuple(now_date), prop_type.sex, prop_type.age):
+        if recordAcceptableEx(event.client.sexCode, event.client.age_tuple(now_date), prop_type.sex, prop_type.age):
             prop = ActionProperty()
             prop.norm = ''
             prop.evaluation = ''
@@ -540,7 +541,9 @@ def api_action_post():
             prop.isAssigned = prop_desc['is_assigned']
             prop.type = prop_type
             pd_value = prop_desc['value']
-            if pd_value is not None:
+            if isinstance(pd_value, dict):
+                prop.set_value(safe_traverse(pd_value, 'id'), True)
+            elif pd_value is not None:
                 prop.set_value(pd_value)
             # elif prop_type.typeName == 'JobTicket' and orgStructure:
             #     prop.value = aux_create_JT(action_desc['planned_endDate'] or now, ActionType.jobType_id, orgStructure.id)
@@ -569,14 +572,8 @@ def api_action_post():
     db.session.add(action)
     db.session.commit()
 
-    context = action.actionType.context
-    print_templates = rbPrintTemplate.query.filter(rbPrintTemplate.context == context).all()
     v = ActionVisualizer()
-    print_context = PrintTemplateVisualizer()
-    return jsonify({
-        'action': v.make_action(action),
-        'print_templates': map(print_context.make_template_info, print_templates)
-    })
+    return jsonify(v.make_action(action))
 
 
 @cache.memoize(86400)
@@ -640,11 +637,15 @@ prescriptionFlatCodes = (
 def int_get_atl_flat(at_class):
     from application.lib.agesex import parseAgeSelector
 
+    id_list = {}
+
     def schwing(t):
         t = list(t)
         t[5] = list(parseAgeSelector(t[7]))
         t[7] = t[7].split() if t[7] else None
         t[8] = bool(t[8])
+        t.append([])
+        id_list[t[0]] = t
         return t
 
     raw = db.text(
@@ -658,7 +659,17 @@ def int_get_atl_flat(at_class):
             WHERE ActionType.class = {at_class} AND ActionType.deleted = 0 AND ActionType.hidden = 0
             GROUP BY ActionType.id'''.format(at_class=at_class))
         # This was goddamn unsafe, but I can't get it working other way
-    return map(schwing, db.session.execute(raw))
+    result = map(schwing, db.session.execute(raw))
+    raw = db.text(
+        ur'''SELECT actionType_id, id, name, age, sex FROM ActionPropertyType
+        WHERE isAssignable != 0 AND actionType_id IN ('{0}')'''.format("','".join(map(str, id_list.keys())))
+    )
+    map(lambda (at_id, apt_id, name, age, sex):
+        id_list[at_id][9].append(
+            (apt_id, name, list(parseAgeSelector(age)), sex)
+        ), db.session.execute(raw)
+    )
+    return result
 
 
 @module.route('/api/action-type-list-flat.json')
@@ -670,6 +681,25 @@ def api_atl_get_flat():
     return jsonify(int_get_atl_flat(at_class))
 
 
+@cache.memoize(86400)
+def int_get_orgstructure(org_id):
+    from application.models.exists import OrgStructure
+    def schwing(t):
+        return {
+            'id': t.id,
+            'name': t.name,
+            'code': t.code,
+            'parent_id': t.parent_id,
+        }
+    return map(schwing, OrgStructure.query.filter(OrgStructure.organisation_id == org_id))
+
+
+@module.route('/api/org-structure.json')
+def api_org_structure():
+    org_id = int(request.args['org_id'])
+    return jsonify(int_get_orgstructure(org_id))
+
+
 @module.route('/api/create-lab-direction.json', methods=['POST'])
 def api_create_lab_direction():
 
@@ -678,7 +708,7 @@ def api_create_lab_direction():
     event = Event.query.get(event_id)
     orgStructure = event.current_org_structure
     for j in ja['directions']:
-        action_type_id = j['type']['id']
+        action_type_id = j['type_id']
         actionType = ActionType.query.get(action_type_id)
         planned_end_date = dateutil_parse(j['planned_end_date'])
         assigned = j['assigned']

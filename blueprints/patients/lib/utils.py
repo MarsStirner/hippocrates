@@ -2,7 +2,7 @@
 
 from application.models.client import ClientAllergy, ClientContact, ClientDocument, \
     ClientIntoleranceMedicament, ClientSocStatus, ClientPolicy, \
-    BloodHistory, ClientAddress, ClientRelation
+    BloodHistory, ClientAddress, ClientRelation, Address
 from application.models.enums import AddressType
 from application.models.exists import rbSocStatusClass
 from application.lib.utils import safe_date, safe_traverse, get_new_uuid
@@ -168,6 +168,8 @@ def add_or_update_address(client, data):
             if not (loc_kladr_code and street_kladr_code):
                 raise ClientSaveException(msg_err, u'Отсутствуют обязательные поля: Населенный пункт и Улица.')
             client_addr.address.flat = flat_number
+
+            loc_kladr_code, street_kladr_code = Address.compatible_kladr(loc_kladr_code, street_kladr_code)
             client_addr.address.house.KLADRCode = loc_kladr_code
             client_addr.address.house.KLADRStreetCode = street_kladr_code
             client_addr.address.house.number = house_number

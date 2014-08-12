@@ -11,10 +11,10 @@
 {% endblock %}
 
 {% block content %}
-    <div class="marketing">
-    <form class="form-signin" method="post" ng-non-bindable>
+    <div class="marketing" ng-controller="LoginCtrl">
+    <form action="{{ request.url }}" class="form-signin" method="post">
         {{ form.hidden_tag() }}
-        <h2 class="form-signin-heading">Авторизуйтесь</h2>
+        <h2 class="form-signin-heading vmargin10">Авторизация</h2>
 
         {% with messages = get_flashed_messages() %}
           {% if messages %}
@@ -35,7 +35,7 @@
         {% endif %}
         <div class="control-group">
             <div class="controls">
-                <input type="text" value="" title="Необходимо заполнить это поле!" required="required" placeholder="Логин" name="login" id="login" class="form-control">
+                <input type="text" ng-blur="get_roles()" ng-model="login" title="Необходимо заполнить это поле!" required="required" placeholder="Логин" name="login" id="login" class="form-control">
             </div>
         </div>
 
@@ -50,10 +50,19 @@
         </div>
 
         <div class="control-group">
+            <select name="role" id="role" ng-disabled="!roles.length" ng-model="role" class="form-control" ng-options="r as r.name for r in roles track by r.code">
+                <option value="" ng-hide="roles.length">-- выберите роль --</option>
+            </select>
+        </div>
+
+        <div class="control-group">
             <div class="controls">
-                <button type="submit" class="btn btn-success btn-lg">Войти</button>
+                <button type="submit" ng-disabled="!role" class="btn btn-block btn-success btn-lg">Войти</button>
             </div>
         </div>
     </form>
     </div>
+{% endblock %}
+{% block modules_js %}
+    <script src="{{ url_for('static', filename='js/controllers/login.js', v=version) }}"></script>
 {% endblock %}

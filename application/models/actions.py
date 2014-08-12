@@ -89,8 +89,6 @@ class ActionProperty(db.Model):
         type_name = self.type.typeName
         if type_name in ["Constructor", u"Жалобы", 'Text', 'Html']:
             class_name = 'String'
-        elif type_name in ["AnalysisStatus", "OperationType"]:
-            class_name = 'Integer'
         elif type_name == u"Запись в др. ЛПУ":
             class_name = 'OtherLPURecord'
         elif type_name == "FlatDirectory":
@@ -127,12 +125,15 @@ class ActionProperty(db.Model):
         # ActionProperty. Объекты этого класса мы будем создавать для значений
         value_class = getattr(self.__class__, self.__get_property_name()).property.mapper.class_
 
+        def set_value(val_object, value):
+            if raw and hasattr(val_object, 'value_'):
+                val_object.value_ = value
+            else:
+                val_object.value = value
+
         def make_value(value, index=0):
             val = value_class()
-            if raw and hasattr(val, 'value_'):
-                val.value_ = value
-            else:
-                val.value = value
+            set_value(val, value)
             val.index = index
             val.property_object = self
             db.session.add(val)
@@ -146,7 +147,7 @@ class ActionProperty(db.Model):
                 if value is None:
                     db.session.delete(value_object[0])
                 else:
-                    value_object[0].value = value
+                    set_value(value_object[0], value)
         else:
             m = min(len(value_object), len(value))
             for i in xrange(m):
@@ -345,11 +346,45 @@ class ActionProperty_Integer_Base(ActionProperty__ValueType):
 
     id = db.Column(db.Integer, db.ForeignKey('ActionProperty.id'), primary_key=True, nullable=False)
     index = db.Column(db.Integer, primary_key=True, nullable=False, server_default=u"'0'")
-    value = db.Column(db.Integer, nullable=False)
+    value_ = db.Column('value', db.Integer, nullable=False)
 
 
 class ActionProperty_Integer(ActionProperty_Integer_Base):
     property_object = db.relationship('ActionProperty', backref='_value_Integer')
+
+    @property
+    def value(self):
+        return self.value_
+
+    @value.setter
+    def value(self, val):
+        self.value_ = val
+
+
+class ActionProperty_AnalysisStatus(ActionProperty_Integer_Base):
+    property_object = db.relationship('ActionProperty', backref='_value_AnalysisStatus')
+
+    @property
+    def value(self):
+        return rbAnalysisStatus.query.get(self.value_)
+
+    @value.setter
+    def value(self, val):
+        self.value_ = val.id if val is not None else None
+
+
+class ActionProperty_OperationType(ActionProperty_Integer_Base):
+    property_object = db.relationship('ActionProperty', backref='_value_OperationType')
+
+    @property
+    def value(self):
+        return rbOperationType.query.get(self.value_)
+
+    @value.setter
+    def value(self, val):
+        self.value_ = val.id if val is not None else None
+
+
 
 
 class ActionProperty_RLS(ActionProperty_Integer_Base):
@@ -359,10 +394,23 @@ class ActionProperty_RLS(ActionProperty_Integer_Base):
     property_object = db.relationship('ActionProperty', backref='_value_RLS')
 
 
-# class ActionProperty_OperationType(ActionProperty_Integer):
-#     value_ = db.Column('value', db.ForeignKey('rbOperationType.id'), index=True)
-#     value = db.relationship('rbOperationType')
-#     property_object = db.relationship('ActionProperty', backref='_value_OperationType')
+class ActionProperty_ReferenceRb(ActionProperty_Integer_Base):
+
+    @property
+    def data(self):
+        domain = ActionProperty.query.get(self.id).type.valueDomain
+        table_name = domain.split(';')[0]
+        return db.session.query(table_name).get(self.value)
+
+    property_object = db.relationship('ActionProperty', backref='_value_ReferenceRb')
+
+
+class ActionProperty_Table(ActionProperty_Integer_Base):
+
+    def get_value(self):
+        return {}
+
+    property_object = db.relationship('ActionProperty', backref='_value_Table')
 
 
 class ActionProperty_JobTicket(ActionProperty__ValueType):
@@ -437,14 +485,6 @@ class ActionProperty_String(ActionProperty__ValueType):
     property_object = db.relationship('ActionProperty', backref='_value_String')
 
 
-class ActionProperty_Table(ActionProperty_Integer_Base):
-
-    def get_value(self):
-        return {}
-
-    property_object = db.relationship('ActionProperty', backref='_value_Table')
-
-
 class ActionProperty_Time(ActionProperty__ValueType):
     __tablename__ = u'ActionProperty_Time'
 
@@ -452,17 +492,6 @@ class ActionProperty_Time(ActionProperty__ValueType):
     index = db.Column(db.Integer, primary_key=True, nullable=False, server_default=u"'0'")
     value = db.Column(db.Time, nullable=False)
     property_object = db.relationship('ActionProperty', backref='_value_Time')
-
-
-class ActionProperty_ReferenceRb(ActionProperty_Integer_Base):
-
-    @property
-    def data(self):
-        domain = ActionProperty.query.get(self.id).type.valueDomain
-        table_name = domain.split(';')[0]
-        return db.session.query(table_name).get(self.value)
-
-    property_object = db.relationship('ActionProperty', backref='_value_ReferenceRb')
 
 
 class ActionProperty_rbBloodComponentType(ActionProperty__ValueType):
@@ -845,6 +874,20 @@ class rbOperationType(db.Model):
             'id': self.id,
             'code': self.code,
             'name': self.name,
+        }
+
+
+class rbAnalysisStatus(db.Model):
+    __tablename__ = u'rbAnalysisStatus'
+
+    id = db.Column(db.Integer, primary_key=True)
+    statusName = db.Column(db.String(80), nullable=False, unique=True)
+
+    def __json__(self):
+        return {
+            'id': self.id,
+            'code': self.statusName,
+            'name': self.statusName
         }
 
 

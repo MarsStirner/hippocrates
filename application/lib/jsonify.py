@@ -4,6 +4,8 @@ import datetime
 import itertools
 
 from collections import defaultdict
+from sqlalchemy.sql.functions import current_date
+from sqlalchemy.sql.expression import between
 from application.systemwide import db
 
 from application.lib.utils import safe_unicode, safe_int, safe_dict
@@ -11,8 +13,8 @@ from application.models.enums import EventPrimary, EventOrder, ActionStatus, Gen
 from application.models.event import Event, EventType, Diagnosis, Diagnostic
 
 from application.models.schedule import Schedule, rbReceptionType, ScheduleClientTicket, ScheduleTicket, QuotingByTime
-from application.models.actions import Action, ActionProperty
-from application.models.exists import rbRequestType
+from application.models.actions import Action, ActionProperty, ActionType
+from application.models.exists import rbRequestType, rbService, ContractTariff, Contract
 
 __author__ = 'mmalkov'
 
@@ -595,21 +597,80 @@ class EventVisualizer(object):
                          if payment.master_id == event_id] if local_contract else []
         }
 
-    def make_event_services(self, event):
-        def make_service(action):
+    def make_event_services(self, event_id):
+
+        def make_raw_service_group(action, service_id, at_code, at_name, service_name, price):
             return {
-                'at_id': action.actionType.id,
-                'at_code': action.actionType.code,
-                'at_name': action.actionType.name,
-                'service_name': action.actionType.service.name,
-                'price': action.price
+                'at_id': action.actionType_id,
+                'service_id': service_id,
+                'at_code': at_code,
+                'at_name': at_name,
+                'service_name': service_name,
+                'action': action,
+                'price': price,
             }
 
-        return map(make_service, event.actions)
+        def make_action_as_service(a, price):
+            return {
+                'action_id': a.id,
+                'account': a.account,
+                'amount': a.amount,
+                'beg_date': a.begDate,
+                'end_date': a.endDate,
+                'coord_date': a.coordDate,
+                'coord_person': person_vis.make_person(a.coordPerson) if a.coordPerson else None,
+                'sum': price * a.amount
+            }
 
+        def shrink_service_group(group):
+            actions = [make_action_as_service(act_serv.pop('action'), act_serv['price']) for act_serv in service_group]
+            total_amount = sum([act['amount'] for act in actions])
+            total_sum = sum([act['sum'] for act in actions])
+            common = group[0]
+            return dict(
+                common,
+                actions=actions,
+                total_amount=total_amount,
+                sum=total_sum
+            )
+        person_vis = PersonTreeVisualizer()
+        query = db.session.query(
+            Action,
+            ActionType.service_id,
+            ActionType.code,
+            ActionType.name,
+            rbService.name,
+            ContractTariff.price
+        ).join(
+            Event,
+            EventType,
+            Contract,
+            ContractTariff,
+            ActionType
+        ).join(
+            rbService, ActionType.service_id == rbService.id
+        ).filter(
+            Action.event_id == event_id,
+            ContractTariff.eventType_id == EventType.id,
+            ContractTariff.service_id == ActionType.service_id,
+            Action.deleted == 0,
+            ContractTariff.deleted == 0,
+            between(current_date(), ContractTariff.begDate, ContractTariff.endDate)
+        )#.all()
 
-class Undefined:
-    pass
+        services_by_at = defaultdict(list)
+        for a, service_id, at_code, at_name, service_name, price in query:
+            services_by_at[(a.actionType_id, service_id)].append(
+                make_raw_service_group(a, service_id, at_code, at_name, service_name, price)
+            )
+        services_grouped = []
+        for key, service_group in services_by_at.iteritems():
+            services_grouped.append(
+                shrink_service_group(service_group)
+            )
+
+        return services_grouped
+
 
 
 class ActionVisualizer(object):
@@ -618,50 +679,71 @@ class ActionVisualizer(object):
         @type action: Action
         """
         return {
-            'id': action.id,
-            'action_type': action.actionType,
-            'event_id': action.event_id,
-            'client': action.event.client,
-            'direction_date': action.directionDate,
-            'begDate': action.begDate,
-            'endDate': action.endDate,
-            'planned_endDate': action.plannedEndDate,
-            'status': ActionStatus(action.status),
-            'set_person': action.setPerson,
-            'person': action.person,
-            'note': action.note,
-            'office': action.office,
-            'amount': action.amount,
-            'uet': action.uet,
-            'pay_status': action.payStatus,
-            'account': action.account,
-            'properties': [
-                self.make_property(prop)
-                for prop in action.properties
-            ]
-        }
-    
-    def make_property(self, prop, value=Undefined):
-        """
-        @type prop: ActionProperty
-        """
-        return {
-            'id': prop.id,
-            'idx': prop.type.idx,
-            'type': prop.type,
-            'is_assigned': prop.isAssigned,
-            'value': value if value != Undefined else prop.value
+            'action': {
+                'id': action.id,
+                'action_type': action.actionType,
+                'event_id': action.event_id,
+                'client': action.event.client,
+                'direction_date': action.directionDate,
+                'begDate': action.begDate,
+                'endDate': action.endDate,
+                'planned_endDate': action.plannedEndDate,
+                'status': ActionStatus(action.status),
+                'set_person': action.setPerson,
+                'person': action.person,
+                'note': action.note,
+                'office': action.office,
+                'amount': action.amount,
+                'uet': action.uet,
+                'pay_status': action.payStatus,
+                'account': action.account,
+                'properties': [
+                    self.make_property(prop)
+                    for prop in action.properties
+                ]
+            },
+            'layout': self.make_action_layout(action)
         }
 
-    def make_abstract_property(self, prop, value):
+    def make_action_layout(self, action):
+        """
+        :type action_type: Action
+        :param action_type:
+        :return:
+        """
+        return {
+            'tagName': 'root',
+            'children': [{
+                'tagName': 'ap',
+                'id': ap.type.id
+            } for ap in action.properties]
+        }
+    
+    def make_property(self, prop):
         """
         @type prop: ActionProperty
-        @type value: any
         """
+        maker = getattr(self, 'make_ap_%s' % prop.type.typeName, lambda v: v)
         return {
             'id': prop.id,
             'idx': prop.type.idx,
             'type': prop.type,
             'is_assigned': prop.isAssigned,
-            'value': value
+            'value': maker(prop.value),
+        }
+
+    # Здесь будут кастомные мейкеры экшон пропертей.
+
+    @staticmethod
+    def make_ap_OrgStructure(value):
+        """
+        :type value: application.models.exists.OrgStructure
+        :param value:
+        :return:
+        """
+        return {
+            'id': value.id,
+            'name': value.name,
+            'code': value.code,
+            'parent_id': value.parent_id, # for compatibility with Reference
         }

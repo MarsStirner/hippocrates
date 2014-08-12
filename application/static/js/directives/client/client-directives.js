@@ -13,7 +13,7 @@ angular.module('WebMis20.directives').
                     modelPolicy: '='
                 },
                 link: function(scope, elm, attrs, formCtrl) {
-                    var policy_codes = (scope.pType == 0)?(['cmiOld', 'cmiTmp', 'cmiCommonPaper', 'cmiCommonElectron', 'cmiUEC', 'cmiFnkcIndustrial', 'cmiFnkcLocal']):(['vmi']);
+                    var policy_codes = (scope.pType == 0)?(['cmiOld', 'cmiTmp', 'cmiCommonPaper', 'cmiCommonElectron', 'cmiUEC', 'cmiFnkcIndustrial', 'cmiFnkcLocal']):(['vmi', '3']);
 
                     /* Здесь начинается костыль, который предотвращает бесконечный $digest */
                     scope.rbPolicyType = RefBookService.get('rbPolicyType');
