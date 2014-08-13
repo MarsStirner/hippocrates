@@ -60,25 +60,25 @@
                             {% include "event/_payment.html" %}
                         {% endif %}
                         {% if current_user.role_in('admin', 'doctor', 'clinicDoctor') %}
-                            <div class="marginal" ng-if="!formstate.is_diagnostic()">
+                            <div class="marginal" ng-if="!formstate.is_diagnostic() && !event.is_new()">
                                 <ng-form name="eventMedDocActionsForm" toc-element="Медицинские документы">
                                     <legend>Медицинские документы</legend>
                                     {{ action_list.action_list('event.info.actions', 'medical_documents') }}
                                 </ng-form>
                             </div>
-                            <div class="marginal">
+                            <div class="marginal" ng-if="!event.is_new()">
                                 <ng-form name="eventDiagActionsForm" toc-element="Диагностика">
                                     <legend>Диагностика</legend>
                                     {{ action_list.action_list('event.info.actions', 'diagnostics') }}
                                 </ng-form>
                             </div>
-                            <div class="marginal">
+                            <div class="marginal" ng-if="!event.is_new()">
                                 <ng-form name="eventLabActionsForm" toc-element="Лаб.исследования">
                                     <legend>Лаб.исследования</legend>
                                     {{ action_list.action_list('event.info.actions', 'lab') }}
                                 </ng-form>
                             </div>
-                            <div class="marginal" ng-if="!formstate.is_diagnostic()">
+                            <div class="marginal" ng-if="!formstate.is_diagnostic() && !event.is_new()">
                                 <ng-form name="eventCureActionsForm" toc-element="Лечение">
                                     <legend>Лечение</legend>
                                     {{ action_list.action_list('event.info.actions', 'treatments') }}
