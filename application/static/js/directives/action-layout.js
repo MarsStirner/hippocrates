@@ -3,7 +3,7 @@
  */
 'use strict';
 
-angular.module('WebMis20.ActionLayout', ['WebMis20.validators', 'WebMis20.directives.personTree'])
+angular.module('WebMis20.ActionLayout', ['WebMis20.validators', 'WebMis20.directives.personTree', 'WebMis20.directives.wysiwyg'])
 .directive('wmActionLayout', ['$compile', 'SelectAll', function ($compile, SelectAll) {
     return {
         restrict: 'E',
@@ -28,7 +28,7 @@ angular.module('WebMis20.ActionLayout', ['WebMis20.validators', 'WebMis20.direct
                             case 'Html':
                             case 'Жалобы':
                             case 'Constructor':
-                                inner_template = '<textarea ckeditor="ckEditorOptions" ng-model="{0}.value"></textarea>';
+                                inner_template = '<wysiwyg ng-model="{0}.value" />';
                                 sas.select(tag.id, false);
                                 break;
                             case 'Date':

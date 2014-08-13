@@ -15,7 +15,6 @@ var WebMis20 = angular.module('WebMis20', [
     'ui.bootstrap',
     'ui.select',
     'ngSanitize',
-    'ngCkeditor',
     'sf.treeRepeat',
     'ui.mask',
     'formstamp',
