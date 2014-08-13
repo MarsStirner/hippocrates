@@ -958,6 +958,14 @@ var aux = {
         }
         return false;
     },
+    safe_date: function (val) {
+        if (!val) {
+            return null;
+        }
+        var date = moment(val);
+        return date.isValid() ? date.toDate() : null;
+
+    },
     make_tree: function (array, masterField) {
         /**
          * @param array: Исходный массив данных

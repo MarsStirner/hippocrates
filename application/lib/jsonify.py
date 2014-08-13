@@ -4,6 +4,7 @@ import datetime
 import itertools
 
 from collections import defaultdict
+from application.lib.data import get_apt_assignable_small_info
 from sqlalchemy.sql.functions import current_date
 from sqlalchemy.sql.expression import between
 from application.systemwide import db
@@ -450,6 +451,7 @@ class ClientVisualizer(object):
     def make_payer_for_lc(self, client):
         id_doc = client.id_document
         return {
+            'id': None,
             'first_name': client.firstName,
             'last_name': client.lastName,
             'patr_name': client.patrName,
@@ -460,6 +462,8 @@ class ClientVisualizer(object):
             'serial_right': id_doc.serial_right if id_doc else None,
             'number': id_doc.number if id_doc else None,
             'reg_address': safe_unicode(client.reg_address),
+            'payer_org_id': None,
+            'payer_org': None
         }
 
 
@@ -589,18 +593,25 @@ class EventVisualizer(object):
             'person_text': safe_unicode(action.person)
         }
 
-    def make_event_payment(self, local_contract, event_id=None):
+    def make_event_payment(self, event, client=None):
+        if client:
+            cvis = ClientVisualizer()
+            lc = cvis.make_payer_for_lc(client)
+            payments = []
+        else:
+            lc = event.localContract if event else None
+            payments = [payment
+                        for payment in event.payments
+                        if payment.master_id == event.id] if lc else []
         return {
-            'local_contract': local_contract,
-            'payments': [payment
-                         for payment in local_contract.payments
-                         if payment.master_id == event_id] if local_contract else []
+            'local_contract': lc,
+            'payments': payments
         }
 
     def make_event_services(self, event_id):
 
         def make_raw_service_group(action, service_id, at_code, at_name, service_name, price):
-            return {
+            service = {
                 'at_id': action.actionType_id,
                 'service_id': service_id,
                 'at_code': at_code,
@@ -609,9 +620,15 @@ class EventVisualizer(object):
                 'action': action,
                 'price': price,
             }
+            if service['at_id'] in apts:
+                service['is_lab'] = True
+                service['assignable'] = apts[service['at_id']]
+            else:
+                service['is_lab'] = False
+            return service
 
-        def make_action_as_service(a, price):
-            return {
+        def make_action_as_service(a, service):
+            action = {
                 'action_id': a.id,
                 'account': a.account,
                 'amount': a.amount,
@@ -619,20 +636,40 @@ class EventVisualizer(object):
                 'end_date': a.endDate,
                 'coord_date': a.coordDate,
                 'coord_person': person_vis.make_person(a.coordPerson) if a.coordPerson else None,
-                'sum': price * a.amount
+                'sum': service['price'] * a.amount,
             }
+            if service['is_lab']:
+                action['assigned'] = [prop.type_id for prop in a.properties if prop.isAssigned]
+                action['planned_end_date'] = a.plannedEndDate
+            return action
 
         def shrink_service_group(group):
-            actions = [make_action_as_service(act_serv.pop('action'), act_serv['price']) for act_serv in service_group]
+            actions = [make_action_as_service(act_serv.pop('action'), act_serv) for act_serv in service_group]
             total_amount = sum([act['amount'] for act in actions])
             total_sum = sum([act['sum'] for act in actions])
-            common = group[0]
-            return dict(
-                common,
+
+            def calc_all_assigned(actions):
+                # [] - all have same assignments, False - have different assignments
+                ref_asgn_list = actions[0]['assigned']
+                return all(map(lambda act: act['assigned'] == ref_asgn_list, actions)) and ref_asgn_list
+
+            def calc_all_ped(actions):
+                # datetime.datetime - all have same planned end date, False - have different dates
+                ref_action_ped = actions[0]['planned_end_date']
+                return all(map(lambda act: act['planned_end_date'] == ref_action_ped, actions)) and ref_action_ped
+
+            result_service = dict(
+                group[0],
                 actions=actions,
                 total_amount=total_amount,
                 sum=total_sum
             )
+            if result_service['is_lab']:
+                result_service['all_assigned'] = calc_all_assigned(actions)
+                result_service['all_planned_end_date'] = calc_all_ped(actions)
+
+            return result_service
+
         person_vis = PersonTreeVisualizer()
         query = db.session.query(
             Action,
@@ -656,7 +693,9 @@ class EventVisualizer(object):
             Action.deleted == 0,
             ContractTariff.deleted == 0,
             between(current_date(), ContractTariff.begDate, ContractTariff.endDate)
-        )#.all()
+        )
+
+        apts = get_apt_assignable_small_info()
 
         services_by_at = defaultdict(list)
         for a, service_id, at_code, at_name, service_name, price in query:

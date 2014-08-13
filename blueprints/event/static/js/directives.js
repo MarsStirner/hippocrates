@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('WebMis20.directives').
-    directive('wmEventServiceGroup', ['WMEventFormState', 'WMEventController',
-        function(WMEventFormState, WMEventController) {
+    directive('wmEventServiceGroup', ['WMEventFormState', 'WMEventController', 'ActionTypeTreeModal',
+        function(WMEventFormState, WMEventController, ActionTypeTreeModal) {
             return {
                 restrict: 'A',
                 scope: {
@@ -26,6 +26,34 @@ angular.module('WebMis20.directives').
                     scope.coord_all = function (off) {
                         scope.service.coord_all = !Boolean(off);
                     };
+                    scope.open_assignments = function () {
+                        var assigned = scope.service.all_assigned,
+                            ped = scope.service.all_planned_end_date;
+
+                        if (assigned === false || ped === false) {
+                            if (!confirm(
+                                    'Осмотры данной группы имеют разные наборы назначаемых исследований или ' +
+                                    'разные даты проведения. Выбрать новые параметры исследований ' +
+                                    'для всех осмотров группы?')) {
+                                return
+                            }
+                            assigned = scope.service.assignable.map(function (asgn_data) {
+                                return asgn_data[0];
+                            });
+                            ped = null;
+                        }
+                        var model = {
+                            assignable: scope.service.assignable,
+                            assigned: assigned,
+                            planned_end_date: ped
+                        };
+                        ActionTypeTreeModal.openAppointmentModal(model, true).then(function () {
+                            scope.service.actions.forEach(function (act) {
+                                act.assigned = model.assigned;
+                                act.planned_end_date = model.planned_end_date;
+                            });
+                        });
+                    };
 
                     scope.amount_disabled = function () {
                         var s = scope.service;
@@ -33,11 +61,11 @@ angular.module('WebMis20.directives').
                     };
                     scope.btn_coordinate_visible = function () {
                         var s = scope.service;
-                        return scope.formstate.is_dms() && !s.fully_coord;
+                        return !s.fully_coord;
                     };
                     scope.btn_cancel_coordinate_visible = function () {
                         var s = scope.service;
-                        return scope.formstate.is_dms() && s.fully_coord;
+                        return s.fully_coord;
                     };
                     scope.btn_delete_visible = function () {
                         var s = scope.service;
@@ -47,7 +75,10 @@ angular.module('WebMis20.directives').
                 template:
 '<td class="sg-expander" ng-click="expanded = !expanded"><span class="glyphicon glyphicon-chevron-[[expanded ? \'down\' : \'right\']]"></span></td>\
 <td ng-bind="service.at_code"></td>\
-<td ng-bind="service.service_name"></td>\
+<td>\
+    [[service.service_name]]\
+    <a ng-click="open_assignments()" ng-if="service.is_lab">Выбрать назначаемые исследования</a>\
+</td>\
 <td ng-bind="service.at_name"></td>\
 <td ng-bind="service.price" class="text-right" ng-show="formstate.is_paid()"></td>\
 <td class="col-md-1">\
@@ -60,7 +91,7 @@ angular.module('WebMis20.directives').
     <input type="checkbox" title="Выбрать для оплаты" ng-model="service.account_all">\
 </td>\
 <td ng-bind="service.paid_count" class="text-center" ng-show="formstate.is_paid()"></td>\
-<td class="text-center">\
+<td class="text-center" ng-show="formstate.is_dms()">\
     <button type="button" class="btn btn-sm btn-default" title="Согласовать"\
             ng-show="btn_coordinate_visible()"\
             ng-click="coord_all()"><span class="glyphicon glyphicon-check"></span>\
@@ -84,8 +115,8 @@ angular.module('WebMis20.directives').
             };
         }
     ]).
-    directive('wmEventServiceRecord', ['WMEventFormState', 'WMEventController',
-        function(WMEventFormState, WMEventController) {
+    directive('wmEventServiceRecord', ['WMEventFormState', 'WMEventController', 'ActionTypeTreeModal',
+        function(WMEventFormState, WMEventController, ActionTypeTreeModal) {
             return {
                 restrict: 'A',
                 scope: {
@@ -104,6 +135,17 @@ angular.module('WebMis20.directives').
                             scope.service.payments.remove_charge(scope.action);
                         }
                     };
+                    scope.open_assignments = function () {
+                        var model = {
+                            assignable: scope.service.assignable,
+                            assigned: scope.action.assigned,
+                            planned_end_date: scope.action.planned_end_date
+                        };
+                        ActionTypeTreeModal.openAppointmentModal(model, true).then(function () {
+                            scope.action.assigned = model.assigned;
+                            scope.action.planned_end_date = model.planned_end_date;
+                        });
+                    };
                     scope.get_info_text = function () {
                         return 'Осмотр: Идентификатор {0}, Дата {1}'.format(scope.action.action_id, scope.action.beg_date);
                     };
@@ -112,10 +154,10 @@ angular.module('WebMis20.directives').
                         return scope.action.account || scope.action.is_coordinated();
                     };
                     scope.btn_coordinate_visible = function () {
-                        return scope.formstate.is_dms() && !scope.action.is_coordinated() && true; // todo: action not closed
+                        return !scope.action.is_coordinated() && true; // todo: action not closed
                     };
                     scope.btn_cancel_coordinate_visible = function () {
-                        return scope.formstate.is_dms() && scope.action.is_coordinated() && true; // todo: action not closed
+                        return scope.action.is_coordinated() && true; // todo: action not closed
                     };
                     scope.btn_delete_visible = function () {
                         return !scope.action.is_paid_for() && !scope.action.is_coordinated() && true; // todo: action not closed
@@ -124,7 +166,10 @@ angular.module('WebMis20.directives').
                 template:
 '<td></td>\
 <td ng-bind="service.at_code"></td>\
-<td ng-bind="service.service_name"></td>\
+<td>\
+    [[service.service_name]]\
+    <a ng-click="open_assignments()" ng-if="service.is_lab">Выбрать назначаемые исследования</a>\
+</td>\
 <td ng-bind="service.at_name"></td>\
 <td ng-bind="service.price" class="text-right" ng-show="formstate.is_paid()"></td>\
 <td class="col-md-1">\
@@ -139,7 +184,7 @@ angular.module('WebMis20.directives').
 <td class="text-center" ng-show="formstate.is_paid()">\
     <span class="glyphicon" ng-class="{\'glyphicon-ok\': action.is_paid_for(), \'glyphicon-remove\':!action.is_paid_for()}"></span>\
 </td>\
-<td class="text-center">\
+<td class="text-center" ng-show="formstate.is_dms()">\
     <button type="button" class="btn btn-sm btn-default" title="Согласовать"\
             ng-show="btn_coordinate_visible()"\
             ng-click="eventctrl.coordinate(action)"><span class="glyphicon glyphicon-check"></span>\

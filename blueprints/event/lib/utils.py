@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import datetime
-from application.lib.data import create_action
-from application.models.actions import Action, ActionType
-from application.models.event import Event, EventType, EventLocalContract
+from application.lib.data import create_new_action
+from application.models.actions import Action
+from application.models.event import EventLocalContract
 from application.lib.utils import safe_date, safe_traverse, safe_datetime
-from flask.ext.login import current_user
-from application.models.exists import rbDocumentType, ContractTariff, Contract, rbService
+from application.models.exists import rbDocumentType
 from application.lib.settings import Settings
 from application.systemwide import db
 
@@ -18,31 +17,39 @@ class EventSaveException(Exception):
 
 
 def create_new_local_contract(lc_info):
+    err_msg = u'Ошибка сохранения обращения'
     lcon = EventLocalContract()
+
+    date = lc_info.get('date_contract')
+    number = lc_info.get('number_contract')
+    if Settings.getBool('Event.Payment.1CODVD'):
+        lcon.dateContract = datetime.date.today()
+        lcon.numberContract = ''
+    else:
+        if not date:
+            raise EventSaveException(err_msg, u'Не указана дата заключения договора.')
+        lcon.dateContract = date
+        if not number:
+            raise EventSaveException(err_msg, u'Не указан номер договора.')
+        lcon.numberContract = number
+
     lcon.coordAgent = lc_info.get('coord_agent', '')
     lcon.coordInspector = lc_info.get('coord_inspector', '')
     lcon.coordText = lc_info.get('coord_text', '')
-    # FIXME: contracts!
-    if Settings.getBool('Event.Payment.1CODVD'):
-        lcon.dateContract = lc_info.get('date_contract') or datetime.date.today()
-        lcon.numberContract = lc_info.get('number_contract') or ''
-    else:
-        lcon.dateContract = lc_info.get('date_contract') or datetime.date.today()  # lc_info['date_contract']
-        lcon.numberContract = lc_info.get('number_contract') or ''  # lc_info['number_contract']
     lcon.sumLimit = lc_info.get('sum_limit', 0.0)
     lcon.lastName = lc_info.get('last_name')
     lcon.firstName = lc_info.get('first_name')
     lcon.patrName = lc_info.get('patr_name')
     lcon.birthDate = safe_date(lc_info.get('birth_date'))
-    _doc_type = lc_info.get('doc_type', {})
-    lcon.documentType_id = _doc_type.get('id') if _doc_type else None
-    lcon.documentType = rbDocumentType.query.get(_doc_type.get('id')) if _doc_type else None
+
+    doc_type_id = safe_traverse(lc_info, 'doc_type', 'id')
+    lcon.documentType_id = doc_type_id
+    lcon.documentType = rbDocumentType.query.get(doc_type_id) if doc_type_id else None
     lcon.serialLeft = lc_info.get('serial_left')
     lcon.serialRight = lc_info.get('serial_right')
     lcon.number = lc_info.get('number')
     lcon.regAddress = lc_info.get('reg_address')
-    _payer_org = lc_info.get('payer_org', {})
-    lcon.org_id = _payer_org.get('id') if _payer_org else None
+    lcon.org_id = safe_traverse(lc_info, 'payer_org', 'id')
     return lcon
 
 
@@ -57,12 +64,12 @@ def get_local_contract(lc_info):
                     or lc.firstName != lc_info.get('first_name', '')
                     or lc.patrName != lc_info.get('patr_name', '')
                     or lc.birthDate != safe_date(lc_info.get('birth_date', ''))
-                    or lc.documentType_id != lc_info.get('doc_type', {}).get('id')
+                    or lc.documentType_id != safe_traverse(lc_info, 'doc_type', 'id')
                     or lc.serialLeft != lc_info.get('serial_left', '')
                     or lc.serialRight != lc_info.get('serial_right', '')
                     or lc.number != lc_info.get('number', '')
                     or lc.regAddress != lc_info.get('reg_address', '')
-                    or lc.org_id != lc_info.get('payer_org_id')):
+                    or lc.org_id != safe_traverse(lcon, 'payer_org', 'id')):
                 return True
             return False
 
@@ -74,43 +81,34 @@ def get_local_contract(lc_info):
     return lcon
 
 
-def get_prev_event_payment(client_id, event_type_id):
-    event = Event.query.join(EventType).filter(EventType.id == event_type_id,
-                                               Event.client_id == client_id,
-                                               Event.deleted == 0).\
-        order_by(Event.setDate.desc()).first()
-    if not event:
-        event = Event()
-        lc = EventLocalContract()
-        event.localContract = lc
-    return event
-
-
 def create_services(event_id, service_groups, cfinance_id):
     result = []
     for sg in service_groups:
-        for action in sg['actions']:
-            action_id = action['action_id']
+        for act_data in sg['actions']:
+            action_id = act_data['action_id']
+            assigned = act_data['assigned'] if sg['is_lab'] else None
+            data = {
+                'amount': act_data['amount'] or 1,
+                'finance_id': cfinance_id,
+                'coordDate': safe_datetime(act_data.get('coord_date')),
+                'coordPerson_id': safe_traverse(act_data, 'coord_person', 'id'),
+                'account': act_data['account'] or 0
+            }
+            if sg['is_lab']:
+                data['plannedEndDate'] = safe_datetime(act_data['planned_end_date'])
             if not action_id:
-                a = create_action(
-                    event_id,
+                action = create_new_action(
                     sg['at_id'],
-                    current_user.id,
-                    {
-                        'finance_id': cfinance_id,
-                        'coordDate': safe_datetime(action.get('coord_date')),
-                        'coordPerson_id': safe_traverse(action, 'coord_person', 'id'),
-                        'account': action['account'] or 0,
-                        'amount': action['amount'] or 1
-                    }
+                    event_id,
+                    assigned=assigned,
+                    data=data
                 )
             else:
-                a = Action.query.get(action_id)
-                a.amount = action.get('amount', 1)
-                a.account = action.get('account', 0)
-                a.coordPerson_id = safe_traverse(action, 'coord_person', 'id')
-                a.coordDate = safe_datetime(action['coord_date'])
-                db.session.add(a)
-            result.append(a.id)
-    db.session.commit()
+                action = Action.query.get(action_id)
+                action.amount = act_data.get('amount', 1)
+                action.account = act_data.get('account', 0)
+                action.coordPerson_id = safe_traverse(act_data, 'coord_person', 'id')
+                action.coordDate = safe_datetime(act_data['coord_date'])
+            db.session.add(action)
+            result.append(action)
     return result

@@ -1,4 +1,4 @@
-<div ng-controller="EventPaymentCtrl">
+<div ng-controller="EventPaymentCtrl" ng-show="formstate.is_paid() || formstate.is_dms() || formstate.is_oms()">
 <ng-form name="payerForm" toc-element="Плательщик">
 <legend xmlns="http://www.w3.org/1999/html">Плательщик</legend>
 <tabset justified="false" class="marginal">

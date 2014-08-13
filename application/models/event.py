@@ -3,7 +3,7 @@
 import datetime
 import re
 
-from application.lib.const import PAID_EVENT_CODES
+from application.lib.const import PAYER_EVENT_CODES
 from application.lib.agesex import AgeSex
 from application.models.client import ClientDocument
 from application.models.exists import Person, rbPost, rbCashOperation, rbService
@@ -63,9 +63,8 @@ class Event(db.Model):
     rbAcheResult = db.relationship(u'rbAcheResult')
     result = db.relationship(u'rbResult')
     typeAsset = db.relationship(u'rbEmergencyTypeAsset')
-    localContract = db.relationship(u'EventLocalContract',
-                                    backref=db.backref('event')
-                                    )
+    localContract = db.relationship(u'EventLocalContract', backref=db.backref('event'))
+    payments = db.relationship('EventPayment', backref=db.backref('event'))
     client = db.relationship(u'Client')
     diagnostics = db.relationship(
         u'Diagnostic', lazy=True, innerjoin=True, primaryjoin=
@@ -74,11 +73,11 @@ class Event(db.Model):
     uuid = db.relationship('UUID')
 
     @property
-    def isPaid(self):
+    def payer_required(self):
         # FIXME: перенести из application.lib.utils загрузку ролей и прав в app.py
         # тогда должны заработать нормальные импорты из utils.py
         from application.lib.utils import safe_traverse_attrs
-        return safe_traverse_attrs(self.eventType, 'finance', 'code') in PAID_EVENT_CODES
+        return safe_traverse_attrs(self.eventType, 'finance', 'code') in PAYER_EVENT_CODES
 
     @property
     def isPrimary(self):
@@ -290,8 +289,7 @@ class EventLocalContract(db.Model):
 
     org = db.relationship(u'Organisation')
     documentType = db.relationship(u'rbDocumentType')
-    payments = db.relationship('EventPayment',
-                               backref=db.backref('local_contract'))
+    # payments = db.relationship('EventPayment', backref=db.backref('local_contract'))
 
     # Это что вообще?!
     @property
@@ -352,7 +350,7 @@ class EventPayment(db.Model):
     modifyDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now, onupdate=datetime.datetime.now)
     modifyPerson_id = db.Column(db.Integer, index=True, default=safe_current_user_id, onupdate=safe_current_user_id)
     deleted = db.Column(db.Integer, nullable=False, default=0)
-    master_id = db.Column(db.Integer)
+    master_id = db.Column(db.Integer, db.ForeignKey('Event.id'))
     date = db.Column(db.Date, nullable=False)
     cashOperation_id = db.Column(db.ForeignKey('rbCashOperation.id'), index=True)
     sum = db.Column(db.Float(asdecimal=True), nullable=False)
