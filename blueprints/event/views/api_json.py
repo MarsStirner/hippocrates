@@ -76,6 +76,8 @@ def api_event_new_get():
         note = ''
         exec_person_id = safe_current_user_id()
     event.execPerson_id = exec_person_id
+    event.execPerson = Person.query.get(exec_person_id)
+    event.orgStructure = event.execPerson.OrgStructure
     event.client = Client.query.get(client_id)
     event.setDate = setDate
     event.note = note
