@@ -11,7 +11,7 @@ from config import ORGANISATION_INFIS_CODE
 from application.models.actions import ActionType, Action
 from application.models.client import Client
 from application.models.enums import EventPrimary, EventOrder
-from application.models.event import (Event, EventType, EventType_Action, Diagnosis, Diagnostic, EventPayment, Visit,
+from application.models.event import (Event, EventType, Diagnosis, Diagnostic, EventPayment, Visit,
                                       rbVisitType, rbScene, Event_Persons)
 from application.models.exists import Person, OrgStructure
 from application.systemwide import db
@@ -20,10 +20,10 @@ from application.lib.utils import (jsonify, safe_traverse, get_new_uuid, logger,
 from blueprints.event.app import module
 from application.models.exists import (Organisation, )
 from application.lib.jsonify import EventVisualizer, ClientVisualizer
-from blueprints.event.lib.utils import (EventSaveException, get_local_contract, get_prev_event_payment,
+from blueprints.event.lib.utils import (EventSaveException, get_local_contract,
     create_new_local_contract, create_services)
 from application.lib.sphinx_search import SearchEventService
-from application.lib.data import create_action, get_apt_assignable_small_info, get_planned_end_datetime
+from application.lib.data import get_apt_assignable_small_info, get_planned_end_datetime
 
 
 @module.errorhandler(EventSaveException)
@@ -46,12 +46,12 @@ def api_event_info():
     }
     if current_user.role_in('admin'):
         data['diagnoses'] = vis.make_diagnoses(event)
-        data['payment'] = vis.make_event_payment(event.localContract, event_id)
+        data['payment'] = vis.make_event_payment(event)
         data['services'] = vis.make_event_services(event_id)
     elif current_user.role_in('doctor'):
         data['diagnoses'] = vis.make_diagnoses(event)
     elif current_user.role_in(('rRegistartor', 'clinicRegistrator')):
-        data['payment'] = vis.make_event_payment(event.localContract, event_id)
+        data['payment'] = vis.make_event_payment(event)
         data['services'] = vis.make_event_services(event_id)
     return jsonify(data)
 
@@ -61,7 +61,7 @@ def api_event_new_get():
     event = Event()
     event.eventType = EventType.get_default_et()
     event.organisation = Organisation.query.filter_by(infisCode=str(ORGANISATION_INFIS_CODE)).first()
-    event.isPrimaryCode = EventPrimary.primary[0]  # TODO: check previous events TMIS-165
+    event.isPrimaryCode = EventPrimary.primary[0]
     event.order = EventOrder.planned[0]
 
     ticket_id = request.args.get('ticket_id')
@@ -130,11 +130,10 @@ def api_event_save():
         event.note = event_data['note']
         event.uuid = get_new_uuid()
 
-        # TODO: обязательность в зависимости от типа события?
         local_contract = safe_traverse(request.json, 'payment', 'local_contract')
-        if not local_contract and event.isPaid:
-            raise EventSaveException(err_msg, u'Не заполнена информация о плательщике.')
-        if local_contract:
+        if event.payer_required:
+            if not local_contract:
+                raise EventSaveException(err_msg, u'Не заполнена информация о плательщике.')
             lcon = get_local_contract(local_contract)
             event.localContract = lcon
         db.session.add(event)
@@ -167,7 +166,13 @@ def api_event_save():
     else:
         services_data = request.json.get('services', [])
         cfinance_id = event_data['contract']['finance']['id']
-        create_services(event.id, services_data, cfinance_id)
+        try:
+            actions = create_services(event.id, services_data, cfinance_id)
+            db.session.commit()
+        except Exception, e:
+            logger.error(e)
+            db.session.rollback()
+            raise EventSaveException(u'Ошибка создания услуг', u'%s Свяжитесь с администратором.' % e.message )
 
     if request.json.get('ticket_id'):
         ticket = ScheduleClientTicket.query.get(int(request.json['ticket_id']))
@@ -335,23 +340,24 @@ def api_new_event_payment_info_get():
     except KeyError or ValueError:
         return abort(400)
 
+    event = client = None
     if source == 'prev_event':
         try:
             event_type_id = int(request.args['event_type_id'])
         except KeyError or ValueError:
             return abort(400)
-        event = get_prev_event_payment(client_id, event_type_id)
-        lcon = event.localContract
+        event = Event.query.join(EventType).filter(
+            EventType.id == event_type_id,
+            Event.client_id == client_id,
+            Event.deleted == 0
+        ).order_by(Event.setDate.desc()).first()
     elif source == 'client':
         client = Client.query.get(client_id)
-        cvis = ClientVisualizer()
-        lc_info = cvis.make_payer_for_lc(client)
-        lcon = create_new_local_contract(lc_info)
     else:
         return abort(400)
 
     vis = EventVisualizer()
-    res = vis.make_event_payment(lcon)
+    res = vis.make_event_payment(event, client)
     return jsonify(res)
 
 
@@ -373,7 +379,7 @@ def api_service_make_payment():
     payment.action_id = None
     payment.service_id = None
 
-    event.localContract.payments.append(payment)
+    event.payments.append(payment)
     db.session.add(event)
     db.session.commit()
 
@@ -382,6 +388,7 @@ def api_service_make_payment():
 
 @module.route('/api/event_payment/service_remove_coord.json', methods=['POST'])
 def api_service_remove_coord():
+    # not used
     data = request.json
     if data['action_id']:
         actions = Action.query.filter(Action.id.in_(data['action_id']))
@@ -396,6 +403,7 @@ def api_service_remove_coord():
 
 @module.route('/api/event_payment/service_coordinate.json', methods=['POST'])
 def api_service_coordinate():
+    # not used
     data = request.json
     service = data['service']
     result = service['actions']
@@ -416,6 +424,7 @@ def api_service_coordinate():
 
 @module.route('/api/event_payment/service_change_account.json', methods=['POST'])
 def api_service_change_account():
+    # not used
     data = request.json
     if data['actions']:
         actions = Action.query.filter(Action.id.in_(data['actions']))

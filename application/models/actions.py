@@ -47,7 +47,8 @@ class Action(db.Model):
     hospitalUidFrom = db.Column(db.String(128), nullable=False, server_default=u"'0'")
     pacientInQueueType = db.Column(db.Integer, server_default=u"'0'")
     AppointmentType = db.Column(
-        db.Enum(u'0', u'amb', u'hospital', u'polyclinic', u'diagnostics', u'portal', u'otherLPU'), nullable=False)
+        db.Enum(u'0', u'amb', u'hospital', u'polyclinic', u'diagnostics', u'portal', u'otherLPU'),
+        nullable=False, default=u'0')
     version = db.Column(db.Integer, nullable=False, server_default=u"'0'")
     parentAction_id = db.Column(db.Integer, index=True)
     uuid_id = db.Column(db.ForeignKey('UUID.id'), nullable=False, index=True, server_default=u"'0'")
@@ -69,17 +70,17 @@ class ActionProperty(db.Model):
     __tablename__ = u'ActionProperty'
 
     id = db.Column(db.Integer, primary_key=True)
-    createDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now())
-    createPerson_id = db.Column(db.Integer, index=True)
-    modifyDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now())
-    modifyPerson_id = db.Column(db.Integer, index=True)
+    createDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now)
+    createPerson_id = db.Column(db.Integer, index=True, default=safe_current_user_id)
+    modifyDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now, onupdate=datetime.datetime.now)
+    modifyPerson_id = db.Column(db.Integer, index=True, default=safe_current_user_id, onupdate=safe_current_user_id)
     deleted = db.Column(db.Integer, nullable=False, server_default=u"'0'")
     action_id = db.Column(db.Integer, db.ForeignKey('Action.id'), nullable=False, index=True)
     type_id = db.Column(db.Integer, db.ForeignKey('ActionPropertyType.id'), nullable=False, index=True)
     unit_id = db.Column(db.Integer, db.ForeignKey('rbUnit.id'), index=True)
-    norm = db.Column(db.String(64), nullable=False)
+    norm = db.Column(db.String(64), nullable=False, default='')
     isAssigned = db.Column(db.Boolean, nullable=False, server_default=u"'0'")
-    evaluation = db.Column(db.Integer)
+    evaluation = db.Column(db.Integer, default=None)
     version = db.Column(db.Integer, nullable=False, server_default=u"'0'")
 
     action = db.relationship(u'Action')
@@ -613,6 +614,11 @@ class ActionType(db.Model):
     property_types = db.relationship(u'ActionPropertyType', lazy='dynamic')
     group = db.relationship(u'ActionType', remote_side=[id])
     jobType = db.relationship(u'rbJobType', lazy=False)
+    tissue_type = db.relationship(
+        'ActionType_TissueType',
+        primaryjoin='and_(ActionType_TissueType.master_id == ActionType.id, ActionType_TissueType.idx == 0)',
+        uselist=False
+    )
 
     def get_property_type_by_name(self, name):
         return self.property_types.filter(ActionPropertyType.name == name).first()
@@ -752,9 +758,9 @@ class TakenTissueJournal(db.Model):
     unit_id = db.Column(db.ForeignKey('rbUnit.id'), index=True)
     datetimeTaken = db.Column(db.DateTime, nullable=False)
     execPerson_id = db.Column(db.ForeignKey('Person.id'), index=True)
-    note = db.Column(db.String(128), nullable=False)
-    barcode = db.Column(db.Integer, nullable=False)
-    period = db.Column(db.Integer, nullable=False)
+    note = db.Column(db.String(128), nullable=False, default='')
+    barcode = db.Column(db.Integer, nullable=False)  # set with trigger
+    period = db.Column(db.Integer, nullable=False)  # set with trigger
 
     client = db.relationship(u'Client')
     execPerson = db.relationship(u'Person')
@@ -896,10 +902,10 @@ class Job(db.Model):
     __tablename__ = u'Job'
 
     id = db.Column(db.Integer, primary_key=True)
-    createDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now())
-    createPerson_id = db.Column(db.Integer, index=True)
-    modifyDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now())
-    modifyPerson_id = db.Column(db.Integer, index=True)
+    createDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now)
+    createPerson_id = db.Column(db.Integer, index=True, default=safe_current_user_id)
+    modifyDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now, onupdate=datetime.datetime.now)
+    modifyPerson_id = db.Column(db.Integer, index=True, default=safe_current_user_id, onupdate=safe_current_user_id)
     deleted = db.Column(db.Integer, nullable=False, server_default=u"'0'")
     jobType_id = db.Column(db.Integer, db.ForeignKey('rbJobType.id'), nullable=False, index=True)
     orgStructure_id = db.Column(db.Integer, db.ForeignKey('OrgStructure.id'), nullable=False, index=True)

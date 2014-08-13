@@ -682,7 +682,7 @@ angular.module('WebMis20.validators', [])
       }
       var allowFloat = attrs.hasOwnProperty('validNumberFloat');
       var allowNegative = attrs.hasOwnProperty('validNumberNegative');
-      var regex = new RegExp('[^0-9' + allowFloat?'\.':'' + allowNegative?'-':'' + ']+', 'g');
+      var regex = new RegExp('[^0-9' + (allowFloat?'\\.':'') + (allowNegative?'-':'') + ']+', 'g');
 
       var minval = parseInt(attrs.minval);
       function clear_char_duplicates(string, char){
@@ -701,8 +701,9 @@ angular.module('WebMis20.validators', [])
           if (angular.isNumber(val)) {
               return val;
           }
-        var clean = val.replace(regex, '');
-        clean = Math.msx(parseFloat(clear_char_duplicates(clean, '.')), minval);
+        var clean = clear_char_duplicates(val.replace(regex, ''), '.');
+        clean = clean !== '' ? parseFloat(clean) : minval;
+        clean = Math.max(clean, minval);
         if (val !== clean) {
           ngModelCtrl.$setViewValue(clean);
           ngModelCtrl.$render();

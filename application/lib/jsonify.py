@@ -423,6 +423,7 @@ class ClientVisualizer(object):
     def make_payer_for_lc(self, client):
         id_doc = client.id_document
         return {
+            'id': None,
             'first_name': client.firstName,
             'last_name': client.lastName,
             'patr_name': client.patrName,
@@ -433,6 +434,8 @@ class ClientVisualizer(object):
             'serial_right': id_doc.serial_right if id_doc else None,
             'number': id_doc.number if id_doc else None,
             'reg_address': safe_unicode(client.reg_address),
+            'payer_org_id': None,
+            'payer_org': None
         }
 
 
@@ -562,12 +565,19 @@ class EventVisualizer(object):
             'person_text': safe_unicode(action.person)
         }
 
-    def make_event_payment(self, local_contract, event_id=None):
+    def make_event_payment(self, event, client=None):
+        if client:
+            cvis = ClientVisualizer()
+            lc = cvis.make_payer_for_lc(client)
+            payments = []
+        else:
+            lc = event.localContract if event else None
+            payments = [payment
+                        for payment in event.payments
+                        if payment.master_id == event.id] if lc else []
         return {
-            'local_contract': local_contract,
-            'payments': [payment
-                         for payment in local_contract.payments
-                         if payment.master_id == event_id] if local_contract else []
+            'local_contract': lc,
+            'payments': payments
         }
 
     def make_event_services(self, event_id):
@@ -585,6 +595,8 @@ class EventVisualizer(object):
             if service['at_id'] in apts:
                 service['is_lab'] = True
                 service['assignable'] = apts[service['at_id']]
+            else:
+                service['is_lab'] = False
             return service
 
         def make_action_as_service(a, service):

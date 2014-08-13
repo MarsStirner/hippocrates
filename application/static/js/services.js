@@ -505,10 +505,10 @@ angular.module('WebMis20.services', []).
                     self.diagnoses = data.result.diagnoses || [];
 
                     var p = data.result.payment;
-                    self.payment = {
+                    self.payment = p ? {
                         local_contract: p.local_contract ? p.local_contract : null,
                         payments: new WMEventPaymentList(p.payments)
-                    };
+                    } : {};
                     self.services = data.result.services && data.result.services.map(function(service) {
                         return new WMEventServiceGroup(service, self.payment.payments);
                     }) || [];
@@ -583,9 +583,14 @@ angular.module('WebMis20.services', []).
                         coord_date: null,
                         coord_person: null,
                         sum: service_group.price,
-                        assigned: service_group.all_assigned,
+                        assigned: service_group.all_assigned !== false ?
+                            service_group.all_assigned :
+                            service_group.assignable.map(function (prop) {
+                                return prop[0];
+                            }),
                         planned_end_date: service_group.all_planned_end_date !== false ?
-                            service_group.all_planned_end_date : null
+                            service_group.all_planned_end_date :
+                            null
                     }
                 }
                 angular.extend(this, action);

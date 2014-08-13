@@ -38,7 +38,11 @@ class Settings(object):
 
     @classmethod
     def getBool(cls, key, default=False):
-        return bool(cls.get(key, default))
+        try:
+            val = int(cls.get(key, default))
+        except ValueError:
+            return False
+        return bool(val)
 
     @classmethod
     def set(cls, key, val):
