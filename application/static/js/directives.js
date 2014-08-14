@@ -703,7 +703,9 @@ angular.module('WebMis20.validators', [])
           }
         var clean = clear_char_duplicates(val.replace(regex, ''), '.');
         clean = clean !== '' ? parseFloat(clean) : minval;
-        clean = Math.max(clean, minval);
+        if (!isNaN(minval)) {
+            clean = Math.max(clean, minval);
+        }
         if (val !== clean) {
           ngModelCtrl.$setViewValue(clean);
           ngModelCtrl.$render();
@@ -719,7 +721,7 @@ angular.module('WebMis20.validators', [])
 
       element.bind('blur', function(event) {
           var value = parseFloat(this.value);
-          if (isNaN(value)) {
+          if (isNaN(value) || value == Number.MIN_VALUE) {
               this.value = null;
           } else {
               this.value = value;
