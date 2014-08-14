@@ -2,19 +2,17 @@
 
 import requests
 
-from collections import defaultdict
 from datetime import datetime, time, timedelta
 from flask.ext.login import current_user
 
 from config import VESTA_URL
-from application.systemwide import db
+from application.systemwide import db, cache
 from application.app import cache
-from application.lib.utils import logger, get_new_uuid
+from application.lib.utils import logger, get_new_uuid, safe_traverse
 from application.models.actions import Action, ActionType, ActionPropertyType, ActionProperty, Job, JobTicket, \
-    TakenTissueJournal, ActionType_TissueType
+    TakenTissueJournal
 from application.models.exists import Person
 from application.models.event import Event
-from application.models.enums import ActionStatus
 from application.lib.agesex import recordAcceptableEx
 from application.lib.calendar import calendar
 
@@ -45,7 +43,7 @@ DP_EVENT_EXEC_PERSON = 3
 DP_CURRENT_USER = 4
 
 
-def create_action(action_type_id, event_id, src_action=None, assigned=None, data=None):
+def create_action(action_type_id, event_id, src_action=None, assigned=None, properties=None, data=None):
     """
     Базовое создание действия, например для отправки клиентской стороне.
 
@@ -53,6 +51,7 @@ def create_action(action_type_id, event_id, src_action=None, assigned=None, data
     :param event_id: event_id int
     :param src_action: другое действие Action, из которого будут браться данные
     :param assigned: список id ActionPropertyType, которые должны быть отмечены назначенными
+    :param properties: список словарей с данными по ActionProperty, включая value
     :param data: словарь с данными для установки произвольных параметров действия
     :return: Action model
     """
@@ -120,6 +119,7 @@ def create_action(action_type_id, event_id, src_action=None, assigned=None, data
     if assigned is None:
         assigned = []
     src_props = dict((prop.type_id, prop) for prop in src_action.properties) if src_action else {}
+    full_props = dict((prop_desc['type']['id'], prop_desc) for prop_desc in properties) if properties else {}
     prop_types = actionType.property_types.filter(ActionPropertyType.deleted == 0)
     for prop_type in prop_types:
         if recordAcceptableEx(event.client.sexCode, event.client.age_tuple(now_date), prop_type.sex, prop_type.age):
@@ -127,13 +127,23 @@ def create_action(action_type_id, event_id, src_action=None, assigned=None, data
             prop.type = prop_type
             prop.action = action
             prop.isAssigned = prop_type.id in assigned
-            prop.value = src_props[prop_type.id].value if src_props.get(prop_type.id) else None
+            if src_props.get(prop_type.id):
+                prop.value = src_props[prop_type.id].value
+            elif prop_type.id in full_props:
+                prop_desc = full_props[prop_type.id]
+                if isinstance(prop_desc['value'], dict):
+                    prop.set_value(safe_traverse(prop_desc, 'value', 'id'), True)
+                else:
+                    prop.set_value(prop_desc['value'])
+                prop.isAssigned = prop_desc['is_assigned']
+            else:
+                prop.value = None
             action.properties.append(prop)
 
     return action
 
 
-def create_new_action(action_type_id, event_id, src_action=None, assigned=None, data=None):
+def create_new_action(action_type_id, event_id, src_action=None, assigned=None, properties=None, data=None):
     """
     Создание действия для сохранения в бд.
 
@@ -141,10 +151,11 @@ def create_new_action(action_type_id, event_id, src_action=None, assigned=None, 
     :param event_id: event_id int
     :param src_action: другое действие Action, из которого будут браться данные
     :param assigned: список id ActionPropertyType, которые должны быть отмечены назначенными
+    :param properties: список словарей с данными по ActionProperty, включая value
     :param data: словарь с данными для установки произвольных параметров действия
     :return: Action model
     """
-    action = create_action(action_type_id, event_id, src_action, assigned, data)
+    action = create_action(action_type_id, event_id, src_action, assigned, properties, data)
 
     org_structure = action.event.current_org_structure
     if action.actionType.isRequiredTissue and org_structure:
@@ -152,6 +163,51 @@ def create_new_action(action_type_id, event_id, src_action=None, assigned=None, 
         for prop in action.properties:
             if prop.type.typeName == 'JobTicket':
                 prop.value = create_JT(action, os_id)
+
+    return action
+
+
+def update_action(action, **kwargs):
+    """
+    Обновление модели действия данными из kwargs.
+
+    kwargs может содержать:
+      - атрибуты Action со значениями
+      - properties_assigned - список id ActionPropertyType, которые должны
+      быть отмечены назначаемыми для исследований
+      - properties - список словарей для редактирования данных свойств в целом
+
+    :param action: Action
+    :param kwargs:
+    :return: Action
+    """
+    # action attributes
+    for attr in ('amount', 'account', 'status', 'person_id', 'setPerson_id', 'begDate', 'endDate', 'isUrgent',
+                 'plannedEndDate', 'coordPerson_id', 'coordDate', 'note', 'uet', 'payStatus', 'contract_id'):
+        edited = attr in kwargs
+        if edited:
+            edited = kwargs.get(attr)
+            setattr(action, attr, edited)
+
+    # properties (only assigned data)
+    assigned = 'properties_assigned' in kwargs
+    if assigned:
+        assigned = kwargs.get('properties_assigned')
+        for prop in action.properties:
+            prop.isAssigned = prop.type_id in assigned
+
+    # properties (full data)
+    properties = 'properties' in kwargs
+    if properties:
+        properties = kwargs.get('properties')
+        for prop_desc in properties:
+            prop = ActionProperty.query.get(prop_desc['id'])
+            if isinstance(prop_desc['value'], dict):
+                prop.set_value(safe_traverse(prop_desc, 'value', 'id'), True)
+            else:
+                prop.set_value(prop_desc['value'])
+            prop.isAssigned = prop_desc['is_assigned']
+            db.session.add(prop)
 
     return action
 
@@ -339,16 +395,48 @@ def get_kladr_street(code):
 
 
 @cache.memoize(86400)
-def get_apt_assignable_small_info():
-    at_apts = defaultdict(list)
+def int_get_atl_flat(at_class):
+    from application.lib.agesex import parseAgeSelector
+
+    id_list = {}
+
+    def schwing(t):
+        t = list(t)
+        t[5] = list(parseAgeSelector(t[7]))
+        t[7] = t[7].split() if t[7] else None
+        t[8] = bool(t[8])
+        t.append([])
+        id_list[t[0]] = t
+        return t
+
     raw = db.text(
-        ur'''SELECT ActionPropertyType.actionType_id, ActionPropertyType.id, ActionPropertyType.name
-        FROM ActionPropertyType
-        JOIN ActionType ON ActionPropertyType.actionType_id = ActionType.id
-        WHERE ActionType.isRequiredTissue = 1 AND ActionPropertyType.isAssignable != 0 AND
-        ActionPropertyType.deleted = 0 AND ActionType.deleted = 0 AND ActionType.hidden = 0'''
+        ur'''SELECT
+            ActionType.id, ActionType.name, ActionType.code, ActionType.flatCode, ActionType.group_id,
+            ActionType.age, ActionType.sex,
+            GROUP_CONCAT(OrgStructure_ActionType.master_id SEPARATOR ' '),
+            ActionType.isRequiredTissue
+            FROM ActionType
+            LEFT JOIN OrgStructure_ActionType ON OrgStructure_ActionType.actionType_id = ActionType.id
+            WHERE ActionType.class = {at_class} AND ActionType.deleted = 0 AND ActionType.hidden = 0
+            GROUP BY ActionType.id'''.format(at_class=at_class))
+        # This was goddamn unsafe, but I can't get it working other way
+    result = map(schwing, db.session.execute(raw))
+    raw = db.text(
+        ur'''SELECT actionType_id, id, name, age, sex FROM ActionPropertyType
+        WHERE isAssignable != 0 AND actionType_id IN ('{0}') AND deleted = 0'''.format("','".join(map(str, id_list.keys())))
     )
-    map(lambda (at_id, apt_id, apt_name): at_apts[at_id].append((apt_id, apt_name)),
-        db.session.execute(raw)
+    map(lambda (at_id, apt_id, name, age, sex):
+        id_list[at_id][9].append(
+            (apt_id, name, list(parseAgeSelector(age)), sex)
+        ), db.session.execute(raw)
     )
-    return at_apts
+    return result
+
+
+@cache.cached(86400)
+def int_get_atl_dict_all():
+    all_at_apt = {}
+    for class_ in range(4):
+        flat = int_get_atl_flat(class_)
+        all_at_apt.update(dict([(at[0], at) for at in flat]))
+    return all_at_apt

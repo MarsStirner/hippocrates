@@ -24,7 +24,7 @@ def recordAcceptableEx(clientSex, clientAge, recordSex, recordAge):
     @type clientSex: str | unicode
     @type clientAge: tuple
     @type recordSex: str | unicode
-    @type recordAge: str | unicode
+    @type recordAge: str | unicode | list
     """
     return not (recordSex and recordSex != clientSex) and \
            not (clientAge and not checkAgeSelector(parseAgeSelector(recordAge), clientAge))
@@ -43,8 +43,10 @@ def checkAgeSelector((begUnit, begCount, endUnit, endCount), ageTuple):
 
 def parseAgeSelector(val):
     """
-    @type val: str | unicode
+    @type val: str | unicode | list
     """
+    if isinstance(val, list):
+        return val
     try:
         return parseAgeSelectorInt(val)
     except:
