@@ -69,7 +69,7 @@ def get_local_contract(lc_info):
                     or lc.serialRight != lc_info.get('serial_right', '')
                     or lc.number != lc_info.get('number', '')
                     or lc.regAddress != lc_info.get('reg_address', '')
-                    or lc.org_id != safe_traverse(lc_info, 'payer_org_id', 'id')):
+                    or lc.org_id != safe_traverse(lc_info, 'payer_org', 'id')):
                 return True
             return False
 
