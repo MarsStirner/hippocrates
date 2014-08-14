@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import datetime
-from application.lib.data import create_new_action
+from application.lib.data import create_new_action, update_action
 from application.models.actions import Action
 from application.models.event import EventLocalContract
 from application.lib.utils import safe_date, safe_traverse, safe_datetime
@@ -69,7 +69,7 @@ def get_local_contract(lc_info):
                     or lc.serialRight != lc_info.get('serial_right', '')
                     or lc.number != lc_info.get('number', '')
                     or lc.regAddress != lc_info.get('reg_address', '')
-                    or lc.org_id != safe_traverse(lcon, 'payer_org', 'id')):
+                    or lc.org_id != safe_traverse(lc_info, 'payer_org_id', 'id')):
                 return True
             return False
 
@@ -86,17 +86,18 @@ def create_services(event_id, service_groups, cfinance_id):
     for sg in service_groups:
         for act_data in sg['actions']:
             action_id = act_data['action_id']
-            assigned = act_data['assigned'] if sg['is_lab'] else None
             data = {
-                'amount': act_data['amount'] or 1,
-                'finance_id': cfinance_id,
+                'amount': act_data.get('amount', 1),
+                'account': act_data.get('account', 0),
                 'coordDate': safe_datetime(act_data.get('coord_date')),
-                'coordPerson_id': safe_traverse(act_data, 'coord_person', 'id'),
-                'account': act_data['account'] or 0
+                'coordPerson_id': safe_traverse(act_data, 'coord_person', 'id')
             }
             if sg['is_lab']:
                 data['plannedEndDate'] = safe_datetime(act_data['planned_end_date'])
+            assigned = act_data['assigned'] if sg['is_lab'] else None
+
             if not action_id:
+                data['contract_id'] = cfinance_id
                 action = create_new_action(
                     sg['at_id'],
                     event_id,
@@ -104,11 +105,11 @@ def create_services(event_id, service_groups, cfinance_id):
                     data=data
                 )
             else:
+                if assigned:
+                    data['properties_assigned'] = assigned
                 action = Action.query.get(action_id)
-                action.amount = act_data.get('amount', 1)
-                action.account = act_data.get('account', 0)
-                action.coordPerson_id = safe_traverse(act_data, 'coord_person', 'id')
-                action.coordDate = safe_datetime(act_data['coord_date'])
+                action = update_action(action, **data)
+
             db.session.add(action)
             result.append(action)
     return result

@@ -419,7 +419,7 @@ var EventPaymentCtrl = function($scope, RefBookService, Settings, $http, $modal)
                 source: source
             }
         }).success(function(data) {
-            $scope.event.payment = data.result;
+            $scope.eventctrl.update_payment($scope.event, data.result);
         }).error(function() {
             alert('error in getting data from server');
         });

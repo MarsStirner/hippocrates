@@ -505,10 +505,10 @@ angular.module('WebMis20.services', []).
                     self.diagnoses = data.result.diagnoses || [];
 
                     var p = data.result.payment;
-                    self.payment = p ? {
-                        local_contract: p.local_contract ? p.local_contract : null,
-                        payments: new WMEventPaymentList(p.payments)
-                    } : {};
+                    self.payment = {
+                        local_contract: (p && p.local_contract) ? p.local_contract : null,
+                        payments: new WMEventPaymentList(p ? p.payments : [])
+                    };
                     self.services = data.result.services && data.result.services.map(function(service) {
                         return new WMEventServiceGroup(service, self.payment.payments);
                     }) || [];
@@ -727,7 +727,7 @@ angular.module('WebMis20.services', []).
                             return angular.equals(asgn_list, ref_asgn_list);
                         }),
                         all_same_ped = ped.every(function (ped) {
-                            return ped === ref_ped;
+                            return moment(ped).isSame(ref_ped);
                         });
                     self.all_assigned = all_same_asgn && ref_asgn_list;
                     self.all_planned_end_date = all_same_ped && ref_ped;
@@ -917,7 +917,7 @@ angular.module('WebMis20.services', []).
                     }
                     return 1;
                 }).forEach(function (ch) {
-                    ch.suffice = bank > ch.action.sum;
+                    ch.suffice = bank >= ch.action.sum;
                     bank -= ch.action.sum;
                 });
 
@@ -991,7 +991,7 @@ angular.module('WebMis20.services', []).
                 var action_id_list = sg.actions.map(function (a) {
                     return a.action_id;
                 });
-                var group_saved = action_id_list.every(function (a_id) {
+                var group_saved = action_id_list.length && action_id_list.every(function (a_id) {
                     return a_id !== undefined && a_id !== null;
                 });
                 if (group_saved) {
@@ -1011,7 +1011,8 @@ angular.module('WebMis20.services', []).
             },
             remove_action: function (event, action, sg) {
                 var sg_idx = event.services.indexOf(sg),
-                    action_idx = event.services[sg_idx].actions.indexOf(action);
+                    action_idx = event.services[sg_idx].actions.indexOf(action),
+                    self = this;
                 if (action.action_id) {
                     $http.post(
                         url_for_event_api_service_delete_service, {
@@ -1019,11 +1020,17 @@ angular.module('WebMis20.services', []).
                         }
                     ).success(function () {
                         sg.actions.splice(action_idx, 1);
+                        if (!sg.actions.length) {
+                            self.remove_service(event, sg_idx)
+                        }
                     }).error(function () {
                         alert('error');
                     });
                 } else {
                     sg.actions.splice(action_idx, 1);
+                    if (!sg.actions.length) {
+                        self.remove_service(event, sg_idx)
+                    }
                 }
             },
             coordinate: function (action, off) {
@@ -1033,6 +1040,13 @@ angular.module('WebMis20.services', []).
                     action.coord_person = user;
                     action.coord_date = date;
                 }
+            },
+            update_payment : function (event, payment) {
+                var PlModel = $injector.get('WMEventPaymentList');
+                event.payment = {
+                    local_contract: payment.local_contract,
+                    payments: new PlModel(payment.payments)
+                };
             }
 //            coordinate_service: function (event, service) {
 //                service.coord_person = current_user_id;

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import datetime
+from application.lib.agesex import recordAcceptableEx
 
 from flask import request, abort
 from flask.ext.login import current_user
@@ -23,7 +24,7 @@ from application.lib.jsonify import EventVisualizer, ClientVisualizer
 from blueprints.event.lib.utils import (EventSaveException, get_local_contract,
     create_new_local_contract, create_services)
 from application.lib.sphinx_search import SearchEventService
-from application.lib.data import get_apt_assignable_small_info, get_planned_end_datetime
+from application.lib.data import get_planned_end_datetime, int_get_atl_dict_all
 
 
 @module.errorhandler(EventSaveException)
@@ -269,25 +270,49 @@ def api_search_services():
                                        speciality_id=speciality_id)
     # result = find_services_direct(query, event_type_id, contract_id, speciality_id)
 
-    apts = get_apt_assignable_small_info()
+    ats_apts = int_get_atl_dict_all()
+    client = Client.query.get(client_id)
+    client_age = client.age_tuple(datetime.date.today())
 
     def make_response(service_data):
+        at_id = service_data['action_type_id']
+        at_data = ats_apts.get(at_id)
+        if at_data:
+            if not recordAcceptableEx(client.sexCode,
+                                      client_age,
+                                      at_data[6],
+                                      at_data[5]):
+                return None
+
         service = {
-            'at_id': service_data.get('action_type_id'),
+            'at_id': at_id,
             'at_code': service_data['code'],
             'at_name': service_data['name'],
             'service_name': service_data['service'],
-            'price': service_data['price']
+            'price': service_data['price'],
+            'is_lab': False
         }
-        at_it = service['at_id']
-        if at_it in apts:
-            service['is_lab'] = True
-            service['assignable'] = apts[at_it]
-            service['all_assigned'] = map(lambda p: p[0], service['assignable'])
-            service['all_planned_end_date'] = get_planned_end_datetime(at_it)
+
+        if at_data and at_data[9]:
+            prop_types = at_data[9]
+            prop_types = [prop_type[:2] for prop_type in prop_types if recordAcceptableEx(client.sexCode,
+                                                                                          client_age,
+                                                                                          prop_type[3],
+                                                                                          prop_type[2])]
+            if prop_types:
+                service['is_lab'] = True
+                service['assignable'] = prop_types
+                service['all_assigned'] = map(lambda p: p[0], service['assignable'])
+                service['all_planned_end_date'] = get_planned_end_datetime(at_id)
         return service
 
-    return jsonify([make_response(item) for item in result['result']['items']])
+    matched = []
+    for item in result['result']['items']:
+        s = make_response(item)
+        if s is not None:
+            matched.append(s)
+
+    return jsonify(matched)
 
 
 def find_services_direct(query, event_type_id, contract_id, speciality_id):
