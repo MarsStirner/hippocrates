@@ -472,8 +472,12 @@ def api_get_events():
     from application.models.exists import Contract
     flt = request.get_json()
     base_query = Event.query.join(Client)
+    context = EventVisualizer()
     if 'id' in flt:
-        return jsonify([base_query.get(flt['id'])])
+        return jsonify({
+            'pages': 1,
+            'items': [context.make_short_event(base_query.filter(Event.id == flt['id']).first())]
+        })
     if 'client_id' in flt:
         base_query = base_query.filter(Event.client_id == flt['client_id'])
     if 'exec_person_id' in flt:
@@ -492,7 +496,6 @@ def api_get_events():
     page = int(flt.get('page', 1))
     base_query = base_query.order_by(Event.setDate)
     paginate = base_query.paginate(page, per_page, False)
-    context = EventVisualizer()
     return jsonify({
         'pages': paginate.pages,
         'items': [
