@@ -721,7 +721,7 @@ angular.module('WebMis20.validators', [])
 
       element.bind('blur', function(event) {
           var value = parseFloat(this.value);
-          if (isNaN(value) || value == Number.MIN_VALUE) {
+          if (isNaN(value)) {
               this.value = null;
           } else {
               this.value = value;
@@ -729,5 +729,4 @@ angular.module('WebMis20.validators', [])
       });
     }
   };
-})
-;
+});
