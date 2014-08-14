@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('WebMis20.directives', ['ui.bootstrap', 'ui.select', 'ngSanitize']);
+angular.module('WebMis20.directives', ['ui.bootstrap', 'ui.select', 'ngSanitize', 'WebMis20.directives.goodies']);
 
 angular.module('WebMis20.directives')
     .directive('rbSelect', ['$compile', function($compile) {
@@ -412,7 +412,7 @@ angular.module('WebMis20.directives')
             }
         }
     }])
-    .directive('wmOrgStructureTree', ['SelectAll', '$compile', '$http', function (SelectAll, $compile, $http) {
+    .directive('wmOrgStructureTree', ['SelectAll', '$compile', '$http', 'FlatTree', function (SelectAll, $compile, $http, FlatTree) {
         // depends on wmCustomDropdown
         return {
             restrict: 'E',
@@ -442,7 +442,7 @@ angular.module('WebMis20.directives')
             link: function (scope) {
                 var scope_query = '';
                 var sas = scope.sas = new SelectAll([]);
-                var der_tree = new Tree('parent_id');
+                var der_tree = new FlatTree('parent_id');
                 var tree = scope.tree = {};
 
                 function doFilter() {

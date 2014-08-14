@@ -19,6 +19,97 @@ angular.module('WebMis20.directives.goodies', [])
     };
     return Timeout;
 }])
+.factory('FlatTree', [function () {
+    var Tree = function (masterField) {
+        this.nodes = [];
+        this.array = [];
+        this.masterField = masterField;
+        var idField = this.idField = arguments[1] || 'id';
+        var childrenField = this.childrenField = arguments[2] || 'children';
+        this.filter_function = arguments[4] || function () {return true};
+        this.make_object = arguments[3] || function (item) {
+            if (item === null) {
+                var result = {};
+                result[masterField] = null;
+                result[idField] = 'root';
+                result[childrenField] = [];
+                return result
+            }
+            return item
+        };
+        this.masterDict = dict({
+            root: []
+        })
+    };
+    Tree.prototype.set_array = function (array) {
+        var idField = this.idField,
+            masterField = this.masterField,
+            idDict = this.idDict = new dict({
+                root: null
+            });
+        this.array = array;
+        array.forEach(function (item) {
+            var id = item[idField];
+            idDict[id] = item;
+        });
+        var nodes = this.nodes = [];
+        array.forEach(function (item) {
+            var master = item[masterField] || 'root';
+            if (!nodes.has(master)) nodes.push(master);
+        });
+    };
+    Tree.prototype.filter = function (filter_function) {
+        var idDict = this.idDict,
+            masterField = this.masterField,
+            idField = this.idField;
+        var masterDict = this.masterDict = new dict({
+            root: []
+        });
+        var array = this.array;
+        var filtered = array.filter(function (item) {
+            return filter_function(item, idDict)
+        });
+        filtered.forEach(function (item) {
+            do {
+                var master = item[masterField] || 'root';
+                if (masterDict[master] === undefined) masterDict[master] = [];
+                if (masterDict[master].has(item[idField])) return;
+                masterDict[master].push(item[idField]);
+                item = idDict[master];
+            } while (item)
+        });
+    };
+    Tree.prototype.render = function (make_object) {
+        var masterDict = this.masterDict,
+            childrenField = this.childrenField,
+            idDict = this.idDict,
+            nodes = this.nodes;
+        function recurse(id) {
+            var childrenObject = {};
+            var children_list = masterDict[id] || [];
+            childrenObject[childrenField] = children_list.map(recurse);
+            return angular.extend({}, make_object(idDict[id], nodes.has(id)), childrenObject);
+        }
+        return {
+            root: recurse('root'),
+            idDict: idDict,
+            masterDict: masterDict
+        };
+    };
+    var dict = function () {
+        if (arguments[0]) {angular.extend(this, arguments[0])}
+    };
+    dict.prototype.keys = function () {
+        var result = [];
+        for (var key in this) {
+            if (this.hasOwnProperty(key) && !key.startswith('$') && ! (typeof this[key] === 'function')) {
+                result.push(key)
+            }
+        }
+        return result;
+    };
+    return Tree;
+}])
 .directive('wmCustomDropdown', ['$timeout', '$compile', 'TimeoutCallback', function ($timeout, $compile, TimeoutCallback) {
 
     return {
