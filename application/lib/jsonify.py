@@ -409,6 +409,7 @@ class ClientVisualizer(object):
             'begDateTime': apnt.ticket.begDateTime,
             'office': apnt.ticket.schedule.office,
             'person': safe_unicode(apnt.ticket.schedule.person),
+            'person_speciality': safe_unicode(getattr(apnt.ticket.schedule.person.speciality, 'name', None)),
             'createPerson': apnt.createPerson,
             'note': apnt.note,
             'receptionType': apnt.ticket.schedule.receptionType,
