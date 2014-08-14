@@ -77,6 +77,7 @@ var PersonAppointmentCtrl = function ($scope, $http, RefBook, WMAppointmentDialo
                 $scope.person_schedules = data.result.related_schedules;
                 $scope.user_schedules = data.result.schedules;
                 $scope.data_selected = data.result.related_schedules.map(function (item) {
+                    $scope.person_fold(item.person.id);
                     return item.person.id;
                 });
                 $scope.refreshSchedules();
@@ -92,23 +93,25 @@ var PersonAppointmentCtrl = function ($scope, $http, RefBook, WMAppointmentDialo
             return 0;
         }).map(function fold(person_schedule) {
             if ($scope.is_folded(person_schedule.person.id)) {
+                var grouped = {};
+                angular.forEach(person_schedule.grouped, function (grouped_schedule, index) {
+                    var max_tickets = 0;
+                    var schedule = grouped_schedule.schedule.map(function (day) {
+                        var result = {
+                            date: day.date,
+                            tickets: day.tickets.filter(function (ticket) {return ticket.client != null;})
+                        };
+                        max_tickets = Math.max(max_tickets, result.tickets.length);
+                        return result;
+                    });
+                    grouped[index] = {
+                        max_tickets: max_tickets,
+                        schedule: schedule
+                    }
+                });
                 return {
                     person: person_schedule.person,
-                    grouped: person_schedule.grouped.forEach(function (grouped_schedule) {
-                        var max_tickets = 0;
-                        var schedule = grouped_schedule.schedule.map(function (day) {
-                            var result = {
-                                date: day.date,
-                                tickets: day.tickets.filter(function (ticket) {return ticket.client != null;})
-                            };
-                            max_tickets = Math.max(max_tickets, result.tickets.length);
-                            return result;
-                        });
-                        return {
-                            max_tickets: max_tickets,
-                            schedule: schedule
-                        }
-                    })
+                    grouped: grouped
                 }
             } else {
                 return person_schedule;
@@ -143,7 +146,7 @@ var PersonAppointmentCtrl = function ($scope, $http, RefBook, WMAppointmentDialo
     };
 
     $scope.$watch('user_selected', function (new_value, old_value) {
-        var new_ids = new_value.filter(aux.func_not_in(old_value));
+        var new_ids = new_value.filter(aux.func_not_in(old_value + $scope.data_selected));
         if (new_ids.length) {
             $http.get(url_schedule_api_schedule, {
                 params: {
