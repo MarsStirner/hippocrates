@@ -99,7 +99,8 @@
     <tab id="tab_payer_org" heading="Юр. лицо" disabled="formcnf.tab_payer_org.disabled()"
          active="formcnf.tab_payer_org.active" deselect="switch_tab(1)">
         <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-6"
+                 ng-class="{'has-error': payerForm.payer_org.$invalid}">
                 <label for="payer_org">Организация</label>
                 <ui-select id="payer_org" name="payer_org" theme="select2" autocomplete="off" ng-required="formcnf.tab_payer_org.active"
                            ng-model="event.payment.local_contract.payer_org" ng-disabled="formcnf.payer_field.disabled">
@@ -119,16 +120,20 @@
 <div class="panel panel-default">
     <div class="panel-body">
         <div class="row">
-            <div class="col-md-2">
+            <div class="col-md-2"
+                ng-class="{'has-error': contract_info_required() && payerForm.date_contract.$invalid}">
                 <label for="date_contract">Дата заключения</label>
                 <wm-date id="date_contract" name="date_contract" ng-disabled="formcnf.contract_field.disabled"
-                         ng-model="event.payment.local_contract.date_contract">
+                         ng-model="event.payment.local_contract.date_contract"
+                         ng-required="contract_info_required()">
                 </wm-date>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-4"
+                 ng-class="{'has-error': contract_info_required() && payerForm.number_contract.$invalid}">
                 <label for="number_contract">Номер договора</label>
                 <input type="text" class="form-control" id="number_contract" name="number_contract" autocomplete="off"
-                       ng-disabled="formcnf.contract_field.disabled" ng-model="event.payment.local_contract.number_contract"/>
+                       ng-disabled="formcnf.contract_field.disabled" ng-model="event.payment.local_contract.number_contract"
+                       ng-required="contract_info_required()"/>
             </div>
         </div>
     </div>

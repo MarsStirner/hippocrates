@@ -337,6 +337,10 @@ var EventPaymentCtrl = function($scope, RefBookService, Settings, $http, $modal)
     $scope.integration1CODVD_enabled = function() {
         return $scope.Settings.get_string('Event.Payment.1CODVD') == '1';
     };
+    $scope.contract_info_required = function () {
+        return ($scope.formstate.is_paid() || $scope.formstate.is_oms() || $scope.formstate.is_dms()) &&
+            !$scope.integration1CODVD_enabled();
+    };
 
     $scope.formcnf = {
         tab_payer_person: {
@@ -553,7 +557,7 @@ var EventServicesCtrl = function($scope, $http) {
 
 };
 
-var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, PrintingService, Settings,
+var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $document, PrintingService, Settings,
         $filter, $modal, ActionTypeTreeModal, WMEventController, WMEventFormState) {
     $scope.aux = aux;
     $scope.current_role_maybe = current_user.current_role_maybe;
@@ -640,6 +644,9 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, P
                 }, function (message) {
                     alert(message);
                 });
+        } else {
+            var formelm = angular.element($('#eventForm').find('.ng-invalid:first'));
+            $document.scrollToElement(formelm, 30, 1500)
         }
     };
 
@@ -829,4 +836,4 @@ WebMis20.controller('EventDiagnosesCtrl', ['$scope', 'RefBookService', '$http', 
 WebMis20.controller('EventMainInfoCtrl', ['$scope', '$http', 'RefBookService', 'EventType', '$window', '$timeout', 'Settings', '$modal', '$filter', EventMainInfoCtrl]);
 WebMis20.controller('EventPaymentCtrl', ['$scope', 'RefBookService', 'Settings', '$http', '$modal', EventPaymentCtrl]);
 WebMis20.controller('EventServicesCtrl', ['$scope', '$http', EventServicesCtrl]);
-WebMis20.controller('EventInfoCtrl', ['$scope', 'WMEvent', '$http', 'RefBookService', '$window', 'PrintingService', 'Settings', '$filter', '$modal', 'ActionTypeTreeModal', 'WMEventController', 'WMEventFormState', EventInfoCtrl]);
+WebMis20.controller('EventInfoCtrl', ['$scope', 'WMEvent', '$http', 'RefBookService', '$window', '$document', 'PrintingService', 'Settings', '$filter', '$modal', 'ActionTypeTreeModal', 'WMEventController', 'WMEventFormState', EventInfoCtrl]);

@@ -49,7 +49,8 @@
             <div class="col-md-10">
                 <div ui-alert-list="alerts"></div>
                 <div class="marginal">
-                    <ng-form name="eventForm" role="form" novalidate toc-element toc-name="tocEventForm" form-safe-close>
+                    <ng-form name="eventForm" id="eventForm" role="form" novalidate
+                             toc-element toc-name="tocEventForm" form-safe-close>
                         {% include "event/_patient_info.html" %}
                         {% include "event/_main_info.html" %}
                         {% if current_user.role_in('admin', 'doctor', 'clinicDoctor') %}
