@@ -50,7 +50,7 @@ class ScheduleVisualizer(object):
             'status': 'busy' if client_id else 'free',
             'client': ticket.client.shortNameText if client_id else None,
             'attendance_type': ticket.attendanceType,
-            'office': ticket.schedule.office.name if ticket.schedule.office else None,
+            'office': ticket.schedule.office.code if ticket.schedule.office else None,
             'record': self.make_client_ticket_record(client_ticket) if client_ticket else None
         }
 
