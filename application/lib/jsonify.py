@@ -4,15 +4,16 @@ import datetime
 import itertools
 
 from collections import defaultdict
-from application.lib.data import get_apt_assignable_small_info
+from application.lib.agesex import recordAcceptableEx
+from application.models.client import Client
 from sqlalchemy.sql.functions import current_date
 from sqlalchemy.sql.expression import between
-from application.systemwide import db
 
+from application.systemwide import db
+from application.lib.data import int_get_atl_dict_all
 from application.lib.utils import safe_unicode, safe_int, safe_dict
 from application.models.enums import EventPrimary, EventOrder, ActionStatus, Gender
 from application.models.event import Event, EventType, Diagnosis, Diagnostic
-
 from application.models.schedule import Schedule, rbReceptionType, ScheduleClientTicket, ScheduleTicket, QuotingByTime
 from application.models.actions import Action, ActionProperty, ActionType
 from application.models.exists import rbRequestType, rbService, ContractTariff, Contract
@@ -408,6 +409,7 @@ class ClientVisualizer(object):
             'begDateTime': apnt.ticket.begDateTime,
             'office': apnt.ticket.schedule.office,
             'person': safe_unicode(apnt.ticket.schedule.person),
+            'person_speciality': safe_unicode(getattr(apnt.ticket.schedule.person.speciality, 'name', None)),
             'createPerson': apnt.createPerson,
             'note': apnt.note,
             'receptionType': apnt.ticket.schedule.receptionType,
@@ -619,12 +621,23 @@ class EventVisualizer(object):
                 'service_name': service_name,
                 'action': action,
                 'price': price,
+                'is_lab': False
             }
-            if service['at_id'] in apts:
-                service['is_lab'] = True
-                service['assignable'] = apts[service['at_id']]
-            else:
-                service['is_lab'] = False
+
+            client = Client.query.get(action.event.client_id)
+            client_age = client.age_tuple(datetime.date.today())
+
+            at_id = service['at_id']
+            at_data = ats_apts.get(at_id)
+            if at_data and at_data[9]:
+                prop_types = at_data[9]
+                prop_types = [prop_type[:2] for prop_type in prop_types if recordAcceptableEx(client.sexCode,
+                                                                                              client_age,
+                                                                                              prop_type[3],
+                                                                                              prop_type[2])]
+                if prop_types:
+                    service['is_lab'] = True
+                    service['assignable'] = prop_types
             return service
 
         def make_action_as_service(a, service):
@@ -695,7 +708,7 @@ class EventVisualizer(object):
             between(current_date(), ContractTariff.begDate, ContractTariff.endDate)
         )
 
-        apts = get_apt_assignable_small_info()
+        ats_apts = int_get_atl_dict_all()
 
         services_by_at = defaultdict(list)
         for a, service_id, at_code, at_name, service_name, price in query:
@@ -709,7 +722,6 @@ class EventVisualizer(object):
             )
 
         return services_grouped
-
 
 
 class ActionVisualizer(object):

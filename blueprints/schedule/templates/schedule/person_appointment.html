@@ -43,8 +43,8 @@
                                 <caption>
                                     <a class="btn btn-default glyphicon glyphicon-chevron-up" ng-click="person_fold(person_schedule.person.id)" ng-if="!is_folded(person_schedule.person.id)"></a>
                                     <a class="btn btn-default glyphicon glyphicon-chevron-down" ng-click="person_unfold(person_schedule.person.id)" ng-if="is_folded(person_schedule.person.id)"></a>
-                                    <span ng-if="person_schedule.grouped[reception_type].max_tickets == 0 && !is_folded(person_schedule.person.id)" class="no-schedule-label">Нет расписания</span>
                                     [[ person_schedule.person.name ]]<small>, [[ person_schedule.person.speciality.name ]]</small>
+                                    <span ng-if="person_schedule.grouped[reception_type].max_tickets == 0 && !is_folded(person_schedule.person.id)" class="no-schedule-label bg-danger">Нет расписания</span>
                                 </caption>
                                 <thead ng-if="person_schedule.grouped[reception_type].max_tickets > 0">
                                 <tr>

@@ -54,22 +54,30 @@ angular.module('WebMis20.directives').
                             });
                         });
                     };
+                    scope.get_min_amount = function () {
+                        var m = 0;
+                        scope.service.actions.forEach(function (act) {
+                            if (act.action_id || act.account || act.is_coordinated()) {
+                                m += 1;
+                            }
+                        });
+                        return m || 1;
+                    };
 
                     scope.amount_disabled = function () {
-                        var s = scope.service;
-                        return s.fully_paid || s.fully_coord;
+                        return scope.service.fully_paid || scope.service.fully_coord;
                     };
                     scope.btn_coordinate_visible = function () {
-                        var s = scope.service;
-                        return !s.fully_coord;
+                        return !scope.service.fully_coord;
                     };
                     scope.btn_cancel_coordinate_visible = function () {
-                        var s = scope.service;
-                        return s.fully_coord;
+                        return scope.service.fully_coord;
                     };
                     scope.btn_delete_visible = function () {
-                        var s = scope.service;
-                        return !s.fully_paid && !s.partially_paid && true; // todo: action not closed
+                        return !scope.service.fully_paid && !scope.service.partially_paid && true; // todo: action not closed
+                    };
+                    scope.lab_components_disabled = function () {
+                        return scope.service.fully_paid || scope.service.fully_coord;
                     };
                 },
                 template:
@@ -77,12 +85,13 @@ angular.module('WebMis20.directives').
 <td ng-bind="service.at_code"></td>\
 <td>\
     [[service.service_name]]\
-    <a ng-click="open_assignments()" ng-if="service.is_lab">Выбрать назначаемые исследования</a>\
+    <a href="javascript:0" class="btn btn-link nomarpad" ng-click="open_assignments()" ng-if="service.is_lab"\
+        ng-disabled="lab_components_disabled()">Выбрать назначаемые исследования</a>\
 </td>\
 <td ng-bind="service.at_name"></td>\
 <td ng-bind="service.price" class="text-right" ng-show="formstate.is_paid()"></td>\
 <td class="col-md-1">\
-    <input type="text" class="form-control input-sm" min="[[service.paid_count || service.coord_actions.length || 1]]" max="100"\
+    <input type="text" class="form-control input-sm" min="[[service.paid_count || 1]]" max="100"\
            ng-disabled="amount_disabled()" ng-model="service.total_amount"\
            valid-number alow-float minval="1"/>\
 </td>\
@@ -162,13 +171,17 @@ angular.module('WebMis20.directives').
                     scope.btn_delete_visible = function () {
                         return !scope.action.is_paid_for() && !scope.action.is_coordinated() && true; // todo: action not closed
                     };
+                    scope.lab_components_disabled = function () {
+                        return scope.action.account || scope.action.is_coordinated()
+                    };
                 },
                 template:
 '<td></td>\
 <td ng-bind="service.at_code"></td>\
 <td>\
     [[service.service_name]]\
-    <a ng-click="open_assignments()" ng-if="service.is_lab">Выбрать назначаемые исследования</a>\
+    <a  href="javascript:0" class="btn btn-link nomarpad" ng-click="open_assignments()" ng-if="service.is_lab"\
+        ng-disabled="lab_components_disabled()">Выбрать назначаемые исследования</a>\
 </td>\
 <td ng-bind="service.at_name"></td>\
 <td ng-bind="service.price" class="text-right" ng-show="formstate.is_paid()"></td>\

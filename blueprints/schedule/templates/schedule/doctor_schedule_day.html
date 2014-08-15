@@ -19,7 +19,7 @@
                 <span ng-if="schedules[0].roa">Причина отсутсвия: <strong>[[ schedules[0].roa.name ]]</strong></span>
             </div>
             <p ng-repeat="schedule in schedules[0].scheds">
-                <legend><a href="javascript:;" title="Показать/скрыть прошедшие записи" class="pull-right small" ng-click="show_past_tickets=!show_past_tickets"><span class="glyphicon" ng-class="{'glyphicon-resize-full': !show_past_tickets, 'glyphicon-resize-small': show_past_tickets}"></span></a><small>[[schedule.reception_type.name]]: [[ (schedules[0].date + ' ' + schedule.begTime|asTime) | asTime ]] - [[ (schedules[0].date + ' ' + schedule.endTime) | asTime ]]</small></legend>
+                <legend><a href="javascript:;" title="Показать/скрыть прошедшие записи" class="pull-right btn btn-xs btn-default" ng-click="show_past_tickets=!show_past_tickets"><span class="glyphicon" ng-class="{'glyphicon-chevron-down': !show_past_tickets, 'glyphicon-chevron-up': show_past_tickets}"></span></a><small>[[schedule.reception_type.name]]: [[ (schedules[0].date + ' ' + schedule.begTime|asTime) | asTime ]] - [[ (schedules[0].date + ' ' + schedule.endTime) | asTime ]]</small></legend>
                 <button ng-repeat="ticket in schedule.tickets" ui-schedule-ticket="ticket" day="schedules[0].date" show-name="true" ng-click="ticket_choose(ticket);" ng-show="show_past_tickets || ticket.attendance_type.code == 'CITO' || ticket.attendance_type.code == 'extra' || show_time(ticket.begDateTime)" ng-class="{'disabled': !client || ticket.disabled}"></button>
             </p>
         </div>

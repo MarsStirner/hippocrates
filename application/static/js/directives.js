@@ -703,7 +703,9 @@ angular.module('WebMis20.validators', [])
           }
         var clean = clear_char_duplicates(val.replace(regex, ''), '.');
         clean = clean !== '' ? parseFloat(clean) : minval;
-        clean = Math.max(clean, minval);
+        if (!isNaN(minval)) {
+            clean = Math.max(clean, minval);
+        }
         if (val !== clean) {
           ngModelCtrl.$setViewValue(clean);
           ngModelCtrl.$render();
@@ -727,5 +729,4 @@ angular.module('WebMis20.validators', [])
       });
     }
   };
-})
-;
+});

@@ -91,7 +91,9 @@ angular.module('WebMis20.directives.personTree', [])
                     spec_group.persons.filter(function (person) {
                         return person.checked;
                     }).map(function (person) {
-                        userSelected.push(person.id);
+                        if (userSelected.indexOf(person.id) == -1) {
+                            userSelected.push(person.id);
+                        }
                     })
                 });
                 $scope.userSelected = userSelected;

@@ -28,7 +28,7 @@
                 </div>
 
                 <div class="row">
-                    <div class="form-group col-md-2"
+                    <div class="form-group col-md-4"
                          ng-class="{'has-error': payerForm.birthdate.$invalid}">
                         <label for="birthdate" class="control-label">Дата рождения</label>
                         <wm-date id="birthdate" ng-model="event.payment.local_contract.birth_date"
@@ -62,7 +62,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="form-group col-md-4"
+                    <div class="form-group col-md-2"
                          ng-class="{'has-error': payerForm.doc_number.$invalid}">
                         <label for="doc_number">Номер</label>{# TODO: add number regexp validators from doctype. Conflicts in disabled. #}
                         <input type="text" class="form-control" id="doc_number" name="doc_number"

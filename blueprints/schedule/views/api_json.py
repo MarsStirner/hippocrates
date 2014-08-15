@@ -1,28 +1,27 @@
 # -*- coding: utf-8 -*-
-import calendar
-from collections import defaultdict
-import datetime
-from application.lib.data import create_new_action, create_action
-from dateutil.parser import parse as dateutil_parse
 
+import calendar
+import datetime
+
+from collections import defaultdict
+from dateutil.parser import parse as dateutil_parse
 from flask import abort, request
 from flask.ext.login import current_user
 
 from application.models.event import Event
 from application.systemwide import db, cache
 from application.lib.sphinx_search import SearchPerson
-from application.lib.agesex import recordAcceptableEx
-from application.lib.utils import (jsonify, safe_traverse, get_new_uuid, parse_id, safe_date, safe_time,
-                                   string_to_datetime, safe_time_as_dt)
+from application.lib.utils import (jsonify, safe_traverse, parse_id, safe_date, safe_time_as_dt, safe_datetime)
 from application.lib.utils import public_endpoint
 from blueprints.schedule.app import module
 from blueprints.schedule.lib.data import delete_schedules
-from application.models.exists import (rbSpeciality, rbReasonOfAbsence, rbPrintTemplate, Person)
-from application.models.actions import Action, ActionType, ActionProperty, ActionPropertyType
-from application.models.schedule import Schedule, ScheduleTicket, ScheduleClientTicket, rbAppointmentType, \
-    rbReceptionType, rbAttendanceType, QuotingByTime
-from application.lib.jsonify import ScheduleVisualizer, PrintTemplateVisualizer, \
-    ActionVisualizer
+from application.models.exists import (rbSpeciality, rbReasonOfAbsence, Person)
+from application.models.actions import Action, ActionType
+from application.models.schedule import (Schedule, ScheduleTicket, ScheduleClientTicket, rbAppointmentType,
+    rbAttendanceType, QuotingByTime)
+from application.lib.jsonify import ScheduleVisualizer, ActionVisualizer
+from application.lib.data import create_new_action, create_action, update_action, int_get_atl_flat
+
 
 __author__ = 'mmalkov'
 
@@ -398,55 +397,30 @@ def api_action_new_get():
 
 @module.route('/api/actions', methods=['POST'])
 def api_action_post():
-    now = datetime.datetime.now()
     action_desc = request.get_json()
-    if action_desc['id']:
-        action = Action.query.get(action_desc['id'])
-        for prop_desc in action_desc['properties']:
-            prop = ActionProperty.query.get(prop_desc['id'])
-            if isinstance(prop_desc['value'], dict):
-                prop.set_value(safe_traverse(prop_desc, 'value', 'id'), True)
-            else:
-                prop.set_value(prop_desc['value'])
-            prop.isAssigned = prop_desc['is_assigned']
-            db.session.add(prop)
+    action_id = action_desc['id']
+    data = {
+        'begDate': safe_datetime(action_desc['begDate']),
+        'endDate': safe_datetime(action_desc['endDate']),
+        'plannedEndDate': safe_datetime(action_desc['planned_endDate']),
+        'status': action_desc['status']['id'],
+        'setPerson_id': safe_traverse(action_desc, 'set_person', 'id'),
+        'person_id':  safe_traverse(action_desc, 'person', 'id'),
+        'note': action_desc['note'],
+        'amount': action_desc['amount'],
+        'account': action_desc['account'] or 0,
+        'uet': action_desc['uet'],
+        'payStatus': action_desc['pay_status'] or 0,
+    }
+    properties_desc = action_desc['properties']
+    if action_id:
+        data['properties'] = properties_desc
+        action = Action.query.get(action_id)
+        action = update_action(action, **data)
     else:
-        # new action
-        action = Action()
-        action.actionType = ActionType.query.get(action_desc['action_type']['id'])
-        action.event = Event.query.get(action_desc['event_id'])
-        # orgStructure = action.event.current_org_structure if action.actionType.isRequiredTissue else None
-        for prop_desc in action_desc['properties']:
-            prop_type = ActionPropertyType.query.get(prop_desc['type']['id'])
-            prop = ActionProperty()
-            prop.action = action
-            prop.isAssigned = prop_desc['is_assigned']
-            prop.type = prop_type
-            pd_value = prop_desc['value']
-            if isinstance(pd_value, dict):
-                prop.set_value(safe_traverse(pd_value, 'id'), True)
-            elif pd_value is not None:
-                prop.set_value(pd_value)
-            # elif prop_type.typeName == 'JobTicket' and orgStructure:
-            #     prop.value = aux_create_JT(action_desc['planned_endDate'] or now, ActionType.jobType_id, orgStructure.id)
-            db.session.add(prop)
-
-    #TODO:begDate, endDate, plannedEndDate, directionDate другой формат дат
-    action.begDate = action_desc['begDate']
-    action.endDate = action_desc['endDate']
-    action.plannedEndDate = action_desc['planned_endDate'] or now
-    action.status = action_desc['status']['id']
-    action.setPerson_id = safe_traverse(action_desc, 'set_person', 'id')
-    action.person_id = safe_traverse(action_desc, 'person', 'id')
-    action.note = action_desc['note'] or ''
-    action.directionDate = action_desc['direction_date']
-    action.office = action_desc['office']
-    action.amount = action_desc['amount']
-    action.uet = action_desc['uet']
-    action.payStatus = action_desc['pay_status'] or 0
-    action.account = action_desc['account'] or 0
-    if not action.uuid:
-        action.uuid = get_new_uuid()
+        at_id = action_desc['action_type']['id']
+        event_id = action_desc['event_id']
+        action = create_new_action(at_id, event_id, properties=properties_desc, data=data)
 
     db.session.add(action)
     db.session.commit()
@@ -457,6 +431,7 @@ def api_action_post():
 
 @cache.memoize(86400)
 def int_get_atl(at_class):
+    # not used?
     atypes = ActionType.query.filter(
         ActionType.class_ == at_class, ActionType.deleted == 0, ActionType.hidden == 0
     )
@@ -495,6 +470,7 @@ def int_get_atl(at_class):
 
 @module.route('/api/action-type-list.json')
 def api_atl_get():
+    # not used?
     at_class = int(request.args['at_class'])
     if not (0 <= at_class < 4):
         return abort(401)
@@ -510,45 +486,6 @@ prescriptionFlatCodes = (
     u'analgesia',
     u'chemotherapy',
 )
-
-
-@cache.memoize(86400)
-def int_get_atl_flat(at_class):
-    from application.lib.agesex import parseAgeSelector
-
-    id_list = {}
-
-    def schwing(t):
-        t = list(t)
-        t[5] = list(parseAgeSelector(t[7]))
-        t[7] = t[7].split() if t[7] else None
-        t[8] = bool(t[8])
-        t.append([])
-        id_list[t[0]] = t
-        return t
-
-    raw = db.text(
-        ur'''SELECT
-            ActionType.id, ActionType.name, ActionType.code, ActionType.flatCode, ActionType.group_id,
-            ActionType.age, ActionType.sex,
-            GROUP_CONCAT(OrgStructure_ActionType.master_id SEPARATOR ' '),
-            ActionType.isRequiredTissue
-            FROM ActionType
-            LEFT JOIN OrgStructure_ActionType ON OrgStructure_ActionType.actionType_id = ActionType.id
-            WHERE ActionType.class = {at_class} AND ActionType.deleted = 0 AND ActionType.hidden = 0
-            GROUP BY ActionType.id'''.format(at_class=at_class))
-        # This was goddamn unsafe, but I can't get it working other way
-    result = map(schwing, db.session.execute(raw))
-    raw = db.text(
-        ur'''SELECT actionType_id, id, name, age, sex FROM ActionPropertyType
-        WHERE isAssignable != 0 AND actionType_id IN ('{0}')'''.format("','".join(map(str, id_list.keys())))
-    )
-    map(lambda (at_id, apt_id, name, age, sex):
-        id_list[at_id][9].append(
-            (apt_id, name, list(parseAgeSelector(age)), sex)
-        ), db.session.execute(raw)
-    )
-    return result
 
 
 @module.route('/api/action-type-list-flat.json')
