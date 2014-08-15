@@ -68,8 +68,10 @@ angular.module('WebMis20.directives').
                         };
                         ActionTypeTreeModal.openAppointmentModal(model, true).then(function () {
                             scope.service.actions.forEach(function (act) {
-                                act.assigned = model.assigned;
-                                act.planned_end_date = model.planned_end_date;
+                                if (!act.is_closed()) {
+                                    act.assigned = model.assigned;
+                                    act.planned_end_date = model.planned_end_date;
+                                }
                             });
                         });
                     };
@@ -78,16 +80,16 @@ angular.module('WebMis20.directives').
                         return scope.service.fully_paid || scope.service.fully_coord;
                     };
                     scope.btn_coordinate_visible = function () {
-                        return !scope.service.fully_coord;
+                        return !scope.service.fully_coord && !scope.service.all_actions_closed;
                     };
                     scope.btn_cancel_coordinate_visible = function () {
-                        return scope.service.fully_coord;
+                        return scope.service.fully_coord && !scope.service.all_actions_closed;
                     };
                     scope.btn_delete_visible = function () {
-                        return !scope.service.fully_paid && !scope.service.partially_paid && true; // todo: action not closed
+                        return !scope.service.fully_paid && !scope.service.partially_paid && !scope.service.all_actions_closed;
                     };
                     scope.lab_components_disabled = function () {
-                        return scope.service.fully_paid || scope.service.fully_coord;
+                        return scope.service.fully_paid || scope.service.fully_coord || scope.service.all_actions_closed;
                     };
                 },
                 template:
@@ -126,7 +128,7 @@ angular.module('WebMis20.directives').
             ng-show="formstate.is_paid()"\
             ng-click="change_print_service()"><span class="glyphicon" ng-class="{\'glyphicon-unchecked\': !service.print, \'glyphicon-check\': service.print}"></span>\
     </button>\
-    <button type="button" class="btn btn-sm btn-danger" title="Убрать из списка услуг"\
+    <button type="button" class="btn btn-sm btn-danger" title="Удалить услуги"\
             ng-show="btn_delete_visible()"\
             ng-click="eventctrl.remove_service(event, idx)"><span class="glyphicon glyphicon-trash"></span>\
     </button>\
@@ -134,8 +136,8 @@ angular.module('WebMis20.directives').
             };
         }
     ]).
-    directive('wmEventServiceRecord', ['WMEventFormState', 'WMEventController', 'ActionTypeTreeModal',
-        function(WMEventFormState, WMEventController, ActionTypeTreeModal) {
+    directive('wmEventServiceRecord', ['WMEventFormState', 'WMEventController', 'ActionTypeTreeModal', '$filter',
+        function(WMEventFormState, WMEventController, ActionTypeTreeModal, $filter) {
             return {
                 restrict: 'A',
                 scope: {
@@ -166,23 +168,36 @@ angular.module('WebMis20.directives').
                         });
                     };
                     scope.get_info_text = function () {
-                        return 'Осмотр: Идентификатор {0}, Дата {1}'.format(scope.action.action_id, scope.action.beg_date);
+                        var msg = [
+                            'Идентификатор: ' + scope.action.action_id,
+                            'Дата начала: ' + $filter('asDateTime')(scope.action.beg_date),
+                            'Дата окончания: ' + $filter('asDateTime')(scope.action.end_date),
+                            'Статус: ' + scope.action.status,
+                            scope.formstate.is_dms() ?
+                                'Согласовано: ' + (
+                                    scope.action.is_coordinated() ?
+                                        '' + $filter('asDateTime')(scope.action.coord_date) + ', ' + (
+                                            scope.action.coord_person.name ? scope.action.coord_person.name : '') :
+                                        'нет') :
+                                ''
+                        ];
+                        return msg.join('; ');
                     };
 
                     scope.amount_disabled = function () {
                         return scope.action.account || scope.action.is_coordinated();
                     };
                     scope.btn_coordinate_visible = function () {
-                        return !scope.action.is_coordinated() && true; // todo: action not closed
+                        return !scope.action.is_coordinated() && !scope.action.is_closed();
                     };
                     scope.btn_cancel_coordinate_visible = function () {
-                        return scope.action.is_coordinated() && true; // todo: action not closed
+                        return scope.action.is_coordinated() && !scope.action.is_closed();
                     };
                     scope.btn_delete_visible = function () {
-                        return !scope.action.is_paid_for() && !scope.action.is_coordinated() && true; // todo: action not closed
+                        return !scope.action.is_paid_for() && !scope.action.is_coordinated() && !scope.action.is_closed();
                     };
                     scope.lab_components_disabled = function () {
-                        return scope.action.account || scope.action.is_coordinated()
+                        return scope.action.account || scope.action.is_coordinated() || scope.action.is_closed();
                     };
                 },
                 template:

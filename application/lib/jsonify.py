@@ -647,6 +647,7 @@ class EventVisualizer(object):
                 'amount': a.amount,
                 'beg_date': a.begDate,
                 'end_date': a.endDate,
+                'status': a.status,
                 'coord_date': a.coordDate,
                 'coord_person': person_vis.make_person(a.coordPerson) if a.coordPerson else None,
                 'sum': service['price'] * a.amount,
