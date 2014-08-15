@@ -114,6 +114,38 @@ def api_refbook(name):
     return abort(404)
 
 
+@cache.memoize(86400)
+def int_api_thesaurus(code):
+    from models.exists import rbThesaurus
+    flat = []
+
+    def make(item):
+        """
+        :type item: rbThesaurus
+        :return:
+        """
+        flat.append((
+            item.id,
+            item.group_id,
+            item.code,
+            item.name,
+            item.template,
+        ))
+        map(make, rbThesaurus.query.filter(rbThesaurus.group_id == item.id))
+    map(make, rbThesaurus.query.filter(rbThesaurus.code == code))
+    return flat
+
+
+
+@app.route('/api/rbThesaurus/')
+@app.route('/api/rbThesaurus/<code>')
+@public_endpoint
+def api_thesaurus(code=None):
+    if not code:
+        return jsonify(None)
+    return jsonify(int_api_thesaurus(code))
+
+
 @app.route('/api/kladr/city/search/')
 @app.route('/api/kladr/city/search/<search_query>/')
 @app.route('/api/kladr/city/search/<search_query>/<limit>/')

@@ -2,7 +2,128 @@
 /*global jQuery, $, FileReader*/
 /*jslint browser:true*/
 'use strict';
-angular.module('WebMis20.directives.wysiwyg', [])
+angular.module('WebMis20.directives.wysiwyg', ['WebMis20.directives.goodies'])
+.service('ThesaurusService', ['$http', '$q', 'FlatTree',function ($http, $q, FlatTree) {
+    var cache = {};
+    function convert(item) {
+        return {
+            id: item[0],
+            parent_id: item[1],
+            code: item[2],
+            name: item[3],
+            template: item[4]
+        }
+    }
+    function makeObject(item) {
+        if (!item) {
+            return {
+                id: null,
+                parent_id: null,
+                code: null,
+                name: null,
+                template: ''
+            }
+        } else {
+            return item
+        }
+    }
+    var Thesaurus = function (data) {
+        var list = data.map(convert);
+        var tree = new FlatTree('parent_id').set_array(list).filter().render(makeObject);
+        this.tree = tree.root;
+        this.dict = tree.idDict;
+    };
+    this.getThesaurus = function (code) {
+        var defer = $q.defer();
+        if (cache.hasOwnProperty(code)) {
+            defer.resolve(cache[code])
+        } else {
+            $http.get(rbThesaurus_root + code)
+            .success(function (data) {
+                var result = cache[code] = new Thesaurus(data.result);
+                defer.resolve(result)
+            })
+        }
+        return defer.promise;
+    }
+}])
+.service('AsideThesaurus', ['ThesaurusService', '$modal', '$q', '$templateCache', function (ThesaurusService, $modal, $q, $templateCache) {
+    var widgets = {}; // зарегистрированные виджеты, которые будут дизейблиться при открытии тезауруса (чтобы не открыть несколько тезаурусов)
+
+    // Функции для апдейта зарегистрированных виджетов
+    function onStateChange(state) {
+        angular.forEach(widgets, function (value, key) {
+            value.call(null, state);
+        });
+    }
+    function disableWidgets() {onStateChange(true)}
+    function enableWidgets() {onStateChange(false)}
+
+    // Рендер вида
+    function buildList(list) {
+        return '<ul>{0}</ul>'.format(list.map(buildNode).join(''))
+    }
+    function buildNode(node) {
+        if (!node.children.length) {
+            return '<li><a ng-click="select(\'{0}\')"><i class="fa fa-angle-double-right">&nbsp;</i>{1}</a></li>'.format(node.id, node.name)
+        } else {
+            return '<li><a ng-click="select(\'{0}\')"><i class="fa fa-angle-double-right">&nbsp;</i>{1}</a>{2}</li>'.format(node.id, node.name, buildList(node.children))
+        }
+    }
+    this.openThesaurus = function (code, selectCallback) {
+        disableWidgets(true);
+        var defer = $q.defer();
+        var myAside;
+        ThesaurusService.getThesaurus(code).then(function (thesaurus) {
+            myAside = $modal.open({
+                windowTemplateUrl: '/WebMis20/aside-thesaurus.html',
+                template: $templateCache.get('/WebMis20/aside-thesaurus/tree.html').format(buildList(thesaurus.tree.children)),
+                backdrop: false,
+                windowClass: 'aside',
+                controller: function ($scope) {
+                    function renderThesaurusTemplate(node_id) {
+                        var node = thesaurus.dict[node_id];
+                        if (!node) {return ''}
+                        var template = node.template;
+                        if (template.indexOf('%s') > -1) {
+                            return template.replace('%s', renderThesaurusTemplate(node.parent_id));
+                        } else {
+                            return template;
+                        }
+                    }
+                    $scope.select = function (node_id) {
+                        selectCallback.call(null, renderThesaurusTemplate(node_id).replace('%n', '\n') + ' ');
+                    };
+                }
+            });
+            myAside.result.then(enableWidgets, enableWidgets);
+            defer.resolve(myAside);
+        });
+        return defer.promise;
+    };
+    this.registerWidget = function (hashKey, setter) {
+        widgets[hashKey] = setter
+    }
+}])
+.directive('wysiwygOpenThesaurus', ['AsideThesaurus', function (AsideThesaurus) {
+    return {
+        restrict: 'A',
+        link: function (scope, element, attributes) {
+            AsideThesaurus.registerWidget(scope.$id, function onStateChange(value) {
+                attributes.$set('disabled', value)
+            });
+            scope.$on('$destroy', function() {
+                AsideThesaurus.registerWidget(scope.$$hashKey)
+            });
+            var jqElement = $(element);
+            jqElement.click(function (event) {
+                event.preventDefault();
+                var code = scope.$eval(attributes.wysiwygOpenThesaurus);
+                AsideThesaurus.openThesaurus(code, scope.insertText);
+            })
+        }
+    }
+}])
 .directive('wysiwyg', ['$q', '$compile', '$templateCache', function ($q, $compile, $templateCache) {
     var readFileIntoDataUrl = function (fileInfo) {
         var loader = $q.defer(),
@@ -19,19 +140,6 @@ angular.module('WebMis20.directives.wysiwyg', [])
         return html && html.replace(/(<br>|\s|<div><br><\/div>|&nbsp;)*$/, '');
     };
     var defaults = {
-        hotKeys: {
-            'ctrl+b meta+b': 'bold',
-            'ctrl+i meta+i': 'italic',
-            'ctrl+u meta+u': 'underline',
-            'ctrl+z meta+z': 'undo',
-            'ctrl+y meta+y meta+shift+z': 'redo',
-            'ctrl+l meta+l': 'justifyleft',
-            'ctrl+r meta+r': 'justifyright',
-            'ctrl+e meta+e': 'justifycenter',
-            'ctrl+j meta+j': 'justifyfull',
-            'shift+tab': 'outdent',
-            'tab': 'indent'
-        },
         toolbarSelector: '[data-role=editor-toolbar]',
         commandRole: 'edit',
         activeToolbarClass: 'btn-info',
@@ -45,23 +153,20 @@ angular.module('WebMis20.directives.wysiwyg', [])
     return {
         restrict: 'E',
         scope: {
-            userOptions: '='
+            userOptions: '=',
+            thesaurusCode: '@',
+            complainsCode: '@'
         },
         require: '^ngModel',
         link: function (scope, element, attributes, ngModel) {
             scope.$model = ngModel;
             var toolbar = $($templateCache.get('/WebMis20/wysiwyg-toolbar.html'));
-            var editor = $('<div style="padding: 10px; overflow: scroll;"></div>');
+            var editor = $('<div style="padding: 10px; overflow: auto; min-height: 40px; max-height: 500px" contenteditable></div>');
             var replace = $('<div class="panel panel-default" style="padding: 0"></div>');
             toolbar.find('.dropdown-menu input')
                 .click(function() {return false;})
                 .change(function () {$(this).parent('.dropdown-menu').siblings('.dropdown-toggle').dropdown('toggle');})
                 .keydown('esc', function () {this.value='';$(this).change();});
-            toolbar.find('[data-role=magic-overlay]')
-                .each(function () {
-                    var overlay = $(this), target = $(overlay.data('target'));
-                    overlay.css('opacity', 0).css('position', 'absolute').offset(target.offset()).width(target.outerWidth()).height(target.outerHeight());
-                });
             var selectedRange,
                 options,
                 toolbarBtnSelector,
@@ -102,7 +207,6 @@ angular.module('WebMis20.directives.wysiwyg', [])
                             document.body.createTextRange().select();
                             document.selection.empty();
                         }
-
                         selection.addRange(selectedRange);
                     }
                 },
@@ -184,20 +288,36 @@ angular.module('WebMis20.directives.wysiwyg', [])
                 initFileDrops();
             }
             bindToolbar(toolbar, options);
-            editor.attr('contenteditable', true);
+
+            var updateModelLock = false; // Этот костыль предотвращает нежелательный апдейт вида данными модели
+            function updateModel() {
+                updateModelLock = true;
+                ngModel.$setViewValue(cleanHtml(editor.html()));
+                ngModel.$render();
+            }
+
             editor.on('mouseup keyup mouseout', function () {
                 if (editor.is(':focus')) {
                     saveSelection();
                     updateToolbar();
-                    ngModel.$setViewValue(cleanHtml(editor.html()));
-                    ngModel.$render();
+                    updateModel();
                 }
             });
-            editor.height('200px');
 
+            scope.insertText = function (myValue) {
+                editor.focus();
+                restoreSelection();
+                execCommand('insertText', myValue);
+                saveSelection();
+                updateModel();
+            };
+            
             scope.$watch('$model.$modelValue', function (n, o) {
-                if (angular.equals(n, o)) return;
-                editor.html(n);
+                if (updateModelLock) {
+                    updateModelLock = false
+                } else {
+                    editor.html(n);
+                }
                 return n;
             });
 
@@ -230,11 +350,14 @@ angular.module('WebMis20.directives.wysiwyg', [])
     $templateCache.put('/WebMis20/wysiwyg-toolbar.html',
         '<div class="btn-toolbar" data-role="editor-toolbar" data-target="#editor">\
             <div class="btn-group">\
-                <a class="btn dropdown-toggle" data-toggle="dropdown" title="Font"><i class="icon-font"></i><b class="caret"></b></a>\
+                <a class="btn" wysiwyg-open-thesaurus="thesaurusCode" ng-if="thesaurusCode"><i class="fa fa-list-alt"></i></a>\
+            </div>\
+            <div class="btn-group">\
+                <a class="btn dropdown-toggle" data-toggle="dropdown" title="Font"><i class="fa fa-font"></i><b class="caret"></b></a>\
                 <ul class="dropdown-menu">{0}</ul>\
             </div>\
             <div class="btn-group">\
-                <a class="btn dropdown-toggle" data-toggle="dropdown" title="Font Size"><i class="icon-text-height"></i>&nbsp;<b class="caret"></b></a>\
+                <a class="btn dropdown-toggle" data-toggle="dropdown" title="Font Size"><i class="fa fa-text-height"></i>&nbsp;<b class="caret"></b></a>\
                 <ul class="dropdown-menu">\
                     <li><a data-edit="fontSize 4"><font size="4">Крупный</font></a></li>\
                     <li><a data-edit="fontSize 3"><font size="3">Нормальный</font></a></li>\
@@ -242,40 +365,60 @@ angular.module('WebMis20.directives.wysiwyg', [])
                 </ul>\
             </div>\
             <div class="btn-group">\
-                <a class="btn" data-edit="bold" title="Bold (Ctrl/Cmd+B)"><i class="icon-bold"></i></a>\
-                <a class="btn" data-edit="italic" title="Italic (Ctrl/Cmd+I)"><i class="icon-italic"></i></a>\
-                <a class="btn" data-edit="strikethrough" title="Strikethrough"><i class="icon-strikethrough"></i></a>\
-                <a class="btn" data-edit="underline" title="Underline (Ctrl/Cmd+U)"><i class="icon-underline"></i></a>\
+                <a class="btn" data-edit="bold" title="Bold (Ctrl/Cmd+B)"><i class="fa fa-bold"></i></a>\
+                <a class="btn" data-edit="italic" title="Italic (Ctrl/Cmd+I)"><i class="fa fa-italic"></i></a>\
+                <a class="btn" data-edit="strikethrough" title="Strikethrough"><i class="fa fa-strikethrough"></i></a>\
+                <a class="btn" data-edit="underline" title="Underline (Ctrl/Cmd+U)"><i class="fa fa-underline"></i></a>\
             </div>\
             <div class="btn-group">\
-                <a class="btn" data-edit="insertunorderedlist" title="Bullet list"><i class="icon-list-ul"></i></a>\
-                <a class="btn" data-edit="insertorderedlist" title="Number list"><i class="icon-list-ol"></i></a>\
-                <a class="btn" data-edit="outdent" title="Reduce indent (Shift+Tab)"><i class="icon-indent-left"></i></a>\
-                <a class="btn" data-edit="indent" title="Indent (Tab)"><i class="icon-indent-right"></i></a>\
+                <a class="btn" data-edit="insertunorderedlist" title="Bullet list"><i class="fa fa-list-ul"></i></a>\
+                <a class="btn" data-edit="insertorderedlist" title="Number list"><i class="fa fa-list-ol"></i></a>\
+                <a class="btn" data-edit="outdent" title="Reduce indent (Shift+Tab)"><i class="fa fa-indent-left"></i></a>\
+                <a class="btn" data-edit="indent" title="Indent (Tab)"><i class="fa fa-indent-right"></i></a>\
             </div>\
             <div class="btn-group">\
-                <a class="btn" data-edit="justifyleft" title="Align Left (Ctrl/Cmd+L)"><i class="icon-align-left"></i></a>\
-                <a class="btn" data-edit="justifycenter" title="Center (Ctrl/Cmd+E)"><i class="icon-align-center"></i></a>\
-                <a class="btn" data-edit="justifyright" title="Align Right (Ctrl/Cmd+R)"><i class="icon-align-right"></i></a>\
-                <a class="btn" data-edit="justifyfull" title="Justify (Ctrl/Cmd+J)"><i class="icon-align-justify"></i></a>\
+                <a class="btn" data-edit="justifyleft" title="Align Left (Ctrl/Cmd+L)"><i class="fa fa-align-left"></i></a>\
+                <a class="btn" data-edit="justifycenter" title="Center (Ctrl/Cmd+E)"><i class="fa fa-align-center"></i></a>\
+                <a class="btn" data-edit="justifyright" title="Align Right (Ctrl/Cmd+R)"><i class="fa fa-align-right"></i></a>\
+                <a class="btn" data-edit="justifyfull" title="Justify (Ctrl/Cmd+J)"><i class="fa fa-align-justify"></i></a>\
             </div>\
             <div class="btn-group">\
-                <a class="btn dropdown-toggle" data-toggle="dropdown" title="Hyperlink"><i class="icon-link"></i></a>\
+                <a class="btn dropdown-toggle" data-toggle="dropdown" title="Hyperlink"><i class="fa fa-link"></i></a>\
                 <div class="dropdown-menu input-append">\
                     <input class="form-control" placeholder="URL" type="text" data-edit="createLink"/>\
                     <button class="btn" type="button">Add</button>\
                 </div>\
-                <a class="btn" data-edit="unlink" title="Remove Hyperlink"><i class="icon-cut"></i></a>\
+                <a class="btn" data-edit="unlink" title="Remove Hyperlink"><i class="fa fa-cut"></i></a>\
             </div>\
             <div class="btn-group">\
-                <a class="btn" title="Insert picture (or just drag & drop)" id="pictureBtn"><i class="icon-picture"></i></a>\
-                <input type="file" data-role="magic-overlay" data-target="#pictureBtn" data-edit="insertImage" />\
+                <a class="btn" data-edit="undo" title="Undo (Ctrl/Cmd+Z)"><i class="fa fa-undo"></i></a>\
+                <a class="btn" data-edit="redo" title="Redo (Ctrl/Cmd+Y)"><i class="fa fa-repeat"></i></a>\
             </div>\
-            <div class="btn-group">\
-                <a class="btn" data-edit="undo" title="Undo (Ctrl/Cmd+Z)"><i class="icon-undo"></i></a>\
-                <a class="btn" data-edit="redo" title="Redo (Ctrl/Cmd+Y)"><i class="icon-repeat"></i></a>\
-            </div>\
-        </div>'.format(fonts.map(makeFontSelector).join('')))
+        </div>'.format(fonts.map(makeFontSelector).join('')));
+    $templateCache.put('/WebMis20/aside-thesaurus/tree.html',
+'<div class="aside-header">\
+    <button type="button" class="close" ng-click="$dismiss()">&times;</button>\
+    <h4 class="aside-title">Тезаурус</h4>\
+</div>\
+<div class="aside-body ui-treeview">{0}</div>\
+<div class="aside-footer">\
+    <button type="button" class="btn btn-default" ng-click="$dismiss()">Закрыть</button>\
+</div>'
+    );
+    $templateCache.put('/WebMis20/aside-thesaurus/custom.html',
+"<div tabindex=\"-1\" role=\"dialog\" class=\"modal fade\" ng-class=\"{in: animate}\" ng-style=\"{'z-index': 1050 + index*10, display: 'block'}\" ng-click=\"close($event)\">\
+    <div class=\"modal-dialog\" ng-class=\"{'modal-sm': size == 'sm', 'modal-lg': size == 'lg'}\"><div class=\"modal-content\" ng-transclude></div></div>\n\
+</div>"
+    );
+    $templateCache.put('/WebMis20/aside-thesaurus.html',
+'<div class="aside right fade in" tabindex="-1" role="dialog">\
+    <div class="aside-dialog">\
+        <div class="aside-content">\
+            <div ng-transclude></div>\
+        </div>\
+    </div>\
+</div>'
+    );
 }])
 ;
 

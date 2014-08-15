@@ -24,10 +24,13 @@ angular.module('WebMis20.ActionLayout', ['WebMis20.validators', 'WebMis20.direct
                         var property_code = 'action.get_property(' + tag.id + ')';
 
                         switch (property.type.type_name) {
+                            case 'Constructor':
+                                inner_template = '<wysiwyg ng-model="{0}.value" thesaurus-code="{1}" />'.format('{0}', property.type.domain);
+                                sas.select(tag.id, false);
+                                break;
                             case 'Text':
                             case 'Html':
                             case 'Жалобы':
-                            case 'Constructor':
                                 inner_template = '<wysiwyg ng-model="{0}.value" />';
                                 sas.select(tag.id, false);
                                 break;

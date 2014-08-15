@@ -26,17 +26,6 @@ angular.module('WebMis20.directives.goodies', [])
         this.masterField = masterField;
         var idField = this.idField = arguments[1] || 'id';
         var childrenField = this.childrenField = arguments[2] || 'children';
-        this.filter_function = arguments[4] || function () {return true};
-        this.make_object = arguments[3] || function (item) {
-            if (item === null) {
-                var result = {};
-                result[masterField] = null;
-                result[idField] = 'root';
-                result[childrenField] = [];
-                return result
-            }
-            return item
-        };
         this.masterDict = dict({
             root: []
         })
@@ -57,6 +46,7 @@ angular.module('WebMis20.directives.goodies', [])
             var master = item[masterField] || 'root';
             if (!nodes.has(master)) nodes.push(master);
         });
+        return this;
     };
     Tree.prototype.filter = function (filter_function) {
         var idDict = this.idDict,
@@ -65,19 +55,25 @@ angular.module('WebMis20.directives.goodies', [])
         var masterDict = this.masterDict = new dict({
             root: []
         });
-        var array = this.array;
-        var filtered = array.filter(function (item) {
-            return filter_function(item, idDict)
-        });
+        var filtered;
+        if (filter_function === undefined) {
+            filtered = this.array;
+        } else {
+            filtered = this.array.filter(function (item) {
+                return filter_function(item, idDict)
+            });
+        }
         filtered.forEach(function (item) {
             do {
                 var master = item[masterField] || 'root';
+                if (!idDict.hasOwnProperty(master)) {master = 'root'}
                 if (masterDict[master] === undefined) masterDict[master] = [];
                 if (masterDict[master].has(item[idField])) return;
                 masterDict[master].push(item[idField]);
                 item = idDict[master];
             } while (item)
         });
+        return this;
     };
     Tree.prototype.render = function (make_object) {
         var masterDict = this.masterDict,
