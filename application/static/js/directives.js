@@ -684,7 +684,19 @@ angular.module('WebMis20.validators', [])
       var allowNegative = attrs.hasOwnProperty('validNumberNegative');
       var regex = new RegExp('[^0-9' + (allowFloat?'\\.':'') + (allowNegative?'-':'') + ']+', 'g');
 
-      var minval = parseInt(attrs.minval);
+      var min_val,
+          max_val;
+      scope.$watch(function () {
+          return parseInt(scope.$eval(attrs.minVal));
+      }, function (n, o) {
+          min_val = n;
+      });
+      scope.$watch(function () {
+          return parseInt(scope.$eval(attrs.maxVal));
+      }, function (n, o) {
+          max_val = n;
+      });
+
       function clear_char_duplicates(string, char){
         var arr = string.split(char);
         var res;
@@ -702,9 +714,9 @@ angular.module('WebMis20.validators', [])
               return val;
           }
         var clean = clear_char_duplicates(val.replace(regex, ''), '.');
-        clean = clean !== '' ? parseFloat(clean) : minval;
-        if (!isNaN(minval)) {
-            clean = Math.max(clean, minval);
+        clean = clean !== '' ? parseFloat(clean) : min_val;
+        if (!isNaN(min_val)) {
+            clean = Math.min(Math.max(clean, min_val), max_val);
         }
         if (val !== clean) {
           ngModelCtrl.$setViewValue(clean);

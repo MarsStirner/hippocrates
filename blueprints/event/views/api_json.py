@@ -499,9 +499,10 @@ def api_get_events():
     base_query = Event.query.join(Client)
     context = EventVisualizer()
     if 'id' in flt:
+        event = base_query.filter(Event.id == flt['id']).first()
         return jsonify({
             'pages': 1,
-            'items': [context.make_short_event(base_query.filter(Event.id == flt['id']).first())]
+            'items': [context.make_short_event(event)] if event else []
         })
     if 'client_id' in flt:
         base_query = base_query.filter(Event.client_id == flt['client_id'])

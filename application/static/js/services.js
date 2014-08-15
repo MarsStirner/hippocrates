@@ -597,6 +597,9 @@ angular.module('WebMis20.services', []).
                 this.planned_end_date = aux.safe_date(this.planned_end_date);
                 this._is_paid_for = undefined;
             };
+             WMSimpleAction.prototype.is_editable = function () {
+                return false;//this.action_id || this.account || this.is_coordinated();
+            };
             WMSimpleAction.prototype.is_paid_for = function () {
                 return this._is_paid_for;
             };
@@ -913,9 +916,9 @@ angular.module('WebMis20.services', []).
                                 (a.beg_date === b.beg_date ? (a.action_id > b.action_id ? 1 : -1) : -1);
                         }
                     } else {
-                        return 1;
+                        return -1;
                     }
-                    return 1;
+                    return -1;
                 }).forEach(function (ch) {
                     ch.suffice = bank >= ch.action.sum;
                     bank -= ch.action.sum;

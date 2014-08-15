@@ -11,6 +11,25 @@ angular.module('WebMis20.directives').
                     idx: '=',
                     expanded: '='
                 },
+                controller: function ($scope) {
+                    $scope.get_min_amount = function () {
+                        var m = 0;
+                        $scope.service.actions.forEach(function (act) {
+                            if (act.action_id || act.account || act.is_coordinated()) {
+                                m += act.amount;
+                            }
+                        });
+                        return m || 1;
+                    };
+                    $scope.get_max_amount = function () {
+                        // max # of actions = 100 + sum amounts for each action
+                        var m = 100;
+                        $scope.service.actions.forEach(function (act) {
+                            m += act.amount - 1;
+                        });
+                        return m;
+                    };
+                },
                 link: function (scope, elm, attrs) {
                     scope.formstate = WMEventFormState;
                     scope.eventctrl = WMEventController;
@@ -54,15 +73,6 @@ angular.module('WebMis20.directives').
                             });
                         });
                     };
-                    scope.get_min_amount = function () {
-                        var m = 0;
-                        scope.service.actions.forEach(function (act) {
-                            if (act.action_id || act.account || act.is_coordinated()) {
-                                m += 1;
-                            }
-                        });
-                        return m || 1;
-                    };
 
                     scope.amount_disabled = function () {
                         return scope.service.fully_paid || scope.service.fully_coord;
@@ -91,9 +101,9 @@ angular.module('WebMis20.directives').
 <td ng-bind="service.at_name"></td>\
 <td ng-bind="service.price" class="text-right" ng-show="formstate.is_paid()"></td>\
 <td class="col-md-1">\
-    <input type="text" class="form-control input-sm" min="[[service.paid_count || 1]]" max="100"\
+    <input type="text" class="form-control input-sm"\
            ng-disabled="amount_disabled()" ng-model="service.total_amount"\
-           valid-number alow-float minval="1"/>\
+           valid-number min-val="get_min_amount()" max-val="get_max_amount()"/>\
 </td>\
 <td ng-bind="service.total_sum" class="text-right" ng-show="formstate.is_paid()"></td>\
 <td class="text-center" ng-show="formstate.is_paid()">\
