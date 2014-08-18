@@ -645,8 +645,8 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
                     alert(message);
                 });
         } else {
-            var formelm = angular.element($('#eventForm').find('.ng-invalid:first'));
-            $document.scrollToElement(formelm, 30, 1500)
+            var formelm = $('#eventForm').find('.ng-invalid:first');
+            $document.scrollToElement(formelm, 30, 1500);
         }
     };
 

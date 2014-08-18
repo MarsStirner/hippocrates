@@ -2,8 +2,8 @@
 
 angular.module('WebMis20.controllers').
     controller('ClientCtrl',
-        ['$scope', '$http', '$modal', 'WMClient', 'WMClientController', 'PrintingService', 'RefBookService', '$window',
-        function ($scope, $http, $modal, WMClient, WMClientController, PrintingService, RefBookService, $window) {
+        ['$scope', '$http', '$modal', 'WMClient', 'WMClientController', 'PrintingService', 'RefBookService', '$window', '$document',
+        function ($scope, $http, $modal, WMClient, WMClientController, PrintingService, RefBookService, $window, $document) {
             $scope.records = [];
             $scope.aux = aux;
             $scope.params = aux.getQueryParams(document.location.search);
@@ -114,6 +114,8 @@ angular.module('WebMis20.controllers').
                 var form = $scope.clientForm;
                 $scope.editing.submit_attempt = true;
                 if (form.$invalid) {
+                    var formelm = $('#clientForm').find('.ng-invalid:first');
+                    $document.scrollToElement(formelm, 30, 1500);
                     return false;
                 }
                 $scope.client.save().then(function(new_client_id) {
