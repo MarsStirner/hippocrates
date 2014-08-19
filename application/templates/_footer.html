@@ -3,6 +3,7 @@
 <!-- Placed at the end of the document so the pages load faster -->
 <script>
     var rb_root = '{{ url_for('api_refbook') }}',
+        rbThesaurus_root = '{{ url_for('api_thesaurus') }}',
         url_client_get = '{{ url_for('patients.api_patient_get') }}',
         url_client_save = '{{ url_for('patients.api_patient_save') }}',
         url_client_html = '{{ url_for('patients.patient') }}',
@@ -62,10 +63,6 @@
 <script src="{{ url_for('static', filename='bootstrap/js/bootstrap.min.js') }}"></script>
 <script src="{{ url_for('static', filename='angular.js/ui-bootstrap-tpls.js') }}"></script>
 
-<script src="{{ url_for('static', filename='ckeditor/ckeditor.js') }}"></script>
-<script src="{{ url_for('static', filename='ckeditor/config.js') }}"></script>
-<script src="{{ url_for('static', filename='angular.js/ng-ckeditor.src.js') }}"></script>
-
 <script src="{{ url_for('static', filename='select2/select2.js') }}"></script>
 <script src="{{ url_for('static', filename='select2/select2_locale_ru.js') }}"></script>
 <script src="{{ url_for('static', filename='angular-ui-select/select.js') }}"></script>
@@ -81,6 +78,7 @@
 <script src="{{ url_for('static', filename='js/directives/person_tree.js', v=version) }}"></script>
 <script src="{{ url_for('static', filename='js/directives/action-type-tree.js', v=version) }}"></script>
 <script src="{{ url_for('static', filename='js/directives/action-layout.js', v=version) }}"></script>
+<script src="{{ url_for('static', filename='js/directives/bootstrap-wysiwyg.js', v=version) }}"></script>
 <script src="{{ url_for('static', filename='js/services.js', v=version) }}"></script>
 <script src="{{ url_for('static', filename='js/services/appointment_dialog.js', v=version) }}"></script>
 <script src="{{ url_for('static', filename='js/controllers.js', v=version) }}"></script>

@@ -6,6 +6,16 @@ from application.lib.agesex import AgeSex
 # from application.models.actions import Action
 
 
+class rbThesaurus(db.Model):
+    __tablename__ = u'rbThesaurus'
+
+    id = db.Column(db.Integer, primary_key=True)
+    group_id = db.Column(db.Integer, index=True)
+    code = db.Column(db.String(30), nullable=False, index=True)
+    name = db.Column(db.String(255), nullable=False, server_default=u"''")
+    template = db.Column(db.String(255), nullable=False, server_default=u"''")
+
+
 class rbDocumentTypeGroup(db.Model):
     __tablename__ = 'rbDocumentTypeGroup'
 

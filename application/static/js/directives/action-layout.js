@@ -3,7 +3,7 @@
  */
 'use strict';
 
-angular.module('WebMis20.ActionLayout', ['WebMis20.validators', 'WebMis20.directives.personTree'])
+angular.module('WebMis20.ActionLayout', ['WebMis20.validators', 'WebMis20.directives.personTree', 'WebMis20.directives.wysiwyg'])
 .directive('wmActionLayout', ['$compile', 'SelectAll', function ($compile, SelectAll) {
     return {
         restrict: 'E',
@@ -15,20 +15,25 @@ angular.module('WebMis20.ActionLayout', ['WebMis20.validators', 'WebMis20.direct
             var v_groups_count = 0; // Must be set to zero before complete rebuild
 
             function build(tag) {
+                var context = arguments[1];
                 var inner_template;
                 switch (tag.tagName) {
 
                     case 'ap':
+                        if (tag.children && tag.children.length) {console.log('"ap" tags don\'t support children')}
                         var property = scope.action.get_property(tag.id);
                         if (property === undefined) return '{' + tag.id + '}';
                         var property_code = 'action.get_property(' + tag.id + ')';
 
                         switch (property.type.type_name) {
+                            case 'Constructor':
+                                inner_template = '<wysiwyg ng-model="{0}.value" thesaurus-code="{1}" />'.format('{0}', property.type.domain);
+                                sas.select(tag.id, false);
+                                break;
                             case 'Text':
                             case 'Html':
                             case 'Жалобы':
-                            case 'Constructor':
-                                inner_template = '<textarea ckeditor="ckEditorOptions" ng-model="{0}.value"></textarea>';
+                                inner_template = '<wysiwyg ng-model="{0}.value" />';
                                 sas.select(tag.id, false);
                                 break;
                             case 'Date':
@@ -96,22 +101,50 @@ angular.module('WebMis20.ActionLayout', ['WebMis20.validators', 'WebMis20.direct
                                 inner_template = '<span ng-bind="{0}.value"></span>';
                         }
                         var property_name = tag.title || property.type.name;
-                        return '<div class="row">\
+                        var template;
+                        if (context === undefined) {
+                            template = '<div class="row">\
                             <div class="col-sm-3">\
                                 <wm-checkbox select-all="sas" key="{2}">{0}</wm-checkbox>\
                             </div>\
                             <div class="col-sm-9"><div ng-show="sas.selected({2})">{1}</div></div>\
-                        </div>'
-                        .format(
-                            property_name,
-                            inner_template.format(property_code),
-                            property.type.id
-                        );
+                        </div>'.format(
+                                property_name,
+                                inner_template.format(property_code),
+                                property.type.id
+                            );
+                        } else {
+                            if (context.tag.tagName == 'table') {
+                                template = '<tr>\
+                                    <td><label><input type="checkbox" ng-model="{1}.is_assigned">{0}</label></td>\
+                                    <td>{2}</td>\
+                                    <td>{3}</td>\
+                                </tr>'.format(
+                                    property_name,
+                                    property_code,
+                                    inner_template.format(property_code),
+                                    property.type.unit.code
+                                );
+                            } else if (context.tag.tagName == 'vgroup') {
+                                template = '<div class="row">\
+                                    <div class="col-sm-3">\
+                                        <label><input type="checkbox" ng-model="{1}.is_assigned">{0}</label>\
+                                    </div>\
+                                    <div class="col-sm-9"><div ng-show="sas.selected({2})">{1}</div></div>\
+                                </div>'.format(
+                                    property_name,
+                                    property_code,
+                                    inner_template.format(property_code),
+                                    property.type.id
+                                );
+                            }
+                        }
+                        return template;
 
                     case 'vgroup':
                         var title = tag.title;
                         inner_template = tag.children.map(function (child) {
-                            return '<li class="list-group-item">{0}</li>'.format(build(child))
+                            return '<li class="list-group-item">{0}</li>'.format(build(child, {tag: tag}))
                         }).join('');
                         var result =  '<div class="panel panel-default">\
                                 <div class="panel-heading"><label><wm-checkbox select-all="sas_vgroup" key="{2}" />{0}</label></div>\
@@ -135,6 +168,12 @@ angular.module('WebMis20.ActionLayout', ['WebMis20.validators', 'WebMis20.direct
                             return '<div class="col-md-{0}">{1}</div>'.format(w, build(child))
                         }).join('');
                         return '<div class="row">{0}</div>'.format(inner_template);
+
+                    case 'table':
+                        return '<table class="table table-condensed">{0}</table>'.format(tag.children.map(function (child) {
+                            if (child.tag.tagName != 'ap') {throw '"table" tags only support "ap" children';}
+                            return build(child, {tag: tag});
+                        }).join(''));
 
                     case 'root':
                         inner_template = tag.children.map(function (child) {

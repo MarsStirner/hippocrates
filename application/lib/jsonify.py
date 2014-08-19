@@ -775,13 +775,17 @@ class ActionVisualizer(object):
         """
         @type prop: ActionProperty
         """
-        maker = getattr(self, 'make_ap_%s' % prop.type.typeName, lambda v: v)
+        if prop.value is None:
+            value = None
+        else:
+            maker = getattr(self, 'make_ap_%s' % prop.type.typeName, None)
+            value = maker(prop.value) if maker else prop.value
         return {
             'id': prop.id,
             'idx': prop.type.idx,
             'type': prop.type,
             'is_assigned': prop.isAssigned,
-            'value': maker(prop.value),
+            'value': value,
         }
 
     # Здесь будут кастомные мейкеры экшон пропертей.
