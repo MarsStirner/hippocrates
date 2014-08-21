@@ -16,8 +16,7 @@ from application.models.event import (Event, EventType, Diagnosis, Diagnostic, E
                                       rbVisitType, rbScene, Event_Persons)
 from application.models.exists import Person, OrgStructure
 from application.systemwide import db
-from application.lib.utils import (jsonify, safe_traverse, get_new_uuid, logger,
-                                   string_to_datetime, get_new_event_ext_id)
+from application.lib.utils import (jsonify, safe_traverse, get_new_uuid, logger, get_new_event_ext_id, safe_datetime)
 from blueprints.event.app import module
 from application.models.exists import (Organisation, )
 from application.lib.jsonify import EventVisualizer, ClientVisualizer
@@ -107,7 +106,7 @@ def api_event_save():
         event.deleted = event_data['deleted']
         event.eventType = EventType.query.get(event_data['event_type']['id'])
         event.execPerson = execPerson
-        event.setDate = string_to_datetime(event_data['set_date'])
+        event.setDate = safe_datetime(event_data['set_date'])
         event.contract_id = event_data['contract']['id']
         event.isPrimaryCode = event_data['is_primary']['id']
         event.order = event_data['order']['id']
@@ -122,7 +121,7 @@ def api_event_save():
         event.eventType = EventType.query.get(event_data['event_type']['id'])
         event.client_id = event_data['client_id']
         event.execPerson = execPerson
-        event.setDate = string_to_datetime(event_data['set_date'])
+        event.setDate = safe_datetime(event_data['set_date'])
         event.externalId = get_new_event_ext_id(event.eventType.id, event.client_id)
         event.contract_id = event_data['contract']['id']
         event.isPrimaryCode = event_data['is_primary']['id']
@@ -152,7 +151,7 @@ def api_event_save():
 
     if close_event:
         exec_date = event_data['exec_date']
-        event.execDate = string_to_datetime(exec_date) if exec_date else datetime.datetime.now()
+        event.execDate = safe_datetime(exec_date) if exec_date else datetime.datetime.now()
 
     try:
         db.session.commit()

@@ -822,7 +822,7 @@ var WebMis20 = angular.module('WebMis20', [
           items: '=',
           disabled: '=ngDisabled',
           freetext: '@',
-          builder: '&',
+          builder: '=',
           "class": '@'
         },
         require: '?ngModel',
