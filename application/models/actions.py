@@ -3,7 +3,7 @@ import datetime
 from application.systemwide import db
 from exists import FDRecord
 from sqlalchemy.orm.collections import InstrumentedList
-from application.models.utils import safe_current_user_id
+from application.models.utils import safe_current_user_id, get_model_by_name
 
 __author__ = 'mmalkov'
 
@@ -97,7 +97,7 @@ class ActionProperty(db.Model):
             class_name = 'FDRecord'
         else:
             class_name = type_name
-        return '_value_{}'.format(class_name)
+        return '_value_{0}'.format(class_name)
 
     @property
     def value_object(self):
@@ -399,10 +399,16 @@ class ActionProperty_RLS(ActionProperty_Integer_Base):
 class ActionProperty_ReferenceRb(ActionProperty_Integer_Base):
 
     @property
-    def data(self):
-        domain = ActionProperty.query.get(self.id).type.valueDomain
-        table_name = domain.split(';')[0]
-        return db.session.query(table_name).get(self.value)
+    def value(self):
+        if not hasattr(self, 'table_name'):
+            domain = ActionProperty.query.get(self.id).type.valueDomain
+            self.table_name = domain.split(';')[0]
+        model = get_model_by_name(self.table_name)
+        return model.query.get(self.value_)
+
+    @value.setter
+    def value(self, val):
+        self.value_ = val.id if val is not None else None
 
     property_object = db.relationship('ActionProperty', backref='_value_ReferenceRb')
 
@@ -608,6 +614,7 @@ class ActionType(db.Model):
     testTubeType_id = db.Column(db.Integer, index=True)
     jobType_id = db.Column(db.ForeignKey('rbJobType.id'), index=True)
     mnem = db.Column(db.String(32), server_default=u"''")
+    layout = db.Column(db.Text)
 
     service = db.relationship(u'rbService', foreign_keys='ActionType.service_id')
     nomenclatureService = db.relationship(u'rbService', foreign_keys='ActionType.nomenclativeService_id')
@@ -631,6 +638,7 @@ class ActionType(db.Model):
             'id': self.id,
             'code': self.code,
             'name': self.name,
+            'class': self.class_,
             'flat_code': self.flatCode,
             'title': self.title,
             'context_name': self.context,

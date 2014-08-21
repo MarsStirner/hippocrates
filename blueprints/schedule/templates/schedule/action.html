@@ -6,48 +6,115 @@
     <a href="{{ url_for('patients.patient') }}?client_id=[[action.action.client.id]]">
                 [[ action.action.client.full_name ]]</a></legend>
 <div>
-    <table id="general_action_info" class="table table-condensed">
-        <tbody>
-        <tr>
-            <td>
-                <label for="begDate" class="control-label">Начато</label>
-            </td>
-            <td>
-                <input id="begDate" type="text" class="form-control" datepicker-popup="dd.MM.yyyy" ng-model="action.action.begDate"/>
-            </td>
-            <td>
-                <div ng-model="action.action.begDate" style="display:inline-block;">
-                      <timepicker show-meridian="false"></timepicker>
+    <div class="form-horizontal">
+    <div class="row" ng-if="!is_med_doc()">
+        <div class="col-md-9">
+            <div class="form-group">
+                <label for="direction_date" class="col-md-2 control-label">Назначено</label>
+                <div class="col-md-3">
+                    <wm-date id="direction_date" name="direction_date" ng-model="action.action.direction_date"></wm-date>
                 </div>
-            </td>
-            <td>
-                <label for="endDate" class="control-label">Выполнено</label>
-            </td>
-            <td>
-                <input id="endDate" type="text" class="form-control" datepicker-popup="dd.MM.yyyy" ng-model="action.action.endDate"/>
-            </td>
-            <td>
-                <div ng-model="action.action.endDate" style="display:inline-block;">
-                      <timepicker show-meridian="false"></timepicker>
-                </div>{#ng-change="changed()"#}
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <label for="status" class="control-label">Статус</label>
-            </td>
-            <td colspan="2">
-                {{ macros.ui_select('action.action.status', 'ActionStatus', 'true') }}
-            </td>
-            <td>
-                <label for="person" class="control-label">Примечания</label>
-            </td>
-            <td colspan="2">
-                <input class="form-control" type="text" ng-model="action.action.note">
-            </td>
-        </tr>
-        </tbody>
-    </table>
+                <label for="planned_end_date" class="col-md-1 control-label">План</label>
+                <div class="col-md-3">
+                    <wm-date id="planned_end_date" name="planned_end_date" ng-model="action.action.planned_end_date"></wm-date>
+                </div>
+                <div class="col-md-2">
+                    <div class="checkbox">
+                        <label><input type="checkbox" ng-model="action.is_urgent"></label>Срочно
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row" ng-if="!is_med_doc()">
+        <div class="col-md-9">
+            <div class="form-group">
+                <label for="set_person" class="col-md-2 control-label">Назначил</label>
+                <div class="col-md-10">
+                    <wm-person-select ng-model="action.action.set_person"></wm-person-select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row" ng-if="is_med_doc() && action.action.coord_date">
+        <div class="col-md-9">
+            <div class="form-group">
+                <label for="direction_date" class="col-md-2 control-label">Согласовано</label>
+                <div class="col-md-3">
+                    <wm-date id="coord_date" name="coord_date" ng-model="action.action.coord_date"></wm-date>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-9">
+            <div class="form-group">
+                <label for="status" class="col-md-2 control-label">Состояние</label>
+                <div class="col-md-2">
+                    <select class="form-control" id="status" name="status"
+                            ng-model="action.action.status"
+                            ng-options="status as status.name for status in ActionStatus.objects track by status.id">
+                    </select>
+                </div>
+                <label for="beg_date" class="col-md-1 control-label">Начато</label>
+                <div class="col-md-3">
+                    <wm-date id="beg_date" name="beg_date" ng-model="action.action.beg_date"></wm-date>
+                </div>
+                <label for="end_date" class="col-md-1 control-label">Выполнено</label>
+                <div class="col-md-3">
+                    <wm-date id="end_date" name="end_date" ng-model="action.action.end_date"></wm-date>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-9">
+            <div class="form-group">
+                <label for="person" class="col-md-2 control-label">Исполнитель</label>
+                <div class="col-md-6">
+                    <wm-person-select id="person" name="person" ng-model="action.action.person"></wm-person-select>
+                </div>
+                <div ng-if="!is_med_doc()">
+                <label for="office" class="col-md-1 control-label">Кабинет</label>
+                <div class="col-md-3">
+                    <input type="text" id="office" name="office" class="form-control" ng-model="action.action.office">
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-9">
+            <div class="form-group">
+                <label for="amount" class="col-md-2 control-label">Количество</label>
+                <div class="col-md-2">
+                    <input type="number" id="amount" name="amount" class="form-control" ng-model="action.action.amount">
+                </div>
+                <label for="uet" class="col-md-1 control-label">УЕТ</label>
+                <div class="col-md-2">
+                    <input type="number" id="uet" name="uet" class="form-control" ng-model="action.action.uet">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-9">
+            <div class="form-group">
+                <label for="note" class="col-md-2 control-label">Примечания</label>
+                <div class="col-md-10">
+                    <input type="text" id="note" name="note" class="form-control" ng-model="action.action.note">
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+    <hr/>
     <wm-action-layout action="action"></wm-action-layout>
 {#    <table class="table table-condensed">#}
 {#        <thead>#}

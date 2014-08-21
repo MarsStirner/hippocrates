@@ -252,11 +252,13 @@ def safe_dict(obj):
 
 def string_to_datetime(date_string, fmt='%Y-%m-%dT%H:%M:%S.%fZ'):
     if date_string:
-        try:
-            date = datetime.datetime.strptime(date_string, fmt)
-        except ValueError:
-            date = datetime.datetime.strptime(date_string, '%Y-%m-%dT%H:%M:%S+00:00')  # ffs
-        return timezone('UTC').localize(date).astimezone(tz=timezone(TIME_ZONE)).replace(tzinfo=None)
+        for fmt in (fmt, '%Y-%m-%dT%H:%M:%S+00:00', '%Y-%m-%dT%H:%M:%S.%f+00:00'):
+            try:
+                dt = datetime.datetime.strptime(date_string, fmt)
+                break
+            except ValueError:
+                continue
+        return timezone('UTC').localize(dt).astimezone(tz=timezone(TIME_ZONE)).replace(tzinfo=None)
     else:
         return date_string
 
