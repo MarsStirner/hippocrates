@@ -478,9 +478,15 @@ class Diagnostic(db.Model):
     def __json__(self):
         return {
             'id': self.id,
+            'set_date': self.setDate,
+            'end_date': self.endDate,
             'MKB': self.diagnosis.mkb,
-            'diagnosisType': self.diagnosisType,
+            'diagnosis_type': self.diagnosisType,
             'character': self.character,
+            'health_group': self.healthGroup,
+            'trauma_type': self.traumaType,
+            'phase': self.phase,
+            'dispanser': self.dispanser,
             'person': self.person,
             'notes': self.notes
         }
