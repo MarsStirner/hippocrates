@@ -20,7 +20,7 @@ angular.module('WebMis20.ActionLayout', ['WebMis20.validators', 'WebMis20.direct
                 switch (tag.tagName) {
 
                     case 'ap':
-                        if (tag.children && tag.children.length) {console.log('"ap" tags don\'t support children')}
+                        if (tag.children && tag.children.length) {console.log('"ap" tags don\'t support children');}
                         var property = scope.action.get_property(tag.id);
                         if (property === undefined) return '{' + tag.id + '}';
                         var property_code = 'action.get_property(' + tag.id + ')';
@@ -68,17 +68,11 @@ angular.module('WebMis20.ActionLayout', ['WebMis20.validators', 'WebMis20.direct
                                 inner_template = '<rb-select ref-book="rbHospitalBedProfile" ng-model="{0}.value"></rb-select>';
                                 break;
                             case 'Person':
-                                inner_template =
-                                    '<ui-select ng-model="{0}.value"theme="select2" class="form-control" autocomplete="off" ref-book="Person">\
-                                        <ui-select-match placeholder="не выбрано">[[ $select.selected.name ]], [[ $select.selected.speciality.name ]]</ui-select-match>\
-                                        <ui-select-choices repeat="item in $refBook.objects | filter: $select.search | limitTo: 50">\
-                                            <span ng-bind-html="(item.name + \', \' + item.speciality.name) | highlight: $select.search"></span>\
-                                        </ui-select-choices>\
-                                    </ui-select>';
+                                inner_template = '<wm-person-select ng-model="{0}.value"></wm-person-select>';
                                 break;
                             case 'Organisation':
                                 inner_template =
-                                    '<ui-select ng-model="{0}.value"theme="select2" class="form-control" autocomplete="off" ref-book="Organisation">\
+                                    '<ui-select ng-model="{0}.value" theme="select2" class="form-control" autocomplete="off" ref-book="Organisation">\
                                         <ui-select-match placeholder="не выбрано">[[ $select.selected.full_name ]]</ui-select-match>\
                                         <ui-select-choices repeat="item in $refBook.objects | filter: $select.search | limitTo: 50">\
                                             <span ng-bind-html="item.full_name | highlight: $select.search"></span>\
@@ -94,8 +88,16 @@ angular.module('WebMis20.ActionLayout', ['WebMis20.validators', 'WebMis20.direct
                                         <wm-org-structure-tree></wm-org-structure-tree>\
                                     </wm-custom-dropdown>';
                                 break;
-                            case 'ReferenceRb': // Без фильтров
-                                inner_template = '<rb-select ref-book="{1}" ng-model="{0}.value"></rb-select>'.format('{0}', property.type.domain);
+                            case 'ReferenceRb':
+                                var domain = property.type.domain.split(';'),
+                                    rbTable = domain[0],
+                                    rb_codes = domain[1].split(',').map(function (code) {
+                                        return "'{0}'".format(code.trim());
+                                    }).filter(function (code) {
+                                        return code !== "''";
+                                    }),
+                                    extra_filter = rb_codes.length ? 'attribute:\'code\':[{0}]'.format(rb_codes.join(',')) : '';
+                                inner_template = '<rb-select ref-book="{1}" ng-model="{0}.value" extra-filter="{2}"></rb-select>'.format('{0}', rbTable, extra_filter);
                                 break;
                             case 'Diagnosis':
                                 inner_template = '<wm-diagnosis ng-model="{0}.value"></wm-diagnosis>';

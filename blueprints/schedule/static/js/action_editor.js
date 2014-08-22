@@ -20,5 +20,8 @@ var ActionEditorCtrl = function ($scope, $http, $window, WMAction, PrintingServi
         $scope.ps.set_context(data.result.action.action_type.context_name)
     }
     $scope.ActionStatus = RefBookService.get('ActionStatus');
+    $scope.is_med_doc = function () { return $scope.action.action.action_type && $scope.action.action.action_type.class === 0; };
+    $scope.is_diag_lab = function () { return $scope.action.action.action_type && $scope.action.action.action_type.class === 1; };
+    $scope.is_treatment = function () { return $scope.action.action.action_type && $scope.action.action.action_type.class === 2; };
 };
 WebMis20.controller('ActionEditorCtrl', ['$scope', '$http', '$window', 'WMAction', 'PrintingService', 'RefBookService', ActionEditorCtrl]);

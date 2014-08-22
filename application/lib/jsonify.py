@@ -8,10 +8,11 @@ from application.lib.agesex import recordAcceptableEx
 from application.models.client import Client
 from sqlalchemy.sql.functions import current_date
 from sqlalchemy.sql.expression import between
+from flask import json
 
 from application.systemwide import db
 from application.lib.data import int_get_atl_dict_all
-from application.lib.utils import safe_unicode, safe_int, safe_dict
+from application.lib.utils import safe_unicode, safe_int, safe_dict, logger
 from application.models.enums import EventPrimary, EventOrder, ActionStatus, Gender
 from application.models.event import Event, EventType, Diagnosis, Diagnostic
 from application.models.schedule import Schedule, rbReceptionType, ScheduleClientTicket, ScheduleTicket, QuotingByTime
@@ -737,9 +738,9 @@ class ActionVisualizer(object):
                 'event_id': action.event_id,
                 'client': action.event.client,
                 'direction_date': action.directionDate,
-                'begDate': action.begDate,
-                'endDate': action.endDate,
-                'planned_endDate': action.plannedEndDate,
+                'beg_date': action.begDate,
+                'end_date': action.endDate,
+                'planned_end_date': action.plannedEndDate,
                 'status': ActionStatus(action.status),
                 'set_person': action.setPerson,
                 'person': action.person,
@@ -749,6 +750,8 @@ class ActionVisualizer(object):
                 'uet': action.uet,
                 'pay_status': action.payStatus,
                 'account': action.account,
+                'is_urgent': action.isUrgent,
+                'coord_date': action.coordDate,
                 'properties': [
                     self.make_property(prop)
                     for prop in action.properties
@@ -759,15 +762,24 @@ class ActionVisualizer(object):
 
     def make_action_layout(self, action):
         """
-        :type action_type: Action
-        :param action_type:
+        :type action: Action
+        :param action:
         :return:
         """
+        at_layout = action.actionType.layout
+        if at_layout:
+            try:
+                at_layout = json.loads(at_layout)
+            except ValueError:
+                logger.warning('Bad layout for ActionType with id = %s' % action.actionType.id)
+            else:
+                return at_layout
+        # default layout
         return {
             'tagName': 'root',
             'children': [{
                 'tagName': 'ap',
-                'id': ap.type.id
+                'id': ap.type.id,
             } for ap in action.properties]
         }
     

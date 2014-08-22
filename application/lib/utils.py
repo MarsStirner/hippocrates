@@ -250,13 +250,22 @@ def safe_dict(obj):
     return obj.__json__()
 
 
-def string_to_datetime(date_string, fmt='%Y-%m-%dT%H:%M:%S.%fZ'):
+def string_to_datetime(date_string, formats=None):
+    if formats is None:
+        formats = ('%Y-%m-%dT%H:%M:%S.%fZ', '%Y-%m-%dT%H:%M:%S+00:00', '%Y-%m-%dT%H:%M:%S.%f+00:00')
+    elif not isinstance(formats, (tuple, list)):
+        formats = (formats, )
+
     if date_string:
-        try:
-            date = datetime.datetime.strptime(date_string, fmt)
-        except ValueError:
-            date = datetime.datetime.strptime(date_string, '%Y-%m-%dT%H:%M:%S+00:00')  # ffs
-        return timezone('UTC').localize(date).astimezone(tz=timezone(TIME_ZONE)).replace(tzinfo=None)
+        for fmt in formats:
+            try:
+                dt = datetime.datetime.strptime(date_string, fmt)
+                break
+            except ValueError:
+                continue
+        else:
+            raise ValueError
+        return timezone('UTC').localize(dt).astimezone(tz=timezone(TIME_ZONE)).replace(tzinfo=None)
     else:
         return date_string
 

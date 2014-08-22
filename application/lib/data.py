@@ -182,8 +182,9 @@ def update_action(action, **kwargs):
     :return: Action
     """
     # action attributes
-    for attr in ('amount', 'account', 'status', 'person_id', 'setPerson_id', 'begDate', 'endDate', 'isUrgent',
-                 'plannedEndDate', 'coordPerson_id', 'coordDate', 'note', 'uet', 'payStatus', 'contract_id'):
+    for attr in ('amount', 'account', 'status', 'person_id', 'setPerson_id', 'begDate', 'endDate', 'directionDate',
+                 'isUrgent', 'plannedEndDate', 'coordPerson_id', 'coordDate', 'note', 'uet', 'payStatus',
+                 'contract_id', 'office'):
         edited = attr in kwargs
         if edited:
             edited = kwargs.get(attr)

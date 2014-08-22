@@ -400,9 +400,11 @@ def api_action_post():
     action_desc = request.get_json()
     action_id = action_desc['id']
     data = {
-        'begDate': safe_datetime(action_desc['begDate']),
-        'endDate': safe_datetime(action_desc['endDate']),
-        'plannedEndDate': safe_datetime(action_desc['planned_endDate']),
+        'begDate': safe_datetime(action_desc['beg_date']),
+        'endDate': safe_datetime(action_desc['end_date']),
+        'plannedEndDate': safe_datetime(action_desc['planned_end_date']),
+        'directionDate': safe_datetime(action_desc['direction_date']),
+        'isUrgent': action_desc['is_urgent'],
         'status': action_desc['status']['id'],
         'setPerson_id': safe_traverse(action_desc, 'set_person', 'id'),
         'person_id':  safe_traverse(action_desc, 'person', 'id'),
@@ -411,6 +413,8 @@ def api_action_post():
         'account': action_desc['account'] or 0,
         'uet': action_desc['uet'],
         'payStatus': action_desc['pay_status'] or 0,
+        'coordDate': safe_datetime(action_desc['coord_date']),
+        'office': action_desc['office']
     }
     properties_desc = action_desc['properties']
     if action_id:

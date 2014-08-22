@@ -98,6 +98,28 @@ angular.module('WebMis20.directives')
             }
         };
     }])
+    .directive('wmPersonSelect', ['$compile', function ($compile) {
+        return {
+            restrict: 'E',
+            require: 'ngModel',
+            link: function (scope, element, attrs) {
+                var template = '\
+    <ui-select {0} {1} theme="select2" class="form-control" autocomplete="off" ref-book="Person" ng-model="{2}" {3}>\
+        <ui-select-match placeholder="не выбрано">[[ $select.selected.name ]], [[ $select.selected.speciality.name ]]</ui-select-match>\
+        <ui-select-choices repeat="item in $refBook.objects | filter: $select.search | limitTo: 50">\
+            <span ng-bind-html="(item.name + \', \' + item.speciality.name) | highlight: $select.search"></span>\
+        </ui-select-choices>\
+    </ui-select>'.format(
+                    attrs.id ? 'id="{0}"'.format(attrs.id) : '',
+                    attrs.name ? 'name="{0}"'.format(attrs.name) : '',
+                    attrs.ngModel,
+                    attrs.ngDisabled ? 'ng-disabled="{0}"'.format(attrs.ngDisabled) : ''
+                );
+                var elm = $compile(template)(scope);
+                element.replaceWith(elm);
+            }
+        }
+    }])
     .directive('uiAlertList', ['$compile', function ($compile) {
         return {
             restrict: 'A',
