@@ -2,6 +2,7 @@
 import datetime
 from application.systemwide import db
 from exists import FDRecord
+from event import Diagnostic
 from sqlalchemy.orm.collections import InstrumentedList
 from application.models.utils import safe_current_user_id
 
@@ -151,15 +152,16 @@ class ActionProperty(db.Model):
                 else:
                     set_value(value_object[0], value)
         else:
-            m = min(len(value_object), len(value))
-            for i in xrange(m):
-                value_object[i].value = value[i]
-            if len(value_object) < len(value):
-                for i in xrange(m, len(value)):
-                    value_object.append(make_value(value[i], i))
-            elif len(value_object) > len(value):
-                for i in xrange(len(value_object)-1, m-1, -1):
-                    db.session.delete(value_object[i])
+            if value is not None:
+                m = min(len(value_object), len(value))
+                for i in xrange(m):
+                    value_object[i].value = value[i]
+                if len(value_object) < len(value):
+                    for i in xrange(m, len(value)):
+                        value_object.append(make_value(value[i], i))
+                elif len(value_object) > len(value):
+                    for i in xrange(len(value_object)-1, m-1, -1):
+                        db.session.delete(value_object[i])
 
     def __json__(self):
         return {
@@ -343,6 +345,16 @@ class ActionProperty_ImageMap(ActionProperty__ValueType):
     property_object = db.relationship('ActionProperty', backref='_value_ImageMap')
 
 
+class ActionProperty_Diagnosis(ActionProperty__ValueType):
+    __tablename__ = u'ActionProperty_Diagnosis'
+    id = db.Column(db.Integer, db.ForeignKey('ActionProperty.id'), primary_key=True, nullable=False)
+    index = db.Column(db.Integer, primary_key=True, nullable=False, server_default=u"'0'")
+    value_ = db.Column('value', db.ForeignKey('Diagnostic.id'), nullable=False)
+
+    value = db.relationship('Diagnostic')
+    property_object = db.relationship('ActionProperty', backref='_value_Diagnosis')
+
+
 class ActionProperty_Integer_Base(ActionProperty__ValueType):
     __tablename__ = u'ActionProperty_Integer'
 
@@ -385,8 +397,6 @@ class ActionProperty_OperationType(ActionProperty_Integer_Base):
     @value.setter
     def value(self, val):
         self.value_ = val.id if val is not None else None
-
-
 
 
 class ActionProperty_RLS(ActionProperty_Integer_Base):

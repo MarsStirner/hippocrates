@@ -559,6 +559,102 @@ angular.module('WebMis20.directives')
                     <button type="button" class="btn btn-default" ng-click="cancel()">Отмена</button>\
                 </div>')
     }])
+    .directive('wmDiagnosis', ['DiagnosisModal', function(DiagnosisModal){
+        return{
+            restrict: 'E',
+            require: '^ngModel',
+            replace: true,
+            scope: {
+                ngModel: '='
+            },
+            controller: function ($scope) {
+                $scope.add_new_diagnosis = function () {
+                };
+                $scope.delete_diagnosis = function () {
+
+                };
+                $scope.edit_diagnosis = function (diagnosis) {
+                    DiagnosisModal.openDiagnosisModal(diagnosis);
+                };
+            },
+            template: '<div class="row">\
+                            <div class="col-md-12">\
+                                <table class="table table-condensed">\
+                                    <thead>\
+                                        <tr>\
+                                            <th>Дата начала</th>\
+                                            <th>Тип</th>\
+                                            <th>Характер</th>\
+                                            <th>Код МКБ</th>\
+                                            <th>Врач</th>\
+                                            <th>Примечание</th>\
+                                            <th></th>\
+                                            <th></th>\
+                                        </tr>\
+                                    </thead>\
+                                    <tbody>\
+                                        <tr ng-repeat="diag in ngModel">\
+                                            <td></td>\
+                                            <td>[[diag.diagnosisType.name]]</td>\
+                                            <td>[[diag.character.name]]</td>\
+                                            <td>[[diag.MKB.code]] [[diag.MKB.name]]</td>\
+                                            <td>[[diag.person.name]]</td>\
+                                            <td>[[diag.notes]]</td>\
+                                            <td>\
+                                                <button type="button" class="btn btn-sm btn-primary" title="Редактировать"\
+                                                        ng-click="edit_diagnosis(diag)"><span class="glyphicon glyphicon-pencil"></span>\
+                                                </button>\
+                                            </td>\
+                                            <td>\
+                                                <button type="button" class="btn btn-sm btn-danger" title="Удалить"\
+                                                        ng-click=""><span class="glyphicon glyphicon-trash"></span>\
+                                                </button>\
+                                            </td>\
+                                        </tr>\
+                                        <tr>\
+                                            <td colspan="6">\
+                                                <button type="button" class="btn btn-sm btn-primary" title="Добавить"\
+                                                        ng-click="">Добавить\
+                                                </button>\
+                                            </td>\
+                                        </tr>\
+                                    </tbody>\
+                                </table>\
+                            </div>\
+                        </div>',
+            link: function(scope, elm, attrs, ctrl){
+
+            }
+        }
+    }])
+.service('DiagnosisModal', ['$modal', function ($modal) {
+    return {
+        openDiagnosisModal: function (model) {
+            var Controller = function ($scope, $modalInstance) {
+                $scope.model = model;
+            };
+            var instance = $modal.open({
+                templateUrl: '/WebMis20/modal-edit-diagnosis.html',
+                controller: Controller
+            });
+            return instance.result.then(function () {
+            });
+        }
+    }
+}])
+.run(['$templateCache', function ($templateCache) {
+    $templateCache.put('/WebMis20/modal-edit-diagnosis.html',
+        '<div class="modal-header" xmlns="http://www.w3.org/1999/html">\
+            <button type="button" class="close" ng-click="$dismiss()">&times;</button>\
+            <h4 class="modal-title">Диагноз</h4>\
+        </div>\
+        <div class="modal-body">\
+        </div>\
+        <div class="modal-footer">\
+            <button type="button" class="btn btn-default" ng-click="$dismiss()">Отмена</button>\
+            <button type="button" class="btn btn-success" ng-click="$close()">OK</button>\
+        </div>')
+    }])
 ;
 angular.module('WebMis20.validators', [])
 .directive('enumValidator', function() {

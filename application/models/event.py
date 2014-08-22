@@ -415,6 +415,13 @@ class Diagnosis(db.Model):
     def __int__(self):
         return self.id
 
+    def __json__(self):
+        return {
+            'id': self.id,
+            'diagnosisType': self.diagnosisType,
+            'character': self.character
+        }
+
 
 class Diagnostic(db.Model):
     __tablename__ = u'Diagnostic'
@@ -467,6 +474,16 @@ class Diagnostic(db.Model):
 
     def __int__(self):
         return self.id
+
+    def __json__(self):
+        return {
+            'id': self.id,
+            'MKB': self.diagnosis.mkb,
+            'diagnosisType': self.diagnosisType,
+            'character': self.character,
+            'person': self.person,
+            'notes': self.notes
+        }
 
 
 def modify_service_code(original, *args):

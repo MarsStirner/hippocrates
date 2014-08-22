@@ -97,6 +97,9 @@ angular.module('WebMis20.ActionLayout', ['WebMis20.validators', 'WebMis20.direct
                             case 'ReferenceRb': // Без фильтров
                                 inner_template = '<rb-select ref-book="{1}" ng-model="{0}.value"></rb-select>'.format('{0}', property.type.domain);
                                 break;
+                            case 'Diagnosis':
+                                inner_template = '<wm-diagnosis ng-model="{0}.value"></wm-diagnosis>';
+                                break;
                             default:
                                 inner_template = '<span ng-bind="{0}.value"></span>';
                         }
