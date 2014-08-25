@@ -161,6 +161,7 @@ class ActionProperty(db.Model):
                         value_object.append(make_value(value[i], i))
                 elif len(value_object) > len(value):
                     for i in xrange(len(value_object)-1, m-1, -1):
+                        # todo: delete for complex values
                         db.session.delete(value_object[i])
 
     def __json__(self):
@@ -353,6 +354,22 @@ class ActionProperty_Diagnosis(ActionProperty__ValueType):
 
     value = db.relationship('Diagnostic')
     property_object = db.relationship('ActionProperty', backref='_value_Diagnosis')
+
+    def get_value_model(self, json_data):
+        from blueprints.event.lib.utils import create_or_update_diagnosis
+        action = self.property_object.action
+
+        if self.property_object.type.isVector:
+            diag_list = []
+            for diag_data in json_data:
+                d = create_or_update_diagnosis(action.event, diag_data, action)
+                db.session.add(d)
+                diag_list.append(d)
+            return diag_list
+        else:
+            d = create_or_update_diagnosis(action.event, json_data, action)
+            db.session.add(d)
+            return d
 
 
 class ActionProperty_Integer_Base(ActionProperty__ValueType):

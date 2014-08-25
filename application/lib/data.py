@@ -131,10 +131,7 @@ def create_action(action_type_id, event_id, src_action=None, assigned=None, prop
                 prop.value = src_props[prop_type.id].value
             elif prop_type.id in full_props:
                 prop_desc = full_props[prop_type.id]
-                if isinstance(prop_desc['value'], dict):
-                    prop.set_value(safe_traverse(prop_desc, 'value', 'id'), True)
-                else:
-                    prop.set_value(prop_desc['value'])
+                set_ap_value(prop, prop_desc['value'])
                 prop.isAssigned = prop_desc['is_assigned']
             else:
                 prop.value = None
@@ -203,14 +200,31 @@ def update_action(action, **kwargs):
         properties = kwargs.get('properties')
         for prop_desc in properties:
             prop = ActionProperty.query.get(prop_desc['id'])
-            if isinstance(prop_desc['value'], dict):
-                prop.set_value(safe_traverse(prop_desc, 'value', 'id'), True)
-            else:
-                prop.set_value(prop_desc['value'])
+            set_ap_value(prop, prop_desc['value'])
             prop.isAssigned = prop_desc['is_assigned']
             db.session.add(prop)
 
     return action
+
+
+def set_ap_value(prop, value):
+    """
+
+    :param prop: ActionProperty
+    :param value: dict|string
+    :return:
+    """
+    # todo: convert dates with safe_date
+    if isinstance(value, dict):
+        value_type_name = safe_traverse(value, 'type', 'type_name')
+        if value_type_name == 'Diagnosis':
+            value_obj = prop.value_object
+            value = value_obj.get_value_model(value)
+            prop.set_value(value)
+        else:
+            prop.set_value(safe_traverse(value, 'value', 'id'), True)
+    else:
+        prop.set_value(value)
 
 
 def create_JT(action, orgstructure_id):
