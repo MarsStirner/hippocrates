@@ -843,7 +843,7 @@ class ActionVisualizer(object):
         @type prop: ActionProperty
         """
         if prop.value is None:
-            value = None
+            value = [] if prop.type.isVector else None
         elif prop.type.isVector:
             maker = getattr(self, 'make_ap_%s' % prop.type.typeName, None)
             value = [maker(v) for v in prop.value] if maker else [v for v in prop.value]

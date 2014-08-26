@@ -1058,6 +1058,29 @@ angular.module('WebMis20.services', []).
                     local_contract: payment.local_contract,
                     payments: new PlModel(payment.payments)
                 };
+            },
+            add_new_diagnosis : function () {
+                return {
+                        "id": null,
+                        "set_date": null,
+                        "end_date": null,
+                        "diagnosis_type": null,
+                        "diagnosis": {
+                            "id": null,
+                            "mkb": null,
+                            "mkbex": null,
+                            "client_id": null
+                        },
+                        "character": null,
+                        "person": null,
+                        "notes": null,
+                        "action_id": null,
+                        "result": null,
+                        "ache_result": null,
+                        "health_group": null,
+                        "trauma_type": null,
+                        "phase": null
+                    };
             }
         };
     }]);

@@ -581,7 +581,7 @@ angular.module('WebMis20.directives')
                     <button type="button" class="btn btn-default" ng-click="cancel()">Отмена</button>\
                 </div>')
     }])
-    .directive('wmDiagnosis', ['DiagnosisModal', function(DiagnosisModal){
+    .directive('wmDiagnosis', ['DiagnosisModal', 'WMEventController', function(DiagnosisModal, WMEventController){
         return{
             restrict: 'E',
             require: '^ngModel',
@@ -591,32 +591,15 @@ angular.module('WebMis20.directives')
             },
             controller: function ($scope) {
                 $scope.add_new_diagnosis = function () {
-                    var new_diagnosis = {
-                        "id": null,
-                        "set_date": null,
-                        "end_date": null,
-                        "diagnosis_type": null,
-                        "diagnosis": {
-                            "id": null,
-                            "mkb": null,
-                            "mkbex": null,
-                            "client_id": null
-                        },
-                        "character": null,
-                        "person": null,
-                        "notes": null,
-                        "action_id": null,
-                        "result": null,
-                        "ache_result": null,
-                        "health_group": null,
-                        "trauma_type": null,
-                        "phase": null
-                    };
+                    var new_diagnosis = WMEventController.add_new_diagnosis();
                     this.ngModel.push(new_diagnosis);
                     DiagnosisModal.openDiagnosisModal(new_diagnosis);
                 };
                 $scope.delete_diagnosis = function (diagnosis) {
-                      diagnosis.deleted = 1;
+                    var index = this.ngModel.indexOf(diagnosis);
+                    if (index > -1) {
+                        this.ngModel.splice(index, 1);
+                    }
                 };
                 $scope.edit_diagnosis = function (diagnosis) {
                     DiagnosisModal.openDiagnosisModal(diagnosis);
@@ -639,7 +622,7 @@ angular.module('WebMis20.directives')
                                     </thead>\
                                     <tbody>\
                                         <tr ng-repeat="diag in ngModel">\
-                                            <td></td>\
+                                            <td>[[diag.set_date | asDate]]</td>\
                                             <td>[[diag.diagnosis_type.name]]</td>\
                                             <td>[[diag.character.name]]</td>\
                                             <td>[[diag.diagnosis.mkb.code]] [[diag.diagnosis.mkb.name]]</td>\
@@ -701,13 +684,7 @@ angular.module('WebMis20.directives')
                 <div class="row marginal">\
                     <div class="col-md-4">\
                         <label for="diagnosis_person" class="control-label">Врач</label>\
-                        <ui-select id="diagnosis_person" name="diagnosis_person" theme="select2"\
-                                   ng-model="model.person" ref-book="Person">\
-                            <ui-select-match placeholder="Лечащий врач">[[$select.selected.name]]</ui-select-match>\
-                            <ui-select-choices repeat="p in $refBook.objects | filter: $select.search">\
-                                <div ng-bind-html="p.name | highlight: $select.search"></div>\
-                            </ui-select-choices>\
-                        </ui-select>\
+                        <wm-person-select ng-model="model.person"></wm-person-select>\
                     </div>\
                     <div class="col-md-3">\
                         <label for="diagnosis_date" class="control-label">Дата начала</label>\
