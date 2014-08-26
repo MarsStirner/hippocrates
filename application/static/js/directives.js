@@ -591,9 +591,32 @@ angular.module('WebMis20.directives')
             },
             controller: function ($scope) {
                 $scope.add_new_diagnosis = function () {
+                    var new_diagnosis = {
+                        "id": null,
+                        "set_date": null,
+                        "end_date": null,
+                        "diagnosis_type": null,
+                        "diagnosis": {
+                            "id": null,
+                            "mkb": null,
+                            "mkbex": null,
+                            "client_id": null
+                        },
+                        "character": null,
+                        "person": null,
+                        "notes": null,
+                        "action_id": null,
+                        "result": null,
+                        "ache_result": null,
+                        "health_group": null,
+                        "trauma_type": null,
+                        "phase": null
+                    };
+                    this.ngModel.push(new_diagnosis);
+                    DiagnosisModal.openDiagnosisModal(new_diagnosis);
                 };
-                $scope.delete_diagnosis = function () {
-
+                $scope.delete_diagnosis = function (diagnosis) {
+                      diagnosis.deleted = 1;
                 };
                 $scope.edit_diagnosis = function (diagnosis) {
                     DiagnosisModal.openDiagnosisModal(diagnosis);
@@ -619,7 +642,7 @@ angular.module('WebMis20.directives')
                                             <td></td>\
                                             <td>[[diag.diagnosis_type.name]]</td>\
                                             <td>[[diag.character.name]]</td>\
-                                            <td>[[diag.MKB.code]] [[diag.MKB.name]]</td>\
+                                            <td>[[diag.diagnosis.mkb.code]] [[diag.diagnosis.mkb.name]]</td>\
                                             <td>[[diag.person.name]]</td>\
                                             <td>[[diag.notes]]</td>\
                                             <td>\
@@ -629,14 +652,14 @@ angular.module('WebMis20.directives')
                                             </td>\
                                             <td>\
                                                 <button type="button" class="btn btn-sm btn-danger" title="Удалить"\
-                                                        ng-click=""><span class="glyphicon glyphicon-trash"></span>\
+                                                        ng-click="delete_diagnosis(diag)"><span class="glyphicon glyphicon-trash"></span>\
                                                 </button>\
                                             </td>\
                                         </tr>\
                                         <tr>\
                                             <td colspan="6">\
                                                 <button type="button" class="btn btn-sm btn-primary" title="Добавить"\
-                                                        ng-click="">Добавить\
+                                                        ng-click="add_new_diagnosis()">Добавить\
                                                 </button>\
                                             </td>\
                                         </tr>\
@@ -652,15 +675,17 @@ angular.module('WebMis20.directives')
 .service('DiagnosisModal', ['$modal', function ($modal) {
     return {
         openDiagnosisModal: function (model) {
+            var locModel = angular.copy(model);
             var Controller = function ($scope, $modalInstance) {
-                $scope.model = model;
+                $scope.model = locModel;
             };
             var instance = $modal.open({
                 templateUrl: '/WebMis20/modal-edit-diagnosis.html',
                 size: 'lg',
                 controller: Controller
             });
-            return instance.result.then(function () {
+            return instance.result.then(function() {
+                angular.extend(model, locModel);
             });
         }
     }
@@ -677,9 +702,9 @@ angular.module('WebMis20.directives')
                     <div class="col-md-4">\
                         <label for="diagnosis_person" class="control-label">Врач</label>\
                         <ui-select id="diagnosis_person" name="diagnosis_person" theme="select2"\
-                                   ng-model="model.person">\
+                                   ng-model="model.person" ref-book="Person">\
                             <ui-select-match placeholder="Лечащий врач">[[$select.selected.name]]</ui-select-match>\
-                            <ui-select-choices repeat="p in Person.objects | filter: $select.search">\
+                            <ui-select-choices repeat="p in $refBook.objects | filter: $select.search">\
                                 <div ng-bind-html="p.name | highlight: $select.search"></div>\
                             </ui-select-choices>\
                         </ui-select>\
@@ -699,7 +724,7 @@ angular.module('WebMis20.directives')
                     <div class="col-md-4">\
                     <label for="diagnosis_type" class="control-label">Тип</label>\
                         <ui-select class="form-control" name="diagnosis_type" theme="select2"\
-                            ng-model="model.diagnosisType"\
+                            ng-model="model.diagnosis_type"\
                             ref-book="rbDiagnosisType">\
                             <ui-select-match placeholder="не выбрано">[[ $select.selected.name ]]</ui-select-match>\
                             <ui-select-choices repeat="dt in ($refBook.objects | filter: $select.search) track by dt.id">\
@@ -709,7 +734,7 @@ angular.module('WebMis20.directives')
                     </div>\
                     <div class="col-md-3">\
                         <label for="MKB" class="control-label">МКБ</label>\
-                        <ui-mkb ng-model="model.MKB"></ui-mkb>\
+                        <ui-mkb ng-model="model.diagnosis.mkb"></ui-mkb>\
                     </div>\
                     <div class="col-md-3">\
                         <label for="diagnosis_character" class="control-label">Характер</label>\
