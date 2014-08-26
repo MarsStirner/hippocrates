@@ -117,8 +117,8 @@ def create_services(event_id, service_groups, cfinance_id):
 
 def create_or_update_diagnosis(event, json_data, action=None):
     diagnostic_id = safe_traverse(json_data, 'id')
-    set_date = safe_date(safe_traverse(json_data, 'set_date'))
-    end_date = safe_date(safe_traverse(json_data, 'end_date'))
+    set_date = safe_datetime(safe_traverse(json_data, 'set_date'))
+    end_date = safe_datetime(safe_traverse(json_data, 'end_date'))
     diagnosis_type_id = safe_traverse(json_data, 'diagnosis_type', 'id')
     character_id = safe_traverse(json_data, 'character', 'id')
     person_id = safe_traverse(json_data, 'person', 'id')
@@ -164,8 +164,8 @@ def create_or_update_diagnosis(event, json_data, action=None):
     else:
         diag = Diagnostic()
         diag.event = event
-        diag.setDate = set_date
-        diag.endDate = end_date
+        diag.setDate = safe_date(set_date)
+        diag.endDate = safe_date(end_date)
         diag.diagnosisType_id = diagnosis_type_id
         diag.character_id = character_id
         diag.person_id = person_id

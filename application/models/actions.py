@@ -371,8 +371,17 @@ class ActionProperty_Diagnosis(ActionProperty__ValueType):
     index = db.Column(db.Integer, primary_key=True, nullable=False, server_default=u"'0'")
     value_ = db.Column('value', db.ForeignKey('Diagnostic.id'), nullable=False)
 
-    value = db.relationship('Diagnostic')
+    value_model = db.relationship('Diagnostic')
     property_object = db.relationship('ActionProperty', backref='_value_Diagnosis')
+
+    @property
+    def value(self):
+        return self.value_model
+
+    @value.setter
+    def value(self, val):
+        if self.value_model in db.session:
+            db.session.merge(val)
 
     @classmethod
     def format_value(cls, property, json_data):
