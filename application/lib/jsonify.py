@@ -882,4 +882,4 @@ class ActionVisualizer(object):
         :return:
         """
         evis = EventVisualizer()
-        return evis.make_diagnostic_record(diag)
+        return evis.make_diagnostic_record(value)

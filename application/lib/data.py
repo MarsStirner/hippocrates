@@ -214,15 +214,10 @@ def set_ap_value(prop, value):
     :param value: dict|string
     :return:
     """
-    # todo: convert dates with safe_date
+    value_class = prop.get_value_class()
+    value = value_class.format_value(prop, value)
     if isinstance(value, dict):
-        value_type_name = safe_traverse(value, 'type', 'type_name')
-        if value_type_name == 'Diagnosis':
-            value_obj = prop.value_object
-            value = value_obj.get_value_model(value)
-            prop.set_value(value)
-        else:
-            prop.set_value(safe_traverse(value, 'value', 'id'), True)
+        prop.set_value(safe_traverse(value, 'value', 'id'), True)
     else:
         prop.set_value(value)
 
