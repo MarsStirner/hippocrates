@@ -137,8 +137,8 @@ def create_or_update_diagnosis(event, json_data, action=None):
     diagnosis = safe_traverse(json_data, 'diagnosis')
     diagnosis_id = safe_traverse(diagnosis, 'id')
     client_id = event.client_id
-    mkb = safe_traverse(diagnosis, 'mkb')
-    mkbex = safe_traverse(diagnosis, 'mkbex')
+    mkb = safe_traverse(diagnosis, 'mkb', 'code')
+    mkbex = safe_traverse(diagnosis, 'mkbex', 'code')
     if diagnostic_id:
         diag = Diagnostic.query.get(diagnostic_id)
         diag.setDate = set_date
@@ -201,3 +201,15 @@ def create_or_update_diagnosis(event, json_data, action=None):
         diag.diagnoses.append(diags)
 
     return diag
+
+
+def delete_diagnosis(diagnostic):
+    """
+    :type diagnostic: application.models.event.Diagnostic
+    :param diagnostic:
+    :return:
+    """
+    diagnostic.deleted = 1
+    for ds in diagnostic.diagnoses:
+        ds.deleted = 1
+    db.session.add(diagnostic)
