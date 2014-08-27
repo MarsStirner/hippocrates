@@ -605,10 +605,10 @@ class EventVisualizer(object):
             'health_group': diagnostic.healthGroup,
             'trauma_type': diagnostic.traumaType,
             'phase': diagnostic.phase,
-            # 'stage': diagnostic.stage,
-            # 'dispanser': diagnostic.dispanser,
-            # 'sanatorium': diagnostic.sanatorium,
-            # 'hospital': diagnostic.hospital
+            'stage': diagnostic.stage,
+            'dispanser': diagnostic.dispanser,
+            'sanatorium': diagnostic.sanatorium,
+            'hospital': diagnostic.hospital
         }
 
     def make_diagnosis_record(self, diagnosis):

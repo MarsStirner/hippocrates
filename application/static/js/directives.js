@@ -587,7 +587,8 @@ angular.module('WebMis20.directives')
             require: '^ngModel',
             replace: true,
             scope: {
-                ngModel: '='
+                ngModel: '=',
+                addNew: '='
             },
             controller: function ($scope) {
                 $scope.add_new_diagnosis = function () {
@@ -637,7 +638,7 @@ angular.module('WebMis20.directives')
                                                 </button>\
                                             </td>\
                                         </tr>\
-                                        <tr>\
+                                        <tr ng-if="addNew">\
                                             <td colspan="6">\
                                                 <button type="button" class="btn btn-sm btn-primary" title="Добавить"\
                                                         ng-click="add_new_diagnosis()">Добавить\
@@ -681,8 +682,15 @@ angular.module('WebMis20.directives')
             <div class="container">\
                 <div class="row marginal">\
                     <div class="col-md-4">\
-                        <label for="diagnosis_person" class="control-label">Врач</label>\
-                        <wm-person-select ng-model="model.person"></wm-person-select>\
+                        <label for="diagnosis_type" class="control-label">Тип</label>\
+                        <ui-select class="form-control" name="diagnosis_type" theme="select2"\
+                            ng-model="model.diagnosis_type"\
+                            ref-book="rbDiagnosisType">\
+                            <ui-select-match placeholder="не выбрано">[[ $select.selected.name ]]</ui-select-match>\
+                            <ui-select-choices repeat="dt in ($refBook.objects | filter: $select.search) track by dt.id">\
+                                <span ng-bind-html="dt.name | highlight: $select.search"></span>\
+                            </ui-select-choices>\
+                        </ui-select>\
                     </div>\
                     <div class="col-md-3">\
                         <label for="diagnosis_date" class="control-label">Дата начала</label>\
@@ -696,17 +704,6 @@ angular.module('WebMis20.directives')
                     </div>\
                 </div>\
                 <div class="row marginal">\
-                    <div class="col-md-4">\
-                    <label for="diagnosis_type" class="control-label">Тип</label>\
-                        <ui-select class="form-control" name="diagnosis_type" theme="select2"\
-                            ng-model="model.diagnosis_type"\
-                            ref-book="rbDiagnosisType">\
-                            <ui-select-match placeholder="не выбрано">[[ $select.selected.name ]]</ui-select-match>\
-                            <ui-select-choices repeat="dt in ($refBook.objects | filter: $select.search) track by dt.id">\
-                                <span ng-bind-html="dt.name | highlight: $select.search"></span>\
-                            </ui-select-choices>\
-                        </ui-select>\
-                    </div>\
                     <div class="col-md-3">\
                         <label for="MKB" class="control-label">МКБ</label>\
                         <ui-mkb ng-model="model.diagnosis.mkb"></ui-mkb>\
@@ -724,6 +721,43 @@ angular.module('WebMis20.directives')
                     </div>\
                 </div>\
                 <div class="row marginal">\
+                    <div class="col-md-4">\
+                        <label for="diagnosis_person" class="control-label">Врач</label>\
+                        <wm-person-select ng-model="model.person"></wm-person-select>\
+                    </div>\
+                </div>\
+                <div class="row marginal">\
+                    <div class="col-md-4">\
+                        <label for="result" class="control-label">Результат</label>\
+                        <ui-select class="form-control" name="result" theme="select2"\
+                            ng-model="model.result"\
+                            ref-book="rbResult">\
+                            <ui-select-match placeholder="не выбрано">[[ $select.selected.name ]]</ui-select-match>\
+                            <ui-select-choices repeat="r in ($refBook.objects | filter: $select.search) track by r.id">\
+                                <span ng-bind-html="r.name | highlight: $select.search"></span>\
+                            </ui-select-choices>\
+                        </ui-select>\
+                    </div>\
+                    <div class="col-md-4">\
+                        <label for="ache_result" class="control-label">Исход</label>\
+                        <ui-select class="form-control" name="ache_result" theme="select2"\
+                            ng-model="model.ache_result"\
+                            ref-book="rbAcheResult">\
+                            <ui-select-match placeholder="не выбрано">[[ $select.selected.name ]]</ui-select-match>\
+                            <ui-select-choices repeat="ar in ($refBook.objects | filter: $select.search) track by ar.id">\
+                                <span ng-bind-html="ar.name | highlight: $select.search"></span>\
+                            </ui-select-choices>\
+                        </ui-select>\
+                    </div>\
+                </div>\
+                <div class="row marginal">\
+                    <div class="col-md-12">\
+                        <button class="btn btn-default btn-sm" ng-click="expanded=!expanded" title="Показать остальные">\
+                            <span class="glyphicon glyphicon-chevron-[[expanded ? \'down\' : \'right\']]"></span>\
+                        </button>\
+                    </div>\
+                </div>\
+                <div class="row marginal" ng-if="expanded">\
                     <div class="col-md-3">\
                         <label for="phase" class="control-label">Фаза</label>\
                         <ui-select class="form-control" name="phase" theme="select2"\
@@ -746,19 +780,8 @@ angular.module('WebMis20.directives')
                             </ui-select-choices>\
                         </ui-select>\
                     </div>\
-                    <div class="col-md-3">\
-                        <label for="dispanser" class="control-label">Диспансерное наблюдение</label>\
-                        <ui-select class="form-control" name="dispanser" theme="select2"\
-                            ng-model="model.stage"\
-                            ref-book="rbDispanser">\
-                            <ui-select-match placeholder="не выбрано">[[ $select.selected.name ]]</ui-select-match>\
-                            <ui-select-choices repeat="d in ($refBook.objects | filter: $select.search) track by d.id">\
-                                <span ng-bind-html="d.name | highlight: $select.search"></span>\
-                            </ui-select-choices>\
-                        </ui-select>\
-                    </div>\
                 </div>\
-                <div class="row marginal">\
+                <div class="row marginal" ng-if="expanded">\
                     <div class="col-md-3">\
                         <label for="trauma" class="control-label">Травма</label>\
                         <ui-select class="form-control" name="trauma" theme="select2"\
@@ -781,8 +804,19 @@ angular.module('WebMis20.directives')
                             </ui-select-choices>\
                         </ui-select>\
                     </div>\
+                    <div class="col-md-3">\
+                        <label for="dispanser" class="control-label">Диспансерное наблюдение</label>\
+                        <ui-select class="form-control" name="dispanser" theme="select2"\
+                            ng-model="model.dispanser"\
+                            ref-book="rbDispanser">\
+                            <ui-select-match placeholder="не выбрано">[[ $select.selected.name ]]</ui-select-match>\
+                            <ui-select-choices repeat="d in ($refBook.objects | filter: $select.search) track by d.id">\
+                                <span ng-bind-html="d.name | highlight: $select.search"></span>\
+                            </ui-select-choices>\
+                        </ui-select>\
+                    </div>\
                 </div>\
-                <div class="row marginal">\
+                <div class="row marginal" ng-if="expanded">\
                     <div class="col-md-6">\
                     <label for="notes" class="control-label">Примечание</label>\
                     <textarea class="form-control" id="notes" name="notes" rows="2" autocomplete="off" ng-model="model.notes"></textarea>\
