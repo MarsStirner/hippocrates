@@ -144,7 +144,6 @@ class ActionProperty(db.Model):
             return val
 
         def delete_value(val_object):
-            val_object.delete_value_record()
             db.session.delete(val_object)
 
         if not self.type.isVector:
@@ -157,7 +156,7 @@ class ActionProperty(db.Model):
                 else:
                     set_value(value_object[0], value)
         else:
-            if value is not None:
+            if value:
                 m = min(len(value_object), len(value))
                 for i in xrange(m):
                     value_object[i].value = value[i]
@@ -272,9 +271,6 @@ class ActionProperty__ValueType(db.Model):
     def format_value(cls, prop, json_data):
         return json_data
 
-    def delete_value_record(self):
-        pass
-
 
 class ActionProperty_Action(ActionProperty__ValueType):
     __tablename__ = u'ActionProperty_Action'
@@ -380,29 +376,32 @@ class ActionProperty_Diagnosis(ActionProperty__ValueType):
 
     @value.setter
     def value(self, val):
-        if self.value_model in db.session:
-            db.session.merge(val)
+        if self.value_model is not None and self.value_model in db.session and self.value_model.id == val.id:
+            self.value_model = db.session.merge(val)
+        else:
+            self.value_model = val
 
     @classmethod
     def format_value(cls, property, json_data):
-        from blueprints.event.lib.utils import create_or_update_diagnosis
+        from blueprints.event.lib.utils import create_or_update_diagnosis, delete_diagnosis
+        from application.lib.utils import safe_traverse
         action = property.action
 
         if property.type.isVector:
             diag_list = []
             for diag_data in json_data:
                 d = create_or_update_diagnosis(action.event, diag_data, action)
+                deleted = safe_traverse(diag_data, 'deleted')
                 db.session.add(d)
-                diag_list.append(d)
+                if deleted:
+                    delete_diagnosis(d)
+                else:
+                    diag_list.append(d)
             return diag_list
         else:
             d = create_or_update_diagnosis(action.event, json_data, action)
             db.session.add(d)
             return d
-
-    def delete_value_record(self):
-        from blueprints.event.lib.utils import delete_diagnosis
-        delete_diagnosis(self.value)
 
 
 class ActionProperty_Integer_Base(ActionProperty__ValueType):

@@ -154,13 +154,13 @@ def create_or_update_diagnosis(event, json_data, action=None):
         diag.traumaType_id = trauma_type_id
         diag.phase_id = phase_id
 
-        diags = filter(lambda ds: ds.id == diagnosis_id, diag.diagnoses)
-        if not diags:
+        diagnosis = filter(lambda ds: ds.id == diagnosis_id, diag.diagnoses)
+        if not diagnosis:
             raise Exception('Diagnosis record can\'t be found')
         else:
-            diags = diags[0]
-        diags.MKB = mkb
-        diags.MKBEx = mkbex
+            diagnosis = diagnosis[0]
+        diagnosis.MKB = mkb
+        diagnosis.MKBEx = mkbex or ''
     else:
         diag = Diagnostic()
         diag.event = event
@@ -184,21 +184,21 @@ def create_or_update_diagnosis(event, json_data, action=None):
         diag.sanatorium = 0
         diag.hospital = 0
 
-        diags = Diagnosis()
-        diags.client_id = client_id
-        diags.MKB = mkb
-        diags.MKBEx = mkbex
-        diags.diagnosisType_id = diagnosis_type_id
-        diags.character_id = character_id
-        diags.traumaType_id = trauma_type_id
-        diags.setDate = set_date
-        diags.endDate = end_date
-        diags.person_id = person_id
+        diagnosis = Diagnosis()
+        diagnosis.client_id = client_id
+        diagnosis.MKB = mkb
+        diagnosis.MKBEx = mkbex or ''
+        diagnosis.diagnosisType_id = diagnosis_type_id
+        diagnosis.character_id = character_id
+        diagnosis.traumaType_id = trauma_type_id
+        diagnosis.setDate = safe_date(set_date)
+        diagnosis.endDate = safe_date(set_date)
+        diagnosis.person_id = person_id
         # etc
-        diags.dispanser_id = None
-        diags.mod_id = None
+        diagnosis.dispanser_id = None
+        diagnosis.mod_id = None
 
-        diag.diagnoses.append(diags)
+        diag.diagnoses.append(diagnosis)
 
     return diag
 

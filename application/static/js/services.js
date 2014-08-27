@@ -1052,14 +1052,14 @@ angular.module('WebMis20.services', []).
                     action.coord_date = date;
                 }
             },
-            update_payment : function (event, payment) {
+            update_payment: function (event, payment) {
                 var PlModel = $injector.get('WMEventPaymentList');
                 event.payment = {
                     local_contract: payment.local_contract,
                     payments: new PlModel(payment.payments)
                 };
             },
-            add_new_diagnosis : function () {
+            add_new_diagnosis: function () {
                 return {
                         "id": null,
                         "set_date": null,
@@ -1081,6 +1081,17 @@ angular.module('WebMis20.services', []).
                         "trauma_type": null,
                         "phase": null
                     };
+            },
+            delete_diagnosis: function (diag_list, diagnosis, deleted) {
+                if (arguments.length < 3) {
+                    deleted = 1;
+                }
+                if (diagnosis && diagnosis.id) {
+                    diagnosis.deleted = deleted;
+                } else {
+                    var idx = diag_list.indexOf(diagnosis);
+                    diag_list.splice(idx, 1);
+                }
             }
         };
     }]);

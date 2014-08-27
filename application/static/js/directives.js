@@ -592,14 +592,12 @@ angular.module('WebMis20.directives')
             controller: function ($scope) {
                 $scope.add_new_diagnosis = function () {
                     var new_diagnosis = WMEventController.add_new_diagnosis();
-                    this.ngModel.push(new_diagnosis);
-                    DiagnosisModal.openDiagnosisModal(new_diagnosis);
+                    DiagnosisModal.openDiagnosisModal(new_diagnosis).then(function () {
+                        $scope.ngModel.push(new_diagnosis);
+                    });
                 };
                 $scope.delete_diagnosis = function (diagnosis) {
-                    var index = this.ngModel.indexOf(diagnosis);
-                    if (index > -1) {
-                        this.ngModel.splice(index, 1);
-                    }
+                    WMEventController.delete_diagnosis($scope.ngModel, diagnosis);
                 };
                 $scope.edit_diagnosis = function (diagnosis) {
                     DiagnosisModal.openDiagnosisModal(diagnosis);
@@ -621,7 +619,7 @@ angular.module('WebMis20.directives')
                                         </tr>\
                                     </thead>\
                                     <tbody>\
-                                        <tr ng-repeat="diag in ngModel">\
+                                        <tr ng-repeat="diag in ngModel | flt_not_deleted">\
                                             <td>[[diag.set_date | asDate]]</td>\
                                             <td>[[diag.diagnosis_type.name]]</td>\
                                             <td>[[diag.character.name]]</td>\
