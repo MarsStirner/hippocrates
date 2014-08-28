@@ -17,7 +17,7 @@
                     </span>
                 </div>
             </div>
-            <div ng-show="query && search_processed && !found_services.length" class="alert alert-danger novmargin">
+            <div ng-show="query && search_processed && !found_services.length" class="alert alert-danger">
                 Нет услуг, удовлетворяющих запросу <strong>"[[query]]"</strong>
             </div>
             <div ng-show="found_services" class="panel panel-default">
@@ -67,7 +67,7 @@
                             expanded="expanded" ng-class="get_class(service)"
                             ng-repeat-start="service in event.services">
                         </tr>
-                        <tr wm-event-service-record ng-show="expanded" action="act" service="service" event="event"
+                        <tr wm-event-service-record ng-show="expanded" action="act" service="service" event="event" idx="$index"
                             ng-repeat="act in service.actions" ng-repeat-end>
                         </tr>
                     </tbody>
@@ -84,9 +84,6 @@
                 <span class="text-success" ng-bind="event.payment.payments.total_in"></span><span class="text-success"> руб.</span>
                 <span class="text-muted"> Долг: </span>
                 <span class="text-danger" ng-bind="event.payment.payments.diff"></span><span class="text-danger"> руб.</span>
-                <div class="pull-left">
-                    <ui-print-button ps="ps_services" resolve="ps_services_resolve()" ng-if="!event.is_new() && formstate.is_paid()"></ui-print-button>
-                </div>
             </div>
             </div>
         </blockquote>

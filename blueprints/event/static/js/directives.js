@@ -34,14 +34,6 @@ angular.module('WebMis20.directives').
                     scope.formstate = WMEventFormState;
                     scope.eventctrl = WMEventController;
 
-                    scope.change_print_service = function() {
-                        var s = scope.service;
-                        if (s.print){
-                            s.print = !s.print;
-                        } else {
-                            s.print = 1;
-                        }
-                    };
                     scope.coord_all = function (off) {
                         scope.service.coord_all = !Boolean(off);
                     };
@@ -124,10 +116,6 @@ angular.module('WebMis20.directives').
 </td>\
 <td ng-bind="service.coord_count" class="text-center" ng-show="formstate.is_dms()"></td>\
 <td nowrap>\
-    <button type="button" class="btn btn-sm btn-default" title="Печатать"\
-            ng-show="formstate.is_paid()"\
-            ng-click="change_print_service()"><span class="glyphicon" ng-class="{\'glyphicon-unchecked\': !service.print, \'glyphicon-check\': service.print}"></span>\
-    </button>\
     <button type="button" class="btn btn-sm btn-danger" title="Удалить услуги"\
             ng-show="btn_delete_visible()"\
             ng-click="eventctrl.remove_service(event, idx)"><span class="glyphicon glyphicon-trash"></span>\
@@ -143,7 +131,8 @@ angular.module('WebMis20.directives').
                 scope: {
                     action: '=',
                     service: '=',
-                    event: '='
+                    event: '=',
+                    idx: '='
                 },
                 link: function(scope, elm, attrs) {
                     scope.formstate = WMEventFormState;
@@ -182,6 +171,14 @@ angular.module('WebMis20.directives').
                                 ''
                         ];
                         return msg.join('; ');
+                    };
+                    scope.get_ps = function () {
+                        return scope.service.print_services[scope.idx];
+                    };
+                    scope.get_ps_resolve = function () {
+                        return {
+                            action_id: scope.action.action_id
+                        };
                     };
 
                     scope.amount_disabled = function () {
@@ -238,6 +235,7 @@ angular.module('WebMis20.directives').
 <td nowrap>\
     <span class="glyphicon glyphicon-info-sign"\
         popover-trigger="mouseenter" popover-popup-delay=\'1000\' popover-placement="left" popover="[[get_info_text()]]"></span>\
+    <ui-print-button ps="get_ps()" resolve="get_ps_resolve()" ng-if="action.action_id"></ui-print-button>\
     <button type="button" class="btn btn-sm btn-danger" title="Убрать из списка услуг"\
             ng-show="btn_delete_visible()"\
             ng-click="eventctrl.remove_action(event, action, service)"><span class="glyphicon glyphicon-trash"></span>\

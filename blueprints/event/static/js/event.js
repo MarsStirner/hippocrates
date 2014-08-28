@@ -584,7 +584,6 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
                 $scope.formstate.set_state(event.info.event_type.request_type, event.info.event_type.finance, event.is_new());
                 if (!$scope.event.is_new()) {
                     $scope.ps.set_context($scope.event.info.event_type.print_context);
-                    $scope.ps_services.set_context('services');
                 }
 
                 if ($scope.event.info.client.info.birth_date) {
@@ -733,22 +732,6 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
             event_id: $scope.event_id
         }
     };
-
-    $scope.ps_services = new PrintingService("services");
-    $scope.ps_services_resolve = function () {
-        var actions_ids = [];
-        var services_for_print = $scope.event.services.filter(function(service) {return service.print})
-        if (services_for_print.length){
-            actions_ids = services_for_print.reduce(function (prev, curr){
-                return prev.concat(curr.actions.map(function(action){return action.action_id}))}, [])
-        }
-        return {
-            event_id: $scope.event_id,
-            actions_ids: actions_ids
-        }
-    };
-    $scope.ps_services.set_context("services");
-
 
     $scope.filter_results = function(event_purpose) {
         return function(elem) {

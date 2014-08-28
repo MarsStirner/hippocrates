@@ -570,8 +570,8 @@ angular.module('WebMis20.services', []).
             return WMEvent;
         }
     ]).
-    factory('WMEventServiceGroup', ['$rootScope', 'WMEventController',
-        function($rootScope, WMEventController) {
+    factory('WMEventServiceGroup', ['$rootScope', 'WMEventController', 'PrintingService',
+        function($rootScope, WMEventController, PrintingService) {
             var WMSimpleAction = function (action, service_group) {
                 if (!action) {
                     action = {
@@ -619,23 +619,22 @@ angular.module('WebMis20.services', []).
                         actions: [],
                         price: undefined,
                         is_lab: null,
+                        print_context: null,
                         assignable: [], // info list of assignable properties
                         all_assigned: [], // [] - all have same assignments, False - have different assignments
                         all_planned_end_date: null // date - all have same dates, False - have different dates
                     }
                 }
-
                 this.all_actions_closed = undefined;
-
                 this.total_sum = undefined;
                 this.account_all = undefined; // false - none, true - all, null - some
                 this.coord_all = undefined;
-
                 this.fully_paid = undefined;
                 this.partially_paid = undefined;
                 this.paid_count = undefined;
-
                 this.coord_count = undefined;
+                this.print_services = [];
+
                 this.initialize(service_data, payments);
             };
 
@@ -651,7 +650,13 @@ angular.module('WebMis20.services', []).
                 this.all_actions_closed = this.actions.every(function (act) {
                     return act.is_closed();
                 });
+                this.actions.forEach(function (act) {
+                    var ps = new PrintingService("action");
+                    ps.set_context(self.print_context);
+                    self.print_services.push(ps);
+                });
 
+                // many much watches
                 $rootScope.$watch(function () {
                     return self.total_amount;
                 }, function (n, o) {
@@ -998,6 +1003,9 @@ angular.module('WebMis20.services', []).
                 }
             },
             remove_service: function(event, sg_idx) {
+                if (!confirm('Вы действительно хотите удалить выбранную группу услуг?')) {
+                    return;
+                }
                 var sg = event.services[sg_idx];
                 var action_id_list = sg.actions.map(function (a) {
                     return a.action_id;
@@ -1021,6 +1029,9 @@ angular.module('WebMis20.services', []).
                 }
             },
             remove_action: function (event, action, sg) {
+                if (action.action_id && !confirm('Вы действительно хотите удалить выбранную услугу?')) {
+                    return;
+                }
                 var sg_idx = event.services.indexOf(sg),
                     action_idx = event.services[sg_idx].actions.indexOf(action),
                     self = this;
