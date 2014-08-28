@@ -136,6 +136,8 @@ def create_action(action_type_id, event_id, src_action=None, assigned=None, prop
                 else:
                     prop.set_value(prop_desc['value'])
                 prop.isAssigned = prop_desc['is_assigned']
+            elif prop.type.defaultValue:
+                prop.set_value(prop.type.defaultValue, True)
             else:
                 prop.value = None
             action.properties.append(prop)
