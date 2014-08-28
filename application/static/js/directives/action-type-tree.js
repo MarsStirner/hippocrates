@@ -244,11 +244,25 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
             model.assignable.forEach(function (prop) {
                 assigned[prop[0]] = model.assigned.has(prop[0]);
             });
-            var Controller = function ($scope, $modalInstance) {
+            var Controller = function ($scope) {
                 $scope.model = model;
                 $scope.assigned = assigned;
                 $scope.date_required = date_required;
                 $scope.ped = ped;
+                $scope.assignable = model.assignable.map(function (item) {
+                    return item[0];
+                });
+                $scope.check_all_selected = function () {
+                    return $scope.assignable.every(function (prop_id) {
+                        return $scope.assigned[prop_id];
+                    });
+                };
+                $scope.select_all = function () {
+                    var enabled = !$scope.check_all_selected();
+                    $scope.assignable.forEach(function (prop_id) {
+                        $scope.assigned[prop_id] = enabled;
+                    });
+                };
             };
             var instance = $modal.open({
                 templateUrl: '/WebMis20/modal-action-assignments.html',
@@ -390,6 +404,10 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
                     <label for="ped">Дата/время назначения</label><div fs-datetime id="ped" ng-model="ped.planned_end_date"></div>\
                 </div>\
             </div>\
+            <div class="checkbox">\
+                <label><input type="checkbox" ng-checked="check_all_selected()" ng-click="select_all()">Выбрать все</label>\
+            </div>\
+            <hr class="novmargin"/>\
             <div class="checkbox" ng-repeat="prop in model.assignable">\
                 <label><input type="checkbox" ng-model="assigned[prop[0]]">[[ prop[1] ]]</label>\
             </div>\
