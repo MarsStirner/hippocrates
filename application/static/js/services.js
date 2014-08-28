@@ -557,7 +557,7 @@ angular.module('WebMis20.services', []).
                 var final_diagnosis = this.diagnoses.filter(function(item){
                     return item.diagnosis_type.code == 1;
                 });
-                return final_diagnosis[0] ? final_diagnosis.length : null
+                return final_diagnosis.length ? final_diagnosis : null
             };
 
             WMEvent.prototype.is_new = function() {

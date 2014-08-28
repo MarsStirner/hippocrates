@@ -633,7 +633,7 @@ angular.module('WebMis20.directives')
                                             <td ng-click="open_action(diag.action_id)">[[diag.diagnosis.mkb.code]] [[diag.diagnosis.mkb.name]]</td>\
                                             <td ng-click="open_action(diag.action_id)">[[diag.person.name]]</td>\
                                             <td ng-click="open_action(diag.action_id)">[[diag.notes]]</td>\
-                                            <td ng-click="open_action(diag.action_id)">\
+                                            <td>\
                                                 <button type="button" class="btn btn-sm btn-primary" title="Редактировать"\
                                                         ng-click="edit_diagnosis(diag)"><span class="glyphicon glyphicon-pencil"></span>\
                                                 </button>\

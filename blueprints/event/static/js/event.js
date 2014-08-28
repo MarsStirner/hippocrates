@@ -666,8 +666,16 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
         return true;
     };
     $scope.event_check_final_diagnosis = function() {
-        if (!$scope.event.get_final_diagnosis()){
-            alert("Необходимо указать заключительный диагноз");
+        var final_diagnosis = $scope.event.get_final_diagnosis()
+        if (!final_diagnosis){
+            alert("Необходимо указать заключительный диагноз.");
+            return false
+        } else if (final_diagnosis.length > 1){
+            alert("В обращении не может быть больше одного заключительного диагноза.");
+            return false
+        }
+        if(!final_diagnosis[0].result){
+            alert("Необходимо указать результат заключительного диагноза");
             return false
         }
         return true
