@@ -652,7 +652,9 @@ angular.module('WebMis20.services', []).
                 });
                 this.actions.forEach(function (act) {
                     var ps = new PrintingService("action");
-                    ps.set_context(self.print_context);
+                    if (self.print_context) {
+                        ps.set_context(self.print_context);
+                    }
                     self.print_services.push(ps);
                 });
 

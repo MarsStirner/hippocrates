@@ -167,9 +167,9 @@ def api_event_save():
                        500, 'save event data error')
     else:
         services_data = request.json.get('services', [])
-        cfinance_id = event_data['contract']['finance']['id']
+        contract_id = event_data['contract']['id']
         try:
-            actions = create_services(event.id, services_data, cfinance_id)
+            actions = create_services(event.id, services_data, contract_id)
             db.session.commit()
         except Exception, e:
             logger.error(e)

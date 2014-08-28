@@ -81,7 +81,7 @@ def get_local_contract(lc_info):
     return lcon
 
 
-def create_services(event_id, service_groups, cfinance_id):
+def create_services(event_id, service_groups, contract_id):
     result = []
     for sg in service_groups:
         for act_data in sg['actions']:
@@ -97,7 +97,7 @@ def create_services(event_id, service_groups, cfinance_id):
             assigned = act_data['assigned'] if sg['is_lab'] else None
 
             if not action_id:
-                data['contract_id'] = cfinance_id
+                data['contract_id'] = contract_id
                 action = create_new_action(
                     sg['at_id'],
                     event_id,
