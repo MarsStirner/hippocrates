@@ -557,8 +557,7 @@ class EventVisualizer(object):
         """
         result = []
         for diagnostic in event.diagnostics:
-            for diagnosis in diagnostic.diagnoses:
-                result.append(self.make_diagnose_row(diagnostic, diagnosis))
+            result.append(self.make_diagnostic_record(diagnostic))
         return result
 
     def make_diagnose_row(self, diagnostic, diagnosis):
@@ -608,7 +607,8 @@ class EventVisualizer(object):
             'stage': diagnostic.stage,
             'dispanser': diagnostic.dispanser,
             'sanatorium': diagnostic.sanatorium,
-            'hospital': diagnostic.hospital
+            'hospital': diagnostic.hospital,
+            'diagnosis_description': diagnostic.diagnosis_description
         }
 
     def make_diagnosis_record(self, diagnosis):

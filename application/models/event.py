@@ -450,6 +450,7 @@ class Diagnostic(db.Model):
     rbAcheResult_id = db.Column(db.ForeignKey('rbAcheResult.id'), index=True)
     version = db.Column(db.Integer, nullable=False, default=0)
     action_id = db.Column(db.Integer, db.ForeignKey('Action.id'), index=True)
+    diagnosis_description = db.Column(db.Text)
 
     rbAcheResult = db.relationship(u'rbAcheResult', innerjoin=True)
     result = db.relationship(u'rbResult', innerjoin=True)

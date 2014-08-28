@@ -526,6 +526,7 @@ angular.module('WebMis20.services', []).
                 var deferred = $q.defer();
                 $http.post(url_event_save, {
                     event: this.info,
+                    diagnoses: this.diagnoses,
                     payment: this.payment,
                     services: this.services,
                     ticket_id: this.ticket_id,

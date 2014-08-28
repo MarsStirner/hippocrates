@@ -129,6 +129,7 @@ def create_or_update_diagnosis(event, json_data, action=None):
     health_group_id = safe_traverse(json_data, 'health_group', 'id')
     trauma_type_id = safe_traverse(json_data, 'trauma_type', 'id')
     phase_id = safe_traverse(json_data, 'phase', 'id')
+    diagnosis_description = safe_traverse(json_data, 'diagnosis_description')
     # 'stage': diagnostic.stage,
     # 'dispanser': diagnostic.dispanser,
     # 'sanatorium': diagnostic.sanatorium,
@@ -153,6 +154,7 @@ def create_or_update_diagnosis(event, json_data, action=None):
         diag.healthGroup_id = health_group_id
         diag.traumaType_id = trauma_type_id
         diag.phase_id = phase_id
+        diag.diagnosis_description = diagnosis_description
 
         diagnosis = filter(lambda ds: ds.id == diagnosis_id, diag.diagnoses)
         if not diagnosis:
@@ -176,6 +178,7 @@ def create_or_update_diagnosis(event, json_data, action=None):
         diag.healthGroup_id = health_group_id
         diag.traumaType_id = trauma_type_id
         diag.phase_id = phase_id
+        diag.diagnosis_description = diagnosis_description
         if action:
             diag.action = action
         # etc

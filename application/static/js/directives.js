@@ -751,8 +751,14 @@ angular.module('WebMis20.directives')
                     </div>\
                 </div>\
                 <div class="row marginal">\
+                    <div class="col-md-9">\
+                        <label for="diagnosis_description" class="control-label">Описание диагноза</label>\
+                        <wysiwyg ng-model="model.diagnosis_description"/>\
+                    </div>\
+                </div>\
+                <div class="row marginal">\
                     <div class="col-md-12">\
-                        <button class="btn btn-default btn-sm" ng-click="expanded=!expanded" title="Показать остальные">\
+                        <button class="btn btn-default btn-sm" ng-click="expanded=!expanded">\
                             <span class="glyphicon glyphicon-chevron-[[expanded ? \'down\' : \'right\']]"></span>\
                         </button>\
                     </div>\

@@ -289,14 +289,16 @@ var WebMis20 = angular.module('WebMis20', [
 .filter('flt_not_deleted', function() {
         return function(items) {
             var out = [];
-            items.forEach(function(item){
-                if (item.hasOwnProperty('deleted') && item.deleted === 0){
-                    out.push(item);
-                }
-                else if (!item.hasOwnProperty('deleted')){
-                    out.push(item);
-                }
-            });
+            if(items){
+                items.forEach(function(item){
+                    if (item.hasOwnProperty('deleted') && item.deleted === 0){
+                        out.push(item);
+                    }
+                    else if (!item.hasOwnProperty('deleted')){
+                        out.push(item);
+                    }
+                })
+            };
             return out;
         };
     })
