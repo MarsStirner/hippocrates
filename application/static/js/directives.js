@@ -588,7 +588,8 @@ angular.module('WebMis20.directives')
             replace: true,
             scope: {
                 ngModel: '=',
-                addNew: '='
+                addNew: '=',
+                clickable: '='
             },
             controller: function ($scope) {
                 $scope.add_new_diagnosis = function () {
@@ -603,13 +604,18 @@ angular.module('WebMis20.directives')
                 $scope.edit_diagnosis = function (diagnosis) {
                     DiagnosisModal.openDiagnosisModal(diagnosis);
                 };
+                $scope.open_action = function (action_id) {
+                    if(action_id && $scope.clickable){
+                        window.open(url_for_schedule_html_action + '?action_id=' + action_id);
+                    }
+                };
             },
             template: '<div class="row">\
                             <div class="col-md-12">\
-                                <table class="table table-condensed">\
+                                <table class="table table-condensed[[clickable ? \' table-clickable\' : \'\']]">\
                                     <thead>\
                                         <tr>\
-                                            <th>Дата начала</th>\
+                                            <th>Дата начала[[diag.action_id]]</th>\
                                             <th>Тип</th>\
                                             <th>Характер</th>\
                                             <th>Код МКБ</th>\
@@ -621,13 +627,13 @@ angular.module('WebMis20.directives')
                                     </thead>\
                                     <tbody>\
                                         <tr ng-repeat="diag in ngModel | flt_not_deleted">\
-                                            <td>[[diag.set_date | asDate]]</td>\
-                                            <td>[[diag.diagnosis_type.name]]</td>\
-                                            <td>[[diag.character.name]]</td>\
-                                            <td>[[diag.diagnosis.mkb.code]] [[diag.diagnosis.mkb.name]]</td>\
-                                            <td>[[diag.person.name]]</td>\
-                                            <td>[[diag.notes]]</td>\
-                                            <td>\
+                                            <td ng-click="open_action(diag.action_id)">[[diag.set_date | asDate]]</td>\
+                                            <td ng-click="open_action(diag.action_id)">[[diag.diagnosis_type.name]]</td>\
+                                            <td ng-click="open_action(diag.action_id)">[[diag.character.name]]</td>\
+                                            <td ng-click="open_action(diag.action_id)">[[diag.diagnosis.mkb.code]] [[diag.diagnosis.mkb.name]]</td>\
+                                            <td ng-click="open_action(diag.action_id)">[[diag.person.name]]</td>\
+                                            <td ng-click="open_action(diag.action_id)">[[diag.notes]]</td>\
+                                            <td ng-click="open_action(diag.action_id)">\
                                                 <button type="button" class="btn btn-sm btn-primary" title="Редактировать"\
                                                         ng-click="edit_diagnosis(diag)"><span class="glyphicon glyphicon-pencil"></span>\
                                                 </button>\
