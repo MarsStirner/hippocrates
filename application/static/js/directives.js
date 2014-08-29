@@ -626,7 +626,7 @@ angular.module('WebMis20.directives')
                                         </tr>\
                                     </thead>\
                                     <tbody>\
-                                        <tr class="[[clickable && (diag.action_id != null) ? \'row-clickable\' : \'\']]" ng-repeat="diag in ngModel | flt_not_deleted">\
+                                        <tr class="[[clickable && diag.action_id ? \'row-clickable\' : \'\']]" ng-repeat="diag in ngModel | flt_not_deleted">\
                                             <td  ng-click="open_action(diag.action_id)">[[diag.set_date | asDate]]</td>\
                                             <td ng-click="open_action(diag.action_id)">[[diag.diagnosis_type.name]]</td>\
                                             <td ng-click="open_action(diag.action_id)">[[diag.character.name]]</td>\
