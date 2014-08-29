@@ -59,6 +59,9 @@
                                     </div>
                                     <ul class="panel-body list-group" ng-switch="person_schedule_day_switch(day)">
                                         <li class="list-group-item list-group-item-danger" ng-if="day.busy">Есть записи</li>
+                                        <li class="list-group-item list-group-item-info" ng-if="quotas_by_week[$parent.$parent.$index][$index]['day_quotas']">
+                                            <span class="glyphicon glyphicon-list-alt" title="На этот день задано квотирование по времени"></span>
+                                        </li>
 
                                         <li class="list-group-item list-group-item-info" ng-repeat="sched in day.scheds">
                                             <div class="row">

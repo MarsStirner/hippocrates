@@ -165,6 +165,7 @@ var ScheduleMonthCtrl = function ($scope, $http, $modal, RefBook) {
 
     $scope.weekdays = ['Пн', "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
     $scope.week_data = [];
+    $scope.quotas_by_week = [];
 
 
     $scope.reloadSchedule = function () {
@@ -192,25 +193,34 @@ var ScheduleMonthCtrl = function ($scope, $http, $modal, RefBook) {
         var first_weekday = $scope.monthDate.weekday();
         var day_iter = 0;
         var schedule = $scope.schedules;
+        var quotas = $scope.quotas;
         var result = [];
+        var quotas_result = [];
         for (var week_n = 0; ; week_n++) {
             var week = [];
+            var quota_week = [];
             for (var weekday_n = 0; weekday_n < 7; weekday_n++) {
                 if (week_n == 0 && weekday_n < first_weekday || day_iter >= schedule.length) {
                     week.push({
                         not_exists: true
                     })
+                    quota_week.push({
+                        not_exists: true
+                    })
                 } else {
                     week.push(schedule[day_iter]);
+                    quota_week.push(quotas[day_iter]);
                     day_iter++;
                 }
             }
             result.push(week);
+            quotas_result.push(quota_week);
             if (day_iter >= schedule.length) {
                 break;
             }
         }
         $scope.week_data = result;
+        $scope.quotas_by_week = quotas_result;
     };
 
     $scope.monthChanged = function () {
