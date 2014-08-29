@@ -418,13 +418,14 @@ var WebMis20 = angular.module('WebMis20', [
             w.print();
         })
         .error(function (data, status) {
+            var result = data.result;
             $rootScope.$broadcast('printing_error', {
-                text: 'Ошибка соединения с сервером печати',
+                text: result.name,
                 code: status,
-                data: data,
+                data: result.data,
                 type: 'danger'
-            })
-        })
+            });
+        });
     };
     return PrintingService;
 }])

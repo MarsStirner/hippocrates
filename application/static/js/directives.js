@@ -128,6 +128,12 @@ angular.module('WebMis20.directives')
                 var subelement = $(
                     '<alert ng-repeat="alert in ' + attrs.uiAlertList + '" type="alert.type" close="alerts.splice(index, 1)">\
                         <span ng-bind="alert.text"></span> [<span ng-bind="alert.code"></span>]\
+                        <span ng-if="alert.data.detailed_msg">\
+                            <a href="javascript:void(0);"  ng-click="show_details = !show_details">\
+                                [[show_details ? "[Скрыть]" : "[Подробнее]"]]\
+                            </a>\
+                            <span ng-show="show_details">[[alert.data.detailed_msg]]: [[alert.data.err_msg]]</span>\
+                        </span>\
                     </alert>'
                 );
                 e.prepend(subelement);
@@ -206,10 +212,24 @@ angular.module('WebMis20.directives')
                 }
             }
             $scope.print_separated = function () {
-                ps.print_template(prepare_data(), true)
+                ps.print_template(prepare_data(), true).then(
+                    function () {
+                        angular.noop();
+                    },
+                    function () {
+                        $scope.$close();
+                    }
+                );
             };
             $scope.print_compact = function () {
-                ps.print_template(prepare_data(), false)
+                ps.print_template(prepare_data(), false).then(
+                    function () {
+                        angular.noop();
+                    },
+                    function () {
+                        $scope.$close();
+                    }
+                );
             };
             $scope.cancel = function () {
                 $modalInstance.dismiss('cancel');
