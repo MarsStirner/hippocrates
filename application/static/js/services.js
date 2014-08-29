@@ -501,7 +501,9 @@ angular.module('WebMis20.services', []).
                     params: params
                 }).success(function (data) {
                     self.info = data.result.event;
-
+                    if (self.info.client.live_address !== null && self.info.client.live_address.synced) {
+                        self.info.client.live_address = self.info.client.reg_address;
+                    }
                     self.diagnoses = data.result.diagnoses || [];
 
                     var p = data.result.payment;
