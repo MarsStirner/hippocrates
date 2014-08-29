@@ -612,10 +612,10 @@ angular.module('WebMis20.directives')
             },
             template: '<div class="row">\
                             <div class="col-md-12">\
-                                <table class="table table-condensed[[clickable ? \' table-clickable\' : \'\']]">\
+                                <table class="table table-condensed">\
                                     <thead>\
                                         <tr>\
-                                            <th>Дата начала[[diag.action_id]]</th>\
+                                            <th>Дата начала</th>\
                                             <th>Тип</th>\
                                             <th>Характер</th>\
                                             <th>Код МКБ</th>\
@@ -626,8 +626,8 @@ angular.module('WebMis20.directives')
                                         </tr>\
                                     </thead>\
                                     <tbody>\
-                                        <tr ng-repeat="diag in ngModel | flt_not_deleted">\
-                                            <td ng-click="open_action(diag.action_id)">[[diag.set_date | asDate]]</td>\
+                                        <tr class="[[clickable && (diag.action_id != null) ? \'row-clickable\' : \'\']]" ng-repeat="diag in ngModel | flt_not_deleted">\
+                                            <td  ng-click="open_action(diag.action_id)">[[diag.set_date | asDate]]</td>\
                                             <td ng-click="open_action(diag.action_id)">[[diag.diagnosis_type.name]]</td>\
                                             <td ng-click="open_action(diag.action_id)">[[diag.character.name]]</td>\
                                             <td ng-click="open_action(diag.action_id)">[[diag.diagnosis.mkb.code]] [[diag.diagnosis.mkb.name]]</td>\
@@ -783,7 +783,7 @@ angular.module('WebMis20.directives')
                     </div>\
                     <div class="col-md-3">\
                         <label for="stage" class="control-label">Стадия</label>\
-                        <ui-select class="form-control" name="phase" theme="select2"\
+                        <ui-select class="form-control" name="stage" theme="select2"\
                             ng-model="model.stage"\
                             ref-book="rbDiseaseStage">\
                             <ui-select-match placeholder="не выбрано">[[ $select.selected.name ]]</ui-select-match>\
