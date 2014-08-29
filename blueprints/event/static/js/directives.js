@@ -78,7 +78,11 @@ angular.module('WebMis20.directives').
                         return scope.service.fully_coord && !scope.service.all_actions_closed;
                     };
                     scope.btn_delete_visible = function () {
-                        return !scope.service.fully_paid && !scope.service.partially_paid && !scope.service.all_actions_closed;
+                        var s = scope.service;
+                        return !(
+                            s.fully_paid || s.partially_paid || s.fully_coord || s.partially_coord ||
+                            scope.service.all_actions_closed
+                        );
                     };
                     scope.lab_components_disabled = function () {
                         return scope.service.fully_paid || scope.service.fully_coord || scope.service.all_actions_closed;
@@ -191,7 +195,7 @@ angular.module('WebMis20.directives').
                         return scope.action.is_coordinated() && !scope.action.is_closed();
                     };
                     scope.btn_delete_visible = function () {
-                        return !scope.action.is_paid_for() && !scope.action.is_coordinated() && !scope.action.is_closed();
+                        return !(scope.action.is_paid_for() || scope.action.is_coordinated() || scope.action.is_closed());
                     };
                     scope.lab_components_disabled = function () {
                         return scope.action.account || scope.action.is_coordinated() || scope.action.is_closed();
