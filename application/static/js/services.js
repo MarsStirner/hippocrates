@@ -528,6 +528,7 @@ angular.module('WebMis20.services', []).
                 var deferred = $q.defer();
                 $http.post(url_event_save, {
                     event: this.info,
+                    diagnoses: this.diagnoses,
                     payment: this.payment,
                     services: this.services,
                     ticket_id: this.ticket_id,
@@ -558,7 +559,7 @@ angular.module('WebMis20.services', []).
                 var final_diagnosis = this.diagnoses.filter(function(item){
                     return item.diagnosis_type.code == 1;
                 });
-                return final_diagnosis[0] ? final_diagnosis.length : null
+                return final_diagnosis.length ? final_diagnosis : null
             };
 
             WMEvent.prototype.is_new = function() {
@@ -1067,12 +1068,46 @@ angular.module('WebMis20.services', []).
                     action.coord_date = date;
                 }
             },
-            update_payment : function (event, payment) {
+            update_payment: function (event, payment) {
                 var PlModel = $injector.get('WMEventPaymentList');
                 event.payment = {
                     local_contract: payment.local_contract,
                     payments: new PlModel(payment.payments)
                 };
+            },
+            add_new_diagnosis: function () {
+                return {
+                        "id": null,
+                        "set_date": null,
+                        "end_date": null,
+                        "diagnosis_type": null,
+                        "diagnosis": {
+                            "id": null,
+                            "mkb": null,
+                            "mkbex": null,
+                            "client_id": null
+                        },
+                        "character": null,
+                        "person": null,
+                        "notes": null,
+                        "action_id": null,
+                        "result": null,
+                        "ache_result": null,
+                        "health_group": null,
+                        "trauma_type": null,
+                        "phase": null
+                    };
+            },
+            delete_diagnosis: function (diag_list, diagnosis, deleted) {
+                if (arguments.length < 3) {
+                    deleted = 1;
+                }
+                if (diagnosis && diagnosis.id) {
+                    diagnosis.deleted = deleted;
+                } else {
+                    var idx = diag_list.indexOf(diagnosis);
+                    diag_list.splice(idx, 1);
+                }
             }
         };
     }]);

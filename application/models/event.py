@@ -382,11 +382,11 @@ class Diagnosis(db.Model):
     __tablename__ = u'Diagnosis'
 
     id = db.Column(db.Integer, primary_key=True)
-    createDatetime = db.Column(db.DateTime, nullable=False)
-    createPerson_id = db.Column(db.ForeignKey('Person.id'), index=True)
-    modifyDatetime = db.Column(db.DateTime, nullable=False)
-    modifyPerson_id = db.Column(db.ForeignKey('Person.id'), index=True)
-    deleted = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    createDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now)
+    createPerson_id = db.Column(db.Integer, index=True, default=safe_current_user_id)
+    modifyDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now, onupdate=datetime.datetime.now)
+    modifyPerson_id = db.Column(db.Integer, index=True, default=safe_current_user_id, onupdate=safe_current_user_id)
+    deleted = db.Column(db.Integer, nullable=False, server_default=u"'0'", default=0)
     client_id = db.Column(db.ForeignKey('Client.id'), index=True, nullable=False)
     diagnosisType_id = db.Column(db.ForeignKey('rbDiagnosisType.id'), index=True, nullable=False)
     character_id = db.Column(db.ForeignKey('rbDiseaseCharacter.id'), index=True)
@@ -400,8 +400,6 @@ class Diagnosis(db.Model):
     person_id = db.Column(db.ForeignKey('Person.id'), index=True)
     # diagnosisName = db.Column(db.String(64), nullable=False)
 
-    createPerson = db.relationship('Person', foreign_keys=[createPerson_id])
-    modifyPerson = db.relationship('Person', foreign_keys=[modifyPerson_id])
     person = db.relationship('Person', foreign_keys=[person_id], lazy=False, innerjoin=True)
     client = db.relationship('Client')
     diagnosisType = db.relationship('rbDiagnosisType', lazy=False, innerjoin=True)
@@ -415,16 +413,23 @@ class Diagnosis(db.Model):
     def __int__(self):
         return self.id
 
+    def __json__(self):
+        return {
+            'id': self.id,
+            'diagnosisType': self.diagnosisType,
+            'character': self.character
+        }
+
 
 class Diagnostic(db.Model):
     __tablename__ = u'Diagnostic'
 
     id = db.Column(db.Integer, primary_key=True)
-    createDatetime = db.Column(db.DateTime, nullable=False)
-    createPerson_id = db.Column(db.ForeignKey('Person.id'), index=True)
-    modifyDatetime = db.Column(db.DateTime, nullable=False)
-    modifyPerson_id = db.Column(db.ForeignKey('Person.id'), index=True)
-    deleted = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    createDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now)
+    createPerson_id = db.Column(db.Integer, index=True, default=safe_current_user_id)
+    modifyDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now, onupdate=datetime.datetime.now)
+    modifyPerson_id = db.Column(db.Integer, index=True, default=safe_current_user_id, onupdate=safe_current_user_id)
+    deleted = db.Column(db.Integer, nullable=False, server_default=u"'0'", default=0)
     event_id = db.Column(db.ForeignKey('Event.id'), nullable=False, index=True)
     diagnosis_id = db.Column(db.ForeignKey('Diagnosis.id'), index=True)
     diagnosisType_id = db.Column(db.ForeignKey('rbDiagnosisType.id'), index=True, nullable=False)
@@ -441,15 +446,14 @@ class Diagnostic(db.Model):
     result_id = db.Column(db.ForeignKey('rbResult.id'), index=True)
     setDate = db.Column(db.DateTime, nullable=False)
     endDate = db.Column(db.DateTime)
-    notes = db.Column(db.Text, nullable=False)
+    notes = db.Column(db.Text, nullable=False, default='')
     rbAcheResult_id = db.Column(db.ForeignKey('rbAcheResult.id'), index=True)
-    version = db.Column(db.Integer, nullable=False)
-    action_id = db.Column(db.Integer, index=True)
+    version = db.Column(db.Integer, nullable=False, default=0)
+    action_id = db.Column(db.Integer, db.ForeignKey('Action.id'), index=True)
+    diagnosis_description = db.Column(db.Text)
 
     rbAcheResult = db.relationship(u'rbAcheResult', innerjoin=True)
     result = db.relationship(u'rbResult', innerjoin=True)
-    createPerson = db.relationship('Person', foreign_keys=[createPerson_id])
-    modifyPerson = db.relationship('Person', foreign_keys=[modifyPerson_id])
     person = db.relationship('Person', foreign_keys=[person_id])
     event = db.relationship('Event', innerjoin=True)
     diagnoses = db.relationship(
@@ -464,6 +468,7 @@ class Diagnostic(db.Model):
     dispanser = db.relationship('rbDispanser')
     traumaType = db.relationship('rbTraumaType')
     healthGroup = db.relationship('rbHealthGroup', lazy=False)
+    action = db.relationship('Action')
 
     def __int__(self):
         return self.id

@@ -635,7 +635,7 @@ class rbSpeciality(db.Model):
             'OKSO_code': self.OKSOCode,
             'MKB_filter': self.mkbFilter,
             'regional_code': self.regionalCode,
-            'quoting_qnabled': bool(self.quotingEnabled),
+            'quoting_enabled': bool(self.quotingEnabled),
         }
 
     def __int__(self):

@@ -355,6 +355,10 @@ table.table-clickable tbody tr {
     cursor: pointer;
 }
 
+tr.row-clickable {
+    cursor: pointer;
+}
+
 .popupable {
     display: block;
     position: absolute;

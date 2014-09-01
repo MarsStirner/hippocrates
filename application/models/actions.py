@@ -2,7 +2,6 @@
 import datetime
 from application.systemwide import db
 from exists import FDRecord
-from sqlalchemy.orm.collections import InstrumentedList
 from application.models.utils import safe_current_user_id, get_model_by_name
 
 __author__ = 'mmalkov'
@@ -87,6 +86,11 @@ class ActionProperty(db.Model):
     type = db.relationship(u'ActionPropertyType', lazy=False, innerjoin=True)
     unit = db.relationship(u'rbUnit', lazy=False)
 
+    def get_value_class(self):
+        # Следующая магия вытаскивает класс, ассоциированный с backref-пропертей, созданной этим же классом у нашего
+        # ActionProperty. Объекты этого класса мы будем создавать для значений
+        return getattr(self.__class__, self.__get_property_name()).property.mapper.class_
+
     def __get_property_name(self):
         type_name = self.type.typeName
         if type_name in ["Constructor", u"Жалобы", 'Text', 'Html']:
@@ -123,9 +127,7 @@ class ActionProperty(db.Model):
 
     def set_value(self, value, raw=False):
         value_object = self.value_object
-        # Следующая магия вытаскивает класс, ассоциированный с backref-пропертей, созданной этим же классом у нашего
-        # ActionProperty. Объекты этого класса мы будем создавать для значений
-        value_class = getattr(self.__class__, self.__get_property_name()).property.mapper.class_
+        value_class = self.get_value_class()
 
         def set_value(val_object, value):
             if raw and hasattr(val_object, 'value_'):
@@ -141,25 +143,32 @@ class ActionProperty(db.Model):
             db.session.add(val)
             return val
 
+        def delete_value(val_object):
+            db.session.delete(val_object)
+
         if not self.type.isVector:
             if len(value_object) == 0:
                 if value is not None:
                     value_object.append(make_value(value))
             else:
                 if value is None:
-                    db.session.delete(value_object[0])
+                    delete_value(value_object[0])
                 else:
                     set_value(value_object[0], value)
         else:
-            m = min(len(value_object), len(value))
-            for i in xrange(m):
-                value_object[i].value = value[i]
-            if len(value_object) < len(value):
-                for i in xrange(m, len(value)):
-                    value_object.append(make_value(value[i], i))
-            elif len(value_object) > len(value):
-                for i in xrange(len(value_object)-1, m-1, -1):
-                    db.session.delete(value_object[i])
+            if value:
+                m = min(len(value_object), len(value))
+                for i in xrange(m):
+                    value_object[i].value = value[i]
+                if len(value_object) < len(value):
+                    for i in xrange(m, len(value)):
+                        value_object.append(make_value(value[i], i))
+                elif len(value_object) > len(value):
+                    for i in xrange(len(value_object) - 1, m - 1, -1):
+                        delete_value(value_object[i])
+            else:
+                for val in value_object:
+                    delete_value(val)
 
     def __json__(self):
         return {
@@ -258,6 +267,10 @@ class ActionPropertyType(db.Model):
 class ActionProperty__ValueType(db.Model):
     __abstract__ = True
 
+    @classmethod
+    def format_value(cls, prop, json_data):
+        return json_data
+
 
 class ActionProperty_Action(ActionProperty__ValueType):
     __tablename__ = u'ActionProperty_Action'
@@ -278,6 +291,11 @@ class ActionProperty_Date(ActionProperty__ValueType):
     value = db.Column(db.Date)
 
     property_object = db.relationship('ActionProperty', backref='_value_Date')
+
+    @classmethod
+    def format_value(cls, prop, json_data):
+        from application.lib.utils import safe_date  # fixme: reorganize utils module
+        return safe_date(json_data)
 
 
 class ActionProperty_Double(ActionProperty__ValueType):
@@ -343,6 +361,49 @@ class ActionProperty_ImageMap(ActionProperty__ValueType):
     property_object = db.relationship('ActionProperty', backref='_value_ImageMap')
 
 
+class ActionProperty_Diagnosis(ActionProperty__ValueType):
+    __tablename__ = u'ActionProperty_Diagnosis'
+    id = db.Column(db.Integer, db.ForeignKey('ActionProperty.id'), primary_key=True, nullable=False)
+    index = db.Column(db.Integer, primary_key=True, nullable=False, server_default=u"'0'")
+    value_ = db.Column('value', db.ForeignKey('Diagnostic.id'), nullable=False)
+
+    value_model = db.relationship('Diagnostic')
+    property_object = db.relationship('ActionProperty', backref='_value_Diagnosis')
+
+    @property
+    def value(self):
+        return self.value_model
+
+    @value.setter
+    def value(self, val):
+        if self.value_model is not None and self.value_model in db.session and self.value_model.id == val.id:
+            self.value_model = db.session.merge(val)
+        else:
+            self.value_model = val
+
+    @classmethod
+    def format_value(cls, property, json_data):
+        from blueprints.event.lib.utils import create_or_update_diagnosis, delete_diagnosis
+        from application.lib.utils import safe_traverse
+        action = property.action
+
+        if property.type.isVector:
+            diag_list = []
+            for diag_data in json_data:
+                d = create_or_update_diagnosis(action.event, diag_data, action)
+                deleted = safe_traverse(diag_data, 'deleted')
+                db.session.add(d)
+                if deleted:
+                    delete_diagnosis(d)
+                else:
+                    diag_list.append(d)
+            return diag_list
+        else:
+            d = create_or_update_diagnosis(action.event, json_data, action)
+            db.session.add(d)
+            return d
+
+
 class ActionProperty_Integer_Base(ActionProperty__ValueType):
     __tablename__ = u'ActionProperty_Integer'
 
@@ -385,8 +446,6 @@ class ActionProperty_OperationType(ActionProperty_Integer_Base):
     @value.setter
     def value(self, val):
         self.value_ = val.id if val is not None else None
-
-
 
 
 class ActionProperty_RLS(ActionProperty_Integer_Base):
@@ -500,6 +559,11 @@ class ActionProperty_Time(ActionProperty__ValueType):
     index = db.Column(db.Integer, primary_key=True, nullable=False, server_default=u"'0'")
     value = db.Column(db.Time, nullable=False)
     property_object = db.relationship('ActionProperty', backref='_value_Time')
+
+    @classmethod
+    def format_value(cls, prop, json_data):
+        from application.lib.utils import safe_time  # fixme: reorganize utils module
+        return safe_time(json_data)
 
 
 class ActionProperty_rbBloodComponentType(ActionProperty__ValueType):

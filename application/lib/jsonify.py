@@ -477,6 +477,19 @@ class PersonTreeVisualizer(object):
             'name': person.shortNameText,
         }
 
+    def make_person_ws(self, person):
+        return {
+            'id': person.id,
+            'name': person.shortNameText,
+            'speciality': self.make_short_speciality(person.speciality)
+        }
+
+    def make_short_speciality(self, speciality):
+        return {
+            'id': speciality.id,
+            'name': speciality.name
+        }
+
     def make_speciality(self, speciality):
         return {
             'id': speciality.id,
@@ -544,8 +557,7 @@ class EventVisualizer(object):
         """
         result = []
         for diagnostic in event.diagnostics:
-            for diagnosis in diagnostic.diagnoses:
-                result.append(self.make_diagnose_row(diagnostic, diagnosis))
+            result.append(self.make_diagnostic_record(diagnostic))
         return result
 
     def make_diagnose_row(self, diagnostic, diagnosis):
@@ -567,6 +579,49 @@ class EventVisualizer(object):
             'dispanser': diagnosis.dispanser,
             'trauma': diagnosis.traumaType,
             'notes': diagnostic.notes,
+        }
+
+    def make_diagnostic_record(self, diagnostic):
+        """
+        :type diagnostic: application.models.event.Diagnostic
+        :param diagnostic:
+        :return:
+        """
+        pvis = PersonTreeVisualizer()
+        return {
+            'id': diagnostic.id,
+            'set_date': diagnostic.setDate,
+            'end_date': diagnostic.endDate,
+            'diagnosis_type': diagnostic.diagnosisType,
+            'diagnosis': self.make_diagnosis_record(diagnostic.diagnosis),
+            'character': diagnostic.character,
+            'person': pvis.make_person_ws(diagnostic.person),
+            'notes': diagnostic.notes,
+            'action_id': diagnostic.action_id,
+            'result': diagnostic.result,
+            'ache_result': diagnostic.rbAcheResult,
+
+            'health_group': diagnostic.healthGroup,
+            'trauma_type': diagnostic.traumaType,
+            'phase': diagnostic.phase,
+            'stage': diagnostic.stage,
+            'dispanser': diagnostic.dispanser,
+            'sanatorium': diagnostic.sanatorium,
+            'hospital': diagnostic.hospital,
+            'diagnosis_description': diagnostic.diagnosis_description
+        }
+
+    def make_diagnosis_record(self, diagnosis):
+        """
+        :type diagnosis: application.models.event.Diagnosis
+        :param diagnosis:
+        :return:
+        """
+        return {
+            'id': diagnosis.id,
+            'mkb': diagnosis.mkb,
+            'mkbex': diagnosis.mkb_ex,
+            'client_id': diagnosis.client_id,
         }
 
     def make_action_type(self, action_type):
@@ -790,7 +845,10 @@ class ActionVisualizer(object):
         @type prop: ActionProperty
         """
         if prop.value is None:
-            value = None
+            value = [] if prop.type.isVector else None
+        elif prop.type.isVector:
+            maker = getattr(self, 'make_ap_%s' % prop.type.typeName, None)
+            value = [maker(v) for v in prop.value] if maker else [v for v in prop.value]
         else:
             maker = getattr(self, 'make_ap_%s' % prop.type.typeName, None)
             value = maker(prop.value) if maker else prop.value
@@ -817,3 +875,13 @@ class ActionVisualizer(object):
             'code': value.code,
             'parent_id': value.parent_id, # for compatibility with Reference
         }
+
+    @staticmethod
+    def make_ap_Diagnosis(value):
+        """
+        :type value: application.models.event.Diagnostic
+        :param value:
+        :return:
+        """
+        evis = EventVisualizer()
+        return evis.make_diagnostic_record(value)

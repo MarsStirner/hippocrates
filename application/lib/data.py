@@ -131,10 +131,7 @@ def create_action(action_type_id, event_id, src_action=None, assigned=None, prop
                 prop.value = src_props[prop_type.id].value
             elif prop_type.id in full_props:
                 prop_desc = full_props[prop_type.id]
-                if isinstance(prop_desc['value'], dict):
-                    prop.set_value(safe_traverse(prop_desc, 'value', 'id'), True)
-                else:
-                    prop.set_value(prop_desc['value'])
+                set_ap_value(prop, prop_desc['value'])
                 prop.isAssigned = prop_desc['is_assigned']
             elif prop.type.defaultValue:
                 prop.set_value(prop.type.defaultValue, True)
@@ -205,14 +202,26 @@ def update_action(action, **kwargs):
         properties = kwargs.get('properties')
         for prop_desc in properties:
             prop = ActionProperty.query.get(prop_desc['id'])
-            if isinstance(prop_desc['value'], dict):
-                prop.set_value(safe_traverse(prop_desc, 'value', 'id'), True)
-            else:
-                prop.set_value(prop_desc['value'])
+            set_ap_value(prop, prop_desc['value'])
             prop.isAssigned = prop_desc['is_assigned']
             db.session.add(prop)
 
     return action
+
+
+def set_ap_value(prop, value):
+    """
+
+    :param prop: ActionProperty
+    :param value: dict|string
+    :return:
+    """
+    value_class = prop.get_value_class()
+    value = value_class.format_value(prop, value)
+    if isinstance(value, dict):
+        prop.set_value(safe_traverse(value, 'value', 'id'), True)
+    else:
+        prop.set_value(value)
 
 
 def create_JT(action, orgstructure_id):

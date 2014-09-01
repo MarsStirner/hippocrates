@@ -99,6 +99,9 @@ angular.module('WebMis20.ActionLayout', ['WebMis20.validators', 'WebMis20.direct
                                     extra_filter = rb_codes.length ? 'attribute:\'code\':[{0}]'.format(rb_codes.join(',')) : '';
                                 inner_template = '<rb-select ref-book="{1}" ng-model="{0}.value" extra-filter="{2}"></rb-select>'.format('{0}', rbTable, extra_filter);
                                 break;
+                            case 'Diagnosis':
+                                inner_template = '<wm-diagnosis ng-model="{0}.value" add-new="true"></wm-diagnosis>';
+                                break;
                             default:
                                 inner_template = '<span ng-bind="{0}.value"></span>';
                         }

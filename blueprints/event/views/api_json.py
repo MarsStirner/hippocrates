@@ -21,7 +21,7 @@ from blueprints.event.app import module
 from application.models.exists import (Organisation, )
 from application.lib.jsonify import EventVisualizer, ClientVisualizer
 from blueprints.event.lib.utils import (EventSaveException, get_local_contract,
-    create_new_local_contract, create_services)
+    create_new_local_contract, create_services, create_or_update_diagnosis)
 from application.lib.sphinx_search import SearchEventService
 from application.lib.data import get_planned_end_datetime, int_get_atl_dict_all
 
@@ -93,6 +93,7 @@ def api_event_new_get():
 @module.route('api/event_save.json', methods=['POST'])
 def api_event_save():
     event_data = request.json['event']
+    diagnoses = request.json['diagnoses']
     close_event = request.json['close_event']
     event_id = event_data.get('id')
     is_diagnostic = event_data['event_type']['request_type']['code'] == '4'
@@ -148,6 +149,9 @@ def api_event_save():
             executives.event = event
             executives.begDate = event.setDate
             db.session.add(executives)
+
+    for diagnosis in diagnoses:
+        create_or_update_diagnosis(event, diagnosis)
 
     if close_event:
         exec_date = event_data['exec_date']
