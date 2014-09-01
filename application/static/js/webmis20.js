@@ -370,7 +370,7 @@ var WebMis20 = angular.module('WebMis20', [
 
     return Settings;
 }])
-.factory('PrintingService', ['$window', '$http', '$rootScope', function ($window, $http, $rootScope) {
+.factory('PrintingService', ['$window', '$http', '$rootScope', '$timeout', function ($window, $http, $rootScope, $timeout) {
     var PrintingService = function (context_type) {
         if (arguments.length >= 3) {
             this.target = arguments[2]
@@ -415,7 +415,8 @@ var WebMis20 = angular.module('WebMis20', [
             w.document.open();
             w.document.write(data);
             w.document.close();
-            w.print();
+            // timeout to fix chrome (36) behaviour - empty print preview https://code.google.com/p/chromium/issues/detail?id=396667
+            $timeout(w.print, 300);
         })
         .error(function (data, status) {
             var result = data.result;
