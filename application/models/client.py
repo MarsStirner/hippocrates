@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import datetime
-from application.lib.agesex import calcAgeTuple
+from application.lib.agesex import calcAgeTuple, formatDays, formatMonthsWeeks, formatYearsMonths, formatYears
 from application.lib.const import ID_DOC_GROUP_CODE, VOL_POLICY_CODES, COMP_POLICY_CODES
 from application.models.utils import safe_current_user_id
 from application.models.enums import Gender, LocalityType, AllergyPower
@@ -158,6 +158,26 @@ class Client(db.Model):
             moment = datetime.date.today()
         return calcAgeTuple(self.birthDate, moment)
 
+
+    @property
+    def age(self):
+        bd = self.birthDate
+        date = datetime.date.today()
+        if not self.age_tuple():
+            return u'ещё не родился'
+        (days, weeks, months, years) = self.age_tuple()
+        if years > 7:
+            return formatYears(years)
+        elif years > 1:
+            return formatYearsMonths(years, months-12*years)
+        elif months > 1:
+            add_year, new_month = divmod(bd.month + months, 12)
+            fmonth_date = bd.replace(month=new_month, year=bd.year+add_year)
+            return formatMonthsWeeks(months, (date-fmonth_date).days/7)
+        else:
+            return formatDays(days)
+
+
     @property
     def nameText(self):
         return u' '.join((u'%s %s %s' % (self.lastName or '', self.firstName or '', self.patrName or '')).split())
@@ -253,6 +273,7 @@ class Client(db.Model):
             'full_name': self.nameText,
             'notes': self.notes,
             'age_tuple': self.age_tuple(),
+            'age': self.age,
             'sex_raw': self.sexCode
         }
 
