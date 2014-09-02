@@ -487,11 +487,7 @@ var WebMis20 = angular.module('WebMis20', [
         return this;
     };
     Action.prototype.cancel = function () {
-        if (this.action.id) {
-            this.get(this.action.id)
-        } else {
-            this.get_new(this.action.event_id, this.action.action_type_id)
-        }
+        window.close();
     };
     Action.prototype.get_property = function (id) {
         if (id instanceof String) {
