@@ -119,7 +119,7 @@ angular.module('WebMis20.directives').
     </button>\
 </td>\
 <td ng-bind="service.coord_count" class="text-center" ng-show="formstate.is_dms()"></td>\
-<td nowrap>\
+<td nowrap class="text-right">\
     <button type="button" class="btn btn-sm btn-danger" title="Удалить услуги"\
             ng-show="btn_delete_visible()"\
             ng-click="eventctrl.remove_service(event, idx)"><span class="glyphicon glyphicon-trash"></span>\
@@ -236,7 +236,7 @@ angular.module('WebMis20.directives').
 <td class="text-center" ng-show="formstate.is_dms()">\
     <span class="glyphicon" ng-class="{\'glyphicon-ok\': action.is_coordinated(), \'glyphicon-remove\':!action.is_coordinated()}"></span>\
 </td>\
-<td nowrap>\
+<td nowrap class="text-right">\
     <span class="glyphicon glyphicon-info-sign"\
         popover-trigger="mouseenter" popover-popup-delay=\'1000\' popover-placement="left" popover="[[get_info_text()]]"></span>\
     <ui-print-button ps="get_ps()" resolve="get_ps_resolve()" ng-if="action.action_id"></ui-print-button>\

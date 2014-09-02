@@ -533,8 +533,13 @@ angular.module('WebMis20.services', []).
                     ticket_id: this.ticket_id,
                     close_event: close_event
                 }).
-                    success(function(data) {
-                        deferred.resolve(data.result.id);
+                    success(function(response) {
+                        var event_id = response.result.id,
+                            error_text = response.result.error_text;
+                        deferred.resolve({
+                            event_id: event_id,
+                            error_text: error_text
+                        });
                     }).
                     error(function(response) {
                         var rr = response.result;
@@ -1075,4 +1080,35 @@ angular.module('WebMis20.services', []).
                 };
             }
         };
+    }]).
+    service('MessageBox', ['$modal', function ($modal) {
+        return {
+            info: function (head, message) {
+                var Controller = function ($scope) {
+                    $scope.head_msg = head;
+                    $scope.message = message;
+                };
+                var instance = $modal.open({
+                    templateUrl: '/WebMis20/modal-MessageBox.html',
+    //                size: 'sm',
+                    controller: Controller
+                });
+                return instance.result.then(function () {
+                });
+            }
+        };
+    }]).
+    run(['$templateCache', function ($templateCache) {
+        $templateCache.put('/WebMis20/modal-MessageBox.html',
+            '<div class="modal-header" xmlns="http://www.w3.org/1999/html">\
+                <button type="button" class="close" ng-click="$dismiss()">&times;</button>\
+                <h4 class="modal-title">[[head_msg]]</h4>\
+            </div>\
+            <div class="modal-body">\
+                <p ng-bind-html="message"></p>\
+            </div>\
+            <div class="modal-footer">\
+                <button type="button" class="btn btn-success" ng-click="$close()">OK</button>\
+            </div>'
+        );
     }]);

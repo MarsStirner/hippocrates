@@ -2,9 +2,9 @@
 
 import datetime
 from application.lib.data import create_new_action, update_action
-from application.models.actions import Action
+from application.models.actions import Action, ActionType
 from application.models.event import EventLocalContract
-from application.lib.utils import safe_date, safe_traverse, safe_datetime
+from application.lib.utils import safe_date, safe_traverse, safe_datetime, logger
 from application.models.exists import rbDocumentType
 from application.lib.settings import Settings
 from application.systemwide import db
@@ -82,10 +82,15 @@ def get_local_contract(lc_info):
 
 
 def create_services(event_id, service_groups, contract_id):
-    result = []
+    """
+    Создание или обновление услуг (действий) и последующее сохранение в бд.
+    """
+    actions = []
+    errors = []
     for sg in service_groups:
         for act_data in sg['actions']:
             action_id = act_data['action_id']
+            action_type = ActionType.query.get(sg['at_id'])
             data = {
                 'amount': act_data.get('amount', 1),
                 'account': act_data.get('account', 0),
@@ -96,20 +101,34 @@ def create_services(event_id, service_groups, contract_id):
                 data['plannedEndDate'] = safe_datetime(act_data['planned_end_date'])
             assigned = act_data['assigned'] if sg['is_lab'] else None
 
-            if not action_id:
-                data['contract_id'] = contract_id
-                action = create_new_action(
-                    sg['at_id'],
-                    event_id,
-                    assigned=assigned,
-                    data=data
-                )
+            try:
+                if not action_id:
+                    data['contract_id'] = contract_id
+                    action = create_new_action(
+                        sg['at_id'],
+                        event_id,
+                        assigned=assigned,
+                        data=data
+                    )
+                else:
+                    if assigned:
+                        data['properties_assigned'] = assigned
+                    action = Action.query.get(action_id)
+                    action = update_action(action, **data)
+            except Exception, e:
+                db.session.rollback()
+                err_msg = u'Ошибка сохранения услуги "%s"' % action_type.name
+                logger.error(err_msg + u'для event_id=%s' % event_id, exc_info=True)
+                errors.append(err_msg)
             else:
-                if assigned:
-                    data['properties_assigned'] = assigned
-                action = Action.query.get(action_id)
-                action = update_action(action, **data)
-
-            db.session.add(action)
-            result.append(action)
-    return result
+                db.session.add(action)
+                try:
+                    db.session.commit()
+                except Exception, e:
+                    db.session.rollback()
+                    err_msg = u'Ошибка сохранения услуги "%s"' % action_type.name
+                    logger.error(err_msg + u'для event_id=%s' % event_id, exc_info=True)
+                    errors.append(err_msg)
+                else:
+                    actions.append(action)
+    return actions, errors
