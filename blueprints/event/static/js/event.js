@@ -586,9 +586,6 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
                     $scope.ps.set_context($scope.event.info.event_type.print_context);
                 }
 
-                if ($scope.event.info.client.info.birth_date) {
-                    $scope.event.info.client.info.age = moment().diff(moment($scope.event.info.client.info.birth_date), 'years');
-                }
                 if ($scope.event.info.client.compulsory_policy && $scope.event.info.client.compulsory_policy.policy_text) {
                     $scope.policies.push($scope.event.info.client.compulsory_policy.policy_text + ' ('+ $filter('asDate')($scope.event.info.client.compulsory_policy.beg_date) + '-' + $filter('asDate')($scope.event.info.client.compulsory_policy.end_date) +')');
                 }
