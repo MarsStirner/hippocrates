@@ -56,12 +56,17 @@ angular.module('WebMis20.directives').
                         var model = {
                             assignable: scope.service.assignable,
                             assigned: assigned,
-                            planned_end_date: ped
+                            planned_end_date: ped,
+                            ped_disabled: scope.service.actions.every(function (act) {
+                                return act.action_id;
+                            })
                         };
                         ActionTypeTreeModal.openAppointmentModal(model, true).then(function () {
                             scope.service.actions.forEach(function (act) {
                                 if (!act.is_closed()) {
                                     act.assigned = model.assigned;
+                                }
+                                if (!act.action_id) {
                                     act.planned_end_date = model.planned_end_date;
                                 }
                             });
@@ -153,7 +158,8 @@ angular.module('WebMis20.directives').
                         var model = {
                             assignable: scope.service.assignable,
                             assigned: scope.action.assigned,
-                            planned_end_date: scope.action.planned_end_date
+                            planned_end_date: scope.action.planned_end_date,
+                            ped_disabled: Boolean(scope.action.action_id)
                         };
                         ActionTypeTreeModal.openAppointmentModal(model, true).then(function () {
                             scope.action.assigned = model.assigned;
