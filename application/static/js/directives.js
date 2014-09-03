@@ -105,7 +105,7 @@ angular.module('WebMis20.directives')
             link: function (scope, element, attrs) {
                 var template = '\
     <ui-select {0} {1} theme="select2" class="form-control" autocomplete="off" ref-book="Person" ng-model="{2}" {3}>\
-        <ui-select-match placeholder="не выбрано">[[ $select.selected.name ]], [[ $select.selected.speciality.name ]]</ui-select-match>\
+        <ui-select-match placeholder="не выбрано">[[ $select.selected.name ]][[$select.selected.name ? ", ": null]][[ $select.selected.speciality.name ]]</ui-select-match>\
         <ui-select-choices repeat="item in $refBook.objects | filter: $select.search | limitTo: 50">\
             <span ng-bind-html="(item.name + \', \' + item.speciality.name) | highlight: $select.search"></span>\
         </ui-select-choices>\
@@ -705,34 +705,45 @@ angular.module('WebMis20.directives')
             <h4 class="modal-title">Диагноз</h4>\
         </div>\
         <div class="modal-body">\
-            <div class="container">\
+            <ng-form name="DiagnosisForm">\
                 <div class="row marginal">\
                     <div class="col-md-4">\
-                        <label for="diagnosis_type" class="control-label">Тип</label>\
-                        <ui-select class="form-control" name="diagnosis_type" theme="select2"\
-                            ng-model="model.diagnosis_type"\
-                            ref-book="rbDiagnosisType">\
-                            <ui-select-match placeholder="не выбрано">[[ $select.selected.name ]]</ui-select-match>\
-                            <ui-select-choices repeat="dt in ($refBook.objects | filter: $select.search) track by dt.id">\
-                                <span ng-bind-html="dt.name | highlight: $select.search"></span>\
-                            </ui-select-choices>\
-                        </ui-select>\
+                        <div class="form-group"\
+                             ng-class="{\'has-error\': DiagnosisForm.diagnosis_type.$invalid}">\
+                            <label for="diagnosis_type" class="control-label">Тип</label>\
+                            <ui-select class="form-control" name="diagnosis_type" theme="select2"\
+                                ng-model="model.diagnosis_type"\
+                                ref-book="rbDiagnosisType"\
+                                ng-required="true">\
+                                <ui-select-match placeholder="не выбрано">[[ $select.selected.name ]]</ui-select-match>\
+                                <ui-select-choices repeat="dt in ($refBook.objects | filter: $select.search) track by dt.id">\
+                                    <span ng-bind-html="dt.name | highlight: $select.search"></span>\
+                                </ui-select-choices>\
+                            </ui-select>\
+                        </div>\
                     </div>\
                     <div class="col-md-3">\
-                        <label for="diagnosis_date" class="control-label">Дата начала</label>\
-                        <wm-date id="set_date" name="set_date" ng-model="model.set_date" ng-required="true">\
-                        </wm-date>\
+                        <div class="form-group" ng-class="{\'has-error\': DiagnosisForm.set_date.$invalid}">\
+                            <label for="diagnosis_date" class="control-label">Дата начала</label>\
+                            <wm-date name="set_date" ng-model="model.set_date" ng-required="true">\
+                            </wm-date>\
+                        </div>\
                     </div>\
                     <div class="col-md-3">\
-                        <label for="diagnosis_date" class="control-label">Дата окончания</label>\
-                        <wm-date id="end_date" name="end_date" ng-model="model.end_date" ng-required="true">\
-                        </wm-date>\
+                        <div class="form-group" ng-class="{\'has-error\': DiagnosisForm.end_date.$invalid}">\
+                            <label for="diagnosis_date" class="control-label">Дата окончания</label>\
+                            <wm-date name="end_date" ng-model="model.end_date" ng-required="true">\
+                            </wm-date>\
+                        </div>\
                     </div>\
                 </div>\
                 <div class="row marginal">\
                     <div class="col-md-3">\
-                        <label for="MKB" class="control-label">МКБ</label>\
-                        <ui-mkb ng-model="model.diagnosis.mkb"></ui-mkb>\
+                        <div class="form-group"\
+                        ng-class="{\'has-error\': DiagnosisForm.mkb.$invalid}">\
+                            <label for="MKB" class="control-label">МКБ</label>\
+                            <ui-mkb ng-model="model.diagnosis.mkb" name="mkb" ng-required="true"></ui-mkb>\
+                        </div>\
                     </div>\
                     <div class="col-md-3">\
                         <label for="diagnosis_character" class="control-label">Характер</label>\
@@ -748,8 +759,11 @@ angular.module('WebMis20.directives')
                 </div>\
                 <div class="row marginal">\
                     <div class="col-md-4">\
-                        <label for="diagnosis_person" class="control-label">Врач</label>\
-                        <wm-person-select ng-model="model.person"></wm-person-select>\
+                        <div class="form-group"\
+                        ng-class="{\'has-error\': model.person == null}">\
+                            <label for="diagnosis_person" class="control-label">Врач</label>\
+                            <wm-person-select ng-model="model.person" name="diagnosis_person" ng-required="true"></wm-person-select>\
+                        </div>\
                     </div>\
                 </div>\
                 <div class="row marginal">\
@@ -854,11 +868,12 @@ angular.module('WebMis20.directives')
                     <textarea class="form-control" id="notes" name="notes" rows="2" autocomplete="off" ng-model="model.notes"></textarea>\
                     </div>\
                 </div>\
-            </div>\
+            </ng-form>\
         </div>\
         <div class="modal-footer">\
             <button type="button" class="btn btn-default" ng-click="$dismiss()">Отмена</button>\
-            <button type="button" class="btn btn-success" ng-click="$close()">Сохранить</button>\
+            <button type="button" class="btn btn-success" ng-click="$close()"\
+            ng-disabled="DiagnosisForm.$invalid">Сохранить</button>\
         </div>')
     }])
 ;

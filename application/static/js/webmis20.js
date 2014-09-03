@@ -624,7 +624,7 @@ var WebMis20 = angular.module('WebMis20', [
         restrict: 'E',
         require: '?ngModel',
         template:
-            '<button class="btn btn-default btn-block" ng-click="to_show()">[[ $model.$modelValue.code ]] <span class="caret"></span></button>' +
+            '<button class="btn btn-default btn-block [[ngRequired && !$model.$modelValue ? \'error-border\' : \'\']]" ng-click="to_show()">[[ $model.$modelValue.code ]] <span class="caret"></span></button>' +
             '<div class="well well-sm popupable" ng-show="shown" ng-mouseleave="to_hide_delay()" ng-mouseenter="to_hide_cancel()">' +
                 '<input type="text" ng-model="query" class="form-control" />' +
                 '<table class="table table-condensed table-hover table-clickable">' +
@@ -636,7 +636,7 @@ var WebMis20 = angular.module('WebMis20', [
                     '</tbody>' +
                 '</table>' +
             '</div>',
-        scope: {},
+        scope: {ngRequired: '='},
         link: function (scope, element, attributes, ngModel) {
             scope.$model = ngModel;
             scope.$RefBook = RefBookService.get('MKB');
