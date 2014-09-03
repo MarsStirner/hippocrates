@@ -262,6 +262,7 @@ def create_JT(action, orgstructure_id):
         ttj.datetimeTaken = planned_end_date
         ttj.externalId = action.event.externalId
         db.session.add(ttj)
+    action.takenTissueJournal = ttj
     jt = JobTicket()
     jt.job = job
     jt.datetime = planned_end_date
