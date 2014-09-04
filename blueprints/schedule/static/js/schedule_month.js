@@ -49,7 +49,7 @@ var DaySetupModalCtrl = function ($scope, $modalInstance, selected_days, model, 
         $scope.model.intervals.push({
             begTime: moment('09:00', "HH:mm:ss").toDate(),
             endTime: moment('15:00', "HH:mm:ss").toDate(),
-            office: null,
+            office: $scope.model.default_office,
             reception_type: null,
             CITO: 0,
             planned: 0,
@@ -356,7 +356,8 @@ var ScheduleMonthCtrl = function ($scope, $http, $modal, RefBook) {
                                 time_end: moment(quota.time_end, "HH:mm:ss").toDate(),
                                 quoting_type: quota.quoting_type
                             }
-                        })
+                        }),
+                        default_office: $scope.person.office
                     };
                 },
                 rec_types: function() {

@@ -15,7 +15,8 @@ from application.lib.data import int_get_atl_dict_all
 from application.lib.utils import safe_unicode, safe_int, safe_dict, logger
 from application.models.enums import EventPrimary, EventOrder, ActionStatus, Gender
 from application.models.event import Event, EventType, Diagnosis, Diagnostic
-from application.models.schedule import Schedule, rbReceptionType, ScheduleClientTicket, ScheduleTicket, QuotingByTime
+from application.models.schedule import Schedule, rbReceptionType, ScheduleClientTicket, ScheduleTicket, QuotingByTime, \
+    Office
 from application.models.actions import Action, ActionProperty, ActionType
 from application.models.exists import rbRequestType, rbService, ContractTariff, Contract
 
@@ -72,13 +73,15 @@ class ScheduleVisualizer(object):
 
     def make_person(self, person):
         speciality = person.speciality
+        office = Office.query.filter(Office.code == person.office).first()
         return {
             'id': person.id,
             'name': person.nameText,
             'speciality': {
                 'id': speciality.id,
                 'name': speciality.name
-            } if speciality else None
+            } if speciality else None,
+            'office': office if office else person.office
         }
 
     def make_schedule(self, schedules, date_start, date_end):
