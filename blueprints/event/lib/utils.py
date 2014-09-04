@@ -29,7 +29,7 @@ def create_new_local_contract(lc_info):
         if not date:
             raise EventSaveException(err_msg, u'Не указана дата заключения договора.')
         lcon.dateContract = date
-        if not number:
+        if number is None:
             raise EventSaveException(err_msg, u'Не указан номер договора.')
         lcon.numberContract = number
 

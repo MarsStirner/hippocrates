@@ -605,10 +605,17 @@ class EventVisualizer(object):
             lc = cvis.make_payer_for_lc(client)
             payments = []
         else:
-            lc = event.localContract if event else None
+            if event:
+                lc = event.localContract
+            else:
+                from blueprints.event.lib.utils import create_new_local_contract
+                lc = create_new_local_contract({
+                    'date_contract': datetime.date.today(),
+                    'number_contract': ''
+                })
             payments = [payment
                         for payment in event.payments
-                        if payment.master_id == event.id] if lc else []
+                        if payment.master_id == event.id] if event else []
         return {
             'local_contract': lc,
             'payments': payments

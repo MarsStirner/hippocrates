@@ -341,6 +341,9 @@ var EventPaymentCtrl = function($scope, RefBookService, Settings, $http, $modal)
         return ($scope.formstate.is_paid() || $scope.formstate.is_oms() || $scope.formstate.is_dms()) &&
             !$scope.integration1CODVD_enabled();
     };
+    $scope.payer_person_required = function () {
+        return ($scope.event.is_new() && $scope.formstate.is_paid() && $scope.event.info.client.info.age_tuple[3] < 18);
+    };
 
     $scope.formcnf = {
         tab_payer_person: {

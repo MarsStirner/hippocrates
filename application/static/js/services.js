@@ -1074,6 +1074,14 @@ angular.module('WebMis20.services', []).
             },
             update_payment : function (event, payment) {
                 var PlModel = $injector.get('WMEventPaymentList');
+                var cur_lc = event.payment.local_contract;
+                if (cur_lc.date_contract && !payment.local_contract.date_contract) {
+                    payment.local_contract.date_contract = cur_lc.date_contract;
+                }
+                if ((cur_lc.number_contract !== null || cur_lc.number_contract !== undefined) &&
+                    !payment.local_contract.number_contract) {
+                    payment.local_contract.number_contract = cur_lc.number_contract;
+                }
                 event.payment = {
                     local_contract: payment.local_contract,
                     payments: new PlModel(payment.payments)
