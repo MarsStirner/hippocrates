@@ -250,12 +250,19 @@ angular.module('WebMis20.directives')
         return {
             restrict: 'E',
             replace: true,
-            template: '<button class="btn btn-default" ng-click="open_print_window()" title="Печать"><i class="glyphicon glyphicon-print"></i></button>',
+            template:
+                '<button class="btn btn-default" ng-click="open_print_window()" title="Печать" ng-disabled="disabled()">\
+                    <i class="glyphicon glyphicon-print"></i>\
+                    <i class="glyphicon glyphicon-remove text-danger" ng-show="disabled()"></i>\
+                 </button>',
             scope: {
                 $ps: '=ps'
             },
             link: function (scope, element, attrs) {
                 var resolver_call = attrs.resolve;
+                scope.disabled = function () {
+                    return !scope.$ps.is_available();
+                };
                 scope.open_print_window = function () {
                     var modal = $modal.open({
                         templateUrl: '/WebMis20/modal-print-dialog.html',
