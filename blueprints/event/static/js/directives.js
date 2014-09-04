@@ -133,8 +133,8 @@ angular.module('WebMis20.directives').
             };
         }
     ]).
-    directive('wmEventServiceRecord', ['WMEventFormState', 'WMEventController', 'ActionTypeTreeModal', '$filter',
-        function(WMEventFormState, WMEventController, ActionTypeTreeModal, $filter) {
+    directive('wmEventServiceRecord', ['WMEventFormState', 'WMEventController', 'ActionTypeTreeModal', '$filter', 'RefBookService',
+        function(WMEventFormState, WMEventController, ActionTypeTreeModal, $filter, RefBookService) {
             return {
                 restrict: 'A',
                 scope: {
@@ -146,6 +146,7 @@ angular.module('WebMis20.directives').
                 link: function(scope, elm, attrs) {
                     scope.formstate = WMEventFormState;
                     scope.eventctrl = WMEventController;
+                    scope.ActionStatus = RefBookService.get('ActionStatus');
 
                     scope.change_action_choice_for_payment = function() {
                         if (scope.action.account) {
@@ -167,11 +168,17 @@ angular.module('WebMis20.directives').
                         });
                     };
                     scope.get_info_text = function () {
+                        function get_action_status_text(status_code) {
+                            var status_item = scope.ActionStatus.objects.filter(function (status) {
+                                return status.id === status_code;
+                            })[0];
+                            return status_item ? status_item.name : '';
+                        }
                         var msg = [
                             'Идентификатор: ' + scope.action.action_id,
-                            'Дата начала: ' + $filter('asDateTime')(scope.action.beg_date),
-                            'Дата окончания: ' + $filter('asDateTime')(scope.action.end_date),
-                            'Статус: ' + scope.action.status,
+                            'Дата начала: ' + (scope.action.beg_date ? $filter('asDateTime')(scope.action.beg_date) : 'отсутствует'),
+                            'Дата окончания: ' + (scope.action.end_date ? $filter('asDateTime')(scope.action.end_date) : 'отсутствует'),
+                            'Статус: ' + get_action_status_text(scope.action.status),
                             scope.formstate.is_dms() ?
                                 'Согласовано: ' + (
                                     scope.action.is_coordinated() ?
