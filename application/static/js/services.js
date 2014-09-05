@@ -596,9 +596,7 @@ angular.module('WebMis20.services', []).
                             service_group.assignable.map(function (prop) {
                                 return prop[0];
                             }),
-                        planned_end_date: service_group.all_planned_end_date !== false ?
-                            service_group.all_planned_end_date :
-                            null
+                        planned_end_date: new Date()
                     }
                 }
                 angular.extend(this, action);
@@ -630,7 +628,7 @@ angular.module('WebMis20.services', []).
                         assignable: [], // info list of assignable properties
                         all_assigned: [], // [] - all have same assignments, False - have different assignments
                         all_planned_end_date: null // date - all have same dates, False - have different dates
-                    }
+                    };
                 }
                 this.all_actions_closed = undefined;
                 this.total_sum = undefined;
