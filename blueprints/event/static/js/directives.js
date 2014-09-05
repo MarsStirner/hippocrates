@@ -56,12 +56,17 @@ angular.module('WebMis20.directives').
                         var model = {
                             assignable: scope.service.assignable,
                             assigned: assigned,
-                            planned_end_date: ped
+                            planned_end_date: ped,
+                            ped_disabled: scope.service.actions.every(function (act) {
+                                return act.action_id;
+                            })
                         };
                         ActionTypeTreeModal.openAppointmentModal(model, true).then(function () {
                             scope.service.actions.forEach(function (act) {
                                 if (!act.is_closed()) {
                                     act.assigned = model.assigned;
+                                }
+                                if (!act.action_id) {
                                     act.planned_end_date = model.planned_end_date;
                                 }
                             });
@@ -119,7 +124,7 @@ angular.module('WebMis20.directives').
     </button>\
 </td>\
 <td ng-bind="service.coord_count" class="text-center" ng-show="formstate.is_dms()"></td>\
-<td nowrap>\
+<td nowrap class="text-right">\
     <button type="button" class="btn btn-sm btn-danger" title="Удалить услуги"\
             ng-show="btn_delete_visible()"\
             ng-click="eventctrl.remove_service(event, idx)"><span class="glyphicon glyphicon-trash"></span>\
@@ -128,8 +133,8 @@ angular.module('WebMis20.directives').
             };
         }
     ]).
-    directive('wmEventServiceRecord', ['WMEventFormState', 'WMEventController', 'ActionTypeTreeModal', '$filter',
-        function(WMEventFormState, WMEventController, ActionTypeTreeModal, $filter) {
+    directive('wmEventServiceRecord', ['WMEventFormState', 'WMEventController', 'ActionTypeTreeModal', '$filter', 'RefBookService',
+        function(WMEventFormState, WMEventController, ActionTypeTreeModal, $filter, RefBookService) {
             return {
                 restrict: 'A',
                 scope: {
@@ -141,6 +146,7 @@ angular.module('WebMis20.directives').
                 link: function(scope, elm, attrs) {
                     scope.formstate = WMEventFormState;
                     scope.eventctrl = WMEventController;
+                    scope.ActionStatus = RefBookService.get('ActionStatus');
 
                     scope.change_action_choice_for_payment = function() {
                         if (scope.action.account) {
@@ -153,7 +159,8 @@ angular.module('WebMis20.directives').
                         var model = {
                             assignable: scope.service.assignable,
                             assigned: scope.action.assigned,
-                            planned_end_date: scope.action.planned_end_date
+                            planned_end_date: scope.action.planned_end_date,
+                            ped_disabled: Boolean(scope.action.action_id)
                         };
                         ActionTypeTreeModal.openAppointmentModal(model, true).then(function () {
                             scope.action.assigned = model.assigned;
@@ -161,11 +168,17 @@ angular.module('WebMis20.directives').
                         });
                     };
                     scope.get_info_text = function () {
+                        function get_action_status_text(status_code) {
+                            var status_item = scope.ActionStatus.objects.filter(function (status) {
+                                return status.id === status_code;
+                            })[0];
+                            return status_item ? status_item.name : '';
+                        }
                         var msg = [
                             'Идентификатор: ' + scope.action.action_id,
-                            'Дата начала: ' + $filter('asDateTime')(scope.action.beg_date),
-                            'Дата окончания: ' + $filter('asDateTime')(scope.action.end_date),
-                            'Статус: ' + scope.action.status,
+                            'Дата начала: ' + (scope.action.beg_date ? $filter('asDateTime')(scope.action.beg_date) : 'отсутствует'),
+                            'Дата окончания: ' + (scope.action.end_date ? $filter('asDateTime')(scope.action.end_date) : 'отсутствует'),
+                            'Статус: ' + get_action_status_text(scope.action.status),
                             scope.formstate.is_dms() ?
                                 'Согласовано: ' + (
                                     scope.action.is_coordinated() ?
@@ -236,7 +249,7 @@ angular.module('WebMis20.directives').
 <td class="text-center" ng-show="formstate.is_dms()">\
     <span class="glyphicon" ng-class="{\'glyphicon-ok\': action.is_coordinated(), \'glyphicon-remove\':!action.is_coordinated()}"></span>\
 </td>\
-<td nowrap>\
+<td nowrap class="text-right">\
     <span class="glyphicon glyphicon-info-sign"\
         popover-trigger="mouseenter" popover-popup-delay=\'1000\' popover-placement="left" popover="[[get_info_text()]]"></span>\
     <ui-print-button ps="get_ps()" resolve="get_ps_resolve()" ng-if="action.action_id"></ui-print-button>\

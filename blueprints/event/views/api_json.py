@@ -102,6 +102,7 @@ def api_event_save():
     else:
         execPerson = Person.query.get(event_data['exec_person']['id'])
     err_msg = u'Ошибка сохранения данных обращения'
+    create_mode = not event_id
     if event_id:
         event = Event.query.get(event_id)
         event.deleted = event_data['deleted']
@@ -170,24 +171,44 @@ def api_event_save():
                         }},
                        500, 'save event data error')
     else:
+        response_result = {
+            'id': int(event)
+        }
         services_data = request.json.get('services', [])
         contract_id = event_data['contract']['id']
-        try:
-            actions = create_services(event.id, services_data, contract_id)
-            db.session.commit()
-        except Exception, e:
-            logger.error(e)
-            db.session.rollback()
-            raise EventSaveException(u'Ошибка создания услуг', u'%s Свяжитесь с администратором.' % e.message )
+        if create_mode:
+            try:
+                actions, errors = create_services(event.id, services_data, contract_id)
+            except Exception, e:
+                db.session.rollback()
+                logger.error(u'Ошибка сохранения услуг при создании обращения %s: %s' % (event.id, e), exc_info=True)
+                response_result['error_text'] = u'Обращение создано, но произошла ошибка при сохранении услуг. ' \
+                                                u'Свяжитесь с администратором.'
+            else:
+                if errors:
+                    err_msg = u'Обращение создано, но произошла ошибка при сохранении следующих услуг:' \
+                              u'<br><br> - %s<br>Свяжитесь с администратором.' % (u'<br> - '.join(errors))
+                    response_result['error_text'] = err_msg
 
-    if request.json.get('ticket_id'):
-        ticket = ScheduleClientTicket.query.get(int(request.json['ticket_id']))
-        ticket.event_id = int(event)
-        db.session.commit()
+            if request.json.get('ticket_id'):
+                ticket = ScheduleClientTicket.query.get(int(request.json['ticket_id']))
+                ticket.event_id = int(event)
+                db.session.commit()
+        else:
+            try:
+                actions, errors = create_services(event.id, services_data, contract_id)
+            except Exception, e:
+                db.session.rollback()
+                logger.error(u'Ошибка сохранения услуг для обращения %s: %s' % (event.id, e), exc_info=True)
+                raise EventSaveException(u'Ошибка сохранения услуг', u'Свяжитесь с администратором.')
+            else:
+                if errors:
+                    err_msg = u'\n\n - %s\nСвяжитесь с администратором.' % (
+                        u'\n - '.join(errors)
+                    )
+                    raise EventSaveException(u'Произошла ошибка при сохранении следующих услуг', err_msg)
 
-    return jsonify({
-        'id': int(event)
-    })
+    return jsonify(response_result)
 
 
 @module.route('/api/events/diagnosis.json', methods=['POST'])

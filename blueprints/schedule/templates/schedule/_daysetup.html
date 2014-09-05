@@ -57,10 +57,14 @@
                                                          ng-class="{'has-error': intervalForm.office.$invalid}">
                                                         <label for="office[[$index]]"
                                                                class="control-label">Кабинет</label>
-                                                        <select class="form-control" id="office[[$index]]" name="office"
-                                                                ng-model="interval.office"
-                                                                ng-options="office.code for office in offices track by office.code"
-                                                                ng-required="true"></select>
+                                                        <ui-select id="office[[$index]]" name="office" ng-model="interval.office"
+                                                                   theme="select2" class="form-control" autocomplete="off"
+                                                                   ref-book="Office" ng-required="true">
+                                                            <ui-select-match placeholder="не выбрано">[[ $select.selected.code ]]</ui-select-match>
+                                                            <ui-select-choices repeat="item in $refBook.objects | filter: $select.search | limitTo: 50">
+                                                                <span ng-bind-html="item.code | highlight: $select.search"></span>
+                                                            </ui-select-choices>
+                                                        </ui-select>
                                                     </div>
 
                                                 </div>

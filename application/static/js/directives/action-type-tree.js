@@ -249,6 +249,7 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
                 $scope.assigned = assigned;
                 $scope.date_required = date_required;
                 $scope.ped = ped;
+                $scope.ped_disabled = Boolean(model.ped_disabled);
                 $scope.assignable = model.assignable.map(function (item) {
                     return item[0];
                 });
@@ -401,7 +402,8 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
         <div class="modal-body">\
             <div class="row" ng-if="date_required">\
                 <div class="col-md-6">\
-                    <label for="ped">Дата/время назначения</label><div fs-datetime id="ped" ng-model="ped.planned_end_date"></div>\
+                    <label for="ped">Дата/время назначения</label>\
+                    <div fs-datetime id="ped" ng-model="ped.planned_end_date" ng-disabled="ped_disabled"></div>\
                 </div>\
             </div>\
             <div class="checkbox">\

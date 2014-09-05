@@ -1059,13 +1059,3 @@ class OrgStructure_ActionType(db.Model):
     master_id = db.Column(db.ForeignKey('OrgStructure.id'), nullable=False, index=True)
     idx = db.Column(db.Integer, nullable=False, server_default=u"'0'")
     actionType_id = db.Column(db.ForeignKey('ActionType.id'), index=True)
-
-
-class ActionPropertyTypeLayout(db.Model):
-    __tablename__ = u'ActionPropertyTypeLayout'
-
-    id = db.Column(db.Integer, primary_key=True)
-    actionPropertyType_id = db.Column(db.Integer, db.ForeignKey('ActionPropertyType.id'), nullable=False, index=True)
-    template = db.Column(db.UnicodeText, nullable=False)
-
-    type = db.relationship(u'ActionPropertyType', lazy=True, innerjoin=True, backref=db.backref('layout'))

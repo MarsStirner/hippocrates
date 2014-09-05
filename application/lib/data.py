@@ -239,7 +239,7 @@ def create_JT(action, orgstructure_id):
     client_id = action.event.client_id
     at_tissue_type = action.actionType.tissue_type
     if at_tissue_type is None:
-        raise Exception(u'Неверно настроены параметры биозаборов для создания лабораторных исследований.')
+        raise Exception(u'Неверно настроены параметры биозаборов для создания лабораторных исследований')
 
     job = Job.query.filter(
         Job.jobType_id == job_type_id,
@@ -271,6 +271,7 @@ def create_JT(action, orgstructure_id):
         ttj.datetimeTaken = planned_end_date
         ttj.externalId = action.event.externalId
         db.session.add(ttj)
+    action.takenTissueJournal = ttj
     jt = JobTicket()
     jt.job = job
     jt.datetime = planned_end_date

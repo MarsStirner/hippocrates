@@ -341,6 +341,9 @@ var EventPaymentCtrl = function($scope, RefBookService, Settings, $http, $modal)
         return ($scope.formstate.is_paid() || $scope.formstate.is_oms() || $scope.formstate.is_dms()) &&
             !$scope.integration1CODVD_enabled();
     };
+    $scope.payer_person_required = function () {
+        return ($scope.event.is_new() && $scope.formstate.is_paid() && $scope.event.info.client.info.age_tuple[3] < 18);
+    };
 
     $scope.formcnf = {
         tab_payer_person: {
@@ -558,7 +561,7 @@ var EventServicesCtrl = function($scope, $http) {
 };
 
 var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $document, PrintingService, Settings,
-        $filter, $modal, ActionTypeTreeModal, WMEventController, WMEventFormState) {
+        $filter, $modal, ActionTypeTreeModal, WMEventController, WMEventFormState, MessageBox) {
     $scope.aux = aux;
     $scope.current_role_maybe = current_user.current_role_maybe;
     $scope.Organisation = RefBookService.get('Organisation');
@@ -625,10 +628,16 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
         $scope.editing.submit_attempt = true;
         if ($scope.eventForm.$valid) {
             $scope.event.save(close_event).
-                then(function (event_id) {
+                then(function (result) {
                     $scope.eventForm.$setPristine();
                     if ($scope.event.is_new()) {
-                        $window.open(url_for_event_html_event_info + '?event_id=' + event_id, '_self');
+                        if (result.error_text) {
+                            MessageBox.info('Внимание!', result.error_text).then(function () {
+                                $window.open(url_for_event_html_event_info + '?event_id=' + result.event_id, '_self');
+                            });
+                        } else {
+                            $window.open(url_for_event_html_event_info + '?event_id=' + result.event_id, '_self');
+                        }
                     } else {
                         $scope.event.reload().then(function () {
                             $scope.$broadcast('event_loaded');
@@ -824,4 +833,4 @@ WebMis20.controller('EventDiagnosesCtrl', ['$scope', 'RefBookService', '$http', 
 WebMis20.controller('EventMainInfoCtrl', ['$scope', '$http', 'RefBookService', 'EventType', '$window', '$timeout', 'Settings', '$modal', '$filter', EventMainInfoCtrl]);
 WebMis20.controller('EventPaymentCtrl', ['$scope', 'RefBookService', 'Settings', '$http', '$modal', EventPaymentCtrl]);
 WebMis20.controller('EventServicesCtrl', ['$scope', '$http', EventServicesCtrl]);
-WebMis20.controller('EventInfoCtrl', ['$scope', 'WMEvent', '$http', 'RefBookService', '$window', '$document', 'PrintingService', 'Settings', '$filter', '$modal', 'ActionTypeTreeModal', 'WMEventController', 'WMEventFormState', EventInfoCtrl]);
+WebMis20.controller('EventInfoCtrl', ['$scope', 'WMEvent', '$http', 'RefBookService', '$window', '$document', 'PrintingService', 'Settings', '$filter', '$modal', 'ActionTypeTreeModal', 'WMEventController', 'WMEventFormState', 'MessageBox', EventInfoCtrl]);

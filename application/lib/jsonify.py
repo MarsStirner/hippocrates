@@ -15,7 +15,8 @@ from application.lib.data import int_get_atl_dict_all
 from application.lib.utils import safe_unicode, safe_int, safe_dict, logger
 from application.models.enums import EventPrimary, EventOrder, ActionStatus, Gender
 from application.models.event import Event, EventType, Diagnosis, Diagnostic
-from application.models.schedule import Schedule, rbReceptionType, ScheduleClientTicket, ScheduleTicket, QuotingByTime
+from application.models.schedule import Schedule, rbReceptionType, ScheduleClientTicket, ScheduleTicket, QuotingByTime, \
+    Office
 from application.models.actions import Action, ActionProperty, ActionType
 from application.models.exists import rbRequestType, rbService, ContractTariff, Contract
 
@@ -72,13 +73,15 @@ class ScheduleVisualizer(object):
 
     def make_person(self, person):
         speciality = person.speciality
+        office = Office.query.filter(Office.code == person.office).first()
         return {
             'id': person.id,
             'name': person.nameText,
             'speciality': {
                 'id': speciality.id,
                 'name': speciality.name
-            } if speciality else None
+            } if speciality else None,
+            'office': office if office else person.office
         }
 
     def make_schedule(self, schedules, date_start, date_end):
@@ -657,10 +660,17 @@ class EventVisualizer(object):
             lc = cvis.make_payer_for_lc(client)
             payments = []
         else:
-            lc = event.localContract if event else None
+            if event:
+                lc = event.localContract
+            else:
+                from blueprints.event.lib.utils import create_new_local_contract
+                lc = create_new_local_contract({
+                    'date_contract': datetime.date.today(),
+                    'number_contract': ''
+                })
             payments = [payment
                         for payment in event.payments
-                        if payment.master_id == event.id] if lc else []
+                        if payment.master_id == event.id] if event else []
         return {
             'local_contract': lc,
             'payments': payments

@@ -386,7 +386,7 @@ var WebMis20 = angular.module('WebMis20', [
 
     return Settings;
 }])
-.factory('PrintingService', ['$window', '$http', '$rootScope', function ($window, $http, $rootScope) {
+.factory('PrintingService', ['$window', '$http', '$rootScope', '$timeout', function ($window, $http, $rootScope, $timeout) {
     var PrintingService = function (context_type) {
         if (arguments.length >= 3) {
             this.target = arguments[2]
@@ -399,6 +399,7 @@ var WebMis20 = angular.module('WebMis20', [
     };
     PrintingService.prototype.set_context = function (context) {
         if (context === this.context) return;
+        this.context = context;
         var t = this;
         $http.get(url_print_templates + context + '.json')
         .success(function (data) {
@@ -406,7 +407,15 @@ var WebMis20 = angular.module('WebMis20', [
                 return (left.code < right.code) ? -1 : (left.code > right.code ? 1 : 0)
             });
         })
+        .error(function (data, status) {
+            if (data === '' && status === 0) {
+                t.not_available = true;
+            }
+        });
     };
+    PrintingService.prototype.is_available = function () {
+        return Boolean(this.context) && !this.not_available;
+    }
     PrintingService.prototype.print_template = function(template_data_list, separated) { // [ {template_id, context}, ... ]
         var self = this;
         var send_data = {
@@ -431,16 +440,25 @@ var WebMis20 = angular.module('WebMis20', [
             w.document.open();
             w.document.write(data);
             w.document.close();
-            w.print();
+            // timeout to fix chrome (36) behaviour - empty print preview https://code.google.com/p/chromium/issues/detail?id=396667
+            $timeout(w.print, 300);
         })
         .error(function (data, status) {
-            var result = data.result;
-            $rootScope.$broadcast('printing_error', {
-                text: result.name,
-                code: status,
-                data: result.data,
-                type: 'danger'
-            });
+            var result = data.result,
+                info = (data === '' && status === 0) ?
+                    {
+                        text: 'Ошибка соединения с сервером печати',
+                        code: status,
+                        data: null,
+                        type: 'danger'
+                    } :
+                    {
+                        text: result.name,
+                        code: status,
+                        data: result.data,
+                        type: 'danger'
+                    };
+            $rootScope.$broadcast('printing_error', info);
         });
     };
     return PrintingService;
@@ -502,11 +520,7 @@ var WebMis20 = angular.module('WebMis20', [
         return this;
     };
     Action.prototype.cancel = function () {
-        if (this.action.id) {
-            this.get(this.action.id)
-        } else {
-            this.get_new(this.action.event_id, this.action.action_type_id)
-        }
+        window.close();
     };
     Action.prototype.get_property = function (id) {
         if (id instanceof String) {
