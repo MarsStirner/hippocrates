@@ -416,6 +416,8 @@ class rbDocumentType(db.Model):
     TFOMSCode = db.Column(db.Integer)
     serial_regexp = db.Column(db.Unicode(256))
     number_regexp = db.Column(db.Unicode(256))
+    serial_mask = db.Column(db.Unicode(256))
+    number_mask = db.Column(db.Unicode(256))
 
     group = db.relationship(u'rbDocumentTypeGroup', lazy=False)
 
@@ -433,6 +435,10 @@ class rbDocumentType(db.Model):
                 'serial': self.serial_regexp,
                 'number': self.number_regexp,
             },
+            'masks': {
+                'serial': self.serial_mask,
+                'number': self.number_mask,
+            }
         }
 
     def __int__(self):
@@ -511,6 +517,8 @@ class rbPolicyType(db.Model):
     TFOMSCode = db.Column(db.String(8))
     serial_regexp = db.Column(db.Unicode(256))
     number_regexp = db.Column(db.Unicode(256))
+    serial_mask = db.Column(db.Unicode(256))
+    number_mask = db.Column(db.Unicode(256))
 
     def __json__(self):
         return {
@@ -522,6 +530,10 @@ class rbPolicyType(db.Model):
                 'serial': self.serial_regexp,
                 'number': self.number_regexp,
             },
+            'masks': {
+                'serial': self.serial_mask,
+                'number': self.number_mask,
+            }
         }
 
     def __int__(self):

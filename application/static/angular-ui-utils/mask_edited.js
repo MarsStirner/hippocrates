@@ -8,8 +8,8 @@ angular.module('ui.mask', [])
   .value('uiMaskConfig', {
     'maskDefinitions': {
       '9': /\d/,
-      'A': /[a-zA-Z]/,
-      '*': /[a-zA-Z0-9]/
+      'A': /[a-zA-Zа-яёА-ЯЁ]/,
+      '*': /[a-zA-Zа-яёА-ЯЁ0-9]/
     }
   })
   .directive('uiMask', ['uiMaskConfig', '$parse', function (maskConfig, $parse) {

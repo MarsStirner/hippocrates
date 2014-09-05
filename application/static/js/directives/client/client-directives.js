@@ -4,6 +4,16 @@ angular.module('WebMis20.directives').
     directive('wmPolicy', ['RefBookService', '$filter',
         function(RefBookService, $filter) {
             return {
+                controller: function($scope){
+                    $scope.make_placeholder = function(mask){
+                        if (mask){
+                            return mask.replace(/[9A*]/g,"_")
+                        }
+                        return ""
+                    }
+                    $scope.placeholder_serial = $scope.make_placeholder($scope.modelPolicy.policy_type.masks.serial)
+                    $scope.placeholder_number = $scope.make_placeholder($scope.modelPolicy.policy_type.masks.number)
+                },
                 restrict: 'E',
                 require: '^form',
                 scope: {
@@ -70,14 +80,16 @@ angular.module('WebMis20.directives').
                  ng-class="{\'has-error\': ((policyForm.$dirty || modelPolicy.id) && policyForm.pol_serial.$invalid) || policyForm.pol_serial.$error.required}">\
                 <label for="pol_serial[[idPostfix]]" class="control-label">Серия</label>\
                 <input type="text" class="form-control" id="pol_serial[[idPostfix]]" name="pol_serial"\
-                       autocomplete="off" placeholder="серия" validator-regexp="modelPolicy.policy_type.validators.serial"\
+                       ui-mask="[[modelPolicy.policy_type.masks.serial]]" autocomplete="off" \
+                       placeholder="[[placeholder_serial]]" validator-regexp="modelPolicy.policy_type.validators.serial"\
                        ng-model="modelPolicy.serial" ng-disabled="!edit_mode()" ng-required="modelPolicy.policy_type.validators.serial && policyForm.$dirty"/>\
             </div>\
             <div class="form-group col-md-2"\
                  ng-class="{\'has-error\': (policyForm.$dirty || modelPolicy.id) && policyForm.pol_number.$invalid}">\
                 <label for="pol_number[[idPostfix]]" class="control-label">Номер</label>\
                 <input type="text" class="form-control" id="pol_number[[idPostfix]]" name="pol_number"\
-                       autocomplete="off" placeholder="номер" validator-regexp="modelPolicy.policy_type.validators.number"\
+                       ui-mask="[[modelPolicy.policy_type.masks.number]]" autocomplete="off"\
+                       placeholder="[[placeholder_number]]" validator-regexp="modelPolicy.policy_type.validators.number"\
                        ng-model="modelPolicy.number" ng-required="policyForm.$dirty" ng-disabled="!edit_mode()"/>\
             </div>\
             <div class="form-group col-md-offset-1 col-md-2"\
@@ -194,6 +206,16 @@ angular.module('WebMis20.directives').
     directive('wmDocument', ['RefBookService',
         function(RefBookService) {
             return {
+                controller: function($scope){
+                    $scope.make_placeholder = function(mask){
+                        if (mask){
+                            return mask.replace(/[9A*]/g,"_")
+                        }
+                        return ""
+                    }
+                    $scope.placeholder_serial = $scope.make_placeholder($scope.modelDocument.doc_type.masks.serial)
+                    $scope.placeholder_number = $scope.make_placeholder($scope.modelDocument.doc_type.masks.number)
+                },
                 restrict: 'E',
                 require: '^form',
                 scope: {
@@ -273,14 +295,16 @@ angular.module('WebMis20.directives').
                  ng-class="{\'has-error\': ((docForm.$dirty || modelDocument.id)  && docForm.doc_serial.$invalid) || docForm.doc_serial.$error.required}">\
                 <label for="doc_serial[[idPostfix]]" class="control-label">Серия</label>\
                 <input type="text" class="form-control" id="doc_serial[[idPostfix]]" name="doc_serial"\
-                       autocomplete="off" placeholder="серия" validator-regexp="serialValidator"\
+                       ui-mask="[[modelDocument.doc_type.masks.serial]]"\
+                       autocomplete="off" placeholder="[[placeholder_serial]]" validator-regexp="serialValidator"\
                        ng-model="modelSerial" ng-disabled="!edit_mode()" ng-required="serialValidator && docForm.$dirty"/>\
             </div>\
             <div class="form-group col-md-2"\
                  ng-class="{\'has-error\': (docForm.$dirty || modelDocument.id) && docForm.doc_number.$invalid}">\
                 <label for="doc_number[[idPostfix]]" class="control-label">Номер</label>\
                 <input type="text" class="form-control" id="doc_number[[idPostfix]]" name="doc_number"\
-                       autocomplete="off" placeholder="номер" validator-regexp="numberValidator"\
+                       ui-mask="[[modelDocument.doc_type.masks.number]]"\
+                       autocomplete="off" placeholder="[[placeholder_number]]" validator-regexp="numberValidator"\
                        ng-model="modelNumber" ng-required="docForm.$dirty" ng-disabled="!edit_mode()"/>\
             </div>\
             <div class="form-group col-md-2"\
