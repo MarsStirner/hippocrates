@@ -98,7 +98,7 @@ angular.module('WebMis20.directives').
 <td ng-bind="service.at_code"></td>\
 <td>\
     [[service.service_name]]\
-    <a href="javascript:0" class="btn btn-link nomarpad" ng-click="open_assignments()" ng-if="service.is_lab"\
+    <a href="javascript:;" class="btn btn-link nomarpad" ng-click="open_assignments()" ng-if="service.is_lab"\
         ng-disabled="lab_components_disabled()">Выбрать назначаемые исследования</a>\
 </td>\
 <td ng-bind="service.at_name"></td>\
@@ -219,7 +219,7 @@ angular.module('WebMis20.directives').
 <td ng-bind="service.at_code"></td>\
 <td>\
     [[service.service_name]]\
-    <a  href="javascript:0" class="btn btn-link nomarpad" ng-click="open_assignments()" ng-if="service.is_lab"\
+    <a  href="javascript:;" class="btn btn-link nomarpad" ng-click="open_assignments()" ng-if="service.is_lab"\
         ng-disabled="lab_components_disabled()">Выбрать назначаемые исследования</a>\
 </td>\
 <td ng-bind="service.at_name"></td>\
