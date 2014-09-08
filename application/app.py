@@ -38,6 +38,13 @@ def enum():
     }
 
 
+@app.context_processor
+def lpu_style():
+    return {
+        'LPU_STYLE': config.LPU_STYLE
+    }
+
+
 @babel.timezoneselector
 def get_timezone():
     return pytz.timezone(app.config['TIME_ZONE'])
