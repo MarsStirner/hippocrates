@@ -56,5 +56,4 @@ class Settings(object):
         if key in cls._cache:
             s.id = cls._cache[key][0]
         db.session.add(s)
-        db.session.commit()
         cls._cache[key] = (s.id, val)
