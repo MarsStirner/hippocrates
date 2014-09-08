@@ -48,6 +48,7 @@ VESTA_URL = ''
 
 TITLE = u'WebMIS 2.0'
 COPYRIGHT_COMPANY = u'КОРУС Консалтинг ИТ'
+LPU_STYLE = 'FNKC'
 
 try:
     from config_local import *
