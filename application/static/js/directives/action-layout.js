@@ -180,6 +180,9 @@ angular.module('WebMis20.ActionLayout', ['WebMis20.validators', 'WebMis20.direct
                             return build(child, {tag: tag});
                         }).join(''));
 
+                    case 'bak_lab_view':
+                        return '<bak-lab-view model="action.get_baklab_info()"></bak-lab-view>';
+
                     case 'root':
                         inner_template = tag.children.map(function (child) {
                             return '<div class="col-md-12">{0}</div>'.format(build(child))

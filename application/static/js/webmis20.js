@@ -476,6 +476,7 @@ var WebMis20 = angular.module('WebMis20', [
         return function (data) {
             self.action = data.result.action;
             self.layout = data.result.layout;
+            self.bak_lab_info = data.result.bak_lab_info;
             self.action_columns = {
                 assignable: false,
                 unit: false
@@ -528,6 +529,9 @@ var WebMis20 = angular.module('WebMis20', [
         } else {
             return this.properties_by_id[id];
         }
+    };
+    Action.prototype.get_baklab_info = function () {
+        return this.bak_lab_info ? this.bak_lab_info : null;
     };
     return Action;
 }])

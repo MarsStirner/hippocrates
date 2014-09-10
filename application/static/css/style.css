@@ -646,3 +646,12 @@ ng-form {
     opacity: 0.5;
     filter: alpha(opacity=50);
 }
+
+
+.table-bak th {
+    text-align: center;
+    vertical-align: middle !important;
+}
+.table-bak td[rowspan] + td[rowspan], .table-bak th[rowspan] + th[rowspan] {
+   border-right-width: medium;
+}
