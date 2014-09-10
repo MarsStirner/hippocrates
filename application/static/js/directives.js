@@ -120,6 +120,73 @@ angular.module('WebMis20.directives')
             }
         }
     }])
+    .directive('bakLabView', [function () {
+        return {
+            restrict: 'E',
+            scope: {
+                bak_model: '=model'
+            },
+            link: function (scope, elm, attrs) {
+                scope.get_row_num = function (organism) {
+                    return organism.sens_values.length || 1;
+                };
+            },
+            template:
+    '<legend class="vmargin10">Результаты БАК исследования</legend>\
+     <div class="row">\
+        <div class="col-md-6">\
+            <label>Подписавший врач:&nbsp;</label><span>[[bak_model.doctor.name]], [[bak_model.doctor.speciality.name]]</span>\
+        </div>\
+        <div class="col-md-6">\
+            <label>Код Лис:&nbsp;</label><span>[[bak_model.code_lis]]</span>\
+        </div>\
+     </div>\
+     <div class="row">\
+        <div class="col-md-6">\
+            <label>Завершено:&nbsp;</label><span>[[bak_model.final ? "Да" : "Нет"]]</span>\
+        </div>\
+        <div class="col-md-6">\
+            <label>Дефекты БМ:&nbsp;</label><span>[[bak_model.defects]]</span>\
+        </div>\
+     </div>\
+     <table class="table table-condensed table-bordered table-bak">\
+        <thead ng-if="bak_model.organisms.length">\
+            <tr>\
+                <th rowspan="2">Микроорганизм</th>\
+                <th rowspan="2">Концентрация</th>\
+                <th colspan="3">Чувствительность к антибиотикам</th>\
+            </tr>\
+            <tr>\
+                <th>Антибиотик</th>\
+                <th>Концентрация</th>\
+                <th>Чувствительность</th>\
+            </tr>\
+        </thead>\
+        <tbody ng-repeat="organism in bak_model.organisms" ng-class="{\'bg-info\': hover}" ng-mouseenter="hover=true" ng-mouseleave="hover=false">\
+            <tr>\
+                <td rowspan="[[get_row_num(organism)]]">[[organism.microorganism]]</td>\
+                <td rowspan="[[get_row_num(organism)]]">[[organism.concentration]]</td>\
+                <td>[[organism.sens_values[0].antibiotic]]</td>\
+                <td>[[organism.sens_values[0].mic]]</td>\
+                <td>[[organism.sens_values[0].activity]]</td>\
+            </tr>\
+            <tr ng-repeat="sens in organism.sens_values.slice(1)">\
+                <td>[[sens.antibiotic]]</td>\
+                <td>[[sens.mic]]</td>\
+                <td>[[sens.activity]]</td>\
+            </tr>\
+        </tbody>\
+        <tbody ng-if="bak_model.comments.length">\
+            <tr>\
+                <th colspan="5">Комментарии</th>\
+            </tr>\
+            <tr ng-repeat="comment in bak_model.comments" ng-class="{\'bg-info\': hover}" ng-mouseenter="hover=true" ng-mouseleave="hover=false">\
+                <td colspan="5">[[comment.text]]</td>\
+            </tr>\
+        </tbody>\
+     </table>'
+        };
+    }])
     .directive('uiAlertList', ['$compile', function ($compile) {
         return {
             restrict: 'A',
