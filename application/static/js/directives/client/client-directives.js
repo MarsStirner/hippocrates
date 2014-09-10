@@ -11,8 +11,8 @@ angular.module('WebMis20.directives').
                         }
                         return ""
                     }
-                    $scope.placeholder_serial = $scope.make_placeholder($scope.modelPolicy.policy_type.masks.serial)
-                    $scope.placeholder_number = $scope.make_placeholder($scope.modelPolicy.policy_type.masks.number)
+                    $scope.placeholder_serial = $scope.modelPolicy.policy_type ? $scope.make_placeholder($scope.modelPolicy.policy_type.masks.serial) : ""
+                    $scope.placeholder_number = $scope.modelPolicy.policy_type ? $scope.make_placeholder($scope.modelPolicy.policy_type.masks.number) : ""
                 },
                 restrict: 'E',
                 require: '^form',
@@ -213,8 +213,8 @@ angular.module('WebMis20.directives').
                         }
                         return ""
                     }
-                    $scope.placeholder_serial = $scope.make_placeholder($scope.modelDocument.doc_type.masks.serial)
-                    $scope.placeholder_number = $scope.make_placeholder($scope.modelDocument.doc_type.masks.number)
+                    $scope.placeholder_serial = $scope.modelDocument.doc_type ? $scope.make_placeholder($scope.modelDocument.doc_type.masks.serial) : ""
+                    $scope.placeholder_number = $scope.modelDocument.doc_type ? $scope.make_placeholder($scope.modelDocument.doc_type.masks.number) : ""
                 },
                 restrict: 'E',
                 require: '^form',
