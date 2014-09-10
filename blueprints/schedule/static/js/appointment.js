@@ -145,6 +145,14 @@ var PersonAppointmentCtrl = function ($scope, $http, RefBook, WMAppointmentDialo
         $scope.refreshSchedules();
     };
 
+    $scope.schedule_is_empty = function (schedule) {
+        return schedule.grouped[$scope.reception_type].is_empty;
+    };
+
+    $scope.schedule_has_free_tickets = function (schedule) {
+        return !$scope.schedule_is_empty(schedule) && schedule.grouped[$scope.reception_type].max_tickets > 0;
+    };
+
     $scope.$watch('user_selected', function (new_value, old_value) {
         var new_ids = new_value.filter(aux.func_not_in(old_value + $scope.data_selected));
         if (new_ids.length) {
