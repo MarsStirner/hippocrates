@@ -48,7 +48,7 @@ def api_event_info():
         data['diagnoses'] = vis.make_diagnoses(event)
         data['payment'] = vis.make_event_payment(event)
         data['services'] = vis.make_event_services(event_id)
-    elif current_user.role_in('doctor'):
+    elif current_user.role_in('doctor', 'clinicDoctor'):
         data['diagnoses'] = vis.make_diagnoses(event)
     elif current_user.role_in(('rRegistartor', 'clinicRegistrator')):
         data['payment'] = vis.make_event_payment(event)
