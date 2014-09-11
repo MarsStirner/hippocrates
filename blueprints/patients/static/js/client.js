@@ -2,15 +2,15 @@
 
 angular.module('WebMis20.controllers').
     controller('ClientCtrl',
-        ['$scope', '$http', '$modal', 'WMClient', 'WMClientController', 'PrintingService', 'RefBookService', '$window', '$document',
-        function ($scope, $http, $modal, WMClient, WMClientController, PrintingService, RefBookService, $window, $document) {
+        ['$scope', '$http', '$modal', 'WMClient', 'WMClientServices', 'PrintingService', 'RefBookService', '$window', '$document',
+        function ($scope, $http, $modal, WMClient, WMClientServices, PrintingService, RefBookService, $window, $document) {
             $scope.records = [];
             $scope.aux = aux;
             $scope.params = aux.getQueryParams(document.location.search);
             $scope.rbGender = RefBookService.get('Gender');
             $scope.rbPerson = RefBookService.get('vrbPersonWithSpeciality');
             $scope.alerts = [];
-            $scope.wmClientCtrl = WMClientController;
+            $scope.clientServices = WMClientServices;
 
             $scope.currentDate= new Date();
 
@@ -50,59 +50,11 @@ angular.module('WebMis20.controllers').
             });
             // printing stuff end
 
-            $scope.flt_not_deleted = function() {
-                return function(item) {
-                    return item.hasOwnProperty('deleted') ? item.deleted === 0 : true;
-                };
-            }; // TODO: application level
-
             $scope.$watch('mainInfoForm.$dirty', function(n, o) {
                 if (n !== o) {
                     client.info.dirty = n;
                 }
             });
-
-            $scope.delete_document = function(entity, doc) {
-                if (confirm('Документ будет удален. Продолжить?')) {
-                    client.delete_record(entity, doc);
-                    client.add_id_doc();
-                }
-            };
-
-            $scope.add_new_cpolicy = function() {
-                var cpols = client.compulsory_policies.filter(function(p) {
-                    return p.deleted === 0;
-                });
-                var cur_cpol = cpols[cpols.length - 1];
-                if (cpols.length) {
-                    var msg = [
-                        'При добавлении нового полиса ОМС старый полис будет удален',
-                        cur_cpol.id ? ' и станет доступен для просмотра в истории документов' : '',
-                        '. Продолжить?'
-                    ].join('');
-                    if (confirm(msg)) {
-                        client.delete_record('compulsory_policies', cur_cpol, 2);
-                        client.add_cpolicy();
-                    }
-                } else {
-                    client.add_cpolicy();
-                }
-            };
-
-            $scope.delete_policy = function(entity, policy) {
-                if (confirm('Полис будет удален. Продолжить?')) {
-                    client.delete_record(entity, policy);
-                }
-            };
-
-            $scope.add_new_blood_type = function(person_id) {
-                var bt = client.blood_types;
-                if (bt.length && !bt[0].id) {
-                    bt.splice(0, 1);
-                }
-                client.add_blood_type();
-                bt[0].person = $scope.rbPerson.get(person_id);
-            };
 
             $scope.bt_history_visible = function() {
                 return client.blood_types && client.blood_types.filter(function(el) {
@@ -146,16 +98,16 @@ angular.module('WebMis20.controllers').
             $scope.refresh_form = function() {
                 $scope.mainInfoForm.$setPristine(true);
                 if (!client.reg_addresses.length) {
-                    $scope.wmClientCtrl.push_address(client, 0);
+                    $scope.clientServices.push_address(client, 0);
                 }
                 if (!client.live_addresses.length) {
-                    $scope.wmClientCtrl.push_address(client, 1);
+                    $scope.clientServices.push_address(client, 1);
                 }
                 if (!client.compulsory_policies.length) {
-                    client.add_cpolicy();
+                    $scope.clientServices.add_new_cpolicy(client);
                 }
                 if (!client.id_docs.length) {
-                    client.add_id_doc();
+                    $scope.clientServices.add_id_doc(client);
                 }
             };
 
@@ -164,16 +116,5 @@ angular.module('WebMis20.controllers').
             }, function(message) {
                 alert(message);
             });
-
-//            $scope.delete_record = function(entity, record) {
-//                var modalInstance = $modal.open({
-//                    templateUrl: 'modal-deleteRecord.html',
-//                    controller: DeleteRecordModalCtrl
-//                });
-//
-//                modalInstance.result.then(function () {
-//                    $scope.client.delete_record(entity, record);
-//                });
-//            };
         }
     ]);

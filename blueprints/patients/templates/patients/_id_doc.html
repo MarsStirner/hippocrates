@@ -1,7 +1,7 @@
 <ng-form name="_idDocForm" toc-element="Документы">
 <div class="marginal">
     <legend>Документ удостоверяющий личность</legend>
-    <div ng-repeat="doc in client.id_docs | filter: flt_not_deleted()">
+    <div ng-repeat="doc in client.id_docs | flt_not_deleted">
         <ng-form name="idDocForm">
             <div class="row">
                 <div class="col-md-11">
@@ -26,7 +26,7 @@
                     </div>
                     <div class="row">
                         <button type="button" class="btn btn-danger marginal" title="Удалить"
-                                ng-click="delete_document('id_docs', doc)"><span class="glyphicon glyphicon-trash"></span></button>
+                                ng-click="clientServices.delete_document(client, doc)"><span class="glyphicon glyphicon-trash"></span></button>
                     </div>
                 </div>
             </div>

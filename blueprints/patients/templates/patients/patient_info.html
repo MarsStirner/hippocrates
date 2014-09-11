@@ -55,20 +55,9 @@
 {% block modules_js %}
     {{ super() }}
 
-    <script src="{{ url_for('static', filename='js/kladr-directives.js', v=version) }}"></script>
-    <script src="{{ url_for('static', filename='js/controllers/client/client-info-ctrl.js', v=version) }}"></script>
-    <script src="{{ url_for('static', filename='js/directives/client/client-directives.js', v=version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/client.js', v=version) }}"></script>
+    <script src="{{ url_for('static', filename='js/directives/client-directives.js', v=version) }}"></script>
+    <script src="{{ url_for('static', filename='js/directives/kladr-directives.js', v=version) }}"></script>
+    <script src="{{ url_for('static', filename='js/services/client/client-services.js', v=version) }}"></script>
 
-    <script type="text/ng-template" id="modal-deleteRecord.html">{% include "patients/_modal_delete_record.html" %}</script>
-
-    <script type="text/javascript">
-        DeleteRecordModalCtrl = function ($scope, $modalInstance) {
-            $scope.accept = function () {
-                $modalInstance.close();
-            };
-            $scope.cancel = function () {
-                $modalInstance.dismiss('cancel');
-            };
-        };
-    </script>
 {% endblock %}

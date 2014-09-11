@@ -3,7 +3,7 @@
     <legend>Контактная информация и родственники</legend>
     <ng-form name="_relations" toc-element="Связи">
         <h4>Связи с другими пациентами</h4>
-        <div ng-repeat="relation in client.relations | filter: flt_not_deleted()">
+        <div ng-repeat="relation in client.relations | flt_not_deleted">
             <div class="row">
                 <div class="col-md-11">
                     <alert type="danger" ng-if="!client.info.sex">Для добавления родственной связи укажите пол пациента</alert>
@@ -22,14 +22,14 @@
                     </div>
                     <div class="row">
                         <button type="button" class="btn btn-danger marginal" title="Удалить"
-                                ng-click="client.delete_record('relations', relation)">
+                                ng-click="clientServices.delete_relation(client, relation)">
                             <span class="glyphicon glyphicon-trash"></span>
                         </button>
                     </div>
                 </div>
             </div>
         </div>
-        <button type="button" ng-click="client.add_relation()" class="btn btn-primary">
+        <button type="button" ng-click="clientServices.add_relation(client)" class="btn btn-primary">
             Добавить связь
         </button>
     </ng-form>
@@ -38,7 +38,7 @@
 
     <ng-form name="_contacts" toc-element="Контакты">
         <h4>Контакты пациента</h4>
-        <div ng-repeat="contact in client.contacts | filter: flt_not_deleted()">
+        <div ng-repeat="contact in client.contacts | flt_not_deleted">
             <div class="row">
                 <div class="col-md-11">
                     <ng-form name="contactForm">
@@ -55,14 +55,14 @@
                     </div>
                     <div class="row">
                         <button type="button" class="btn btn-danger marginal" title="Удалить"
-                                ng-click="client.delete_record('contacts', contact)">
+                                ng-click="clientServices.delete_contact(client, contact)">
                             <span class="glyphicon glyphicon-trash"></span>
                         </button>
                     </div>
                 </div>
             </div>
         </div>
-        <button type="button" ng-click="client.add_contact()" class="btn btn-primary">
+        <button type="button" ng-click="clientServices.add_contact(client)" class="btn btn-primary">
             Добавить контакт
         </button>
     </ng-form>

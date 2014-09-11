@@ -3,7 +3,7 @@
     <legend>Адрес регистрации и проживания</legend>
     <ng-form name="_regaddress" toc-element="Регистрации">
         <h4>Адрес регистрации</h4>
-        <div ng-repeat="reg_addr in client.reg_addresses | filter: flt_not_deleted()">
+        <div ng-repeat="reg_addr in client.reg_addresses | flt_not_deleted">
             <div class="row">
                 <div class="col-md-11">
                     <ng-form name="regAddressForm">
@@ -27,7 +27,7 @@
                     </div>
                     <div class="row">
                         <button type="button" class="btn btn-danger marginal" title="Удалить"
-                                ng-click="wmClientCtrl.delete_address(client, 0, reg_addr)">
+                                ng-click="clientServices.delete_address(client, 0, reg_addr)">
                             <span class="glyphicon glyphicon-trash"></span></button>
                     </div>
                 </div>
@@ -36,7 +36,7 @@
         </div>
         <div>
             <button type="button" class="btn btn-primary"
-                    ng-click="wmClientCtrl.add_new_address(client, 0)">Добавить новый</button>
+                    ng-click="clientServices.add_new_address(client, 0)">Добавить новый</button>
         </div>
     </ng-form>
 
@@ -44,7 +44,7 @@
 
     <ng-form name="_liveaddress" toc-element="Проживания">
         <h4>Адрес проживания</h4>
-        <div ng-repeat="live_addr in client.live_addresses | filter: flt_not_deleted()">
+        <div ng-repeat="live_addr in client.live_addresses | flt_not_deleted">
             <div class="row">
                 <div class="col-md-11">
                     <ng-form name="locAddressForm">
@@ -63,7 +63,7 @@
                                 <label>
                                     <input type="checkbox" id="[[prefix]]_copy_addr" name="copy_addr"
                                            ng-model="live_addr.synced"
-                                           ng-change="wmClientCtrl.sync_addresses(client, live_addr, live_addr.synced)"
+                                           ng-change="clientServices.sync_addresses(client, live_addr, live_addr.synced)"
                                            ng-disabled="(live_addr.synced ? live_addr.live_id : live_addr.id) ? !edit.activated : false"/>
                                     Совпадает с адресом регистрации
                                 </label>
@@ -78,7 +78,7 @@
                     </div>
                     <div class="row">
                         <button type="button" class="btn btn-danger marginal" title="Удалить"
-                                ng-click="wmClientCtrl.delete_address(client, 1, live_addr)">
+                                ng-click="clientServices.delete_address(client, 1, live_addr)">
                             <span class="glyphicon glyphicon-trash"></span></button>
                     </div>
                 </div>
@@ -87,7 +87,7 @@
         </div>
         <div>
             <button type="button" class="btn btn-primary"
-                    ng-click="wmClientCtrl.add_new_address(client, 1)">Добавить новый</button>
+                    ng-click="clientServices.add_new_address(client, 1)">Добавить новый</button>
         </div>
     </ng-form>
 </ng-form>

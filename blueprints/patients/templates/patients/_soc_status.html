@@ -3,7 +3,7 @@
     <legend>Социальные статусы</legend>
     <ng-form name="_invalidity" toc-element="Инвалидность">
         <h4>Инвалидность</h4>
-        <div ng-repeat="socstat in client.invalidities | filter: flt_not_deleted()">
+        <div ng-repeat="socstat in client.invalidities | flt_not_deleted">
             <ng-form name="socStatInvalidityForm">
                 <div class="row">
                     <div class="col-md-11">
@@ -23,7 +23,7 @@
                         </div>
                         <div class="row">
                             <button type="button" class="btn btn-danger marginal" title="Удалить"
-                                    ng-click="client.delete_record('invalidities', socstat)"><span class="glyphicon glyphicon-trash"></span></button>
+                                    ng-click="clientServices.delete_invalidity(client, socstat)"><span class="glyphicon glyphicon-trash"></span></button>
                         </div>
                     </div>
                 </div>
@@ -50,7 +50,7 @@
         </div>
         <div>
             <button type="button" class="btn btn-primary"
-                    ng-click="wmClientCtrl.add_new_invalidity(client)">Добавить инвалидность</button>
+                    ng-click="clientServices.add_new_invalidity(client)">Добавить инвалидность</button>
         </div>
     </ng-form>
 
@@ -58,7 +58,7 @@
 
     <ng-form name="_works" toc-element="Занятость">
         <h4>Занятость</h4>
-        <div ng-repeat="socstat in client.works | filter: flt_not_deleted()">
+        <div ng-repeat="socstat in client.works | flt_not_deleted">
             <ng-form name="socStatWorkForm">
                 <div class="row">
                     <div class="col-md-11">
@@ -77,7 +77,7 @@
                         </div>
                         <div class="row">
                             <button type="button" class="btn btn-danger marginal" title="Удалить"
-                                    ng-click="client.delete_record('works', socstat)"><span class="glyphicon glyphicon-trash"></span></button>
+                                    ng-click="clientServices.delete_work(client, socstat)"><span class="glyphicon glyphicon-trash"></span></button>
                         </div>
                     </div>
                 </div>
@@ -104,7 +104,7 @@
         </div>
         <div>
             <button type="button" class="btn btn-primary"
-                    ng-click="client.add_soc_status('works', 3)">Добавить занятость</button>
+                    ng-click="clientServices.add_new_work(client)">Добавить занятость</button>
         </div>
     </ng-form>
 
@@ -112,7 +112,7 @@
 
     <ng-form name="_nationalities" toc-element="Гражданство">
         <h4>Гражданство</h4>
-        <div ng-repeat="socstat in client.nationalities | filter: flt_not_deleted()">
+        <div ng-repeat="socstat in client.nationalities | flt_not_deleted">
             <ng-form name="socStatNationalityForm">
                 <div class="row">
                     <div class="col-md-11">
@@ -131,7 +131,7 @@
                         </div>
                         <div class="row">
                             <button type="button" class="btn btn-danger marginal" title="Удалить"
-                                    ng-click="client.delete_record('nationalities', socstat)"><span class="glyphicon glyphicon-trash"></span></button>
+                                    ng-click="clientServices.delete_nationality(client, socstat)"><span class="glyphicon glyphicon-trash"></span></button>
                         </div>
                     </div>
                 </div>
@@ -139,7 +139,7 @@
         </div>
         <div>
             <button type="button" class="btn btn-primary"
-                    ng-click="client.add_soc_status('nationalities', 4)">Добавить гражданство</button>
+                    ng-click="clientServices.add_new_nationality(client)">Добавить гражданство</button>
         </div>
     </ng-form>
 </ng-form>
