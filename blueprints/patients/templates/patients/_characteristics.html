@@ -3,23 +3,19 @@
     <legend>Особенности пациента</legend>
     <ng-form name="_bloodtype" toc-element="Группа крови">
         <h4>Группа крови и резус фактор</h4>
-        <div ng-repeat="bt in client.blood_types.slice(0, 1) | filter: flt_not_deleted()">
+        <div ng-repeat="bt in client.blood_types.slice(0, 1) | flt_not_deleted">
             <div class="row">
                 <div class="col-md-11">
                     <ng-form name="cbtForm">
-                        <wm-client-blood-type id-postfix="$index"
-                            model-type="bt.blood_type"
-                            model-date="bt.date"
-                            model-person="bt.person"
-                            edit-mode="bt.id ? false : true"
-                            model-blood-type="bt">
+                        <wm-client-blood-type id-postfix="$index" model-blood-type="bt"
+                            edit-mode="bt.id ? false : true">
                         </wm-client-blood-type>
                     </ng-form>
                 </div>
                 <div class="col-md-1">
                     <div class="row">
                         <button type="button" class="btn btn-danger marginal" title="Удалить"
-                                ng-click="client.delete_record('blood_types', bt)" ng-if="!bt.id">
+                                ng-click="clientServices.delete_blood_type(client, bt)" ng-if="!bt.id">
                             <span class="glyphicon glyphicon-trash"></span>
                         </button>
                     </div>
@@ -28,7 +24,7 @@
         </div>
         <div>
             <button type="button" class="btn btn-primary" ng-if="!client.blood_types.length"
-                    ng-click="add_new_blood_type({{ current_user.get_id() }})">Добавить новую</button>
+                    ng-click="clientServices.add_new_blood_type(client)">Добавить новую</button>
         </div>
 
         <div ng-if="bt_history_visible()">
@@ -56,7 +52,7 @@
 
     <ng-form name="_allergies" toc-element="Аллергия">
         <h4>Аллергия</h4>
-        <div ng-repeat="alg in client.allergies | filter: flt_not_deleted()">
+        <div ng-repeat="alg in client.allergies | flt_not_deleted">
             <div class="row">
                 <div class="col-md-11">
                     <ng-form name="allergyForm">
@@ -78,14 +74,14 @@
                     </div>
                     <div class="row">
                         <button type="button" class="btn btn-danger marginal" title="Удалить"
-                                ng-click="client.delete_record('allergies', alg)"><span class="glyphicon glyphicon-trash"></span></button>
+                                ng-click="clientServices.delete_allergy(client, alg)"><span class="glyphicon glyphicon-trash"></span></button>
                     </div>
                 </div>
             </div>
         </div>
         <div>
             <button type="button" class="btn btn-primary"
-                    ng-click="client.add_allergy()">Добавить новую</button>
+                    ng-click="clientServices.add_allergy(client)">Добавить новую</button>
         </div>
     </ng-form>
 
@@ -93,7 +89,7 @@
 
     <ng-form name="_intolerances" toc-element="Непереносимость">
         <h4>Медикаментозная непереносимость</h4>
-        <div ng-repeat="intlr in client.intolerances | filter: flt_not_deleted()">
+        <div ng-repeat="intlr in client.intolerances | flt_not_deleted">
             <div class="row">
                 <div class="col-md-11">
                     <ng-form name="intoleranceForm">
@@ -115,14 +111,14 @@
                     </div>
                     <div class="row">
                         <button type="button" class="btn btn-danger marginal" title="Удалить"
-                                ng-click="client.delete_record('intolerances', intlr)"><span class="glyphicon glyphicon-trash"></span></button>
+                                ng-click="clientServices.delete_med_intolerance(client, intlr)"><span class="glyphicon glyphicon-trash"></span></button>
                     </div>
                 </div>
             </div>
         </div>
         <div>
             <button type="button" class="btn btn-primary"
-                    ng-click="client.add_med_intolerance()">Добавить новую</button>
+                    ng-click="clientServices.add_med_intolerance(client)">Добавить новую</button>
         </div>
     </ng-form>
 

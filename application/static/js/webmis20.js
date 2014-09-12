@@ -4,6 +4,7 @@
 var WebMis20 = angular.module('WebMis20', [
     'WebMis20.services',
     'WebMis20.services.dialogs',
+    'WebMis20.services.models',
     'WebMis20.directives',
     'WebMis20.directives.personTree',
     'WebMis20.directives.ActionTypeTree',
@@ -289,16 +290,14 @@ var WebMis20 = angular.module('WebMis20', [
 .filter('flt_not_deleted', function() {
         return function(items) {
             var out = [];
-            if(items){
+            if(items) {
                 items.forEach(function(item){
-                    if (item.hasOwnProperty('deleted') && item.deleted === 0){
+                    if (!item.hasOwnProperty('deleted') ||
+                        (item.hasOwnProperty('deleted') && item.deleted === 0)) {
                         out.push(item);
                     }
-                    else if (!item.hasOwnProperty('deleted')){
-                        out.push(item);
-                    }
-                })
-            };
+                });
+            }
             return out;
         };
     })
@@ -488,6 +487,7 @@ var WebMis20 = angular.module('WebMis20', [
         return function (data) {
             self.action = data.result.action;
             self.layout = data.result.layout;
+            self.bak_lab_info = data.result.bak_lab_info;
             self.action_columns = {
                 assignable: false,
                 unit: false
@@ -540,6 +540,9 @@ var WebMis20 = angular.module('WebMis20', [
         } else {
             return this.properties_by_id[id];
         }
+    };
+    Action.prototype.get_baklab_info = function () {
+        return this.bak_lab_info ? this.bak_lab_info : null;
     };
     return Action;
 }])
@@ -949,6 +952,8 @@ var WebMis20 = angular.module('WebMis20', [
       };
     }
   ]);
+
+angular.module('WebMis20.services.models', []);
 
 var aux = {
     getQueryParams: function (qs) {

@@ -4,21 +4,22 @@ import datetime
 import itertools
 
 from collections import defaultdict
-from application.lib.agesex import recordAcceptableEx
-from application.models.client import Client
 from sqlalchemy.sql.functions import current_date
 from sqlalchemy.sql.expression import between
 from flask import json
 
 from application.systemwide import db
 from application.lib.data import int_get_atl_dict_all
-from application.lib.utils import safe_unicode, safe_int, safe_dict, logger
+from application.lib.utils import safe_unicode, safe_int, safe_dict, logger, safe_traverse_attrs
+from application.lib.action.utils import action_is_bak_lab
+from application.lib.agesex import recordAcceptableEx
 from application.models.enums import EventPrimary, EventOrder, ActionStatus, Gender
 from application.models.event import Event, EventType, Diagnosis, Diagnostic
 from application.models.schedule import Schedule, rbReceptionType, ScheduleClientTicket, ScheduleTicket, QuotingByTime, \
     Office
 from application.models.actions import Action, ActionProperty, ActionType
 from application.models.exists import rbRequestType, rbService, ContractTariff, Contract
+from application.models.client import Client
 
 __author__ = 'mmalkov'
 
@@ -798,7 +799,7 @@ class ActionVisualizer(object):
         """
         @type action: Action
         """
-        return {
+        result = {
             'action': {
                 'id': action.id,
                 'action_type': action.actionType,
@@ -826,6 +827,9 @@ class ActionVisualizer(object):
             },
             'layout': self.make_action_layout(action)
         }
+        if action_is_bak_lab(action):
+            result['bak_lab_info'] = self.make_bak_lab_info(action)
+        return result
 
     def make_action_layout(self, action):
         """
@@ -842,13 +846,18 @@ class ActionVisualizer(object):
             else:
                 return at_layout
         # default layout
-        return {
+        layout = {
             'tagName': 'root',
             'children': [{
                 'tagName': 'ap',
                 'id': ap.type.id,
             } for ap in action.properties]
         }
+        if action_is_bak_lab(action):
+            layout['children'].append({
+                'tagName': 'bak_lab_view',
+            })
+        return layout
     
     def make_property(self, prop):
         """
@@ -895,3 +904,45 @@ class ActionVisualizer(object):
         """
         evis = EventVisualizer()
         return evis.make_diagnostic_record(value)
+
+    # ---
+
+    def make_bak_lab_info(self, action):
+        bbt_response = action.bbt_response
+        if not bbt_response:
+            return None
+
+        def make_comment(comment):
+            return {
+                'id': comment.id,
+                'text': comment.valueText
+            }
+
+        def make_sens_value(sv):
+            return {
+                'id': sv.id,
+                'mic': sv.MIC,
+                'activity': sv.activity,
+                'antibiotic': safe_traverse_attrs(sv, 'antibiotic', 'name')
+            }
+
+        def make_organism(organism):
+            return {
+                'id': organism.id,
+                'microorganism': safe_traverse_attrs(organism, 'microorganism', 'name'),
+                'concentration': organism.concentration,
+                'sens_values': [make_sens_value(sv) for sv in organism.sens_values]
+            }
+
+        organisms = [make_organism(osm) for osm in bbt_response.values_organism]
+        comments = [make_comment(com) for com in bbt_response.values_text]
+        pvis = PersonTreeVisualizer()
+        result = {
+            'doctor': pvis.make_person_ws(bbt_response.doctor),
+            'code_lis': bbt_response.codeLIS,
+            'defects': bbt_response.defects,
+            'final': bool(bbt_response.final),
+            'organisms': organisms,
+            'comments': comments
+        }
+        return result

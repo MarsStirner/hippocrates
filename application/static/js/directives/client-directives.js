@@ -345,11 +345,8 @@ angular.module('WebMis20.directives').
                 require: '^form',
                 scope: {
                     idPostfix: '@',
-                    modelType: '=',
-                    modelDate: '=',
-                    modelPerson: '=',
-                    edit_mode: '&editMode',
-                    modelBloodType: '='
+                    modelBloodType: '=',
+                    edit_mode: '&editMode'
                 },
                 link: function(scope, elm, attrs, formCtrl) {
                     scope.cbtForm = formCtrl;
@@ -361,22 +358,6 @@ angular.module('WebMis20.directives').
                             scope.modelBloodType.dirty = n;
                         }
                     });
-
-                    // todo: fix? промежуточные модели для ui-select...
-                    // вероятно проблема в том, что ui-select в качестве модели нужен объект в скоупе
-                    scope.intmd_models = {};
-                    scope.intmd_models.type = scope.modelType;
-                    scope.intmd_models.person = scope.modelPerson;
-                    scope.$watch('intmd_models.type', function(n, o) {
-                        if (n !== o) {
-                            scope.modelType = n;
-                        }
-                    });
-                    scope.$watch('intmd_models.person', function(n, o) {
-                        if (n !== o) {
-                            scope.modelPerson = n;
-                        }
-                    });
                 },
                 template:
 '<div class="panel panel-default">\
@@ -386,14 +367,14 @@ angular.module('WebMis20.directives').
                  ng-class="{\'has-error\': (cbtForm.$dirty || modelBloodType.id) && cbtForm.cbt_date[[idPostfix]].$invalid}">\
                 <label for="cbt_date[[idPostfix]]" class="control-label">Дата установления</label>\
                 <wm-date id="cbt_date[[idPostfix]]"\
-                         ng-model="modelDate" ng-disabled="!edit_mode()" ng-required="cbtForm.$dirty">\
+                         ng-model="modelBloodType.date" ng-disabled="!edit_mode()" ng-required="cbtForm.$dirty">\
                 </wm-date>\
             </div>\
             <div class="form-group col-md-4"\
                  ng-class="{\'has-error\': (cbtForm.$dirty || modelBloodType.id) && cbtForm.cbt_type.$invalid}">\
                 <label for="cbt_type[[idPostfix]]" class="control-label">Тип</label>\
                 <ui-select class="form-control" id="cbt_type[[idPostfix]]" name="cbt_type" theme="select2"\
-                           ng-model="intmd_models.type" ng-disabled="!edit_mode()" ng-required="cbtForm.$dirty">\
+                           ng-model="modelBloodType.blood_type" ng-disabled="!edit_mode()" ng-required="cbtForm.$dirty">\
                     <ui-select-match placeholder="Группа крови">[[$select.selected.name]]</ui-select-match>\
                     <ui-select-choices repeat="bt in rbBloodType.objects | filter: $select.search">\
                         <div ng-bind-html="bt.name | highlight: $select.search"></div>\
@@ -404,9 +385,9 @@ angular.module('WebMis20.directives').
                  ng-class="{\'has-error\': (cbtForm.$dirty || modelBloodType.id) && cbtForm.cbt_person.$invalid}">\
                 <label for="cbt_person[[idPostfix]]" class="control-label">Врач, установивший группу крови</label>\
                 <ui-select class="form-control" id="cbt_person[[idPostfix]]" name="cbt_person" theme="select2"\
-                           ng-model="intmd_models.person" ng-disabled="!edit_mode()" ng-required="cbtForm.$dirty">\
+                           ng-model="modelBloodType.person" ng-disabled="!edit_mode()" ng-required="cbtForm.$dirty">\
                     <ui-select-match placeholder="">[[$select.selected.name]]</ui-select-match>\
-                    <ui-select-choices repeat="p in rbPerson.objects | filter: $select.search">\
+                    <ui-select-choices repeat="p in rbPerson.objects | filter: $select.search track by p.id">\
                         <div ng-bind-html="p.name | highlight: $select.search"></div>\
                     </ui-select-choices>\
                 </ui-select>\

@@ -2,7 +2,7 @@
     <ng-form name="_policies" toc-element="Полисы">
     <legend>Медицинские полисы</legend>
     <h4>Полис ОМС</h4>
-    <div ng-repeat="cpol in client.compulsory_policies | filter: flt_not_deleted()">
+    <div ng-repeat="cpol in client.compulsory_policies | flt_not_deleted">
         <ng-form name="cpolForm" toc-element toc-dynamic="cpol.insurer.short_name">
             <div class="row">
                 <div class="col-md-11">
@@ -18,7 +18,7 @@
                     </div>
                     <div class="row">
                         <button type="button" class="btn btn-danger marginal" title="Удалить"
-                                ng-click="delete_policy('compulsory_policies', cpol)"><span class="glyphicon glyphicon-trash"></span></button>
+                                ng-click="clientServices.delete_cpolicy(client, cpol)"><span class="glyphicon glyphicon-trash"></span></button>
                     </div>
                 </div>
             </div>
@@ -26,13 +26,13 @@
     </div>
     <div>
         <button type="button" class="btn btn-primary"
-                ng-click="add_new_cpolicy()">Добавить новый</button>
+                ng-click="clientServices.add_new_cpolicy(client)">Добавить новый</button>
     </div>
 
     <hr>
 
     <h4>Полисы ДМС</h4>
-    <div ng-repeat="vpol in client.voluntary_policies | filter: flt_not_deleted()">
+    <div ng-repeat="vpol in client.voluntary_policies | flt_not_deleted">
         <ng-form name="vpolForm" toc-element toc-dynamic="vpol.insurer.short_name">
             <div class="row">
                 <div class="col-md-11">
@@ -48,7 +48,7 @@
                     </div>
                     <div class="row">
                         <button type="button" class="btn btn-danger marginal" title="Удалить"
-                                ng-click="delete_policy('voluntary_policies', vpol)"><span class="glyphicon glyphicon-trash"></span></button>
+                                ng-click="clientServices.delete_vpolicy(client, vpol)"><span class="glyphicon glyphicon-trash"></span></button>
                     </div>
                 </div>
             </div>
@@ -56,7 +56,7 @@
     </div>
     <div>
         <button type="button" class="btn btn-primary"
-                ng-click="client.add_vpolicy()">Добавить новый</button>
+                ng-click="clientServices.add_new_vpolicy(client)">Добавить новый</button>
     </div>
     </ng-form>
 </div>
