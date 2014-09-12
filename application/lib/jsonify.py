@@ -603,7 +603,7 @@ class EventVisualizer(object):
             'action_id': diagnostic.action_id,
             'result': diagnostic.result,
             'ache_result': diagnostic.rbAcheResult,
-
+            'event_id': diagnostic.event_id,
             'health_group': diagnostic.healthGroup,
             'trauma_type': diagnostic.traumaType,
             'phase': diagnostic.phase,

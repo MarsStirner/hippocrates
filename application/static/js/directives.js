@@ -687,12 +687,19 @@ angular.module('WebMis20.directives')
             }
         }
     }])
-.service('DiagnosisModal', ['$modal', function ($modal) {
+.service('DiagnosisModal', ['$modal', 'WMEvent', function ($modal, WMEvent) {
     return {
         openDiagnosisModal: function (model) {
             var locModel = angular.copy(model);
             var Controller = function ($scope, $modalInstance) {
                 $scope.model = locModel;
+                $scope.event = new WMEvent($scope.model.event_id);
+                $scope.event.reload();
+                $scope.filter_type = function() {
+                    return function(elem) {
+                        return ["1", "2", "3", "7", "9", "11"].indexOf(elem.code) > -1;
+                    };
+                };
             };
             var instance = $modal.open({
                 templateUrl: '/WebMis20/modal-edit-diagnosis.html',
@@ -723,7 +730,7 @@ angular.module('WebMis20.directives')
                                 ref-book="rbDiagnosisType"\
                                 ng-required="true">\
                                 <ui-select-match placeholder="не выбрано">[[ $select.selected.name ]]</ui-select-match>\
-                                <ui-select-choices repeat="dt in ($refBook.objects | filter: $select.search) track by dt.id">\
+                                <ui-select-choices repeat="dt in ($refBook.objects | filter: $select.search | filter: filter_type()) track by dt.id">\
                                     <span ng-bind-html="dt.name | highlight: $select.search"></span>\
                                 </ui-select-choices>\
                             </ui-select>\
@@ -780,7 +787,7 @@ angular.module('WebMis20.directives')
                             ng-model="model.result"\
                             ref-book="rbResult">\
                             <ui-select-match placeholder="не выбрано">[[ $select.selected.name ]]</ui-select-match>\
-                            <ui-select-choices repeat="r in ($refBook.objects | filter: $select.search) track by r.id">\
+                            <ui-select-choices repeat="r in ($refBook.objects | filter: $select.search | rb_result_filter: event.info.event_type.purpose.id) track by r.id">\
                                 <span ng-bind-html="r.name | highlight: $select.search"></span>\
                             </ui-select-choices>\
                         </ui-select>\

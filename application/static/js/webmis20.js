@@ -302,7 +302,19 @@ var WebMis20 = angular.module('WebMis20', [
             return out;
         };
     })
-
+.filter('rb_result_filter', function() {
+        return function(items, event_purpose_id) {
+            var out = [];
+            if(items){
+                items.forEach(function(item){
+                    if (item.eventPurpose_id == event_purpose_id){
+                        out.push(item);
+                    }
+                })
+            };
+            return out;
+        };
+    })
 // Services
 .factory('RefBook', ['$http', '$rootScope', function ($http, $rootScope) {
     var RefBook = function (name) {
