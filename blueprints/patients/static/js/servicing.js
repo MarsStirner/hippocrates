@@ -55,8 +55,8 @@ var ClientModalCtrl = function ($scope, $modalInstance, client, PrintingService,
         $scope.child_window = window.open(url_schedule_appointment_html + '?client_id=' + client_id, '_blank');
     };
 
-    $scope.open_event = function(event) {
-        $scope.child_window = window.open(url_for_event_html_event_info + '?event_id=' + event.id, '_blank');
+    $scope.open_event = function(event_id) {
+        $scope.child_window = window.open(url_for_event_html_event_info + '?event_id=' + event_id, '_blank');
     };
 
     $scope.open_client = function (client_id) {
