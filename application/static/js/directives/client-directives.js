@@ -10,17 +10,17 @@ angular.module('WebMis20.directives').
                             return mask.replace(/[9A*]/g,"_")
                         }
                         return ""
-                    }
-                    $scope.placeholder_serial = $scope.modelPolicy.policy_type ? $scope.make_placeholder($scope.modelPolicy.policy_type.masks.serial) : ""
-                    $scope.placeholder_number = $scope.modelPolicy.policy_type ? $scope.make_placeholder($scope.modelPolicy.policy_type.masks.number) : ""
+                    };
+                    $scope.placeholder_serial = $scope.modelPolicy.policy_type ? $scope.make_placeholder($scope.modelPolicy.policy_type.masks.serial) : "";
+                    $scope.placeholder_number = $scope.modelPolicy.policy_type ? $scope.make_placeholder($scope.modelPolicy.policy_type.masks.number) : "";
                 },
                 restrict: 'E',
                 require: '^form',
                 scope: {
                     pType: '@',
                     idPostfix: '@',
-                    edit_mode: '&editMode',
-                    modelPolicy: '='
+                    modelPolicy: '=',
+                    edit_mode: '&editMode'
                 },
                 link: function(scope, elm, attrs, formCtrl) {
                     var policy_codes = (scope.pType == 0)?(['cmiOld', 'cmiTmp', 'cmiCommonPaper', 'cmiCommonElectron', 'cmiUEC', 'cmiFnkcIndustrial', 'cmiFnkcLocal']):(['vmi', '3']);
@@ -131,12 +131,8 @@ angular.module('WebMis20.directives').
                 scope: {
                     ssClass: '@',
                     idPostfix: '@',
-                    modelType: '=',
-                    modelBegDate: '=',
-                    modelEndDate: '=',
-                    modelDocument: '=',
-                    edit_mode: '&editMode',
-                    modelSocStatus: '='
+                    modelSocStatus: '=',
+                    edit_mode: '&editMode'
                 },
                 link: function(scope, elm, attrs, formCtrl) {
                     scope.socStatusForm = formCtrl;
@@ -156,16 +152,6 @@ angular.module('WebMis20.directives').
                             return classes_codes.indexOf(s_class) != -1;
                         };
                     };
-
-                    // todo: fix? промежуточные модели для ui-select...
-                    // вероятно проблема в том, что ui-select в качестве модели нужен объект в скоупе
-                    scope.intmd_models = {};
-                    scope.intmd_models.type = scope.modelType;
-                    scope.$watch('intmd_models.type', function(n, o) {
-                        if (n !== o) {
-                            scope.modelType = n;
-                        }
-                    });
                 },
                 template:
 '<div class="panel panel-default">\
@@ -175,7 +161,7 @@ angular.module('WebMis20.directives').
                  ng-class="{\'has-error\': (socStatusForm.$dirty || modelSocStatus.id) && socStatusForm.ss_type.$invalid}">\
                 <label for="ss_type_[[idPostfix]]">Тип</label>\
                 <ui-select class="form-control" id="ss_type_[[idPostfix]]" name="ss_type" theme="select2"\
-                           ng-model="intmd_models.type" ng-disabled="!edit_mode()" ng-required="socStatusForm.$dirty">\
+                           ng-model="modelSocStatus.ss_type" ng-disabled="!edit_mode()" ng-required="socStatusForm.$dirty">\
                     <ui-select-match placeholder="">[[$select.selected.name]]</ui-select-match>\
                     <ui-select-choices repeat="sst in rbSocStatusType.objects | filter: filter_soc_status(ssClass) | filter: $select.search">\
                         <div ng-bind-html="sst.name | highlight: $select.search"></div>\
@@ -186,7 +172,7 @@ angular.module('WebMis20.directives').
                  ng-class="{\'has-error\': ((socStatusForm.$dirty || modelSocStatus.id) && socStatusForm.ss_begdate[[idPostfix]].$invalid)}">\
                 <label for="ss_begdate[[idPostfix]]" class="control-label">Дата начала</label>\
                 <wm-date id="ss_begdate[[idPostfix]]"\
-                         ng-model="modelBegDate" ng-disabled="!edit_mode()"\
+                         ng-model="modelSocStatus.beg_date" ng-disabled="!edit_mode()"\
                          ng-required="socStatusForm.$dirty">\
                 </wm-date>\
             </div>\
@@ -194,7 +180,7 @@ angular.module('WebMis20.directives').
                  ng-class="{\'has-error\': socStatusForm.ss_enddate_[[idPostfix]].$invalid}">\
                 <label for="ss_enddate_[[idPostfix]]" class="control-label">Дата окончания</label>\
                 <wm-date id="ss_enddate_[[idPostfix]]"\
-                         ng-model="modelEndDate" ng-disabled="!edit_mode()">\
+                         ng-model="modelSocStatus.end_date" ng-disabled="!edit_mode()">\
                 </wm-date>\
             </div>\
         </div>\
@@ -212,25 +198,17 @@ angular.module('WebMis20.directives').
                             return mask.replace(/[9A*]/g,"_")
                         }
                         return ""
-                    }
-                    $scope.placeholder_serial = $scope.modelDocument.doc_type ? $scope.make_placeholder($scope.modelDocument.doc_type.masks.serial) : ""
-                    $scope.placeholder_number = $scope.modelDocument.doc_type ? $scope.make_placeholder($scope.modelDocument.doc_type.masks.number) : ""
+                    };
+                    $scope.placeholder_serial = $scope.modelDocument.doc_type ? $scope.make_placeholder($scope.modelDocument.doc_type.masks.serial) : "";
+                    $scope.placeholder_number = $scope.modelDocument.doc_type ? $scope.make_placeholder($scope.modelDocument.doc_type.masks.number) : "";
                 },
                 restrict: 'E',
                 require: '^form',
                 scope: {
                     idPostfix: '@',
                     groupCode:'@',
-                    modelType: '=',
-                    modelSerial: '=',
-                    serialValidator: '=',
-                    modelNumber: '=',
-                    numberValidator: '=',
-                    modelBegDate: '=',
-                    modelEndDate: '=',
-                    modelOrigin: '=',
-                    edit_mode: '&editMode',
-                    modelDocument: '='
+                    modelDocument: '=',
+                    edit_mode: '&editMode'
                 },
                 link: function(scope, elm, attrs, formCtrl) {
                     scope.docForm = formCtrl;
@@ -258,23 +236,6 @@ angular.module('WebMis20.directives').
                             return elem.group.code == group_code;
                         };
                     };
-
-                    // todo: fix? промежуточные модели для ui-select...
-                    // вероятно проблема в том, что ui-select в качестве модели нужен объект в скоупе
-                    scope.intmd_models = {};
-                    scope.intmd_models.type = scope.modelType;
-                    scope.intmd_models.origin = scope.modelOrigin;
-                    scope.$watch('intmd_models.type', function(n, o) {
-                        if (n !== o) {
-                            scope.modelType = n;
-                        }
-                    });
-
-                    scope.$watch('intmd_models.origin', function(n, o) {
-                        if (n !== o) {
-                            scope.modelOrigin = n;
-                        }
-                    });
                 },
                 template:
 '<div class="panel panel-default">\
@@ -284,7 +245,7 @@ angular.module('WebMis20.directives').
                  ng-class="{\'has-error\': (docForm.$dirty || modelDocument.id) && docForm.doc_type.$invalid}">\
                 <label for="doc_type[[idPostfix]]" class="control-label">Тип</label>\
                 <ui-select class="form-control" id="doc_type[[idPostfix]]" name="doc_type" theme="select2"\
-                           ng-model="intmd_models.type" ng-disabled="!edit_mode()" ng-required="docForm.$dirty">\
+                           ng-model="modelDocument.doc_type" ng-disabled="!edit_mode()" ng-required="docForm.$dirty">\
                     <ui-select-match placeholder="Тип документа">[[$select.selected.name]]</ui-select-match>\
                     <ui-select-choices repeat="dt in rbDocumentType.objects | filter: filter_document(groupCode) | filter: $select.search">\
                         <div ng-bind-html="dt.name | highlight: $select.search"></div>\
@@ -296,28 +257,29 @@ angular.module('WebMis20.directives').
                 <label for="doc_serial[[idPostfix]]" class="control-label">Серия</label>\
                 <input type="text" class="form-control" id="doc_serial[[idPostfix]]" name="doc_serial"\
                        ui-mask="[[modelDocument.doc_type.masks.serial]]"\
-                       autocomplete="off" placeholder="[[placeholder_serial]]" validator-regexp="serialValidator"\
-                       ng-model="modelSerial" ng-disabled="!edit_mode()" ng-required="serialValidator && docForm.$dirty"/>\
+                       autocomplete="off" placeholder="[[placeholder_serial]]" validator-regexp="modelDocument.doc_type.validators.serial"\
+                       ng-model="modelDocument.serial" ng-disabled="!edit_mode()"\
+                       ng-required="modelDocument.doc_type.validators.serial && docForm.$dirty"/>\
             </div>\
             <div class="form-group col-md-2"\
                  ng-class="{\'has-error\': (docForm.$dirty || modelDocument.id) && docForm.doc_number.$invalid}">\
                 <label for="doc_number[[idPostfix]]" class="control-label">Номер</label>\
                 <input type="text" class="form-control" id="doc_number[[idPostfix]]" name="doc_number"\
                        ui-mask="[[modelDocument.doc_type.masks.number]]"\
-                       autocomplete="off" placeholder="[[placeholder_number]]" validator-regexp="numberValidator"\
-                       ng-model="modelNumber" ng-required="docForm.$dirty" ng-disabled="!edit_mode()"/>\
+                       autocomplete="off" placeholder="[[placeholder_number]]" validator-regexp="modelDocument.doc_type.validators.number"\
+                       ng-model="modelDocument.number" ng-required="docForm.$dirty" ng-disabled="!edit_mode()"/>\
             </div>\
             <div class="form-group col-md-2"\
                  ng-class="{\'has-error\': (docForm.$dirty || modelDocument.id) && docForm.doc_begdate[[idPostfix]].$invalid}">\
                 <label for="doc_begdate[[idPostfix]]" class="control-label">Дата выдачи</label>\
                 <wm-date id="doc_begdate[[idPostfix]]"\
-                         ng-model="modelBegDate" ng-disabled="!edit_mode()" ng-required="docForm.$dirty">\
+                         ng-model="modelDocument.beg_date" ng-disabled="!edit_mode()" ng-required="docForm.$dirty">\
                 </wm-date>\
             </div>\
             <div class="form-group col-md-2"\
                  ng-class="{\'has-error\': docForm.doc_enddate[[idPostfix]].$invalid }">\
                 <label for="doc_enddate[[idPostfix]]" class="control-label">Действителен до</label>\
-                <wm-date id="doc_enddate[[idPostfix]]" ng-model="modelEndDate" ng-disabled="!edit_mode()">\
+                <wm-date id="doc_enddate[[idPostfix]]" ng-model="modelDocument.end_date" ng-disabled="!edit_mode()">\
                 </wm-date>\
             </div>\
         </div>\
@@ -328,7 +290,7 @@ angular.module('WebMis20.directives').
                 <label for="doc_ufms[[idPostfix]]" class="control-label">Выдан</label>\
                 <div ng-class="form-control" class="validatable" id="doc_ufms[[idPostfix]]" name="doc_ufms"\
                      fs-select="" freetext="true" items="ufmsItems"\
-                     ng-disabled="!edit_mode()" ng-required="docForm.$dirty" ng-model="intmd_models.origin">\
+                     ng-disabled="!edit_mode()" ng-required="docForm.$dirty" ng-model="modelDocument.origin">\
                     {{item}}\
                 </div>\
             </div>\
@@ -406,12 +368,9 @@ angular.module('WebMis20.directives').
                 scope: {
                     idPostfix: '@',
                     type: '@',
-                    modelName: '=',
-                    modelPower: '=',
-                    modelDate: '=',
-                    modelNote: '=',
-                    edit_mode: '&editMode',
-                    modelAllergy: '='
+                    modelAllergy: '=',
+                    edit_mode: '&editMode'
+
                 },
                 link: function(scope, elm, attrs, formCtrl) {
                     scope.algForm = formCtrl;
@@ -428,26 +387,26 @@ angular.module('WebMis20.directives').
     <div class="panel-body">\
         <div class="row">\
             <div class="form-group col-md-4"\
-                 ng-class="{\'has-error\': (algForm.$dirty || modelAllergy) && algForm.alg_name.$invalid}">\
+                 ng-class="{\'has-error\': (algForm.$dirty || modelAllergy.id) && algForm.alg_name.$invalid}">\
                 <label for="alg_name[[idPostfix]]" class="control-label">[[type === \'allergy\' ? \'Вещество\' : \'Препарат\']]</label>\
                 <input type="text" class="form-control" id="alg_name[[idPostfix]]" name="alg_name"\
                        autocomplete="off" placeholder=""\
-                       ng-model="modelName" ng-disabled="!edit_mode()" ng-required="algForm.$dirty"/>\
+                       ng-model="modelAllergy.name" ng-disabled="!edit_mode()" ng-required="algForm.$dirty"/>\
             </div>\
             <div class="form-group col-md-3"\
-                 ng-class="{\'has-error\': (algForm.$dirty || modelAllergy) && algForm.alg_power.$invalid}">\
+                 ng-class="{\'has-error\': (algForm.$dirty || modelAllerg.idy) && algForm.alg_power.$invalid}">\
                 <label for="alg_power[[idPostfix]]" class="control-label">Степень</label>\
                 <select class="form-control" id="alg_power[[idPostfix]]" name="alg_power"\
-                        ng-model="modelPower"\
+                        ng-model="modelAllergy.power"\
                         ng-options="pow as pow.name for pow in rbAllergyPower.objects track by pow.id"\
                         ng-disabled="!edit_mode()" ng-required="algForm.$dirty">\
                 </select>\
             </div>\
             <div class="form-group col-md-3"\
-                 ng-class="{\'has-error\': (algForm.$dirty || modelAllergy) && algForm.alg_date[[idPostfix]].$invalid}">\
+                 ng-class="{\'has-error\': (algForm.$dirty || modelAllergy.id) && algForm.alg_date[[idPostfix]].$invalid}">\
                 <label for="alg_date[[idPostfix]]" class="control-label">Дата установления</label>\
                 <wm-date id="alg_date[[idPostfix]]"\
-                         ng-model="modelDate" ng-disabled="!edit_mode()" ng-required="algForm.$dirty">\
+                         ng-model="modelAllergy.date" ng-disabled="!edit_mode()" ng-required="algForm.$dirty">\
                 </wm-date>\
             </div>\
         </div>\
@@ -455,7 +414,7 @@ angular.module('WebMis20.directives').
             <div class="form-group col-md-12">\
                 <label for="alg_notes[idPostfix]">Примечание</label>\
                 <textarea class="form-control" id="alg_notes" name="alg_notes" rows="2" autocomplete="off"\
-                    ng-model="modelNote" ng-disabled="!edit_mode()"></textarea>\
+                    ng-model="modelAllergy.notes" ng-disabled="!edit_mode()"></textarea>\
             </div>\
         </div>\
     </div>\

@@ -7,7 +7,8 @@
             <div class="row">
                 <div class="col-md-11">
                     <ng-form name="cbtForm">
-                        <wm-client-blood-type id-postfix="$index" model-blood-type="bt"
+                        <wm-client-blood-type id-postfix="$index"
+                            model-blood-type="bt"
                             edit-mode="bt.id ? false : true">
                         </wm-client-blood-type>
                     </ng-form>
@@ -58,12 +59,8 @@
                     <ng-form name="allergyForm">
                         <wm-client-allergy id-postfix="[[$index]]"
                             type="allergy"
-                            model-name="alg.name"
-                            model-power="alg.power"
-                            model-date="alg.date"
-                            model-note="alg.notes"
-                            edit-mode="alg.id ? edit.activated : true"
-                            model-allergy="alg">
+                            model-allergy="alg"
+                            edit-mode="alg.id ? edit.activated : true">
                         </wm-client-allergy>
                     </ng-form>
                 </div>
@@ -95,12 +92,8 @@
                     <ng-form name="intoleranceForm">
                         <wm-client-allergy id-postfix="[[$index]]"
                             type="intolerance"
-                            model-name="intlr.name"
-                            model-power="intlr.power"
-                            model-date="intlr.date"
-                            model-note="intlr.notes"
-                            edit-mode="intlr.id ? edit.activated : true"
-                            model-allergy="intlr">
+                            model-allergy="intlr"
+                            edit-mode="intlr.id ? edit.activated : true">
                         </wm-client-allergy>
                     </ng-form>
                 </div>

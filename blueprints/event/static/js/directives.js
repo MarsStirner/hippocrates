@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('WebMis20.directives').
-    directive('wmEventServiceGroup', ['WMEventFormState', 'WMEventController', 'ActionTypeTreeModal',
-        function(WMEventFormState, WMEventController, ActionTypeTreeModal) {
+    directive('wmEventServiceGroup', ['WMEventFormState', 'WMEventServices', 'ActionTypeTreeModal',
+        function(WMEventFormState, WMEventServices, ActionTypeTreeModal) {
             return {
                 restrict: 'A',
                 scope: {
@@ -32,7 +32,7 @@ angular.module('WebMis20.directives').
                 },
                 link: function (scope, elm, attrs) {
                     scope.formstate = WMEventFormState;
-                    scope.eventctrl = WMEventController;
+                    scope.eventServices = WMEventServices;
 
                     scope.coord_all = function (off) {
                         scope.service.coord_all = !Boolean(off);
@@ -127,14 +127,14 @@ angular.module('WebMis20.directives').
 <td nowrap class="text-right">\
     <button type="button" class="btn btn-sm btn-danger" title="Удалить услуги"\
             ng-show="btn_delete_visible()"\
-            ng-click="eventctrl.remove_service(event, idx)"><span class="glyphicon glyphicon-trash"></span>\
+            ng-click="eventServices.remove_service(event, idx)"><span class="glyphicon glyphicon-trash"></span>\
     </button>\
 </td>'
             };
         }
     ]).
-    directive('wmEventServiceRecord', ['WMEventFormState', 'WMEventController', 'ActionTypeTreeModal', '$filter', 'RefBookService',
-        function(WMEventFormState, WMEventController, ActionTypeTreeModal, $filter, RefBookService) {
+    directive('wmEventServiceRecord', ['WMEventFormState', 'WMEventServices', 'ActionTypeTreeModal', '$filter', 'RefBookService',
+        function(WMEventFormState, WMEventServices, ActionTypeTreeModal, $filter, RefBookService) {
             return {
                 restrict: 'A',
                 scope: {
@@ -145,7 +145,7 @@ angular.module('WebMis20.directives').
                 },
                 link: function(scope, elm, attrs) {
                     scope.formstate = WMEventFormState;
-                    scope.eventctrl = WMEventController;
+                    scope.eventServices = WMEventServices;
                     scope.ActionStatus = RefBookService.get('ActionStatus');
 
                     scope.change_action_choice_for_payment = function() {
@@ -239,11 +239,11 @@ angular.module('WebMis20.directives').
 <td class="text-center" ng-show="formstate.is_dms()">\
     <button type="button" class="btn btn-sm btn-default" title="Согласовать"\
             ng-show="btn_coordinate_visible()"\
-            ng-click="eventctrl.coordinate(action)"><span class="glyphicon glyphicon-check"></span>\
+            ng-click="eventServices.coordinate(action)"><span class="glyphicon glyphicon-check"></span>\
     </button>\
     <button type="button" class="btn btn-sm btn-default" title="Отменить согласование"\
             ng-show="btn_cancel_coordinate_visible()"\
-            ng-click="eventctrl.coordinate(action, \'off\')"><span class="glyphicon glyphicon-remove"></span>\
+            ng-click="eventServices.coordinate(action, \'off\')"><span class="glyphicon glyphicon-remove"></span>\
     </button>\
 </td>\
 <td class="text-center" ng-show="formstate.is_dms()">\
@@ -255,7 +255,7 @@ angular.module('WebMis20.directives').
     <ui-print-button ps="get_ps()" resolve="get_ps_resolve()" ng-if="action.action_id"></ui-print-button>\
     <button type="button" class="btn btn-sm btn-danger" title="Убрать из списка услуг"\
             ng-show="btn_delete_visible()"\
-            ng-click="eventctrl.remove_action(event, action, service)"><span class="glyphicon glyphicon-trash"></span>\
+            ng-click="eventServices.remove_action(event, action, service)"><span class="glyphicon glyphicon-trash"></span>\
     </button>\
 </td>'
             };

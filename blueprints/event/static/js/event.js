@@ -426,7 +426,7 @@ var EventPaymentCtrl = function($scope, RefBookService, Settings, $http, $modal)
                 source: source
             }
         }).success(function(data) {
-            $scope.eventctrl.update_payment($scope.event, data.result);
+            $scope.eventServices.update_payment($scope.event, data.result);
         }).error(function() {
             alert('error in getting data from server');
         });
@@ -561,13 +561,13 @@ var EventServicesCtrl = function($scope, $http) {
 };
 
 var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $document, PrintingService, Settings,
-        $filter, $modal, ActionTypeTreeModal, WMEventController, WMEventFormState, MessageBox) {
+        $filter, $modal, ActionTypeTreeModal, WMEventServices, WMEventFormState, MessageBox) {
     $scope.aux = aux;
     $scope.current_role_maybe = current_user.current_role_maybe;
     $scope.Organisation = RefBookService.get('Organisation');
     $scope.Settings = new Settings();
     $scope.alerts = [];
-    $scope.eventctrl = WMEventController;
+    $scope.eventServices = WMEventServices;
     $scope.formstate = WMEventFormState;
 
     var params = aux.getQueryParams(location.search);
@@ -833,4 +833,4 @@ WebMis20.controller('EventDiagnosesCtrl', ['$scope', 'RefBookService', '$http', 
 WebMis20.controller('EventMainInfoCtrl', ['$scope', '$http', 'RefBookService', 'EventType', '$window', '$timeout', 'Settings', '$modal', '$filter', EventMainInfoCtrl]);
 WebMis20.controller('EventPaymentCtrl', ['$scope', 'RefBookService', 'Settings', '$http', '$modal', EventPaymentCtrl]);
 WebMis20.controller('EventServicesCtrl', ['$scope', '$http', EventServicesCtrl]);
-WebMis20.controller('EventInfoCtrl', ['$scope', 'WMEvent', '$http', 'RefBookService', '$window', '$document', 'PrintingService', 'Settings', '$filter', '$modal', 'ActionTypeTreeModal', 'WMEventController', 'WMEventFormState', 'MessageBox', EventInfoCtrl]);
+WebMis20.controller('EventInfoCtrl', ['$scope', 'WMEvent', '$http', 'RefBookService', '$window', '$document', 'PrintingService', 'Settings', '$filter', '$modal', 'ActionTypeTreeModal', 'WMEventServices', 'WMEventFormState', 'MessageBox', EventInfoCtrl]);

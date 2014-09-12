@@ -675,7 +675,7 @@ angular.module('WebMis20.directives')
                     <button type="button" class="btn btn-default" ng-click="cancel()">Отмена</button>\
                 </div>')
     }])
-    .directive('wmDiagnosis', ['DiagnosisModal', 'WMEventController', function(DiagnosisModal, WMEventController){
+    .directive('wmDiagnosis', ['DiagnosisModal', 'WMEventServices', function(DiagnosisModal, WMEventServices){
         return{
             restrict: 'E',
             require: '^ngModel',
@@ -687,13 +687,13 @@ angular.module('WebMis20.directives')
             },
             controller: function ($scope) {
                 $scope.add_new_diagnosis = function () {
-                    var new_diagnosis = WMEventController.add_new_diagnosis();
+                    var new_diagnosis = WMEventServices.add_new_diagnosis();
                     DiagnosisModal.openDiagnosisModal(new_diagnosis).then(function () {
                         $scope.ngModel.push(new_diagnosis);
                     });
                 };
                 $scope.delete_diagnosis = function (diagnosis) {
-                    WMEventController.delete_diagnosis($scope.ngModel, diagnosis);
+                    WMEventServices.delete_diagnosis($scope.ngModel, diagnosis);
                 };
                 $scope.edit_diagnosis = function (diagnosis) {
                     DiagnosisModal.openDiagnosisModal(diagnosis);

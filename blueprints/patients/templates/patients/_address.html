@@ -8,13 +8,6 @@
                 <div class="col-md-11">
                     <ng-form name="regAddressForm">
                         <wm-kladr-address prefix='reg'
-                            locality-model="reg_addr.address.locality"
-                            locality-type-model="reg_addr.locality_type"
-                            street-model="reg_addr.address.street"
-                            house-model="reg_addr.address.house_number"
-                            corpus-model="reg_addr.address.corpus_number"
-                            flat-model="reg_addr.address.flat_number"
-                            free-input-model="reg_addr.free_input"
                             address-model="reg_addr"
                             edit-mode="reg_addr.id ? edit.activated : true">
                         </wm-kladr-address>
@@ -49,13 +42,6 @@
                 <div class="col-md-11">
                     <ng-form name="locAddressForm">
                         <wm-kladr-address prefix='loc'
-                            locality-model="live_addr.address.locality"
-                            locality-type-model="live_addr.locality_type"
-                            street-model="live_addr.address.street"
-                            house-model="live_addr.address.house_number"
-                            corpus-model="live_addr.address.corpus_number"
-                            flat-model="live_addr.address.flat_number"
-                            free-input-model="live_addr.free_input"
                             address-model="live_addr"
                             dependent-address="true"
                             edit-mode="(live_addr.synced ? live_addr.live_id : live_addr.id) ? edit.activated : true">

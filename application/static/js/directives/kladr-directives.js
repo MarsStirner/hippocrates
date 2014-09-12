@@ -1,20 +1,13 @@
 'use strict';
 
 angular.module('WebMis20.directives').
-    directive('wmKladrAddress', [function() {
+    directive('wmKladrAddress', [function () {
         return {
             restrict: 'E',
             require: '^form',
             transclude: true,
             scope: {
                 prefix: '@',
-                localityModel: '=',
-                localityTypeModel: '=',
-                streetModel: '=',
-                houseModel: '=',
-                corpusModel: '=',
-                flatModel: '=',
-                freeInputModel: '=',
                 addressModel: '=',
                 dependentAddress: '=',
                 editMode: '&'
@@ -116,7 +109,7 @@ angular.module('WebMis20.directives').
                         (addressForm.locality.$error.required || (!inFreeInputMode() && addressForm.locality.$invalid))}">\
                     <label for="[[prefix]]_locality">Населенный пункт</label>\
                     <wm-kladr-locality id="[[prefix]]_locality" name="locality"\
-                        model="localityModel" required="!inFreeInputMode() && addressForm.$dirty"\
+                        model="addressModel.address.locality" required="!inFreeInputMode() && addressForm.$dirty"\
                         disabled="mode.switch_to_free_input || !editMode()">\
                     </wm-kladr-locality>\
                 </div>\
@@ -124,7 +117,7 @@ angular.module('WebMis20.directives').
                      ng-class="{\'has-error\': addressForm.$dirty && addressForm.locality_type.$invalid}">\
                     <label for="[[prefix]]_locality_type">Тип населенного пункта</label>\
                     <wm-kladr-locality-type id="[[prefix]]_locality_type" name="locality_type"\
-                        model="localityTypeModel" required="addressForm.$dirty"\
+                        model="addressModel.locality_type" required="addressForm.$dirty"\
                         disabled="!editMode()">\
                     </wm-kladr-locality-type>\
                 </div>\
@@ -136,7 +129,7 @@ angular.module('WebMis20.directives').
                         (addressForm.street.$error.required || (!inFreeInputMode() && addressForm.street.$invalid))}">\
                     <label for="[[prefix]]_street">Улица</label>\
                     <wm-kladr-street id="[[prefix]]_street" name="street"\
-                        model="streetModel" required="!inFreeInputMode() && addressForm.$dirty"\
+                        model="addressModel.address.street" required="!inFreeInputMode() && addressForm.$dirty"\
                         disabled="mode.switch_to_free_input || !editMode()">\
                     </wm-kladr-street>\
                 </div>\
@@ -144,7 +137,7 @@ angular.module('WebMis20.directives').
                      ng-class="{\'has-error\': addressForm.$dirty && addressForm.house_number.$error.required && addressForm.house_number.$invalid}">\
                     <label for="[[prefix]]_house_number">Дом</label>\
                     <wm-kladr-house-number id="[[prefix]]_house_number" name="house_number"\
-                        model="houseModel" required="!inFreeInputMode() && addressForm.$dirty"\
+                        model="addressModel.address.house_number" required="!inFreeInputMode() && addressForm.$dirty"\
                         disabled="mode.switch_to_free_input || !editMode()">\
                     </wm-kladr-house-number>\
                 </div>\
@@ -152,7 +145,7 @@ angular.module('WebMis20.directives').
                      ng-class="{\'has-error\': addressForm.$dirty && addressForm.corpus_number.$error.required && addressForm.corpus_number.$invalid}">\
                     <label for="[[prefix]]_corpus_number">Корпус</label>\
                     <wm-kladr-corpus-number id="[[prefix]]_corpus_number" name="corpus_number"\
-                        model="corpusModel" required="false"\
+                        model="addressModel.address.corpus_number" required="false"\
                         disabled="mode.switch_to_free_input || !editMode()">\
                     </wm-kladr-corpus-number>\
                 </div>\
@@ -160,7 +153,7 @@ angular.module('WebMis20.directives').
                      ng-class="{\'has-error\': addressForm.$dirty && addressForm.flat_number.$error.required && addressForm.flat_number.$invalid}">\
                     <label for="[[prefix]]_flat_number">Квартира</label>\
                     <wm-kladr-flat-number id="[[prefix]]_flat_number" name="flat_number"\
-                        model="flatModel" required="false"\
+                        model="addressModel.address.flat_number" required="false"\
                         disabled="mode.switch_to_free_input || !editMode()">\
                     </wm-kladr-flat-number>\
                 </div>\
@@ -171,7 +164,7 @@ angular.module('WebMis20.directives').
                      ng-class="{\'has-error\': addressForm.$dirty && addressForm.free_input.$error.required && addressForm.free_input.$invalid}">\
                     <label for="[[prefix]]_free_input">В свободном виде</label>\
                     <wm-kladr-free-input id="[[prefix]]_free_input" name="free_input"\
-                        model="freeInputModel" required="inFreeInputMode() && addressForm.$dirty"\
+                        model="addressModel.free_input" required="inFreeInputMode() && addressForm.$dirty"\
                         disabled="!mode.switch_to_free_input || !editMode()">\
                     </wm-kladr-free-input>\
                 </div>\
