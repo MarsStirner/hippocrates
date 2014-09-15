@@ -66,8 +66,8 @@ angular.module('WebMis20.controllers').
                 var form = $scope.clientForm;
                 $scope.editing.submit_attempt = true;
                 if (form.$invalid) {
-                    var formelm = $('#clientForm').find('.ng-invalid:first');
-                    $document.scrollToElement(formelm, 30, 1500);
+                    var formelm = $('#clientForm').find('.ng-invalid:not(ng-form):first');
+                    $document.scrollToElement(formelm, 100, 1500);
                     return false;
                 }
                 $scope.client.save().then(function(new_client_id) {

@@ -650,8 +650,8 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
                     alert(message);
                 });
         } else {
-            var formelm = $('#eventForm').find('.ng-invalid:first');
-            $document.scrollToElement(formelm, 30, 1500);
+            var formelm = $('#eventForm').find('.ng-invalid:not(ng-form):first');
+            $document.scrollToElement(formelm, 100, 1500);
         }
     };
 
