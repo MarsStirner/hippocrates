@@ -760,8 +760,6 @@ angular.module('WebMis20.directives')
             var locModel = angular.copy(model);
             var Controller = function ($scope, $modalInstance) {
                 $scope.model = locModel;
-                $scope.event = new WMEvent($scope.model.event_id);
-                $scope.event.reload();
                 $scope.filter_type = function() {
                     return function(elem) {
                         return ["1", "2", "3", "7", "9", "11"].indexOf(elem.code) > -1;
@@ -854,7 +852,7 @@ angular.module('WebMis20.directives')
                             ng-model="model.result"\
                             ref-book="rbResult">\
                             <ui-select-match placeholder="не выбрано">[[ $select.selected.name ]]</ui-select-match>\
-                            <ui-select-choices repeat="r in ($refBook.objects | filter: $select.search | rb_result_filter: event.info.event_type.purpose.id) track by r.id">\
+                            <ui-select-choices repeat="r in ($refBook.objects | filter: $select.search | rb_result_filter: 2) track by r.id">\
                                 <span ng-bind-html="r.name | highlight: $select.search"></span>\
                             </ui-select-choices>\
                         </ui-select>\
