@@ -485,7 +485,7 @@ class PersonTreeVisualizer(object):
         return {
             'id': person.id,
             'name': person.shortNameText,
-            'speciality': self.make_short_speciality(person.speciality)
+            'speciality': self.make_short_speciality(person.speciality) if person.speciality else None
         }
 
     def make_short_speciality(self, speciality):
@@ -599,7 +599,7 @@ class EventVisualizer(object):
             'diagnosis_type': diagnostic.diagnosisType,
             'diagnosis': self.make_diagnosis_record(diagnostic.diagnosis),
             'character': diagnostic.character,
-            'person': pvis.make_person_ws(diagnostic.person),
+            'person': pvis.make_person_ws(diagnostic.person) if diagnostic.person else None,
             'notes': diagnostic.notes,
             'action_id': diagnostic.action_id,
             'result': diagnostic.result,
