@@ -999,7 +999,7 @@ var aux = {
     any_in: function (what, where) {
         for (var i = what.length-1; i >= 0; i--) {
             for (var j = where.length-1; j >= 0; j--) {
-                if (what[i] == what[j]) {
+                if (what[i] == where[j]) {
                     return true;
                 }
             }

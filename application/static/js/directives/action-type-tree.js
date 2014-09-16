@@ -54,11 +54,13 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
             return ! (sex && sex != client_info.sex_raw);
         }
         function os_acceptable(orgstructures) {
-            return !orgstructures || aux.any_in(current_user.action_type_org_structures, orgstructures)
+            return orgstructures && aux.any_in(current_user.action_type_org_structures, orgstructures)
         }
+        self.os_acceptable = os_acceptable;
         function personally_acceptable(id) {
             return !current_user.action_type_personally.length || current_user.action_type_personally.has(id)
         }
+        self.personally_acceptable = personally_acceptable;
         function keywords_acceptable(keywords, item) {
             return keywords.filter(function (keyword) {
                 return (item.name.toLowerCase() + ' ' + item.code.toLowerCase()).indexOf(keyword) !== -1
@@ -83,17 +85,22 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
                 root: new TreeItem(null)
             };
             angular.forEach(self.lookup, function (value, key) {
-                if (is_acceptable(keywords, value)) {
-                    var clone = value.clone();
-                    clone.assignable = clone.assignable.filter(function (item) {
-                        return age_acceptable(client_info, item[2]) && sex_acceptable(client_info, item[3])
-                    });
-                    filtered[key] = clone;
-                    for (var id = value.gid; id; value = self.lookup[id], id = value.gid) {
-                        if (id && !filtered.hasOwnProperty(id)) {
-                            filtered[id] =  self.lookup[id].clone();
+                try {
+                    if (is_acceptable(keywords, value)) {
+                        var clone = value.clone();
+                        clone.assignable = clone.assignable.filter(function (item) {
+                            return age_acceptable(client_info, item[2]) && sex_acceptable(client_info, item[3])
+                        });
+                        filtered[key] = clone;
+                        for (var id = value.gid; id; value = self.lookup[id], id = value.gid) {
+                            if (id && !filtered.hasOwnProperty(id)) {
+                                filtered[id] =  self.lookup[id].clone();
+                            }
                         }
                     }
+                } catch(e) {
+                    // possible ActionType inconsistency
+                    console.log('Error filtering ActionType tree branch for at_id = ' + key);
                 }
             });
             angular.forEach(filtered, function (value) {
@@ -125,7 +132,7 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
                 deferred.resolve(trees[at_class]);
             })
         } else {
-            deferred.resolve(trees[at_class])
+            deferred.resolve(trees[at_class]);
         }
         return deferred.promise;
     }
@@ -168,8 +175,6 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
                     person_check: true
                 };
                 $scope.query = '';
-                $scope.os_check = true;
-                $scope.person_check = true;
                 $scope.tree = undefined;
                 $scope.set_filter = function () {
                     if (typeof service === 'undefined') return;
@@ -227,8 +232,20 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
 
                 ActionTypeTreeService.get(at_class).then(function (tree) {
                     service = tree;
-                    $scope.set_filter()
-                })
+                    var os_check = false,
+                        personal_check = false;
+                    angular.forEach(tree.lookup, function (at_item) {
+                        if (at_item.osids && service.os_acceptable(at_item.osids)) {
+                            os_check = true;
+                        }
+                        if (service.personally_acceptable(at_item.id)) {
+                            personal_check = true;
+                        }
+                    });
+                    $scope.conditions.os_check = os_check;
+                    $scope.conditions.person_check = personal_check;
+                    $scope.set_filter();
+                });
             };
             return $modal.open({
                 templateUrl: templateUrl,
