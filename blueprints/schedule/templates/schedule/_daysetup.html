@@ -3,109 +3,211 @@
     <h4 class="modal-title" id="myModalLabel">Заполнение расписания</h4>
 </div>
 <div class="modal-body">
-    <div class="row">
-        <div class="col-md-4">
-            <input type="checkbox" id="absent" ng-model="absent" ng-change="absent_checked()"><label for="absent">Причина
-            отсутствия</label>
+    <ng-form name="daySetupForm">
+        <div class="row">
+            <div class="col-md-8">
+                <ul class="list-inline">
+                    <li ng-repeat="day in selected_days" class="schedule_label">
+                      <span class="label schedule_label"
+                            ng-class="{'label-primary': day.selected, 'label-default': !day.selected}"
+                            ng-click="day.selected = !day.selected" ng-bind="day.date | asShortDate"></span>
+                    </li>
+                </ul>
+            </div>
+            <div class="col-md-4 text-right">
+                <button type="button" id="absent" class="btn btn-warning" ng-model="absent.checked"
+                        btn-checkbox btn-checkbox-true="true" btn-checkbox-false="false" ng-change="absent_checked()">
+                    [[absent.checked ? 'Убрать причину отсутствия' : 'Установить причину отсутствия' ]]
+                </button>
+                <div class="vmargin10" ng-show="absent.checked">
+                    <select class="form-control" ng-options="item as item.name for item in roas track by item.code"
+                            ng-model="model.roa"></select>
+                </div>
+            </div>
         </div>
-        <div class="col-md-8">
-            <select class="form-control" ng-options="item.code as item.name for item in roas" ng-model="model.roa"
-                    ng-show="absent"></select>
-        </div>
-    </div>
-    <div ng-show="!absent">
-        <ng-form name="daysetupForm">
+        <ng-form name="intervalsSetupForm" ng-show="!absent.checked"  class="marginal">
             <div class="row">
-                <div class="col-md-4 col-md-offset-4 text-center">
-                    <label>Начало</label>
-                </div>
-                <div class="col-md-4 text-center">
-                    <label>Конец</label>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-4"><label>Время приёма</label></div>
-                <div class="col-md-4 text-center">
-                    <div ng-model="model.begTime1" style="display: inline-block" ng-change="sync_times()"
-                         ng-class="{'error-border': !times_valid}">
-                        <timepicker minute-step="15" show-meridian="false" ></timepicker>
+                <div class="col-md-12">
+                    <legend>Интервалы</legend>
+                    <div class="alert alert-danger" ng-show="!times_valid">Время начала интервала должно быть меньше
+                        времени
+                        окончания и интервалы приёма не могут пересекаться по времени.
                     </div>
-                </div>
-                <div class="col-md-4 text-center">
-                    <div ng-model="model.endTime1" style="display: inline-block" ng-change="sync_times()"
-                         ng-class="{'error-border': !times_valid}">
-                        <timepicker minute-step="15" show-meridian="false"></timepicker>
+                    <div ng-repeat="interval in model.intervals">
+                        <ng-form name="intervalForm">
+                            <div class="row">
+                                <div class="col-md-11">
+                                    <div class="panel panel-default">
+
+                                        <div class="panel-body">
+                                            <div class="row">
+                                                <div class="col-md-2">
+                                                    <div class="form-group"
+                                                         ng-class="{'has-error': intervalForm.rt.$invalid}">
+                                                        <label for="rt[[$index]]" class="control-label">Тип</label>
+                                                        <select class="form-control" id="rt[[$index]]" name="rt"
+                                                                ng-model="interval.reception_type"
+                                                                ng-options="rt as rt.name for rt in rec_types track by rt.id"
+                                                                ng-required="true">
+                                                            <option value="">Не выбрано</option>
+                                                        </select>
+                                                    </div>
+                                                    <div ng-if="interval.reception_type.code !== 'home'"
+                                                         class="form-group"
+                                                         ng-class="{'has-error': intervalForm.office.$invalid}">
+                                                        <label for="office[[$index]]"
+                                                               class="control-label">Кабинет</label>
+                                                        <ui-select id="office[[$index]]" name="office" ng-model="interval.office"
+                                                                   theme="select2" class="form-control" autocomplete="off"
+                                                                   ref-book="Office" ng-required="true">
+                                                            <ui-select-match placeholder="не выбрано">[[ $select.selected.code ]]</ui-select-match>
+                                                            <ui-select-choices repeat="item in $refBook.objects | filter: $select.search | limitTo: 50">
+                                                                <span ng-bind-html="item.code | highlight: $select.search"></span>
+                                                            </ui-select-choices>
+                                                        </ui-select>
+                                                    </div>
+
+                                                </div>
+                                                <div class="form-group col-md-2 text-center">
+                                                    <label for="beg_time[[$index]]">Начало приёма</label>
+
+                                                    <div id="beg_time[[$index]]" name="beg_time"
+                                                         style="display: inline-block"
+                                                         ng-model="interval.begTime" ng-required="true"
+                                                         ng-change="sync_times()"
+                                                         ng-class="{'error-border': !times_valid}">
+                                                        <timepicker minute-step="15" show-meridian="false"></timepicker>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group col-md-2 text-center">
+                                                    <label for="end_time[[$index]]">Окончание приёма</label>
+
+                                                    <div id="end_time[[$index]]" name="end_time"
+                                                         style="display: inline-block"
+                                                         ng-model="interval.endTime" ng-required="true"
+                                                         ng-change="sync_times()"
+                                                         ng-class="{'error-border': !times_valid}">
+                                                        <timepicker minute-step="15" show-meridian="false"></timepicker>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group col-md-2">
+                                                    <label for="planned">План приёма</label>
+                                                    <input class="form-control validatable" id="planned[[$index]]"
+                                                           name="planned" type="number"
+                                                           ng-model="interval.planned" min="1" max="100"
+                                                           ng-required="true">
+                                                    <span class='text-danger' ng-show="interval.planned.$invalid">Обязательно для заполнения (0 - 100)</span>
+                                                </div>
+                                                <div class="form-group col-md-2">
+                                                    <label for="extra">Сверх плана</label>
+                                                    <input class="form-control validatable" id="extra[[$index]]"
+                                                           name="extra"
+                                                           type="number"
+                                                           ng-model="interval.extra" min="0" max="10"
+                                                           ng-required="true">
+                                                    <span class='text-danger' ng-show="interval.extra.$invalid">Обязательно для заполнения (0 - 10)</span>
+                                                </div>
+                                                <div class="form-group col-md-2">
+                                                    <label for="CITO">Вне очереди</label>
+                                                    <input class="form-control validatable" id="CITO[[$index]]"
+                                                           name="CITO"
+                                                           type="number"
+                                                           ng-model="interval.CITO" min="0" max="10" ng-required="true">
+                                                    <span class='text-danger' ng-show="interval.CITO.$invalid">Обязательно для заполнения (0 - 10)</span>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-1">
+                                    <div class="row">
+                                        <button ng-click="delete_interval(interval)" title="Удалить интервал"
+                                                class="btn btn-danger marginal" type="button">
+                                            <span class="glyphicon glyphicon-trash"></span></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </ng-form>
                     </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-4">
-                    <input id="pause" type="checkbox" ng-model="model.pause" ng-change="sync_times()" />
-                    <label for="pause">Перерыв</label>
-                </div>
-                <div class="col-md-4 text-center">
-                    <div ng-model="model.begTime2" style="display: inline-block" ng-show="model.pause" ng-change="sync_times()"
-                         ng-class="{'error-border': !times_valid}">
-                        <timepicker minute-step="15" show-meridian="false"></timepicker>
-                    </div>
-                </div>
-                <div class="col-md-4 text-center">
-                    <div ng-model="model.endTime2" style="display: inline-block" ng-show="model.pause" ng-change="sync_times()"
-                         ng-class="{'error-border': !times_valid}">
-                        <timepicker minute-step="15" show-meridian="false"></timepicker>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-offset-4 col-md-8">
-                    <span class='text-danger' ng-show="!times_valid">Время начала должно быть меньше времени окончания
-                        и время перерыва должно попадать в интервал времени приёма</span>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-4">
-                    <label for="office">Кабинет</label>
-                </div>
-                <div class="col-md-8">
-                    <select class="form-control" ng-options="item.code for item in offices track by item.code" id="office"
-                            ng-model="model.office"></select>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-4">
-                    <label for="planned">План приёма</label>
-                </div>
-                <div class="col-md-8" ng-class="{'has-error': daysetupForm.planned.$invalid}">
-                    <input class="form-control" id="planned" name="planned" type="number" ng-model="model.planned"
-                           min="1" max="100" ng-required="true">
-                    <span class='text-danger' ng-show="daysetupForm.planned.$invalid">Обязательно для заполнения (от 0 до 100)</span>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-4">
-                    <label for="extra">Сверх плана</label>
-                </div>
-                <div class="col-md-8" ng-class="{'has-error': daysetupForm.extra.$invalid}">
-                    <input class="form-control" id="extra" name="extra" type="number" ng-model="model.extra"
-                           min="0" max="10" ng-required="true">
-                    <span class='text-danger' ng-show="daysetupForm.extra.$invalid">Обязательно для заполнения (от 0 до 10)</span>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-4">
-                    <label for="CITO">Вне очереди</label>
-                </div>
-                <div class="col-md-8" ng-class="{'has-error': daysetupForm.CITO.$invalid}">
-                    <input class="form-control" id="CITO" name="CITO" type="number" ng-model="model.CITO"
-                           min="0" max="10" ng-required="true">
-                    <span class='text-danger' ng-show="daysetupForm.CITO.$invalid">Обязательно для заполнения (от 0 до 10)</span>
+
+                    <button type="button" class="btn btn-primary" ng-click="add_new_interval()">Добавить интервал
+                    </button>
                 </div>
             </div>
         </ng-form>
-    </div>
+        <ng-form name="quotingSetupForm">
+            <div class="row" >
+                <div class="col-md-12">
+                    <legend>Распределение времени для предварительной записи</legend>
+                    <div ng-repeat="quota in model.quotas">
+                        <ng-form name="timeQuotingForm">
+                            <div class="row">
+                                <div class="col-md-11">
+                                    <div class="panel panel-default">
+                                        <div class="panel-body">
+                                            <div class="row">
+                                                <div class="col-md-3">
+                                                    <div class="form-group"
+                                                         ng-class="{'has-error': timeQuotingForm.tqt.$invalid}">
+                                                        <label for="tqt[[$index]]" class="control-label">Тип</label>
+                                                        <select class="form-control" id="tqt[[$index]]" name="tqt"
+                                                                ng-model="quota.quoting_type"
+                                                                ng-options="tqt.name for tqt in tq_types track by tqt.code"
+                                                                ng-required="true">
+                                                            <option value="">Не выбрано</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group col-md-2 text-center">
+                                                    <label for="time_start[[$index]]">Начало периода</label>
+
+                                                    <div id="time_start[[$index]]" name="time_start"
+                                                         style="display: inline-block"
+                                                         ng-model="quota.time_start" ng-required="true"
+{#                                                         ng-change="sync_times()"#}
+                                                         ng-class="{'error-border': !times_valid}">
+                                                        <timepicker minute-step="15" show-meridian="false"></timepicker>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group col-md-3 text-center">
+                                                    <label for="time_end[[$index]]">Окончание периода</label>
+
+                                                    <div id="time_end[[$index]]" name="time_end"
+                                                         style="display: inline-block"
+                                                         ng-model="quota.time_end" ng-required="true"
+{#                                                         ng-change="sync_times()"#}
+                                                         ng-class="{'error-border': !times_valid}">
+                                                        <timepicker minute-step="15" show-meridian="false"></timepicker>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-1">
+                                    <div class="row">
+                                        <button ng-click="delete_quota(quota)" title="Удалить интервал"
+                                                class="btn btn-danger marginal" type="button">
+                                            <span class="glyphicon glyphicon-trash"></span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </ng-form>
+                    </div>
+                    <button type="button" class="btn btn-primary" ng-click="add_new_quota()">Добавить
+                    </button>
+                </div>
+            </div>
+        </ng-form>
+        {#    <pre>Model: [[ model | json ]]</pre>#}
+    </ng-form>
 </div>
 <div class="modal-footer">
     <button type="button" class="btn btn-default" ng-click="cancel()">Отмена</button>
     <button type="button" class="btn btn-success" ng-click="accept()"
-            ng-disabled="(!absent && (daysetupForm.$invalid || !times_valid)) || (absent && model.roa === null)">Подтвердить</button>
+            ng-disabled="(!absent.checked && (daySetupForm.$invalid || !times_valid)) || (absent.checked && model.roa === null)">
+        Подтвердить
+    </button>
 </div>

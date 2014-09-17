@@ -1,30 +1,46 @@
 'use strict';
 
-angular.module('WebMis20.directives', ['ui.bootstrap', 'ui.select', 'ngSanitize']);
+angular.module('WebMis20.directives', ['ui.bootstrap', 'ui.select', 'ngSanitize', 'WebMis20.directives.goodies']);
 
-angular.module('WebMis20.directives').
-    directive('rbSelect', ['RefBookService', function(RefBookService) {
+angular.module('WebMis20.directives')
+    .directive('rbSelect', ['$compile', '$timeout', function($compile, $timeout) {
         return {
-            restrict: 'A',
-            replace: true,
-            scope: {
-                id: '=',
-                rb: '=',
-                ngModel: '='
-            },
-            link: function ($scope, f, attrs) {
-                $scope.rbObj = RefBookService.get(attrs.rb);
-            },
-            template: '<div><ui-select id=id name="exec_person" theme="select2"' +
-                      '    ng-model="ngModel" ng-required="true">' +
-                      '<ui-select-match placeholder="Лечащий врач">[[$select.selected.name]]</ui-select-match>' +
-                      '<ui-select-choices repeat="item in rbObj.objects | filter: $select.search">' +
-                      '    <div ng-bind-html="item.name | highlight: $select.search"></div>' +
-                      '</ui-select-choices>' +
-                      '</ui-select></div>'
+            restrict: 'E',
+            require: '^ngModel',
+            link: function (scope, element, attrs, ctrl) {
+                var _id = attrs.id,
+                    name = attrs.name,
+                    theme = attrs.theme || "select2",
+                    ngDisabled = attrs.ngDisabled,
+                    placeholder = attrs.placeholder,
+                    ngModel = attrs.ngModel,
+                    refBook = attrs.refBook,
+                    extra_filter = attrs.extraFilter;
+                if (!ngModel) throw new Error('<rb-select> must have ng-model attribute');
+                if (!refBook) throw new Error('<rb-select> must have rb attribute');
+                var uiSelect = $('<ui-select></ui-select>');
+                var uiSelectMatch = $('<ui-select-match>[[ $select.selected.name ]]</ui-select-match>');
+                var uiSelectChoices = $(
+                    '<ui-select-choices repeat="item in $refBook.objects | {0}filter: $select.search track by item.id">\
+                        <div ng-bind-html="item.name | highlight: $select.search"></div>\
+                    </ui-select-choices>'
+                    .format(extra_filter?(extra_filter + ' | '):'')
+                );
+                if (_id) uiSelect.attr('id', _id);
+                if (name) uiSelect.attr('name', name);
+                if (theme) uiSelect.attr('theme', theme);
+                if (ngDisabled) uiSelect.attr('ng-disabled', ngDisabled);
+                if (ngModel) uiSelect.attr('ng-model', ngModel);
+                if (placeholder) uiSelectMatch.attr('placeholder', placeholder);
+                if (refBook) uiSelect.attr('ref-book', refBook);
+                uiSelect.append(uiSelectMatch);
+                uiSelect.append(uiSelectChoices);
+                $(element).replaceWith(uiSelect);
+                $compile(uiSelect)(scope);
+            }
         };
-    }]).
-    directive('wmDate', ['$timeout', function ($timeout) {
+    }])
+    .directive('wmDate', ['$timeout', function ($timeout) {
         return {
             restrict: 'E',
             replace: true,
@@ -32,7 +48,8 @@ angular.module('WebMis20.directives').
                 id: '@',
                 ngModel: '=',
                 ngRequired: '=',
-                ngDisabled: '='
+                ngDisabled: '=',
+                maxDate: '='
             },
             controller: function ($scope) {
                 $scope.popup = { opened: false };
@@ -47,8 +64,9 @@ angular.module('WebMis20.directives').
             },
             template: ['<div class="input-group">',
                         '<input type="text" id="[[id]]_inner" name="[[id]]" class="form-control"',
-                        'is-open="popup.opened" ng-model="ngModel" autocomplete="off"',
-                        'datepicker_popup="dd.MM.yyyy" ng-required="ngRequired" ng-disabled="ngDisabled" manual-date/>',
+                        'is-open="popup.opened" ng-model="ngModel" autocomplete="off" max="maxDate"',
+                        'datepicker_popup="dd.MM.yyyy" ng-required="ngRequired" ng-disabled="ngDisabled"' +
+                        'manual-date ui-mask="99.99.9999" date-mask />',
                         '<span class="input-group-btn">',
                         '<button type="button" class="btn btn-default" ng-click="open_datepicker_popup(popup.opened)" ng-disabled="ngDisabled">',
                         '<i class="glyphicon glyphicon-calendar"></i></button>',
@@ -56,21 +74,21 @@ angular.module('WebMis20.directives').
                         '</div>'
             ].join('\n')
         };
-    }]).
-    directive('manualDate', [function() {
+    }])
+    .directive('manualDate', [function() {
         return {
             restrict: 'A',
-            require: 'ngModel',
+            require: '^ngModel',
             link: function(scope, elm, attrs, ctrl) {
-                ctrl.$parsers.unshift(function(viewValue) {
+                ctrl.$parsers.unshift(function(_) {
                     var viewValue = ctrl.$viewValue;
-                    if (!viewValue || viewValue instanceof Date) return viewValue;
-                    var parts = viewValue.split('.');
-                    var d = new Date(parseInt(parts[2]), parseInt(parts[1] - 1),
-                        parseInt(parts[0]));
+                    if (!viewValue || viewValue instanceof Date) {
+                        return viewValue;
+                    }
+                    var d = moment(viewValue.replace('_', ''), "DD.MM.YYYY", true);
                     if (moment(d).isValid()) {
                         ctrl.$setValidity('date', true);
-                        ctrl.$setViewValue(d);
+                        ctrl.$setViewValue(d.toDate());
                         return d;
                     } else {
                         ctrl.$setValidity('date', false);
@@ -80,6 +98,28 @@ angular.module('WebMis20.directives').
             }
         };
     }])
+    .directive('wmPersonSelect', ['$compile', function ($compile) {
+        return {
+            restrict: 'E',
+            require: 'ngModel',
+            link: function (scope, element, attrs) {
+                var template = '\
+    <ui-select {0} {1} theme="select2" class="form-control" autocomplete="off" ref-book="Person" ng-model="{2}" {3}>\
+        <ui-select-match placeholder="не выбрано">[[ $select.selected.name ]], [[ $select.selected.speciality.name ]]</ui-select-match>\
+        <ui-select-choices repeat="item in $refBook.objects | filter: $select.search | limitTo: 50">\
+            <span ng-bind-html="(item.name + \', \' + item.speciality.name) | highlight: $select.search"></span>\
+        </ui-select-choices>\
+    </ui-select>'.format(
+                    attrs.id ? 'id="{0}"'.format(attrs.id) : '',
+                    attrs.name ? 'name="{0}"'.format(attrs.name) : '',
+                    attrs.ngModel,
+                    attrs.ngDisabled ? 'ng-disabled="{0}"'.format(attrs.ngDisabled) : ''
+                );
+                var elm = $compile(template)(scope);
+                element.replaceWith(elm);
+            }
+        }
+    }])
     .directive('uiAlertList', ['$compile', function ($compile) {
         return {
             restrict: 'A',
@@ -88,6 +128,12 @@ angular.module('WebMis20.directives').
                 var subelement = $(
                     '<alert ng-repeat="alert in ' + attrs.uiAlertList + '" type="alert.type" close="alerts.splice(index, 1)">\
                         <span ng-bind="alert.text"></span> [<span ng-bind="alert.code"></span>]\
+                        <span ng-if="alert.data.detailed_msg">\
+                            <a href="javascript:void(0);"  ng-click="show_details = !show_details">\
+                                [[show_details ? "[Скрыть]" : "[Подробнее]"]]\
+                            </a>\
+                            <span ng-show="show_details">[[alert.data.detailed_msg]]: [[alert.data.err_msg]]</span>\
+                        </span>\
                     </alert>'
                 );
                 e.prepend(subelement);
@@ -103,8 +149,8 @@ angular.module('WebMis20.directives').
             $scope.selected_templates = [];
             $scope.mega_model = {};
             $scope.toggle_select_template = function (template) {
-                if (aux.inArray($scope.selected_templates, template)) {
-                    $scope.selected_templates.splice($scope.selected_templates.indexOf(template), 1);
+                if ($scope.selected_templates.has(template)) {
+                    $scope.selected_templates.remove(template);
                     $scope.mega_model[template.id] = undefined;
                 } else {
                     $scope.selected_templates.push(template);
@@ -120,7 +166,7 @@ angular.module('WebMis20.directives').
                     $scope.mega_model = {};
                 } else {
                     $scope.selected_templates = ps.templates.map(function (template) {
-                        if (! aux.inArray($scope.selected_templates, template)) {
+                        if (!$scope.selected_templates.has(template)) {
                             make_model(template)
                         }
                         return template;
@@ -147,7 +193,7 @@ angular.module('WebMis20.directives').
                             context[name] = parseFloat(value);
                         else if (typeName == 'Boolean')
                             context[name] = Boolean(value);
-                        else if (aux.inArray(['Organisation', 'OrgStructure', 'Person', 'Service'], typeName))
+                        else if (['Organisation', 'OrgStructure', 'Person', 'Service'].has(typeName))
                             context[name] = value ? value.id : null;
                         else context[name] = value
                     });
@@ -166,10 +212,24 @@ angular.module('WebMis20.directives').
                 }
             }
             $scope.print_separated = function () {
-                ps.print_template(prepare_data(), true)
+                ps.print_template(prepare_data(), true).then(
+                    function () {
+                        angular.noop();
+                    },
+                    function () {
+                        $scope.$close();
+                    }
+                );
             };
             $scope.print_compact = function () {
-                ps.print_template(prepare_data(), false)
+                ps.print_template(prepare_data(), false).then(
+                    function () {
+                        angular.noop();
+                    },
+                    function () {
+                        $scope.$close();
+                    }
+                );
             };
             $scope.cancel = function () {
                 $modalInstance.dismiss('cancel');
@@ -190,15 +250,22 @@ angular.module('WebMis20.directives').
         return {
             restrict: 'E',
             replace: true,
-            template: '<button class="btn btn-default" ng-click="open_print_window()" title="Печать"><i class="glyphicon glyphicon-print"></i></button>',
+            template:
+                '<button class="btn btn-default" ng-click="open_print_window()" title="Печать" ng-disabled="disabled()">\
+                    <i class="glyphicon glyphicon-print"></i>\
+                    <i class="glyphicon glyphicon-remove text-danger" ng-show="disabled()"></i>\
+                 </button>',
             scope: {
                 $ps: '=ps'
             },
             link: function (scope, element, attrs) {
                 var resolver_call = attrs.resolve;
+                scope.disabled = function () {
+                    return !scope.$ps.is_available();
+                };
                 scope.open_print_window = function () {
                     var modal = $modal.open({
-                        templateUrl: 'modal-print-dialog.html',
+                        templateUrl: '/WebMis20/modal-print-dialog.html',
                         controller: ModalPrintDialogController,
                         size: 'lg',
                         resolve: {
@@ -308,7 +375,7 @@ angular.module('WebMis20.directives').
                 }
             }
             if (ctrl.$parent) {
-                aux.removeFromArray(ctrl.$parent.$children, ctrl)
+                ctrl.$parent.$children.remove(ctrl)
             }
         };
         this.registerToc = function (the_toc) {
@@ -339,7 +406,6 @@ angular.module('WebMis20.directives').
                     }
                 };
                 this.tocIsActive = false;
-                console.log('controller for tocElement (' + this.$name + ') created')
             }],
             link: function (scope, element, attrs, ctrls) {
                 if (!attrs.name) {
@@ -363,7 +429,6 @@ angular.module('WebMis20.directives').
                         self_ctrl.$title = new_name;
                     })
                 }
-                console.log('link for tocElement (' + attrs.name + ') created')
             }
         }
     }])
@@ -394,11 +459,154 @@ angular.module('WebMis20.directives').
                     <div ng-transclude></div>\
                 </div>',
             link: function (scope, element, attrs) {
-                console.log('Link for tocAffix creating...');
                 TocSpy.registerToc(scope);
-                console.log('Link for tocAffix created');
             }
         }
+    }])
+    .directive('wmOrgStructureTree', ['SelectAll', '$compile', '$http', 'FlatTree', function (SelectAll, $compile, $http, FlatTree) {
+        // depends on wmCustomDropdown
+        return {
+            restrict: 'E',
+            scope: {
+                onSelect: '&'
+            },
+            template:
+                '<div class="ui-treeview">\
+                    <ul ng-repeat="root in tree.children">\
+                        <li sf-treepeat="node in children of root">\
+                            <a ng-click="select(node)" ng-if="!node.is_node" class="leaf">\
+                                <div class="tree-label leaf">&nbsp;</div>\
+                                [[ node.name ]]\
+                            </a>\
+                            <a ng-if="node.is_node" ng-click="sas.toggle(node.id)" class="node">\
+                                <div class="tree-label"\
+                                     ng-class="{\'collapsed\': !sas.selected(node.id),\
+                                                \'expanded\': sas.selected(node.id)}">&nbsp;</div>\
+                                [[ node.name ]]\
+                            </a>\
+                            <ul ng-if="node.is_node && sas.selected(node.id)">\
+                                <li sf-treecurse></li>\
+                            </ul>\
+                        </li>\
+                    </ul>\
+                </div>',
+            link: function (scope) {
+                var scope_query = '';
+                var sas = scope.sas = new SelectAll([]);
+                var der_tree = new FlatTree('parent_id');
+                var tree = scope.tree = {};
+
+                function doFilter() {
+                    var keywords = scope_query.toLowerCase().split();
+                    tree = der_tree.filter(function filter(item, idDict) {
+                        return !keywords.length || keywords.filter(function (keyword) {
+                            return (item.name.toLowerCase()).indexOf(keyword) !== -1
+                        }).length == keywords.length
+                    });
+                    doRender();
+                    sas.setSource(tree.masterDict.keys().map(function (key) {
+                        var result = parseInt(key);
+                        if (isNaN(result)) {
+                            return key
+                        } else {
+                            return result
+                        }
+                    }));
+                    sas.selectAll();
+                }
+
+                function doRender() {
+                    tree = der_tree.render(make_object);
+                    scope.tree.children = tree.root.children;
+                }
+
+                function make_object(item, is_node) {
+                    if (item === null) {
+                        var result = {};
+                        result.parent_id = null;
+                        result.id = 'root';
+                        result.children = [];
+                        result.is_node = true;
+                        return result
+                    }
+                    return angular.extend(item, {is_node: is_node});
+                }
+                $http.get(url_get_orgstructure, {
+                    params: {
+                        org_id: 3479
+                    }
+                })
+                .success(function (data) {
+                    der_tree.set_array(data.result);
+                    doFilter();
+                });
+                scope.$on('FilterChanged', function (event, query) {
+                    scope_query = query;
+                    doFilter()
+                });
+                scope.select = function (node) {
+                    if (scope.$parent.$ctrl) {
+                        scope.$parent.$ctrl.$set_query(node.name);
+                        scope.$parent.$ctrl.$select(node);
+                    }
+                    if (scope.onSelect) {
+                        scope.onSelect()(node);
+                    }
+                }
+            }
+        }
+    }])
+    .run(['$templateCache', function ($templateCache) {
+        $templateCache.put('/WebMis20/modal-print-dialog.html',
+            '<div class="modal-header" xmlns="http://www.w3.org/1999/html">\
+                <button type="button" class="close" ng-click="cancel()">&times;</button>\
+            <h4 class="modal-title" id="myModalLabel">Печать документов</h4>\
+        </div>\
+        <table ng-show="page == 0" class="table table-condensed modal-body">\
+            <thead>\
+                <tr>\
+                    <th>\
+                        <input type="checkbox" ng-checked="ps.templates.length == selected_templates.length" ng-click="select_all_templates()">\
+                        </th>\
+                        <th>Наименование</th>\
+                    </tr>\
+                </thead>\
+                <tbody>\
+                    <tr ng-repeat="template in ps.templates">\
+                        <td>\
+                            <input type="checkbox" ng-checked="selected_templates.has(template)" id="template-id-[[template.id]]" ng-click="toggle_select_template(template)">\
+                            </td>\
+                            <td>\
+                                <label for="template-id-[[template.id]]" ng-bind="template.name"></label>\
+                            </td>\
+                        </tr>\
+                    </tbody>\
+                </table>\
+                <div ng-show="page == 1">\
+                    <form name="printing_meta">\
+                        <div class="modal-body" ng-repeat="template in selected_templates | filter:template_has_meta">\
+                            <p ng-bind="template.name"></p>\
+                            <div class="row" ng-repeat="var_meta in template.meta">\
+                                <div class="col-md-3">\
+                                    <label ng-bind="var_meta.title"></label>\
+                                </div>\
+                                <div class="col-md-9" ui-print-variable meta="var_meta" model="mega_model[template.id][var_meta.name]">\
+                                </div>\
+                            </div>\
+                        </div>\
+                    </form>\
+                </div>\
+                <div class="modal-footer">\
+                    <button type="button" class="btn btn-success" ng-click="btn_next()" ng-if="page == 0 && !instant_print()">\
+                    Далее &gt;&gt;</button>\
+                    <button type="button" class="btn btn-default" ng-click="btn_prev()" ng-if="page == 1 && !instant_print()">\
+                    &lt;&lt; Назад</button>\
+                    <button type="button" class="btn btn-primary" ng-click="print_separated()" ng-if="page == 1 || instant_print()"\
+                    ng-disabled="printing_meta.$invalid">Печать</button>\
+                    <button type="button" class="btn btn-primary" ng-click="print_compact()" ng-if="page == 1 || instant_print()"\
+                    ng-disabled="printing_meta.$invalid">Печать компактно</button>\
+                    <button type="button" class="btn btn-default" ng-click="cancel()">Отмена</button>\
+                </div>')
     }])
 ;
 angular.module('WebMis20.validators', [])
@@ -435,7 +643,7 @@ angular.module('WebMis20.validators', [])
                 else return '' + result;
             }
             ctrl.$parsers.unshift(function(viewValue) {
-                ctrl.$setValidity('text', viewValue && viewValue.substring(12, 14) == snilsCRC(viewValue));
+                ctrl.$setValidity('text', viewValue == "" || viewValue && viewValue.substring(12, 14) == snilsCRC(viewValue));
                 $timeout(function(){
                     if (ctrl.$invalid){
                         elm.trigger('show_popover');
@@ -449,76 +657,95 @@ angular.module('WebMis20.validators', [])
     };
 }])
 .directive('validatorRegexp', [function () {
-return {
-    restrict: 'A',
-    require: 'ngModel',
-    link: function(scope, element, attrs, ctrl) {
-        var regexp = null;
-        var evalue = null;
-        scope.$watch(attrs.validatorRegexp, function (n, o) {
-            evalue = n;
-            if (!evalue) {
-                if (ctrl.$viewValue) {
-                    ctrl.$setViewValue('');
-                    ctrl.$render();
-                };
-                ctrl.$setValidity('text', true);
-                $(element).attr('disabled', true);
-            } else {
-                $(element).removeAttr('disabled');
-                regexp = new RegExp(evalue);
-                ctrl.$setValidity('text', ctrl.$viewValue && regexp.test(ctrl.$viewValue));
-            }
-        });
-        ctrl.$parsers.unshift(function(viewValue) {
-            if (evalue && regexp) {
-                ctrl.$setValidity('text', viewValue && regexp.test(viewValue));
-            }
-            return viewValue
-        });
-    }
-}
-}]).directive('formSafeClose', ['$timeout', function ($timeout) {
-return {
-    restrict: 'A',
-    require: 'form',
-    link: function($scope, element, attrs, form) {
-        var message = "Вы уверены, что хотите закрыть вкладку? Форма может содержать несохранённые данные.";
-        $scope.$on('$locationChangeStart', function(event, next, current) {
-            if (form.$dirty) {
-                if(!confirm(message)) {
-                    event.preventDefault();
+    return {
+        restrict: 'A',
+        require: 'ngModel',
+        link: function(scope, element, attrs, ctrl) {
+            var regexp = null;
+            var evalue = null;
+            scope.$watch(attrs.validatorRegexp, function (n, o) {
+                evalue = n;
+                if (!evalue) {
+                    if (ctrl.$viewValue) {
+                        ctrl.$setViewValue('');
+                        ctrl.$render();
+                    };
+                    ctrl.$setValidity('text', true);
+                    $(element).attr('disabled', true);
+                } else {
+                    $(element).removeAttr('disabled');
+                    regexp = new RegExp(evalue);
+                    ctrl.$setValidity('text', ctrl.$viewValue && regexp.test(ctrl.$viewValue));
                 }
-            }
-        });
-        // Чтобы обойти баг FF с повторным вызовом onbeforeunload (http://stackoverflow.com/a/2295156/1748202)
-        $scope.onBeforeUnloadFired = false;
+            });
+            ctrl.$parsers.unshift(function(viewValue) {
+                if (evalue && regexp) {
+                    ctrl.$setValidity('text', viewValue && regexp.test(viewValue));
+                }
+                return viewValue
+            });
+        }
+    }
+}])
+.directive('formSafeClose', ['$timeout', function ($timeout) {
+    return {
+        restrict: 'A',
+        require: 'form',
+        link: function($scope, element, attrs, form) {
+            var message = "Вы уверены, что хотите закрыть вкладку? Форма может содержать несохранённые данные.";
+            $scope.$on('$locationChangeStart', function(event, next, current) {
+                if (form.$dirty) {
+                    if(!confirm(message)) {
+                        event.preventDefault();
+                    }
+                }
+            });
+            // Чтобы обойти баг FF с повторным вызовом onbeforeunload (http://stackoverflow.com/a/2295156/1748202)
+            $scope.onBeforeUnloadFired = false;
 
-        $scope.ResetOnBeforeUnloadFired = function () {
-           $scope.onBeforeUnloadFired = false;
-        };
-        window.onbeforeunload = function(evt){
-            if (form.$dirty && !$scope.onBeforeUnloadFired) {
-                $scope.onBeforeUnloadFired = true;
-                if (typeof evt == "undefined") {
-                    evt = window.event;
+            $scope.ResetOnBeforeUnloadFired = function () {
+               $scope.onBeforeUnloadFired = false;
+            };
+            window.onbeforeunload = function(evt){
+                if (form.$dirty && !$scope.onBeforeUnloadFired) {
+                    $scope.onBeforeUnloadFired = true;
+                    if (typeof evt == "undefined") {
+                        evt = window.event;
+                    }
+                    if (evt) {
+                        evt.returnValue = message;
+                    }
+                    $timeout($scope.ResetOnBeforeUnloadFired);
+                    return message;
                 }
-                if (evt) {
-                    evt.returnValue = message;
-                }
-                $timeout($scope.ResetOnBeforeUnloadFired);
-                return message;
-            }
-        };
+            };
+        }
     }
-}
-}]).directive('validNumber', function() {
+}])
+.directive('validNumber', function() {
   return {
     require: '?ngModel',
     link: function(scope, element, attrs, ngModelCtrl) {
       if(!ngModelCtrl) {
         return;
       }
+      var allowFloat = attrs.hasOwnProperty('validNumberFloat');
+      var allowNegative = attrs.hasOwnProperty('validNumberNegative');
+      var regex = new RegExp('[^0-9' + (allowFloat?'\\.':'') + (allowNegative?'-':'') + ']+', 'g');
+
+      var min_val,
+          max_val;
+      scope.$watch(function () {
+          return parseInt(scope.$eval(attrs.minVal));
+      }, function (n, o) {
+          min_val = n;
+      });
+      scope.$watch(function () {
+          return parseInt(scope.$eval(attrs.maxVal));
+      }, function (n, o) {
+          max_val = n;
+      });
+
       function clear_char_duplicates(string, char){
         var arr = string.split(char);
         var res;
@@ -532,9 +759,14 @@ return {
           return res;
       }
       ngModelCtrl.$parsers.push(function(val) {
-//        var clean = val.replace( /[^0-9\.\-]+/g, ''); Если вдруг захотим отрицательные
-        var clean = val.replace( /[^0-9\.]+/g, '');
-        clean = clear_char_duplicates(clean, '.');
+          if (angular.isNumber(val)) {
+              return val;
+          }
+        var clean = clear_char_duplicates(val.replace(regex, ''), '.');
+        clean = clean !== '' ? parseFloat(clean) : min_val;
+        if (!isNaN(min_val)) {
+            clean = Math.min(Math.max(clean, min_val), max_val);
+        }
         if (val !== clean) {
           ngModelCtrl.$setViewValue(clean);
           ngModelCtrl.$render();
@@ -549,7 +781,12 @@ return {
       });
 
       element.bind('blur', function(event) {
-          this.value = parseFloat(this.value);
+          var value = parseFloat(this.value);
+          if (isNaN(value)) {
+              this.value = null;
+          } else {
+              this.value = value;
+          }
       });
     }
   };

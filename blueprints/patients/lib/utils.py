@@ -2,7 +2,8 @@
 
 from application.models.client import ClientAllergy, ClientContact, ClientDocument, \
     ClientIntoleranceMedicament, ClientSocStatus, ClientPolicy, \
-    BloodHistory, ClientAddress, ClientRelation
+    BloodHistory, ClientAddress, ClientRelation, Address
+from application.models.enums import AddressType
 from application.models.exists import rbSocStatusClass
 from application.lib.utils import safe_date, safe_traverse, get_new_uuid
 
@@ -159,14 +160,16 @@ def add_or_update_address(client, data):
     if addr_id:
         client_addr = ClientAddress.query.get(addr_id)
 
-        if client_addr.address and client_addr.address.house and\
-                (client_addr.address.house.KLADRCode and client_addr.address.house.KLADRStreetCode):
+        #TODO: проверить еще раз условие (client_addr.address.house.KLADRCode and client_addr.address.house.KLADRStreetCode)
+        if client_addr.address and client_addr.address.house:
             if free_input:
                 raise ClientSaveException(msg_err, u'попытка сохранения адреса в свободном виде для '
                                           u'записи адреса из справочника адресов. Добавьте новую запись адреса.')
             if not (loc_kladr_code and street_kladr_code):
                 raise ClientSaveException(msg_err, u'Отсутствуют обязательные поля: Населенный пункт и Улица.')
             client_addr.address.flat = flat_number
+
+            loc_kladr_code, street_kladr_code = Address.compatible_kladr(loc_kladr_code, street_kladr_code)
             client_addr.address.house.KLADRCode = loc_kladr_code
             client_addr.address.house.KLADRStreetCode = street_kladr_code
             client_addr.address.house.number = house_number
@@ -199,28 +202,26 @@ def add_or_update_address(client, data):
 def add_or_update_copy_address(client, data, copy_from):
     # todo: check for existing records ?
     msg_err = u'Ошибка сохранения адреса проживания'
-    addr_id = data.get('id')
+    addr_id = data.get('live_id')
     deleted = data.get('deleted')
     if deleted:
         client_addr = ClientAddress.query.get(addr_id)
         client_addr.deleted = deleted
         return client_addr
 
-    from_id = data.get('copy_from_id')
+    from_id = data.get('id')
     from_addr = ClientAddress.query.get(from_id) if from_id else copy_from
     if from_addr is None:
-        raise ClientSaveException(msg_err, u'отсутствует совпадающий адрес. Свяжитесь с администратором.')
+        raise ClientSaveException(msg_err, u'Для адреса проживания указано, что он совпадает с адресом регистрации, '
+                                           u'но соответствующий адрес не найден. Свяжитесь с администратором.')
 
-    if addr_id:  # TODO: delete this after test
-        raise ClientSaveException(msg_err, u'how did you get there?')
+    if addr_id:
         client_addr = ClientAddress.query.get(addr_id)
-        client_addr.type = 1  # todo: enum
         client_addr.address = from_addr.address
         client_addr.freeInput = from_addr.freeInput
         client_addr.localityType = from_addr.localityType
-        client_addr.deleted = from_addr.deleted
     else:
-        client_addr = ClientAddress.create_from_copy(1, from_addr, client)  # todo: enum
+        client_addr = ClientAddress.create_from_copy(AddressType.live[0], from_addr, client)
     return client_addr
 
 
@@ -239,8 +240,8 @@ def add_or_update_policy(client, data):
     if not beg_date:
         raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Дата выдачи')
     end_date = safe_date(data.get('end_date'))
-    insurer = safe_traverse(data, 'insurer', 'id')
-    if not insurer:
+    insurer = data['insurer']
+    if not (insurer['id'] or insurer['full_name']):
         raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Страховая медицинская организация')
     deleted = data.get('deleted', 0)
 
@@ -251,7 +252,8 @@ def add_or_update_policy(client, data):
         policy.number = number
         policy.begDate = beg_date
         policy.endDate = end_date
-        policy.insurer_id = insurer
+        policy.insurer_id = insurer['id']
+        policy.name = insurer['full_name'] if not insurer['id'] else None
         policy.client = client
         policy.deleted = deleted
     else:

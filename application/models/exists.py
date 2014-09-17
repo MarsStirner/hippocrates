@@ -6,6 +6,16 @@ from application.lib.agesex import AgeSex
 # from application.models.actions import Action
 
 
+class rbThesaurus(db.Model):
+    __tablename__ = u'rbThesaurus'
+
+    id = db.Column(db.Integer, primary_key=True)
+    group_id = db.Column(db.Integer, index=True)
+    code = db.Column(db.String(30), nullable=False, index=True)
+    name = db.Column(db.String(255), nullable=False, server_default=u"''")
+    template = db.Column(db.String(255), nullable=False, server_default=u"''")
+
+
 class rbDocumentTypeGroup(db.Model):
     __tablename__ = 'rbDocumentTypeGroup'
 
@@ -120,6 +130,7 @@ class Organisation(db.Model):
             'title': self.title,
             # 'net': self.net,
             'infis': self.infisCode,
+            'is_insurer': bool(self.isInsurer)
         }
 
     def __int__(self):
@@ -211,7 +222,7 @@ class OrgStructure(db.Model):
         return {
             'id': self.id,
             'code': self.code,
-            'name': self.name,  # TODO: more
+            'name': self.name,
         }
 
 
@@ -376,12 +387,14 @@ class rbContactType(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     code = db.Column(db.String(8), nullable=False, index=True)
     name = db.Column(db.Unicode(64), nullable=False, index=True)
-    
+    idx = db.Column(db.Integer, nullable=False, default=0)
+
     def __json__(self):
         return {
             'id': self.id,
             'code': self.code,
             'name': self.name,
+            'idx': self.idx,
         }
 
     def __int__(self):
@@ -1428,6 +1441,16 @@ class rbUserRight(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     code = db.Column(db.String(64), nullable=False, index=True)
     name = db.Column(db.String(128), nullable=False, index=True)
+
+
+class rbBloodComponentType(db.Model):
+    __tablename__ = u'rbTrfuBloodComponentType'
+
+    id = db.Column(db.Integer, primary_key=True)
+    trfu_id = db.Column(db.Integer)
+    code = db.Column(db.String(32))
+    name = db.Column(db.String(256))
+    unused = db.Column(db.Integer, nullable=False, server_default=u"'0'")
 
 
 class FDField(db.Model):

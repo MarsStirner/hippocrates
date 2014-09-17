@@ -1,16 +1,12 @@
 {%- extends 'schedule/base.html' -%}
-{%- import "schedule/_appointment.html" as appointment -%}
-{%- import "schedule/_person_tree.html" as person_tree -%}
 {% block title %}> {{ module_name }}{% endblock %}
 
 {% block main %}
     {% include "_breadcrumbs.html" %}
-    <div>
+    <div ng-controller="PersonAppointmentCtrl">
         <legend xmlns="http://www.w3.org/1999/html" wm-page-header><h2>Запись пациента на прием - <a href="{{ url_for('patients.patient', client_id=client.id) }}">{{ client.nameText }}</a></h2></legend>
         <div class="row">
-            <div class="col-md-9" ng-controller="Schedules">
-                <script type="text/ng-template" id="makeAppointment.html">{{ appointment.html_make() }}</script>
-                <script type="text/ng-template" id="cancelAppointment.html">{{ appointment.html_cancel() }}</script>
+            <div class="col-md-9">
                 <div class="row marginal">
                     <div class="col-md-2">
                         <select class="form-control" name="year" ng-model="year" ng-options="y for y in years"
@@ -45,19 +41,24 @@
                         <div class="col-md-12">
                             <table class="table table-condensed person-schedule">
                                 <caption>
-                                    <a class="btn btn-default glyphicon glyphicon-chevron-up" ng-click="person_fold(person_schedule.person.id)" ng-if="!is_folded(person_schedule.person.id)"></a>
-                                    <a class="btn btn-default glyphicon glyphicon-chevron-down" ng-click="person_unfold(person_schedule.person.id)" ng-if="is_folded(person_schedule.person.id)"></a>
-                                    <span ng-if="person_schedule.grouped[reception_type].max_tickets == 0 && !is_folded(person_schedule.person.id)" class="no-schedule-label">Нет расписания</span>
+                                    <a class="btn btn-default glyphicon glyphicon-chevron-up" ng-click="person_fold(person_schedule.person.id)"
+                                       ng-if="!is_folded(person_schedule.person.id)"></a>
+                                    <a class="btn btn-default glyphicon glyphicon-chevron-down" ng-click="person_unfold(person_schedule.person.id)"
+                                       ng-if="is_folded(person_schedule.person.id)"></a>
                                     [[ person_schedule.person.name ]]<small>, [[ person_schedule.person.speciality.name ]]</small>
+                                    <span ng-if="schedule_is_empty(person_schedule) && !is_folded(person_schedule.person.id)"
+                                          class="no-schedule-label bg-danger">Нет расписания</span>
+                                    <span ng-if="!schedule_is_empty(person_schedule) && !schedule_has_free_tickets(person_schedule) && !is_folded(person_schedule.person.id)"
+                                          class="no-schedule-label bg-danger">Нет свободных номерков</span>
                                 </caption>
-                                <thead ng-if="person_schedule.grouped[reception_type].max_tickets > 0">
+                                <thead ng-if="schedule_has_free_tickets(person_schedule)">
                                 <tr>
                                     <th ng-repeat="day in person_schedule.grouped[reception_type].schedule"
                                         ng-bind="day.date | asMomentFormat:'DD.MM.YYYY, dd'">
                                     </th>
                                 </tr>
                                 </thead>
-                                <tbody ng-if="person_schedule.grouped[reception_type].max_tickets > 0">
+                                <tbody ng-if="schedule_has_free_tickets(person_schedule)">
                                 <tr ng-repeat="row in aux.range(person_schedule.grouped[reception_type].max_tickets)">
                                     <td ng-repeat="day in person_schedule.grouped[reception_type].schedule">
                                         <button ui-schedule-ticket="day.tickets[row]" day="day" show-name="false"
@@ -72,7 +73,8 @@
                 </div>
             </div>
             <div class="col-md-3">
-                {{ person_tree.html(checkbox=True) }}
+                <person-tree checkboxed="true" locked-persons="data_selected" user-selected="user_selected"></person-tree>
+{#                {{ person_tree.html(checkbox=True) }}#}
             </div>
         </div>
 {#        <pre>[[schedule|json]]</pre>#}
@@ -80,190 +82,5 @@
 {% endblock %}
 {% block modules_js %}
     {{ super() }}
-    <script type="text/javascript">
-        {{ person_tree.js() }}
-        {{ appointment.js() }}
-        WebMis20.controller('Schedules', ['$scope', '$http', '$modal', 'RefBook', function ($scope, $http, $modal, RefBook) {
-            $scope.modal = {};
-            $scope.max_tickets = [];
-            $scope.person_schedules = [];
-            $scope.user_schedules = [];
-            $scope.total_schedules = [];
-
-            $scope.user_selected = [];
-            $scope.data_selected = [];
-            $scope.foldedArray = [];
-
-            $scope.aux = aux;
-            $scope.params = aux.getQueryParams(document.location.search);
-            $scope.client_id = $scope.params.client_id;
-            var curDate = new Date();
-            var curYear = curDate.getUTCFullYear();
-            $scope.years = [curYear - 1, curYear, curYear + 1];
-            $scope.year = curYear;
-
-            $scope.month = curDate.getMonth();
-
-            $scope.reception_types = new RefBook('rbReceptionType');
-            $scope.reception_type = 'amb';
-
-            $scope.setDatePage = function(index) {
-                if (index != $scope.page) {
-                    $scope.page = index;
-                    $scope.loadData();
-                }
-            };
-
-            $scope.monthChanged = function () {
-                var mid_date = moment({
-                    year: $scope.year,
-                    month: $scope.month,
-                    day: new Date().getDate()
-                });
-                var start_date = moment({
-                    year: $scope.year,
-                    month: $scope.month,
-                    day: 1
-                });
-                var end_date = moment(start_date).add(1, 'M').subtract(1, 'd');
-                var chosen_page = -1;
-                var pages = [];
-                while (start_date <= end_date) {
-                    if (mid_date >= start_date) {
-                        chosen_page += 1;
-                    }
-                    pages.push(moment(start_date));
-                    start_date.add(1, 'w');
-                }
-                $scope.page = chosen_page;
-                $scope.pages = pages;
-                $scope.loadData();
-            };
-
-            $scope.changeReceptionType = function (code) {
-                $scope.reception_type = code;
-            };
-
-            $scope.loadData = function () {
-                $http.get(
-                    '{{ url_for('.api_schedule') }}', {
-                        params: {
-                            client_id: $scope.client_id,
-                            start_date: $scope.pages[$scope.page].format('YYYY-MM-DD'),
-                            related: true,
-                            person_ids: '[' + $scope.user_selected.join() + ']'
-                        }
-                    }
-                ).success(function (data) {
-                    $scope.person_schedules = data.result.related_schedules;
-                    $scope.user_schedules = data.result.schedules;
-                    $scope.data_selected = data.result.related_schedules.map(function (item) {
-                        return item.person.id;
-                    });
-                    $scope.refreshSchedules();
-                    $scope.$root.$broadcast('DataSelectedChanged', $scope.data_selected);
-                });
-            };
-
-            $scope.refreshSchedules = function () {
-                $scope.total_schedules = [].concat($scope.person_schedules, $scope.user_schedules).sort(function compare(a, b) {
-                    if (a.person.name < b.person.name)
-                        return -1;
-                    else if (a.person.name > b.person.name)
-                        return 1;
-                    return 0;
-                }).map(function fold(person_schedule) {
-                    if ($scope.is_folded(person_schedule.person.id)) {
-                        return {
-                            person: person_schedule.person,
-                            grouped: aux.forEach(person_schedule.grouped, function (grouped_schedule) {
-                                var max_tickets = 0;
-                                var schedule = grouped_schedule.schedule.map(function (day) {
-                                    var result = {
-                                        date: day.date,
-                                        tickets: day.tickets.filter(function (ticket) {return ticket.client != null;})
-                                    };
-                                    max_tickets = Math.max(max_tickets, result.tickets.length);
-                                    return result;
-                                });
-                                return {
-                                    max_tickets: max_tickets,
-                                    schedule: schedule
-                                }
-                            })
-                        }
-                    } else {
-                        return person_schedule;
-                    }
-                });
-            };
-            $scope.appointment_toggle = function (ticket, person) {
-                var instance;
-                if (ticket.status == 'busy') {
-                    instance = $modal.open({
-                        templateUrl: 'cancelAppointment.html',
-                        controller: CancelAppointmentModalInstanceCtrl,
-                        resolve: {
-                            person: function () {return person},
-                            ticket: function () {return ticket},
-                            client_id: function () {return $scope.client_id}
-                        }
-                    });
-                } else {
-                    instance = $modal.open({
-                        templateUrl: 'makeAppointment.html',
-                        controller: MakeAppointmentModalInstanceCtrl,
-                        resolve: {
-                            person: function () {return person},
-                            ticket: function () {return ticket},
-                            client_id: function () {return $scope.client_id}
-                        }
-                    });
-                }
-                instance.result.then(function () {
-                    $scope.loadData();
-                })
-            };
-
-            $scope.is_folded = function (person_id) {
-                return aux.inArray($scope.foldedArray, person_id);
-            };
-
-            $scope.person_fold = function (person_id) {
-                $scope.foldedArray.push(person_id);
-                $scope.refreshSchedules();
-            };
-
-            $scope.person_unfold = function (person_id) {
-                var index = $scope.foldedArray.indexOf(person_id);
-                $scope.foldedArray.splice(index, 1);
-                $scope.refreshSchedules();
-            };
-
-
-            $scope.$on('UserSelectionChanged', function (event, person, user_selected) {
-                $scope.user_selected = user_selected;
-                if (person.checked) {
-                    $http.get('{{ url_for('.api_schedule') }}', {
-                        params: {
-                            client_id: $scope.client_id,
-                            person_ids: person.id,
-                            start_date: $scope.pages[$scope.page].format('YYYY-MM-DD'),
-                            reception_type: 'amb'
-                        }
-                    }).success(function (data) {
-                        $scope.user_schedules.push(data.result['schedules'][0]);
-                        $scope.refreshSchedules();
-                    })
-                } else {
-                    $scope.user_schedules = $scope.user_schedules.filter(function (sched_group) {
-                        return sched_group.person.id != person.id;
-                    });
-                    $scope.refreshSchedules();
-                }
-            });
-
-            $scope.monthChanged();
-        }]);
-    </script>
+    <script src="{{ url_for('.static', filename="js/appointment.js", v=version) }}"></script>
 {% endblock %}

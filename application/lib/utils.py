@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import datetime
 import functools
-from flask import json, session
+from flask import json, session, make_response
 import uuid
 from functools import wraps
 from decimal import Decimal
@@ -10,7 +10,6 @@ from flask import g, current_app, request, abort
 from flask.ext.principal import Permission, RoleNeed, ActionNeed, PermissionDenied
 from flask.ext.login import current_user
 from application.models.client import ClientIdentification
-from application.models.event import EventType
 from application.systemwide import db
 from application.models.exists import rbUserProfile, UUID, rbCounter, rbAccountingSystem
 from application.models.client import Client
@@ -173,53 +172,60 @@ class WebMisJsonEncoder(json.JSONEncoder):
 app.json_encoder = WebMisJsonEncoder
 
 
-def jsonify(obj, result_code=200, result_name='OK', extra_headers=None):
-    """Creates a :class:`~flask.Response` with the JSON representation of
-    the given arguments with an `application/json` mimetype.  The arguments
-    to this function are the same as to the :class:`dict` constructor.
-
-    Example usage::
-
-        from flask import jsonify
-
-        @app.route('/_get_current_user')
-        def get_current_user():
-            return jsonify(username=g.user.username,
-                           email=g.user.email,
-                           id=g.user.id)
-
-    This will send a JSON response like this to the browser::
-
-        {
-            "username": "admin",
-            "email": "admin@localhost",
-            "id": 42
-        }
-
-    For security reasons only objects are supported toplevel.  For more
-    information about this, have a look at :ref:`json-security`.
-
-    This function's response will be pretty printed if it was not requested
-    with ``X-Requested-With: XMLHttpRequest`` to simplify debugging unless
-    the ``JSONIFY_PRETTYPRINT_REGULAR`` config parameter is set to false.
-
-    .. versionadded:: 0.2
+def jsonify_int(obj, result_code=200, result_name='OK', indent=None):
     """
-    indent = 2
+    Преобразование объекта к стандартному json-ответу с данными и метаданными без формирования http-ответа
+    :param obj: сериализуемый объект
+    :param result_code: код результата
+    :param result_name: наименование результата
+    :return: json-строка
+    :type obj: any
+    :type result_code: int
+    :type result_name: str|unicode
+    :rtype: str
+    """
+    return json.dumps({
+        'result': obj,
+        'meta': {
+            'code': result_code,
+            'name': result_name,
+        }
+    }, indent=indent, cls=WebMisJsonEncoder, encoding='utf-8', ensure_ascii=False)
+
+
+def jsonify_response(body, result_code=200, extra_headers=None):
+    """
+    Формирование http-ответа из json-ифицированного тела
+    :param body: json-ифицированное тело (jsonify_int)
+    :param result_code: http-код результата
+    :param extra_headers: дополнительные http-заголовки
+    :return: flask response
+    :type body: str
+    :type result_code: int
+    :type extra_headers: list
+    :rtype: flask.wrappers.Response
+    """
     headers = [('content-type', 'application/json; charset=utf-8')]
     if extra_headers:
         headers.extend(extra_headers)
-    return (
-        json.dumps({
-            'result': obj,
-            'meta': {
-                'code': result_code,
-                'name': result_name,
-            }
-        }, indent=indent, cls=WebMisJsonEncoder, encoding='utf-8', ensure_ascii=False),
-        result_code,
-        headers
-    )
+    return make_response((body, result_code, headers))
+
+
+def jsonify(obj, result_code=200, result_name='OK', extra_headers=None, indent=None):
+    """
+    Convenience-функция, преобразуцющая объект к стандартному http-json-ответу
+    :param obj: сериализуемый объект
+    :param result_code: код результата, http-код
+    :param result_name: наименование результата
+    :param extra_headers: дополнительные заголовки
+    :return: flask response
+    :type obj: any
+    :type result_code: int
+    :type result_name: str|unicode
+    :type extra_headers: list
+    :rtype: flask.wrappers.Response
+    """
+    return jsonify_response(jsonify_int(obj, result_code, result_name, indent), result_code, extra_headers)
 
 
 def safe_unicode(obj):
@@ -234,15 +240,54 @@ def safe_int(obj):
     return int(obj)
 
 
-def string_to_datetime(date_string, fmt='%Y-%m-%dT%H:%M:%S.%fZ'):
+def safe_dict(obj):
+    if obj is None:
+        return None
+    elif isinstance(obj, dict):
+        return obj
+    elif not hasattr(obj, '__json__'):
+        return None
+    return obj.__json__()
+
+
+def string_to_datetime(date_string, formats=None):
+    if formats is None:
+        formats = ('%Y-%m-%dT%H:%M:%S.%fZ', '%Y-%m-%dT%H:%M:%S+00:00', '%Y-%m-%dT%H:%M:%S.%f+00:00')
+    elif not isinstance(formats, (tuple, list)):
+        formats = (formats, )
+
     if date_string:
-        try:
-            date = datetime.datetime.strptime(date_string, fmt)
-        except ValueError:
-            date = datetime.datetime.strptime(date_string, '%Y-%m-%dT%H:%M:%S+00:00') # ffs
-        return timezone('UTC').localize(date).astimezone(tz=timezone(TIME_ZONE)).replace(tzinfo=None)
+        for fmt in formats:
+            try:
+                dt = datetime.datetime.strptime(date_string, fmt)
+                break
+            except ValueError:
+                continue
+        else:
+            raise ValueError
+        return timezone('UTC').localize(dt).astimezone(tz=timezone(TIME_ZONE)).replace(tzinfo=None)
     else:
         return date_string
+
+
+def safe_datetime(val):
+    if not val:
+        return None
+    if isinstance(val, basestring):
+        try:
+            val = string_to_datetime(val)
+        except ValueError:
+            try:
+                val = string_to_datetime(val, '%Y-%m-%d')
+            except ValueError:
+                return None
+        return val
+    elif isinstance(val, datetime.datetime):
+        return val
+    elif isinstance(val, datetime.date):
+        return datetime.datetime(val.year, val.month, val.day)
+    else:
+        return None
 
 
 def safe_date(val):
@@ -252,7 +297,10 @@ def safe_date(val):
         try:
             val = string_to_datetime(val)
         except ValueError:
-            val = string_to_datetime(val, '%Y-%m-%d')
+            try:
+                val = string_to_datetime(val, '%Y-%m-%d')
+            except ValueError:
+                return None
         return val.date()
     elif isinstance(val, datetime.datetime):
         return val.date()
@@ -260,6 +308,34 @@ def safe_date(val):
         return val
     else:
         return None
+
+
+def safe_time_as_dt(val):
+    if not val:
+        return None
+    if isinstance(val, basestring):
+        for fmt in ('%H:%M:%S', '%H:%M'):
+            try:
+                val = datetime.datetime.strptime(val, fmt)
+                break
+            except ValueError:
+                continue
+        return val
+    elif isinstance(val, datetime.datetime):
+        return val
+    else:
+        return None
+
+
+def safe_time(val):
+    if not val:
+        return None
+    val = safe_time_as_dt(val)
+    if isinstance(val, datetime.datetime):
+        return val.time()
+    else:
+        return None
+
 
 def safe_traverse(obj, *args, **kwargs):
     """Безопасное копание вглубь dict'а
@@ -308,12 +384,12 @@ def get_new_uuid():
 
 def get_new_event_ext_id(event_type_id, client_id):
     """Формирование externalId (номер обращения/истории болезни)."""
+    from application.models.event import EventType
     et = EventType.query.get(event_type_id)
     if not et.counter_id:
         return ''
 
     counter = rbCounter.query.filter_by(id=et.counter_id).with_for_update().first()
-    # todo: check for update
     if not counter:
         return ''
     external_id = _get_external_id_from_counter(counter.prefix,
@@ -337,7 +413,7 @@ def _get_external_id_from_counter(prefix, value, separator, client_id):
             date_val = datetime.date.today().strftime(format_)
             check = datetime.datetime.strptime(date_val, format_)
         except ValueError, e:
-            print e
+            logger.error(e, exc_info=True)
             return None
         return date_val
 
@@ -387,3 +463,25 @@ def parse_id(request_data, identifier, allow_empty=False):
         except ValueError:
             return False
     return _id
+
+from sqlalchemy.sql import expression
+from sqlalchemy.ext import compiler
+
+
+class group_concat(expression.FunctionElement):
+    name = "group_concat"
+
+
+@compiler.compiles(group_concat) # , 'mysql'
+def _group_concat_mysql(element, cmplr, **kw):
+    if len(element.clauses) == 2:
+        separator = cmplr.process(element.clauses.clauses[1])
+    elif len(element.clauses) == 1:
+        separator = ','
+    else:
+        raise SyntaxError(u'group_concat must have 1 or 2 arguments!')
+
+    return 'GROUP_CONCAT({0} SEPARATOR {1})'.format(
+        cmplr.process(element.clauses.clauses[0]),
+        separator,
+        )

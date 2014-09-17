@@ -1,11 +1,10 @@
 {% extends 'schedule/base.html' %}
-{% import "schedule/_person_tree.html" as person_tree %}
 
 {% block title %}> {{ module_name }}{% endblock %}
 
 {% block main %}
     <legend xmlns="http://www.w3.org/1999/html"><h2>График работы</h2></legend>
-    <div ng-controller="Schedule">
+    <div ng-controller="ScheduleCtrl">
         <div class="row marginal">
             <div class="col-md-2">
                 <select class="form-control" name="year" ng-model="year"
@@ -16,12 +15,12 @@
                         ng-options="item.value as item.name for item in aux.months" ng-change="monthChanged()"></select>
             </div>
             <div class="col-md-8">
-                {{ person_tree.html(popup=True) }}
+                <person-tree popupable="true" person-id="person_id"></person-tree>
             </div>
         </div>
         <ul class="nav nav-tabs nav-justified" ng-model="reception_type" ng-if="person">
             <li ng-class="{active: (rt.code == reception_type)}" ng-repeat="rt in reception_types.objects"
-                ng-click="changeReceptionType(rt.code)"><a href="#">[[ rt.name ]]</a>
+                ng-click="changeReceptionType(rt.code)"><a>[[ rt.name ]]</a>
             </li>
         </ul>
         <div class="tab-content" ng-if="person">
@@ -29,7 +28,7 @@
                 <div class="col-md-12">
                     <ul class="nav nav-pills">
                         <li ng-class="{active: ($index == page)}" ng-repeat="p in pages">
-                            <a ng-click="setDatePage($index)" href="#">
+                            <a ng-click="setDatePage($index)">
                                 [[ p | asShortDate ]] - [[ aux.moment(p).add(6, 'd') | asShortDate ]]
                             </a>
                         </li>
@@ -65,89 +64,5 @@
 {% endblock %}
 {% block modules_js %}
     {{ super() }}
-    <script type="text/javascript">
-        {{ person_tree.js() }}
-        WebMis20.controller('Schedule', ['$scope', '$http', 'RefBook', function ($scope, $http, RefBook) {
-            $scope.data = {};
-            $scope.aux = aux;
-            $scope.params = aux.getQueryParams(document.location.search);
-            {#            $scope.person_id = $scope.params.person_id;#}
-            $scope.person_query = '';
-            var curDate = new Date();
-            var curYear = curDate.getUTCFullYear();
-            $scope.years = [curYear - 1, curYear, curYear + 1];
-            $scope.year = curYear;
-
-            $scope.month = curDate.getMonth();
-
-            $scope.reception_types = new RefBook('rbReceptionType');
-            $scope.reception_type = 'amb';
-
-            $scope.reloadSchedule = function () {
-                if ($scope.person_id) {
-                    $http.get(
-                            '{{ url_for('.api_schedule') }}',
-                            {
-                                params: {
-                                    person_ids: $scope.person_id,
-                                    start_date: $scope.pages[$scope.page].format('YYYY-MM-DD')
-                                }
-                            }
-                    ).success(function (data) {
-                                var d = data.result['schedules'][0];
-                                $scope.person = d.person;
-                                $scope.grouped = d.grouped;
-                            })
-                }
-            };
-
-            $scope.setDatePage = function (index) {
-                if (index != $scope.page) {
-                    $scope.page = index;
-                    $scope.reloadSchedule();
-                }
-            };
-
-            $scope.monthChanged = function () {
-                var mid_date = moment({
-                    year: $scope.year,
-                    month: $scope.month,
-                    day: new Date().getDate()
-                });
-                var start_date = moment({
-                    year: $scope.year,
-                    month: $scope.month,
-                    day: 1
-                });
-                var end_date = moment(start_date).add(1, 'M').subtract(1, 'd');
-                var chosen_page = -1;
-                var pages = [];
-                while (start_date <= end_date) {
-                    if (mid_date >= start_date) {
-                        chosen_page += 1;
-                    }
-                    pages.push(moment(start_date));
-                    start_date.add(1, 'w');
-                }
-                $scope.page = chosen_page;
-                $scope.pages = pages;
-                $scope.reloadSchedule();
-            };
-
-            $scope.changeReceptionType = function (code) {
-                $scope.reception_type = code;
-            };
-
-            $scope.monthChanged();
-
-            $scope.$on('PersonSelected', function (event, person) {
-                history.pushState(null, null, window.location.origin + window.location.pathname + '?person_id=' + person.id);
-                $scope.person_id = person.id;
-                $scope.reloadSchedule();
-            });
-            if ($scope.params.person_id) {
-                $scope.$root.$broadcast('ManuallySelectedPersonId', $scope.params.person_id)
-            }
-        }]);
-    </script>
+    <script src="{{ url_for('.static', filename='js/index.js', v=version) }}"></script>
 {% endblock %}

@@ -1,24 +1,26 @@
 # -*- coding: utf-8 -*-
+
 import calendar
-from collections import defaultdict
 import datetime
 
+from collections import defaultdict
+from dateutil.parser import parse as dateutil_parse
 from flask import abort, request
 from flask.ext.login import current_user
 
 from application.models.event import Event
 from application.systemwide import db, cache
 from application.lib.sphinx_search import SearchPerson
-from application.lib.agesex import recordAcceptableEx
-from application.lib.utils import (jsonify, safe_traverse, get_new_uuid)
+from application.lib.utils import (jsonify, safe_traverse, parse_id, safe_date, safe_time_as_dt, safe_datetime)
 from application.lib.utils import public_endpoint
 from blueprints.schedule.app import module
-from application.models.exists import (rbSpeciality, rbReasonOfAbsence, rbPrintTemplate, Person)
-from application.models.actions import Action, ActionType, ActionProperty, ActionPropertyType
-from application.models.schedule import Schedule, ScheduleTicket, ScheduleClientTicket, rbAppointmentType, \
-    rbReceptionType, rbAttendanceType
-from application.lib.jsonify import ScheduleVisualizer, PrintTemplateVisualizer, \
-    ActionVisualizer
+from blueprints.schedule.lib.data import delete_schedules
+from application.models.exists import (rbSpeciality, rbReasonOfAbsence, Person)
+from application.models.actions import Action, ActionType
+from application.models.schedule import (Schedule, ScheduleTicket, ScheduleClientTicket, rbAppointmentType,
+    rbAttendanceType, QuotingByTime)
+from application.lib.jsonify import ScheduleVisualizer, ActionVisualizer
+from application.lib.data import create_new_action, create_action, update_action, int_get_atl_flat
 
 
 __author__ = 'mmalkov'
@@ -85,7 +87,9 @@ def api_schedule():
 
 @module.route('/api/schedule-description.json', methods=['GET'])
 def api_schedule_description():
-    person_id_s = request.args.get('person_ids')
+    person_id = parse_id(request.args, 'person_id')
+    if person_id is False:
+        return abort(400)
     start_date_s = request.args.get('start_date')
     try:
         start_date = datetime.datetime.strptime(start_date_s, '%Y-%m').date()
@@ -93,40 +97,41 @@ def api_schedule_description():
     except ValueError:
         return abort(400)
 
-    result = {
-        'schedules': [],
-    }
+    context = ScheduleVisualizer()
+    person = Person.query.get(person_id)
+    return jsonify(context.make_person_schedule_description(person, start_date, end_date))
+
+
+@module.route('/api/day_schedule.json', methods=['GET'])
+def api_day_schedule():
+    person_id = parse_id(request.args, 'person_id')
+    if person_id is False:
+        return abort(400)
+    try:
+        start_date = datetime.datetime.strptime(request.args.get('start_date'), '%Y-%m-%d').date()
+        end_date = start_date + datetime.timedelta(days=1)
+    except ValueError:
+        return abort(400)
 
     context = ScheduleVisualizer()
-
-    try:
-        person_ids = {int(person_id_s)}
-    except ValueError:
-        person_ids = set()
-
-    if person_ids:
-        persons = Person.query.filter(Person.id.in_(person_ids))
-        schedules = context.make_persons_schedule_description(persons, start_date, end_date)
-        result['schedules'] = schedules
-
-    return jsonify(result)
+    person = Person.query.get(person_id)
+    return jsonify(context.make_person_schedule_description(person, start_date, end_date))
 
 
 @module.route('/api/schedule-description.json', methods=['POST'])
 def api_schedule_description_post():
     # TODO: validations
+
     def make_default_ticket(schedule):
         ticket = ScheduleTicket()
         ticket.schedule = schedule
-        ticket.createDatetime = datetime.datetime.now()
-        ticket.modifyDatetime = datetime.datetime.now()
         return ticket
 
     def make_tickets(schedule, planned, extra, cito):
         # here cometh another math
-        dt = (datetime.datetime.combine(schedule.date.date(), schedule.endTime.time())
-              - datetime.datetime.combine(schedule.date.date(), schedule.begTime.time())) / planned
-        it = schedule.begTime
+        dt = (datetime.datetime.combine(schedule.date, schedule.endTime) -
+              datetime.datetime.combine(schedule.date, schedule.begTime)) / planned
+        it = schedule.begTimeAsDt
         attendanceType = rbAttendanceType.query.filter(rbAttendanceType.code == 'planned').first()
         for i in xrange(planned):
             ticket = make_default_ticket(schedule)
@@ -151,86 +156,70 @@ def api_schedule_description_post():
                 ticket.attendanceType = attendanceType
                 db.session.add(ticket)
 
-    json = request.json
-    schedule = request.json['schedule']
-    person_id = json['person_id']
-    reception_type = json['receptionType']
-    dates = [
-        day['date'] for day in schedule
-    ]
-    schedules = Schedule.query.join(rbReceptionType).filter(
-        Schedule.receptionType_id == rbReceptionType.id,
-        Schedule.deleted == 0, Schedule.person_id == person_id,
-        Schedule.date.in_(dates), rbReceptionType.code == reception_type
-    )
-    schedules_with_clients = schedules.join(ScheduleTicket, ScheduleClientTicket).filter(
-        ScheduleClientTicket.client_id is not None
-    ).all()
-    if schedules_with_clients:
-        return jsonify({}, 401, u'Пациенты успели записаться на приём')
-    schedules.update({
-        Schedule.deleted: 1
-    }, synchronize_session=False)
+    schedule_data = request.json
+    schedule = schedule_data['schedule']
+    quotas = schedule_data['quotas']
+    person_id = schedule_data['person_id']
+    dates = [day['date'] for day in schedule]
+
+    if schedule:
+        ok = delete_schedules(dates, person_id)
+
     for day_desc in schedule:
-        new_sched = Schedule()
-        new_sched.person_id = person_id
-        new_sched.date = datetime.datetime.strptime(day_desc['date'], '%Y-%m-%d')
-        new_sched.createDatetime = datetime.datetime.now()
-        new_sched.modifyDatetime = datetime.datetime.now()
-        new_sched.receptionType = rbReceptionType.query.filter(rbReceptionType.code == reception_type).first()
-        new_sched.office_id = safe_traverse(day_desc, 'office', 'id')
-        if day_desc['roa']:
+        date = safe_date(day_desc['date'])
+        roa = day_desc['roa']
+
+        if roa:
+            new_sched = Schedule()
+            new_sched.person_id = person_id
+            new_sched.date = date
             new_sched.reasonOfAbsence = rbReasonOfAbsence.query.\
-                filter(rbReasonOfAbsence.code == day_desc['roa']['code']).first()
+                filter(rbReasonOfAbsence.code == roa['code']).first()
             new_sched.begTime = '00:00'
             new_sched.endTime = '00:00'
             new_sched.numTickets = 0
             db.session.add(new_sched)
         else:
-            new_sched.begTime = datetime.datetime.strptime(day_desc['scheds'][0]['begTime'], '%H:%M:%S')
-            new_sched.endTime = datetime.datetime.strptime(day_desc['scheds'][0]['endTime'], '%H:%M:%S')
-            new_sched.numTickets = int(day_desc['planned'])
+            new_scheds_by_rt = defaultdict(list)
+            for sub_sched in day_desc['scheds']:
+                new_sched = Schedule()
+                new_sched.person_id = person_id
+                new_sched.date = date
+                new_sched.begTimeAsDt = safe_time_as_dt(sub_sched['begTime'])
+                new_sched.begTime = new_sched.begTimeAsDt.time()
+                new_sched.endTimeAsDt = safe_time_as_dt(sub_sched['endTime'])
+                new_sched.endTime = new_sched.endTimeAsDt.time()
+                new_sched.receptionType_id = safe_traverse(sub_sched, 'reception_type', 'id')
+                new_sched.office_id = safe_traverse(sub_sched, 'office', 'id')
+                new_sched.numTickets = sub_sched.get('planned', 0)
 
-            if len(day_desc['scheds']) == 1:
-                db.session.add(new_sched)
-                make_tickets(new_sched, int(day_desc['planned']), int(day_desc['extra']), int(day_desc['CITO']))
-            if len(day_desc['scheds']) == 2:
-                add_sched = Schedule()
-                add_sched.person_id = person_id
-                add_sched.date = datetime.datetime.strptime(day_desc['date'], '%Y-%m-%d')
-                add_sched.createDatetime = datetime.datetime.now()
-                add_sched.modifyDatetime = datetime.datetime.now()
-                add_sched.receptionType = rbReceptionType.query.filter(rbReceptionType.code == reception_type).first()
-                add_sched.begTime = datetime.datetime.strptime(day_desc['scheds'][1]['begTime'], '%H:%M:%S')
-                add_sched.endTime = datetime.datetime.strptime(day_desc['scheds'][1]['endTime'], '%H:%M:%S')
-                add_sched.office_id = safe_traverse(day_desc, 'office', 'id')
+                make_tickets(new_sched,
+                             sub_sched.get('planned', 0),
+                             sub_sched.get('extra', 0),
+                             sub_sched.get('CITO', 0))
 
-                # Here cometh thy math
-
-                qt = int(day_desc['planned'])
-                M = new_sched.endTime - new_sched.begTime
-                N = add_sched.endTime - add_sched.begTime
-                qt1 = int(round(float(M.seconds * qt) / (M + N).seconds))
-                qt2 = int(round(float(N.seconds * qt) / (M + N).seconds))
-
-                new_sched.numTickets = qt1
-                add_sched.numTickets = qt2
-
-                make_tickets(new_sched, qt1, int(day_desc['extra']), int(day_desc['CITO']))
-                make_tickets(add_sched, qt2, 0, 0)
-                db.session.add(new_sched)
-                db.session.add(add_sched)
+    for quota_desc in quotas:
+        date = safe_date(quota_desc['date'])
+        QuotingByTime.query.filter(QuotingByTime.doctor_id == person_id,
+                                   QuotingByTime.quoting_date == date).delete()
+        new_quotas = quota_desc['day_quotas']
+        for quota in new_quotas:
+            quota_record = QuotingByTime()
+            quota_record.quoting_date = date
+            quota_record.doctor_id = person_id
+            quota_record.QuotingTimeStart = safe_time_as_dt(quota['time_start'])
+            quota_record.QuotingTimeEnd = safe_time_as_dt(quota['time_end'])
+            quota_record.quotingType_id = quota['quoting_type']['id']
+            db.session.add(quota_record)
 
     db.session.commit()
 
-    start_date_s = json.get('start_date')
+    start_date_s = schedule_data.get('start_date')
     start_date = datetime.datetime.strptime(start_date_s, '%Y-%m').date()
     end_date = start_date + datetime.timedelta(calendar.monthrange(start_date.year, start_date.month)[1])
     context = ScheduleVisualizer()
-    persons = Person.query.filter(Person.id == person_id)
-    return jsonify({
-        'schedules': context.make_persons_schedule_description(persons, start_date, end_date)
-    })
+    person = Person.query.get(person_id)
+    return jsonify(context.make_person_schedule_description(person, start_date, end_date))
 
 
 @module.route('/api/all_persons_tree.json')
@@ -298,6 +287,7 @@ def api_appointment():
     data = request.get_json()
     client_id = int(data['client_id'])
     ticket_id = int(data['ticket_id'])
+    create_person = data.get('create_person', current_user.get_id())
     appointment_type_code = data.get('appointment_type_code', 'amb')
     delete = bool(data.get('delete', False))
     ticket = ScheduleTicket.query.get(ticket_id)
@@ -317,7 +307,7 @@ def api_appointment():
         client_ticket.client_id = client_id
         client_ticket.ticket_id = ticket_id
         client_ticket.createDatetime = client_ticket.modifyDatetime = datetime.datetime.now()
-        client_ticket.createPerson_id = client_ticket.modifyPerson_id = current_user.get_id()
+        client_ticket.createPerson_id = client_ticket.modifyPerson_id = create_person
         db.session.add(client_ticket)
         client_ticket.appointmentType = rbAppointmentType.query.filter(rbAppointmentType.code == appointment_type_code).first()
     if 'note' in data:
@@ -392,190 +382,60 @@ def api_action_get():
 
 @module.route('/api/actions/new.json', methods=['GET'])
 def api_action_new_get():
-
-    # Preparación de datos de entrada
-
-    now = datetime.datetime.now()
     src_action = Action.query.get(int(request.args['src_action_id'])) \
         if 'src_action_id' in request.args else None
-    """@type: Action | None"""
-    src_props = dict((prop.type_id, prop) for prop in src_action.properties) if src_action else {}
-    given_datetime = datetime.datetime.strptime(request.args['datetime'], '%Y-%m-%dT%H:%M') \
-        if 'datetime' in request.args else None
-    actionType = ActionType.query.get(int(request.args['action_type_id']))
-    """@type: ActionType"""
-    event = Event.query.get(int(request.args['event_id']))
-    """@type: Event"""
+    action_type_id = int(request.args['action_type_id'])
+    event_id = int(request.args['event_id'])
 
-    # Action creation starts
+    action = create_action(action_type_id, event_id, src_action=src_action)
 
-    action = Action()
-    action.createDatetime = action.modifyDatetime = action.begDate = now
-    action.createPerson = action.modifyPerson = action.setPerson = Person.query.get(current_user.get_id())
-    action.office = actionType.office or u''
-    action.amount = actionType.amount if actionType.amountEvaluation in (0, 7) else 1
-    action.uet = 0  # TODO: calculate UET
-
-    if given_datetime:
-        action.plannedEndDate = given_datetime or now
-    else:
-        action.plannedEndDate = now
-        # TODO: calculate plannedEndDate
-
-    if actionType.defaultEndDate == 1:
-        action.endDate = now
-    elif actionType.defaultEndDate == 2:
-        action.endDate = event.setDate
-    elif actionType.defaultEndDate == 3:
-        action.endDate = event.execDate
-    if actionType.defaultDirectionDate == 1:
-        action.directionDate = event.setDate
-    elif actionType.defaultDirectionDate == 2:
-        action.directionDate = now
-    elif actionType.defaultDirectionDate == 3 and action.endDate:
-        action.directionDate = max(action.endDate, event.setDate)
-    else:
-        action.directionDate = event.setDate
-
-    if src_action:
-        action.person = src_action.person
-    elif actionType.defaultExecPerson_id:
-        action.person = Person.query.get(actionType.defaultExecPerson_id)
-    elif actionType.defaultPersonInEvent == 0:
-        action.person = None
-    elif actionType.defaultPersonInEvent == 2:
-        action.person = action.setPerson
-    elif actionType.defaultPersonInEvent == 3:
-        action.person = event.execPerson
-    elif actionType.defaultPersonInEvent == 4:
-        action.person = Person.query.get(current_user.get_id())
-
-    action.event = event
-    action.event_id = event.id
-    action.actionType = actionType
-    action.status = actionType.defaultStatus
-    prop_types = actionType.property_types.filter(ActionPropertyType.deleted == 0)
     v = ActionVisualizer()
-
     result = v.make_action(action)
-
-    # アクションプロパティを作成する
-
-    now_date = now.date()
-    for prop_type in prop_types:
-        if recordAcceptableEx(event.client.sex, event.client.age_tuple(now_date), prop_type.sex, prop_type.age):
-            prop = ActionProperty()
-            prop.type = prop_type
-            prop.action = action
-            value = src_props[prop_type.id].value if src_props.get(prop_type.id) else None
-            result['properties'].append(v.make_abstract_property(prop, value))
     db.session.rollback()
-
     return jsonify(result)
 
 
 @module.route('/api/actions', methods=['POST'])
 def api_action_post():
-    now = datetime.datetime.now()
-    action_desc = request.json
-    if action_desc['id']:
-        action = Action.query.get(action_desc['id'])
-        for prop_desc in action_desc['properties']:
-            prop_type = ActionPropertyType.query.get(prop_desc['type']['id'])
-            prop = ActionProperty.query.get(prop_desc['id'])
-            prop.action = action
-            prop.isAssigned = prop_desc['is_assigned']
-            prop.type = prop_type
-            if prop_desc['type']['vector']:
-                # Идите в жопу со своими векторными значениями
-                continue
-            if prop_desc['value'] is not None:
-                prop_value = prop.raw_values_query.first()
-                if isinstance(prop_desc['value'], dict):
-                    if prop_value:
-                        if prop_desc['value']['id'] != prop_value.value:
-                            prop_value.value = prop_desc['value']['id']
-                            db.session.add(prop_value)
-                    else:
-                        prop_value = prop.valueTypeClass()
-                        prop_value.property_object = prop
-                        prop_value.value = prop_desc['value']['id']
-                        db.session.add(prop_value)
-                else:
-                    if prop_value:
-                        if prop_value.value != prop_desc['value']:
-                            prop_value.value = prop_desc['value']
-                            db.session.add(prop_value)
-                    else:
-                        prop_value = prop.valueTypeClass()
-                        prop_value.property_object = prop
-                        prop_value.value = prop_desc['value']
-                        db.session.add(prop_value)
-            else:
-                prop.raw_values_query.delete()
-            db.session.add(prop)
+    action_desc = request.get_json()
+    action_id = action_desc['id']
+    data = {
+        'begDate': safe_datetime(action_desc['beg_date']),
+        'endDate': safe_datetime(action_desc['end_date']),
+        'plannedEndDate': safe_datetime(action_desc['planned_end_date']),
+        'directionDate': safe_datetime(action_desc['direction_date']),
+        'isUrgent': action_desc['is_urgent'],
+        'status': action_desc['status']['id'],
+        'setPerson_id': safe_traverse(action_desc, 'set_person', 'id'),
+        'person_id':  safe_traverse(action_desc, 'person', 'id'),
+        'note': action_desc['note'],
+        'amount': action_desc['amount'],
+        'account': action_desc['account'] or 0,
+        'uet': action_desc['uet'],
+        'payStatus': action_desc['pay_status'] or 0,
+        'coordDate': safe_datetime(action_desc['coord_date']),
+        'office': action_desc['office']
+    }
+    properties_desc = action_desc['properties']
+    if action_id:
+        data['properties'] = properties_desc
+        action = Action.query.get(action_id)
+        action = update_action(action, **data)
     else:
-        # new action
-        action = Action()
-        action.createDatetime = now
-        action.actionType = ActionType.query.get(action_desc['action_type']['id'])
-        action.event = Event.query.get(action_desc['event_id'])
-        for prop_desc in action_desc['properties']:
-            prop_type = ActionPropertyType.query.get(prop_desc['type']['id'])
-            prop = ActionProperty()
-            prop.createDatetime = prop.modifyDatetime = now
-            prop.norm = ''
-            prop.evaluation = ''
-            prop.action = action
-            prop.isAssigned = prop_desc['is_assigned']
-            prop.type = prop_type
-            if prop_desc['type']['vector']:
-                # Идите в жопу со своими векторными значениями
-                continue
-            if prop_desc['value'] is not None:
-                prop_value = prop.valueTypeClass()
-                prop_value.property_object = prop
-                if isinstance(prop_desc['value'], dict):
-                    prop_value.value = prop_desc['value']['id']
-                else:
-                    prop_value.value = prop_desc['value']
-                db.session.add(prop_value)
-            db.session.add(prop)
-
-    action.modifyDatetime = now
-    action.begDate = action_desc['begDate']
-    action.endDate = action_desc['endDate']
-    action.plannedEndDate = action_desc['planned_endDate'] or now
-    action.status = action_desc['status']['id']
-    action.setPerson_id = safe_traverse(action_desc, 'set_person', 'id')
-    action.person_id = safe_traverse(action_desc, 'person', 'id')
-    action.note = action_desc['note'] or ''
-    action.directionDate = action_desc['direction_date']
-    action.office = action_desc['office']
-    action.amount = action_desc['amount']
-    action.uet = action_desc['uet']
-    action.payStatus = action_desc['pay_status'] or 0
-    action.account = action_desc['account'] or 0
-    action.coordText = ''
-    action.AppointmentType = 0
-    if not action.uuid:
-        action.uuid = get_new_uuid()
+        at_id = action_desc['action_type']['id']
+        event_id = action_desc['event_id']
+        action = create_new_action(at_id, event_id, properties=properties_desc, data=data)
 
     db.session.add(action)
     db.session.commit()
 
-    context = action.actionType.context
-    print_templates = rbPrintTemplate.query.filter(rbPrintTemplate.context == context).all()
     v = ActionVisualizer()
-    print_context = PrintTemplateVisualizer()
-    return jsonify({
-        'action': v.make_action(action),
-        'print_templates': map(print_context.make_template_info, print_templates)
-    })
+    return jsonify(v.make_action(action))
 
 
 @cache.memoize(86400)
 def int_get_atl(at_class):
+    # not used?
     atypes = ActionType.query.filter(
         ActionType.class_ == at_class, ActionType.deleted == 0, ActionType.hidden == 0
     )
@@ -614,6 +474,7 @@ def int_get_atl(at_class):
 
 @module.route('/api/action-type-list.json')
 def api_atl_get():
+    # not used?
     at_class = int(request.args['at_class'])
     if not (0 <= at_class < 4):
         return abort(401)
@@ -621,3 +482,68 @@ def api_atl_get():
     result = int_get_atl(at_class)
 
     return jsonify(result)
+
+
+prescriptionFlatCodes = (
+    u'prescription',
+    u'infusion',
+    u'analgesia',
+    u'chemotherapy',
+)
+
+
+@module.route('/api/action-type-list-flat.json')
+def api_atl_get_flat():
+    at_class = int(request.args['at_class'])
+    if not (0 <= at_class < 4):
+        return abort(401)
+
+    return jsonify(int_get_atl_flat(at_class))
+
+
+@cache.memoize(86400)
+def int_get_orgstructure(org_id):
+    from application.models.exists import OrgStructure
+    def schwing(t):
+        return {
+            'id': t.id,
+            'name': t.name,
+            'code': t.code,
+            'parent_id': t.parent_id,
+        }
+    return map(schwing, OrgStructure.query.filter(OrgStructure.organisation_id == org_id))
+
+
+@module.route('/api/org-structure.json')
+def api_org_structure():
+    org_id = int(request.args['org_id'])
+    return jsonify(int_get_orgstructure(org_id))
+
+
+@module.route('/api/create-lab-direction.json', methods=['POST'])
+def api_create_lab_direction():
+    ja = request.get_json()
+    event_id = ja['event_id']
+    event = Event.query.get(event_id)
+    org_structure = event.current_org_structure
+    if not org_structure:
+        return jsonify({
+            'message': u'Пациент не привязан ни к одному из отделений.'
+        }, 422, 'ERROR')
+
+    for j in ja['directions']:
+        action_type_id = j['type_id']
+        assigned = j['assigned']
+        data = {
+            'plannedEndDate': dateutil_parse(j['planned_end_date'])
+        }
+        action = create_new_action(
+            action_type_id,
+            event_id,
+            assigned=assigned,
+            data=data
+        )
+        db.session.add(action)
+
+    db.session.commit()
+    return jsonify(None)

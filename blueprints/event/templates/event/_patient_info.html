@@ -1,0 +1,22 @@
+<legend>Информация о пациенте</legend>
+<div class="well well-sm" toc-element="Информация о пациенте">
+    <div class="row" >
+        <div class="col-md-9">
+            <dl class="dl-horizontal novmargin">
+                <dt ng-if="event.info.client.phones.length">Контактный телефон:</dt><dd ng-init="showAllPhones=false"><span ng-repeat="phone in event.info.client.phones" ng-show="$first || showAllPhones"> [[phone]]</span> <a href="javascript:void(0);" ng-show="event.info.client.phones.length && !showAllPhones" ng-click="showAllPhones = !showAllPhones">[ещё]</a><a href="javascript:void(0);" ng-show="event.info.client.phones.length && showAllPhones" ng-click="showAllPhones = !showAllPhones">[скрыть]</a></dd>
+                <dt>Адрес регистрации:</dt><dd>[[event.info.client.reg_address ? event.info.client.reg_address.text_summary : '']]&nbsp;</dd>
+                <dt>Адрес проживания:</dt><dd>[[event.info.client.live_address ? event.info.client.live_address.text_summary : '']]&nbsp;</dd>
+                <dt>Документ:</dt><dd>[[event.info.client.id_document ? event.info.client.id_document.doc_text : '']]&nbsp;</dd>
+                <dt>Медицинский полис:</dt><dd ng-repeat="policy_text in policies">[[policy_text]]</dd>
+            </dl>
+        </div>
+        <div class="col-md-3">
+            <dl class="dl-horizontal novmargin pull-right">
+                <dt>Код пациента:</dt><dd>[[event.info.client.info.id]]&nbsp;</dd>
+                <dt>Дата рождения:</dt><dd>[[event.info.client.info.birth_date|asDate]]&nbsp;</dd>
+                <dt>Возраст:</dt><dd>[[event.info.client.info.age]]&nbsp;</dd>
+                <dt>Пол:</dt><dd>[[event.info.client.info.sex.name]]&nbsp;</dd>
+            </dl>
+        </div>
+    </div>
+</div>

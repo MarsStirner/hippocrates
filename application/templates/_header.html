@@ -1,14 +1,17 @@
 <meta charset="utf-8">
-<title>WebMIS 2.0 {% block title %}{% endblock %}</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="WebMIS 2.0">
 <meta name="author" content="Высокотехнологичные решения">
 <link href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}" media="screen, print" rel="stylesheet">
 <link href="{{ url_for('static', filename='css/style.css', v=version) }}" rel="stylesheet">
+{% if LPU_STYLE == 'FNKC' %}
+<link href="{{ url_for('static', filename='css/style_fnkc.css', v=version) }}" rel="stylesheet">
+{% endif %}
 <link href="{{ url_for('static', filename='select2/select2.css') }}" rel="stylesheet">
 {#<link href="{{ url_for('static', filename='css/select.css') }}" rel="stylesheet">#}
 <link href="{{ url_for('static', filename='angular-ui-select/select.css') }}" rel="stylesheet">
 <link href="{{ url_for('static', filename='css/select2-bootstrap.css') }}" rel="stylesheet">
+<link href="{{ url_for('static', filename='css/font-awesome.css') }}" rel="stylesheet">
 <link href="{{ url_for('static', filename='angular-formstamp/formstamp.css') }}" rel="stylesheet">
 <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
 <script src="{{ url_for('static', filename='angular.js/angular.js') }}"></script>

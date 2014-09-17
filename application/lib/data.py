@@ -1,15 +1,21 @@
 # -*- coding: utf-8 -*-
-from datetime import datetime, time, timedelta
+
 import requests
 
+from datetime import datetime, time, timedelta
+from flask.ext.login import current_user
+
 from config import VESTA_URL
-from application.systemwide import db
-from application.lib.utils import logger, get_new_uuid
-from application.models.actions import Action, ActionType, ActionPropertyType, ActionProperty
-from application.models.exists import Person, UUID
+from application.systemwide import db, cache
+from application.app import cache
+from application.lib.utils import logger, get_new_uuid, safe_traverse
+from application.models.actions import Action, ActionType, ActionPropertyType, ActionProperty, Job, JobTicket, \
+    TakenTissueJournal
+from application.models.exists import Person
 from application.models.event import Event
 from application.lib.agesex import recordAcceptableEx
 from application.lib.calendar import calendar
+
 
 # планируемая дата выполнения (default planned end date)
 DPED_UNDEFINED = 0  # Не определено
@@ -37,30 +43,39 @@ DP_EVENT_EXEC_PERSON = 3
 DP_CURRENT_USER = 4
 
 
-def create_action(event_id, action_type_id, current_user_id, data):
-    if not event_id or not action_type_id:
+def create_action(action_type_id, event_id, src_action=None, assigned=None, properties=None, data=None):
+    """
+    Базовое создание действия, например для отправки клиентской стороне.
+
+    :param action_type_id: action_type_id int
+    :param event_id: event_id int
+    :param src_action: другое действие Action, из которого будут браться данные
+    :param assigned: список id ActionPropertyType, которые должны быть отмечены назначенными
+    :param properties: список словарей с данными по ActionProperty, включая value
+    :param data: словарь с данными для установки произвольных параметров действия
+    :return: Action model
+    """
+    # TODO: transfer some checks from ntk
+    if not action_type_id or not event_id:
         raise AttributeError
 
     now = datetime.now()
+    now_date = now.date()
     actionType = ActionType.query.get(int(action_type_id))
     event = Event.query.get(int(event_id))
-    _current_user = Person.query.get(int(current_user_id))
+    current_user_p = Person.query.get(current_user.get_id())
 
     action = Action()
-    action.actionType_id = action_type_id
-    action.event_id = event_id
-    action.createDatetime = action.modifyDatetime = action.begDate = now
-    action.createPerson_id = action.modifyPerson_id = action.setPerson_id = current_user_id
+    action.actionType = actionType
+    action.event = event
+    action.event_id = event.id  # need for now
+    action.begDate = now  # todo
+    action.setPerson = current_user_p
     action.office = actionType.office or u''
-    # action.amount = actionType.amount if actionType.amountEvaluation in (0, 7) else 1
-    action.amount = 1
-    action.status = 0
-    action.note = ''
-    action.payStatus = 0
+    action.amount = actionType.amount if actionType.amountEvaluation in (0, 7) else 1
+    action.status = actionType.defaultStatus
     action.account = 0
-    action.coordText = ''
-    action.AppointmentType = 0
-    action.uuid = get_new_uuid()
+    action.uet = 0  # TODO: calculate UET
 
     if actionType.defaultEndDate == DED_CURRENT_DATE:
         action.endDate = now
@@ -78,7 +93,9 @@ def create_action(event_id, action_type_id, current_user_id, data):
     else:
         action.directionDate = event.setDate
 
-    if actionType.defaultExecPerson_id:
+    if src_action:
+        action.person = src_action.person
+    elif actionType.defaultExecPerson_id:
         action.person = Person.query.get(actionType.defaultExecPerson_id)
     elif actionType.defaultPersonInEvent == DP_UNDEFINED:
         action.person = None
@@ -87,37 +104,170 @@ def create_action(event_id, action_type_id, current_user_id, data):
     elif actionType.defaultPersonInEvent == DP_EVENT_EXEC_PERSON:
         action.person = event.execPerson
     elif actionType.defaultPersonInEvent == DP_CURRENT_USER:
-        action.person = _current_user
+        action.person = current_user_p
 
     action.plannedEndDate = get_planned_end_datetime(action_type_id)
+    action.uuid = get_new_uuid()
 
-    for field, value in data.items():
-        if field in Action.__table__.columns:  # and not getattr(action, field):
-            setattr(action, field, value)
+    # set changed attributes
+    if data:
+        for field, value in data.items():
+            if field in Action.__table__.columns:
+                setattr(action, field, value)
 
+    # properties
+    if assigned is None:
+        assigned = []
+    src_props = dict((prop.type_id, prop) for prop in src_action.properties) if src_action else {}
+    full_props = dict((prop_desc['type']['id'], prop_desc) for prop_desc in properties) if properties else {}
     prop_types = actionType.property_types.filter(ActionPropertyType.deleted == 0)
-    now_date = now.date()
     for prop_type in prop_types:
-        if recordAcceptableEx(event.client.sex, event.client.age_tuple(now_date), prop_type.sex, prop_type.age):
+        if recordAcceptableEx(event.client.sexCode, event.client.age_tuple(now_date), prop_type.sex, prop_type.age):
             prop = ActionProperty()
             prop.type = prop_type
             prop.action = action
-            prop.createDatetime = prop.modifyDatetime = now
-            prop.norm = ''
-            prop.evaluation = ''
-            prop.createPerson_id = prop.modifyPerson_id = int(data.get('person_id', 1))
+            prop.isAssigned = prop_type.id in assigned
+            if src_props.get(prop_type.id):
+                prop.value = src_props[prop_type.id].value
+            elif prop_type.id in full_props:
+                prop_desc = full_props[prop_type.id]
+                if isinstance(prop_desc['value'], dict):
+                    prop.set_value(safe_traverse(prop_desc, 'value', 'id'), True)
+                else:
+                    prop.set_value(prop_desc['value'])
+                prop.isAssigned = prop_desc['is_assigned']
+            elif prop.type.defaultValue:
+                prop.set_value(prop.type.defaultValue, True)
+            else:
+                prop.value = None
+            action.properties.append(prop)
+
+    return action
+
+
+def create_new_action(action_type_id, event_id, src_action=None, assigned=None, properties=None, data=None):
+    """
+    Создание действия для сохранения в бд.
+
+    :param action_type_id: action_type_id int
+    :param event_id: event_id int
+    :param src_action: другое действие Action, из которого будут браться данные
+    :param assigned: список id ActionPropertyType, которые должны быть отмечены назначенными
+    :param properties: список словарей с данными по ActionProperty, включая value
+    :param data: словарь с данными для установки произвольных параметров действия
+    :return: Action model
+    """
+    action = create_action(action_type_id, event_id, src_action, assigned, properties, data)
+
+    org_structure = action.event.current_org_structure
+    if action.actionType.isRequiredTissue and org_structure:
+        os_id = org_structure.id
+        for prop in action.properties:
+            if prop.type.typeName == 'JobTicket':
+                prop.value = create_JT(action, os_id)
+
+    return action
+
+
+def update_action(action, **kwargs):
+    """
+    Обновление модели действия данными из kwargs.
+
+    kwargs может содержать:
+      - атрибуты Action со значениями
+      - properties_assigned - список id ActionPropertyType, которые должны
+      быть отмечены назначаемыми для исследований
+      - properties - список словарей для редактирования данных свойств в целом
+
+    :param action: Action
+    :param kwargs:
+    :return: Action
+    """
+    # action attributes
+    for attr in ('amount', 'account', 'status', 'person_id', 'setPerson_id', 'begDate', 'endDate', 'directionDate',
+                 'isUrgent', 'plannedEndDate', 'coordPerson_id', 'coordDate', 'note', 'uet', 'payStatus',
+                 'contract_id', 'office'):
+        edited = attr in kwargs
+        if edited:
+            edited = kwargs.get(attr)
+            setattr(action, attr, edited)
+
+    # properties (only assigned data)
+    assigned = 'properties_assigned' in kwargs
+    if assigned:
+        assigned = kwargs.get('properties_assigned')
+        for prop in action.properties:
+            prop.isAssigned = prop.type_id in assigned
+
+    # properties (full data)
+    properties = 'properties' in kwargs
+    if properties:
+        properties = kwargs.get('properties')
+        for prop_desc in properties:
+            prop = ActionProperty.query.get(prop_desc['id'])
+            if isinstance(prop_desc['value'], dict):
+                prop.set_value(safe_traverse(prop_desc, 'value', 'id'), True)
+            else:
+                prop.set_value(prop_desc['value'])
+            prop.isAssigned = prop_desc['is_assigned']
             db.session.add(prop)
 
-    db.session.add(action)
+    return action
 
-    try:
-        db.session.commit()
-    except Exception, e:
-        logger.error(e)
-        db.session.rollback()
-    else:
-        return action
-    return None
+
+def create_JT(action, orgstructure_id):
+    """
+    Создание JobTicket для лабораторного исследования
+
+    :param action: Action
+    :param orgstructure_id:
+    :return: JobTicket
+    """
+    planned_end_date = action.plannedEndDate
+    job_type_id = action.actionType.jobType_id
+    jt_date = planned_end_date.date()
+    jt_time = planned_end_date.time()
+    client_id = action.event.client_id
+    at_tissue_type = action.actionType.tissue_type
+    if at_tissue_type is None:
+        raise Exception(u'Неверно настроены параметры биозаборов для создания лабораторных исследований')
+
+    job = Job.query.filter(
+        Job.jobType_id == job_type_id,
+        Job.date == jt_date,
+        Job.orgStructure_id == orgstructure_id,
+        Job.begTime <= jt_time,
+        Job.endTime >= jt_time
+    ).first()
+    if not job:
+        job = Job()
+        job.date = jt_date
+        job.begTime = '00:00:00'
+        job.endTime = '23:59:59'
+        job.jobType_id = job_type_id
+        job.orgStructure_id = orgstructure_id
+        job.quantity = 100
+        db.session.add(job)
+    ttj = TakenTissueJournal.query.filter(
+        TakenTissueJournal.client_id == client_id,
+        TakenTissueJournal.tissueType_id == at_tissue_type.tissueType_id,
+        TakenTissueJournal.datetimeTaken == planned_end_date
+    ).first()
+    if not ttj:
+        ttj = TakenTissueJournal()
+        ttj.client_id = client_id
+        ttj.tissueType_id = at_tissue_type.tissueType_id
+        ttj.amount = at_tissue_type.amount
+        ttj.unit_id = at_tissue_type.unit_id
+        ttj.datetimeTaken = planned_end_date
+        ttj.externalId = action.event.externalId
+        db.session.add(ttj)
+    action.takenTissueJournal = ttj
+    jt = JobTicket()
+    jt.job = job
+    jt.datetime = planned_end_date
+    db.session.add(jt)
+    return jt
 
 
 def isRedDay(date):
@@ -206,6 +356,7 @@ def get_planned_end_datetime(action_type_id):
     return datetime.combine(plannedEndDate, plannedEndTime)
 
 
+@cache.memoize(86400)
 def get_kladr_city(code):
     if len(code) == 13:  # убрать после конвертации уже записанных кодов кладр
         code = code[:-2]
@@ -228,6 +379,7 @@ def get_kladr_city(code):
     return result
 
 
+@cache.memoize(86400)
 def get_kladr_street(code):
     if len(code) == 17:  # убрать после конвертации уже записанных кодов кладр
         code = code[:-2]
@@ -244,3 +396,51 @@ def get_kladr_street(code):
             data['code'] = data['identcode']
             data['name'] = u'{0} {1}'.format(data['fulltype'], data['name'])
     return data
+
+
+@cache.memoize(86400)
+def int_get_atl_flat(at_class):
+    from application.lib.agesex import parseAgeSelector
+
+    id_list = {}
+
+    def schwing(t):
+        t = list(t)
+        t[5] = list(parseAgeSelector(t[7]))
+        t[7] = t[7].split() if t[7] else None
+        t[8] = bool(t[8])
+        t.append([])
+        id_list[t[0]] = t
+        return t
+
+    raw = db.text(
+        ur'''SELECT
+            ActionType.id, ActionType.name, ActionType.code, ActionType.flatCode, ActionType.group_id,
+            ActionType.age, ActionType.sex,
+            GROUP_CONCAT(OrgStructure_ActionType.master_id SEPARATOR ' '),
+            ActionType.isRequiredTissue
+            FROM ActionType
+            LEFT JOIN OrgStructure_ActionType ON OrgStructure_ActionType.actionType_id = ActionType.id
+            WHERE ActionType.class = {at_class} AND ActionType.deleted = 0 AND ActionType.hidden = 0
+            GROUP BY ActionType.id'''.format(at_class=at_class))
+        # This was goddamn unsafe, but I can't get it working other way
+    result = map(schwing, db.session.execute(raw))
+    raw = db.text(
+        ur'''SELECT actionType_id, id, name, age, sex FROM ActionPropertyType
+        WHERE isAssignable != 0 AND actionType_id IN ('{0}') AND deleted = 0'''.format("','".join(map(str, id_list.keys())))
+    )
+    map(lambda (at_id, apt_id, name, age, sex):
+        id_list[at_id][9].append(
+            (apt_id, name, list(parseAgeSelector(age)), sex)
+        ), db.session.execute(raw)
+    )
+    return result
+
+
+@cache.cached(86400)
+def int_get_atl_dict_all():
+    all_at_apt = {}
+    for class_ in range(4):
+        flat = int_get_atl_flat(class_)
+        all_at_apt.update(dict([(at[0], at) for at in flat]))
+    return all_at_apt

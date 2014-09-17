@@ -3,18 +3,23 @@
  */
 var WebMis20 = angular.module('WebMis20', [
     'WebMis20.services',
+    'WebMis20.services.dialogs',
     'WebMis20.directives',
+    'WebMis20.directives.personTree',
+    'WebMis20.directives.ActionTypeTree',
+    'WebMis20.ActionLayout',
+    'WebMis20.directives.goodies',
     'WebMis20.controllers',
     'WebMis20.LoadingIndicator',
     'WebMis20.validators',
     'ui.bootstrap',
     'ui.select',
     'ngSanitize',
-    'ngCkeditor',
     'sf.treeRepeat',
     'ui.mask',
     'formstamp',
-    'mgcrea.ngStrap.affix'
+    'mgcrea.ngStrap.affix',
+    'duScroll'
 ])
 .config(function ($interpolateProvider, datepickerConfig, datepickerPopupConfig) {
     $interpolateProvider.startSymbol('[[');
@@ -111,11 +116,11 @@ var WebMis20 = angular.module('WebMis20', [
         var value = data[key];
         if (!value) return value;
         var result = moment(value);
-        if (aux.endswith(key, 'Date')) {
+        if (key.endswith('Date')) {
             return result.format('DD.MM.YYYY');
-        } else if (aux.endswith(key, 'DateTime')) {
+        } else if (key.endswith('DateTime')) {
             return result.format('DD.MM.YYYY HH:mm');
-        } else if (aux.endswith(key, 'Time')) {
+        } else if (key.endswith('Time')) {
             return result.format('HH:mm');
         } else {
             if (result.isValid()) {
@@ -131,6 +136,63 @@ var WebMis20 = angular.module('WebMis20', [
         if (data instanceof Array)
             return data.join(char);
         return data
+    }
+})
+.filter('attribute', function ($filter) {
+    return function (array, attribute) {
+        var value = arguments[2];
+        var func = arguments[3];
+        var attrs = attribute.split('.');
+        var item_attribute;
+        if (func === undefined) {
+            item_attribute = function (item) {
+                return safe_traverse(item, attrs)
+            }
+        } else if (typeof(func) == 'function') {
+            item_attribute = function (item) {
+                return func(safe_traverse(item, attrs))
+            }
+        } else {
+            throw 'Ну что это за ерунда?'
+        }
+        if (array instanceof Array) {
+            if (value === undefined) {
+                return array.filter(function (item) {
+                    return Boolean(item_attribute(item));
+                })
+            } else if (value instanceof Array) {
+                return array.filter(function (item) {
+                    return value.has(item_attribute(item));
+                })
+            } else {
+                return array.filter(function (item) {
+                    return item_attribute(item) == value;
+                })
+            }
+        } else {
+            return array;
+        }
+    }
+})
+.filter('action_group_filter', function ($filter) {
+    return function (items, group) {
+        if (items instanceof Array) {
+            var ff;
+            switch (group) {
+                case 'medical_documents':
+                    ff = function (item) {return item.type.class == 0}; break;
+                case 'treatments':
+                    ff = function (item) {return item.type.class == 2}; break;
+                case 'diagnostics':
+                    ff = function (item) {return item.type.class == 1 && item.type.is_required_tissue == false}; break;
+                case 'lab':
+                    ff = function (item) {return item.type.class == 1 && item.type.is_required_tissue == true}; break;
+                default:
+                    throw 'action_group_filter'
+            }
+            return items.filter(ff)
+        }
+        return items;
     }
 })
 .filter('event_type_filter', function() {
@@ -176,7 +238,7 @@ var WebMis20 = angular.module('WebMis20', [
                     if (item.contingent && itemMatches){
                         item.contingent.forEach(function(cont){
                             if((!cont.sex || cont.sex == client_info.info.sex.id) &&
-                               (!cont.org_id || cont.org_id == client_info.info.work_org_id) &&
+                               (!cont.org_id || cont.org_id == client_info.work_org_id) &&
                                (!cont.insurer_id || cont.insurer_id == client_info.compulsory_policy.insurer_id) &&
                                  (!cont.policyType_id || cont.policyType_id == client_info.compulsory_policy.policyType_id)){
                                 itemMatches = true;
@@ -210,6 +272,18 @@ var WebMis20 = angular.module('WebMis20', [
             }
         }
         return out;
+    }
+})
+.filter('highlight', function() {
+    return function (input, query) {
+        if (input) {
+            var query_array = query.split(' ');
+            input = input.toString();
+            for (var i = 0; i < query_array.length; i++) {
+                input = input.replace(new RegExp('('+ query_array[i] + ')', 'gi'), '<mark>$1</mark>');
+            }
+        }
+        return input;
     }
 })
 
@@ -296,7 +370,7 @@ var WebMis20 = angular.module('WebMis20', [
 
     return Settings;
 }])
-.factory('PrintingService', ['$window', '$http', '$rootScope', function ($window, $http, $rootScope) {
+.factory('PrintingService', ['$window', '$http', '$rootScope', '$timeout', function ($window, $http, $rootScope, $timeout) {
     var PrintingService = function (context_type) {
         if (arguments.length >= 3) {
             this.target = arguments[2]
@@ -309,6 +383,7 @@ var WebMis20 = angular.module('WebMis20', [
     };
     PrintingService.prototype.set_context = function (context) {
         if (context === this.context) return;
+        this.context = context;
         var t = this;
         $http.get(url_print_templates + context + '.json')
         .success(function (data) {
@@ -316,7 +391,15 @@ var WebMis20 = angular.module('WebMis20', [
                 return (left.code < right.code) ? -1 : (left.code > right.code ? 1 : 0)
             });
         })
+        .error(function (data, status) {
+            if (data === '' && status === 0) {
+                t.not_available = true;
+            }
+        });
     };
+    PrintingService.prototype.is_available = function () {
+        return Boolean(this.context) && !this.not_available;
+    }
     PrintingService.prototype.print_template = function(template_data_list, separated) { // [ {template_id, context}, ... ]
         var self = this;
         var send_data = {
@@ -341,69 +424,93 @@ var WebMis20 = angular.module('WebMis20', [
             w.document.open();
             w.document.write(data);
             w.document.close();
-            w.print();
+            // timeout to fix chrome (36) behaviour - empty print preview https://code.google.com/p/chromium/issues/detail?id=396667
+            $timeout(w.print, 300);
         })
         .error(function (data, status) {
-            $rootScope.$broadcast('printing_error', {
-                text: 'Ошибка соединения с сервером печати',
-                code: status,
-                data: data,
-                type: 'danger'
-            })
-        })
+            var result = data.result,
+                info = (data === '' && status === 0) ?
+                    {
+                        text: 'Ошибка соединения с сервером печати',
+                        code: status,
+                        data: null,
+                        type: 'danger'
+                    } :
+                    {
+                        text: result.name,
+                        code: status,
+                        data: result.data,
+                        type: 'danger'
+                    };
+            $rootScope.$broadcast('printing_error', info);
+        });
     };
     return PrintingService;
 }])
 .factory('WMAction', ['$http', '$rootScope', function ($http, $rootScope) {
+        // FIXME: На данный момент это ломает функциональность действий, но пока пофиг.
     var Action = function () {
-        this.action = null;
-        this.action_culumns = {};
-        this.event_id = null;
-        this.action_type_id = null;
+        this.action = {};
+        this.layout = {};
+        this.action_columns = {};
+        this.properties_by_id = {};
+        this.properties_by_code = {};
     };
-    function success_wrapper(t) {
+    function success_wrapper(self) {
         return function (data) {
-            angular.extend(t, data.result);
-            t.action_columns = {
+            self.action = data.result.action;
+            self.layout = data.result.layout;
+            self.action_columns = {
                 assignable: false,
                 unit: false
             };
-            angular.forEach(data.result.properties, function (item) {
-                t.action_columns.assignable |= item.type.is_assignable;
-                t.action_columns.unit |= item.type.unit;
+            self.properties_by_id = {};
+            self.properties_by_code = {};
+
+            angular.forEach(data.result.action.properties, function (item) {
+                self.action_columns.assignable |= item.type.is_assignable;
+                self.action_columns.unit |= item.type.unit;
+
+
+                self.properties_by_id[item.type.id] = item;
+
+                if (item.type.code) {
+                    self.properties_by_code[item.type.code] = item;
+                }
             });
-            $rootScope.$broadcast('action_loaded', t);
+            $rootScope.$broadcast('action_loaded', self);
         }
     }
     Action.prototype.get = function (id) {
-        var t = this;
         return $http.get(url_action_get, {
             params: {
                 action_id: id
             }
-        }).success(success_wrapper(t));
+        }).success(success_wrapper(this));
     };
     Action.prototype.get_new = function (event_id, action_type_id) {
-        this.event_id = event_id;
-        this.action_type_id = action_type_id;
-        var t = this;
+        this.action.event_id = event_id;
+        this.action.action_type_id = action_type_id;
         return $http.get(url_action_new, {
             params: {
                 action_type_id: action_type_id,
                 event_id: event_id
             }
-        }).success(success_wrapper(t));
+        }).success(success_wrapper(this));
     };
     Action.prototype.save = function () {
-        var t = this;
-        $http.post(url_action_save, this).success(success_wrapper(t));
+        $http.post(
+            url_action_save, this.action).success(success_wrapper(this));
         return this;
     };
     Action.prototype.cancel = function () {
-        if (this.action.id) {
-            this.get(this.action.id)
+        window.close();
+    };
+    Action.prototype.get_property = function (id) {
+        if (id instanceof String) {
+            return this.properties_by_code[id];
         } else {
-            this.get_new(this.event_id, this.action_type_id)
+            return this.properties_by_id[id];
         }
     };
     return Action;
@@ -435,6 +542,80 @@ var WebMis20 = angular.module('WebMis20', [
     return EventType;
     }
 ])
+.factory('SelectAll', function () {
+    var SelectAll = function (source) {
+        this._source = source;
+        this._selected = source.clone();
+    };
+    SelectAll.prototype.setSource = function (source) {
+        this._source = source;
+        this._selected = source.clone();
+    };
+    SelectAll.prototype.selected = function () {
+        var item = arguments[0];
+        if (item === undefined) {
+            return this._selected;
+        } else {
+            return this._selected.has(item);
+        }
+    };
+    SelectAll.prototype.selectAll = function () {
+        this._selected = this._source.clone();
+    };
+    SelectAll.prototype.selectNone = function () {
+        this._selected = [];
+    };
+    SelectAll.prototype.select = function (item) {
+        var checked = arguments[1];
+        if (checked === false) {
+            this._selected.remove(item);
+        } else {
+            if (!this._selected.has(item)) {
+                this._selected.push(item);
+            }
+        }
+    };
+    SelectAll.prototype.toggle = function (item) {
+        var index = this._selected.indexOf(item);
+        if (index === -1) {
+            this._selected.push(item);
+        } else {
+            this._selected.splice(index, 1);
+        }
+    };
+    return SelectAll
+})
+.directive('wmCheckbox', ['$compile', function ($compile) {
+    return {
+        restrict: 'E',
+        scope: {
+            selectAll: '=',
+            key: '='
+        },
+        link: function (scope, element, attributes) {
+            // Создаём элементы
+            var inputElement = $('<input type="checkbox"></input>');
+            var replace = $('<label></label>');
+            // Формируем элеменент для замены
+            replace.append(inputElement);
+            replace.append(element.html());
+
+            // 2-way binding
+            function select() {
+                scope.selectAll.select(scope.key, this.checked);
+                scope.$root.$digest(); // Это может негативно влиять на производительность, но оно нужно.
+            }
+            scope.$watch('selectAll._selected', function (n, o) {
+                inputElement[0].checked = scope.selectAll.selected(scope.key);
+                return n;
+            });
+
+            $(element).replaceWith(replace); // Заменяем исходный элемент
+            inputElement.change(select); // Цепляем хендл. Не могу сказать, как jQuery поступит при дестрое элемента
+            $compile(replace)(scope); // Компилируем
+        }
+    }
+}])
 // end services
 .directive('uiMkb', function ($timeout, RefBookService) {
     return {
@@ -488,7 +669,7 @@ var WebMis20 = angular.module('WebMis20', [
             };
             scope.search = function (actual, expected) {
                 return actual.split(' ').filter(function (part) {
-                    return aux.startswith(part, expected)
+                    return part.startswith(expected)
                 }).length > 0;
             };
             function to_hide () {
@@ -523,7 +704,7 @@ var WebMis20 = angular.module('WebMis20', [
                 }
                 if (n == 'busy') {
                     elem.removeClass('btn-success btn-warning btn-gray disabled');
-                    elem.addClass('btn-danger');
+                    elem.addClass('btn-primary');
                     if (scope.showName) {
                         text += ' - ' + scope.ticket.client
                     }
@@ -535,9 +716,10 @@ var WebMis20 = angular.module('WebMis20', [
                         case 'extra': elem.addClass('btn-gray'); break;
                     }
                     var now = moment();
-                    if (scope.day.roa ||
+                    scope.ticket.disabled = scope.day.roa ||
                         scope.ticket.begDateTime && (moment(scope.ticket.begDateTime) < now) ||
-                                                     moment(scope.day.date) < now.startOf('day')) {
+                                                     moment(scope.day.date) < now.startOf('day');
+                    if (scope.ticket.disabled) {
                         elem.addClass('disabled');
                     }
                 }
@@ -546,45 +728,6 @@ var WebMis20 = angular.module('WebMis20', [
 
         }
     };
-}])
-.directive('uiActionProperty', ['$compile', function ($compile) {
-    return {
-        restrict: 'A',
-        replace: true,
-        link: function (scope, element, attributes) {
-            var property = scope.$property = scope.$eval(attributes.uiActionProperty);
-            var typeName = property.type.type_name;
-            var element_code = null;
-            switch (typeName) {
-                case 'Text':
-                case 'Html':
-                case 'Жалобы':
-                case 'Constructor':
-                    element_code = '<textarea ckeditor="ckEditorOptions" ng-model="$property.value"></textarea>';
-                    break;
-                case 'Date':
-                    element_code = '<input type="text" class="form-control" datepicker-popup="dd-MM-yyyy" ng-model="$property.value" />';
-                    break;
-                case 'Integer':
-                case 'Double':
-                case 'Time':
-                    element_code = '<input class="form-control" type="text" ng-model="$property.value">';
-                    break;
-                case 'String':
-                    if (property.type.domain) {
-                        element_code = '<select class="form-control" ng-model="$property.value" ng-options="val for val in $property.type.values"></select>'
-                    } else {
-                        element_code = '<input class="form-control" type="text" ng-model="$property.value">';
-                    }
-                    break;
-                default:
-                    element_code = '<span ng-bind="$property.value">';
-            }
-            var el = angular.element(element_code);
-            $(element[0]).append(el);
-            $compile(el)(scope);
-        }
-    }
 }])
 .directive('wmTime', ['$document',
     function ($document) {
@@ -598,12 +741,27 @@ var WebMis20 = angular.module('WebMis20', [
                 ngRequired: '=',
                 ngDisabled: '='
             },
-            templateUrl: "_timePicker.html",
+            template:
+'<div class="input-group">\
+    <input type="text" id="{{id}}" name="{{name}}" class="form-control"\
+           ng-model="ngModel" autocomplete="off"\
+           ng-required="ngRequired" show-time ng-disabled="ngDisabled"/>\
+    <span class="input-group-btn">\
+        <button class="btn btn-default" type="button" ng-click="open_timepicker_popup()" ng-disabled="ngDisabled">\
+            <i class="glyphicon glyphicon-time"></i>\
+        </button>\
+        <div class="timepicker_popup" ng-show="isPopupVisible">\
+            <div ng-model="ngModel" style="display:inline-block;">\
+                <timepicker show-meridian="false"></timepicker>\
+            </div>\
+        </div>\
+    </span>\
+</div>',
             link: function(scope, element, attr){
                 scope.isPopupVisible = false;
                 scope.open_timepicker_popup = function(){
                     scope.isPopupVisible = !scope.isPopupVisible;
-                }
+                };
 
                 $document.bind('click', function(event){
                     var isClickedElementChildOfPopup = element
@@ -617,7 +775,6 @@ var WebMis20 = angular.module('WebMis20', [
                     scope.$apply();
                   });
             }
-
         };
     }
 ])
@@ -663,73 +820,6 @@ var WebMis20 = angular.module('WebMis20', [
     }
   };
 })
-.directive('wmCustomDropdown', function ($timeout) {
-    return {
-        restrict: 'A',
-        scope: {},
-        link: function (scope, element) {
-            var element_control = $($(element).find('*[wm-cdd-control]')[0]);
-            var element_input = $($(element).find('*[wm-cdd-input]')[0]);
-            if (!element_control[0]) {
-                element_control = element_input;
-                console.info('assuming element with wm-cdd-input is also wm-cdd-contol');
-            }
-            if (!element_input[0]) {
-                throw 'wmCustomDropdown directive must have an element with wm-cdd-input attribute'
-            }
-            element_input.focusin(show_popup);
-            element_input.click(show_popup);
-            var element_popup = $($(element).find('*[wm-cdd-popup]')[0]);
-            if (!element_input[0]) {
-                throw 'wmCustomDropdown directive must have an element with wm-cdd-popup attribute'
-            }
-            element_popup.addClass('wm-popup');
-            element_popup.mouseenter(show_popup);
-            element_popup.mouseleave(hide_popup);
-            var hide_timeout = null;
-            function ensure_timeout_killed () {
-                if (hide_timeout) {
-                    $timeout.cancel(hide_timeout);
-                    hide_timeout = null;
-                }
-            }
-            var hide_popup_int = scope.hide_popup = function () {
-                ensure_timeout_killed();
-                element_popup.hide();
-            };
-            function show_popup () {
-                ensure_timeout_killed();
-                element_popup.width(Math.max(element_control.width(), element_popup.width()));
-                element_popup.show();
-            }
-            function hide_popup () {
-                ensure_timeout_killed();
-                hide_timeout = $timeout(hide_popup_int, element_popup.attr.wmCddPopup || 600);
-            }
-        }
-    }
-})
-.directive('wmSlowChange', function ($timeout) {
-    return {
-        restrict: 'A',
-        require: 'ngModel',
-        link: function (scope, element, attr, ngModel) {
-            var query_timeout = null;
-            function ensure_timeout_killed () {
-                if (query_timeout) {
-                    $timeout.cancel(query_timeout);
-                    query_timeout = null;
-                }
-            }
-            ngModel.$viewChangeListeners.push(function () {
-                ensure_timeout_killed();
-                query_timeout = $timeout(function () {
-                    scope.$eval(attr.wmSlowChange)
-                }, attr.wmSlowChangeTimeout || 600)
-            });
-        }
-    }
-})
 .directive('wmPageHeader', function ($timeout) {
     return {
         link: function (scope, element, attr) {
@@ -738,7 +828,100 @@ var WebMis20 = angular.module('WebMis20', [
             }
         }
     }
-});
+})
+.directive("freeInputSelect", [
+    '$timeout', function($timeout) {
+      return {
+        restrict: "A",
+        scope: {
+          items: '=',
+          disabled: '=ngDisabled',
+          freetext: '@',
+          builder: '=',
+          "class": '@'
+        },
+        require: '?ngModel',
+        replace: true,
+        template: function(el) {
+          var itemTpl, template;
+          itemTpl = el.html();
+          return template = "<div class='fs-select fs-widget-root'>\n  <div ng-hide=\"active\" class=\"fs-select-sel\" ng-class=\"{'btn-group': item}\">\n      <a class=\"btn btn-default fs-select-active\"\n         ng-class='{\"btn-danger\": invalid}'\n         href=\"javascript:void(0)\"\n         ng-click=\"active = true\"\n         ng-disabled=\"disabled\">\n           <span ng-show='item'>" + itemTpl + "</span>\n           <span ng-hide='item'>none</span>\n      </a>\n      <button type=\"button\"\n              class=\"btn btn-default fs-select-clear-btn\"\n              aria-hidden=\"true\"\n              ng-show='item'\n              ng-disabled=\"disabled\"\n              ng-click='unselectItem()'>&times;</button>\n    </div>\n  <div class=\"open\" ng-show=\"active\">\n    <input class=\"form-control\"\n           fs-input\n           fs-focus-when='active'\n           fs-blur-when='!active'\n           fs-on-focus='active = true'\n           fs-on-blur='onBlur()'\n           fs-hold-focus\n           fs-down='move(1)'\n           fs-up='move(-1)'\n           fs-pg-up='move(-11)'\n           fs-pg-down='move(11)'\n           fs-enter='onEnter($event)'\n           fs-esc='active = false'\n           type=\"text\"\n           placeholder='Search'\n           ng-model=\"search\"\n           fs-null-form />\n\n    <div ng-if=\"active && dropdownItems.length > 0\">\n      <div fs-list items=\"dropdownItems\">\n       " + itemTpl + "\n      </div>\n    </div>\n  </div>\n</div>";
+        },
+        controller: function($scope, $element, $attrs, $filter, $timeout) {
+          var updateDropdown;
+          $scope.active = false;
+          if ($attrs.freetext != null) {
+            $scope.dynamicItems = function() {
+              if ($scope.search) {
+                var free_input = $scope.builder($scope.search);
+                return [free_input];
+              } else {
+                return [];
+              }
+            };
+          } else {
+            $scope.dynamicItems = function() {
+              return [];
+            };
+          }
+          updateDropdown = function() {
+            return $scope.dropdownItems = $filter('filter')($scope.items, $scope.search).concat($scope.dynamicItems());
+          };
+          $scope.$watch('active', function(q) {
+            return updateDropdown();
+          });
+          $scope.$watch('search', function(q) {
+            return updateDropdown();
+          });
+          $scope.selectItem = function(item) {
+            $scope.item = item;
+            $scope.search = "";
+            return $scope.active = false;
+          };
+          $scope.unselectItem = function(item) {
+            return $scope.item = null;
+          };
+          $scope.onBlur = function() {
+            return $timeout(function() {
+              $scope.active = false;
+              return $scope.search = '';
+            }, 0, true);
+          };
+          $scope.move = function(d) {
+            return $scope.listInterface.move && $scope.listInterface.move(d);
+          };
+          $scope.onEnter = function(event) {
+            if ($scope.dropdownItems.length > 0) {
+              return $scope.selectItem($scope.listInterface.selectedItem);
+            } else {
+              return $scope.selectItem(null);
+            }
+          };
+          return $scope.listInterface = {
+            onSelect: function(selectedItem) {
+              return $scope.selectItem(selectedItem);
+            },
+            move: function() {
+              return console.log("not-implemented listInterface.move() function");
+            }
+          };
+        },
+        link: function(scope, element, attrs, ngModelCtrl, transcludeFn) {
+          if (ngModelCtrl) {
+            scope.$watch('item', function(newValue, oldValue) {
+              if (newValue !== oldValue) {
+                return ngModelCtrl.$setViewValue(scope.item);
+              }
+            });
+            return ngModelCtrl.$render = function() {
+              return scope.item = ngModelCtrl.$viewValue;
+            };
+          }
+        }
+      };
+    }
+  ]);
+
 var aux = {
     getQueryParams: function (qs) {
         qs = qs.split("+").join(" ");
@@ -770,30 +953,6 @@ var aux = {
         {name: 'Ноябрь', value: 10},
         {name: 'Декабрь', value: 11}
     ],
-    endswith: function (str, suffix) {
-        return str.indexOf(suffix, str.length - suffix.length) !== -1;
-    },
-    startswith: function (str, prefix) {
-        return str.indexOf(prefix) === 0;
-    },
-    format: function (record, key) {
-        if (typeof (record) === 'undefined') {
-            return null;
-        } else if (aux.endswith(key, 'DateTime')) {
-            return moment(record[key]).format('DD-MM-YYYY HH:mm');
-        } else if (aux.endswith(key, 'Date')) {
-            return moment(record[key]).format('DD-MM-YYYY');
-        } else {
-            return record[key];
-        }
-    },
-    arrayCopy: function (source) {
-        // proven fastest copy mechanism http://jsperf.com/new-array-vs-splice-vs-slice/28
-        var b = [];
-        var i = source.length;
-        while (i--) {b[i] = source[i]}
-        return b;
-    },
     func_in: function (against) {
         return function (item) {
             return against.indexOf(item) !== -1;
@@ -804,28 +963,93 @@ var aux = {
             return against.indexOf(item) === -1;
         }
     },
-    find_by_code: function (where, code, field) {
-        if (typeof (field) === 'undefined') field = 'code';
-        var subresult = where.filter(function (item) {return item[field] == code});
-        if (subresult.length === 0) return null;
-        return subresult[0]
-    },
-    inArray: function (array, item) {
-        return array.indexOf(item) !== -1;
-    },
-    removeFromArray: function (array, item) {
-        if (aux.inArray(array, item))
-            array.splice(array.indexOf(item), 1)
-    },
-    forEach: function (object, callback) {
-        var result = {};
-        var key;
-        for (key in object) {
-            result[key] = callback(object[key]);
+    any_in: function (what, where) {
+        for (var i = what.length-1; i >= 0; i--) {
+            for (var j = where.length-1; j >= 0; j--) {
+                if (what[i] == what[j]) {
+                    return true;
+                }
+            }
         }
-        return result
+        return false;
+    },
+    safe_date: function (val) {
+        if (!val) {
+            return null;
+        }
+        var date = moment(val);
+        return date.isValid() ? date.toDate() : null;
+
+    },
+    make_tree: function (array, masterField) {
+        /**
+         * @param array: Исходный массив данных
+         * @param masterField: Наименование поля указателя на родительский элемент
+         * @param idField: наименование поля идентификатора. (default: 'id')
+         * @param childrenField: наименование поля со списком детей (default: 'children')
+         * @param make_object: Функция, возвращающая элемент дерева по элементу массива function(item)
+         * @param filter_function: Функция, фильтрующая элементы массива function(item, lookup_dict)
+         * @rtype {*}
+         */
+        var idField = arguments[2] || 'id',
+            childrenField = arguments[3] || 'children',
+            filter_function = arguments[5] || function () {return true;},
+            make_object = arguments[4] || function (item) {
+                if (item === null) {
+                    var result = {};
+                    result[masterField] = null;
+                    result[idField] = 'root';
+                    result[childrenField] = [];
+                    return result
+                }
+                return item
+            };
+        var idDict = new dict({
+            root: null
+        });
+        var masterDict = new dict({
+            root: []
+        });
+        array.forEach(function (item) {
+            var id = item[idField];
+            idDict[id] = item;
+        });
+        var filtered = array.filter(function (item) {
+            return filter_function(item, idDict)
+        });
+        filtered.forEach(function (item) {
+            do {
+                var master = item[masterField] || 'root';
+                if (masterDict[master] === undefined) masterDict[master] = [];
+                if (masterDict[master].has(item[idField])) return;
+                masterDict[master].push(item[idField]);
+                item = idDict[master];
+            } while (item)
+        });
+        function recurse(id) {
+            var childrenObject = {};
+            var children_list = masterDict[id] || [];
+            childrenObject[childrenField] = children_list.map(recurse);
+            return angular.extend({}, make_object(idDict[id]), childrenObject);
+        }
+        return {
+            root: recurse('root'),
+            idDict: idDict,
+            masterDict: masterDict
+        };
     }
 };
+function safe_traverse(object, attrs) {
+    var o = object, attr;
+    for (var i = 0; i < attrs.length; ++i) {
+        attr = attrs[i];
+        o = o[attr];
+        if (o === undefined) {
+            return undefined
+        }
+    }
+    return o;
+}
 if (!HTMLElement.prototype.hasOwnProperty('getOffsetRect')) {
     HTMLElement.prototype.getOffsetRect = function () {
         // (1)
@@ -843,5 +1067,58 @@ if (!HTMLElement.prototype.hasOwnProperty('getOffsetRect')) {
         var top  = box.top +  scrollTop - clientTop;
         var left = box.left + scrollLeft - clientLeft;
         return { top: Math.round(top), left: Math.round(left) }
+    }
+}
+if (!String.prototype.format) {
+    String.prototype.format = function() {
+        var args = arguments;
+        return this.replace(/{(\d+)}/g, function(match, number) {
+            return typeof args[number] != 'undefined'
+                ? args[number]
+                : match
+                ;
+        });
+    };
+}
+if (!String.prototype.startswith) {
+    String.prototype.startswith = function (prefix) {
+        return this.indexOf(prefix) === 0;
+    }
+}
+if (!String.prototype.endswith) {
+    String.prototype.endswith = function (suffix) {
+        return this.indexOf(suffix, this.length - suffix.length) !== -1;
+    }
+}
+if (!Array.prototype.clone) {
+    Array.prototype.clone = function () {
+        var b = [];
+        var i = this.length;
+        while (i--) {b[i] = this[i]}
+        return b;
+    }
+}
+if (!Array.prototype.has) {
+    Array.prototype.has = function (item) {
+        return this.indexOf(item) !== -1
+    }
+}
+if (!Array.prototype.remove) {
+    Array.prototype.remove = function (item) {
+        var index = this.indexOf(item);
+        if (index !== -1) {
+            return this.splice(index, 1)
+        } else {
+            if (arguments[1]) {
+                throw Error('Array doesn\'t have element')
+            } else {
+                return undefined
+            }
+        }
+    }
+}
+if (!Array.range) {
+    Array.range = function (num) {
+        return Array.apply(null, new Array(num)).map(function(_, i) {return i;})
     }
 }

@@ -1,4 +1,4 @@
-<table class="table table-condensed">
+<table class="table table-condensed novmargin">
     <thead>
     <tr>
         <th>Отметка</th>
@@ -15,41 +15,15 @@
         <td>[[ record.mark ]]</td>
         <td>[[ record.begDateTime | asDateTime ]]</td>
         <td>[[ record.office.code ]]</td>
-        <td>[[ record.person ]]</td>
+        <td>[[ record.person ]] <span class="text-muted" ng-if="record.person_speciality">([[ record.person_speciality ]])</span></td>
         <td>[[ record.createPerson.name ]]</td>
         <td>[[ record.note ]]</td>
         <td width="1%">
-            <button ng-click="new_event(client_id, record.id)" class="btn btn-success" title="Создать обращение"><span class="glyphicon glyphicon-plus"></span></button>
+            {% if current_user.role_in(('admin', 'rRegistartor', 'clinicRegistrator')) %}<button ng-click="new_event(client_id, record.id)" class="btn btn-sm btn-success" title="Создать обращение"><span class="glyphicon glyphicon-plus"></span></button>{% endif %}
         </td>
         <td width="1%">
-            <ui-print-button ps="ps_home" resolve="ps_home_resolve(record.id)" ng-if="record.receptionType.code == 'home'"></ui-print-button>
-            <ui-print-button ps="ps_amb" resolve="ps_amb_resolve(record.id)" ng-if="record.receptionType.code == 'amb'"></ui-print-button>
-{#            <div class="dropdown">#}
-{#                <button class="btn btn-default" type="button" data-target="print_dropdownMenu2"#}
-{#                        data-toggle="dropdown" ng-if="record.receptionType.code == 'amb'" ng-disabled="!ps_amb.templates" title="Печать">#}
-{#                    <span class="glyphicon glyphicon-print"></span>#}
-{#                    <span class="caret"></span>#}
-{#                </button>#}
-{#                <button class="btn btn-default" type="button" data-target="print_dropdownMenu2"#}
-{#                        data-toggle="dropdown" ng-if="record.receptionType.code == 'home'" ng-disabled="!ps_home.templates" title="Печать">#}
-{#                    <span class="glyphicon glyphicon-print"></span>#}
-{#                    <span class="caret"></span>#}
-{#                </button>#}
-{#                <ul class="dropdown-menu dropdown-menu-right" role="menu" id="print_dropdownMenu2">#}
-{#                    <li role="presentation" ng-repeat="template in ps_amb.templates"#}
-{#                        ng-if="record.receptionType.code == 'amb'">#}
-{#                        <a role="menuitem" tabindex="-1" href="" class="print_template"#}
-{#                           ng-click="ps_amb.print_template(template.id, record.id)" ng-bind="template.name">#}
-{#                        </a>#}
-{#                    </li>#}
-{#                    <li role="presentation" ng-repeat="template in ps_home.templates"#}
-{#                        ng-if="record.receptionType.code == 'home'">#}
-{#                        <a role="menuitem" tabindex="-1" href="" class="print_template"#}
-{#                           ng-click="ps_home.print_template(template.id, record.id)" ng-bind="template.name">#}
-{#                        </a>#}
-{#                    </li>#}
-{#                </ul>#}
-{#            </div>#}
+            <ui-print-button ps="ps_home" class="btn-sm" resolve="ps_home_resolve(record.id)" ng-if="record.receptionType.code == 'home'"></ui-print-button>
+            <ui-print-button ps="ps_amb" class="btn-sm" resolve="ps_amb_resolve(record.id)" ng-if="record.receptionType.code == 'amb'"></ui-print-button>
         </td>
     </tr>
     </tbody>

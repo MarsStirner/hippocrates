@@ -15,7 +15,7 @@ class User(UserMixin):
                                   for key, value in person.__dict__.iteritems()
                                   if not callable(value) and not key.startswith('__')))
         self.roles = list()
-        self.current_role = None
+        self._current_role = None
         self.rights = dict()
         self.post = dict()
         if person.post:
@@ -24,15 +24,46 @@ class User(UserMixin):
                              if not callable(value) and not key.startswith('__')))
         self.set_roles_rights(person)
 
+        orgStructure = person.OrgStructure
+        atos = set()
+        while orgStructure:
+            atos.add(orgStructure.id)
+            orgStructure = orgStructure.parent if orgStructure.inheritActionTypes else None
+        self.action_type_org_structures = atos
+        self.action_type_personally = []
+
+    @property
+    def current_role(self):
+        return getattr(self, '_current_role', None)
+
+    @current_role.setter
+    def current_role(self, value):
+        self._current_role = value
+        from ..models.actions import ActionType_User
+        from ..models.exists import rbUserProfile
+        self.action_type_personally = [
+            record.actionType_id
+            for record in ActionType_User.query.outerjoin(rbUserProfile).filter(db.or_(
+                ActionType_User.person_id == self.id,
+                rbUserProfile.code == value
+            ))
+        ]
+
     def is_active(self):
         return self.deleted == 0
 
     def is_admin(self):
-        return self.current_role == 'admin'
+        return getattr(self, 'current_role', None) == 'admin'
 
-    def role_in(self, roles):
-        if not isinstance(roles, (list, tuple)):
-            roles = [roles]
+    def role_in(self, *args):
+        roles = []
+        for arg in args:
+            if isinstance(arg, list):
+                roles.extend(arg)
+            elif isinstance(arg, tuple):
+                roles.extend(list(arg))
+            else:
+                roles.append(arg)
         return self.current_role in roles
 
     def has_role(self, role):
@@ -55,11 +86,31 @@ class User(UserMixin):
                     for right in role.rights:
                         self.rights[role.code].append(right.code)
 
+    def export_js(self):
+        return {
+            'id': self.get_id(),
+            'roles': self.roles,
+            'is_admin': self.is_admin(),
+            'current_role': self.current_role,
+            'rights': self.rights,
+            'action_type_org_structures': sorted(getattr(self, 'action_type_org_structures', set())),
+            'action_type_personally': sorted(getattr(self, 'action_type_personally', [])),
+        }
+
 
 class AnonymousUser(AnonymousUserMixin):
 
     def is_admin(self):
         return False
+
+    def export_js(self):
+        return {
+            'id': None,
+            'roles': [],
+            'is_admin': self.is_admin(),
+            'current_role': None,
+            'rights': [],
+        }
 
 
 class UserAuth():
@@ -91,3 +142,15 @@ class UserAuth():
     @classmethod
     def get_by_id(cls, user_id):
         return User(db.session.query(Person).get(int(user_id)))
+
+    @classmethod
+    def get_roles_by_login(cls, login):
+        from ..models.exists import rbUserProfile, PersonProfiles
+        return [
+            {'code': role.code, 'name': role.name}
+            for role in (rbUserProfile.query
+                         .join(PersonProfiles)
+                         .join(Person)
+                         .filter(Person.login == login)
+                         .order_by(rbUserProfile.name))
+        ]

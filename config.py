@@ -30,7 +30,8 @@ BABEL_DEFAULT_LOCALE = 'ru_RU'
 
 BEAKER_SESSION = {'session.type': 'file',
                   'session.data_dir': '/tmp/session/data',
-                  'session.lock_dir': '/tmp/session/lock'}
+                  'session.lock_dir': '/tmp/session/lock',
+                  'session.key': '{0}.beaker.session.id'.format(os.path.basename(os.path.abspath('..')))}
 
 TIME_ZONE = 'Europe/Moscow'
 
@@ -45,7 +46,9 @@ ORGANISATION_INFIS_CODE = 500
 PRINT_SUBSYSTEM_URL = ''
 VESTA_URL = ''
 
+TITLE = u'WebMIS 2.0'
 COPYRIGHT_COMPANY = u'КОРУС Консалтинг ИТ'
+LPU_STYLE = 'FNKC'
 
 try:
     from config_local import *

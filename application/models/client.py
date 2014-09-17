@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 import datetime
-from application.lib.agesex import calcAgeTuple
+from application.lib.agesex import calcAgeTuple, formatDays, formatMonthsWeeks, formatYearsMonths, formatYears
 from application.lib.const import ID_DOC_GROUP_CODE, VOL_POLICY_CODES, COMP_POLICY_CODES
 from application.models.utils import safe_current_user_id
 from application.models.enums import Gender, LocalityType, AllergyPower
-from application.models.exists import rbDocumentTypeGroup, rbDocumentType
+from application.models.exists import rbDocumentTypeGroup, rbDocumentType, rbContactType
 from application.models.kladr_models import Kladr, Street
 from application.systemwide import db
 from sqlalchemy import orm
@@ -152,9 +152,31 @@ class Client(db.Model):
         """
         @type moment: datetime.datetime
         """
+        if not self.birthDate:
+            return None
         if not moment:
-            moment = datetime.datetime.now()
+            moment = datetime.date.today()
         return calcAgeTuple(self.birthDate, moment)
+
+
+    @property
+    def age(self):
+        bd = self.birthDate
+        date = datetime.date.today()
+        if not self.age_tuple():
+            return u'ещё не родился'
+        (days, weeks, months, years) = self.age_tuple()
+        if years > 7:
+            return formatYears(years)
+        elif years > 1:
+            return formatYearsMonths(years, months-12*years)
+        elif months > 1:
+            add_year, new_month = divmod(bd.month + months, 12)
+            fmonth_date = bd.replace(month=new_month, year=bd.year+add_year)
+            return formatMonthsWeeks(months, (date-fmonth_date).days/7)
+        else:
+            return formatDays(days)
+
 
     @property
     def nameText(self):
@@ -218,15 +240,12 @@ class Client(db.Model):
 
     @property
     def phones(self):
-        return ', '.join([
-            (u'%s: %s (%s)' % (contact.name, contact.contact, contact.notes))
-            if contact.notes
-            else (u'%s: %s' % (contact.name, contact.contact))
-            for contact in self.contacts
-        ])
+        return [(u'%s: %s (%s)' % (contact.name, contact.contact, contact.notes))
+                if contact.notes
+                else (u'%s: %s' % (contact.name, contact.contact))
+                for contact in self.contacts.join(rbContactType).order_by(rbContactType.idx)]
 
     def has_identical_addresses(self):
-        # TODO: fix this
         reg = self.reg_address
         live = self.loc_address
         if reg and live:
@@ -253,7 +272,9 @@ class Client(db.Model):
             'snils': self.SNILS,
             'full_name': self.nameText,
             'notes': self.notes,
-            'work_org_id': self.works[0].org_id if self.works else None,
+            'age_tuple': self.age_tuple(),
+            'age': self.age,
+            'sex_raw': self.sexCode
         }
 
 
@@ -359,8 +380,7 @@ class ClientAddress(db.Model):
             'free_input': self.freeInput,
             'locality_type': LocalityType(self.localityType) if self.localityType is not None else None,
             'text_summary': self.__unicode__(),
-            'same_as_reg': getattr(self, 'same_as_reg', False),
-            'copy_from_id': getattr(self, 'copy_from_id', None)
+            'synced': getattr(self, 'synced', False)
         }
 
     def __int__(self):
@@ -933,7 +953,8 @@ class ClientPolicy(db.Model):
         self.number = number
         self.begDate = beg_date
         self.endDate = end_date
-        self.insurer_id = int(insurer) if insurer else None
+        self.insurer_id = int(insurer['id']) if insurer['id'] else None
+        self.name = insurer['full_name'] if not insurer['id'] else None
         self.client = client
 
     def __unicode__(self):
@@ -954,7 +975,13 @@ class ClientPolicy(db.Model):
             'number': self.number,
             'beg_date': self.begDate,
             'end_date': self.endDate,
-            'insurer': self.insurer,
+            'insurer': self.insurer if self.insurer else {
+                'id': None,
+                'full_name': self.name,
+                'short_name': self.name,
+                'infis': None,
+                'title': None
+            },
             'policy_text': self.__unicode__()
         }
 
@@ -1003,31 +1030,14 @@ class Address(db.Model):
         db.Index(u'house_id', u'house_id', u'flat'),
     )
 
-    id = db.Column(db.Integer,
-                   primary_key=True)
-    createDatetime = db.Column(db.DateTime,
-                               nullable=False,
-                               default=datetime.datetime.now)
-    createPerson_id = db.Column(db.Integer,
-                                index=True,
-                                default=safe_current_user_id)
-    modifyDatetime = db.Column(db.DateTime,
-                               nullable=False,
-                               default=datetime.datetime.now,
-                               onupdate=datetime.datetime.now)
-    modifyPerson_id = db.Column(db.Integer,
-                                index=True,
-                                default=safe_current_user_id,
-                                onupdate=safe_current_user_id)
-    deleted = db.Column(db.Integer,
-                        nullable=False,
-                        default=0,
-                        server_default=u"'0'")
-    house_id = db.Column(db.Integer,
-                         db.ForeignKey('AddressHouse.id'),
-                         nullable=False)
-    flat = db.Column(db.String(6),
-                     nullable=False)
+    id = db.Column(db.Integer, primary_key=True)
+    createDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now)
+    createPerson_id = db.Column(db.Integer, index=True, default=safe_current_user_id)
+    modifyDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now, onupdate=datetime.datetime.now)
+    modifyPerson_id = db.Column(db.Integer, index=True, default=safe_current_user_id, onupdate=safe_current_user_id)
+    deleted = db.Column(db.Integer, nullable=False, default=0, server_default=u"'0'")
+    house_id = db.Column(db.Integer, db.ForeignKey('AddressHouse.id'), nullable=False)
+    flat = db.Column(db.String(6), nullable=False)
 
     house = db.relationship(u'AddressHouse')
 
@@ -1036,9 +1046,18 @@ class Address(db.Model):
         addr = cls()
         addr.flat = flat_number
 
+        loc_kladr_code, street_kladr_code = cls.compatible_kladr(loc_kladr_code, street_kladr_code)
+
         addr_house = AddressHouse(loc_kladr_code, street_kladr_code, house_number, corpus_number)
         addr.house = addr_house
         return addr
+
+    @classmethod
+    def compatible_kladr(cls, kladr_code, street_kladr_code):
+        # Для совместимости со старыми кодами КЛАДР в НТК добавляем 00
+        kladr_code = '{0}00'.format(kladr_code) if len(kladr_code) == 11 else kladr_code
+        street_kladr_code = '{0}00'.format(street_kladr_code) if len(street_kladr_code) == 15 else street_kladr_code
+        return kladr_code, street_kladr_code
 
     @property
     def KLADRCode(self):
@@ -1052,7 +1071,7 @@ class Address(db.Model):
 
     @property
     def city(self):
-        from application.lib.data import get_kladr_city  # TODO: fix?
+        from application.lib.data import get_kladr_city
         text = ''
         if self.KLADRCode:
             city_info = get_kladr_city(self.KLADRCode)
@@ -1100,7 +1119,7 @@ class Address(db.Model):
 
     @property
     def street(self):
-        from application.lib.data import get_kladr_street  # TODO: fix?
+        from application.lib.data import get_kladr_street
         text = ''
         if self.KLADRStreetCode:
             street_info = get_kladr_street(self.KLADRStreetCode)

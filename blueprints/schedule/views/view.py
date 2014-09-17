@@ -20,14 +20,6 @@ def index():
         abort(404)
 
 
-@module.route('/doctors/')
-def doctors():
-    try:
-        return render_template('schedule/doctors.html')
-    except TemplateNotFound:
-        abort(404)
-
-
 @module.route('/appointment/')
 @breadcrumb(u'Запись на прием')
 def appointment():
@@ -49,6 +41,16 @@ def appointment():
 def person_schedule_monthview():
     try:
         return render_template('schedule/person_schedule_monthview.html')
+    except TemplateNotFound:
+        abort(404)
+
+
+@module.route('/doctor/')
+@roles_require('clinicDoctor')
+@breadcrumb(u'Приём пациентов')
+def doctor_schedule_day():
+    try:
+        return render_template('schedule/doctor_schedule_day.html')
     except TemplateNotFound:
         abort(404)
 

@@ -30,10 +30,8 @@ def check_valid_login():
             not current_user.is_admin() and
             not getattr(app.view_functions[request.endpoint], 'is_public', False)):
 
-        if not login_valid:
-            return redirect(url_for('login', next=url_for(request.endpoint)))
-        if not current_user.current_role:
-            return redirect(url_for('select_role', next=url_for(request.endpoint)))
+        if not login_valid or not getattr(current_user, 'current_role', None):
+            return redirect(url_for('login', next=request.url))
 
 
 @app.route('/')
@@ -52,16 +50,22 @@ def login():
         user = UserAuth.auth_user(form.login.data.strip(), form.password.data.strip())
         if user:
             # Keep the user info in the session using Flask-Login
+            user.current_role = request.form['role']
             if login_user(user):
+                session_save_user(user)
                 # Tell Flask-Principal the identity changed
                 identity_changed.send(current_app._get_current_object(), identity=Identity(user.id))
-                return redirect(url_for('select_role', next=request.args.get('next')))
+                return redirect(request.args.get('next') or request.referrer or url_for('index'))
             else:
                 errors.append(u'Аккаунт неактивен')
         else:
             errors.append(u'Неверная пара логин/пароль')
 
     return render_template('user/login.html', form=form, errors=errors)
+
+
+def session_save_user(user):
+    session['hippo_user'] = user
 
 
 @app.route('/select_role/', methods=['GET', 'POST'])
@@ -82,6 +86,7 @@ def select_role():
 
 
 @app.route('/logout/')
+@public_endpoint
 def logout():
     # Remove the user information from the session
     logout_user()
@@ -95,7 +100,7 @@ def logout():
 
 @app.route('/api/rb/')
 @app.route('/api/rb/<name>')
-@cache.memoize(600)  # 86400
+@cache.memoize(86400)
 def api_refbook(name):
     for mod in (enums,):
         if hasattr(mod, name):
@@ -112,6 +117,46 @@ def api_refbook(name):
                 res = jsonify(res)
             return res
     return abort(404)
+
+
+@app.route('/api/roles/')
+@app.route('/api/roles/<user_login>')
+@public_endpoint
+@cache.memoize(86400)
+def api_roles(user_login):
+    return jsonify(UserAuth.get_roles_by_login(user_login.strip()))
+
+
+@cache.memoize(86400)
+def int_api_thesaurus(code):
+    from models.exists import rbThesaurus
+    flat = []
+
+    def make(item):
+        """
+        :type item: rbThesaurus
+        :return:
+        """
+        flat.append((
+            item.id,
+            item.group_id,
+            item.code,
+            item.name,
+            item.template,
+        ))
+        map(make, rbThesaurus.query.filter(rbThesaurus.group_id == item.id))
+    map(make, rbThesaurus.query.filter(rbThesaurus.code == code))
+    return flat
+
+
+
+@app.route('/api/rbThesaurus/')
+@app.route('/api/rbThesaurus/<code>')
+@public_endpoint
+def api_thesaurus(code=None):
+    if not code:
+        return jsonify(None)
+    return jsonify(int_api_thesaurus(code))
 
 
 @app.route('/api/kladr/city/search/')
@@ -176,7 +221,7 @@ def kladr_street(code=None):
 def authorisation_failed(e):
     if request_wants_json():
         return jsonify(unicode(e), result_code=403, result_name=u'Forbidden')
-    flash(u'У вас недостаточно привилегий для доступа к функционалу')
+    flash(u'У вас недостаточно прав для доступа к функционалу')
     return render_template('user/denied.html'), 403
 
 

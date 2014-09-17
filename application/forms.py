@@ -11,3 +11,4 @@ class LoginForm(Form):
 
 class RoleForm(Form):
     roles = SelectField(u'Роль', validators=[Optional()], choices=[])
+

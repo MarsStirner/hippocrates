@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
-from datetime import datetime
+
+import datetime
+
 from application.models.client import Client
 from application.systemwide import db
 from exists import Person, rbReasonOfAbsence, Organisation
+from application.models.utils import safe_current_user_id
 
 
 class rbReceptionType(db.Model):
@@ -17,6 +20,7 @@ class rbReceptionType(db.Model):
 
     def __json__(self):
         return {
+            'id': self.id,
             'code': self.code,
             'name': self.name,
         }
@@ -56,6 +60,24 @@ class rbAppointmentType(db.Model):
         }
 
 
+class rbTimeQuotingType(db.Model):
+    __tablename__ = u'rbTimeQuotingType'
+
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.Integer, nullable=False, unique=True)
+    name = db.Column(db.Text(collation=u'utf8_unicode_ci'), nullable=False)
+
+    def __unicode__(self):
+        return u'(%d) %s' % (self.code, self.name)
+
+    def __json__(self):
+        return {
+            'id': self.id,
+            'code': self.code,
+            'name': self.name,
+        }
+
+
 class Office(db.Model):
     __tablename__ = 'Office'
 
@@ -71,6 +93,7 @@ class Office(db.Model):
 
     def __json__(self):
         return {
+            'id': self.id,
             'code': self.code,
             'name': self.name,
             'org_structure': self.orgStructure
@@ -89,20 +112,23 @@ class Schedule(db.Model):
     office_id = db.Column(db.ForeignKey('Office.id'))
     reasonOfAbsence_id = db.Column(db.Integer, db.ForeignKey('rbReasonOfAbsence.id'))
     receptionType_id = db.Column(db.Integer, db.ForeignKey('rbReceptionType.id'))
-    createDatetime = db.Column(db.DateTime, nullable=False)
-    createPerson_id = db.Column(db.Integer, db.ForeignKey('Person.id'), index=True)
-    modifyDatetime = db.Column(db.DateTime, nullable=False)
-    modifyPerson_id = db.Column(db.Integer, db.ForeignKey('Person.id'), index=True)
-    deleted = db.Column(db.SmallInteger, nullable=False, server_default='0')
+    createDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now)
+    createPerson_id = db.Column(db.Integer, db.ForeignKey('Person.id'), index=True, default=safe_current_user_id)
+    modifyDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now, onupdate=datetime.datetime.now)
+    modifyPerson_id = db.Column(db.Integer, db.ForeignKey('Person.id'), index=True, default=safe_current_user_id, onupdate=safe_current_user_id)
+    deleted = db.Column(db.SmallInteger, nullable=False, server_default='0', default=0)
 
     person = db.relationship('Person', foreign_keys=person_id)
     reasonOfAbsence = db.relationship('rbReasonOfAbsence', lazy='joined')
     receptionType = db.relationship('rbReceptionType', lazy='joined')
     tickets = db.relationship(
         'ScheduleTicket', lazy=False, primaryjoin=
-        "and_(ScheduleTicket.schedule_id == Schedule.id, ScheduleTicket.deleted == 0)")
+        "and_(ScheduleTicket.schedule_id == Schedule.id, ScheduleTicket.deleted == 0)",
+        backref=db.backref('schedule'),
+        order_by='ScheduleTicket.begTime'
+    )
     office = db.relationship('Office', lazy='joined')
-    
+
 
 class ScheduleTicket(db.Model):
     __tablename__ = 'ScheduleTicket'
@@ -112,11 +138,11 @@ class ScheduleTicket(db.Model):
     begTime = db.Column(db.Time)
     endTime = db.Column(db.Time)
     attendanceType_id = db.Column(db.Integer, db.ForeignKey('rbAttendanceType.id'), nullable=False)
-    createDatetime = db.Column(db.DateTime, nullable=False)
-    createPerson_id = db.Column(db.Integer, db.ForeignKey('Person.id'), index=True)
-    modifyDatetime = db.Column(db.DateTime, nullable=False)
-    modifyPerson_id = db.Column(db.Integer, db.ForeignKey('Person.id'), index=True)
-    deleted = db.Column(db.SmallInteger, nullable=False, server_default='0')
+    createDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now)
+    createPerson_id = db.Column(db.Integer, db.ForeignKey('Person.id'), index=True, default=safe_current_user_id)
+    modifyDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now, onupdate=datetime.datetime.now)
+    modifyPerson_id = db.Column(db.Integer, db.ForeignKey('Person.id'), index=True, default=safe_current_user_id, onupdate=safe_current_user_id)
+    deleted = db.Column(db.SmallInteger, nullable=False, server_default='0', default=0)
 
     attendanceType = db.relationship('rbAttendanceType', lazy=False)
     client_ticket = db.relationship(
@@ -124,11 +150,11 @@ class ScheduleTicket(db.Model):
         "and_(ScheduleClientTicket.ticket_id == ScheduleTicket.id, ScheduleClientTicket.deleted == 0)",
         uselist=False)
 
-    schedule = db.relationship(
-        'Schedule', lazy=True, innerjoin=True, uselist=False,
-        primaryjoin='and_('
-                    'Schedule.deleted == 0, ScheduleTicket.deleted == 0, ScheduleTicket.schedule_id == Schedule.id)'
-    )
+    # schedule = db.relationship(
+    #     'Schedule', lazy=True, innerjoin=True, uselist=False,
+    #     primaryjoin='and_('
+    #                 'Schedule.deleted == 0, ScheduleTicket.deleted == 0, ScheduleTicket.schedule_id == Schedule.id)'
+    # )
 
     @property
     def client(self):
@@ -137,11 +163,11 @@ class ScheduleTicket(db.Model):
 
     @property
     def begDateTime(self):
-        return datetime.combine(self.schedule.date, self.begTime) if self.begTime is not None else None
+        return datetime.datetime.combine(self.schedule.date, self.begTime) if self.begTime is not None else None
 
     @property
     def endDateTime(self):
-        return datetime.combine(self.schedule.date, self.endTime) if self.endTime is not None else None
+        return datetime.datetime.combine(self.schedule.date, self.endTime) if self.endTime is not None else None
 
 
 class ScheduleClientTicket(db.Model):
@@ -151,14 +177,14 @@ class ScheduleClientTicket(db.Model):
     client_id = db.Column(db.Integer, db.ForeignKey('Client.id'), nullable=False)
     ticket_id = db.Column(db.Integer, db.ForeignKey('ScheduleTicket.id'), nullable=False)
     isUrgent = db.Column(db.Boolean)
-    note = db.Column(db.Unicode(256))
+    note = db.Column(db.Unicode(256), default=u'')
     appointmentType_id = db.Column(db.Integer, db.ForeignKey('rbAppointmentType.id'))
     infisFrom = db.Column(db.Unicode(20))
-    createDatetime = db.Column(db.DateTime, nullable=False)
-    createPerson_id = db.Column(db.Integer, db.ForeignKey('Person.id'), index=True)
-    modifyDatetime = db.Column(db.DateTime, nullable=False)
-    modifyPerson_id = db.Column(db.Integer, db.ForeignKey('Person.id'), index=True)
-    deleted = db.Column(db.SmallInteger, nullable=False, server_default='0')
+    createDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now)
+    createPerson_id = db.Column(db.Integer, db.ForeignKey('Person.id'), index=True, default=safe_current_user_id)
+    modifyDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now, onupdate=datetime.datetime.now)
+    modifyPerson_id = db.Column(db.Integer, db.ForeignKey('Person.id'), index=True, default=safe_current_user_id, onupdate=safe_current_user_id)
+    deleted = db.Column(db.SmallInteger, nullable=False, server_default='0', default=0)
     event_id = db.Column(db.ForeignKey('Event.id'))
     
     client = db.relationship('Client', lazy='joined', uselist=False)
@@ -183,3 +209,16 @@ class ScheduleClientTicket(db.Model):
         if not org:
             return self.infisFrom
         return org.title
+
+
+class QuotingByTime(db.Model):
+    __tablename__ = u'QuotingByTime'
+
+    id = db.Column(db.Integer, primary_key=True)
+    doctor_id = db.Column(db.Integer)
+    quoting_date = db.Column(db.Date, nullable=False)
+    QuotingTimeStart = db.Column(db.Time, nullable=False)
+    QuotingTimeEnd = db.Column(db.Time, nullable=False)
+    quotingType_id = db.Column("QuotingType", db.Integer, db.ForeignKey('rbTimeQuotingType.code'))
+
+    quotingType = db.relationship('rbTimeQuotingType', lazy='joined')

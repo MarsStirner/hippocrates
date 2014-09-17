@@ -9,7 +9,7 @@
             <div class="input-group">
                 <span class="input-group-addon"><span class="glyphicon glyphicon-search"></span></span>
                 <input id="search" class="form-control" type="text" ng-model="query" autocomplete="off"
-                       placeholder="Поиск пациента по коду, ФИО, полису или документу, удостоверяющему личность">
+                       placeholder="Поиск пациента по коду, ФИО, дате рождения, полису или документу, удостоверяющему личность">
                 <span class="input-group-addon" ng-click="query_clear()" style="cursor: pointer">
                     <span class="glyphicon glyphicon-remove"></span></span>
             </div>
@@ -19,8 +19,10 @@
             <caption>
                 <span ng-if="results.length > 0">Результаты поиска</span>
                 <span ng-if="results.length === 0 && query">Нет результатов</span>
+                {% if current_user.role_in(('rRegistartor', 'clinicRegistrator')) %}
                 <button ng-click="open_client('new');" class="btn btn-primary pull-right"
                         ng-show="!results.length">Зарегистрировать пациента</button>
+                {% endif %}
             </caption>
             <thead ng-if="results.length > 0">
             <tr>
@@ -45,83 +47,15 @@
                 <td ng-click="open_client(result.id)" ng-bind="result.voluntaryPolicy.policyText"></td>
                 <td>
                     <ui-print-button ps="ps" resolve="ps_resolve(result.id)"></ui-print-button>
-{#                    <div class="dropdown">#}
-{#                        <button class="btn dropdown-toggle" type="button" id="print_dropdownMenu"#}
-{#                                ng-disabled="!ps.templates" data-toggle="dropdown">#}
-{#                            <span class="glyphicon glyphicon-print"></span>#}
-{#                            <span class="caret"></span>#}
-{#                        </button>#}
-{#                        <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="print_dropdownMenu">#}
-{#                            <li role="presentation" ng-repeat="template in ps.templates">#}
-{#                                <a role="menuitem" tabindex="-1" href="" class="print_template"#}
-{#                                   ng-click="ps.print_template(template.id, result.id)" ng-bind="template.name">#}
-{#                                </a>#}
-{#                            </li>#}
-{#                        </ul>#}
-{#                    </div>#}
                 </td>
             </tr>
             </tbody>
         </table>
 {#        <pre>[[schedule|json]]</pre>#}
     </div>
-    <script type="text/ng-template" id="modal-print-dialog.html">{% include "_modal-print-dialog.html" %}</script>
 {% endblock %}
 
 {% block modules_js %}
     {{ super() }}
-    <script type="text/javascript">
-        WebMis20.controller('ClientSearch', ['$scope', '$http', '$timeout', '$window', 'PrintingService',
-        function ($scope, $http, $timeout, $window, PrintingService) {
-            $scope.ps = new PrintingService('registry');
-            $scope.ps_resolve = function (client_id) {
-                return {
-                    client_id: client_id
-                }
-            }
-            $scope.ps.set_context('token');
-            $scope.aux = aux;
-            $scope.params = aux.getQueryParams(document.location.search);
-            $scope.query = "";
-            $scope.results = [];
-            $scope.alerts = [];
-            var _timeoutObjectForQuery;
-
-            $scope.$watch('query', function (val) {
-                if (_timeoutObjectForQuery) $timeout.cancel(_timeoutObjectForQuery);
-                _timeoutObjectForQuery = $timeout(function () {
-                    $scope.results = null;
-                    $scope.perform_search(val);
-                }, 500)
-            });
-
-            $scope.perform_search = function (val) {
-                if (!val) {
-                    $scope.results = [];
-                } else {
-                    $http.get(
-                        '{{ url_for('.api_search_clients') }}', {
-                            params: {
-                                q: val
-                            }
-                        }
-                    ).success(function (data) {
-                        $scope.results = data.result;
-                    })
-                }
-            };
-
-            $scope.open_client = function (client_id) {
-                window.open('{{ url_for('patients.patient') }}?client_id=' + client_id, '_self');
-            };
-
-            $scope.$on('printing_error', function (event, error) {
-                $scope.alerts.push(error);
-            });
-
-            $scope.query_clear = function () {
-                $scope.query = '';
-            }
-        }]);
-    </script>
+    <script type="text/javascript" src="{{ url_for('.static', filename='js/index.js', v=version) }}"></script>
 {% endblock %}

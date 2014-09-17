@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('WebMis20.directives').
-    directive('wmKladrAddress', ['$timeout', function($timeout) {
+    directive('wmKladrAddress', [function() {
         return {
             restrict: 'E',
             require: '^form',
@@ -16,6 +16,7 @@ angular.module('WebMis20.directives').
                 flatModel: '=',
                 freeInputModel: '=',
                 addressModel: '=',
+                dependentAddress: '=',
                 editMode: '&'
             },
             controller: function ($scope) {
@@ -32,8 +33,9 @@ angular.module('WebMis20.directives').
                     return mode.switch_to_free_input;
                 };
 
-                $scope.sameAddress = function() {
-                    return $scope.addressModel.same_as_reg;
+                $scope.show_warning = function () {
+                  return (!$scope.mode.kladr_addr_valid && $scope.addressForm.$dirty) &&
+                      !($scope.addressModel.synced && $scope.dependentAddress)
                 };
 
                 $scope.setFreeInputText = function(switched) {
@@ -57,40 +59,6 @@ angular.module('WebMis20.directives').
                 $scope.clearStreet = function() {
                     widgets.street.reset();
                 };
-
-//                $scope.copy_address = function(same) {
-//                    var cur_id = $scope.addressModel.id;
-//                    if (same) {
-//                        var copy_from = $scope.copyFromModel;
-//                        if (copy_from.free_input) {
-//                            mode.switch_to_free_input = true;
-//                        }
-//                        angular.copy(copy_from, $scope.addressModel);
-//                        $scope.addressModel.id = cur_id;
-//                        // если что-то изменится в совпадающем адресе, то убрать галочку и прекратить слежение
-//                        // timeout - чтобы сначала прошли предыдущие watch со смены $scope.addressModel
-//                        $timeout(function() {
-//                            var unregister_watcher = $scope.$watchCollection(function() {
-//                                var col = [];
-//                                angular.forEach(widgets, function(w) {
-//                                    col.push(w.model);
-//                                });
-//                                return col;
-//                            }, function(n, o) {
-//                                if (n !== o) {
-//                                    $scope.addressModel.same_as_reg = false;
-//                                    unregister_watcher();
-//                                }
-//                            });
-//                        });
-//                    } else {
-//                        var copy_from = {};
-//                        mode.switch_to_free_input = false;
-//                        angular.copy(copy_from, $scope.addressModel);
-//                    }
-//                    $scope.addressModel.same_as_reg = same;
-//                    $scope.addressModel.copy_from_id = copy_from.id;
-//                };
             },
             link: function(scope, elm, attrs, formCtrl) {
                 scope.addressForm = formCtrl;
@@ -103,15 +71,12 @@ angular.module('WebMis20.directives').
                     }).length === n.length;
                 });
                 var unregister_init_mode_set = scope.$watch('widgets.freeinput.model', function(n, o) {
+                    // для совпадающих адресов
                     if (angular.isString(n) && n !== '') {
                         scope.mode.switch_to_free_input = true;
-                        unregister_init_mode_set();
-                    }
-                });
-                var unregister_init_after_copy = scope.$watch('addressModel.dirty', function(n, o) {
-                    if (n !== undefined && o !== undefined) {
-                        scope.addressForm.$setDirty(n);
-                        unregister_init_after_copy();
+//                        unregister_init_mode_set();
+                    } else {
+                         scope.mode.switch_to_free_input = false;
                     }
                 });
                 scope.$watch('mode.switch_to_free_input', function(n, o) {
@@ -125,32 +90,95 @@ angular.module('WebMis20.directives').
                         scope.addressModel.dirty = n;
                     }
                 });
+                scope.$watch('addressModel.dirty', function(n, o) {
+                    if (n && !scope.addressForm.$dirty) {
+                        scope.addressForm.$setDirty(n);
+                    }
+                });
                 scope.$watch(function() {
                     return scope.widgets.locality.model;
                 }, function(n, o) {
                     if (n !== o) { scope.clearStreet(); }
                 });
-                scope.$watch('addressModel.copy_from_id', function(n, o) {
-                    if (angular.isDefined(n)) {
-                        //если что-то изменится в совпадающем адресе, то убрать галочку и прекратить слежение
-                        // timeout - чтобы сначала прошли предыдущие watch со смены $scope.addressModel
-                        var unregister_watcher = scope.$watchCollection(function() {
-                            var col = [];
-                            angular.forEach(scope.widgets, function(w) {
-                                col.push(w.model);
-                            });
-                            return col;
-                        }, function(n, o) {
-                            if (n !== o) {
-                                scope.addressModel.same_as_reg = false;
-                                unregister_watcher();
-                                scope.addressModel.copy_from_id = undefined;
-                            }
-                        });
-                    }
-                });
             },
-            templateUrl: 'kladr-ui.html'
+            template:
+'<div>\
+    <div class="panel panel-default">\
+        <div class="panel-body">\
+            <div ng-transclude></div>\
+            <alert ng-show="show_warning()" type="danger">Введенный адрес не найден в справочнике адресов Кладр.\
+                <a ng-click="mode.switch_to_free_input = !mode.switch_to_free_input">\
+                [[mode.switch_to_free_input ? "Выбрать из Кладр" : "Ввести адрес вручную?"]]</a>\
+            </alert>\
+            <div class="row">\
+                <div class="form-group col-md-9"\
+                     ng-class="{\'has-error\': addressForm.$dirty &&\
+                        (addressForm.locality.$error.required || (!inFreeInputMode() && addressForm.locality.$invalid))}">\
+                    <label for="[[prefix]]_locality">Населенный пункт</label>\
+                    <wm-kladr-locality id="[[prefix]]_locality" name="locality"\
+                        model="localityModel" required="!inFreeInputMode() && addressForm.$dirty"\
+                        disabled="mode.switch_to_free_input || !editMode()">\
+                    </wm-kladr-locality>\
+                </div>\
+                <div class="form-group col-md-3"\
+                     ng-class="{\'has-error\': addressForm.$dirty && addressForm.locality_type.$invalid}">\
+                    <label for="[[prefix]]_locality_type">Тип населенного пункта</label>\
+                    <wm-kladr-locality-type id="[[prefix]]_locality_type" name="locality_type"\
+                        model="localityTypeModel" required="addressForm.$dirty"\
+                        disabled="!editMode()">\
+                    </wm-kladr-locality-type>\
+                </div>\
+            </div>\
+\
+            <div class="row">\
+                <div class="form-group col-md-9"\
+                     ng-class="{\'has-error\': addressForm.$dirty &&\
+                        (addressForm.street.$error.required || (!inFreeInputMode() && addressForm.street.$invalid))}">\
+                    <label for="[[prefix]]_street">Улица</label>\
+                    <wm-kladr-street id="[[prefix]]_street" name="street"\
+                        model="streetModel" required="!inFreeInputMode() && addressForm.$dirty"\
+                        disabled="mode.switch_to_free_input || !editMode()">\
+                    </wm-kladr-street>\
+                </div>\
+                <div class="form-group col-md-1"\
+                     ng-class="{\'has-error\': addressForm.$dirty && addressForm.house_number.$error.required && addressForm.house_number.$invalid}">\
+                    <label for="[[prefix]]_house_number">Дом</label>\
+                    <wm-kladr-house-number id="[[prefix]]_house_number" name="house_number"\
+                        model="houseModel" required="!inFreeInputMode() && addressForm.$dirty"\
+                        disabled="mode.switch_to_free_input || !editMode()">\
+                    </wm-kladr-house-number>\
+                </div>\
+                <div class="form-group col-md-1"\
+                     ng-class="{\'has-error\': addressForm.$dirty && addressForm.corpus_number.$error.required && addressForm.corpus_number.$invalid}">\
+                    <label for="[[prefix]]_corpus_number">Корпус</label>\
+                    <wm-kladr-corpus-number id="[[prefix]]_corpus_number" name="corpus_number"\
+                        model="corpusModel" required="false"\
+                        disabled="mode.switch_to_free_input || !editMode()">\
+                    </wm-kladr-corpus-number>\
+                </div>\
+                <div class="form-group col-md-1"\
+                     ng-class="{\'has-error\': addressForm.$dirty && addressForm.flat_number.$error.required && addressForm.flat_number.$invalid}">\
+                    <label for="[[prefix]]_flat_number">Квартира</label>\
+                    <wm-kladr-flat-number id="[[prefix]]_flat_number" name="flat_number"\
+                        model="flatModel" required="false"\
+                        disabled="mode.switch_to_free_input || !editMode()">\
+                    </wm-kladr-flat-number>\
+                </div>\
+            </div>\
+\
+            <div class="row" ng-show="inFreeInputMode()">\
+                <div class="form-group col-md-12"\
+                     ng-class="{\'has-error\': addressForm.$dirty && addressForm.free_input.$error.required && addressForm.free_input.$invalid}">\
+                    <label for="[[prefix]]_free_input">В свободном виде</label>\
+                    <wm-kladr-free-input id="[[prefix]]_free_input" name="free_input"\
+                        model="freeInputModel" required="inFreeInputMode() && addressForm.$dirty"\
+                        disabled="!mode.switch_to_free_input || !editMode()">\
+                    </wm-kladr-free-input>\
+                </div>\
+            </div>\
+        </div>\
+    </div>\
+</div>'
         };
     }]).
     directive('wmKladrLocality', ['$http', function($http) {
@@ -166,7 +194,7 @@ angular.module('WebMis20.directives').
             controller: function($scope) {
                 $scope.getCity = function(search_q) {
                     var url = [kladr_city + 'search/' + search_q + '/'].join('');
-//                    var url = url_kladr_get;
+//                    var url = url_kladr_city_get;
                     return $http.get(url, {}).then(function(res) {
                         return res.data.result;
                     });
@@ -211,14 +239,14 @@ angular.module('WebMis20.directives').
                 scope.rbLocalityType = RefBookService.get('LocalityType');
                 kladrCtrl.registerWidget('locality_type', scope);
 
-                modelCtrl.$parsers.unshift(function(viewValue) {
-                    if (modelCtrl.$isEmpty(viewValue)) {
-                        modelCtrl.$setValidity('select', false);
-                        return undefined;
-                    }
-                    modelCtrl.$setValidity('select', true);
-                    return viewValue;
-                });
+//                modelCtrl.$parsers.unshift(function(viewValue) {
+//                    if (modelCtrl.$isEmpty(viewValue)) {
+//                        modelCtrl.$setValidity('select', false);
+//                        return undefined;
+//                    }
+//                    modelCtrl.$setValidity('select', true);
+//                    return viewValue;
+//                });
             },
             template:
                 '<select class="form-control" ng-model="model"\
@@ -245,6 +273,7 @@ angular.module('WebMis20.directives').
                         return [];
                     }
                     var url = [kladr_street, 'search/', loc, '/', search_q, '/' ].join('');
+//                    var url = url_kladr_street_get;
                     return $http.get(url, {}).then(function(res) {
                         return res.data.result;
                     });

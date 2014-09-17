@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
+
 import datetime
+from application.lib.agesex import recordAcceptableEx
 
 from flask import request, abort
 from flask.ext.login import current_user
@@ -10,19 +12,28 @@ from config import ORGANISATION_INFIS_CODE
 from application.models.actions import ActionType, Action
 from application.models.client import Client
 from application.models.enums import EventPrimary, EventOrder
-from application.models.event import (Event, EventType, EventType_Action, Diagnosis, Diagnostic, EventPayment, Visit,
+from application.models.event import (Event, EventType, Diagnosis, Diagnostic, EventPayment, Visit,
                                       rbVisitType, rbScene, Event_Persons)
 from application.models.exists import Person, OrgStructure
 from application.systemwide import db
-from application.lib.utils import (jsonify, safe_traverse, get_new_uuid,
-                                   string_to_datetime, get_new_event_ext_id)
+from application.lib.utils import (jsonify, safe_traverse, get_new_uuid, logger, get_new_event_ext_id, safe_datetime)
 from blueprints.event.app import module
 from application.models.exists import (Organisation, )
 from application.lib.jsonify import EventVisualizer, ClientVisualizer
-from blueprints.event.lib.utils import get_local_contract, get_prev_event_payment, create_new_local_contract, \
-    get_event_services, create_services
+from blueprints.event.lib.utils import (EventSaveException, get_local_contract,
+    create_new_local_contract, create_services)
 from application.lib.sphinx_search import SearchEventService
-from application.lib.data import create_action
+from application.lib.data import get_planned_end_datetime, int_get_atl_dict_all
+
+
+@module.errorhandler(EventSaveException)
+def handle_event_error(err):
+    return jsonify({
+        'name': err.message,
+        'data': {
+            'err_msg': err.data
+        }
+    }, 422, 'error')
 
 
 @module.route('/api/event_info.json')
@@ -35,13 +46,13 @@ def api_event_info():
     }
     if current_user.role_in('admin'):
         data['diagnoses'] = vis.make_diagnoses(event)
-        data['payment'] = vis.make_event_payment(event.localContract, event_id)
-        data['services'] = get_event_services(event_id)
+        data['payment'] = vis.make_event_payment(event)
+        data['services'] = vis.make_event_services(event_id)
     elif current_user.role_in('doctor'):
         data['diagnoses'] = vis.make_diagnoses(event)
     elif current_user.role_in(('rRegistartor', 'clinicRegistrator')):
-        data['payment'] = vis.make_event_payment(event.localContract, event_id)
-        data['services'] = get_event_services(event_id)
+        data['payment'] = vis.make_event_payment(event)
+        data['services'] = vis.make_event_services(event_id)
     return jsonify(data)
 
 
@@ -50,7 +61,7 @@ def api_event_new_get():
     event = Event()
     event.eventType = EventType.get_default_et()
     event.organisation = Organisation.query.filter_by(infisCode=str(ORGANISATION_INFIS_CODE)).first()
-    event.isPrimaryCode = EventPrimary.primary[0]  # TODO: check previous events
+    event.isPrimaryCode = EventPrimary.primary[0]
     event.order = EventOrder.planned[0]
 
     ticket_id = request.args.get('ticket_id')
@@ -66,6 +77,8 @@ def api_event_new_get():
         note = ''
         exec_person_id = safe_current_user_id()
     event.execPerson_id = exec_person_id
+    event.execPerson = Person.query.get(exec_person_id)
+    event.orgStructure = event.execPerson.OrgStructure
     event.client = Client.query.get(client_id)
     event.setDate = setDate
     event.note = note
@@ -79,83 +92,119 @@ def api_event_new_get():
 
 @module.route('api/event_save.json', methods=['POST'])
 def api_event_save():
-    now = datetime.datetime.now()
     event_data = request.json['event']
     close_event = request.json['close_event']
     event_id = event_data.get('id')
-    execPerson = Person.query.get(event_data['exec_person']['id'])
+    is_diagnostic = event_data['event_type']['request_type']['code'] == '4'
+    if is_diagnostic:
+        execPerson = None
+    else:
+        execPerson = Person.query.get(event_data['exec_person']['id'])
+    err_msg = u'Ошибка сохранения данных обращения'
+    create_mode = not event_id
     if event_id:
         event = Event.query.get(event_id)
-        event.modifyDatetime = now
-        event.modifyPerson_id = current_user.get_id() or 1  # todo: fix
         event.deleted = event_data['deleted']
         event.eventType = EventType.query.get(event_data['event_type']['id'])
         event.execPerson = execPerson
-        event.setDate = string_to_datetime(event_data['set_date'])
+        event.setDate = safe_datetime(event_data['set_date'])
         event.contract_id = event_data['contract']['id']
         event.isPrimaryCode = event_data['is_primary']['id']
         event.order = event_data['order']['id']
         event.orgStructure_id = event_data['org_structure']['id']
         event.result_id = event_data['result']['id'] if event_data.get('result') else None
         event.rbAcheResult_id = event_data['ache_result']['id'] if event_data.get('ache_result') else None
-        event.note = ''
+        event.note = event_data['note']
         db.session.add(event)
     else:
         event = Event()
-        event.createDatetime = event.modifyDatetime = now
-        event.createPerson_id = event.modifyPerson_id = event.setPerson_id = current_user.get_id() or 1  # todo: fix
-        event.deleted = 0
-        event.version = 0
+        event.setPerson_id = current_user.get_id()
         event.eventType = EventType.query.get(event_data['event_type']['id'])
         event.client_id = event_data['client_id']
         event.execPerson = execPerson
-        event.setDate = string_to_datetime(event_data['set_date'])
+        event.setDate = safe_datetime(event_data['set_date'])
         event.externalId = get_new_event_ext_id(event.eventType.id, event.client_id)
         event.contract_id = event_data['contract']['id']
         event.isPrimaryCode = event_data['is_primary']['id']
         event.order = event_data['order']['id']
         event.org_id = event_data['organisation']['id']
         event.orgStructure_id = event_data['org_structure']['id']
-        event.note = ''
         event.payStatus = 0
+        event.note = event_data['note']
         event.uuid = get_new_uuid()
-        # TODO: обязательность в зависимости от типа события?
-        payment_data = request.json['payment']
-        if payment_data and payment_data['local_contract']:
-            lcon = get_local_contract(payment_data['local_contract'])
+
+        local_contract = safe_traverse(request.json, 'payment', 'local_contract')
+        if event.payer_required:
+            if not local_contract:
+                raise EventSaveException(err_msg, u'Не заполнена информация о плательщике.')
+            lcon = get_local_contract(local_contract)
             event.localContract = lcon
         db.session.add(event)
 
-        visit = Visit.make_default(event)
-        db.session.add(visit)
-        executives = Event_Persons()
-        executives.person = event.execPerson
-        executives.event = event
-        executives.begDate = event.setDate
-        db.session.add(executives)
+        if not is_diagnostic:
+            visit = Visit.make_default(event)
+            db.session.add(visit)
+            executives = Event_Persons()
+            executives.person = event.execPerson
+            executives.event = event
+            executives.begDate = event.setDate
+            db.session.add(executives)
 
     if close_event:
         exec_date = event_data['exec_date']
-        event.execDate = string_to_datetime(exec_date) if exec_date else now
+        event.execDate = safe_datetime(exec_date) if exec_date else datetime.datetime.now()
 
     try:
         db.session.commit()
-    except:
-        db.session.rollback()
+    except EventSaveException:
         raise
+    except Exception, e:
+        logger.error(e, exc_info=True)
+        db.session.rollback()
+        return jsonify({'name': err_msg,
+                        'data': {
+                            'err_msg': 'INTERNAL SERVER ERROR'
+                        }},
+                       500, 'save event data error')
     else:
+        response_result = {
+            'id': int(event)
+        }
         services_data = request.json.get('services', [])
-        cfinance_id = event_data['contract']['finance']['id']
-        create_services(event.id, services_data, cfinance_id)
+        contract_id = event_data['contract']['id']
+        if create_mode:
+            try:
+                actions, errors = create_services(event.id, services_data, contract_id)
+            except Exception, e:
+                db.session.rollback()
+                logger.error(u'Ошибка сохранения услуг при создании обращения %s: %s' % (event.id, e), exc_info=True)
+                response_result['error_text'] = u'Обращение создано, но произошла ошибка при сохранении услуг. ' \
+                                                u'Свяжитесь с администратором.'
+            else:
+                if errors:
+                    err_msg = u'Обращение создано, но произошла ошибка при сохранении следующих услуг:' \
+                              u'<br><br> - %s<br>Свяжитесь с администратором.' % (u'<br> - '.join(errors))
+                    response_result['error_text'] = err_msg
 
-    if request.json.get('ticket_id'):
-        ticket = ScheduleClientTicket.query.get(int(request.json['ticket_id']))
-        ticket.event_id = int(event)
-        db.session.commit()
+            if request.json.get('ticket_id'):
+                ticket = ScheduleClientTicket.query.get(int(request.json['ticket_id']))
+                ticket.event_id = int(event)
+                db.session.commit()
+        else:
+            try:
+                actions, errors = create_services(event.id, services_data, contract_id)
+            except Exception, e:
+                db.session.rollback()
+                logger.error(u'Ошибка сохранения услуг для обращения %s: %s' % (event.id, e), exc_info=True)
+                raise EventSaveException(u'Ошибка сохранения услуг', u'Свяжитесь с администратором.')
+            else:
+                if errors:
+                    err_msg = u'\n\n - %s\nСвяжитесь с администратором.' % (
+                        u'\n - '.join(errors)
+                    )
+                    raise EventSaveException(u'Произошла ошибка при сохранении следующих услуг', err_msg)
 
-    return jsonify({
-        'id': int(event)
-    })
+    return jsonify(response_result)
 
 
 @module.route('/api/events/diagnosis.json', methods=['POST'])
@@ -239,16 +288,95 @@ def api_search_services():
                                        eventType_id=event_type_id,
                                        contract_id=contract_id,
                                        speciality_id=speciality_id)
+    # result = find_services_direct(query, event_type_id, contract_id, speciality_id)
 
-    def make_response(_item):
-        return {
-            'at_id': _item['action_type_id'],
-            'at_code': _item['code'],
-            'at_name': _item['name'],
-            'service_name': _item['service'],
-            'price': _item['price']
+    ats_apts = int_get_atl_dict_all()
+    client = Client.query.get(client_id)
+    client_age = client.age_tuple(datetime.date.today())
+
+    def make_response(service_data):
+        at_id = service_data['action_type_id']
+        at_data = ats_apts.get(at_id)
+        if at_data:
+            if not recordAcceptableEx(client.sexCode,
+                                      client_age,
+                                      at_data[6],
+                                      at_data[5]):
+                return None
+
+        service = {
+            'at_id': at_id,
+            'at_code': service_data['code'],
+            'at_name': service_data['name'],
+            'service_name': service_data['service'],
+            'price': service_data['price'],
+            'is_lab': False
         }
-    return jsonify([make_response(item) for item in result['result']['items']])
+
+        if at_data and at_data[9]:
+            prop_types = at_data[9]
+            prop_types = [prop_type[:2] for prop_type in prop_types if recordAcceptableEx(client.sexCode,
+                                                                                          client_age,
+                                                                                          prop_type[3],
+                                                                                          prop_type[2])]
+            if prop_types:
+                service['is_lab'] = True
+                service['assignable'] = prop_types
+                service['all_assigned'] = map(lambda p: p[0], service['assignable'])
+                service['all_planned_end_date'] = get_planned_end_datetime(at_id)
+        return service
+
+    matched = []
+    for item in result['result']['items']:
+        s = make_response(item)
+        if s is not None:
+            matched.append(s)
+
+    return jsonify(matched)
+
+
+def find_services_direct(query, event_type_id, contract_id, speciality_id):
+    # for tests
+    sql = u'''
+SELECT  at.id as action_type_id, ct.code, ct.name as service, at.name, at.service_id,
+	GROUP_CONCAT(DISTINCT e.eventType_id SEPARATOR ',') as eventType_id,
+	IF(e.speciality_id, GROUP_CONCAT(DISTINCT e.speciality_id SEPARATOR ','), 0) as speciality_id,
+	GROUP_CONCAT(DISTINCT ct.master_id SEPARATOR ',') as contract_id,
+	ct.price
+FROM ActionType at
+INNER JOIN EventType_Action e ON e.actionType_id=at.id
+INNER JOIN Contract_Tariff ct ON ct.service_id=at.service_id AND ct.eventType_id=e.eventType_id
+INNER JOIN rbService s ON s.id=at.service_id
+WHERE at.deleted=0 AND ct.deleted=0 AND (CURDATE() BETWEEN ct.begDate AND ct.endDate)
+AND e.eventType_id {0} AND ct.master_id {1} AND speciality_id {2} AND at.code like '%{3}%'
+GROUP BY at.id, ct.code
+'''
+    result = {
+        'result': {
+            'items': []
+        }
+    }
+    sr = db.session.execute(
+        db.text(
+            sql.format(
+                '= %s' % event_type_id if event_type_id else '!= -1',
+                '= %s' % contract_id if contract_id else '!= -1',
+                '!= %s' % speciality_id if speciality_id else '!= -1',
+                '%s' % query
+                )
+        )
+    )
+    for r in sr:
+        r = list(r)
+        item = {}
+        item['action_type_id'] = r[0]
+        item['code'] = r[1]
+        item['service'] = r[2]
+        item['name'] = r[3]
+        item['price'] = r[8]
+        result['result']['items'].append(item)
+    return result
+
 
 
 @module.route('/api/event_payment/local_contract.json', methods=['GET'])
@@ -259,23 +387,24 @@ def api_new_event_payment_info_get():
     except KeyError or ValueError:
         return abort(400)
 
+    event = client = None
     if source == 'prev_event':
         try:
             event_type_id = int(request.args['event_type_id'])
         except KeyError or ValueError:
             return abort(400)
-        event = get_prev_event_payment(client_id, event_type_id)
-        lcon = event.localContract
+        event = Event.query.join(EventType).filter(
+            EventType.id == event_type_id,
+            Event.client_id == client_id,
+            Event.deleted == 0
+        ).order_by(Event.setDate.desc()).first()
     elif source == 'client':
         client = Client.query.get(client_id)
-        cvis = ClientVisualizer()
-        lc_info = cvis.make_payer_for_lc(client)
-        lcon = create_new_local_contract(lc_info)
     else:
         return abort(400)
 
     vis = EventVisualizer()
-    res = vis.make_event_payment(lcon)
+    res = vis.make_event_payment(event, client)
     return jsonify(res)
 
 
@@ -288,30 +417,25 @@ def api_service_make_payment():
     event = Event.query.get(event_id)
 
     payment = EventPayment()
-    payment.createDatetime = payment.modifyDatetime = datetime.datetime.now()
-    payment.deleted = 0
     payment.master_id = event_id
     payment.date = datetime.date.today()
     payment.sum = pay_data['sum']
     payment.typePayment = 0
     payment.cashBox = ''
     payment.sumDiscount = 0
-    payment.action_id = pay_data['action_id']
-    payment.service_id = pay_data['service_id']
+    payment.action_id = None
+    payment.service_id = None
 
-    # check already paid
-    if not db.session.query(EventPayment.id).filter(EventPayment.action_id == pay_data['action_id']).all():
-        event.localContract.payments.append(payment)
-        db.session.add(event)
-        db.session.commit()
+    event.payments.append(payment)
+    db.session.add(event)
+    db.session.commit()
 
-    return jsonify({
-        'result': 'ok'
-    })
+    return jsonify(None)
 
 
 @module.route('/api/event_payment/service_remove_coord.json', methods=['POST'])
 def api_service_remove_coord():
+    # not used
     data = request.json
     if data['action_id']:
         actions = Action.query.filter(Action.id.in_(data['action_id']))
@@ -324,8 +448,9 @@ def api_service_remove_coord():
     })
 
 
-@module.route('/api/event_payment/service_add_coord.json', methods=['POST'])
-def api_service_add_coord():
+@module.route('/api/event_payment/service_coordinate.json', methods=['POST'])
+def api_service_coordinate():
+    # not used
     data = request.json
     service = data['service']
     result = service['actions']
@@ -344,6 +469,20 @@ def api_service_add_coord():
     })
 
 
+@module.route('/api/event_payment/service_change_account.json', methods=['POST'])
+def api_service_change_account():
+    # not used
+    data = request.json
+    if data['actions']:
+        actions = Action.query.filter(Action.id.in_(data['actions']))
+        actions.update({Action.account: data['account']}, synchronize_session=False)
+        db.session.commit()
+
+    return jsonify({
+        'result': 'ok'
+    })
+
+
 @module.route('/api/event_payment/delete_service.json', methods=['POST'])
 def api_service_delete_service():
     # TODO: validations
@@ -356,4 +495,57 @@ def api_service_delete_service():
 
     return jsonify({
         'result': 'ok'
+    })
+
+
+@module.route('api/delete_action.json', methods=['POST'])
+def api_delete_action():
+    action_id = request.json['action_id']
+    if action_id:
+        action = Action.query.filter(Action.id == action_id)
+        action.update({Action.deleted: 1}, synchronize_session=False)
+        db.session.commit()
+
+    return jsonify({
+        'result': 'ok'
+    })
+
+
+@module.route('/api/events.json', methods=["POST"])
+def api_get_events():
+    from application.models.event import Event
+    from application.models.exists import Contract
+    flt = request.get_json()
+    base_query = Event.query.join(Client)
+    context = EventVisualizer()
+    if 'id' in flt:
+        event = base_query.filter(Event.id == flt['id']).first()
+        return jsonify({
+            'pages': 1,
+            'items': [context.make_short_event(event)] if event else []
+        })
+    if 'client_id' in flt:
+        base_query = base_query.filter(Event.client_id == flt['client_id'])
+    if 'exec_person_id' in flt:
+        base_query = base_query.filter(Event.execPerson_id == flt['exec_person_id'])
+    if 'beg_date' in flt:
+        base_query = base_query.filter(Event.setDate >= datetime.datetime.strptime(flt['beg_date'], '%Y-%m-%d').date())
+    if 'unfinished' in flt:
+        base_query = base_query.filter(Event.execDate.is_(None))
+    elif 'end_date' in flt:
+        base_query = base_query.filter(Event.execDate <= datetime.datetime.strptime(flt['end_date'], '%Y-%m-%d').date())
+    if 'request_type_id' in flt:
+        base_query = base_query.join(EventType).filter(EventType.requestType_id == flt['request_type_id'])
+    if 'finance_id' in flt:
+        base_query = base_query.join(Contract).filter(Contract.finance_id == flt['finance_id'])
+    per_page = int(flt.get('per_page', 20))
+    page = int(flt.get('page', 1))
+    base_query = base_query.order_by(Event.setDate)
+    paginate = base_query.paginate(page, per_page, False)
+    return jsonify({
+        'pages': paginate.pages,
+        'items': [
+            context.make_short_event(event)
+            for event in paginate.items
+        ]
     })

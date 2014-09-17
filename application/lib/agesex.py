@@ -24,7 +24,7 @@ def recordAcceptableEx(clientSex, clientAge, recordSex, recordAge):
     @type clientSex: str | unicode
     @type clientAge: tuple
     @type recordSex: str | unicode
-    @type recordAge: str | unicode
+    @type recordAge: str | unicode | list
     """
     return not (recordSex and recordSex != clientSex) and \
            not (clientAge and not checkAgeSelector(parseAgeSelector(recordAge), clientAge))
@@ -43,8 +43,10 @@ def checkAgeSelector((begUnit, begCount, endUnit, endCount), ageTuple):
 
 def parseAgeSelector(val):
     """
-    @type val: str | unicode
+    @type val: str | unicode | list
     """
+    if isinstance(val, list):
+        return val
     try:
         return parseAgeSelectorInt(val)
     except:
@@ -142,3 +144,53 @@ def calcAgeInDays(birthDay, today):
     assert isinstance(birthDay, datetime.date)
     assert isinstance(today, datetime.date)
     return (today - birthDay).days
+
+
+def agreeNumberAndWord(num, words):
+    u"""
+        Согласовать число и слово:
+        num - число, слово = (один, два, много)
+        agreeNumberAndWord(12, (u'год', u'года', u'лет'))
+    """
+    if num < 0:
+        num = -num
+    if (num/10) % 10 != 1:
+        if num % 10 == 1:
+            return words[0]
+        elif 1 < num % 10 < 5:
+            return words[1]
+    return words[-1]
+
+
+def formatYears(years):
+    return '%d %s' % (years, agreeNumberAndWord(years, (u'год', u'года', u'лет')))
+
+
+def formatMonths(months):
+    return '%d %s' % (months, agreeNumberAndWord(months, (u'месяц', u'месяца', u'месяцев')))
+
+
+def formatWeeks(weeks):
+    return '%d %s' % (weeks, agreeNumberAndWord(weeks, (u'неделя', u'недели', u'недель')))
+
+
+def formatDays(days):
+    return '%d %s' % (days, agreeNumberAndWord(days, (u'день', u'дня', u'дней')))
+
+
+def formatYearsMonths(years, months):
+    if years == 0:
+        return formatMonths(months)
+    elif months == 0:
+        return formatYears(years)
+    else:
+        return formatYears(years) + ' ' + formatMonths(months)
+
+
+def formatMonthsWeeks(months, weeks):
+    if months == 0:
+        return formatWeeks(weeks)
+    elif weeks == 0:
+        return formatMonths(months)
+    else:
+        return formatMonths(months) + ' ' + formatWeeks(weeks)

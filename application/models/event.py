@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
+
 import datetime
 import re
+
+from application.lib.const import PAYER_EVENT_CODES
 from application.lib.agesex import AgeSex
 from application.models.client import ClientDocument
 from application.models.exists import Person, rbPost, rbCashOperation, rbService
@@ -12,11 +15,11 @@ class Event(db.Model):
     __tablename__ = u'Event'
 
     id = db.Column(db.Integer, primary_key=True)
-    createDatetime = db.Column(db.DateTime, nullable=False)
-    createPerson_id = db.Column(db.Integer, index=True)
-    modifyDatetime = db.Column(db.DateTime, nullable=False)
-    modifyPerson_id = db.Column(db.Integer, index=True)
-    deleted = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    createDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now)
+    createPerson_id = db.Column(db.Integer, index=True, default=safe_current_user_id)
+    modifyDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now, onupdate=datetime.datetime.now)
+    modifyPerson_id = db.Column(db.Integer, index=True, default=safe_current_user_id, onupdate=safe_current_user_id)
+    deleted = db.Column(db.Integer, nullable=False, server_default=u"'0'", default=0)
     externalId = db.Column(db.String(30), nullable=False)
     eventType_id = db.Column(db.Integer, db.ForeignKey('EventType.id'), nullable=False, index=True)
     org_id = db.Column(db.Integer, db.ForeignKey('Organisation.id'))
@@ -33,19 +36,18 @@ class Event(db.Model):
     nextEventDate = db.Column(db.DateTime)
     payStatus = db.Column(db.Integer, nullable=False)
     typeAsset_id = db.Column(db.Integer, db.ForeignKey('rbEmergencyTypeAsset.id'), index=True)
-    note = db.Column(db.Text, nullable=False)
+    note = db.Column(db.Text, nullable=False, default='')
     curator_id = db.Column(db.Integer, db.ForeignKey('Person.id'), index=True)
     assistant_id = db.Column(db.Integer, db.ForeignKey('Person.id'), index=True)
-    pregnancyWeek = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    pregnancyWeek = db.Column(db.Integer, nullable=False, server_default=u"'0'", default=0)
     MES_id = db.Column(db.Integer, index=True)
     mesSpecification_id = db.Column(db.ForeignKey('rbMesSpecification.id'), index=True)
     rbAcheResult_id = db.Column(db.ForeignKey('rbAcheResult.id'), index=True)
-    version = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    version = db.Column(db.Integer, nullable=False, server_default=u"'0'", default=0)
     privilege = db.Column(db.Integer, server_default=u"'0'")
     urgent = db.Column(db.Integer, server_default=u"'0'")
     orgStructure_id = db.Column(db.Integer, db.ForeignKey('OrgStructure.id'))
-    uuid_id = db.Column(db.Integer, db.ForeignKey('UUID.id'),
-                        nullable=False, index=True, server_default=u"'0'")
+    uuid_id = db.Column(db.Integer, db.ForeignKey('UUID.id'), nullable=False, index=True, server_default=u"'0'")
     lpu_transfer = db.Column(db.String(100))
     localContract_id = db.Column(db.Integer, db.ForeignKey('Event_LocalContract.id'))
 
@@ -61,15 +63,21 @@ class Event(db.Model):
     rbAcheResult = db.relationship(u'rbAcheResult')
     result = db.relationship(u'rbResult')
     typeAsset = db.relationship(u'rbEmergencyTypeAsset')
-    localContract = db.relationship(u'EventLocalContract',
-                                    backref=db.backref('event')
-                                    )
+    localContract = db.relationship(u'EventLocalContract', backref=db.backref('event'))
+    payments = db.relationship('EventPayment', backref=db.backref('event'))
     client = db.relationship(u'Client')
     diagnostics = db.relationship(
         u'Diagnostic', lazy=True, innerjoin=True, primaryjoin=
         "and_(Event.id == Diagnostic.event_id, Diagnostic.deleted == 0)"
     )
     uuid = db.relationship('UUID')
+
+    @property
+    def payer_required(self):
+        # FIXME: перенести из application.lib.utils загрузку ролей и прав в app.py
+        # тогда должны заработать нормальные импорты из utils.py
+        from application.lib.utils import safe_traverse_attrs
+        return safe_traverse_attrs(self.eventType, 'finance', 'code') in PAYER_EVENT_CODES
 
     @property
     def isPrimary(self):
@@ -85,6 +93,25 @@ class Event(db.Model):
             Person.orgStructure_id == self.orgStructure_id,
             rbPost.flatCode == u'departmentManager'
         ).first()
+
+    @property
+    def current_org_structure(self):
+        """ Get OrgStructure
+        :return: current location of patient
+        :rtype: application.models.exists.OrgStructure
+        """
+        from .actions import ActionProperty_OrgStructure, ActionProperty, ActionType, Action
+        from .exists import OrgStructure
+        if self.orgStructure_id:
+            return self.orgStructure
+        prop = ActionProperty_OrgStructure.query.join(ActionProperty, ActionType, Action).filter(
+            Action.event == self,
+            Action.status < 2,
+            ActionType.flatCode == 'moving',
+        ).orderby(Action.begDate.desc()).first()
+        if not prop:
+            return None
+        return OrgStructure.query.get(prop.value)
 
     @property
     def date(self):
@@ -236,11 +263,11 @@ class EventLocalContract(db.Model):
     )
 
     id = db.Column(db.Integer, primary_key=True)
-    createDatetime = db.Column(db.DateTime, nullable=False)
-    createPerson_id = db.Column(db.Integer, index=True)
-    modifyDatetime = db.Column(db.DateTime, nullable=False)
-    modifyPerson_id = db.Column(db.Integer, index=True)
-    deleted = db.Column(db.Integer, nullable=False)
+    createDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now)
+    createPerson_id = db.Column(db.Integer, index=True, default=safe_current_user_id)
+    modifyDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now, onupdate=datetime.datetime.now)
+    modifyPerson_id = db.Column(db.Integer, index=True, default=safe_current_user_id, onupdate=safe_current_user_id)
+    deleted = db.Column(db.Integer, nullable=False, server_default=u"'0'", default=0)
     master_id = db.Column(db.Integer)
     coordDate = db.Column(db.DateTime)
     coordAgent = db.Column(db.String(128), nullable=False, server_default=u"''")
@@ -262,8 +289,7 @@ class EventLocalContract(db.Model):
 
     org = db.relationship(u'Organisation')
     documentType = db.relationship(u'rbDocumentType')
-    payments = db.relationship('EventPayment',
-                               backref=db.backref('local_contract'))
+    # payments = db.relationship('EventPayment', backref=db.backref('local_contract'))
 
     # Это что вообще?!
     @property
@@ -319,12 +345,12 @@ class EventPayment(db.Model):
     __tablename__ = 'Event_Payment'
 
     id = db.Column(db.Integer, primary_key=True)
-    createDatetime = db.Column(db.DateTime, nullable=False)
-    createPerson_id = db.Column(db.Integer, index=True)
-    modifyDatetime = db.Column(db.DateTime, nullable=False)
-    modifyPerson_id = db.Column(db.Integer, index=True)
-    deleted = db.Column(db.Integer, nullable=False)
-    master_id = db.Column(db.Integer)
+    createDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now)
+    createPerson_id = db.Column(db.Integer, index=True, default=safe_current_user_id)
+    modifyDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now, onupdate=datetime.datetime.now)
+    modifyPerson_id = db.Column(db.Integer, index=True, default=safe_current_user_id, onupdate=safe_current_user_id)
+    deleted = db.Column(db.Integer, nullable=False, default=0)
+    master_id = db.Column(db.Integer, db.ForeignKey('Event.id'))
     date = db.Column(db.Date, nullable=False)
     cashOperation_id = db.Column(db.ForeignKey('rbCashOperation.id'), index=True)
     sum = db.Column(db.Float(asdecimal=True), nullable=False)

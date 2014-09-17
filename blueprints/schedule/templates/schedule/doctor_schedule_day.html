@@ -1,0 +1,71 @@
+{% extends 'schedule/base.html' %}
+{% block title %}> {{ module_name }}{% endblock %}
+
+{% block main %}
+    <div ng-controller="ScheduleDayCtrl">
+        <div class="col-lg-3 col-md-3">
+            <div class="well">
+                <datepicker class="vbmargin10" style="width: 100%" ng-model="date" show-weeks="false" ng-change="dateChanged();"></datepicker>
+                <button ng-click="today()" class="btn btn-sm btn-block btn-info ng-binding" type="button">Сегодня</button>
+            </div>
+            <div class="well-sm alert alert-info" ng-if="schedules[0].scheds.length">
+                <a href="{{ url_for('schedule.index', person_id=current_user.id) }}" target="_blank" class="pull-right" title="Посмотреть полный график"><h4 class="glyphicon glyphicon-calendar novmargin"></h4></a>
+                <ul class="list-unstyled novmargin">
+                    <li ng-repeat="schedule in schedules[0].scheds" title="[[schedule.reception_type.name]]"><small class="glyphicon" ng-class="{'glyphicon-plus': (schedule.reception_type.code == 'amb'), 'glyphicon-home': (schedule.reception_type.code == 'home')}"></small> [[ (schedules[0].date + ' ' + schedule.begTime|asTime) | asTime ]] - [[ (schedules[0].date + ' ' + schedule.endTime) | asTime ]] <small class="text-danger" ng-if="schedule.office">каб. [[schedule.office.code]]</small></li>
+                </ul>
+            </div>
+            <div class="well-sm alert alert-danger" ng-if="schedules && !schedules[0].scheds.length">
+                <strong ng-if="!schedules[0].roa">Нет расписания на [[ date | asMomentFormat : 'DD.MM.YYYY' ]]</strong>
+                <span ng-if="schedules[0].roa">Причина отсутсвия: <strong>[[ schedules[0].roa.name ]]</strong></span>
+            </div>
+            <p ng-repeat="schedule in schedules[0].scheds">
+                <legend><a href="javascript:;" title="Показать/скрыть прошедшие записи" class="pull-right btn btn-xs btn-default" ng-click="show_past_tickets=!show_past_tickets"><span class="glyphicon" ng-class="{'glyphicon-chevron-down': !show_past_tickets, 'glyphicon-chevron-up': show_past_tickets}"></span></a><small>[[schedule.reception_type.name]]: [[ (schedules[0].date + ' ' + schedule.begTime|asTime) | asTime ]] - [[ (schedules[0].date + ' ' + schedule.endTime) | asTime ]]</small></legend>
+                <button ng-repeat="ticket in schedule.tickets" ui-schedule-ticket="ticket" day="schedules[0].date" show-name="true" ng-click="ticket_choose(ticket);" ng-show="show_past_tickets || ticket.attendance_type.code == 'CITO' || ticket.attendance_type.code == 'extra' || show_time(ticket.begDateTime)" ng-class="{'disabled': !client || ticket.disabled}"></button>
+            </p>
+        </div>
+        <div class="col-lg-9 col-md-9" id="client_top">
+        {% include "_breadcrumbs.html" %}
+            <div ng-if="client">
+                <legend class="vbmargin10">
+                    <h2>[[ client.info.full_name ]] <small ng-if="client.info.full_name">(запись на [[ticket.begDateTime|asTime]])</small></h2>
+                </legend>
+                <div ng-if="client.info.full_name" class="vbmargin10">
+                    <button class="btn btn-lg btn-success" ng-if="!ticket.record.event_id" ng-click="new_event(client.info.id, ticket.record.id)" title="Создать обращение">Создать обращение</button>
+                    <button class="btn btn-lg btn-success" ng-if="ticket.record.event_id" ng-click="open_event(ticket.record.event_id)" title="Открыть обращение #[[ticket.record.event_id]]">Открыть обращение #[[ticket.record.event_id]]</button>
+                    <button class="btn btn-lg btn-primary" ng-click="new_appointment(ticket.record.client_id)" title="Записать на приём к другому специалисту">Записать на приём</button>
+                    <ui-print-button class="btn-lg" ps="ps_home" class="btn-sm" resolve="ps_home_resolve(ticket.record.id)" ng-if="ticket.record.appointment_type.code == 'home'"></ui-print-button>
+                    <ui-print-button class="btn-lg" ps="ps_amb" class="btn-sm" resolve="ps_amb_resolve(ticket.record.id)" ng-if="ticket.record.appointment_type.code == 'amb'"></ui-print-button>
+                </div>
+                <div class="well well-sm">
+                    <div class="row">
+                        <div class="col-md-9">
+                            <dl class="dl-horizontal novmargin">
+                                <dt ng-if="client.phones.length">Контакты:</dt><dd ng-init="showAllPhones=false"><span ng-repeat="phone in client.phones" ng-show="$first || showAllPhones"> [[phone]]</span> <a href="javascript:void(0);" ng-show="client.phones.length && !showAllPhones" ng-click="showAllPhones = !showAllPhones">[ещё]</a><a href="javascript:void(0);" ng-show="client.phones.length && showAllPhones" ng-click="showAllPhones = !showAllPhones">[скрыть]</a></dd>
+                                <dt>Адрес регистрации:</dt><dd>[[client.reg_addresses ? client.reg_addresses[0].text_summary : '']]&nbsp;</dd>
+                                <dt>Адрес проживания:</dt><dd>[[client.live_addresses ? client.live_addresses[0].text_summary : '']]&nbsp;</dd>
+                                <dt>Документ:</dt><dd>[[client.id_docs ? client.id_docs[0].doc_text : '']]&nbsp;</dd>
+                                <dt>Медицинский полис:</dt><dd ng-repeat="policy_text in client.policies">[[policy_text]]</dd>
+                            </dl>
+                        </div>
+                        <div class="col-md-3">
+                            <dl class="dl-horizontal novmargin pull-right">
+                                <dt>Код пациента:</dt><dd>[[client.info.id]]&nbsp;</dd>
+                                <dt>Дата рождения:</dt><dd>[[client.info.birth_date|asDate]]&nbsp;</dd>
+                                <dt>Возраст:</dt><dd>[[client.age]]&nbsp;</dd>
+                                <dt>Пол:</dt><dd>[[client.info.sex.name]]&nbsp;</dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+                <tabset>
+                    <tab heading="Предварительные записи">{% include "patients/_appointments.html" %}</tab>
+                    <tab heading="Обращения">{% include "patients/_event_list.html" %}</tab>
+                </tabset>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block modules_js %}
+    {{ super() }}
+    <script src="{{ url_for('.static', filename='js/schedule_day.js', v=version) }}"></script>
+{% endblock %}

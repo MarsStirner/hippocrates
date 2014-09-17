@@ -18,35 +18,35 @@
             </div>
         <h2>Пациент: [[ client.info.full_name ]]</h2>
         </legend>
-
-        <div class="col-md-2 affix-holder">
-            <div class="toc-affix" bs-affix>
-                <toc-affix toc-name="tocClientForm">
-                <hr>
-                    <button ng-click="save_client()" class="btn btn-success"
-                            tooltip="[[clientForm.$invalid ? 'Заполните все обязательные поля': '']]">Сохранить</button>
-                    <button ng-click="cancel_editing()" class="btn btn-default">Отмена</button>
-                </toc-affix>
+        <div class="row">
+            <div class="col-md-2 affix-holder">
+                <div class="toc-affix" bs-affix>
+                    <toc-affix toc-name="tocClientForm">
+                    <hr>
+                        <button ng-click="save_client()" class="btn btn-success"
+                                tooltip="[[clientForm.$invalid ? 'Заполните все обязательные поля': '']]">Сохранить</button>
+                        <button ng-click="cancel_editing()" class="btn btn-default">Отмена</button>
+                    </toc-affix>
+                </div>
             </div>
-        </div>
-        <div class="col-md-10">
+            <div class="col-md-10">
+                <div ui-alert-list="alerts"></div>
+                <div class="marginal">
+                    <ng-form name="clientForm" id="clientForm" role="form" novalidate toc-element toc-name="tocClientForm" form-safe-close>
+                        {% include "patients/_main_info.html" %}
+                        {% include "patients/_id_doc.html" %}
+                        {% include "patients/_address.html" %}
+                        {% include "patients/_policy.html" %}
+                        {% include "patients/_characteristics.html" %}
+                        {% include "patients/_soc_status.html" %}
+                        {% include "patients/_contacts.html" %}
+                        {% include "patients/_doc_history.html" %}
 
-            <div ui-alert-list="alerts"></div>
-            <div class="marginal">
-                <ng-form name="clientForm" role="form" novalidate toc-element toc-name="tocClientForm" form-safe-close>
-                    {% include "patients/_main_info.html" %}
-                    {% include "patients/_id_doc.html" %}
-                    {% include "patients/_address.html" %}
-                    {% include "patients/_policy.html" %}
-                    {% include "patients/_characteristics.html" %}
-                    {% include "patients/_soc_status.html" %}
-                    {% include "patients/_contacts.html" %}
-                    {% include "patients/_doc_history.html" %}
-
-{#                    {% include "patients/identifiers.html" %}#}
-{#                    <legend>Debug</legend>#}
-{#                    <pre>[[client | json]]</pre>#}
-                </ng-form>
+    {#                    {% include "patients/identifiers.html" %}#}
+    {#                    <legend>Debug</legend>#}
+    {#                    <pre>[[client | json]]</pre>#}
+                    </ng-form>
+                </div>
             </div>
         </div>
     </div>
@@ -60,7 +60,6 @@
     <script src="{{ url_for('static', filename='js/directives/client/client-directives.js', v=version) }}"></script>
 
     <script type="text/ng-template" id="modal-deleteRecord.html">{% include "patients/_modal_delete_record.html" %}</script>
-    <script type="text/ng-template" id="modal-print-dialog.html">{% include "_modal-print-dialog.html" %}</script>
 
     <script type="text/javascript">
         DeleteRecordModalCtrl = function ($scope, $modalInstance) {

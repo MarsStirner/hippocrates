@@ -1,4 +1,5 @@
-<div ng-controller="EventPaymentCtrl">
+<div ng-controller="EventPaymentCtrl" ng-show="formstate.is_paid() || formstate.is_dms() || formstate.is_oms()">
+<ng-form name="payerForm" toc-element="Плательщик">
 <legend xmlns="http://www.w3.org/1999/html">Плательщик</legend>
 <tabset justified="false" class="marginal">
     <tab id="tab_payer_person" heading="Физ. лицо" disabled="formcnf.tab_payer_person.disabled()"
@@ -6,17 +7,19 @@
         <div class="row">
             <div class="col-md-10">
                 <div class="row">
-                    <div class="form-group col-md-4">
+                    <div class="form-group col-md-4"
+                         ng-class="{'has-error': payerForm.lastname.$invalid && editing.submit_attempt}">
                         <label for="lastname">Фамилия</label>
                         <input type="text" class="form-control" autocomplete="off" placeholder="Фамилия"
                                id="lastname" name="lastname" ng-model="event.payment.local_contract.last_name"
-                               ng-disabled="formcnf.payer_field.disabled"/>
+                               ng-disabled="formcnf.payer_field.disabled" ng-required="payer_person_required()"/>
                     </div>
-                    <div class="form-group col-md-4">
+                    <div class="form-group col-md-4"
+                         ng-class="{'has-error': payerForm.firstname.$invalid && editing.submit_attempt}">
                         <label for="firstname">Имя</label>
                         <input type="text" class="form-control" autocomplete="off" placeholder="Имя"
                                id="firstname" name="firstname" ng-model="event.payment.local_contract.first_name"
-                               ng-disabled="formcnf.payer_field.disabled"/>
+                               ng-disabled="formcnf.payer_field.disabled" ng-required="payer_person_required()"/>
                     </div>
                     <div class="form-group col-md-4">
                         <label for="patronymic">Отчество</label>
@@ -27,16 +30,19 @@
                 </div>
 
                 <div class="row">
-                    <div class="form-group col-md-2">
-                        <label for="birthdate">Дата рождения</label>
-                        <wm-date id="birthdate" name="birthdate" ng-model="event.payment.local_contract.birth_date"
-                                 ng-disabled="formcnf.payer_field.disabled">
+                    <div class="form-group col-md-4"
+                         ng-class="{'has-error': payerForm.birthdate.$invalid && editing.submit_attempt}">
+                        <label for="birthdate" class="control-label">Дата рождения</label>
+                        <wm-date id="birthdate" ng-model="event.payment.local_contract.birth_date"
+                                 ng-disabled="formcnf.payer_field.disabled" ng-required="payer_person_required()">
                         </wm-date>
                     </div>
-                    <div class="form-group col-md-4">
+                    <div class="form-group col-md-4"
+                         ng-class="{'has-error': payerForm.doc_type.$invalid && editing.submit_attempt}">
                         <label for="doc_type">Документ</label>
                         <ui-select class="form-control" id="doc_type" name="doc_type" theme="select2" autocomplete="off"
-                                   ng-model="event.payment.local_contract.doc_type" ng-disabled="formcnf.payer_field.disabled">
+                                   ng-model="event.payment.local_contract.doc_type" ng-disabled="formcnf.payer_field.disabled"
+                                   ng-required="payer_person_required() || payerForm.doc_number.$viewValue || payerForm.doc_serial_left.$viewValue || payerForm.doc_serial_right.$viewValue">
                             <ui-select-match placeholder="Тип документа">[[$select.selected.name]]</ui-select-match>
                             <ui-select-choices repeat="dt in rbDocumentType.objects | filter: $select.search">
                                 <div ng-bind-html="dt.name | highlight: $select.search"></div>
@@ -45,7 +51,7 @@
                     </div>
                     <div class="form-group col-md-2">
                         <label for="doc_serial">Серия</label>
-                        <div class="row">
+                        <div class="row">{# TODO: add serial regexp validators from doctype #}
                             <div class="col-md-6">
                                 <input type="text" class="form-control" id="doc_serial_left" name="doc_serial_left"
                                        autocomplete="off" ng-pattern="/^[\d]+$/"
@@ -58,11 +64,13 @@
                             </div>
                         </div>
                     </div>
-                    <div class="form-group col-md-4">
-                        <label for="doc_number">Номер</label>
+                    <div class="form-group col-md-2"
+                         ng-class="{'has-error': payerForm.doc_number.$invalid && editing.submit_attempt}">
+                        <label for="doc_number">Номер</label>{# TODO: add number regexp validators from doctype. Conflicts in disabled. #}
                         <input type="text" class="form-control" id="doc_number" name="doc_number"
-                               autocomplete="off" placeholder="номер" ng-pattern="/^\d+$/" {# FIXME: allows whitespace as first char #}
-                               ng-model="event.payment.local_contract.number" ng-disabled="formcnf.payer_field.disabled"/>
+                               autocomplete="off" placeholder="номер" ng-pattern="/^\d+$/"
+                               ng-model="event.payment.local_contract.number" ng-disabled="formcnf.payer_field.disabled"
+                               ng-required="payer_person_required()"/>
                     </div>
                 </div>
 
@@ -70,24 +78,22 @@
                     <div class="form-group col-md-12">
                         <label for="reg_address">Адрес</label>
                         <input type="text" class="form-control" id="reg_address" name="reg_address" autocomplete="off"
-                               placeholder="Адрес регистрации" ng-model="event.payment.local_contract.reg_address.text_summary"
+                               placeholder="Адрес регистрации" ng-model="event.payment.local_contract.reg_address"
                                ng-disabled="formcnf.payer_field.disabled"/>
                     </div>
                 </div>
             </div>
 
             <div class="col-md-2">
-                <blockquote>
-                    Заполнить из:
+                <div>
+                    <label>Заполнить из:</label>
                     <button type="button" class="btn btn-info btn-block" ng-disabled="formcnf.payer_field.disabled"
                             ng-click="get_payer('client', event.info.client_id)">карты пациента</button>
-
                     <button type="button" class="btn btn-info btn-block" ng-disabled="formcnf.payer_field.disabled"
                             ng-click="open_relatives_modal()">карты родственника</button>
-
                     <button type="button" class="btn btn-info btn-block" ng-disabled="formcnf.payer_field.disabled"
                             ng-click="get_payer('prev_event', event.info.client_id)">предыдущего</button>
-                </blockquote>
+                </div>
             </div>
         </div>
 
@@ -96,7 +102,8 @@
     <tab id="tab_payer_org" heading="Юр. лицо" disabled="formcnf.tab_payer_org.disabled()"
          active="formcnf.tab_payer_org.active" deselect="switch_tab(1)">
         <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-6"
+                 ng-class="{'has-error': payerForm.payer_org.$invalid && editing.submit_attempt}">
                 <label for="payer_org">Организация</label>
                 <ui-select id="payer_org" name="payer_org" theme="select2" autocomplete="off" ng-required="formcnf.tab_payer_org.active"
                            ng-model="event.payment.local_contract.payer_org" ng-disabled="formcnf.payer_field.disabled">
@@ -116,10 +123,12 @@
 <div class="panel panel-default">
     <div class="panel-body">
         <div class="row">
-            <div class="col-md-2">
+            <div class="col-md-2"
+                ng-class="{'has-error': payerForm.date_contract.$invalid && editing.submit_attempt}">
                 <label for="date_contract">Дата заключения</label>
                 <wm-date id="date_contract" name="date_contract" ng-disabled="formcnf.contract_field.disabled"
-                         ng-model="event.payment.local_contract.date_contract">
+                         ng-model="event.payment.local_contract.date_contract"
+                         ng-required="contract_info_required()">
                 </wm-date>
             </div>
             <div class="col-md-4">
@@ -130,4 +139,17 @@
         </div>
     </div>
 </div>
+</ng-form>
+
+<div class="panel panel-default" ng-show="formstate.is_paid() && payment_box_visible()">
+    <div class="panel-body">
+        <div class="form-inline form-group">
+            <label for="paysum">Внести сумму на счет обращения</label>
+            <input type="text" class="form-control" id="paysum" autocomplete="off"
+                   ng-model="payment_sum"/>
+            <button type="button" class="btn btn-primary" ng-click="process_payment()">Внести</button>
+        </div>
+    </div>
+</div>
+
 </div>

@@ -38,7 +38,11 @@ class Settings(object):
 
     @classmethod
     def getBool(cls, key, default=False):
-        return bool(cls.get(key, default))
+        try:
+            val = int(cls.get(key, default))
+        except ValueError:
+            return False
+        return bool(val)
 
     @classmethod
     def set(cls, key, val):
@@ -52,5 +56,4 @@ class Settings(object):
         if key in cls._cache:
             s.id = cls._cache[key][0]
         db.session.add(s)
-        db.session.commit()
         cls._cache[key] = (s.id, val)

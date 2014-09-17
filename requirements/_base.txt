@@ -11,7 +11,7 @@ Flask-Login
 Flask-Principal
 blinker
 selenium
-#dateutils
+dateutils
 beaker
 Flask-Beaker
 sphinxit

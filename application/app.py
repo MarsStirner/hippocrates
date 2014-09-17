@@ -7,7 +7,7 @@ from flask.ext.login import LoginManager, current_user
 from flask_beaker import BeakerSession
 import pytz
 from werkzeug.contrib.profiler import ProfilerMiddleware
-from application.middleware import Gzip
+# from application.middleware import Gzip
 from systemwide import db, cache
 from autoload import load_blueprints
 import config
@@ -38,6 +38,13 @@ def enum():
     }
 
 
+@app.context_processor
+def lpu_style():
+    return {
+        'LPU_STYLE': config.LPU_STYLE
+    }
+
+
 @babel.timezoneselector
 def get_timezone():
     return pytz.timezone(app.config['TIME_ZONE'])
@@ -52,4 +59,4 @@ from views import *
 if app.config['PROFILE']:
     app.wsgi_app = ProfilerMiddleware(app.wsgi_app, restrictions=[30])
 
-Gzip(app)
+# Gzip(app)
