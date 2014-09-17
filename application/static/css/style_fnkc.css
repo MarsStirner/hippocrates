@@ -1,16 +1,16 @@
 @media screen and (min-width: 800px) {
   body {
-    font: normal 105%/1.5em Arial, Helvetica, sans-serif;
+    font: normal 135%/1.5em Arial, Helvetica, sans-serif;
   }
 }
 @media screen and (min-width: 1400px) {
   body {
-    font: normal 125%/1.5em Arial, Helvetica, sans-serif;
+    font: normal 145%/1.5em Arial, Helvetica, sans-serif;
   }
 }
 @media screen and (min-width: 1600px) {
   body {
-    font: normal 145%/1.5em Arial, Helvetica, sans-serif;
+    font: normal 155%/1.5em Arial, Helvetica, sans-serif;
   }
 }
 @media screen and (min-width: 1800px) {
@@ -27,7 +27,14 @@
 }
 
 .navbar {
-    background: -webkit-linear-gradient(top, #ededed 0%, #c4c4c4 100%);
+    background: #c4c4c4; /* Old browsers */
+    background: -moz-linear-gradient(top, #ededed 0%, #c4c4c4 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ededed), color-stop(100%,#c4c4c4)); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top, #ededed 0%, #c4c4c4 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top, #ededed 0%,#c4c4c4 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top, #ededed 0%, #c4c4c4 100%); /* IE10+ */
+    background: linear-gradient(to bottom, #ededed 0%, #c4c4c4 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ededed', endColorstr='#c4c4c4',GradientType=0 ); /* IE6-9 */
     border: 0;
 }
 .navbar a.navbar-btn.active {
