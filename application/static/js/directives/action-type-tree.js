@@ -44,11 +44,16 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
                 self.lookup[item[0]] =  new TreeItem(item)
             })
         };
+        function tissue_acceptable(action_type, tissue_required) {
+            // split at_class 1 in diag action types and lab action types
+            return (tissue_required === undefined || action_type.tissue_required === tissue_required);
+        }
+        self.tissue_acceptable = tissue_acceptable;
         function age_acceptable(client_info, selector) {
             return ! (
                 selector[0] != 0 && client_info.age_tuple[selector[0] - 1] < selector[1] ||
                 selector[2] != 0 && client_info.age_tuple[selector[2] - 1] > selector[3]
-            )
+            );
         }
         function sex_acceptable(client_info, sex) {
             return ! (sex && sex != client_info.sex_raw);
@@ -58,18 +63,18 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
         }
         self.os_acceptable = os_acceptable;
         function personally_acceptable(id) {
-            return !current_user.action_type_personally.length || current_user.action_type_personally.has(id)
+            return current_user.action_type_personally.length && current_user.action_type_personally.has(id)
         }
         self.personally_acceptable = personally_acceptable;
         function keywords_acceptable(keywords, item) {
             return keywords.filter(function (keyword) {
                 return (item.name.toLowerCase() + ' ' + item.code.toLowerCase()).indexOf(keyword) !== -1
-            }).length == keywords.length
+            }).length == keywords.length;
         }
         self.filter = function (query, client_info, check_os, check_person, tissue_required) {
             function is_acceptable(keywords, item) {
                 return Boolean(
-                    ! (tissue_required !== undefined && item.tissue_required != tissue_required)
+                    tissue_acceptable(item, tissue_required)
                     && ! item.children.length
                     && sex_acceptable(client_info, item.sex)
                     && age_acceptable(client_info, item.age)
@@ -175,6 +180,8 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
                     person_check: true
                 };
                 $scope.query = '';
+                $scope.os_check_enabled = true;
+                $scope.personal_check_enabled = true;
                 $scope.tree = undefined;
                 $scope.set_filter = function () {
                     if (typeof service === 'undefined') return;
@@ -235,15 +242,17 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
                     var os_check = false,
                         personal_check = false;
                     angular.forEach(tree.lookup, function (at_item) {
-                        if (at_item.osids && service.os_acceptable(at_item.osids)) {
+                        if (at_item.osids
+                                && service.os_acceptable(at_item.osids)
+                                && service.tissue_acceptable(at_item, tissue)) {
                             os_check = true;
                         }
-                        if (service.personally_acceptable(at_item.id)) {
+                        if (service.personally_acceptable(at_item.id) && service.tissue_acceptable(at_item, tissue)) {
                             personal_check = true;
                         }
                     });
-                    $scope.conditions.os_check = os_check;
-                    $scope.conditions.person_check = personal_check;
+                    $scope.conditions.os_check = $scope.os_check_enabled = os_check;
+                    $scope.conditions.person_check = $scope.personal_check_enabled = personal_check;
                     $scope.set_filter();
                 });
             };
@@ -309,13 +318,13 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
             <input class="form-control" type="text" ng-model="conditions.query" wm-slow-change="set_filter()"></input>\
             <div class="checkbox">\
                 <label>\
-                    <input type="checkbox" ng-model="conditions.person_check" ng-change="set_filter()" />\
+                    <input type="checkbox" ng-model="conditions.person_check" ng-change="set_filter()" ng-disabled="!personal_check_enabled" />\
                     Только разрешённые мне\
                 </label>\
             </div>\
             <div class="checkbox">\
                 <label>\
-                    <input type="checkbox" ng-model="conditions.os_check" ng-change="set_filter()" />\
+                    <input type="checkbox" ng-model="conditions.os_check" ng-change="set_filter()" ng-disabled="!os_check_enabled" />\
                     Только разрешённые в моём отделении\
                 </label>\
             </div>\
@@ -355,13 +364,13 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
                     <input class="form-control" type="text" ng-model="conditions.query" wm-slow-change="set_filter()"></input>\
                     <div class="checkbox">\
                         <label>\
-                            <input type="checkbox" ng-model="conditions.person_check" ng-change="set_filter()" />\
+                            <input type="checkbox" ng-model="conditions.person_check" ng-change="set_filter()" ng-disabled="!personal_check_enabled" />\
                             Только разрешённые мне\
                         </label>\
                     </div>\
                     <div class="checkbox">\
                         <label>\
-                            <input type="checkbox" ng-model="conditions.os_check" ng-change="set_filter()" />\
+                            <input type="checkbox" ng-model="conditions.os_check" ng-change="set_filter()" ng-disabled="!os_check_enabled" />\
                             Только разрешённые в моём отделении\
                         </label>\
                     </div>\
