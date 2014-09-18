@@ -70,7 +70,7 @@ def api_patient_get():
         })
     else:
         client = Client()
-        db.session.add(client)  # требуется привязанный к сессии клиент для доступа к некоторым атрибутам (documents)
+        # db.session.add(client)  # требуется привязанный к сессии клиент для доступа к некоторым атрибутам (documents)
         return jsonify({
             'client_data': context.make_client_info(client)
         })

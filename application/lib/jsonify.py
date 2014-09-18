@@ -320,28 +320,29 @@ class ClientVisualizer(object):
             raise ValueError('Relation info does not match Client')
 
     def make_client_info(self, client):
-        reg_addr, live_addr = self.make_addresses_info(client)
+        reg_addr, live_addr = self.make_addresses_info(client) if client.id else None, None
 
-        relations = [self.make_relation_info(client.id, relation) for relation in client.client_relations]
+        relations = ([self.make_relation_info(client.id, relation) for relation in client.client_relations]
+                     if client.id else [])
 
-        documents = [safe_dict(doc) for doc in client.documents_all]
-        policies = [safe_dict(policy) for policy in client.policies_all]
+        documents = [safe_dict(doc) for doc in client.documents_all] if client.id else []
+        policies = [safe_dict(policy) for policy in client.policies_all] if client.id else []
         document_history = documents + policies
         # identifications = [self.make_identification_info(identification) for identification in client.identifications]
         return {
             'info': client,
-            'id_document': client.id_document,
+            'id_document': client.id_document if client.id else None,
             'reg_address': reg_addr,
             'live_address': live_addr,
             'compulsory_policy': client.compulsoryPolicy,
             'voluntary_policies': client.voluntaryPolicies,
-            'blood_history': client.blood_history.all(),
-            'allergies': client.allergies.all(),
-            'intolerances': client.intolerances.all(),
+            'blood_history': client.blood_history.all() if client.id else None,
+            'allergies': client.allergies.all() if client.id else None,
+            'intolerances': client.intolerances.all() if client.id else None,
             'soc_statuses': client.soc_statuses,
             'relations': relations,
-            'contacts': client.contacts.all(),
-            'phones': client.phones,
+            'contacts': client.contacts.all() if client.id else None,
+            'phones': client.phones if client.id else None,
             'document_history': document_history,
             # 'identifications': identifications,
         }
