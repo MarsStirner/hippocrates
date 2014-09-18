@@ -318,22 +318,19 @@ var EventPaymentCtrl = function($scope, RefBookService, Settings, $http, $modal)
     $scope.Organisation = RefBookService.get('Organisation');
 
     var event_created = !$scope.event.is_new();
+    function isNotEmpty(val) { return val !== undefined && val !== null; }
+
     $scope.payer_is_person = function() {
-        function isDefined(element) {
-            return element !== undefined && element !== null;
-        }
         var lc = $scope.event.payment && $scope.event.payment.local_contract || null;
         return (lc !== null &&
             [lc.first_name, lc.last_name, lc.patr_name, lc.birth_date, lc.doc_type,
-                lc.serial_left, lc.serial_right, lc.number, lc.reg_address].some(isDefined)
+                lc.serial_left, lc.serial_right, lc.number, lc.reg_address].some(isNotEmpty)
             );
     };
     $scope.payer_is_org = function() {
         var lc = $scope.event.payment && $scope.event.payment.local_contract || null;
         return lc !== null && lc.payer_org;
     };
-    $scope.person_tab_active = function() { return !event_created || $scope.payer_is_person(); };
-    $scope.org_tab_active = function() { return event_created && $scope.payer_is_org(); };
     $scope.integration1CODVD_enabled = function() {
         return $scope.Settings.get_string('Event.Payment.1CODVD') == '1';
     };
@@ -342,24 +339,34 @@ var EventPaymentCtrl = function($scope, RefBookService, Settings, $http, $modal)
             !$scope.integration1CODVD_enabled();
     };
     $scope.payer_person_required = function () {
-        return ($scope.payer_is_person() && $scope.event.is_new() && $scope.formstate.is_paid() && $scope.event.info.client.info.age_tuple[3] < 18);
+        return ($scope.payer_tabs.person.active && $scope.event.is_new() && $scope.formstate.is_paid() && $scope.event.info.client.info.age_tuple[3] < 18);
+    };
+    $scope.payer_org_required = function () {
+        return ($scope.payer_tabs.org.active && $scope.event.is_new() && $scope.formstate.is_paid());
+    };
+    $scope.payer_info_disabled = function () {
+        return event_created;
+    };
+    $scope.contract_info_disabled = function () {
+        return event_created || $scope.integration1CODVD_enabled();
     };
 
-    $scope.formcnf = {
-        tab_payer_person: {
-            disabled: event_created && $scope.payer_is_org,
-            active: $scope.person_tab_active()
+    $scope.payer_tabs = {
+        person: {
+            active: true,
+            disabled: true
         },
-        tab_payer_org: {
-            disabled: event_created && $scope.payer_is_person,
-            active: $scope.org_tab_active()
-        },
-        payer_field: {
-            disabled: event_created
-        },
-        contract_field: {
-            disabled: event_created || $scope.integration1CODVD_enabled()
+        org: {
+            active: false,
+            disabled: true
         }
+    };
+
+    $scope.refresh_tabs = function (org_active) {
+        $scope.payer_tabs.person.active = !org_active;
+        $scope.payer_tabs.org.active = Boolean(org_active);
+        $scope.payer_tabs.person.disabled = event_created && $scope.payer_tabs.org.active;
+        $scope.payer_tabs.org.disabled = event_created && $scope.payer_tabs.person.active;
     };
 
     $scope.payment_box_visible = function () {
@@ -367,9 +374,7 @@ var EventPaymentCtrl = function($scope, RefBookService, Settings, $http, $modal)
     };
 
     $scope.$on('event_loaded', function() {
-        $scope.formcnf.tab_payer_person.active = $scope.person_tab_active();
-        $scope.formcnf.tab_payer_org.active = $scope.org_tab_active();
-        $scope.formcnf.contract_field.disabled = event_created || $scope.integration1CODVD_enabled();
+        $scope.refresh_tabs($scope.payer_is_org());
     });
 
     $scope.switch_tab = function(from_tab) {
@@ -388,7 +393,9 @@ var EventPaymentCtrl = function($scope, RefBookService, Settings, $http, $modal)
                 templateUrl: 'modal-switch-payer.html',
                 controller: SwitchPayerModalCtrl,
                 resolve: {
-                    from_tab: from_tab
+                    from_tab: function () {
+                        return from_tab;
+                    }
                 }
             });
 
@@ -409,10 +416,10 @@ var EventPaymentCtrl = function($scope, RefBookService, Settings, $http, $modal)
             }, function () {
                 if (from_tab === 0) {
                     $scope.switch_in_process = true;
-                    $scope.formcnf.tab_payer_person.active = true;
+                    $scope.payer_tabs.person.active = true;
                 } else {
                     $scope.switch_in_process = true;
-                    $scope.formcnf.tab_payer_org.active = true;
+                    $scope.payer_tabs.org.active = true;
                 }
             });
         }
@@ -427,6 +434,7 @@ var EventPaymentCtrl = function($scope, RefBookService, Settings, $http, $modal)
             }
         }).success(function(data) {
             $scope.eventctrl.update_payment($scope.event, data.result);
+            $scope.refresh_tabs($scope.payer_is_org());
         }).error(function() {
             alert('error in getting data from server');
         });
