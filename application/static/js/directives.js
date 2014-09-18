@@ -262,6 +262,12 @@ angular.module('WebMis20.directives')
                             context[name] = Boolean(value);
                         else if (['Organisation', 'OrgStructure', 'Person', 'Service'].has(typeName))
                             context[name] = value ? value.id : null;
+                        else if (typeName == 'SpecialVariable') {
+                            if (!('special_variables' in context))
+                                context['special_variables']={};
+                            context['special_variables'][name] = meta['arguments'];
+                        }
+
                         else context[name] = value
                     });
                     return {
