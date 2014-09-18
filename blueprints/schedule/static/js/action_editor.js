@@ -6,7 +6,7 @@ var ActionEditorCtrl = function ($scope, $http, $window, WMAction, PrintingServi
     $scope.ps = new PrintingService("action");
     $scope.ps_resolve = function () {
         return {
-            action_id: $scope.action.id
+            action_id: $scope.action.action.id
         }
     };
     $scope.action_id = params.action_id;
