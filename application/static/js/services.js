@@ -596,7 +596,9 @@ angular.module('WebMis20.services', []).
                             service_group.assignable.map(function (prop) {
                                 return prop[0];
                             }),
-                        planned_end_date: new Date()
+                        planned_end_date: service_group.all_planned_end_date !== false ?
+                            service_group.all_planned_end_date :
+                            new Date()
                     }
                 }
                 angular.extend(this, action);
