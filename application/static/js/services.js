@@ -580,6 +580,7 @@ angular.module('WebMis20.services', []).
     factory('WMEventServiceGroup', ['$rootScope', 'WMEventController', 'PrintingService',
         function($rootScope, WMEventController, PrintingService) {
             var WMSimpleAction = function (action, service_group) {
+                var self = this;
                 if (!action) {
                     action = {
                         action_id: null,
@@ -596,10 +597,11 @@ angular.module('WebMis20.services', []).
                             service_group.assignable.map(function (prop) {
                                 return prop[0];
                             }),
-                        planned_end_date: service_group.all_planned_end_date !== false ?
-                            service_group.all_planned_end_date :
-                            new Date()
-                    }
+                        planned_end_date: null
+                    };
+                    WMEventController.get_action_ped(service_group.at_id).then(function (ped) {
+                        self.planned_end_date = ped;
+                    });
                 }
                 angular.extend(this, action);
                 this.planned_end_date = aux.safe_date(this.planned_end_date);
@@ -989,7 +991,7 @@ angular.module('WebMis20.services', []).
             }
         };
     }]).
-    service('WMEventController', ['$http', '$injector', function ($http, $injector) {
+    service('WMEventController', ['$http', '$injector', '$q', function ($http, $injector, $q) {
         function contains_sg (event, at_id, service_id) {
             return event.services.some(function (sg) {
                 return sg.at_id === at_id && (sg.service_id !== undefined ? sg.service_id === service_id : true);
@@ -1086,6 +1088,19 @@ angular.module('WebMis20.services', []).
                     local_contract: payment.local_contract,
                     payments: new PlModel(payment.payments)
                 };
+            },
+            get_action_ped: function (action_type_id) {
+                var deferred = $q.defer();
+                $http.get(url_api_get_action_ped, {
+                    params: {
+                        action_type_id: action_type_id
+                    }
+                }).success(function (data) {
+                    deferred.resolve(new Date(data.result.ped));
+                }).error(function (response) {
+                    deferred.reject();
+                });
+                return deferred.promise;
             }
         };
     }]).

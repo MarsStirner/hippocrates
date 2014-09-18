@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import datetime
-from application.lib.data import create_new_action, update_action
+from application.lib.data import create_new_action, update_action, ActionException
 from application.models.actions import Action, ActionType
 from application.models.event import EventLocalContract
 from application.lib.utils import safe_date, safe_traverse, safe_datetime, logger
@@ -115,6 +115,11 @@ def create_services(event_id, service_groups, contract_id):
                         data['properties_assigned'] = assigned
                     action = Action.query.get(action_id)
                     action = update_action(action, **data)
+            except ActionException, e:
+                db.session.rollback()
+                err_msg = u'Ошибка сохранения услуги "%s": %s.' % (action_type.name, e.message)
+                logger.error(err_msg + u'для event_id=%s' % event_id, exc_info=True)
+                errors.append(err_msg)
             except Exception, e:
                 db.session.rollback()
                 err_msg = u'Ошибка сохранения услуги "%s"' % action_type.name
