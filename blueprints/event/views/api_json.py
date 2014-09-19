@@ -397,7 +397,9 @@ def api_new_event_payment_info_get():
     if source == 'prev_event':
         try:
             event_type_id = int(request.args['event_type_id'])
-            event_set_date = safe_datetime(request.args['set_date'])
+            event_set_date = safe_datetime(request.args.get('set_date'))
+            if event_set_date is None:
+                event_set_date = datetime.datetime.now()
         except KeyError or ValueError:
             return abort(400)
         event = Event.query.join(EventType).filter(
