@@ -474,7 +474,7 @@ var WebMis20 = angular.module('WebMis20', [
     };
     return PrintingService;
 }])
-.factory('WMAction', ['$http', '$rootScope', function ($http, $rootScope) {
+.factory('WMAction', ['$http', '$q', '$rootScope', function ($http, $q, $rootScope) {
         // FIXME: На данный момент это ломает функциональность действий, но пока пофиг.
     var Action = function () {
         this.action = {};
@@ -526,10 +526,23 @@ var WebMis20 = angular.module('WebMis20', [
             }
         }).success(success_wrapper(this));
     };
+    Action.prototype.is_new = function () {
+        return !this.action.id;
+    };
     Action.prototype.save = function () {
+        var deferred = $q.defer();
         $http.post(
-            url_action_save, this.action).success(success_wrapper(this));
-        return this;
+            url_action_save, this.action
+            ).
+                success(function(responce){
+                    success_wrapper(responce);
+                    deferred.resolve(responce.result);
+                }).
+                error(function(responce){
+                    deferred.reject('action save error');
+                })
+        ;
+        return deferred.promise;
     };
     Action.prototype.cancel = function () {
         window.close();

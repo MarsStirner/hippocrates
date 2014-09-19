@@ -19,6 +19,17 @@ var ActionEditorCtrl = function ($scope, $http, $window, WMAction, PrintingServi
     function update_print_templates (data) {
         $scope.ps.set_context(data.result.action.action_type.context_name)
     }
+
+    $scope.save_action = function () {
+        $scope.action.save().
+            then(function (result) {
+                if ($scope.action.is_new()) {
+                    $window.open(url_for_schedule_html_action + '?action_id=' + result.action.id, '_self');
+                } else {
+                    $scope.action.get(result.action.id);
+                }
+            });
+    };
     $scope.ActionStatus = RefBookService.get('ActionStatus');
     $scope.is_med_doc = function () { return $scope.action.action.action_type && $scope.action.action.action_type.class === 0; };
     $scope.is_diag_lab = function () { return $scope.action.action.action_type && $scope.action.action.action_type.class === 1; };
