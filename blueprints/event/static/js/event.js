@@ -345,28 +345,44 @@ var EventPaymentCtrl = function($scope, RefBookService, Settings, $http, $modal)
         return ($scope.payer_tabs.org.active && $scope.event.is_new() && $scope.formstate.is_paid());
     };
     $scope.payer_info_disabled = function () {
-        return event_created;
+        return event_created && false;
     };
     $scope.contract_info_disabled = function () {
         return event_created || $scope.integration1CODVD_enabled();
+    };
+    $scope.import_payer_btn_disabled = function () {
+        return event_created && $scope.contract_available();
     };
 
     $scope.payer_tabs = {
         person: {
             active: true,
-            disabled: true
+            disabled: false
         },
         org: {
             active: false,
-            disabled: true
+            disabled: false
         }
     };
 
     $scope.refresh_tabs = function (org_active) {
         $scope.payer_tabs.person.active = !org_active;
         $scope.payer_tabs.org.active = Boolean(org_active);
-        $scope.payer_tabs.person.disabled = event_created && $scope.payer_tabs.org.active;
-        $scope.payer_tabs.org.disabled = event_created && $scope.payer_tabs.person.active;
+//        $scope.payer_tabs.person.disabled = event_created && $scope.payer_tabs.org.active;
+//        $scope.payer_tabs.org.disabled = event_created && $scope.payer_tabs.person.active;
+    };
+
+    $scope.contract_available = function () {
+        var event = $scope.event;
+        return event.payment && event.payment.local_contract && event.payment.local_contract.id;
+    };
+
+    $scope.contract_is_shared = function () {
+        return $scope.contract_available() && $scope.event.payment.local_contract.shared_in_events.length;
+    };
+
+    $scope.get_shared_contract_warning = function () {
+        return "Этот договор также используется в других обращениях.Редактирование данных плательщика приведет к созданию нового договора.";
     };
 
     $scope.payment_box_visible = function () {
@@ -429,6 +445,7 @@ var EventPaymentCtrl = function($scope, RefBookService, Settings, $http, $modal)
         $http.get(url_for_event_api_new_event_payment_info_get, {
             params: {
                 event_type_id: $scope.event.info.event_type.id,
+                set_date: $scope.event.info.set_date,
                 client_id: client_id,
                 source: source
             }
