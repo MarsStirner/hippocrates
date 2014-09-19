@@ -445,7 +445,7 @@ var EventPaymentCtrl = function($scope, RefBookService, Settings, $http, $modal)
         $http.get(url_for_event_api_new_event_payment_info_get, {
             params: {
                 event_type_id: $scope.event.info.event_type.id,
-                set_date: $scope.event.info.set_date,
+                set_date: $scope.event.info.set_date.toISOString(),
                 client_id: client_id,
                 source: source
             }
