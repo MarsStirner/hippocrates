@@ -2,8 +2,13 @@
 <ng-form name="payerForm" toc-element="Плательщик">
 <legend xmlns="http://www.w3.org/1999/html">Плательщик</legend>
 <tabset justified="false" class="marginal">
-    <tab id="tab_payer_person" heading="Физ. лицо" disabled="payer_tabs.person.disabled"
+    <tab id="tab_payer_person" disabled="payer_tabs.person.disabled"
          active="payer_tabs.person.active" deselect="switch_tab(0)">
+        <tab-heading>Физ. лицо
+            <span class="glyphicon glyphicon-th-list lmargin20 text-info"
+                  ng-show="payer_tabs.person.active && contract_is_shared()"
+                  tooltip="[[get_shared_contract_warning()]]"></span>
+        </tab-heading>
         <div class="row">
             <div class="col-md-10">
                 <div class="row">
@@ -87,11 +92,11 @@
             <div class="col-md-2">
                 <div>
                     <label>Заполнить из:</label>
-                    <button type="button" class="btn btn-info btn-block" ng-disabled="payer_info_disabled()"
+                    <button type="button" class="btn btn-info btn-block" ng-disabled="import_payer_btn_disabled()"
                             ng-click="get_payer('client', event.info.client_id)">карты пациента</button>
-                    <button type="button" class="btn btn-info btn-block" ng-disabled="payer_info_disabled()"
+                    <button type="button" class="btn btn-info btn-block" ng-disabled="import_payer_btn_disabled()"
                             ng-click="open_relatives_modal()">карты родственника</button>
-                    <button type="button" class="btn btn-info btn-block" ng-disabled="payer_info_disabled()"
+                    <button type="button" class="btn btn-info btn-block" ng-disabled="import_payer_btn_disabled()"
                             ng-click="get_payer('prev_event', event.info.client_id)">предыдущего</button>
                 </div>
             </div>
@@ -99,8 +104,13 @@
 
     </tab>
 
-    <tab id="tab_payer_org" heading="Юр. лицо" disabled="payer_tabs.org.disabled"
+    <tab id="tab_payer_org" disabled="payer_tabs.org.disabled"
          active="payer_tabs.org.active" deselect="switch_tab(1)">
+        <tab-heading>Юр. лицо
+            <span class="glyphicon glyphicon-th-list lmargin20 text-info"
+                  ng-show="payer_tabs.org.active && contract_is_shared()"
+                  tooltip="[[get_shared_contract_warning()]]"></span>
+        </tab-heading>
         <div class="row">
             <div class="col-md-6"
                  ng-class="{'has-error': payerForm.payer_org.$invalid && editing.submit_attempt}">

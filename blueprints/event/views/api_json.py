@@ -20,8 +20,7 @@ from application.lib.utils import (jsonify, safe_traverse, get_new_uuid, logger,
 from blueprints.event.app import module
 from application.models.exists import (Organisation, )
 from application.lib.jsonify import EventVisualizer, ClientVisualizer
-from blueprints.event.lib.utils import (EventSaveException, get_local_contract,
-    create_new_local_contract, create_services)
+from blueprints.event.lib.utils import (EventSaveException, create_services, create_or_update_local_contract)
 from application.lib.sphinx_search import SearchEventService
 from application.lib.data import get_planned_end_datetime, int_get_atl_dict_all
 
@@ -115,6 +114,13 @@ def api_event_save():
         event.result_id = event_data['result']['id'] if event_data.get('result') else None
         event.rbAcheResult_id = event_data['ache_result']['id'] if event_data.get('ache_result') else None
         event.note = event_data['note']
+
+        local_contract = safe_traverse(request.json, 'payment', 'local_contract')
+        if event.payer_required:
+            if not local_contract:
+                raise EventSaveException(err_msg, u'Не заполнена информация о плательщике.')
+            lcon = create_or_update_local_contract(event, local_contract)
+            event.localContract = lcon
         db.session.add(event)
     else:
         event = Event()
@@ -137,7 +143,7 @@ def api_event_save():
         if event.payer_required:
             if not local_contract:
                 raise EventSaveException(err_msg, u'Не заполнена информация о плательщике.')
-            lcon = get_local_contract(local_contract)
+            lcon = create_or_update_local_contract(event, local_contract)
             event.localContract = lcon
         db.session.add(event)
 
@@ -391,12 +397,14 @@ def api_new_event_payment_info_get():
     if source == 'prev_event':
         try:
             event_type_id = int(request.args['event_type_id'])
+            event_set_date = safe_datetime(request.args['set_date'])
         except KeyError or ValueError:
             return abort(400)
         event = Event.query.join(EventType).filter(
             EventType.id == event_type_id,
             Event.client_id == client_id,
-            Event.deleted == 0
+            Event.deleted == 0,
+            Event.setDate < event_set_date
         ).order_by(Event.setDate.desc()).first()
     elif source == 'client':
         client = Client.query.get(client_id)

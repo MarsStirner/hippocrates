@@ -471,7 +471,8 @@ class ClientVisualizer(object):
             'number': id_doc.number if id_doc else None,
             'reg_address': safe_unicode(client.reg_address),
             'payer_org_id': None,
-            'payer_org': None
+            'payer_org': None,
+            'shared_in_events': []
         }
 
 
@@ -604,24 +605,55 @@ class EventVisualizer(object):
     def make_event_payment(self, event, client=None):
         if client:
             cvis = ClientVisualizer()
-            lc = cvis.make_payer_for_lc(client)
+            local_contract = cvis.make_payer_for_lc(client)
             payments = []
         else:
-            if event:
-                lc = event.localContract
-            else:
-                from blueprints.event.lib.utils import create_new_local_contract
-                lc = create_new_local_contract({
-                    'date_contract': datetime.date.today(),
-                    'number_contract': ''
-                })
+            local_contract = self.make_event_local_contract(event)
             payments = [payment
                         for payment in event.payments
                         if payment.master_id == event.id] if event else []
         return {
-            'local_contract': lc,
+            'local_contract': local_contract,
             'payments': payments
         }
+
+    def make_event_local_contract(self, event):
+        if event and event.localContract:
+            local_contract = event.localContract
+        else:
+            from blueprints.event.lib.utils import create_new_local_contract
+            local_contract = create_new_local_contract({
+                'date_contract': datetime.date.today(),
+                'number_contract': ''
+            })
+        lc = {
+            'id': local_contract.id,
+            'number_contract': local_contract.numberContract,
+            'date_contract': local_contract.dateContract,
+            'first_name': local_contract.firstName,
+            'last_name': local_contract.lastName,
+            'patr_name': local_contract.patrName,
+            'birth_date': local_contract.birthDate,
+            'doc_type_id': local_contract.documentType_id,
+            'doc_type': local_contract.documentType,
+            'serial_left': local_contract.serialLeft,
+            'serial_right': local_contract.serialRight,
+            'number': local_contract.number,
+            'reg_address': local_contract.regAddress,
+            'payer_org_id': local_contract.org_id,
+            'payer_org': local_contract.org,
+        }
+        if event and event.id and local_contract.id:
+            other_events = db.session.query(
+                Event.id, Event.externalId
+            ).filter(
+                Event.localContract_id == local_contract.id,
+                Event.id != event.id
+            ).all()
+        else:
+            other_events = []
+        lc['shared_in_events'] = other_events
+        return lc
 
     def make_event_services(self, event_id):
 
