@@ -817,7 +817,7 @@ angular.module('WebMis20.directives')
                     <div class="col-md-3">\
                         <div class="form-group" ng-class="{\'has-error\': DiagnosisForm.end_date.$invalid}">\
                             <label for="diagnosis_date" class="control-label">Дата окончания</label>\
-                            <wm-date name="end_date" ng-model="model.end_date" ng-required="true">\
+                            <wm-date name="end_date" ng-model="model.end_date">\
                             </wm-date>\
                         </div>\
                     </div>\
