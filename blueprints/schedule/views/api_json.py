@@ -20,7 +20,8 @@ from application.models.actions import Action, ActionType
 from application.models.schedule import (Schedule, ScheduleTicket, ScheduleClientTicket, rbAppointmentType,
     rbAttendanceType, QuotingByTime)
 from application.lib.jsonify import ScheduleVisualizer, ActionVisualizer
-from application.lib.data import create_new_action, create_action, update_action, int_get_atl_flat
+from application.lib.data import (create_new_action, create_action, update_action, int_get_atl_flat,
+    get_planned_end_datetime)
 
 
 __author__ = 'mmalkov'
@@ -431,6 +432,19 @@ def api_action_post():
 
     v = ActionVisualizer()
     return jsonify(v.make_action(action))
+
+
+@module.route('/api/action_type/planned_end_date.json', methods=['GET'])
+def api_get_action_ped():
+    at_id = parse_id(request.args, 'action_type_id')
+    if at_id is False:
+        raise abort(404)
+    at = ActionType.query.get(at_id)
+    if not at:
+        raise abort(404)
+    return jsonify({
+        'ped': get_planned_end_datetime(at_id)
+    })
 
 
 @cache.memoize(86400)

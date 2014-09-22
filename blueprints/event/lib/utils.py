@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import datetime
-from application.lib.data import create_new_action, update_action
+from application.lib.data import create_new_action, update_action, ActionException
 from application.models.actions import Action, ActionType
 from application.models.event import EventLocalContract
 from application.lib.utils import safe_date, safe_traverse, safe_datetime, logger
@@ -53,32 +53,77 @@ def create_new_local_contract(lc_info):
     return lcon
 
 
-def get_local_contract(lc_info):
+def _check_shared_local_contract_changes(lc_info):
+    def _has_changes(lc, lc_info):
+        if (lc.numberContract != lc_info.get('number_contract', '')
+                or lc.lastName != lc_info.get('last_name', '')
+                or lc.firstName != lc_info.get('first_name', '')
+                or lc.patrName != lc_info.get('patr_name', '')
+                or lc.birthDate != safe_date(lc_info.get('birth_date', ''))
+                or lc.documentType_id != safe_traverse(lc_info, 'doc_type', 'id')
+                or lc.serialLeft != lc_info.get('serial_left', '')
+                or lc.serialRight != lc_info.get('serial_right', '')
+                or lc.number != lc_info.get('number', '')
+                or lc.regAddress != lc_info.get('reg_address', '')
+                or lc.org_id != safe_traverse(lc_info, 'payer_org', 'id')):
+            return True
+        return False
+
+    lc_id = lc_info.get('id')
+    lcon = EventLocalContract.query.get(lc_id)
+    return _has_changes(lcon, lc_info)
+
+
+def get_local_contract_for_new_event(lc_info):
     lc_id = None
     if lc_info:
         lc_id = lc_info.get('id')
     if lc_id:
-        def _has_changes(lc, lc_info):
-            if (lc.numberContract != lc_info.get('number_contract', '')
-                    or lc.lastName != lc_info.get('last_name', '')
-                    or lc.firstName != lc_info.get('first_name', '')
-                    or lc.patrName != lc_info.get('patr_name', '')
-                    or lc.birthDate != safe_date(lc_info.get('birth_date', ''))
-                    or lc.documentType_id != safe_traverse(lc_info, 'doc_type', 'id')
-                    or lc.serialLeft != lc_info.get('serial_left', '')
-                    or lc.serialRight != lc_info.get('serial_right', '')
-                    or lc.number != lc_info.get('number', '')
-                    or lc.regAddress != lc_info.get('reg_address', '')
-                    or lc.org_id != safe_traverse(lc_info, 'payer_org', 'id')):
-                return True
-            return False
-
-        lcon = EventLocalContract.query.get(lc_id)
-        if _has_changes(lcon, lc_info):
+        if _check_shared_local_contract_changes(lc_info):
             lcon = create_new_local_contract(lc_info)
+        else:
+            lcon = EventLocalContract.query.get(lc_id)
     else:
         lcon = create_new_local_contract(lc_info)
     return lcon
+
+
+def create_or_update_local_contract(event, lc_info):
+    lc_id = lc_info.get('id')
+    # number_contract = lc_info.get('number_contract', '')
+    last_name = lc_info.get('last_name', '')
+    first_name = lc_info.get('first_name', '')
+    patr_name = lc_info.get('patr_name', '')
+    birth_date = safe_date(lc_info.get('birth_date', ''))
+    document_type_id = safe_traverse(lc_info, 'doc_type', 'id')
+    serial_left = lc_info.get('serial_left', '')
+    serial_right = lc_info.get('serial_right', '')
+    doc_number = lc_info.get('number', '')
+    reg_address = lc_info.get('reg_address', '')
+    org_id = safe_traverse(lc_info, 'payer_org', 'id')
+    if event.id:
+        if event.localContract_id and event.localContract_id == lc_id:
+            if lc_info.get('shared_in_events') and _check_shared_local_contract_changes(lc_info):
+                lc = create_new_local_contract(lc_info)
+            else:
+                lc = EventLocalContract.query.get(lc_id)
+                lc.lastName = last_name
+                lc.firstName = first_name
+                lc.patrName = patr_name
+                lc.birthDate = birth_date
+                lc.documentType_id = document_type_id
+                lc.serialLeft = serial_left
+                lc.serialRight = serial_right
+                lc.number = doc_number
+                lc.regAddress = reg_address
+                lc.org_id = org_id
+        elif not event.localContract_id:
+            lc = get_local_contract_for_new_event(lc_info)
+        else:
+            raise EventSaveException(u'Ошибка сохранения обращения', u'Ошибка сохранения договора')
+    else:
+        lc = get_local_contract_for_new_event(lc_info)
+    return lc
 
 
 def create_services(event_id, service_groups, contract_id):
@@ -115,6 +160,11 @@ def create_services(event_id, service_groups, contract_id):
                         data['properties_assigned'] = assigned
                     action = Action.query.get(action_id)
                     action = update_action(action, **data)
+            except ActionException, e:
+                db.session.rollback()
+                err_msg = u'Ошибка сохранения услуги "%s": %s.' % (action_type.name, e.message)
+                logger.error(err_msg + u'для event_id=%s' % event_id, exc_info=True)
+                errors.append(err_msg)
             except Exception, e:
                 db.session.rollback()
                 err_msg = u'Ошибка сохранения услуги "%s"' % action_type.name
