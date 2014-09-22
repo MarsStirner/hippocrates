@@ -28,13 +28,11 @@ angular.module('WebMis20.ActionLayout', ['WebMis20.validators', 'WebMis20.direct
                         switch (property.type.type_name) {
                             case 'Constructor':
                                 inner_template = '<wysiwyg ng-model="{0}.value" thesaurus-code="{1}" />'.format('{0}', property.type.domain);
-                                sas.select(tag.id, false);
                                 break;
                             case 'Text':
                             case 'Html':
                             case 'Жалобы':
                                 inner_template = '<wysiwyg ng-model="{0}.value" />';
-                                sas.select(tag.id, false);
                                 break;
                             case 'Date':
                                 inner_template = '<input type="text" class="form-control" datepicker-popup="dd-MM-yyyy" ng-model="{0}.value" />';
@@ -108,11 +106,9 @@ angular.module('WebMis20.ActionLayout', ['WebMis20.validators', 'WebMis20.direct
                         var property_name = tag.title || property.type.name;
                         var template;
                         if (context === undefined) {
-                            template = '<div class="row">\
-                            <div class="col-sm-3">\
+                            template = '<div class="form-group">\
                                 <wm-checkbox select-all="sas" key="{2}">{0}</wm-checkbox>\
-                            </div>\
-                            <div class="col-sm-9"><div ng-show="sas.selected({2})">{1}</div></div>\
+                                <div ng-show="sas.selected({2})">{1}</div>\
                         </div>'.format(
                                 property_name,
                                 inner_template.format(property_code),
@@ -144,6 +140,10 @@ angular.module('WebMis20.ActionLayout', ['WebMis20.validators', 'WebMis20.direct
                                 );
                             }
                         }
+
+                        if (!property || !property.value) {
+                            sas.select(tag.id, false);
+                        }
                         return template;
 
                     case 'vgroup':
@@ -172,7 +172,7 @@ angular.module('WebMis20.ActionLayout', ['WebMis20.validators', 'WebMis20.direct
                         inner_template = tag.children.map(function (child) {
                             return '<div class="col-md-{0}">{1}</div>'.format(w, build(child))
                         }).join('');
-                        return '<div class="row">{0}</div>'.format(inner_template);
+                        return '<div class="row">{0}</div><hr>'.format(inner_template);
 
                     case 'table':
                         return '<table class="table table-condensed">{0}</table>'.format(tag.children.map(function (child) {
@@ -185,9 +185,9 @@ angular.module('WebMis20.ActionLayout', ['WebMis20.validators', 'WebMis20.direct
 
                     case 'root':
                         inner_template = tag.children.map(function (child) {
-                            return '<div class="col-md-12">{0}</div>'.format(build(child))
+                            return '<div class="row"><div class="col-md-12">{0}</div></div>'.format(build(child))
                         }).join('');
-                        return '<div class="row marginal">{0}</div>'.format(inner_template);
+                        return '<div class="row marginal"><div class="col-md-12">{0}</div></div>'.format(inner_template);
 
                     default:
                         return '<div>[[ tag | json ]]</div>';
@@ -202,21 +202,6 @@ angular.module('WebMis20.ActionLayout', ['WebMis20.validators', 'WebMis20.direct
                 properties = properties || [];
                 sas.setSource(properties.map(function (item) {return item.type.id}));
             });
-
-            scope.ckEditorOptions = {
-                language: 'ru',
-                removeButtons: '',
-                toolbar: [
-                    { name: 'document', items: [ 'Source', '-', 'NewPage', 'Preview', '-', 'Templates' ] },	// Defines toolbar group with name (used to create voice label) and items in 3 subgroups.
-                    [ 'Cut', 'Copy', 'Paste', 'PasteText', 'PasteFromWord', '-', 'Undo', 'Redo' ],			// Defines toolbar group without name.
-                    { name: 'basicstyles', items: [ 'Bold', 'Italic', 'Underline' ] }
-                ],
-                autoGrow_minHeight: 50,
-                autoGrow_bottomSpace: 50,
-                autoGrow_onStartup: true,
-                height: 100,
-                autoParagraph: false
-            };
 
             scope.$watch('action.layout', function (layout) {
                 v_groups_count = 0;

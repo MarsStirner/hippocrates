@@ -330,6 +330,10 @@ div.select2-container {
     margin-bottom: 10px;
 }
 
+.rmargin10 {
+    margin-right: 10px !important;
+}
+
 .nomarpad {
     margin: 0;
     padding: 0;

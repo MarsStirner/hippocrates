@@ -846,7 +846,10 @@ class ActionVisualizer(object):
                 logger.warning('Bad layout for ActionType with id = %s' % action.actionType.id)
             else:
                 return at_layout
-        # default layout
+        layout = self.make_default_two_cols_layout(action)
+        return layout
+
+    def make_default_layout(self, action):
         layout = {
             'tagName': 'root',
             'children': [{
@@ -859,7 +862,39 @@ class ActionVisualizer(object):
                 'tagName': 'bak_lab_view',
             })
         return layout
-    
+
+    def make_default_two_cols_layout(self, action):
+        def pairwise(iterable):
+            from itertools import izip_longest
+            a = iter(iterable)
+            return izip_longest(a, a)
+
+        def make_row(ap, ap2):
+            return {
+                'tagName': 'row',
+                'cols': 2,
+                'children': [{
+                    'tagName': 'ap',
+                    'id': ap.type.id
+                }, {
+                    'tagName': 'ap',
+                    'id': ap2.type.id
+                } if ap2 else {}]
+            }
+
+        layout = {
+            'tagName': 'root',
+            'children': []
+        }
+        for ap, next_ap in pairwise(sorted(action.properties, key=lambda ap: ap.type.idx)):
+            layout['children'].append(make_row(ap, next_ap))
+
+        if action_is_bak_lab(action):
+            layout['children'].append({
+                'tagName': 'bak_lab_view',
+            })
+        return layout
+
     def make_property(self, prop):
         """
         @type prop: ActionProperty

@@ -638,7 +638,7 @@ var WebMis20 = angular.module('WebMis20', [
         },
         link: function (scope, element, attributes) {
             // Создаём элементы
-            var inputElement = $('<input type="checkbox"></input>');
+            var inputElement = $('<input type="checkbox" class="rmargin10"></input>');
             var replace = $('<label></label>');
             // Формируем элеменент для замены
             replace.append(inputElement);
