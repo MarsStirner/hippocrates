@@ -50,6 +50,7 @@
         url_schedule_api_day_schedule = '{{ url_for('schedule.api_day_schedule') }}',
         url_roles_api = '{{ url_for('api_roles') }}',
         url_get_orgstructure = '{{ url_for('schedule.api_org_structure') }}',
+        url_api_get_action_ped = '{{ url_for('schedule.api_get_action_ped') }}',
         current_user = {{ current_user.export_js() | tojson | safe }},
         current_user_id = {{ current_user.id|default('undefined') }};
 </script>

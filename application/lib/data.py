@@ -43,6 +43,9 @@ DP_EVENT_EXEC_PERSON = 3
 DP_CURRENT_USER = 4
 
 
+class ActionException(Exception): pass
+
+
 def create_action(action_type_id, event_id, src_action=None, assigned=None, properties=None, data=None):
     """
     Базовое создание действия, например для отправки клиентской стороне.
@@ -233,13 +236,15 @@ def create_JT(action, orgstructure_id):
     :return: JobTicket
     """
     planned_end_date = action.plannedEndDate
+    if not planned_end_date:
+        raise ActionException(u'Не заполнена плановая дата исследования')
     job_type_id = action.actionType.jobType_id
     jt_date = planned_end_date.date()
     jt_time = planned_end_date.time()
     client_id = action.event.client_id
     at_tissue_type = action.actionType.tissue_type
     if at_tissue_type is None:
-        raise Exception(u'Неверно настроены параметры биозаборов для создания лабораторных исследований')
+        raise ActionException(u'Неверно настроены параметры биозаборов для создания лабораторных исследований')
 
     job = Job.query.filter(
         Job.jobType_id == job_type_id,

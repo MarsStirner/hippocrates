@@ -107,6 +107,7 @@ angular.module('WebMis20.services.models').
     factory('WMEventServiceGroup', ['$rootScope', 'WMEventServices', 'PrintingService',
         function($rootScope, WMEventServices, PrintingService) {
             var WMSimpleAction = function (action, service_group) {
+                var self = this;
                 if (!action) {
                     action = {
                         action_id: null,
@@ -123,8 +124,11 @@ angular.module('WebMis20.services.models').
                             service_group.assignable.map(function (prop) {
                                 return prop[0];
                             }),
-                        planned_end_date: new Date()
-                    }
+                        planned_end_date: null
+                    };
+                    WMEventServices.get_action_ped(service_group.at_id).then(function (ped) {
+                        self.planned_end_date = ped;
+                    });
                 }
                 angular.extend(this, action);
                 this.planned_end_date = aux.safe_date(this.planned_end_date);

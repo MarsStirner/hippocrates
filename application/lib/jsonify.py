@@ -100,6 +100,7 @@ class ScheduleVisualizer(object):
             return {
                 'max_tickets': 0,
                 'schedule': rt_group,
+                'is_empty': True
             }
         if self.reception_type:
             result = {self.reception_type: new_rt()}
@@ -110,6 +111,7 @@ class ScheduleVisualizer(object):
             if schedule.receptionType and schedule.receptionType.code in result:
                 result[schedule.receptionType.code]['schedule'][(schedule.date - date_start).days]['scheds'].\
                     append(self.make_day(schedule))
+                result[schedule.receptionType.code]['is_empty'] = False
 
         for group in result.itervalues():
             group['max_tickets'] = max(

@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('WebMis20.services').
-    service('WMEventServices', ['$http', '$injector', function ($http, $injector) {
+    service('WMEventServices', ['$http', '$injector', '$q', function ($http, $injector, $q) {
         function contains_sg (event, at_id, service_id) {
             return event.services.some(function (sg) {
                 return sg.at_id === at_id && (sg.service_id !== undefined ? sg.service_id === service_id : true);
@@ -98,6 +98,19 @@ angular.module('WebMis20.services').
                     local_contract: payment.local_contract,
                     payments: new PlModel(payment.payments)
                 };
+            },
+            get_action_ped: function (action_type_id) {
+                var deferred = $q.defer();
+                $http.get(url_api_get_action_ped, {
+                    params: {
+                        action_type_id: action_type_id
+                    }
+                }).success(function (data) {
+                    deferred.resolve(new Date(data.result.ped));
+                }).error(function (response) {
+                    deferred.reject();
+                });
+                return deferred.promise;
             },
             add_new_diagnosis: function () {
                 return {

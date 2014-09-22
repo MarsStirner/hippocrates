@@ -106,7 +106,8 @@ angular.module('WebMis20.directives').
 <td class="col-md-1">\
     <input type="text" class="form-control input-sm"\
            ng-disabled="amount_disabled()" ng-model="service.total_amount"\
-           valid-number min-val="get_min_amount()" max-val="get_max_amount()"/>\
+           valid-number min-val="get_min_amount()" max-val="get_max_amount()"\
+           wm-debounce />\
 </td>\
 <td ng-bind="service.total_sum" class="text-right" ng-show="formstate.is_paid()"></td>\
 <td class="text-center" ng-show="formstate.is_paid()">\
