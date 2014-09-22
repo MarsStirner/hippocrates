@@ -216,6 +216,10 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
                         planned_end_date: new Date()
                     })
                 };
+                $scope.create_action = function (node_id) {
+                    $scope.action_window = window.open(url_for_schedule_html_action + '?action_type_id=' + node_id + '&event_id=' + $scope.event_id);
+                    $scope.$close($scope.action_window);
+                }
                 $scope.create_actions = function () {
                     $http.post(
                         url_schedule_api_create_lab_direction,
@@ -331,7 +335,7 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
             <div class="ui-treeview">\
                 <ul ng-repeat="root in tree.children">\
                     <li sf-treepeat="node in children of root">\
-                        <a ng-href="[[ url_for_schedule_html_action ]]?action_type_id=[[ node.id ]]&event_id=[[ event_id ]]" \
+                        <a ng-click="create_action(node.id)" \
                            ng-if="!node.children.length" target="_blank">\
                             <div class="tree-label leaf">&nbsp;</div>\
                             [ [[node.code]] ] [[ node.name ]]\

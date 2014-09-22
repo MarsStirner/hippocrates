@@ -561,7 +561,7 @@ var EventServicesCtrl = function($scope, $http) {
 };
 
 var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $document, PrintingService, Settings,
-        $filter, $modal, ActionTypeTreeModal, WMEventServices, WMEventFormState, MessageBox) {
+        $filter, $modal, $interval, ActionTypeTreeModal, WMEventServices, WMEventFormState, MessageBox) {
     $scope.aux = aux;
     $scope.current_role_maybe = current_user.current_role_maybe;
     $scope.Organisation = RefBookService.get('Organisation');
@@ -616,8 +616,12 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
 
     $scope.open_action_tree = function (at_class) {
         ActionTypeTreeModal.open(at_class, $scope.event_id, $scope.event.info.client.info)
-            .result.then(function (_) {
-                $scope.event.reload();
+            .result.then(function (result) {
+                if(typeof (result) === 'object'){
+                    $scope.child_window = result;
+                } else {
+                    $scope.event.reload();
+                }
             });
     };
 
@@ -781,7 +785,7 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
     };
 
     $scope.open_action = function (action_id) {
-        window.open(url_for_schedule_html_action + '?action_id=' + action_id);
+        $scope.child_window = window.open(url_for_schedule_html_action + '?action_id=' + action_id);
     };
 
     $scope.delete_action = function (action) {
@@ -805,6 +809,27 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
             });
         }
     }, true);
+
+    var interval;
+    $scope.clearInterval = function() {
+        $interval.cancel(interval);
+        interval = undefined;
+    };
+
+    $scope.$watch('child_window.document', function (n, o) {
+        if (n && n!=o) {
+            $scope.clearInterval();
+            interval = $interval(function () {
+                if ($scope.child_window.closed) {
+                    $scope.event.reload().then(function () {
+                            $scope.$broadcast('event_loaded');
+                        });
+                    $scope.clearInterval();
+                    $scope.child_window = {};
+                }
+            }, 500);
+        }
+    });
 
     $scope.initialize();
 };
@@ -833,4 +858,4 @@ WebMis20.controller('EventDiagnosesCtrl', ['$scope', 'RefBookService', '$http', 
 WebMis20.controller('EventMainInfoCtrl', ['$scope', '$http', 'RefBookService', 'EventType', '$window', '$timeout', 'Settings', '$modal', '$filter', EventMainInfoCtrl]);
 WebMis20.controller('EventPaymentCtrl', ['$scope', 'RefBookService', 'Settings', '$http', '$modal', EventPaymentCtrl]);
 WebMis20.controller('EventServicesCtrl', ['$scope', '$http', EventServicesCtrl]);
-WebMis20.controller('EventInfoCtrl', ['$scope', 'WMEvent', '$http', 'RefBookService', '$window', '$document', 'PrintingService', 'Settings', '$filter', '$modal', 'ActionTypeTreeModal', 'WMEventServices', 'WMEventFormState', 'MessageBox', EventInfoCtrl]);
+WebMis20.controller('EventInfoCtrl', ['$scope', 'WMEvent', '$http', 'RefBookService', '$window', '$document', 'PrintingService', 'Settings', '$filter', '$modal', '$interval', 'ActionTypeTreeModal', 'WMEventServices', 'WMEventFormState', 'MessageBox', EventInfoCtrl]);
