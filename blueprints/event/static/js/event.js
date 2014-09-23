@@ -226,8 +226,8 @@ var EventMainInfoCtrl = function ($scope, $http, RefBookService, EventType, $win
             if (!policy.beg_date || moment(policy.beg_date).isAfter($scope.event.info.set_date)) {
                 $scope.add_policy_error('Дата начала действия полиса не установлена или превышает дату создания обращения');
             }
-            if (!policy.end_date || moment($scope.event.info.set_date).isAfter(policy.end_date)) {
-                $scope.add_policy_error('Не установлена дата окончания действия полиса или дата создания обращения превышает её');
+            if (moment($scope.event.info.set_date).isAfter(policy.end_date)) {
+                $scope.add_policy_error('Дата создания обращения превышает дату окончания действия полиса');
             }
         }
         return $scope.no_policy_errors();

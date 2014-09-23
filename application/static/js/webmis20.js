@@ -82,7 +82,7 @@ var WebMis20 = angular.module('WebMis20', [
 })
 .filter('asDate', function ($filter) {
     return function (data) {
-        if (!data) return data;
+        if (!data) return ' ';
         var result = moment(data);
         if (!result.isValid()) return data;
         return result.format('DD.MM.YYYY');
