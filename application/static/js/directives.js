@@ -135,7 +135,8 @@ angular.module('WebMis20.directives')
     '<legend class="vmargin10">Результаты БАК исследования</legend>\
      <div class="row">\
         <div class="col-md-6">\
-            <label>Подписавший врач:&nbsp;</label><span>[[bak_model.doctor.name]], [[bak_model.doctor.speciality.name]]</span>\
+            <label>Подписавший врач:&nbsp;</label>\
+            <span>[[bak_model.doctor ? \'{0}, {1}\'.format(bak_model.doctor.name, bak_model.doctor.speciality.name) : \'\']]</span>\
         </div>\
         <div class="col-md-6">\
             <label>Код Лис:&nbsp;</label><span>[[bak_model.code_lis]]</span>\
@@ -162,7 +163,7 @@ angular.module('WebMis20.directives')
                 <th>Чувствительность</th>\
             </tr>\
         </thead>\
-        <tbody ng-repeat="organism in bak_model.organisms" ng-class="{\'bg-info\': hover}" ng-mouseenter="hover=true" ng-mouseleave="hover=false">\
+        <tbody ng-repeat="organism in bak_model.organisms" ng-class="{\'bg-muted\': hover}" ng-mouseenter="hover=true" ng-mouseleave="hover=false">\
             <tr>\
                 <td rowspan="[[get_row_num(organism)]]">[[organism.microorganism]]</td>\
                 <td rowspan="[[get_row_num(organism)]]">[[organism.concentration]]</td>\
@@ -180,7 +181,7 @@ angular.module('WebMis20.directives')
             <tr>\
                 <th colspan="5">Комментарии</th>\
             </tr>\
-            <tr ng-repeat="comment in bak_model.comments" ng-class="{\'bg-info\': hover}" ng-mouseenter="hover=true" ng-mouseleave="hover=false">\
+            <tr ng-repeat="comment in bak_model.comments" ng-class="{\'bg-muted\': hover}" ng-mouseenter="hover=true" ng-mouseleave="hover=false">\
                 <td colspan="5">[[comment.text]]</td>\
             </tr>\
         </tbody>\

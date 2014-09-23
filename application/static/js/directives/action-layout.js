@@ -24,6 +24,7 @@ angular.module('WebMis20.ActionLayout', ['WebMis20.validators', 'WebMis20.direct
                         var property = scope.action.get_property(tag.id);
                         if (property === undefined) return '{' + tag.id + '}';
                         var property_code = 'action.get_property(' + tag.id + ')';
+                        var property_is_assignable = 'action.is_assignable(' + tag.id + ')';
 
                         switch (property.type.type_name) {
                             case 'Constructor':
@@ -115,18 +116,22 @@ angular.module('WebMis20.ActionLayout', ['WebMis20.validators', 'WebMis20.direct
                                 property.type.id
                             );
                         } else {
-                            if (context.tag.tagName == 'table') {
+                            if (context.tag.tagName === 'table') {
                                 template = '<tr>\
-                                    <td><label><input type="checkbox" ng-model="{1}.is_assigned">{0}</label></td>\
-                                    <td>{2}</td>\
+                                    <td><label>{0}</label></td>\
+                                    <td class="text-center"><input type="checkbox" ng-model="{1}.is_assigned" ng-if="{2}"></td>\
                                     <td>{3}</td>\
+                                    <td class="text-center">{4}</td>\
+                                    <td class="text-center">{5}</td>\
                                 </tr>'.format(
                                     property_name,
                                     property_code,
+                                    property_is_assignable,
                                     inner_template.format(property_code),
-                                    property.type.unit.code
+                                    property.type.unit ? property.type.unit.code : '',
+                                    property.type.norm ? property.type.norm : ''
                                 );
-                            } else if (context.tag.tagName == 'vgroup') {
+                            } else if (context.tag.tagName === 'vgroup') {
                                 template = '<div class="row">\
                                     <div class="col-sm-3">\
                                         <label><input type="checkbox" ng-model="{1}.is_assigned">{0}</label>\
@@ -175,8 +180,19 @@ angular.module('WebMis20.ActionLayout', ['WebMis20.validators', 'WebMis20.direct
                         return '<div class="row">{0}</div><hr>'.format(inner_template);
 
                     case 'table':
-                        return '<table class="table table-condensed">{0}</table>'.format(tag.children.map(function (child) {
-                            if (child.tag.tagName != 'ap') {throw '"table" tags only support "ap" children';}
+                        return '\
+                            <table class="table table-hover">\
+                                <thead>\
+                                    <th width="30%"></th>\
+                                    <th width="10%" class="text-center">Назначено</th>\
+                                    <th width="30%">Значение</th>\
+                                    <th width="15%" class="text-center">Ед. измерения</th>\
+                                    <th width="15%" class="text-center">Норма</th>\
+                                </thead>\
+                                {0}\
+                            </table>\
+                        '.format(tag.children.map(function (child) {
+                            if (child.tagName !== 'ap') {throw '"table" tags only support "ap" children';}
                             return build(child, {tag: tag});
                         }).join(''));
 

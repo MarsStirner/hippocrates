@@ -557,6 +557,10 @@ var WebMis20 = angular.module('WebMis20', [
     Action.prototype.get_baklab_info = function () {
         return this.bak_lab_info ? this.bak_lab_info : null;
     };
+    Action.prototype.is_assignable = function (id) {
+        var prop = this.get_property(id);
+        return prop ? prop.type.is_assignable : false;
+    };
     return Action;
 }])
 .factory('EventType', ['RefBook', function (RefBook) {

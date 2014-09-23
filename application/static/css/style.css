@@ -343,6 +343,10 @@ div.select2-container {
     padding: 0;
 }
 
+.bg-muted {
+  background-color: #f5f5f5;
+}
+
 .tab-content {
     border-left: 1px solid #ddd;
     border-right: 1px solid #ddd;

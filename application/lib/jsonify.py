@@ -11,7 +11,7 @@ from flask import json
 from application.systemwide import db
 from application.lib.data import int_get_atl_dict_all
 from application.lib.utils import safe_unicode, safe_int, safe_dict, logger, safe_traverse_attrs
-from application.lib.action.utils import action_is_bak_lab
+from application.lib.action.utils import action_is_bak_lab, action_is_lab
 from application.lib.agesex import recordAcceptableEx
 from application.models.enums import EventPrimary, EventOrder, ActionStatus, Gender
 from application.models.event import Event, EventType, Diagnosis, Diagnostic
@@ -880,7 +880,10 @@ class ActionVisualizer(object):
                 logger.warning('Bad layout for ActionType with id = %s' % action.actionType.id)
             else:
                 return at_layout
-        layout = self.make_default_two_cols_layout(action)
+        if action_is_lab(action):
+            layout = self.make_table_layout(action)
+        else:
+            layout = self.make_default_two_cols_layout(action)
         return layout
 
     def make_default_layout(self, action):
@@ -889,12 +892,8 @@ class ActionVisualizer(object):
             'children': [{
                 'tagName': 'ap',
                 'id': ap.type.id,
-            } for ap in action.properties]
+            } for ap in action.properties_ordered]
         }
-        if action_is_bak_lab(action):
-            layout['children'].append({
-                'tagName': 'bak_lab_view',
-            })
         return layout
 
     def make_default_two_cols_layout(self, action):
@@ -920,8 +919,21 @@ class ActionVisualizer(object):
             'tagName': 'root',
             'children': []
         }
-        for ap, next_ap in pairwise(sorted(action.properties, key=lambda ap: ap.type.idx)):
+        for ap, next_ap in pairwise(action.properties_ordered):
             layout['children'].append(make_row(ap, next_ap))
+        return layout
+
+    def make_table_layout(self, action):
+        layout = {
+            'tagName': 'root',
+            'children': [{
+                'tagName': 'table',
+                'children': [{
+                    'tagName': 'ap',
+                    'id': ap.type.id
+                } for ap in action.properties_ordered]
+            }]
+        }
 
         if action_is_bak_lab(action):
             layout['children'].append({
@@ -947,6 +959,8 @@ class ActionVisualizer(object):
             'type': prop.type,
             'is_assigned': prop.isAssigned,
             'value': value,
+            'unit': prop.unit,
+            'norm': prop.norm
         }
 
     # Здесь будут кастомные мейкеры экшон пропертей.

@@ -65,6 +65,10 @@ class Action(db.Model):
     uuid = db.relationship('UUID')
     bbt_response = db.relationship(u'BbtResponse', uselist=False)
 
+    @property
+    def properties_ordered(self):
+        return sorted(self.properties, key=lambda ap: ap.type.idx)
+
 
 class ActionProperty(db.Model):
     __tablename__ = u'ActionProperty'
@@ -257,6 +261,7 @@ class ActionPropertyType(db.Model):
             'mandatory': self.mandatory,
             'type_name': self.typeName,
             'unit': self.unit,
+            'norm': self.norm,
             'vector': bool(self.isVector),
         }
         if self.typeName == 'String':
