@@ -322,7 +322,7 @@ class ClientVisualizer(object):
             raise ValueError('Relation info does not match Client')
 
     def make_client_info(self, client):
-        reg_addr, live_addr = self.make_addresses_info(client) if client.id else None, None
+        reg_addr, live_addr = self.make_addresses_info(client) if client.id else (None, None)
 
         relations = ([self.make_relation_info(client.id, relation) for relation in client.client_relations]
                      if client.id else [])
