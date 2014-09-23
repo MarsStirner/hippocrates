@@ -167,17 +167,15 @@ def kladr_search_city(search_query=None, limit=20):
     result = []
     if search_query is None:
         return jsonify([])
-    short_types = [u'г', u'п', u'с']
     response = requests.get(u'{0}kladr/psg/search/{1}/{2}/'.format(app.config['VESTA_URL'],
                                                                    search_query,
                                                                    limit))
     for city in response.json()['data']:
-        if city['shorttype'] in short_types:
-            data = {'code': city['identcode'], 'name': u'{0}. {1}'.format(city['shorttype'], city['name'])}
-            if city['parents']:
-                for parent in city['parents']:
-                    data['name'] = u'{0}, {1}. {2}'.format(data['name'], parent['shorttype'], parent['name'])
-            result.append(data)
+        data = {'code': city['identcode'], 'name': u'{0}. {1}'.format(city['shorttype'], city['name'])}
+        if city['parents']:
+            for parent in city['parents']:
+                data['name'] = u'{0}, {1}. {2}'.format(data['name'], parent['shorttype'], parent['name'])
+        result.append(data)
     return jsonify(result)
 
 
