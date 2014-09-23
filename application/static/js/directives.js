@@ -1033,6 +1033,7 @@ angular.module('WebMis20.validators', [])
             });
             ctrl.$parsers.unshift(function(viewValue) {
                 if (evalue && regexp) {
+                    if ($(element).attr('ui-mask')){viewValue = viewValue.replace(/_$/, '')};
                     ctrl.$setValidity('text', viewValue && regexp.test(viewValue));
                 }
                 return viewValue
