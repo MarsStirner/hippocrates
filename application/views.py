@@ -218,6 +218,14 @@ def kladr_street(code=None):
 @app.route('/clear_cache/')
 def clear_cache():
     cache.delete_memoized(api_refbook)
+    import os
+    nginx_cache_path = '/var/cache/nginx/'
+    try:
+        cache_list = os.listdir(nginx_cache_path)
+        for file_name in cache_list:
+            os.remove(os.path.join(nginx_cache_path, file_name))
+    except Exception as e:
+        print e
     return u'Кэш справочников удалён', 200, [('content-type', 'text/plain; charset=utf-8')]
 
 
