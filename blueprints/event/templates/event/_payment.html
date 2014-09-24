@@ -39,7 +39,7 @@
                          ng-class="{'has-error': payerForm.birthdate.$invalid && editing.submit_attempt}">
                         <label for="birthdate" class="control-label">Дата рождения</label>
                         <wm-date id="birthdate" ng-model="event.payment.local_contract.birth_date"
-                                 ng-disabled="payer_info_disabled()" ng-required="payer_person_required()">
+                                 ng-disabled="payer_info_disabled()">
                         </wm-date>
                     </div>
                     <div class="form-group col-md-4"
@@ -59,12 +59,12 @@
                         <div class="row">{# TODO: add serial regexp validators from doctype #}
                             <div class="col-md-6">
                                 <input type="text" class="form-control" id="doc_serial_left" name="doc_serial_left"
-                                       autocomplete="off" ng-pattern="/^[\d]+$/"
+                                       autocomplete="off" ng-pattern="/^[\d\w]+$/"
                                        ng-model="event.payment.local_contract.serial_left" ng-disabled="payer_info_disabled()"/>
                             </div>
                             <div class="col-md-6">
                                 <input type="text" class="form-control" id="doc_serial_right" name="doc_serial_right"
-                                       autocomplete="off" ng-pattern="/^[\d]+$/"
+                                       autocomplete="off" ng-pattern="/^[\d\w]+$/"
                                        ng-model="event.payment.local_contract.serial_right" ng-disabled="payer_info_disabled()"/>
                             </div>
                         </div>
