@@ -219,13 +219,14 @@ def kladr_street(code=None):
 def clear_cache():
     cache.delete_memoized(api_refbook)
     import os
-    nginx_cache_path = '/var/cache/nginx/'
+    import shutil
+    nginx_cache_path = '/var/cache/nginx'
     try:
         cache_list = os.listdir(nginx_cache_path)
         for _name in cache_list:
             entity_path = os.path.join(nginx_cache_path, _name)
             if os.path.isdir(entity_path):
-                os.rmdir(entity_path)
+                shutil.rmtree(entity_path)
             elif os.path.isfile(entity_path):
                 os.remove(entity_path)
     except Exception as e:
