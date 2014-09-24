@@ -2,7 +2,7 @@
  * Created by mmalkov on 11.07.14.
  */
 angular.module('WebMis20.directives.personTree', [])
-.directive('personTree', ['$http', function($http) {
+.directive('personTree', ['$http', 'PersonTreeUpdater', function($http, PersonTreeUpdater) {
     return {
         restrict: 'E',
         replace: true,
@@ -24,14 +24,17 @@ angular.module('WebMis20.directives.personTree', [])
                     <ul>\
                         <li ng-repeat="spec_group in tree">\
                             <input class="group" type="checkbox" id="spec-[[spec_group.speciality.id]]" checked>\
-                                <label class="group" for="spec-[[spec_group.speciality.id]]" ng-bind="spec_group.speciality.name" ></label>\
-                                <ul>\
-                                    <li ng-repeat="person in spec_group.persons">\
-                                        <a class="leaf" ng-bind="person.nameFull" ng-click="person_selected(person)" ng-if="!checkboxed"></a>\
-                                        <input type="checkbox" id="doc-[[person.id]]" ng-model="person.checked" ng-disabled="person.disabled" ng-change="selection_change(person)" class="leaf" ng-if="checkboxed">\
-                                        <label class="leaf" for="doc-[[person.id]]" ng-bind="person.name" ng-if="checkboxed"></label>\
-                                    </li>\
-                                </ul>\
+                            <label class="group" for="spec-[[spec_group.speciality.id]]" ng-bind="spec_group.speciality.name" ></label>\
+                            <ul>\
+                                <li ng-repeat="person in spec_group.persons">\
+                                    <a class="leaf" ng-bind="person.nameFull" ng-click="person_selected(person)"\
+                                        ng-if="!checkboxed" ng-class="{\'no-schedule\': display_no_schedule(person)}"></a>\
+                                    <input type="checkbox" id="doc-[[person.id]]" ng-model="person.checked"\
+                                        ng-disabled="person.disabled" ng-change="selection_change(person)" class="leaf" ng-if="checkboxed">\
+                                    <label class="leaf" for="doc-[[person.id]]" ng-bind="person.name" ng-if="checkboxed"\
+                                        ng-class="{\'no-schedule\': display_no_schedule(person)}"></label>\
+                                </li>\
+                            </ul>\
                         </li>\
                     </ul>\
                 </div>\
@@ -42,6 +45,7 @@ angular.module('WebMis20.directives.personTree', [])
             $scope.data = [];
             $scope.query = '';
             $scope.tree = [];
+            $scope.persons_with_scheds = [];
             $scope.reloadTree = function() {
                 $http.get(
                     url_schedule_all_persons_tree
@@ -70,15 +74,19 @@ angular.module('WebMis20.directives.personTree', [])
                             return {
                                 id: person.id,
                                 name: person.name,
-                                nameFull: person.nameFull.join(' '),
+                                nameFull: '{0}{1}'.format(
+                                    person.nameFull.join(' '),
+                                    person.org_structure ? (' (' + person.org_structure + ')') : ''
+                                ),
                                 disabled: ($scope.lockedPersons || []).has(person.id),
-                                checked: [].concat($scope.lockedPersons, $scope.userSelected).has(person.id)
+                                checked: [].concat($scope.lockedPersons, $scope.userSelected).has(person.id),
+                                has_sched: $scope.persons_with_scheds.has(person.id)
                             }
                         })
                     }
                 }).filter(function (spec_group) {
                     return spec_group.persons.length > 0;
-                })
+                });
             };
             $scope.selection_change = function (person) {
                 var userSelected = [];
@@ -94,7 +102,7 @@ angular.module('WebMis20.directives.personTree', [])
                         if (userSelected.indexOf(person.id) == -1) {
                             userSelected.push(person.id);
                         }
-                    })
+                    });
                 });
                 $scope.userSelected = userSelected;
             };
@@ -132,7 +140,42 @@ angular.module('WebMis20.directives.personTree', [])
                 $scope.hide_tree();
                 $scope.personId = person.id;
             };
+
+            $scope.display_no_schedule = function (person) {
+                var schedule_dates = PersonTreeUpdater.get_schedule_period();
+                return schedule_dates && schedule_dates.length && !person.has_sched;
+            };
+            $scope.refresh_schedule_info = function (date_period) {
+                if (!date_period || !date_period.length) return;
+                $http.get(url_api_persons_tree_schedule_info, {
+                    params: {
+                        beg_date: date_period[0].toISOString(),
+                        end_date: date_period[1].toISOString()
+                    }
+                }).success(function (data) {
+                    $scope.persons_with_scheds = data.result.persons_with_scheds;
+                    $scope.tree.forEach(function (spec_group) {
+                        spec_group.persons.forEach(function (person) {
+                            person.has_sched = $scope.persons_with_scheds.has(person.id);
+                        });
+                    });
+                });
+            };
+            $scope.$watch(PersonTreeUpdater.get_schedule_period, function (n, o) {
+                $scope.refresh_schedule_info(n);
+            });
             $scope.reset();
         }
     }
+}])
+.service('PersonTreeUpdater', [function () {
+    var schedule_period;
+    return {
+        get_schedule_period: function () {
+            return schedule_period;
+        },
+        set_schedule_period: function (start_date, end_date) {
+            schedule_period = [start_date, end_date];
+        }
+    };
 }]);

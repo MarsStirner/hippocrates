@@ -1,7 +1,7 @@
 /**
  * Created by mmalkov on 11.07.14.
  */
-var ScheduleCtrl = function ($scope, $http, RefBook) {
+var ScheduleCtrl = function ($scope, $http, RefBook, PersonTreeUpdater) {
     $scope.aux = aux;
     var params = aux.getQueryParams(document.location.search);
     $scope.person_id = params.person_id;
@@ -51,6 +51,7 @@ var ScheduleCtrl = function ($scope, $http, RefBook) {
         if (index != $scope.page) {
             $scope.page = index;
             $scope.reloadSchedule();
+            $scope.update_sched_in_person_tree($scope.pages[$scope.page]);
         }
     };
 
@@ -79,6 +80,14 @@ var ScheduleCtrl = function ($scope, $http, RefBook) {
         $scope.page = chosen_page;
         $scope.pages = pages;
         $scope.reloadSchedule();
+        $scope.update_sched_in_person_tree($scope.pages[$scope.page]);
+    };
+
+    $scope.update_sched_in_person_tree = function (start_date) {
+        PersonTreeUpdater.set_schedule_period(
+            start_date.clone().toDate(),
+            start_date.clone().add(6, 'd').endOf('day').toDate()
+        );
     };
 
     $scope.changeReceptionType = function (code) {
@@ -115,4 +124,4 @@ var ScheduleCtrl = function ($scope, $http, RefBook) {
         $scope.$digest();
     }
 };
-WebMis20.controller('ScheduleCtrl', ['$scope', '$http', 'RefBook', ScheduleCtrl]);
+WebMis20.controller('ScheduleCtrl', ['$scope', '$http', 'RefBook', 'PersonTreeUpdater', ScheduleCtrl]);
