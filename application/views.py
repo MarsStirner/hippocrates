@@ -215,6 +215,12 @@ def kladr_street(code=None):
     return jsonify([get_kladr_street(code)])
 
 
+@app.route('/clear_cache/')
+def clear_cache():
+    cache.delete_memoized(api_refbook)
+    return u'Кэш справочников удалён', 200, [('content-type', 'text/plain; charset=utf-8')]
+
+
 @app.errorhandler(403)
 def authorisation_failed(e):
     if request_wants_json():
