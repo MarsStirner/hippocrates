@@ -23,8 +23,8 @@ var DaySetupModalCtrl = function ($scope, $modalInstance, selected_days, model, 
     };
 
     $scope.accept = function () {
-        var interval_altered = true ? this.intervalsSetupForm.$dirty: false;
-        var quoting_altered = true ? this.quotingSetupForm.$dirty : false;
+        var interval_altered = this.intervalsSetupForm.$dirty || this.roaForm.$dirty;
+        var quoting_altered = this.quotingSetupForm.$dirty;
 
         var selected_days = $scope.selected_days.map(function(day) {
                 return day.selected ? day.date : undefined;
