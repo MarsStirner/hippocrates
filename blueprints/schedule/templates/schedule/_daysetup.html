@@ -15,14 +15,16 @@
                 </ul>
             </div>
             <div class="col-md-4 text-right">
-                <button type="button" id="absent" class="btn btn-warning" ng-model="absent.checked"
-                        btn-checkbox btn-checkbox-true="true" btn-checkbox-false="false" ng-change="absent_checked()">
-                    [[absent.checked ? 'Убрать причину отсутствия' : 'Установить причину отсутствия' ]]
-                </button>
-                <div class="vmargin10" ng-show="absent.checked">
-                    <select class="form-control" ng-options="item as item.name for item in roas track by item.code"
-                            ng-model="model.roa"></select>
-                </div>
+                <ng-form name="roaForm">
+                    <button type="button" id="absent" class="btn btn-warning" ng-model="absent.checked"
+                            btn-checkbox btn-checkbox-true="true" btn-checkbox-false="false" ng-change="absent_checked()">
+                        [[absent.checked ? 'Убрать причину отсутствия' : 'Установить причину отсутствия' ]]
+                    </button>
+                    <div class="vmargin10" ng-show="absent.checked">
+                        <select class="form-control" ng-options="item as item.name for item in roas track by item.code"
+                                ng-model="model.roa"></select>
+                    </div>
+                </ng-form>
             </div>
         </div>
         <ng-form name="intervalsSetupForm" ng-show="!absent.checked"  class="marginal">
@@ -201,7 +203,7 @@
                 </div>
             </div>
         </ng-form>
-        {#    <pre>Model: [[ model | json ]]</pre>#}
+{#            <pre>Model: [[ model | json ]]</pre>#}
     </ng-form>
 </div>
 <div class="modal-footer">

@@ -33,9 +33,10 @@ var DayFreeCtrl = function ($scope, $http, PersonTreeUpdater) {
             }
             $scope.roa = false;
             $scope.day = data.result.schedules[0].grouped[$scope.reception_type].schedule[0];
-            $scope.destination = data.result.schedules[0].grouped.forEach(function (group) {
+            $scope.destination = {};
+            angular.forEach(data.result.schedules[0].grouped, function (group, rec_type) {
                 $scope.roa |= Boolean(group.schedule[0].roa);
-                return group.schedule[0].tickets;
+                $scope.destination[rec_type] = group.schedule[0].tickets;
             });
         });
     };
@@ -53,8 +54,9 @@ var DayFreeCtrl = function ($scope, $http, PersonTreeUpdater) {
                 return;
             }
             $scope.sourcePerson = data.result.schedules[0].person;
-            $scope.source = data.result.schedules[0].grouped.forEach(function (group) {
-                return group.schedule[0].tickets;
+            $scope.source = {};
+            angular.forEach(data.result.schedules[0].grouped, function (group, rec_type) {
+                $scope.source[rec_type] = group.schedule[0].tickets;
             });
         }).then(function () {
             $scope.selectedSourceTicket = null;
