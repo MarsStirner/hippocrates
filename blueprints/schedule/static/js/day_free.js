@@ -1,7 +1,7 @@
 /**
  * Created by mmalkov on 11.07.14.
  */
-var DayFreeCtrl = function ($scope, $http) {
+var DayFreeCtrl = function ($scope, $http, PersonTreeUpdater) {
     $scope.aux = aux;
     var params = aux.getQueryParams(location.search);
 
@@ -80,10 +80,22 @@ var DayFreeCtrl = function ($scope, $http) {
         $scope.reloadSchedule();
     });
 
+    $scope.$watch('destinationDate', function (new_value, old_value) {
+        $scope.reloadSchedule();
+        $scope.update_sched_in_person_tree(new_value);
+    });
+
+    $scope.update_sched_in_person_tree = function (start_date) {
+        PersonTreeUpdater.set_schedule_period(
+            moment(start_date).startOf('day').toDate(),
+            moment(start_date).endOf('day').toDate()
+        );
+    };
+
     $scope.back2monthview = function () {
         window.open(url_schedule_html_person_schedule_monthview + '?person_id=' + params.person_id, '_self')
     };
 
     loadSchedule();
 };
-WebMis20.controller('DayFreeCtrl', ['$scope', '$http', DayFreeCtrl]);
+WebMis20.controller('DayFreeCtrl', ['$scope', '$http', 'PersonTreeUpdater', DayFreeCtrl]);

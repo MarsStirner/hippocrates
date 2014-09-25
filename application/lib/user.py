@@ -24,7 +24,7 @@ class User(UserMixin):
                              if not callable(value) and not key.startswith('__')))
         self.set_roles_rights(person)
 
-        orgStructure = person.OrgStructure
+        orgStructure = person.org_structure
         atos = set()
         while orgStructure:
             atos.add(orgStructure.id)
