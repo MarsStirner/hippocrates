@@ -10,8 +10,10 @@ WebMis20
         var all = arguments[1];
         var defer = $q.defer();
         $http.get(Config.url.schedule, {
-            for_date: date,
-            all: all
+            params: {
+                date: (date)?(moment(date).format('YYYY-MM-DD')):undefined,
+                all: all
+            }
         }).success(function (data) {
             if (data.meta.code != 200) {
                 defer.reject(data.meta)
@@ -24,9 +26,19 @@ WebMis20
     this.event = function () {
         var event_id = arguments[0];
         var ticker_id = arguments[1];
-        return $http.get(Config.url.event + (event_id)?(event_id):'', {
-            ticket_id: ticker_id
-        })
+        var defer = $q.defer();
+        $http.get(Config.url.event + (event_id)?(event_id):'', {
+            params: {
+                ticket_id: ticker_id
+            }
+        }).success(function (data) {
+            if (data.meta.code != 200) {
+                defer.reject(data.meta)
+            } else {
+                defer.resolve(data.result);
+            }
+        });
+        return defer.promise;
     }
 }])
 ;
