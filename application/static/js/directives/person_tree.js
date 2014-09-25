@@ -29,10 +29,11 @@ angular.module('WebMis20.directives.personTree', [])
                                 <li ng-repeat="person in spec_group.persons">\
                                     <a class="leaf" ng-bind="person.nameFull" ng-click="person_selected(person)"\
                                         ng-if="!checkboxed" ng-class="{\'no-schedule\': display_no_schedule(person)}"></a>\
-                                    <input type="checkbox" id="doc-[[person.id]]" ng-model="person.checked"\
-                                        ng-disabled="person.disabled" ng-change="selection_change(person)" class="leaf" ng-if="checkboxed">\
-                                    <label class="leaf" for="doc-[[person.id]]" ng-bind="person.name" ng-if="checkboxed"\
-                                        ng-class="{\'no-schedule\': display_no_schedule(person)}"></label>\
+                                    <label class="leaf" for="doc-[[person.id]]" ng-if="checkboxed" ng-class="{\'no-schedule\': display_no_schedule(person)}">\
+                                        <input type="checkbox" id="doc-[[person.id]]" class="leaf" ng-model="person.checked"\
+                                               ng-disabled="person.disabled" ng-change="selection_change(person)" >\
+                                        [[person.name]]\
+                                    </label>\
                                 </li>\
                             </ul>\
                         </li>\
@@ -73,7 +74,7 @@ angular.module('WebMis20.directives.personTree', [])
                         }).map(function (person) {
                             return {
                                 id: person.id,
-                                name: person.name,
+                                name: person.name + (person.org_structure ? (' (' + person.org_structure + ')') : ''),
                                 nameFull: '{0}{1}'.format(
                                     person.nameFull.join(' '),
                                     person.org_structure ? (' (' + person.org_structure + ')') : ''
