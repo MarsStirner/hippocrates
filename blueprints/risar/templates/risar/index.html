@@ -4,27 +4,37 @@
 
 {% block main %}
     <div ng-controller="IndexCtrl">
-        <div>Пациентки на сегодня: [[ tickets.length ]]</div>
-        <table class="table table-condensed">
-        <thead>
-        <tr>
-            <th>Время</th>
-            <th>Риск</th>
-            <th>ФИО</th>
-            <th>Неделя</th>
-            <th>Примечание</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr ng-repeat="row in tickets">
-            <td ng-bind="row.beg_time | asTime"></td>
-            <td><span class="fa fa-question text-warning"></span></td>
-            <td ng-bind="row.client.full_name"></td>
-            <td>31</td>
-            <td ng-bind="row.note"></td>
-        </tr>
-        </tbody>
-        </table>
+        <div class="row">
+            <div class="col-lg-3 col-md-3">
+                <div class="well">
+                    <datepicker class="vbmargin10" style="width: 100%" ng-model="date" show-weeks="false" ng-change="dateChanged();"></datepicker>
+                    <button ng-click="today()" class="btn btn-sm btn-block btn-info ng-binding" type="button">Сегодня</button>
+                </div>
+            </div>
+            <div class="col-lg-9 col-md-9">
+                Пациенток на дату: [[ tickets.length ]]
+                <table class="table table-condensed">
+                    <thead>
+                    <tr>
+                        <th>Время</th>
+                        <th>Риск</th>
+                        <th>ФИО</th>
+                        <th>Неделя</th>
+                        <th>Примечание</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="row in tickets">
+                        <td ng-bind="row.beg_time | asTime"></td>
+                        <td><span class="fa fa-question text-warning"></span></td>
+                        <td ng-bind="row.client.full_name"></td>
+                        <td>31</td>
+                        <td ng-bind="row.note"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 {% endblock %}
 
