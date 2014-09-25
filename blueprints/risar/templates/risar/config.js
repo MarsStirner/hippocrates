@@ -5,8 +5,9 @@
 WebMis20
 .constant('Config', {
     url: {
-        schedule: '{{ url_for('.api_0_schedule') }}',
-        event: '{{ url_for('.api_0_event') }}'
+        api_schedule: '{{ url_for('.api_0_schedule') }}',
+        api_chart: '{{ url_for('.api_0_chart') }}',
+        chart_html: '{{ url_for('.html_chart') }}'
     }
 })
 ;

@@ -1,0 +1,101 @@
+{% extends 'risar/base.html' %}
+
+{% block title %}> {{ module_name }}{% endblock %}
+
+{% block main %}
+    <div ng-controller="ChartCtrl" ng-cloak>
+        <div class="row">
+            <div class="col-md-12">
+                <h2>Карта пациентки <a ng-href="{{ url_for('patients.patient') }}?client_id=[[ chart.client.id ]]">[[ chart.client.full_name ]]</a> <small>([[ chart.external_id ]])</small></h2>
+            </div>
+        </div>
+        <div class="row marginal">
+            <div class="col-lg-10 col-md-10">
+                Ачивки!
+            </div>
+            <div class="col-lg-2 col-md-2">
+                <button class="btn btn-default btn-block">146%</button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-8 col-md-8">
+                <div class="well well-sm">
+                    <dl class="dl-horizontal novmargin">
+                        <dt>Дата рождения:</dt><dd>[[ chart.client.birth_date | asDate ]] ([[ chart.client.age ]])&nbsp;</dd>
+                        <dt>СНИЛС:</dt><dd>[[ chart.snils ]]&nbsp;</dd>
+                    </dl>
+                </div>
+                <div class="panel panel-default">
+                    <div class="panel-heading">Анамнез</div>
+                    <div class="panel-body">
+                        [[ chart.anamnesis | json ]]
+                    </div>
+                </div>
+                <div class="panel panel-default">
+                    <div class="panel-heading">Осмотры</div>
+                    <ul class="list-group">
+                        <li class="list-group-item" ng-repeat="checkup in chart.checkups">
+                            [[ checkup | json ]]
+                        </li>
+                        <li class="list-group-item">
+                            <button class="btn btn-primary">Добавить...</button>
+                        </li>
+                    </ul>
+                </div>
+                <div class="panel panel-default">
+                    <div class="panel-heading">Эпикриз</div>
+                    <div class="panel-body">
+                        [[ chart.epicrisis ]]
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-4">
+                <div class="panel panel-default">
+                    <div class="panel-heading">Особенности</div>
+                    <div class="panel-body">
+                        [[ chart.characteristics | json ]]
+                    </div>
+                </div>
+                <div class="panel panel-default">
+                    <div class="panel-heading">ЛПУ родоразрешение</div>
+                    <table class="table table-condensed">
+                        <tbody>
+                        <tr>
+                            <td>Экстренное</td>
+                            <td>Не определено</td>
+                        </tr>
+                        <tr>
+                            <td>Плановое</td>
+                            <td>Не определено</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="panel panel-default">
+                    <div class="panel-heading">Прогресс</div>
+                    <div class="panel-body">
+                        <p>Лабораторные исследования</p>
+                        <progressbar class="progress-striped" value="chart.progress.lab.percent">
+                            [[ chart.progress.lab.complete ]]/[[ chart.progress.lab.total ]]
+                        </progressbar>
+                        <p>Функциональные исследования</p>
+                        <progressbar class="progress-striped" value="chart.progress.func.percent">
+                            [[ chart.progress.func.complete ]]/[[ chart.progress.func.total ]]
+                        </progressbar>
+                        <p>Осмотры</p>
+                        <progressbar class="progress-striped" value="chart.progress.checkups.percent">
+                            [[ chart.progress.checkups.complete ]]/[[ chart.progress.checkups.total ]]
+                        </progressbar>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block modules_js %}
+    {{ super() }}
+    <script src="{{ url_for('.static', filename='js/chart.js', v=version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/risar.js', v=version) }}"></script>
+{% endblock %}

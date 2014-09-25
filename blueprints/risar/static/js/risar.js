@@ -9,7 +9,7 @@ WebMis20
         var date = arguments[0];
         var all = arguments[1];
         var defer = $q.defer();
-        $http.get(Config.url.schedule, {
+        $http.get(Config.url.api_schedule, {
             params: {
                 date: (date)?(moment(date).format('YYYY-MM-DD')):undefined,
                 all: all
@@ -23,13 +23,15 @@ WebMis20
         });
         return defer.promise;
     };
-    this.event = function () {
+    this.chart = function () {
         var event_id = arguments[0];
-        var ticker_id = arguments[1];
+        var ticket_id = arguments[1];
         var defer = $q.defer();
-        $http.get(Config.url.event + (event_id)?(event_id):'', {
+        var url = Config.url.api_chart;
+        url += (event_id)?(event_id):'';
+        $http.get(url, {
             params: {
-                ticket_id: ticker_id
+                ticket_id: ticket_id
             }
         }).success(function (data) {
             if (data.meta.code != 200) {

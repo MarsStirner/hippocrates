@@ -11,6 +11,7 @@ from application.models.exists import Organisation, Person
 from application.models.schedule import Schedule, ScheduleClientTicket
 from application.models.utils import safe_current_user_id
 from application.systemwide import db
+from blueprints.risar.lib.represent import represent_event
 from config import ORGANISATION_INFIS_CODE
 
 
@@ -41,19 +42,13 @@ def api_0_schedule(person_id=None):
     ])
 
 
-def represent_event(event):
-    return {
-        'id': event.id,
-        'client': event.client,
-        'external_id': event.externalId,
-        'type': event.eventType
-    }
-
-@module.route('/api/0/event/')
-@module.route('/api/0/event/<int:event_id>')
-def api_0_event(event_id=None):
+@module.route('/api/0/chart/')
+@module.route('/api/0/chart/<int:event_id>')
+def api_0_chart(event_id=None):
     ticket_id = request.args.get('ticket_id')
-    if ticket_id and not event_id:
+    if not event_id and not ticket_id:
+        return jsonify(None, 404, u'Either event_id or ticket_id must be provided')
+    if ticket_id:
         ticket = ScheduleClientTicket.query.get(ticket_id)
         if not ticket:
             return jsonify(None, 404, 'ScheduleClientTicket not found')
@@ -81,11 +76,8 @@ def api_0_event(event_id=None):
             ticket.event = event
             db.session.add(ticket)
             db.session.commit()
-        return jsonify(represent_event(event))
-    elif event_id and not ticket_id:
+    else:
         event = Event.query.get(event_id)
         if not event:
             return jsonify(None, result_code=404, result_name='Event not found')
-        return jsonify(represent_event(event))
-    else:
-        return jsonify(None, 404, u'Either event_id or ticket_id must be provided')
+    return jsonify(represent_event(event))
