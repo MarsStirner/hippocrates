@@ -2,15 +2,6 @@
  * Created by mmalkov on 11.07.14.
  */
 var DaySetupModalCtrl = function ($scope, $modalInstance, selected_days, model, rec_types, roas, offices, tq_types) {
-    function unique_rectypes(array) {
-        var used_rts =  array.map(function(interval) {
-            return interval.reception_type && interval.reception_type.code;
-        });
-        return used_rts.filter(function(rt_code, pos) {
-            return used_rts.indexOf(rt_code) === pos;
-        });
-    }
-
     $scope.rec_types = rec_types;
     $scope.roas = roas;
     $scope.offices = offices;
@@ -23,8 +14,8 @@ var DaySetupModalCtrl = function ($scope, $modalInstance, selected_days, model, 
     };
 
     $scope.accept = function () {
-        var interval_altered = true ? this.intervalsSetupForm.$dirty: false;
-        var quoting_altered = true ? this.quotingSetupForm.$dirty : false;
+        var interval_altered = this.intervalsSetupForm.$dirty || this.roaForm.$dirty;
+        var quoting_altered = this.quotingSetupForm.$dirty;
 
         var selected_days = $scope.selected_days.map(function(day) {
                 return day.selected ? day.date : undefined;
@@ -74,33 +65,6 @@ var DaySetupModalCtrl = function ($scope, $modalInstance, selected_days, model, 
         $scope.model.quotas.remove(quota);
         this.quotingSetupForm.$dirty = true;
 //        $scope.sync_times();
-    };
-    $scope.used_rts = unique_rectypes($scope.model.intervals);
-    $scope.$watch(function() {
-        return unique_rectypes($scope.model.intervals);
-    }, function(used_codes, o) {
-        if (used_codes !== o) {
-            $scope.used_rts = used_codes;
-            $scope.rec_types.forEach(function(rec_type) {
-                var code = rec_type.code;
-                if (used_codes.has(code)) {
-                    if (!$scope.model.info[code]) {
-                        $scope.model.info[code] = {
-                            'CITO': 0,
-                            'extra': 0,
-                            'planned': 0
-                        };
-                    }
-                } else {
-                    delete $scope.model.info[code];
-                }
-            });
-        }
-    }, true);
-    $scope.flt_rec_type = function() {
-        return function(item) {
-            return $scope.used_rts.indexOf(item.code) !== -1;
-        };
     };
     // timepicker validation, TODO: directive
     $scope.times_valid = true;
@@ -203,7 +167,7 @@ var ScheduleMonthCtrl = function ($scope, $http, $modal, RefBook) {
                 if (week_n == 0 && weekday_n < first_weekday || day_iter >= schedule.length) {
                     week.push({
                         not_exists: true
-                    })
+                    });
                     quota_week.push({
                         not_exists: true
                     })
@@ -337,7 +301,6 @@ var ScheduleMonthCtrl = function ($scope, $http, $modal, RefBook) {
                     var first_day_shedule = $scope.selected_days[0];
                     var first_day_quotas = $scope.quotas.filter(function(day_quotas){return day_quotas.date == first_day_shedule.date})[0];
                     return {
-                        info: angular.copy(first_day_shedule.info),
                         roa: first_day_shedule.roa,
                         intervals: first_day_shedule.scheds.map(function(interval) {
                             return {
@@ -378,23 +341,18 @@ var ScheduleMonthCtrl = function ($scope, $http, $modal, RefBook) {
             var processed_days = $scope.selected_days.filter(function(day_schedule) {
                 return result.selected_days.has(day_schedule.date); // strings
             });
-
             var prosessed_quotas = $scope.quotas.filter(function(day_quotas) {
                 return result.selected_days.has(day_quotas.date); // strings
             });
 
-
             var model = result.model;
             if (result.interval_altered){
                 processed_days.forEach(function(day) {
-                    day.roa = model.roa;
                     day.altered = true;
+                    day.roa = model.roa;
                     if (model.roa) {
-                        day.info = null;
                         day.scheds = [];
                     } else {
-                        day.info = model.info;
-
                         day.scheds = model.intervals.map(function(interval) {
                             return {
                                 begTime: moment(interval.begTime).format("HH:mm:ss"),
@@ -424,8 +382,6 @@ var ScheduleMonthCtrl = function ($scope, $http, $modal, RefBook) {
             }
 
             $scope.select.none();
-        }, function () {
-            console.log('dismissed!')
         });
     };
 
@@ -513,8 +469,5 @@ var ScheduleMonthCtrl = function ($scope, $http, $modal, RefBook) {
         return text;
     };
 
-    $scope.show_day_info_title = function(day_info) {
-        return Object.keys(day_info).length > 1;
-    };
 };
 WebMis20.controller('ScheduleMonthCtrl', ['$scope', '$http', '$modal', 'RefBook', ScheduleMonthCtrl]);
