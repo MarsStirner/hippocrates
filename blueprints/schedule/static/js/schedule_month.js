@@ -108,7 +108,7 @@ var DayFreeModalCtrl = function ($scope, $modalInstance, day, roas) {
     };
     $scope.roas = roas;
 };
-var ScheduleMonthCtrl = function ($scope, $http, $modal, RefBook) {
+var ScheduleMonthCtrl = function ($scope, $http, $modal, RefBook, PersonTreeUpdater) {
     $scope.reception_types = new RefBook('rbReceptionType');
     $scope.rbReasonOfAbsence = new RefBook('rbReasonOfAbsence');
     $scope.rbTimeQuotingType = new RefBook('rbTimeQuotingType');
@@ -194,6 +194,10 @@ var ScheduleMonthCtrl = function ($scope, $http, $modal, RefBook) {
             day: 1
         });
         $scope.reloadSchedule();
+        PersonTreeUpdater.set_schedule_period(
+            $scope.monthDate.clone().toDate(),
+            $scope.monthDate.clone().endOf('month').toDate()
+        );
     };
 
     $scope.start_editing = function () {
@@ -470,4 +474,4 @@ var ScheduleMonthCtrl = function ($scope, $http, $modal, RefBook) {
     };
 
 };
-WebMis20.controller('ScheduleMonthCtrl', ['$scope', '$http', '$modal', 'RefBook', ScheduleMonthCtrl]);
+WebMis20.controller('ScheduleMonthCtrl', ['$scope', '$http', '$modal', 'RefBook', 'PersonTreeUpdater', ScheduleMonthCtrl]);

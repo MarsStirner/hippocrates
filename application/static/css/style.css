@@ -265,6 +265,11 @@ span.twitter-typeahead {
 .css-treeview input.group:checked + label.group::before {
     background-position: 0 -16px;
 }
+.css-treeview a.no-schedule, .css-treeview label.no-schedule {
+    text-decoration: line-through;
+    font-style: italic;
+    color: #999;
+}
 
 /* webkit adjacent element selector bugfix */
 @media screen and (-webkit-min-device-pixel-ratio:0) {

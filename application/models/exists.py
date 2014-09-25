@@ -287,7 +287,7 @@ class Person(db.Model):
     post = db.relationship('rbPost', lazy=False)
     speciality = db.relationship('rbSpeciality', lazy=False)
     organisation = db.relationship('Organisation', lazy=False)
-    OrgStructure = db.relationship('OrgStructure', lazy=False)
+    org_structure = db.relationship('OrgStructure', lazy=False)
     academicDegree = db.relationship('rbAcademicDegree', lazy=False)
     academicTitle = db.relationship('rbAcademicTitle', lazy=False)
     tariffCategory = db.relationship('rbTariffCategory', lazy=False)
@@ -317,7 +317,7 @@ class Person(db.Model):
             'regional_code': self.regionalCode,
             'post': self.post,
             'organisation': self.organisation,
-            'org_structure': self.OrgStructure,
+            'org_structure': self.org_structure,
             'academic_degree': self.academicDegree,
             'academic_title': self.academicTitle,
         }
