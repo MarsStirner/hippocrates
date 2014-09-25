@@ -27,7 +27,9 @@
                     <tr ng-repeat="row in tickets">
                         <td ng-bind="row.beg_time | asTime"></td>
                         <td><span class="fa fa-question text-warning"></span></td>
-                        <td ng-bind="row.client.full_name"></td>
+                        <td><a ng-href="{{ url_for('.html_chart') }}?ticket_id=[[ row.client_ticket_id ]]">[[ row.client.full_name ]]</a>
+                            <i ng-if="!row.event_id" class="fa fa-exclamation-circle text-warning" tooltip="Медицинская карта будет заведена автомагически"></i>
+                        </td>
                         <td>31</td>
                         <td ng-bind="row.note"></td>
                     </tr>
