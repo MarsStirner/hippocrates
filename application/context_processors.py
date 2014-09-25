@@ -45,4 +45,7 @@ def general_menu():
     menu_items.append(dict(link='event.get_events',
                            title=u'Обращения',
                            roles=('admin', 'rRegistartor', 'clinicRegistrator', 'clinicDoctor')))
+    menu_items.append(dict(link='risar.index_html',
+                           title=u'АРМ Акушера-гинеколога',
+                           roles=('admin',)))
     return dict(main_menu=menu_items)
