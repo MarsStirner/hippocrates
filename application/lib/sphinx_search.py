@@ -38,6 +38,8 @@ class SearchPatient():
                                                'SNILS': 50,
                                                'document': 50,
                                                'policy': 50})
+        #fixme: after sphinxit merge https://github.com/semirook/sphinxit/pull/20
+        search = search.order_by('@weight desc, lastName asc, firstName asc, patrName', 'asc')
         result = search.ask()
         return result
 
