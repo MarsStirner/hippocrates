@@ -1,0 +1,7 @@
+.progress {
+    margin-bottom: 0;
+}
+
+table.table-personal-data > tbody > tr > th {
+    text-align: right;
+}

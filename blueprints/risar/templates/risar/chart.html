@@ -5,56 +5,106 @@
 {% block main %}
     <div ng-controller="ChartCtrl" ng-cloak>
         <div class="row">
-            <div class="col-md-12">
+            <div class="col-md-6">
                 <h2>Карта пациентки <a ng-href="{{ url_for('patients.patient') }}?client_id=[[ chart.client.id ]]">[[ chart.client.full_name ]]</a> <small>([[ chart.external_id ]])</small></h2>
             </div>
-        </div>
-        <div class="row marginal">
-            <div class="col-lg-10 col-md-10">
+            <div class="col-md-4">
                 Ачивки!
             </div>
-            <div class="col-lg-2 col-md-2">
+            <div class="col-md-2">
                 <button class="btn btn-default btn-block">146%</button>
             </div>
         </div>
         <div class="row">
             <div class="col-lg-8 col-md-8">
-                <div class="well well-sm">
-                    <dl class="dl-horizontal novmargin">
-                        <dt>Дата рождения:</dt><dd>[[ chart.client.birth_date | asDate ]] ([[ chart.client.age ]])&nbsp;</dd>
-                        <dt>СНИЛС:</dt><dd>[[ chart.snils ]]&nbsp;</dd>
-                    </dl>
+                <div class="panel panel-default">
+                    <div class="panel-heading">Личные данные</div>
+                    <table class="table table-condensed table-personal-data">
+                        <tbody>
+                        <tr>
+                            <th>Дата рождения:</th>
+                            <td>[[ chart.client.birth_date | asDate ]] ([[ chart.client.age ]])</td>
+                        </tr>
+                        <tr ng-if="chart.client.snils">
+                            <th>СНИЛС:</th>
+                            <td>[[ chart.client.snils ]]</td>
+                        </tr>
+                        <tr ng-if="chart.client.cmi_policy">
+                            <th>Полис ОМС:</th>
+                            <td>[[ chart.client.cmi_policy.insurer.short_name ]] <b>серия [[ chart.client.cmi_policy.serial ]] № [[ chart.client.cmi_policy.number ]]</b> от [[ chart.client.cmi_policy.beg_date ]]</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="panel panel-default">
+                    <div class="panel-heading">Анамнез / <a ng-href="#">подробнее</a></div>
+                    <table class="table table-condensed">
+                        <tbody>
+                        <tr>
+                            <td><a ng-href="#">Мать</a></td>
+                        </tr>
+                        <tr>
+                            <td><a ng-href="#">Отец</a></td>
+                        </tr>
+                        <tr>
+                            <td><a ng-href="#">Прошлые беременности</a></td>
+                        </tr>
+                        <tr>
+                            <td><a ng-href="#">Переливания крови</a></td>
+                        </tr>
+                        </tbody>
+                    </table>
                 </div>
                 <div class="panel panel-default">
-                    <div class="panel-heading">Анамнез</div>
+                    <div class="panel-heading">Осмотры / <a ng-href="#">подробнее</a></div>
+                    <table class="table table-condensed">
+                        <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Дата</th>
+                            <th>Z̸̨̩̼̦̞̄̅ͣͧͮ̿͛ͩĄ͎̮̲̣̮̬̺͖̬̣͇̙ͯͭ̔͑ͮͦ̃ͧͣ̃̍̈́͝ͅL̋͆ͯ͐́͝҉̘̥͚̯̙̘̼̮̰̞̻͇̪̠͕͝͠ͅͅG̶̡̤̠̻͚̞͖̱ͤ̆ͨ̐͂̓ͨ̋͡Ǫ̴̻͈̺͓̙̯̗̘͈̲̼ͮͥ́̑͝</th>
+                            <th>Врач</th>
+                        </tr>
+                        </thead>
+                        <tr ng-repeat="checkup in chart.checkups">
+                            <td>[[ $index + 1 ]]</td>
+                            <td>[[ checkup.beg_date | asDate ]]</td>
+                            <td>[[ checkup.zalgo ]]</td>
+                            <td>[[ checkup.person_name ]]</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="panel panel-default">
+                    <div class="panel-heading">Эпикриз / <a ng-href="#">подробнее</a></div>
                     <div class="panel-body">
-                        [[ chart.anamnesis | json ]]
-                    </div>
-                </div>
-                <div class="panel panel-default">
-                    <div class="panel-heading">Осмотры</div>
-                    <ul class="list-group">
-                        <li class="list-group-item" ng-repeat="checkup in chart.checkups">
-                            [[ checkup | json ]]
-                        </li>
-                        <li class="list-group-item">
-                            <button class="btn btn-primary">Добавить...</button>
-                        </li>
-                    </ul>
-                </div>
-                <div class="panel panel-default">
-                    <div class="panel-heading">Эпикриз</div>
-                    <div class="panel-body">
-                        [[ chart.epicrisis ]]
+                        <span ng-if="!chart.epicrisis">Отсутствует</span>
+                        <span ng-if="chart.epicrisis">[[ chart.epicrisis ]]</span>
                     </div>
                 </div>
             </div>
             <div class="col-lg-4 col-md-4">
                 <div class="panel panel-default">
                     <div class="panel-heading">Особенности</div>
-                    <div class="panel-body">
-                        [[ chart.characteristics | json ]]
-                    </div>
+                    <table class="table table.condensed">
+                        <tbody>
+                        <tr ng-repeat="char in chart.characteristics" ng-class="{
+                        'success text-success': char.power.code == 'low',
+                        'warning text-warning': ['medium', 'unknown'].has(char.power.code),
+                        'danger text-danger': ['high', 'strict'].has(char.power.code),
+                        }">
+                            <td><span class="fa" ng-class="{
+                        'fa-question': char.power.code == 'unknown',
+                        'fa-exclamation': char.power.code == 'low',
+                        'fa-exclamation-triangle': char.power.code == 'medium',
+                        'fa-exclamation-circle': char.power.code == 'high',
+                        'fa-times-circle': char.power.code == 'strict',
+                        }"></span></td>
+                            <td>[[ char.type ]]</td>
+                            <td><b>[[ char.name ]]</b><span ng-if="char.note"> ([[ char.note ]])</span></td>
+                        </tr>
+                        </tbody>
+                    </table>
                 </div>
                 <div class="panel panel-default">
                     <div class="panel-heading">ЛПУ родоразрешение</div>
@@ -73,22 +123,35 @@
                 </div>
                 <div class="panel panel-default">
                     <div class="panel-heading">Прогресс</div>
-                    <div class="panel-body">
-                        <p>Лабораторные исследования</p>
-                        <progressbar class="progress-striped" value="chart.progress.lab.percent">
-                            [[ chart.progress.lab.complete ]]/[[ chart.progress.lab.total ]]
-                        </progressbar>
-                        <p>Функциональные исследования</p>
-                        <progressbar class="progress-striped" value="chart.progress.func.percent">
-                            [[ chart.progress.func.complete ]]/[[ chart.progress.func.total ]]
-                        </progressbar>
-                        <p>Осмотры</p>
-                        <progressbar class="progress-striped" value="chart.progress.checkups.percent">
-                            [[ chart.progress.checkups.complete ]]/[[ chart.progress.checkups.total ]]
-                        </progressbar>
-                    </div>
+                    <table class="table table-condensed">
+                        <tbody>
+                        <tr>
+                            <td class="col-md-6">Лабораторные исследования:</td>
+                            <td class="col-md-6">
+                                <progressbar class="progress-striped" value="chart.progress.lab.percent">
+                                    [[ chart.progress.lab.complete ]]/[[ chart.progress.lab.total ]]
+                                </progressbar>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Функциональные исследования:</td>
+                            <td>
+                                <progressbar class="progress-striped" value="chart.progress.func.percent">
+                                    [[ chart.progress.func.complete ]]/[[ chart.progress.func.total ]]
+                                </progressbar>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Осмотры:</td>
+                            <td>
+                                <progressbar class="progress-striped" value="chart.progress.checkups.percent">
+                                    [[ chart.progress.checkups.complete ]]/[[ chart.progress.checkups.total ]]
+                                </progressbar>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
                 </div>
-
             </div>
         </div>
     </div>

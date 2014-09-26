@@ -47,5 +47,5 @@ def general_menu():
                            roles=('admin', 'rRegistartor', 'clinicRegistrator', 'clinicDoctor')))
     menu_items.append(dict(link='risar.index_html',
                            title=u'АРМ Акушера-гинеколога',
-                           roles=('admin',)))
+                           roles=('admin', 'obstetrician')))
     return dict(main_menu=menu_items)
