@@ -402,7 +402,7 @@ class ClientVisualizer(object):
             )
         else:
             appointments = (client.appointments.join(ScheduleClientTicket.ticket).join(ScheduleTicket.schedule).
-                            filter(ScheduleClientTicket.event_id.is_(None)).
+                            filter(Schedule.date >= current_date()).
                             order_by(Schedule.date.desc(), ScheduleTicket.begTime.desc()))
             return map(
                 self.make_appointment,
