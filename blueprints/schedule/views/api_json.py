@@ -11,7 +11,8 @@ from flask.ext.login import current_user
 from application.models.event import Event
 from application.systemwide import db, cache
 from application.lib.sphinx_search import SearchPerson
-from application.lib.utils import (jsonify, safe_traverse, parse_id, safe_date, safe_time_as_dt, safe_datetime)
+from application.lib.utils import (jsonify, safe_traverse, parse_id, safe_date, safe_time_as_dt, safe_datetime,
+                                   safe_traverse_attrs)
 from application.lib.utils import public_endpoint
 from blueprints.schedule.app import module
 from blueprints.schedule.lib.data import delete_schedules
@@ -164,7 +165,9 @@ def api_schedule_description_post():
     dates = [day['date'] for day in schedule]
 
     if schedule:
-        ok = delete_schedules(dates, person_id)
+        ok, msg = delete_schedules(dates, person_id)
+        if not ok:
+            return jsonify({}, 422, msg)
 
     for day_desc in schedule:
         date = safe_date(day_desc['date'])
@@ -229,13 +232,13 @@ def api_all_persons_tree():
     persons = Person.query.\
         filter(Person.deleted == 0).\
         filter(Person.speciality).\
-        order_by(Person.lastName, Person.firstName).\
-        all()
+        order_by(Person.lastName, Person.firstName)
     for person in persons:
         sub_result[person.speciality_id].append({
             'id': person.id,
             'name': person.shortNameText,
-            'nameFull': [person.lastName, person.firstName, person.patrName]
+            'nameFull': [person.lastName, person.firstName, person.patrName],
+            'org_structure': safe_traverse_attrs(person, 'org_structure', 'name')
         })
     result = [
         {
@@ -247,6 +250,23 @@ def api_all_persons_tree():
         } for spec_id, person_list in sub_result.iteritems()
     ]
     return jsonify(result)
+
+
+@module.route('/api/person/persons_tree_schedule_info.json')
+def api_persons_tree_schedule_info():
+    beg_date = safe_date(request.args.get('beg_date'))
+    end_date = safe_date(request.args.get('end_date'))
+    if not (beg_date and end_date):
+        return abort(404)
+    result = db.session.query(Schedule.person_id).filter(
+        Schedule.deleted == 0,
+        Schedule.reasonOfAbsence_id.is_(None),
+        beg_date <= Schedule.date,
+        Schedule.date <= end_date
+    ).distinct()
+    return jsonify({
+        'persons_with_scheds': [row[0] for row in result]
+    })
 
 
 @module.route('/api/search_persons.json')
@@ -438,10 +458,10 @@ def api_action_post():
 def api_get_action_ped():
     at_id = parse_id(request.args, 'action_type_id')
     if at_id is False:
-        raise abort(404)
+        return abort(404)
     at = ActionType.query.get(at_id)
     if not at:
-        raise abort(404)
+        return abort(404)
     return jsonify({
         'ped': get_planned_end_datetime(at_id)
     })

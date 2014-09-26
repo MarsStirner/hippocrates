@@ -1,7 +1,7 @@
 /**
  * Created by mmalkov on 11.07.14.
  */
-var DayFreeCtrl = function ($scope, $http) {
+var DayFreeCtrl = function ($scope, $http, PersonTreeUpdater) {
     $scope.aux = aux;
     var params = aux.getQueryParams(location.search);
 
@@ -33,9 +33,10 @@ var DayFreeCtrl = function ($scope, $http) {
             }
             $scope.roa = false;
             $scope.day = data.result.schedules[0].grouped[$scope.reception_type].schedule[0];
-            $scope.destination = data.result.schedules[0].grouped.forEach(function (group) {
+            $scope.destination = {};
+            angular.forEach(data.result.schedules[0].grouped, function (group, rec_type) {
                 $scope.roa |= Boolean(group.schedule[0].roa);
-                return group.schedule[0].tickets;
+                $scope.destination[rec_type] = group.schedule[0].tickets;
             });
         });
     };
@@ -53,8 +54,9 @@ var DayFreeCtrl = function ($scope, $http) {
                 return;
             }
             $scope.sourcePerson = data.result.schedules[0].person;
-            $scope.source = data.result.schedules[0].grouped.forEach(function (group) {
-                return group.schedule[0].tickets;
+            $scope.source = {};
+            angular.forEach(data.result.schedules[0].grouped, function (group, rec_type) {
+                $scope.source[rec_type] = group.schedule[0].tickets;
             });
         }).then(function () {
             $scope.selectedSourceTicket = null;
@@ -80,10 +82,22 @@ var DayFreeCtrl = function ($scope, $http) {
         $scope.reloadSchedule();
     });
 
+    $scope.$watch('destinationDate', function (new_value, old_value) {
+        $scope.reloadSchedule();
+        $scope.update_sched_in_person_tree(new_value);
+    });
+
+    $scope.update_sched_in_person_tree = function (start_date) {
+        PersonTreeUpdater.set_schedule_period(
+            moment(start_date).startOf('day').toDate(),
+            moment(start_date).endOf('day').toDate()
+        );
+    };
+
     $scope.back2monthview = function () {
         window.open(url_schedule_html_person_schedule_monthview + '?person_id=' + params.person_id, '_self')
     };
 
     loadSchedule();
 };
-WebMis20.controller('DayFreeCtrl', ['$scope', '$http', DayFreeCtrl]);
+WebMis20.controller('DayFreeCtrl', ['$scope', '$http', 'PersonTreeUpdater', DayFreeCtrl]);

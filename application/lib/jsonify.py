@@ -4,22 +4,26 @@ import datetime
 import itertools
 
 from collections import defaultdict
+
+from sqlalchemy.orm import aliased
 from sqlalchemy.sql.functions import current_date
 from sqlalchemy.sql.expression import between
 from flask import json
 
 from application.systemwide import db
 from application.lib.data import int_get_atl_dict_all
-from application.lib.utils import safe_unicode, safe_int, safe_dict, logger, safe_traverse_attrs
+from application.lib.utils import safe_traverse_attrs
 from application.lib.action.utils import action_is_bak_lab, action_is_lab
 from application.lib.agesex import recordAcceptableEx
+from application.lib.utils import safe_unicode, safe_dict, logger
 from application.models.enums import EventPrimary, EventOrder, ActionStatus, Gender
-from application.models.event import Event, EventType, Diagnosis, Diagnostic
+from application.models.event import Event, EventType, Diagnosis
 from application.models.schedule import Schedule, rbReceptionType, ScheduleClientTicket, ScheduleTicket, QuotingByTime, \
-    Office
+    Office, rbAttendanceType
 from application.models.actions import Action, ActionProperty, ActionType
-from application.models.exists import rbRequestType, rbService, ContractTariff, Contract
 from application.models.client import Client
+from application.models.exists import rbRequestType, rbService, ContractTariff, Contract, Person, rbSpeciality, Organisation
+
 
 __author__ = 'mmalkov'
 
@@ -82,7 +86,7 @@ class ScheduleVisualizer(object):
                 'id': speciality.id,
                 'name': speciality.name
             } if speciality else None,
-            'office': office if office else person.office
+            'office': office if office else None
         }
 
     def make_schedule(self, schedules, date_start, date_end):
@@ -219,7 +223,8 @@ class ScheduleVisualizer(object):
             sub_scheds.append(sub_sched)
         return {
             'scheds': sub_scheds if not roa else [],
-            'info': info,
+            'info': info,  # суммарная информация о плане, cito, extra по типам приема amb и home на день
+                           # в интерфейсе на клиентской стороне не используется
             'busy': busy,
             'roa': roa
         }
@@ -390,43 +395,113 @@ class ClientVisualizer(object):
     def make_client_info_for_servicing(self, client):
         return {
             'client_data': self.make_search_client_info(client),
-            'appointments': self.make_appointments(client),
+            'appointments': self.make_appointments(client.id),
             'events': self.make_events(client)
         }
 
-    def make_appointments(self, client, every=False):
-        if every:
-            return map(
-                self.make_appointment,
-                client.appointments
-            )
-        else:
-            appointments = (client.appointments.join(ScheduleClientTicket.ticket).join(ScheduleTicket.schedule).
-                            filter(ScheduleClientTicket.event_id.is_(None)).
-                            order_by(Schedule.date.desc(), ScheduleTicket.begTime.desc()))
-            return map(
-                self.make_appointment,
-                appointments
-            )
+    def make_appointments(self, client_id, every=False):
 
-    def make_appointment(self, apnt):
-        return {
-            'id': apnt.id,
-            'mark': None,
-            'date': apnt.ticket.schedule.date,
-            'begDateTime': apnt.ticket.begDateTime,
-            'office': apnt.ticket.schedule.office,
-            'person': safe_unicode(apnt.ticket.schedule.person),
-            'person_speciality': safe_unicode(getattr(apnt.ticket.schedule.person.speciality, 'name', None)),
-            'createPerson': apnt.createPerson,
-            'note': apnt.note,
-            'receptionType': apnt.ticket.schedule.receptionType,
-            'person_id': apnt.ticket.schedule.person_id,
-            'org_from': apnt.org_from,
-            'event_id': apnt.event_id,
-            'attendance_type': apnt.ticket.attendanceType,
-            'ticket_id': apnt.ticket_id
-        }
+        createPerson = aliased(Person)
+        schedulePerson = aliased(Person)
+
+        where = [ScheduleClientTicket.client_id == client_id, ]
+        if not every:
+            where.append(ScheduleClientTicket.event_id.isnot(None))
+
+        query = db.select(
+            (
+                # 0
+                ScheduleClientTicket.id,
+                Schedule.date,
+                ScheduleTicket.begTime,
+                Schedule.person_id,
+                ScheduleClientTicket.event_id,
+                ScheduleClientTicket.ticket_id,
+
+                # 6
+                Schedule.office_id,
+                Office.code,
+                Office.name,
+
+                # 9
+                schedulePerson.firstName,
+                schedulePerson.patrName,
+                schedulePerson.lastName,
+
+                # 12
+                rbSpeciality.name,
+
+                # 13
+                createPerson.firstName,
+                createPerson.patrName,
+                createPerson.lastName,
+
+                # 16
+                Organisation.shortName,
+
+                # 17
+                Schedule.receptionType_id,
+                rbReceptionType.code,
+                rbReceptionType.name,
+
+                # 20
+                ScheduleTicket.attendanceType_id,
+                rbAttendanceType.code,
+                rbAttendanceType.name,
+
+                # 23
+                ScheduleClientTicket.note,
+                ScheduleClientTicket.infisFrom,
+                ScheduleClientTicket.createPerson_id,
+            ), whereclause=db.and_(*where),
+            from_obj=ScheduleClientTicket.__table__
+                .join(ScheduleTicket, ScheduleTicket.id == ScheduleClientTicket.ticket_id)
+                .join(Schedule, Schedule.id == ScheduleTicket.schedule_id)
+                .join(rbAttendanceType, rbAttendanceType.id == ScheduleTicket.attendanceType_id)
+                .join(rbReceptionType, rbReceptionType.id == Schedule.receptionType_id)
+                .outerjoin(createPerson, createPerson.id == ScheduleClientTicket.createPerson_id)
+                .join(schedulePerson, schedulePerson.id == Schedule.person_id)
+                .join(rbSpeciality, rbSpeciality.id == schedulePerson.speciality_id)
+                .join(Office, Office.id == Schedule.office_id)
+                .outerjoin(Organisation, Organisation.infisCode == ScheduleClientTicket.infisFrom))
+
+        load_all = db.session.execute(query)
+
+        return [
+            {
+                'id': row[0],
+                'mark': None,
+                'date': row[1],
+                'begDateTime': datetime.datetime.combine(row[1], row[2]),
+                'office': {
+                    'id': row[6],
+                    'code': row[7],
+                    'name': row[8],
+                },
+                'person': u' '.join(filter(None, (row[9], row[10], row[11]))) or None,
+                'person_speciality': row[12],
+                'createPerson': {
+                    'id': row[25],
+                    'name': u' '.join(filter(None, (row[13], row[14], row[15]))) or None,
+                },
+                'note': row[23],
+                'receptionType': {
+                    'id': row[17],
+                    'code': row[18],
+                    'name': row[19],
+                },
+                'person_id': row[3],
+                'org_from': row[16] or row[24],
+                'event_id': row[4],
+                'attendance_type': {
+                    'id': row[20],
+                    'code': row[21],
+                    'name': row[22],
+                },
+                'ticket_id': row[5]
+            }
+            for row in load_all
+        ]
 
     def make_events(self, client):
         return map(
