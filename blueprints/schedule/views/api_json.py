@@ -165,7 +165,9 @@ def api_schedule_description_post():
     dates = [day['date'] for day in schedule]
 
     if schedule:
-        ok = delete_schedules(dates, person_id)
+        ok, msg = delete_schedules(dates, person_id)
+        if not ok:
+            return jsonify({}, 422, msg)
 
     for day_desc in schedule:
         date = safe_date(day_desc['date'])
