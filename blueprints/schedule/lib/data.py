@@ -10,10 +10,11 @@ def delete_schedules(dates, person_id):
     )
     schedules_with_clients = schedules.join(ScheduleTicket).join(ScheduleClientTicket).filter(
         Schedule.deleted == 0,
-        ScheduleClientTicket.client_id is not None
-    ).all()  # todo: check deleted ?
+        ScheduleClientTicket.client_id is not None,
+        ScheduleClientTicket.deleted == 0
+    ).all()
     if schedules_with_clients:
-        return jsonify({}, 401, u'Пациенты успели записаться на приём')
+        return False, u'Пациенты успели записаться на приём'
 
     schedules.update({
         Schedule.deleted: 1,
@@ -24,4 +25,4 @@ def delete_schedules(dates, person_id):
     ).update({
         ScheduleTicket.deleted: 1
     }, synchronize_session=False)
-    return True
+    return True, ''
