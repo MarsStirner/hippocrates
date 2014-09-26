@@ -56,6 +56,11 @@
                             </dl>
                         </div>
                     </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <button class="btn btn-sm btn-primary pull-right" ng-click="open_patient_info(client.info.id)">Детальнее</button>
+                        </div>
+                    </div>
                 </div>
                 <tabset>
                     <tab heading="Предварительные записи">{% include "patients/_appointments.html" %}</tab>
