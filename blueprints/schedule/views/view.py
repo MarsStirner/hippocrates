@@ -71,7 +71,7 @@ def html_action():
 def patient_info_full():
     try:
         client_id = int(request.args['client_id'])
-    except KeyError or ValueError:
+    except (KeyError, ValueError):
         return abort(404)
     client = Client.query.get(client_id)
     if not client:

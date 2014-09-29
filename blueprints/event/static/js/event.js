@@ -416,7 +416,7 @@ var EventPaymentCtrl = function($scope, RefBookService, Settings, $http, $modal)
             });
 
             modalInstance.result.then(function () {
-                $scope.eventctrl.clear_local_contract($scope.event);
+                $scope.eventServices.clear_local_contract($scope.event);
             }, function () {
                 if (from_tab === 0) {
                     $scope.switch_in_process = true;
@@ -431,7 +431,7 @@ var EventPaymentCtrl = function($scope, RefBookService, Settings, $http, $modal)
 
     $scope.clear_payer_lc = function () {
         if (confirm('Данные плательщика будут удалены. Продолжить?')) {
-            $scope.eventctrl.clear_local_contract($scope.event);
+            $scope.eventServices.clear_local_contract($scope.event);
         }
     };
 
@@ -463,7 +463,7 @@ var EventPaymentCtrl = function($scope, RefBookService, Settings, $http, $modal)
     };
 
     $scope.open_prev_event_contract_modal = function() {
-        $scope.eventctrl.get_prev_events_contracts(
+        $scope.eventServices.get_prev_events_contracts(
             $scope.event.info.client_id,
             $scope.event.info.event_type.finance.id,
             $scope.event.info.set_date.toISOString()
@@ -479,7 +479,7 @@ var EventPaymentCtrl = function($scope, RefBookService, Settings, $http, $modal)
                     }
                 }
             }).result.then(function (selected_lcon) {
-                $scope.eventctrl.update_payment(
+                $scope.eventServices.update_payment(
                     $scope.event,
                     {
                         payments: [],
