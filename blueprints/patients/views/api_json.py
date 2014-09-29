@@ -29,7 +29,7 @@ def api_search_clients():
     try:
         query_string = request.args['q']
         limit = int(request.args.get('limit', 100))
-    except KeyError or ValueError:
+    except (KeyError, ValueError):
         return abort(404)
 
     base_query = Client.query
