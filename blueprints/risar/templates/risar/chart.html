@@ -6,7 +6,11 @@
     <div ng-controller="ChartCtrl" ng-cloak>
         <div class="row">
             <div class="col-md-6">
-                <h2>Карта пациентки <a ng-href="{{ url_for('patients.patient') }}?client_id=[[ chart.client.id ]]">[[ chart.client.full_name ]]</a> <small>([[ chart.external_id ]])</small></h2>
+                <h2>
+                    Карта пациентки
+                    <a ng-href="{{ url_for('patients.patient') }}?client_id=[[ chart.client.id ]]">[[ chart.client.full_name ]]</a>
+                    ([[ chart.external_id ]])
+                </h2>
             </div>
             <div class="col-md-4">
                 Ачивки!
@@ -31,7 +35,7 @@
                         </tr>
                         <tr ng-if="chart.client.cmi_policy">
                             <th>Полис ОМС:</th>
-                            <td>[[ chart.client.cmi_policy.insurer.short_name ]] <b>серия [[ chart.client.cmi_policy.serial ]] № [[ chart.client.cmi_policy.number ]]</b> от [[ chart.client.cmi_policy.beg_date ]]</td>
+                            <td>[[ chart.client.cmi_policy.insurer.short_name ]] <b>серия [[ chart.client.cmi_policy.serial ]] № [[ chart.client.cmi_policy.number ]]</b> от [[ chart.client.cmi_policy.beg_date | asDate ]]</td>
                         </tr>
                         </tbody>
                     </table>
@@ -63,14 +67,14 @@
                         <tr>
                             <th>#</th>
                             <th>Дата</th>
-                            <th>Z̸̨̩̼̦̞̄̅ͣͧͮ̿͛ͩĄ͎̮̲̣̮̬̺͖̬̣͇̙ͯͭ̔͑ͮͦ̃ͧͣ̃̍̈́͝ͅL̋͆ͯ͐́͝҉̘̥͚̯̙̘̼̮̰̞̻͇̪̠͕͝͠ͅͅG̶̡̤̠̻͚̞͖̱ͤ̆ͨ̐͂̓ͨ̋͡Ǫ̴̻͈̺͓̙̯̗̘͈̲̼ͮͥ́̑͝</th>
+                            <th>Диагноз</th>
                             <th>Врач</th>
                         </tr>
                         </thead>
                         <tr ng-repeat="checkup in chart.checkups">
                             <td>[[ $index + 1 ]]</td>
                             <td>[[ checkup.beg_date | asDate ]]</td>
-                            <td>[[ checkup.zalgo ]]</td>
+                            <td><span tooltip="[[ checkup.diag.name ]]">[[ checkup.diag.code ]]</span></td>
                             <td>[[ checkup.person_name ]]</td>
                         </tr>
                     </table>

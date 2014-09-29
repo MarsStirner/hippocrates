@@ -33,7 +33,7 @@ def api_0_schedule(person_id=None):
         'ticket_id': ticket.id,
         'client_ticket_id': ticket.client_ticket.id if ticket.client_ticket else None,
         'client': ticket.client,
-        'beg_time': ticket.begTime,
+        'beg_time': ticket.begDateTime,
         'event_id': ticket.client_ticket.event_id if ticket.client_ticket else None,
         'note': ticket.client_ticket.note if ticket.client else None,
     }

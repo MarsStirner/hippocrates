@@ -80,30 +80,58 @@ def represent_event(event):
             {
                 'beg_date': datetime.date(2014, 7, 15),
                 'person_name': u'Занкоков Тенши Ноёнивич',
+                'diag': {
+                    'code': 'Z.01',
+                    'name': u'Не очень всё как-то...',
+                }
             },
             {
                 'beg_date': datetime.date(2014, 8, 6),
                 'person_name': u'Занкоков Тенши Ноёнивич',
+                'diag': {
+                    'code': 'Z.01',
+                    'name': u'Не очень всё как-то...',
+                }
             },
             {
                 'beg_date': datetime.date(2014, 8, 14),
                 'person_name': u'Занкоков Тенши Ноёнивич',
+                'diag': {
+                    'code': 'Z.01',
+                    'name': u'Не очень всё как-то...',
+                }
             },
             {
                 'beg_date': datetime.date(2014, 8, 19),
                 'person_name': u'Занкоков Тенши Ноёнивич',
+                'diag': {
+                    'code': 'Z.02',
+                    'name': u'Ай-яй!',
+                }
             },
             {
                 'beg_date': datetime.date(2014, 8, 24),
                 'person_name': u'Шоненова Шинвани Наровна',
+                'diag': {
+                    'code': 'Z.02',
+                    'name': u'Ай-яй!',
+                }
             },
             {
                 'beg_date': datetime.date(2014, 9, 1),
                 'person_name': u'Шоненова Шинвани Наровна',
+                'diag': {
+                    'code': 'Z.13',
+                    'name': u'Ну, это совсем труба...',
+                }
             },
             {
                 'beg_date': datetime.date(2014, 9, 7),
                 'person_name': u'Шоненова Шинвани Наровна',
+                'diag': {
+                    'code': 'Z.13',
+                    'name': u'Ну, это совсем труба...',
+                }
             },
         ]
     }

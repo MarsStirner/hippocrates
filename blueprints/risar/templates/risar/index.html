@@ -32,7 +32,10 @@
                             <i ng-if="!row.event_id" class="fa fa-exclamation-circle text-warning" tooltip="Медицинская карта будет заведена автомагически"></i>
                         </td>
                         <td>31</td>
-                        <td ng-bind="row.note"></td>
+                        <td>
+                            <span ng-if="row.event_id">Повторный приём</span>
+                            <span ng-if="!row.event_id">Первичный приём</span>
+                        </td>
                     </tr>
                     </tbody>
                 </table>
