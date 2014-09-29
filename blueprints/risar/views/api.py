@@ -45,6 +45,7 @@ def api_0_schedule(person_id=None):
 @module.route('/api/0/chart/')
 @module.route('/api/0/chart/<int:event_id>')
 def api_0_chart(event_id=None):
+    automagic = False
     ticket_id = request.args.get('ticket_id')
     if not event_id and not ticket_id:
         return jsonify(None, 404, u'Either event_id or ticket_id must be provided')
@@ -55,7 +56,7 @@ def api_0_chart(event_id=None):
         event = ticket.event
         if not event:
             event = Event()
-            event.eventType = EventType.get_default_et()
+            event.eventType = EventType.get_default_et()  # FIXME: Risar has different EventType
             event.organisation = Organisation.query.filter_by(infisCode=str(ORGANISATION_INFIS_CODE)).first()
             event.isPrimaryCode = EventPrimary.primary[0]
             event.order = EventOrder.planned[0]
@@ -76,8 +77,45 @@ def api_0_chart(event_id=None):
             ticket.event = event
             db.session.add(ticket)
             db.session.commit()
+            automagic = True
     else:
         event = Event.query.get(event_id)
         if not event:
             return jsonify(None, result_code=404, result_name='Event not found')
-    return jsonify(represent_event(event))
+    return jsonify({
+        'event': represent_event(event),
+        'automagic': automagic
+    })
+
+
+@module.route('/api/0/chart/<int:event_id>', methods=['DELETE'])
+def api_0_chart_delete(event_id):
+    # TODO: Security
+    ticket_id = int(request.args.get('ticket_id', 0))
+    event = Event.query.get(event_id)
+    if not event:
+        return jsonify(None, 404, 'Event not found')
+    if event.deleted:
+        return jsonify(None, 400, 'Event already deleted')
+    ticket = ScheduleClientTicket.query.get(ticket_id)
+    if not ticket:
+        return jsonify(None, 404, 'Ticket not found')
+    if ticket.event_id != event_id:
+        return jsonify(None, 400, 'Ticket not connected to event')
+    ticket.event = None
+    event.deleted = 1
+    db.session.commit()
+    return jsonify(None)
+
+
+#@module.route('/api/0/chart/<int:event_id>/undelete', methods=['POST'])
+#def api_o_chart_undelete(event_id):
+#    event = Event.query.get(event_id)
+#    if not event:
+#        return jsonify(None, 404, 'Event not found')
+#    if not event.deleted:
+#        return jsonify(None, 400, 'Event is not deleted')
+#    event.deleted = 0
+#    db.session.add(event)
+#    db.session.commit()
+#    return jsonify(None)

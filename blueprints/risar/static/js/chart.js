@@ -10,8 +10,9 @@ var ChartCtrl = function ($scope, RisarApi) {
     var reload_chart = function () {
         RisarApi.chart(undefined, ticket_id)
         .then(function (event_info) {
-            $scope.chart = event_info;
+            $scope.chart = event_info.event;
+            $scope.automagic = event_info.automagic;
         })
-    }
+    };
     reload_chart();
 };
