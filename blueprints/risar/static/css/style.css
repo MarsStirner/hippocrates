@@ -5,3 +5,7 @@
 /*table.table-personal-data > tbody > tr > th {*/
     /*text-align: right;*/
 /*}*/
+
+h2 { /* Fix me if you don't like me */
+    margin-top: 0;
+}

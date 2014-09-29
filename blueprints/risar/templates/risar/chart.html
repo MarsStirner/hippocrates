@@ -5,14 +5,17 @@
 {% block main %}
     <div ng-controller="ChartCtrl" ng-cloak>
         <div class="row">
-            <div class="col-md-6">
+            <div class="col-lg-8 col-md-8">
                 <h2>
                     Карта пациентки
                     <a ng-href="{{ url_for('patients.patient') }}?client_id=[[ chart.client.id ]]">[[ chart.client.full_name ]]</a>
                     ([[ chart.external_id ]])
                 </h2>
+                На учёте с <b>[[ chart.set_date | asDate ]]</b>.
+                Врач: <b>[[ chart.person.name ]]</b>;
+                <b>[[ chart.person.organisation.short_name ]]</b>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-2">
                 Ачивки!
             </div>
             <div class="col-md-2">

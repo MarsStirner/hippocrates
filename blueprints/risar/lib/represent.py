@@ -29,6 +29,8 @@ def represent_event(event):
             'sex_raw': client.sexCode,
             'cmi_policy': client.policy,
         },
+        'set_date': event.setDate,
+        'person': event.execPerson,
         'external_id': event.externalId,
         'type': event.eventType,
         'progress': {
