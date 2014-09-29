@@ -462,7 +462,7 @@ class ClientVisualizer(object):
                 .join(rbSpeciality, rbSpeciality.id == schedulePerson.speciality_id)
                 .join(Office, Office.id == Schedule.office_id)
                 .outerjoin(Organisation, Organisation.infisCode == ScheduleClientTicket.infisFrom))
-
+        query = query.order_by(Schedule.date.desc(), ScheduleTicket.begTime.desc())
         load_all = db.session.execute(query)
 
         return [
