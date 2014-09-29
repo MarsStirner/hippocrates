@@ -658,11 +658,12 @@ class EventVisualizer(object):
 
     def make_event_services(self, event_id):
 
-        def make_raw_service_group(action, service_id, at_code, at_name, service_name, price, at_context):
+        def make_raw_service_group(action, service_id, at_code, at_name, service_name, price, at_context, ct_code):
             service = {
                 'at_id': action.actionType_id,
                 'service_id': service_id,
                 'at_code': at_code,
+                'ct_code': ct_code,
                 'at_name': at_name,
                 'service_name': service_name,
                 'action': action,
@@ -739,7 +740,8 @@ class EventVisualizer(object):
             ActionType.name,
             rbService.name,
             ContractTariff.price,
-            ActionType.context
+            ActionType.context,
+            ContractTariff.code
         ).join(
             Event,
             EventType,
@@ -760,9 +762,9 @@ class EventVisualizer(object):
         ats_apts = int_get_atl_dict_all()
 
         services_by_at = defaultdict(list)
-        for a, service_id, at_code, at_name, service_name, price, at_context in query:
+        for a, service_id, at_code, at_name, service_name, price, at_context, ct_code in query:
             services_by_at[(a.actionType_id, service_id)].append(
-                make_raw_service_group(a, service_id, at_code, at_name, service_name, price, at_context)
+                make_raw_service_group(a, service_id, at_code, at_name, service_name, price, at_context, ct_code)
             )
         services_grouped = []
         for key, service_group in services_by_at.iteritems():
