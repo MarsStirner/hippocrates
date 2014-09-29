@@ -82,7 +82,7 @@ class ScheduleVisualizer(object):
                 'id': speciality.id,
                 'name': speciality.name
             } if speciality else None,
-            'office': office if office else person.office
+            'office': office if office else None
         }
 
     def make_schedule(self, schedules, date_start, date_end):
