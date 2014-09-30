@@ -623,6 +623,7 @@ angular.module('WebMis20.services', []).
                         at_id: null,
                         at_code: null,
                         at_name: null,
+                        ct_code: null,
                         service_id: undefined,
                         service_name: null,
                         actions: [],
@@ -1004,6 +1005,7 @@ angular.module('WebMis20.services', []).
                     var service_data = angular.extend(
                             service_group,
                             {
+                                ct_code: service_group.at_code,
                                 amount: 1,
                                 sum: service_group.price,
                                 actions: [undefined]
