@@ -1586,3 +1586,18 @@ class Setting(db.Model):
             'path': self.path,
             'value': self.value,
         }
+
+
+class rbMethodOfAdministration(db.Model):
+    __tablename__ = u'rbMethodOfAdministration'
+
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(16), nullable=False, index=True)
+    name = db.Column(db.String(64), nullable=False, index=True)
+
+    def __json__(self):
+        return {
+            'id': self.id,
+            'code': self.code,
+            'name': self.name,
+        }

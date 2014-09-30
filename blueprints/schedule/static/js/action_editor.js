@@ -9,8 +9,9 @@ var ActionEditorCtrl = function ($scope, $http, $window, WMAction, PrintingServi
             action_id: $scope.action.action.id
         }
     };
+    $scope.ActionStatus = RefBookService.get('ActionStatus');
     $scope.action_id = params.action_id;
-    $scope.action = new WMAction();
+    var action = $scope.action = new WMAction();
     if (params.action_id) {
         $scope.action.get(params.action_id).success(update_print_templates);
     } else if (params.event_id && params.action_type_id) {
@@ -19,6 +20,16 @@ var ActionEditorCtrl = function ($scope, $http, $window, WMAction, PrintingServi
     function update_print_templates (data) {
         $scope.ps.set_context(data.result.action.action_type.context_name)
     }
+
+    $scope.on_status_changed = function () {
+        if (action.action.status.code === 'finished') {
+            if (!action.action.end_date) {
+                action.action.end_date = new Date();
+            }
+        } else {
+            action.action.end_date = null;
+        }
+    };
 
     $scope.save_action = function () {
         $scope.action.save().
@@ -30,7 +41,6 @@ var ActionEditorCtrl = function ($scope, $http, $window, WMAction, PrintingServi
                 }
             });
     };
-    $scope.ActionStatus = RefBookService.get('ActionStatus');
     $scope.is_med_doc = function () { return $scope.action.action.action_type && $scope.action.action.action_type.class === 0; };
     $scope.is_diag_lab = function () { return $scope.action.action.action_type && $scope.action.action.action_type.class === 1; };
     $scope.is_treatment = function () { return $scope.action.action.action_type && $scope.action.action.action_type.class === 2; };
