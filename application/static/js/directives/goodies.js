@@ -215,4 +215,16 @@ angular.module('WebMis20.directives.goodies', [])
             });
         }
     }
+})
+.directive('bindOnce', function() {
+    // until angularjs 1.3+ one-time-binding ::
+    return {
+        scope: true,
+        link: function( $scope, $element ) {
+            setTimeout(function() {
+                $scope.$destroy();
+                $element.removeClass('ng-binding ng-scope');
+            }, 0);
+        }
+    }
 });

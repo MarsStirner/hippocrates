@@ -273,7 +273,7 @@ def api_persons_tree_schedule_info():
 def api_search_persons():
     try:
         query_string = request.args['q']
-    except KeyError or ValueError:
+    except (KeyError, ValueError):
         return abort(404)
     result = SearchPerson.search(query_string)
 
@@ -344,7 +344,7 @@ def api_schedule_lock():
         person_id = j['person_id']
         date = datetime.datetime.strptime(j['date'], '%Y-%m-%d')
         roa = j['roa']
-    except ValueError or KeyError:
+    except (ValueError, KeyError):
         return abort(418)
     scheds = Schedule.query.filter(
         Schedule.person_id == person_id,
@@ -367,7 +367,7 @@ def api_move_client():
     try:
         ticket_id = int(j['ticket_id'])
         destination_tid = j['destination_ticket_id']
-    except ValueError or KeyError:
+    except (ValueError, KeyError):
         return jsonify(None, 418, 'Both ticket_id and destination_ticket_id must be specified')
     source = ScheduleTicket.query.get(ticket_id)
     oldCT = source.client_ticket

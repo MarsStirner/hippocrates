@@ -22,7 +22,7 @@ def index():
 def html_event_info():
     try:
         event_id = int(request.args['event_id'])
-    except KeyError or ValueError:
+    except (KeyError, ValueError):
         return abort(400)
     return get_event_form()
 
@@ -32,7 +32,7 @@ def html_event_info():
 def new_event():
     try:
         client_id = int(request.args['client_id'])
-    except KeyError or ValueError:
+    except (KeyError, ValueError):
         return abort(400)
     return get_event_form(event_new=True)
 

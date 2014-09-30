@@ -14,7 +14,7 @@ from application.models.client import Client
 from application.models.enums import EventPrimary, EventOrder
 from application.models.event import (Event, EventType, Diagnosis, Diagnostic, EventPayment, Visit,
                                       rbVisitType, rbScene, Event_Persons)
-from application.models.exists import Person, OrgStructure
+from application.models.exists import Person, OrgStructure, rbRequestType
 from application.systemwide import db
 from application.lib.utils import (jsonify, safe_traverse, get_new_uuid, logger, get_new_event_ext_id, safe_datetime)
 from blueprints.event.app import module
@@ -384,37 +384,41 @@ GROUP BY at.id, ct.code
     return result
 
 
-
-@module.route('/api/event_payment/local_contract.json', methods=['GET'])
-def api_new_event_payment_info_get():
+@module.route('/api/event_payment/previous_local_contracts.json', methods=['GET'])
+def api_prev_event_payment_info_get():
     try:
-        source = request.args['source']
         client_id = int(request.args['client_id'])
-    except KeyError or ValueError:
+        finance_id = int(request.args.get('finance_id'))
+        event_set_date = safe_datetime(request.args.get('set_date'))
+        if event_set_date is None:
+            event_set_date = datetime.datetime.now()
+    except (KeyError, ValueError, TypeError):
         return abort(400)
+    request_type_codes = ['policlinic', '4']
 
-    event = client = None
-    if source == 'prev_event':
-        try:
-            event_type_id = int(request.args['event_type_id'])
-            event_set_date = safe_datetime(request.args.get('set_date'))
-            if event_set_date is None:
-                event_set_date = datetime.datetime.now()
-        except KeyError or ValueError:
-            return abort(400)
-        event = Event.query.join(EventType).filter(
-            EventType.id == event_type_id,
-            Event.client_id == client_id,
-            Event.deleted == 0,
-            Event.setDate < event_set_date
-        ).order_by(Event.setDate.desc()).first()
-    elif source == 'client':
-        client = Client.query.get(client_id)
-    else:
-        return abort(400)
+    event_list = Event.query.join(EventType, rbRequestType).filter(
+        rbRequestType.code.in_(request_type_codes),
+        EventType.finance_id == finance_id,
+        Event.client_id == client_id,
+        Event.deleted == 0,
+        Event.setDate < event_set_date
+    ).order_by(Event.setDate.desc())
 
     vis = EventVisualizer()
-    res = vis.make_event_payment(event, client)
+    res = vis.make_prev_events_contracts(event_list)
+    return jsonify(res)
+
+
+@module.route('/api/event_payment/client_local_contract.json', methods=['GET'])
+def api_client_payment_info_get():
+    try:
+        client_id = int(request.args['client_id'])
+    except (KeyError, ValueError):
+        return abort(400)
+
+    client = Client.query.get(client_id)
+    vis = EventVisualizer()
+    res = vis.make_event_payment(None, client)
     return jsonify(res)
 
 

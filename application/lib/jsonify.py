@@ -14,7 +14,7 @@ from application.lib.agesex import recordAcceptableEx
 from application.models.client import Client
 from application.systemwide import db
 from application.lib.data import int_get_atl_dict_all
-from application.lib.utils import safe_unicode, safe_dict, logger
+from application.lib.utils import safe_unicode, safe_dict, logger, safe_traverse_attrs
 from application.models.enums import EventPrimary, EventOrder, ActionStatus, Gender
 from application.models.event import Event, EventType, Diagnosis
 from application.models.schedule import Schedule, rbReceptionType, ScheduleClientTicket, ScheduleTicket, QuotingByTime, \
@@ -729,6 +729,30 @@ class EventVisualizer(object):
             other_events = []
         lc['shared_in_events'] = other_events
         return lc
+
+    def make_prev_events_contracts(self, event_list):
+        def make_event_small_info(event):
+            return {
+                'id': event.id,
+                'set_date': event.setDate,
+                'exec_date': event.execDate,
+                'descr': u'Обращение №{0}, {1}'.format(
+                    event.externalId,
+                    safe_traverse_attrs(event, 'eventType', 'name', default=u'')
+                )
+            }
+
+        result = []
+        for event in event_list:
+            lc = self.make_event_local_contract(event)
+            if not lc['id']:
+                continue
+
+            result.append({
+                'local_contract': lc,
+                'event_info': make_event_small_info(event)
+            })
+        return result
 
     def make_event_services(self, event_id):
 

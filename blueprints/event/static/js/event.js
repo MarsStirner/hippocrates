@@ -127,7 +127,7 @@ var EventMainInfoCtrl = function ($scope, $http, RefBookService, EventType, $win
     };
 
     $scope.$on('event_loaded', function() {
-        if ($scope.event.is_new()) $scope.event.info.set_date = new Date($scope.event.info.set_date);
+        $scope.event.info.set_date = new Date($scope.event.info.set_date);
 
         $scope.request_type_init = angular.extend({}, $scope.event.info.event_type.request_type);
         $scope.finance_init = angular.extend({}, $scope.event.info.event_type.finance);
@@ -339,10 +339,10 @@ var EventPaymentCtrl = function($scope, RefBookService, Settings, $http, $modal)
             !$scope.integration1CODVD_enabled();
     };
     $scope.payer_person_required = function () {
-        return ($scope.payer_tabs.person.active && $scope.event.is_new() && $scope.formstate.is_paid() && $scope.event.info.client.info.age_tuple[3] < 18);
+        return ($scope.payer_tabs.person.active && $scope.formstate.is_paid() && $scope.event.info.client.info.age_tuple[3] < 18);
     };
     $scope.payer_org_required = function () {
-        return ($scope.payer_tabs.org.active && $scope.event.is_new() && $scope.formstate.is_paid());
+        return ($scope.payer_tabs.org.active && $scope.formstate.is_paid() && $scope.event.info.client.info.age_tuple[3] < 18);
     };
     $scope.payer_info_disabled = function () {
         return event_created && false;
@@ -416,19 +416,7 @@ var EventPaymentCtrl = function($scope, RefBookService, Settings, $http, $modal)
             });
 
             modalInstance.result.then(function () {
-                if (from_tab === 0) {
-                    lc.first_name = null;
-                    lc.last_name = null;
-                    lc.patr_name = null;
-                    lc.birth_date = null;
-                    lc.doc_type = null;
-                    lc.serial_left = null;
-                    lc.serial_right = null;
-                    lc.number = null;
-                    lc.reg_address = null;
-                } else {
-                    lc.payer_org = null
-                }
+                $scope.eventctrl.clear_local_contract($scope.event);
             }, function () {
                 if (from_tab === 0) {
                     $scope.switch_in_process = true;
@@ -441,19 +429,22 @@ var EventPaymentCtrl = function($scope, RefBookService, Settings, $http, $modal)
         }
     };
 
-    $scope.get_payer = function(source, client_id) {
-        $http.get(url_for_event_api_new_event_payment_info_get, {
+    $scope.clear_payer_lc = function () {
+        if (confirm('Данные плательщика будут удалены. Продолжить?')) {
+            $scope.eventctrl.clear_local_contract($scope.event);
+        }
+    };
+
+    $scope.get_payer = function(client_id) {
+        $http.get(url_api_client_payment_info_get, {
             params: {
-                event_type_id: $scope.event.info.event_type.id,
-                set_date: $scope.event.info.set_date.toISOString(),
-                client_id: client_id,
-                source: source
+                client_id: client_id
             }
         }).success(function(data) {
             $scope.eventctrl.update_payment($scope.event, data.result);
             $scope.refresh_tabs($scope.payer_is_org());
         }).error(function() {
-            alert('error in getting data from server');
+            alert('Ошибка получения данных плательщика');
         });
     };
 
@@ -466,8 +457,38 @@ var EventPaymentCtrl = function($scope, RefBookService, Settings, $http, $modal)
 
         modalInstance.result.then(function (selected_client_id) {
             if (selected_client_id) {
-                $scope.get_payer('client', selected_client_id);
+                $scope.get_payer(selected_client_id);
             }
+        });
+    };
+
+    $scope.open_prev_event_contract_modal = function() {
+        $scope.eventctrl.get_prev_events_contracts(
+            $scope.event.info.client_id,
+            $scope.event.info.event_type.finance.id,
+            $scope.event.info.set_date.toISOString()
+        ).then(function (prev_con_info) {
+            $modal.open({
+                templateUrl: 'modal-prev-event-contract.html',
+                size: 'lg',
+                controller: PrevEventContractModalCtrl,
+                scope: $scope,
+                resolve: {
+                    model: function () {
+                        return prev_con_info;
+                    }
+                }
+            }).result.then(function (selected_lcon) {
+                $scope.eventctrl.update_payment(
+                    $scope.event,
+                    {
+                        payments: [],
+                        local_contract: selected_lcon
+                    });
+                $scope.refresh_tabs($scope.payer_is_org());
+            });
+        }, function (message) {
+            alert(message);
         });
     };
 
@@ -487,6 +508,61 @@ var EventPaymentCtrl = function($scope, RefBookService, Settings, $http, $modal)
 //        $scope.event.reload();
     }
 
+};
+
+var PrevEventContractModalCtrl = function ($scope, $modalInstance, model, $filter) {
+    $scope.model = model;
+    $scope.selected = {
+        lcon_idx: null
+    };
+
+    $scope.format_event_period = function (event) {
+        return '{0} - {1}'.formatNonEmpty($filter('asDateTime')(event.set_date), $filter('asDateTime')(event.exec_date));
+    };
+    $scope.format_contract_info = function (lcon) {
+        return '<strong>{0}</strong>, {1}'.formatNonEmpty(lcon.number_contract || 'без номера', lcon.date_contract);
+    };
+    $scope.format_payer_info = function (lcon) {
+        if ($scope.is_payer_org(lcon)) {
+            return 'Юр. лицо:<br> {0}'.formatNonEmpty(lcon.payer_org.full_name);
+        } else if ($scope.is_payer_person(lcon)) {
+            return 'Физ. лицо:<br>{<strong>ФИО</strong> |0|<br>} {<strong>документ</strong> |1|<br>} {<strong>адрес</strong> |2|<br>}'.formatNonEmpty(
+                '{0} {1} {2} {3| г.р.}'.formatNonEmpty(lcon.last_name, lcon.first_name, lcon.patr_name, lcon.birth_date),
+                '{0}{ серия |0}{ |1}{ номер |2}'.formatNonEmpty(lcon.doc_type.name, lcon.serial_left, lcon.serial_right, lcon.number),
+                '{0}'.formatNonEmpty(lcon.reg_address)
+            );
+        } else {
+            return 'Данные плательщика отсутствуют';
+        }
+    };
+
+    $scope.is_payer_person = function (lcon) {
+        function isNotEmpty(val) { return val !== undefined && val !== null; }
+        return (lcon &&
+            [lcon.first_name, lcon.last_name, lcon.patr_name, lcon.birth_date, lcon.doc_type,
+                lcon.serial_left, lcon.serial_right, lcon.number, lcon.reg_address].some(isNotEmpty)
+            );
+    };
+    $scope.is_payer_org = function (lcon) {
+        return lcon && lcon.payer_org_id;
+    };
+    $scope.is_older_than_year = function (event) {
+        return moment(event.set_date).isBefore(moment().subtract(1, 'years'));
+    };
+
+    $scope.select_contract = function (index) {
+        $scope.selected.lcon_idx = index;
+    };
+
+    $scope.contract_selected = function () {
+        return $scope.selected.lcon_idx !== null && $scope.selected.lcon_idx !== undefined;
+    };
+    $scope.accept = function() {
+        $modalInstance.close($scope.model[$scope.selected.lcon_idx].local_contract);
+    };
+    $scope.cancel = function() {
+        $modalInstance.dismiss('cancel');
+    };
 };
 
 var RelativesModalCtrl = function ($scope, $modalInstance) {
