@@ -137,3 +137,21 @@ def represent_event(event):
             },
         ]
     }
+
+common_codes = ['education', 'work_group', 'professional_properties', 'infertility', 'infertility_period', 'infertility_cause', 'blood_type', 'rh', 'finished_diseases', 'current_diseases', 'hereditary', 'alcohol', 'smoking', 'toxic', 'drugs']
+mother_codes = ['menstruation_start_age', 'menstruation_duration', 'menstruation_perion', 'menstruation_disorders', 'sex_life_start_age', 'contraception_type', 'natural_pregnancy', 'family_income'] + common_codes
+father_codes = ['name'] + common_codes
+def represent_anamnesis_action(action, mother=False):
+    """
+    :type action: application.models.actions.Action
+    :type mother: bool
+    :param action:
+    :param mother:
+    :return:
+    """
+    codes = mother_codes if mother else father_codes
+    return {
+        (prop.type.code, prop.value)
+        for prop in action.properties
+        if prop.type.code in codes
+    }

@@ -41,6 +41,18 @@ WebMis20
             }
         });
         return defer.promise;
+    };
+    this.anamnesis = function (event_id) {
+        var defer = $q.defer();
+        var url = Config.url.api_anamnesis + event_id;
+        $http.get(url).success(function (data) {
+            if (data.meta.code != 200) {
+                defer.reject(data.meta)
+            } else {
+                defer.resolve(data.result);
+            }
+        });
+        return defer.promise;
     }
 }])
 ;

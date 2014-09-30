@@ -11,7 +11,7 @@ from application.models.exists import Organisation, Person
 from application.models.schedule import Schedule, ScheduleClientTicket
 from application.models.utils import safe_current_user_id
 from application.systemwide import db
-from blueprints.risar.lib.represent import represent_event
+from blueprints.risar.lib.represent import represent_event, represent_anamnesis_action
 from config import ORGANISATION_INFIS_CODE
 
 
@@ -119,3 +119,27 @@ def api_0_chart_delete(event_id):
 #    db.session.add(event)
 #    db.session.commit()
 #    return jsonify(None)
+
+
+@module.route('/api/0/anamnesis/')
+@module.route('/api/0/anamnesis/<int:event_id>')
+def api_0_anamnesis(event_id=None):
+    from application.models.actions import ActionType, Action
+    if not event_id:
+        return jsonify(None, 400, 'Event id must be provided')
+    event = Event.query.get(event_id)
+    if not event:
+        return jsonify(None, 404, 'Event not found')
+    mother = Action.query.join(ActionType).filter(
+        Action.event_id == event_id,
+        ActionType.flatCode == 'risar_mother_anamnesis'
+    ).first()
+    father = Action.query.join(ActionType).filter(
+        Action.event_id == event_id,
+        ActionType.flatCode == 'risar_father_anamnesis'
+    ).first()
+    return jsonify({
+        'event': represent_event(event),
+        'mother': represent_anamnesis_action(mother, True) if mother else None,
+        'father': represent_anamnesis_action(father, False) if father else None,
+    })

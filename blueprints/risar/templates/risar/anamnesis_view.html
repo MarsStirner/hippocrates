@@ -1,0 +1,59 @@
+{% extends 'risar/base.html' %}
+
+{% block title %}> {{ module_name }}{% endblock %}
+
+{% block main %}
+    <div ng-controller="AnamnesisCtrl" ng-cloak>
+        <div class="col-md-12">
+            <h2>
+                Карта пациентки
+                <a ng-href="{{ url_for('patients.patient') }}?client_id=[[ anamnesis.event.client.id ]]">[[ anamnesis.event.client.full_name ]]</a>
+                ([[ anamnesis.event.external_id ]])
+            </h2>
+            На учёте в <b>[[ anamnesis.event.person.organisation.short_name ]]</b>
+            у <b>[[ anamnesis.event.person.name ]]</b>;
+            с <b>[[ anamnesis.event.set_date | asDate ]]</b>
+        </div>
+        <tabset justified="true">
+            <tab heading="Сведения о матери и об отце">
+                <p>
+                    Менструации с [[ anamnesis.mother.menstruation_start_age ]] лет,
+                    длительность [[ anamnesis.mother.menstruation_duration ]] дней,
+                    продолжительность цикла [[ anamnesis.mother.menstruation_period ]] дней,
+                    нарушения [[ anamnesis.mother.menstruation_disorders ]].
+                </p>
+                <p>
+                    Половая жизнь с [[ anamnesis.mother.sex_life_start_age ]] лет.
+                    Вид контрацепции: [[ anamnesis.mother.contraception_type ]].
+                </p>
+                <p>Беременность наступила естественным путём: [[ anamnesis.mother.natural_pregnancy ]].</p>
+                <p>ФИО отца: [[ anamnesis.father.name ]]</p>
+                <p>Доход семьи: [[ anamnesis.mother.family_income ]]</p>
+                <table class="table table-condensed">
+                    <thead>
+                    <tr>
+                        <th class="col-md-2">Критерий</th>
+                        <th class="col-md-5">Мать</th>
+                        <th class="col-md-5">Отец</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="criterion in ['education', 'work_group', 'professional_properties', 'infertility', 'infertility_period', 'infertility_cause', 'blood_type', 'rh', 'finished_diseases', 'current_diseases', 'hereditary', 'alcohol', 'smoking', 'toxic', 'drugs']">
+                        <td ng-bind="criterion_names[criterion]"></td>
+                        <td ng-bind="anamnesis.mother[criterion]"></td>
+                        <td ng-bind="anamnesis.father[criterion]"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </tab>
+            <tab heading="Сведения о предыдущих беременностях"></tab>
+            <tab heading="Сведения о переливаниях крови"></tab>
+        </tabset>
+    </div>
+{% endblock %}
+
+{% block modules_js %}
+    {{ super() }}
+    <script src="{{ url_for('.static', filename='js/anamnesis.js', v=version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/risar.js', v=version) }}"></script>
+{% endblock %}
