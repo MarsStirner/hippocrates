@@ -46,8 +46,52 @@
                     </tbody>
                 </table>
             </tab>
-            <tab heading="Сведения о предыдущих беременностях"></tab>
-            <tab heading="Сведения о переливаниях крови"></tab>
+            <tab heading="Сведения о предыдущих беременностях">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>№</th>
+                        <th>Исход беременности</th>
+                        <th>Срок гестации</th>
+                        <th>Пособия о перфайшш</th>
+                        <th>Сведения о детях</th>
+                        <th>Особенности</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="p in anamnesis.pregnancies">
+                        <td ng-bind="p.number"></td>
+                        <td ng-bind="p.result"></td>
+                        <td ng-bind="p._01"></td>
+                        <td ng-bind="p._02"></td>
+                        <td ng-bind="p.info"></td>
+                        <td ng-bind="p.note"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </tab>
+            <tab heading="Сведения о переливаниях крови">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Дата</th>
+                        <th>Вид</th>
+                        <th>Группа крови</th>
+                        <th>Резус-фактор</th>
+                        <th>Реакция</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="t in anamnesis.transfusions">
+                        <td ng-bind="t.date | asDate"></td>
+                        <td ng-bind="t.type"></td>
+                        <td ng-bind="t.blood_type"></td>
+                        <td ng-bind="t.rh"></td>
+                        <td ng-bind="t.reaction"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </tab>
         </tabset>
     </div>
 {% endblock %}

@@ -5,7 +5,7 @@
 'use strict';
 
 var AnamnesisCtrl = function ($scope, RisarApi) {
-    $scope.criterion_names = {
+    var criterion_names = $scope.criterion_names = {
         'education': 'Образование',
         'work_group': 'Общественно-профессиональная группа',
         'professional_properties': 'Профессиональные и экологические особенности',
@@ -28,7 +28,15 @@ var AnamnesisCtrl = function ($scope, RisarApi) {
         RisarApi.anamnesis(event_id)
         .then(function (anamnesis) {
             $scope.anamnesis = anamnesis;
+            $scope.warnings = calculate_warnings(anamnesis);
         })
+    };
+    var calculate_warnings = function (anamnesis) {
+        var warnings = {};
+        _(criterion_names).keys().forEach(function (key) {
+            warnings[key] = key == 'rh';
+        });
+        return warnings;
     };
     reload_anamnesis();
 };

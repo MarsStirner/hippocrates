@@ -142,4 +142,6 @@ def api_0_anamnesis(event_id=None):
         'event': represent_event(event),
         'mother': represent_anamnesis_action(mother, True) if mother else None,
         'father': represent_anamnesis_action(father, False) if father else None,
+        'pregnancies': [],
+        'transfusions': [],
     })
