@@ -215,6 +215,25 @@ def kladr_street(code=None):
     return jsonify([get_kladr_street(code)])
 
 
+@app.route('/clear_cache/')
+def clear_cache():
+    cache.delete_memoized(api_refbook)
+    import os
+    import shutil
+    nginx_cache_path = '/var/cache/nginx'
+    try:
+        cache_list = os.listdir(nginx_cache_path)
+        for _name in cache_list:
+            entity_path = os.path.join(nginx_cache_path, _name)
+            if os.path.isdir(entity_path):
+                shutil.rmtree(entity_path)
+            elif os.path.isfile(entity_path):
+                os.remove(entity_path)
+    except Exception as e:
+        print e
+    return u'Кэш справочников удалён', 200, [('content-type', 'text/plain; charset=utf-8')]
+
+
 @app.errorhandler(403)
 def authorisation_failed(e):
     if request_wants_json():
