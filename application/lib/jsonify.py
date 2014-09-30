@@ -403,7 +403,7 @@ class ClientVisualizer(object):
 
         where = [ScheduleClientTicket.client_id == client_id, ]
         if not every:
-            where.append(ScheduleClientTicket.event_id.isnot(None))
+            # where.append(ScheduleClientTicket.event_id.isnot(None))
             where.append(Schedule.date >= datetime.datetime.today())
 
         query = db.select(
