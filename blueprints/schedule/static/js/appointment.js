@@ -1,7 +1,7 @@
 /**
  * Created by mmalkov on 11.07.14.
  */
-var PersonAppointmentCtrl = function ($scope, $http, RefBook, WMAppointmentDialog) {
+var PersonAppointmentCtrl = function ($scope, $http, RefBook, WMAppointmentDialog, PersonTreeUpdater) {
     $scope.modal = {};
     $scope.max_tickets = [];
     $scope.person_schedules = [];
@@ -29,6 +29,7 @@ var PersonAppointmentCtrl = function ($scope, $http, RefBook, WMAppointmentDialo
         if (index != $scope.page) {
             $scope.page = index;
             $scope.loadData();
+            $scope.update_sched_in_person_tree($scope.pages[$scope.page]);
         }
     };
 
@@ -57,6 +58,14 @@ var PersonAppointmentCtrl = function ($scope, $http, RefBook, WMAppointmentDialo
         $scope.page = chosen_page;
         $scope.pages = pages;
         $scope.loadData();
+        $scope.update_sched_in_person_tree($scope.pages[$scope.page]);
+    };
+
+    $scope.update_sched_in_person_tree = function (start_date) {
+        PersonTreeUpdater.set_schedule_period(
+            start_date.clone().toDate(),
+            start_date.clone().add(6, 'd').endOf('day').toDate()
+        );
     };
 
     $scope.changeReceptionType = function (code) {
@@ -180,4 +189,4 @@ var PersonAppointmentCtrl = function ($scope, $http, RefBook, WMAppointmentDialo
 
     $scope.monthChanged();
 };
-WebMis20.controller('PersonAppointmentCtrl', ['$scope', '$http' , 'RefBook', 'WMAppointmentDialog', PersonAppointmentCtrl]);
+WebMis20.controller('PersonAppointmentCtrl', ['$scope', '$http' , 'RefBook', 'WMAppointmentDialog', 'PersonTreeUpdater', PersonAppointmentCtrl]);

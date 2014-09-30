@@ -82,7 +82,7 @@ class ScheduleVisualizer(object):
                 'id': speciality.id,
                 'name': speciality.name
             } if speciality else None,
-            'office': office if office else person.office
+            'office': office if office else None
         }
 
     def make_schedule(self, schedules, date_start, date_end):
@@ -219,7 +219,8 @@ class ScheduleVisualizer(object):
             sub_scheds.append(sub_sched)
         return {
             'scheds': sub_scheds if not roa else [],
-            'info': info,
+            'info': info,  # суммарная информация о плане, cito, extra по типам приема amb и home на день
+                           # в интерфейсе на клиентской стороне не используется
             'busy': busy,
             'roa': roa
         }
