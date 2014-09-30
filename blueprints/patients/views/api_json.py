@@ -84,12 +84,10 @@ def api_patient_appointments():
         return abort(404)
     context = ClientVisualizer()
     if client_id:
-        client = Client.query.get(client_id)
-        if not client:
+        if Client.query.filter(Client.id == client_id).count():
+            return jsonify(context.make_appointments(client_id, every))
+        else:
             return abort(404)
-        return jsonify(
-            context.make_appointments(client, every)
-        )
     return jsonify(None, 400, 'Can\'t!')
 
 
