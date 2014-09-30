@@ -82,7 +82,6 @@ def api_event_new_get():
     event.client = Client.query.get(client_id)
     event.setDate = setDate
     event.note = note
-    db.session.add(event)
     v = EventVisualizer()
     return jsonify({
         'event': v.make_event(event),
