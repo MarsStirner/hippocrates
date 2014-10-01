@@ -42,7 +42,7 @@ angular.module('WebMis20.ActionLayout', ['WebMis20.validators', 'WebMis20.direct
                                 inner_template = '<input class="form-control" type="number" ng-model="{0}.value" valid-number valid-number-negative>';
                                 break;
                             case 'Double':
-                                inner_template = '<input class="form-control" type="number" ng-model="{0}.value" valid-number valid-number-negative valid-number-float>';
+                                inner_template = '<input class="form-control" type="text" ng-model="{0}.value" valid-number valid-number-negative valid-number-float>';
                                 break;
                             case 'Time':
                                 inner_template = '<div fs-time ng-model="{0}.value"></div>';

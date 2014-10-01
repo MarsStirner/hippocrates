@@ -350,7 +350,7 @@ angular.module('WebMis20.directives.wysiwyg', ['WebMis20.directives.goodies'])
     $templateCache.put('/WebMis20/wysiwyg-toolbar.html',
         '<div class="btn-toolbar" data-role="editor-toolbar" data-target="#editor">\
             <div class="btn-group">\
-                <a class="btn" wysiwyg-open-thesaurus="thesaurusCode" ng-if="thesaurusCode"><i class="fa fa-list-alt"></i></a>\
+                <a class="btn" wysiwyg-open-thesaurus="thesaurusCode" ng-if="thesaurusCode"><i class="fa">Тезаурус <i class="fa fa-list-alt"></i></i></a>\
             </div>\
             <div class="btn-group">\
                 <a class="btn dropdown-toggle" data-toggle="dropdown" title="Font"><i class="fa fa-font"></i><b class="caret"></b></a>\
