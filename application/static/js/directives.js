@@ -1078,71 +1078,99 @@ angular.module('WebMis20.validators', [])
     }
 }])
 .directive('validNumber', function() {
-  return {
-    require: '?ngModel',
-    link: function(scope, element, attrs, ngModelCtrl) {
-      if(!ngModelCtrl) {
-        return;
-      }
-      var allowFloat = attrs.hasOwnProperty('validNumberFloat');
-      var allowNegative = attrs.hasOwnProperty('validNumberNegative');
-      var regex = new RegExp('[^0-9' + (allowFloat?'\\.':'') + (allowNegative?'-':'') + ']+', 'g');
+    return {
+        require: '?ngModel',
+        link: function (scope, element, attrs, ngModelCtrl) {
+            if (!ngModelCtrl) {
+                return;
+            }
+            var allowFloat = attrs.hasOwnProperty('validNumberFloat');
+            var allowNegative = attrs.hasOwnProperty('validNumberNegative');
+            var regex = new RegExp('[^0-9' + (allowFloat ? '.' : '') + (allowNegative ? '-' : '') + ']+', 'g');
 
-      var min_val,
-          max_val;
-      scope.$watch(function () {
-          return parseInt(scope.$eval(attrs.minVal));
-      }, function (n, o) {
-          min_val = n;
-      });
-      scope.$watch(function () {
-          return parseInt(scope.$eval(attrs.maxVal));
-      }, function (n, o) {
-          max_val = n;
-      });
+            var min_val,
+                max_val,
+                precision = 0;
+            scope.$watch(function () {
+                return parseInt(scope.$eval(attrs.minVal));
+            }, function (n, o) {
+                min_val = n;
+            });
+            scope.$watch(function () {
+                return parseInt(scope.$eval(attrs.maxVal));
+            }, function (n, o) {
+                max_val = n;
+            });
 
-      function clear_char_duplicates(string, char){
-        var arr = string.split(char);
-        var res;
-        if (arr.length > 1){
-            res = arr.shift();
-            res += char + arr.shift();
-            res += arr.join('');
-        }else{
-            res = arr[0];
-        }
-          return res;
-      }
-      ngModelCtrl.$parsers.push(function(val) {
-          if (angular.isNumber(val)) {
-              return val;
-          }
-        var clean = clear_char_duplicates(val.replace(regex, ''), '.');
-        clean = clean !== '' ? parseFloat(clean) : min_val;
-        if (!isNaN(min_val)) {
-            clean = Math.min(Math.max(clean, min_val), max_val);
-        }
-        if (val !== clean) {
-          ngModelCtrl.$setViewValue(clean);
-          ngModelCtrl.$render();
-        }
-        return clean;
-      });
+            function clear_char_duplicates(string, char) {
+                var arr = string.split(char);
+                var res;
+                if (arr.length > 1) {
+                    res = arr.shift();
+                    res += char + arr.shift();
+                    res += arr.join('');
+                } else {
+                    res = arr[0];
+                }
+                return res;
+            }
 
-      element.bind('keypress', function(event) {
-        if(event.keyCode === 32) {
-          event.preventDefault();
-        }
-      });
+            function format_view_value(val, clean_val) {
+                if (allowFloat) {
+                    return (val.endswith('.') &&  val.indexOf('.') === val.length - 1) ?
+                        (clean_val + '.') :
+                        clean_val.toFixed(precision);
+                } else {
+                    return clean_val;
+                }
+            }
 
-      element.bind('blur', function(event) {
-          var value = parseFloat(this.value);
-          if (isNaN(value)) {
-              this.value = null;
-          } else {
-              this.value = value;
-          }
-      });
-    }
-  };
+            function calc_precision(val) {
+                if (allowFloat){
+                    var precision = val.length -
+                        (val.indexOf('.') !== -1 ? val.indexOf('.') : val.length) -
+                        (val.endswith('.') ? 0 : 1);
+                    precision = Math.min(Math.max(precision, 0), 20);
+                    return precision;
+                } else {
+                    return 0;
+                }
+            }
+
+            ngModelCtrl.$parsers.push(function (val) {
+                if (angular.isNumber(val)) {
+                    return val;
+                }
+                var clean = clear_char_duplicates(val.replace(regex, ''), '.');
+                precision = calc_precision(clean);
+                clean = clean !== '' ? parseFloat(clean) : min_val;
+                if (!isNaN(min_val)) {
+                    clean = Math.max(clean, min_val);
+                }
+                if (!isNaN(max_val)) {
+                    clean = Math.min(clean, max_val);
+                }
+                if (val !== clean) {
+                    ngModelCtrl.$viewValue = format_view_value(val, clean);
+                    ngModelCtrl.$render();
+                }
+                return clean;
+            });
+
+            element.bind('keypress', function (event) {
+                if (event.keyCode === 32) {
+                    event.preventDefault();
+                }
+            });
+
+            element.bind('blur', function (event) {
+                var value = parseFloat(this.value);
+                if (isNaN(value)) {
+                    this.value = null;
+                } else {
+                    this.value = value;
+                }
+            });
+        }
+    };
 });
