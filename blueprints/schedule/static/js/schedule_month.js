@@ -220,6 +220,12 @@ var ScheduleMonthCtrl = function ($scope, $http, $modal, RefBook, PersonTreeUpda
             $scope.editing = false;
             $scope.selected_days = [];
             make_schedule(data);
+        }).error(function (response) {
+            var msg = 'Ошибка сохранения расписания';
+            if (response.meta && response.meta.name) {
+                msg = '{0}: "{1}".'.format(msg, response.meta.name);
+            }
+            alert(msg);
         });
     };
 

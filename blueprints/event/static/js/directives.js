@@ -95,7 +95,7 @@ angular.module('WebMis20.directives').
                 },
                 template:
 '<td class="sg-expander" ng-click="expanded = !expanded"><span class="glyphicon glyphicon-chevron-[[expanded ? \'down\' : \'right\']]"></span></td>\
-<td ng-bind="service.at_code"></td>\
+<td ng-bind="service.ct_code"></td>\
 <td>\
     [[service.service_name]]\
     <a href="javascript:;" class="btn btn-link nomarpad" ng-click="open_assignments()" ng-if="service.is_lab"\
@@ -217,7 +217,7 @@ angular.module('WebMis20.directives').
                 },
                 template:
 '<td></td>\
-<td ng-bind="service.at_code"></td>\
+<td ng-bind="service.ct_code"></td>\
 <td>\
     [[service.service_name]]\
     <a  href="javascript:;" class="btn btn-link nomarpad" ng-click="open_assignments()" ng-if="service.is_lab"\

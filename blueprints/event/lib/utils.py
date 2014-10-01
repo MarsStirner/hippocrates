@@ -102,8 +102,12 @@ def create_or_update_local_contract(event, lc_info):
     reg_address = lc_info.get('reg_address', '')
     org_id = safe_traverse(lc_info, 'payer_org', 'id')
     if event.id:
-        if event.localContract_id and event.localContract_id == lc_id:
-            if lc_info.get('shared_in_events') and _check_shared_local_contract_changes(lc_info):
+        if not event.localContract_id:
+            lc = get_local_contract_for_new_event(lc_info)
+        else:
+            if not lc_id or (
+                lc_id and lc_info.get('shared_in_events') and _check_shared_local_contract_changes(lc_info)
+            ):
                 lc = create_new_local_contract(lc_info)
             else:
                 lc = EventLocalContract.query.get(lc_id)
@@ -117,10 +121,6 @@ def create_or_update_local_contract(event, lc_info):
                 lc.number = doc_number
                 lc.regAddress = reg_address
                 lc.org_id = org_id
-        elif not event.localContract_id:
-            lc = get_local_contract_for_new_event(lc_info)
-        else:
-            raise EventSaveException(u'Ошибка сохранения обращения', u'Ошибка сохранения договора')
     else:
         lc = get_local_contract_for_new_event(lc_info)
     return lc
