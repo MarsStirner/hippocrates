@@ -14,6 +14,7 @@ angular.module('WebMis20.services').
                     var service_data = angular.extend(
                             service_group,
                             {
+                                ct_code: service_group.at_code,
                                 amount: 1,
                                 sum: service_group.price,
                                 actions: [undefined]
