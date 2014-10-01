@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
-import json
 
 from application.systemwide import db
-from application.models.exists import Person
+from application.models.exists import Person, vrbPersonWithSpeciality
 from flask.ext.login import UserMixin, AnonymousUserMixin
 import hashlib
 
@@ -33,6 +32,7 @@ class User(UserMixin):
             orgStructure = orgStructure.parent if orgStructure.inheritActionTypes else None
         self.action_type_org_structures = atos
         self.action_type_personally = []
+        self.info = vrbPersonWithSpeciality.query.get(self.id)
 
     @property
     def current_role(self):
@@ -97,7 +97,7 @@ class User(UserMixin):
             'rights': self.rights,
             'action_type_org_structures': sorted(getattr(self, 'action_type_org_structures', set())),
             'action_type_personally': sorted(getattr(self, 'action_type_personally', [])),
-            'info': json.loads(self.info)
+            'info': getattr(self, 'info', {})
         }
 
 

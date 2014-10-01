@@ -244,10 +244,12 @@ def safe_dict(obj):
     if obj is None:
         return None
     elif isinstance(obj, dict):
+        for k, v in obj.iteritems():
+            obj[k] = safe_dict(v)
         return obj
-    elif not hasattr(obj, '__json__'):
-        return None
-    return obj.__json__()
+    elif hasattr(obj, '__json__'):
+        return safe_dict(obj.__json__())
+    return obj
 
 
 def string_to_datetime(date_string, formats=None):
