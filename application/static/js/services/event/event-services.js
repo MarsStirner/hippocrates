@@ -125,7 +125,7 @@ angular.module('WebMis20.services').
                             "client_id": null
                         },
                         "character": null,
-                        "person": null,
+                        "person": current_user.info,
                         "notes": null,
                         "action_id": null,
                         "result": null,

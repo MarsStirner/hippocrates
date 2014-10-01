@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import json
+
 from application.systemwide import db
 from application.models.exists import Person
 from flask.ext.login import UserMixin, AnonymousUserMixin
@@ -95,6 +97,7 @@ class User(UserMixin):
             'rights': self.rights,
             'action_type_org_structures': sorted(getattr(self, 'action_type_org_structures', set())),
             'action_type_personally': sorted(getattr(self, 'action_type_personally', [])),
+            'info': json.loads(self.info)
         }
 
 

@@ -104,7 +104,7 @@ angular.module('WebMis20.directives')
             require: 'ngModel',
             link: function (scope, element, attrs) {
                 var template = '\
-    <ui-select {0} {1} theme="select2" class="form-control" autocomplete="off" ref-book="Person" ng-model="{2}" {3}>\
+    <ui-select {0} {1} theme="select2" class="form-control" autocomplete="off" ref-book="vrbPersonWithSpeciality" ng-model="{2}" {3}>\
         <ui-select-match placeholder="не выбрано">[[ $select.selected.name ]][[$select.selected.name ? ", ": null]][[ $select.selected.speciality.name ]]</ui-select-match>\
         <ui-select-choices repeat="item in $refBook.objects | filter: $select.search | limitTo: 50">\
             <span ng-bind-html="(item.name + \', \' + item.speciality.name) | highlight: $select.search"></span>\

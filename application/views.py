@@ -1,6 +1,7 @@
 # -*- encoding: utf-8 -*-
 
 import requests
+import json
 
 from flask import render_template, abort, request, redirect, url_for, flash, session, current_app
 from flask.ext.principal import Identity, AnonymousIdentity, identity_changed
@@ -10,8 +11,9 @@ from flask.ext.login import login_user, logout_user, login_required, current_use
 from application.app import app, db, login_manager, cache
 from application.context_processors import *
 from application.lib.data import get_kladr_city, get_kladr_street
-from application.models.exists import rbPrintTemplate
-from application.lib.utils import public_endpoint, jsonify, roles_require, rights_require, request_wants_json
+from application.models.exists import rbPrintTemplate, vrbPersonWithSpeciality
+from application.lib.utils import public_endpoint, jsonify, roles_require, rights_require, request_wants_json, \
+    WebMisJsonEncoder
 from application.models import *
 from lib.user import UserAuth, AnonymousUser
 from forms import LoginForm, RoleForm
@@ -51,6 +53,7 @@ def login():
         if user:
             # Keep the user info in the session using Flask-Login
             user.current_role = request.form['role']
+            user.info = json.dumps(vrbPersonWithSpeciality.query.get(user.id), cls=WebMisJsonEncoder)
             if login_user(user):
                 session_save_user(user)
                 # Tell Flask-Principal the identity changed
