@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import datetime
+import calendar
 from application.lib.agesex import calcAgeTuple, formatDays, formatMonthsWeeks, formatYearsMonths, formatYears
 from application.lib.const import ID_DOC_GROUP_CODE, VOL_POLICY_CODES, COMP_POLICY_CODES
 from application.models.utils import safe_current_user_id
@@ -172,7 +173,8 @@ class Client(db.Model):
             return formatYearsMonths(years, months-12*years)
         elif months > 1:
             add_year, new_month = divmod(bd.month + months, 12)
-            fmonth_date = bd.replace(month=new_month, year=bd.year+add_year)
+            new_day = min(bd.day, calendar.monthrange(bd.year+add_year, new_month)[1])
+            fmonth_date = datetime.date(bd.year+add_year, new_month, new_day)
             return formatMonthsWeeks(months, (date-fmonth_date).days/7)
         else:
             return formatDays(days)
