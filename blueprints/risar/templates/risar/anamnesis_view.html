@@ -4,9 +4,13 @@
 
 {% block main %}
     <div ng-controller="AnamnesisCtrl" ng-cloak>
+    <ul class="breadcrumb">
+        <li><a href="{{ url_for('.index_html') }}">Рабочий стол</a></li>
+        <li><a ng-href="{{ url_for('.html_chart') }}?event_id=[[ anamnesis.event.id ]]">Карта пациентки</a></li>
+        <li>Анамнез пациентки</li>
+    </ul>
         <div class="col-md-12">
             <h2>
-                <a ng-href="{{ url_for('.html_chart') }}?event_id=[[ anamnesis.event.id ]]">Карта пациентки</a>
                 <a ng-href="{{ url_for('patients.patient') }}?client_id=[[ anamnesis.event.client.id ]]">[[ anamnesis.event.client.full_name ]]</a>
                 ([[ anamnesis.event.external_id ]])
             </h2>
@@ -15,7 +19,7 @@
             с <b>[[ anamnesis.event.set_date | asDate ]]</b>
         </div>
         <tabset justified="true">
-            <tab heading="Сведения о матери и об отце" ng-controller="MotherFatherCtrl">
+            <tab heading="Сведения о матери и об отце" active="tabs.motherfather" ng-controller="MotherFatherCtrl">
                 <p>
                     Менструации с [[ anamnesis.mother.menstruation_start_age ]] лет,
                     длительность [[ anamnesis.mother.menstruation_duration ]] дней,
@@ -33,14 +37,14 @@
                     <thead>
                     <tr>
                         <th class="col-md-2">Критерий</th>
-                        <th class="col-md-5">Мать</th>
-                        <th class="col-md-5">Отец</th>
+                        <th class="col-md-5 text-center"><i class="fa fa-female gender-icon-padding gender-icon-female"></i>Мать</th>
+                        <th class="col-md-5 text-center"><i class="fa fa-male gender-icon-padding gender-icon-male"></i>Отец</th>
                     </tr>
                     </thead>
                     <tbody>
                     <tr ng-repeat="criterion in criterions_order" ng-class="{'bg-danger': warnings[criterion]}">
                         <td>
-                            [[ criterion_names[criterion] ]]
+                            <span ng-class="{'small-left-margin': indented.has(criterion)}">[[ criterion_names[criterion] ]]</span>
                             <div ng-if="warnings[criterion]" ng-bind="warnings[criterion]" class="text-danger"></div>
                         </td>
                         <td ng-bind="anamnesis.mother[criterion]"></td>
@@ -49,7 +53,7 @@
                     </tbody>
                 </table>
             </tab>
-            <tab heading="Сведения о предыдущих беременностях" ng-controller="PregnanciesCtrl">
+            <tab heading="Сведения о предыдущих беременностях" active="tabs.pregnancies" ng-controller="PregnanciesCtrl">
                 <table class="table">
                     <thead>
                     <tr>
@@ -81,7 +85,7 @@
                     </tbody>
                 </table>
             </tab>
-            <tab heading="Сведения о переливаниях крови" ng-controller="TransfusionsCtrl">
+            <tab heading="Сведения о переливаниях крови" active="tabs.transfusions" ng-controller="TransfusionsCtrl">
                 <table class="table">
                     <thead>
                     <tr>
@@ -113,6 +117,7 @@
                     </tbody>
                 </table>
             </tab>
+            <tab heading="Сведения об аллергиях" active="tabs.allergies"></tab>
         </tabset>
     </div>
 {% endblock %}

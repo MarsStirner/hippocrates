@@ -2,28 +2,27 @@
     <h3 class="modal-title">Переливания крови</h3>
 </div>
 <div class="modal-body">
-    <table class="table table-condensed">
-        <tbody>
-        <tr>
-            <td>Дата и время:</td>
-            <td><div fs-datetime fs-date-format="dd.MM.yyyy" ng-model="model.datetime"></div></td>
-        </tr>
-        <tr>
-            <td>Наименование</td>
-            <td><rb-select ref-book="rbBloodTransfusionType" ng-model="model.type" /></td>
-        </tr>
-        <tr>
-            <td>Группа крови донора</td>
-            <td><rb-select ref-book="rbBloodType" ng-model="model.blood_type" /></td>
-        </tr>
-        <tr>
-            <td>Реакция</td>
-            <td><input class="form-control" type="text" ng-model="model.reaction" /></td>
-        </tr>
-        </tbody>
-    </table>
+    <div class="das-form">
+        <div class="row">
+            <div class="col-md-4">Дата и время:</div>
+            <div class="col-md-6"><div fs-datetime ng-model="model.datetime" class="col-md-6"></div></div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">Наименование</div>
+            <div class="col-md-8"><rb-select ref-book="rbBloodTransfusionType" ng-model="model.type" /></div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">Группа крови донора</div>
+            <div class="col-md-8"><rb-select ref-book="rbBloodType" ng-model="model.blood_type" /></div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">Реакция</div>
+            <div class="col-md-8"><input class="form-control" type="text" ng-model="model.reaction" /></div>
+        </div>
+    </div>
 </div>
 <div class="modal-footer">
-    <button class="btn btn-success" ng-click="$close(model)">Сохронить</button>
+    <label><input type="checkbox" class="checkbox checkbox-inline" ng-model="restart">Добавить ещё одно сведение</label>
+    <button class="btn btn-success" ng-click="$close([model, restart])">Сохранить</button>
     <a class="pseudo-btn" ng-click="$dismiss()">Отменить</a>
 </div>

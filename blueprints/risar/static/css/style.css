@@ -9,3 +9,28 @@
 h2 { /* Fix me if you don't like me */
     margin-top: 0;
 }
+
+.gender-icon-padding {
+    padding-right: 10px;
+}
+
+.gender-icon-female {
+    color: hotpink;
+}
+
+.gender-icon-male {
+    color: royalblue;
+}
+
+div.das-form > .row {
+    min-height: 34px;
+    padding-bottom: 10px;
+}
+
+.custom-4-digit-shit {
+    width: 4em;
+}
+
+.small-left-margin {
+    margin-left: 20px;
+}

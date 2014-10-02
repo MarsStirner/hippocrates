@@ -6,8 +6,21 @@
 
 var AnamnesisCtrl = function ($scope, RisarApi) {
     $scope.hooks = [];
+    var tabs = $scope.tabs = {
+        motherfather: true,
+        pregnancies: false,
+        transfusions: false,
+        allergies: false
+    };
 
     var params = aux.getQueryParams(window.location.search);
+    var hash = window.location.hash;
+    if (hash.length > 1) {
+        hash = hash.substr(1);
+        if (_(tabs).keys().has(hash)) {
+            tabs[hash] = true
+        }
+    }
     var event_id = params.event_id;
     var reload_anamnesis = function () {
         RisarApi.anamnesis(event_id)
@@ -22,30 +35,35 @@ var AnamnesisCtrl = function ($scope, RisarApi) {
 
 var MotherFatherCtrl = function ($scope) {
     $scope.criterions_order = ['education', 'work_group', 'professional_properties', 'infertility',
-        'infertility_period', 'infertility_cause', 'blood_type', 'rh', 'finished_diseases', 'current_diseases',
-        'hereditary', 'alcohol', 'smoking', 'toxic', 'drugs'];
+        'infertility_period', 'infertility_treatment', 'infertility_cause', 'blood_type', 'finished_diseases', 'current_diseases',
+        'hereditary', 'bad_habits', 'alcohol', 'smoking', 'toxic', 'drugs'];
     var criterion_names = $scope.criterion_names = {
         'education': 'Образование',
         'work_group': 'Общественно-профессиональная группа',
-        'professional_properties': 'Профессиональные и экологические особенности',
+        'professional_properties': 'Профессиональные и экологические вредности',
         'infertility': 'Бесплодие',
-        'infertility_period': 'Длительность бесплодия',
-        'infertility_cause': 'Причина бесплодия',
-        'blood_type': 'Тип крови',
-        'rh': 'Резус-фактор',
+        'infertility_period': 'Длительность',
+        'infertility_cause': 'Причина',
+        'infertility_treatment': 'Лечение',
+        'blood_type': 'Тип крови и резус-фактор',
         'finished_diseases': 'Перенесенные заболевания',
         'current_diseases': 'Текущие заболевания',
         'hereditary': 'Наследственность',
+        'bad_habits': 'Вредные привычки',
         'alcohol': 'Алкоголь',
         'smoking': 'Курение',
         'toxic': 'Токсичные вещества',
         'drugs': 'Наркотики'
     };
+    $scope.indented = ['infertility_period', 'infertility_treatment', 'infertility_cause', 'alcohol', 'smoking', 'toxic', 'drugs'];
     var reload_hook = function (anamnesis) {
         $scope.warnings = {};
         _(criterion_names).keys().forEach(function (key) {
-            if (key == 'rh') {
-                $scope.warnings[key] = 'Несовместимый резус-фактор';
+            if (key == 'blood_type') {
+                $scope.warnings[key] = {
+                    title: 'Несовместимый резус-фактор'
+
+                };
             } else {
                 $scope.warnings[key] = undefined;
             }
@@ -54,19 +72,25 @@ var MotherFatherCtrl = function ($scope) {
     $scope.hooks.push(reload_hook)
 };
 
-var PregnanciesCtrl = function ($scope, $modal) {
+var PregnanciesCtrl = function ($scope, $modal, $timeout) {
     $scope.add = function () {
         var model = {
             alive: true
         };
-        open_edit(model).result.then(function (result) {
-            $scope.anamnesis.pregnancies.push(result)
+        open_edit(model).result.then(function ([result, restart]) {
+            $scope.anamnesis.pregnancies.push(result);
+            if (restart) {
+                $timeout($scope.add)
+            }
         })
     };
     $scope.edit = function (p) {
         var model = angular.extend({}, p);
-        open_edit(model).result.then(function (result) {
+        open_edit(model).result.then(function ([result, restart]) {
             angular.extend(p, result);
+            if (restart) {
+                $timeout($scope.add)
+            }
         });
     };
     $scope.remove = function (p) {
@@ -89,17 +113,23 @@ var PregnanciesCtrl = function ($scope, $modal) {
     };
 };
 
-var TransfusionsCtrl = function ($scope, $modal) {
+var TransfusionsCtrl = function ($scope, $modal, $timeout) {
     $scope.add = function () {
         var model = {};
-        open_edit(model).result.then(function (result) {
-            $scope.anamnesis.transfusions.push(result)
+        open_edit(model).result.then(function ([result, restart]) {
+            $scope.anamnesis.transfusions.push(result);
+            if (restart) {
+                $timeout($scope.add)
+            }
         })
     };
     $scope.edit = function (p) {
         var model = angular.extend({}, p);
-        open_edit(model).result.then(function (result) {
+        open_edit(model).result.then(function ([result, restart]) {
             angular.extend(p, result);
+            if (restart) {
+                $timeout($scope.add)
+            }
         });
     };
     $scope.remove = function (p) {

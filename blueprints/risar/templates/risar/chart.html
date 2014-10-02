@@ -4,6 +4,10 @@
 
 {% block main %}
     <div ng-controller="ChartCtrl" ng-cloak>
+        <ul class="breadcrumb">
+            <li><a href="{{ url_for('.index_html') }}">Рабочий стол</a></li>
+            <li>Карта пациентки</li>
+        </ul>
         <div class="row">
             <div class="col-lg-8 col-md-8">
                 <h2>
@@ -49,16 +53,19 @@
                     <table class="table table-condensed">
                         <tbody>
                         <tr>
-                            <td><a ng-href="#">Мать</a></td>
+                            <td><a ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ chart.id ]]#motherfather">Заполнить Сведения о матери</a></td>
                         </tr>
                         <tr>
-                            <td><a ng-href="#">Отец</a></td>
+                            <td><a ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ chart.id ]]#motherfather">Заполнить Сведения об отце</a></td>
                         </tr>
                         <tr>
-                            <td><a ng-href="#">Прошлые беременности</a></td>
+                            <td><a ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ chart.id ]]#pregnancies">Заполнить Сведения о предыдущих беременностях</a></td>
                         </tr>
                         <tr>
-                            <td><a ng-href="#">Переливания крови</a></td>
+                            <td><a ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ chart.id ]]#transfusions">Заполнить Сведения о переливаниях крови</a></td>
+                        </tr>
+                        <tr>
+                            <td><a ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ chart.id ]]#allergies">Заполнить сведения об аллергии</a></td>
                         </tr>
                         </tbody>
                     </table>
