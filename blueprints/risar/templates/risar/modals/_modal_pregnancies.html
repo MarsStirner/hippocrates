@@ -1,0 +1,41 @@
+<div class="modal-header">
+    <h3 class="modal-title">Сведения о беременности</h3>
+</div>
+<div class="modal-body">
+    <table class="table table-condensed">
+        <tbody>
+        <tr>
+            <td>№</td>
+            <td><input class="form-control validatable" type="text" ng-model="model.number" valid-number/></td>
+        </tr>
+        <tr>
+            <td>Год</td>
+            <td><input class="form-control validatable" type="text" ng-model="model.year" ui-mask="9999" validator-regexp="'^[12]\\d{3}$'"></td>
+        </tr>
+        <tr>
+            <td>Исход беременности</td>
+            <td><rb-select ref-book="rbPregnancyResult" ng-model="model.pregnancyResult" /></td>
+        </tr>
+        <tr>
+            <td>Ребёнок живой</td>
+            <td><input type="checkbox" class="checkbox" ng-model="model.alive"></td>
+        </tr>
+        <tr>
+            <td>Масса при рождении</td>
+            <td><input ng-disabled="!model.alive" class="form-control validatable" type="number" ng-model="model.weight" valid-number/></td>
+        </tr>
+        <tr>
+            <td>Причина смерти</td>
+            <td><input ng-disabled="model.alive" class="form-control" type="text" ng-model="model.cause_of_death" /></td>
+        </tr>
+        <tr>
+            <td>Особенности родов</td>
+            <td><input class="form-control" type="text" ng-model="model.note" /></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-success" ng-click="$close(model)">Сохронить</button>
+    <a class="pseudo-btn" ng-click="$dismiss()">Отменить</a>
+</div>

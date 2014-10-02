@@ -1,0 +1,29 @@
+<div class="modal-header">
+    <h3 class="modal-title">Переливания крови</h3>
+</div>
+<div class="modal-body">
+    <table class="table table-condensed">
+        <tbody>
+        <tr>
+            <td>Дата и время:</td>
+            <td><div fs-datetime fs-date-format="dd.MM.yyyy" ng-model="model.datetime"></div></td>
+        </tr>
+        <tr>
+            <td>Наименование</td>
+            <td><rb-select ref-book="rbBloodTransfusionType" ng-model="model.type" /></td>
+        </tr>
+        <tr>
+            <td>Группа крови донора</td>
+            <td><rb-select ref-book="rbBloodType" ng-model="model.blood_type" /></td>
+        </tr>
+        <tr>
+            <td>Реакция</td>
+            <td><input class="form-control" type="text" ng-model="model.reaction" /></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-success" ng-click="$close(model)">Сохронить</button>
+    <a class="pseudo-btn" ng-click="$dismiss()">Отменить</a>
+</div>

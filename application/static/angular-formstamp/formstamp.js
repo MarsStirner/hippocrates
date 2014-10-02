@@ -602,14 +602,15 @@ angular.module('formstamp', []).run(['$templateCache', function($templateCache) 
 }).call(this);
 
 (function() {
+  angular.module('formstamp').value('fsDateFormatValue', 'dd.MM.yyyy');
   angular.module('formstamp').directive('fsDateFormat', [
-    '$filter', function($filter) {
+    '$filter', 'fsDateFormatValue', function($filter, fsDateFormatValue) {
       return {
         restrict: 'A',
         require: 'ngModel',
         link: function(scope, element, attrs, ngModel) {
           ngModel.$formatters.push(function(value) {
-            return $filter('date')(value, 'MM/dd/yyyy');
+            return $filter('date')(value, fsDateFormatValue);
           });
           return ngModel.$parsers.unshift(function(value) {
             var date;

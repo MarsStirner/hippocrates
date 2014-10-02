@@ -672,3 +672,12 @@ ng-form {
 .table-bak td[rowspan] + td[rowspan], .table-bak th[rowspan] + th[rowspan] {
    border-right-width: medium;
 }
+
+a.pseudo-btn {
+    padding: 6px 12px;
+    cursor: pointer;
+    text-decoration: underline;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+}

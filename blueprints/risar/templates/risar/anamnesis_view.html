@@ -6,7 +6,7 @@
     <div ng-controller="AnamnesisCtrl" ng-cloak>
         <div class="col-md-12">
             <h2>
-                Карта пациентки
+                <a ng-href="{{ url_for('.html_chart') }}?event_id=[[ anamnesis.event.id ]]">Карта пациентки</a>
                 <a ng-href="{{ url_for('patients.patient') }}?client_id=[[ anamnesis.event.client.id ]]">[[ anamnesis.event.client.full_name ]]</a>
                 ([[ anamnesis.event.external_id ]])
             </h2>
@@ -15,7 +15,7 @@
             с <b>[[ anamnesis.event.set_date | asDate ]]</b>
         </div>
         <tabset justified="true">
-            <tab heading="Сведения о матери и об отце">
+            <tab heading="Сведения о матери и об отце" ng-controller="MotherFatherCtrl">
                 <p>
                     Менструации с [[ anamnesis.mother.menstruation_start_age ]] лет,
                     длительность [[ anamnesis.mother.menstruation_duration ]] дней,
@@ -38,56 +38,77 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr ng-repeat="criterion in ['education', 'work_group', 'professional_properties', 'infertility', 'infertility_period', 'infertility_cause', 'blood_type', 'rh', 'finished_diseases', 'current_diseases', 'hereditary', 'alcohol', 'smoking', 'toxic', 'drugs']">
-                        <td ng-bind="criterion_names[criterion]"></td>
+                    <tr ng-repeat="criterion in criterions_order" ng-class="{'bg-danger': warnings[criterion]}">
+                        <td>
+                            [[ criterion_names[criterion] ]]
+                            <div ng-if="warnings[criterion]" ng-bind="warnings[criterion]" class="text-danger"></div>
+                        </td>
                         <td ng-bind="anamnesis.mother[criterion]"></td>
                         <td ng-bind="anamnesis.father[criterion]"></td>
                     </tr>
                     </tbody>
                 </table>
             </tab>
-            <tab heading="Сведения о предыдущих беременностях">
+            <tab heading="Сведения о предыдущих беременностях" ng-controller="PregnanciesCtrl">
                 <table class="table">
                     <thead>
                     <tr>
                         <th>№</th>
                         <th>Исход беременности</th>
-                        <th>Срок гестации</th>
-                        <th>Пособия о перфайшш</th>
                         <th>Сведения о детях</th>
                         <th>Особенности</th>
+                        <th>&nbsp;</th>
                     </tr>
                     </thead>
                     <tbody>
                     <tr ng-repeat="p in anamnesis.pregnancies">
-                        <td ng-bind="p.number"></td>
-                        <td ng-bind="p.result"></td>
-                        <td ng-bind="p._01"></td>
-                        <td ng-bind="p._02"></td>
-                        <td ng-bind="p.info"></td>
-                        <td ng-bind="p.note"></td>
+                        <td ng-if="p.deleted" colspan="5" class="text-center">Удалено. <a ng-click="restore(p)" style="cursor: pointer">Восстановить</a>?</td>
+                        <td ng-if="!p.deleted" ng-bind="p.number"></td>
+                        <td ng-if="!p.deleted" ng-bind="p.result.name"></td>
+                        <td ng-if="!p.deleted">[[ (p.alive)?('живой'):('мёртвый') ]]; [[ (p.alive)?(p.weight):(p.cause_of_death) ]]</td>
+                        <td ng-if="!p.deleted" ng-bind="p.note"></td>
+                        <td ng-if="!p.deleted" class="col-md-1 nowrap">
+                            <a class="pseudo-btn" ng-click="edit(p)">Изменить</a>
+                            <button class="btn btn-danger" ng-click="remove(p)">Удалить</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">&nbsp;</td>
+                        <td>
+                            <a class="pseudo-btn" ng-click="add()">Добавить</a>
+                        </td>
                     </tr>
                     </tbody>
                 </table>
             </tab>
-            <tab heading="Сведения о переливаниях крови">
+            <tab heading="Сведения о переливаниях крови" ng-controller="TransfusionsCtrl">
                 <table class="table">
                     <thead>
                     <tr>
                         <th>Дата</th>
                         <th>Вид</th>
-                        <th>Группа крови</th>
-                        <th>Резус-фактор</th>
+                        <th>Группа крови, Резус-фактор</th>
                         <th>Реакция</th>
+                        <th>&nbsp;</th>
                     </tr>
                     </thead>
                     <tbody>
                     <tr ng-repeat="t in anamnesis.transfusions">
-                        <td ng-bind="t.date | asDate"></td>
-                        <td ng-bind="t.type"></td>
-                        <td ng-bind="t.blood_type"></td>
-                        <td ng-bind="t.rh"></td>
-                        <td ng-bind="t.reaction"></td>
+                        <td ng-if="t.deleted" colspan="6" class="text-center">Удалено. <a ng-click="restore(t)" style="cursor: pointer">Восстановить</a>?</td>
+                        <td ng-if="!t.deleted" ng-bind="t.datetime | asDateTime"></td>
+                        <td ng-if="!t.deleted" ng-bind="t.type"></td>
+                        <td ng-if="!t.deleted" ng-bind="t.blood_type.name"></td>
+                        <td ng-if="!t.deleted" ng-bind="t.reaction"></td>
+                        <td ng-if="!t.deleted" class="col-md-1 nowrap">
+                            <a class="pseudo-btn" ng-click="edit(t)">Изменить</a>
+                            <button class="btn btn-danger" ng-click="remove(t)">Удалить</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">&nbsp;</td>
+                        <td>
+                            <a class="pseudo-btn" ng-click="add()">Добавить</a>
+                        </td>
                     </tr>
                     </tbody>
                 </table>
@@ -100,4 +121,6 @@
     {{ super() }}
     <script src="{{ url_for('.static', filename='js/anamnesis.js', v=version) }}"></script>
     <script src="{{ url_for('.static', filename='js/risar.js', v=version) }}"></script>
+    <script type="text/ng-template" id="/WebMis20/RISAR/modal/pregnancies.html">{% include 'risar/modals/_modal_pregnancies.html' %}</script>
+    <script type="text/ng-template" id="/WebMis20/RISAR/modal/transfusions.html">{% include 'risar/modals/_modal_transfusions.html' %}</script>
 {% endblock %}
