@@ -132,10 +132,12 @@ def api_0_anamnesis(event_id=None):
         return jsonify(None, 404, 'Event not found')
     mother = Action.query.join(ActionType).filter(
         Action.event_id == event_id,
+        Action.deleted == 0,
         ActionType.flatCode == 'risar_mother_anamnesis'
     ).first()
     father = Action.query.join(ActionType).filter(
         Action.event_id == event_id,
+        Action.deleted == 0,
         ActionType.flatCode == 'risar_father_anamnesis'
     ).first()
     return jsonify({

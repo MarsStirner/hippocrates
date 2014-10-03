@@ -43,6 +43,14 @@ div.das-form > .row {
     margin-bottom: 5px;
 }
 
+table.table > tbody > tr > td, table.table > thead > tr > th {
+    padding-left: 15px;
+}
+
+ul.breadcrumbs {
+    margin-bottom: 5px;
+}
+
 /* RISAR Navbar */
 
 .navbar-inverse {

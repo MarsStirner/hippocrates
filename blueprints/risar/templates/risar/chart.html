@@ -15,9 +15,11 @@
                     <a ng-href="{{ url_for('patients.patient') }}?client_id=[[ chart.client.id ]]">[[ chart.client.full_name ]]</a>
                     ([[ chart.external_id ]])
                 </h2>
-                На учёте в <b>[[ chart.person.organisation.short_name ]]</b>
-                у <b>[[ chart.person.name ]]</b>
-                с <b>[[ chart.set_date | asDate ]]</b>
+                <span style="padding-left: 2px">
+                    На учёте в <b>[[ chart.person.organisation.short_name ]]</b>
+                    у <b>[[ chart.person.name ]]</b>
+                    с <b>[[ chart.set_date | asDate ]]</b>
+                </span>
             </div>
             <div class="col-md-2 achievements">
                 <i class="fa fa-exclamation-triangle text-danger"></i>
@@ -37,16 +39,16 @@
                     <table class="table table-condensed table-personal-data">
                         <tbody>
                         <tr>
-                            <th>Дата рождения:</th>
+                            <td>Дата рождения:</td>
                             <td>[[ chart.client.birth_date | asDate ]] ([[ chart.client.age ]])</td>
                         </tr>
                         <tr ng-if="chart.client.snils">
-                            <th>СНИЛС:</th>
+                            <td>СНИЛС:</td>
                             <td>[[ chart.client.snils ]]</td>
                         </tr>
                         <tr ng-if="chart.client.cmi_policy">
-                            <th>Полис ОМС:</th>
-                            <td>[[ chart.client.cmi_policy.insurer.short_name ]] <b>серия [[ chart.client.cmi_policy.serial ]] № [[ chart.client.cmi_policy.number ]]</b> от [[ chart.client.cmi_policy.beg_date | asDate ]]</td>
+                            <td>Полис ОМС:</td>
+                            <td>Номер [[ chart.client.cmi_policy.serial ]] [[ chart.client.cmi_policy.number ]], выдан [[ chart.client.cmi_policy.insurer.short_name ]] [[ chart.client.cmi_policy.beg_date | asDate ]]</td>
                         </tr>
                         </tbody>
                     </table>
@@ -57,19 +59,19 @@
                     <table class="table table-condensed">
                         <tbody>
                         <tr>
-                            <td><a ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ chart.id ]]#motherfather">Заполнить Сведения о матери</a></td>
+                            <td><a ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ chart.id ]]#motherfather">Ввести сведения о матери</a></td>
                         </tr>
                         <tr>
-                            <td><a ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ chart.id ]]#motherfather">Заполнить Сведения об отце</a></td>
+                            <td><a ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ chart.id ]]#motherfather">Ввести сведения об отце</a></td>
                         </tr>
                         <tr>
-                            <td><a ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ chart.id ]]#pregnancies">Заполнить Сведения о предыдущих беременностях</a></td>
+                            <td><a ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ chart.id ]]#pregnancies">Ввести сведения о прошлых беременностях</a></td>
                         </tr>
                         <tr>
-                            <td><a ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ chart.id ]]#transfusions">Заполнить Сведения о переливаниях крови</a></td>
+                            <td><a ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ chart.id ]]#transfusions">Ввести сведения о переливаниях крови</a></td>
                         </tr>
                         <tr>
-                            <td><a ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ chart.id ]]#allergies">Заполнить Сведения об аллергии</a></td>
+                            <td><a ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ chart.id ]]#allergies">Ввести сведения об аллергии</a></td>
                         </tr>
                         </tbody>
                     </table>
@@ -130,11 +132,11 @@
                         <tbody>
                         <tr>
                             <td>Экстренное</td>
-                            <td>Не определено</td>
+                            <td>"ПОДКБ "им. Филатова"</td>
                         </tr>
                         <tr>
                             <td>Плановое</td>
-                            <td>Не определено</td>
+                            <td>"Пензенский городской родильный дом № 1"</td>
                         </tr>
                         </tbody>
                     </table>
