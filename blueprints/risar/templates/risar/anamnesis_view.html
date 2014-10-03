@@ -9,14 +9,16 @@
         <li><a ng-href="{{ url_for('.html_chart') }}?event_id=[[ anamnesis.event.id ]]">Карта пациентки</a></li>
         <li>Анамнез пациентки</li>
     </ul>
+        <div class="row marginal">
         <div class="col-md-12">
             <h2>
                 <a ng-href="{{ url_for('patients.patient') }}?client_id=[[ anamnesis.event.client.id ]]">[[ anamnesis.event.client.full_name ]]</a>
                 ([[ anamnesis.event.external_id ]])
             </h2>
             На учёте в <b>[[ anamnesis.event.person.organisation.short_name ]]</b>
-            у <b>[[ anamnesis.event.person.name ]]</b>;
+            у <b>[[ anamnesis.event.person.name ]]</b>
             с <b>[[ anamnesis.event.set_date | asDate ]]</b>
+        </div>
         </div>
         <tabset justified="true">
             <tab heading="Сведения о матери и об отце" active="tabs.motherfather" ng-controller="MotherFatherCtrl">
