@@ -36,7 +36,11 @@ div.das-form > .row {
 }
 
 .achievements {
-    font-size: 24px;
+    font-size: 28px;
+}
+
+.small-marginal {
+    margin-bottom: 5px;
 }
 
 /* RISAR Navbar */

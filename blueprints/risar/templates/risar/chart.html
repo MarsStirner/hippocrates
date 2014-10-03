@@ -8,7 +8,7 @@
             <li><a href="{{ url_for('.index_html') }}">Рабочий стол</a></li>
             <li>Карта пациентки</li>
         </ul>
-        <div class="row marginal">
+        <div class="row small-marginal">
             <div class="col-lg-8 col-md-8">
                 <h2>
                     Карта пациентки
@@ -16,7 +16,7 @@
                     ([[ chart.external_id ]])
                 </h2>
                 На учёте в <b>[[ chart.person.organisation.short_name ]]</b>
-                у <b>[[ chart.person.name ]]</b>;
+                у <b>[[ chart.person.name ]]</b>
                 с <b>[[ chart.set_date | asDate ]]</b>
             </div>
             <div class="col-md-2 achievements">
