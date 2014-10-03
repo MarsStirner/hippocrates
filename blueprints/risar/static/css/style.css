@@ -54,7 +54,17 @@ ul.breadcrumbs {
 /* RISAR Navbar */
 
 .navbar-inverse {
-    background-color: rgb(90, 150, 110);
+    /*background: #5A966E; *//* Old browsers */
+    
+    background: #5A966E; /* Old browsers */
+    background: -moz-linear-gradient(top, #A5D663 0%, #83c783 0%, #52b152 0%, #5A966E 68%, #5A966E 100%, #002400 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#A5D663), color-stop(0%,#83c783), color-stop(0%,#52b152), color-stop(68%,#5A966E), color-stop(100%,#5A966E), color-stop(100%,#002400)); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top, #A5D663 0%,#83c783 0%,#52b152 0%,#5A966E 68%,#5A966E 100%,#002400 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top, #A5D663 0%,#83c783 0%,#52b152 0%,#5A966E 68%,#5A966E 100%,#002400 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top, #A5D663 0%,#83c783 0%,#52b152 0%,#5A966E 68%,#5A966E 100%,#002400 100%); /* IE10+ */
+    background: linear-gradient(to bottom, #A5D663 0%,#83c783 0%,#52b152 0%,#5A966E 68%,#5A966E 100%,#002400 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#A5D663', endColorstr='#002400',GradientType=0 ); /* IE6-9 */
+
     border-color: rgb(70, 130, 90);
 }
 .navbar-inverse .navbar-brand {
@@ -141,4 +151,9 @@ ul.breadcrumbs {
 }
 .navbar-inverse .navbar-link:hover {
     color: #fff;
+}
+.abs-alert{
+    position: absolute;
+    left: 40%;
+    top: -15px;
 }

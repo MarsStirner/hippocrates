@@ -5,6 +5,10 @@
 {% block main %}
     <div ng-controller="ChartCtrl" ng-cloak>
         <ul class="breadcrumb">
+            <div class="alert alert-success abs-alert alert-dismissable" role="alert">
+              <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+              Пациентка поставлена на учёт: <b>[[ chart.person.name ]]</b>. <a href="#">Изменить</a> <a href="#">Отменить</a>
+            </div>
             <li><a href="{{ url_for('.index_html') }}">Рабочий стол</a></li>
             <li>Карта пациентки</li>
         </ul>
@@ -15,11 +19,10 @@
                     <a ng-href="{{ url_for('patients.patient') }}?client_id=[[ chart.client.id ]]">[[ chart.client.full_name ]]</a>
                     ([[ chart.external_id ]])
                 </h2>
-                <span style="padding-left: 2px">
-                    На учёте в <b>[[ chart.person.organisation.short_name ]]</b>
-                    у <b>[[ chart.person.name ]]</b>
-                    с <b>[[ chart.set_date | asDate ]]</b>
-                </span>
+                <div class="breadcrumb alert-warning" style="margin-bottom: 5px">На учёте в <b>[[ chart.person.organisation.short_name ]]</b>
+                у <b>[[ chart.person.name ]]</b>
+                с <b>[[ chart.set_date | asDate ]]</b>
+                </div>
             </div>
             <div class="col-md-2 achievements">
                 <i class="fa fa-exclamation-triangle text-danger"></i>
@@ -148,7 +151,7 @@
                         <tr>
                             <td class="col-md-6">Лабораторные исследования:</td>
                             <td class="col-md-6">
-                                <progressbar class="progress-striped" value="chart.progress.lab.percent">
+                                <progressbar class="progress" value="chart.progress.lab.percent">
                                     [[ chart.progress.lab.complete ]]/[[ chart.progress.lab.total ]]
                                 </progressbar>
                             </td>
@@ -156,7 +159,7 @@
                         <tr>
                             <td>Функциональные исследования:</td>
                             <td>
-                                <progressbar class="progress-striped" value="chart.progress.func.percent">
+                                <progressbar class="progress" value="chart.progress.func.percent">
                                     [[ chart.progress.func.complete ]]/[[ chart.progress.func.total ]]
                                 </progressbar>
                             </td>
@@ -164,7 +167,7 @@
                         <tr>
                             <td>Осмотры:</td>
                             <td>
-                                <progressbar class="progress-striped" value="chart.progress.checkups.percent">
+                                <progressbar class="progress" value="chart.progress.checkups.percent">
                                     [[ chart.progress.checkups.complete ]]/[[ chart.progress.checkups.total ]]
                                 </progressbar>
                             </td>
