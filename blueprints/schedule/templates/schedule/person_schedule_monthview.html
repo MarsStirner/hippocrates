@@ -33,6 +33,18 @@
                     <button class="btn btn-primary" ng-click="select.none()">Снять</button>
                 </div>
                 <label ng-show="editing" for="weekendCheckBox"><input type="checkbox" id="weekendCheckBox" ng-model="weekends_selectable"> Выбирать выходные</label>
+
+                <div class="btn-group pull-right" dropdown ng-if="editing">
+                    <button type="button" class="btn btn-info" ng-click="copy_schedule_from_previous_month()">Копировать из предыдущего</button>
+                    <button type="button" class="btn btn-info dropdown-toggle">
+                        <span class="caret"></span><span class="sr-only">Выбрать месяц</span>
+                    </button>
+                    <ul class="dropdown-menu" role="menu">
+                        <li ng-repeat="m in prevMonthsInfo">
+                            <a href="javascript:;" ng-bind="m.name" ng-click="copy_schedule_from_previous_month(m.date)"></a>
+                        </li>
+                    </ul>
+                </div>
             </div>
             <div class="row">
                 <div class="col-md-12">

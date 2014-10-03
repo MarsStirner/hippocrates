@@ -126,6 +126,7 @@ var ScheduleMonthCtrl = function ($scope, $http, $modal, RefBook, PersonTreeUpda
     $scope.year = curYear;
 
     $scope.month = curDate.getMonth();
+    $scope.prevMonthsInfo = [];
 
     $scope.weekdays = ['Пн', "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
     $scope.week_data = [];
@@ -187,6 +188,14 @@ var ScheduleMonthCtrl = function ($scope, $http, $modal, RefBook, PersonTreeUpda
         $scope.quotas_by_week = quotas_result;
     };
 
+    function month_is_empty() {
+        return !($scope.schedules.some(function (schedule) {
+            return schedule.roa || schedule.scheds.length; // todo: || Object.keys(schedule.info).length
+        }) || $scope.quotas.some(function (quota) {
+            return quota.day_quotas.length;
+        }));
+    }
+
     $scope.monthChanged = function () {
         $scope.monthDate = moment({
             year: $scope.year,
@@ -194,10 +203,22 @@ var ScheduleMonthCtrl = function ($scope, $http, $modal, RefBook, PersonTreeUpda
             day: 1
         });
         $scope.reloadSchedule();
+        $scope.updatePreviousMonthsInfo();
         PersonTreeUpdater.set_schedule_period(
             $scope.monthDate.clone().toDate(),
             $scope.monthDate.clone().endOf('month').toDate()
         );
+    };
+
+    $scope.updatePreviousMonthsInfo = function () {
+        $scope.prevMonthsInfo = aux.range(2, 7).map(function (m_offset) {
+            var p_month = moment($scope.monthDate).subtract(m_offset, 'months'),
+                fmt = p_month.year() === $scope.monthDate.year() ? 'MMMM' : 'MMMM (YYYY)';
+            return {
+                date: p_month,
+                name: p_month.format(fmt)
+            };
+        });
     };
 
     $scope.start_editing = function () {
@@ -422,6 +443,32 @@ var ScheduleMonthCtrl = function ($scope, $http, $modal, RefBook, PersonTreeUpda
         })
     };
 
+    $scope.copy_schedule_from_previous_month = function (from_date) {
+        if (!month_is_empty()) {
+            return alert('На месяц уже заведено расписание или указано квотирование по времени. ' +
+                'Чтобы копировать расписание с предыдущего месяца удалите существующее расписание и информацию о квотах.');
+        }
+        if (from_date === undefined) {
+            from_date = $scope.monthDate.clone().subtract(1, 'months');
+        }
+        var from_start_date = from_date.clone().startOf('month'),
+            from_end_date = from_date.clone().endOf('month'),
+            to_start_date = $scope.monthDate.clone().startOf('month'),
+            to_end_date = $scope.monthDate.clone().endOf('month');
+
+        $http.get(
+            url_api_copy_schedule_description, {
+                params: {
+                    person_id: $scope.person_id,
+                    from_start_date: from_start_date.format('YYYY-MM-DD'),
+                    from_end_date: from_end_date.format('YYYY-MM-DD'),
+                    to_start_date: to_start_date.format('YYYY-MM-DD'),
+                    to_end_date: to_end_date.format('YYYY-MM-DD')
+                }
+            }
+        ).success(make_schedule);
+    };
+
     $scope.get_day_class = function (day, index) {
         var result = [];
         if ($scope.editing) {
@@ -478,6 +525,5 @@ var ScheduleMonthCtrl = function ($scope, $http, $modal, RefBook, PersonTreeUpda
                 '<nobr>' + '&nbsp;' + rt_text + '</nobr>'].join('');
         return text;
     };
-
 };
 WebMis20.controller('ScheduleMonthCtrl', ['$scope', '$http', '$modal', 'RefBook', 'PersonTreeUpdater', ScheduleMonthCtrl]);

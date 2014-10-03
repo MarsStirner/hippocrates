@@ -104,6 +104,23 @@ def api_schedule_description():
     return jsonify(context.make_person_schedule_description(person, start_date, end_date))
 
 
+@module.route('/api/copy_schedule_description.json', methods=['GET'])
+def api_copy_schedule_description():
+    person_id = parse_id(request.args, 'person_id')
+    if person_id is False:
+        return abort(400)
+    from_start_date = safe_date(request.args.get('from_start_date'))
+    from_end_date = safe_date(request.args.get('from_end_date'))
+    to_start_date = safe_date(request.args.get('to_start_date'))
+    to_end_date = safe_date(request.args.get('to_end_date'))
+    if not (from_start_date and from_end_date and to_start_date and to_end_date):
+        return abort(400)
+
+    context = ScheduleVisualizer()
+    person = Person.query.get(person_id)
+    return jsonify(context.make_copy_schedule_description(person, from_start_date, from_end_date, to_start_date, to_end_date))
+
+
 @module.route('/api/day_schedule.json', methods=['GET'])
 def api_day_schedule():
     person_id = parse_id(request.args, 'person_id')
