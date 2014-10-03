@@ -139,7 +139,7 @@ def represent_event(event):
     }
 
 common_codes = ['education', 'work_group', 'professional_properties', 'infertility', 'infertility_period', 'infertility_cause', 'blood_type', 'rh', 'finished_diseases', 'current_diseases', 'hereditary', 'alcohol', 'smoking', 'toxic', 'drugs']
-mother_codes = ['menstruation_start_age', 'menstruation_duration', 'menstruation_perion', 'menstruation_disorders', 'sex_life_start_age', 'contraception_type', 'natural_pregnancy', 'family_income'] + common_codes
+mother_codes = ['menstruation_start_age', 'menstruation_duration', 'menstruation_period', 'menstruation_disorders', 'sex_life_start_age', 'contraception_type', 'natural_pregnancy', 'family_income'] + common_codes
 father_codes = ['name'] + common_codes
 def represent_anamnesis_action(action, mother=False):
     """

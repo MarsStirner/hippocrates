@@ -25,18 +25,18 @@
         <tabset justified="true">
             <tab heading="Сведения о матери и об отце" active="tabs.motherfather" ng-controller="MotherFatherCtrl">
                 <p>
-                    Менструации с <b>[[ anamnesis.mother.menstruation_start_age ]] лет</b>,
-                    длительность <b>[[ anamnesis.mother.menstruation_duration ]] дней</b>,
-                    продолжительность цикла <b>[[ anamnesis.mother.menstruation_period ]] дней</b>,
+                    Менструации с <b ng-bind-html="anamnesis.mother.menstruation_start_age | underlineNoVal:'лет'"></b>,
+                    длительность <b ng-bind-html="anamnesis.mother.menstruation_duration | underlineNoVal:'дней'"></b>,
+                    продолжительность цикла <b ng-bind-html="anamnesis.mother.menstruation_period | underlineNoVal:'дней'"></b>,
                     нарушения <b>[[ anamnesis.mother.menstruation_disorders ]]</b>.
                 </p>
                 <p>
-                    Половая жизнь с <b>[[ anamnesis.mother.sex_life_start_age ]] лет</b>.
-                    Вид контрацепции: <b>[[ anamnesis.mother.contraception_type ]]</b>.
+                    Половая жизнь с <b ng-bind-html="anamnesis.mother.sex_life_start_age | underlineNoVal:'лет'"></b>.
+                    Вид контрацепции: <b ng-bind-html="anamnesis.mother.contraception_type | underlineNoVal"></b>.
                 </p>
-                <p>Беременность наступила естественным путём: <b>[[ anamnesis.mother.natural_pregnancy ]]</b>.</p>
-                <p>ФИО отца: <b>[[ anamnesis.father.name ]]</b></p>
-                <p>Доход семьи: <b>[[ anamnesis.mother.family_income ]]</b></p>
+                <p>Беременность наступила естественным путём: <b ng-bind-html="anamnesis.mother.natural_pregnancy | underlineNoVal"></b>.</p>
+                <p>ФИО отца: <b ng-bind-html="anamnesis.father.name | underlineNoVal"></b></p>
+                <p>Доход семьи: <b ng-bind-html="anamnesis.mother.family_income | underlineNoVal"></b></p>
                 <table class="table table-condensed">
                     <thead>
                     <tr>

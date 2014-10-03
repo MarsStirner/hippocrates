@@ -125,6 +125,7 @@ def api_0_chart_delete(event_id):
 @module.route('/api/0/anamnesis/<int:event_id>')
 def api_0_anamnesis(event_id=None):
     from application.models.actions import ActionType, Action
+    from application.models.client import BloodHistory
     if not event_id:
         return jsonify(None, 400, 'Event id must be provided')
     event = Event.query.get(event_id)
@@ -140,10 +141,20 @@ def api_0_anamnesis(event_id=None):
         Action.deleted == 0,
         ActionType.flatCode == 'risar_father_anamnesis'
     ).first()
+    represent_mother = represent_anamnesis_action(mother, True) if mother else None
+    represent_father = represent_anamnesis_action(father, False) if father else None
+    if represent_mother is not None:
+        mother_blood_type = BloodHistory.query\
+            .filter(BloodHistory.client_id == event.client_id)\
+            .order_by(BloodHistory.bloodDate.desc())\
+            .first()
+        if mother_blood_type:
+            represent_mother['blood_type'] = mother_blood_type.bloodType
+
     return jsonify({
         'event': represent_event(event),
-        'mother': represent_anamnesis_action(mother, True) if mother else None,
-        'father': represent_anamnesis_action(father, False) if father else None,
+        'mother': represent_mother,
+        'father': represent_father,
         'pregnancies': [],
         'transfusions': [],
     })

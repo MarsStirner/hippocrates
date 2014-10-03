@@ -51,6 +51,12 @@ ul.breadcrumbs {
     margin-bottom: 5px;
 }
 
+span.empty-value {
+    border-bottom: 1px solid #000000;
+    width: 24px;
+    display: inline-block;
+}
+
 /* RISAR Navbar */
 
 .navbar-inverse {

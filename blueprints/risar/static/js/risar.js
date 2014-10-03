@@ -55,4 +55,12 @@ WebMis20
         return defer.promise;
     }
 }])
+.filter('underlineNoVal', function () {
+    return function(value, label) {
+        if (value !== 0 && !value) {
+            return '<span class="empty-value"></span> ' + (label || '');
+        }
+        return value + ' ' + (label || '');
+    }
+})
 ;
