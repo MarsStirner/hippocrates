@@ -150,8 +150,8 @@ def represent_anamnesis_action(action, mother=False):
     :return:
     """
     codes = mother_codes if mother else father_codes
-    return {
+    return dict(
         (prop.type.code, prop.value)
         for prop in action.properties
         if prop.type.code in codes
-    }
+    )
