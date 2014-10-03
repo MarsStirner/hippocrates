@@ -157,3 +157,25 @@ ul.breadcrumbs {
     left: 40%;
     top: -15px;
 }
+.inline-datepicker{
+    display: inherit;
+    width: 100%;
+}
+.inline-datepicker input{
+    background-color: #fff;
+    background-image: none;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    display: inherit;
+    font-size: inherit;
+    height: inherit;
+    line-height: inherit;
+    padding: 0;
+    float: inherit !important;
+    cursor: pointer;
+    color: #428bca;
+}
+.inline-datepicker .input-group-btn{
+    display: none;
+}
