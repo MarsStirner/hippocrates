@@ -77,7 +77,9 @@ var PregnanciesCtrl = function ($scope, $modal, $timeout) {
         var model = {
             alive: true
         };
-        open_edit(model).result.then(function ([result, restart]) {
+        open_edit(model).result.then(function (rslt) {
+            var result = rslt[0],
+                restart = rslt[1];
             $scope.anamnesis.pregnancies.push(result);
             if (restart) {
                 $timeout($scope.add)
@@ -86,7 +88,9 @@ var PregnanciesCtrl = function ($scope, $modal, $timeout) {
     };
     $scope.edit = function (p) {
         var model = angular.extend({}, p);
-        open_edit(model).result.then(function ([result, restart]) {
+        open_edit(model).result.then(function (rslt) {
+            var result = rslt[0],
+                restart = rslt[1];
             angular.extend(p, result);
             if (restart) {
                 $timeout($scope.add)
@@ -116,7 +120,9 @@ var PregnanciesCtrl = function ($scope, $modal, $timeout) {
 var TransfusionsCtrl = function ($scope, $modal, $timeout) {
     $scope.add = function () {
         var model = {};
-        open_edit(model).result.then(function ([result, restart]) {
+        open_edit(model).result.then(function (rslt) {
+            var result = rslt[0],
+                restart = rslt[1];
             $scope.anamnesis.transfusions.push(result);
             if (restart) {
                 $timeout($scope.add)
@@ -125,7 +131,9 @@ var TransfusionsCtrl = function ($scope, $modal, $timeout) {
     };
     $scope.edit = function (p) {
         var model = angular.extend({}, p);
-        open_edit(model).result.then(function ([result, restart]) {
+        open_edit(model).result.then(function (rslt) {
+            var result = rslt[0],
+                restart = rslt[1];
             angular.extend(p, result);
             if (restart) {
                 $timeout($scope.add)
