@@ -12,7 +12,7 @@ from application.models.event import Event
 from application.systemwide import db, cache
 from application.lib.sphinx_search import SearchPerson
 from application.lib.utils import (jsonify, safe_traverse, parse_id, safe_date, safe_time_as_dt, safe_datetime,
-                                   safe_traverse_attrs)
+                                   safe_traverse_attrs, format_date)
 from application.lib.utils import public_endpoint
 from blueprints.schedule.app import module
 from blueprints.schedule.lib.data import delete_schedules
@@ -211,11 +211,17 @@ def api_schedule_description_post():
                 new_sched.endTimeAsDt = safe_time_as_dt(sub_sched['endTime'])
                 new_sched.endTime = new_sched.endTimeAsDt.time()
                 new_sched.receptionType_id = safe_traverse(sub_sched, 'reception_type', 'id')
-                new_sched.office_id = safe_traverse(sub_sched, 'office', 'id')
+                office_id = safe_traverse(sub_sched, 'office', 'id')
+                if not office_id and safe_traverse(sub_sched, 'reception_type', 'code') == 'amb':
+                    return jsonify({}, 422, u'На %s не указан кабинет' % format_date(date))
+                new_sched.office_id = office_id
                 new_sched.numTickets = sub_sched.get('planned', 0)
 
+                planned_count = sub_sched.get('planned')
+                if not planned_count:
+                    return jsonify({}, 422, u'На %s указаны интервалы с нулевым планом' % format_date(date))
                 make_tickets(new_sched,
-                             sub_sched.get('planned', 0),
+                             planned_count,
                              sub_sched.get('extra', 0),
                              sub_sched.get('CITO', 0))
 
