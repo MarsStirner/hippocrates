@@ -3,5 +3,11 @@ var PatientInfoCtrl = function ($scope, $http, WMClient, PrintingService, $inter
     $scope.client_id = $scope.params.client_id;
     $scope.client = new WMClient($scope.client_id);
     $scope.client.reload()
+    $scope.close_patient_info = function(){
+        if (window.opener){
+            window.opener.focus();
+            window.close();
+        }
+    }
 }
 WebMis20.controller('PatientInfoCtrl', ['$scope', '$http', 'WMClient', 'PrintingService', PatientInfoCtrl]);
