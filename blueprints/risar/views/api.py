@@ -87,23 +87,19 @@ def api_0_chart(event_id=None):
         'automagic': automagic
     })
 
-
-@module.route('/api/0/chart/<int:event_id>', methods=['DELETE'])
-def api_0_chart_delete(event_id):
+@module.route('/api/0/chart/ticket/', methods=['DELETE'])
+@module.route('/api/0/chart/ticket/<int:ticket_id>', methods=['DELETE'])
+def api_0_chart_delete(ticket_id):
     # TODO: Security
-    ticket_id = int(request.args.get('ticket_id', 0))
-    event = Event.query.get(event_id)
-    if not event:
-        return jsonify(None, 404, 'Event not found')
-    if event.deleted:
-        return jsonify(None, 400, 'Event already deleted')
     ticket = ScheduleClientTicket.query.get(ticket_id)
     if not ticket:
         return jsonify(None, 404, 'Ticket not found')
-    if ticket.event_id != event_id:
-        return jsonify(None, 400, 'Ticket not connected to event')
+    if not ticket.event:
+        return jsonify(None, 404, 'Event not found')
+    if ticket.event.deleted:
+        return jsonify(None, 400, 'Event already deleted')
+    ticket.event.deleted = 1
     ticket.event = None
-    event.deleted = 1
     db.session.commit()
     return jsonify(None)
 

@@ -160,7 +160,8 @@ span.empty-value {
 }
 .abs-alert{
     position: absolute;
-    left: 40%;
+    left: 30%;
+    right: 30%;
     top: -15px;
 }
 .inline-datepicker{
