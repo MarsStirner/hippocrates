@@ -525,6 +525,30 @@ def api_delete_action():
     })
 
 
+@module.route('api/delete_event.json', methods=['POST'])
+def api_delete_event():
+    event_id = request.json['event_id']
+
+    if event_id:
+        event = Event.query.get(event_id)
+        if (current_user.has_right('evtDelAll') or current_user.has_right('adm') or
+                (current_user.has_right('evtDelOwn') and event.execPerson_id == current_user.id)):
+            for action in event.actions:
+                action.deleted = 1
+            event.deleted = 1
+            db.session.add(event)
+            db.session.commit()
+            return jsonify({
+                'result': 'ok'
+            })
+        else:
+            return jsonify({'name': u"У пользователя нет прав на удаление обращения",
+                            'data': {
+                                'err_msg': 'INTERNAL SERVER ERROR'
+                            }},
+                           500, 'save event data error')
+
+
 @module.route('/api/events.json', methods=["POST"])
 def api_get_events():
     from application.models.event import Event

@@ -8,6 +8,7 @@ from flask.ext.login import current_user
 # noinspection PyUnresolvedReferences
 from . import api_json
 from application.lib.utils import breadcrumb
+from application.models.event import Event
 
 
 @module.route('/')
@@ -22,9 +23,10 @@ def index():
 def html_event_info():
     try:
         event_id = int(request.args['event_id'])
+        event = Event.query.get(event_id)
     except (KeyError, ValueError):
         return abort(400)
-    return get_event_form()
+    return get_event_form(event=event)
 
 
 @module.route('/event_new.html')

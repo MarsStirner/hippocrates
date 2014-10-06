@@ -756,6 +756,46 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
         }
     };
 
+
+    $scope.open_delete_event_modal = function() {
+        var modalInstance = $modal.open({
+            templateUrl: 'modal-delete-record.html',
+            controller: DeleteRecordModalCtrl,
+            resolve: {
+                message: function(){
+                    return 'текущее обращение';
+                }
+            },
+            scope: $scope
+        });
+        modalInstance.result.then(function () {
+            $scope.delete_event();
+        });
+    };
+
+
+    $scope.delete_event = function (){
+        if(!$scope.event.payment.payments.payments.length){
+            $http.post(
+                url_for_delete_event, {
+                    event_id: $scope.event_id
+                }
+            ).success(function() {
+                if (window.opener){
+                    window.opener.focus();
+                    window.close();
+                }
+            }).error(function(response) {
+                var rr = response.result;
+                var message = rr.name + ': ' + (rr.data ? rr.data.err_msg : '');
+                alert(message);
+            });
+        } else {
+            alert('Невозможно удалить обращение! По нему была совершена оплата.');
+        }
+
+    };
+
     $scope.event_mandatoryResult = function() {
         return $scope.Settings.get_string('Event.mandatoryResult') == '1';
     };

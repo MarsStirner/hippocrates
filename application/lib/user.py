@@ -48,6 +48,7 @@ class User(UserMixin):
                 rbUserProfile.code == value
             ))
         ]
+        self.current_rights = self.rights[value]
 
     def is_active(self):
         return self.deleted == 0
@@ -75,7 +76,7 @@ class User(UserMixin):
 
     def has_right(self, right):
         # what about list?
-        return right in self.rights
+        return right in self.current_rights
 
     def set_roles_rights(self, person):
         if person.user_profiles:
