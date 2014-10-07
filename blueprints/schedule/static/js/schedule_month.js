@@ -108,7 +108,7 @@ var DayFreeModalCtrl = function ($scope, $modalInstance, day, roas) {
     };
     $scope.roas = roas;
 };
-var ScheduleMonthCtrl = function ($scope, $http, $modal, RefBook, PersonTreeUpdater) {
+var ScheduleMonthCtrl = function ($scope, $http, $modal, RefBook, PersonTreeUpdater, $location) {
     $scope.reception_types = new RefBook('rbReceptionType');
     $scope.rbReasonOfAbsence = new RefBook('rbReasonOfAbsence');
     $scope.rbTimeQuotingType = new RefBook('rbTimeQuotingType');
@@ -260,7 +260,9 @@ var ScheduleMonthCtrl = function ($scope, $http, $modal, RefBook, PersonTreeUpda
 
     $scope.$watch('person_id', function (new_value, old_value) {
         if (!new_value || new_value == old_value) return;
-        history.pushState(null, document.title, location.origin + location.pathname + '?person_id=' + new_value);
+        var path = $location.path() + '?person_id=' + new_value;
+        $location.url(path).replace();
+        window.history.pushState(null, document.title, location.origin + location.pathname + '?person_id=' + new_value);
         $scope.reloadSchedule();
     });
 
@@ -526,4 +528,4 @@ var ScheduleMonthCtrl = function ($scope, $http, $modal, RefBook, PersonTreeUpda
         return text;
     };
 };
-WebMis20.controller('ScheduleMonthCtrl', ['$scope', '$http', '$modal', 'RefBook', 'PersonTreeUpdater', ScheduleMonthCtrl]);
+WebMis20.controller('ScheduleMonthCtrl', ['$scope', '$http', '$modal', 'RefBook', 'PersonTreeUpdater', '$location', ScheduleMonthCtrl]);

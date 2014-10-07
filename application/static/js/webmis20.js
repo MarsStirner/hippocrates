@@ -21,7 +21,7 @@ var WebMis20 = angular.module('WebMis20', [
     'mgcrea.ngStrap.affix',
     'duScroll'
 ])
-.config(function ($interpolateProvider, datepickerConfig, datepickerPopupConfig) {
+.config(function ($interpolateProvider, datepickerConfig, datepickerPopupConfig, $locationProvider) {
     $interpolateProvider.startSymbol('[[');
     $interpolateProvider.endSymbol(']]');
     datepickerConfig.showWeek = false;
@@ -31,6 +31,7 @@ var WebMis20 = angular.module('WebMis20', [
     datepickerPopupConfig.clearText = 'Убрать';
     datepickerPopupConfig.closeText = 'Готово';
 //    datepickerPopupConfig.appendToBody=true;
+    $locationProvider.html5Mode(true);
 }).config(['$tooltipProvider', function($tooltipProvider){
     $tooltipProvider.setTriggers({
         'mouseenter': 'mouseleave',
