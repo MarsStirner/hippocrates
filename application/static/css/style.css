@@ -672,3 +672,16 @@ ng-form {
 .table-bak td[rowspan] + td[rowspan], .table-bak th[rowspan] + th[rowspan] {
    border-right-width: medium;
 }
+
+.modal-scrollable .modal-dialog,
+.modal-scrollable .modal-content {
+    /* 90% of window height */
+    height: 90%;
+}
+
+.modal-scrollable .modal-body {
+    /* 100% = dialog height, 150px = header + footer */
+    max-height: calc(100% - 150px);
+    height: 100%;
+    overflow-y: scroll;
+}
