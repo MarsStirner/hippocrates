@@ -30,10 +30,8 @@ WebMis20
         });
     };
     this.chart = {
-        get: function () {
-            var event_id = arguments[0];
-            var ticket_id = arguments[1];
-            var url = Config.url.api_chart + (event_id)?(event_id):'';
+        get: function (event_id, ticket_id) {
+            var url = Config.url.api_chart + ((event_id)?(event_id):'');
             return wrapper('GET', url, {ticket_id: ticket_id});
         },
         delete: function (ticket_id) {
