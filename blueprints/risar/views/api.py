@@ -11,7 +11,7 @@ from application.models.exists import Organisation, Person
 from application.models.schedule import Schedule, ScheduleClientTicket
 from application.models.utils import safe_current_user_id
 from application.systemwide import db
-from blueprints.risar.lib.represent import represent_event, represent_anamnesis_action
+from blueprints.risar.lib.represent import represent_event, represent_anamnesis_action, represent_ticket
 from config import ORGANISATION_INFIS_CODE
 
 
@@ -28,15 +28,8 @@ def api_0_schedule(person_id=None):
     schedule_list = Schedule.query\
         .filter(Schedule.date == for_date, Schedule.person_id == person_id)\
         .order_by(Schedule.begTime).all()
-    return jsonify([{
-        'schedule_id': ticket.schedule_id,
-        'ticket_id': ticket.id,
-        'client_ticket_id': ticket.client_ticket.id if ticket.client_ticket else None,
-        'client': ticket.client,
-        'beg_time': ticket.begDateTime,
-        'event_id': ticket.client_ticket.event_id if ticket.client_ticket else None,
-        'note': ticket.client_ticket.note if ticket.client else None,
-    }
+    return jsonify([
+        represent_ticket(ticket)
         for ticket in itertools.chain(*(schedule.tickets for schedule in schedule_list))
         if all_tickets or ticket.client_ticket
     ])

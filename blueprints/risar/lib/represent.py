@@ -141,6 +141,8 @@ def represent_event(event):
 common_codes = ['education', 'work_group', 'professional_properties', 'infertility', 'infertility_period', 'infertility_cause', 'blood_type', 'rh', 'finished_diseases', 'current_diseases', 'hereditary', 'alcohol', 'smoking', 'toxic', 'drugs']
 mother_codes = ['menstruation_start_age', 'menstruation_duration', 'menstruation_period', 'menstruation_disorders', 'sex_life_start_age', 'contraception_type', 'natural_pregnancy', 'family_income'] + common_codes
 father_codes = ['name'] + common_codes
+
+
 def represent_anamnesis_action(action, mother=False):
     """
     :type action: application.models.actions.Action
@@ -155,3 +157,29 @@ def represent_anamnesis_action(action, mother=False):
         for prop in action.properties
         if prop.type.code in codes
     )
+
+checkup_flat_codes = ['risarFirstInspection', 'risarSecondInspection']
+
+
+def represent_ticket(ticket):
+    from application.models.actions import Action, ActionType
+    checkup_n = 0
+    event_id = ticket.client_ticket.event_id if ticket.client_ticket else None
+    if event_id is not None:
+        checkup_n = Action.query\
+            .join(ActionType)\
+            .filter(
+                Action.event_id == event_id,
+                Action.deleted == 0,
+                ActionType.flatCode.in_(checkup_flat_codes))\
+            .count()
+    return {
+        'schedule_id': ticket.schedule_id,
+        'ticket_id': ticket.id,
+        'client_ticket_id': ticket.client_ticket.id if ticket.client_ticket else None,
+        'client': ticket.client,
+        'beg_time': ticket.begDateTime,
+        'event_id': ticket.client_ticket.event_id if ticket.client_ticket else None,
+        'note': ticket.client_ticket.note if ticket.client else None,
+        'checkup_n': checkup_n,
+    }
