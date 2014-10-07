@@ -344,6 +344,19 @@ div.select2-container {
     padding: 0;
 }
 
+.btngroup8515 > .btn-group {
+    width: 85%
+}
+
+.btngroup8515 > .btn-group + .btn-group {
+    width: 15%
+}
+
+.modal-scrollable {
+    max-height: 500px;
+    overflow-y: auto;
+}
+
 .tab-content {
     border-left: 1px solid #ddd;
     border-right: 1px solid #ddd;

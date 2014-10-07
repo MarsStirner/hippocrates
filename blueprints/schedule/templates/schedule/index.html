@@ -51,8 +51,18 @@
                         <tbody ng-if="grouped[reception_type].max_tickets > 0">
                         <tr ng-repeat="row in aux.range(grouped[reception_type].max_tickets)">
                             <td ng-repeat="day in grouped[reception_type].schedule">
-                                <button ui-schedule-ticket="day.tickets[row]" day="day" show-name="true"
-                                        ng-click="pasteSourceTicket(ticket)"></button>
+                                <div class="btn-group btn-group-justified btngroup8515">
+                                    <div class="btn-group">
+                                        <button ui-schedule-ticket="day.tickets[row]" day="day" show-name="true"
+                                                ng-click="appointment_toggle(day.tickets[row])"></button>
+                                    </div>
+                                    <div class="btn-group" ng-if="ticket_user_info_available(day.tickets[row])">
+                                        <button type="button" class="btn btn-primary" title="Посмотреть информацию о пациенте"
+                                                ng-click="view_patient_info(day.tickets[row])">
+                                            <span class="glyphicon glyphicon-user"></span>
+                                        </button>
+                                    </div>
+                                </div>
                             </td>
                         </tr>
                         </tbody>
