@@ -5,67 +5,76 @@
 
 WebMis20
 .service('RisarApi', ['$http', 'Config', '$q', function ($http, Config, $q) {
+    var wrapper = function (method, url, params, data) {
+        var defer = $q.defer();
+        $http({
+            method: method,
+            url: url,
+            params: params,
+            data: data
+        })
+        .success(function (data) {
+            defer.resolve(data.result)
+        })
+        .error(function (data, code) {
+            defer.reject(data.meta)
+        });
+        return defer.promise;
+    };
     this.schedule = function () {
         var date = arguments[0];
         var all = arguments[1];
-        var defer = $q.defer();
-        $http.get(Config.url.api_schedule, {
-            params: {
-                date: (date)?(moment(date).format('YYYY-MM-DD')):undefined,
-                all: all
-            }
-        }).success(function (data) {
-            if (data.meta.code != 200) {
-                defer.reject(data.meta)
-            } else {
-                defer.resolve(data.result);
-            }
+        return wrapper('GET', Config.url.api_schedule, {
+            date: (date)?(moment(date).format('YYYY-MM-DD')):undefined,
+            all: all
         });
-        return defer.promise;
     };
-    this.chart = function () {
-        var event_id = arguments[0];
-        var ticket_id = arguments[1];
-        var defer = $q.defer();
-        var url = Config.url.api_chart;
-        url += (event_id)?(event_id):'';
-        $http.get(url, {
-            params: {
-                ticket_id: ticket_id
-            }
-        }).success(function (data) {
-            if (data.meta.code != 200) {
-                defer.reject(data.meta)
-            } else {
-                defer.resolve(data.result);
-            }
-        });
-        return defer.promise;
+    this.chart = {
+        get: function () {
+            var event_id = arguments[0];
+            var ticket_id = arguments[1];
+            var url = Config.url.api_chart + (event_id)?(event_id):'';
+            return wrapper('GET', url, {ticket_id: ticket_id});
+        },
+        delete: function (ticket_id) {
+            var url = Config.url.api_chart_delete + ticket_id;
+            return wrapper('DELETE', url);
+        }
     };
-    this.chart_delete = function (ticket_id) {
-        var defer = $q.defer();
-        var url = Config.url.api_chart_delete + ticket_id;
-        $http.delete(url).success(function (data, status) {
-            if (status == 200) {
-                defer.resolve(data.result)
-            } else {
-                defer.reject(data.meta)
+    this.anamnesis = {
+        get: function (event_id) {
+            var url = Config.url.api_anamnesis + event_id;
+            return wrapper('GET', url);
+        },
+        pregnancies: {
+            get: function (id) {
+                return wrapper('GET', Config.url.api_anamnesis_pregnancies + id);
+            },
+            delete: function (id) {
+                return wrapper('DELETE', Config.url.api_anamnesis_pregnancies + id);
+            },
+            undelete: function (id) {
+                return wrapper('POST', Config.url.api_anamnesis_pregnancies + id + '/undelete');
+            },
+            save: function (event_id, data) {
+                return wrapper('POST', Config.url.api_anamnesis_pregnancies + (data.id||''), {event_id: event_id}, data);
             }
-        });
-        return defer.promise;
+        },
+        transfusions: {
+            get: function (id) {
+                return wrapper('GET', Config.url.api_anamnesis_transfusions + id);
+            },
+            delete: function (id) {
+                return wrapper('DELETE', Config.url.api_anamnesis_transfusions + id);
+            },
+            undelete: function (id) {
+                return wrapper('POST', Config.url.api_anamnesis_transfusions + id + '/undelete');
+            },
+            save: function (event_id, data) {
+                return wrapper('POST', Config.url.api_anamnesis_transfusions + (data.id||''), {event_id: event_id}, data);
+            }
+        }
     };
-    this.anamnesis = function (event_id) {
-        var defer = $q.defer();
-        var url = Config.url.api_anamnesis + event_id;
-        $http.get(url).success(function (data) {
-            if (data.meta.code != 200) {
-                defer.reject(data.meta)
-            } else {
-                defer.resolve(data.result);
-            }
-        });
-        return defer.promise;
-    }
 }])
 .filter('underlineNoVal', function () {
     return function(value, label) {
@@ -75,7 +84,7 @@ WebMis20
         return value + ' ' + (label || '');
     }
 })
-.service('RisarNotificationService', function ($rootScope, $timeout) {
+.service('RisarNotificationService', function () {
     var self = this;
     var recompilers = [];
     var indices = {};

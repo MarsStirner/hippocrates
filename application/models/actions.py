@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import datetime
+from werkzeug.utils import cached_property
 from application.systemwide import db
 from exists import FDRecord
 from application.models.utils import safe_current_user_id, get_model_by_name
@@ -68,6 +69,14 @@ class Action(db.Model):
     @property
     def properties_ordered(self):
         return sorted(self.properties, key=lambda ap: ap.type.idx)
+
+    @cached_property
+    def propsByCode(self):
+        return dict(
+            (prop.type.code, prop)
+            for prop in self.properties
+            if prop.type.code
+        )
 
 
 class ActionProperty(db.Model):

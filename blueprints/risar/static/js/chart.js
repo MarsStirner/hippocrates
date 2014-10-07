@@ -9,7 +9,7 @@ var ChartCtrl = function ($scope, RisarApi, RisarNotificationService, Config, $t
     var ticket_id = params.ticket_id;
     var event_id = params.event_id;
     var reload_chart = function () {
-        RisarApi.chart(event_id, ticket_id)
+        RisarApi.chart.get(event_id, ticket_id)
         .then(function (event_info) {
             $scope.chart = event_info.event;
             if (event_info.automagic) {
@@ -21,7 +21,7 @@ var ChartCtrl = function ($scope, RisarApi, RisarNotificationService, Config, $t
         })
     };
     $scope.cancel_created = function () {
-        RisarApi.chart_delete(ticket_id).then(function success() {
+        RisarApi.chart.delete(ticket_id).then(function success() {
             window.location.replace(Config.url.index_html);
         })
     };

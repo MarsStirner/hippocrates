@@ -21,9 +21,9 @@ var AnamnesisCtrl = function ($scope, RisarApi) {
             tabs[hash] = true
         }
     }
-    var event_id = params.event_id;
+    var event_id = $scope.event_id = params.event_id;
     var reload_anamnesis = function () {
-        RisarApi.anamnesis(event_id)
+        RisarApi.anamnesis.get(event_id)
         .then(function (anamnesis) {
             $scope.anamnesis = anamnesis;
             $scope.hooks.forEach(function (hook) {hook(anamnesis)});
@@ -81,7 +81,7 @@ var MotherFatherCtrl = function ($scope) {
     $scope.hooks.push(reload_hook)
 };
 
-var PregnanciesCtrl = function ($scope, $modal, $timeout) {
+var PregnanciesCtrl = function ($scope, $modal, $timeout, RisarApi) {
     $scope.add = function () {
         var model = {
             alive: true
@@ -89,7 +89,9 @@ var PregnanciesCtrl = function ($scope, $modal, $timeout) {
         open_edit(model).result.then(function (rslt) {
             var result = rslt[0],
                 restart = rslt[1];
-            $scope.anamnesis.pregnancies.push(result);
+            RisarApi.anamnesis.pregnancies.save($scope.event_id, result).then(function (result) {
+                $scope.anamnesis.pregnancies.push(result);
+            });
             if (restart) {
                 $timeout($scope.add)
             }
@@ -100,17 +102,31 @@ var PregnanciesCtrl = function ($scope, $modal, $timeout) {
         open_edit(model).result.then(function (rslt) {
             var result = rslt[0],
                 restart = rslt[1];
-            angular.extend(p, result);
+            RisarApi.anamnesis.pregnancies.save($scope.event_id, result).then(function (result) {
+                angular.extend(p, result);
+            });
             if (restart) {
                 $timeout($scope.add)
             }
         });
     };
     $scope.remove = function (p) {
-        p.deleted = true;
+        if (p.id) {
+            RisarApi.anamnesis.pregnancies.delete(p.id).then(function () {
+                p.deleted = 1;
+            });
+        } else {
+            p.deleted = 1;
+        }
     };
     $scope.restore = function (p) {
-        p.deleted = false;
+        if (p.id) {
+            RisarApi.anamnesis.pregnancies.undelete(p.id).then(function () {
+                p.deleted = 0;
+            });
+        } else {
+            p.deleted = 0;
+        }
     };
     var open_edit = function (p) {
         var scope = $scope.$new();
@@ -126,13 +142,15 @@ var PregnanciesCtrl = function ($scope, $modal, $timeout) {
     };
 };
 
-var TransfusionsCtrl = function ($scope, $modal, $timeout) {
+var TransfusionsCtrl = function ($scope, $modal, $timeout, RisarApi) {
     $scope.add = function () {
         var model = {};
         open_edit(model).result.then(function (rslt) {
             var result = rslt[0],
                 restart = rslt[1];
-            $scope.anamnesis.transfusions.push(result);
+            RisarApi.anamnesis.transfusions.save($scope.event_id, result).then(function (result) {
+                $scope.anamnesis.transfusions.push(result);
+            });
             if (restart) {
                 $timeout($scope.add)
             }
@@ -143,17 +161,31 @@ var TransfusionsCtrl = function ($scope, $modal, $timeout) {
         open_edit(model).result.then(function (rslt) {
             var result = rslt[0],
                 restart = rslt[1];
-            angular.extend(p, result);
+            RisarApi.anamnesis.transfusions.save($scope.event_id, result).then(function (result) {
+                angular.extend(p, result);
+            });
             if (restart) {
                 $timeout($scope.add)
             }
         });
     };
     $scope.remove = function (p) {
-        p.deleted = true;
+        if (p.id) {
+            RisarApi.anamnesis.transfusions.delete(p.id).then(function () {
+                p.deleted = 1;
+            });
+        } else {
+            p.deleted = 1;
+        }
     };
     $scope.restore = function (p) {
-        p.deleted = false;
+        if (p.id) {
+            RisarApi.anamnesis.transfusions.undelete(p.id).then(function () {
+                p.deleted = 0;
+            });
+        } else {
+            p.deleted = 0;
+        }
     };
     var open_edit = function (p) {
         var scope = $scope.$new();
