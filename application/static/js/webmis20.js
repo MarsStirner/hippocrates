@@ -689,7 +689,7 @@ var WebMis20 = angular.module('WebMis20', [
         },
         link: function (scope, element, attributes) {
             var elem = $(element);
-            elem.addClass('btn btn-block');
+            elem.addClass('btn btn-block text-left');
             scope.$watch('ticket.status', function (n, o) {
                 if (!scope.ticket) {
                     elem.addClass('disabled');
@@ -706,7 +706,7 @@ var WebMis20 = angular.module('WebMis20', [
                     elem.removeClass('btn-success btn-warning btn-gray disabled');
                     elem.addClass('btn-primary');
                     if (scope.showName) {
-                        text += ' - ' + scope.ticket.client
+                        text += ' - ' + scope.ticket.client + ' (' + scope.ticket.record.client_id + ')';
                     }
                 } else {
                     elem.removeClass('btn-danger');

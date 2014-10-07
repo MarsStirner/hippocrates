@@ -344,12 +344,12 @@ div.select2-container {
     padding: 0;
 }
 
-.btngroup8515 > .btn-group {
-    width: 85%
+.btn-group-justified {
+  table-layout: auto;
 }
 
-.btngroup8515 > .btn-group + .btn-group {
-    width: 15%
+.btn-group-justified > .btn-group{
+      width:100%;
 }
 
 .modal-scrollable {
@@ -663,4 +663,9 @@ ng-form {
 .aside-backdrop.in {
     opacity: 0.5;
     filter: alpha(opacity=50);
+}
+
+button.text-left {
+    text-align: left;
+    padding-left: 10px;
 }
