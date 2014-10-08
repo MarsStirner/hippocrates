@@ -80,7 +80,6 @@ var MotherFatherCtrl = function ($scope) {
     };
     $scope.hooks.push(reload_hook)
 };
-
 var PregnanciesCtrl = function ($scope, $modal, $timeout, RisarApi) {
     $scope.add = function () {
         var model = {
@@ -141,7 +140,6 @@ var PregnanciesCtrl = function ($scope, $modal, $timeout, RisarApi) {
         })
     };
 };
-
 var TransfusionsCtrl = function ($scope, $modal, $timeout, RisarApi) {
     $scope.add = function () {
         var model = {};
@@ -267,3 +265,53 @@ var IntolerancesCtrl = function ($scope, $modal, $timeout, RisarApi) {
         })
     };
 };
+var AnamnesisMotherEditCtrl = function ($scope, RisarApi) {
+    $scope._isArray = _.isArray;
+    var criterions = $scope.criterions = [
+        'education', 'work_group', 'professional_properties', 'family_income', 'blood_type',
+        'menstruation', [
+            'menstruation_start_age',
+            'menstruation_duration',
+            'menstruation_period',
+            'menstruation_disorders'
+        ], 'sex_life_start_age', 'contraception_type', 'natural_pregnancy', 'multifetation',
+        'infertility', [
+            'intertility_type',
+            'infertility_period',
+            'infertility_treatment',
+            'infertility_cause'
+        ], 'finished_diseases', 'hereditary', 'current_diseases',
+        'bad_habits', [
+            'alcohol', 'smoking', 'toxic', 'drugs'
+        ]
+    ];
+    $scope.meta = {
+        education: {title: 'Образование', type: 'rb', rb: 'rbRisarEducation'},
+        work_group: {title: 'Общественно-профессиональная группа', type: 'rb', rb: 'rbRisarWorkGroup'},
+        professional_properties: {title: 'Профессиональные вредности', type: 'str'},
+        family_income: {title: 'Доход семьи', type: 'str'},
+        blood_type: {title: 'Группа крови', type: 'rb', rb: 'rbBloodType'},
+        menstruation: {title: 'Менструации'},
+        menstruation_start_age: {title: 'с возраста', type: 'num'},
+        menstruation_duration: {title: 'длительность', type: 'num'},
+        menstruation_period: {title: 'продолжительность цикла', type: 'num'},
+        menstruation_disorders: {title: 'нарушения', type: 'str'},
+        sex_life_start_age: {title: 'Половая жизнь с', type: 'num'},
+        contraception_type: {title: 'Тип контрацепции', type: 'str'},
+        natural_pregnancy: {title: 'Беременность наступила естественным путём', type: 'chk'},
+        multifetation: {title: 'Многоплодие', type: 'chk'},
+        infertility: {title: 'Бесплодие', type: 'chk'},
+        infertility_type: {title: 'вид', type: 'str'},
+        infertility_period: {title: 'длительность', type: 'num'},
+        infertility_treatment: {title: 'лечение', type: 'str'},
+        infertility_cause: {title: 'причина', type: 'str'},
+        finished_diseases: {title: 'перенесенные заболевания', type: 'str'},
+        hereditary: {title: 'Наследственность', type: 'str'},
+        current_diseases: {title: 'Текущие заболевания', type: 'str'},
+        bad_habits: {title: 'Вредные привычки'},
+        alcohol: {title: 'Алкоголь', type: 'chk'},
+        smoking: {title: 'Курение', type: 'chk'},
+        toxic: {title: 'Токсические вещества', type: 'chk'},
+        drugs: {title: 'Наркотики', type: 'chk'}
+    }
+}

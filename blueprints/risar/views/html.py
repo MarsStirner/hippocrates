@@ -19,3 +19,8 @@ def html_chart():
 @module.route('/anamnesis.html')
 def html_anamnesis():
     return render_template('risar/anamnesis_view.html')
+
+
+@module.route('/anamnesis_edit.html')
+def html_anamnesis_edit():
+    return render_template('risar/anamnesis_edit.html')
