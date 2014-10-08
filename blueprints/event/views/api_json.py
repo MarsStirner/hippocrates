@@ -117,9 +117,7 @@ def api_event_save():
         event.note = event_data['note']
 
         local_contract = safe_traverse(request.json, 'payment', 'local_contract')
-        if event.payer_required:
-            if not local_contract:
-                raise EventSaveException(err_msg, u'Не заполнена информация о плательщике.')
+        if local_contract:
             lcon = create_or_update_local_contract(event, local_contract)
             event.localContract = lcon
         db.session.add(event)
