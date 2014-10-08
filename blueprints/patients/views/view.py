@@ -45,3 +45,18 @@ def patient():
         if not client:
             return abort(404)
     return render_template('patients/patient_info.html')
+
+
+@module.route('/patient_info_full.html')
+def patient_info_full():
+    try:
+        client_id = int(request.args['client_id'])
+    except (KeyError, ValueError):
+        return abort(404)
+    client = Client.query.get(client_id)
+    if not client:
+        return abort(404)
+    return render_template(
+        'patients/patient_info_full.html',
+        client=client
+    )
