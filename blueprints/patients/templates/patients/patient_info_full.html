@@ -20,7 +20,7 @@
             </div>
             <div class="col-md-10">
                 <ng-form name="PatientForm" id="PatientForm" role="form" toc-element toc-name="tocPatientForm">
-                    <div name="MainInfo" class="well well-sm" toc-element="Основная информация">
+                    <div name="MainInfo" class="well well-sm" toc-element="Основная информация" ng-if="client.info">
                         <legend>Основная информация</legend>
                         <div class="row">
                             <div class="col-md-3">
@@ -70,13 +70,14 @@
                             </div>
                         </div>
                     </div>
-                    <div name="AddressFullInfo" class="well well-sm" toc-element="Адреса">
+                    <div name="AddressFullInfo" class="well well-sm" toc-element="Адреса"
+                         ng-if="client.reg_addresses.length||client.live_addresses.length">
                         <legend>Адреса</legend>
                         <div>
                             <dl class="dl-horizontal novmargin">
-                                <dt ng-if="client.reg_addresses">Адрес регистрации</dt>
+                                <dt ng-if="client.reg_addresses.length">Адрес регистрации</dt>
                                     <dd class="clearfix" ng-repeat="reg_addr in client.reg_addresses | flt_not_deleted"> [[reg_addr.text_summary]]</dd>
-                                <dt ng-if="client.live_addresses">Адрес проживания</dt>
+                                <dt ng-if="client.live_addresses.length">Адрес проживания</dt>
                                     <dd class="clearfix" ng-repeat="live_addr in client.live_addresses | flt_not_deleted"> [[live_addr.text_summary]]</dd>
                             </dl>
                         </div>
