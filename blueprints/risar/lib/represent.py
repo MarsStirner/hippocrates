@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import datetime
 from application.lib.utils import safe_dict
-from application.models.enums import Gender, AllergyPower
+from application.models.enums import Gender, AllergyPower, IntoleranceType
 
 __author__ = 'mmalkov'
 
@@ -182,4 +182,17 @@ def represent_ticket(ticket):
         'event_id': ticket.client_ticket.event_id if ticket.client_ticket else None,
         'note': ticket.client_ticket.note if ticket.client else None,
         'checkup_n': checkup_n,
+    }
+
+
+def represent_intolerance(obj):
+    from application.models.client import ClientAllergy, ClientIntoleranceMedicament
+    code = 0 if isinstance(obj, ClientAllergy) else 1 if isinstance(obj, ClientIntoleranceMedicament) else None
+    return {
+        'type': IntoleranceType(code),
+        'id': obj.id,
+        'date': obj.createDate,
+        'name': obj.name,
+        'power': AllergyPower(obj.power),
+        'note': obj.notes,
     }

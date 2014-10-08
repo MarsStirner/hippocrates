@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 from flask import request
+import itertools
 from application.lib.data import create_action
 from application.models.actions import Action, ActionType
-from application.lib.utils import jsonify, safe_traverse_attrs
+from application.lib.utils import jsonify, safe_traverse_attrs, safe_traverse
 from application.models.event import Event
-from application.models.client import BloodHistory
+from application.models.client import BloodHistory, ClientAllergy, ClientIntoleranceMedicament
 from application.systemwide import db, cache
 from blueprints.risar.app import module
-from blueprints.risar.lib.represent import represent_anamnesis_action, represent_event
+from blueprints.risar.lib.represent import represent_anamnesis_action, represent_event, represent_intolerance
 
 __author__ = 'mmalkov'
 
@@ -43,6 +44,14 @@ def api_0_anamnesis(event_id=None):
         if mother_blood_type:
             represent_mother['blood_type'] = mother_blood_type.bloodType
 
+    event = Event.query.get(event_id)
+    allergies = ClientAllergy.query.filter(
+        ClientAllergy.client_id == Event.client_id,
+        ClientAllergy.deleted == 0)
+    medical_intolerances = ClientIntoleranceMedicament.query.filter(
+        ClientIntoleranceMedicament.client_id == Event.client_id,
+        ClientIntoleranceMedicament.deleted == 0)
+
     return jsonify({
         'event': represent_event(event),
         'mother': represent_mother,
@@ -57,6 +66,10 @@ def api_0_anamnesis(event_id=None):
             for action in event.actions
             if action.actionType_id == get_action_type_id(risar_anamnesis_transfusion)
         ],
+        'intolerances': [
+            represent_intolerance(obj)
+            for obj in itertools.chain(event.client.allergies, event.client.intolerances)
+        ]
     })
 
 
@@ -75,6 +88,8 @@ pregnancy_apt_codes = ['number', 'year', 'pregnancyResult', 'alive', 'weight', '
 def action_apt_values(action, codes):
     return dict((key, safe_traverse_attrs(action.propsByCode.get(key), 'value')) for key in codes)
 
+
+# Беременности
 
 @module.route('/api/0/anamnesis/pregnancies/')
 @module.route('/api/0/anamnesis/pregnancies/<int:action_id>', methods=['GET'])
@@ -135,6 +150,8 @@ def api_0_pregnancies_post(action_id=None):
         id=action.id
     ))
 
+
+# Переливания
 
 transfusion_apt_codes = ['date', 'type', 'blood_type', 'reaction']
 
@@ -197,3 +214,85 @@ def api_0_transfusions_post(action_id=None):
         action_apt_values(action, transfusion_apt_codes),
         id=action.id
     ))
+
+
+# Аллергии и медикаментозные непереносимости
+
+def intolerance_class_from_type(i_type):
+    if i_type == 'allergy':
+        return ClientAllergy
+    elif i_type == 'medicine':
+        return ClientIntoleranceMedicament
+
+
+@module.route('/api/0/anamnesis/intolerances/')
+@module.route('/api/0/anamnesis/intolerances/<i_type>/<int:object_id>', methods=['GET'])
+def api_0_intolerances_get(i_type, object_id):
+    c = intolerance_class_from_type(i_type)
+    if c is None:
+        return jsonify(None, 404, 'Intolerance type not found')
+    obj = c.query.get(object_id)
+    if obj is None:
+        return jsonify(None, 404, 'Object not found')
+    return jsonify(dict(
+        represent_intolerance(obj),
+        id=object_id
+    ))
+
+
+@module.route('/api/0/anamnesis/intolerances/<i_type>/<int:object_id>', methods=['DELETE'])
+def api_0_intolerances_delete(i_type, object_id):
+    c = intolerance_class_from_type(i_type)
+    if c is None:
+        return jsonify(None, 404, 'Intolerance type not found')
+    obj = c.query.get(object_id)
+    if obj is None:
+        return jsonify(None, 404, 'Allergy not found')
+    if obj.deleted:
+        return jsonify(None, 400, 'Allergy already deleted')
+    obj.deleted = 1
+    db.session.commit()
+    return jsonify(True)
+
+
+@module.route('/api/0/anamnesis/intolerances/<i_type>/<int:object_id>/undelete', methods=['POST'])
+def api_0_intolerances_undelete(i_type, object_id):
+    c = intolerance_class_from_type(i_type)
+    if c is None:
+        return jsonify(None, 404, 'Intolerance type not found')
+    obj = c.query.get(object_id)
+    if obj is None:
+        return jsonify(None, 404, 'Allergy not found')
+    if not obj.deleted:
+        return jsonify(None, 400, 'Allergy not deleted')
+    obj.deleted = 0
+    db.session.commit()
+    return jsonify(True)
+
+
+@module.route('/api/0/anamnesis/intolerances/<i_type>/', methods=['POST'])
+@module.route('/api/0/anamnesis/intolerances/<i_type>/<int:object_id>', methods=['POST'])
+def api_0_intolerances_post(i_type, object_id=None):
+    c = intolerance_class_from_type(i_type)
+    if c is None:
+        return jsonify(None, 404, 'Intolerance type not found')
+    client_id = request.args.get('client_id', None)
+    if object_id is None:
+        if client_id is None:
+            return jsonify(None, 400, 'Client is not set')
+        obj = c()
+    else:
+        obj = c.query.get(object_id)
+        if obj is None:
+            return jsonify(None, 404, 'Action not found')
+    json = request.get_json()
+    obj.name = json.get('name')
+    obj.client_id = client_id
+    obj.power = safe_traverse(json, 'power', 'id')
+    obj.createDate = json.get('date')
+    obj.notes = json.get('note')
+    db.session.add(obj)
+    db.session.commit()
+    return jsonify(
+        represent_intolerance(obj)
+    )

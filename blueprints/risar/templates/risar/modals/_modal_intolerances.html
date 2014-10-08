@@ -1,0 +1,32 @@
+<div class="modal-header">
+    <h3 class="modal-title">Переливания крови</h3>
+</div>
+<div class="modal-body">
+    <div class="das-form">
+        <div class="row" ng-if="!model.id">
+            <div class="col-md-4">Тип:</div>
+            <div class="col-md-4"><rb-select ref-book="IntoleranceType" ng-model="model.type" /></div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">Дата:</div>
+            <div class="col-md-4"><div fs-date ng-model="model.date"></div></div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">Наименование</div>
+            <div class="col-md-8"><input class="form-control" type="text" ng-model="model.name" /></div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">Степень</div>
+            <div class="col-md-8"><rb-select ref-book="AllergyPower" ng-model="model.power" /></div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">Примечания</div>
+            <div class="col-md-8"><input class="form-control" type="text" ng-model="model.note" /></div>
+        </div>
+    </div>
+</div>
+<div class="modal-footer">
+    <label><input type="checkbox" class="checkbox checkbox-inline" ng-model="restart">Добавить ещё одно сведение</label>
+    <button class="btn btn-success" ng-click="$close([model, restart])">Сохранить</button>
+    <a class="pseudo-btn" ng-click="$dismiss()">Отменить</a>
+</div>

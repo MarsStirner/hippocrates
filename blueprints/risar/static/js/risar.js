@@ -31,12 +31,10 @@ WebMis20
     };
     this.chart = {
         get: function (event_id, ticket_id) {
-            var url = Config.url.api_chart + ((event_id)?(event_id):'');
-            return wrapper('GET', url, {ticket_id: ticket_id});
+            return wrapper('GET', Config.url.api_chart + ((event_id)?(event_id):''), {ticket_id: ticket_id});
         },
         delete: function (ticket_id) {
-            var url = Config.url.api_chart_delete + ticket_id;
-            return wrapper('DELETE', url);
+            return wrapper('DELETE', Config.url.api_chart_delete + ticket_id);
         }
     };
     this.anamnesis = {
@@ -70,6 +68,24 @@ WebMis20
             },
             save: function (event_id, data) {
                 return wrapper('POST', Config.url.api_anamnesis_transfusions + (data.id||''), {event_id: event_id}, data);
+            }
+        },
+        intolerances: {
+            get: function (id, type) {
+                var url = '{0}{1}/{2}'.format(Config.url.api_anamnesis_intolerances, type, id);
+                return wrapper('GET', url);
+            },
+            delete: function (id, type) {
+                var url = '{0}{1}/{2}'.format(Config.url.api_anamnesis_intolerances, type, id);
+                return wrapper('DELETE', url);
+            },
+            undelete: function (id, type) {
+                var url = '{0}{1}/{2}/undelete'.format(Config.url.api_anamnesis_intolerances, type, id);
+                return wrapper('POST', url);
+            },
+            save: function (client_id, data) {
+                var url = '{0}{1}/{2}'.format(Config.url.api_anamnesis_intolerances, data.type.code, (data.id||''));
+                return wrapper('POST', url, {client_id: client_id}, data);
             }
         }
     };

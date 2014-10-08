@@ -75,7 +75,7 @@
                             <td><a ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ chart.id ]]#transfusions">Ввести сведения о переливаниях крови</a></td>
                         </tr>
                         <tr>
-                            <td><a ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ chart.id ]]#allergies">Ввести сведения об аллергии</a></td>
+                            <td><a ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ chart.id ]]#intolerances">Ввести сведения об аллергии</a></td>
                         </tr>
                         </tbody>
                     </table>
@@ -117,7 +117,7 @@
                         'warning text-warning': ['medium', 'unknown'].has(char.power.code),
                         'danger text-danger': ['high', 'strict'].has(char.power.code),
                         }">
-                            <td><span class="fa" ng-class="{
+                            <td class="text-center "><span class="fa" ng-class="{
                         'fa-question': char.power.code == 'unknown',
                         'fa-exclamation': char.power.code == 'low',
                         'fa-exclamation-triangle': char.power.code == 'medium',

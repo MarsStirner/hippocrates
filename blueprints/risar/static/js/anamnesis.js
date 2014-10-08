@@ -10,7 +10,7 @@ var AnamnesisCtrl = function ($scope, RisarApi) {
         motherfather: true,
         pregnancies: false,
         transfusions: false,
-        allergies: false
+        intolerances: false
     };
 
     var params = aux.getQueryParams(window.location.search);
@@ -26,8 +26,8 @@ var AnamnesisCtrl = function ($scope, RisarApi) {
         RisarApi.anamnesis.get(event_id)
         .then(function (anamnesis) {
             $scope.anamnesis = anamnesis;
+            $scope.client_id = anamnesis.event.client.id;
             $scope.hooks.forEach(function (hook) {hook(anamnesis)});
-
         })
     };
     reload_anamnesis();
@@ -192,6 +192,73 @@ var TransfusionsCtrl = function ($scope, $modal, $timeout, RisarApi) {
         scope.model = p;
         return $modal.open({
             templateUrl: '/WebMis20/RISAR/modal/transfusions.html',
+            scope: scope,
+            resolve: {
+                model: function () {return p}
+            },
+            size: 'lg'
+        })
+    };
+};
+var IntolerancesCtrl = function ($scope, $modal, $timeout, RisarApi) {
+    $scope.intolerance_types = [
+        {
+            code: 'allergy',
+            name: 'Аллергия'
+        }, {
+            code: 'medicine',
+            name: 'Медикаментозная непереносимость'
+        }
+    ];
+    $scope.add = function () {
+        var model = {};
+        open_edit(model).result.then(function (rslt) {
+            var result = rslt[0],
+                restart = rslt[1];
+            RisarApi.anamnesis.intolerances.save($scope.client_id, result).then(function (result) {
+                $scope.anamnesis.intolerances.push(result);
+            });
+            if (restart) {
+                $timeout($scope.add)
+            }
+        })
+    };
+    $scope.edit = function (p) {
+        var model = angular.extend({}, p);
+        open_edit(model).result.then(function (rslt) {
+            var result = rslt[0],
+                restart = rslt[1];
+            RisarApi.anamnesis.intolerances.save($scope.client_id, result).then(function (result) {
+                angular.extend(p, result);
+            });
+            if (restart) {
+                $timeout($scope.add)
+            }
+        });
+    };
+    $scope.remove = function (p) {
+        if (p.id) {
+            RisarApi.anamnesis.intolerances.delete(p.id, p.type.code).then(function () {
+                p.deleted = 1;
+            });
+        } else {
+            p.deleted = 1;
+        }
+    };
+    $scope.restore = function (p) {
+        if (p.id) {
+            RisarApi.anamnesis.intolerances.undelete(p.id, p.type.code).then(function () {
+                p.deleted = 0;
+            });
+        } else {
+            p.deleted = 0;
+        }
+    };
+    var open_edit = function (p) {
+        var scope = $scope.$new();
+        scope.model = p;
+        return $modal.open({
+            templateUrl: '/WebMis20/RISAR/modal/intolerances.html',
             scope: scope,
             resolve: {
                 model: function () {return p}

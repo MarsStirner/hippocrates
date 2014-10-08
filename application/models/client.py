@@ -426,7 +426,7 @@ class ClientAllergy(db.Model):
                         nullable=False,
                         default=0)
 
-    def __init__(self, name, power, date, notes, client):
+    def __init__(self, name=None, power=None, date=None, notes=None, client=None):
         self.name = name
         self.power = power
         self.createDate = date
@@ -489,7 +489,7 @@ class ClientIntoleranceMedicament(db.Model):
                         nullable=False,
                         default=0)
 
-    def __init__(self, name, power, date, notes, client):
+    def __init__(self, name=None, power=None, date=None, notes=None, client=None):
         self.name = name
         self.power = power
         self.createDate = date

@@ -48,3 +48,8 @@ class AllergyPower(Enum):
     medium = 2, u'средняя'
     high = 3, u'высокая'
     strict = 4, u'строгая'
+
+
+class IntoleranceType(Enum):
+    allergy = 0, u'Аллергия'
+    medicine = 1, u'Медикаментозная непереносимость'

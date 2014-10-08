@@ -122,7 +122,38 @@
                     </tbody>
                 </table>
             </tab>
-            <tab heading="Сведения об аллергиях" active="tabs.allergies"></tab>
+            <tab heading="Сведения об аллергиях" active="tabs.intolerances" ng-controller="IntolerancesCtrl">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Дата</th>
+                        <th>Наименование</th>
+                        <th>Степень</th>
+                        <th>Примечания</th>
+                        <th>&nbsp;</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="t in anamnesis.intolerances">
+                        <td ng-if="t.deleted" colspan="6" class="text-center">Удалено. <a ng-click="restore(t)" style="cursor: pointer">Восстановить</a>?</td>
+                        <td ng-if="!t.deleted" ng-bind="t.date | asDate"></td>
+                        <td ng-if="!t.deleted" ng-bind="t.name"></td>
+                        <td ng-if="!t.deleted" ng-bind="t.power.name"></td>
+                        <td ng-if="!t.deleted" ng-bind="t.note"></td>
+                        <td ng-if="!t.deleted" class="col-md-1 nowrap">
+                            <a class="pseudo-btn" ng-click="edit(t)">Изменить</a>
+                            <button class="btn btn-danger" ng-click="remove(t)">Удалить</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">&nbsp;</td>
+                        <td>
+                            <a class="pseudo-btn" ng-click="add()">Добавить</a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </tab>
         </tabset>
     </div>
 {% endblock %}
@@ -133,4 +164,5 @@
     <script src="{{ url_for('.static', filename='js/risar.js', v=version) }}"></script>
     <script type="text/ng-template" id="/WebMis20/RISAR/modal/pregnancies.html">{% include 'risar/modals/_modal_pregnancies.html' %}</script>
     <script type="text/ng-template" id="/WebMis20/RISAR/modal/transfusions.html">{% include 'risar/modals/_modal_transfusions.html' %}</script>
+    <script type="text/ng-template" id="/WebMis20/RISAR/modal/intolerances.html">{% include 'risar/modals/_modal_intolerances.html' %}</script>
 {% endblock %}
