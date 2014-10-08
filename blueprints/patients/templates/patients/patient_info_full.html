@@ -76,9 +76,9 @@
                         </div>
                     </div>
                     <div name="PolicyFullInfo" class="well well-sm" toc-element="Полисы"
-                         ng-if="[[client.compulsory_policies.length || client.voluntary_policies.length]]">
+                         ng-if="client.compulsory_policies.length || client.voluntary_policies.length">
                         <legend>Полисы</legend>
-                        <h4 ng-if="client.compulsory_policies">Полис ОМС</h4>
+                        <h4 ng-if="client.compulsory_policies.length">Полис ОМС</h4>
                         <div ng-repeat="cpol in client.compulsory_policies | flt_not_deleted">
                             <div class="row">
                                 <div class="col-md-5">
@@ -101,7 +101,7 @@
                                 </div>
                             </div>
                         </div>
-                        <h4 ng-if="client.voluntary_policies">Полисы ДМС</h4>
+                        <h4 ng-if="client.voluntary_policies.length">Полисы ДМС</h4>
                         <div ng-repeat="vpol in client.voluntary_policies | flt_not_deleted">
                             <div class="row">
                                 <div class="col-md-5">
@@ -126,7 +126,7 @@
                         </div>
                     </div>
                     <div name="CharacteristicsFullInfo" class="well well-sm" toc-element="Особенности пациента"
-                         ng-if="[[client.blood_types.length||client.allergies.length||client.intolerances.length]]">
+                         ng-if="client.blood_types.length||client.allergies.length||client.intolerances.length">
                         <legend>Особенности пациента</legend>
                         <div name="BloodTypeFullInfo" toc-element="Группа крови" ng-if="client.blood_types">
                             <h4>Группа крови и резус фактор</h4>
@@ -191,7 +191,7 @@
                         </div>
                     </div>
                     <div name="SocStatusFullInfo" class="well well-sm" toc-element="Соц. статус"
-                         ng-if="[[client.invalidities.length||client.works.length||client.nationalities.length]]">
+                         ng-if="client.invalidities.length||client.works.length||client.nationalities.length">
                         <legend>Социальные статусы</legend>
                         <div name="InvalidityFullInfo" toc-element="Инвалидность" ng-if="client.invalidities">
                             <h4>Инвалидность</h4>
