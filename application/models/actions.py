@@ -463,6 +463,18 @@ class ActionProperty_OperationType(ActionProperty_Integer_Base):
         self.value_ = val.id if val is not None else None
 
 
+class ActionProperty_Boolean(ActionProperty_Integer_Base):
+    property_object = db.relationship('ActionProperty', backref='_value_Boolean')
+
+    @property
+    def value(self):
+        return bool(self.value_)
+
+    @value.setter
+    def value(self, val):
+        self.value_ = 1 if val else 0
+
+
 class ActionProperty_RLS(ActionProperty_Integer_Base):
 
     def get_value(self):
@@ -482,7 +494,7 @@ class ActionProperty_ReferenceRb(ActionProperty_Integer_Base):
 
     @value.setter
     def value(self, val):
-        self.value_ = val.id if val is not None else None
+        self.value_ = val['id'] if val is not None else None
 
     property_object = db.relationship('ActionProperty', backref='_value_ReferenceRb')
 
