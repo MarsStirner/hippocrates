@@ -1,93 +1,19 @@
 # -*- coding: utf-8 -*-
 from flask import request
-import itertools
+
 from application.lib.data import create_action
-from application.models.actions import Action, ActionType
-from application.lib.utils import jsonify, safe_traverse_attrs, safe_traverse
-from application.models.event import Event
-from application.models.client import BloodHistory, ClientAllergy, ClientIntoleranceMedicament
-from application.systemwide import db, cache
-from blueprints.risar.app import module
-from blueprints.risar.lib.represent import represent_anamnesis_action, represent_event, represent_intolerance
+from application.models.actions import Action
+from application.lib.utils import jsonify, safe_traverse
+from application.models.client import ClientAllergy, ClientIntoleranceMedicament
+from application.systemwide import db
+from ...app import module
+from ...lib.represent import represent_intolerance, action_apt_values, \
+    get_action_type_id
+from ...risar_config import pregnancy_apt_codes, risar_anamnesis_pregnancy, transfusion_apt_codes, \
+    risar_anamnesis_transfusion
+
 
 __author__ = 'mmalkov'
-
-risar_anamnesis_pregnancy = 'risar_anamnesis_pregnancy'
-risar_anamnesis_transfusion = 'risar_anamnesis_transfusion'
-
-
-@module.route('/api/0/anamnesis/')
-@module.route('/api/0/anamnesis/<int:event_id>')
-def api_0_anamnesis(event_id=None):
-    if not event_id:
-        return jsonify(None, 400, 'Event id must be provided')
-    event = Event.query.get(event_id)
-    if not event:
-        return jsonify(None, 404, 'Event not found')
-    mother = Action.query.join(ActionType).filter(
-        Action.event_id == event_id,
-        Action.deleted == 0,
-        ActionType.flatCode == 'risar_mother_anamnesis'
-    ).first()
-    father = Action.query.join(ActionType).filter(
-        Action.event_id == event_id,
-        Action.deleted == 0,
-        ActionType.flatCode == 'risar_father_anamnesis'
-    ).first()
-    represent_mother = represent_anamnesis_action(mother, True) if mother else None
-    represent_father = represent_anamnesis_action(father, False) if father else None
-    if represent_mother is not None:
-        mother_blood_type = BloodHistory.query\
-            .filter(BloodHistory.client_id == event.client_id)\
-            .order_by(BloodHistory.bloodDate.desc())\
-            .first()
-        if mother_blood_type:
-            represent_mother['blood_type'] = mother_blood_type.bloodType
-
-    event = Event.query.get(event_id)
-    allergies = ClientAllergy.query.filter(
-        ClientAllergy.client_id == Event.client_id,
-        ClientAllergy.deleted == 0)
-    medical_intolerances = ClientIntoleranceMedicament.query.filter(
-        ClientIntoleranceMedicament.client_id == Event.client_id,
-        ClientIntoleranceMedicament.deleted == 0)
-
-    return jsonify({
-        'event': represent_event(event),
-        'mother': represent_mother,
-        'father': represent_father,
-        'pregnancies': [
-            dict(action_apt_values(action, pregnancy_apt_codes), id=action.id)
-            for action in event.actions
-            if action.actionType_id == get_action_type_id(risar_anamnesis_pregnancy)
-        ],
-        'transfusions': [
-            dict(action_apt_values(action, transfusion_apt_codes), id=action.id)
-            for action in event.actions
-            if action.actionType_id == get_action_type_id(risar_anamnesis_transfusion)
-        ],
-        'intolerances': [
-            represent_intolerance(obj)
-            for obj in itertools.chain(event.client.allergies, event.client.intolerances)
-        ]
-    })
-
-
-@cache.memoize()
-def get_action_type_id(flat_code):
-    selectable = db.select((ActionType.id, ), whereclause=ActionType.flatCode == flat_code, from_obj=ActionType)
-    row = db.session.execute(selectable).first()
-    if not row:
-        return None
-    return row[0]
-
-
-pregnancy_apt_codes = ['number', 'year', 'pregnancyResult', 'alive', 'weight', 'cause_of_death', 'note']
-
-
-def action_apt_values(action, codes):
-    return dict((key, safe_traverse_attrs(action.propsByCode.get(key), 'value')) for key in codes)
-
 
 # Беременности
 
@@ -152,9 +78,6 @@ def api_0_pregnancies_post(action_id=None):
 
 
 # Переливания
-
-transfusion_apt_codes = ['date', 'type', 'blood_type', 'reaction']
-
 
 @module.route('/api/0/anamnesis/transfusions/')
 @module.route('/api/0/anamnesis/transfusions/<int:action_id>', methods=['GET'])

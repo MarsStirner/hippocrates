@@ -1,4 +1,5 @@
 {% extends 'risar/base.html' %}
+{% import 'risar/_macros.html' as rimacros %}
 
 {% block title %}> {{ module_name }}{% endblock %}
 
@@ -6,24 +7,12 @@
     <div ng-controller="ChartCtrl" ng-cloak>
         <div alert-notify></div>
         <ul class="breadcrumb">
-{#            <div class="alert alert-success abs-alert alert-dismissable" role="alert" ng-show="automagic">#}
-{#              <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>#}
-{#              Пациентка поставлена на учёт: <b>[[ chart.person.name ]]</b>. <a href="#">Изменить</a> <a href="#">Отменить</a>#}
-{#            </div>#}
             <li><a href="{{ url_for('.index_html') }}">Рабочий стол</a></li>
             <li>Карта пациентки</li>
         </ul>
         <div class="row small-marginal">
             <div class="col-lg-8 col-md-8">
-                <h2>
-                    Карта пациентки
-                    <a ng-href="{{ url_for('patients.patient') }}?client_id=[[ chart.client.id ]]">[[ chart.client.full_name ]]</a>
-                    ([[ chart.external_id ]])
-                </h2>
-                <div class="breadcrumb alert-warning" style="margin-bottom: 5px">На учёте в <b>[[ chart.person.organisation.short_name ]]</b>
-                у <b>[[ chart.person.name ]]</b>
-                с <b>[[ chart.set_date | asDate ]]</b>
-                </div>
+                {{ rimacros.page_title('Карта пациентки') }}
             </div>
             <div class="col-md-2 achievements">
                 <i class="fa fa-exclamation-triangle text-danger"></i>
@@ -112,7 +101,7 @@
                     <div class="panel-heading">Особенности</div>
                     <table class="table table.condensed">
                         <tbody>
-                        <tr ng-repeat="char in chart.characteristics" ng-class="{
+                        <tr ng-repeat="char in chart.anamnesis.intolerances" ng-class="{
                         'success text-success': char.power.code == 'low',
                         'warning text-warning': ['medium', 'unknown'].has(char.power.code),
                         'danger text-danger': ['high', 'strict'].has(char.power.code),
@@ -124,7 +113,7 @@
                         'fa-exclamation-circle': char.power.code == 'high',
                         'fa-times-circle': char.power.code == 'strict',
                         }"></span></td>
-                            <td>[[ char.type ]]</td>
+                            <td>[[ char.type.name ]]</td>
                             <td><b>[[ char.name ]]</b><span ng-if="char.note"> ([[ char.note ]])</span></td>
                         </tr>
                         </tbody>

@@ -1,7 +1,15 @@
 # -*- coding: utf-8 -*-
 import datetime
-from application.lib.utils import safe_dict
+import itertools
+
+from application.lib.utils import safe_traverse_attrs
+from application.models.actions import Action, ActionType
+from application.models.client import BloodHistory
 from application.models.enums import Gender, AllergyPower, IntoleranceType
+from application.systemwide import cache, db
+from ..risar_config import pregnancy_apt_codes, risar_anamnesis_pregnancy, transfusion_apt_codes, \
+    risar_anamnesis_transfusion, mother_codes, father_codes
+
 
 __author__ = 'mmalkov'
 
@@ -50,33 +58,7 @@ def represent_event(event):
                 'percent': 900 / 10,
             }
         },
-        'characteristics': [
-            {
-                'type': u'Аллергия',
-                'name': row.name,
-                'power': AllergyPower(row.power) if row.power is not None else None,
-                'note': row.notes,
-            }
-            for row in client.allergies.all()
-        ] + [
-            {
-                'type': u'Непереносимость',
-                'name': row.name,
-                'power': AllergyPower(row.power) if row.power is not None else None,
-                'note': row.notes,
-            }
-            for row in client.intolerances.all()
-        ],
-        'anamnesis': {
-            'mother': {
-                'data': u'Данные по матери'
-            },
-            'father': {
-                'data': u'Данные по отцу'
-            },
-            'transfusions': None,
-            'pregnancies': None,
-        },
+        'anamnesis': represent_anamnesis(event),
         'epicrisis': None,
         'checkups': [
             {
@@ -138,9 +120,59 @@ def represent_event(event):
         ]
     }
 
-common_codes = ['education', 'work_group', 'professional_properties', 'infertility', 'infertility_period', 'infertility_cause', 'blood_type', 'rh', 'finished_diseases', 'current_diseases', 'hereditary', 'alcohol', 'smoking', 'toxic', 'drugs']
-mother_codes = ['menstruation_start_age', 'menstruation_duration', 'menstruation_period', 'menstruation_disorders', 'sex_life_start_age', 'contraception_type', 'natural_pregnancy', 'family_income'] + common_codes
-father_codes = ['name'] + common_codes
+
+@cache.memoize()
+def get_action_type_id(flat_code):
+    selectable = db.select((ActionType.id, ), whereclause=ActionType.flatCode == flat_code, from_obj=ActionType)
+    row = db.session.execute(selectable).first()
+    if not row:
+        return None
+    return row[0]
+
+
+def action_apt_values(action, codes):
+    return dict((key, safe_traverse_attrs(action.propsByCode.get(key), 'value')) for key in codes)
+
+
+def represent_anamnesis(event):
+    mother = Action.query.join(ActionType).filter(
+        Action.event == event,
+        Action.deleted == 0,
+        ActionType.flatCode == 'risar_mother_anamnesis').first()
+    father = Action.query.join(ActionType).filter(
+        Action.event == event,
+        Action.deleted == 0,
+        ActionType.flatCode == 'risar_father_anamnesis').first()
+
+    represent_mother = represent_anamnesis_action(mother, True) if mother else None
+    represent_father = represent_anamnesis_action(father, False) if father else None
+
+    if represent_mother is not None:
+        mother_blood_type = BloodHistory.query \
+            .filter(BloodHistory.client_id == event.client_id) \
+            .order_by(BloodHistory.bloodDate.desc()) \
+            .first()
+        if mother_blood_type:
+            represent_mother['blood_type'] = mother_blood_type.bloodType
+
+    return {
+        'mother': represent_mother,
+        'father': represent_father,
+        'pregnancies': [
+            dict(action_apt_values(action, pregnancy_apt_codes), id=action.id)
+            for action in event.actions
+            if action.actionType_id == get_action_type_id(risar_anamnesis_pregnancy)
+        ],
+        'transfusions': [
+            dict(action_apt_values(action, transfusion_apt_codes), id=action.id)
+            for action in event.actions
+            if action.actionType_id == get_action_type_id(risar_anamnesis_transfusion)
+        ],
+        'intolerances': [
+            represent_intolerance(obj)
+            for obj in itertools.chain(event.client.allergies, event.client.intolerances)
+        ]
+    }
 
 
 def represent_anamnesis_action(action, mother=False):

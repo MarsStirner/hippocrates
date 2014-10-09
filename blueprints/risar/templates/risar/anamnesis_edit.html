@@ -1,4 +1,5 @@
 {% extends 'risar/base.html' %}
+{% import 'risar/_macros.html' as rimacros %}
 
 {% block title %}> {{ module_name }}{% endblock %}
 
@@ -6,44 +7,34 @@
     <div ng-controller="AnamnesisCtrl" ng-cloak>
         <ul class="breadcrumb">
             <li><a href="{{ url_for('.index_html') }}">Рабочий стол</a></li>
-            <li><a ng-href="{{ url_for('.html_chart') }}?event_id=[[ anamnesis.event.id ]]">Карта пациентки</a></li>
-            <li><a ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ anamnesis.event.id ]]">Анамнез пациентки</a></li>
+            <li><a ng-href="{{ url_for('.html_chart') }}?event_id=[[ chart.id ]]">Карта пациентки</a></li>
+            <li><a ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ chart.id ]]">Анамнез пациентки</a></li>
             <li>Изменение данных о матери</li>
         </ul>
         <div class="row small-marginal">
             <div class="col-md-12">
-                <h2>
-                    Анамнез пациентки
-                    <a ng-href="{{ url_for('patients.patient') }}?client_id=[[ anamnesis.event.client.id ]]">[[ anamnesis.event.client.full_name ]]</a>
-                    ([[ anamnesis.event.external_id ]])
-                </h2>
-                <span style="padding-left: 2px">
-                    На учёте в <b>[[ anamnesis.event.person.organisation.short_name ]]</b>
-                    у <b>[[ anamnesis.event.person.name ]]</b>
-                    с <b>[[ anamnesis.event.set_date | asDate ]]</b>
-                </span>
+                {{ rimacros.page_title('Изменение данных о матери') }}
             </div>
         </div>
-        <h2>Изменение данных о матери</h2>
         <div ng-controller="AnamnesisMotherEditCtrl">
             <div class="row" ng-repeat="code in criterions">
                 <div ng-if="_isArray(code)" class="col-md-12">
                     <div class="row" ng-repeat="code in code">{# yep! this is insane! :) #}
                         <div class="col-md-offset-1 col-md-5" ng-bind="meta[code].title"></div>
                         <div ng-if="!_isArray(code)" class="col-md-6" ng-switch="meta[code].type">
-                            <input ng-switch-when="str" ng-model="anamnesis.mother[code]" class="form-control">
-                            <input ng-switch-when="num" ng-model="anamnesis.mother[code]" class="form-control" type="number" valid-number>
-                            <input ng-switch-when="chk" ng-model="anamnesis.mother[code]" class="checkbox" type="checkbox">
-                            <rb-select ng-switch-when="rb" ng-model="anamnesis.mother[code]" ref-book="[[ meta[code].rb ]]"></rb-select>
+                            <input ng-switch-when="str" ng-model="chart.anamnesis.mother[code]" class="form-control">
+                            <input ng-switch-when="num" ng-model="chart.anamnesis.mother[code]" class="form-control" type="number" valid-number>
+                            <input ng-switch-when="chk" ng-model="chart.anamnesis.mother[code]" class="checkbox" type="checkbox">
+                            <rb-select ng-switch-when="rb" ng-model="chart.anamnesis.mother[code]" ref-book="[[ meta[code].rb ]]"></rb-select>
                         </div>
                     </div>
                 </div>
                 <div ng-if="!_isArray(code)" class="col-md-6" ng-bind="meta[code].title"></div>
                 <div ng-if="!_isArray(code)" class="col-md-6" ng-switch="meta[code].type">
-                    <input ng-switch-when="str" ng-model="anamnesis.mother[code]" class="form-control">
-                    <input ng-switch-when="num" ng-model="anamnesis.mother[code]" class="form-control" type="number" valid-number>
-                    <input ng-switch-when="chk" ng-model="anamnesis.mother[code]" class="checkbox" type="checkbox">
-                    <rb-select ng-switch-when="rb" ng-model="anamnesis.mother[code]" ref-book="[[ meta[code].rb ]]"></rb-select>
+                    <input ng-switch-when="str" ng-model="chart.anamnesis.mother[code]" class="form-control">
+                    <input ng-switch-when="num" ng-model="chart.anamnesis.mother[code]" class="form-control" type="number" valid-number>
+                    <input ng-switch-when="chk" ng-model="chart.anamnesis.mother[code]" class="checkbox" type="checkbox">
+                    <rb-select ng-switch-when="rb" ng-model="chart.anamnesis.mother[code]" ref-book="[[ meta[code].rb ]]"></rb-select>
                 </div>
             </div>
         </div>

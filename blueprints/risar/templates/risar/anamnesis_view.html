@@ -1,4 +1,5 @@
 {% extends 'risar/base.html' %}
+{% import 'risar/_macros.html' as rimacros %}
 
 {% block title %}> {{ module_name }}{% endblock %}
 
@@ -6,45 +7,36 @@
     <div ng-controller="AnamnesisCtrl" ng-cloak>
     <ul class="breadcrumb">
         <li><a href="{{ url_for('.index_html') }}">Рабочий стол</a></li>
-        <li><a ng-href="{{ url_for('.html_chart') }}?event_id=[[ anamnesis.event.id ]]">Карта пациентки</a></li>
+        <li><a ng-href="{{ url_for('.html_chart') }}?event_id=[[ chart.id ]]">Карта пациентки</a></li>
         <li>Анамнез пациентки</li>
     </ul>
         <div class="row small-marginal">
         <div class="col-md-12">
-            <h2>
-                Анамнез пациентки
-                <a ng-href="{{ url_for('patients.patient') }}?client_id=[[ anamnesis.event.client.id ]]">[[ anamnesis.event.client.full_name ]]</a>
-                ([[ anamnesis.event.external_id ]])
-            </h2>
-            <span style="padding-left: 2px">
-                На учёте в <b>[[ anamnesis.event.person.organisation.short_name ]]</b>
-                у <b>[[ anamnesis.event.person.name ]]</b>
-                с <b>[[ anamnesis.event.set_date | asDate ]]</b>
-            </span>
+            {{ rimacros.page_title('Анамнез пациентки') }}
         </div>
         </div>
         <tabset justified="true">
             <tab heading="Сведения о матери и об отце" active="tabs.motherfather" ng-controller="MotherFatherCtrl">
                 <p>
-                    Менструации с <b ng-bind-html="anamnesis.mother.menstruation_start_age | underlineNoVal:'лет'"></b>,
-                    длительность <b ng-bind-html="anamnesis.mother.menstruation_duration | underlineNoVal:'дней'"></b>,
-                    продолжительность цикла <b ng-bind-html="anamnesis.mother.menstruation_period | underlineNoVal:'дней'"></b>,
-                    нарушения <b>[[ anamnesis.mother.menstruation_disorders ]]</b>.
+                    Менструации с <b ng-bind-html="chart.anamnesis.mother.menstruation_start_age | underlineNoVal:'лет'"></b>,
+                    длительность <b ng-bind-html="chart.anamnesis.mother.menstruation_duration | underlineNoVal:'дней'"></b>,
+                    продолжительность цикла <b ng-bind-html="chart.anamnesis.mother.menstruation_period | underlineNoVal:'дней'"></b>,
+                    нарушения <b>[[ chart.anamnesis.mother.menstruation_disorders ]]</b>.
                 </p>
                 <p>
-                    Половая жизнь с <b ng-bind-html="anamnesis.mother.sex_life_start_age | underlineNoVal:'лет'"></b>.
-                    Вид контрацепции: <b ng-bind-html="anamnesis.mother.contraception_type | underlineNoVal"></b>.
+                    Половая жизнь с <b ng-bind-html="chart.anamnesis.mother.sex_life_start_age | underlineNoVal:'лет'"></b>.
+                    Вид контрацепции: <b ng-bind-html="chart.anamnesis.mother.contraception_type | underlineNoVal"></b>.
                 </p>
-                <p>Беременность наступила естественным путём: <b ng-bind-html="anamnesis.mother.natural_pregnancy | underlineNoVal"></b>.</p>
-                <p>ФИО отца: <b ng-bind-html="anamnesis.father.name | underlineNoVal"></b></p>
-                <p>Доход семьи: <b ng-bind-html="anamnesis.mother.family_income | underlineNoVal"></b></p>
+                <p>Беременность наступила естественным путём: <b ng-bind-html="chart.anamnesis.mother.natural_pregnancy | underlineNoVal"></b>.</p>
+                <p>ФИО отца: <b ng-bind-html="chart.anamnesis.father.name | underlineNoVal"></b></p>
+                <p>Доход семьи: <b ng-bind-html="chart.anamnesis.mother.family_income | underlineNoVal"></b></p>
                 <table class="table table-condensed">
                     <thead>
                     <tr>
                         <th class="col-md-2">Критерий</th>
                         <th class="col-md-5 text-center">
                             <i class="fa fa-female gender-icon-padding gender-icon-female"></i>Мать
-                            <a ng-href="{{ url_for('.html_anamnesis_edit') }}?event_id=[[ anamnesis.event.id ]]">Изменить</a>
+                            <a ng-href="{{ url_for('.html_anamnesis_edit') }}?event_id=[[ chart.id ]]">Изменить</a>
                         </th>
                         <th class="col-md-5 text-center"><i class="fa fa-male gender-icon-padding gender-icon-male"></i>Отец</th>
                     </tr>
@@ -55,8 +47,8 @@
                             <span ng-class="{'small-left-margin': indented.has(criterion)}">[[ criterion_names[criterion] ]]</span>
                             <div ng-if="warnings[criterion]" ng-bind="warnings[criterion].title" class="text-danger"></div>
                         </td>
-                        <td ng-bind="auto_convert(criterion, anamnesis.mother[criterion])"></td>
-                        <td ng-bind="auto_convert(criterion, anamnesis.father[criterion])"></td>
+                        <td ng-bind="auto_convert(criterion, chart.anamnesis.mother[criterion])"></td>
+                        <td ng-bind="auto_convert(criterion, chart.anamnesis.father[criterion])"></td>
                     </tr>
                     </tbody>
                 </table>
@@ -73,7 +65,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr ng-repeat="p in anamnesis.pregnancies">
+                    <tr ng-repeat="p in chart.anamnesis.pregnancies">
                         <td ng-if="p.deleted" colspan="5" class="text-center">Удалено. <a ng-click="restore(p)" style="cursor: pointer">Восстановить</a>?</td>
                         <td ng-if="!p.deleted" ng-bind="p.number"></td>
                         <td ng-if="!p.deleted" ng-bind="p.result.name"></td>
@@ -105,7 +97,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr ng-repeat="t in anamnesis.transfusions">
+                    <tr ng-repeat="t in chart.anamnesis.transfusions">
                         <td ng-if="t.deleted" colspan="6" class="text-center">Удалено. <a ng-click="restore(t)" style="cursor: pointer">Восстановить</a>?</td>
                         <td ng-if="!t.deleted" ng-bind="t.datetime | asDateTime"></td>
                         <td ng-if="!t.deleted" ng-bind="t.type"></td>
@@ -138,7 +130,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr ng-repeat="t in anamnesis.intolerances">
+                    <tr ng-repeat="t in chart.anamnesis.intolerances">
                         <td ng-if="t.deleted" colspan="6" class="text-center">Удалено. <a ng-click="restore(t)" style="cursor: pointer">Восстановить</a>?</td>
                         <td ng-if="!t.deleted" ng-bind="t.type.name" class="col-md-2"></td>
                         <td ng-if="!t.deleted" ng-bind="t.date | asDate"></td>

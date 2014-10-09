@@ -23,11 +23,11 @@ var AnamnesisCtrl = function ($scope, RisarApi) {
     }
     var event_id = $scope.event_id = params.event_id;
     var reload_anamnesis = function () {
-        RisarApi.anamnesis.get(event_id)
-        .then(function (anamnesis) {
-            $scope.anamnesis = anamnesis;
-            $scope.client_id = anamnesis.event.client.id;
-            $scope.hooks.forEach(function (hook) {hook(anamnesis)});
+        RisarApi.chart.get(event_id)
+        .then(function (data) {
+            $scope.chart = data.event;
+            $scope.client_id = chart.client.id;
+            $scope.hooks.forEach(function (hook) {hook(chart)});
         })
     };
     reload_anamnesis();
@@ -56,7 +56,7 @@ var MotherFatherCtrl = function ($scope) {
         'drugs': 'Наркотики'
     };
     $scope.indented = ['infertility_period', 'infertility_treatment', 'infertility_cause', 'alcohol', 'smoking', 'toxic', 'drugs'];
-    var reload_hook = function (anamnesis) {
+    var reload_hook = function (chart) {
         $scope.warnings = {};
         _(criterion_names).keys().forEach(function (key) {
             if (key == 'blood_type') {
@@ -89,7 +89,7 @@ var PregnanciesCtrl = function ($scope, $modal, $timeout, RisarApi) {
             var result = rslt[0],
                 restart = rslt[1];
             RisarApi.anamnesis.pregnancies.save($scope.event_id, result).then(function (result) {
-                $scope.anamnesis.pregnancies.push(result);
+                $scope.chart.anamnesis.pregnancies.push(result);
             });
             if (restart) {
                 $timeout($scope.add)
@@ -147,7 +147,7 @@ var TransfusionsCtrl = function ($scope, $modal, $timeout, RisarApi) {
             var result = rslt[0],
                 restart = rslt[1];
             RisarApi.anamnesis.transfusions.save($scope.event_id, result).then(function (result) {
-                $scope.anamnesis.transfusions.push(result);
+                $scope.chart.anamnesis.transfusions.push(result);
             });
             if (restart) {
                 $timeout($scope.add)
@@ -214,7 +214,7 @@ var IntolerancesCtrl = function ($scope, $modal, $timeout, RisarApi) {
             var result = rslt[0],
                 restart = rslt[1];
             RisarApi.anamnesis.intolerances.save($scope.client_id, result).then(function (result) {
-                $scope.anamnesis.intolerances.push(result);
+                $scope.chart.anamnesis.intolerances.push(result);
             });
             if (restart) {
                 $timeout($scope.add)
