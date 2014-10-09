@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import datetime
 import itertools
+from application.lib.data import create_action
 
 from application.lib.utils import safe_traverse_attrs
 from application.models.actions import Action, ActionType
@@ -8,7 +9,8 @@ from application.models.client import BloodHistory
 from application.models.enums import Gender, AllergyPower, IntoleranceType
 from application.systemwide import cache, db
 from ..risar_config import pregnancy_apt_codes, risar_anamnesis_pregnancy, transfusion_apt_codes, \
-    risar_anamnesis_transfusion, mother_codes, father_codes
+    risar_anamnesis_transfusion, mother_codes, father_codes, risar_father_anamnesis, risar_mother_anamnesis, \
+    checkup_flat_codes
 
 
 __author__ = 'mmalkov'
@@ -135,29 +137,9 @@ def action_apt_values(action, codes):
 
 
 def represent_anamnesis(event):
-    mother = Action.query.join(ActionType).filter(
-        Action.event == event,
-        Action.deleted == 0,
-        ActionType.flatCode == 'risar_mother_anamnesis').first()
-    father = Action.query.join(ActionType).filter(
-        Action.event == event,
-        Action.deleted == 0,
-        ActionType.flatCode == 'risar_father_anamnesis').first()
-
-    represent_mother = represent_anamnesis_action(mother, True) if mother else None
-    represent_father = represent_anamnesis_action(father, False) if father else None
-
-    if represent_mother is not None:
-        mother_blood_type = BloodHistory.query \
-            .filter(BloodHistory.client_id == event.client_id) \
-            .order_by(BloodHistory.bloodDate.desc()) \
-            .first()
-        if mother_blood_type:
-            represent_mother['blood_type'] = mother_blood_type.bloodType
-
     return {
-        'mother': represent_mother,
-        'father': represent_father,
+        'mother': represent_mother_action(event),
+        'father': represent_father_action(event),
         'pregnancies': [
             dict(action_apt_values(action, pregnancy_apt_codes), id=action.id)
             for action in event.actions
@@ -175,22 +157,69 @@ def represent_anamnesis(event):
     }
 
 
-def represent_anamnesis_action(action, mother=False):
+def get_action(event, flat_code, create=False):
     """
-    :type action: application.models.actions.Action
-    :type mother: bool
-    :param action:
-    :param mother:
+    :type flat_code: list|tuple|basestring|None
+    :param event:
+    :param flat_code:
     :return:
     """
-    codes = mother_codes if mother else father_codes
-    return dict(
+    query = Action.query.join(ActionType).filter(Action.event == event, Action.deleted == 0)
+    if isinstance(flat_code, (list, tuple)):
+        query = query.filter(ActionType.flatCode.in_(flat_code))
+    elif isinstance(flat_code, basestring):
+        query = query.filter(ActionType.flatCode == flat_code)
+    elif flat_code is None:
+        return
+    else:
+        raise TypeError('flat_code must be list|tuple|basestring|None')
+    action = query.first()
+    if action is None and create:
+        action = create_action(get_action_type_id(flat_code), event)
+    return action
+
+
+def represent_mother_action(event, action=None):
+    if action is None:
+        action = get_action(event, risar_mother_anamnesis)
+    if action is None:
+        return
+
+    represent_mother = dict((
         (prop.type.code, prop.value)
         for prop in action.properties
-        if prop.type.code in codes
+        if prop.type.code in mother_codes),
+
+        blood_type=safe_traverse_attrs(
+            BloodHistory.query
+            .filter(BloodHistory.client_id == event.client_id)
+            .order_by(BloodHistory.bloodDate.desc())
+            .first(),
+            'bloodType', default=None)
     )
 
-checkup_flat_codes = ['risarFirstInspection', 'risarSecondInspection']
+    if represent_mother is not None:
+        mother_blood_type = BloodHistory.query \
+            .filter(BloodHistory.client_id == event.client_id) \
+            .order_by(BloodHistory.bloodDate.desc()) \
+            .first()
+        if mother_blood_type:
+            represent_mother['blood_type'] = mother_blood_type.bloodType
+
+    return represent_mother
+
+
+def represent_father_action(event, action=None):
+    if action is None:
+        action = get_action(event, risar_father_anamnesis)
+    if action is None:
+        return
+    represent_father = dict(
+        (prop.type.code, prop.value)
+        for prop in action.properties
+        if prop.type.code in father_codes
+    )
+    return represent_father
 
 
 def represent_ticket(ticket):

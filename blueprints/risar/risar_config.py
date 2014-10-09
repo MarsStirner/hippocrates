@@ -2,6 +2,9 @@
 
 __author__ = 'mmalkov'
 
+risar_mother_anamnesis = 'risar_mother_anamnesis'
+risar_father_anamnesis = 'risar_father_anamnesis'
+
 risar_anamnesis_pregnancy = 'risar_anamnesis_pregnancy'
 risar_anamnesis_transfusion = 'risar_anamnesis_transfusion'
 
@@ -12,6 +15,4 @@ common_codes = ['education', 'work_group', 'professional_properties', 'infertili
 mother_codes = ['menstruation_start_age', 'menstruation_duration', 'menstruation_period', 'menstruation_disorders', 'sex_life_start_age', 'contraception_type', 'natural_pregnancy', 'family_income'] + common_codes
 father_codes = ['name'] + common_codes
 
-
-
-
+checkup_flat_codes = ['risarFirstInspection', 'risarSecondInspection']

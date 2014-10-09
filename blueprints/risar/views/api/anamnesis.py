@@ -2,13 +2,16 @@
 from flask import request
 
 from application.lib.data import create_action
-from application.models.actions import Action
+from application.models.actions import Action, ActionType
 from application.lib.utils import jsonify, safe_traverse
 from application.models.client import ClientAllergy, ClientIntoleranceMedicament
+from application.models.event import Event
 from application.systemwide import db
 from ...app import module
+from blueprints.risar.lib.represent import get_action
+from blueprints.risar.risar_config import risar_mother_anamnesis
 from ...lib.represent import represent_intolerance, action_apt_values, \
-    get_action_type_id
+    get_action_type_id, represent_mother_action
 from ...risar_config import pregnancy_apt_codes, risar_anamnesis_pregnancy, transfusion_apt_codes, \
     risar_anamnesis_transfusion
 
@@ -219,3 +222,18 @@ def api_0_intolerances_post(i_type, object_id=None):
     return jsonify(
         represent_intolerance(obj)
     )
+
+
+@module.route('/api/0/chart/<int:event_id>/mother', methods=['GET', 'POST'])
+def api_0_chart_mother(event_id):
+    event = Event.query.get(event_id)
+    if not event:
+        return jsonify(None, 404, 'Event not found')
+    if request.method == 'GET':
+        action = get_action(event, risar_mother_anamnesis)
+        if not action:
+            return jsonify(None, 404, 'Action not found')
+    else:
+        action = get_action(event, risar_mother_anamnesis, True)
+        # TODO POST
+    return jsonify(represent_mother_action(event, action))
