@@ -541,10 +541,23 @@ def api_delete_event():
 
     ok, msg = can_delete_event(event)
     if ok:
-        for action in event.actions:
-            action.deleted = 1
         event.deleted = 1
         db.session.add(event)
+        db.session.query(Action).filter(
+            Action.event_id == event.id
+        ).update({
+            Action.deleted: 1,
+        }, synchronize_session=False)
+        db.session.query(Visit).filter(
+            Visit.event_id == event.id
+        ).update({
+            Visit.deleted: 1,
+        }, synchronize_session=False)
+        db.session.query(ScheduleClientTicket).filter(
+            ScheduleClientTicket.event_id == event.id
+        ).update({
+            ScheduleClientTicket.event_id: None,
+        }, synchronize_session=False)
         db.session.commit()
         return jsonify(None)
 
