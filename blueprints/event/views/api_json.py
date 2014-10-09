@@ -525,6 +525,7 @@ def api_delete_event():
     event = Event.query.get_or_404(event_id)
 
     def can_delete_event(event):
+        # TODO: check payments
         if current_user.has_right('evtDelAll') or current_user.has_right('adm'):
             return True, ''
         elif current_user.has_right('evtDelOwn'):

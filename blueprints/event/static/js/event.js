@@ -353,7 +353,6 @@ var EventPaymentCtrl = function($scope, RefBookService, Settings, $http, $modal)
     $scope.import_payer_btn_disabled = function () {
         return event_created && $scope.contract_available();
     };
-
     $scope.payer_tabs = {
         person: {
             active: true,
@@ -775,7 +774,7 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
 
 
     $scope.delete_event = function (){
-        if(!$scope.event.payment.payments.payments.length){
+        if(!$scope.event_has_payments()){
             $http.post(
                 url_for_delete_event, {
                     event_id: $scope.event_id
@@ -817,6 +816,13 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
             return false
         }
         return true
+    };
+
+    $scope.event_has_payments = function () {
+        return $scope.event.payment && $scope.event.payment.payments.payments.length;
+    };
+    $scope.btn_delete_event_visible = function () {
+        return !$scope.event.is_new() && $scope.event.payment && !$scope.event_has_payments();
     };
 
     $scope.open_unclosed_actions_modal = function(unclosed_actions) {
