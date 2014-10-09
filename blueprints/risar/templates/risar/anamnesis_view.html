@@ -61,7 +61,7 @@
                     </tbody>
                 </table>
             </tab>
-            <tab heading="Сведения о предыдущих беременностях" active="tabs.pregnancies" ng-controller="PregnanciesCtrl">
+            <tab heading="Предыдущие беременности" active="tabs.pregnancies" ng-controller="PregnanciesCtrl">
                 <table class="table">
                     <thead>
                     <tr>
@@ -93,7 +93,7 @@
                     </tbody>
                 </table>
             </tab>
-            <tab heading="Сведения о переливаниях крови" active="tabs.transfusions" ng-controller="TransfusionsCtrl">
+            <tab heading="Переливания крови" active="tabs.transfusions" ng-controller="TransfusionsCtrl">
                 <table class="table">
                     <thead>
                     <tr>
@@ -125,10 +125,11 @@
                     </tbody>
                 </table>
             </tab>
-            <tab heading="Сведения об аллергиях" active="tabs.intolerances" ng-controller="IntolerancesCtrl">
+            <tab heading="Аллергии и непереносимости" active="tabs.intolerances" ng-controller="IntolerancesCtrl">
                 <table class="table">
                     <thead>
                     <tr>
+                        <th>Тип</th>
                         <th>Дата</th>
                         <th>Наименование</th>
                         <th>Степень</th>
@@ -139,6 +140,7 @@
                     <tbody>
                     <tr ng-repeat="t in anamnesis.intolerances">
                         <td ng-if="t.deleted" colspan="6" class="text-center">Удалено. <a ng-click="restore(t)" style="cursor: pointer">Восстановить</a>?</td>
+                        <td ng-if="!t.deleted" ng-bind="t.type.name" class="col-md-2"></td>
                         <td ng-if="!t.deleted" ng-bind="t.date | asDate"></td>
                         <td ng-if="!t.deleted" ng-bind="t.name"></td>
                         <td ng-if="!t.deleted" ng-bind="t.power.name"></td>
@@ -149,7 +151,7 @@
                         </td>
                     </tr>
                     <tr>
-                        <td colspan="4">&nbsp;</td>
+                        <td colspan="5">&nbsp;</td>
                         <td>
                             <a class="pseudo-btn" ng-click="add()">Добавить</a>
                         </td>
