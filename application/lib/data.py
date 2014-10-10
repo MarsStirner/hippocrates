@@ -376,12 +376,13 @@ def get_kladr_city(code):
         code = code[:-2]
     result = dict()
     try:
-        response = requests.get(u'{0}kladr/city/{1}/'.format(VESTA_URL, code))
-    except (requests.ConnectionError, requests.exceptions.MissingSchema):
-        # log
-        pass
+        url = u'{0}kladr/city/{1}/'.format(VESTA_URL, code)
+        response = requests.get(url)
+        response_json = response.json()
+    except (requests.ConnectionError, requests.exceptions.MissingSchema, ValueError) as e:
+        logger.error(u'Ошибка получения данных региона из кладр: %s (%s)' % (e, url), exc_info=True)
     else:
-        city = response.json().get('data')
+        city = response_json.get('data')
         if city:
             result = city[0]
             result['code'] = result['identcode']
@@ -399,12 +400,13 @@ def get_kladr_street(code):
         code = code[:-2]
     data = dict()
     try:
-        response = requests.get(u'{0}kladr/street/{1}/'.format(VESTA_URL, code))
-    except (requests.ConnectionError, requests.exceptions.MissingSchema):
-        # log
-        pass
+        url = u'{0}kladr/street/{1}/'.format(VESTA_URL, code)
+        response = requests.get(url)
+        response_json = response.json()
+    except (requests.ConnectionError, requests.exceptions.MissingSchema, ValueError) as e:
+        logger.error(u'Ошибка получения данных улицы из кладр: %s (%s)' % (e, url), exc_info=True)
     else:
-        street = response.json().get('data')
+        street = response_json.get('data')
         if street:
             data = street[0]
             data['code'] = data['identcode']
