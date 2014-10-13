@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
+from pytz import timezone
 from application.app import app
 from datetime import datetime
 from version import version as _version, last_change_date
 
+from config import TIME_ZONE
 
 @app.context_processor
 def copyright():
@@ -11,7 +13,8 @@ def copyright():
 
 @app.context_processor
 def version():
-    return dict(version=_version, change_date=last_change_date)
+    change_date = timezone(TIME_ZONE).localize(last_change_date)
+    return dict(version=_version, change_date=change_date)
 
 
 @app.context_processor
