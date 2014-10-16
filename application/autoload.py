@@ -14,7 +14,9 @@ def load_blueprints(app, apps_path):
     base_pkg = os.path.basename(apps_path)
     if pkg_list:
         for pkg_name in pkg_list:
-            if not pkg_name.startswith('__') and os.path.isdir(os.path.join(apps_path, pkg_name)):
+            if not pkg_name.startswith('__') \
+                    and os.path.isdir(os.path.join(apps_path, pkg_name)) \
+                    and os.path.exists(os.path.join(apps_path, pkg_name, '__init__.py')):
                 register_blueprint(app, '%s.%s' % (base_pkg, pkg_name), module_name="app", blueprint_name="module")
 
 

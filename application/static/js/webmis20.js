@@ -482,11 +482,13 @@ var WebMis20 = angular.module('WebMis20', [
         this.action_columns = {};
         this.properties_by_id = {};
         this.properties_by_code = {};
+        this.ro = false;
     };
     function success_wrapper(self) {
         return function (data) {
             self.action = data.result.action;
             self.layout = data.result.layout;
+            self.ro = data.result.ro;
             self.bak_lab_info = data.result.bak_lab_info;
             self.action_columns = {
                 assignable: false,

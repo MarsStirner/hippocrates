@@ -932,6 +932,8 @@ class EventVisualizer(object):
 
 
 class ActionVisualizer(object):
+    ro = True
+
     def make_action(self, action):
         """
         @type action: Action
@@ -962,7 +964,8 @@ class ActionVisualizer(object):
                     for prop in action.properties
                 ]
             },
-            'layout': self.make_action_layout(action)
+            'ro': self.ro,
+            'layout': self.make_action_layout(action),
         }
         if action_is_bak_lab(action):
             result['bak_lab_info'] = self.make_bak_lab_info(action)
