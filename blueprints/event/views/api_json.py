@@ -459,9 +459,7 @@ def api_service_remove_coord():
                        synchronize_session=False)
         db.session.commit()
 
-    return jsonify({
-        'result': 'ok'
-    })
+    return jsonify(None)
 
 
 @module.route('/api/event_payment/service_coordinate.json', methods=['POST'])
@@ -494,9 +492,7 @@ def api_service_change_account():
         actions.update({Action.account: data['account']}, synchronize_session=False)
         db.session.commit()
 
-    return jsonify({
-        'result': 'ok'
-    })
+    return jsonify(None)
 
 
 @module.route('/api/event_payment/delete_service.json', methods=['POST'])
@@ -509,9 +505,7 @@ def api_service_delete_service():
                        synchronize_session=False)
         db.session.commit()
 
-    return jsonify({
-        'result': 'ok'
-    })
+    return jsonify(None)
 
 
 @module.route('api/delete_action.json', methods=['POST'])
@@ -522,9 +516,29 @@ def api_delete_action():
         action.update({Action.deleted: 1}, synchronize_session=False)
         db.session.commit()
 
-    return jsonify({
-        'result': 'ok'
-    })
+    return jsonify(None)
+
+
+@module.route('api/delete_event.json', methods=['POST'])
+def api_delete_event():
+    event_id = request.json['event_id']
+
+    if event_id:
+        event = Event.query.get(event_id)
+        if (current_user.has_right('evtDelAll') or current_user.has_right('adm') or
+                (current_user.has_right('evtDelOwn') and event.execPerson_id == current_user.id)):
+            for action in event.actions:
+                action.deleted = 1
+            event.deleted = 1
+            db.session.add(event)
+            db.session.commit()
+            return jsonify(None)
+        else:
+            return jsonify({'name': u"У пользователя нет прав на удаление обращения",
+                            'data': {
+                                'err_msg': 'Forbidden'
+                            }},
+                           403, 'deleteve event error')
 
 
 @module.route('/api/events.json', methods=["POST"])

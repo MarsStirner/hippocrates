@@ -43,6 +43,14 @@
                         </div>
                     </div>
                     {%- endif %}
+                    {% if current_user.has_right('evtDelAll') or current_user.has_right('adm') or
+                    (current_user.has_right('evtDelOwn') and current_user.id == event.execPerson_id)%}
+                    <div class="row vmargin10">
+                        <div class="col-md-12">
+                            <button type="button" ng-click="open_delete_event_modal();" class="btn btn-block btn-danger">Удалить обращение</button>
+                        </div>
+                    </div>
+                    {% endif %}
                     </toc-affix>
                 </div>
             </div>
