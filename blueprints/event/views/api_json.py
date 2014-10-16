@@ -521,24 +521,55 @@ def api_delete_action():
 
 @module.route('api/delete_event.json', methods=['POST'])
 def api_delete_event():
-    event_id = request.json['event_id']
+    event_id = request.json.get('event_id')
+    if not event_id:
+        return abort(404)
+    event = Event.query.get_or_404(event_id)
 
-    if event_id:
-        event = Event.query.get(event_id)
-        if (current_user.has_right('evtDelAll') or current_user.has_right('adm') or
-                (current_user.has_right('evtDelOwn') and event.execPerson_id == current_user.id)):
-            for action in event.actions:
-                action.deleted = 1
-            event.deleted = 1
-            db.session.add(event)
-            db.session.commit()
-            return jsonify(None)
-        else:
-            return jsonify({'name': u"У пользователя нет прав на удаление обращения",
-                            'data': {
-                                'err_msg': 'Forbidden'
-                            }},
-                           403, 'deleteve event error')
+    def can_delete_event(event):
+        # TODO: check payments
+        if current_user.has_right('evtDelAll') or current_user.has_right('adm'):
+            return True, ''
+        elif current_user.has_right('evtDelOwn'):
+            if event.execPerson_id == current_user.id:
+                return True, ''
+            elif event.createPerson_id == current_user.id:
+                # Проверка, что все действия не были изменены после создания обращения
+                # или, что не появилось новых действий
+                for action in event.actions:
+                    if action.modifyPerson_id != event.createPerson_id:
+                        return False, u'В обращении были созданы новые или отредактированы первоначальные документы'
+                return True, ''
+        return False, u'У пользователя нет прав на удаление обращения'
+
+    ok, msg = can_delete_event(event)
+    if ok:
+        event.deleted = 1
+        db.session.add(event)
+        db.session.query(Action).filter(
+            Action.event_id == event.id
+        ).update({
+            Action.deleted: 1,
+        }, synchronize_session=False)
+        db.session.query(Visit).filter(
+            Visit.event_id == event.id
+        ).update({
+            Visit.deleted: 1,
+        }, synchronize_session=False)
+        db.session.query(ScheduleClientTicket).filter(
+            ScheduleClientTicket.event_id == event.id
+        ).update({
+            ScheduleClientTicket.event_id: None,
+        }, synchronize_session=False)
+        db.session.commit()
+        return jsonify(None)
+
+    return jsonify({
+        'name': msg,
+        'data': {
+            'err_msg': u'Удаление запрещено'
+        }
+    }, 403, 'delete event error')
 
 
 @module.route('/api/events.json', methods=["POST"])

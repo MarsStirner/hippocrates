@@ -67,8 +67,12 @@ class Event(db.Model):
     payments = db.relationship('EventPayment', backref=db.backref('event'))
     client = db.relationship(u'Client')
     diagnostics = db.relationship(
-        u'Diagnostic', lazy=True, innerjoin=True, primaryjoin=
-        "and_(Event.id == Diagnostic.event_id, Diagnostic.deleted == 0)"
+        u'Diagnostic', lazy=True, innerjoin=True,
+        primaryjoin="and_(Event.id == Diagnostic.event_id, Diagnostic.deleted == 0)"
+    )
+    visits = db.relationship(
+        u'Visit',
+        primaryjoin="and_(Event.id == Visit.event_id, Visit.deleted == 0)"
     )
     uuid = db.relationship('UUID')
 

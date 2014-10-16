@@ -36,7 +36,7 @@ def new_event():
         client_id = int(request.args['client_id'])
     except (KeyError, ValueError):
         return abort(400)
-    return get_event_form(event_new=True)
+    return get_event_form(event=None)
 
 
 def get_event_form(**kwargs):
