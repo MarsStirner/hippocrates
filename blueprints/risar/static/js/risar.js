@@ -42,6 +42,11 @@ WebMis20
             var url = Config.url.api_anamnesis + event_id;
             return wrapper('GET', url);
         },
+        mother: {
+            save: function (event_id, data) {
+                return wrapper('POST', Config.url.api_anamnesis_mother + event_id, {}, data);
+            }
+        },
         pregnancies: {
             get: function (id) {
                 return wrapper('GET', Config.url.api_anamnesis_pregnancies + id);

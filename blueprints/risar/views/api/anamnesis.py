@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
+import datetime
 from flask import request
+from flask.ext.login import current_user
 
 from application.lib.data import create_action
 from application.models.actions import Action, ActionType
 from application.lib.utils import jsonify, safe_traverse
-from application.models.client import ClientAllergy, ClientIntoleranceMedicament
+from application.models.client import ClientAllergy, ClientIntoleranceMedicament, BloodHistory
 from application.models.event import Event
 from application.systemwide import db
 from ...app import module
@@ -235,5 +237,16 @@ def api_0_chart_mother(event_id):
             return jsonify(None, 404, 'Action not found')
     else:
         action = get_action(event, risar_mother_anamnesis, True)
-        # TODO POST
+        for code, value in request.get_json().iteritems():
+            if code not in ('id', 'blood_type') and code in action.propsByCode:
+                action.propsByCode[code].value = value
+            elif code == 'blood_type' and value:
+                mother_blood_type = BloodHistory.query \
+                    .filter(BloodHistory.client_id == event.client_id) \
+                    .order_by(BloodHistory.bloodDate.desc()) \
+                    .first()
+                if mother_blood_type and value.id != mother_blood_type.bloodType_id:
+                    n = BloodHistory(value.id, datetime.date.today(), current_user.id, event.client_id)
+                    db.session.add(n)
+        db.session.commit()
     return jsonify(represent_mother_action(event, action))

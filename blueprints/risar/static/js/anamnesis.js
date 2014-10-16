@@ -313,5 +313,12 @@ var AnamnesisMotherEditCtrl = function ($scope, RisarApi) {
         smoking: {title: 'Курение', type: 'chk'},
         toxic: {title: 'Токсические вещества', type: 'chk'},
         drugs: {title: 'Наркотики', type: 'chk'}
+    };
+    $scope.save = function () {
+        var model = $scope.chart.anamnesis.mother;
+        RisarApi.anamnesis.mother.save($scope.chart.id, model)
+        .then(function (data) {
+            $scope.chart.anamnesis.mother = data;
+        })
     }
-}
+};
