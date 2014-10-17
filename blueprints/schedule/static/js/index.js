@@ -1,7 +1,7 @@
 /**
  * Created by mmalkov on 11.07.14.
  */
-var ScheduleCtrl = function ($scope, $http, RefBook, PersonTreeUpdater) {
+var ScheduleCtrl = function ($scope, $http, RefBook, PersonTreeUpdater, WMAppointmentDialog, $window) {
     $scope.aux = aux;
     var params = aux.getQueryParams(document.location.search);
     $scope.person_id = params.person_id;
@@ -101,6 +101,26 @@ var ScheduleCtrl = function ($scope, $http, RefBook, PersonTreeUpdater) {
         $scope.reloadSchedule(true);
     });
 
+    $scope.ticket_user_info_available = function (ticket) {
+        return ticket && ticket.record && ticket.record.client_id;
+    };
+
+    $scope.view_patient_info = function (ticket) {
+        $window.open(url_client_html + '?client_id=' + ticket.record.client_id);
+    };
+
+    $scope.appointment_toggle = function (ticket) {
+        var instance;
+        if (ticket.status == 'busy') {
+            instance = WMAppointmentDialog.cancel(ticket, $scope.person, ticket.record.client_id);
+        } else {
+            instance = WMAppointmentDialog.make(ticket, $scope.person, null);
+        }
+        instance.result.then(function () {
+            $scope.reloadSchedule();
+        });
+    };
+
     window.onpopstate = function (event) {
         // Это всё происходит вне контекста скоупа, и потому не запускается вотчер на person_id, иначе нам пришлось
         // бы делать хак
@@ -124,4 +144,4 @@ var ScheduleCtrl = function ($scope, $http, RefBook, PersonTreeUpdater) {
         $scope.$digest();
     }
 };
-WebMis20.controller('ScheduleCtrl', ['$scope', '$http', 'RefBook', 'PersonTreeUpdater', ScheduleCtrl]);
+WebMis20.controller('ScheduleCtrl', ['$scope', '$http', 'RefBook', 'PersonTreeUpdater', 'WMAppointmentDialog', '$window', ScheduleCtrl]);

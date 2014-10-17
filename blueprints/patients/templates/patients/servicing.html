@@ -3,61 +3,10 @@
 {% block title %}> {{ module_name }}{% endblock %}
 
 {% block main %}
-    <legend xmlns="http://www.w3.org/1999/html"><h2>Обслуживание пациентов</h2></legend>
     <div ng-controller="ClientSearch" class="ng-cloak">
-        <form class="form-horizontal marginal" role="form">
-            <div class="input-group">
-                <input id="search" class="form-control" type="text" ng-model="query" autocomplete="off"
-                       ng-change="clear_results()"
-                       placeholder="Поиск пациента по коду, ФИО, дате рождения, полису или документу, удостоверяющему личность">
-                <span class="input-group-btn">
-                    <button class="btn btn-info" ng-click="perform_search()"><span class="glyphicon glyphicon-search"> Найти</span></button>
-                </span>
-            </div>
-        </form>
-        <div ui-alert-list="alerts"></div>
-        <div class="panel panel-default" ng-class="{'panel-danger': results.length === 0, 'panel-success': results.length > 0}">
-            <div class="panel-heading">
-                <div class="row">
-                    <div class="col-sm-8">
-                        <span ng-if="results.length > 0" class="lead">Результаты поиска</span>
-                        <span ng-if="results.length === 0 && query">Пациент не найден в базе данных</span>
-                    </div>
-                    <div class="col-sm-4 text-right">
-                        <button ng-click="open_client('new')" class="btn btn-primary btn-lg">Зарегистрировать пациента
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <table id="result_tbl" class="table table-condensed table-clickable table-hover" ng-if="results.length > 0">
-                <thead>
-                <tr>
-                    <th>Код</th>
-                    <th>ФИО</th>
-                    <th>Дата рождения</th>
-                    <th>Пол</th>
-                    <th>Документ</th>
-                    <th>СНИЛС</th>
-                    <th>Полис ОМС</th>
-                    <th>Полис ДМС</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr ng-repeat="result in results" style="cursor: pointer" ng-click="set_patient_id(result.info.id)"
-                        ng-class="{'bg-info text-info': result.info.id === client_id}">
-                    <td ng-bind-html="result.info.id | highlight: query"></td>
-                    <td ng-bind-html="result.info.full_name | highlight: query"></td>
-                    <td ng-bind-html="result.info.birth_date | asDate | highlight: query"></td>
-                    <td ng-bind="result.info.sex.name"></td>
-                    <td ng-bind-html="result.id_document.doc_text | highlight: query"></td>
-                    <td class="whitespace: nowrap" ng-bind-html="clientServices.formatSnils(result.info.snils) | highlight: query"></td>
-                    <td ng-bind-html="result.compulsory_policy.policy_text | highlight: query"></td>
-                    <td><div ng-repeat="policy in result.voluntary_policies"><span ng-bind-html="policy.policy_text | highlight: query"></span></div></td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-        {#        <pre>[[schedule|json]]</pre><pre>[[client | json]]</pre>#}
+        <legend xmlns="http://www.w3.org/1999/html"><h2>Обслуживание пациентов</h2></legend>
+        <wm-search-client client-id="client.client_id" query="query" allow-register
+            on-select="set_patient_id(selected_client)"></wm-search-client>
     </div>
 
 {% endblock %}

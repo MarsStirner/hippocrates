@@ -104,49 +104,19 @@ var ClientModalCtrl = function ($scope, $modalInstance, client, PrintingService,
         $scope.client = null;
     });
 };
-var ClientSearch = function ($scope, $http, $timeout, $window, PrintingService, WMClient, WMClientServices, $modal, $q) {
+
+var ClientSearch = function ($scope, WMClient, $modal) {
     $scope.aux = aux;
     $scope.params = aux.getQueryParams(document.location.search);
     $scope.query = "";
-    $scope.results = null;
     $scope.client_id = null;
     $scope.client = null;
-    $scope.clientServices = WMClientServices;
-    $scope.alerts = [];
 
-    $scope.set_patient_id = function (patient_id) {
+    $scope.set_patient_id = function (selected_client) {
+        var patient_id = selected_client.info.id;
         $scope.client_id = patient_id;
         $scope.client = new WMClient(patient_id);
         $scope.client.reload('for_servicing');
-    };
-
-    $scope.clear_results = function () {
-        $scope.results = null;
-        $scope.client = null;
-        $scope.client_id = null;
-    };
-
-    var canceler = $q.defer();
-    $scope.perform_search = function () {
-        canceler.resolve();
-        canceler = $q.defer();
-        if ($scope.query) {
-            $http.get(
-                url_client_search, {
-                    params: {
-                        q: $scope.query
-                    },
-                    timeout: canceler.promise
-                }
-            ).success(function (data) {
-                    $scope.results = data.result;
-                });
-        }
-    };
-
-    $scope.query_clear = function () {
-        $scope.query = '';
-        $scope.clear_results();
     };
 
     $scope.$watch('client.info.id', function(n, o){
@@ -154,10 +124,6 @@ var ClientSearch = function ($scope, $http, $timeout, $window, PrintingService, 
             $scope.modal_client();
         }
     });
-
-    $scope.open_client = function (client_id) {
-        window.open(url_client_html + '?client_id=' + client_id, '_blank');
-    };
 
     $scope.modal_client = function() {
         var modalInstance = $modal.open({
@@ -172,4 +138,5 @@ var ClientSearch = function ($scope, $http, $timeout, $window, PrintingService, 
         });
     };
 };
-WebMis20.controller('ClientSearch', ['$scope', '$http', '$timeout', '$window', 'PrintingService', 'WMClient', 'WMClientServices', '$modal', '$q', ClientSearch]);
+WebMis20.controller('ClientSearch', ['$scope', 'WMClient', '$modal', ClientSearch]);
+

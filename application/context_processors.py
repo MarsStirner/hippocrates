@@ -38,7 +38,7 @@ def general_menu():
                            title=u'Формирование графика врача',
                            roles=('admin', 'rRegistartor', 'clinicRegistrator')))
     menu_items.append(dict(link='schedule.index',
-                           title=u'Просмотр графика работы',
+                           title=u'График работы',
                            roles=('admin', 'rRegistartor', 'clinicRegistrator')))
     menu_items.append(dict(link='schedule.doctor_schedule_day',
                            title=u'Приём пациентов',
