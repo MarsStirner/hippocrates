@@ -350,6 +350,10 @@ var EventPaymentCtrl = function($scope, RefBookService, Settings, $http, $modal)
     $scope.contract_info_disabled = function () {
         return event_created || $scope.integration1CODVD_enabled();
     };
+    $scope.btn_edit_contract_info_visible = function () {
+        var lc = $scope.event.payment && $scope.event.payment.local_contract || null;
+        return !(lc && lc.date_contract && lc.number_contract || $scope.integration1CODVD_enabled());
+    };
     $scope.import_payer_btn_disabled = function () {
         return event_created && $scope.contract_available();
     };
