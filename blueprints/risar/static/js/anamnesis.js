@@ -26,8 +26,8 @@ var AnamnesisCtrl = function ($scope, RisarApi) {
         RisarApi.chart.get(event_id)
         .then(function (data) {
             $scope.chart = data.event;
-            $scope.client_id = chart.client.id;
-            $scope.hooks.forEach(function (hook) {hook(chart)});
+            $scope.client_id = data.event.client.id;
+            $scope.hooks.forEach(function (hook) {hook(data.event)});
         })
     };
     reload_anamnesis();
@@ -266,6 +266,11 @@ var IntolerancesCtrl = function ($scope, $modal, $timeout, RisarApi) {
     };
 };
 var AnamnesisMotherEditCtrl = function ($scope, RisarApi) {
+    $scope.hooks.push(function (chart) {
+        if (!chart.anamnesis.mother) {
+            chart.anamnesis.mother = {};
+        }
+    });
     $scope._isArray = _.isArray;
     var criterions = $scope.criterions = [
         'education', 'work_group', 'professional_properties', 'family_income', 'blood_type',

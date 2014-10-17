@@ -37,6 +37,9 @@
                     <rb-select ng-switch-when="rb" ng-model="chart.anamnesis.mother[code]" ref-book="[[ meta[code].rb ]]"></rb-select>
                 </div>
             </div>
+            <div class="text-right">
+                <button class="btn btn-success" ng-click="save()">Схоронить</button>
+            </div>
         </div>
     </div>
 {% endblock %}

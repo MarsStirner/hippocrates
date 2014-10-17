@@ -245,8 +245,8 @@ def api_0_chart_mother(event_id):
                     .filter(BloodHistory.client_id == event.client_id) \
                     .order_by(BloodHistory.bloodDate.desc()) \
                     .first()
-                if mother_blood_type and value.id != mother_blood_type.bloodType_id:
-                    n = BloodHistory(value.id, datetime.date.today(), current_user.id, event.client_id)
+                if mother_blood_type and value['id'] != mother_blood_type.bloodType_id or not mother_blood_type:
+                    n = BloodHistory(value['id'], datetime.date.today(), current_user.id, event.client)
                     db.session.add(n)
         db.session.commit()
     return jsonify(represent_mother_action(event, action))

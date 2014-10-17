@@ -44,7 +44,7 @@ WebMis20
         },
         mother: {
             save: function (event_id, data) {
-                return wrapper('POST', Config.url.api_anamnesis_mother + event_id, {}, data);
+                return wrapper('POST', Config.url.api_anamnesis_mother.format(event_id), {}, data);
             }
         },
         pregnancies: {
