@@ -985,8 +985,21 @@ var aux = {
 
         return params;
     },
-    range: function (num) {
-        return Array.apply(null, new Array(num)).map(function(_, i) {return i;})
+    range: function (start, end) {
+        if (arguments.length < 2) {
+            end = start;
+            start = 0;
+        }
+        if (start >= end) {
+            return [];
+        }
+        var res = [],
+            cur = end - start;
+        end--;
+        while (cur--) {
+            res[cur] = end--;
+        }
+        return res;
     },
     moment: moment,
     months: [

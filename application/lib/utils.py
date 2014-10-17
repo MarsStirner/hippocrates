@@ -375,6 +375,13 @@ def safe_traverse_attrs(obj, *args, **kwargs):
         return safe_traverse_attrs(getattr(obj, args[0]), *args[1:], **kwargs)
 
 
+def format_date(d):
+    if isinstance(d, datetime.date):
+        return d.strftime('%d.%m.%Y')
+    else:
+        return d
+
+
 def get_new_uuid():
     """Сгенерировать новый uuid уникальный в пределах бд.
     @rtype: application.models.exist.UUID
