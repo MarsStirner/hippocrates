@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('WebMis20.directives').
-    directive('wmSearchClient', ['$q', '$http', 'WMClientController', function ($q, $http, WMClientController) {
+    directive('wmSearchClient', ['$q', '$http', 'WMClientServices', function ($q, $http, WMClientServices) {
         return {
             restrict: 'E',
             scope: {
@@ -50,7 +50,7 @@ angular.module('WebMis20.directives').
                 };
             },
             link: function (scope, element, attrs) {
-                scope.wmClientCtrl = WMClientController;
+                scope.wmClientCtrl = WMClientServices;
                 scope.results = null;
                 scope.allow_register = angular.isDefined(attrs.allowRegister);
             },
