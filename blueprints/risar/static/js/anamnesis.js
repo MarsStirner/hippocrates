@@ -265,7 +265,7 @@ var IntolerancesCtrl = function ($scope, $modal, $timeout, RisarApi) {
         })
     };
 };
-var AnamnesisMotherEditCtrl = function ($scope, RisarApi) {
+var AnamnesisMotherEditCtrl = function ($scope, RisarApi, RefBook) {
     $scope.hooks.push(function (chart) {
         if (!chart.anamnesis.mother) {
             chart.anamnesis.mother = {};
@@ -290,6 +290,7 @@ var AnamnesisMotherEditCtrl = function ($scope, RisarApi) {
             'alcohol', 'smoking', 'toxic', 'drugs'
         ]
     ];
+    $scope.MKB = new RefBook('MKB');
     $scope.meta = {
         education: {title: 'Образование', type: 'rb', rb: 'rbRisarEducation'},
         work_group: {title: 'Общественно-профессиональная группа', type: 'rb', rb: 'rbRisarWorkGroup'},
@@ -310,9 +311,9 @@ var AnamnesisMotherEditCtrl = function ($scope, RisarApi) {
         infertility_period: {title: 'длительность', type: 'num'},
         infertility_treatment: {title: 'лечение', type: 'str'},
         infertility_cause: {title: 'причина', type: 'str'},
-        finished_diseases: {title: 'перенесенные заболевания', type: 'str'},
+        finished_diseases: {title: 'перенесенные заболевания', type: 'mkb-multi'},
         hereditary: {title: 'Наследственность', type: 'str'},
-        current_diseases: {title: 'Текущие заболевания', type: 'str'},
+        current_diseases: {title: 'Текущие заболевания', type: 'mkb-multi'},
         bad_habits: {title: 'Вредные привычки'},
         alcohol: {title: 'Алкоголь', type: 'chk'},
         smoking: {title: 'Курение', type: 'chk'},

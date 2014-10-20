@@ -26,6 +26,9 @@
                             <input ng-switch-when="num" ng-model="chart.anamnesis.mother[code]" class="form-control" type="number" valid-number>
                             <input ng-switch-when="chk" ng-model="chart.anamnesis.mother[code]" class="checkbox" type="checkbox">
                             <rb-select ng-switch-when="rb" ng-model="chart.anamnesis.mother[code]" ref-book="[[ meta[code].rb ]]"></rb-select>
+                            <div ng-switch-when="mkb-multi" ng-model="chart.anamnesis.mother[code]" items="MKB.objects" fs-multiselect>
+                                <strong>[[ item.code ]]</strong> - [[ item.name ]]
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -35,6 +38,9 @@
                     <input ng-switch-when="num" ng-model="chart.anamnesis.mother[code]" class="form-control" type="number" valid-number>
                     <input ng-switch-when="chk" ng-model="chart.anamnesis.mother[code]" class="checkbox" type="checkbox">
                     <rb-select ng-switch-when="rb" ng-model="chart.anamnesis.mother[code]" ref-book="[[ meta[code].rb ]]"></rb-select>
+                    <div ng-switch-when="mkb-multi" ng-model="chart.anamnesis.mother[code]" items="MKB.objects" fs-multiselect>
+                        <strong>[[ item.code ]]</strong> - [[ item.name ]]
+                    </div>
                 </div>
             </div>
             <div class="text-right">
