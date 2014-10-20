@@ -186,3 +186,6 @@ span.empty-value {
 .inline-datepicker .input-group-btn{
     display: none;
 }
+.bottom_dotted {
+    border-bottom: 1px dotted;
+}

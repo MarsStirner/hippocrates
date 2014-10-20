@@ -83,7 +83,7 @@
                         <tr ng-repeat="checkup in chart.checkups">
                             <td>[[ $index + 1 ]]</td>
                             <td>[[ checkup.beg_date | asDate ]]</td>
-                            <td><span tooltip="[[ checkup.diag.name ]]">[[ checkup.diag.code ]]</span></td>
+                            <td><span class="text-info bottom_dotted" tooltip="[[ checkup.diag.name ]]">[[ checkup.diag.code ]]</span></td>
                             <td>[[ checkup.person_name ]]</td>
                         </tr>
                     </table>
@@ -114,7 +114,7 @@
                         'fa-times-circle': char.power.code == 'strict',
                         }"></span></td>
                             <td>[[ char.type.name ]]</td>
-                            <td><b>[[ char.name ]]</b><span ng-if="char.note"> ([[ char.note ]])</span></td>
+                            <td><b ng-class="{'bottom_dotted': char.note}" tooltip="[[ char.note ]]">[[ char.name ]]</b></td>
                         </tr>
                         </tbody>
                     </table>
