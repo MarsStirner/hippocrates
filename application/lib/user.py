@@ -2,7 +2,7 @@
 
 from application.systemwide import db
 from application.models.exists import Person, vrbPersonWithSpeciality
-from flask.ext.login import UserMixin, AnonymousUserMixin
+from flask.ext.login import UserMixin, AnonymousUserMixin, current_user
 import hashlib
 
 
