@@ -43,6 +43,7 @@ class ScheduleVisualizer(object):
             'id': client_ticket.id,
             'client_id': client_ticket.client_id,
             'event_id': client_ticket.event_id,
+            'event_external_id': client_ticket.event.externalId if client_ticket.event else None,
             'finance': client_ticket.event.finance if client_ticket.event else None,
             'appointment_type': client_ticket.appointmentType,
             'note': client_ticket.note,
@@ -600,7 +601,7 @@ class ClientVisualizer(object):
         return map(
             self.make_event,
             (client.events.join(EventType).join(rbRequestType)
-             .filter(db.or_(rbRequestType.code == u'policlinic', rbRequestType.code == u'4'))
+             # .filter(db.or_(rbRequestType.code == u'policlinic', rbRequestType.code == u'4'))
              .order_by(Event.setDate.desc()))
         )
 
