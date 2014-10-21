@@ -600,7 +600,7 @@ class ClientVisualizer(object):
         return map(
             self.make_event,
             (client.events.join(EventType).join(rbRequestType)
-             .filter(db.or_(rbRequestType.code == u'policlinic', rbRequestType.code == u'4'))
+             # .filter(db.or_(rbRequestType.code == u'policlinic', rbRequestType.code == u'4'))
              .order_by(Event.setDate.desc()))
         )
 
