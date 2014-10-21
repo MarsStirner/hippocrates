@@ -11,10 +11,209 @@
         <li>Осмотры акушера-гинеколога беременной</li>
     </ul>
         <div class="row small-marginal">
-        <div class="col-md-12">
-            <div class="pull-right">ачивки</div>{{ rimacros.page_title('Осмотры акушера-гинеколога беременной') }}
+            <div class="col-lg-8 col-md-8">
+                <h2>
+                    Осмотры акушера-гинеколога беременной
+                    <a ng-href="{{ url_for('patients.patient') }}?client_id=[[ chart.client.id ]]">[[ chart.client.full_name ]]</a>
+                    ([[ chart.external_id ]])
+                </h2>
+            </div>
+            <div class="col-md-2 col-md-offset-2 achievements text-right">
+                <a class="btn" href="#"><i class="fa fa-table"></i></a>
+                <a class="btn" href="#"><i class="fa fa-line-chart"></i></a>
+                <a class="btn" href="#"><i class="fa fa-info"></i></a>
+            </div>
+            <div class="col-md-12 col-lg-12">
+                <div class="alert-warning small-marginal">Случай беременности. На учёте в <b>[[ chart.person.organisation.short_name ]]</b>
+                    у <b>[[ chart.person.name ]]</b>
+                    с <b>[[ chart.set_date | asDate ]]</b>
+                </div>
+            </div>
         </div>
-        </div>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th width="10%">Данные осмотра</th>
+                    <th width="10%">
+                        <a href="#">Первичный осмотр</a>
+                        <div class="btn-group">
+                          <button type="button" class="btn btn-xs btn-default dropdown-toggle" data-toggle="dropdown">
+                            <span class="caret"></span>
+                          </button>
+                          <ul class="dropdown-menu" role="menu">
+                            <li><a href="#">Копировать</a></li>
+                            <li><a href="#">Удалить</a></li>
+                          </ul>
+                        </div>
+                    </th>
+                    <th width="10%">
+                        <a href="#">Повторный осмотр</a>
+                        <div class="btn-group">
+                          <button type="button" class="btn btn-xs btn-default dropdown-toggle" data-toggle="dropdown">
+                            <span class="caret"></span>
+                          </button>
+                          <ul class="dropdown-menu" role="menu">
+                            <li><a href="#">Копировать</a></li>
+                            <li><a href="#">Удалить</a></li>
+                          </ul>
+                        </div>
+                    </th>
+                    <th><a href="#"><i class="glyphicon glyphicon-plus"></i> Добавить</a></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th>Дата</th>
+                    <td>10.10.2014</td>
+                    <td>10.11.2014</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <th>Срок беременности</th>
+                    <td>1</td>
+                    <td>2</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <th>Масса тела</th>
+                    <td><i class="glyphicon glyphicon-arrow-down text-danger"></i><i class="fa fa-angle-double-down text-danger"></i> 50</td>
+                    <td><i class="glyphicon glyphicon-arrow-up text-success"></i><i class="fa fa-angle-double-up text-success"></i> 55</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <th>Прибавка в массе</th>
+                    <td><i class="fa fa-angle-double-down text-danger"></i></td>
+                    <td><i class="fa fa-angle-double-up text-success"></i></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <th>Молочные железы</th>
+                    <td><i class="glyphicon glyphicon-arrow-down text-danger"></i></td>
+                    <td><i class="glyphicon glyphicon-arrow-up text-success"></i></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <th>Соски</th>
+                    <td><i class="glyphicon glyphicon-arrow-down text-danger"></i></td>
+                    <td><i class="glyphicon glyphicon-arrow-up text-success"></i></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <th>Отёки</th>
+                    <td><i class="glyphicon glyphicon-arrow-down text-danger"></i></td>
+                    <td><i class="glyphicon glyphicon-arrow-up text-success"></i></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <th>АД левая рука</th>
+                    <td><i class="glyphicon glyphicon-arrow-down text-danger"></i> 130/80</td>
+                    <td><i class="glyphicon glyphicon-arrow-up text-success"></i> 120/70</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <th>АД правая рука</th>
+                    <td><i class="glyphicon glyphicon-arrow-down text-danger"></i> 130/80</td>
+                    <td><i class="glyphicon glyphicon-arrow-up text-success"></i> 120/70</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <th>Окружность живота</th>
+                    <td><i class="glyphicon glyphicon-arrow-down text-danger"></i></td>
+                    <td><i class="glyphicon glyphicon-arrow-up text-success"></i></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <th>Матка</th>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Высота дна</td>
+                    <td><i class="glyphicon glyphicon-arrow-up text-danger"></i></td>
+                    <td><i class="glyphicon glyphicon-arrow-up text-success"></i></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Состояние</td>
+                    <td><i class="glyphicon glyphicon-arrow-up text-success"></i></td>
+                    <td><i class="glyphicon glyphicon-arrow-up text-success"></i></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Длина шейки</td>
+                    <td><i class="glyphicon glyphicon-arrow-up text-success"></i></td>
+                    <td><i class="glyphicon glyphicon-arrow-up text-success"></i></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Цервикальный канал</td>
+                    <td><i class="glyphicon glyphicon-arrow-up text-success"></i></td>
+                    <td><i class="glyphicon glyphicon-arrow-up text-success"></i></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Консистенция</td>
+                    <td><i class="glyphicon glyphicon-arrow-up text-success"></i></td>
+                    <td><i class="glyphicon glyphicon-arrow-up text-success"></i></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <th>Плод</th>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Положение</td>
+                    <td><i class="glyphicon glyphicon-arrow-up text-success"></i></td>
+                    <td><i class="glyphicon glyphicon-arrow-up text-success"></i></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Предлежание</td>
+                    <td><i class="glyphicon glyphicon-arrow-up text-success"></i></td>
+                    <td><i class="glyphicon glyphicon-arrow-up text-success"></i></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Характер СС</td>
+                    <td><i class="glyphicon glyphicon-arrow-up text-success"></i></td>
+                    <td><i class="glyphicon glyphicon-arrow-up text-success"></i></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Частота СС</td>
+                    <td><i class="glyphicon glyphicon-arrow-up text-success"></i></td>
+                    <td><i class="glyphicon glyphicon-arrow-up text-success"></i></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <th>Диагнозы</th>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>основной</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>сопутствующий</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>осложнения</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 {% endblock %}
 

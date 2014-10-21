@@ -39,6 +39,11 @@ div.das-form > .row {
     font-size: 28px;
 }
 
+.achievements a.btn{
+    font-size: 28px;
+    padding: 0 6px;
+}
+
 .small-marginal {
     margin-bottom: 5px;
 }
