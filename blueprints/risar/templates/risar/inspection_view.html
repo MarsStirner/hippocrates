@@ -1,0 +1,25 @@
+{% extends 'risar/base.html' %}
+{% import 'risar/_macros.html' as rimacros %}
+
+{% block title %}> {{ module_name }}{% endblock %}
+
+{% block main %}
+    <div ng-controller="ChartCtrl" ng-cloak>
+    <ul class="breadcrumb">
+        <li><a href="{{ url_for('.index_html') }}">Рабочий стол</a></li>
+        <li><a ng-href="{{ url_for('.html_chart') }}?event_id=[[ chart.id ]]">Карта пациентки</a></li>
+        <li>Осмотры акушера-гинеколога беременной</li>
+    </ul>
+        <div class="row small-marginal">
+        <div class="col-md-12">
+            <div class="pull-right">ачивки</div>{{ rimacros.page_title('Осмотры акушера-гинеколога беременной') }}
+        </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block modules_js %}
+    {{ super() }}
+    <script src="{{ url_for('.static', filename='js/chart.js', v=version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/risar.js', v=version) }}"></script>
+{% endblock %}

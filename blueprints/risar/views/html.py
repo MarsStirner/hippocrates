@@ -15,7 +15,6 @@ def index_html():
 def html_chart():
     return render_template('risar/chart.html')
 
-
 @module.route('/anamnesis.html')
 def html_anamnesis():
     return render_template('risar/anamnesis_view.html')
@@ -24,3 +23,8 @@ def html_anamnesis():
 @module.route('/anamnesis_edit.html')
 def html_anamnesis_edit():
     return render_template('risar/anamnesis_edit.html')
+
+
+@module.route('/inspection.html')
+def html_inspection():
+    return render_template('risar/inspection_view.html')
