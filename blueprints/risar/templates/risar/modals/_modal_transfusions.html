@@ -4,25 +4,29 @@
 <div class="modal-body">
     <div class="das-form">
         <div class="row">
-            <div class="col-md-4">Дата</div>
-            <div class="col-md-4"><div fs-date ng-model="model.date"></div></div>
+            <div class="col-md-2">Дата</div>
+            <div class="col-lg-2 col-md-3 col-xs-3"><div fs-date ng-model="model.date"></div></div>
         </div>
         <div class="row">
-            <div class="col-md-4">Вид</div>
-            <div class="col-md-8"><rb-select ref-book="rbBloodTransfusionType" ng-model="model.type" /></div>
+            <div class="col-md-2">Вид</div>
+            <div class="col-md-10"><rb-select ref-book="rbBloodTransfusionType" ng-model="model.type" /></div>
         </div>
         <div class="row">
-            <div class="col-md-4">Группа крови донора</div>
-            <div class="col-md-8"><rb-select ref-book="rbBloodType" ng-model="model.blood_type" /></div>
+            <div class="col-md-2">Группа крови донора</div>
+            <div class="col-md-4 col-lg-3  col-xs-4"><rb-select ref-book="rbBloodType" ng-model="model.blood_type" /></div>
         </div>
         <div class="row">
-            <div class="col-md-4">Реакция</div>
-            <div class="col-md-8"><input class="form-control" type="text" ng-model="model.reaction" /></div>
+            <div class="col-md-2">Реакция</div>
+            <div class="col-md-10"><input class="form-control" type="text" ng-model="model.reaction" /></div>
         </div>
     </div>
 </div>
 <div class="modal-footer">
-    <label><input type="checkbox" class="checkbox checkbox-inline" ng-model="restart">Добавить ещё одно сведение</label>
-    <button class="btn btn-success" ng-click="$close([model, restart])">Сохранить</button>
-    <a class="pseudo-btn" ng-click="$dismiss()">Отменить</a>
+    <div class="pull-left">
+            <div class="checkbox"><label><input type="checkbox" class="checkbox checkbox-inline" ng-model="restart">Создать ещё одно</label></div>
+        </div>
+    <div>
+        <button class="btn btn-success" ng-click="$close([model, restart])">Сохранить</button>
+        <a class="pseudo-btn" ng-click="$dismiss()">Отменить</a>
+    </div>
 </div>
