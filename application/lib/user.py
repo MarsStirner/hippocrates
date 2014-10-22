@@ -170,29 +170,44 @@ modeRights = (
 
 class UserUtils(object):
 
-    def can_delete_event(self, event):
+    @staticmethod
+    def can_delete_event(event):
         return event and (
             current_user.has_right('adm', 'evtDelAll') or (
                 current_user.has_right('evtDelOwn') and (
                     current_user.id == event.execPerson_id or
                     current_user.id == event.createPerson_id)))
 
-    def can_delete_action(self, action):
+    @staticmethod
+    def can_delete_action(action):
         return action and (
-            current_user.has_right('adm', 'actDelAll') or (
-                current_user.has_right('actDelOwn') and (
-                    current_user.id in (action.createPerson_id, action.person_id))))
+            # админу можно всё
+            current_user.has_right('adm') or (
+                # остальным - только если обращение не закрыто
+                not action.event.is_closed and (
+                    # либо есть право на удаление любых действий
+                    current_user.has_right('actDelAll') or (
+                        # либо только своих
+                        current_user.has_right('actDelOwn') and (
+                            current_user.id in (action.createPerson_id, action.person_id))))))
 
-    def can_edit_action(self, action):
-        updateRight = u'client%sUpdate' % modeRights[action.type.class_]
+    @staticmethod
+    def can_edit_action(action):
+        updateRight = u'client%sUpdate' % modeRights[action.actionType.class_]
         return action and (
-            current_user.has_right('adm', 'editOtherpeopleAction') or (
-                not action.event.is_closed and
-                current_user.has_right(updateRight) and
-                current_user.id in (action.createPerson_id, action.person_id)))
+            # админу можно всё
+            current_user.has_right('adm') or (
+                # остальным - только если обращение не закрыто
+                not action.event.is_closed and (
+                    # либо есть право редактировать любые действия
+                    current_user.has_right('editOtherpeopleAction') or (
+                        # либо право на свои определённых классов
+                        current_user.has_right(updateRight) and
+                        current_user.id in (action.createPerson_id, action.person_id)))))
 
-    def can_read_action(self, action):
-        readRight = u'client%sRead' % modeRights[action.type.class_]
+    @staticmethod
+    def can_read_action(action):
+        readRight = u'client%sRead' % modeRights[action.actionType.class_]
         return action and (
             current_user.has_right('adm') or (
                 current_user.has_right(readRight) and

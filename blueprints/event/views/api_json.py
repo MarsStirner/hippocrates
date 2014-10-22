@@ -5,6 +5,7 @@ from application.lib.agesex import recordAcceptableEx
 
 from flask import request, abort
 from flask.ext.login import current_user
+from application.lib.user import UserUtils
 from application.models.schedule import ScheduleClientTicket
 from application.models.utils import safe_current_user_id
 
@@ -510,10 +511,14 @@ def api_service_delete_service():
 
 @module.route('api/delete_action.json', methods=['POST'])
 def api_delete_action():
-    action_id = request.json['action_id']
+    action_id = int(request.json['action_id'])
     if action_id:
-        action = Action.query.filter(Action.id == action_id)
-        action.update({Action.deleted: 1}, synchronize_session=False)
+        action = Action.query.get(action_id)
+        if not action:
+            return jsonify(None, 404, 'Action %s not found' % action_id)
+        if not UserUtils.can_delete_action(action):
+            return jsonify(None, 403, 'User cannot delete action %s' % action)
+        action.deleted = 1
         db.session.commit()
 
     return jsonify(None)

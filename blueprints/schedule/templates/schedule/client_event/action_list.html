@@ -18,7 +18,7 @@
             <td ng-click="open_action(action.id)">[[ action.endDate | asDateTime ]]</td>
             <td ng-click="open_action(action.id)">[[ action.person_text ]]</td>
             <td>
-                <button type="button" class="btn btn-sm btn-danger" title="Удалить" ng-show="action.status.code != 'finished'"
+                <button type="button" class="btn btn-sm btn-danger" title="Удалить" ng-show="action.status.code != 'finished' && action.can_delete"
                         ng-click="open_delete_action_modal(action)"><span class="glyphicon glyphicon-trash"></span>
                 </button>
             </td>

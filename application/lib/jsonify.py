@@ -9,6 +9,7 @@ from sqlalchemy.orm import aliased
 from sqlalchemy.sql.functions import current_date
 from sqlalchemy.sql.expression import between
 from flask import json
+from application.lib.user import UserUtils
 
 from application.systemwide import db
 from application.lib.data import int_get_atl_dict_all
@@ -825,7 +826,10 @@ class EventVisualizer(object):
             'status': ActionStatus(action.status),
             'begDate': action.begDate,
             'endDate': action.endDate,
-            'person_text': safe_unicode(action.person)
+            'person_text': safe_unicode(action.person),
+            'can_read': UserUtils.can_read_action(action),
+            'can_edit': UserUtils.can_edit_action(action),
+            'can_delete': UserUtils.can_delete_action(action),
         }
 
     def make_event_payment(self, event, client=None):

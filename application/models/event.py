@@ -5,7 +5,6 @@ import re
 
 from application.lib.const import PAYER_EVENT_CODES
 from application.lib.agesex import AgeSex
-from application.lib.data import addPeriod
 from application.lib.settings import Settings
 from application.models.client import ClientDocument
 from application.models.exists import Person, rbPost, rbCashOperation, rbService
@@ -129,6 +128,7 @@ class Event(db.Model):
         # Текущая дата больше, чем дата завершения + 2 рабочих дня
         # согласно какому-то мегаприказу МЗ и главврача ФНКЦ
         # Установлен результат обращения
+        from application.lib.data import addPeriod
         return self.is_pre_closed and datetime.date.today() > addPeriod(
             self.execDate.date(),
             Settings.getInt('Event.BlockTime', 2),
