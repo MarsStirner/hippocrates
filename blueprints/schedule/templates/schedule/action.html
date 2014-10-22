@@ -131,7 +131,7 @@
 <div class="row">
     <div class="col-md-12">
         <div class="pull-right">
-            <button class="btn btn-lg btn-success" ng-click="save_action()">Сохранить</button>
+            <button class="btn btn-lg btn-success" ng-click="save_action()" ng-if="!action.ro">Сохранить</button>
             <button class="btn btn-lg btn-danger" ng-click="action.cancel()">Закрыть</button>
         </div>
     </div>

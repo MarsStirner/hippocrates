@@ -7,6 +7,7 @@ from collections import defaultdict
 from dateutil.parser import parse as dateutil_parse
 from flask import abort, request
 from flask.ext.login import current_user
+from application.lib.user import UserUtils
 
 from application.models.event import Event
 from application.systemwide import db, cache
@@ -464,6 +465,10 @@ def api_action_post():
     if action_id:
         data['properties'] = properties_desc
         action = Action.query.get(action_id)
+        if not action:
+            return jsonify(None, 404, 'Action %s not found' % action_id)
+        if not UserUtils.can_edit_action(action):
+            return jsonify(None, 403, 'User cannot edit action %s' % action_id)
         action = update_action(action, **data)
     else:
         at_id = action_desc['action_type']['id']
