@@ -350,10 +350,13 @@ var EventPaymentCtrl = function($scope, RefBookService, Settings, $http, $modal)
     $scope.contract_info_disabled = function () {
         return event_created || $scope.integration1CODVD_enabled();
     };
+    $scope.btn_edit_contract_info_visible = function () {
+        var lc = $scope.event.payment && $scope.event.payment.local_contract || null;
+        return !(lc && lc.date_contract && lc.number_contract || $scope.integration1CODVD_enabled());
+    };
     $scope.import_payer_btn_disabled = function () {
         return event_created && $scope.contract_available();
     };
-
     $scope.payer_tabs = {
         person: {
             active: true,
@@ -760,6 +763,46 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
         }
     };
 
+
+    $scope.open_delete_event_modal = function() {
+        var modalInstance = $modal.open({
+            templateUrl: 'modal-delete-record.html',
+            controller: DeleteRecordModalCtrl,
+            resolve: {
+                message: function(){
+                    return 'текущее обращение';
+                }
+            },
+            scope: $scope
+        });
+        modalInstance.result.then(function () {
+            $scope.delete_event();
+        });
+    };
+
+
+    $scope.delete_event = function (){
+        if(!$scope.event_has_payments()){
+            $http.post(
+                url_for_delete_event, {
+                    event_id: $scope.event_id
+                }
+            ).success(function() {
+                if (window.opener){
+                    window.opener.focus();
+                    window.close();
+                }
+            }).error(function(response) {
+                var rr = response.result;
+                var message = rr.name + ': ' + (rr.data ? rr.data.err_msg : '');
+                alert(message);
+            });
+        } else {
+            alert('Невозможно удалить обращение! По нему была совершена оплата.');
+        }
+
+    };
+
     $scope.event_mandatoryResult = function() {
         return $scope.Settings.get_string('Event.mandatoryResult') == '1';
     };
@@ -789,6 +832,13 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
             return false
         }
         return true
+    };
+
+    $scope.event_has_payments = function () {
+        return $scope.event.payment && $scope.event.payment.payments.payments.length;
+    };
+    $scope.btn_delete_event_visible = function () {
+        return !$scope.event.is_new() && $scope.event.payment && !$scope.event_has_payments();
     };
 
     $scope.open_unclosed_actions_modal = function(unclosed_actions) {

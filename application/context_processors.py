@@ -2,6 +2,7 @@
 from pytz import timezone
 from application.app import app
 from datetime import datetime
+from application.lib.user import UserUtils
 from version import version as _version, last_change_date
 
 from config import TIME_ZONE
@@ -37,7 +38,7 @@ def general_menu():
                            title=u'Формирование графика врача',
                            roles=('admin', 'rRegistartor', 'clinicRegistrator')))
     menu_items.append(dict(link='schedule.index',
-                           title=u'Просмотр графика работы',
+                           title=u'График работы',
                            roles=('admin', 'rRegistartor', 'clinicRegistrator')))
     menu_items.append(dict(link='schedule.doctor_schedule_day',
                            title=u'Приём пациентов',
@@ -49,3 +50,10 @@ def general_menu():
                            title=u'Обращения',
                            roles=('admin', 'rRegistartor', 'clinicRegistrator', 'clinicDoctor')))
     return dict(main_menu=menu_items)
+
+
+@app.context_processor
+def user_utils():
+    return {
+        'user_utils': UserUtils()
+    }

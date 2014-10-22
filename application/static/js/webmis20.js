@@ -739,7 +739,7 @@ var WebMis20 = angular.module('WebMis20', [
         },
         link: function (scope, element, attributes) {
             var elem = $(element);
-            elem.addClass('btn btn-block');
+            elem.addClass('btn btn-block text-left');
             scope.$watch('ticket.status', function (n, o) {
                 if (!scope.ticket) {
                     elem.addClass('disabled');
@@ -756,7 +756,7 @@ var WebMis20 = angular.module('WebMis20', [
                     elem.removeClass('btn-success btn-warning btn-gray disabled');
                     elem.addClass('btn-primary');
                     if (scope.showName) {
-                        text += ' - ' + scope.ticket.client
+                        text += ' - ' + scope.ticket.client + ' (' + scope.ticket.record.client_id + ')';
                     }
                 } else {
                     elem.removeClass('btn-danger');
@@ -987,8 +987,21 @@ var aux = {
 
         return params;
     },
-    range: function (num) {
-        return Array.apply(null, new Array(num)).map(function(_, i) {return i;})
+    range: function (start, end) {
+        if (arguments.length < 2) {
+            end = start;
+            start = 0;
+        }
+        if (start >= end) {
+            return [];
+        }
+        var res = [],
+            cur = end - start;
+        end--;
+        while (cur--) {
+            res[cur] = end--;
+        }
+        return res;
     },
     moment: moment,
     months: [

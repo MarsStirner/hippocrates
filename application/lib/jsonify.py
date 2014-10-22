@@ -43,6 +43,7 @@ class ScheduleVisualizer(object):
             'id': client_ticket.id,
             'client_id': client_ticket.client_id,
             'event_id': client_ticket.event_id,
+            'event_external_id': client_ticket.event.externalId if client_ticket.event else None,
             'finance': client_ticket.event.finance if client_ticket.event else None,
             'appointment_type': client_ticket.appointmentType,
             'note': client_ticket.note,
@@ -263,23 +264,115 @@ class ScheduleVisualizer(object):
 
         return result
 
+    def _clear_schedule_info(self, schedules):
+        for day in schedules:
+            day['busy'] = False
+            day['roa'] = None
+            if 'id' in day:
+                del day['id']
+            for sub_sched in day['scheds']:
+                sub_sched['busy'] = False
+                if 'id' in sub_sched:
+                    del sub_sched['id']
+                if 'tickets' in sub_sched:
+                    del sub_sched['tickets']
+        return schedules
+
+    def _clear_quotas_info(self, quotas):
+        for day in quotas:
+            for q in day['day_quotas']:
+                if 'id' in q:
+                    del q['id']
+        return quotas
+
     def make_person_schedule_description(self, person, start_date, end_date):
-        schedules_by_date = (Schedule.query.outerjoin(Schedule.tickets)
-                             .filter(Schedule.person_id == person.id,
-                                     start_date <= Schedule.date, Schedule.date < end_date,
-                                     Schedule.deleted == 0)
-                             .order_by(Schedule.date)
-                             .order_by(Schedule.begTime)
-                             .order_by(ScheduleTicket.begTime)
-                             .options(db.contains_eager(Schedule.tickets).contains_eager('schedule')))
-        quoting_by_date = QuotingByTime.query.filter(QuotingByTime.doctor_id == person.id,
-                                                     QuotingByTime.quoting_date >= start_date,
-                                                     QuotingByTime.quoting_date < end_date)
+        schedules_by_date = Schedule.query.outerjoin(
+            Schedule.tickets
+        ).filter(
+            Schedule.person_id == person.id,
+            start_date <= Schedule.date, Schedule.date < end_date,
+            Schedule.deleted == 0
+        ).order_by(
+            Schedule.date,
+            Schedule.begTime,
+            ScheduleTicket.begTime
+        ).options(
+            db.contains_eager(Schedule.tickets).contains_eager('schedule')
+        )
+        schedules = self.make_schedule_description(schedules_by_date, start_date, end_date)
+
+        quoting_by_date = QuotingByTime.query.filter(
+            QuotingByTime.doctor_id == person.id,
+            QuotingByTime.quoting_date >= start_date,
+            QuotingByTime.quoting_date < end_date
+        )
+        quotas = self.make_quotas_description(quoting_by_date, start_date, end_date)
+
         return {
             'person': self.make_person(person),
-            'schedules': self.make_schedule_description(schedules_by_date, start_date, end_date),
-            'quotas': self.make_quotas_description(quoting_by_date, start_date, end_date)
+            'schedules': schedules,
+            'quotas': quotas
         }
+
+    def make_copy_schedule_description(self, person, from_start_date, from_end_date, to_start_date, to_end_date):
+        """Копировать чистое расписание без записей пациентов и причин
+        отсутствия с одного месяца на другой.
+        Копирование происходит по алгоритму 'цикличный месяц'. На каждый день
+        целевого месяца идет копирование расписания из дня предыдущего месяца,
+        выбранного с таким смещением, чтобы дни недели совпадали. Сдвиг дней
+        происходит в правую сторону так, что если день недели первого дня
+        месяца, который является источником расписания, позднее дня недели того
+        дня, куда идет копирование, то расписание будет копироваться уже со
+        следующей недели. Если в процессе копирования заканчиваются дни в
+        месяце-источнике, то отсчет дней начинается с начала того же месяца
+        с новым сдвигом, который опять выравнивает дни недели.
+        Таким же образом копируется информация о квотах.
+        """
+
+        def get_day_shift(d_from, d_to):
+            """Получить разницу между днями недели двух дат.
+            Если день недели 1-ой даты раньше, чем у 2-ой, то разница считается
+            в пределах недели, в противном случае - для дней текущей и следующей
+            недели.
+            """
+            shift = d_from.weekday() - d_to.weekday()
+            if shift > 0:
+                shift = 7 - shift
+            else:
+                shift = abs(shift)
+            return shift
+
+        day_shift = get_day_shift(from_start_date, to_start_date)
+        from_schedule_info = self.make_person_schedule_description(person, from_start_date, from_end_date)
+        from_schedule = self._clear_schedule_info(from_schedule_info['schedules'])
+        copy_schedule = []
+        from_quotas = self._clear_quotas_info(from_schedule_info['quotas'])
+        copy_quotas = []
+        from_sched_len = len(from_schedule)
+        while to_start_date <= to_end_date:
+            cur_shift = to_start_date.day + day_shift
+            if cur_shift > from_sched_len:
+                # 2nd loop in month
+                from_date = from_start_date + datetime.timedelta(days=(cur_shift - from_sched_len - 1))
+                cur_shift = cur_shift - from_sched_len + get_day_shift(from_date, to_start_date)
+
+            new_sched_day = dict(from_schedule[cur_shift - 1])
+            new_sched_day['date'] = to_start_date + datetime.timedelta(days=0)
+            if new_sched_day['scheds'] or new_sched_day['roa']:
+                new_sched_day['altered'] = True
+            copy_schedule.append(new_sched_day)
+
+            new_quote_day = dict(from_quotas[cur_shift - 1])
+            new_quote_day['date'] = to_start_date + datetime.timedelta(days=0)
+            if new_quote_day['day_quotas']:
+                new_quote_day['altered'] = True
+            copy_quotas.append(new_quote_day)
+
+            to_start_date += datetime.timedelta(days=1)
+
+        from_schedule_info['schedules'] = copy_schedule
+        from_schedule_info['quotas'] = copy_quotas
+        return from_schedule_info
 
 
 class ClientVisualizer(object):
@@ -508,7 +601,7 @@ class ClientVisualizer(object):
         return map(
             self.make_event,
             (client.events.join(EventType).join(rbRequestType)
-             .filter(db.or_(rbRequestType.code == u'policlinic', rbRequestType.code == u'4'))
+             # .filter(db.or_(rbRequestType.code == u'policlinic', rbRequestType.code == u'4'))
              .order_by(Event.setDate.desc()))
         )
 

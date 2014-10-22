@@ -325,18 +325,28 @@ angular.module('WebMis20.directives')
             restrict: 'E',
             replace: true,
             template:
-                '<button class="btn btn-default" ng-click="open_print_window()" title="Печать" ng-disabled="disabled()">\
+                '<button class="btn btn-default" ng-click="print_templates()" title="Печать" ng-disabled="disabled()">\
                     <i class="glyphicon glyphicon-print"></i>\
                     <i class="glyphicon glyphicon-remove text-danger" ng-show="disabled()"></i>\
                  </button>',
             scope: {
-                $ps: '=ps'
+                $ps: '=ps',
+                beforePrint: '&?'
             },
             link: function (scope, element, attrs) {
                 var resolver_call = attrs.resolve;
+                if (!attrs.beforePrint) {scope.beforePrint=null};
                 scope.disabled = function () {
                     return !scope.$ps.is_available();
                 };
+                scope.print_templates = function(){
+                    if (scope.beforePrint){
+                        scope.beforePrint().then(scope.open_print_window());
+                    } else {
+                        scope.open_print_window();
+                    }
+
+                }
                 scope.open_print_window = function () {
                     var modal = $modal.open({
                         templateUrl: '/WebMis20/modal-print-dialog.html',

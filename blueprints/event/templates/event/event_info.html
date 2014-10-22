@@ -43,6 +43,14 @@
                         </div>
                     </div>
                     {%- endif %}
+                    {% if user_utils.can_delete_event(event) %}
+                    <div class="row vmargin10">
+                        <div class="col-md-12">
+                            <button type="button" ng-click="open_delete_event_modal();" class="btn btn-block btn-danger"
+                                    ng-if="btn_delete_event_visible()">Удалить обращение</button>
+                        </div>
+                    </div>
+                    {% endif %}
                     </toc-affix>
                 </div>
             </div>

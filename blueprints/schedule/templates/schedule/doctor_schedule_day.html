@@ -31,7 +31,7 @@
                 </legend>
                 <div ng-if="client.info.full_name" class="vbmargin10">
                     <button class="btn btn-lg btn-success" ng-if="!ticket.record.event_id" ng-click="new_event(client.info.id, ticket.record.id)" title="Создать обращение">Создать обращение</button>
-                    <button class="btn btn-lg btn-success" ng-if="ticket.record.event_id" ng-click="open_event(ticket.record.event_id)" title="Открыть обращение #[[ticket.record.event_id]]">Открыть обращение #[[ticket.record.event_id]]</button>
+                    <button class="btn btn-lg btn-success" ng-if="ticket.record.event_id" ng-click="open_event(ticket.record.event_id)" title="Открыть обращение [[ticket.record.event_external_id]]">Открыть обращение [[ticket.record.event_external_id]]</button>
                     <button class="btn btn-lg btn-primary" ng-click="new_appointment(ticket.record.client_id)" title="Записать на приём к другому специалисту">Записать на приём</button>
                     <ui-print-button class="btn-lg" ps="ps_home" class="btn-sm" resolve="ps_home_resolve(ticket.record.id)" ng-if="ticket.record.appointment_type.code == 'home'"></ui-print-button>
                     <ui-print-button class="btn-lg" ps="ps_amb" class="btn-sm" resolve="ps_amb_resolve(ticket.record.id)" ng-if="ticket.record.appointment_type.code == 'amb'"></ui-print-button>
