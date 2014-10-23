@@ -57,12 +57,11 @@ angular.module('WebMis20.directives').
             template: '\
 <form class="form-horizontal marginal" role="form">\
     <div class="input-group">\
-        <span class="input-group-addon"><span class="glyphicon glyphicon-search"></span></span>\
         <input id="search" class="form-control" type="text" ng-model="query" autocomplete="off"\
-               ng-change="clear_results()" wm-slow-change="perform_search()"\
+               ng-change="clear_results()"\
                placeholder="Поиск пациента по коду, ФИО, дате рождения, полису или документу, удостоверяющему личность">\
         <span class="input-group-btn">\
-            <button class="btn btn-danger" ng-click="query_clear()"><span class="glyphicon glyphicon-remove"></span></button>\
+            <button class="btn btn-info" ng-click="perform()"><span class="glyphicon glyphicon-search"> Найти</span></button>\
         </span>\
     </div>\
 </form>\
