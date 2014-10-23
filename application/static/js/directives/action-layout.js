@@ -57,7 +57,15 @@ angular.module('WebMis20.ActionLayout', ['WebMis20.validators', 'WebMis20.direct
                                 case 'OrgStructure':
                                     inner_template = '<span ng-bind="{0}.value.name"></span>'; break;
                                 case 'Diagnosis':
-                                    inner_template = '<span ng-bind="{0}.value.name"></span>'; break;
+                                    if (property.type.vector) {
+                                        inner_template =
+                                            '<div ng-repeat="$v in {0}.value">[[ $v.diagnosis_type.name ]]: [[ $v.diagnosis.mkb.code ]] - [[ $v.diagnosis.mkb.name ]] ([[ $v.character.name ]])</div>';
+                                    } else {
+                                        inner_template =
+                                            '<span>[[ {0}.value.diagnosis_type.name ]]: [[ {0}.value.diagnosis.mkb.code ]] - [[ {0}.value.diagnosis.mkb.name ]] ([[ {0}.value.character.name ]])</span>';
+                                    }
+                                    break;
+
                                 default:
                                     inner_template = '<span ng-bind="{0}.value"></span>'; break;
                             }
