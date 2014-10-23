@@ -61,7 +61,7 @@ angular.module('WebMis20.directives').
                ng-change="clear_results()"\
                placeholder="Поиск пациента по коду, ФИО, дате рождения, полису или документу, удостоверяющему личность">\
         <span class="input-group-btn">\
-            <button class="btn btn-success" ng-click="perform()"><span class="glyphicon glyphicon-search"></span> Найти</button>\
+            <button class="btn btn-success" ng-click="perform_search()"><span class="glyphicon glyphicon-search"></span> Найти</button>\
         </span>\
     </div>\
 </form>\
