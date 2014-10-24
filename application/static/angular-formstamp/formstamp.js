@@ -1038,6 +1038,7 @@ angular.module('formstamp', []).run(['$templateCache', function($templateCache) 
           return "<div class='fs-multiselect fs-widget-root' ng-class='{ \"fs-with-selected-items\": selectedItems.length > 0 }'>\n  <div class='fs-multiselect-wrapper'>\n    <div class=\"fs-multiselect-selected-items\" ng-if=\"selectedItems.length > 0\">\n      <a ng-repeat='item in selectedItems' class=\"btn\" ng-click=\"unselectItem(item)\" ng-disabled=\"disabled\">\n        " + itemTpl + "\n        <span class=\"glyphicon glyphicon-remove\" ></span>\n      </a>\n    </div>\n\n    <input ng-keydown=\"onkeys($event)\"\n           fs-null-form\n           ng-disabled=\"disabled\"\n           fs-input\n           fs-hold-focus\n           fs-on-focus=\"active = true\"\n           fs-on-blur=\"onBlur()\"\n           fs-blur-when=\"!active\"\n           fs-down='listInterface.move(1)'\n           fs-up='listInterface.move(-1)'\n           fs-pgup='listInterface.move(-11)'\n           fs-pgdown='listInterface.move(11)'\n           fs-enter='onEnter()'\n           fs-esc='active = false'\n           class=\"form-control\"\n           type=\"text\"\n           placeholder='Select something'\n           ng-model=\"search\" />\n\n    <div ng-if=\"active && dropdownItems.length > 0\" class=\"open\">\n      <div fs-list items=\"dropdownItems\">\n        " + itemTpl + "\n      </div>\n    </div>\n  </div>\n</div>";
         },
         controller: function($scope, $element, $attrs, $filter) {
+          $scope.limit = parseInt($attrs.limit) || 25;
           if ($attrs.freetext != null) {
             $scope.dynamicItems = function() {
               if ($scope.search) {
@@ -1052,11 +1053,18 @@ angular.module('formstamp', []).run(['$templateCache', function($templateCache) 
             };
           }
           $scope.updateDropdownItems = function() {
-            var allItems, excludeFilter, searchFilter;
+            var allItems, excludeFilter, searchFilter, limitFilter;
             searchFilter = $filter('filter');
             excludeFilter = $filter('exclude');
+            limitFilter = $filter('limitTo');
             allItems = $scope.items.concat($scope.dynamicItems());
-            return $scope.dropdownItems = searchFilter(excludeFilter(allItems, $scope.selectedItems), $scope.search);
+            return $scope.dropdownItems = limitFilter(
+                searchFilter(
+                    excludeFilter(
+                        allItems,
+                        $scope.selectedItems),
+                    $scope.search),
+                $scope.limit);
           };
           $scope.selectItem = function(item) {
             if ((item != null) && indexOf($scope.selectedItems, item) === -1) {

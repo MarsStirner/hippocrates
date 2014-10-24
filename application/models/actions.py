@@ -140,18 +140,16 @@ class ActionProperty(db.Model):
         self.set_value(value)
 
     def set_value(self, value, raw=False):
+        if self.type.isVector and not (isinstance(value, (list, tuple)) or value is None):
+            raise Exception(u'Tried assigning non-list value (%s) to vector action property (%s)' % (value, self.type.name))
+        if not self.type.isVector and isinstance(value, (list, tuple)):
+            raise Exception(u'Tried assigning list value (%s) to non-vector action property (%s)' % (value, self.type.name))
         value_object = self.value_object
         value_class = self.get_value_class()
 
-        def set_value(val_object, value):
-            if raw and hasattr(val_object, 'value_'):
-                val_object.value_ = value
-            else:
-                val_object.value = value
-
         def make_value(value, index=0):
             val = value_class()
-            set_value(val, value)
+            val.set_value(value)
             val.index = index
             val.property_object = self
             db.session.add(val)
@@ -168,15 +166,17 @@ class ActionProperty(db.Model):
                 if value is None:
                     delete_value(value_object[0])
                 else:
-                    set_value(value_object[0], value)
+                    value_object[0].set_value(value)
         else:
             if value:
                 m = min(len(value_object), len(value))
                 for i in xrange(m):
-                    value_object[i].value = value[i]
+                    value_object[i].set_value(value[i])
+
                 if len(value_object) < len(value):
                     for i in xrange(m, len(value)):
                         value_object.append(make_value(value[i], i))
+
                 elif len(value_object) > len(value):
                     for i in xrange(len(value_object) - 1, m - 1, -1):
                         delete_value(value_object[i])
@@ -285,6 +285,20 @@ class ActionProperty__ValueType(db.Model):
     @classmethod
     def format_value(cls, prop, json_data):
         return json_data
+
+    def set_raw_value(self, value):
+        if isinstance(value, dict):
+            value = value['id']
+        if hasattr(self, 'value_'):
+            self.value_ = value
+        else:
+            self.value = value
+
+    def set_value(self, value):
+        if isinstance(value, dict):
+            return self.set_raw_value(value)
+        else:
+            self.value = value
 
 
 class ActionProperty_Action(ActionProperty__ValueType):
