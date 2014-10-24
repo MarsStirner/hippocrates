@@ -10,7 +10,6 @@ from flask.ext.login import login_user, logout_user, login_required, current_use
 from application.app import app, db, login_manager, cache
 from application.context_processors import *
 from application.lib.data import get_kladr_city, get_kladr_street
-from application.models.exists import rbPrintTemplate
 from application.lib.utils import public_endpoint, jsonify, roles_require, rights_require, request_wants_json
 from application.models import *
 from lib.user import UserAuth, AnonymousUser
@@ -163,7 +162,7 @@ def api_thesaurus(code=None):
 @app.route('/api/kladr/city/search/<search_query>/')
 @app.route('/api/kladr/city/search/<search_query>/<limit>/')
 @cache.memoize(86400)
-def kladr_search_city(search_query=None, limit=20):
+def kladr_search_city(search_query=None, limit=30):
     result = []
     if search_query is None:
         return jsonify([])
@@ -183,7 +182,7 @@ def kladr_search_city(search_query=None, limit=20):
 @app.route('/api/kladr/street/search/<city_code>/<search_query>/')
 @app.route('/api/kladr/street/search/<city_code>/<search_query>/<limit>/')
 @cache.memoize(86400)
-def kladr_search_street(city_code=None, search_query=None, limit=20):
+def kladr_search_street(city_code=None, search_query=None, limit=30):
     result = []
     if city_code is None or search_query is None:
         return jsonify([])

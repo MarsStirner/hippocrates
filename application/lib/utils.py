@@ -39,9 +39,15 @@ def breadcrumb(view_title):
             elif request.path == u'/event/event.html':
                 title = u"Редактирование обращения"
             session_crumbs = session.setdefault('crumbs', [])
+
+            titles = [item[1] for item in session_crumbs]
             if (request.url, title) in session_crumbs:
                 index = session_crumbs.index((request.url, title))
                 session['crumbs'] = session_crumbs[:index+1]
+            elif title in titles:
+                index = titles.index(title)
+                del session['crumbs'][index]
+                session_crumbs.append((request.url, title))
             else:
                 session_crumbs.append((request.url, title))
             # Call the view
@@ -244,10 +250,12 @@ def safe_dict(obj):
     if obj is None:
         return None
     elif isinstance(obj, dict):
+        for k, v in obj.iteritems():
+            obj[k] = safe_dict(v)
         return obj
-    elif not hasattr(obj, '__json__'):
-        return None
-    return obj.__json__()
+    elif hasattr(obj, '__json__'):
+        return safe_dict(obj.__json__())
+    return obj
 
 
 def string_to_datetime(date_string, formats=None):
@@ -365,6 +373,13 @@ def safe_traverse_attrs(obj, *args, **kwargs):
         return getattr(obj, args[0], default)
     else:
         return safe_traverse_attrs(getattr(obj, args[0]), *args[1:], **kwargs)
+
+
+def format_date(d):
+    if isinstance(d, datetime.date):
+        return d.strftime('%d.%m.%Y')
+    else:
+        return d
 
 
 def get_new_uuid():

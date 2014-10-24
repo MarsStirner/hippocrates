@@ -14,6 +14,7 @@ angular.module('WebMis20.services').
                     var service_data = angular.extend(
                             service_group,
                             {
+                                ct_code: service_group.at_code,
                                 amount: 1,
                                 sum: service_group.price,
                                 actions: [undefined]
@@ -112,6 +113,39 @@ angular.module('WebMis20.services').
                 });
                 return deferred.promise;
             },
+            get_prev_events_contracts: function (client_id, finance_id, set_date) {
+                var deferred = $q.defer();
+                $http.get(url_api_prev_event_payment_info_get, {
+                    params: {
+                        client_id: client_id,
+                        finance_id: finance_id,
+                        set_date: set_date
+                    }
+                }).success(function (data) {
+                    deferred.resolve(data.result)
+                }).error(function() {
+                    deferred.reject('Произошла ошибка получения данных предыдущих обращений');
+                });
+                return deferred.promise;
+            },
+            clear_local_contract: function (event) {
+                var lc = event.payment && event.payment.local_contract;
+                if (lc) {
+                    lc.id = null;
+                    lc.first_name = null;
+                    lc.last_name = null;
+                    lc.patr_name = null;
+                    lc.birth_date = null;
+                    lc.doc_type = null;
+                    lc.serial_left = null;
+                    lc.serial_right = null;
+                    lc.number = null;
+                    lc.reg_address = null;
+                    lc.payer_org = null;
+                    lc.payer_org_id = null;
+                    lc.shared_in_events = null;
+                }
+            },
             add_new_diagnosis: function () {
                 return {
                         "id": null,
@@ -125,7 +159,7 @@ angular.module('WebMis20.services').
                             "client_id": null
                         },
                         "character": null,
-                        "person": null,
+                        "person": current_user.info,
                         "notes": null,
                         "action_id": null,
                         "result": null,

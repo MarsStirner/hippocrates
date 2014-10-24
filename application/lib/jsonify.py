@@ -9,13 +9,13 @@ from sqlalchemy.orm import aliased
 from sqlalchemy.sql.functions import current_date
 from sqlalchemy.sql.expression import between
 from flask import json
+from application.lib.user import UserUtils
 
 from application.systemwide import db
 from application.lib.data import int_get_atl_dict_all
-from application.lib.utils import safe_traverse_attrs
 from application.lib.action.utils import action_is_bak_lab, action_is_lab
 from application.lib.agesex import recordAcceptableEx
-from application.lib.utils import safe_unicode, safe_dict, logger
+from application.lib.utils import safe_unicode, safe_dict, logger, safe_traverse_attrs
 from application.models.enums import EventPrimary, EventOrder, ActionStatus, Gender
 from application.models.event import Event, EventType, Diagnosis
 from application.models.schedule import Schedule, rbReceptionType, ScheduleClientTicket, ScheduleTicket, QuotingByTime, \
@@ -44,6 +44,7 @@ class ScheduleVisualizer(object):
             'id': client_ticket.id,
             'client_id': client_ticket.client_id,
             'event_id': client_ticket.event_id,
+            'event_external_id': client_ticket.event.externalId if client_ticket.event else None,
             'finance': client_ticket.event.finance if client_ticket.event else None,
             'appointment_type': client_ticket.appointmentType,
             'note': client_ticket.note,
@@ -264,23 +265,115 @@ class ScheduleVisualizer(object):
 
         return result
 
+    def _clear_schedule_info(self, schedules):
+        for day in schedules:
+            day['busy'] = False
+            day['roa'] = None
+            if 'id' in day:
+                del day['id']
+            for sub_sched in day['scheds']:
+                sub_sched['busy'] = False
+                if 'id' in sub_sched:
+                    del sub_sched['id']
+                if 'tickets' in sub_sched:
+                    del sub_sched['tickets']
+        return schedules
+
+    def _clear_quotas_info(self, quotas):
+        for day in quotas:
+            for q in day['day_quotas']:
+                if 'id' in q:
+                    del q['id']
+        return quotas
+
     def make_person_schedule_description(self, person, start_date, end_date):
-        schedules_by_date = (Schedule.query.outerjoin(Schedule.tickets)
-                             .filter(Schedule.person_id == person.id,
-                                     start_date <= Schedule.date, Schedule.date < end_date,
-                                     Schedule.deleted == 0)
-                             .order_by(Schedule.date)
-                             .order_by(Schedule.begTime)
-                             .order_by(ScheduleTicket.begTime)
-                             .options(db.contains_eager(Schedule.tickets).contains_eager('schedule')))
-        quoting_by_date = QuotingByTime.query.filter(QuotingByTime.doctor_id == person.id,
-                                                     QuotingByTime.quoting_date >= start_date,
-                                                     QuotingByTime.quoting_date < end_date)
+        schedules_by_date = Schedule.query.outerjoin(
+            Schedule.tickets
+        ).filter(
+            Schedule.person_id == person.id,
+            start_date <= Schedule.date, Schedule.date < end_date,
+            Schedule.deleted == 0
+        ).order_by(
+            Schedule.date,
+            Schedule.begTime,
+            ScheduleTicket.begTime
+        ).options(
+            db.contains_eager(Schedule.tickets).contains_eager('schedule')
+        )
+        schedules = self.make_schedule_description(schedules_by_date, start_date, end_date)
+
+        quoting_by_date = QuotingByTime.query.filter(
+            QuotingByTime.doctor_id == person.id,
+            QuotingByTime.quoting_date >= start_date,
+            QuotingByTime.quoting_date < end_date
+        )
+        quotas = self.make_quotas_description(quoting_by_date, start_date, end_date)
+
         return {
             'person': self.make_person(person),
-            'schedules': self.make_schedule_description(schedules_by_date, start_date, end_date),
-            'quotas': self.make_quotas_description(quoting_by_date, start_date, end_date)
+            'schedules': schedules,
+            'quotas': quotas
         }
+
+    def make_copy_schedule_description(self, person, from_start_date, from_end_date, to_start_date, to_end_date):
+        """Копировать чистое расписание без записей пациентов и причин
+        отсутствия с одного месяца на другой.
+        Копирование происходит по алгоритму 'цикличный месяц'. На каждый день
+        целевого месяца идет копирование расписания из дня предыдущего месяца,
+        выбранного с таким смещением, чтобы дни недели совпадали. Сдвиг дней
+        происходит в правую сторону так, что если день недели первого дня
+        месяца, который является источником расписания, позднее дня недели того
+        дня, куда идет копирование, то расписание будет копироваться уже со
+        следующей недели. Если в процессе копирования заканчиваются дни в
+        месяце-источнике, то отсчет дней начинается с начала того же месяца
+        с новым сдвигом, который опять выравнивает дни недели.
+        Таким же образом копируется информация о квотах.
+        """
+
+        def get_day_shift(d_from, d_to):
+            """Получить разницу между днями недели двух дат.
+            Если день недели 1-ой даты раньше, чем у 2-ой, то разница считается
+            в пределах недели, в противном случае - для дней текущей и следующей
+            недели.
+            """
+            shift = d_from.weekday() - d_to.weekday()
+            if shift > 0:
+                shift = 7 - shift
+            else:
+                shift = abs(shift)
+            return shift
+
+        day_shift = get_day_shift(from_start_date, to_start_date)
+        from_schedule_info = self.make_person_schedule_description(person, from_start_date, from_end_date)
+        from_schedule = self._clear_schedule_info(from_schedule_info['schedules'])
+        copy_schedule = []
+        from_quotas = self._clear_quotas_info(from_schedule_info['quotas'])
+        copy_quotas = []
+        from_sched_len = len(from_schedule)
+        while to_start_date <= to_end_date:
+            cur_shift = to_start_date.day + day_shift
+            if cur_shift > from_sched_len:
+                # 2nd loop in month
+                from_date = from_start_date + datetime.timedelta(days=(cur_shift - from_sched_len - 1))
+                cur_shift = cur_shift - from_sched_len + get_day_shift(from_date, to_start_date)
+
+            new_sched_day = dict(from_schedule[cur_shift - 1])
+            new_sched_day['date'] = to_start_date + datetime.timedelta(days=0)
+            if new_sched_day['scheds'] or new_sched_day['roa']:
+                new_sched_day['altered'] = True
+            copy_schedule.append(new_sched_day)
+
+            new_quote_day = dict(from_quotas[cur_shift - 1])
+            new_quote_day['date'] = to_start_date + datetime.timedelta(days=0)
+            if new_quote_day['day_quotas']:
+                new_quote_day['altered'] = True
+            copy_quotas.append(new_quote_day)
+
+            to_start_date += datetime.timedelta(days=1)
+
+        from_schedule_info['schedules'] = copy_schedule
+        from_schedule_info['quotas'] = copy_quotas
+        return from_schedule_info
 
 
 class ClientVisualizer(object):
@@ -404,9 +497,11 @@ class ClientVisualizer(object):
         createPerson = aliased(Person)
         schedulePerson = aliased(Person)
 
-        where = [ScheduleClientTicket.client_id == client_id, ]
+        where = [ScheduleClientTicket.client_id == client_id,
+                 ScheduleClientTicket.deleted == 0]
         if not every:
-            where.append(ScheduleClientTicket.event_id.isnot(None))
+            # where.append(ScheduleClientTicket.event_id.isnot(None))
+            where.append(Schedule.date >= datetime.date.today())
 
         query = db.select(
             (
@@ -462,9 +557,9 @@ class ClientVisualizer(object):
                 .outerjoin(createPerson, createPerson.id == ScheduleClientTicket.createPerson_id)
                 .join(schedulePerson, schedulePerson.id == Schedule.person_id)
                 .join(rbSpeciality, rbSpeciality.id == schedulePerson.speciality_id)
-                .join(Office, Office.id == Schedule.office_id)
+                .outerjoin(Office, Office.id == Schedule.office_id)
                 .outerjoin(Organisation, Organisation.infisCode == ScheduleClientTicket.infisFrom))
-
+        query = query.order_by(Schedule.date.desc(), ScheduleTicket.begTime.desc())
         load_all = db.session.execute(query)
 
         return [
@@ -507,7 +602,7 @@ class ClientVisualizer(object):
         return map(
             self.make_event,
             (client.events.join(EventType).join(rbRequestType)
-             .filter(db.or_(rbRequestType.code == u'policlinic', rbRequestType.code == u'4'))
+             # .filter(db.or_(rbRequestType.code == u'policlinic', rbRequestType.code == u'4'))
              .order_by(Event.setDate.desc()))
         )
 
@@ -731,7 +826,10 @@ class EventVisualizer(object):
             'status': ActionStatus(action.status),
             'begDate': action.begDate,
             'endDate': action.endDate,
-            'person_text': safe_unicode(action.person)
+            'person_text': safe_unicode(action.person),
+            'can_read': UserUtils.can_read_action(action),
+            'can_edit': UserUtils.can_edit_action(action),
+            'can_delete': UserUtils.can_delete_action(action),
         }
 
     def make_event_payment(self, event, client=None):
@@ -787,13 +885,38 @@ class EventVisualizer(object):
         lc['shared_in_events'] = other_events
         return lc
 
+    def make_prev_events_contracts(self, event_list):
+        def make_event_small_info(event):
+            return {
+                'id': event.id,
+                'set_date': event.setDate,
+                'exec_date': event.execDate,
+                'descr': u'Обращение №{0}, {1}'.format(
+                    event.externalId,
+                    safe_traverse_attrs(event, 'eventType', 'name', default=u'')
+                )
+            }
+
+        result = []
+        for event in event_list:
+            lc = self.make_event_local_contract(event)
+            if not lc['id']:
+                continue
+
+            result.append({
+                'local_contract': lc,
+                'event_info': make_event_small_info(event)
+            })
+        return result
+
     def make_event_services(self, event_id):
 
-        def make_raw_service_group(action, service_id, at_code, at_name, service_name, price, at_context):
+        def make_raw_service_group(action, service_id, at_code, at_name, service_name, price, at_context, ct_code):
             service = {
                 'at_id': action.actionType_id,
                 'service_id': service_id,
                 'at_code': at_code,
+                'ct_code': ct_code,
                 'at_name': at_name,
                 'service_name': service_name,
                 'action': action,
@@ -870,7 +993,8 @@ class EventVisualizer(object):
             ActionType.name,
             rbService.name,
             ContractTariff.price,
-            ActionType.context
+            ActionType.context,
+            ContractTariff.code
         ).join(
             Event,
             EventType,
@@ -891,9 +1015,9 @@ class EventVisualizer(object):
         ats_apts = int_get_atl_dict_all()
 
         services_by_at = defaultdict(list)
-        for a, service_id, at_code, at_name, service_name, price, at_context in query:
+        for a, service_id, at_code, at_name, service_name, price, at_context, ct_code in query:
             services_by_at[(a.actionType_id, service_id)].append(
-                make_raw_service_group(a, service_id, at_code, at_name, service_name, price, at_context)
+                make_raw_service_group(a, service_id, at_code, at_name, service_name, price, at_context, ct_code)
             )
         services_grouped = []
         for key, service_group in services_by_at.iteritems():
@@ -905,6 +1029,8 @@ class EventVisualizer(object):
 
 
 class ActionVisualizer(object):
+    ro = True
+
     def make_action(self, action):
         """
         @type action: Action
@@ -935,7 +1061,8 @@ class ActionVisualizer(object):
                     for prop in action.properties
                 ]
             },
-            'layout': self.make_action_layout(action)
+            'ro': not UserUtils.can_edit_action(action),
+            'layout': self.make_action_layout(action),
         }
         if action_is_bak_lab(action):
             result['bak_lab_info'] = self.make_bak_lab_info(action)

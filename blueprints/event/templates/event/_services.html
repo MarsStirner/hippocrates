@@ -32,7 +32,7 @@
                     </thead>
                     <tbody>
                         <tr ng-repeat="service in found_services" ng-click="eventServices.add_service(event, service)">
-                            <td ng-bind="service.at_code"></td>
+                            <td ng-bind="service.at_code"></td> {# == ct_code #}
                             <td ng-bind="service.service_name"></td>
                             <td ng-bind="service.at_name"></td>
                             <td ng-bind="service.price" class="text-right" ng-show="formstate.is_paid()"></td>

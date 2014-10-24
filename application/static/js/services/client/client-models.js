@@ -49,9 +49,12 @@ angular.module('WebMis20.services.models').
                         t.nationalities = t.soc_statuses.filter(function(status) {
                             return status.ss_class.code == 4;
                         });
-                        t.contacts = data.result.client_data.contacts;
-                        t.phones = data.result.client_data.phones;
-                        t.relations = data.result.client_data.relations;
+                        var contacts = data.result.client_data.contacts;
+                        t.contacts = contacts !== null ? contacts : [];
+                        var phones = data.result.client_data.phones;
+                        t.phones = phones !== null ? phones : [];
+                        var relations = data.result.client_data.relations;
+                        t.relations = relations !== null ? relations : [];
                         t.document_history = data.result.client_data.document_history;
 
                         t.deleted_entities = {}; // deleted items to save

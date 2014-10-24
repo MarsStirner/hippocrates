@@ -150,6 +150,7 @@ angular.module('WebMis20.services.models').
                         at_id: null,
                         at_code: null,
                         at_name: null,
+                        ct_code: null,
                         service_id: undefined,
                         service_name: null,
                         actions: [],

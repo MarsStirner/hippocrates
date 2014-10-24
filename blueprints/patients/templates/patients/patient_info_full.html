@@ -1,0 +1,313 @@
+{% extends 'schedule/base.html' %}
+{% block title %}{% endblock %}
+{% block main %}
+    <div ng-controller="PatientInfoCtrl">
+        <legend xmlns="http://www.w3.org/1999/html">
+            <h2>Пациент: [[ client.info.full_name ]]</h2>
+        </legend>
+        <div class="row">
+            <div class="col-md-2 affix-holder">
+                <div class="toc-affix" bs-affix>
+                    <toc-affix toc-name="tocPatientForm">
+                    <hr>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <button type="button" ng-click="close_patient_info();" class="btn btn-block btn-default">Закрыть</button>
+                        </div>
+                    </div>
+                    </toc-affix>
+                </div>
+            </div>
+            <div class="col-md-10">
+                <ng-form name="PatientForm" id="PatientForm" role="form" toc-element toc-name="tocPatientForm">
+                    <div name="MainInfo" class="well well-sm" toc-element="Основная информация" ng-if="client.info">
+                        <legend>Основная информация</legend>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <dl class="dl-horizontal novmargin">
+                                    <dt>Фамилия</dt> <dd class="clearfix">[[client.info.last_name]]</dd>
+                                    <dt>Дата рождения</dt> <dd class="clearfix">[[client.info.birth_date|asDate]]</dd>
+                                    <dt>СНИЛС</dt> <dd class="clearfix">[[client.info.snils]]</dd>
+                                </dl>
+                            </div>
+                            <div class="col-md-3">
+                                <dl class="dl-horizontal novmargin">
+                                    <dt>Имя</dt> <dd class="clearfix">[[ client.info.first_name ]]</dd>
+                                    <dt>Пол</dt> <dd class="clearfix">[[ client.info.sex.name ]]</dd>
+                                    <dt>Примечания</dt> <dd class="clearfix">[[ client.info.notes ]]</dd>
+                                </dl>
+                            </div>
+                            <div class="col-md-3">
+                                <dl class="dl-horizontal novmargin">
+                                    <dt>Отчетво</dt> <dd class="clearfix">[[ client.info.patr_name ]]</dd>
+                                    <dt>Возраст</dt><dd class="clearfix">[[ client.info.age ]]</dd>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                    <div name="DocumentFullInfo" class="well well-sm" toc-element="Документы" ng-if="client.id_docs">
+                        <legend>Документ удостоверяющий личность</legend>
+                        <div ng-repeat="doc in client.id_docs | flt_not_deleted">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <dl class="dl-horizontal novmargin">
+                                        <dt>Тип</dt><dd class="clearfix">[[ doc.doc_type.name ]]</dd>
+                                        <dt>Дата выдачи</dt><dd class="clearfix">[[ doc.beg_date|asDate ]]</dd>
+                                        <dt>Выдан</dt><dd class="clearfix">[[ doc.origin ]]</dd>
+                                    </dl>
+                                </div>
+                                <div class="col-md-3">
+                                    <dl class="dl-horizontal novmargin">
+                                        <dt>Серия</dt><dd class="clearfix">[[ doc.serial ]]</dd>
+                                        <dt>Действителен до </dt><dd class="clearfix">[[ doc.end_date|asDate ]]</dd>
+                                    </dl>
+                                </div>
+                                <div class="col-md-3">
+                                    <dl class="dl-horizontal novmargin">
+                                        <dt>Номер</dt><dd class="clearfix">[[ doc.number ]]</dd>
+                                    </dl>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div name="AddressFullInfo" class="well well-sm" toc-element="Адреса"
+                         ng-if="client.reg_addresses.length||client.live_addresses.length">
+                        <legend>Адреса</legend>
+                        <div>
+                            <dl class="dl-horizontal novmargin">
+                                <dt ng-if="client.reg_addresses.length">Адрес регистрации</dt>
+                                    <dd class="clearfix" ng-repeat="reg_addr in client.reg_addresses | flt_not_deleted"> [[reg_addr.text_summary]]</dd>
+                                <dt ng-if="client.live_addresses.length">Адрес проживания</dt>
+                                    <dd class="clearfix" ng-repeat="live_addr in client.live_addresses | flt_not_deleted"> [[live_addr.text_summary]]</dd>
+                            </dl>
+                        </div>
+                    </div>
+                    <div name="PolicyFullInfo" class="well well-sm" toc-element="Полисы"
+                         ng-if="client.compulsory_policies.length || client.voluntary_policies.length">
+                        <legend>Полисы</legend>
+                        <h4 ng-if="client.compulsory_policies.length">Полис ОМС</h4>
+                        <div ng-repeat="cpol in client.compulsory_policies | flt_not_deleted">
+                            <div class="row">
+                                <div class="col-md-5">
+                                    <dl class="dl-horizontal novmargin">
+                                        <dt>Тип</dt><dd>[[ cpol.policy_type.name ]]</dd>
+                                        <dt>Дата выдачи</dt><dd>[[ cpol.beg_date|asDate ]]</dd>
+                                        <dt>Выдан</dt><dd>[[ cpol.insurer.full_name ]]</dd>
+                                    </dl>
+                                </div>
+                                <div class="col-md-3">
+                                    <dl class="dl-horizontal novmargin">
+                                        <dt>Серия</dt><dd>[[ cpol.serial ]]</dd>
+                                        <dt>Действителен до </dt><dd>[[ cpol.end_date|asDate ]]</dd>
+                                    </dl>
+                                </div>
+                                <div class="col-md-3">
+                                    <dl class="dl-horizontal novmargin">
+                                        <dt>Номер</dt><dd>[[ cpol.number ]]</dd>
+                                    </dl>
+                                </div>
+                            </div>
+                        </div>
+                        <h4 ng-if="client.voluntary_policies.length">Полисы ДМС</h4>
+                        <div ng-repeat="vpol in client.voluntary_policies | flt_not_deleted">
+                            <div class="row">
+                                <div class="col-md-5">
+                                    <dl class="dl-horizontal novmargin">
+                                        <dt>Тип</dt><dd>[[ vpol.policy_type.name ]]</dd>
+                                        <dt>Дата выдачи</dt><dd>[[ vpol.beg_date|asDate ]]</dd>
+                                        <dt>Выдан</dt><dd>[[ vpol.insurer.full_name ]]</dd>
+                                    </dl>
+                                </div>
+                                <div class="col-md-3">
+                                    <dl class="dl-horizontal novmargin">
+                                        <dt>Серия</dt><dd>[[ vpol.serial ]]</dd>
+                                        <dt>Действителен до </dt><dd>[[ vpol.end_date|asDate ]]</dd>
+                                    </dl>
+                                </div>
+                                <div class="col-md-3">
+                                    <dl class="dl-horizontal novmargin">
+                                        <dt>Номер</dt><dd>[[ vpol.number ]]</dd>
+                                    </dl>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div name="CharacteristicsFullInfo" class="well well-sm" toc-element="Особенности пациента"
+                         ng-if="client.blood_types.length||client.allergies.length||client.intolerances.length">
+                        <legend>Особенности пациента</legend>
+                        <div name="BloodTypeFullInfo" toc-element="Группа крови" ng-if="client.blood_types">
+                            <h4>Группа крови и резус фактор</h4>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Дата установления</th>
+                                        <th>Тип</th>
+                                        <th>Врач, установивший группу крови</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="bt in client.blood_types.slice(0, 1) | flt_not_deleted">
+                                        <td>[[bt.date|asDate]]</td>
+                                        <td>[[bt.blood_type.name]]</td>
+                                        <td>[[bt.person.name]]</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div name="AllergyFullInfo" toc-element="Аллергия" ng-if="client.allergies">
+                            <h4>Аллергия</h4>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Вещество</th>
+                                        <th>Степень</th>
+                                        <th>Дата установления</th>
+                                        <th>Примечание</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="alg in client.allergies | flt_not_deleted">
+                                        <td>[[alg.name]]</td>
+                                        <td>[[alg.power.name]]</td>
+                                        <td>[[alg.date|asDate]]</td>
+                                        <td>[[alg.notes]]</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div name="IntoleranceInfo" toc-element="Непереносимость" ng-if="client.intolerances">
+                            <h4>Медикаментозная непереносимость</h4>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Препарат</th>
+                                        <th>Степень</th>
+                                        <th>Дата установления</th>
+                                        <th>Примечание</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="intlr in client.intolerances | flt_not_deleted">
+                                        <td>[[intlr.name]]</td>
+                                        <td>[[intlr.power.name]]</td>
+                                        <td>[[intlr.date|asDate]]</td>
+                                        <td>[[intlr.notes]]</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div name="SocStatusFullInfo" class="well well-sm" toc-element="Соц. статус"
+                         ng-if="client.invalidities.length||client.works.length||client.nationalities.length">
+                        <legend>Социальные статусы</legend>
+                        <div name="InvalidityFullInfo" toc-element="Инвалидность" ng-if="client.invalidities">
+                            <h4>Инвалидность</h4>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Тип</th>
+                                        <th>Дата начала</th>
+                                        <th>Дата окончания</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="socstat in client.invalidities | flt_not_deleted">
+                                        <td>[[socstat.ss_type.name]]</td>
+                                        <td>[[socstat.beg_date|asDate]]</td>
+                                        <td>[[socstat.end_date|asDate]]</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div name="WorksFullInfo" toc-element="Занятость" ng-if="client.works">
+                            <h4>Занятость</h4>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Тип</th>
+                                        <th>Дата начала</th>
+                                        <th>Дата окончания</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="socstat in client.works | flt_not_deleted">
+                                        <td>[[socstat.ss_type.name]]</td>
+                                        <td>[[socstat.beg_date|asDate]]</td>
+                                        <td>[[socstat.end_date|asDate]]</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div name="NationalityFullInfo" toc-element="Гражданство" ng-if="client.nationalities">
+                            <h4>Гражданство</h4>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Тип</th>
+                                        <th>Дата начала</th>
+                                        <th>Дата окончания</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="socstat in client.nationalities | flt_not_deleted">
+                                        <td>[[socstat.ss_type.name]]</td>
+                                        <td>[[socstat.beg_date|asDate]]</td>
+                                        <td>[[socstat.end_date|asDate]]</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div name="ContactsFullInfo" toc-element="Связи и контакты"
+                         ng-if="client.relations.length || client.contacts.length">
+                        <legend>Контактная информация и родственники</legend>
+                        <div class="well well-sm" >
+                            <div name="RlationsFullInfo" toc-element="Связи" ng-if="client.relations.length">
+                                <h4>Связи с другими пациентами</h4>
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Тип</th>
+                                            <th>Связь</th>
+                                            <th>Родственник</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="relation in client.relations | flt_not_deleted">
+                                            <td>[[relation.direct ? relation.rel_type.leftName+' -> '+relation.rel_type.rightName: relation.rel_type.rightName+' -> '+relation.rel_type.leftName]]</td>
+                                            <td>[[relation.direct ? 'Прямая' : 'Обратная']]</td>
+                                            <td>[[relation.relative.full_name]]</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div name="ContactsFullInfo" toc-element="Контакты" ng-if="client.contacts.length">
+                                <h4>Контакты пациента</h4>
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Тип</th>
+                                            <th>Номер</th>
+                                            <th>Примечание</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="contact in client.contacts | flt_not_deleted">
+                                            <td>[[contact.contact_type.name]]</td>
+                                            <td>[[contact.contact_text]]</td>
+                                            <td>[[contact.notes]]</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </ng-form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block modules_js %}
+    {{ super() }}
+    <script src="{{ url_for('.static', filename="js/patient_info.js", v=version) }}"></script>
+{% endblock %}

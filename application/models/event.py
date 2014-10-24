@@ -5,6 +5,7 @@ import re
 
 from application.lib.const import PAYER_EVENT_CODES
 from application.lib.agesex import AgeSex
+from application.lib.settings import Settings
 from application.models.client import ClientDocument
 from application.models.exists import Person, rbPost, rbCashOperation, rbService
 from application.models.utils import safe_current_user_id
@@ -67,8 +68,12 @@ class Event(db.Model):
     payments = db.relationship('EventPayment', backref=db.backref('event'))
     client = db.relationship(u'Client')
     diagnostics = db.relationship(
-        u'Diagnostic', lazy=True, innerjoin=True, primaryjoin=
-        "and_(Event.id == Diagnostic.event_id, Diagnostic.deleted == 0)"
+        u'Diagnostic', lazy=True, innerjoin=True,
+        primaryjoin="and_(Event.id == Diagnostic.event_id, Diagnostic.deleted == 0)"
+    )
+    visits = db.relationship(
+        u'Visit',
+        primaryjoin="and_(Event.id == Visit.event_id, Visit.deleted == 0)"
     )
     uuid = db.relationship('UUID')
 
@@ -117,6 +122,22 @@ class Event(db.Model):
     def date(self):
         date = self.execDate if self.execDate is not None else datetime.date.today()
         return date
+
+    @property
+    def is_closed(self):
+        # Текущая дата больше, чем дата завершения + 2 рабочих дня
+        # согласно какому-то мегаприказу МЗ и главврача ФНКЦ
+        # Установлен результат обращения
+        from application.lib.data import addPeriod
+        return self.is_pre_closed and datetime.date.today() > addPeriod(
+            self.execDate.date(),
+            Settings.getInt('Event.BlockTime', 2),
+            False
+        )
+
+    @property
+    def is_pre_closed(self):
+        return self.execDate and (self.result_id is not None)
 
     def __unicode__(self):
         return unicode(self.eventType)

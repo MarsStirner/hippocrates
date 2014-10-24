@@ -352,6 +352,19 @@ div.select2-container {
   background-color: #f5f5f5;
 }
 
+.btn-group-justified {
+  table-layout: auto;
+}
+
+.btn-group-justified > .btn-group{
+      width:100%;
+}
+
+.modal-scrollable {
+    max-height: 500px;
+    overflow-y: auto;
+}
+
 .tab-content {
     border-left: 1px solid #ddd;
     border-right: 1px solid #ddd;
@@ -671,6 +684,24 @@ ng-form {
 }
 .table-bak td[rowspan] + td[rowspan], .table-bak th[rowspan] + th[rowspan] {
    border-right-width: medium;
+}
+
+.modal-scrollable .modal-dialog,
+.modal-scrollable .modal-content {
+    /* 90% of window height */
+    height: 90%;
+}
+
+.modal-scrollable .modal-body {
+    /* 100% = dialog height, 150px = header + footer */
+    max-height: calc(100% - 150px);
+    height: 100%;
+    overflow-y: scroll;
+}
+
+button.text-left {
+    text-align: left;
+    padding-left: 10px;
 }
 
 a.pseudo-btn {

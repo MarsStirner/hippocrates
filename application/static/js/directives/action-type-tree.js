@@ -263,7 +263,8 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
             return $modal.open({
                 templateUrl: templateUrl,
                 size: 'lg',
-                controller: Controller
+                controller: Controller,
+                windowClass: 'modal-scrollable'
             })
         },
         openAppointmentModal: function (model, date_required) {
@@ -318,7 +319,7 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
             <button type="button" class="close" ng-click="cancel()">&times;</button>\
             <h4 class="modal-title" id="myModalLabel">Новое действие</h4>\
         </div>\
-        <div class="modal-body">\
+        <div class="modal-body modal-scrollable">\
             <input class="form-control" type="text" ng-model="conditions.query" wm-slow-change="set_filter()"></input>\
             <div class="checkbox">\
                 <label>\
@@ -362,7 +363,7 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
             <button type="button" class="close" ng-click="cancel()">&times;</button>\
             <h4 class="modal-title" id="myModalLabel">Новое направление на лаб.исследование</h4>\
         </div>\
-        <div class="modal-body">\
+        <div class="modal-body modal-scrollable">\
             <div class="row">\
                 <div class="col-md-6">\
                     <input class="form-control" type="text" ng-model="conditions.query" wm-slow-change="set_filter()"></input>\

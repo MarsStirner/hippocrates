@@ -230,20 +230,21 @@ def add_or_update_policy(client, data):
     err_msg = u'Ошибка сохранения полиса'
     policy_id = data.get('id')
     pol_type = safe_traverse(data, 'policy_type', 'id')
-    if not pol_type:
-        raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Тип полиса')
+    deleted = data.get('deleted', 0)
     serial = data.get('serial') or ''
     number = data.get('number')
-    if not number:
-        raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Номер полиса')
     beg_date = safe_date(data.get('beg_date'))
-    if not beg_date:
-        raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Дата выдачи')
     end_date = safe_date(data.get('end_date'))
     insurer = data['insurer']
-    if not (insurer['id'] or insurer['full_name']):
-        raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Страховая медицинская организация')
-    deleted = data.get('deleted', 0)
+    if not deleted:
+        if not pol_type:
+            raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Тип полиса')
+        if not number:
+            raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Номер полиса')
+        if not beg_date:
+            raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Дата выдачи')
+        if not (insurer['id'] or insurer['full_name']):
+            raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Страховая медицинская организация')
 
     if policy_id:
         policy = ClientPolicy.query.get(policy_id)

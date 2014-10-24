@@ -96,6 +96,10 @@ var ScheduleDayCtrl = function ($scope, $http, $modal, $filter, WMClient, Printi
         $scope.child_window = window.open(url_for_event_html_event_info + '?event_id=' + event_id, '_blank');
     };
 
+    $scope.open_patient_info = function(client_id) {
+        window.open(url_for_patien_info_full + '?client_id=' + client_id, '_blank');
+    };
+
     $scope.new_appointment = function(client_id) {
         $scope.child_window = window.open(url_schedule_appointment_html + '?client_id=' + client_id, '_blank');
     };

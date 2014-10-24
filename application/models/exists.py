@@ -1558,15 +1558,18 @@ class vrbPersonWithSpeciality(db.Model):
     code = db.Column(db.String(12), nullable=False, index=True)
     name = db.Column(db.String(101), nullable=False, index=True)
     orgStructure_id = db.Column(db.ForeignKey('OrgStructure.id'))
+    speciality_id = db.Column(db.ForeignKey('rbSpeciality.id'))
 
     orgStructure = db.relationship('OrgStructure', lazy='joined')
+    speciality = db.relationship('rbSpeciality', lazy='joined')
 
     def __json__(self):
         return {
             'id': self.id,
             'code': self.code,
             'name': self.name,
-            'org_structure': self.orgStructure
+            'org_structure': self.orgStructure,
+            'speciality': self.speciality
         }
 
     def __int__(self):
@@ -1585,4 +1588,19 @@ class Setting(db.Model):
             'id': self.id,
             'path': self.path,
             'value': self.value,
+        }
+
+
+class rbMethodOfAdministration(db.Model):
+    __tablename__ = u'rbMethodOfAdministration'
+
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(16), nullable=False, index=True)
+    name = db.Column(db.String(64), nullable=False, index=True)
+
+    def __json__(self):
+        return {
+            'id': self.id,
+            'code': self.code,
+            'name': self.name,
         }

@@ -90,14 +90,21 @@
             </div>
 
             <div class="col-md-2">
-                <div>
+                <div class="marginal">
                     <label>Заполнить из:</label>
                     <button type="button" class="btn btn-info btn-block" ng-disabled="import_payer_btn_disabled()"
-                            ng-click="get_payer('client', event.info.client_id)">карты пациента</button>
+                            ng-click="get_payer(event.info.client_id)">карты пациента</button>
                     <button type="button" class="btn btn-info btn-block" ng-disabled="import_payer_btn_disabled()"
                             ng-click="open_relatives_modal()">карты родственника</button>
                     <button type="button" class="btn btn-info btn-block" ng-disabled="import_payer_btn_disabled()"
-                            ng-click="get_payer('prev_event', event.info.client_id)">предыдущего</button>
+                            ng-click="open_prev_event_contract_modal()">предыдущего</button>
+                </div>
+                <div>
+                    <label>&nbsp;</label><br>
+                    <button type="button" class="btn btn-danger pull-right" title="Удалить"
+                            ng-click="clear_payer_lc()">
+                        <span class="glyphicon glyphicon-trash"></span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -124,6 +131,13 @@
                     </ui-select-choices>
                 </ui-select>
             </div>
+            <div class="col-md-offset-4 col-md-2">
+                <label>&nbsp;</label><br>
+                <button type="button" class="btn btn-danger pull-right" title="Удалить"
+                        ng-click="clear_payer_lc()">
+                    <span class="glyphicon glyphicon-trash"></span>
+                </button>
+            </div>
         </div>
     </tab>
 </tabset>
@@ -137,7 +151,7 @@
             <div class="col-md-2"
                 ng-class="{'has-error': payerForm.date_contract.$invalid && editing.submit_attempt}">
                 <label for="date_contract">Дата заключения</label>
-                <wm-date id="date_contract" name="date_contract" ng-disabled="contract_info_disabled()"
+                <wm-date id="date_contract" name="date_contract" ng-disabled="contract_info_disabled() && !con_info.editing"
                          ng-model="event.payment.local_contract.date_contract"
                          ng-required="contract_info_required()">
                 </wm-date>
@@ -145,7 +159,13 @@
             <div class="col-md-4">
                 <label for="number_contract">Номер договора</label>
                 <input type="text" class="form-control" id="number_contract" name="number_contract" autocomplete="off"
-                       ng-disabled="contract_info_disabled()" ng-model="event.payment.local_contract.number_contract"/>
+                       ng-disabled="contract_info_disabled() && !con_info.editing" ng-model="event.payment.local_contract.number_contract"/>
+            </div>
+            <div class="col-md-6">
+                <label>&nbsp;</label><br>
+                <button type="button" class="btn btn-default pull-right" ng-show="btn_edit_contract_info_visible()"
+                        ng-click="con_info.editing = true"><span class="glyphicon glyphicon-pencil"></span>
+                </button>
             </div>
         </div>
     </div>

@@ -7,12 +7,13 @@ from collections import defaultdict
 from dateutil.parser import parse as dateutil_parse
 from flask import abort, request
 from flask.ext.login import current_user
+from application.lib.user import UserUtils
 
 from application.models.event import Event
 from application.systemwide import db, cache
 from application.lib.sphinx_search import SearchPerson
 from application.lib.utils import (jsonify, safe_traverse, parse_id, safe_date, safe_time_as_dt, safe_datetime,
-                                   safe_traverse_attrs)
+                                   safe_traverse_attrs, format_date)
 from application.lib.utils import public_endpoint
 from blueprints.schedule.app import module
 from blueprints.schedule.lib.data import delete_schedules
@@ -102,6 +103,23 @@ def api_schedule_description():
     context = ScheduleVisualizer()
     person = Person.query.get(person_id)
     return jsonify(context.make_person_schedule_description(person, start_date, end_date))
+
+
+@module.route('/api/copy_schedule_description.json', methods=['GET'])
+def api_copy_schedule_description():
+    person_id = parse_id(request.args, 'person_id')
+    if person_id is False:
+        return abort(400)
+    from_start_date = safe_date(request.args.get('from_start_date'))
+    from_end_date = safe_date(request.args.get('from_end_date'))
+    to_start_date = safe_date(request.args.get('to_start_date'))
+    to_end_date = safe_date(request.args.get('to_end_date'))
+    if not (from_start_date and from_end_date and to_start_date and to_end_date):
+        return abort(400)
+
+    context = ScheduleVisualizer()
+    person = Person.query.get(person_id)
+    return jsonify(context.make_copy_schedule_description(person, from_start_date, from_end_date, to_start_date, to_end_date))
 
 
 @module.route('/api/day_schedule.json', methods=['GET'])
@@ -194,11 +212,17 @@ def api_schedule_description_post():
                 new_sched.endTimeAsDt = safe_time_as_dt(sub_sched['endTime'])
                 new_sched.endTime = new_sched.endTimeAsDt.time()
                 new_sched.receptionType_id = safe_traverse(sub_sched, 'reception_type', 'id')
-                new_sched.office_id = safe_traverse(sub_sched, 'office', 'id')
+                office_id = safe_traverse(sub_sched, 'office', 'id')
+                if not office_id and safe_traverse(sub_sched, 'reception_type', 'code') == 'amb':
+                    return jsonify({}, 422, u'На %s не указан кабинет' % format_date(date))
+                new_sched.office_id = office_id
                 new_sched.numTickets = sub_sched.get('planned', 0)
 
+                planned_count = sub_sched.get('planned')
+                if not planned_count:
+                    return jsonify({}, 422, u'На %s указаны интервалы с нулевым планом' % format_date(date))
                 make_tickets(new_sched,
-                             sub_sched.get('planned', 0),
+                             planned_count,
                              sub_sched.get('extra', 0),
                              sub_sched.get('CITO', 0))
 
@@ -273,7 +297,7 @@ def api_persons_tree_schedule_info():
 def api_search_persons():
     try:
         query_string = request.args['q']
-    except KeyError or ValueError:
+    except (KeyError, ValueError):
         return abort(404)
     result = SearchPerson.search(query_string)
 
@@ -329,8 +353,8 @@ def api_appointment():
         client_ticket.ticket_id = ticket_id
         client_ticket.createDatetime = client_ticket.modifyDatetime = datetime.datetime.now()
         client_ticket.createPerson_id = client_ticket.modifyPerson_id = create_person
-        db.session.add(client_ticket)
         client_ticket.appointmentType = rbAppointmentType.query.filter(rbAppointmentType.code == appointment_type_code).first()
+        db.session.add(client_ticket)
     if 'note' in data:
         client_ticket.note = data['note']
     db.session.commit()
@@ -344,7 +368,7 @@ def api_schedule_lock():
         person_id = j['person_id']
         date = datetime.datetime.strptime(j['date'], '%Y-%m-%d')
         roa = j['roa']
-    except ValueError or KeyError:
+    except (ValueError, KeyError):
         return abort(418)
     scheds = Schedule.query.filter(
         Schedule.person_id == person_id,
@@ -367,7 +391,7 @@ def api_move_client():
     try:
         ticket_id = int(j['ticket_id'])
         destination_tid = j['destination_ticket_id']
-    except ValueError or KeyError:
+    except (ValueError, KeyError):
         return jsonify(None, 418, 'Both ticket_id and destination_ticket_id must be specified')
     source = ScheduleTicket.query.get(ticket_id)
     oldCT = source.client_ticket
@@ -441,6 +465,10 @@ def api_action_post():
     if action_id:
         data['properties'] = properties_desc
         action = Action.query.get(action_id)
+        if not action:
+            return jsonify(None, 404, 'Action %s not found' % action_id)
+        if not UserUtils.can_edit_action(action):
+            return jsonify(None, 403, 'User cannot edit action %s' % action_id)
         action = update_action(action, **data)
     else:
         at_id = action_desc['action_type']['id']

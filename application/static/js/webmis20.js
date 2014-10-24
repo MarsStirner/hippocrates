@@ -482,11 +482,13 @@ var WebMis20 = angular.module('WebMis20', [
         this.action_columns = {};
         this.properties_by_id = {};
         this.properties_by_code = {};
+        this.ro = false;
     };
     function success_wrapper(self) {
         return function (data) {
             self.action = data.result.action;
             self.layout = data.result.layout;
+            self.ro = data.result.ro;
             self.bak_lab_info = data.result.bak_lab_info;
             self.action_columns = {
                 assignable: false,
@@ -670,7 +672,7 @@ var WebMis20 = angular.module('WebMis20', [
         restrict: 'E',
         require: '?ngModel',
         template:
-            '<button class="btn btn-default btn-block [[ngRequired && !$model.$modelValue ? \'error-border\' : \'\']]" ng-click="to_show()">[[ $model.$modelValue.code ]] <span class="caret"></span></button>' +
+            '<button class="btn btn-default btn-block [[ngRequired && !$model.$modelValue ? \'error-border\' : \'\']]" ng-click="to_show()">[[ $model.$modelValue.code ]] [[$model.$modelValue.name]] <span class="caret"></span></button>' +
             '<div class="well well-sm popupable" ng-show="shown" ng-mouseleave="to_hide_delay()" ng-mouseenter="to_hide_cancel()">' +
                 '<input type="text" ng-model="query" class="form-control" />' +
                 '<table class="table table-condensed table-hover table-clickable">' +
@@ -737,7 +739,7 @@ var WebMis20 = angular.module('WebMis20', [
         },
         link: function (scope, element, attributes) {
             var elem = $(element);
-            elem.addClass('btn btn-block');
+            elem.addClass('btn btn-block text-left');
             scope.$watch('ticket.status', function (n, o) {
                 if (!scope.ticket) {
                     elem.addClass('disabled');
@@ -754,7 +756,7 @@ var WebMis20 = angular.module('WebMis20', [
                     elem.removeClass('btn-success btn-warning btn-gray disabled');
                     elem.addClass('btn-primary');
                     if (scope.showName) {
-                        text += ' - ' + scope.ticket.client
+                        text += ' - ' + scope.ticket.client + ' (' + scope.ticket.record.client_id + ')';
                     }
                 } else {
                     elem.removeClass('btn-danger');
@@ -985,8 +987,21 @@ var aux = {
 
         return params;
     },
-    range: function (num) {
-        return Array.apply(null, new Array(num)).map(function(_, i) {return i;})
+    range: function (start, end) {
+        if (arguments.length < 2) {
+            end = start;
+            start = 0;
+        }
+        if (start >= end) {
+            return [];
+        }
+        var res = [],
+            cur = end - start;
+        end--;
+        while (cur--) {
+            res[cur] = end--;
+        }
+        return res;
     },
     moment: moment,
     months: [
@@ -1126,6 +1141,17 @@ if (!String.prototype.format) {
             return typeof args[number] != 'undefined'
                 ? args[number]
                 : match
+                ;
+        });
+    };
+}
+if (!String.prototype.formatNonEmpty) {
+    String.prototype.formatNonEmpty = function() {
+        var args = arguments;
+        return this.replace(/{([\w\u0400-\u04FF\s\.,</>]*)\|?(\d+)\|?([\w\u0400-\u04FF\s\.,</>]*)}/g, function(match, prefix, number, suffix) {
+            return typeof args[number] != 'undefined'
+                ? (args[number] ? (prefix + args[number] + suffix): '')
+                : ''
                 ;
         });
     };

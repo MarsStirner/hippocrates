@@ -26,95 +26,141 @@ angular.module('WebMis20.ActionLayout', ['WebMis20.validators', 'WebMis20.direct
                         var property_code = 'action.get_property(' + tag.id + ')';
                         var property_is_assignable = 'action.is_assignable(' + tag.id + ')';
 
-                        switch (property.type.type_name) {
-                            case 'Constructor':
-                                inner_template = '<wysiwyg ng-model="{0}.value" thesaurus-code="{1}" />'.format('{0}', property.type.domain);
-                                break;
-                            case 'Text':
-                            case 'Html':
-                            case 'Жалобы':
-                                inner_template = '<wysiwyg ng-model="{0}.value" />';
-                                break;
-                            case 'Date':
-                                inner_template = '<input type="text" class="form-control" datepicker-popup="dd-MM-yyyy" ng-model="{0}.value" />';
-                                break;
-                            case 'Integer':
-                                inner_template = '<input class="form-control" type="number" ng-model="{0}.value" valid-number valid-number-negative>';
-                                break;
-                            case 'Double':
-                                inner_template = '<input class="form-control" type="number" ng-model="{0}.value" valid-number valid-number-negative valid-number-float>';
-                                break;
-                            case 'Time':
-                                inner_template = '<div fs-time ng-model="{0}.value"></div>';
-                                break;
-                            case 'String':
-                                if (property.type.domain) {
-                                    inner_template = '<select class="form-control" ng-model="{0}.value" ng-options="val for val in {0}.type.values"></select>'
-                                } else {
-                                    inner_template = '<input class="form-control" type="text" ng-model="{0}.value">';
-                                }
-                                break;
-                            case 'JobTicket':
-                                inner_template = '<span ng-bind="{0}.value.datetime | asDateTime"></span>';
-                                break;
-                            case 'AnalysisStatus':
-                                inner_template = '<rb-select ref-book="rbAnalysisStatus" ng-model="{0}.value"></rb-select>';
-                                break;
-                            case 'OperationType':
-                                inner_template = '<rb-select ref-book="rbOperationType" ng-model="{0}.value"></rb-select>';
-                                break;
-                            case 'HospitalBedProfile':
-                                inner_template = '<rb-select ref-book="rbHospitalBedProfile" ng-model="{0}.value"></rb-select>';
-                                break;
-                            case 'Person':
-                                inner_template = '<wm-person-select ng-model="{0}.value"></wm-person-select>';
-                                break;
-                            case 'Organisation':
-                                inner_template =
-                                    '<ui-select ng-model="{0}.value" theme="select2" class="form-control" autocomplete="off" ref-book="Organisation">\
-                                        <ui-select-match placeholder="не выбрано">[[ $select.selected.full_name ]]</ui-select-match>\
-                                        <ui-select-choices repeat="item in $refBook.objects | filter: $select.search | limitTo: 50">\
-                                            <span ng-bind-html="item.full_name | highlight: $select.search"></span>\
-                                        </ui-select-choices>\
-                                    </ui-select>';
-                                break;
-                            case 'MKB':
-                                inner_template = '<ui-mkb ng-model="{0}.value"></ui-mkb>';
-                                break;
-                            case 'OrgStructure': // Без фильтров
-                                inner_template =
-                                    '<wm-custom-dropdown ng-model="{0}.value">\
-                                        <wm-org-structure-tree></wm-org-structure-tree>\
-                                    </wm-custom-dropdown>';
-                                break;
-                            case 'ReferenceRb':
-                                var domain = property.type.domain.split(';'),
-                                    rbTable = domain[0],
-                                    rb_codes = domain[1].split(',').map(function (code) {
-                                        return "'{0}'".format(code.trim());
-                                    }).filter(function (code) {
-                                        return code !== "''";
-                                    }),
-                                    extra_filter = rb_codes.length ? 'attribute:\'code\':[{0}]'.format(rb_codes.join(',')) : '';
-                                inner_template = '<rb-select ref-book="{1}" ng-model="{0}.value" extra-filter="{2}"></rb-select>'.format('{0}', rbTable, extra_filter);
-                                break;
-                            case 'Diagnosis':
-                                inner_template = '<wm-diagnosis ng-model="{0}.value" add-new="true"></wm-diagnosis>';
-                                break;
-                            default:
-                                inner_template = '<span ng-bind="{0}.value"></span>';
+                        if (scope.action.ro) {
+                            switch (property.type.type_name) {
+                                case 'Constructor':
+                                case 'Text':
+                                case 'HTML':
+                                case 'Жалобы':
+                                    inner_template = '<span ng-bind-html="{0}.value"></span>'; break;
+                                case 'String':
+                                case 'Integer':
+                                case 'Double':
+                                    inner_template = '<span ng-bind="{0}.value"></span>'; break;
+                                case 'Date':
+                                    inner_template = '<span ng-bind="{0}.value | asDate"></span>'; break;
+                                case 'Time':
+                                    inner_template = '<span ng-bind="{0}.value | asTime"></span>'; break;
+                                case 'JobTicket':
+                                    inner_template = '<span ng-bind="{0}.value.datetime | asDateTime"></span>'; break;
+                                case 'AnalysisStatus':
+                                case 'OperationType':
+                                case 'HospitalBedProfile':
+                                case 'ReferenceRb':
+                                    inner_template = '<span ng-bind="{0}.value.name"></span>'; break;
+                                case 'Person':
+                                    inner_template = '<span ng-bind="{0}.value.name"></span>'; break;
+                                case 'Organisation':
+                                    inner_template = '<span ng-bind="{0}.value.full_name"></span>'; break;
+                                case 'MKB':
+                                    inner_template = '<span ng-bind="{0}.value.name"></span>'; break;
+                                case 'OrgStructure':
+                                    inner_template = '<span ng-bind="{0}.value.name"></span>'; break;
+                                case 'Diagnosis':
+                                    if (property.type.vector) {
+                                        inner_template =
+                                            '<div ng-repeat="$v in {0}.value">[[ $v.diagnosis_type.name ]]: [[ $v.diagnosis.mkb.code ]] - [[ $v.diagnosis.mkb.name ]] ([[ $v.character.name ]])</div>';
+                                    } else {
+                                        inner_template =
+                                            '<span>[[ {0}.value.diagnosis_type.name ]]: [[ {0}.value.diagnosis.mkb.code ]] - [[ {0}.value.diagnosis.mkb.name ]] ([[ {0}.value.character.name ]])</span>';
+                                    }
+                                    break;
+
+                                default:
+                                    inner_template = '<span ng-bind="{0}.value"></span>'; break;
+                            }
+                        } else {
+                            switch (property.type.type_name) {
+                                case 'Constructor':
+                                    inner_template = '<wysiwyg ng-model="{0}.value" thesaurus-code="{1}" />'.format('{0}', property.type.domain);
+                                    break;
+                                case 'Text':
+                                case 'Html':
+                                case 'Жалобы':
+                                    inner_template = '<wysiwyg ng-model="{0}.value" />';
+                                    break;
+                                case 'Date':
+                                    inner_template = '<input type="text" class="form-control" datepicker-popup="dd-MM-yyyy" ng-model="{0}.value" />';
+                                    break;
+                                case 'Integer':
+                                    inner_template = '<input class="form-control" type="number" ng-model="{0}.value" valid-number valid-number-negative>';
+                                    break;
+                                case 'Double':
+                                    inner_template = '<input class="form-control" type="text" ng-model="{0}.value" valid-number valid-number-negative valid-number-float>';
+                                    break;
+                                case 'Time':
+                                    inner_template = '<div fs-time ng-model="{0}.value"></div>';
+                                    break;
+                                case 'String':
+                                    if (property.type.domain) {
+                                        inner_template = '<select class="form-control" ng-model="{0}.value" ng-options="val for val in {0}.type.values"></select>'
+                                    } else {
+                                        inner_template = '<input class="form-control" type="text" ng-model="{0}.value">';
+                                    }
+                                    break;
+                                case 'JobTicket':
+                                    inner_template = '<span ng-bind="{0}.value.datetime | asDateTime"></span>';
+                                    break;
+                                case 'AnalysisStatus':
+                                    inner_template = '<rb-select ref-book="rbAnalysisStatus" ng-model="{0}.value"></rb-select>';
+                                    break;
+                                case 'OperationType':
+                                    inner_template = '<rb-select ref-book="rbOperationType" ng-model="{0}.value"></rb-select>';
+                                    break;
+                                case 'HospitalBedProfile':
+                                    inner_template = '<rb-select ref-book="rbHospitalBedProfile" ng-model="{0}.value"></rb-select>';
+                                    break;
+                                case 'Person':
+                                    inner_template = '<wm-person-select ng-model="{0}.value"></wm-person-select>';
+                                    break;
+                                case 'Organisation':
+                                    inner_template =
+                                        '<ui-select ng-model="{0}.value" theme="select2" class="form-control" autocomplete="off" ref-book="Organisation">\
+                                            <ui-select-match placeholder="не выбрано">[[ $select.selected.full_name ]]</ui-select-match>\
+                                            <ui-select-choices repeat="item in $refBook.objects | filter: $select.search | limitTo: 50">\
+                                                <span ng-bind-html="item.full_name | highlight: $select.search"></span>\
+                                            </ui-select-choices>\
+                                        </ui-select>';
+                                    break;
+                                case 'MKB':
+                                    inner_template = '<ui-mkb ng-model="{0}.value"></ui-mkb>';
+                                    break;
+                                case 'OrgStructure': // Без фильтров
+                                    inner_template =
+                                        '<wm-custom-dropdown ng-model="{0}.value">\
+                                            <wm-org-structure-tree></wm-org-structure-tree>\
+                                        </wm-custom-dropdown>';
+                                    break;
+                                case 'ReferenceRb':
+                                    var domain = property.type.domain.split(';'),
+                                        rbTable = domain[0],
+                                        rb_codes = domain[1].split(',').map(function (code) {
+                                            return "'{0}'".format(code.trim());
+                                        }).filter(function (code) {
+                                            return code !== "''";
+                                        }),
+                                        extra_filter = rb_codes.length ? 'attribute:\'code\':[{0}]'.format(rb_codes.join(',')) : '';
+                                    inner_template = '<rb-select ref-book="{1}" ng-model="{0}.value" extra-filter="{2}"></rb-select>'.format('{0}', rbTable, extra_filter);
+                                    break;
+                                case 'Diagnosis':
+                                    inner_template = '<wm-diagnosis ng-model="{0}.value" add-new="true"></wm-diagnosis>';
+                                    break;
+                                default:
+                                    inner_template = '<span ng-bind="{0}.value"></span>';
+                            }
                         }
                         var property_name = tag.title || property.type.name;
                         var template;
                         if (context === undefined) {
-                            template = '<div class="form-group">\
-                                <wm-checkbox select-all="sas" key="{2}">{0}</wm-checkbox>\
-                                <div ng-show="sas.selected({2})">{1}</div>\
-                        </div>'.format(
-                                property_name,
-                                inner_template.format(property_code),
-                                property.type.id
-                            );
+                            if (scope.action.ro) {
+                                template = '<div><label>{0}:</label> {1}</div>'.format(property_name, inner_template.format(property_code))
+                            } else {
+                                template =
+                                    '<div class="form-group"><wm-checkbox select-all="sas" key="{2}">{0}</wm-checkbox><div ng-show="sas.selected({2})">{1}</div></div>'.format(
+                                        property_name,
+                                        inner_template.format(property_code),
+                                        property.type.id);
+                            }
                         } else {
                             if (context.tag.tagName === 'table') {
                                 template = '<tr>\

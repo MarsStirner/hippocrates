@@ -5,6 +5,7 @@ from application.lib.agesex import recordAcceptableEx
 
 from flask import request, abort
 from flask.ext.login import current_user
+from application.lib.user import UserUtils
 from application.models.schedule import ScheduleClientTicket
 from application.models.utils import safe_current_user_id
 
@@ -14,7 +15,7 @@ from application.models.client import Client
 from application.models.enums import EventPrimary, EventOrder
 from application.models.event import (Event, EventType, Diagnosis, Diagnostic, EventPayment, Visit,
                                       rbVisitType, rbScene, Event_Persons)
-from application.models.exists import Person, OrgStructure
+from application.models.exists import Person, OrgStructure, rbRequestType
 from application.systemwide import db
 from application.lib.utils import (jsonify, safe_traverse, get_new_uuid, logger, get_new_event_ext_id, safe_datetime)
 from blueprints.event.app import module
@@ -82,7 +83,6 @@ def api_event_new_get():
     event.client = Client.query.get(client_id)
     event.setDate = setDate
     event.note = note
-    db.session.add(event)
     v = EventVisualizer()
     return jsonify({
         'event': v.make_event(event),
@@ -118,9 +118,7 @@ def api_event_save():
         event.note = event_data['note']
 
         local_contract = safe_traverse(request.json, 'payment', 'local_contract')
-        if event.payer_required:
-            if not local_contract:
-                raise EventSaveException(err_msg, u'Не заполнена информация о плательщике.')
+        if local_contract:
             lcon = create_or_update_local_contract(event, local_contract)
             event.localContract = lcon
         db.session.add(event)
@@ -389,37 +387,41 @@ GROUP BY at.id, ct.code
     return result
 
 
-
-@module.route('/api/event_payment/local_contract.json', methods=['GET'])
-def api_new_event_payment_info_get():
+@module.route('/api/event_payment/previous_local_contracts.json', methods=['GET'])
+def api_prev_event_payment_info_get():
     try:
-        source = request.args['source']
         client_id = int(request.args['client_id'])
-    except KeyError or ValueError:
+        finance_id = int(request.args.get('finance_id'))
+        event_set_date = safe_datetime(request.args.get('set_date'))
+        if event_set_date is None:
+            event_set_date = datetime.datetime.now()
+    except (KeyError, ValueError, TypeError):
         return abort(400)
+    request_type_codes = ['policlinic', '4']
 
-    event = client = None
-    if source == 'prev_event':
-        try:
-            event_type_id = int(request.args['event_type_id'])
-            event_set_date = safe_datetime(request.args.get('set_date'))
-            if event_set_date is None:
-                event_set_date = datetime.datetime.now()
-        except KeyError or ValueError:
-            return abort(400)
-        event = Event.query.join(EventType).filter(
-            EventType.id == event_type_id,
-            Event.client_id == client_id,
-            Event.deleted == 0,
-            Event.setDate < event_set_date
-        ).order_by(Event.setDate.desc()).first()
-    elif source == 'client':
-        client = Client.query.get(client_id)
-    else:
-        return abort(400)
+    event_list = Event.query.join(EventType, rbRequestType).filter(
+        rbRequestType.code.in_(request_type_codes),
+        EventType.finance_id == finance_id,
+        Event.client_id == client_id,
+        Event.deleted == 0,
+        Event.setDate < event_set_date
+    ).order_by(Event.setDate.desc())
 
     vis = EventVisualizer()
-    res = vis.make_event_payment(event, client)
+    res = vis.make_prev_events_contracts(event_list)
+    return jsonify(res)
+
+
+@module.route('/api/event_payment/client_local_contract.json', methods=['GET'])
+def api_client_payment_info_get():
+    try:
+        client_id = int(request.args['client_id'])
+    except (KeyError, ValueError):
+        return abort(400)
+
+    client = Client.query.get(client_id)
+    vis = EventVisualizer()
+    res = vis.make_event_payment(None, client)
     return jsonify(res)
 
 
@@ -458,9 +460,7 @@ def api_service_remove_coord():
                        synchronize_session=False)
         db.session.commit()
 
-    return jsonify({
-        'result': 'ok'
-    })
+    return jsonify(None)
 
 
 @module.route('/api/event_payment/service_coordinate.json', methods=['POST'])
@@ -493,9 +493,7 @@ def api_service_change_account():
         actions.update({Action.account: data['account']}, synchronize_session=False)
         db.session.commit()
 
-    return jsonify({
-        'result': 'ok'
-    })
+    return jsonify(None)
 
 
 @module.route('/api/event_payment/delete_service.json', methods=['POST'])
@@ -508,22 +506,75 @@ def api_service_delete_service():
                        synchronize_session=False)
         db.session.commit()
 
-    return jsonify({
-        'result': 'ok'
-    })
+    return jsonify(None)
 
 
 @module.route('api/delete_action.json', methods=['POST'])
 def api_delete_action():
-    action_id = request.json['action_id']
+    action_id = int(request.json['action_id'])
     if action_id:
-        action = Action.query.filter(Action.id == action_id)
-        action.update({Action.deleted: 1}, synchronize_session=False)
+        action = Action.query.get(action_id)
+        if not action:
+            return jsonify(None, 404, 'Action %s not found' % action_id)
+        if not UserUtils.can_delete_action(action):
+            return jsonify(None, 403, 'User cannot delete action %s' % action)
+        action.deleted = 1
         db.session.commit()
 
+    return jsonify(None)
+
+
+@module.route('api/delete_event.json', methods=['POST'])
+def api_delete_event():
+    event_id = request.json.get('event_id')
+    if not event_id:
+        return abort(404)
+    event = Event.query.get_or_404(event_id)
+
+    def can_delete_event(event):
+        # TODO: check payments
+        if current_user.has_right('evtDelAll') or current_user.has_right('adm'):
+            return True, ''
+        elif current_user.has_right('evtDelOwn'):
+            if event.execPerson_id == current_user.id:
+                return True, ''
+            elif event.createPerson_id == current_user.id:
+                # Проверка, что все действия не были изменены после создания обращения
+                # или, что не появилось новых действий
+                for action in event.actions:
+                    if action.modifyPerson_id != event.createPerson_id:
+                        return False, u'В обращении были созданы новые или отредактированы первоначальные документы'
+                return True, ''
+        return False, u'У пользователя нет прав на удаление обращения'
+
+    ok, msg = can_delete_event(event)
+    if ok:
+        event.deleted = 1
+        db.session.add(event)
+        db.session.query(Action).filter(
+            Action.event_id == event.id
+        ).update({
+            Action.deleted: 1,
+        }, synchronize_session=False)
+        db.session.query(Visit).filter(
+            Visit.event_id == event.id
+        ).update({
+            Visit.deleted: 1,
+        }, synchronize_session=False)
+        db.session.query(ScheduleClientTicket).filter(
+            ScheduleClientTicket.event_id == event.id
+        ).update({
+            ScheduleClientTicket.event_id: None,
+        }, synchronize_session=False)
+        db.session.commit()
+        return jsonify(None)
+
     return jsonify({
-        'result': 'ok'
-    })
+        'name': msg,
+        'data': {
+            'err_msg': u'Удаление запрещено'
+        }
+    }, 403, 'delete event error')
 
 
 @module.route('/api/events.json', methods=["POST"])
