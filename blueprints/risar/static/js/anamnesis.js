@@ -301,7 +301,7 @@ var AnamnesisMotherEditCtrl = function ($scope, RisarApi, RefBook) {
         menstruation_start_age: {title: 'с возраста', type: 'num'},
         menstruation_duration: {title: 'длительность', type: 'num'},
         menstruation_period: {title: 'продолжительность цикла', type: 'num'},
-        menstruation_disorders: {title: 'нарушения', type: 'str'},
+        menstruation_disorders: {title: 'нарушения', type: 'chk'},
         sex_life_start_age: {title: 'Половая жизнь с', type: 'num'},
         contraception_type: {title: 'Тип контрацепции', type: 'str'},
         natural_pregnancy: {title: 'Беременность наступила естественным путём', type: 'chk'},
@@ -325,6 +325,57 @@ var AnamnesisMotherEditCtrl = function ($scope, RisarApi, RefBook) {
         RisarApi.anamnesis.mother.save($scope.chart.id, model)
         .then(function (data) {
             $scope.chart.anamnesis.mother = data;
+        })
+    }
+};
+var AnamnesisFatherEditCtrl = function ($scope, RisarApi, RefBook) {
+    $scope.hooks.push(function (chart) {
+        if (!chart.anamnesis.father) {
+            chart.anamnesis.father = {};
+        }
+    });
+    $scope._isArray = _.isArray;
+    var criterions = $scope.criterions = [
+        'name', 'education', 'work_group', 'professional_properties', 'blood_type',
+        'phone', 'HIV',
+        'infertility', [
+            'intertility_type',
+            'infertility_period',
+            'infertility_treatment',
+            'infertility_cause'
+        ], 'finished_diseases', 'hereditary', 'current_diseases',
+        'bad_habits', [
+            'alcohol', 'smoking', 'toxic', 'drugs'
+        ]
+    ];
+    $scope.MKB = new RefBook('MKB');
+    $scope.meta = {
+        name: {title: 'ФИО', type: 'str'},
+        education: {title: 'Образование', type: 'rb', rb: 'rbRisarEducation'},
+        work_group: {title: 'Общественно-профессиональная группа', type: 'rb', rb: 'rbRisarWorkGroup'},
+        professional_properties: {title: 'Профессиональные вредности', type: 'str'},
+        blood_type: {title: 'Группа крови', type: 'rb', rb: 'rbBloodType'},
+        phone: {title: 'Телефон', type: 'str'},
+        HIV: {title: 'ВИЧ', type: 'chk'},
+        infertility: {title: 'Бесплодие', type: 'chk'},
+        infertility_type: {title: 'вид', type: 'str'},
+        infertility_period: {title: 'длительность', type: 'num'},
+        infertility_treatment: {title: 'лечение', type: 'str'},
+        infertility_cause: {title: 'причина', type: 'str'},
+        finished_diseases: {title: 'перенесенные заболевания', type: 'mkb-multi'},
+        hereditary: {title: 'Наследственность', type: 'str'},
+        current_diseases: {title: 'Текущие заболевания', type: 'mkb-multi'},
+        bad_habits: {title: 'Вредные привычки'},
+        alcohol: {title: 'Алкоголь', type: 'chk'},
+        smoking: {title: 'Курение', type: 'chk'},
+        toxic: {title: 'Токсические вещества', type: 'chk'},
+        drugs: {title: 'Наркотики', type: 'chk'}
+    };
+    $scope.save = function () {
+        var model = $scope.chart.anamnesis.father;
+        RisarApi.anamnesis.father.save($scope.chart.id, model)
+        .then(function (data) {
+            $scope.chart.anamnesis.father = data;
         })
     }
 };

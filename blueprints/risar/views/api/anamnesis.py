@@ -10,12 +10,10 @@ from application.models.client import ClientAllergy, ClientIntoleranceMedicament
 from application.models.event import Event
 from application.systemwide import db
 from ...app import module
-from blueprints.risar.lib.represent import get_action
-from blueprints.risar.risar_config import risar_mother_anamnesis
 from ...lib.represent import represent_intolerance, action_apt_values, \
-    get_action_type_id, represent_mother_action
+    get_action_type_id, represent_mother_action, get_action, represent_father_action
 from ...risar_config import pregnancy_apt_codes, risar_anamnesis_pregnancy, transfusion_apt_codes, \
-    risar_anamnesis_transfusion
+    risar_anamnesis_transfusion, risar_father_anamnesis, risar_mother_anamnesis
 
 
 __author__ = 'mmalkov'
@@ -250,3 +248,21 @@ def api_0_chart_mother(event_id):
                     db.session.add(n)
         db.session.commit()
     return jsonify(represent_mother_action(event, action))
+
+
+@module.route('/api/0/chart/<int:event_id>/father', methods=['GET', 'POST'])
+def api_0_chart_father(event_id):
+    event = Event.query.get(event_id)
+    if not event:
+        return jsonify(None, 404, 'Event not found')
+    if request.method == 'GET':
+        action = get_action(event, risar_father_anamnesis)
+        if not action:
+            return jsonify(None, 404, 'Action not found')
+    else:
+        action = get_action(event, risar_father_anamnesis, True)
+        for code, value in request.get_json().iteritems():
+            if code not in ('id', ) and code in action.propsByCode:
+                action.propsByCode[code].value = value
+        db.session.commit()
+    return jsonify(represent_father_action(event, action))

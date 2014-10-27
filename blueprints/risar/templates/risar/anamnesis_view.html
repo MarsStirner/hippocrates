@@ -36,9 +36,12 @@
                         <th class="col-md-2">Критерий</th>
                         <th class="col-md-5 text-center">
                             <i class="fa fa-female gender-icon-padding gender-icon-female"></i>Мать
-                            <a ng-href="{{ url_for('.html_anamnesis_edit') }}?event_id=[[ chart.id ]]">Изменить</a>
+                            <a ng-href="{{ url_for('.html_anamnesis_mother_edit') }}?event_id=[[ chart.id ]]">Изменить</a>
                         </th>
-                        <th class="col-md-5 text-center"><i class="fa fa-male gender-icon-padding gender-icon-male"></i>Отец</th>
+                        <th class="col-md-5 text-center">
+                            <i class="fa fa-male gender-icon-padding gender-icon-male"></i>Отец
+                            <a ng-href="{{ url_for('.html_anamnesis_father_edit') }}?event_id=[[ chart.id ]]">Изменить</a>
+                        </th>
                     </tr>
                     </thead>
                     <tbody>

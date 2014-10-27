@@ -20,9 +20,24 @@ def html_anamnesis():
     return render_template('risar/anamnesis_view.html')
 
 
-@module.route('/anamnesis_edit.html')
-def html_anamnesis_edit():
-    return render_template('risar/anamnesis_edit.html')
+@module.route('/anamnesis/mother_edit.html')
+def html_anamnesis_mother_edit():
+    return render_template(
+        'risar/anamnesis_edit.html',
+        ctrl='AnamnesisMotherEditCtrl',
+        title=u'Изменение данных о матери',
+        who='mother',
+    )
+
+
+@module.route('/anamnesis/father_edit.html')
+def html_anamnesis_father_edit():
+    return render_template(
+        'risar/anamnesis_edit.html',
+        ctrl='AnamnesisFatherEditCtrl',
+        title=u'Изменение данных об отце',
+        who='father',
+    )
 
 
 @module.route('/inspection.html')
