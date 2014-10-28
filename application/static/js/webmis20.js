@@ -132,6 +132,13 @@ var WebMis20 = angular.module('WebMis20', [
         }
     }
 })
+.filter('danet', function () {
+    return function (data) {
+        if (data === true) return 'да';
+        if (data === false) return 'нет';
+        return data;
+    }
+})
 .filter('join', function ($filter) {
     return function (data, char) {
         if (data instanceof Array)
