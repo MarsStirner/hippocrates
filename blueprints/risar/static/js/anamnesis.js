@@ -72,10 +72,20 @@ var MotherFatherCtrl = function ($scope) {
     $scope.auto_convert = function (criterion, value) {
         if (_.isUndefined(value))
             return '';
-        if (['finished_diseases', 'current_diseases'].has(criterion))
-            return '{0} - {1}'.format(value.code, value.name);
-        if (criterion == 'blood_type')
+        if (value === true) {
+            return 'да'
+        }
+        if (value === false) {
+            return 'нет'
+        }
+        if (['finished_diseases', 'current_diseases'].has(criterion)) {
+            return value.map(function (value) {
+                return '{0} - {1}'.format(value.code, value.name);
+            }).join(', ')
+        }
+        if (value.hasOwnProperty('name')) {
             return value.name;
+        }
         return value;
     };
     $scope.hooks.push(reload_hook)
