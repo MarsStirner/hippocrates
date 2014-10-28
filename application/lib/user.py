@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from application.systemwide import db
 from application.models.exists import Person
-from flask.ext.login import UserMixin, AnonymousUserMixin
+from flask.ext.login import UserMixin, AnonymousUserMixin, current_user
 import hashlib
 
 
@@ -48,6 +48,7 @@ class User(UserMixin):
                 rbUserProfile.code == value
             ))
         ]
+        self.current_rights = self.rights[value]
 
     def is_active(self):
         return self.deleted == 0
@@ -75,7 +76,7 @@ class User(UserMixin):
 
     def has_right(self, right):
         # what about list?
-        return right in self.rights
+        return right in self.current_rights
 
     def set_roles_rights(self, person):
         if person.user_profiles:
@@ -154,3 +155,16 @@ class UserAuth():
                          .filter(Person.login == login)
                          .order_by(rbUserProfile.name))
         ]
+
+
+class UserUtils(object):
+
+    def can_delete_event(self, event):
+        return event and (
+            current_user.has_right('evtDelAll') or
+            current_user.has_right('adm') or
+            (current_user.has_right('evtDelOwn') and
+                (current_user.id == event.execPerson_id or
+                 current_user.id == event.createPerson_id)
+            )
+        )

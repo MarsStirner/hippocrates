@@ -43,6 +43,14 @@
                         </div>
                     </div>
                     {%- endif %}
+                    {% if user_utils.can_delete_event(event) %}
+                    <div class="row vmargin10">
+                        <div class="col-md-12">
+                            <button type="button" ng-click="open_delete_event_modal();" class="btn btn-block btn-danger"
+                                    ng-if="btn_delete_event_visible()">Удалить обращение</button>
+                        </div>
+                    </div>
+                    {% endif %}
                     </toc-affix>
                 </div>
             </div>
@@ -91,10 +99,6 @@
             </div>
         </div>
     </div>
-    <script type="text/ng-template" id="modal-unclosed-actions.html">{% include "event/_modal_unclosed_actions.html" %}</script>
-    {% if current_user.role_in('admin', 'doctor', 'clinicDoctor') %}
-        <script type="text/ng-template" id="modal-delete-record.html">{% include "event/_modal_delete_record.html" %}</script>
-    {% endif %}
 {% endblock %}
 
 {% block modules_js %}
@@ -104,4 +108,6 @@
     <script type="text/ng-template" id="modal-prev-event-contract.html">{% include "event/_modal_prev_event_contracts.html" %}</script>
     <script type="text/ng-template" id="modal-relatives.html">{% include "event/_modal_relatives.html" %}</script>
     <script type="text/ng-template" id="modal-switch-payer.html">{% include "event/_modal_switch_payer_tab.html" %}</script>
+    <script type="text/ng-template" id="modal-unclosed-actions.html">{% include "event/_modal_unclosed_actions.html" %}</script>
+    <script type="text/ng-template" id="modal-delete-record.html">{% include "event/_modal_delete_record.html" %}</script>
 {% endblock %}
