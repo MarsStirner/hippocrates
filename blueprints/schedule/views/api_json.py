@@ -352,8 +352,8 @@ def api_appointment():
         client_ticket.ticket_id = ticket_id
         client_ticket.createDatetime = client_ticket.modifyDatetime = datetime.datetime.now()
         client_ticket.createPerson_id = client_ticket.modifyPerson_id = create_person
-        db.session.add(client_ticket)
         client_ticket.appointmentType = rbAppointmentType.query.filter(rbAppointmentType.code == appointment_type_code).first()
+        db.session.add(client_ticket)
     if 'note' in data:
         client_ticket.note = data['note']
     db.session.commit()

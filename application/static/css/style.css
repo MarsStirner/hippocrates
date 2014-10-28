@@ -344,6 +344,19 @@ div.select2-container {
     padding: 0;
 }
 
+.btn-group-justified {
+  table-layout: auto;
+}
+
+.btn-group-justified > .btn-group{
+      width:100%;
+}
+
+.modal-scrollable {
+    max-height: 500px;
+    overflow-y: auto;
+}
+
 .tab-content {
     border-left: 1px solid #ddd;
     border-right: 1px solid #ddd;
@@ -650,4 +663,9 @@ ng-form {
 .aside-backdrop.in {
     opacity: 0.5;
     filter: alpha(opacity=50);
+}
+
+button.text-left {
+    text-align: left;
+    padding-left: 10px;
 }
