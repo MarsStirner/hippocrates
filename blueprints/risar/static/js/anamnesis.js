@@ -337,7 +337,7 @@ var AnamnesisFatherEditCtrl = function ($scope, RisarApi, RefBook) {
     $scope._isArray = _.isArray;
     var criterions = $scope.criterions = [
         'name', 'education', 'work_group', 'professional_properties', 'blood_type',
-        'phone', 'HIV',
+        'phone', 'HIV', 'fluorography',
         'infertility', [
             'intertility_type',
             'infertility_period',
@@ -357,6 +357,7 @@ var AnamnesisFatherEditCtrl = function ($scope, RisarApi, RefBook) {
         blood_type: {title: 'Группа крови', type: 'rb', rb: 'rbBloodType'},
         phone: {title: 'Телефон', type: 'str'},
         HIV: {title: 'ВИЧ', type: 'chk'},
+        fluorography: {title: 'Флюорография', type: 'str'},
         infertility: {title: 'Бесплодие', type: 'chk'},
         infertility_type: {title: 'вид', type: 'str'},
         infertility_period: {title: 'длительность', type: 'num'},
