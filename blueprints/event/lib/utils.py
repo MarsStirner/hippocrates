@@ -56,6 +56,7 @@ def create_new_local_contract(lc_info):
 def _check_shared_local_contract_changes(lc_info):
     def _has_changes(lc, lc_info):
         if (lc.numberContract != lc_info.get('number_contract', '')
+                or lc.dateContract != safe_date(lc_info.get('date_contract'))
                 or lc.lastName != lc_info.get('last_name', '')
                 or lc.firstName != lc_info.get('first_name', '')
                 or lc.patrName != lc_info.get('patr_name', '')
@@ -90,7 +91,8 @@ def get_local_contract_for_new_event(lc_info):
 
 def create_or_update_local_contract(event, lc_info):
     lc_id = lc_info.get('id')
-    # number_contract = lc_info.get('number_contract', '')
+    number_contract = lc_info.get('number_contract', '')
+    date_contract = safe_date(lc_info.get('date_contract'))
     last_name = lc_info.get('last_name', '')
     first_name = lc_info.get('first_name', '')
     patr_name = lc_info.get('patr_name', '')
@@ -111,6 +113,8 @@ def create_or_update_local_contract(event, lc_info):
                 lc = create_new_local_contract(lc_info)
             else:
                 lc = EventLocalContract.query.get(lc_id)
+                lc.numberContract = number_contract
+                lc.dateContract = date_contract
                 lc.lastName = last_name
                 lc.firstName = first_name
                 lc.patrName = patr_name
