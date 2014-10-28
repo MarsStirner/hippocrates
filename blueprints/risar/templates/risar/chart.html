@@ -19,6 +19,7 @@
                 </h2>
             </div>
             <div class="col-md-2 achievements">
+                <i>[ [[ pregnancy_week ]] ]</i>
                 <i class="fa fa-exclamation-triangle text-danger"></i>
                 <i class="fa fa-exclamation-triangle text-success"></i>
                 <i class="fa fa-exclamation-triangle text-warning"></i>
@@ -62,10 +63,10 @@
                     <table class="table table-condensed">
                         <tbody>
                         <tr>
-                            <td><a ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ chart.id ]]#motherfather">Ввести сведения о матери</a></td>
+                            <td><a ng-href="{{ url_for('.html_anamnesis_mother_edit') }}?event_id=[[ chart.id ]]">Ввести сведения о матери</a></td>
                         </tr>
                         <tr>
-                            <td><a ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ chart.id ]]#motherfather">Ввести сведения об отце</a></td>
+                            <td><a ng-href="{{ url_for('.html_anamnesis_father_edit') }}?event_id=[[ chart.id ]]">Ввести сведения об отце</a></td>
                         </tr>
                         <tr>
                             <td><a ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ chart.id ]]#pregnancies">Ввести сведения о прошлых беременностях</a></td>

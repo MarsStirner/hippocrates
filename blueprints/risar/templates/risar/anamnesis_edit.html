@@ -29,6 +29,7 @@
                             <div ng-switch-when="mkb-multi" ng-model="chart.anamnesis.{{ who }}[code]" items="MKB.objects" fs-multiselect>
                                 <strong>[[ item.code ]]</strong> - [[ item.name ]]
                             </div>
+                            <wm-date ng-switch-when="date" ng-model="chart.anamnesis.{{ who }}[code]" style="width: 250px"></wm-date>
                         </div>
                     </div>
                 </div>
@@ -41,10 +42,12 @@
                     <div ng-switch-when="mkb-multi" ng-model="chart.anamnesis.{{ who }}[code]" items="MKB.objects" fs-multiselect>
                         <strong>[[ item.code ]]</strong> - [[ item.name ]]
                     </div>
+                    <wm-date ng-switch-when="date" ng-model="chart.anamnesis.{{ who }}[code]" style="width: 250px"></wm-date>
                 </div>
             </div>
             <div class="text-right">
-                <button class="btn btn-success" ng-click="save()">Схоронить</button>
+                <a class="pseudo-btn" ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ chart.id ]]">Назад в анамнез пациентки</a>
+                <button class="btn btn-success" ng-click="save()">Сохранить</button>
             </div>
         </div>
     </div>

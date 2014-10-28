@@ -284,6 +284,7 @@ var AnamnesisMotherEditCtrl = function ($scope, RisarApi, RefBook) {
     $scope._isArray = _.isArray;
     var criterions = $scope.criterions = [
         'education', 'work_group', 'professional_properties', 'family_income', 'blood_type',
+        'menstruation_last_date',
         'menstruation', [
             'menstruation_start_age',
             'menstruation_duration',
@@ -307,6 +308,7 @@ var AnamnesisMotherEditCtrl = function ($scope, RisarApi, RefBook) {
         professional_properties: {title: 'Профессиональные вредности', type: 'str'},
         family_income: {title: 'Доход семьи', type: 'str'},
         blood_type: {title: 'Группа крови', type: 'rb', rb: 'rbBloodType'},
+        menstruation_last_date: {title: 'Дата последней менструации', type: 'date'},
         menstruation: {title: 'Менструации'},
         menstruation_start_age: {title: 'с возраста', type: 'num'},
         menstruation_duration: {title: 'длительность', type: 'num'},
