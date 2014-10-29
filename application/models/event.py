@@ -3,7 +3,7 @@
 import datetime
 import re
 
-from application.lib.const import PAYER_EVENT_CODES
+from application.lib.const import PAYER_EVENT_CODES, STATIONARY_EVENT_CODES
 from application.lib.agesex import AgeSex
 from application.lib.settings import Settings
 from application.models.client import ClientDocument
@@ -138,6 +138,10 @@ class Event(db.Model):
     @property
     def is_pre_closed(self):
         return self.execDate and (self.result_id is not None)
+
+    @property
+    def is_stationary(self):
+        return self.eventType.requestType.code in STATIONARY_EVENT_CODES
 
     def __unicode__(self):
         return unicode(self.eventType)
