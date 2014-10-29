@@ -11,17 +11,17 @@
         <li>Осмотры акушера-гинеколога беременной</li>
     </ul>
         <div class="row small-marginal">
-            <div class="col-lg-8 col-md-8">
+            <div class="col-lg-10 col-md-10">
                 <h2>
                     Осмотры акушера-гинеколога беременной
                     <a ng-href="{{ url_for('patients.patient') }}?client_id=[[ chart.client.id ]]">[[ chart.client.full_name ]]</a>
                     ([[ chart.external_id ]])
                 </h2>
             </div>
-            <div class="col-md-2 col-md-offset-2 achievements text-right">
-                <a class="btn" href="#"><i class="fa fa-table"></i></a>
-                <a class="btn" href="#"><i class="fa fa-line-chart"></i></a>
-                <a class="btn" href="#"><i class="fa fa-info"></i></a>
+            <div class="col-md-2 achievements text-right">
+                <a class="btn" href="#"><i class="fa fa-table" style="width: 32px"></i></a>
+                <a class="btn" href="#"><i class="fa fa-line-chart" style="width: 32px"></i></a>
+                <a class="btn" href="#"><i class="fa fa-info" style="width: 32px"></i></a>
             </div>
             <div class="col-md-12 col-lg-12">
                 <div class="alert-warning small-marginal">Случай беременности. На учёте в <b>[[ chart.person.organisation.short_name ]]</b>
@@ -33,9 +33,9 @@
         <table class="table table-bordered">
             <thead>
                 <tr>
-                    <th width="10%">Данные осмотра</th>
-                    <th width="10%">
-                        <a href="#">Первичный осмотр</a>
+                    <th width="10%" nowrap>Данные осмотра <a href="#" class="btn btn-xs btn-success" title="Добавить новый осмотр"><i class="glyphicon glyphicon-plus"></i></a></th>
+                    <th width="10%" nowrap>
+                        <a href="#">10 ноября 2014</a>
                         <div class="btn-group">
                           <button type="button" class="btn btn-xs btn-default dropdown-toggle" data-toggle="dropdown">
                             <span class="caret"></span>
@@ -46,8 +46,8 @@
                           </ul>
                         </div>
                     </th>
-                    <th width="10%">
-                        <a href="#">Повторный осмотр</a>
+                    <th width="10%" nowrap>
+                        <a href="#">10 октября 2014</a>
                         <div class="btn-group">
                           <button type="button" class="btn btn-xs btn-default dropdown-toggle" data-toggle="dropdown">
                             <span class="caret"></span>
@@ -58,16 +58,10 @@
                           </ul>
                         </div>
                     </th>
-                    <th><a href="#"><i class="glyphicon glyphicon-plus"></i> Добавить</a></th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <th>Дата</th>
-                    <td>10.10.2014</td>
-                    <td>10.11.2014</td>
-                    <td></td>
-                </tr>
                 <tr>
                     <th>Срок беременности</th>
                     <td>1</td>
@@ -76,50 +70,50 @@
                 </tr>
                 <tr>
                     <th>Масса тела</th>
-                    <td><i class="glyphicon glyphicon-arrow-down text-danger"></i><i class="fa fa-angle-double-down text-danger"></i> 50</td>
-                    <td><i class="glyphicon glyphicon-arrow-up text-success"></i><i class="fa fa-angle-double-up text-success"></i> 55</td>
+                    <td><i class="glyphicon glyphicon-arrow-up text-success"></i> 55</td>
+                    <td><i class="glyphicon glyphicon-arrow-down text-danger"></i> 50</td>
                     <td></td>
                 </tr>
                 <tr>
                     <th>Прибавка в массе</th>
-                    <td><i class="fa fa-angle-double-down text-danger"></i></td>
-                    <td><i class="fa fa-angle-double-up text-success"></i></td>
+                    <td><i class="glyphicon glyphicon-arrow-up text-success"></i></td>
+                    <td><i class="glyphicon glyphicon-arrow-down text-danger"></i></td>
                     <td></td>
                 </tr>
                 <tr>
                     <th>Молочные железы</th>
-                    <td><i class="glyphicon glyphicon-arrow-down text-danger"></i></td>
                     <td><i class="glyphicon glyphicon-arrow-up text-success"></i></td>
+                    <td><i class="glyphicon glyphicon-arrow-down text-danger"></i></td>
                     <td></td>
                 </tr>
                 <tr>
                     <th>Соски</th>
-                    <td><i class="glyphicon glyphicon-arrow-down text-danger"></i></td>
                     <td><i class="glyphicon glyphicon-arrow-up text-success"></i></td>
+                    <td><i class="glyphicon glyphicon-arrow-down text-danger"></i></td>
                     <td></td>
                 </tr>
                 <tr>
                     <th>Отёки</th>
-                    <td><i class="glyphicon glyphicon-arrow-down text-danger"></i></td>
                     <td><i class="glyphicon glyphicon-arrow-up text-success"></i></td>
+                    <td><i class="glyphicon glyphicon-arrow-down text-danger"></i></td>
                     <td></td>
                 </tr>
                 <tr>
                     <th>АД левая рука</th>
-                    <td><i class="glyphicon glyphicon-arrow-down text-danger"></i> 130/80</td>
                     <td><i class="glyphicon glyphicon-arrow-up text-success"></i> 120/70</td>
+                    <td><i class="glyphicon glyphicon-arrow-down text-danger"></i> 130/80</td>
                     <td></td>
                 </tr>
                 <tr>
                     <th>АД правая рука</th>
-                    <td><i class="glyphicon glyphicon-arrow-down text-danger"></i> 130/80</td>
                     <td><i class="glyphicon glyphicon-arrow-up text-success"></i> 120/70</td>
+                    <td><i class="glyphicon glyphicon-arrow-down text-danger"></i> 130/80</td>
                     <td></td>
                 </tr>
                 <tr>
                     <th>Окружность живота</th>
-                    <td><i class="glyphicon glyphicon-arrow-down text-danger"></i></td>
                     <td><i class="glyphicon glyphicon-arrow-up text-success"></i></td>
+                    <td><i class="glyphicon glyphicon-arrow-down text-danger"></i></td>
                     <td></td>
                 </tr>
                 <tr>
@@ -130,8 +124,8 @@
                 </tr>
                 <tr>
                     <td>Высота дна</td>
-                    <td><i class="glyphicon glyphicon-arrow-up text-danger"></i></td>
                     <td><i class="glyphicon glyphicon-arrow-up text-success"></i></td>
+                    <td><i class="glyphicon glyphicon-arrow-up text-danger"></i></td>
                     <td></td>
                 </tr>
                 <tr>
