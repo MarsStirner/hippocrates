@@ -89,8 +89,12 @@
                         <td ng-bind="chart.anamnesis.mother.infertility_treatment"></td>
                         <td ng-bind="chart.anamnesis.father.infertility_treatment"></td>
                     </tr>
+                    <tr ng-if="warnings.blood_type">
+                        <td rowspan="2">Тип крови и резус-фактор</td>
+                        <td colspan="2" class="text-center text-danger bg-danger">[[ warnings.blood_type ]]</td>
+                    </tr>
                     <tr>
-                        <td>Тип крови и резус-фактор</td>
+                        <td ng-if="!warnings.blood_type">Тип крови и резус-фактор</td>
                         <td ng-bind="chart.anamnesis.mother.blood_type.name"></td>
                         <td ng-bind="chart.anamnesis.father.blood_type.name"></td>
                     </tr>

@@ -34,59 +34,10 @@ var AnamnesisCtrl = function ($scope, RisarApi) {
 };
 
 var MotherFatherCtrl = function ($scope) {
-    $scope.criterions_order = ['education', 'work_group', 'professional_properties', 'infertility',
-        'infertility_period', 'infertility_treatment', 'infertility_cause', 'blood_type', 'finished_diseases', 'current_diseases',
-        'hereditary', 'bad_habits', 'alcohol', 'smoking', 'toxic', 'drugs'];
-    var criterion_names = $scope.criterion_names = {
-        'education': 'Образование',
-        'work_group': 'Общественно-профессиональная группа',
-        'professional_properties': 'Профессиональные и экологические вредности',
-        'infertility': 'Бесплодие',
-        'infertility_period': 'Длительность',
-        'infertility_cause': 'Причина',
-        'infertility_treatment': 'Лечение',
-        'blood_type': 'Тип крови и резус-фактор',
-        'finished_diseases': 'Перенесенные заболевания',
-        'current_diseases': 'Текущие заболевания',
-        'hereditary': 'Наследственность',
-        'bad_habits': 'Вредные привычки',
-        'alcohol': 'Алкоголь',
-        'smoking': 'Курение',
-        'toxic': 'Токсичные вещества',
-        'drugs': 'Наркотики'
-    };
-    $scope.indented = ['infertility_period', 'infertility_treatment', 'infertility_cause', 'alcohol', 'smoking', 'toxic', 'drugs'];
     var reload_hook = function (chart) {
-        $scope.warnings = {};
-        _(criterion_names).keys().forEach(function (key) {
-            if (key == 'blood_type') {
-                $scope.warnings[key] = {
-                    title: 'Несовместимый резус-фактор'
-
-                };
-            } else {
-                $scope.warnings[key] = undefined;
-            }
-        });
-    };
-    $scope.auto_convert = function (criterion, value) {
-        if (_.isUndefined(value))
-            return '';
-        if (value === true) {
-            return 'да'
-        }
-        if (value === false) {
-            return 'нет'
-        }
-        if (['finished_diseases', 'current_diseases'].has(criterion)) {
-            return value.map(function (value) {
-                return '{0} - {1}'.format(value.code, value.name);
-            }).join(', ')
-        }
-        if (value.hasOwnProperty('name')) {
-            return value.name;
-        }
-        return value;
+        $scope.warnings = {
+            blood_type: 'Несовместимый резус-фактор'
+        };
     };
     $scope.hooks.push(reload_hook)
 };
