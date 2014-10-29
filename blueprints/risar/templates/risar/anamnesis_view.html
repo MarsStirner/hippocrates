@@ -30,13 +30,13 @@
                             Вид контрацепции: <b ng-bind-html="chart.anamnesis.mother.contraception_type | underlineNoVal"></b>.
                         </p>
                         <p>Беременность наступила естественным путём: <b ng-bind-html="chart.anamnesis.mother.natural_pregnancy | danet | underlineNoVal"></b>.</p>
+                        <p>Доход семьи: <b ng-bind-html="chart.anamnesis.mother.family_income | underlineNoVal"></b></p>
                     </div>
                     <div class="col-md-6">
                         <p>ФИО отца: <b ng-bind-html="chart.anamnesis.father.name | underlineNoVal"></b></p>
                         <p>Телефон отца: <b ng-bind-html="chart.anamnesis.father.phone | underlineNoVal"></b></p>
                         <p>Данные исследований отца ВИЧ: <b ng-bind-html="chart.anamnesis.father.HIV | danet | underlineNoVal"></b></p>
                         <p>Флюорография: <b ng-bind-html="chart.anamnesis.father.fluorography | underlineNoVal"></b></p>
-                        <p>Доход семьи: <b ng-bind-html="chart.anamnesis.mother.family_income | underlineNoVal"></b></p>
                     </div>
                 </div>
                 <table class="table table-condensed">
@@ -100,13 +100,13 @@
                     </tr>
                     <tr>
                         <td>Перенесенные заболевания</td>
-                        <td ng-bind="chart.anamnesis.mother.finished_diseases | format:'{code} - {name}' | join:', '"></td>
-                        <td ng-bind="chart.anamnesis.father.finished_diseases | format:'{code} - {name}' | join:', '"></td>
+                        <td ng-bind-html="chart.anamnesis.mother.finished_diseases | format:'{code} - {name}' | escape | join:'<br/> '"></td>
+                        <td ng-bind-html="chart.anamnesis.father.finished_diseases | format:'{code} - {name}' | escape | join:'<br/> '"></td>
                     </tr>
                     <tr>
                         <td>Текущие заболевания</td>
-                        <td ng-bind="chart.anamnesis.mother.current_diseases | format:'{code} - {name}' | join:', '"></td>
-                        <td ng-bind="chart.anamnesis.father.current_diseases | format:'{code} - {name}' | join:', '"></td>
+                        <td ng-bind-html="chart.anamnesis.mother.current_diseases | format:'{code} - {name}' | escape | join:'<br/> '"></td>
+                        <td ng-bind-html="chart.anamnesis.father.current_diseases | format:'{code} - {name}' | escape | join:'<br/> '"></td>
                     </tr>
                     <tr>
                         <td>Наследственность</td>

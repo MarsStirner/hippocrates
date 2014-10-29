@@ -148,7 +148,7 @@ var WebMis20 = angular.module('WebMis20', [
                 })
             })
         } else if (data instanceof Object) {
-            return format.replace(/{(.+?)}/g, function (match) {
+            return format.replace(/{(.+?)}/g, function (str, match) {
                 return data.hasOwnProperty(match) ? data[match] : match
             })
         } else {
@@ -156,6 +156,23 @@ var WebMis20 = angular.module('WebMis20', [
         }
     }
 })
+.filter('escape', function () {
+        return function (data) {
+            if (data instanceof Array) {
+                return data.map(function (item) {
+                    if (item instanceof String) {
+                        return item.replace('<', '&lt;').replace('>', '&gt;').replace('&', '&amp;');
+                    } else {
+                        return item;
+                    }
+                })
+            } else if (data instanceof String) {
+                return data.replace('<', '&lt;').replace('>', '&gt;').replace('&', '&amp;');
+            } else {
+                return data;
+            }
+        }
+    })
 .filter('join', function ($filter) {
     return function (data, char) {
         if (data instanceof Array)
