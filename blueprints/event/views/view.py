@@ -1,7 +1,8 @@
 # -*- encoding: utf-8 -*-
 
-from flask import request, render_template, abort
+from flask import request, render_template, abort, redirect
 from jinja2 import TemplateNotFound
+from application.app import app
 from ..app import module
 from flask.ext.login import current_user
 
@@ -26,6 +27,12 @@ def html_event_info():
         event = Event.query.get(event_id)
     except (KeyError, ValueError):
         return abort(400)
+    if event.is_stationary:
+        wm10url = app.config['WEBMIS10_URL'].rstrip('/')
+        if not wm10url:
+            return abort(404)
+        new_url = u'%s/appeals/%s/' % (wm10url, event_id)
+        return redirect(new_url)
     return get_event_form(event=event)
 
 
@@ -44,7 +51,6 @@ def get_event_form(**kwargs):
     if current_user.role_in('admin', 'doctor', 'clinicDoctor', 'rRegistartor', 'clinicRegistrator'):
         return render_template('event/event_info.html', **kwargs)
     return abort(403)
-
 
 
 @module.route('/events.html')
