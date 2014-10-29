@@ -420,11 +420,12 @@ class ClientVisualizer(object):
             raise ValueError('Relation info does not match Client')
 
     def make_client_info(self, client):
+        """Полные данные пациента.
+        Используется при редактировании данных пациента.
+        """
         reg_addr, live_addr = self.make_addresses_info(client) if client.id else (None, None)
-
         relations = ([self.make_relation_info(client.id, relation) for relation in client.client_relations]
                      if client.id else [])
-
         documents = [safe_dict(doc) for doc in client.documents_all] if client.id else []
         policies = [safe_dict(policy) for policy in client.policies_all] if client.id else []
         document_history = documents + policies
@@ -447,9 +448,9 @@ class ClientVisualizer(object):
             # 'identifications': identifications,
         }
 
-    def make_client_info_for_event(self, client):
+    def make_client_info_for_view_frame(self, client):
+        """Данные пациента для фрейма информации о пациенте."""
         reg_addr, live_addr = self.make_addresses_info(client)
-        relations = [self.make_relation_info(client.id, relation) for relation in client.client_relations]
         return {
             'info': client,
             'id_document': client.id_document,
@@ -457,12 +458,18 @@ class ClientVisualizer(object):
             'live_address': live_addr,
             'compulsory_policy': client.compulsoryPolicy,
             'voluntary_policies': client.voluntaryPolicies,
-            'relations': relations,
-            'phones': client.phones,
-            'work_org_id': client.works[0].org_id if client.works else None,  # FIXME: ...
+            'phones': client.phones
         }
 
+    def make_client_info_for_event(self, client):
+        """Данные пациента, используемые в интерфейсе обращения."""
+        info = self.make_client_info_for_view_frame(client)
+        info['relations'] = [self.make_relation_info(client.id, relation) for relation in client.client_relations]
+        info['work_org_id'] = client.works[0].org_id if client.works else None,  # FIXME: ...
+        return info
+
     def make_search_client_info(self, client):
+        """Данные пациента, используемые при поиске пациентов."""
         return {
             'info': client,
             'id_document': client.id_document,
@@ -471,7 +478,9 @@ class ClientVisualizer(object):
         }
 
     def make_short_client_info(self, client):
-        """
+        """Краткие данные пациента.
+        Используется при редактировании родственных связей пациента (поиск родственника).
+
         :type client: application.models.client.Client
         :return:
         """
@@ -486,8 +495,9 @@ class ClientVisualizer(object):
         }
 
     def make_client_info_for_servicing(self, client):
+        """Данные пациента, используемые в интерфейсах работы регистратора и врача."""
         return {
-            'client_data': self.make_search_client_info(client),
+            'client_data': self.make_client_info_for_view_frame(client),
             'appointments': self.make_appointments(client.id),
             'events': self.make_events(client)
         }

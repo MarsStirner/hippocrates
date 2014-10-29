@@ -36,32 +36,9 @@
                     <ui-print-button class="btn-lg" ps="ps_home" class="btn-sm" resolve="ps_home_resolve(ticket.record.id)" ng-if="ticket.record.appointment_type.code == 'home'"></ui-print-button>
                     <ui-print-button class="btn-lg" ps="ps_amb" class="btn-sm" resolve="ps_amb_resolve(ticket.record.id)" ng-if="ticket.record.appointment_type.code == 'amb'"></ui-print-button>
                 </div>
-                <div class="well well-sm">
-                    <div class="row">
-                        <div class="col-md-9">
-                            <dl class="dl-horizontal novmargin">
-                                <dt ng-if="client.phones.length">Контакты:</dt><dd ng-init="showAllPhones=false"><span ng-repeat="phone in client.phones" ng-show="$first || showAllPhones"> [[phone]]</span> <a href="javascript:void(0);" ng-show="client.phones.length && !showAllPhones" ng-click="showAllPhones = !showAllPhones">[ещё]</a><a href="javascript:void(0);" ng-show="client.phones.length && showAllPhones" ng-click="showAllPhones = !showAllPhones">[скрыть]</a></dd>
-                                <dt>Адрес регистрации:</dt><dd>[[client.reg_addresses ? client.reg_addresses[0].text_summary : '']]&nbsp;</dd>
-                                <dt>Адрес проживания:</dt><dd>[[client.live_addresses ? client.live_addresses[0].text_summary : '']]&nbsp;</dd>
-                                <dt>Документ:</dt><dd>[[client.id_docs ? client.id_docs[0].doc_text : '']]&nbsp;</dd>
-                                <dt>Медицинский полис:</dt><dd ng-repeat="policy_text in client.policies">[[policy_text]]</dd>
-                            </dl>
-                        </div>
-                        <div class="col-md-3">
-                            <dl class="dl-horizontal novmargin pull-right">
-                                <dt>Код пациента:</dt><dd>[[client.info.id]]&nbsp;</dd>
-                                <dt>Дата рождения:</dt><dd>[[client.info.birth_date|asDate]]&nbsp;</dd>
-                                <dt>Возраст:</dt><dd>[[client.age]]&nbsp;</dd>
-                                <dt>Пол:</dt><dd>[[client.info.sex.name]]&nbsp;</dd>
-                            </dl>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <button class="btn btn-sm btn-primary pull-right" ng-click="open_patient_info(client.info.id)">Детальнее</button>
-                        </div>
-                    </div>
-                </div>
+
+                <wm-client-info client="client"></wm-client-info>
+
                 <tabset>
                     <tab heading="Предварительные записи">{% include "patients/_appointments.html" %}</tab>
                     <tab heading="Обращения">{% include "patients/_event_list.html" %}</tab>
