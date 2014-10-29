@@ -22,22 +22,12 @@ def html_anamnesis():
 
 @module.route('/anamnesis/mother_edit.html')
 def html_anamnesis_mother_edit():
-    return render_template(
-        'risar/anamnesis_edit.html',
-        ctrl='AnamnesisMotherEditCtrl',
-        title=u'Изменение данных о матери',
-        who='mother',
-    )
+    return render_template('risar/anamnesis_mother_edit.html')
 
 
 @module.route('/anamnesis/father_edit.html')
 def html_anamnesis_father_edit():
-    return render_template(
-        'risar/anamnesis_edit.html',
-        ctrl='AnamnesisFatherEditCtrl',
-        title=u'Изменение данных об отце',
-        who='father',
-    )
+    return render_template('risar/anamnesis_father_edit.html')
 
 
 @module.route('/inspection.html')

@@ -1,0 +1,181 @@
+{% extends 'risar/base.html' %}
+{% import 'risar/_macros.html' as rimacros %}
+
+{% block title %}> {{ module_name }}{% endblock %}
+
+{% block main %}
+    <div ng-controller="AnamnesisCtrl" ng-cloak>
+        <ul class="breadcrumb">
+            <li><a href="{{ url_for('.index_html') }}">Рабочий стол</a></li>
+            <li><a ng-href="{{ url_for('.html_chart') }}?event_id=[[ chart.id ]]">Карта пациентки</a></li>
+            <li><a ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ chart.id ]]">Анамнез пациентки</a></li>
+            <li>Изменение данных о матери</li>
+        </ul>
+        <div class="row small-marginal">
+            <div class="col-md-12">
+                {{ rimacros.page_title('Изменение данных о матери') }}
+            </div>
+        </div>
+        <div ng-controller="AnamnesisMotherEditCtrl">
+
+            <div class="row marginal">
+                <div class="col-md-4">Образование</div>
+                <div class="col-md-8"><rb-select ng-model="chart.anamnesis.mother.education" ref-book="rbRisarEducation"></rb-select></div>
+            </div>
+
+            <div class="row marginal">
+                <div class="col-md-4">Общественно-профессиональная группа</div>
+                <div class="col-md-8"><rb-select ng-model="chart.anamnesis.mother.work_group" ref-book="rbRisarWorkGroup"></rb-select></div>
+            </div>
+
+            <div class="row marginal">
+                <div class="col-md-4">Профессиональные вредности</div>
+                <div class="col-md-8"><input ng-model="chart.anamnesis.mother.professional_properties" class="form-control"></div>
+            </div>
+
+            <div class="row marginal">
+                <div class="col-md-4">Доход семьи</div>
+                <div class="col-md-8"><input ng-model="chart.anamnesis.mother.family_income" class="form-control"></div>
+            </div>
+
+            <div class="row marginal">
+                <div class="col-md-4">Группа крови</div>
+                <div class="col-md-2"><rb-select ng-model="chart.anamnesis.mother.blood_type" ref-book="rbBloodType"></rb-select></div>
+            </div>
+
+            <div class="row marginal">
+                <div class="col-md-4">Дата последней менструации</div>
+                <div class="col-md-8"><wm-date ng-model="chart.anamnesis.mother.menstruation_last_date" style="width: 250px"></wm-date></div>
+            </div>
+
+            <div class="row marginal">
+                <div class="col-md-4">Менструации</div>
+                <div class="col-md-8">&nbsp;</div>
+            </div>
+
+            <div class="row marginal">
+                <div class="col-md-offset-1 col-md-3">с возраста</div>
+                <div class="col-md-2"><input ng-model="chart.anamnesis.mother.menstruation_start_age" class="form-control" type="number" valid-number></div>
+            </div>
+
+            <div class="row marginal">
+                <div class="col-md-offset-1 col-md-3">длительность</div>
+                <div class="col-md-2"><input ng-model="chart.anamnesis.mother.menstruation_duration" class="form-control" type="number" valid-number></div>
+            </div>
+
+            <div class="row marginal">
+                <div class="col-md-offset-1 col-md-3">продолжительность цикла</div>
+                <div class="col-md-2"><input ng-model="chart.anamnesis.mother.menstruation_period" class="form-control" type="number" valid-number></div>
+            </div>
+
+            <div class="row marginal">
+                <div class="col-md-offset-1 col-md-3">нарушения</div>
+                <div class="col-md-8"><input ng-model="chart.anamnesis.mother.menstruation_disorders" class="checkbox" type="checkbox"></div>
+            </div>
+
+            <div class="row marginal">
+                <div class="col-md-4">Половая жизнь с</div>
+                <div class="col-md-2"><input ng-model="chart.anamnesis.mother.sex_life_start_age" class="form-control" type="number" valid-number></div>
+            </div>
+
+            <div class="row marginal">
+                <div class="col-md-4">Тип контрацепции</div>
+                <div class="col-md-8"><input ng-model="chart.anamnesis.mother.contraception_type" class="form-control"></div>
+            </div>
+
+            <div class="row marginal">
+                <div class="col-md-4">Беременность наступила естественным путём</div>
+                <div class="col-md-8"><input ng-model="chart.anamnesis.mother.natural_pregnancy" class="checkbox" type="checkbox"></div>
+            </div>
+
+            <div class="row marginal">
+                <div class="col-md-4">Многоплодие</div>
+                <div class="col-md-8"><input ng-model="chart.anamnesis.mother.multifetation" class="checkbox" type="checkbox"></div>
+            </div>
+
+            <div class="row marginal">
+                <div class="col-md-4">Бесплодие</div>
+                <div class="col-md-8"><input ng-model="chart.anamnesis.mother.infertility" class="checkbox" type="checkbox"></div>
+            </div>
+
+            <div class="row marginal" ng-if="chart.anamnesis.mother.infertility">
+                <div class="col-md-offset-1 col-md-3">вид</div>
+                <div class="col-md-8"><input ng-model="chart.anamnesis.mother.infertility_type" class="form-control"></div>
+            </div>
+
+            <div class="row marginal" ng-if="chart.anamnesis.mother.infertility">
+                <div class="col-md-offset-1 col-md-3">длительность</div>
+                <div class="col-md-8"><input ng-model="chart.anamnesis.mother.infertility_period" class="form-control" type="number" valid-number></div>
+            </div>
+
+            <div class="row marginal" ng-if="chart.anamnesis.mother.infertility">
+                <div class="col-md-offset-1 col-md-3">лечние</div>
+                <div class="col-md-8"><input ng-model="chart.anamnesis.mother.infertility_treatment" class="form-control"></div>
+            </div>
+
+            <div class="row marginal" ng-if="chart.anamnesis.mother.infertility">
+                <div class="col-md-offset-1 col-md-3">причина</div>
+                <div class="col-md-8"><input ng-model="chart.anamnesis.mother.infertility_cause" class="form-control"></div>
+            </div>
+
+            <div class="row marginal">
+                <div class="col-md-4">Перенесенные заболевания</div>
+                <div class="col-md-8">
+                    <div ng-model="chart.anamnesis.mother.finished_diseases" items="$refBook.objects" fs-multiselect ref-book="MKB">
+                        <strong>[[ item.code ]]</strong> - [[ item.name ]]
+                    </div>
+                </div>
+            </div>
+
+            <div class="row marginal">
+                <div class="col-md-4">Наследственность</div>
+                <div class="col-md-8"><input ng-model="chart.anamnesis.mother.hereditary" class="form-control"></div>
+            </div>
+
+            <div class="row marginal">
+                <div class="col-md-4">Текущие заболевания</div>
+                <div class="col-md-8">
+                    <div ng-model="chart.anamnesis.mother.current_diseases" items="$refBook.objects" fs-multiselect ref-book="MKB">
+                        <strong>[[ item.code ]]</strong> - [[ item.name ]]
+                    </div>
+                </div>
+            </div>
+
+            <div class="row marginal">
+                <div class="col-md-4">Вредные привычки</div>
+                <div class="col-md-8">&nbsp;</div>
+            </div>
+
+            <div class="row marginal">
+                <div class="col-md-offset-1 col-md-3">Алкоголь</div>
+                <div class="col-md-8"><input ng-model="chart.anamnesis.mother.alcohol" class="checkbox" type="checkbox"></div>
+            </div>
+
+            <div class="row marginal">
+                <div class="col-md-offset-1 col-md-3">Курение</div>
+                <div class="col-md-8"><input ng-model="chart.anamnesis.mother.smoking" class="checkbox" type="checkbox"></div>
+            </div>
+
+            <div class="row marginal">
+                <div class="col-md-offset-1 col-md-3">Токсические вещества</div>
+                <div class="col-md-8"><input ng-model="chart.anamnesis.mother.toxic" class="checkbox" type="checkbox"></div>
+            </div>
+
+            <div class="row marginal">
+                <div class="col-md-offset-1 col-md-3">Наркотики</div>
+                <div class="col-md-8"><input ng-model="chart.anamnesis.mother.drugs" class="checkbox" type="checkbox"></div>
+            </div>
+
+            <div class="text-right">
+                <a class="pseudo-btn" ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ chart.id ]]">Назад в анамнез пациентки</a>
+                <button class="btn btn-success" ng-click="save()">Сохранить</button>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block modules_js %}
+    {{ super() }}
+    <script src="{{ url_for('.static', filename='js/anamnesis.js', v=version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/risar.js', v=version) }}"></script>
+{% endblock %}
