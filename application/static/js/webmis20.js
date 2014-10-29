@@ -139,6 +139,23 @@ var WebMis20 = angular.module('WebMis20', [
         return data;
     }
 })
+.filter('format', function () {
+    return function (data, format) {
+        if (data instanceof Array) {
+            return data.map(function (item) {
+                return format.replace(/{\s*?(.+?)\s*?}/g, function (str, match) {
+                    return item.hasOwnProperty(match) ? item[match] : match
+                })
+            })
+        } else if (data instanceof Object) {
+            return format.replace(/{(.+?)}/g, function (match) {
+                return data.hasOwnProperty(match) ? data[match] : match
+            })
+        } else {
+            return data
+        }
+    }
+})
 .filter('join', function ($filter) {
     return function (data, char) {
         if (data instanceof Array)

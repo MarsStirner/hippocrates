@@ -54,13 +54,85 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr ng-repeat="criterion in criterions_order" ng-class="{'bg-danger': warnings[criterion]}">
-                        <td>
-                            <span ng-class="{'small-left-margin': indented.has(criterion)}">[[ criterion_names[criterion] ]]</span>
-                            <div ng-if="warnings[criterion]" ng-bind="warnings[criterion].title" class="text-danger"></div>
-                        </td>
-                        <td ng-bind="auto_convert(criterion, chart.anamnesis.mother[criterion])"></td>
-                        <td ng-bind="auto_convert(criterion, chart.anamnesis.father[criterion])"></td>
+                    <tr>
+                        <td>Образование</td>
+                        <td ng-bind="chart.anamnesis.mother.education"></td>
+                        <td ng-bind="chart.anamnesis.father.education"></td>
+                    </tr>
+                    <tr>
+                        <td>Общественно-профессиональная группа</td>
+                        <td ng-bind="chart.anamnesis.mother.work_group"></td>
+                        <td ng-bind="chart.anamnesis.father.work_group"></td>
+                    </tr>
+                    <tr>
+                        <td>Профессиональные и экологические вредности</td>
+                        <td ng-bind="chart.anamnesis.mother.professional_properties"></td>
+                        <td ng-bind="chart.anamnesis.father.professional_properties"></td>
+                    </tr>
+                    <tr>
+                        <td>Бесплодие</td>
+                        <td ng-bind="chart.anamnesis.mother.infertility | danet"></td>
+                        <td ng-bind="chart.anamnesis.father.infertility | danet"></td>
+                    </tr>
+                    <tr>
+                        <td><span class="small-left-margin">Длительность</span></td>
+                        <td ng-bind="chart.anamnesis.mother.infertility_period"></td>
+                        <td ng-bind="chart.anamnesis.father.infertility_period"></td>
+                    </tr>
+                    <tr>
+                        <td><span class="small-left-margin">Причина</span></td>
+                        <td ng-bind="chart.anamnesis.mother.infertility_cause"></td>
+                        <td ng-bind="chart.anamnesis.father.infertility_cause"></td>
+                    </tr>
+                    <tr>
+                        <td><span class="small-left-margin">Лечение</span></td>
+                        <td ng-bind="chart.anamnesis.mother.infertility_treatment"></td>
+                        <td ng-bind="chart.anamnesis.father.infertility_treatment"></td>
+                    </tr>
+                    <tr>
+                        <td>Тип крови и резус-фактор</td>
+                        <td ng-bind="chart.anamnesis.mother.blood_type.name"></td>
+                        <td ng-bind="chart.anamnesis.father.blood_type.name"></td>
+                    </tr>
+                    <tr>
+                        <td>Перенесенные заболевания</td>
+                        <td ng-bind="chart.anamnesis.mother.finished_diseases | format:'{code} - {name}' | join:', '"></td>
+                        <td ng-bind="chart.anamnesis.father.finished_diseases | format:'{code} - {name}' | join:', '"></td>
+                    </tr>
+                    <tr>
+                        <td>Текущие заболевания</td>
+                        <td ng-bind="chart.anamnesis.mother.current_diseases | format:'{code} - {name}' | join:', '"></td>
+                        <td ng-bind="chart.anamnesis.father.current_diseases | format:'{code} - {name}' | join:', '"></td>
+                    </tr>
+                    <tr>
+                        <td>Наследственность</td>
+                        <td ng-bind="chart.anamnesis.mother.hereditary"></td>
+                        <td ng-bind="chart.anamnesis.father.hereditary"></td>
+                    </tr>
+                    <tr>
+                        <td>Вредные привычки</td>
+                        <td ng-bind="chart.anamnesis.mother.bad_habits"></td>
+                        <td ng-bind="chart.anamnesis.father.bad_habits"></td>
+                    </tr>
+                    <tr>
+                        <td><span class="small-left-margin">Алкоголь</span></td>
+                        <td><i class="fa" ng-class="{'fa-times text-success': !chart.anamnesis.mother.alcohol, 'fa-check text-danger': chart.anamnesis.mother.alcohol}"></i></td>
+                        <td><i class="fa" ng-class="{'fa-times text-success': !chart.anamnesis.father.alcohol, 'fa-check text-danger': chart.anamnesis.father.alcohol}"></i></td>
+                    </tr>
+                    <tr>
+                        <td><span class="small-left-margin">Курение</span></td>
+                        <td><i class="fa" ng-class="{'fa-times text-success': !chart.anamnesis.mother.smoking, 'fa-check text-danger': chart.anamnesis.mother.smoking}"></i></td>
+                        <td><i class="fa" ng-class="{'fa-times text-success': !chart.anamnesis.father.smoking, 'fa-check text-danger': chart.anamnesis.father.smoking}"></i></td>
+                    </tr>
+                    <tr>
+                        <td><span class="small-left-margin">Токсичные вещества</span></td>
+                        <td><i class="fa" ng-class="{'fa-times text-success': !chart.anamnesis.mother.toxic, 'fa-check text-danger': chart.anamnesis.mother.toxic}"></i></td>
+                        <td><i class="fa" ng-class="{'fa-times text-success': !chart.anamnesis.father.toxic, 'fa-check text-danger': chart.anamnesis.father.toxic}"></i></td>
+                    </tr>
+                    <tr>
+                        <td><span class="small-left-margin">Наркотики</span></td>
+                        <td><i class="fa" ng-class="{'fa-times text-success': !chart.anamnesis.mother.drugs, 'fa-check text-danger': chart.anamnesis.mother.drugs}"></i></td>
+                        <td><i class="fa" ng-class="{'fa-times text-success': !chart.anamnesis.father.drugs, 'fa-check text-danger': chart.anamnesis.father.drugs}"></i></td>
                     </tr>
                     </tbody>
                 </table>
