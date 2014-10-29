@@ -218,7 +218,7 @@ var EventMainInfoCtrl = function ($scope, $http, RefBookService, EventType, $win
         return true;
     };
 
-    $scope.check_oms = function(){
+    $scope.check_oms = function() {
         var policy = $scope.event.info.client.compulsory_policy;
         if (!policy){
             $scope.add_policy_error('У пациента не указан полис ОМС');
@@ -682,7 +682,6 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
     $scope.editing = {
         submit_attempt: false
     };
-    $scope.policies = [];
 
     $scope.initialize = function() {
         $scope.event.reload().
@@ -691,15 +690,6 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
                 $scope.formstate.set_state(event.info.event_type.request_type, event.info.event_type.finance, event.is_new());
                 if (!$scope.event.is_new()) {
                     $scope.ps.set_context($scope.event.info.event_type.print_context);
-                }
-
-                if ($scope.event.info.client.compulsory_policy && $scope.event.info.client.compulsory_policy.policy_text) {
-                    $scope.policies.push($scope.event.info.client.compulsory_policy.policy_text + ' ('+ $filter('asDate')($scope.event.info.client.compulsory_policy.beg_date) + '-' + $filter('asDate')($scope.event.info.client.compulsory_policy.end_date) +')');
-                }
-                if ($scope.event.info.client.voluntary_policies.length>0) {
-                    angular.forEach($scope.event.info.client.voluntary_policies, function (value, key) {
-                        $scope.policies.push(value.policy_text + ' ('+ $filter('asDate')(value.beg_date) + '-' + $filter('asDate')(value.end_date) + ')');
-                    });
                 }
 
                 $scope.$watch(function () {

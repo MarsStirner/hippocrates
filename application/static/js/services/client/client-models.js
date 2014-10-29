@@ -3,72 +3,128 @@
 angular.module('WebMis20.services.models').
     factory('WMClient', ['$http', '$q', '$rootScope',
         function($http, $q, $rootScope) {
+            function initialize(self, data, info_type) {
+                // В разных интерфейсах поля модели могут отличаться
+                function add_id_doc() {
+                    var id_doc = data.client_data.id_document;
+                    self.id_docs = id_doc !== null ? [id_doc] : [];
+                }
+                function add_policies(for_editing) {
+                    if (for_editing) {
+                        var cpol = data.client_data.compulsory_policy;
+                        self.compulsory_policies = cpol !== null ? [cpol] : [];
+                    } else {
+                        self.compulsory_policy = data.client_data.compulsory_policy;
+                    }
+                    self.voluntary_policies = data.client_data.voluntary_policies;
+                }
+                function add_addresses(for_editing) {
+                    var reg_addr = data.client_data.reg_address;
+                    var live_addr = data.client_data.live_address;
+                    if (live_addr !== null && live_addr.synced) {
+                        reg_addr.live_id = live_addr.id;
+                        reg_addr.synced = true;
+                        live_addr = reg_addr;
+                    }
+                    if (for_editing) {
+                        self.reg_addresses = reg_addr !== null ? [reg_addr] : [];
+                        self.live_addresses = live_addr !== null ? [live_addr] : [];
+                    } else {
+                        self.reg_address = reg_addr;
+                        self.live_address = live_addr;
+                    }
+                }
+                function add_characteristics() {
+                    var blood_types = data.client_data.blood_history;
+                    self.blood_types = blood_types !== null ? blood_types : [];
+                    var allergies = data.client_data.allergies;
+                    self.allergies = allergies !== null ? allergies : [];
+                    var intolerances = data.client_data.intolerances;
+                    self.intolerances = intolerances !== null ? intolerances : [];
+                }
+                function add_soc_statuses() {
+                    self.soc_statuses = data.client_data.soc_statuses;
+                    self.invalidities = self.soc_statuses.filter(function(status) {
+                        return status.ss_class.code == 2;
+                    });
+                    self.works = self.soc_statuses.filter(function(status) {
+                        return status.ss_class.code == 3;
+                    });
+                    self.nationalities = self.soc_statuses.filter(function(status) {
+                        return status.ss_class.code == 4;
+                    });
+                }
+                function add_relations() {
+                    var relations = data.client_data.relations;
+                    self.relations = relations !== null ? relations : [];
+                }
+                function add_contacts() {
+                    var contacts = data.client_data.contacts;
+                    self.contacts = contacts !== null ? contacts : [];
+                }
+                function add_phones() {
+                    var phones = data.client_data.phones;
+                    self.phones = phones !== null ? phones : [];
+                }
+
+                self.info = data.client_data.info;
+                if (info_type === 'for_editing') {
+                    add_id_doc();
+                    add_policies(true);
+                    add_addresses(true);
+                    add_characteristics();
+                    add_soc_statuses();
+                    add_relations();
+                    add_contacts();
+                    self.document_history = data.client_data.document_history;
+                    self.deleted_entities = {}; // deleted items to save
+                } else if (info_type === 'for_event') {
+                    add_id_doc();
+                    add_policies();
+                    add_addresses();
+                    add_relations();
+                    add_phones();
+                } else if (info_type === 'for_servicing') {
+                    add_id_doc();
+                    add_policies();
+                    add_addresses();
+                    add_phones();
+                    self.appointments = data.appointments;
+                    self.events = data.events;
+                }
+            }
+
             var WMClient = function(client_id) {
                 this.client_id = client_id;
             };
 
             WMClient.prototype.reload = function(info_type) {
-                var t = this;
+                var self = this;
                 var deferred = $q.defer();
                 var url_args = { client_id: this.client_id };
-                if (info_type !== undefined) { url_args[info_type] = true; }
+                if (info_type !== undefined) {
+                    url_args[info_type] = true;
+                } else {
+                    info_type = 'for_editing';
+                }
 
                 $http.get(url_client_get, {
                     params: url_args
                 }).success(function(data) {
-                    t.info = data.result.client_data.info;
-                    var id_doc = data.result.client_data.id_document;
-                    t.id_docs = id_doc !== null ? [id_doc] : [];
-                    var cpol = data.result.client_data.compulsory_policy;
-                    t.compulsory_policies = cpol !== null ? [cpol] : [];
-                    t.voluntary_policies = data.result.client_data.voluntary_policies;
-
-                    if (info_type === undefined || info_type == 'for_event') {
-                        var reg_addr = data.result.client_data.reg_address;
-                        t.reg_addresses = reg_addr !== null ? [reg_addr] : [];
-                        var live_addr = data.result.client_data.live_address;
-                        if (live_addr !== null && live_addr.synced) {
-                            reg_addr.live_id = live_addr.id;
-                            reg_addr.synced = true;
-                            live_addr = reg_addr;
-                        }
-                        t.live_addresses = live_addr !== null ? [live_addr] : [];
-                        var blood_types = data.result.client_data.blood_history;
-                        t.blood_types = blood_types !== null ? blood_types : [];
-                        var allergies = data.result.client_data.allergies;
-                        t.allergies = allergies !== null ? allergies : [];
-                        var intolerances = data.result.client_data.intolerances;
-                        t.intolerances = intolerances !== null ? intolerances : [];
-                        t.soc_statuses = data.result.client_data.soc_statuses;
-                        t.invalidities = t.soc_statuses.filter(function(status) {
-                            return status.ss_class.code == 2;
-                        });
-                        t.works = t.soc_statuses.filter(function(status) {
-                            return status.ss_class.code == 3;
-                        });
-                        t.nationalities = t.soc_statuses.filter(function(status) {
-                            return status.ss_class.code == 4;
-                        });
-                        var contacts = data.result.client_data.contacts;
-                        t.contacts = contacts !== null ? contacts : [];
-                        var phones = data.result.client_data.phones;
-                        t.phones = phones !== null ? phones : [];
-                        var relations = data.result.client_data.relations;
-                        t.relations = relations !== null ? relations : [];
-                        t.document_history = data.result.client_data.document_history;
-
-                        t.deleted_entities = {}; // deleted items to save
-                    } else if (info_type === 'for_servicing') {
-                        t.appointments = data.result.appointments;
-                        t.events = data.result.events;
-                    }
-
+                    initialize(self, data.result, info_type);
                     deferred.resolve();
                 }).error(function(data, status) {
-                    var message = status === 404 ? 'Пациент с id ' + t.client_id + ' не найден.' : data.result;
+                    var message = status === 404 ? 'Пациент с id ' + self.client_id + ' не найден.' : data.result;
                     deferred.reject(message);
                 });
                 return deferred.promise;
+            };
+
+            WMClient.prototype.init_from_obj = function (client_data, info_type) {
+                if (info_type === undefined) {
+                    info_type = 'for_editing';
+                }
+                initialize(this, client_data, info_type);
             };
 
             WMClient.prototype.save = function() {
