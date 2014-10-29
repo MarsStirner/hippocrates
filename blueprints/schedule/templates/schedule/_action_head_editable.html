@@ -57,7 +57,7 @@
                 </div>
                 <label for="end_date" class="col-md-1 control-label">Выполнено</label>
                 <div class="col-md-3">
-                    <wm-date id="end_date" name="end_date" ng-model="action.action.end_date"></wm-date>
+                    <wm-date id="end_date" name="end_date" ng-model="action.action.end_date" ng-change="on_enddate_changed()"></wm-date>
                 </div>
             </div>
         </div>

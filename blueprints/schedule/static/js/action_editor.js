@@ -30,6 +30,15 @@ var ActionEditorCtrl = function ($scope, $http, $window, WMAction, PrintingServi
             action.action.end_date = null;
         }
     };
+    $scope.on_enddate_changed = function () {
+        if (action.action.end_date) {
+            if (action.action.status.code !== 'finished') {
+                action.action.status = $scope.ActionStatus.get_by_code('finished');
+            }
+        } else {
+            action.action.status = $scope.ActionStatus.get_by_code('started');
+        }
+    };
 
     $scope.save_action = function () {
         $scope.action.save().
