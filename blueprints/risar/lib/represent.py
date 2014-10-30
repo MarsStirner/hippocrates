@@ -62,64 +62,7 @@ def represent_event(event):
         },
         'anamnesis': represent_anamnesis(event),
         'epicrisis': None,
-        'checkups': [
-            {
-                'beg_date': datetime.date(2014, 7, 15),
-                'person_name': u'Занкоков Тенши Ноёнивич',
-                'diag': {
-                    'code': 'O.10',
-                    'name': u'Существовавшая ранее гипертензия, осложняющая беременность, роды и послеродовой период',
-                }
-            },
-            {
-                'beg_date': datetime.date(2014, 8, 6),
-                'person_name': u'Занкоков Тенши Ноёнивич',
-                'diag': {
-                    'code': 'O.15',
-                    'name': u'Эклампсия',
-                }
-            },
-            {
-                'beg_date': datetime.date(2014, 8, 14),
-                'person_name': u'Занкоков Тенши Ноёнивич',
-                'diag': {
-                    'code': 'O.10',
-                    'name': u'Существовавшая ранее гипертензия, осложняющая беременность, роды и послеродовой период',
-                }
-            },
-            {
-                'beg_date': datetime.date(2014, 8, 19),
-                'person_name': u'Занкоков Тенши Ноёнивич',
-                'diag': {
-                    'code': 'O.15',
-                    'name': u'Эклампсия',
-                }
-            },
-            {
-                'beg_date': datetime.date(2014, 8, 24),
-                'person_name': u'Шоненова Шинвани Наровна',
-                'diag': {
-                    'code': 'O.10',
-                    'name': u'Существовавшая ранее гипертензия, осложняющая беременность, роды и послеродовой период',
-                }
-            },
-            {
-                'beg_date': datetime.date(2014, 9, 1),
-                'person_name': u'Шоненова Шинвани Наровна',
-                'diag': {
-                    'code': 'O.15',
-                    'name': u'Эклампсия',
-                }
-            },
-            {
-                'beg_date': datetime.date(2014, 9, 7),
-                'person_name': u'Шоненова Шинвани Наровна',
-                'diag': {
-                    'code': 'O.10',
-                    'name': u'Существовавшая ранее гипертензия, осложняющая беременность, роды и послеродовой период',
-                }
-            },
-        ]
+        'checkups': represent_checkups(event),
     }
 
 
@@ -220,6 +163,25 @@ def represent_father_action(event, action=None):
         if prop.type.code in father_codes
     )
     return represent_father
+
+
+def represent_checkups(event):
+    query = Action.query.join(ActionType).filter(
+        Action.event == event,
+        Action.deleted == 0,
+        ActionType.flatCode.in_(checkup_flat_codes)
+    ).order_by(Action.begDate.desc())
+    return map(represent_checkup, query)
+
+
+def represent_checkup(action):
+    result = dict(
+        (code, prop.value)
+        for (code, prop) in action.propsByCode.iteritems()
+    )
+    result['beg_date'] = action.begDate
+    result['person'] = action.person
+    return result
 
 
 def represent_ticket(ticket):
