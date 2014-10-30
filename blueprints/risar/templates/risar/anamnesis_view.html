@@ -26,6 +26,9 @@
                             нарушения <b ng-bind-html="chart.anamnesis.mother.menstruation_disorders | danet | underlineNoVal"></b>.
                         </p>
                         <p>
+                            Дата последней менструации <b ng-bind-html="chart.anamnesis.mother.menstruation_last_date | asDate | underlineNoVal"></b>.
+                        </p>
+                        <p>
                             Половая жизнь с <b ng-bind-html="chart.anamnesis.mother.sex_life_start_age | underlineNoVal:'лет'"></b>.
                             Вид контрацепции: <b ng-bind-html="chart.anamnesis.mother.contraception_type | underlineNoVal"></b>.
                         </p>
