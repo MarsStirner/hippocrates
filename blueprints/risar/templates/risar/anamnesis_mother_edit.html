@@ -9,11 +9,11 @@
             <li><a href="{{ url_for('.index_html') }}">Рабочий стол</a></li>
             <li><a ng-href="{{ url_for('.html_chart') }}?event_id=[[ chart.id ]]">Карта пациентки</a></li>
             <li><a ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ chart.id ]]">Анамнез пациентки</a></li>
-            <li>Изменение данных о матери</li>
+            <li>Ввод данных о матери</li>
         </ul>
         <div class="row small-marginal">
             <div class="col-md-12">
-                {{ rimacros.page_title('Изменение данных о матери') }}
+                {{ rimacros.page_title('Ввод данных о матери') }}
             </div>
         </div>
         <div ng-controller="AnamnesisMotherEditCtrl">
