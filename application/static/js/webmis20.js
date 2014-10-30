@@ -1152,9 +1152,10 @@ function safe_traverse(object, attrs) {
     }
     for (var i = 0; i < attrs.length; ++i) {
         attr = attrs[i];
-        o = o[attr];
-        if (o === undefined) {
-            return undefined
+        if (o !== null && o.hasOwnProperty(attr)) {
+            o = o[attr];
+        } else {
+            return
         }
     }
     return o;
