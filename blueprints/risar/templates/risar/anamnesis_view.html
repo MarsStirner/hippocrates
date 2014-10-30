@@ -38,8 +38,11 @@
                     <div class="col-md-6">
                         <p>ФИО отца: <b ng-bind-html="chart.anamnesis.father.name | underlineNoVal"></b></p>
                         <p>Телефон отца: <b ng-bind-html="chart.anamnesis.father.phone | underlineNoVal"></b></p>
-                        <p>Данные исследований отца ВИЧ: <b ng-bind-html="chart.anamnesis.father.HIV | danet | underlineNoVal"></b></p>
-                        <p>Флюорография: <b ng-bind-html="chart.anamnesis.father.fluorography | underlineNoVal"></b></p>
+                        <p>Данные исследований отца:
+                        <ul>
+                            <li>ВИЧ: <b ng-bind-html="chart.anamnesis.father.HIV | danet | underlineNoVal"></b></li>
+                            <li>Флюорография: <b ng-bind-html="chart.anamnesis.father.fluorography | underlineNoVal"></b></li>
+                        </ul>
                     </div>
                 </div>
                 <table class="table table-condensed">
