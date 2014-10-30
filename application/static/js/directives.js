@@ -99,6 +99,100 @@ angular.module('WebMis20.directives')
             }
         };
     }])
+    .directive('wmTime', ['$document', function ($document) {
+        return {
+            restrict: 'E',
+            replace: true,
+            scope: {
+                id: '=',
+                name: '=',
+                ngModel: '=',
+                ngRequired: '=',
+                ngDisabled: '='
+            },
+            template:
+'<div class="input-group">\
+    <input type="text" id="[[id]]" name="[[name]]" class="form-control"\
+           ng-model="ngModel" autocomplete="off"\
+           ng-required="ngRequired" show-time ng-disabled="ngDisabled"/>\
+    <span class="input-group-btn">\
+        <button class="btn btn-default" type="button" ng-click="open_timepicker_popup()" ng-disabled="ngDisabled">\
+            <i class="glyphicon glyphicon-time"></i>\
+        </button>\
+        <div class="timepicker_popup" ng-show="isPopupVisible">\
+            <div style="display:inline-block;">\
+                <timepicker ng-model="ngModel" show-meridian="false"></timepicker>\
+            </div>\
+        </div>\
+    </span>\
+</div>',
+            link: function(scope, element, attr) {
+                scope.isPopupVisible = false;
+                scope.open_timepicker_popup = function () {
+                    scope.isPopupVisible = !scope.isPopupVisible;
+                };
+
+                $document.bind('click', function(event) {
+                    var isClickedElementChildOfPopup = element
+                      .find(event.target)
+                      .length > 0;
+                    if (isClickedElementChildOfPopup)
+                      return;
+
+                    scope.isPopupVisible = false;
+                    scope.$apply();
+                });
+            }
+        };
+    }])
+    .directive('showTime', function() {
+        return {
+            restrict: 'A',
+            require: 'ngModel',
+            link: function (scope, element, attrs, ngModel) {
+                ngModel.$parsers.unshift(function (value) {
+                    var oldValue = ngModel.$modelValue;
+                    if (value && !(value instanceof Date)) {
+                        if (/^([01]\d|2[0-3]):([0-5]\d)$/.test(value)) {
+                            var parts = value.split(':');
+                            oldValue.setHours(parts[0]);
+                            oldValue.setMinutes(parts[1]);
+                        }
+                        if (moment(oldValue).isValid()) {
+                            ngModel.$setValidity('date', true);
+                            ngModel.$setViewValue(oldValue);
+                            return oldValue;
+                        } else {
+                            ngModel.$setValidity('date', false);
+                            return undefined;
+                        }
+                    } else {
+                        return oldValue;
+                    }
+                });
+
+                function format_time(date) {
+                    function lead_zero(val) {
+                        return String(val).length === 1 ? ('0' + val) : String(val);
+                    }
+                    return lead_zero(date.getHours()) + ":" + lead_zero(date.getMinutes());
+                }
+
+                if (ngModel) {
+                    ngModel.$formatters.push(function (value) {
+                        if (!(value instanceof Date) && value) {
+                            value = new Date(value);
+                        }
+                        if (value && moment(value).isValid()) {
+                            return format_time(value);
+                        } else {
+                            return undefined;
+                        }
+                    });
+                }
+            }
+        };
+    })
     .directive('wmPersonSelect', ['$compile', function ($compile) {
         return {
             restrict: 'E',
