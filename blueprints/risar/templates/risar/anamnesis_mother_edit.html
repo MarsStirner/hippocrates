@@ -39,7 +39,7 @@
             </div>
 
             <div class="row marginal">
-                <div class="col-md-4">Группа крови</div>
+                <div class="col-md-4">Группа крови и резус-фактор</div>
                 <div class="col-md-2"><rb-select ng-model="chart.anamnesis.mother.blood_type" ref-book="rbBloodType"></rb-select></div>
             </div>
 
@@ -79,7 +79,7 @@
             </div>
 
             <div class="row marginal">
-                <div class="col-md-4">Тип контрацепции</div>
+                <div class="col-md-4">Сведения по контрацепции</div>
                 <div class="col-md-8"><input ng-model="chart.anamnesis.mother.contraception_type" class="form-control"></div>
             </div>
 
@@ -98,24 +98,24 @@
                 <div class="col-md-8"><input ng-model="chart.anamnesis.mother.infertility" class="checkbox" type="checkbox"></div>
             </div>
 
-            <div class="row marginal" ng-if="chart.anamnesis.mother.infertility">
+            <div class="row marginal">
                 <div class="col-md-offset-1 col-md-3">вид</div>
-                <div class="col-md-8"><input ng-model="chart.anamnesis.mother.infertility_type" class="form-control"></div>
+                <div class="col-md-8"><input ng-model="chart.anamnesis.mother.infertility_type" class="form-control" ng-disabled="!chart.anamnesis.mother.infertility"></div>
             </div>
 
-            <div class="row marginal" ng-if="chart.anamnesis.mother.infertility">
+            <div class="row marginal">
                 <div class="col-md-offset-1 col-md-3">длительность</div>
-                <div class="col-md-8"><input ng-model="chart.anamnesis.mother.infertility_period" class="form-control" type="number" valid-number></div>
+                <div class="col-md-8"><input ng-model="chart.anamnesis.mother.infertility_period" class="form-control" type="number" valid-number ng-disabled="!chart.anamnesis.mother.infertility"></div>
             </div>
 
-            <div class="row marginal" ng-if="chart.anamnesis.mother.infertility">
-                <div class="col-md-offset-1 col-md-3">лечние</div>
-                <div class="col-md-8"><input ng-model="chart.anamnesis.mother.infertility_treatment" class="form-control"></div>
+            <div class="row marginal">
+                <div class="col-md-offset-1 col-md-3">лечение</div>
+                <div class="col-md-8"><input ng-model="chart.anamnesis.mother.infertility_treatment" class="form-control" ng-disabled="!chart.anamnesis.mother.infertility"></div>
             </div>
 
-            <div class="row marginal" ng-if="chart.anamnesis.mother.infertility">
+            <div class="row marginal">
                 <div class="col-md-offset-1 col-md-3">причина</div>
-                <div class="col-md-8"><input ng-model="chart.anamnesis.mother.infertility_cause" class="form-control"></div>
+                <div class="col-md-8"><input ng-model="chart.anamnesis.mother.infertility_cause" class="form-control" ng-disabled="!chart.anamnesis.mother.infertility"></div>
             </div>
 
             <div class="row marginal">
