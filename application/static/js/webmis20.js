@@ -160,13 +160,13 @@ var WebMis20 = angular.module('WebMis20', [
         return function (data) {
             if (data instanceof Array) {
                 return data.map(function (item) {
-                    if (item instanceof String) {
+                    if (typeof item === 'string' || item instanceof String) {
                         return item.replace('<', '&lt;').replace('>', '&gt;').replace('&', '&amp;');
                     } else {
                         return item;
                     }
                 })
-            } else if (data instanceof String) {
+            } else if (typeof data === 'string' || data instanceof String) {
                 return data.replace('<', '&lt;').replace('>', '&gt;').replace('&', '&amp;');
             } else {
                 return data;
@@ -1147,6 +1147,9 @@ var aux = {
 };
 function safe_traverse(object, attrs) {
     var o = object, attr;
+    if (typeof attrs === "string") {
+        attrs = attrs.split('.');
+    }
     for (var i = 0; i < attrs.length; ++i) {
         attr = attrs[i];
         o = o[attr];
