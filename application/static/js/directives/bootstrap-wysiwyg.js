@@ -78,8 +78,7 @@ angular.module('WebMis20.directives.wysiwyg', ['WebMis20.directives.goodies'])
             myAside = $modal.open({
                 windowTemplateUrl: '/WebMis20/aside-thesaurus.html',
                 template: $templateCache.get('/WebMis20/aside-thesaurus/tree.html').format(buildList(thesaurus.tree.children)),
-                backdrop: false,
-                windowClass: 'aside',
+                backdrop: true,
                 controller: function ($scope) {
                     function renderThesaurusTemplate(node_id) {
                         var node = thesaurus.dict[node_id];
@@ -373,8 +372,8 @@ angular.module('WebMis20.directives.wysiwyg', ['WebMis20.directives.goodies'])
             <div class="btn-group">\
                 <a class="btn" data-edit="insertunorderedlist" title="Bullet list"><i class="fa fa-list-ul"></i></a>\
                 <a class="btn" data-edit="insertorderedlist" title="Number list"><i class="fa fa-list-ol"></i></a>\
-                <a class="btn" data-edit="outdent" title="Reduce indent (Shift+Tab)"><i class="fa fa-indent-left"></i></a>\
-                <a class="btn" data-edit="indent" title="Indent (Tab)"><i class="fa fa-indent-right"></i></a>\
+                <a class="btn" data-edit="outdent" title="Reduce indent (Shift+Tab)"><i class="fa fa-indent"></i></a>\
+                <a class="btn" data-edit="indent" title="Indent (Tab)"><i class="fa fa-outdent"></i></a>\
             </div>\
             <div class="btn-group">\
                 <a class="btn" data-edit="justifyleft" title="Align Left (Ctrl/Cmd+L)"><i class="fa fa-align-left"></i></a>\
@@ -400,10 +399,7 @@ angular.module('WebMis20.directives.wysiwyg', ['WebMis20.directives.goodies'])
     <button type="button" class="close" ng-click="$dismiss()">&times;</button>\
     <h4 class="aside-title">Тезаурус</h4>\
 </div>\
-<div class="aside-body ui-treeview">{0}</div>\
-<div class="aside-footer">\
-    <button type="button" class="btn btn-default" ng-click="$dismiss()">Закрыть</button>\
-</div>'
+<div class="aside-body modal-scrollable ui-treeview">{0}</div>'
     );
     $templateCache.put('/WebMis20/aside-thesaurus/custom.html',
 "<div tabindex=\"-1\" role=\"dialog\" class=\"modal fade\" ng-class=\"{in: animate}\" ng-style=\"{'z-index': 1050 + index*10, display: 'block'}\" ng-click=\"close($event)\">\
@@ -411,10 +407,12 @@ angular.module('WebMis20.directives.wysiwyg', ['WebMis20.directives.goodies'])
 </div>"
     );
     $templateCache.put('/WebMis20/aside-thesaurus.html',
-'<div class="aside right fade in" tabindex="-1" role="dialog">\
-    <div class="aside-dialog">\
-        <div class="aside-content">\
-            <div ng-transclude></div>\
+'<div tabindex="-1" role="dialog" class="modal fade" ng-class="{in: animate}" ng-style="{\'z-index\': 1050 + index*10, display: \'block\'}" ng-click="close($event)">\
+    <div class="aside right">\
+        <div class="aside-dialog">\
+            <div class="aside-content">\
+                <div ng-transclude></div>\
+            </div>\
         </div>\
     </div>\
 </div>'
