@@ -288,32 +288,41 @@ var WebMis20 = angular.module('WebMis20', [
     }
 })
 .filter('flt_not_deleted', function() {
-        return function(items) {
-            var out = [];
-            if(items) {
-                items.forEach(function(item){
-                    if (!item.hasOwnProperty('deleted') ||
-                        (item.hasOwnProperty('deleted') && item.deleted === 0)) {
-                        out.push(item);
-                    }
-                });
-            }
-            return out;
-        };
-    })
+    return function(items) {
+        var out = [];
+        if(items) {
+            items.forEach(function(item){
+                if (!item.hasOwnProperty('deleted') ||
+                    (item.hasOwnProperty('deleted') && item.deleted === 0)) {
+                    out.push(item);
+                }
+            });
+        }
+        return out;
+    };
+})
 .filter('rb_result_filter', function() {
-        return function(items, event_purpose_id) {
-            var out = [];
-            if(items){
-                items.forEach(function(item){
-                    if (item.eventPurpose_id == event_purpose_id){
-                        out.push(item);
-                    }
-                })
-            };
-            return out;
-        };
-    })
+    return function(items, event_purpose_id) {
+        var out = [];
+        if(items){
+            items.forEach(function(item){
+                if (item.eventPurpose_id == event_purpose_id){
+                    out.push(item);
+                }
+            })
+        }
+        return out;
+    };
+})
+.filter('formatSnils', function () {
+    return function (snils) {
+        return snils && snils.length === 11 ?
+            [snils.substr(0, 3), '-',
+             snils.substr(3, 3), '-',
+             snils.substr(6, 3), ' ', snils.substr(9, 2)].join('') :
+            '';
+    }
+})
 // Services
 .factory('RefBook', ['$http', '$rootScope', function ($http, $rootScope) {
     var RefBook = function (name) {
@@ -323,7 +332,7 @@ var WebMis20 = angular.module('WebMis20', [
     };
     RefBook.prototype.load = function () {
         var t = this;
-        $http.get(rb_root + this.name)
+        this.loading = $http.get(rb_root + this.name)
         .success(function (data) {
             t.objects = data.result;
             $rootScope.$broadcast('rb_load_success_'+ t.name, {
@@ -353,6 +362,12 @@ var WebMis20 = angular.module('WebMis20', [
             if (this.objects[i].code == code) return this.objects[i];
         }
         return null;
+    };
+    RefBook.prototype.get_by_code_async = function (code) {
+        var self = this;
+        return this.loading.then(function () {
+            return self.get_by_code(code);
+        });
     };
     return RefBook;
 }])

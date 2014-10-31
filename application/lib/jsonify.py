@@ -13,7 +13,7 @@ from application.lib.user import UserUtils
 
 from application.systemwide import db
 from application.lib.data import int_get_atl_dict_all
-from application.lib.utils import safe_traverse_attrs
+from application.lib.utils import safe_traverse_attrs, format_date
 from application.lib.action.utils import action_is_bak_lab, action_is_lab
 from application.lib.agesex import recordAcceptableEx
 from application.lib.utils import safe_unicode, safe_dict, logger, safe_traverse_attrs
@@ -706,10 +706,17 @@ class EventVisualizer(object):
             'id': event.id,
             'client_id': event.client_id,
             'client_full_name': event.client.nameText,
+            'external_id': event.externalId,
             'beg_date': event.setDate,
             'end_date': event.execDate,
             'type_name': event.eventType.name,
             'person_short_name': event.execPerson.shortNameText if event.execPerson else u'Нет',
+            'text_description': u'{0} №{1} от {2}, {3}'.format(
+                u'История болезни' if event.is_stationary else u'Обращение',
+                event.externalId,
+                format_date(event.setDate),
+                safe_traverse_attrs(event, 'eventType', 'name', default=u'')
+            )
         }
     def make_event(self, event):
         """

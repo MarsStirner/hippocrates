@@ -325,15 +325,17 @@ def api_appointment():
     Параметры:
         client_id (int) - id пациента
         ticket_id (int) - ScheduleTicket.id
-        [opt] appointment_type_code (str) - rbAppointmentType.code
+        [opt] appointment_type_id (int) - rbAppointmentType.id
+        [opt] event_id (int) - id обращения в рамках которого проводится запись на приём
         [opt] delete (bool) - удалять ли запись
         [opt] note (str) - жалобы
     """
     data = request.get_json()
-    client_id = int(data['client_id'])
-    ticket_id = int(data['ticket_id'])
+    client_id = data['client_id']
+    ticket_id = data['ticket_id']
     create_person = data.get('create_person', current_user.get_id())
-    appointment_type_code = data.get('appointment_type_code', 'amb')
+    appointment_type_id = data.get('appointment_type_id')
+    event_id = data.get('event_id')
     delete = bool(data.get('delete', False))
     ticket = ScheduleTicket.query.get(ticket_id)
     if not ticket:
@@ -353,7 +355,12 @@ def api_appointment():
         client_ticket.ticket_id = ticket_id
         client_ticket.createDatetime = client_ticket.modifyDatetime = datetime.datetime.now()
         client_ticket.createPerson_id = client_ticket.modifyPerson_id = create_person
-        client_ticket.appointmentType = rbAppointmentType.query.filter(rbAppointmentType.code == appointment_type_code).first()
+        if event_id:
+            client_ticket.event_id = event_id
+        if appointment_type_id:
+            client_ticket.appointmentType_id = appointment_type_id
+        else:
+            client_ticket.appointmentType = rbAppointmentType.query.filter(rbAppointmentType.code == 'amb').first()
         db.session.add(client_ticket)
     if 'note' in data:
         client_ticket.note = data['note']

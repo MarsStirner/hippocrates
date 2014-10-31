@@ -703,3 +703,7 @@ button.text-left {
     text-align: left;
     padding-left: 10px;
 }
+
+.label-no-bold {
+    font-weight: normal;
+}

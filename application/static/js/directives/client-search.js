@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('WebMis20.directives').
-    directive('wmSearchClient', ['$q', '$http', 'WMClientServices', function ($q, $http, WMClientServices) {
+    directive('wmSearchClient', ['$q', '$http', function ($q, $http) {
         return {
             restrict: 'E',
             scope: {
@@ -50,7 +50,6 @@ angular.module('WebMis20.directives').
                 };
             },
             link: function (scope, element, attrs) {
-                scope.wmClientCtrl = WMClientServices;
                 scope.results = null;
                 scope.allow_register = angular.isDefined(attrs.allowRegister);
             },
@@ -98,7 +97,7 @@ angular.module('WebMis20.directives').
             <td ng-bind-html="result.info.birth_date | asDate | highlight: query"></td>\
             <td ng-bind="result.info.sex.name"></td>\
             <td ng-bind-html="result.id_document.doc_text | highlight: query"></td>\
-            <td class="whitespace: nowrap" ng-bind-html="wmClientCtrl.formatSnils(result.info.snils) | highlight: query"></td>\
+            <td class="whitespace: nowrap" ng-bind-html="result.info.snils | formatSnils | highlight: query"></td>\
             <td ng-bind-html="result.compulsory_policy.policy_text | highlight: query"></td>\
             <td><div ng-repeat="policy in result.voluntary_policies"><span ng-bind-html="policy.policy_text | highlight: query"></span></div></td>\
         </tr>\
