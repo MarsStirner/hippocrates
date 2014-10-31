@@ -26,7 +26,7 @@
                         <td><span class="fa fa-question text-warning"></span></td>
                         <td><a ng-href="{{ url_for('.html_chart') }}?ticket_id=[[ row.client_ticket_id ]]">[[ row.client.full_name ]]</a></td>
                         <td>31</td>
-                        <td ng-bind="(row.checkups_n)?('Повторный осмотр: ' + row.checkups_n):('Первичный осмотр')"></td>
+                        <td ng-bind="(row.checkup_n)?('Повторный осмотр: ' + row.checkup_n):('Первичный осмотр')"></td>
                     </tr>
                     </tbody>
                 </table>
