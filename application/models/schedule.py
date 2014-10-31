@@ -38,6 +38,7 @@ class rbAttendanceType(db.Model):
 
     def __json__(self):
         return {
+            'id': self.id,
             'code': self.code,
             'name': self.name,
         }
@@ -55,6 +56,7 @@ class rbAppointmentType(db.Model):
 
     def __json__(self):
         return {
+            'id': self.id,
             'code': self.code,
             'name': self.name,
         }

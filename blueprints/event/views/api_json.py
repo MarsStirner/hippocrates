@@ -2,6 +2,7 @@
 
 import datetime
 from application.lib.agesex import recordAcceptableEx
+from application.lib.const import STATIONARY_EVENT_CODES
 
 from flask import request, abort
 from flask.ext.login import current_user
@@ -88,6 +89,19 @@ def api_event_new_get():
         'event': v.make_event(event),
         'payment': v.make_event_payment(None)
     })
+
+
+@module.route('/api/event/event_stationary_open.json', methods=['GET'])
+def api_event_stationary_open_get():
+    client_id = int(request.args['client_id'])
+    events = Event.query.join(EventType, rbRequestType).filter(
+        Event.client_id == client_id,
+        Event.execDate.is_(None),
+        Event.deleted == 0,
+        rbRequestType.code.in_(STATIONARY_EVENT_CODES)
+    ).order_by(Event.setDate.desc())
+    v = EventVisualizer()
+    return jsonify([v.make_short_event(event) for event in events])
 
 
 @module.route('api/event_save.json', methods=['POST'])

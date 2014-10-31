@@ -14,7 +14,7 @@ var PersonAppointmentCtrl = function ($scope, $http, RefBook, WMAppointmentDialo
 
     $scope.aux = aux;
     $scope.params = aux.getQueryParams(document.location.search);
-    $scope.client_id = $scope.params.client_id;
+    $scope.client_id = parseInt($scope.params.client_id);
     var curDate = new Date();
     var curYear = curDate.getUTCFullYear();
     $scope.years = [curYear - 1, curYear, curYear + 1];
