@@ -441,7 +441,7 @@ var WebMis20 = angular.module('WebMis20', [
     };
     PrintingService.prototype.is_available = function () {
         return Boolean(this.context) && !this.not_available;
-    }
+    };
     PrintingService.prototype.print_template = function(template_data_list, separated) { // [ {template_id, context}, ... ]
         var self = this;
         var send_data = {

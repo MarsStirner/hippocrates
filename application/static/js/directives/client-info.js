@@ -9,7 +9,7 @@ angular.module('WebMis20.directives')
         },
         link: function (scope, element, attrs) {
             scope.format_doc = function (docs) {
-                return docs ? docs[0].doc_text : '&nbsp;';
+                return docs && docs.length ? docs[0].doc_text : '&nbsp;';
             };
             scope.format_address = function (address) {
                 return address ? address.text_summary : '&nbsp;';
