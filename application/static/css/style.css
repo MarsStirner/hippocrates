@@ -707,13 +707,18 @@ button.text-left {
     font-weight: normal;
 }
 .thesaurus-tree{
-    max-height: calc(100% - 150px);
+    max-height: calc(100% - 305px);
     height: 100%;
     overflow-y: auto;
 }
 .full-height{
     height: 100%;
 }
+.aside.full-height .wysiwyg-panel{
+    max-height: 190px!important;
+    overflow-y: scroll!important;
+}
 .aside.full-height{
+    max-width: 800px;
     overflow-y: hidden;
 }
