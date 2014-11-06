@@ -667,8 +667,10 @@ var WebMis20 = angular.module('WebMis20', [
 
             // 2-way binding
             function select() {
-                scope.selectAll.select(scope.key, this.checked);
-                scope.$root.$digest(); // Это может негативно влиять на производительность, но оно нужно.
+                scope.$apply(angular.bind(this, function () {
+                    scope.selectAll.select(scope.key, this.checked);
+                }));
+//                scope.$root.$digest(); // Это может негативно влиять на производительность, но оно нужно.
             }
             scope.$watch('selectAll._selected', function (n, o) {
                 inputElement[0].checked = scope.selectAll.selected(scope.key);
