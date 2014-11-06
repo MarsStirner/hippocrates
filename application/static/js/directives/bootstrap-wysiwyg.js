@@ -62,7 +62,7 @@ angular.module('WebMis20.directives.wysiwyg', ['WebMis20.directives.goodies'])
     function buildView(thesaurus_tree_nodes) {
         var tree = buildList(thesaurus_tree_nodes),
             editor = '<wysiwyg ng-model="model.text" get-wysiwyg-api="getWysiwygApi(api)" />';
-        return editor + '<hr>' + tree;
+        return editor + '<hr>' + '<div class="thesaurus-tree">' + tree + '</div>';
     }
     this.openThesaurus = function (code, editor_model, close_promise) {
         var myAside;
@@ -415,7 +415,7 @@ angular.module('WebMis20.directives.wysiwyg', ['WebMis20.directives.goodies'])
     <button type="button" class="close" ng-click="$dismiss()">&times;</button>\
     <h4 class="aside-title">Тезаурус</h4>\
 </div>\
-<div class="aside-body modal-scrollable ui-treeview">{0}</div>'
+<div class="aside-body full-height modal-scrollable ui-treeview">{0}</div>'
     );
     $templateCache.put('/WebMis20/aside-thesaurus/custom.html',
 "<div tabindex=\"-1\" role=\"dialog\" class=\"modal fade\" ng-class=\"{in: animate}\" ng-style=\"{'z-index': 1050 + index*10, display: 'block'}\" ng-click=\"close($event)\">\
@@ -423,11 +423,11 @@ angular.module('WebMis20.directives.wysiwyg', ['WebMis20.directives.goodies'])
 </div>"
     );
     $templateCache.put('/WebMis20/aside-thesaurus.html',
-'<div tabindex="-1" role="dialog" class="modal fade" ng-class="{in: animate}" ng-style="{\'z-index\': 1050 + index*10, display: \'block\'}" ng-click="close($event)">\
-    <div class="aside right">\
-        <div class="aside-dialog">\
-            <div class="aside-content">\
-                <div ng-transclude></div>\
+'<div tabindex="-1" role="dialog" class="modal fade full-height" ng-class="{in: animate}" ng-style="{\'z-index\': 1050 + index*10, display: \'block\'}" ng-click="close($event)">\
+    <div class="aside right full-height">\
+        <div class="aside-dialog full-height">\
+            <div class="aside-content full-height">\
+                <div class="full-height" ng-transclude></div>\
             </div>\
         </div>\
     </div>\
