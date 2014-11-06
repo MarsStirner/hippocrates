@@ -716,7 +716,7 @@ button.text-left {
 }
 .aside.full-height .wysiwyg-panel{
     max-height: 190px!important;
-    overflow-y: scroll!important;
+    overflow-y: auto!important;
 }
 .aside.full-height{
     max-width: 800px;
