@@ -1,0 +1,374 @@
+{% extends 'risar/base.html' %}
+{% import 'risar/_macros.html' as rimacros %}
+
+{% block title %}> {{ module_name }}{% endblock %}
+
+{% block main %}
+    <div ng-controller="CheckupCtrl" ng-cloak>
+        <div class="row small-marginal">
+            <div class="col-lg-10 col-md-10">
+                <h2>
+                    Ввод данных первичного осмотра
+                    <a ng-href="{{ url_for('patients.patient') }}?client_id=[[ chart.client.id ]]">[[ chart.client.full_name ]]</a>
+                    ([[ chart.external_id ]])
+                </h2>
+            </div>
+        </div>
+        <table class="table table-condensed">
+            <thead>
+            <tr>
+                <th class="col-md-4"></th>
+                <th class="col-md-8"></th>
+            </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th>Дата осмотра</th>
+                    <td><wm-date ng-model="checkup.date" style="width: 250px"></wm-date></td>
+                </tr>
+                <tr>
+                    <th>Время осмотра</th>
+                    <td></td>
+                </tr>
+                <tr>
+                    <th>Общая информация</th>
+                    <td>&nbsp;</td>
+                </tr>
+                <tr>
+                    <td>Рост</td>
+                    <td><div class="row"><div class="col-md-4"><input ng-model="checkup.height" class="form-control"></div></div></td>
+                </tr>
+                <tr>
+                    <td>Масса до беременности, кг</td>
+                    <td><div class="row"><div class="col-md-4"><input ng-model="checkup.weight_before" class="form-control"></div></div></td>
+                </tr>
+                <tr>
+                    <td>Масса при осмотре, кг</td>
+                    <td><div class="row"><div class="col-md-4"><input ng-model="checkup.weight" class="form-control"></div></div></td>
+                </tr>
+                <tr>
+                    <td>Массо-ростовой коэффициент (МРК)</td>
+                    <td><div class="row"><div class="col-md-4"><input ng-model="checkup.hw_ratio" class="form-control"></div></div></td>
+                </tr>
+                <tr>
+                    <td>Индекс массы тела</td>
+                    <td><div class="row"><div class="col-md-4"><input ng-model="checkup.BMI" class="form-control"></div></div></td>
+                </tr>
+                <tr>
+                    <td>Общее состояние</td>
+                    <td><input ng-model="checkup.state" class="form-control"></td>
+                </tr>
+                <tr>
+                    <td>Подкожно-жировая клетчатка</td>
+                    <td><input ng-model="checkup.subcutaneous_fat" class="form-control"></td>
+                </tr>
+                <tr>
+                    <td>Состояние вен</td>
+                    <td><input ng-model="checkup.vein" class="form-control"></td>
+                </tr>
+                <tr>
+                    <td>Язык</td>
+                    <td><input ng-model="checkup.tongue" class="form-control"></td>
+                </tr>
+                <tr>
+                    <td>AD правая рука</td>
+                    <td><input ng-model="checkup.ad_right" class="form-control"></td>
+                </tr>
+                <tr>
+                    <td>AD левая рука</td>
+                    <td><input ng-model="checkup.ad_left" class="form-control"></td>
+                </tr>
+                <tr>
+                    <td>ССС: пульс</td>
+                    <td><div class="row"><div class="col-md-4"><input ng-model="checkup.heart_rate" class="form-control" type="number" valid-number></div></div></td>
+                </tr>
+                <tr>
+                    <th>Соматический статус</th>
+                    <td>&nbsp;</td>
+                </tr>
+                <tr>
+                    <td>Жалобы</td>
+                    <td><rb-select ng-model="chart.complaints" ref-book="rbRisarComplaints"></rb-select></td>
+                </tr>
+                <tr>
+                    <td>Кожа</td>
+                    <td><rb-select ng-model="chart.skin" ref-book="rbRisarSkin"></rb-select></td>
+                </tr>
+                <tr>
+                    <td>Лимфоузлы</td>
+                    <td><rb-select ng-model="chart.lymph" ref-book="rbRisarLymph"></rb-select></td>
+                </tr>
+                <tr>
+                    <td>Тоны сердца</td>
+                    <td><rb-select ng-model="chart.heart_tones" ref-book="rbRisarHeartTones"></rb-select></td>
+                </tr>
+                <tr>
+                    <td>Пульс</td>
+                    <td><rb-select ng-model="chart.pulse" ref-book="rbRisarPulse"></rb-select></td>
+                </tr>
+                <tr>
+                    <td>Молочные железы</td>
+                    <td><rb-select ng-model="chart.breast" ref-book="rbRisarBreast"></rb-select></td>
+                </tr>
+                <tr>
+                    <td>Состояние сосков</td>
+                    <td><rb-select ng-model="chart.nipples" ref-book="rbRisarNipples"></rb-select></td>
+                </tr>
+                <tr>
+                    <td>Полость рта</td>
+                    <td><rb-select ng-model="chart.mouth" ref-book="rbRisarMouth"></rb-select></td>
+                </tr>
+                <tr>
+                    <td>Органы дыхания</td>
+                    <td><rb-select ng-model="chart.breath" ref-book="rbRisarBreath"></rb-select></td>
+                </tr>
+                <tr>
+                    <td>Органы брюшной полости</td>
+                    <td><rb-select ng-model="chart.stomach" ref-book="rbRisarStomach"></rb-select></td>
+                </tr>
+                <tr>
+                    <td>Печень</td>
+                    <td><rb-select ng-model="chart.liver" ref-book="rbRisarLiber"></rb-select></td>
+                </tr>
+                <tr>
+                    <td>Мочевыводящая система</td>
+                    <td><rb-select ng-model="chart.urinoexcretory" ref-book="rbRisarUrinoexcretory"></rb-select></td>
+                </tr>
+                <tr>
+                    <th>Акушерский статус</th>
+                    <td>&nbsp;</td>
+                </tr>
+                <tr>
+                    <th>Ромб Михаэлиса</th>
+                    <td>&nbsp;</td>
+                </tr>
+                <tr>
+                    <td>Горизонтальная диагональ</td>
+                    <td><div class="row"><div class="col-md-4"><input ng-model="checkup.MikHHor" class="form-control"></div></div></td>
+                </tr>
+                <tr>
+                    <td>Вертикальная диагональ</td>
+                    <td><div class="row"><div class="col-md-4"><input ng-model="checkup.MikhVert" class="form-control"></div></div></td>
+                </tr>
+                <tr>
+                    <th>Размеры таза</th>
+                    <td>&nbsp;</td>
+                </tr>
+                <tr>
+                    <td>Ds. Sp</td>
+                    <td><div class="row"><div class="col-md-4"><input ng-model="checkup.DsSP" class="form-control"></div></div></td>
+                </tr>
+                <tr>
+                    <td>Ds. Cr</td>
+                    <td><div class="row"><div class="col-md-4"><input ng-model="checkup.DsCr" class="form-control"></div></div></td>
+                </tr>
+                <tr>
+                    <td>Ds. Tr</td>
+                    <td><div class="row"><div class="col-md-4"><input ng-model="checkup.DsTr" class="form-control"></div></div></td>
+                </tr>
+                <tr>
+                    <td>C. Ext</td>
+                    <td><div class="row"><div class="col-md-4"><input ng-model="checkup.CExt" class="form-control"></div></div></td>
+                </tr>
+                <tr>
+                    <td>C. Diag</td>
+                    <td><div class="row"><div class="col-md-4"><input ng-model="checkup.CDiag" class="form-control"></div></div></td>
+                </tr>
+                <tr>
+                    <td>C. Vera</td>
+                    <td><div class="row"><div class="col-md-4"><input ng-model="checkup.CVera" class="form-control"></div></div></td>
+                </tr>
+                <tr>
+                    <td>Индекс Соловьёва</td>
+                    <td><div class="row"><div class="col-md-4"><input ng-model="checkup.soloviev_index" class="form-control"></div></div></td>
+                </tr>
+                <tr>
+                    <th>Форма таза</th>
+                    <td>&nbsp;</td>
+                </tr>
+                <tr>
+                    <td>Степень сужения таза</td>
+                    <td><rb-select ng-model="chart.pelvis_narrowness" ref-book="rbRisarPelvisNarrowness"></rb-select></td>
+                </tr>
+                <tr>
+                    <td>Форма таза</td>
+                    <td><rb-select ng-model="chart.pelvis_form" ref-book="rbRisarPelvisForm"></rb-select></td>
+                </tr>
+                <tr>
+                    <th>Окружность живота</th>
+                    <td><div class="row"><div class="col-md-4"><input ng-model="checkup.abdominal" class="form-control"></div></div></td>
+                </tr>
+                <tr>
+                    <th>Плод</th>
+                    <td>&nbsp;</td>
+                </tr>
+                <tr>
+                    <td>Положение</td>
+                    <td><input ng-model="checkup.fetus_position" class="form-control"></td>
+                </tr>
+                <tr>
+                    <td>Позиция</td>
+                    <td><input ng-model="checkup.fetus_position_2" class="form-control"></td>
+                </tr>
+                <tr>
+                    <td>Вид плода</td>
+                    <td><input ng-model="checkup.fetus_type" class="form-control"></td>
+                </tr>
+                <tr>
+                    <td>Предлежащая часть</td>
+                    <td><rb-select ng-model="checkup.presenting_part" ref-book="rbRisarPresentingPart"></rb-select></td>
+                </tr>
+                <tr>
+                    <td>Сердцебиение</td>
+                    <td><input ng-model="checkup.fetus_heartbeat" class="form-control"></td>
+                </tr>
+                <tr>
+                    <td>ЧСС</td>
+                    <td><div class="row"><div class="col-md-4"><input ng-model="checkup.fetus_heart_rate" class="form-control"></div></div></td>
+                </tr>
+                <tr>
+                    <th>Матка</th>
+                    <td>&nbsp;</td>
+                </tr>
+                <tr>
+                    <td>Тело матки</td>
+                    <td><rb-select ng-model="checkup.body_of_womb" ref-book="rbRisarBodyOfWomb"></rb-select></td>
+                </tr>
+                <tr>
+                    <td>Высота стояния дна матки</td>
+                    <td><div class="row"><div class="col-md-4"><input ng-model="checkup.fundal_height" class="form-control"></div></div></td>
+                </tr>
+                <tr>
+                    <td>Состояние матки</td>
+                    <td><rb-select ng-model="checkup.metra_state" ref-book="rbRisarMetraState"></rb-select></td>
+                </tr>
+                <tr>
+                    <td>Длина шейки</td>
+                    <td><rb-select ng-model="checkup.cervix_length" ref-book="rbRisarCervixLength"></rb-select></td>
+                </tr>
+                <tr>
+                    <td>Позиция шейки</td>
+                    <td><rb-select ng-model="checkup.cervix_position" ref-book="rbRisarCervixPosition"></rb-select></td>
+                </tr>
+                <tr>
+                    <td>Зрелость шейки</td>
+                    <td><rb-select ng-model="checkup.cervix_maturity" ref-book="rbRisarCervixMaturity"></rb-select></td>
+                </tr>
+                <tr>
+                    <td>Консистенция шейки</td>
+                    <td><rb-select ng-model="checkup.cervix_consistency" ref-book="rbRisarCervixConsistency"></rb-select></td>
+                </tr>
+                <tr>
+                    <td>Цервикальный канал</td>
+                    <td><rb-select ng-model="checkup.cervical_canal" ref-book="rbRisarCervixConsistency"></rb-select></td>
+                </tr>
+                <tr>
+                    <th>Специальный статус</th>
+                    <td>&nbsp;</td>
+                </tr>
+                <tr>
+                    <td>Влагалище</td>
+                    <td><rb-select ng-model="checkup.vagina" ref-book="rbRisarVagina"></rb-select></td>
+                </tr>
+                <tr>
+                    <td>Шейка матки</td>
+                    <td><rb-select ng-model="checkup.cervix" ref-book="rbRisarCervix"></rb-select></td>
+                </tr>
+                <tr>
+                    <td>Придатки</td>
+                    <td><rb-select ng-model="checkup.appendages" ref-book="rbRisarAppendages"></rb-select></td>
+                </tr>
+                <tr>
+                    <td>Околоматочное пространство</td>
+                    <td><rb-select ng-model="checkup.parametrum" ref-book="rbRisarParametrum"></rb-select></td>
+                </tr>
+                <tr>
+                    <td>Особенности</td>
+                    <td><wysiwyg ng-model="checkup.features" /></td>
+                </tr>
+                <tr>
+                    <td>Наружные половые органы</td>
+                    <td><wysiwyg ng-model="checkup.externalia" /></td>
+                </tr>
+                <tr>
+                    <th>Взято на анализ</th>
+                    <td>&nbsp;</td>
+                </tr>
+                <tr>
+                    <td>отделяемое из влагалища</td>
+                    <td><input ng-model="checkup.vagina_secretion" class="checkbox" type="checkbox"></td>
+                </tr>
+                <tr>
+                    <td>отделяемое из цервикального канала</td>
+                    <td><input ng-model="checkup.cervical_canal_secretion" class="checkbox" type="checkbox"></td>
+                </tr>
+                <tr>
+                    <td>мазок на онкоцитологию</td>
+                    <td><input ng-model="checkup.onco_smear" class="checkbox" type="checkbox"></td>
+                </tr>
+                <tr>
+                    <th>Заключение</th>
+                    <td>&nbsp;</td>
+                </tr>
+                <tr>
+                    <td>Беременность (недель)</td>
+                    <td><div class="row"><div class="col-md-4"><input ng-model="checkup.pregnancy_week" class="form-control" type="number" valid-number></div></div></td>
+                </tr>
+                <tr>
+                    <td>Возможность сохранения беременности</td>
+                    <td><input ng-model="checkup.save" class="form-control"></td>
+                </tr>
+                <tr>
+                    <td>Изменение условий труда</td>
+                    <td><rb-select ng-model="checkup.craft" ref-book="rbRisarCraft"></rb-select></td>
+                </tr>
+                <tr>
+                    <th>Диагнозы</th>
+                    <td>&nbsp;</td>
+                </tr>
+                <tr>
+                    <td>основной</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>расшифровка основного</td>
+                    <td><wysiwyg ng-model="checkup.diagwr" /></td>
+                </tr>
+                <tr>
+                    <td>сопутствующий</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>расшифровка сопутствующего</td>
+                    <td><wysiwyg ng-model="checkup.diagwr2" /></td>
+                </tr>
+                <tr>
+                    <td>осложнения </td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Расшифровка осложнения</td>
+                    <td><wysiwyg ng-model="checkup.diagwr3" /></td>
+                </tr>
+                <tr>
+                    <td>Плановая дата следующей явки</td>
+                    <td><wm-date ng-model="checkup.nextDate" style="width: 250px"></wm-date></td>
+                </tr>
+                <tr>
+                    <td>Примечания</td>
+                    <td><wysiwyg ng-model="checkup.notes" /></td>
+                </tr>
+                <tr>
+                    <td>Рекомендации</td>
+                    <td><wysiwyg ng-model="checkup.recommendations" /></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
+
+{% block modules_js %}
+    {{ super() }}
+    <script src="{{ url_for('.static', filename='js/checkup.js', v=version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/risar.js', v=version) }}"></script>
+{% endblock %}

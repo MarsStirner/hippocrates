@@ -33,3 +33,12 @@ def html_anamnesis_father_edit():
 @module.route('/inspection.html')
 def html_inspection():
     return render_template('risar/inspection_view.html')
+
+
+@module.route('/inspection_edit.html')
+def html_inspection_edit():
+    code = request.args['code']
+    if code == 'risarFirstInspection':
+        return render_template('risar/inspection_first_edit.html')
+    elif code == 'risarSecondInspection':
+        return render_template('risar/inspection_second_edit.html')

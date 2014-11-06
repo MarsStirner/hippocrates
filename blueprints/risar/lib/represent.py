@@ -181,6 +181,8 @@ def represent_checkup(action):
     )
     result['beg_date'] = action.begDate
     result['person'] = action.person
+    result['flatCode'] = action.actionType.flatCode
+    result['id'] = action.id
     return result
 
 
