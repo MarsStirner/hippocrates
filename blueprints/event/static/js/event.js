@@ -531,7 +531,7 @@ var PrevEventContractModalCtrl = function ($scope, $modalInstance, model, $filte
         } else if ($scope.is_payer_person(lcon)) {
             return 'Физ. лицо:<br>{<strong>ФИО</strong> |0|<br>} {<strong>документ</strong> |1|<br>} {<strong>адрес</strong> |2|<br>}'.formatNonEmpty(
                 '{0} {1} {2} {3| г.р.}'.formatNonEmpty(lcon.last_name, lcon.first_name, lcon.patr_name, lcon.birth_date),
-                '{0}{ серия |0}{ |1}{ номер |2}'.formatNonEmpty(lcon.doc_type.name, lcon.serial_left, lcon.serial_right, lcon.number),
+                '{0}{ серия |0}{ |1}{ номер |2}'.formatNonEmpty(safe_traverse(lcon, ['doc_type', 'name']), lcon.serial_left, lcon.serial_right, lcon.number),
                 '{0}'.formatNonEmpty(lcon.reg_address)
             );
         } else {

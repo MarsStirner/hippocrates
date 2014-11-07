@@ -1031,12 +1031,14 @@ var aux = {
     }
 };
 function safe_traverse(object, attrs) {
-    var o = object, attr;
+    var o = object,
+        attr,
+        default_val = arguments[2];
     for (var i = 0; i < attrs.length; ++i) {
         attr = attrs[i];
         o = o[attr];
-        if (o === undefined) {
-            return undefined
+        if (o === undefined || (o === null && i < attrs.length - 1)) {
+            return default_val;
         }
     }
     return o;
