@@ -473,6 +473,7 @@ var EventPaymentCtrl = function($scope, RefBookService, Settings, $http, $modal)
         ).then(function (prev_con_info) {
             $modal.open({
                 templateUrl: 'modal-prev-event-contract.html',
+                windowClass: 'modal-scrollable',
                 size: 'lg',
                 controller: PrevEventContractModalCtrl,
                 scope: $scope,
