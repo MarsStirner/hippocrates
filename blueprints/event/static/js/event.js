@@ -753,44 +753,28 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
         }
     };
 
-
-    $scope.open_delete_event_modal = function() {
-        var modalInstance = $modal.open({
-            templateUrl: 'modal-delete-record.html',
-            controller: DeleteRecordModalCtrl,
-            resolve: {
-                message: function(){
-                    return 'текущее обращение';
-                }
-            },
-            scope: $scope
-        });
-        modalInstance.result.then(function () {
-            $scope.delete_event();
-        });
-    };
-
-
-    $scope.delete_event = function (){
-        if(!$scope.event_has_payments()){
-            $http.post(
-                url_for_delete_event, {
-                    event_id: $scope.event_id
-                }
-            ).success(function() {
-                if (window.opener){
+    $scope.delete_event = function () {
+        if($scope.event_has_payments()) {
+            alert('Невозможно удалить обращение! По нему была совершена оплата.');
+            return;
+        }
+        MessageBox.question(
+            'Удаление обращения',
+            'Вы уверены, что хотите удалить текущее обращение?'
+        ).then(function () {
+            $scope.eventServices.delete_event(
+                event
+            ).then(function () {
+                if (window.opener) {
                     window.opener.focus();
                     window.close();
                 }
-            }).error(function(response) {
+            }, function (response) {
                 var rr = response.result;
                 var message = rr.name + ': ' + (rr.data ? rr.data.err_msg : '');
                 alert(message);
             });
-        } else {
-            alert('Невозможно удалить обращение! По нему была совершена оплата.');
-        }
-
+        });
     };
 
     $scope.event_mandatoryResult = function() {
@@ -847,19 +831,16 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
         });
     };
 
-    $scope.open_delete_action_modal = function(action) {
-        var modalInstance = $modal.open({
-            templateUrl: 'modal-delete-record.html',
-            controller: DeleteRecordModalCtrl,
-            resolve: {
-                message: function(){
-                    return 'действие "' + action.name +'"';
-                }
-            },
-            scope: $scope
-        });
-        modalInstance.result.then(function () {
-            $scope.delete_action(action);
+    $scope.delete_action = function (action) {
+        MessageBox.question(
+            'Удаление записи',
+            'Вы уверены, что хотите удалить "{0}"?'.format(safe_traverse(action, ['name']))
+        ).then(function () {
+            $scope.eventServices.delete_action(
+                event, action
+            ).then(angular.noop, function () {
+                alert('Ошибка удаления действия. Свяжитесь с администратором.');
+            });
         });
     };
 
@@ -929,17 +910,6 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
         $scope.child_window = window.open(url_for_schedule_html_action + '?action_id=' + action_id);
     };
 
-    $scope.delete_action = function (action) {
-        $http.post(
-            url_for_event_api_delete_action, {
-                action_id: action.id
-            }
-        ).success(function() {
-            $scope.event.info.actions.remove(action);
-        }).error(function() {
-            alert('error');
-        });
-    };
     // action data end
 
     $scope.$watch('event.info.contract', function(new_val, old_val) {
@@ -977,16 +947,6 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
 
 var UnclosedActionsModalCtrl = function ($scope, $modalInstance, unclosed_actions) {
     $scope.unclosed_actions = unclosed_actions;
-    $scope.accept = function() {
-        $modalInstance.close();
-    };
-    $scope.cancel = function() {
-        $modalInstance.dismiss('cancel');
-    };
-};
-
-var DeleteRecordModalCtrl = function ($scope, $modalInstance, message) {
-    $scope.message = message;
     $scope.accept = function() {
         $modalInstance.close();
     };

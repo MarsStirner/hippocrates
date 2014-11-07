@@ -179,6 +179,22 @@ angular.module('WebMis20.services').
                     var idx = diag_list.indexOf(diagnosis);
                     diag_list.splice(idx, 1);
                 }
+            },
+            delete_event: function (event) {
+                return $http.post(
+                    url_for_delete_event, {
+                        event_id: event.event_id
+                    }
+                );
+            },
+            delete_action: function (event, action) {
+                return $http.post(
+                    url_for_event_api_delete_action, {
+                        action_id: action.id
+                    }
+                ).success(function() {
+                    event.info.actions.remove(action);
+                });
             }
         };
     }]).
