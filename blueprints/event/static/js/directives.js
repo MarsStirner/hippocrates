@@ -251,7 +251,7 @@ angular.module('WebMis20.directives').
     <span class="glyphicon" ng-class="{\'glyphicon-ok\': action.is_coordinated(), \'glyphicon-remove\':!action.is_coordinated()}"></span>\
 </td>\
 <td nowrap class="text-right">\
-    <span class="glyphicon glyphicon-info-sign"\
+    <span class="glyphicon glyphicon-info-sign" ng-if="action.action_id"\
         popover-trigger="mouseenter" popover-popup-delay=\'1000\' popover-placement="left" popover="[[get_info_text()]]"></span>\
     <ui-print-button ps="get_ps()" resolve="get_ps_resolve()" ng-if="action.action_id"></ui-print-button>\
     <button type="button" class="btn btn-sm btn-danger" title="Убрать из списка услуг"\
