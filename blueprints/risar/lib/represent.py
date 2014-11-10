@@ -122,6 +122,16 @@ def get_action(event, flat_code, create=False):
     return action
 
 
+def get_action_by_id(action_id, create=False):
+    """
+    :param action_id:
+    :return:
+    """
+    query = Action.query.filter(Action.id == action_id, Action.deleted == 0)
+    action = query.first()
+    return action
+
+
 def represent_mother_action(event, action=None):
     if action is None:
         action = get_action(event, risar_mother_anamnesis)
@@ -181,6 +191,8 @@ def represent_checkup(action):
     )
     result['beg_date'] = action.begDate
     result['person'] = action.person
+    result['flatCode'] = action.actionType.flatCode
+    result['id'] = action.id
     return result
 
 

@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 import datetime
+import requests
 from werkzeug.utils import cached_property
 from application.systemwide import db
 from exists import FDRecord
+from application.app import app
 from application.models.utils import safe_current_user_id, get_model_by_name
 
 __author__ = 'mmalkov'
@@ -511,6 +513,36 @@ class ActionProperty_ReferenceRb(ActionProperty_Integer_Base):
         self.value_ = val['id'] if val is not None else None
 
     property_object = db.relationship('ActionProperty', backref='_value_ReferenceRb')
+
+
+class ActionProperty_ExtReferenceRb(ActionProperty__ValueType):
+    __tablename__ = u'ActionProperty_ExtRef'
+
+    id = db.Column(db.Integer, db.ForeignKey('ActionProperty.id'), primary_key=True, nullable=False)
+    index = db.Column(db.Integer, primary_key=True, nullable=False, server_default=u"'0'")
+    value_ = db.Column('value', db.Text, nullable=False)
+
+    def set_raw_value(self, value):
+        if isinstance(value, dict):
+            value = value['code']
+        if hasattr(self, 'value_'):
+            self.value_ = value
+        else:
+            self.value = value
+
+    @property
+    def value(self):
+        if not hasattr(self, 'table_name'):
+            domain = ActionProperty.query.get(self.id).type.valueDomain
+            self.table_name = domain.split(';')[0]
+        response = requests.get(u'{0}v1/{1}/code/{2}'.format(app.config['VESTA_URL'], self.table_name, self.value_))
+        return response.json()['data']
+
+    @value.setter
+    def value(self, val):
+        self.value_ = val['id'] if val is not None else None
+
+    property_object = db.relationship('ActionProperty', backref='_value_ExtReferenceRb')
 
 
 class ActionProperty_Table(ActionProperty_Integer_Base):
