@@ -198,7 +198,7 @@ class UserUtils(object):
         action_type = ActionType.query.get_or_404(at_id)
         event = Event.query.get_or_404(event_id)
         createRight = u'client%sCreate' % modeRights[action_type.class_]
-        return False and action_type and (
+        return action_type and (
             current_user.has_right('adm') or (
                 not event.is_closed and current_user.has_right(createRight)))
 
