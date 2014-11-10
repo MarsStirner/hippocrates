@@ -1078,6 +1078,7 @@ class ActionVisualizer(object):
                     for prop in action.properties
                 ]
             },
+            #FIXME: Мелочь, конечно, но использование двойного отрицания не особо красиво. Зачем здесь делать "not", чтобы потом в интефейсе проверять "!ro".
             'ro': not UserUtils.can_edit_action(action) if action.id else False,
             'layout': self.make_action_layout(action),
         }
