@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from flask import render_template, request
 from ..app import module
+from application.models.actions import Action
 
 __author__ = 'mmalkov'
 
@@ -37,8 +38,10 @@ def html_inspection():
 
 @module.route('/inspection_edit.html')
 def html_inspection_edit():
-    code = request.args['code']
-    if code == 'risarFirstInspection':
+    checkup_id = request.args['checkup_id']
+    checkup = Action.query.get(checkup_id)
+    flat_code = checkup.actionType.flatCode
+    if flat_code == 'risarFirstInspection':
         return render_template('risar/inspection_first_edit.html')
-    elif code == 'risarSecondInspection':
+    elif flat_code == 'risarSecondInspection':
         return render_template('risar/inspection_second_edit.html')

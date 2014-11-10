@@ -37,6 +37,11 @@ WebMis20
             return wrapper('DELETE', Config.url.api_chart_delete + ticket_id);
         }
     };
+    this.checkup = {
+            save: function (checkup_id, data) {
+                return wrapper('POST', Config.url.api_checkup_save.format(checkup_id), {}, data);
+            }
+    }
     this.anamnesis = {
         get: function (event_id) {
             var url = Config.url.api_anamnesis + event_id;

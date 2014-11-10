@@ -14,3 +14,13 @@ var CheckupCtrl = function ($scope, RisarApi) {
     };
     reload_checkup();
 }
+
+var CheckupFirstEditCtrl = function ($scope, RisarApi) {
+    $scope.save = function () {
+        var model = $scope.checkup;
+        RisarApi.checkup.save($scope.checkup.id, model)
+        .then(function (data) {
+            $scope.checkup = data;
+        })
+    }
+};

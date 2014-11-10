@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from . import anamnesis, chart, schedule
+from . import anamnesis, chart, checkups, schedule
 
 __author__ = 'mmalkov'
 
-__all__ = ['anamnesis', 'chart', 'schedule']
+__all__ = ['anamnesis', 'chart', 'checkups', 'schedule']
