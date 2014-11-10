@@ -480,6 +480,9 @@ def api_action_post():
     else:
         at_id = action_desc['action_type']['id']
         event_id = action_desc['event_id']
+        if not UserUtils.can_create_action(at_id, event_id):
+            return jsonify(None, 403,
+                'User cannot create action with ActionType id = %s for event id = %s' % (at_id, event_id))
         action = create_new_action(at_id, event_id, properties=properties_desc, data=data)
 
     db.session.add(action)

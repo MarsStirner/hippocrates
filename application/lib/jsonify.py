@@ -1078,7 +1078,7 @@ class ActionVisualizer(object):
                     for prop in action.properties
                 ]
             },
-            'ro': not UserUtils.can_edit_action(action),
+            'ro': not UserUtils.can_edit_action(action) if action.id else False,
             'layout': self.make_action_layout(action),
         }
         if action_is_bak_lab(action):
