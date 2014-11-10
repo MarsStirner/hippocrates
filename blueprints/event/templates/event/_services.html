@@ -47,20 +47,7 @@
                 <div class="panel-heading"><strong>Выбранные услуги</strong></div>
                 <table class="table table-condensed table-bordered">
                     <thead>
-                        <tr>
-                            <th></th>
-                            <th>Код</th>
-                            <th>Услуга</th>
-                            <th class="nowrap">Тип действия</th>
-                            <th class="nowrap" ng-show="formstate.is_paid()">Цена (руб.)</th>
-                            <th>Количество</th>
-                            <th class="nowrap" ng-show="formstate.is_paid()">Сумма к оплате (руб.)</th>
-                            <th ng-show="formstate.is_paid()">Считать</th>
-                            <th ng-show="formstate.is_paid()">Оплачено</th>
-                            <th ng-show="formstate.is_dms()">Согласовать</th>
-                            <th ng-show="formstate.is_dms()">Согласовано</th>
-                            <th></th>
-                        </tr>
+                        <tr wm-event-service-list-header></tr>
                     </thead>
                     <tbody>
                         <tr wm-event-service-group model="service" event="event" idx="$index"

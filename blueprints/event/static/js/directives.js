@@ -261,6 +261,41 @@ angular.module('WebMis20.directives').
 </td>'
             };
         }
-    ])
+    ]).
+    directive('wmEventServiceListHeader', [function () {
+        return {
+            restrict: 'A',
+            link: function (scope, element, attrs) {
+                scope.all_accounted = false;
+                scope.$watch(function () {
+                    return scope.event.services.map(function (sg) {
+                        return sg.account_all;
+                    }).every(Boolean);
+                }, function (n, o) {
+                    scope.all_accounted = n;
+                });
+                scope.account_all = function () {
+                    scope.event.services.forEach(function (sg) {
+                        sg.account_all = scope.all_accounted;
+                    });
+                };
+            },
+            template:
+'<th></th>\
+<th>Код</th>\
+<th>Услуга</th>\
+<th class="nowrap">Тип действия</th>\
+<th class="nowrap" ng-show="formstate.is_paid()">Цена (руб.)</th>\
+<th>Количество</th>\
+<th class="nowrap" ng-show="formstate.is_paid()">Сумма к оплате (руб.)</th>\
+<th ng-show="formstate.is_paid()">\
+    <div class="checkbox inline-checkbox"><input type="checkbox" ng-model="all_accounted" ng-change="account_all()">Считать</div>\
+</th>\
+<th ng-show="formstate.is_paid()">Оплачено</th>\
+<th ng-show="formstate.is_dms()">Согласовать</th>\
+<th ng-show="formstate.is_dms()">Согласовано</th>\
+<th></th>'
+        };
+    }])
 ;
 
