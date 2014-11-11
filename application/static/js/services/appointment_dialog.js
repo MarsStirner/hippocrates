@@ -111,6 +111,7 @@ angular.module('WebMis20.services.dialogs', ['WebMis20.services', 'ui.bootstrap'
                     $scope.event_list = [];
                     $scope.chose_client_mode = !client_id;
                     $scope.page = client_id ? 1 : 0;
+                    var assoc_event_required_codes = ['hospital', 'polyclinic'];
 
                     $scope.load_event_info = function (client_id) {
                         if (!client_id) {
@@ -127,15 +128,15 @@ angular.module('WebMis20.services.dialogs', ['WebMis20.services', 'ui.bootstrap'
                     $scope.load_event_info($scope.model.client.client_id);
 
                     $scope.show_assoc_events = function () {
-                        return $scope.model.appointment_type && $scope.model.appointment_type.code === 'hospital';
+                        return $scope.model.appointment_type && assoc_event_required_codes.has($scope.model.appointment_type.code);
                     };
                     $scope.flt_appointment_type = function () {
                         return function (appointment_type) {
-                            return $scope.event_list.length ? true : appointment_type.code !== 'hospital';
+                            return $scope.event_list.length ? true : !assoc_event_required_codes.has(appointment_type.code);
                         }
                     };
                     $scope.on_at_change = function () {
-                        if ($scope.model.appointment_type.code !== 'hospital') {
+                        if (!assoc_event_required_codes.has($scope.model.appointment_type.code)) {
                             $scope.model.associated_event_id = null;
                         }
                     };

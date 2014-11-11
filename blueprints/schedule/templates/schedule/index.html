@@ -51,7 +51,7 @@
                         <tbody ng-if="grouped[reception_type].max_tickets > 0">
                         <tr ng-repeat="row in aux.range(grouped[reception_type].max_tickets)">
                             <td ng-repeat="day in grouped[reception_type].schedule">
-                                <div class="btn-group btn-group-justified btngroup8515">
+                                <div class="btn-group btn-group-justified">
                                     <div class="btn-group">
                                         <button ui-schedule-ticket="day.tickets[row]" day="day" show-name="true"
                                                 ng-click="appointment_toggle(day.tickets[row])"></button>
