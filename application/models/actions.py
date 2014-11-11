@@ -405,8 +405,11 @@ class ActionProperty_Diagnosis(ActionProperty__ValueType):
                     diag_list.append(d)
             return diag_list
         else:
-            d = create_or_update_diagnosis(action.event, json_data, action)
-            db.session.add(d)
+            if json_data is not None:
+                d = create_or_update_diagnosis(action.event, json_data, action)
+                db.session.add(d)
+            else:
+                d = None
             return d
 
 
