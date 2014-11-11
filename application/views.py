@@ -121,7 +121,7 @@ def api_refbook(name):
         result = []
         response = requests.get(u'{0}v1/{1}/'.format(app.config['VESTA_URL'], name))
         for i, item in enumerate(response.json()['data']):
-            result.append({'id': i, 'name': item['name'], 'code': item['code']})
+            result.append({'id': item['_id'], 'name': item['name'], 'code': item['code']})
         return jsonify(result)
     return abort(404)
 

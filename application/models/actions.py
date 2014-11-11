@@ -536,11 +536,12 @@ class ActionProperty_ExtReferenceRb(ActionProperty__ValueType):
             domain = ActionProperty.query.get(self.id).type.valueDomain
             self.table_name = domain.split(';')[0]
         response = requests.get(u'{0}v1/{1}/code/{2}'.format(app.config['VESTA_URL'], self.table_name, self.value_))
-        return response.json()['data']
+        result = response.json()['data']
+        return {'id': result['_id'], 'name': result['name'], 'code': result['code']}
 
     @value.setter
     def value(self, val):
-        self.value_ = val['id'] if val is not None else None
+        self.value_ = val['code'] if val is not None else None
 
     property_object = db.relationship('ActionProperty', backref='_value_ExtReferenceRb')
 

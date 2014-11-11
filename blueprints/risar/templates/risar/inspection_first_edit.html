@@ -87,54 +87,102 @@
                         <th>Соматический статус</th>
                         <td>&nbsp;</td>
                     </tr>
-    {#                <tr>#}
-    {#                    <td>Жалобы[[checkup.complaints]]</td>#}
-    {#                    <td><rb-select ng-model="checkup.complaints" ref-book="rbRisarComplaints"></rb-select></td>#}
-    {#                </tr>#}
-    {#                <tr>#}
-    {#                    <td>Кожа</td>#}
-    {#                    <td><rb-select ng-model="checkup.skin" ref-book="rbRisarSkin"></rb-select></td>#}
-    {#                </tr>#}
-    {#                <tr>#}
-    {#                    <td>Лимфоузлы</td>#}
-    {#                    <td><rb-select ng-model="checkup.lymph" ref-book="rbRisarLymph"></rb-select></td>#}
-    {#                </tr>#}
-    {#                <tr>#}
-    {#                    <td>Тоны сердца</td>#}
-    {#                    <td><rb-select ng-model="checkup.heart_tones" ref-book="rbRisarHeart_Tones"></rb-select></td>#}
-    {#                </tr>#}
-    {#                <tr>#}
-    {#                    <td>Пульс</td>#}
-    {#                    <td><rb-select ng-model="checkup.pulse" ref-book="rbRisarPulse"></rb-select></td>#}
-    {#                </tr>#}
-    {#                <tr>#}
-    {#                    <td>Молочные железы</td>#}
-    {#                    <td><rb-select ng-model="checkup.breast" ref-book="rbRisarBreast"></rb-select></td>#}
-    {#                </tr>#}
-    {#                <tr>#}
-    {#                    <td>Состояние сосков</td>#}
-    {#                    <td><rb-select ng-model="checkup.nipples" ref-book="rbRisarNipples"></rb-select></td>#}
-    {#                </tr>#}
-    {#                <tr>#}
-    {#                    <td>Полость рта</td>#}
-    {#                    <td><rb-select ng-model="checkup.mouth" ref-book="rbRisarMouth"></rb-select></td>#}
-    {#                </tr>#}
-    {#                <tr>#}
-    {#                    <td>Органы дыхания</td>#}
-    {#                    <td><rb-select ng-model="checkup.breathe" ref-book="rbRisarBreathe"></rb-select></td>#}
-    {#                </tr>#}
-    {#                <tr>#}
-    {#                    <td>Органы брюшной полости</td>#}
-    {#                    <td><rb-select ng-model="checkup.stomach" ref-book="rbRisarStomach"></rb-select></td>#}
-    {#                </tr>#}
-    {#                <tr>#}
-    {#                    <td>Печень</td>#}
-    {#                    <td><rb-select ng-model="checkup.liver" ref-book="rbRisarLiver"></rb-select></td>#}
-    {#                </tr>#}
-    {#                <tr>#}
-    {#                    <td>Мочевыводящая система</td>#}
-    {#                    <td><rb-select ng-model="checkup.urinoexcretory" ref-book="rbRisarUrinoexcretory"></rb-select></td>#}
-    {#                </tr>#}
+                    <tr>
+                        <td>Жалобы</td>
+                        <td>
+                            <div refbook-checkbox ref-book="rbRisarComplaints" ng-model="checkup.complaints">
+                                [[ item.name ]]
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Кожа</td>
+                        <td>
+                            <div refbook-checkbox ref-book="rbRisarSkin" ng-model="checkup.skin">
+                                [[ item.name ]]
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Лимфоузлы</td>
+                        <td>
+                            <div refbook-checkbox ng-model="checkup.lymph" ref-book="rbRisarLymph">
+                                [[ item.name ]]
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Тоны сердца</td>
+                        <td>
+                            <div refbook-checkbox ng-model="checkup.heart_tones" ref-book="rbRisarHeart_Tones">
+                                [[ item.name ]]
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Пульс</td>
+                        <td>
+                            <div refbook-checkbox ng-model="checkup.pulse" ref-book="rbRisarPulse">
+                                [[ item.name ]]
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Молочные железы</td>
+                        <td>
+                            <div refbook-checkbox ng-model="checkup.breast" ref-book="rbRisarBreast">
+                                [[ item.name ]]
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Состояние сосков</td>
+                        <td>
+                            <div refbook-checkbox ng-model="checkup.nipples" ref-book="rbRisarNipples">
+                                [[ item.name ]]
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Полость рта</td>
+                        <td>
+                            <div refbook-checkbox ng-model="checkup.mouth" ref-book="rbRisarMouth">
+                                [[ item.name ]]
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Органы дыхания</td>
+                        <td>
+                            <div refbook-checkbox ng-model="checkup.breathe" ref-book="rbRisarBreathe">
+                                [[ item.name ]]
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Органы брюшной полости</td>
+                        <td>
+                            <div refbook-checkbox ng-model="checkup.stomach" ref-book="rbRisarStomach">
+                                [[ item.name ]]
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Печень</td>
+                        <td>
+                            <div refbook-checkbox ng-model="checkup.liver" ref-book="rbRisarLiver">
+                                [[ item.name ]]
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Мочевыводящая система</td>
+                        <td>
+                            <div refbook-checkbox ng-model="checkup.urinoexcretory" ref-book="rbRisarUrinoexcretory">
+                                [[ item.name ]]
+                            </div>
+                        </td>
+                    </tr>
                     <tr>
                         <th>Акушерский статус</th>
                         <td>&nbsp;</td>
@@ -219,10 +267,13 @@
                         <td>Предлежащая часть</td>
                         <td><rb-select ng-model="checkup.presenting_part" ref-book="rbRisarPresenting_Part"></rb-select></td>
                     </tr>
-    {#                <tr>#}
-    {#                    <td>Сердцебиение</td>#}
-    {#                    <td><input ng-model="checkup.fetus_heartbeat" class="form-control"></td>#}
-    {#                </tr>#}
+                    <tr>
+                        <td>Сердцебиение</td>
+                        <td>
+                            <div refbook-checkbox ng-model="checkup.fetus_heartbeat" ref-book="rbRisarFetus_Heartbeat">
+                                [[ item.name ]]
+                            </div>
+                    </tr>
                     <tr>
                         <td>ЧСС</td>
                         <td><div class="row"><div class="col-md-4"><input ng-model="checkup.fetus_heart_rate" class="form-control"></div></div></td>
@@ -231,10 +282,13 @@
                         <th>Матка</th>
                         <td>&nbsp;</td>
                     </tr>
-    {#                <tr>#}
-    {#                    <td>Тело матки</td>#}
-    {#                    <td><rb-select ng-model="checkup.body_of_womb" ref-book="rbRisarBody_Of_Womb"></rb-select></td>#}
-    {#                </tr>#}
+                    <tr>
+                        <td>Тело матки</td>
+                        <td>
+                            <div refbook-checkbox ng-model="checkup.body_of_womb" ref-book="rbRisarBody_Of_Womb">
+                                [[ item.name ]]
+                            </div>
+                    </tr>
                     <tr>
                         <td>Высота стояния дна матки</td>
                         <td><div class="row"><div class="col-md-4"><input ng-model="checkup.fundal_height" class="form-control"></div></div></td>
