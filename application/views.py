@@ -162,7 +162,7 @@ def api_thesaurus(code=None):
 @app.route('/api/kladr/city/search/<search_query>/')
 @app.route('/api/kladr/city/search/<search_query>/<limit>/')
 @cache.memoize(86400)
-def kladr_search_city(search_query=None, limit=100):
+def kladr_search_city(search_query=None, limit=300):
     result = []
     if search_query is None:
         return jsonify([])
