@@ -38,8 +38,8 @@ WebMis20
         }
     };
     this.checkup = {
-            save: function (checkup_id, data) {
-                return wrapper('POST', Config.url.api_checkup_save.format(checkup_id), {}, data);
+            save: function (event_id, data) {
+                return wrapper('POST', Config.url.api_checkup_save.format(event_id), {}, data);
             }
     }
     this.anamnesis = {

@@ -13,6 +13,12 @@
                     ([[ chart.external_id ]])
                 </h2>
             </div>
+            <div class="col-md-12 col-lg-12">
+                <div class="alert-warning small-marginal">Случай беременности. На учёте в <b>[[ chart.person.organisation.short_name ]]</b>
+                    у <b>[[ chart.person.name ]]</b>
+                    с <b>[[ chart.set_date | asDate ]]</b>
+                </div>
+            </div>
         </div>
         <div ng-controller="CheckupFirstEditCtrl">
             <table class="table table-condensed">
@@ -350,15 +356,15 @@
                         <td>&nbsp;</td>
                     </tr>
                     <tr>
-                        <td>отделяемое из влагалища</td>
+                        <td>Отделяемое из влагалища</td>
                         <td><input ng-model="checkup.vagina_secretion" class="checkbox" type="checkbox"></td>
                     </tr>
                     <tr>
-                        <td>отделяемое из цервикального канала</td>
+                        <td>Отделяемое из цервикального канала</td>
                         <td><input ng-model="checkup.cervical_canal_secretion" class="checkbox" type="checkbox"></td>
                     </tr>
                     <tr>
-                        <td>мазок на онкоцитологию</td>
+                        <td>Мазок на онкоцитологию</td>
                         <td><input ng-model="checkup.onco_smear" class="checkbox" type="checkbox"></td>
                     </tr>
                     <tr>

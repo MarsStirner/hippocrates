@@ -80,7 +80,8 @@
                     </table>
                 </div>
                 <div class="panel panel-default">
-                    <div class="panel-heading">Осмотры акушером-гинекологом / <a ng-href="{{ url_for('.html_inspection') }}?event_id=[[ chart.id ]]">подробнее</a></div>
+                    <div class="panel-heading">Осмотры акушером-гинекологом / <a ng-href="{{ url_for('.html_inspection') }}?event_id=[[ chart.id ]]">подробнее</a>
+                    <a ng-href="{{ url_for('.html_inspection_edit') }}?event_id=[[ chart.id ]]" class="btn btn-xs btn-success" title="Добавить новый осмотр"><i class="glyphicon glyphicon-plus"></i></a></div>
                     <table class="table table-condensed">
                         <thead>
                         <tr>

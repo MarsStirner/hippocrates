@@ -122,13 +122,17 @@ def get_action(event, flat_code, create=False):
     return action
 
 
-def get_action_by_id(action_id, create=False):
+def get_action_by_id(action_id, event, flat_code, create=False):
     """
     :param action_id:
     :return:
     """
-    query = Action.query.filter(Action.id == action_id, Action.deleted == 0)
-    action = query.first()
+    action = None
+    if action_id:
+        query = Action.query.filter(Action.id == action_id, Action.deleted == 0)
+        action = query.first()
+    elif create:
+        action = create_action(get_action_type_id(flat_code), event)
     return action
 
 
