@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from flask import render_template, request
 from ..app import module
-from application.models.actions import Action
+from application.models.actions import Action, ActionType
 
 __author__ = 'mmalkov'
 
@@ -38,9 +38,15 @@ def html_inspection():
 
 @module.route('/inspection_edit.html')
 def html_inspection_edit():
-    checkup_id = request.args['checkup_id']
-    checkup = Action.query.get(checkup_id)
-    flat_code = checkup.actionType.flatCode
+    event_id = request.args['event_id']
+    checkup_id = request.args.get('checkup_id')
+    if checkup_id:
+        checkup = Action.query.get(checkup_id)
+        flat_code = checkup.actionType.flatCode
+    else:
+        first_inspection = Action.query.join(ActionType).filter(Action.event_id == event_id, Action.deleted == 0,
+                                                               ActionType.flatCode == 'risarFirstInspection').first()
+        flat_code = 'risarSecondInspection' if first_inspection else 'risarFirstInspection'
     if flat_code == 'risarFirstInspection':
         return render_template('risar/inspection_first_edit.html')
     elif flat_code == 'risarSecondInspection':

@@ -15,7 +15,8 @@ WebMis20
         api_anamnesis_transfusions: '{{ url_for('.api_0_transfusions_get') }}',
         api_anamnesis_intolerances: '{{ url_for('.api_0_intolerances_get') }}',
         chart_html: '{{ url_for('.html_chart') }}',
-        index_html: '{{ url_for('.index_html') }}'
+        index_html: '{{ url_for('.index_html') }}',
+        inpection_edit_html:'{{ url_for('.html_inspection_edit') }}'
     }
 })
 ;

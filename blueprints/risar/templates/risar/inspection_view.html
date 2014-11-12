@@ -33,7 +33,7 @@
         <table class="table table-bordered">
             <thead>
                 <tr>
-                    <th width="10%" nowrap>Данные осмотра <a href="#" class="btn btn-xs btn-success" title="Добавить новый осмотр"><i class="glyphicon glyphicon-plus"></i></a></th>
+                    <th width="10%" nowrap>Данные осмотра <a ng-href="{{ url_for('.html_inspection_edit') }}?event_id=[[ chart.id ]]" class="btn btn-xs btn-success" title="Добавить новый осмотр"><i class="glyphicon glyphicon-plus"></i></a></th>
                     <th width="10%" nowrap ng-repeat="checkup in chart.checkups">
                         <a ng-href="{{ url_for('.html_inspection_edit') }}?event_id=[[ chart.id ]]&checkup_id=[[ checkup.id ]]">[[ checkup.beg_date | asDate ]]</a>
                         <div class="btn-group">
