@@ -180,6 +180,15 @@ angular.module('WebMis20.services').
                     diag_list.splice(idx, 1);
                 }
             },
+            reload_diagnoses: function (event) {
+                return $http.get(url_api_diagnosis_get, {
+                    params: {
+                        event_id: event.event_id
+                    }
+                }).success(function (data) {
+                    event.diagnoses = data.result;
+                });
+            },
             delete_event: function (event) {
                 return $http.post(
                     url_for_delete_event, {
@@ -188,12 +197,14 @@ angular.module('WebMis20.services').
                 );
             },
             delete_action: function (event, action) {
+                var self = this;
                 return $http.post(
                     url_for_event_api_delete_action, {
                         action_id: action.id
                     }
                 ).success(function() {
                     event.info.actions.remove(action);
+                    return self.reload_diagnoses(event);
                 });
             }
         };

@@ -6,7 +6,6 @@ from application.lib.const import STATIONARY_EVENT_CODES
 
 from flask import request, abort
 from flask.ext.login import current_user
-from application.lib.user import UserUtils
 from application.models.schedule import ScheduleClientTicket
 from application.models.utils import safe_current_user_id
 
@@ -21,11 +20,11 @@ from application.systemwide import db
 from application.lib.utils import (jsonify, safe_traverse, get_new_uuid, logger, get_new_event_ext_id, safe_datetime)
 from blueprints.event.app import module
 from application.models.exists import (Organisation, )
-from application.lib.jsonify import EventVisualizer, ClientVisualizer
+from application.lib.jsonify import EventVisualizer
 from blueprints.event.lib.utils import (EventSaveException, create_services, create_or_update_local_contract,
     create_or_update_diagnosis)
 from application.lib.sphinx_search import SearchEventService
-from application.lib.data import get_planned_end_datetime, int_get_atl_dict_all
+from application.lib.data import get_planned_end_datetime, int_get_atl_dict_all, delete_action
 
 
 @module.errorhandler(EventSaveException)
@@ -296,6 +295,14 @@ def api_diagnosis_delete():
     db.session.commit()
 
 
+@module.route('/api/events/diagnosis', methods=['GET'])
+def api_diagnosis_get():
+    event_id = int(request.args['event_id'])
+    event = Event.query.get(event_id)
+    vis = EventVisualizer()
+    return jsonify(vis.make_diagnoses(event))
+
+
 @module.route('/api/service/service_price.json', methods=['GET'])
 def api_search_services():
     query = request.args['q']
@@ -526,16 +533,15 @@ def api_service_delete_service():
 @module.route('api/delete_action.json', methods=['POST'])
 def api_delete_action():
     action_id = int(request.json['action_id'])
-    if action_id:
-        action = Action.query.get(action_id)
-        if not action:
-            return jsonify(None, 404, 'Action %s not found' % action_id)
-        if not UserUtils.can_delete_action(action):
-            return jsonify(None, 403, 'User cannot delete action %s' % action)
-        action.deleted = 1
+    if not action_id:
+        return jsonify(None, 404, "Argument 'action_id' cannot be found.")
+    action = Action.query.get(action_id)
+    ok, code, msg = delete_action(action)
+    if ok:
         db.session.commit()
-
-    return jsonify(None)
+        return jsonify(None)
+    else:
+        return jsonify(None, code, msg)
 
 
 @module.route('api/delete_event.json', methods=['POST'])

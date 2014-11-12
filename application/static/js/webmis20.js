@@ -290,7 +290,7 @@ var WebMis20 = angular.module('WebMis20', [
 .filter('flt_not_deleted', function() {
     return function(items) {
         var out = [];
-        if(items) {
+        if (items && items instanceof Array) {
             items.forEach(function(item){
                 if (!item.hasOwnProperty('deleted') ||
                     (item.hasOwnProperty('deleted') && item.deleted === 0)) {

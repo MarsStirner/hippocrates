@@ -283,12 +283,14 @@ def create_or_update_diagnosis(event, json_data, action=None):
     return diag
 
 
-def delete_diagnosis(diagnostic):
+def delete_diagnosis(diagnostic, diagnostic_id=None):
     """
     :type diagnostic: application.models.event.Diagnostic
     :param diagnostic:
     :return:
     """
+    if diagnostic is None and diagnostic_id:
+        diagnostic = Diagnostic.query.get(diagnostic_id)
     diagnostic.deleted = 1
     for ds in diagnostic.diagnoses:
         ds.deleted = 1
