@@ -23,7 +23,11 @@
                     <tbody>
                     <tr ng-repeat="row in tickets">
                         <td ng-bind="row.beg_time | asTime"></td>
-                        <td><span class="fa fa-question text-warning"></span></td>
+                        <td><span class="fa" ng-class="{'fa-question':row.risk_rate.value==0,
+                                                        'fa-frown-o text-danger':row.risk_rate.value==3,
+                                                        'fa-meh-o text-warning':row.risk_rate.value==2,
+                                                        'fa-smile-o text-success':row.risk_rate.value==1}"
+                                             tooltip="[[row.risk_rate.note]]"></span></td>
                         <td><a ng-href="{{ url_for('.html_chart') }}?ticket_id=[[ row.client_ticket_id ]]">[[ row.client.full_name ]]</a></td>
                         <td>31</td>
                         <td ng-bind="(row.checkup_n)?('Повторный осмотр: ' + row.checkup_n):('Первичный осмотр')"></td>

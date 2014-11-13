@@ -69,24 +69,25 @@ def represent_event(event):
 
 def get_all_diagnoses(actions):
     result = []
-    for action in actions:
-        for property in action.properties:
-            if property.type.typeName == 'MKB' and property.value:
-                result.extend(property.value) if isinstance(property.value, list) else result.append(property.value)
+    if actions:
+        for action in actions:
+            for property in action.properties:
+                if property.type.typeName == 'MKB' and property.value:
+                    result.extend(property.value) if isinstance(property.value, list) else result.append(property.value)
     return result
 
 
 def get_risk_rate(diagnoses):
     for diag in diagnoses:
         if diag.DiagID in risk_rates_diagID['high'] or diag.BlockID in risk_rates_blockID['high']:
-            return 3
+            return {'value': 3, 'note': u"Внимание! У пациентки выявлен высокий риск невынашивания "}
             break
         elif diag.DiagID in risk_rates_diagID['middle'] or diag.BlockID in risk_rates_blockID['middle']:
-            return 2
+            return {'value': 2, 'note':  u"У пациентки выявлен средний риск невынашивания "}
             break
         elif diag.DiagID in risk_rates_diagID['low'] or diag.BlockID in risk_rates_blockID['low']:
-            return 1
-    return 0
+            return {'value': 1, 'note': u"У пациентки выявлен низкий риск невынашивания "}
+    return {'value': 0, 'note': u"У пациентки риск невынашивания не выявлен"}
 
 
 @cache.memoize()
@@ -225,8 +226,10 @@ def represent_checkup(action):
 
 def represent_ticket(ticket):
     from application.models.actions import Action, ActionType
+    from application.models.event import Event
     checkup_n = 0
     event_id = ticket.client_ticket.event_id if ticket.client_ticket else None
+    event = Event.query.get(event_id) if event_id else None
     if event_id is not None:
         checkup_n = Action.query\
             .join(ActionType)\
@@ -244,6 +247,7 @@ def represent_ticket(ticket):
         'event_id': ticket.client_ticket.event_id if ticket.client_ticket else None,
         'note': ticket.client_ticket.note if ticket.client else None,
         'checkup_n': checkup_n,
+        'risk_rate': get_risk_rate(get_all_diagnoses(event.actions))
     }
 
 
