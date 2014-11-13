@@ -5,6 +5,12 @@
 
 {% block main %}
     <div ng-controller="CheckupCtrl" ng-cloak>
+        <ul class="breadcrumb">
+            <li><a href="{{ url_for('.index_html') }}">Рабочий стол</a></li>
+            <li><a ng-href="{{ url_for('.html_chart') }}?event_id=[[ chart.id ]]">Карта пациентки</a></li>
+            <li><a ng-href="{{ url_for('.html_inspection') }}?event_id=[[ chart.id ]]">Осмотры акушера-гинеколога беременной</a></li>
+            <li>Ввод данных первичного осмотра</li>
+        </ul>
         <div class="row small-marginal">
             <div class="col-lg-10 col-md-10">
                 <h2>
@@ -31,11 +37,13 @@
                 <tbody>
                     <tr>
                         <th>Дата осмотра</th>
-                        <td><wm-date ng-model="checkup.date" style="width: 250px"></wm-date></td>
+                        <td><wm-date ng-model="checkup.beg_date" style="width: 250px"></wm-date></td>
                     </tr>
                     <tr>
                         <th>Время осмотра</th>
-                        <td></td>
+                        <td>
+                            <wm-time ng-model="checkup.beg_date" style="width: 250px"></wm-time>
+                        </td>
                     </tr>
                     <tr>
                         <th>Общая информация</th>
@@ -383,34 +391,42 @@
                         <td>Изменение условий труда</td>
                         <td><rb-select ng-model="checkup.craft" ref-book="rbRisarCraft"></rb-select></td>
                     </tr>
-    {#                <tr>#}
-    {#                    <th>Диагнозы</th>#}
-    {#                    <td>&nbsp;</td>#}
-    {#                </tr>#}
-    {#                <tr>#}
-    {#                    <td>основной</td>#}
-    {#                    <td></td>#}
-    {#                </tr>#}
-    {#                <tr>#}
-    {#                    <td>расшифровка основного</td>#}
-    {#                    <td><wysiwyg ng-model="checkup.diagwr" /></td>#}
-    {#                </tr>#}
-    {#                <tr>#}
-    {#                    <td>сопутствующий</td>#}
-    {#                    <td></td>#}
-    {#                </tr>#}
-    {#                <tr>#}
-    {#                    <td>расшифровка сопутствующего</td>#}
-    {#                    <td><wysiwyg ng-model="checkup.diagwr2" /></td>#}
-    {#                </tr>#}
-    {#                <tr>#}
-    {#                    <td>осложнения </td>#}
-    {#                    <td></td>#}
-    {#                </tr>#}
-    {#                <tr>#}
-    {#                    <td>Расшифровка осложнения</td>#}
-    {#                    <td><wysiwyg ng-model="checkup.diagwr3" /></td>#}
-    {#                </tr>#}
+                    <tr>
+                        <th>Диагнозы</th>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td>Основной</td>
+                        <td><rb-select ng-model="checkup.diag" ref-book="MKB"></rb-select></td>
+                    </tr>
+                    <tr>
+                        <td>расшифровка основного</td>
+                        <td><wysiwyg ng-model="checkup.diagwr" /></td>
+                    </tr>
+{#                    <tr>#}
+{#                        <td>Сопутствующие</td>#}
+{#                        <td>#}
+{#                            <div ng-model="checkup.diag2" items="$refBook.objects" fs-multiselect ref-book="MKB">#}
+{#                                <strong>[[ item.code ]]</strong> - [[ item.name ]]#}
+{#                            </div>#}
+{#                        </td>#}
+{#                    </tr>#}
+{#                    <tr>#}
+{#                        <td>расшифровка сопутствующего</td>#}
+{#                        <td><wysiwyg ng-model="checkup.diagwr2" /></td>#}
+{#                    </tr>#}
+{#                    <tr>#}
+{#                        <td>Осложнения</td>#}
+{#                        <td>#}
+{#                            <div ng-model="checkup.diag3" items="$refBook.objects" fs-multiselect ref-book="MKB">#}
+{#                                <strong>[[ item.code ]]</strong> - [[ item.name ]]#}
+{#                            </div>#}
+{#                        </td>#}
+{#                    </tr>#}
+{#                    <tr>#}
+{#                        <td>Расшифровка осложнения</td>#}
+{#                        <td><wysiwyg ng-model="checkup.diagwr3" /></td>#}
+{#                    </tr>#}
                     <tr>
                         <td>Плановая дата следующей явки</td>
                         <td><wm-date ng-model="checkup.nextDate" style="width: 250px"></wm-date></td>

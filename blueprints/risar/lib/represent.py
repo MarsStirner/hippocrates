@@ -11,7 +11,7 @@ from application.systemwide import cache, db
 from ..risar_config import pregnancy_apt_codes, risar_anamnesis_pregnancy, transfusion_apt_codes, \
     risar_anamnesis_transfusion, mother_codes, father_codes, risar_father_anamnesis, risar_mother_anamnesis, \
     checkup_flat_codes
-
+from ..lib.utils import risk_rates_diagID, risk_rates_blockID
 
 __author__ = 'mmalkov'
 
@@ -63,7 +63,30 @@ def represent_event(event):
         'anamnesis': represent_anamnesis(event),
         'epicrisis': None,
         'checkups': represent_checkups(event),
+        'risk_rate': get_risk_rate(get_all_diagnoses(event.actions))
     }
+
+
+def get_all_diagnoses(actions):
+    result = []
+    for action in actions:
+        for property in action.properties:
+            if property.type.typeName == 'MKB' and property.value:
+                result.extend(property.value) if isinstance(property.value, list) else result.append(property.value)
+    return result
+
+
+def get_risk_rate(diagnoses):
+    for diag in diagnoses:
+        if diag.DiagID in risk_rates_diagID['high'] or diag.BlockID in risk_rates_blockID['high']:
+            return 3
+            break
+        elif diag.DiagID in risk_rates_diagID['middle'] or diag.BlockID in risk_rates_blockID['middle']:
+            return 2
+            break
+        elif diag.DiagID in risk_rates_diagID['low'] or diag.BlockID in risk_rates_blockID['low']:
+            return 1
+    return 0
 
 
 @cache.memoize()
