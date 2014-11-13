@@ -63,7 +63,7 @@
                 </div>
 
                 <div class="panel panel-default">
-                    <div class="panel-heading">Анамнез / <a ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ chart.id ]]">подробнее</a></div>
+                    <div class="panel-heading">Анамнез (<a ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ chart.id ]]">подробнее</a>).</div>
                     <table class="table table-condensed">
                         <tbody>
                         <tr>
@@ -85,8 +85,8 @@
                     </table>
                 </div>
                 <div class="panel panel-default">
-                    <div class="panel-heading">Осмотры акушером-гинекологом / <a ng-href="{{ url_for('.html_inspection') }}?event_id=[[ chart.id ]]">подробнее</a>
-                    <a ng-href="{{ url_for('.html_inspection_edit') }}?event_id=[[ chart.id ]]" class="btn btn-xs btn-success" title="Добавить новый осмотр"><i class="glyphicon glyphicon-plus"></i></a></div>
+                    <div class="panel-heading">Осмотры акушером-гинекологом (<a ng-href="{{ url_for('.html_inspection') }}?event_id=[[ chart.id ]]">подробнее</a>).
+                    <a ng-href="{{ url_for('.html_inspection_edit') }}?event_id=[[ chart.id ]]" title=""> Добавить новый осмотр</a></div>
                     <table class="table table-condensed">
                         <thead>
                         <tr>
@@ -105,7 +105,7 @@
                     </table>
                 </div>
                 <div class="panel panel-default">
-                    <div class="panel-heading">Эпикриз / <a ng-href="#">подробнее</a></div>
+                    <div class="panel-heading">Эпикриз (<a ng-href="#">подробнее</a>).</div>
                     <div class="panel-body">
                         <span ng-if="!chart.epicrisis">Отсутствует</span>
                         <span ng-if="chart.epicrisis">[[ chart.epicrisis ]]</span>
