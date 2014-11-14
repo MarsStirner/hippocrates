@@ -21,9 +21,9 @@
             <div class="col-md-2 achievements">
                 <b>[[ pregnancy_week ]]</b>
                 <i class="fa" ng-class="{'fa-question':chart.risk_rate.value==0,
-                                         'fa-frown-o text-danger':chart.risk_rate.value==3,
-                                         'fa-meh-o text-warning':chart.risk_rate.value==2,
-                                         'fa-smile-o text-success':chart.risk_rate.value==1}"
+                                         'fa-circle text-danger':chart.risk_rate.value==3,
+                                         'fa-circle text-warning':chart.risk_rate.value==2,
+                                         'fa-circle text-success':chart.risk_rate.value==1}"
                               tooltip="[[chart.risk_rate.note]]"></i>
                 <i class="fa fa-exclamation-triangle text-danger"></i>
                 <i class="fa fa-exclamation-triangle text-success"></i>

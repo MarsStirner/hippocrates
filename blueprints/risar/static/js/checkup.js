@@ -12,6 +12,20 @@ var CheckupCtrl = function ($scope, RisarApi) {
             $scope.checkup = data.event.checkups.filter(function(elem){return elem.id == checkup_id})[0]
         })
     };
+    var updateHW_Ratio = function (){
+        $scope.checkup.hw_ratio = $scope.checkup.height ? Math.round(($scope.checkup.weight/$scope.checkup.height)*100) : NaN;
+    }
+    var updateBMI = function (){
+        $scope.checkup.BMI = $scope.checkup.height ? ($scope.checkup.weight/Math.pow($scope.checkup.height/100,2)).toFixed(1) : NaN;
+    }
+    $scope.$watch('checkup.height', function() {
+        updateHW_Ratio();
+        updateBMI();
+    });
+    $scope.$watch('checkup.weight', function() {
+        updateHW_Ratio();
+        updateBMI();
+    });
     reload_checkup();
 }
 
