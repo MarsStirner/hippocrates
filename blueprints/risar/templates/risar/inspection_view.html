@@ -158,13 +158,13 @@
                     <td></td>
                 </tr>
                 <tr>
-                    <td>сопутствующий</td>
-                    <td ng-repeat="checkup in chart.checkups">[[ checkup.diag2 | format:'{code} - {name}' ]]</td>
+                    <td>сопутствующие</td>
+                    <td ng-repeat="checkup in chart.checkups"><p ng-repeat="diag in checkup.diag2">[[ diag | format:'{code} - {name}' ]]</p></td>
                     <td></td>
                 </tr>
                 <tr>
                     <td>осложнения</td>
-                    <td ng-repeat="checkup in chart.checkups">[[ checkup.diag3 | format:'{code} - {name}' ]]</td>
+                    <td ng-repeat="checkup in chart.checkups"><p ng-repeat="diag in checkup.diag3">[[ diag | format:'{code} - {name}' ]]</p></td>
                     <td></td>
                 </tr>
             </tbody>
