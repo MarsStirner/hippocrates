@@ -56,6 +56,25 @@
                     <td></td>
                 </tr>
                 <tr>
+                    <th>Диагнозы</th>
+                    <td colspan="[[ chart.checkups.length + 1 ]]"></td>
+                </tr>
+                <tr>
+                    <td>основной</td>
+                    <td ng-repeat="checkup in chart.checkups">[[ checkup.diag | format:'{code} - {name}' ]]</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>сопутствующие</td>
+                    <td ng-repeat="checkup in chart.checkups"><p ng-repeat="diag in checkup.diag2">[[ diag | format:'{code} - {name}' ]]</p></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>осложнения</td>
+                    <td ng-repeat="checkup in chart.checkups"><p ng-repeat="diag in checkup.diag3">[[ diag | format:'{code} - {name}' ]]</p></td>
+                    <td></td>
+                </tr>
+                <tr>
                     <th>Масса тела</th>
                     <td ng-repeat="checkup in chart.checkups"><i class="glyphicon glyphicon-arrow-up text-success"></i> [[ checkup.weight ]]</td>
                     <td></td>
@@ -146,25 +165,6 @@
                 <tr>
                     <td>Частота СС</td>
                     <td ng-repeat="checkup in chart.checkups"><i class="glyphicon glyphicon-arrow-up text-success"></i> [[ checkup.fetus_heart_rate ]]</td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <th>Диагнозы</th>
-                    <td colspan="[[ chart.checkups.length + 1 ]]"></td>
-                </tr>
-                <tr>
-                    <td>основной</td>
-                    <td ng-repeat="checkup in chart.checkups">[[ checkup.diag | format:'{code} - {name}' ]]</td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td>сопутствующие</td>
-                    <td ng-repeat="checkup in chart.checkups"><p ng-repeat="diag in checkup.diag2">[[ diag | format:'{code} - {name}' ]]</p></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td>осложнения</td>
-                    <td ng-repeat="checkup in chart.checkups"><p ng-repeat="diag in checkup.diag3">[[ diag | format:'{code} - {name}' ]]</p></td>
                     <td></td>
                 </tr>
             </tbody>
