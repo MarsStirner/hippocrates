@@ -19,18 +19,29 @@ var CheckupCtrl = function ($scope, RisarApi) {
         $scope.checkup.BMI = $scope.checkup.height ? ($scope.checkup.weight/Math.pow($scope.checkup.height/100,2)).toFixed(1) : NaN;
     }
     $scope.$watch('checkup.height', function() {
+        if ($scope.checkup){
         updateHW_Ratio();
         updateBMI();
+        }
+
     });
     $scope.$watch('checkup.weight', function() {
-        updateHW_Ratio();
-        updateBMI();
+        if ($scope.checkup){
+            updateHW_Ratio();
+            updateBMI();
+        }
     });
     reload_checkup();
 }
 
-var CheckupFirstEditCtrl = function ($scope, $window, RisarApi, Config) {
+var CheckupFirstEditCtrl = function ($scope, $window, $document, RisarApi, Config) {
     $scope.save = function () {
+        var form = $scope.CheckupFirstEditForm;
+        if (form.$invalid) {
+            var formelm = $('#CheckupFirstEditForm').find('.ng-invalid:not(ng-form):first');
+            $document.scrollToElement(formelm, 100, 1500);
+            return false;
+        }
         if($scope.checkup){
             $scope.checkup.flat_code = 'risarFirstInspection';
         } else {
@@ -48,3 +59,6 @@ var CheckupFirstEditCtrl = function ($scope, $window, RisarApi, Config) {
         })
     }
 };
+
+WebMis20.controller('CheckupCtrl', ['$scope', 'RisarApi', CheckupCtrl]);
+WebMis20.controller('CheckupFirstEditCtrl', ['$scope', '$window', '$document', 'RisarApi', 'Config', CheckupFirstEditCtrl]);
