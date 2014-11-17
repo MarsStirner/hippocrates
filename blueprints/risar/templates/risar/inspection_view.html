@@ -86,12 +86,12 @@
                 </tr>
                 <tr>
                     <th>Молочные железы</th>
-                    <td ng-repeat="checkup in chart.checkups"><i class="glyphicon glyphicon-arrow-up text-success"></i> [[ checkup.breast ]]</td>
+                    <td ng-repeat="checkup in chart.checkups"><i class="glyphicon glyphicon-arrow-up text-success"></i><p ng-repeat="item in checkup.breast">[[ item | format:'{name}' ]]</p></td>
                     <td></td>
                 </tr>
                 <tr>
                     <th>Соски</th>
-                    <td ng-repeat="checkup in chart.checkups"><i class="glyphicon glyphicon-arrow-up text-success"></i> [[ checkup.nipples ]]</td>
+                    <td ng-repeat="checkup in chart.checkups"><i class="glyphicon glyphicon-arrow-up text-success"></i><p ng-repeat="item in checkup.nipples">[[ item | format:'{name}' ]]</p></td>
                     <td></td>
                 </tr>
                 <tr>
