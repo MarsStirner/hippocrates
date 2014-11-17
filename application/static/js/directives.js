@@ -12,6 +12,7 @@ angular.module('WebMis20.directives')
                     name = attrs.name,
                     theme = attrs.theme || "select2",
                     ngDisabled = attrs.ngDisabled,
+                    ngRequired = attrs.ngRequired,
                     placeholder = attrs.placeholder,
                     ngModel = attrs.ngModel,
                     refBook = attrs.refBook,
@@ -30,6 +31,7 @@ angular.module('WebMis20.directives')
                 if (name) uiSelect.attr('name', name);
                 if (theme) uiSelect.attr('theme', theme);
                 if (ngDisabled) uiSelect.attr('ng-disabled', ngDisabled);
+                if (ngRequired) uiSelect.attr('ng-required', ngRequired);
                 if (ngModel) uiSelect.attr('ng-model', ngModel);
                 if (placeholder) uiSelectMatch.attr('placeholder', placeholder);
                 if (refBook) uiSelect.attr('ref-book', refBook);

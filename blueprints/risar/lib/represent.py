@@ -78,16 +78,16 @@ def get_all_diagnoses(actions):
 
 
 def get_risk_rate(diagnoses):
+    risk_rate = {'value': 0, 'note': u"У пациентки риск невынашивания не выявлен"}
     for diag in diagnoses:
         if diag.DiagID in risk_rates_diagID['high'] or diag.BlockID in risk_rates_blockID['high']:
-            return {'value': 3, 'note': u"Внимание! У пациентки выявлен высокий риск невынашивания "}
+            risk_rate = {'value': 3, 'note': u"Внимание! У пациентки выявлен высокий риск невынашивания "}
             break
         elif diag.DiagID in risk_rates_diagID['middle'] or diag.BlockID in risk_rates_blockID['middle']:
-            return {'value': 2, 'note':  u"У пациентки выявлен средний риск невынашивания "}
-            break
+            risk_rate = {'value': 2, 'note':  u"У пациентки выявлен средний риск невынашивания "}
         elif diag.DiagID in risk_rates_diagID['low'] or diag.BlockID in risk_rates_blockID['low']:
-            return {'value': 1, 'note': u"У пациентки выявлен низкий риск невынашивания "}
-    return {'value': 0, 'note': u"У пациентки риск невынашивания не выявлен"}
+            risk_rate = {'value': 1, 'note': u"У пациентки выявлен низкий риск невынашивания "}
+    return risk_rate
 
 
 @cache.memoize()
