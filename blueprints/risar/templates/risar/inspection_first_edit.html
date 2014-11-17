@@ -61,7 +61,7 @@
                         </td>
                     </tr>
                     <tr>
-                        <td>Масса до беременности, кг</td>
+                        <td>Масса до беременности, кг <span class="text-danger">*</span></td>
                         <td><div class="row"
                                  ng-class="{'has-error': CheckupFirstEditForm.weight_before.$invalid}">
                             <div class="col-md-4">
@@ -71,7 +71,7 @@
                         </td>
                     </tr>
                     <tr>
-                        <td>Масса при осмотре, кг</td>
+                        <td>Масса при осмотре, кг <span class="text-danger">*</span></td>
                         <td><div class="row"
                                  ng-class="{'has-error': CheckupFirstEditForm.weight.$invalid}">
                             <div class="col-md-4">
@@ -95,43 +95,43 @@
                                                                           class="form-control"></div></div></td>
                     </tr>
                     <tr>
-                        <td>Общее состояние</td>
+                        <td>Общее состояние <span class="text-danger">*</span></td>
                         <td><div ng-class="{'has-error': CheckupFirstEditForm.state.$invalid}">
                             <rb-select name="state" ng-model="checkup.state" ref-book="rbRisarState" ng-required="true"></rb-select>
                         </div></td>
                     </tr>
                     <tr>
-                        <td>Подкожно-жировая клетчатка</td>
+                        <td>Подкожно-жировая клетчатка <span class="text-danger">*</span></td>
                         <td><div ng-class="{'has-error': CheckupFirstEditForm.subcutaneous_fat.$invalid}">
                             <rb-select name="subcutaneous_fat" ng-model="checkup.subcutaneous_fat" ref-book="rbRisarSubcutaneous_Fat" ng-required="true"></rb-select>
                         </div></td>
                     </tr>
                     <tr>
-                        <td>Состояние вен</td>
+                        <td>Состояние вен <span class="text-danger">*</span></td>
                         <td><div ng-class="{'has-error': CheckupFirstEditForm.vein.$invalid}">
                             <rb-select name="vein" ng-model="checkup.vein" ref-book="rbRisarVein" ng-required="true"></rb-select>
                         </div></td>
                     </tr>
                     <tr>
-                        <td>Язык</td>
+                        <td>Язык <span class="text-danger">*</span></td>
                         <td><div ng-class="{'has-error': CheckupFirstEditForm.tongue.$invalid}">
                             <rb-select name="tongue" ng-model="checkup.tongue" ref-book="rbRisarTongue" ng-required="true"></rb-select>
                         </div></td>
                     </tr>
                     <tr>
-                        <td>АД правая рука</td>
+                        <td>АД правая рука <span class="text-danger">*</span></td>
                         <td><div ng-class="{'has-error': CheckupFirstEditForm.ad_right.$invalid}">
                             <input name="ad_right" ng-model="checkup.ad_right" class="form-control" ng-required="true">
                         </div></td>
                     </tr>
                     <tr>
-                        <td>АД левая рука</td>
+                        <td>АД левая рука <span class="text-danger">*</span></td>
                         <td><div ng-class="{'has-error': CheckupFirstEditForm.ad_left.$invalid}">
                             <input name="ad_left" ng-model="checkup.ad_left" class="form-control" ng-required="true">
                         </div></td>
                     </tr>
                     <tr>
-                        <td>ССС: пульс</td>
+                        <td>ССС: пульс <span class="text-danger">*</span></td>
                         <td><div class="row"
                                  ng-class="{'has-error': CheckupFirstEditForm.heart_rate.$invalid}"><div class="col-md-4">
                             <input name="heart_rate" ng-model="checkup.heart_rate" class="form-control" type="number" valid-number ng-required="true" /></div></div>
@@ -142,98 +142,110 @@
                         <td>&nbsp;</td>
                     </tr>
                     <tr>
-                        <td>Жалобы</td>
-                        <td>
+                        <td>Жалобы <span class="text-danger">*</span></td>
+                        <td><div ng-class="{'text-danger': CheckupFirstEditForm.complaints.$invalid}">
                             <div name="complaints" refbook-checkbox ref-book="rbRisarComplaints" ng-model="checkup.complaints" ng-required="true">
                                 [[ item.name ]]
                             </div>
+                            </div>
                         </td>
                     </tr>
                     <tr>
-                        <td>Кожа</td>
-                        <td>
+                        <td>Кожа <span class="text-danger">*</span></td>
+                        <td><div ng-class="{'text-danger': CheckupFirstEditForm.skin.$invalid}">
                             <div name="skin" refbook-checkbox ref-book="rbRisarSkin" ng-model="checkup.skin" ng-required="true">
                                 [[ item.name ]]
                             </div>
+                            </div>
                         </td>
                     </tr>
                     <tr>
-                        <td>Лимфоузлы</td>
-                        <td>
+                        <td>Лимфоузлы <span class="text-danger">*</span></td>
+                        <td><div ng-class="{'text-danger': CheckupFirstEditForm.lymph.$invalid}">
                             <div name="lymph" refbook-checkbox ng-model="checkup.lymph" ref-book="rbRisarLymph" ng-required="true">
                                 [[ item.name ]]
                             </div>
+                            </div>
                         </td>
                     </tr>
                     <tr>
-                        <td>Тоны сердца</td>
-                        <td>
+                        <td>Тоны сердца <span class="text-danger">*</span></td>
+                        <td><div ng-class="{'text-danger': CheckupFirstEditForm.heart_tones.$invalid}">
                             <div name="heart_tones" refbook-checkbox ng-model="checkup.heart_tones" ref-book="rbRisarHeart_Tones" ng-required="true">
                                 [[ item.name ]]
                             </div>
+                            </div>
                         </td>
                     </tr>
                     <tr>
-                        <td>Пульс</td>
-                        <td>
+                        <td>Пульс <span class="text-danger">*</span></td>
+                        <td><div ng-class="{'text-danger': CheckupFirstEditForm.pulse.$invalid}">
                             <div name="pulse" refbook-checkbox ng-model="checkup.pulse" ref-book="rbRisarPulse" ng-required="true">
                                 [[ item.name ]]
                             </div>
+                            </div>
                         </td>
                     </tr>
                     <tr>
-                        <td>Молочные железы</td>
-                        <td>
+                        <td>Молочные железы <span class="text-danger">*</span></td>
+                        <td><div ng-class="{'text-danger': CheckupFirstEditForm.breast.$invalid}">
                             <div name="breast" refbook-checkbox ng-model="checkup.breast" ref-book="rbRisarBreast" ng-required="true">
                                 [[ item.name ]]
                             </div>
+                            </div>
                         </td>
                     </tr>
                     <tr>
-                        <td>Состояние сосков</td>
-                        <td>
+                        <td>Состояние сосков <span class="text-danger">*</span></td>
+                        <td><div ng-class="{'text-danger': CheckupFirstEditForm.nipples.$invalid}">
                             <div name="nipples" refbook-checkbox ng-model="checkup.nipples" ref-book="rbRisarNipples" ng-required="true">
                                 [[ item.name ]]
                             </div>
+                            </div>
                         </td>
                     </tr>
                     <tr>
-                        <td>Полость рта</td>
-                        <td>
+                        <td>Полость рта <span class="text-danger">*</span></td>
+                        <td><div ng-class="{'text-danger': CheckupFirstEditForm.mouth.$invalid}">
                             <div name="mouth" refbook-checkbox ng-model="checkup.mouth" ref-book="rbRisarMouth" ng-required="true">
                                 [[ item.name ]]
                             </div>
+                            </div>
                         </td>
                     </tr>
                     <tr>
-                        <td>Органы дыхания</td>
-                        <td>
+                        <td>Органы дыхания <span class="text-danger">*</span></td>
+                        <td><div ng-class="{'text-danger': CheckupFirstEditForm.breathe.$invalid}">
                             <div name="breathe" refbook-checkbox ng-model="checkup.breathe" ref-book="rbRisarBreathe" ng-required="true">
                                 [[ item.name ]]
                             </div>
+                            </div>
                         </td>
                     </tr>
                     <tr>
-                        <td>Органы брюшной полости</td>
-                        <td>
+                        <td>Органы брюшной полости <span class="text-danger">*</span></td>
+                        <td><div ng-class="{'text-danger': CheckupFirstEditForm.stomach.$invalid}">
                             <div name="stomach" refbook-checkbox ng-model="checkup.stomach" ref-book="rbRisarStomach" ng-required="true">
                                 [[ item.name ]]
                             </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Печень</td>
-                        <td>
-                            <div name="liver" refbook-checkbox ng-model="checkup.liver" ref-book="rbRisarLiver" ng-required="true">
-                                [[ item.name ]]
                             </div>
                         </td>
                     </tr>
                     <tr>
-                        <td>Мочевыводящая система</td>
-                        <td>
+                        <td>Печень <span class="text-danger">*</span></td>
+                        <td><div ng-class="{'text-danger': CheckupFirstEditForm.liver.$invalid}">
+                            <div name="liver" refbook-checkbox ng-model="checkup.liver" ref-book="rbRisarLiver" ng-required="true">
+                                [[ item.name ]]
+                            </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Мочевыводящая система <span class="text-danger">*</span></td>
+                        <td><div ng-class="{'text-danger': CheckupFirstEditForm.urinoexcretory.$invalid}">
                             <div name="urinoexcretory" refbook-checkbox ng-model="checkup.urinoexcretory" ref-book="rbRisarUrinoexcretory" ng-required="true">
                                 [[ item.name ]]
+                            </div>
                             </div>
                         </td>
                     </tr>
@@ -258,25 +270,25 @@
                         <td>&nbsp;</td>
                     </tr>
                     <tr>
-                        <td>Ds. Sp</td>
+                        <td>Ds. Sp <span class="text-danger">*</span></td>
                         <td><div class="row"
                                  ng-class="{'has-error': CheckupFirstEditForm.DsSP.$invalid}"><div class="col-md-4">
                             <input name="DsSP" ng-model="checkup.DsSP" class="form-control" ng-required="true"></div></div></td>
                     </tr>
                     <tr>
-                        <td>Ds. Cr</td>
+                        <td>Ds. Cr <span class="text-danger">*</span></td>
                         <td><div class="row"
                                  ng-class="{'has-error': CheckupFirstEditForm.DsCr.$invalid}"><div class="col-md-4">
                             <input name="DsCr" ng-model="checkup.DsCr" class="form-control" ng-required="true"></div></div></td>
                     </tr>
                     <tr>
-                        <td>Ds. Tr</td>
+                        <td>Ds. Tr <span class="text-danger">*</span></td>
                         <td><div class="row"
                                  ng-class="{'has-error': CheckupFirstEditForm.DsTr.$invalid}"><div class="col-md-4">
                             <input name="DsTr" ng-model="checkup.DsTr" class="form-control" ng-required="true"></div></div></td>
                     </tr>
                     <tr>
-                        <td>C. Ext</td>
+                        <td>C. Ext <span class="text-danger">*</span></td>
                         <td><div class="row"
                                  ng-class="{'has-error': CheckupFirstEditForm.CExt.$invalid}"><div class="col-md-4">
                             <input name="CExt" ng-model="checkup.CExt" class="form-control" ng-required="true"></div></div></td>
@@ -290,7 +302,7 @@
                         <td><div class="row"><div class="col-md-4"><input ng-model="checkup.CVera" class="form-control"></div></div></td>
                     </tr>
                     <tr>
-                        <td>Индекс Соловьёва</td>
+                        <td>Индекс Соловьёва <span class="text-danger">*</span></td>
                         <td><div class="row"
                                  ng-class="{'has-error': CheckupFirstEditForm.soloviev_index.$invalid}"><div class="col-md-4">
                             <input name="soloviev_index" ng-model="checkup.soloviev_index" class="form-control" ng-required="true"></div></div></td>
@@ -358,7 +370,7 @@
                         <td><div class="row"><div class="col-md-4"><input ng-model="checkup.fundal_height" class="form-control"></div></div></td>
                     </tr>
                     <tr>
-                        <td>Состояние матки</td>
+                        <td>Состояние матки <span class="text-danger">*</span></td>
                         <td><div ng-class="{'has-error': CheckupFirstEditForm.metra_state.$invalid}">
                             <rb-select name="metra_state" ng-model="checkup.metra_state" ref-book="rbRisarMetra_State" ng-required="true"></rb-select>
                         </div></td>
@@ -388,13 +400,13 @@
                         <td>&nbsp;</td>
                     </tr>
                     <tr>
-                        <td>Влагалище</td>
+                        <td>Влагалище <span class="text-danger">*</span></td>
                         <td><div ng-class="{'has-error': CheckupFirstEditForm.vagina.$invalid}">
                             <rb-select name="vagina" ng-model="checkup.vagina" ref-book="rbRisarVagina" ng-required="true"></rb-select>
                         </div></td>
                     </tr>
                     <tr>
-                        <td>Шейка матки</td>
+                        <td>Шейка матки <span class="text-danger">*</span></td>
                         <td><div ng-class="{'has-error': CheckupFirstEditForm.cervix.$invalid}">
                             <rb-select name="cervix" ng-model="checkup.cervix" ref-book="rbRisarCervix" ng-required="true"></rb-select>
                         </div></td>
@@ -438,13 +450,13 @@
                         <td>&nbsp;</td>
                     </tr>
                     <tr>
-                        <td>Беременность (недель)</td>
+                        <td>Беременность (недель) <span class="text-danger">*</span></td>
                         <td><div class="row"
                                  ng-class="{'has-error': CheckupFirstEditForm.pregnancy_week.$invalid}"><div class="col-md-4">
                             <input name="pregnancy_week" ng-model="checkup.pregnancy_week" class="form-control" type="number" valid-number ng-required="true"></div></div></td>
                     </tr>
                     <tr>
-                        <td>Возможность сохранения беременности</td>
+                        <td>Возможность сохранения беременности <span class="text-danger">*</span></td>
                         <td><div ng-class="{'has-error': CheckupFirstEditForm.save.$invalid}">
                             <input name="save" ng-model="checkup.save" class="form-control" ng-required="true">
                         </div></td>
@@ -458,7 +470,7 @@
                         <td>&nbsp;</td>
                     </tr>
                     <tr>
-                        <td>Основной</td>
+                        <td>Основной <span class="text-danger">*</span></td>
                         <td><ui-mkb ng-model="checkup.diag" name="mkb" ng-required="true"></ui-mkb></td>
                     </tr>
                     <tr>
@@ -490,7 +502,7 @@
                         <td><wysiwyg ng-model="checkup.diagwr3" /></td>
                     </tr>
                     <tr>
-                        <td>Плановая дата следующей явки</td>
+                        <td>Плановая дата следующей явки <span class="text-danger">*</span></td>
                         <td><div ng-class="{'has-error': CheckupFirstEditForm.nextDate.$invalid}">
                             <wm-date name="nextDate" ng-model="checkup.nextDate" style="width: 250px" ng-required="true"></wm-date>
                         </div></td>

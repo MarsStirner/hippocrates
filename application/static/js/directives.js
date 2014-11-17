@@ -422,7 +422,8 @@ angular.module('WebMis20.directives')
               if (ngModelCtrl) {
                 setViewValue = function(newValue, oldValue) {
                   if (!angular.equals(newValue, oldValue)) {
-                    return ngModelCtrl.$setViewValue(scope.selectedItems);
+                    var new_value = scope.selectedItems.length ? scope.selectedItems : undefined;
+                    return ngModelCtrl.$setViewValue(new_value);
                   }
                 };
                 scope.$watch('selectedItems', setViewValue, true);
