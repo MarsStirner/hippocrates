@@ -186,9 +186,8 @@ class Client(db.Model):
 
     @property
     def shortNameText(self):
-        words = self.firstName.split() + self.patrName.split()
-        initials = ['%s.' % word[0].upper() for word in words if word]
-        return u'%s %s' % (self.lastName, u' '.join(initials))
+        from application.lib.utils import initialize_name
+        return initialize_name(self.lastName, self.firstName, self.patrName)
 
     @property
     def sex(self):

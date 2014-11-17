@@ -87,14 +87,10 @@
                         <div class="col-md-4" ng-if="!formstate.is_diagnostic()"
                              ng-class="{'has-error': event_maininfo_form.exec_person.$invalid && editing.submit_attempt}">
                             <label for="exec_person" class="control-label">Лечащий врач</label>
-                            <ui-select id="exec_person" name="exec_person" theme="select2"
-                                       ng-model="event.info.exec_person" ng-required="true" ng-change="exec_person_changed()"
-                                       ng-disabled="formcnf.exec_person.disabled">
-                                <ui-select-match placeholder="Лечащий врач">[[$select.selected.name]]</ui-select-match>
-                                <ui-select-choices repeat="p in Person.objects | filter: $select.search">
-                                    <div ng-bind-html="p.name | highlight: $select.search"></div>
-                                </ui-select-choices>
-                            </ui-select>
+                            <wm-person-select id="exec_person" name="exec_person"
+                                ng-model="event.info.exec_person" ng-required="true" ng-change="exec_person_changed()"
+                                ng-disabled="formcnf.exec_person.disabled" placeholder="Лечащий врач">
+                            </wm-person-select>
                         </div>
                         <div class="col-md-4"
                              ng-class="{'has-error': event_maininfo_form.org_structure.$invalid && editing.submit_attempt}">

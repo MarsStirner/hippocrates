@@ -299,9 +299,8 @@ class Person(db.Model):
 
     @property
     def shortNameText(self):
-        words = self.firstName.split() + self.patrName.split()
-        initials = ['%s.' % word[0].upper() for word in words if word]
-        return u'%s %s' % (self.lastName, u' '.join(initials))
+        from application.lib.utils import initialize_name
+        return initialize_name(self.lastName, self.firstName, self.patrName)
 
     def __unicode__(self):
         return self.nameText
@@ -320,6 +319,10 @@ class Person(db.Model):
             'org_structure': self.org_structure,
             'academic_degree': self.academicDegree,
             'academic_title': self.academicTitle,
+            'full_name': u'%s%s' % (
+                self.nameText,
+                u' (%s)' % self.speciality if self.speciality else ''
+            )
         }
 
     def __int__(self):
@@ -652,6 +655,9 @@ class rbSpeciality(db.Model):
 
     def __int__(self):
         return self.id
+
+    def __unicode__(self):
+        return self.name
 
 
 class rbSocStatusClass(db.Model):
@@ -1569,7 +1575,8 @@ class vrbPersonWithSpeciality(db.Model):
             'code': self.code,
             'name': self.name,
             'org_structure': self.orgStructure,
-            'speciality': self.speciality
+            'speciality': self.speciality,
+            'short_name': self.name
         }
 
     def __int__(self):

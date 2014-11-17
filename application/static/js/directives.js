@@ -193,22 +193,37 @@ angular.module('WebMis20.directives')
             }
         };
     })
-    .directive('wmPersonSelect', ['$compile', function ($compile) {
+    .directive('wmPersonSelect', ['$compile', '$http', function ($compile, $http) {
         return {
             restrict: 'E',
             require: 'ngModel',
             link: function (scope, element, attrs) {
+                scope.persons = [];
+                scope.refresh_choices = function (query) {
+                    if (!query) { return; }
+                    $http.get(url_api_search_persons, {
+                        params: {
+                            q: query
+                        }
+                    }).success(function (data) {
+                        scope.persons = data.result;
+                    });
+                };
+
                 var template = '\
-    <ui-select {0} {1} theme="select2" class="form-control" autocomplete="off" ref-book="vrbPersonWithSpeciality" ng-model="{2}" {3}>\
-        <ui-select-match placeholder="не выбрано">[[ $select.selected.name ]][[$select.selected.name ? ", ": null]][[ $select.selected.speciality.name ]]</ui-select-match>\
-        <ui-select-choices repeat="item in $refBook.objects | filter: $select.search | limitTo: 50">\
-            <span ng-bind-html="(item.name + \', \' + item.speciality.name) | highlight: $select.search"></span>\
+    <ui-select {0} {1} theme="select2" class="form-control" autocomplete="off" ng-model="{2}" {3} {4} {5}>\
+        <ui-select-match placeholder="{6}"><span ng-bind="$select.selected.full_name || $select.selected.short_name"></span></ui-select-match>\
+        <ui-select-choices refresh="refresh_choices($select.search)" repeat="person in persons | filter: $select.search">\
+            <span ng-bind-html="person.short_name | highlight: $select.search"></span>\
         </ui-select-choices>\
     </ui-select>'.format(
                     attrs.id ? 'id="{0}"'.format(attrs.id) : '',
                     attrs.name ? 'name="{0}"'.format(attrs.name) : '',
                     attrs.ngModel,
-                    attrs.ngDisabled ? 'ng-disabled="{0}"'.format(attrs.ngDisabled) : ''
+                    attrs.ngDisabled ? 'ng-disabled="{0}"'.format(attrs.ngDisabled) : '', // 3
+                    attrs.ngRequired ? 'ng-required="{0}"'.format(attrs.ngRequired) : '', // 4
+                    attrs.ngChange ? 'ng-change="{0}"'.format(attrs.ngChange) : '', // 5
+                    attrs.placeholder ? attrs.placeholder : 'не выбрано' // 6
                 );
                 var elm = $compile(template)(scope);
                 element.replaceWith(elm);

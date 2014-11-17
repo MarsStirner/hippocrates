@@ -7,23 +7,23 @@ from collections import defaultdict
 from dateutil.parser import parse as dateutil_parse
 from flask import abort, request
 from flask.ext.login import current_user
-from application.lib.user import UserUtils
 
 from application.models.event import Event
 from application.systemwide import db, cache
 from application.lib.sphinx_search import SearchPerson
 from application.lib.utils import (jsonify, safe_traverse, parse_id, safe_date, safe_time_as_dt, safe_datetime,
-                                   safe_traverse_attrs, format_date)
+                                   safe_traverse_attrs, format_date, initialize_name, logger)
 from application.lib.utils import public_endpoint
 from blueprints.schedule.app import module
 from blueprints.schedule.lib.data import delete_schedules
-from application.models.exists import (rbSpeciality, rbReasonOfAbsence, Person)
+from application.models.exists import (rbSpeciality, rbReasonOfAbsence, Person, vrbPersonWithSpeciality)
 from application.models.actions import Action, ActionType
 from application.models.schedule import (Schedule, ScheduleTicket, ScheduleClientTicket, rbAppointmentType,
     rbAttendanceType, QuotingByTime)
 from application.lib.jsonify import ScheduleVisualizer, ActionVisualizer
 from application.lib.data import (create_new_action, create_action, update_action, int_get_atl_flat,
     get_planned_end_datetime)
+from application.lib.user import UserUtils
 
 
 __author__ = 'mmalkov'
@@ -299,18 +299,41 @@ def api_search_persons():
         query_string = request.args['q']
     except (KeyError, ValueError):
         return abort(404)
-    result = SearchPerson.search(query_string)
+    try:
+        result = SearchPerson.search(query_string)
 
-    def cat(item):
-        return {
-            'display': u'#%d - %s %s %s (%s)' % (
-                item['id'], item['lastname'], item['firstname'], item['patrname'], item['speciality']),
-            'name': u'%s %s %s' % (item['lastname'], item['firstname'], item['patrname']),
-            'speciality': item['speciality'],
-            'id': item['id'],
-            'tokens': [item['lastname'], item['firstname'], item['patrname']] + item['speciality'].split(),
-        }
-    data = map(cat, result['result']['items'])
+        def cat(item):
+            return {
+                'id': item['id'],
+                'name': u'%s %s %s' % (item['lastname'], item['firstname'], item['patrname']),
+                'full_name': u'%s %s %s (%s)' % (
+                    item['lastname'], item['firstname'], item['patrname'], item['speciality']),
+                'short_name': u'%s%s%s' % (
+                    initialize_name(item['lastname'], item['firstname'], item['patrname']),
+                    u', ' if item['speciality'] else u'',
+                    item['speciality']),
+                'speciality': {
+                    'id': item['speciality_id'],
+                    'code': item['speciality_code'],
+                    'name': item['speciality']
+                } if item['speciality_id'] else None,
+                'org_structure': {
+                    'id': item['orgstructure_id'],
+                    'code': item['orgstructure_code'],
+                    'name': item['orgstructure']
+                } if item['orgstructure_id'] else None,
+
+                'tokens': [item['lastname'], item['firstname'], item['patrname']] + item['speciality'].split(),
+            }
+        data = map(cat, result['result']['items'])
+    except Exception, e:
+        logger.critical(u'Ошибка в сервисе поиска врача через sphinx: %s' % e, exc_info=True)
+        query_string = query_string.split()
+        data = vrbPersonWithSpeciality.query.filter(
+            *[vrbPersonWithSpeciality.name.like(u'%%%s%%' % q) for q in query_string]
+        ).order_by(
+            vrbPersonWithSpeciality.name
+        ).all()
     return jsonify(data)
 
 
