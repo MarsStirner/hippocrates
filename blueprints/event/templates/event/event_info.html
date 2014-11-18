@@ -1,14 +1,12 @@
 {% extends "event/base.html" %}
 
-{% import "schedule/client_event/action_list.html" as action_list %}
-
 {% block main %}
     <div ng-controller="EventInfoCtrl" class="ng-cloak">
         {% include "_breadcrumbs.html" %}
         <legend>
             <div class="pull-right text-right col-md-1">
                 <ui-print-button ps="ps" resolve="ps_resolve()" ng-if="!event.is_new()"></ui-print-button>
-                <button type="button" ng-click="save_event();" ng-hide="event.is_new();" class="btn btn-success" title="Сохранить"><span class="glyphicon glyphicon-ok"></span></button>
+                <button type="button" ng-click="save_event();" ng-hide="event.is_new()" class="btn btn-success" title="Сохранить"><span class="glyphicon glyphicon-ok"></span></button>
             </div>
             <h2>[[event.is_new() ? 'Создание обращения' : 'Обращение № ' + event.info.external_id]], пациент
                 <a href="{{ url_for('patients.patient') }}?client_id=[[event.info.client_id]]">[[ event.info.client.info.full_name ]]</a>
@@ -21,18 +19,17 @@
                     <hr>
                     <div class="row">
                         <div class="col-md-6">
-                            <button type="button" ng-click="save_event();" class="btn btn-block btn-success"
+                            <button type="button" ng-click="save_event()" class="btn btn-block btn-success"
                             ng-bind="event.is_new() ? 'Создать' : 'Сохранить'">Создать</button>
                         </div>
                         <div class="col-md-6">
-                            <button type="button" ng-click="cancel_editing();" class="btn btn-block btn-default">Отмена</button>
+                            <button type="button" ng-click="cancel_editing()" class="btn btn-block btn-default">Отмена</button>
                         </div>
                     </div>
                     {% if user_utils.can_close_event(event) %}
                     <div class="row vmargin10">
                         <div class="col-md-12">
-                            <button type="button" ng-click="close_event();" ng-show="!event.is_closed" class="btn btn-block btn-info"
-                                    tooltip="[[event.is_closed ? 'Обращение уже закрыто': '']]">Закрыть обращение</button>
+                            <button type="button" ng-click="close_event()" class="btn btn-block btn-info">Закрыть обращение</button>
                         </div>
                     </div>
                     {%- endif %}
@@ -46,7 +43,7 @@
                     {% if user_utils.can_delete_event(event) %}
                     <div class="row vmargin10">
                         <div class="col-md-12">
-                            <button type="button" ng-click="delete_event();" class="btn btn-block btn-danger"
+                            <button type="button" ng-click="delete_event()" class="btn btn-block btn-danger"
                                     ng-if="btn_delete_event_visible()">Удалить обращение</button>
                         </div>
                     </div>
@@ -72,25 +69,29 @@
                             <div class="marginal" ng-if="!formstate.is_diagnostic() && !event.is_new()">
                                 <ng-form name="eventMedDocActionsForm" toc-element="Медицинские документы">
                                     <legend>Медицинские документы</legend>
-                                    {{ action_list.action_list('event.info.actions', 'medical_documents') }}
+                                    <wm-action-list actions="event.info.actions" event="event"
+                                            action-type-group="medical_documents"></wm-action-list>
                                 </ng-form>
                             </div>
                             <div class="marginal" ng-if="!event.is_new()">
                                 <ng-form name="eventDiagActionsForm" toc-element="Диагностика">
                                     <legend>Диагностика</legend>
-                                    {{ action_list.action_list('event.info.actions', 'diagnostics') }}
+                                    <wm-action-list actions="event.info.actions" event="event"
+                                            action-type-group="diagnostics"></wm-action-list>
                                 </ng-form>
                             </div>
                             <div class="marginal" ng-if="!event.is_new()">
                                 <ng-form name="eventLabActionsForm" toc-element="Лаб.исследования">
                                     <legend>Лаб.исследования</legend>
-                                    {{ action_list.action_list('event.info.actions', 'lab') }}
+                                    <wm-action-list actions="event.info.actions" event="event"
+                                            action-type-group="lab"></wm-action-list>
                                 </ng-form>
                             </div>
                             <div class="marginal" ng-if="!formstate.is_diagnostic() && !event.is_new()">
                                 <ng-form name="eventCureActionsForm" toc-element="Лечение">
                                     <legend>Лечение</legend>
-                                    {{ action_list.action_list('event.info.actions', 'treatments') }}
+                                    <wm-action-list actions="event.info.actions" event="event"
+                                            action-type-group="treatments"></wm-action-list>
                                 </ng-form>
                             </div>
                         {% endif %}
@@ -106,6 +107,7 @@
     <script src="{{ url_for('.static', filename='js/event.js', v=version) }}"></script>
     <script src="{{ url_for('static', filename='js/services/event/event-services.js', v=version) }}"></script>
     <script src="{{ url_for('.static', filename='js/directives.js', v=version) }}"></script>
+    <script src="{{ url_for('static', filename='js/directives/event-directives.js', v=version) }}"></script>
     <script type="text/ng-template" id="modal-prev-event-contract.html">{% include "event/_modal_prev_event_contracts.html" %}</script>
     <script type="text/ng-template" id="modal-relatives.html">{% include "event/_modal_relatives.html" %}</script>
     <script type="text/ng-template" id="modal-switch-payer.html">{% include "event/_modal_switch_payer_tab.html" %}</script>
