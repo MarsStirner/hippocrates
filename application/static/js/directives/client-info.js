@@ -55,11 +55,7 @@ angular.module('WebMis20.directives')
                     <dt>Возраст:</dt><dd ng-bind-html="format_age(client.info.age)"></dd>\
                     <dt>Пол:</dt><dd ng-bind-html="format_sex(client.info.sex.name)"></dd>\
                 </dl>\
-            </div>\
-        </div>\
-        <div class="row">\
-            <div class="col-md-12">\
-                <button class="btn btn-sm btn-primary pull-right" ng-click="open_patient_info(client.info.id)">Детальнее</button>\
+                <button class="btn btn-sm btn-primary pull-right vmargin10" ng-click="open_patient_info(client.info.id)">Детальнее</button>\
             </div>\
         </div>\
     </div>'

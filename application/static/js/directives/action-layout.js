@@ -144,7 +144,7 @@ angular.module('WebMis20.ActionLayout', ['WebMis20.validators', 'WebMis20.direct
                                     break;
                                 case 'Diagnosis':
                                     inner_template = '<wm-diagnosis model="{0}.value" can-add-new="true" ' +
-                                        'can-delete="true" list-mode="{0}"></wm-diagnosis>'.format(property.type.vector);
+                                        'can-delete="true" can-edit="true" list-mode="{0}"></wm-diagnosis>'.format(property.type.vector);
                                     break;
                                 default:
                                     inner_template = '<span ng-bind="{0}.value"></span>';
