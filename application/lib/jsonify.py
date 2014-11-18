@@ -9,7 +9,7 @@ from sqlalchemy.orm import aliased
 from sqlalchemy.sql.functions import current_date
 from sqlalchemy.sql.expression import between
 from flask import json
-from application.lib.user import UserUtils
+from flask.ext.login import current_user
 
 from application.systemwide import db
 from application.lib.data import int_get_atl_dict_all
@@ -24,6 +24,7 @@ from application.models.schedule import Schedule, rbReceptionType, ScheduleClien
 from application.models.actions import Action, ActionProperty, ActionType
 from application.models.client import Client
 from application.models.exists import rbRequestType, rbService, ContractTariff, Contract, Person, rbSpeciality, Organisation
+from application.lib.user import UserUtils
 
 __author__ = 'mmalkov'
 
@@ -701,6 +702,22 @@ class PrintTemplateVisualizer(object):
 
 
 class EventVisualizer(object):
+    def make_event_info_for_current_role(self, event):
+        data = {
+            'event': self.make_event(event),
+            'ro': not UserUtils.can_edit_event(event) if event.id else False,
+        }
+        if current_user.role_in('admin'):
+            data['diagnoses'] = self.make_diagnoses(event)
+            data['payment'] = self.make_event_payment(event)
+            data['services'] = self.make_event_services(event.id)
+        elif current_user.role_in('doctor', 'clinicDoctor'):
+            data['diagnoses'] = self.make_diagnoses(event)
+        elif current_user.role_in(('rRegistartor', 'clinicRegistrator')):
+            data['payment'] = self.make_event_payment(event)
+            data['services'] = self.make_event_services(event.id)
+        return data
+
     def make_short_event(self, event):
         return {
             'id': event.id,

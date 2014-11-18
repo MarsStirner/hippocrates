@@ -1,62 +1,41 @@
 /**
  * Created by mmalkov on 11.07.14.
  */
-var EventDiagnosesCtrl = function($scope) {
+var EventDiagnosesCtrl = function ($scope) {
 };
 var EventMainInfoCtrl = function ($scope, $http, RefBookService, EventType, $window, $timeout, Settings, $modal, $filter) {
     $scope.Organisation = RefBookService.get('Organisation');
-    $scope.Person = RefBookService.get('vrbPersonWithSpeciality');
     $scope.Contract = RefBookService.get('Contract');
     $scope.rbRequestType = RefBookService.get('rbRequestType');
     $scope.rbFinance = RefBookService.get('rbFinance');
     $scope.rbEventType = new EventType();
     $scope.OrgStructure = RefBookService.get('OrgStructure');
-    $scope.rbDocumentType = RefBookService.get('rbDocumentType');
-    $scope.rbOrder = RefBookService.get('EventOrder');
-    $scope.rbPrimary = RefBookService.get('EventPrimary');
     $scope.rbResult = RefBookService.get('rbResult');
     $scope.rbAcheResult = RefBookService.get('rbAcheResult');
 
     var event_created = !$scope.event.is_new();
-    $scope.formcnf = {
-        request_type: {
-            disabled: event_created
-        },
-        finance: {
-            disabled: event_created
-        },
-        contract: {
-            disabled: event_created
-        },
-        event_type: {
-            disabled: event_created
-        },
-        exec_person: {
-            disabled: event_created || !current_user.current_role_maybe('admin', 'rRegistartor', 'clinicRegistrator')
-        },
-        org_structure: {
-            disabled: event_created
-        },
-        primacy: {
-            disabled: event_created
-        },
-        order: {
-            disabled: event_created
-        },
-        set_date: {
-            disabled: event_created
-        },
-        exec_date: {
-            disabled: $scope.event.closed()
-        },
-        result: {
-            disabled: $scope.event.closed(),
-            show: current_user.current_role_maybe('admin', 'doctor')
-        },
-        ache_result: {
-            disabled: !$scope.event.closed(),
-            show: current_user.current_role_maybe('admin', 'doctor')
+    $scope.widget_disabled = function (widget_name) {
+        if (['request_type', 'finance', 'contract', 'event_type', 'dms',
+             'exec_person', 'org_structure', 'set_date'
+        ].has(widget_name)
+        ) {
+            return event_created || $scope.event.ro;
+        } else if (widget_name === 'exec_person') {
+            return event_created || $scope.event.ro || !current_user.current_role_maybe('admin', 'rRegistartor', 'clinicRegistrator');
+        } else if (['result', 'ache_result', 'exec_date'].has(widget_name)) {
+            return $scope.event.ro;
         }
+    };
+    $scope.services_added = function () {
+        return $scope.event.is_new() && $scope.event.services.length;
+    };
+    $scope.cmb_result_available = function () {
+        return current_user.current_role_maybe('admin', 'doctor', 'clinicDoctor') || (
+            current_user.current_role_maybe('rRegistartor', 'clinicRegistrator') && $scope.formstate.is_diagnostic()
+        );
+    };
+    $scope.cmb_ache_result_available = function () {
+        return current_user.current_role_maybe('admin', 'doctor', 'clinicDoctor');
     };
 
     $scope.finance_is_oms = function(){return $scope._finance.code == '2'};
@@ -263,7 +242,6 @@ var PolicyInvalidModalCtrl = function ($scope, $modalInstance, policy_errors, po
 };
 var EventPaymentCtrl = function($scope, RefBookService, Settings, $http, $modal) {
     $scope.rbDocumentType = RefBookService.get('rbDocumentType');
-    $scope.Organisation = RefBookService.get('Organisation');
 
     var event_created = !$scope.event.is_new();
     function isNotEmpty(val) { return val !== undefined && val !== null; }
@@ -293,17 +271,20 @@ var EventPaymentCtrl = function($scope, RefBookService, Settings, $http, $modal)
         return ($scope.payer_tabs.org.active && $scope.formstate.is_paid() && $scope.event.info.client.info.age_tuple[3] < 18);
     };
     $scope.payer_info_disabled = function () {
-        return event_created && false;
+        return $scope.event.ro;
     };
     $scope.contract_info_disabled = function () {
         return event_created || $scope.integration1CODVD_enabled();
     };
     $scope.btn_edit_contract_info_visible = function () {
         var lc = $scope.event.payment && $scope.event.payment.local_contract || null;
-        return !(lc && lc.date_contract && lc.number_contract || $scope.integration1CODVD_enabled());
+        return !(lc && lc.date_contract && lc.number_contract || $scope.integration1CODVD_enabled() || $scope.event.ro);
     };
     $scope.import_payer_btn_disabled = function () {
         return event_created && $scope.contract_available();
+    };
+    $scope.btn_delete_lc_disabled = function () {
+        return $scope.event.ro;
     };
     $scope.payer_tabs = {
         person: {
@@ -319,8 +300,8 @@ var EventPaymentCtrl = function($scope, RefBookService, Settings, $http, $modal)
     $scope.refresh_tabs = function (org_active) {
         $scope.payer_tabs.person.active = !org_active;
         $scope.payer_tabs.org.active = Boolean(org_active);
-//        $scope.payer_tabs.person.disabled = event_created && $scope.payer_tabs.org.active;
-//        $scope.payer_tabs.org.disabled = event_created && $scope.payer_tabs.person.active;
+        $scope.payer_tabs.person.disabled = $scope.event.ro; //event_created && $scope.payer_tabs.org.active;
+        $scope.payer_tabs.org.disabled = $scope.event.ro; // event_created && $scope.payer_tabs.person.active;
     };
 
     $scope.contract_available = function () {
@@ -587,11 +568,6 @@ var EventServicesCtrl = function($scope, $http) {
         $scope.query = '';
     };
 
-
-    // ng-class="{'success': service.fully_paid || (service.is_new && service.coord_person_id) || (!service.is_new && service.coord_actions && service.coord_actions.length==service.amount),
-    // 'warning': service.partially_paid || (!service.is_new && service.coord_actions && service.coord_actions.length<service.amount),
-    // 'info': service.is_new && !(service.is_new && service.coord_person_id),
-    // 'danger': !service.fully_paid && !service.partially_paid && !service.is_new && !service.coord_actions.length}"
     $scope.get_class = function (service) {
         var result = [];
         if (service.check_payment() || service.check_coord()) {
@@ -611,13 +587,15 @@ var EventServicesCtrl = function($scope, $http) {
         $scope.query_clear();
     });
 
+    $scope.search_disabled = function () {
+        return $scope.event.ro;
+    };
 };
 
 var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $document, PrintingService, Settings,
-        $filter, $modal, $interval, ActionTypeTreeModal, WMEventServices, WMEventFormState, MessageBox) {
+        $filter, $modal, WMEventServices, WMEventFormState, MessageBox) {
     $scope.aux = aux;
     $scope.current_role_maybe = current_user.current_role_maybe;
-    $scope.Organisation = RefBookService.get('Organisation');
     $scope.Settings = new Settings();
     $scope.alerts = [];
     $scope.eventServices = WMEventServices;
@@ -654,17 +632,6 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
                         });
                     }
                 }, true);
-            });
-    };
-
-    $scope.open_action_tree = function (at_class) {
-        ActionTypeTreeModal.open(at_class, $scope.event_id, $scope.event.info.client.info)
-            .result.then(function (result) {
-                if(typeof (result) === 'object'){
-                    $scope.child_window = result;
-                } else {
-                    $scope.event.reload();
-                }
             });
     };
 
@@ -742,7 +709,7 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
         return true;
     };
     $scope.event_check_final_diagnosis = function() {
-        var final_diagnosis = $scope.event.get_final_diagnosis()
+        var final_diagnosis = $scope.event.get_final_diagnosis();
         if (!final_diagnosis){
             alert("Необходимо указать заключительный диагноз.");
             return false
@@ -777,19 +744,6 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
         });
         modalInstance.result.then(function () {
             $scope.save_event(true);
-        });
-    };
-
-    $scope.delete_action = function (action) {
-        MessageBox.question(
-            'Удаление записи',
-            'Вы уверены, что хотите удалить "{0}"?'.format(safe_traverse(action, ['name']))
-        ).then(function () {
-            $scope.eventServices.delete_action(
-                event, action
-            ).then(angular.noop, function () {
-                alert('Ошибка удаления действия. Свяжитесь с администратором.');
-            });
         });
     };
 
@@ -832,35 +786,6 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
         $scope.alerts.push(error);
     });
 
-    // todo: action data not here
-    $scope.action_type_tree = [];
-    $scope.action_type_popped = null;
-    $scope.at_pop_toggle = function (at_class) {
-        if ($scope.action_type_popped === at_class) {
-            $scope.action_type_popped = null;
-        } else {
-            $scope.action_type_popped = at_class;
-        }
-    };
-
-    $scope.hidden_nodes = [];
-    $scope.toggle_vis = function (node_id) {
-        if ($scope.hidden_nodes.has(node_id)) {
-            $scope.hidden_nodes.splice($scope.hidden_nodes.indexOf(node_id), 1);
-        } else {
-            $scope.hidden_nodes.push(node_id);
-        }
-    };
-    $scope.subtree_shown = function (node_id) {
-        return !$scope.hidden_nodes.has(node_id);
-    };
-
-    $scope.open_action = function (action_id) {
-        $scope.child_window = window.open(url_for_schedule_html_action + '?action_id=' + action_id);
-    };
-
-    // action data end
-
     $scope.$watch('event.info.contract', function(new_val, old_val) {
         if (new_val != old_val) {
             $scope.$broadcast('form_state_change', {
@@ -869,27 +794,6 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
             });
         }
     }, true);
-
-    var interval;
-    $scope.clearInterval = function() {
-        $interval.cancel(interval);
-        interval = undefined;
-    };
-
-    $scope.$watch('child_window.document', function (n, o) {
-        if (n && n!=o) {
-            $scope.clearInterval();
-            interval = $interval(function () {
-                if ($scope.child_window.closed) {
-                    $scope.event.reload().then(function () {
-                            $scope.$broadcast('event_loaded');
-                        });
-                    $scope.clearInterval();
-                    $scope.child_window = {};
-                }
-            }, 500);
-        }
-    });
 
     $scope.initialize();
 };
@@ -908,4 +812,4 @@ WebMis20.controller('EventDiagnosesCtrl', ['$scope', 'RefBookService', '$http', 
 WebMis20.controller('EventMainInfoCtrl', ['$scope', '$http', 'RefBookService', 'EventType', '$window', '$timeout', 'Settings', '$modal', '$filter', EventMainInfoCtrl]);
 WebMis20.controller('EventPaymentCtrl', ['$scope', 'RefBookService', 'Settings', '$http', '$modal', EventPaymentCtrl]);
 WebMis20.controller('EventServicesCtrl', ['$scope', '$http', EventServicesCtrl]);
-WebMis20.controller('EventInfoCtrl', ['$scope', 'WMEvent', '$http', 'RefBookService', '$window', '$document', 'PrintingService', 'Settings', '$filter', '$modal', '$interval', 'ActionTypeTreeModal', 'WMEventServices', 'WMEventFormState', 'MessageBox', EventInfoCtrl]);
+WebMis20.controller('EventInfoCtrl', ['$scope', 'WMEvent', '$http', 'RefBookService', '$window', '$document', 'PrintingService', 'Settings', '$filter', '$modal', 'WMEventServices', 'WMEventFormState', 'MessageBox', EventInfoCtrl]);

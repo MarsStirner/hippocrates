@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 
+import hashlib
+
 from application.systemwide import db
 from application.models.exists import Person, vrbPersonWithSpeciality
 from flask.ext.login import UserMixin, AnonymousUserMixin, current_user
-import hashlib
+
+from application.models.enums import ActionStatus
 
 
 class User(UserMixin):
@@ -171,12 +174,61 @@ modeRights = (
 class UserUtils(object):
 
     @staticmethod
-    def can_delete_event(event):
+    def can_edit_event(event):
         return event and (
-            current_user.has_right('adm', 'evtDelAll') or (
-                current_user.has_right('evtDelOwn') and (
-                    current_user.id == event.execPerson_id or
-                    current_user.id == event.createPerson_id)))
+            current_user.has_right('adm') or (
+                event.is_closed and
+                current_user.id in (event.createPerson_id, event.execPerson_id) and
+                current_user.has_right('evtEditClosed')
+            ) or not event.is_closed)
+
+    @staticmethod
+    def can_delete_event(event, out_msg=None):
+        if not out_msg:
+            out_msg = {'message': u'ok'}
+
+        if not event:
+            out_msg['message'] = u'Обращение еще не создано'
+            return False
+        if current_user.has_right('adm', 'evtDelAll'):
+            return True
+        elif current_user.has_right('evtDelOwn') and not event.is_closed:
+            if event.execPerson_id == current_user.id:
+                return True
+            elif event.createPerson_id == current_user.id:
+                if event.payments:
+                    out_msg['message'] = u'В обращении есть платежи по услугам'
+                    return False
+                for action in event.actions:
+                    # Проверка, что все действия не были изменены после создания обращения
+                    # или, что не появилось новых действий
+                    if action.modifyPerson_id != event.createPerson_id:
+                        out_msg['message'] = u'В обращении были созданы новые или отредактированы первоначальные ' \
+                                             u'документы'
+                        return False
+                    # не закрыто
+                    if action.status == ActionStatus.finished[0]:
+                        out_msg['message'] = u'В обращении есть закрытые документы'
+                        return False
+                    # не отмечено "Считать"
+                    if action.account == 1:
+                        out_msg['message'] = u'В обращении есть услуги, отмеченные для оплаты'
+                        return False
+                return True
+        out_msg['message'] = u'У пользователя нет прав на удаление обращения'
+        return False
+
+    @staticmethod
+    def can_close_event(event):
+        return event and not event.is_closed and (
+            current_user.has_right('adm') or (
+                current_user.role_in('doctor', 'clinicDoctor') and
+                current_user.id == event.execPerson_id
+            ) or (
+                current_user.role_in('rRegistartor', 'clinicRegistrator') and event.is_diagnostic and
+                current_user.id == event.createPerson_id
+            )
+        )
 
     @staticmethod
     def can_delete_action(action):

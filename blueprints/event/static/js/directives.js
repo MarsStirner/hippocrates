@@ -74,23 +74,24 @@ angular.module('WebMis20.directives').
                     };
 
                     scope.amount_disabled = function () {
-                        return scope.service.fully_paid || scope.service.fully_coord;
+                        return scope.service.fully_paid || scope.service.fully_coord || scope.event.ro;
                     };
                     scope.btn_coordinate_visible = function () {
-                        return !scope.service.fully_coord && !scope.service.all_actions_closed;
+                        return !scope.service.fully_coord && !scope.service.all_actions_closed && !scope.event.ro;
                     };
                     scope.btn_cancel_coordinate_visible = function () {
-                        return scope.service.fully_coord && !scope.service.all_actions_closed;
+                        return scope.service.fully_coord && !scope.service.all_actions_closed && !scope.event.ro;
                     };
                     scope.btn_delete_visible = function () {
                         var s = scope.service;
                         return !(
                             s.fully_paid || s.partially_paid || s.fully_coord || s.partially_coord ||
-                            scope.service.all_actions_closed
+                            scope.service.all_actions_closed || scope.event.ro
                         );
                     };
                     scope.lab_components_disabled = function () {
-                        return scope.service.fully_paid || scope.service.fully_coord || scope.service.all_actions_closed;
+                        return (scope.service.fully_paid || scope.service.fully_coord ||
+                            scope.service.all_actions_closed || scope.event.ro);
                     };
                 },
                 template:
@@ -200,19 +201,20 @@ angular.module('WebMis20.directives').
                     };
 
                     scope.amount_disabled = function () {
-                        return scope.action.account || scope.action.is_coordinated();
+                        return scope.action.account || scope.action.is_coordinated() || scope.event.ro;
                     };
                     scope.btn_coordinate_visible = function () {
-                        return !scope.action.is_coordinated() && !scope.action.is_closed();
+                        return !scope.action.is_coordinated() && !scope.action.is_closed() && !scope.event.ro;
                     };
                     scope.btn_cancel_coordinate_visible = function () {
-                        return scope.action.is_coordinated() && !scope.action.is_closed();
+                        return scope.action.is_coordinated() && !scope.action.is_closed() && !scope.event.ro;
                     };
                     scope.btn_delete_visible = function () {
-                        return !(scope.action.is_paid_for() || scope.action.is_coordinated() || scope.action.is_closed());
+                        return !(scope.action.is_paid_for() || scope.action.is_coordinated() ||
+                            scope.action.is_closed() || scope.event.ro);
                     };
                     scope.lab_components_disabled = function () {
-                        return scope.action.account || scope.action.is_coordinated() || scope.action.is_closed();
+                        return scope.action.account || scope.action.is_coordinated() || scope.action.is_closed() || scope.event.ro;
                     };
                 },
                 template:

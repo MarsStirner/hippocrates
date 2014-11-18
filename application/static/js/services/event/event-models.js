@@ -11,6 +11,7 @@ angular.module('WebMis20.services.models').
                 this.payment = null;
                 this.diagnoses = [];
                 this.services = [];
+                this.ro = false;
             };
 
             WMEvent.prototype.reload = function() {
@@ -27,6 +28,7 @@ angular.module('WebMis20.services.models').
                     params: params
                 }).success(function (data) {
                     self.info = data.result.event;
+                    self.ro = data.result.ro;
                     var client_info = self.info.client;
                     self.info.client = new WMClient();
                     self.info.client.init_from_obj({

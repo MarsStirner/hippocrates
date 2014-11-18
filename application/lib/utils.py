@@ -479,6 +479,14 @@ def parse_id(request_data, identifier, allow_empty=False):
             return False
     return _id
 
+
+def initialize_name(last_name, first_name, patr_name):
+    last_name, first_name, patr_name = [name if name else u'' for name in (last_name, first_name, patr_name)]
+    words = first_name.split() + patr_name.split()
+    initials = ['%s.' % word[0].upper() for word in words if word]
+    return u'%s %s' % (last_name, u' '.join(initials))
+
+
 from sqlalchemy.sql import expression
 from sqlalchemy.ext import compiler
 

@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import datetime
-from application.lib.agesex import recordAcceptableEx
-from application.lib.const import STATIONARY_EVENT_CODES
 
 from flask import request, abort
 from flask.ext.login import current_user
@@ -25,6 +23,9 @@ from blueprints.event.lib.utils import (EventSaveException, create_services, cre
     create_or_update_diagnosis)
 from application.lib.sphinx_search import SearchEventService
 from application.lib.data import get_planned_end_datetime, int_get_atl_dict_all, delete_action
+from application.lib.agesex import recordAcceptableEx
+from application.lib.const import STATIONARY_EVENT_CODES
+from application.lib.user import UserUtils
 
 
 @module.errorhandler(EventSaveException)
@@ -42,19 +43,7 @@ def api_event_info():
     event_id = int(request.args['event_id'])
     event = Event.query.get(event_id)
     vis = EventVisualizer()
-    data = {
-        'event': vis.make_event(event),
-    }
-    if current_user.role_in('admin'):
-        data['diagnoses'] = vis.make_diagnoses(event)
-        data['payment'] = vis.make_event_payment(event)
-        data['services'] = vis.make_event_services(event_id)
-    elif current_user.role_in('doctor', 'clinicDoctor'):
-        data['diagnoses'] = vis.make_diagnoses(event)
-    elif current_user.role_in(('rRegistartor', 'clinicRegistrator')):
-        data['payment'] = vis.make_event_payment(event)
-        data['services'] = vis.make_event_services(event_id)
-    return jsonify(data)
+    return jsonify(vis.make_event_info_for_current_role(event))
 
 
 @module.route('/api/event_new.json', methods=['GET'])
@@ -551,24 +540,8 @@ def api_delete_event():
         return abort(404)
     event = Event.query.get_or_404(event_id)
 
-    def can_delete_event(event):
-        # TODO: check payments
-        if current_user.has_right('evtDelAll') or current_user.has_right('adm'):
-            return True, ''
-        elif current_user.has_right('evtDelOwn'):
-            if event.execPerson_id == current_user.id:
-                return True, ''
-            elif event.createPerson_id == current_user.id:
-                # Проверка, что все действия не были изменены после создания обращения
-                # или, что не появилось новых действий
-                for action in event.actions:
-                    if action.modifyPerson_id != event.createPerson_id:
-                        return False, u'В обращении были созданы новые или отредактированы первоначальные документы'
-                return True, ''
-        return False, u'У пользователя нет прав на удаление обращения'
-
-    ok, msg = can_delete_event(event)
-    if ok:
+    msg = {}
+    if UserUtils.can_delete_event(event, msg):
         event.deleted = 1
         db.session.add(event)
         db.session.query(Action).filter(
@@ -590,7 +563,7 @@ def api_delete_event():
         return jsonify(None)
 
     return jsonify({
-        'name': msg,
+        'name': msg['message'],
         'data': {
             'err_msg': u'Удаление запрещено'
         }

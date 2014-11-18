@@ -3,7 +3,7 @@
 import datetime
 import re
 
-from application.lib.const import PAYER_EVENT_CODES, STATIONARY_EVENT_CODES
+from application.lib.const import PAYER_EVENT_CODES, STATIONARY_EVENT_CODES, DIAGNOSTIC_EVENT_CODES
 from application.lib.agesex import AgeSex
 from application.lib.settings import Settings
 from application.models.client import ClientDocument
@@ -125,15 +125,18 @@ class Event(db.Model):
 
     @property
     def is_closed(self):
-        # Текущая дата больше, чем дата завершения + 2 рабочих дня
-        # согласно какому-то мегаприказу МЗ и главврача ФНКЦ
-        # Установлен результат обращения
         from application.lib.data import addPeriod
-        return self.is_pre_closed and datetime.date.today() > addPeriod(
-            self.execDate.date(),
-            Settings.getInt('Event.BlockTime', 2),
-            False
-        )
+        if self.is_stationary:
+            # Текущая дата больше, чем дата завершения + 2 рабочих дня
+            # согласно какому-то мегаприказу МЗ и главврача ФНКЦ
+            # Установлен результат обращения
+            return self.is_pre_closed and datetime.date.today() > addPeriod(
+                self.execDate.date(),
+                Settings.getInt('Event.BlockTime', 2),
+                False
+            )
+        else:
+            return self.is_pre_closed
 
     @property
     def is_pre_closed(self):
@@ -142,6 +145,10 @@ class Event(db.Model):
     @property
     def is_stationary(self):
         return self.eventType.requestType.code in STATIONARY_EVENT_CODES
+
+    @property
+    def is_diagnostic(self):
+        return self.eventType.requestType.code in DIAGNOSTIC_EVENT_CODES
 
     def __unicode__(self):
         return unicode(self.eventType)

@@ -9,9 +9,11 @@
                     <span class="input-group-addon"><span class="glyphicon glyphicon-search"></span></span>
                     <input type="text" id="service_search" name="service_search" class="form-control"
                            autocomplete="off" placeholder="Введите код или наименование услуги"
-                           ng-change="search_processed=false" ng-model="query" wm-slow-change="perform_search(query)">
+                           ng-change="search_processed=false" ng-model="query" wm-slow-change="perform_search(query)"
+                           ng-disabled="search_disabled()">
                     <span class="input-group-btn">
-                        <button class="btn btn-danger" ng-click="query_clear()" title="Очистить поле">
+                        <button class="btn btn-danger" ng-click="query_clear()" title="Очистить поле"
+                            ng-disabled="search_disabled()">
                             <span class="glyphicon glyphicon-remove"></span>
                         </button>
                     </span>
