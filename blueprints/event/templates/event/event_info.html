@@ -36,6 +36,13 @@
                         </div>
                     </div>
                     {%- endif %}
+                    {% if event.is_closed %}
+                    <div class="row vmargin10">
+                        <div class="col-md-12">
+                            <h3><span class="label label-danger">Обращение закрыто</span></h3>
+                        </div>
+                    </div>
+                    {%- endif %}
                     {% if user_utils.can_delete_event(event) %}
                     <div class="row vmargin10">
                         <div class="col-md-12">
