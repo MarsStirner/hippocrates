@@ -89,6 +89,7 @@ var rcWizardDirective = {
           
           self.currentIndex = nextTab;
           self.firstIndex = wizardElement.bootstrapWizard('firstIndex');
+          self.lastIndex = wizardElement.bootstrapWizard('lastIndex');
           self.navigationLength = wizardElement.bootstrapWizard('navigationLength');
           
           if (!$scope.$$phase) $scope.$apply();
