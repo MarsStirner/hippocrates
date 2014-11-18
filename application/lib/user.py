@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 
+import hashlib
+
 from application.systemwide import db
 from application.models.exists import Person, vrbPersonWithSpeciality
 from flask.ext.login import UserMixin, AnonymousUserMixin, current_user
-import hashlib
+
+from application.models.enums import ActionStatus
 
 
 class User(UserMixin):
@@ -184,7 +187,6 @@ class UserUtils(object):
         if not out_msg:
             out_msg = {'message': u'ok'}
 
-        # TODO: check payments!
         if not event:
             out_msg['message'] = u'Обращение еще не создано'
             return False
@@ -194,12 +196,23 @@ class UserUtils(object):
             if event.execPerson_id == current_user.id:
                 return True
             elif event.createPerson_id == current_user.id:
-                # Проверка, что все действия не были изменены после создания обращения
-                # или, что не появилось новых действий
+                if event.payments:
+                    out_msg['message'] = u'В обращении есть платежи по услугам'
+                    return False
                 for action in event.actions:
+                    # Проверка, что все действия не были изменены после создания обращения
+                    # или, что не появилось новых действий
                     if action.modifyPerson_id != event.createPerson_id:
                         out_msg['message'] = u'В обращении были созданы новые или отредактированы первоначальные ' \
                                              u'документы'
+                        return False
+                    # не закрыто
+                    if action.status == ActionStatus.finished[0]:
+                        out_msg['message'] = u'В обращении есть закрытые документы'
+                        return False
+                    # не отмечено "Считать"
+                    if action.account == 1:
+                        out_msg['message'] = u'В обращении есть услуги, отмеченные для оплаты'
                         return False
                 return True
         out_msg['message'] = u'У пользователя нет прав на удаление обращения'
