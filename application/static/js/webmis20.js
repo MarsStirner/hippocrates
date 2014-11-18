@@ -19,6 +19,7 @@ var WebMis20 = angular.module('WebMis20', [
     'sf.treeRepeat',
     'ui.mask',
     'formstamp',
+    'rcWizard',
     'mgcrea.ngStrap.affix',
     'duScroll'
 ])

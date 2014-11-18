@@ -60,5 +60,8 @@ var CheckupFirstEditCtrl = function ($scope, $window, $document, RisarApi, Confi
     }
 };
 
+var CheckupSecondEditCtrl = function ($scope, $window, $document, RisarApi, Config) {
+};
+
 WebMis20.controller('CheckupCtrl', ['$scope', 'RisarApi', CheckupCtrl]);
 WebMis20.controller('CheckupFirstEditCtrl', ['$scope', '$window', '$document', 'RisarApi', 'Config', CheckupFirstEditCtrl]);
