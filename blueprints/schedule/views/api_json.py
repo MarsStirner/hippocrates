@@ -622,9 +622,7 @@ def api_create_lab_direction():
     event = Event.query.get(event_id)
     org_structure = event.current_org_structure
     if not org_structure:
-        return jsonify({
-            'message': u'Пациент не привязан ни к одному из отделений.'
-        }, 422, 'ERROR')
+        return jsonify(None, 422, u'Пациент не привязан ни к одному из отделений')
 
     for j in ja['directions']:
         action_type_id = j['type_id']

@@ -107,16 +107,15 @@ class Event(db.Model):
         """
         from .actions import ActionProperty_OrgStructure, ActionProperty, ActionType, Action
         from .exists import OrgStructure
-        if self.orgStructure_id:
-            return self.orgStructure
-        prop = ActionProperty_OrgStructure.query.join(ActionProperty, ActionType, Action).filter(
-            Action.event == self,
-            Action.status < 2,
-            ActionType.flatCode == 'moving',
-        ).orderby(Action.begDate.desc()).first()
-        if not prop:
-            return None
-        return OrgStructure.query.get(prop.value)
+        if self.is_stationary:
+            prop = ActionProperty_OrgStructure.query.join(ActionProperty, Action, ActionType).filter(
+                Action.event == self,
+                Action.status < 2,
+                ActionType.flatCode == 'moving',
+            ).order_by(Action.begDate.desc()).first()
+            return OrgStructure.query.get(prop.value) if prop else None
+        else:
+            return self.orgStructure if self.orgStructure_id else None
 
     @property
     def date(self):
