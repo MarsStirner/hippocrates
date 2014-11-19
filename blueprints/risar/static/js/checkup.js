@@ -4,14 +4,24 @@ var CheckupCtrl = function ($scope, RisarApi) {
     var params = aux.getQueryParams(window.location.search);
     var checkup_id = $scope.checkup_id = params.checkup_id
     var event_id = $scope.event_id = params.event_id;
+    var create_new_checkup = function (){
+        $scope.checkup = {height: NaN,
+                          weight: NaN}
+    }
     var reload_checkup = function () {
         RisarApi.chart.get(event_id)
         .then(function (data) {
             $scope.chart = data.event;
             $scope.client_id = data.event.client.id;
             $scope.checkup = data.event.checkups.filter(function(elem){return elem.id == checkup_id})[0]
+            if (!$scope.checkup) create_new_checkup();
         })
     };
+
+    reload_checkup();
+}
+
+var CheckupFirstEditCtrl = function ($scope, $window, $document, RisarApi, Config) {
     var updateHW_Ratio = function (){
         $scope.checkup.hw_ratio = $scope.checkup.height ? Math.round(($scope.checkup.weight/$scope.checkup.height)*100) : NaN;
     }
@@ -19,22 +29,18 @@ var CheckupCtrl = function ($scope, RisarApi) {
         $scope.checkup.BMI = $scope.checkup.height ? ($scope.checkup.weight/Math.pow($scope.checkup.height/100,2)).toFixed(1) : NaN;
     }
     $scope.$watch('checkup.height', function() {
-        if ($scope.checkup){
+        if ($scope.checkup.height && (!isNaN($scope.checkup.weight))){
         updateHW_Ratio();
         updateBMI();
         }
 
     });
     $scope.$watch('checkup.weight', function() {
-        if ($scope.checkup){
+        if (!isNaN($scope.checkup.weight)){
             updateHW_Ratio();
             updateBMI();
         }
     });
-    reload_checkup();
-}
-
-var CheckupFirstEditCtrl = function ($scope, $window, $document, RisarApi, Config) {
     $scope.save = function () {
         var form = $scope.CheckupFirstEditForm;
         if (form.$invalid) {
