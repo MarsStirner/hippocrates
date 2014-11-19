@@ -897,54 +897,22 @@ class ClientPolicy(db.Model):
         db.Index(u'client_insurer', u'client_id', u'insurer_id')
     )
 
-    id = db.Column(db.Integer,
-                   primary_key=True)
-    createDatetime = db.Column(db.DateTime,
-                               nullable=False,
-                               default=datetime.datetime.now)
-    createPerson_id = db.Column(db.Integer,
-                                index=True,
-                                default=safe_current_user_id)
-    modifyDatetime = db.Column(db.DateTime,
-                               nullable=False,
-                               default=datetime.datetime.now,
-                               onupdate=datetime.datetime.now)
-    modifyPerson_id = db.Column(db.Integer,
-                                index=True,
-                                default=safe_current_user_id,
-                                onupdate=safe_current_user_id)
-    deleted = db.Column(db.Integer,
-                        nullable=False,
-                        server_default=u"'0'",
-                        default=0)
-    clientId = db.Column("client_id",
-                         db.ForeignKey('Client.id'),
-                         nullable=False)
-    insurer_id = db.Column(db.Integer,
-                           db.ForeignKey('Organisation.id'),
-                           index=True)
-    policyType_id = db.Column(db.Integer,
-                              db.ForeignKey('rbPolicyType.id'),
-                              index=True)
-    serial = db.Column(db.String(16),
-                       nullable=False)
-    number = db.Column(db.String(16),
-                       nullable=False)
-    begDate = db.Column(db.Date,
-                        nullable=False)
+    id = db.Column(db.Integer, primary_key=True)
+    createDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now)
+    createPerson_id = db.Column(db.Integer, index=True, default=safe_current_user_id)
+    modifyDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now, onupdate=datetime.datetime.now)
+    modifyPerson_id = db.Column(db.Integer, index=True, default=safe_current_user_id, onupdate=safe_current_user_id)
+    deleted = db.Column(db.Integer, nullable=False, server_default=u"'0'", default=0)
+    clientId = db.Column("client_id", db.ForeignKey('Client.id'), nullable=False)
+    insurer_id = db.Column(db.Integer, db.ForeignKey('Organisation.id'), index=True)
+    policyType_id = db.Column(db.Integer, db.ForeignKey('rbPolicyType.id'), index=True)
+    serial = db.Column(db.String(16), nullable=False)
+    number = db.Column(db.String(16), nullable=False)
+    begDate = db.Column(db.Date, nullable=False)
     endDate = db.Column(db.Date)
-    name = db.Column(db.Unicode(64),
-                     nullable=False,
-                     server_default=u"''",
-                     default=u'')
-    note = db.Column(db.Unicode(200),
-                     nullable=False,
-                     server_default=u"''",
-                     default=u'')
-    version = db.Column(db.Integer,
-                        nullable=False,
-                        server_default=u"'0'",
-                        default=0)
+    name = db.Column(db.Unicode(64), nullable=False, server_default=u"''", default=u'')
+    note = db.Column(db.Unicode(200), nullable=False, server_default=u"''", default=u'')
+    version = db.Column(db.Integer, nullable=False, server_default=u"'0'", default=0)
 
     insurer = db.relationship(u'Organisation', lazy=False)
     policyType = db.relationship(u'rbPolicyType', lazy=False)
@@ -969,6 +937,7 @@ class ClientPolicy(db.Model):
         return self.id
 
     def __json__(self):
+        from application.lib.utils import format_date
         return {
             'id': self.id,
             'policy_type': self.policyType,
@@ -984,7 +953,7 @@ class ClientPolicy(db.Model):
                 'infis': None,
                 'title': None
             },
-            'policy_text': self.__unicode__()
+            'policy_text': u'%s (%s - %s)' % (unicode(self), format_date(self.begDate) or '', format_date(self.endDate) or '')
         }
 
 

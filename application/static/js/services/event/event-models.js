@@ -1,13 +1,13 @@
 'use strict';
 
 angular.module('WebMis20.services.models').
-    factory('WMEvent', ['$http', '$q', 'WMEventServiceGroup', 'WMEventPaymentList',
-        function($http, $q, WMEventServiceGroup, WMEventPaymentList) {
+    factory('WMEvent', ['$http', '$q', 'WMClient', 'WMEventServiceGroup', 'WMEventPaymentList',
+        function($http, $q, WMClient, WMEventServiceGroup, WMEventPaymentList) {
             var WMEvent = function(event_id, client_id, ticket_id) {
                 this.event_id = parseInt(event_id);
                 this.client_id = client_id;
                 this.ticket_id = ticket_id;
-                this.info = null;  //TODO: в качестве info.client заиспользовать WMClient?
+                this.info = null;
                 this.payment = null;
                 this.diagnoses = [];
                 this.services = [];
@@ -27,9 +27,11 @@ angular.module('WebMis20.services.models').
                     params: params
                 }).success(function (data) {
                     self.info = data.result.event;
-                    if (self.info.client.live_address !== null && self.info.client.live_address.synced) {
-                        self.info.client.live_address = self.info.client.reg_address;
-                    }
+                    var client_info = self.info.client;
+                    self.info.client = new WMClient();
+                    self.info.client.init_from_obj({
+                        client_data: client_info
+                    }, 'for_event');
                     self.diagnoses = data.result.diagnoses || [];
 
                     var p = data.result.payment;

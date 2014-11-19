@@ -360,11 +360,6 @@ div.select2-container {
       width:100%;
 }
 
-.modal-scrollable {
-    max-height: 500px;
-    overflow-y: auto;
-}
-
 .tab-content {
     border-left: 1px solid #ddd;
     border-right: 1px solid #ddd;
@@ -686,6 +681,10 @@ ng-form {
    border-right-width: medium;
 }
 
+.modal-scrollable {
+    overflow-y: auto;
+}
+
 .modal-scrollable .modal-dialog,
 .modal-scrollable .modal-content {
     /* 90% of window height */
@@ -711,4 +710,9 @@ a.pseudo-btn {
     text-align: center;
     white-space: nowrap;
     vertical-align: middle;
+}
+
+.label-no-bold {
+    font-weight: normal;
+
 }

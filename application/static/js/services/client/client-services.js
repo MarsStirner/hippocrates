@@ -31,13 +31,6 @@ angular.module('WebMis20.services').
         }
 
         return {
-            formatSnils: function (snils) {
-                return snils && snils.length === 11 ?
-                    [snils.substr(0, 3), '-',
-                     snils.substr(3, 3), '-',
-                     snils.substr(6, 3), ' ', snils.substr(9, 2)].join('') :
-                    '';
-            },
             push_id_doc: function(client) {
                 var new_doc = {
                     "id": null,
