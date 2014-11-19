@@ -117,6 +117,12 @@ var rcWizardDirective = {
           if (steps.length > currentIndex && steps[currentIndex].element) {
             steps[currentIndex].element.find('input').first().focus();
           }
+          if (wizardElement.find('.bar').length){
+            var $total = navigation.find('li:has([data-toggle="tab"])').length;
+            var $current = currentIndex+1;
+            var $percent = ($current/$total) * 100;
+            wizardElement.find('.bar').css({width:$percent+'%'});
+          }
         };
         
         var updateWizard = function (options) {
