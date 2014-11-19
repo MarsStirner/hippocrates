@@ -240,7 +240,7 @@ var PolicyInvalidModalCtrl = function ($scope, $modalInstance, policy_errors, po
         $modalInstance.dismiss('cancel');
     };
 };
-var EventPaymentCtrl = function($scope, RefBookService, Settings, $http, $modal) {
+var EventPaymentCtrl = function($scope, RefBookService, Settings, $http, $modal, MessageBox) {
     $scope.rbDocumentType = RefBookService.get('rbDocumentType');
 
     var event_created = !$scope.event.is_new();
@@ -281,7 +281,7 @@ var EventPaymentCtrl = function($scope, RefBookService, Settings, $http, $modal)
         return !(lc && lc.date_contract && lc.number_contract || $scope.integration1CODVD_enabled() || $scope.event.ro);
     };
     $scope.import_payer_btn_disabled = function () {
-        return event_created && $scope.contract_available();
+        return $scope.event.ro;
     };
     $scope.btn_delete_lc_disabled = function () {
         return $scope.event.ro;
@@ -307,6 +307,9 @@ var EventPaymentCtrl = function($scope, RefBookService, Settings, $http, $modal)
     $scope.contract_available = function () {
         var event = $scope.event;
         return event.payment && event.payment.local_contract && event.payment.local_contract.id;
+    };
+    $scope.payer_info_filled = function () {
+        return $scope.payer_is_person() || $scope.payer_is_org();
     };
 
     $scope.contract_is_shared = function () {
@@ -367,6 +370,27 @@ var EventPaymentCtrl = function($scope, RefBookService, Settings, $http, $modal)
         }
     };
 
+    $scope.import_payer_info = function (from) {
+        function process_import() {
+            if (from === 'self') {
+                $scope.get_payer($scope.event.info.client_id);
+            } else if (from === 'parent') {
+                $scope.open_relatives_modal();
+            } else if (from === 'prev') {
+                $scope.open_prev_event_contract_modal();
+            }
+        }
+        if ($scope.payer_info_filled()) {
+            MessageBox.question(
+                'Изменение данных плательщика',
+                'Данные плательщика будут изменены. Продолжить?'
+            ).then(function () {
+                process_import();
+            });
+        } else {
+            process_import();
+        }
+    };
     $scope.get_payer = function(client_id) {
         $http.get(url_api_client_payment_info_get, {
             params: {
@@ -810,6 +834,6 @@ var UnclosedActionsModalCtrl = function ($scope, $modalInstance, unclosed_action
 
 WebMis20.controller('EventDiagnosesCtrl', ['$scope', 'RefBookService', '$http', EventDiagnosesCtrl]);
 WebMis20.controller('EventMainInfoCtrl', ['$scope', '$http', 'RefBookService', 'EventType', '$window', '$timeout', 'Settings', '$modal', '$filter', EventMainInfoCtrl]);
-WebMis20.controller('EventPaymentCtrl', ['$scope', 'RefBookService', 'Settings', '$http', '$modal', EventPaymentCtrl]);
+WebMis20.controller('EventPaymentCtrl', ['$scope', 'RefBookService', 'Settings', '$http', '$modal', 'MessageBox', EventPaymentCtrl]);
 WebMis20.controller('EventServicesCtrl', ['$scope', '$http', EventServicesCtrl]);
 WebMis20.controller('EventInfoCtrl', ['$scope', 'WMEvent', '$http', 'RefBookService', '$window', '$document', 'PrintingService', 'Settings', '$filter', '$modal', 'WMEventServices', 'WMEventFormState', 'MessageBox', EventInfoCtrl]);
