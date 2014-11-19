@@ -198,3 +198,7 @@ span.empty-value {
 .navbar-default .navbar-nav>.active>a {
 box-shadow: inset 0 3px 8px rgba(0,0,0,0.125);
 }
+
+.print_link{
+    padding: 0 7px 0 7px;
+}
