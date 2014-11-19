@@ -27,44 +27,49 @@
             </div>
         </div>
         <div ng-controller="CheckupSecondEditCtrl">
-            <div rc-wizard="sampleWizard">
-                <ul class="nav nav-pills">
-                    <li class="active">
-                        <a class="active" href="#first" data-toggle="tab">
-                            <span class="badge">1</span>
-                            <span>Общая информация</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#second" data-toggle="tab">
-                            <span class="badge">2</span>
-                            <span>Соматический статус</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#third" data-toggle="tab">
-                            <span class="badge">3</span>
-                            <span>Акушерский и специальный статусы</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#fourth" data-toggle="tab">
-                            <span class="badge">4</span>
-                            <span>Заключение</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#last" data-toggle="tab">
-                            <span class="badge">5</span>
-                            <span>Диагностические мероприятия</span>
-                        </a>
-                    </li>
-                </ul>
-{#                <div id="bar" class="progress progress-striped active">#}
-{#                  <div class="bar progress-bar progress-bar-success" role="progressbar" aria-valuemin="0" aria-valuemax="100">#}
-{#        #}
-{#                  </div>#}
-{#                </div>#}
+            <div rc-wizard="sampleWizard" id="sampleWizard">
+                <nav class="navbar navbar-default" role="navigation">
+                    <div class="container-fluid">
+                        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                        <ul class="nav navbar-nav nav-pills" style="margin: 7.5px -15px">
+                            <li class="active">
+                                <a class="active" href="#first" data-toggle="tab">
+                                    <span class="badge">1</span>
+                                    <span>Общая информация</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#second" data-toggle="tab">
+                                    <span class="badge">2</span>
+                                    <span>Соматический статус</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#third" data-toggle="tab">
+                                    <span class="badge">3</span>
+                                    <span>Акушерский и специальный статусы</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#fourth" data-toggle="tab">
+                                    <span class="badge">4</span>
+                                    <span>Заключение</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#last" data-toggle="tab">
+                                    <span class="badge">5</span>
+                                    <span>Диагностические мероприятия</span>
+                                </a>
+                            </li>
+                        </ul>
+                        </div>
+                    </div>
+                </nav>
+                <div id="bar" class="progress progress-striped active">
+                  <div class="bar progress-bar progress-bar-success" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+                  </div>
+                </div>
                 <div class="tab-content  marginal">
                     <div class="tab-pane active" id="first">
                         <h3>Шаг 1. Общая информация</h3>
@@ -347,6 +352,9 @@
                     </div>
                 </div>
                 <div class="form-group">
+                    <div class="pull-left">
+                    <a class="pseudo-btn" ng-href="{{ url_for('.html_inspection') }}?event_id=[[ chart.id ]]">Перейти на форму осмотров пациентки</a>
+                    </div>
                     <div class="pull-right">
                         <a class="btn btn-default"
                            ng-click="rc.sampleWizard.backward()"
