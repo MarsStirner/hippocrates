@@ -19,7 +19,7 @@
                 </h2>
             </div>
             <div class="col-md-2 achievements">
-                <b>[[ pregnancy_week ]]</b>
+                <b>[[ pregnancy_week ]]</b><i class="fa fa-question" ng-if="!pregnancy_week"></i>
                 <i class="fa" ng-class="{'fa-question':chart.risk_rate.value==0,
                                          'fa-circle text-danger':chart.risk_rate.value==3,
                                          'fa-circle text-warning':chart.risk_rate.value==2,
