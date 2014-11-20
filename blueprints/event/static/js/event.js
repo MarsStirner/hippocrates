@@ -117,7 +117,7 @@ var EventMainInfoCtrl = function ($scope, $http, RefBookService, EventType, $win
     $scope.process_policies = function (_finance, _contract) {
         if(!$scope.check_policy()) {
             $scope.show_policy_errors();
-            $scope.finance.selected = $scope.rbFinance.get_by_code(4);
+//            $scope.finance.selected = $scope.rbFinance.get_by_code(4);
         } else {
             if($scope.finance_is_dms() && _contract){
                 var _break = false;
@@ -685,7 +685,7 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
                         alert("Обращение закрыто");
                     }
                 }, function (message) {
-                    alert(message);
+                    MessageBox.info('Ошибка сохранения', message);
                 });
         } else {
             var formelm = $('#eventForm').find('.ng-invalid:not(ng-form):first');

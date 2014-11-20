@@ -74,7 +74,7 @@ angular.module('WebMis20.services.models').
                     }).
                     error(function(response) {
                         var rr = response.result;
-                        var message = rr.name + ': ' + (rr.data ? rr.data.err_msg : '');
+                        var message = rr ? (rr.name + ': ' + (rr.data ? rr.data.err_msg : '')) : response.meta.name;
                         deferred.reject(message);
                     });
                 return deferred.promise;

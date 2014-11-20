@@ -105,6 +105,7 @@ def api_event_save():
         execPerson = Person.query.get(event_data['exec_person']['id'])
     err_msg = u'Ошибка сохранения данных обращения'
     create_mode = not event_id
+    error_msg = {}
     if event_id:
         event = Event.query.get(event_id)
         event.deleted = event_data['deleted']
@@ -129,6 +130,7 @@ def api_event_save():
         event.setPerson_id = current_user.get_id()
         event.eventType = EventType.query.get(event_data['event_type']['id'])
         event.client_id = event_data['client_id']
+        event.client = Client.query.get(event_data['client_id'])
         event.execPerson = execPerson
         event.setDate = safe_datetime(event_data['set_date'])
         event.externalId = get_new_event_ext_id(event.eventType.id, event.client_id)
@@ -140,6 +142,9 @@ def api_event_save():
         event.payStatus = 0
         event.note = event_data['note']
         event.uuid = get_new_uuid()
+
+        if not UserUtils.can_create_event(event, error_msg):
+            return jsonify(None, 403, u'Невозможно создать обращение: %s.' % error_msg['message'])
 
         local_contract = safe_traverse(request.json, 'payment', 'local_contract')
         if event.payer_required:
