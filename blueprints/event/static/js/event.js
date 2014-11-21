@@ -117,7 +117,7 @@ var EventMainInfoCtrl = function ($scope, $http, RefBookService, EventType, $win
     $scope.process_policies = function (_finance, _contract) {
         if(!$scope.check_policy()) {
             $scope.show_policy_errors();
-            $scope.finance.selected = $scope.rbFinance.get_by_code(4);
+//            $scope.finance.selected = $scope.rbFinance.get_by_code(4);
         } else {
             if($scope.finance_is_dms() && _contract){
                 var _break = false;
@@ -659,34 +659,36 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
             });
     };
 
-    $scope.save_event = function (close_event) {
-        if (typeof (close_event) === 'undefined') {
-            close_event = false;
-        }
+    $scope.save_event = function () {
         $scope.editing.submit_attempt = true;
         if ($scope.eventForm.$valid) {
-            $scope.event.save(close_event).
-                then(function (result) {
-                    $scope.eventForm.$setPristine();
-                    if ($scope.event.is_new()) {
-                        if (result.error_text) {
-                            MessageBox.info('Внимание!', result.error_text).then(function () {
-                                $window.open(url_for_event_html_event_info + '?event_id=' + result.event_id, '_self');
-                            });
-                        } else {
+            $scope.event.save()
+            .then(function (result) {
+                $scope.eventForm.$setPristine();
+                if ($scope.event.is_new()) {
+                    if (result.error_text) {
+                        MessageBox.info('Внимание!', result.error_text).then(function () {
                             $window.open(url_for_event_html_event_info + '?event_id=' + result.event_id, '_self');
-                        }
+                        });
+                    } else {
+                        $window.open(url_for_event_html_event_info + '?event_id=' + result.event_id, '_self');
+                    }
+                } else {
+                    if (result.error_text) {
+                        MessageBox.info('Внимание!', result.error_text).then(function () {
+                            $scope.event.reload().then(function () {
+                                $scope.$broadcast('event_loaded');
+                            });
+                        });
                     } else {
                         $scope.event.reload().then(function () {
                             $scope.$broadcast('event_loaded');
                         });
                     }
-                    if (close_event) {
-                        alert("Обращение закрыто");
-                    }
-                }, function (message) {
-                    alert(message);
-                });
+                }
+            }, function (message) {
+                MessageBox.info('Ошибка сохранения', message);
+            });
         } else {
             var formelm = $('#eventForm').find('.ng-invalid:not(ng-form):first');
             $document.scrollToElement(formelm, 100, 1500);
@@ -717,37 +719,6 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
         });
     };
 
-    $scope.event_mandatoryResult = function() {
-        return $scope.Settings.get_string('Event.mandatoryResult') == '1';
-    };
-
-    $scope.event_check_results = function() {
-        if (!$scope.event.info.result){
-            alert("Необходимо задать результат");
-            return false
-        }
-        if (!$scope.formstate.is_diagnostic() && !$scope.event.info.ache_result && $scope.event_mandatoryResult()){
-            alert("Необходимо задать исход заболевания/госпитализации");
-            return false
-        }
-        return true;
-    };
-    $scope.event_check_final_diagnosis = function() {
-        var final_diagnosis = $scope.event.get_final_diagnosis();
-        if (!final_diagnosis){
-            alert("Необходимо указать заключительный диагноз.");
-            return false
-        } else if (final_diagnosis.length > 1){
-            alert("В обращении не может быть больше одного заключительного диагноза.");
-            return false
-        }
-        if(!final_diagnosis[0].result){
-            alert("Необходимо указать результат заключительного диагноза");
-            return false
-        }
-        return true
-    };
-
     $scope.event_has_payments = function () {
         return $scope.event.payment && $scope.event.payment.payments.payments.length;
     };
@@ -755,35 +726,22 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
         return !$scope.event.is_new() && $scope.event.payment && !$scope.event_has_payments();
     };
 
-    $scope.open_unclosed_actions_modal = function(unclosed_actions) {
-        var modalInstance = $modal.open({
-            templateUrl: 'modal-unclosed-actions.html',
-            controller: UnclosedActionsModalCtrl,
-            resolve: {
-                unclosed_actions: function(){
-                    return unclosed_actions;
-                }
-            },
-            scope: $scope
+    $scope.close_event = function() {
+        $scope.eventServices.check_can_close_event($scope.event)
+        .then(function () {
+            $scope.eventServices.close_event($scope.event)
+            .then(function (response) {
+                MessageBox.info('Данные сохранены', response.data.meta.name)
+                .then(function () {
+                    $scope.eventForm.$setPristine();
+                    $window.location.reload(true);
+                });
+            }, function () {
+                alert('Ошибка закрытия обращения');
+            });
+        }, function () {
+            alert('Ошибка закрытия обращения');
         });
-        modalInstance.result.then(function () {
-            $scope.save_event(true);
-        });
-    };
-
-    $scope.close_event = function(){
-        if (!$scope.event.is_closed){
-            var unclosed_actions = $scope.event.get_unclosed_actions();
-            if (!$scope.event_check_results()){
-                return false;
-            } else if (!$scope.formstate.is_diagnostic() && !$scope.event_check_final_diagnosis()){
-                return false;
-            } else if (unclosed_actions.length){
-                $scope.open_unclosed_actions_modal(unclosed_actions);
-            } else {
-                $scope.save_event(true);
-            }
-        }
     };
 
     $scope.cancel_editing = function(){
@@ -820,16 +778,6 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
     }, true);
 
     $scope.initialize();
-};
-
-var UnclosedActionsModalCtrl = function ($scope, $modalInstance, unclosed_actions) {
-    $scope.unclosed_actions = unclosed_actions;
-    $scope.accept = function() {
-        $modalInstance.close();
-    };
-    $scope.cancel = function() {
-        $modalInstance.dismiss('cancel');
-    };
 };
 
 WebMis20.controller('EventDiagnosesCtrl', ['$scope', 'RefBookService', '$http', EventDiagnosesCtrl]);

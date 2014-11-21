@@ -179,6 +179,9 @@ class Client(db.Model):
         else:
             return formatDays(days)
 
+    @property
+    def is_adult(self):
+        return self.age_tuple()[3] >= 18
 
     @property
     def nameText(self):
@@ -357,6 +360,10 @@ class ClientAddress(db.Model):
     @property
     def corpus(self):
         return self.address.corpus if self.address else ''
+
+    @property
+    def is_russian(self):
+        return bool(self.KLADRCode)
 
     def set_deleted(self, val):
         self.deleted = val

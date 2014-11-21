@@ -3,7 +3,8 @@
 import datetime
 import re
 
-from application.lib.const import PAYER_EVENT_CODES, STATIONARY_EVENT_CODES, DIAGNOSTIC_EVENT_CODES
+from application.lib.const import PAYER_EVENT_CODES, STATIONARY_EVENT_CODES, DIAGNOSTIC_EVENT_CODES, \
+    POLICLINIC_EVENT_CODES, PAID_EVENT_CODE, OMS_EVENT_CODE, DMS_EVENT_CODE, BUDGET_EVENT_CODE
 from application.lib.agesex import AgeSex
 from application.lib.settings import Settings
 from application.models.client import ClientDocument
@@ -142,12 +143,32 @@ class Event(db.Model):
         return self.execDate and (self.result_id is not None)
 
     @property
+    def is_policlinic(self):
+        return self.eventType.requestType.code in POLICLINIC_EVENT_CODES
+
+    @property
     def is_stationary(self):
         return self.eventType.requestType.code in STATIONARY_EVENT_CODES
 
     @property
     def is_diagnostic(self):
         return self.eventType.requestType.code in DIAGNOSTIC_EVENT_CODES
+
+    @property
+    def is_paid(self):
+        return self.eventType.finance.code == PAID_EVENT_CODE
+
+    @property
+    def is_oms(self):
+        return self.eventType.finance.code == OMS_EVENT_CODE
+
+    @property
+    def is_dms(self):
+        return self.eventType.finance.code == DMS_EVENT_CODE
+
+    @property
+    def is_budget(self):
+        return self.eventType.finance.code == BUDGET_EVENT_CODE
 
     def __unicode__(self):
         return unicode(self.eventType)
@@ -253,6 +274,9 @@ class EventType(db.Model):
 
     def __int__(self):
         return self.id
+
+    def __unicode__(self):
+        return self.name
 
 
 class EventType_Action(db.Model):

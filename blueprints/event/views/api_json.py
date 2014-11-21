@@ -3,24 +3,21 @@
 import datetime
 
 from flask import request, abort
-from flask.ext.login import current_user
-from application.models.schedule import ScheduleClientTicket
-from application.models.utils import safe_current_user_id
 
 from config import ORGANISATION_INFIS_CODE
-from application.models.actions import ActionType, Action
+from application.models.actions import Action
 from application.models.client import Client
 from application.models.enums import EventPrimary, EventOrder
-from application.models.event import (Event, EventType, Diagnosis, Diagnostic, EventPayment, Visit,
-                                      rbVisitType, rbScene, Event_Persons)
-from application.models.exists import Person, OrgStructure, rbRequestType
+from application.models.event import (Event, EventType, Diagnosis, Diagnostic, EventPayment, Visit)
+from application.models.exists import Person, rbRequestType
 from application.systemwide import db
-from application.lib.utils import (jsonify, safe_traverse, get_new_uuid, logger, get_new_event_ext_id, safe_datetime)
-from blueprints.event.app import module
+from application.lib.utils import (jsonify, safe_traverse, logger, safe_datetime, get_utc_datetime_with_tz)
+from application.models.schedule import ScheduleClientTicket
+from application.models.utils import safe_current_user_id
 from application.models.exists import (Organisation, )
 from application.lib.jsonify import EventVisualizer
-from blueprints.event.lib.utils import (EventSaveException, create_services, create_or_update_local_contract,
-    create_or_update_diagnosis)
+from blueprints.event.app import module
+from blueprints.event.lib.utils import (EventSaveException, create_services, save_event)
 from application.lib.sphinx_search import SearchEventService
 from application.lib.data import get_planned_end_datetime, int_get_atl_dict_all, delete_action
 from application.lib.agesex import recordAcceptableEx
@@ -30,12 +27,13 @@ from application.lib.user import UserUtils
 
 @module.errorhandler(EventSaveException)
 def handle_event_error(err):
-    return jsonify({
-        'name': err.message,
-        'data': {
-            'err_msg': err.data
-        }
-    }, 422, 'error')
+    base_msg = u'Ошибка сохранения данных обращения'
+    code = err.data and err.data.get('code') or 500
+    msg = err.message or base_msg
+    ext_msg = err.data and err.data.get('ext_msg') or ''
+    if ext_msg:
+        msg = u'%s: %s' % (msg, ext_msg)
+    return jsonify(None, code, msg)
 
 
 @module.route('/api/event_info.json')
@@ -66,9 +64,10 @@ def api_event_new_get():
         setDate = datetime.datetime.now()
         note = ''
         exec_person_id = safe_current_user_id()
-    event.execPerson_id = exec_person_id
-    event.execPerson = Person.query.get(exec_person_id)
-    event.orgStructure = event.execPerson.org_structure
+    if not event.is_diagnostic:
+        event.execPerson_id = exec_person_id
+        event.execPerson = Person.query.get(exec_person_id)
+        event.orgStructure = event.execPerson.org_structure
     event.client = Client.query.get(client_id)
     event.setDate = setDate
     event.note = note
@@ -94,128 +93,42 @@ def api_event_stationary_open_get():
 
 @module.route('api/event_save.json', methods=['POST'])
 def api_event_save():
-    event_data = request.json['event']
-    diagnoses = request.json['diagnoses']
-    close_event = request.json['close_event']
+    all_data = request.json
+    event_data = all_data.get('event')
     event_id = event_data.get('id')
-    is_diagnostic = event_data['event_type']['request_type']['code'] == '4'
-    if is_diagnostic:
-        execPerson = None
-    else:
-        execPerson = Person.query.get(event_data['exec_person']['id'])
-    err_msg = u'Ошибка сохранения данных обращения'
-    create_mode = not event_id
-    if event_id:
-        event = Event.query.get(event_id)
-        event.deleted = event_data['deleted']
-        event.eventType = EventType.query.get(event_data['event_type']['id'])
-        event.execPerson = execPerson
-        event.setDate = safe_datetime(event_data['set_date'])
-        event.contract_id = event_data['contract']['id']
-        event.isPrimaryCode = event_data['is_primary']['id']
-        event.order = event_data['order']['id']
-        event.orgStructure_id = event_data['org_structure']['id']
-        event.result_id = event_data['result']['id'] if event_data.get('result') else None
-        event.rbAcheResult_id = event_data['ache_result']['id'] if event_data.get('ache_result') else None
-        event.note = event_data['note']
-
-        local_contract = safe_traverse(request.json, 'payment', 'local_contract')
-        if local_contract:
-            lcon = create_or_update_local_contract(event, local_contract)
-            event.localContract = lcon
-        db.session.add(event)
-    else:
-        event = Event()
-        event.setPerson_id = current_user.get_id()
-        event.eventType = EventType.query.get(event_data['event_type']['id'])
-        event.client_id = event_data['client_id']
-        event.execPerson = execPerson
-        event.setDate = safe_datetime(event_data['set_date'])
-        event.externalId = get_new_event_ext_id(event.eventType.id, event.client_id)
-        event.contract_id = event_data['contract']['id']
-        event.isPrimaryCode = event_data['is_primary']['id']
-        event.order = event_data['order']['id']
-        event.org_id = event_data['organisation']['id']
-        event.orgStructure_id = event_data['org_structure']['id']
-        event.payStatus = 0
-        event.note = event_data['note']
-        event.uuid = get_new_uuid()
-
-        local_contract = safe_traverse(request.json, 'payment', 'local_contract')
-        if event.payer_required:
-            if not local_contract:
-                raise EventSaveException(err_msg, u'Не заполнена информация о плательщике.')
-            lcon = create_or_update_local_contract(event, local_contract)
-            event.localContract = lcon
-        db.session.add(event)
-
-        if not is_diagnostic:
-            visit = Visit.make_default(event)
-            db.session.add(visit)
-            executives = Event_Persons()
-            executives.person = event.execPerson
-            executives.event = event
-            executives.begDate = event.setDate
-            db.session.add(executives)
-
-    for diagnosis in diagnoses:
-        create_or_update_diagnosis(event, diagnosis)
-
-    if close_event:
-        exec_date = event_data['exec_date']
-        event.execDate = safe_datetime(exec_date) if exec_date else datetime.datetime.now()
 
     try:
-        db.session.commit()
+        result = save_event(event_id, all_data)
     except EventSaveException:
         raise
     except Exception, e:
         logger.error(e, exc_info=True)
-        db.session.rollback()
-        return jsonify({'name': err_msg,
-                        'data': {
-                            'err_msg': 'INTERNAL SERVER ERROR'
-                        }},
-                       500, 'save event data error')
-    else:
-        response_result = {
-            'id': int(event)
-        }
-        services_data = request.json.get('services', [])
-        contract_id = event_data['contract']['id']
-        if create_mode:
-            try:
-                actions, errors = create_services(event.id, services_data, contract_id)
-            except Exception, e:
-                db.session.rollback()
-                logger.error(u'Ошибка сохранения услуг при создании обращения %s: %s' % (event.id, e), exc_info=True)
-                response_result['error_text'] = u'Обращение создано, но произошла ошибка при сохранении услуг. ' \
-                                                u'Свяжитесь с администратором.'
-            else:
-                if errors:
-                    err_msg = u'Обращение создано, но произошла ошибка при сохранении следующих услуг:' \
-                              u'<br><br> - %s<br>Свяжитесь с администратором.' % (u'<br> - '.join(errors))
-                    response_result['error_text'] = err_msg
+        raise EventSaveException()
 
-            if request.json.get('ticket_id'):
-                ticket = ScheduleClientTicket.query.get(int(request.json['ticket_id']))
-                ticket.event_id = int(event)
-                db.session.commit()
-        else:
-            try:
-                actions, errors = create_services(event.id, services_data, contract_id)
-            except Exception, e:
-                db.session.rollback()
-                logger.error(u'Ошибка сохранения услуг для обращения %s: %s' % (event.id, e), exc_info=True)
-                raise EventSaveException(u'Ошибка сохранения услуг', u'Свяжитесь с администратором.')
-            else:
-                if errors:
-                    err_msg = u'\n\n - %s\nСвяжитесь с администратором.' % (
-                        u'\n - '.join(errors)
-                    )
-                    raise EventSaveException(u'Произошла ошибка при сохранении следующих услуг', err_msg)
+    return jsonify(result)
 
-    return jsonify(response_result)
+
+@module.route('api/event_close.json', methods=['POST'])
+def api_event_close():
+    all_data = request.json
+    event_data = all_data['event']
+    event_id = event_data['id']
+    event = Event.query.get(event_id)
+
+    error_msg = {}
+    if not UserUtils.can_close_event(event, error_msg):
+        return jsonify(None, 403, u'Невозможно закрыть обращение: %s.' % error_msg['message'])
+
+    if not event_data['exec_date']:
+        event_data['exec_date'] = get_utc_datetime_with_tz().isoformat()
+    try:
+        save_event(event_id, all_data)
+    except EventSaveException:
+        raise
+    except Exception, e:
+        logger.error(e, exc_info=True)
+        raise EventSaveException()
+    return jsonify(None, result_name=u'Обращение закрыто')
 
 
 @module.route('/api/events/diagnosis.json', methods=['POST'])

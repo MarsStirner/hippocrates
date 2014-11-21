@@ -1,12 +1,16 @@
 # -*- coding: utf-8 -*-
 
 import hashlib
+from application.lib.utils import safe_traverse_attrs
 
 from application.systemwide import db
 from application.models.exists import Person, vrbPersonWithSpeciality
 from flask.ext.login import UserMixin, AnonymousUserMixin, current_user
 
 from application.models.enums import ActionStatus
+from application.lib.user_rights import (urEventPoliclinicPaidCreate, urEventPoliclinicOmsCreate,
+    urEventPoliclinicDmsCreate, urEventDiagnosticPaidCreate, urEventDiagnosticBudgetCreate, urEventPoliclinicPaidClose,
+    urEventPoliclinicOmsClose, urEventPoliclinicDmsClose, urEventDiagnosticPaidClose, urEventDiagnosticBudgetClose)
 
 
 class User(UserMixin):
@@ -174,6 +178,50 @@ modeRights = (
 class UserUtils(object):
 
     @staticmethod
+    def can_create_event(event, out_msg=None):
+        if out_msg is None:
+            out_msg = {'message': u'ok'}
+
+        base_msg = u'У пользователя нет прав на создание обращений типа %s'
+        event_type = event and event.eventType
+        if not event_type:
+            out_msg['message'] = u'У обращения не указан тип'
+            return False
+        if current_user.has_right('adm'):
+            return True
+        # есть ли ограничения на создание обращений определенных EventType
+        if event.is_policlinic and event.is_paid:
+            if not current_user.has_right(urEventPoliclinicPaidCreate):
+                out_msg['message'] = base_msg % unicode(event_type)
+                return False
+        elif event.is_policlinic and event.is_oms:
+            if not current_user.has_right(urEventPoliclinicOmsCreate):
+                out_msg['message'] = base_msg % unicode(event_type)
+                return False
+            client = event.client
+            if client.is_adult:
+                out_msg['message'] = u'Нельзя создавать обращения %s для пациентов старше 18 лет' % unicode(event_type)
+                return False
+            if not safe_traverse_attrs(client, 'reg_address', 'is_russian'):
+                out_msg['message'] = u'Нельзя создавать обращения %s для пациентов без адреса ' \
+                                     u'регистрации в РФ' % unicode(event_type)
+                return False
+        elif event.is_policlinic and event.is_dms:
+            if not current_user.has_right(urEventPoliclinicDmsCreate):
+                out_msg['message'] = base_msg % unicode(event_type)
+                return False
+        elif event.is_diagnostic and event.is_paid:
+            if not current_user.has_right(urEventDiagnosticPaidCreate):
+                out_msg['message'] = base_msg % unicode(event_type)
+                return False
+        elif event.is_diagnostic and event.is_budget:
+            if not current_user.has_right(urEventDiagnosticBudgetCreate):
+                out_msg['message'] = base_msg % unicode(event_type)
+                return False
+        # все остальные можно
+        return True
+
+    @staticmethod
     def can_edit_event(event):
         return event and (
             current_user.has_right('adm') or (
@@ -184,7 +232,7 @@ class UserUtils(object):
 
     @staticmethod
     def can_delete_event(event, out_msg=None):
-        if not out_msg:
+        if out_msg is None:
             out_msg = {'message': u'ok'}
 
         if not event:
@@ -219,16 +267,47 @@ class UserUtils(object):
         return False
 
     @staticmethod
-    def can_close_event(event):
-        return event and not event.is_closed and (
-            current_user.has_right('adm') or (
-                current_user.role_in('doctor', 'clinicDoctor') and
-                current_user.id == event.execPerson_id
-            ) or (
-                current_user.role_in('rRegistartor', 'clinicRegistrator') and event.is_diagnostic and
-                current_user.id == event.createPerson_id
-            )
-        )
+    def can_close_event(event, out_msg=None):
+        if out_msg is None:
+            out_msg = {'message': u'ok'}
+
+        base_msg = u'У пользователя нет прав на закрытие обращений типа %s'
+        event_type = event and event.eventType
+        if not event:
+            out_msg['message'] = u'Обращение еще не создано'
+            return False
+        if event.is_closed:
+            out_msg['message'] = u'Обращение уже закрыто'
+            return False
+        if current_user.has_right('adm'):
+            return True
+        # Состояние пользователя
+        if not current_user.id in (event.execPerson_id, event.createPerson_id):
+            out_msg['message'] = u'Пользователь не является создателем или ответственным за обращение'
+            return False
+        # есть ли ограничения на закрытие обращений определенных EventType
+        if event.is_policlinic and event.is_paid:
+            if not current_user.has_right(urEventPoliclinicPaidClose):
+                out_msg['message'] = base_msg % unicode(event_type)
+                return False
+        elif event.is_policlinic and event.is_oms:
+            if not current_user.has_right(urEventPoliclinicOmsClose):
+                out_msg['message'] = base_msg % unicode(event_type)
+                return False
+        elif event.is_policlinic and event.is_dms:
+            if not current_user.has_right(urEventPoliclinicDmsClose):
+                out_msg['message'] = base_msg % unicode(event_type)
+                return False
+        elif event.is_diagnostic and event.is_paid:
+            if not current_user.has_right(urEventDiagnosticPaidClose):
+                out_msg['message'] = base_msg % unicode(event_type)
+                return False
+        elif event.is_diagnostic and event.is_budget:
+            if not current_user.has_right(urEventDiagnosticBudgetClose):
+                out_msg['message'] = base_msg % unicode(event_type)
+                return False
+        # все остальные можно
+        return True
 
     @staticmethod
     def can_delete_action(action):

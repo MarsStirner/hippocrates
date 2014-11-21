@@ -63,38 +63,19 @@ angular.module('WebMis20.services.models').
                     services: this.services,
                     ticket_id: this.ticket_id,
                     close_event: close_event
-                }).
-                    success(function(response) {
-                        var event_id = response.result.id,
-                            error_text = response.result.error_text;
-                        deferred.resolve({
-                            event_id: event_id,
-                            error_text: error_text
-                        });
-                    }).
-                    error(function(response) {
-                        var rr = response.result;
-                        var message = rr.name + ': ' + (rr.data ? rr.data.err_msg : '');
-                        deferred.reject(message);
+                })
+                .success(function(response) {
+                    var event_id = response.result.id,
+                        error_text = response.result.error_text;
+                    deferred.resolve({
+                        event_id: event_id,
+                        error_text: error_text
                     });
+                })
+                .error(function(response) {
+                    deferred.reject(response.meta.name);
+                });
                 return deferred.promise;
-            };
-
-            WMEvent.prototype.get_unclosed_actions = function() {
-                var unclosed_actions = [];
-                this.info.actions.forEach(function(item){
-                    if (item.status < 2){
-                        unclosed_actions.push(item);
-                    }
-                });
-                return unclosed_actions
-            };
-
-            WMEvent.prototype.get_final_diagnosis = function() {
-                var final_diagnosis = this.diagnoses.filter(function(item){
-                    return item.diagnosis_type.code == 1;
-                });
-                return final_diagnosis.length ? final_diagnosis : null
             };
 
             WMEvent.prototype.is_new = function() {
