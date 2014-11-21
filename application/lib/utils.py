@@ -382,6 +382,16 @@ def format_date(d):
         return d
 
 
+def get_utc_datetime_with_tz(dt=None):
+    """Получить датувремя в ютс с таймзоной.
+    С последующим .isoformat() результат будет в таком же формате,
+    как в запросе из браузера"""
+    if not dt:
+        dt = datetime.datetime.now()
+    dt_with_tz = timezone(TIME_ZONE).localize(dt)
+    return dt_with_tz.astimezone(timezone('UTC'))
+
+
 def get_new_uuid():
     """Сгенерировать новый uuid уникальный в пределах бд.
     @rtype: application.models.exist.UUID
