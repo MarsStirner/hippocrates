@@ -24,7 +24,7 @@ var ChartCtrl = function ($scope, RisarApi, RisarNotificationService, Config, $t
                 if (pregnancy_week > 40) pregnancy_week = '40+';
                 $scope.pregnancy_week = pregnancy_week;
             } else {
-                $scope.pregnancy_week = '?'
+                $scope.pregnancy_week = ''
             }
         })
     };

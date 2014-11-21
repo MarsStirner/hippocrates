@@ -47,18 +47,24 @@
                             <li>
                                 <a href="#third" data-toggle="tab">
                                     <span class="badge">3</span>
-                                    <span>Акушерский и специальный статусы</span>
+                                    <span>Акушерский статус</span>
                                 </a>
                             </li>
                             <li>
                                 <a href="#fourth" data-toggle="tab">
                                     <span class="badge">4</span>
+                                    <span>Комментарии к анализам</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#fifth" data-toggle="tab">
+                                    <span class="badge">5</span>
                                     <span>Заключение</span>
                                 </a>
                             </li>
                             <li>
                                 <a href="#last" data-toggle="tab">
-                                    <span class="badge">5</span>
+                                    <span class="badge">6</span>
                                     <span>Диагностические мероприятия</span>
                                 </a>
                             </li>
@@ -177,7 +183,7 @@
                         </table>
                     </div>
                     <div class="tab-pane" id="third">
-                        <h3>Шаг 3. Акушерский и специальный статусы</h3>
+                        <h3>Шаг 3. Акушерский статус</h3>
                         <table class="table table-condensed">
                             <thead>
                             <tr>
@@ -187,12 +193,22 @@
                             </thead>
                             <tbody>
                                 <tr>
-                                    <th>Акушерский статус</th>
+                                    <th>Наружное исследование</th>
                                     <td>&nbsp;</td>
                                 </tr>
                                 <tr>
                                     <th>Окружность живота</th>
                                     <td><div class="row"><div class="col-md-4"><input ng-model="checkup.abdominal" class="form-control"></div></div></td>
+                                </tr>
+                                <tr>
+                                    <th>Высота стояния дна матки</th>
+                                    <td><div class="row"><div class="col-md-4"><input ng-model="checkup.fundal_height" class="form-control"></div></div></td>
+                                </tr>
+                                <tr>
+                                    <th>Состояние матки</th>
+                                    <td><div ng-class="{'has-error': CheckupFirstEditForm.metra_state.$invalid}">
+                                        <rb-select name="metra_state" ng-model="checkup.metra_state" ref-book="rbRisarMetra_State" ng-required="true"></rb-select>
+                                    </div></td>
                                 </tr>
                                 <tr>
                                     <th>Плод</th>
@@ -207,19 +223,24 @@
                                     <td><rb-select ng-model="checkup.presenting_part" ref-book="rbRisarPresenting_Part"></rb-select></td>
                                 </tr>
                                 <tr>
-                                    <th>Матка</th>
+                                    <td>Сердцебиение</td>
+                                    <td><rb-select ng-model="checkup.presenting_part" ref-book="rbRisarFetus_Heartbeat"></rb-select></td>
+                                </tr>
+                                <tr>
+                                    <td>ЧСС, уд/мин</td>
+                                    <td><rb-select ng-model="checkup.presenting_part" ref-book="rbRisarFetus_Heart_Rate"></rb-select></td>
+                                </tr>
+                                <tr>
+                                    <td>Шевеление</td>
+                                    <td><wysiwyg ng-model="fetus_movement" /></td>
+                                </tr>
+                                <tr>
+                                    <th>Внутреннее исследование</th>
                                     <td>&nbsp;</td>
                                 </tr>
-
                                 <tr>
-                                    <td>Высота стояния дна матки</td>
-                                    <td><div class="row"><div class="col-md-4"><input ng-model="checkup.fundal_height" class="form-control"></div></div></td>
-                                </tr>
-                                <tr>
-                                    <td>Состояние матки</td>
-                                    <td><div ng-class="{'has-error': CheckupFirstEditForm.metra_state.$invalid}">
-                                        <rb-select name="metra_state" ng-model="checkup.metra_state" ref-book="rbRisarMetra_State" ng-required="true"></rb-select>
-                                    </div></td>
+                                    <th>Шейка матки</th>
+                                    <td>&nbsp;</td>
                                 </tr>
                                 <tr>
                                     <td>Длина шейки</td>
@@ -238,38 +259,47 @@
                                     <td><rb-select ng-model="checkup.cervix_consistency" ref-book="rbRisarCervix_Consistency"></rb-select></td>
                                 </tr>
                                 <tr>
-                                    <td>Цервикальный канал</td>
+                                    <th>Цервикальный канал</th>
                                     <td><rb-select ng-model="checkup.cervical_canal" ref-book="rbRisarCervical_Canal"></rb-select></td>
                                 </tr>
                                 <tr>
-                                    <th>Отклонения от нормы результатов исследований</th>
-                                    <td>&nbsp;</td>
-                                </tr>
-                                <tr>
-                                    <td>Мочи</td>
-                                    <td><wysiwyg ng-model="checkup.urine_deviation" /></td>
-                                </tr>
-                                <tr>
-                                    <td>Крови</td>
-                                    <td><wysiwyg ng-model="checkup.blood_deviation" /></td>
-                                </tr>
-                                <tr>
-                                    <td>УЗИ</td>
-                                    <td><wysiwyg ng-model="checkup.us_deviation" /></td>
-                                </tr>
-                                <tr>
-                                    <th>Специальный статус</th>
-                                    <td>&nbsp;</td>
-                                </tr>
-                                <tr>
-                                    <td>Выделения</td>
+                                    <th>Выделение</th>
                                     <td><rb-select ng-model="checkup.secretion" ref-book="rbRisarSecretion"></rb-select></td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
                     <div class="tab-pane" id="fourth">
-                        <h3>Шаг 4. Заключение</h3>
+                        <h3>Шаг 4. Комментарии к анализам</h3>
+                        <table class="table table-condensed">
+                            <thead>
+                            <tr>
+                                <th class="col-md-4"></th>
+                                <th class="col-md-8"></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <th>Мочи</th>
+                                    <td><wysiwyg ng-model="checkup.urine" /></td>
+                                </tr>
+                                <tr>
+                                    <th>Крови</th>
+                                    <td><wysiwyg ng-model="checkup.blood" /></td>
+                                </tr>
+                                <tr>
+                                    <th>УЗИ</th>
+                                    <td><wysiwyg ng-model="checkup.us" /></td>
+                                </tr>
+                                <tr>
+                                    <th>Другое</th>
+                                    <td><wysiwyg ng-model="checkup.other_analysis" /></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="tab-pane" id="fifth">
+                        <h3>Шаг 5. Заключение</h3>
                         <table class="table table-condensed">
                             <thead>
                             <tr>
@@ -348,7 +378,7 @@
                         </table>
                     </div>
                     <div class="tab-pane" id="last">
-                        <h2>Шаг 5. Диагностические мероприятия</h2>
+                        <h2>Шаг 6. Диагностические мероприятия</h2>
                         <table class="table">
                             <thead>
                                 <tr>
@@ -362,34 +392,40 @@
                                 <tr>
                                     <td>Общий анализ крови</td>
                                     <td>12.09.2014 - 12.10.2014</td>
-                                    <td><a class="print_link" href="#">Напечатать направление</a><a class="print_link" href="#">Редактировать направление</a></td>
+                                    <td><a class="print_link" href="#"><span class="glyphicon glyphicon-print"></span> Печать</a>
+                                        <a class="print_link" href="#"><span class="glyphicon glyphicon-pencil"></span> Редактировать</a></td>
                                 </tr>
                                 <tr>
                                     <td><span class="text-danger" tooltip="Исследование просрочено">Общий анализ мочи</span></td>
                                     <td>12.09.2014 - 12.10.2014</td>
-                                    <td><a class="print_link" href="#">Напечатать направление</a><a class="print_link" href="#">Редактировать направление</a></td>
+                                    <td><a class="print_link" href="#"><span class="glyphicon glyphicon-print"></span> Печать</a>
+                                        <a class="print_link" href="#"><span class="glyphicon glyphicon-pencil"></span> Редактировать</a></td>
                                 </tr>
                                 <tr>
                                     <td>Определение антител M,G к гепатиту B</td>
                                     <td>12.09.2014 - 12.11.2014</td>
-                                    <td><a class="print_link" href="#">Напечатать направление</a><a class="print_link" href="#">Редактировать направление</a></td>
+                                    <td><a class="print_link" href="#"><span class="glyphicon glyphicon-print"></span> Печать</a>
+                                        <a class="print_link" href="#"><span class="glyphicon glyphicon-pencil"></span> Редактировать</a></td>
                                 </tr>
                                 <tr><th colspan="3" style="text-align: center;">Функциональные исследования</th></tr>
                                 <tr>
                                     <td>УЗИ плода I триместр</td>
                                     <td>12.09.2014 - 12.12.2014</td>
-                                    <td><a class="print_link" href="#">Напечатать направление</a><a class="print_link" href="#">Редактировать направление</a></td>
+                                    <td><a class="print_link" href="#"><span class="glyphicon glyphicon-print"></span> Печать</a>
+                                        <a class="print_link" href="#"><span class="glyphicon glyphicon-pencil"></span> Редактировать</a></td>
                                 </tr>
                                 <tr><th colspan="3" style="text-align: center;">Консультации специалистов</th></tr>
                                 <tr>
                                     <td>Консультация стоматолога</td>
                                     <td>12.09.2014 - 12.02.2014</td>
-                                    <td><a class="print_link" href="#">Напечатать направление</a><a class="print_link" href="#">Редактировать направление</a></td>
+                                    <td><a class="print_link" href="#"><span class="glyphicon glyphicon-print"></span> Печать</a>
+                                        <a class="print_link" href="#"><span class="glyphicon glyphicon-pencil"></span> Редактировать</a></td>
                                 </tr>
                                 <tr>
                                     <td>Консультация офтальмолога</td>
                                     <td>12.09.2014 - 12.02.2014</td>
-                                    <td><a class="print_link" class="print_link" href="#">Напечатать направление</a><a class="print_link" href="#">Редактировать направление</a></td>
+                                    <td><a class="print_link" href="#"><span class="glyphicon glyphicon-print"></span> Печать</a>
+                                        <a class="print_link" href="#"><span class="glyphicon glyphicon-pencil"></span> Редактировать</a></td>
                                 </tr>
                                 <tr><th colspan="3" style="text-align: center;">Дополнительные мероприятия</th></tr>
                                 <tr>
