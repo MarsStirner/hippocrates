@@ -87,7 +87,7 @@ def api_0_attach_lpu():
         return jsonify(None, 400, 'Client is not set')
     data = request.get_json()
 
-    result = []
+    result = {}
     for attach_type in data:
         attach_lpu = data[attach_type]
         if attach_lpu:
@@ -104,6 +104,6 @@ def api_0_attach_lpu():
             obj.begDate = datetime.now()
             db.session.add(obj)
             db.session.commit()
-            result.append(obj)
+            result[attach_type]= obj
     return jsonify(result
     )

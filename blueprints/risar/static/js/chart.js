@@ -44,7 +44,9 @@ var ChartCtrl = function ($scope, $modal, RisarApi, RisarNotificationService, Co
     };
     $scope.attach_lpu_edit = function () {
         open_attach_lpu_edit().result.then(function (result) {
-            RisarApi.attach_lpu.save($scope.chart.client.id, result);
+            RisarApi.attach_lpu.save($scope.chart.client.id, result).then(function(result){
+                $scope.chart.client.attach_lpu = result;
+            });
         }, function(){
             reload_chart();
         });
