@@ -7,6 +7,7 @@ from application.lib.utils import safe_traverse_attrs
 from application.models.actions import Action, ActionType
 from application.models.client import BloodHistory
 from application.models.enums import Gender, AllergyPower, IntoleranceType
+from application.models.exists import rbAttachType
 from application.systemwide import cache, db
 from ..risar_config import pregnancy_apt_codes, risar_anamnesis_pregnancy, transfusion_apt_codes, \
     risar_anamnesis_transfusion, mother_codes, father_codes, risar_father_anamnesis, risar_mother_anamnesis, \
@@ -38,6 +39,7 @@ def represent_event(event):
             'age': client.age,
             'sex_raw': client.sexCode,
             'cmi_policy': client.policy,
+            'attach_lpu': get_lpu_attached(client.attachments)
         },
         'set_date': event.setDate,
         'person': event.execPerson,
@@ -64,6 +66,14 @@ def represent_event(event):
         'epicrisis': None,
         'checkups': represent_checkups(event),
         'risk_rate': get_risk_rate(get_all_diagnoses(event.actions))
+    }
+
+
+def get_lpu_attached(attachments):
+
+    return {
+        'plan_lpu': attachments.join(rbAttachType).filter(rbAttachType.code == 10).first(),
+        'extra_lpu': attachments.join(rbAttachType).filter(rbAttachType.code == 11).first()
     }
 
 

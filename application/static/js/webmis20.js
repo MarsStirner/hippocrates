@@ -365,6 +365,20 @@ var WebMis20 = angular.module('WebMis20', [
             '';
     }
 })
+.filter('organisation_filter', function() {
+    return function(items) {
+        var out = [];
+        if(items) {
+            items.forEach(function(item){
+                if (!item.hasOwnProperty('is_hospital') ||
+                    (item.hasOwnProperty('is_hospital') && item.is_hospital)) {
+                    out.push(item);
+                }
+            });
+        }
+        return out;
+    };
+})
 // Services
 .factory('RefBook', ['$http', '$rootScope', function ($http, $rootScope) {
     var RefBook = function (name) {

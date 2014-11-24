@@ -1,0 +1,36 @@
+<div class="modal-header">
+    <h3 class="modal-title">Выбор ЛПУ для родоразрешения</h3>
+</div>
+<div class="modal-body">
+    <div class="das-form">
+        <div class="row">
+            <div class="col-md-3">ЛПУ для экстренного родоразрешения</div>
+            <div class="col-md-9">
+                <ui-select ng-model="model.extra_lpu.org" theme="select2" class="form-control" autocomplete="off" ref-book="Organisation">
+                    <ui-select-match placeholder="не выбрано">[[ $select.selected.full_name ]]</ui-select-match>
+                    <ui-select-choices repeat="item in $refBook.objects | organisation_filter | filter: $select.search | limitTo: 50">
+                        <span ng-bind-html="item.full_name | highlight: $select.search"></span>
+                    </ui-select-choices>
+                </ui-select>
+            </div>
+        </div>
+    </div>
+    <div class="das-form">
+        <div class="row">
+            <div class="col-md-3">ЛПУ для планового родоразрешения</div>
+            <div class="col-md-9">
+                <ui-select ng-model="model.plan_lpu.org" theme="select2" class="form-control" autocomplete="off" ref-book="Organisation">
+                    <ui-select-match placeholder="не выбрано">[[ $select.selected.full_name ]]</ui-select-match>
+                    <ui-select-choices repeat="item in $refBook.objects | organisation_filter | filter: $select.search | limitTo: 50">
+                        <span ng-bind-html="item.full_name | highlight: $select.search"></span>
+                    </ui-select-choices>
+                </ui-select>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-footer">
+    <button class="btn btn-success" ng-click="$close(model)">Сохранить</button>
+    <a class="pseudo-btn" ng-click="$dismiss()">Отменить</a>
+</div>

@@ -4,7 +4,7 @@
 
 'use strict';
 
-var ChartCtrl = function ($scope, RisarApi, RisarNotificationService, Config, $timeout) {
+var ChartCtrl = function ($scope, $modal, RisarApi, RisarNotificationService, Config, $timeout) {
     var params = aux.getQueryParams(window.location.search);
     var ticket_id = params.ticket_id;
     var event_id = params.event_id;
@@ -28,10 +28,27 @@ var ChartCtrl = function ($scope, RisarApi, RisarNotificationService, Config, $t
             }
         })
     };
+    var open_attach_lpu_edit = function () {
+        var scope = $scope.$new();
+        scope.model = $scope.chart.client.attach_lpu;
+        return $modal.open({
+            templateUrl: '/WebMis20/RISAR/modal/attach_lpu.html',
+            scope: scope,
+            size: 'lg'
+        })
+    };
     $scope.cancel_created = function () {
         RisarApi.chart.delete(ticket_id).then(function success() {
             window.location.replace(Config.url.index_html);
         })
     };
+    $scope.attach_lpu_edit = function () {
+        open_attach_lpu_edit().result.then(function (result) {
+            RisarApi.attach_lpu.save($scope.chart.client.id, result);
+        }, function(){
+            reload_chart();
+        });
+    };
+
     reload_chart();
 };

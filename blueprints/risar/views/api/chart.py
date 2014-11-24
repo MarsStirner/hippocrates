@@ -1,14 +1,17 @@
 # -*- coding: utf-8 -*-
+from datetime import datetime
 from flask import request
-from application.lib.utils import jsonify, get_new_event_ext_id
-from application.models.client import Client
+
+from application.lib.utils import jsonify, get_new_event_ext_id, safe_traverse
+from application.models.client import Client, ClientAttach
 from application.models.enums import EventPrimary, EventOrder
 from application.models.event import Event, EventType
-from application.models.exists import Organisation, Person
+from application.models.exists import Organisation, Person, rbAttachType
 from application.models.schedule import ScheduleClientTicket
 from application.systemwide import db
 from blueprints.risar.app import module
-from blueprints.risar.lib.represent import represent_event
+from blueprints.risar.lib.represent import represent_event, get_lpu_attached
+from blueprints.risar.risar_config import attach_codes
 from config import ORGANISATION_INFIS_CODE
 
 __author__ = 'mmalkov'
@@ -75,3 +78,32 @@ def api_0_chart(event_id=None):
         'event': represent_event(event),
         'automagic': automagic
     })
+
+
+@module.route('/api/0/chart/attach_lpu/', methods=['POST'])
+def api_0_attach_lpu():
+    client_id = request.args.get('client_id', None)
+    if client_id is None:
+        return jsonify(None, 400, 'Client is not set')
+    data = request.get_json()
+
+    result = []
+    for attach_type in data:
+        attach_lpu = data[attach_type]
+        if attach_lpu:
+            if attach_lpu.get('id') is None:
+                obj = ClientAttach()
+            else:
+                obj = ClientAttach.query.get(attach_lpu['id'])
+                if obj is None:
+                    return jsonify(None, 404, 'Attach not found')
+
+            obj.client_id = client_id
+            obj.attachType = rbAttachType.query.filter(rbAttachType.code == attach_codes[attach_type]).first()
+            obj.org = Organisation.query.get(safe_traverse(attach_lpu, 'org', 'id'))
+            obj.begDate = datetime.now()
+            db.session.add(obj)
+            db.session.commit()
+            result.append(obj)
+    return jsonify(result
+    )
