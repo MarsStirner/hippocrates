@@ -136,7 +136,7 @@
                     </table>
                 </div>
                 <div class="panel panel-default">
-                    <div class="panel-heading">ЛПУ родоразрешения (<a ng-click="attach_lpu_edit()">[[chart.client.attach_lpu ? 'Изменить' : 'Указать']]</a>)</div>
+                    <div class="panel-heading">ЛПУ родоразрешения (<a ng-click="attach_lpu_edit()">[[(chart.client.attach_lpu.extra_lpu || chart.client.attach_lpu.plan_lpu) ? 'Изменить' : 'Указать']]</a>)</div>
                     <table class="table table-condensed">
                         <tbody>
                         <tr>
