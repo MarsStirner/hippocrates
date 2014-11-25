@@ -467,7 +467,7 @@ class ClientAttach(db.Model):
     createPerson_id = db.Column(db.Integer, index=True, default=safe_current_user_id)
     modifyDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now,
                                onupdate=datetime.datetime.now)
-    modifyPerson_id = db.Column(db.Integer, index=True, default=safe_current_user_id,
+    modifyPerson_id = db.Column(db.ForeignKey('Person.id'), index=True, default=safe_current_user_id,
                                 onupdate=safe_current_user_id)
     deleted = db.Column(db.Integer, nullable=False, server_default=u"'0'")
     client_id = db.Column(db.ForeignKey('Client.id'), nullable=False, index=True)
@@ -483,6 +483,7 @@ class ClientAttach(db.Model):
     org = db.relationship(u'Organisation')
     orgStructure = db.relationship(u'OrgStructure')
     attachType = db.relationship(u'rbAttachType')
+    modifyPerson = db.relationship(u'Person')
 
     @property
     def code(self):
@@ -514,7 +515,9 @@ class ClientAttach(db.Model):
             'id': self.id,
             'deleted': self.deleted,
             'org': self.org,
-            'attach_type': self.attachType
+            'attach_type': self.attachType,
+            'begDate': self.begDate,
+            'modifyPerson': self.modifyPerson.shortNameText
         }
 
     def __int__(self):

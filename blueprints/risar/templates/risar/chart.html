@@ -136,16 +136,18 @@
                     </table>
                 </div>
                 <div class="panel panel-default">
-                    <div class="panel-heading">ЛПУ родоразрешения (<a ng-click="attach_lpu_edit()">[[(chart.client.attach_lpu.extra_lpu || chart.client.attach_lpu.plan_lpu) ? 'Изменить' : 'Указать']]</a>)</div>
+                    <div class="panel-heading">ЛПУ родоразрешения (<a href="#" ng-click="attach_lpu_edit()">[[(chart.client.attach_lpu.extra_lpu || chart.client.attach_lpu.plan_lpu) ? 'изменить' : 'указать']]</a>).</div>
                     <table class="table table-condensed">
                         <tbody>
                         <tr>
                             <td>Экстренное</td>
-                            <td>[[chart.client.attach_lpu.extra_lpu.org.short_name]]</td>
+                            <td><span tooltip="Выбрано пользователем [[chart.client.attach_lpu.extra_lpu.modifyPerson]] [[chart.client.attach_lpu.extra_lpu.begDate]]"
+                                    >[[chart.client.attach_lpu.extra_lpu.org.short_name]]</span></td>
                         </tr>
                         <tr>
                             <td>Плановое</td>
-                            <td>[[chart.client.attach_lpu.plan_lpu.org.short_name]]</td>
+                            <td><span tooltip="Выбрано пользователем [[chart.client.attach_lpu.extra_lpu.modifyPerson]] [[chart.client.attach_lpu.extra_lpu.begDate]]"
+                                    >[[chart.client.attach_lpu.plan_lpu.org.short_name]]</span></td>
                         </tr>
                         </tbody>
                     </table>
