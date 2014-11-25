@@ -1,6 +1,21 @@
 'use strict';
 
 angular.module('WebMis20.services.models').
+    service('WMEventCache', ['WMEvent', '$q', function (WMEvent, $q) {
+        var cache = {};
+        this.get = function (event_id) {
+            if (cache.hasOwnProperty(event_id)) {
+                var deferred = $q.defer();
+                deferred.resolve(cache[event_id]);
+                return deferred.promise;
+            }
+            var event = new WMEvent(event_id);
+            return event.reload().then(function () {
+                return cache[event_id] = event;
+            });
+        };
+        return this;
+    }]).
     factory('WMEvent', ['$http', '$q', 'WMClient', 'WMEventServiceGroup', 'WMEventPaymentList',
         function($http, $q, WMClient, WMEventServiceGroup, WMEventPaymentList) {
             var WMEvent = function(event_id, client_id, ticket_id) {
@@ -12,6 +27,7 @@ angular.module('WebMis20.services.models').
                 this.diagnoses = [];
                 this.services = [];
                 this.ro = false;
+                return this;
             };
 
             WMEvent.prototype.reload = function() {
@@ -23,8 +39,7 @@ angular.module('WebMis20.services.models').
                 } : {
                     event_id: this.event_id
                 };
-                var deferred = $q.defer();
-                $http.get(url, {
+                return $http.get(url, {
                     params: params
                 }).success(function (data) {
                     self.info = data.result.event;
@@ -45,12 +60,7 @@ angular.module('WebMis20.services.models').
                         return new WMEventServiceGroup(service, self.payment.payments);
                     }) || [];
                     self.is_closed = self.closed();
-                    deferred.resolve();
-                }).
-                error(function(data) {
-                    deferred.reject('error load event');
                 });
-                return deferred.promise;
             };
 
             WMEvent.prototype.save = function(close_event) {

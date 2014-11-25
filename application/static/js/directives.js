@@ -819,12 +819,15 @@ angular.module('WebMis20.directives')
             }
         }
     }])
-    .directive('wmDiagnosis', ['DiagnosisModal', 'WMEventServices', function(DiagnosisModal, WMEventServices){
+    .directive('wmDiagnosis', ['DiagnosisModal', 'WMEventServices', 'WMEventCache',
+            function(DiagnosisModal, WMEventServices, WMEventCache) {
         return{
             restrict: 'E',
             replace: true,
             scope: {
                 model: '=',
+                action: '=?',
+                event: '=?',
                 listMode: '=',
                 canAddNew: '=',
                 canDelete: '=',
@@ -833,14 +836,15 @@ angular.module('WebMis20.directives')
             },
             controller: function ($scope) {
                 $scope.add_new_diagnosis = function () {
-                    var new_diagnosis = WMEventServices.add_new_diagnosis();
-                    DiagnosisModal.openDiagnosisModal(new_diagnosis).then(function () {
+                    var new_diagnosis = WMEventServices.get_new_diagnosis($scope.action.action);
+                    DiagnosisModal.openDiagnosisModal(new_diagnosis, $scope.action).then(function () {
                         if ($scope.listMode) {
                             $scope.model.push(new_diagnosis);
                         }
                         else {
                             $scope.model = new_diagnosis;
                         }
+                        WMEventServices.add_diagnosis($scope.event, new_diagnosis);
                     });
                 };
                 $scope.delete_diagnosis = function (diagnosis) {
@@ -849,9 +853,10 @@ angular.module('WebMis20.directives')
                     } else {
                         $scope.model = null;
                     }
+                    WMEventServices.delete_diagnosis($scope.event.diagnoses, diagnosis);
                 };
                 $scope.edit_diagnosis = function (diagnosis) {
-                    DiagnosisModal.openDiagnosisModal(diagnosis);
+                    DiagnosisModal.openDiagnosisModal(diagnosis, $scope.action);
                 };
                 $scope.open_action = function (action_id) {
                     if(action_id && $scope.clickable){
@@ -927,19 +932,55 @@ angular.module('WebMis20.directives')
                 scope.add_new_btn_visible = function () {
                     return scope.canAddNew && (scope.listMode ? true : !scope.model)
                 };
+                if (scope.action || scope.event) {
+                    WMEventCache.get(scope.action.action.event_id).then(function (event) {
+                        scope.event = event;
+                    });
+                }
             }
         }
     }])
-.service('DiagnosisModal', ['$modal', 'WMEvent', function ($modal, WMEvent) {
+.service('DiagnosisModal', ['$modal', 'WMEventCache', function ($modal, WMEventCache) {
     return {
-        openDiagnosisModal: function (model) {
+        openDiagnosisModal: function (model, action) {
             var locModel = angular.copy(model);
-            var Controller = function ($scope, $modalInstance) {
+            var Controller = function ($scope) {
                 $scope.model = locModel;
+                $scope.diag_type_codes = ['2', '3', '7', '9', '11'];
+
+                $scope.event = null;
+                WMEventCache.get(action.action.event_id).then(function (event) {
+                    $scope.event = event;
+                    $scope.can_set_final_diag = (
+                        // только лечащий врач
+                        current_user_id === event.info.exec_person.id &&
+                        // в текущем действии еще нет заключительных диагнозов
+                        action.action.properties.filter(function (prop) {
+                            return (prop.type.type_name === 'Diagnosis' && (
+                                prop.type.vector ? (
+                                    prop.value.length && prop.value.some(function (diag) {
+                                        return diag.diagnosis_type.code === '1' && diag.deleted === 0;
+                                    })
+                                ) : (prop.value && prop.value.diagnosis_type.code === '1' && diag.deleted === 0))
+                            )
+                        }).length === 0 &&
+                        // в других *закрытых* действиях нет заключительных диагнозов
+                        event.diagnoses.filter(function (diag) {
+                            return diag.diagnosis_type.code === '1' && diag.action.status.code === 'finished';
+                        }).length === 0
+                    );
+                    if ($scope.can_set_final_diag) {
+                        $scope.diag_type_codes.push('1');
+                    }
+                });
+
                 $scope.filter_type = function() {
                     return function(elem) {
-                        return ["1", "2", "3", "7", "9", "11"].indexOf(elem.code) > -1;
+                        return $scope.diag_type_codes.has(elem.code);
                     };
+                };
+                $scope.result_required = function () {
+                    return safe_traverse($scope.model, ['diagnosis_type', 'code']) === '1';
                 };
             };
             var instance = $modal.open({
@@ -967,8 +1008,7 @@ angular.module('WebMis20.directives')
                              ng-class="{\'has-error\': DiagnosisForm.diagnosis_type.$invalid}">\
                             <label for="diagnosis_type" class="control-label">Тип</label>\
                             <ui-select class="form-control" name="diagnosis_type" theme="select2"\
-                                ng-model="model.diagnosis_type"\
-                                ref-book="rbDiagnosisType"\
+                                ng-model="model.diagnosis_type" ref-book="rbDiagnosisType"\
                                 ng-required="true">\
                                 <ui-select-match placeholder="не выбрано">[[ $select.selected.name ]]</ui-select-match>\
                                 <ui-select-choices repeat="dt in ($refBook.objects | filter: $select.search | filter: filter_type()) track by dt.id">\
@@ -1003,8 +1043,7 @@ angular.module('WebMis20.directives')
                     <div class="col-md-3">\
                         <label for="diagnosis_character" class="control-label">Характер</label>\
                         <ui-select class="form-control" name="diagnosis_character" theme="select2"\
-                            ng-model="model.character"\
-                            ref-book="rbDiseaseCharacter">\
+                            ng-model="model.character" ref-book="rbDiseaseCharacter">\
                             <ui-select-match placeholder="не выбрано">[[ $select.selected.name ]]</ui-select-match>\
                             <ui-select-choices repeat="ct in ($refBook.objects | filter: $select.search) track by ct.id">\
                                 <span ng-bind-html="ct.name | highlight: $select.search"></span>\
@@ -1022,11 +1061,12 @@ angular.module('WebMis20.directives')
                     </div>\
                 </div>\
                 <div class="row marginal">\
-                    <div class="col-md-4">\
+                    <div class="col-md-4"\
+                        ng-class="{\'has-error\': DiagnosisForm.result.$invalid}">\
                         <label for="result" class="control-label">Результат</label>\
                         <ui-select class="form-control" name="result" theme="select2"\
-                            ng-model="model.result"\
-                            ref-book="rbResult">\
+                            ng-model="model.result" ref-book="rbResult"\
+                            ng-required="result_required()">\
                             <ui-select-match placeholder="не выбрано">[[ $select.selected.name ]]</ui-select-match>\
                             <ui-select-choices repeat="r in ($refBook.objects | filter: $select.search | rb_result_filter: 2) track by r.id">\
                                 <span ng-bind-html="r.name | highlight: $select.search"></span>\
@@ -1036,8 +1076,7 @@ angular.module('WebMis20.directives')
                     <div class="col-md-4">\
                         <label for="ache_result" class="control-label">Исход</label>\
                         <ui-select class="form-control" name="ache_result" theme="select2"\
-                            ng-model="model.ache_result"\
-                            ref-book="rbAcheResult">\
+                            ng-model="model.ache_result" ref-book="rbAcheResult">\
                             <ui-select-match placeholder="не выбрано">[[ $select.selected.name ]]</ui-select-match>\
                             <ui-select-choices repeat="ar in ($refBook.objects | filter: $select.search) track by ar.id">\
                                 <span ng-bind-html="ar.name | highlight: $select.search"></span>\
@@ -1062,8 +1101,7 @@ angular.module('WebMis20.directives')
                     <div class="col-md-3">\
                         <label for="phase" class="control-label">Фаза</label>\
                         <ui-select class="form-control" name="phase" theme="select2"\
-                            ng-model="model.phase"\
-                            ref-book="rbDiseasePhases">\
+                            ng-model="model.phase" ref-book="rbDiseasePhases">\
                             <ui-select-match placeholder="не выбрано">[[ $select.selected.name ]]</ui-select-match>\
                             <ui-select-choices repeat="dp in ($refBook.objects | filter: $select.search) track by dp.id">\
                                 <span ng-bind-html="dp.name | highlight: $select.search"></span>\
@@ -1073,8 +1111,7 @@ angular.module('WebMis20.directives')
                     <div class="col-md-3">\
                         <label for="stage" class="control-label">Стадия</label>\
                         <ui-select class="form-control" name="stage" theme="select2"\
-                            ng-model="model.stage"\
-                            ref-book="rbDiseaseStage">\
+                            ng-model="model.stage" ref-book="rbDiseaseStage">\
                             <ui-select-match placeholder="не выбрано">[[ $select.selected.name ]]</ui-select-match>\
                             <ui-select-choices repeat="ds in ($refBook.objects | filter: $select.search) track by ds.id">\
                                 <span ng-bind-html="ds.name | highlight: $select.search"></span>\
@@ -1086,8 +1123,7 @@ angular.module('WebMis20.directives')
                     <div class="col-md-3">\
                         <label for="trauma" class="control-label">Травма</label>\
                         <ui-select class="form-control" name="trauma" theme="select2"\
-                            ng-model="model.trauma_type"\
-                            ref-book="rbTraumaType">\
+                            ng-model="model.trauma_type" ref-book="rbTraumaType">\
                             <ui-select-match placeholder="не выбрано">[[ $select.selected.name ]]</ui-select-match>\
                             <ui-select-choices repeat="tt in ($refBook.objects | filter: $select.search) track by tt.id">\
                                 <span ng-bind-html="tt.name | highlight: $select.search"></span>\
@@ -1097,8 +1133,7 @@ angular.module('WebMis20.directives')
                     <div class="col-md-3">\
                         <label for="health_group" class="control-label">Группа здоровья</label>\
                         <ui-select class="form-control" name="health_group" theme="select2"\
-                            ng-model="model.health_group"\
-                            ref-book="rbHealthGroup">\
+                            ng-model="model.health_group" ref-book="rbHealthGroup">\
                             <ui-select-match placeholder="не выбрано">[[ $select.selected.name ]]</ui-select-match>\
                             <ui-select-choices repeat="hg in ($refBook.objects | filter: $select.search) track by hg.id">\
                                 <span ng-bind-html="hg.name | highlight: $select.search"></span>\
@@ -1108,8 +1143,7 @@ angular.module('WebMis20.directives')
                     <div class="col-md-3">\
                         <label for="dispanser" class="control-label">Диспансерное наблюдение</label>\
                         <ui-select class="form-control" name="dispanser" theme="select2"\
-                            ng-model="model.dispanser"\
-                            ref-book="rbDispanser">\
+                            ng-model="model.dispanser" ref-book="rbDispanser">\
                             <ui-select-match placeholder="не выбрано">[[ $select.selected.name ]]</ui-select-match>\
                             <ui-select-choices repeat="d in ($refBook.objects | filter: $select.search) track by d.id">\
                                 <span ng-bind-html="d.name | highlight: $select.search"></span>\
