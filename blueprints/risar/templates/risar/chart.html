@@ -64,23 +64,66 @@
 
                 <div class="panel panel-default">
                     <div class="panel-heading">Анамнез (<a ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ chart.id ]]">подробнее</a>).</div>
+                    <table class="table">
+                        <tbody>
+                            <tr>
+                                <td>
+                                    Способ оплодотворения:
+                                </td>
+                                <td>
+                                    Многоплодные беременности: [[chart.anamnesis.mother.multifetation ? 'Да' : 'Нет']]
+                                </td>
+                                <td>
+                                    Предыдущие беременности:
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Переливания крови:
+                                </td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                        </tbody>
+                    </table>
                     <table class="table table-condensed">
                         <tbody>
-                        <tr>
-                            <td><a ng-href="{{ url_for('.html_anamnesis_mother_edit') }}?event_id=[[ chart.id ]]">Ввести сведения о матери</a></td>
-                        </tr>
-                        <tr>
-                            <td><a ng-href="{{ url_for('.html_anamnesis_father_edit') }}?event_id=[[ chart.id ]]">Ввести сведения об отце</a></td>
-                        </tr>
-                        <tr>
-                            <td><a ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ chart.id ]]#pregnancies">Ввести сведения о прошлых беременностях</a></td>
-                        </tr>
-                        <tr>
-                            <td><a ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ chart.id ]]#transfusions">Ввести сведения о переливаниях крови</a></td>
-                        </tr>
-                        <tr>
-                            <td><a ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ chart.id ]]#intolerances">Ввести сведения об аллергии</a></td>
-                        </tr>
+                            <tr>
+                                <th></th>
+                                <th>Мать</th>
+                                <th>Отец</th>
+                            </tr>
+                            <tr>
+                                <td>Группа крови</td>
+                                <td>[[chart.anamnesis.mother.blood_type.name]]</td>
+                                <td>[[chart.anamnesis.father.blood_type.name]]</td>
+                            </tr>
+                            <tr>
+                                <td>ВИЧ</td>
+                                <td>[[chart.anamnesis.mother.HIV ? 'Да' : 'Нет']]</td>
+                                <td>[[chart.anamnesis.father.HIV ? 'Да' : 'Нет']]</td>
+                            </tr>
+                            <tr>
+                                <td>Бесплодие</td>
+                                <td>[[chart.anamnesis.mother.infertility ? 'Да' : 'Нет']]</td>
+                                <td>[[chart.anamnesis.father.infertility ? 'Да' : 'Нет']]</td>
+                            </tr>
+                            <tr>
+                                <td>Заболевания</td>
+                                <td>Перенесенные: <span ng-repeat="diag in chart.anamnesis.mother.finished_diseases"> [[diag.code]]</span>, Текущие: <span ng-repeat="diag in chart.anamnesis.mother.current_diseases"> [[diag.code]]</span></td>
+                                <td>Перенесенные: <span ng-repeat="diag in chart.anamnesis.mother.finished_diseases"> [[diag.code]]</span>, Текущие: <span ng-repeat="diag in chart.anamnesis.mother.current_diseases"> [[diag.code]]</span></td>
+                            </tr>
+                            <tr>
+                                <td>Привычки</td>
+                                <td>[[chart.anamnesis.mother.alcohol ? 'алк.' : '']]
+                                    [[chart.anamnesis.mother.smoking ? 'курение' : '']]
+                                    [[chart.anamnesis.mother.toxic ? 'токсические вещества' : '']]
+                                    [[chart.anamnesis.mother.drugs ? 'наркотики' : '']] </td>
+                                <td>[[chart.anamnesis.father.alcohol ? 'алк.' : '']]
+                                    [[chart.anamnesis.father.smoking ? 'курение' : '']]
+                                    [[chart.anamnesis.father.toxic ? 'токсические вещества' : '']]
+                                    [[chart.anamnesis.father.drugs ? 'наркотики' : '']]</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
