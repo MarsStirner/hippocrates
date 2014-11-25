@@ -800,16 +800,19 @@ class EventVisualizer(object):
         :return:
         """
         pvis = PersonTreeVisualizer()
+        aviz = ActionVisualizer()
         return {
             'id': diagnostic.id,
             'set_date': diagnostic.setDate,
             'end_date': diagnostic.endDate,
             'diagnosis_type': diagnostic.diagnosisType,
+            'deleted': diagnostic.deleted,
             'diagnosis': self.make_diagnosis_record(diagnostic.diagnosis),
             'character': diagnostic.character,
             'person': pvis.make_person_ws(diagnostic.person) if diagnostic.person else None,
             'notes': diagnostic.notes,
             'action_id': diagnostic.action_id,
+            'action': aviz.make_small_action_info(diagnostic.action),
             'result': diagnostic.result,
             'ache_result': diagnostic.rbAcheResult,
             'event_id': diagnostic.event_id,
@@ -1102,6 +1105,19 @@ class ActionVisualizer(object):
         if action_is_bak_lab(action):
             result['bak_lab_info'] = self.make_bak_lab_info(action)
         return result
+
+    def make_small_action_info(self, action):
+        return {
+            'id': action.id,
+            'action_type': action.actionType,
+            'event_id': action.event_id,
+            'beg_date': action.begDate,
+            'end_date': action.endDate,
+            'planned_end_date': action.plannedEndDate,
+            'status': ActionStatus(action.status),
+            'set_person_id': action.setPerson_id,
+            'person_id': action.person_id,
+        }
 
     def make_action_layout(self, action):
         """

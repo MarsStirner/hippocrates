@@ -143,7 +143,7 @@ angular.module('WebMis20.ActionLayout', ['WebMis20.validators', 'WebMis20.direct
                                     inner_template = '<rb-select ref-book="{1}" ng-model="{0}.value" extra-filter="{2}"></rb-select>'.format('{0}', rbTable, extra_filter);
                                     break;
                                 case 'Diagnosis':
-                                    inner_template = '<wm-diagnosis model="{0}.value" can-add-new="true" ' +
+                                    inner_template = '<wm-diagnosis model="{0}.value" action="action" can-add-new="true" ' +
                                         'can-delete="true" can-edit="true" list-mode="{0}"></wm-diagnosis>'.format(property.type.vector);
                                     break;
                                 default:

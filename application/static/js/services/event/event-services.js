@@ -196,28 +196,33 @@ angular.module('WebMis20.services').
                     lc.shared_in_events = null;
                 }
             },
-            add_new_diagnosis: function () {
+            get_new_diagnosis: function (action_info) {
                 return {
-                        "id": null,
-                        "set_date": null,
-                        "end_date": null,
-                        "diagnosis_type": null,
-                        "diagnosis": {
-                            "id": null,
-                            "mkb": null,
-                            "mkbex": null,
-                            "client_id": null
-                        },
-                        "character": null,
-                        "person": current_user.info,
-                        "notes": null,
-                        "action_id": null,
-                        "result": null,
-                        "ache_result": null,
-                        "health_group": null,
-                        "trauma_type": null,
-                        "phase": null
-                    };
+                    'id': null,
+                    'set_date': null,
+                    'end_date': null,
+                    'diagnosis_type': null,
+                    'deleted': 0,
+                    'diagnosis': {
+                        'id': null,
+                        'mkb': null,
+                        'mkbex': null,
+                        'client_id': null
+                    },
+                    'character': null,
+                    'person': current_user.info,
+                    'notes': null,
+                    'action_id': null,
+                    'action': action_info ? action_info : null,
+                    'result': null,
+                    'ache_result': null,
+                    'health_group': null,
+                    'trauma_type': null,
+                    'phase': null
+                };
+            },
+            add_diagnosis: function (event, diagnosis) {
+                event.diagnoses.push(diagnosis);
             },
             delete_diagnosis: function (diag_list, diagnosis, deleted) {
                 if (arguments.length < 3) {
