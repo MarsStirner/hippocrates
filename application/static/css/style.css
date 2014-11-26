@@ -731,3 +731,7 @@ button.text-left {
     max-height: 300px;
     overflow-y: auto;
 }
+
+.cursor-default {
+    cursor: auto;
+}

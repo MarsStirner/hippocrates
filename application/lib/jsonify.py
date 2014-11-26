@@ -13,17 +13,17 @@ from flask.ext.login import current_user
 
 from application.systemwide import db
 from application.lib.data import int_get_atl_dict_all
-from application.lib.utils import safe_traverse_attrs, format_date
 from application.lib.action.utils import action_is_bak_lab, action_is_lab
 from application.lib.agesex import recordAcceptableEx
-from application.lib.utils import safe_unicode, safe_dict, logger, safe_traverse_attrs
+from application.lib.utils import safe_unicode, safe_dict, logger, safe_traverse_attrs, format_date
 from application.models.enums import EventPrimary, EventOrder, ActionStatus, Gender
 from application.models.event import Event, EventType, Diagnosis
-from application.models.schedule import Schedule, rbReceptionType, ScheduleClientTicket, ScheduleTicket, QuotingByTime, \
-    Office, rbAttendanceType
+from application.models.schedule import (Schedule, rbReceptionType, ScheduleClientTicket, ScheduleTicket,
+    QuotingByTime, Office, rbAttendanceType)
 from application.models.actions import Action, ActionProperty, ActionType
 from application.models.client import Client
-from application.models.exists import rbRequestType, rbService, ContractTariff, Contract, Person, rbSpeciality, Organisation
+from application.models.exists import (rbRequestType, rbService, ContractTariff, Contract, Person, rbSpeciality,
+    Organisation, rbContactType)
 from application.lib.user import UserUtils
 
 __author__ = 'mmalkov'
@@ -420,6 +420,19 @@ class ClientVisualizer(object):
         else:
             raise ValueError('Relation info does not match Client')
 
+    def make_contacts_info(self, client):
+        def make_contact(contact):
+            return {
+                'id': contact.id,
+                'deleted': contact.deleted,
+                'contact_type': contact.contactType,
+                'contact_text': contact.contact,
+                'notes': contact.notes
+            }
+        return ([make_contact(contact)
+                for contact in client.contacts.join(rbContactType).order_by(rbContactType.idx)]
+                if client.id else [])
+
     def make_client_info(self, client):
         """Полные данные пациента.
         Используется при редактировании данных пациента.
@@ -443,8 +456,7 @@ class ClientVisualizer(object):
             'intolerances': client.intolerances.all() if client.id else None,
             'soc_statuses': client.soc_statuses,
             'relations': relations,
-            'contacts': client.contacts.all() if client.id else None,
-            'phones': client.phones if client.id else None,
+            'contacts': self.make_contacts_info(client),
             'document_history': document_history,
             # 'identifications': identifications,
         }
@@ -459,7 +471,7 @@ class ClientVisualizer(object):
             'live_address': live_addr,
             'compulsory_policy': client.compulsoryPolicy,
             'voluntary_policies': client.voluntaryPolicies,
-            'phones': client.phones
+            'contacts': self.make_contacts_info(client)
         }
 
     def make_client_info_for_event(self, client):
@@ -475,7 +487,8 @@ class ClientVisualizer(object):
             'info': client,
             'id_document': client.id_document,
             'compulsory_policy': client.compulsoryPolicy,
-            'voluntary_policies': client.voluntaryPolicies
+            'voluntary_policies': client.voluntaryPolicies,
+            'contacts': self.make_contacts_info(client)
         }
 
     def make_short_client_info(self, client):
