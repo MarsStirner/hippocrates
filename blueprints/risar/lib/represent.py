@@ -39,7 +39,8 @@ def represent_event(event):
             'age': client.age,
             'sex_raw': client.sexCode,
             'cmi_policy': client.policy,
-            'attach_lpu': get_lpu_attached(client.attachments)
+            'attach_lpu': get_lpu_attached(client.attachments),
+            'phone': client.contacts[0]
         },
         'set_date': event.setDate,
         'person': event.execPerson,

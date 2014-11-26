@@ -58,6 +58,10 @@
                             <td>Полис ОМС:</td>
                             <td>Номер [[ chart.client.cmi_policy.serial ]] [[ chart.client.cmi_policy.number ]], выдан [[ chart.client.cmi_policy.insurer.short_name ]] [[ chart.client.cmi_policy.beg_date | asDate ]]</td>
                         </tr>
+                        <tr ng-if="chart.anamnesis.father.phone">
+                            <td>Контактные данные:</td>
+                            <td>пациентки: [[chart.client.phone.contact_text]], отца ребёнка: <span tooltip="[[chart.anamnesis.father.name]]" style="cursor: pointer; border-bottom: 2px black dashed;">[[ chart.anamnesis.father.phone ]]</span></td>
+                        </tr>
                         </tbody>
                     </table>
                 </div>
@@ -74,7 +78,7 @@
                                     Многоплодные беременности: [[chart.anamnesis.mother.multifetation ? 'Да' : 'Нет']]
                                 </td>
                                 <td>
-                                    Предыдущие беременности: [[chart.anamnesis.pregnancies.length]]
+                                    Предыдущие беременности: <a ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ chart.id ]]#pregnancies">[[chart.anamnesis.pregnancies.length]]</a>
                                 </td>
                             </tr>
                             <tr>
