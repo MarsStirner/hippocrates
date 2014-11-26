@@ -108,7 +108,7 @@
                 <tr>
                     <th>Перенесенные заболевания</th>
                     <td>
-                        <div ng-model="chart.anamnesis.mother.finished_diseases" refbook-multiselect ref-book="MKB">
+                        <div ng-model="chart.anamnesis.mother.finished_diseases" placeholder="Выберите диагноз" refbook-multiselect ref-book="MKB">
                             <strong>[[ item.code ]]</strong> - [[ item.name ]]
                         </div>
                     </td>
@@ -120,7 +120,7 @@
                 <tr>
                     <th>Текущие заболевания</th>
                     <td>
-                        <div ng-model="chart.anamnesis.mother.current_diseases" refbook-multiselect ref-book="MKB">
+                        <div ng-model="chart.anamnesis.mother.current_diseases" placeholder="Выберите диагноз" refbook-multiselect ref-book="MKB">
                             <strong>[[ item.code ]]</strong> - [[ item.name ]]
                         </div>
                     </td>

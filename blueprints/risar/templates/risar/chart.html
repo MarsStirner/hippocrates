@@ -75,7 +75,7 @@
                                     Способ оплодотворения: [[chart.anamnesis.mother.fertilization_type]]
                                 </td>
                                 <td>
-                                    Многоплодные беременности: [[chart.anamnesis.mother.multifetation ? 'Да' : 'Нет']]
+                                    Многоплодные беременности: [[chart.anamnesis.mother.multifetation ? 'да' : 'нет']]
                                 </td>
                                 <td>
                                     Предыдущие беременности: <a ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ chart.id ]]#pregnancies">[[chart.anamnesis.pregnancies.length]]</a>
@@ -83,7 +83,7 @@
                             </tr>
                             <tr>
                                 <td>
-                                    Переливания крови: [[chart.anamnesis.transfusions.length ? 'были' : '']]
+                                    Переливания крови: [[chart.anamnesis.transfusions.length ? 'были' : 'нет']]
                                 </td>
                                 <td></td>
                                 <td></td>
@@ -120,12 +120,12 @@
                             <tr>
                                 <td>Вредные привычки</td>
                                 <td>[[(!chart.anamnesis.mother.alcohol && !chart.anamnesis.mother.smoking && !chart.anamnesis.mother.toxic && !chart.anamnesis.mother.drugs) ? 'Нет': '' ]]
-                                    [[chart.anamnesis.mother.alcohol ? 'алк.' : '']]
+                                    [[chart.anamnesis.mother.alcohol ? 'алкоголь' : '']]
                                     [[chart.anamnesis.mother.smoking ? 'курение' : '']]
                                     [[chart.anamnesis.mother.toxic ? 'токсические вещества' : '']]
                                     [[chart.anamnesis.mother.drugs ? 'наркотики' : '']] </td>
                                 <td>[[(!chart.anamnesis.father.alcohol && !chart.anamnesis.father.smoking && !chart.anamnesis.father.toxic && !chart.anamnesis.father.drugs) ? 'Нет': '' ]]
-                                    [[chart.anamnesis.father.alcohol ? 'алк.' : '']]
+                                    [[chart.anamnesis.father.alcohol ? 'алкоголь' : '']]
                                     [[chart.anamnesis.father.smoking ? 'курение' : '']]
                                     [[chart.anamnesis.father.toxic ? 'токсические вещества' : '']]
                                     [[chart.anamnesis.father.drugs ? 'наркотики' : '']]</td>
