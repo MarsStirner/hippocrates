@@ -58,9 +58,9 @@
                             <td>Полис ОМС:</td>
                             <td>Номер [[ chart.client.cmi_policy.serial ]] [[ chart.client.cmi_policy.number ]], выдан [[ chart.client.cmi_policy.insurer.short_name ]] [[ chart.client.cmi_policy.beg_date | asDate ]]</td>
                         </tr>
-                        <tr ng-if="chart.anamnesis.father.phone">
+                        <tr ng-if="chart.anamnesis.father.phone || chart.client.phone">
                             <td>Контактные данные:</td>
-                            <td>пациентки: [[chart.client.phone.contact_text]], отца ребёнка: <span tooltip="[[chart.anamnesis.father.name]]" style="cursor: pointer; border-bottom: 2px black dashed;">[[ chart.anamnesis.father.phone ]]</span></td>
+                            <td>пациентки: [[chart.client.phone.contact_text]], отца ребёнка: <span tooltip="[[chart.anamnesis.father.name]]" class="bottom_dotted">[[ chart.anamnesis.father.phone ]]</span></td>
                         </tr>
                         </tbody>
                     </table>
@@ -99,8 +99,8 @@
                             </tr>
                             <tr>
                                 <td>Группа крови</td>
-                                <td>[[chart.anamnesis.mother.blood_type.name]]</td>
-                                <td>[[chart.anamnesis.father.blood_type.name]]</td>
+                                <td>[[chart.anamnesis.mother.blood_type.name ? chart.anamnesis.mother.blood_type.name: 'Нет']]</td>
+                                <td>[[chart.anamnesis.father.blood_type.name ? chart.anamnesis.father.blood_type.name: 'Нет']]</td>
                             </tr>
                             <tr>
                                 <td>ВИЧ</td>
@@ -114,16 +114,18 @@
                             </tr>
                             <tr>
                                 <td>Заболевания</td>
-                                <td>Перенесенные: <span ng-repeat="diag in chart.anamnesis.mother.finished_diseases"> [[diag.code]]</span>, Текущие: <span ng-repeat="diag in chart.anamnesis.mother.current_diseases"> [[diag.code]]</span></td>
-                                <td>Перенесенные: <span ng-repeat="diag in chart.anamnesis.mother.finished_diseases"> [[diag.code]]</span>, Текущие: <span ng-repeat="diag in chart.anamnesis.mother.current_diseases"> [[diag.code]]</span></td>
+                                <td>Перенесенные: <span ng-repeat="diag in chart.anamnesis.mother.finished_diseases"> [[diag.code]]</span>[[chart.anamnesis.mother.finished_diseases ? '' : 'Нет']], Текущие: <span ng-repeat="diag in chart.anamnesis.mother.current_diseases"> [[diag.code]]</span>[[chart.anamnesis.mother.current_diseases ? '' : 'Нет']]</td>
+                                <td>Перенесенные: <span ng-repeat="diag in chart.anamnesis.father.finished_diseases"> [[diag.code]]</span>[[chart.anamnesis.father.finished_diseases ? '' : 'Нет']], Текущие: <span ng-repeat="diag in chart.anamnesis.father.current_diseases"> [[diag.code]]</span>[[chart.anamnesis.father.current_diseases ? '' : 'Нет']]</td>
                             </tr>
                             <tr>
-                                <td>Привычки</td>
-                                <td>[[chart.anamnesis.mother.alcohol ? 'алк.' : '']]
+                                <td>Вредные привычки</td>
+                                <td>[[(!chart.anamnesis.mother.alcohol && !chart.anamnesis.mother.smoking && !chart.anamnesis.mother.toxic && !chart.anamnesis.mother.drugs) ? 'Нет': '' ]]
+                                    [[chart.anamnesis.mother.alcohol ? 'алк.' : '']]
                                     [[chart.anamnesis.mother.smoking ? 'курение' : '']]
                                     [[chart.anamnesis.mother.toxic ? 'токсические вещества' : '']]
                                     [[chart.anamnesis.mother.drugs ? 'наркотики' : '']] </td>
-                                <td>[[chart.anamnesis.father.alcohol ? 'алк.' : '']]
+                                <td>[[(!chart.anamnesis.father.alcohol && !chart.anamnesis.father.smoking && !chart.anamnesis.father.toxic && !chart.anamnesis.father.drugs) ? 'Нет': '' ]]
+                                    [[chart.anamnesis.father.alcohol ? 'алк.' : '']]
                                     [[chart.anamnesis.father.smoking ? 'курение' : '']]
                                     [[chart.anamnesis.father.toxic ? 'токсические вещества' : '']]
                                     [[chart.anamnesis.father.drugs ? 'наркотики' : '']]</td>
