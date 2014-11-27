@@ -26,6 +26,14 @@ var ChartCtrl = function ($scope, $modal, RisarApi, RisarNotificationService, Co
             } else {
                 $scope.pregnancy_week = ''
             }
+            $scope.chart.bad_habits_mother = [{value:$scope.chart.anamnesis.mother.alcohol, text: 'алкоголь'},
+                {value:$scope.chart.anamnesis.mother.smoking, text: 'курение'},
+                {value:$scope.chart.anamnesis.mother.toxic, text: 'токсические вечества'},
+                {value:$scope.chart.anamnesis.mother.drugs,text: 'наркотики'}];
+            $scope.chart.bad_habits_father = [{value:$scope.chart.anamnesis.father.alcohol, text: 'алкоголь'},
+                {value:$scope.chart.anamnesis.father.smoking, text: 'курение'},
+                {value:$scope.chart.anamnesis.father.toxic, text: 'токсические вечества'},
+                {value:$scope.chart.anamnesis.father.drugs,text: 'наркотики'}];
         })
     };
     var open_attach_lpu_edit = function () {

@@ -40,7 +40,7 @@ def represent_event(event):
             'sex_raw': client.sexCode,
             'cmi_policy': client.policy,
             'attach_lpu': get_lpu_attached(client.attachments),
-            'phone': client.contacts[0]
+            'phone': client.contacts.first()
         },
         'set_date': event.setDate,
         'person': event.execPerson,
