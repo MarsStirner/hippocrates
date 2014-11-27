@@ -507,10 +507,14 @@ def api_action_post():
         action = update_action(action, **data)
     else:
         at_id = action_desc['action_type']['id']
+        if not at_id:
+            return jsonify(None, 404, u'Невозможно создать действие без указания типа action_type.id')
         event_id = action_desc['event_id']
-        if not UserUtils.can_create_action(at_id, event_id):
-            return jsonify(None, 403,
-                'User cannot create action with ActionType id = %s for event id = %s' % (at_id, event_id))
+        if not UserUtils.can_create_action(event_id, at_id):
+            return jsonify(None, 403, (
+                u'У пользовател нет прав на создание действия с ActionType id = %s '
+                u'для обращения с event id = %s') % (at_id, event_id)
+            )
         action = create_new_action(at_id, event_id, properties=properties_desc, data=data)
 
     db.session.add(action)

@@ -742,6 +742,10 @@ class EventVisualizer(object):
         data = {
             'event': self.make_event(event),
             'ro': not UserUtils.can_edit_event(event) if event.id else False,
+            'can_create_actions': (
+                [UserUtils.can_create_action(event.id, None, cl) for cl in range(4)]
+                if event.id else [False] * 4
+            )
         }
         if current_user.role_in('admin'):
             data['diagnoses'] = self.make_diagnoses(event)
