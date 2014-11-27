@@ -1,0 +1,89 @@
+{% extends 'risar/base.html' %}
+{% import 'risar/_macros.html' as rimacros %}
+
+{% block title %}> {{ module_name }}{% endblock %}
+
+{% block main %}
+    <div ng-controller="EpicrisisCtrl" ng-cloak>
+        <ul class="breadcrumb">
+            <li><a href="{{ url_for('.index_html') }}">Рабочий стол</a></li>
+            <li><a ng-href="{{ url_for('.html_chart') }}?event_id=[[ chart.id ]]">Карта пациентки</a></li>
+            <li>Эпикриз</li>
+        </ul>
+        <div class="row small-marginal">
+            <div class="col-lg-10 col-md-10">
+                <h2>
+                    Эпикриз -
+                    <a ng-href="{{ url_for('patients.patient') }}?client_id=[[ chart.client.id ]]">[[ chart.client.full_name ]]</a>
+                    ([[ chart.external_id ]])
+                </h2>
+            </div>
+            <div class="col-md-12 col-lg-12">
+                <div class="alert-warning small-marginal">Случай беременности. На учёте в <b>[[ chart.person.organisation.short_name ]]</b>
+                    у <b>[[ chart.person.name ]]</b>
+                    с <b>[[ chart.set_date | asDate ]]</b>
+                </div>
+            </div>
+        </div>
+        <tabset>
+            <tab heading="Информация о родоразрешении">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        Роды при сроке 36 недель (12.05.2014 17:00), закончившиеся смертью матери.
+                        Место родоразрешения: Пензенский городской родильный дома №1. Были осуществлены манипуляции и проведены
+                        операции.
+                        Дети (2): Мальчик живой, девочка мертвая.
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        Диагнозы
+                    </div>
+                    <div class="col-md-6">
+                        Данные случая
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        Смерть
+                    </div>
+                    <div class="col-md-6">
+                        Осложнения
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        Пособия и манипуляции
+                    </div>
+                    <div class="col-md-6">
+                        Операции
+                    </div>
+                </div>
+            </tab>
+            <tab heading="Информация о детях">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>№</th>
+                            <th>Живой</th>
+                            <th>Дата и время рождения</th>
+                            <th>Пол</th>
+                            <th>Масса</th>
+                            <th>Длина</th>
+                            <th>Степень доношенности</th>
+                            <th>Оценка по Апгар на минуту</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </tab>
+        </tabset>
+    </div>
+{% endblock %}
+
+{% block modules_js %}
+    {{ super() }}
+    <script src="{{ url_for('.static', filename='js/risar.js', v=version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/epicrisis.js', v=version) }}"></script>
+{% endblock %}
