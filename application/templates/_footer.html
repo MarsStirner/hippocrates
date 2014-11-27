@@ -60,6 +60,8 @@
         url_api_get_action_ped = '{{ url_for('schedule.api_get_action_ped') }}',
         url_api_persons_tree_schedule_info = '{{ url_for('schedule.api_persons_tree_schedule_info') }}',
         url_api_search_persons = '{{ url_for('schedule.api_search_persons') }}',
+        url_api_procedure_offices_get = '{{ url_for('schedule.api_procedure_offices_get') }}',
+        url_schedule_index = '{{ url_for('schedule.index') }}',
         current_user = {{ current_user.export_js() | tojson | safe }},
         current_user_id = {{ current_user.id|default('undefined') }};
 </script>
@@ -84,6 +86,7 @@
 <script src="{{ url_for('static', filename='js/services.js', v=version) }}"></script>
 <script src="{{ url_for('static', filename='js/services/client/client-models.js', v=version) }}"></script>
 <script src="{{ url_for('static', filename='js/services/event/event-models.js', v=version) }}"></script>
+<script src="{{ url_for('static', filename='js/services/schedule-models.js', v=version) }}"></script>
 <script src="{{ url_for('static', filename='js/services/appointment_dialog.js', v=version) }}"></script>
 <script src="{{ url_for('static', filename='js/controllers.js', v=version) }}"></script>
 <script src="{{ url_for('static', filename='js/loader.js', v=version) }}"></script>

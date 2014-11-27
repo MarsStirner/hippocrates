@@ -316,6 +316,29 @@ class ScheduleVisualizer(object):
             'quotas': quotas
         }
 
+    def make_procedure_office_schedule_description(self, proc_office_id, start_date, end_date, person):
+        # Пока что процедурные кабинеты являются персонами. Потом должны быть выделены в отдельную сущность.
+        schedules_by_date = Schedule.query.outerjoin(
+            Schedule.tickets
+        ).filter(
+            Schedule.person_id == proc_office_id,
+            start_date <= Schedule.date, Schedule.date < end_date,
+            Schedule.deleted == 0
+        ).order_by(
+            Schedule.date,
+            Schedule.begTime,
+            ScheduleTicket.begTime
+        ).options(
+            db.contains_eager(Schedule.tickets).contains_eager('schedule')
+        )
+        schedules = self.make_schedule_description(schedules_by_date, start_date, end_date)
+
+        return {
+            'schedules': schedules,
+            'person': self.make_person(person),
+            'proc_office': True
+        }
+
     def make_copy_schedule_description(self, person, from_start_date, from_end_date, to_start_date, to_end_date):
         """Копировать чистое расписание без записей пациентов и причин
         отсутствия с одного месяца на другой.

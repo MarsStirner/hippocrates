@@ -125,6 +125,7 @@ def api_copy_schedule_description():
 @module.route('/api/day_schedule.json', methods=['GET'])
 def api_day_schedule():
     person_id = parse_id(request.args, 'person_id')
+    proc_office_id = parse_id(request.args, 'proc_office_id')
     if person_id is False:
         return abort(400)
     try:
@@ -133,9 +134,13 @@ def api_day_schedule():
     except ValueError:
         return abort(400)
 
-    context = ScheduleVisualizer()
+    viz = ScheduleVisualizer()
     person = Person.query.get(person_id)
-    return jsonify(context.make_person_schedule_description(person, start_date, end_date))
+    if proc_office_id:
+        result = viz.make_procedure_office_schedule_description(proc_office_id, start_date, end_date, person)
+    else:
+        result = viz.make_person_schedule_description(person, start_date, end_date)
+    return jsonify(result)
 
 
 @module.route('/api/schedule-description.json', methods=['POST'])
@@ -640,3 +645,9 @@ def api_create_lab_direction():
 
     db.session.commit()
     return jsonify(None)
+
+
+@module.route('/api/schedule/procedure_offices.json', methods=['GET'])
+def api_procedure_offices_get():
+    proc_offices = Person.query.filter(Person.id.in_([710, 879, 751]))
+    return jsonify([po for po in proc_offices])
