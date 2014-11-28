@@ -653,5 +653,11 @@ def api_create_lab_direction():
 
 @module.route('/api/schedule/procedure_offices.json', methods=['GET'])
 def api_procedure_offices_get():
-    proc_offices = Person.query.filter(Person.id.in_([710, 879, 751]))
+    proc_offices = Person.query.filter(Person.id.in_(
+        # I have a dream one day
+        # all the procedures will get their own entity.
+        [710, 879, 751, 555, 557, 553, 554, 752, 552, 556, 935,
+         915, 916, 917, 913, 911, 912, 914, 962, 961, 608, 920,
+         924, 709, 963, 936, 934, 934, 943, 944, 1200]
+    ))
     return jsonify([po for po in proc_offices])
