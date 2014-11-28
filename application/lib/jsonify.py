@@ -316,6 +316,29 @@ class ScheduleVisualizer(object):
             'quotas': quotas
         }
 
+    def make_procedure_office_schedule_description(self, proc_office_id, start_date, end_date, person):
+        # Пока что процедурные кабинеты являются персонами. Потом должны быть выделены в отдельную сущность.
+        schedules_by_date = Schedule.query.outerjoin(
+            Schedule.tickets
+        ).filter(
+            Schedule.person_id == proc_office_id,
+            start_date <= Schedule.date, Schedule.date < end_date,
+            Schedule.deleted == 0
+        ).order_by(
+            Schedule.date,
+            Schedule.begTime,
+            ScheduleTicket.begTime
+        ).options(
+            db.contains_eager(Schedule.tickets).contains_eager('schedule')
+        )
+        schedules = self.make_schedule_description(schedules_by_date, start_date, end_date)
+
+        return {
+            'schedules': schedules,
+            'person': self.make_person(person),
+            'proc_office': True
+        }
+
     def make_copy_schedule_description(self, person, from_start_date, from_end_date, to_start_date, to_end_date):
         """Копировать чистое расписание без записей пациентов и причин
         отсутствия с одного месяца на другой.
@@ -719,12 +742,16 @@ class EventVisualizer(object):
         data = {
             'event': self.make_event(event),
             'ro': not UserUtils.can_edit_event(event) if event.id else False,
+            'can_create_actions': (
+                [UserUtils.can_create_action(event.id, None, cl) for cl in range(4)]
+                if event.id else [False] * 4
+            )
         }
         if current_user.role_in('admin'):
             data['diagnoses'] = self.make_diagnoses(event)
             data['payment'] = self.make_event_payment(event)
             data['services'] = self.make_event_services(event.id)
-        elif current_user.role_in('doctor', 'clinicDoctor'):
+        elif current_user.role_in('doctor', 'clinicDoctor', 'diagDoctor'):
             data['diagnoses'] = self.make_diagnoses(event)
         elif current_user.role_in(('rRegistartor', 'clinicRegistrator')):
             data['payment'] = self.make_event_payment(event)

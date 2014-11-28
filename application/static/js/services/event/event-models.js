@@ -27,6 +27,7 @@ angular.module('WebMis20.services.models').
                 this.diagnoses = [];
                 this.services = [];
                 this.ro = false;
+                this.can_create_actions = [false, false, false, false];
                 return this;
             };
 
@@ -44,6 +45,7 @@ angular.module('WebMis20.services.models').
                 }).success(function (data) {
                     self.info = data.result.event;
                     self.ro = data.result.ro;
+                    self.can_create_actions = data.result.can_create_actions;
                     var client_info = self.info.client;
                     self.info.client = new WMClient();
                     self.info.client.init_from_obj({

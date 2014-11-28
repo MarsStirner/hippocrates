@@ -125,6 +125,7 @@ def api_copy_schedule_description():
 @module.route('/api/day_schedule.json', methods=['GET'])
 def api_day_schedule():
     person_id = parse_id(request.args, 'person_id')
+    proc_office_id = parse_id(request.args, 'proc_office_id')
     if person_id is False:
         return abort(400)
     try:
@@ -133,9 +134,13 @@ def api_day_schedule():
     except ValueError:
         return abort(400)
 
-    context = ScheduleVisualizer()
+    viz = ScheduleVisualizer()
     person = Person.query.get(person_id)
-    return jsonify(context.make_person_schedule_description(person, start_date, end_date))
+    if proc_office_id:
+        result = viz.make_procedure_office_schedule_description(proc_office_id, start_date, end_date, person)
+    else:
+        result = viz.make_person_schedule_description(person, start_date, end_date)
+    return jsonify(result)
 
 
 @module.route('/api/schedule-description.json', methods=['POST'])
@@ -502,10 +507,14 @@ def api_action_post():
         action = update_action(action, **data)
     else:
         at_id = action_desc['action_type']['id']
+        if not at_id:
+            return jsonify(None, 404, u'Невозможно создать действие без указания типа action_type.id')
         event_id = action_desc['event_id']
-        if not UserUtils.can_create_action(at_id, event_id):
-            return jsonify(None, 403,
-                'User cannot create action with ActionType id = %s for event id = %s' % (at_id, event_id))
+        if not UserUtils.can_create_action(event_id, at_id):
+            return jsonify(None, 403, (
+                u'У пользовател нет прав на создание действия с ActionType id = %s '
+                u'для обращения с event id = %s') % (at_id, event_id)
+            )
         action = create_new_action(at_id, event_id, properties=properties_desc, data=data)
 
     db.session.add(action)
@@ -640,3 +649,15 @@ def api_create_lab_direction():
 
     db.session.commit()
     return jsonify(None)
+
+
+@module.route('/api/schedule/procedure_offices.json', methods=['GET'])
+def api_procedure_offices_get():
+    proc_offices = Person.query.filter(Person.id.in_(
+        # I have a dream one day
+        # all the procedures will get their own entity.
+        [710, 879, 751, 555, 557, 553, 554, 752, 552, 556, 935,
+         915, 916, 917, 913, 911, 912, 914, 962, 961, 608, 920,
+         924, 709, 963, 936, 934, 934, 943, 944, 1200]
+    ))
+    return jsonify([po for po in proc_offices])

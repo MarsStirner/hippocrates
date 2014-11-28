@@ -4,12 +4,22 @@
 {% block main %}
     <div ng-controller="ScheduleDayCtrl">
         <div class="col-lg-3 col-md-3">
+            <div ng-if="mode === 'proc_office'">
+            <ui-select id="proc_office" name="proc_office" theme="select2" ng-model="proc_office.selected"
+                ng-change="procOfficeChanged()">
+                <ui-select-match placeholder="Процедурный кабинет">[[$select.selected.name]]</ui-select-match>
+                <ui-select-choices repeat='po in proc_offices | filter: $select.search '>
+                    <div ng-bind-html="po.name | highlight: $select.search"></div>
+                </ui-select-choices>
+            </ui-select>
+            <hr>
+            </div>
             <div class="well">
                 <datepicker class="vbmargin10" style="width: 100%" ng-model="date" show-weeks="false" ng-change="dateChanged();"></datepicker>
                 <button ng-click="today()" class="btn btn-sm btn-block btn-info ng-binding" type="button">Сегодня</button>
             </div>
             <div class="well-sm alert alert-info" ng-if="schedules[0].scheds.length">
-                <a href="{{ url_for('schedule.index', person_id=current_user.id) }}" target="_blank" class="pull-right" title="Посмотреть полный график"><h4 class="glyphicon glyphicon-calendar novmargin"></h4></a>
+                <a ng-href="[[get_full_schedule_url()]]" target="_blank" class="pull-right" title="Посмотреть полный график"><h4 class="glyphicon glyphicon-calendar novmargin"></h4></a>
                 <ul class="list-unstyled novmargin">
                     <li ng-repeat="schedule in schedules[0].scheds" title="[[schedule.reception_type.name]]"><small class="glyphicon" ng-class="{'glyphicon-plus': (schedule.reception_type.code == 'amb'), 'glyphicon-home': (schedule.reception_type.code == 'home')}"></small> [[ (schedules[0].date + ' ' + schedule.begTime|asTime) | asTime ]] - [[ (schedules[0].date + ' ' + schedule.endTime) | asTime ]] <small class="text-danger" ng-if="schedule.office">каб. [[schedule.office.code]]</small></li>
                 </ul>

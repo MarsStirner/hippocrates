@@ -11,11 +11,17 @@ angular.module('WebMis20.directives')
             actionTypeGroup: '@'
         },
         link: function (scope, element, attrs) {
+            var at_class = {
+                'medical_documents': 0,
+                'diagnostics': 1,
+                'lab': 1,
+                'treatments': 2
+            };
             scope.can_delete_action = function (action) {
                 return action.status.code !== 'finished' && action.can_delete;
             };
             scope.can_create_action = function () {
-                return current_user.current_role_maybe('doctor', 'clinicDoctor', 'admin') && !scope.event.ro;
+                return scope.event.can_create_actions[at_class[scope.actionTypeGroup]] && !scope.event.ro;
             };
             scope.open_action = function (action_id) {
                 scope.child_window = $window.open(url_for_schedule_html_action + '?action_id=' + action_id);

@@ -323,14 +323,13 @@ class UserUtils(object):
                             current_user.id in (action.createPerson_id, action.person_id))))))
 
     @staticmethod
-    def can_create_action(at_id, event_id):
+    def can_create_action(event_id, at_id, class_=None):
         from application.models.event import Event
         from application.models.actions import ActionType
-        action_type = ActionType.query.get_or_404(at_id)
         event = Event.query.get_or_404(event_id)
-        createRight = u'client%sCreate' % modeRights[action_type.class_]
-        return action_type and (
-            current_user.has_right('adm') or (
+        class_ = class_ if class_ is not None else ActionType.query.get_or_404(at_id).class_
+        createRight = u'client%sCreate' % modeRights[class_]
+        return (current_user.has_right('adm') or (
                 not event.is_closed and current_user.has_right(createRight)))
 
     @staticmethod
