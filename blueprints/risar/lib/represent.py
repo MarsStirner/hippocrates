@@ -11,7 +11,7 @@ from application.models.exists import rbAttachType
 from application.systemwide import cache, db
 from ..risar_config import pregnancy_apt_codes, risar_anamnesis_pregnancy, transfusion_apt_codes, \
     risar_anamnesis_transfusion, mother_codes, father_codes, risar_father_anamnesis, risar_mother_anamnesis, \
-    checkup_flat_codes
+    checkup_flat_codes, risar_epicrisis
 from ..lib.utils import risk_rates_diagID, risk_rates_blockID
 
 __author__ = 'mmalkov'
@@ -64,7 +64,7 @@ def represent_event(event):
             }
         },
         'anamnesis': represent_anamnesis(event),
-        'epicrisis': None,
+        'epicrisis': represent_epicrisis(event),
         'checkups': represent_checkups(event),
         'risk_rate': get_risk_rate(get_all_diagnoses(event.actions))
     }
@@ -273,3 +273,15 @@ def represent_intolerance(obj):
         'power': AllergyPower(obj.power),
         'note': obj.notes,
     }
+
+
+def represent_epicrisis(event, action=None):
+    if action is None:
+        action = get_action(event, risar_epicrisis)
+    if action is None:
+        return
+    epicrisis = dict(
+        (code, prop.value)
+        for (code, prop) in action.propsByCode.iteritems()
+    )
+    return epicrisis
