@@ -46,7 +46,7 @@ def person_schedule_monthview():
 
 
 @module.route('/doctor/')
-@roles_require('clinicDoctor')
+@roles_require('clinicDoctor', 'diagDoctor')
 @breadcrumb(u'Приём пациентов')
 def doctor_schedule_day():
     try:

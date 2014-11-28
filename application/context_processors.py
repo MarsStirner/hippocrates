@@ -42,13 +42,13 @@ def general_menu():
                            roles=('admin', 'rRegistartor', 'clinicRegistrator')))
     menu_items.append(dict(link='schedule.doctor_schedule_day',
                            title=u'Приём пациентов',
-                           roles=('admin', 'clinicDoctor')))
+                           roles=('admin', 'clinicDoctor', 'diagDoctor')))
     menu_items.append(dict(link='patients.search',
                            title=u'Поиск пациентов',
-                           roles=('admin', 'clinicDoctor')))
+                           roles=('admin', 'clinicDoctor', 'diagDoctor')))
     menu_items.append(dict(link='event.get_events',
                            title=u'Обращения',
-                           roles=('admin', 'rRegistartor', 'clinicRegistrator', 'clinicDoctor')))
+                           roles=('admin', 'rRegistartor', 'clinicRegistrator', 'clinicDoctor', 'diagDoctor')))
     return dict(main_menu=menu_items)
 
 

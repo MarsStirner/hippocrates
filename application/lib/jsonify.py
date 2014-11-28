@@ -751,7 +751,7 @@ class EventVisualizer(object):
             data['diagnoses'] = self.make_diagnoses(event)
             data['payment'] = self.make_event_payment(event)
             data['services'] = self.make_event_services(event.id)
-        elif current_user.role_in('doctor', 'clinicDoctor'):
+        elif current_user.role_in('doctor', 'clinicDoctor', 'diagDoctor'):
             data['diagnoses'] = self.make_diagnoses(event)
         elif current_user.role_in(('rRegistartor', 'clinicRegistrator')):
             data['payment'] = self.make_event_payment(event)
