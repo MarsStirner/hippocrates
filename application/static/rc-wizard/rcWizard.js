@@ -96,7 +96,7 @@ var rcWizardDirective = {
         };
         
         var onTabClick = function (activeTab, navigation, currentIndex, clickedIndex) {
-            return false;
+            return true;
         };
         
         var onTabShow = function (activeTab, navigation, currentIndex) {
@@ -116,12 +116,6 @@ var rcWizardDirective = {
           // allows for easier keyboard-ony navigation.
           if (steps.length > currentIndex && steps[currentIndex].element) {
             steps[currentIndex].element.find('input').first().focus();
-          }
-          if (wizardElement.find('.bar').length){
-            var $total = navigation.find('li:has([data-toggle="tab"])').length;
-            var $current = currentIndex+1;
-            var $percent = ($current/$total) * 100;
-            wizardElement.find('.bar').css({width:$percent+'%'});
           }
         };
         
