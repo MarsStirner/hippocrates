@@ -2,19 +2,21 @@
  * Created by mmalkov on 21.07.14.
  */
 
-var EventListCtrl = function ($scope, $http) {
+var EventListCtrl = function ($scope, $http, $window) {
     function get_model(page) {
         var model = {
             page: page
         };
         if ($scope.flt.id) model.id = $scope.flt.id;
         if ($scope.flt.client) model.client_id = $scope.flt.client.id;
-        if ($scope.flt.exec_person) model.exec_person_id = $scope.flt.exec_person.id;
         if ($scope.flt.beg_date) model.beg_date = moment($scope.flt.beg_date).format('YYYY-MM-DD');
         if ($scope.flt.end_date) model.end_date = moment($scope.flt.end_date).format('YYYY-MM-DD');
         if ($scope.flt.unfinished) model.unfinished = $scope.flt.unfinished;
         if ($scope.flt.finance_type) model.finance_id = $scope.flt.finance_type.id;
         if ($scope.flt.request_type) model.request_type_id = $scope.flt.request_type.id;
+        if ($scope.flt.speciality) model.speciality_id = $scope.flt.speciality.id;
+        if ($scope.flt.exec_person) model.exec_person_id = $scope.flt.exec_person.id;
+        if ($scope.flt.result) model.result_id = $scope.flt.result.id;
         return model;
     }
     $scope.get_data = function (page) {
@@ -51,6 +53,11 @@ var EventListCtrl = function ($scope, $http) {
         };
         $scope.get_data();
     };
+    $scope.on_unfinished_changed = function () {
+        if ($scope.flt.unfinished) {
+            $scope.flt.end_date = null;
+        }
+    };
     $scope.clear = function () {
         $scope.page = 1;
         $scope.pages = 1;
@@ -61,7 +68,9 @@ var EventListCtrl = function ($scope, $http) {
             end_date: null,
             finance_type: undefined,
             request_type: undefined,
+            speciality: undefined,
             exec_person: null,
+            result: undefined,
             unfinished: false
         };
     };
@@ -69,9 +78,9 @@ var EventListCtrl = function ($scope, $http) {
         $scope.clear();
         $scope.results = [];
     };
-
-    $scope.url_event_get = url_for_event_html_event_info;
-    $scope.url_client_get = url_client_html;
+    $scope.open_event = function (event_id) {
+        $window.open(url_for_event_html_event_info + '?event_id=' + event_id);
+    };
 
     $scope.clients = [];
     $scope.last_query = '';
@@ -79,4 +88,4 @@ var EventListCtrl = function ($scope, $http) {
 
     $scope.clear_all();
 };
-WebMis20.controller('EventListCtrl', ['$scope', '$http', EventListCtrl]);
+WebMis20.controller('EventListCtrl', ['$scope', '$http', '$window', EventListCtrl]);

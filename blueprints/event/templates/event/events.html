@@ -1,37 +1,7 @@
 {% extends "event/base.html" %}
 {% block main %}
     <div class="row" ng-controller="EventListCtrl">
-        <div class="col-md-8">
-            <!-- Main -->
-            <table class="table table-condensed">
-                <thead>
-                <tr>
-                    <th>№</th>
-                    <th>ФИО</th>
-                    <th>Начато</th>
-                    <th>Закончено</th>
-                    <th>Тип</th>
-                    <th>Врач</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr ng-repeat="event in results">
-                    <td><a ng-href="[[ url_event_get ]]?event_id=[[ event.id ]]" target="_blank">[[ event.id ]]</a></td>
-                    <td><a ng-href="[[ url_client_get ]]?client_id=[[ event.client_id ]]" target="_blank">[[ event.client_full_name
-                        ]]</a>
-                    </td>
-                    <td>[[ event.beg_date | asDate ]]</td>
-                    <td>[[ event.end_date | asDate ]]</td>
-                    <td>[[ event.type_name ]]</td>
-                    <td>[[ event.person_short_name ]]</td>
-                </tr>
-                </tbody>
-            </table>
-            <div class="center-block">
-                <pagination page="page" ng-model="page" total-items="pages" items-per-page="1" max-size="max_size" ng-change="get_data(page)" ng-show="pages > 1" boundary-links="true"></pagination>
-            </div>
-        </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
             <!-- Filter -->
             <div class="affix-wrapper" bs-affix>
                 <div class="panel panel-default">
@@ -41,6 +11,16 @@
                     <div class="panel-body">
                         <label for="filter-id">Идентификатор обращения</label>
                         <input class="form-control" id="filter-id" type="text" valid-number ng-model="flt.id" placeholder="Идентификатор">
+
+                        <label for="filter-beg-date">Начато</label>
+                        <wm-date id="filter-beg-date" ng-model="flt.beg_date"></wm-date>
+
+                        <label class="checkbox">
+                            <input type="checkbox" ng-model="flt.unfinished" ng-change="on_unfinished_changed()">Только незавершённые
+                        </label>
+
+                        <label for="filter-end-date">Завершено</label>
+                        <wm-date id="filter-end-date" ng-model="flt.end_date" ng-disabled="flt.unfinished"></wm-date>
 
                         <label for="filter-client">Пациент</label>
                         <ui-select id="filter-client" ng-model="flt.client" theme="select2">
@@ -56,18 +36,20 @@
                             </ui-select-choices>
                         </ui-select>
 
-                        <label for="filter-beg-date">Начало</label>
-                        <wm-date id="filter-beg-date" ng-model="flt.beg_date"></wm-date>
-
-                        <label style="display: block"><input type="checkbox" ng-model="flt.unfinished">Только незавершённые</label>
-                        <label for="filter-end-date">Конец</label>
-                        <wm-date id="filter-end-date" ng-model="flt.end_date" ng-disabled="flt.unfinished"></wm-date>
-
                         <label for="filter-finance">Тип финансирования</label>
                         <rb-select id="filter-finance" ng-model="flt.finance_type" placeholder="Тип финансирования" ref-book="rbFinance"></rb-select>
 
                         <label for="filter-request">Тип обращения</label>
                         <rb-select id="filter-request" ng-model="flt.request_type" placeholder="Тип обращения" ref-book="rbRequestType"></rb-select>
+
+                        <label for="filter-speciality">Специальность врача</label>
+                        <rb-select id="filter-speciality" ng-model="flt.speciality" placeholder="Специальность врача" ref-book="rbSpeciality"></rb-select>
+
+                        <label for="filter-exec-person">Лечащий врач</label>
+                        <wm-person-select id="filter-exec-person" ng-model="flt.exec_person" placeholder="Лечащий врач"></wm-person-select>
+
+                        <label for="filter-result">Результат</label>
+                        <rb-select id="filter-result" ng-model="flt.result" placeholder="Результат" ref-book="rbResult"></rb-select>
                     </div>
                     <div class="panel-footer panel-default">
                         <div class="btn-group">
@@ -93,6 +75,36 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+        <div class="col-md-9">
+            <!-- Main -->
+            <table class="table table-condensed table-hover">
+                <thead>
+                <tr>
+                    <th>№ обращения</th>
+                    <th>Тип</th>
+                    <th>Начато</th>
+                    <th>Закончено</th>
+                    <th>Пациент</th>
+                    <th>Врач</th>
+                    <th>Результат</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="event in results" ng-click="open_event(event.id)">
+                    <td>[[ event.id ]]</td>
+                    <td>[[ event.type_name ]]</td>
+                    <td>[[ event.beg_date | asDate ]]</td>
+                    <td>[[ event.end_date | asDate ]]</td>
+                    <td>[[ event.client_full_name ]]</td>
+                    <td>[[ event.person_short_name ]]</td>
+                    <td>[[ event.result_text ]]</td>
+                </tr>
+                </tbody>
+            </table>
+            <div class="center-block">
+                <pagination page="page" ng-model="page" total-items="pages" items-per-page="1" max-size="max_size" ng-change="get_data(page)" ng-show="pages > 1" boundary-links="true"></pagination>
             </div>
         </div>
 {#    <pre>[[ flt | json ]]</pre>#}

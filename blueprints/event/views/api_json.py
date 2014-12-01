@@ -498,8 +498,6 @@ def api_get_events():
         })
     if 'client_id' in flt:
         base_query = base_query.filter(Event.client_id == flt['client_id'])
-    if 'exec_person_id' in flt:
-        base_query = base_query.filter(Event.execPerson_id == flt['exec_person_id'])
     if 'beg_date' in flt:
         base_query = base_query.filter(Event.setDate >= datetime.datetime.strptime(flt['beg_date'], '%Y-%m-%d').date())
     if 'unfinished' in flt:
@@ -510,6 +508,12 @@ def api_get_events():
         base_query = base_query.join(EventType).filter(EventType.requestType_id == flt['request_type_id'])
     if 'finance_id' in flt:
         base_query = base_query.join(Contract).filter(Contract.finance_id == flt['finance_id'])
+    if 'speciality_id' in flt:
+        base_query = base_query.join(Event.execPerson).filter(Person.speciality_id == flt['speciality_id'])
+    if 'exec_person_id' in flt:
+        base_query = base_query.filter(Event.execPerson_id == flt['exec_person_id'])
+    if 'result_id' in flt:
+        base_query = base_query.filter(Event.result_id == flt['result_id'])
     per_page = int(flt.get('per_page', 20))
     page = int(flt.get('page', 1))
     base_query = base_query.order_by(Event.setDate)
