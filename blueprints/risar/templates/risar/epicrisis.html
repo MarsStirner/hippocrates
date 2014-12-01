@@ -27,19 +27,19 @@
         </div>
         <tabset>
             <tab heading="Информация о родоразрешении">
-                <div class="panel panel-default">
+                <div class="panel panel-default" style="border-color: #ffffff;">
                     <div class="panel-body">
-                        Роды при сроке 36 недель (12.05.2014 17:00), закончившиеся смертью матери.
-                        Место родоразрешения: Пензенский городской родильный дома №1. </br>
+                        <b>Беременность закончилась</b> родами при сроке 36 недель (12.05.2014 17:00), закончившиеся смертью матери. <b>Место родоразрешения:</b> Пензенский городской родильный дома №1. </br>
                         Были осуществлены манипуляции и проведены операции.</br>
-                        Дети (2): Мальчик живой, девочка мертвая.
+                        <b>Дети (2)</b>: Мальчик живой, девочка мертвая.
                     </div>
+                    <div class="text-right"><a class="pseudo-btn"><span class="glyphicon glyphicon-pencil"></span> Изменить</a> </div>
                 </div>
                 <div class="row">
                     <div class="col-md-6">
                         <div class="panel panel-default">
                             <div class="panel-heading"> Диагнозы
-                                <a class="print_link pull-right" href="#"><span class="glyphicon glyphicon-pencil"></span> Редактировать</a>
+                                <a class="print_link pull-right" href="#"><span class="glyphicon glyphicon-pencil"></span> Изменить</a>
                             </div>
                             <div class="panel-body">
                                 <div class="row">
@@ -54,13 +54,19 @@
                                     <div class="col-md-4">Диагноз осложнения:</div>
                                     <div class="col-md-8">[[chart.epicrisis.complicating_diagnosis.code]] - [[chart.epicrisis.complicating_diagnosis.name]]</div>
                                 </div>
+                                <div class="row">
+                                    <div class="col-md-12">&nbsp;</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">&nbsp;</div>
+                                </div>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="panel panel-default">
                             <div class="panel-heading"> Данные случая
-                                <a class="print_link pull-right" href="#"><span class="glyphicon glyphicon-pencil"></span> Редактировать</a>
+                                <a class="print_link pull-right" href="#"><span class="glyphicon glyphicon-pencil"></span> Изменить</a>
                             </div>
                             <div class="panel-body">
                                 <div class="row">
@@ -89,9 +95,9 @@
                 </div>
                 <div class="row">
                     <div class="col-md-6">
-                        <div class="panel panel-default">
+                        <div class="panel panel-default" ng-if="chart.epicrisis.death_date || chart.epicrisis.reason_of_death">
                             <div class="panel-heading"> Смерть
-                                <a class="print_link pull-right" href="#"><span class="glyphicon glyphicon-pencil"></span> Редактировать</a>
+                                <a class="print_link pull-right" href="#"><span class="glyphicon glyphicon-pencil"></span> Изменить</a>
                             </div>
                             <div class="panel-body">
                                 <div class="row">
@@ -100,7 +106,22 @@
                                 </div>
                                 <div class="row">
                                     <div class="col-md-4">Причины смерти:</div>
-                                    <div class="col-md-8">[[chart.epicrisis.]]</div>
+                                    <div class="col-md-8">[[chart.epicrisis.reason_of_death]]</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">&nbsp;</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">&nbsp;</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">&nbsp;</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">&nbsp;</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">&nbsp;</div>
                                 </div>
                             </div>
                         </div>
@@ -108,7 +129,7 @@
                     <div class="col-md-6">
                         <div class="panel panel-default">
                             <div class="panel-heading"> Осложнения
-                                <a class="print_link pull-right" href="#"><span class="glyphicon glyphicon-pencil"></span> Редактировать</a>
+                                <a class="print_link pull-right" href="#"><span class="glyphicon glyphicon-pencil"></span> Изменить</a>
                             </div>
                             <div class="panel-body">
                                 <div class="row">
@@ -148,7 +169,7 @@
                     <div class="col-md-6">
                         <div class="panel panel-default">
                             <div class="panel-heading"> Пособия и манипуляции
-                                <a class="print_link pull-right" href="#"><span class="glyphicon glyphicon-pencil"></span> Редактировать</a>
+                                <a class="print_link pull-right" href="#"><span class="glyphicon glyphicon-pencil"></span> Изменить</a>
                             </div>
                             <div class="panel-body">
                                 <div class="row">
@@ -171,13 +192,25 @@
                                     <div class="col-md-6">Другие пособия и манипуляции:</div>
                                     <div class="col-md-6">[[chart.epicrisis.other_manipulations]]</div>
                                 </div>
+                                <div class="row">
+                                    <div class="col-md-12">&nbsp;</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">&nbsp;</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">&nbsp;</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">&nbsp;</div>
+                                </div>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="panel panel-default">
                             <div class="panel-heading"> Операции
-                                <a class="print_link pull-right" href="#"><span class="glyphicon glyphicon-pencil"></span> Редактировать</a>
+                                <a class="print_link pull-right" href="#"><span class="glyphicon glyphicon-pencil"></span> Изменить</a>
                             </div>
                             <div class="panel-body">
                                 <div class="row">
@@ -193,11 +226,11 @@
                                     <div class="col-md-7">[[chart.epicrisis.vacuum_extraction]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-md-5">Показания:</div>
+                                    <div class="col-md-5">Показания к операции:</div>
                                     <div class="col-md-7">[[chart.epicrisisindication.indication]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-md-5">Особенности:</div>
+                                    <div class="col-md-5">Особенности операции:</div>
                                     <div class="col-md-7">[[chart.epicrisis.specialities]]</div>
                                 </div>
                                 <div class="row">
@@ -233,28 +266,29 @@
                             <th>Длина, см</th>
                             <th>Степень доношенности</th>
                             <th>Оценка по Апгар на минуту</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>1</td>
-                            <td>да</td>
-                            <td>12.05.2014 17:00</td>
-                            <td>мужской</td>
-                            <td>3,3</td>
-                            <td>51</td>
-                            <td>доношенный</td>
-                            <td>7</td>
+                        <tr ng-repeat="inspection in chart.epicrisis.newborn_inspections">
+                            <td>[[$index+1]]</td>
+                            <td>[[inspection.alive ? 'да': 'нет']]</td>
+                            <td>[[inspection.birth_date |asDate ]] [[inspection.birth_time]]</td>
+                            <td>[[inspection.sex]]</td>
+                            <td>[[inspection.weight]]</td>
+                            <td>[[inspection.length]]</td>
+                            <td>[[inspection.maturity_rate]]</td>
+                            <td>[[inspection.apgar_score]]</td>
+                            <td class="col-md-1 nowrap">
+                                <button class="btn btn-primary"><span class="glyphicon glyphicon-pencil"></span> Изменить</button>
+                                <button class="btn btn-danger"><span class="glyphicon glyphicon-trash"></span> Удалить</button>
+                            </td>
                         </tr>
                         <tr>
-                            <td>2</td>
-                            <td>нет</td>
-                            <td>12.05.2014 16:45</td>
-                            <td>женский</td>
-                            <td>2,6</td>
-                            <td>45</td>
-                            <td>доношенный</td>
-                            <td>0</td>
+                            <td colspan="8">&nbsp;</td>
+                            <td>
+                                <button class="btn btn-success"><span class="glyphicon glyphicon-plus"></span> Добавить</button>
+                            </td>
                         </tr>
                     </tbody>
                 </table>

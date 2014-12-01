@@ -11,7 +11,7 @@ from application.models.exists import rbAttachType
 from application.systemwide import cache, db
 from ..risar_config import pregnancy_apt_codes, risar_anamnesis_pregnancy, transfusion_apt_codes, \
     risar_anamnesis_transfusion, mother_codes, father_codes, risar_father_anamnesis, risar_mother_anamnesis, \
-    checkup_flat_codes, risar_epicrisis
+    checkup_flat_codes, risar_epicrisis, risar_newborn_inspection
 from ..lib.utils import risk_rates_diagID, risk_rates_blockID
 
 __author__ = 'mmalkov'
@@ -284,4 +284,19 @@ def represent_epicrisis(event, action=None):
         (code, prop.value)
         for (code, prop) in action.propsByCode.iteritems()
     )
+    epicrisis['newborn_inspections'] = represent_newborn_inspections(event)
     return epicrisis
+
+
+def represent_newborn_inspections(event):
+    actions = Action.query.join(ActionType).filter(Action.event == event, Action.deleted == 0,
+                                                   ActionType.flatCode == risar_newborn_inspection).all()
+
+    newborn_inspections = [dict((code, prop.value) for (code, prop) in inspect .propsByCode.iteritems())
+                           for inspect in actions]
+    for inspection in newborn_inspections:
+        if inspection['sexCode'] == '1':
+            inspection.sex = 'мужской'
+        elif inspection['sexCode'] == '2':
+            inspection.sex = 'женский'
+    return newborn_inspections

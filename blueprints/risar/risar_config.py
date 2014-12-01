@@ -5,6 +5,7 @@ __author__ = 'mmalkov'
 risar_mother_anamnesis = 'risar_mother_anamnesis'
 risar_father_anamnesis = 'risar_father_anamnesis'
 risar_epicrisis = 'epicrisis'
+risar_newborn_inspection = 'risar_newborn_inspection'
 
 risar_anamnesis_pregnancy = 'risar_anamnesis_pregnancy'
 risar_anamnesis_transfusion = 'risar_anamnesis_transfusion'
