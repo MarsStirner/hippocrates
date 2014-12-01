@@ -78,61 +78,67 @@
                         <table class="table table-condensed">
                             <thead>
                             <tr>
-                                <th class="col-md-4"></th>
-                                <th class="col-md-8"></th>
+                                <th class="col-md-2"></th>
+                                <th class="col-md-10"></th>
                             </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <th><span class="text-danger">*</span> Дата осмотра</th>
+                                    <th class="text-right">Дата осмотра <span class="text-danger">*</span></th>
                                     <td><wm-date ng-model="checkup.beg_date" style="width: 250px"></wm-date></td>
                                 </tr>
                                 <tr>
-                                    <th><span class="text-danger">*</span> Время осмотра</th>
+                                    <th class="text-right">Время осмотра <span class="text-danger">*</span></th>
                                     <td>
                                         <wm-time ng-model="checkup.beg_date" style="width: 250px"></wm-time>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <th>Срок беременности</th>
+                                    <th class="text-right">Срок беременности <span>&nbsp;</span></th>
                                     <td>
 
                                     </td>
                                 </tr>
                                 <tr>
-                                    <th><span class="text-danger">*</span> Общее состояние</th>
-                                    <td><div ng-class="{'has-error': CheckupFirstEditForm.state.$invalid}">
-                                        <rb-select name="state" ng-model="checkup.state" ref-book="rbRisarState" ng-required="true"></rb-select>
+                                    <th class="text-right">Общее состояние <span class="text-danger">*</span></th>
+                                    <td><div class="row" ng-class="{'has-error': CheckupFirstEditForm.state.$invalid}">
+                                        <div class="col-md-4">
+                                            <rb-select name="state" ng-model="checkup.state" ref-book="rbRisarState" ng-required="true"></rb-select>
+                                        </div>
                                     </div></td>
                                 </tr>
                                 <tr>
-                                    <th><span class="text-danger">*</span> Масса при осмотре, кг</th>
+                                    <th class="text-right">Масса при осмотре, кг <span class="text-danger">*</span></th>
                                     <td><div class="row"
                                              ng-class="{'has-error': CheckupFirstEditForm.weight.$invalid}">
-                                        <div class="col-md-4">
+                                        <div class="col-md-1">
                                             <input name="weight" ng-model="checkup.weight" class="form-control" ng-required="true">
                                         </div>
                                         </div>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <th><span class="text-danger">*</span> АД правая рука</th>
-                                    <td><div ng-class="{'has-error': CheckupFirstEditForm.ad_right.$invalid}">
-                                        <input name="ad_right" ng-model="checkup.ad_right" class="form-control" ng-required="true">
+                                    <th class="text-right">АД правая рука <span class="text-danger">*</span></th>
+                                    <td><div class="row" ng-class="{'has-error': CheckupFirstEditForm.ad_right.$invalid}">
+                                        <div class="col-md-2">
+                                            <input name="ad_right" ng-model="checkup.ad_right" class="form-control" ng-required="true">
+                                        </div>
                                     </div></td>
                                 </tr>
                                 <tr>
-                                    <th><span class="text-danger">*</span> АД левая рука</th>
-                                    <td><div ng-class="{'has-error': CheckupFirstEditForm.ad_left.$invalid}">
-                                        <input name="ad_left" ng-model="checkup.ad_left" class="form-control" ng-required="true">
+                                    <th class="text-right">АД левая рука <span class="text-danger">*</span></th>
+                                    <td><div class="row"ng-class="{'has-error': CheckupFirstEditForm.ad_left.$invalid}">
+                                        <div class="col-md-2">
+                                            <input name="ad_left" ng-model="checkup.ad_left" class="form-control" ng-required="true">
+                                        </div>
                                     </div></td>
                                 </tr>
                                 <tr>
-                                    <th>Педикулёз</th>
+                                    <th class="text-right">Педикулёз <span>&nbsp;</span></th>
                                     <td><input ng-model="checkup.pediculosis" class="checkbox" type="checkbox"></td>
                                 </tr>
                                 <tr>
-                                    <th>Чесотка</th>
+                                    <th class="text-right">Чесотка <span>&nbsp;</span></th>
                                     <td><input ng-model="checkup.scabies" class="checkbox" type="checkbox"></td>
                                 </tr>
                             </tbody>
@@ -143,13 +149,13 @@
                         <table class="table table-condensed">
                             <thead>
                             <tr>
-                                <th class="col-md-4"></th>
-                                <th class="col-md-8"></th>
+                                <th class="col-md-2"></th>
+                                <th class="col-md-10"></th>
                             </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <th><span class="text-danger">*</span> Жалобы</th>
+                                    <th class="text-right">Жалобы <span class="text-danger">*</span></th>
                                     <td><div ng-class="{'text-danger': CheckupFirstEditForm.complaints.$invalid}">
                                         <div name="complaints" refbook-checkbox ref-book="rbRisarComplaints" ng-model="checkup.complaints" ng-required="true">
                                             [[ item.name ]]
@@ -158,7 +164,7 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <th>Молочные железы</th>
+                                    <th class="text-right">Молочные железы <span>&nbsp;</span></th>
                                     <td><div ng-class="{'text-danger': CheckupFirstEditForm.breast.$invalid}">
                                         <div name="breast" refbook-checkbox ng-model="checkup.breast" ref-book="rbRisarBreast" ng-required="true">
                                             [[ item.name ]]
@@ -167,7 +173,7 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <th>Состояние сосков</th>
+                                    <th class="text-right">Состояние сосков <span>&nbsp;</span></th>
                                     <td><div ng-class="{'text-danger': CheckupFirstEditForm.nipples.$invalid}">
                                         <div name="nipples" refbook-checkbox ng-model="checkup.nipples" ref-book="rbRisarNipples" ng-required="true">
                                             [[ item.name ]]
@@ -183,83 +189,83 @@
                         <table class="table table-condensed">
                             <thead>
                             <tr>
-                                <th class="col-md-4"></th>
-                                <th class="col-md-8"></th>
+                                <th class="col-md-2"></th>
+                                <th class="col-md-10"></th>
                             </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <th>Наружное исследование</th>
+                                    <th class="text-right">Наружное исследование</th>
                                     <td>&nbsp;</td>
                                 </tr>
                                 <tr>
-                                    <th>Окружность живота</th>
+                                    <th class="text-right">Окружность живота</th>
                                     <td><div class="row"><div class="col-md-4"><input ng-model="checkup.abdominal" class="form-control"></div></div></td>
                                 </tr>
                                 <tr>
-                                    <th>Высота стояния дна матки</th>
+                                    <th class="text-right">Высота стояния дна матки</th>
                                     <td><div class="row"><div class="col-md-4"><input ng-model="checkup.fundal_height" class="form-control"></div></div></td>
                                 </tr>
                                 <tr>
-                                    <th>Состояние матки</th>
+                                    <th class="text-right">Состояние матки</th>
                                     <td><div ng-class="{'has-error': CheckupFirstEditForm.metra_state.$invalid}">
                                         <rb-select name="metra_state" ng-model="checkup.metra_state" ref-book="rbRisarMetra_State" ng-required="true"></rb-select>
                                     </div></td>
                                 </tr>
                                 <tr>
-                                    <th>Плод</th>
+                                    <th class="text-right">Плод</th>
                                     <td>&nbsp;</td>
                                 </tr>
                                 <tr>
-                                    <td>Положение</td>
+                                    <td class="text-right">Положение</td>
                                     <td><rb-select ng-model="checkup.fetus_position" ref-book="rbRisarFetus_Position"></rb-select></td>
                                 </tr>
                                 <tr>
-                                    <td>Предлежащая часть</td>
+                                    <td class="text-right">Предлежащая часть</td>
                                     <td><rb-select ng-model="checkup.presenting_part" ref-book="rbRisarPresenting_Part"></rb-select></td>
                                 </tr>
                                 <tr>
-                                    <td>Сердцебиение</td>
-                                    <td><rb-select ng-model="checkup.presenting_part" ref-book="rbRisarFetus_Heartbeat"></rb-select></td>
+                                    <td class="text-right">Сердцебиение</td>
+                                    <td><rb-select ng-model="checkup.fetus_heartbeat" ref-book="rbRisarFetus_Heartbeat"></rb-select></td>
                                 </tr>
                                 <tr>
-                                    <td>ЧСС, уд/мин</td>
-                                    <td><rb-select ng-model="checkup.presenting_part" ref-book="rbRisarFetus_Heart_Rate"></rb-select></td>
+                                    <td class="text-right">ЧСС, уд/мин</td>
+                                    <td><rb-select ng-model="checkup.fetus_heart_rate" ref-book="rbRisarFetus_Heart_Rate"></rb-select></td>
                                 </tr>
                                 <tr>
-                                    <td>Шевеление</td>
+                                    <td class="text-right">Шевеление</td>
                                     <td><wysiwyg ng-model="fetus_movement" /></td>
                                 </tr>
                                 <tr>
-                                    <th>Внутреннее исследование</th>
+                                    <th class="text-right">Внутреннее исследование</th>
                                     <td>&nbsp;</td>
                                 </tr>
                                 <tr>
-                                    <th>Шейка матки</th>
+                                    <th class="text-right">Шейка матки</th>
                                     <td>&nbsp;</td>
                                 </tr>
                                 <tr>
-                                    <td>Длина шейки</td>
+                                    <td class="text-right">Длина шейки</td>
                                     <td><rb-select ng-model="checkup.cervix_length" ref-book="rbRisarCervix_Length"></rb-select></td>
                                 </tr>
                                 <tr>
-                                    <td>Позиция шейки</td>
+                                    <td class="text-right">Позиция шейки</td>
                                     <td><rb-select ng-model="checkup.cervix_position" ref-book="rbRisarCervix_Position"></rb-select></td>
                                 </tr>
                                 <tr>
-                                    <td>Зрелость шейки</td>
+                                    <td class="text-right">Зрелость шейки</td>
                                     <td><rb-select ng-model="checkup.cervix_maturity" ref-book="rbRisarCervix_Maturity"></rb-select></td>
                                 </tr>
                                 <tr>
-                                    <td>Консистенция шейки</td>
+                                    <td class="text-right">Консистенция шейки</td>
                                     <td><rb-select ng-model="checkup.cervix_consistency" ref-book="rbRisarCervix_Consistency"></rb-select></td>
                                 </tr>
                                 <tr>
-                                    <th>Цервикальный канал</th>
+                                    <th class="text-right">Цервикальный канал</th>
                                     <td><rb-select ng-model="checkup.cervical_canal" ref-book="rbRisarCervical_Canal"></rb-select></td>
                                 </tr>
                                 <tr>
-                                    <th>Выделение</th>
+                                    <th class="text-right">Выделение</th>
                                     <td><rb-select ng-model="checkup.secretion" ref-book="rbRisarSecretion"></rb-select></td>
                                 </tr>
                             </tbody>
@@ -270,25 +276,25 @@
                         <table class="table table-condensed">
                             <thead>
                             <tr>
-                                <th class="col-md-4"></th>
-                                <th class="col-md-8"></th>
+                                <th class="col-md-2"></th>
+                                <th class="col-md-10"></th>
                             </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <th>Мочи</th>
+                                    <th class="text-right">Мочи</th>
                                     <td><wysiwyg ng-model="checkup.urine" /></td>
                                 </tr>
                                 <tr>
-                                    <th>Крови</th>
+                                    <th class="text-right">Крови</th>
                                     <td><wysiwyg ng-model="checkup.blood" /></td>
                                 </tr>
                                 <tr>
-                                    <th>УЗИ</th>
+                                    <th class="text-right">УЗИ</th>
                                     <td><wysiwyg ng-model="checkup.us" /></td>
                                 </tr>
                                 <tr>
-                                    <th>Другое</th>
+                                    <th class="text-right">Другое</th>
                                     <td><wysiwyg ng-model="checkup.other_analysis" /></td>
                                 </tr>
                             </tbody>
@@ -299,25 +305,25 @@
                         <table class="table table-condensed">
                             <thead>
                             <tr>
-                                <th class="col-md-4"></th>
-                                <th class="col-md-8"></th>
+                                <th class="col-md-3"></th>
+                                <th class="col-md-9"></th>
                             </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <th>Диагнозы</th>
+                                    <th class="text-right">Диагнозы <span>&nbsp;</span></th>
                                     <td>&nbsp;</td>
                                 </tr>
                                 <tr>
-                                    <td><span class="text-danger">*</span> Основной</td>
+                                    <td class="text-right">Основной <span class="text-danger">*</span></td>
                                     <td><ui-mkb ng-model="checkup.diag" name="mkb" ng-required="true"></ui-mkb></td>
                                 </tr>
                                 <tr>
-                                    <td>Расшифровка основного</td>
+                                    <td class="text-right">Расшифровка основного <span>&nbsp;</span></td>
                                     <td><wysiwyg ng-model="checkup.diagwr" /></td>
                                 </tr>
                                 <tr>
-                                    <td>Сопутствующие</td>
+                                    <td class="text-right">Сопутствующие <span>&nbsp;</span></td>
                                     <td>
                                         <div ng-model="checkup.diag2" placeholder="Выберите диагноз" refbook-multiselect ref-book="MKB">
                                             <strong>[[ item.code ]]</strong> - [[ item.name ]]
@@ -325,11 +331,11 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td>Расшифровка сопутствующего</td>
+                                    <td class="text-right">Расшифровка сопутствующего <span>&nbsp;</span></td>
                                     <td><wysiwyg ng-model="checkup.diagwr2" /></td>
                                 </tr>
                                 <tr>
-                                    <td>Осложнения</td>
+                                    <td class="text-right">Осложнения <span>&nbsp;</span></td>
                                     <td>
                                         <div ng-model="checkup.diag3" placeholder="Выберите диагноз" refbook-multiselect ref-book="MKB">
                                             <strong>[[ item.code ]]</strong> - [[ item.name ]]
@@ -337,37 +343,37 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td>Расшифровка осложнения</td>
+                                    <td class="text-right">Расшифровка осложнения <span>&nbsp;</span></td>
                                     <td><wysiwyg ng-model="checkup.diagwr3" /></td>
                                 </tr>
                                 <tr>
-                                    <th><span class="text-danger">*</span> Возможность сохранения беременности</th>
+                                    <th class="text-right">Возможность сохранения беременности <span class="text-danger">*</span></th>
                                     <td><input ng-model="checkup.pregnancy_continuation" class="checkbox" type="checkbox"></td>
                                 </tr>
                                 <tr>
-                                    <th>Витаминизация</th>
+                                    <th class="text-right">Витаминизация <span>&nbsp;</span></th>
                                     <td><wysiwyg ng-model="checkup.fortification" /></td>
                                 </tr>
                                 <tr>
-                                    <th>Коррекция питания</th>
+                                    <th class="text-right">Коррекция питания <span>&nbsp;</span></th>
                                     <td><wysiwyg ng-model="checkup.nutrition" /></td>
                                 </tr>
                                 <tr>
-                                    <th>Лечение</th>
+                                    <th class="text-right">Лечение <span>&nbsp;</span></th>
                                     <td><wysiwyg ng-model="checkup.treatment" /></td>
                                 </tr>
                                 <tr>
-                                    <th><span class="text-danger">*</span> Плановая дата следующей явки</th>
+                                    <th class="text-right">Плановая дата следующей явки <span class="text-danger">*</span></th>
                                     <td><div ng-class="{'has-error': CheckupFirstEditForm.next_date.$invalid}">
                                         <wm-date name="next_date" ng-model="checkup.next_date" style="width: 250px" ng-required="true"></wm-date>
                                     </div></td>
                                 </tr>
                                 <tr>
-                                    <th>Примечания</th>
+                                    <th class="text-right">Примечания <span>&nbsp;</span></th>
                                     <td><wysiwyg ng-model="checkup.notes" /></td>
                                 </tr>
                                 <tr>
-                                    <th>Рекомендации</th>
+                                    <th class="text-right">Рекомендации <span>&nbsp;</span></th>
                                     <td><wysiwyg ng-model="checkup.recommendations" /></td>
                                 </tr>
                             </tbody>
@@ -389,39 +395,39 @@
                                     <td>Общий анализ крови</td>
                                     <td>12.09.2014 - 12.10.2014</td>
                                     <td><a class="print_link" href="#"><span class="glyphicon glyphicon-print"></span> Печать</a>
-                                        <a class="print_link" href="#"><span class="glyphicon glyphicon-pencil"></span> Редактировать</a></td>
+                                        <a class="print_link" href="#"><span class="glyphicon glyphicon-pencil"></span> Изменить</a></td>
                                 </tr>
                                 <tr>
                                     <td><span class="text-danger" tooltip="Исследование просрочено">Общий анализ мочи</span></td>
                                     <td>12.09.2014 - 12.10.2014</td>
                                     <td><a class="print_link" href="#"><span class="glyphicon glyphicon-print"></span> Печать</a>
-                                        <a class="print_link" href="#"><span class="glyphicon glyphicon-pencil"></span> Редактировать</a></td>
+                                        <a class="print_link" href="#"><span class="glyphicon glyphicon-pencil"></span> Изменить</a></td>
                                 </tr>
                                 <tr>
                                     <td>Определение антител M,G к гепатиту B</td>
                                     <td>12.09.2014 - 12.11.2014</td>
                                     <td><a class="print_link" href="#"><span class="glyphicon glyphicon-print"></span> Печать</a>
-                                        <a class="print_link" href="#"><span class="glyphicon glyphicon-pencil"></span> Редактировать</a></td>
+                                        <a class="print_link" href="#"><span class="glyphicon glyphicon-pencil"></span> Изменить</a></td>
                                 </tr>
                                 <tr><th colspan="3" style="text-align: center;">Функциональные исследования</th></tr>
                                 <tr>
                                     <td>УЗИ плода I триместр</td>
                                     <td>12.09.2014 - 12.12.2014</td>
                                     <td><a class="print_link" href="#"><span class="glyphicon glyphicon-print"></span> Печать</a>
-                                        <a class="print_link" href="#"><span class="glyphicon glyphicon-pencil"></span> Редактировать</a></td>
+                                        <a class="print_link" href="#"><span class="glyphicon glyphicon-pencil"></span> Изменить</a></td>
                                 </tr>
                                 <tr><th colspan="3" style="text-align: center;">Консультации специалистов</th></tr>
                                 <tr>
                                     <td>Консультация стоматолога</td>
                                     <td>12.09.2014 - 12.02.2014</td>
                                     <td><a class="print_link" href="#"><span class="glyphicon glyphicon-print"></span> Печать</a>
-                                        <a class="print_link" href="#"><span class="glyphicon glyphicon-pencil"></span> Редактировать</a></td>
+                                        <a class="print_link" href="#"><span class="glyphicon glyphicon-pencil"></span> Изменить</a></td>
                                 </tr>
                                 <tr>
                                     <td>Консультация офтальмолога</td>
                                     <td>12.09.2014 - 12.02.2014</td>
                                     <td><a class="print_link" href="#"><span class="glyphicon glyphicon-print"></span> Печать</a>
-                                        <a class="print_link" href="#"><span class="glyphicon glyphicon-pencil"></span> Редактировать</a></td>
+                                        <a class="print_link" href="#"><span class="glyphicon glyphicon-pencil"></span> Изменить</a></td>
                                 </tr>
                                 <tr><th colspan="3" style="text-align: center;">Дополнительные мероприятия</th></tr>
                                 <tr>
@@ -448,17 +454,14 @@
                     <a class="pseudo-btn" ng-href="{{ url_for('.html_inspection') }}?event_id=[[ chart.id ]]">Перейти на форму осмотров пациентки</a>
                     </div>
                     <div class="pull-right">
-                        <a class="btn btn-default"
-                           ng-click="rc.sampleWizard.backward()"
-                           ng-show="rc.sampleWizard.currentIndex > rc.sampleWizard.firstIndex">Предыдущий</a>
-                        <a class="btn btn-primary"
-                           ng-click="rc.sampleWizard.forward()"
+
+                        <a class="btn btn-success btn-lg"
+                           ng-click="save()">Сохранить</a>
+                        <a class="btn btn-primary btn-lg"
+                           ng-click="save(); rc.sampleWizard.forward()"
                            ng-show="rc.sampleWizard.currentIndex < rc.sampleWizard.navigationLength">
-                            Следующий
+                            Сохранить и продолжить
                         </a>
-                        <a class="btn btn-success"
-                           ng-click="save()"
-                           ng-show="rc.sampleWizard.currentIndex == rc.sampleWizard.lastIndex">Сохранить</a>
                     </div>
                 </div>
             </div>

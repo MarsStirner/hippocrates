@@ -67,6 +67,7 @@ var CheckupFirstEditCtrl = function ($scope, $window, $document, RisarApi, Confi
 };
 
 var CheckupSecondEditCtrl = function ($scope, $window, $document, RisarApi, Config) {
+
     $scope.save = function () {
         if($scope.checkup){
             $scope.checkup.flat_code = 'risarSecondInspection';
