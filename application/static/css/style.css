@@ -735,3 +735,12 @@ button.text-left {
 .cursor-default {
     cursor: auto;
 }
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.header-sorter {
+    margin-left: 10px;
+    cursor: pointer;
+}

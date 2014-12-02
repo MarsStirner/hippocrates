@@ -819,6 +819,60 @@ angular.module('WebMis20.directives')
             }
         }
     }])
+    .directive('wmSortableHeader', [function () {
+        return {
+            restrict: 'A',
+            controller: function () {
+                this.sort_cols = [];
+                this.register_col = function (col) {
+                    this.sort_cols.push(col);
+                };
+                this.clear_other = function (cur_col) {
+                    this.sort_cols.forEach(function (col) {
+                        if (col !== cur_col) {
+                            col.order = undefined;
+                        }
+                    });
+                }
+            }
+        }
+    }])
+    .directive('wmSortableColumn', ['$compile', function ($compile) {
+        return {
+            restrict: 'A',
+            require: '^wmSortableHeader',
+            scope: {
+                onChangeOrder: '&?'
+            },
+            link: function (scope, element, attrs, allColsCtrl) {
+                allColsCtrl.register_col(scope);
+                scope.order = undefined;
+                scope.column_name = attrs.wmSortableColumn;
+
+                var orders = [undefined, 'DESC', 'ASC'];
+
+                element.click(function () {
+                    scope.$apply(function () {
+                        allColsCtrl.clear_other(scope);
+                        var cur_idx = orders.indexOf(scope.order),
+                            total_choices = orders.length;
+                        scope.order = orders[(cur_idx < total_choices - 1 ? (cur_idx + 1) : 0)];
+                        scope.onChangeOrder({
+                            params: {
+                                order: scope.order,
+                                column_name: scope.column_name
+                            }
+                        });
+                    });
+                });
+                element.addClass('cursor-pointer');
+                var arrow = $('<span class="fa header-sorter"></span>');
+                arrow.attr('ng-class', "{'fa-caret-down': order === 'DESC', 'fa-caret-up': order === 'ASC'}");
+                element.append(arrow);
+                $compile(arrow)(scope);
+            }
+        }
+    }])
     .directive('wmDiagnosis', ['DiagnosisModal', 'WMEventServices', 'WMEventCache',
             function(DiagnosisModal, WMEventServices, WMEventCache) {
         return{

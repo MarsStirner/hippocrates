@@ -3,13 +3,14 @@
 import datetime
 
 from flask import request, abort
+from sqlalchemy import desc
 
 from config import ORGANISATION_INFIS_CODE
 from application.models.actions import Action
 from application.models.client import Client
 from application.models.enums import EventPrimary, EventOrder
 from application.models.event import (Event, EventType, Diagnosis, Diagnostic, EventPayment, Visit)
-from application.models.exists import Person, rbRequestType
+from application.models.exists import Person, rbRequestType, rbResult, Contract
 from application.systemwide import db
 from application.lib.utils import (jsonify, safe_traverse, logger, safe_datetime, get_utc_datetime_with_tz)
 from application.models.schedule import ScheduleClientTicket
@@ -485,8 +486,6 @@ def api_delete_event():
 
 @module.route('/api/events.json', methods=["POST"])
 def api_get_events():
-    from application.models.event import Event
-    from application.models.exists import Contract
     flt = request.get_json()
     base_query = Event.query.join(Client)
     context = EventVisualizer()
@@ -496,6 +495,8 @@ def api_get_events():
             'pages': 1,
             'items': [context.make_short_event(event)] if event else []
         })
+    if 'external_id' in flt:
+        base_query = base_query.filter(Event.externalId == flt['external_id'])
     if 'client_id' in flt:
         base_query = base_query.filter(Event.client_id == flt['client_id'])
     if 'beg_date' in flt:
@@ -514,9 +515,38 @@ def api_get_events():
         base_query = base_query.filter(Event.execPerson_id == flt['exec_person_id'])
     if 'result_id' in flt:
         base_query = base_query.filter(Event.result_id == flt['result_id'])
+
+    order_options = flt.get('sorting_params')
+    if order_options:
+        desc_order = order_options['order'] == 'DESC'
+        col_name = order_options['column_name']
+        if col_name == 'id':
+            base_query = base_query.order_by(Event.id.desc() if desc_order else Event.id)
+        if col_name == 'external_id':
+            # that's bad
+            ext_id_order_1 = u'CAST(SUBSTR(%s, 1, 4) AS UNSIGNED)' % Event.externalId
+            ext_id_order_2 = u'CAST(SUBSTR(%s, 6) AS UNSIGNED)' % Event.externalId
+            if desc_order:
+                ext_id_order_1 = desc(ext_id_order_1)
+                ext_id_order_2 = desc(ext_id_order_2)
+            base_query = base_query.order_by(ext_id_order_1, ext_id_order_2)
+        elif col_name == 'type_name':
+            base_query = base_query.join(EventType).order_by(EventType.name.desc() if desc_order else EventType.name)
+        elif col_name == 'beg_date':
+            base_query = base_query.order_by(Event.setDate.desc() if desc_order else Event.setDate)
+        elif col_name == 'end_date':
+            base_query = base_query.order_by(Event.execDate.desc() if desc_order else Event.execDate)
+        elif col_name == 'client_full_name':
+            base_query = base_query.order_by(Client.lastName.desc() if desc_order else Client.lastName)
+        elif col_name == 'person_short_name':
+            base_query = base_query.join(Event.execPerson).order_by(Person.lastName.desc() if desc_order else Person.lastName)
+        elif col_name == 'result_text':
+            base_query = base_query.join(rbResult).order_by(rbResult.name.desc() if desc_order else rbResult.name)
+    else:
+        base_query = base_query.order_by(Event.setDate)
+
     per_page = int(flt.get('per_page', 20))
     page = int(flt.get('page', 1))
-    base_query = base_query.order_by(Event.setDate)
     paginate = base_query.paginate(page, per_page, False)
     return jsonify({
         'pages': paginate.pages,

@@ -10,7 +10,7 @@
                     </div>
                     <div class="panel-body">
                         <label for="filter-id">Идентификатор обращения</label>
-                        <input class="form-control" id="filter-id" type="text" valid-number ng-model="flt.id" placeholder="Идентификатор">
+                        <input class="form-control" id="filter-id" type="text" ng-model="flt.external_id" placeholder="Идентификатор">
 
                         <label for="filter-beg-date">Начато</label>
                         <wm-date id="filter-beg-date" ng-model="flt.beg_date"></wm-date>
@@ -80,20 +80,20 @@
         <div class="col-md-9">
             <!-- Main -->
             <table class="table table-condensed table-hover">
-                <thead>
+                <thead wm-sortable-header>
                 <tr>
-                    <th>№ обращения</th>
-                    <th>Тип</th>
-                    <th>Начато</th>
-                    <th>Закончено</th>
-                    <th>Пациент</th>
-                    <th>Врач</th>
-                    <th>Результат</th>
+                    <th wm-sortable-column="external_id" on-change-order="sort_by_column(params)">№ обращения</th>
+                    <th wm-sortable-column="type_name" on-change-order="sort_by_column(params)">Тип</th>
+                    <th wm-sortable-column="beg_date" on-change-order="sort_by_column(params)">Начато</th>
+                    <th wm-sortable-column="end_date" on-change-order="sort_by_column(params)">Закончено</th>
+                    <th wm-sortable-column="client_full_name" on-change-order="sort_by_column(params)">Пациент</th>
+                    <th wm-sortable-column="person_short_name" on-change-order="sort_by_column(params)">Врач</th>
+                    <th wm-sortable-column="result_text" on-change-order="sort_by_column(params)">Результат</th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr ng-repeat="event in results" ng-click="open_event(event.id)">
-                    <td>[[ event.id ]]</td>
+                    <td>[[ event.external_id ]]</td>
                     <td>[[ event.type_name ]]</td>
                     <td>[[ event.beg_date | asDate ]]</td>
                     <td>[[ event.end_date | asDate ]]</td>

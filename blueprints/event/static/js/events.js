@@ -8,6 +8,7 @@ var EventListCtrl = function ($scope, $http, $window) {
             page: page
         };
         if ($scope.flt.id) model.id = $scope.flt.id;
+        if ($scope.flt.external_id) model.external_id = $scope.flt.external_id;
         if ($scope.flt.client) model.client_id = $scope.flt.client.id;
         if ($scope.flt.beg_date) model.beg_date = moment($scope.flt.beg_date).format('YYYY-MM-DD');
         if ($scope.flt.end_date) model.end_date = moment($scope.flt.end_date).format('YYYY-MM-DD');
@@ -20,12 +21,16 @@ var EventListCtrl = function ($scope, $http, $window) {
         return model;
     }
     $scope.get_data = function (page) {
-        $http.post(url_event_api_get_events, get_model(page))
+        var flt = get_model(page);
+        if ($scope.current_sorting) {
+            flt.sorting_params = $scope.current_sorting;
+        }
+        $http.post(url_event_api_get_events, flt)
         .success(function (data) {
             $scope.page = page;
             $scope.pages = data.result.pages;
             $scope.results = data.result.items;
-        })
+        });
     };
     $scope.get_clients = function (query) {
         if (!query) return;
@@ -43,6 +48,7 @@ var EventListCtrl = function ($scope, $http, $window) {
     $scope.diurnal = function () {
         $scope.flt = {
             id: null,
+            external_id: undefined,
             client: undefined,
             beg_date: moment().toDate(),
             end_date: null,
@@ -58,11 +64,42 @@ var EventListCtrl = function ($scope, $http, $window) {
             $scope.flt.end_date = null;
         }
     };
+    var sort_locally = function (col_name, order) {
+        if (order === undefined) {
+            col_name = 'beg_date';
+            order = 'ASC';
+        }
+
+        $scope.results.sort(function (a, b) {
+            if (a[col_name] < b[col_name]) {
+                return order === 'ASC' ? -1 : 1;
+            }
+            if (a[col_name] > b[col_name]) {
+                return order === 'DESC' ? -1 : 1;
+            }
+            return 0;
+        });
+    };
+    $scope.sort_by_column = function (params) {
+        var order = params.order,
+            col_name = params.column_name;
+        if (order === undefined) {
+            $scope.current_sorting = undefined;
+        } else {
+            $scope.current_sorting = params;
+        }
+        if ($scope.pages === 1) {
+            sort_locally(col_name, order);
+        } else if ($scope.pages > 1) {
+            $scope.get_data($scope.page);
+        }
+    };
     $scope.clear = function () {
         $scope.page = 1;
         $scope.pages = 1;
         $scope.flt = {
             id: null,
+            external_id: undefined,
             client: undefined,
             beg_date: null,
             end_date: null,
@@ -85,6 +122,7 @@ var EventListCtrl = function ($scope, $http, $window) {
     $scope.clients = [];
     $scope.last_query = '';
     $scope.max_size = 8;
+    $scope.current_sorting = undefined;
 
     $scope.clear_all();
 };
