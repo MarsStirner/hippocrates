@@ -275,6 +275,37 @@ def represent_intolerance(obj):
     }
 
 
+def make_epicrisis_info(epicrisis):
+    info = u'<b>Беременность закончилась</b> ' + epicrisis['pregnancy_final']
+    if epicrisis['delivery_waters'] or epicrisis['weakness'] or epicrisis['perineal_tear'] or epicrisis['eclampsia'] or \
+            epicrisis['funiculus'] or epicrisis['afterbirth'] or epicrisis['other_complications']:
+        info += u' с осложнениями'
+
+    info += u' при сроке %.2f.' % epicrisis['body_weight_gain']
+
+    if epicrisis['pregnancy_final'] == u'родами':
+        info += ' {0} {1}.'.format(epicrisis['ch_b_date'], epicrisis['ch_b_time'])
+    elif epicrisis['pregnancy_final'] == u'абортом':
+        info += ' {0} {1}.'.format(epicrisis['abort_date'], epicrisis['abort_time'])
+
+    info += u" <b>Место родоразрешения</b>: {0}.</br>".format(epicrisis['LPU'].shortName)
+
+    if (epicrisis['newborn_inspections'] and
+            not (epicrisis['pregnancy_final'] == u'абортом' or
+                 epicrisis['pregnancy_final'] == u'смертью матери во время/после аборта')):
+        info += u'<b>Дети</b> ({}): '.format(epicrisis['newborn_inspections'].length)
+
+        for child in epicrisis['newborn_inspections']:
+            if child['sexCode'] == 1:
+                info += u'мальчик '
+                info += u'живой' if child['alive'] else u'мертвый'
+            else:
+                info += u'девочка '
+                info += u'живая' if child['alive'] else u'мертвая'
+
+    return info
+
+
 def represent_epicrisis(event, action=None):
     if action is None:
         action = get_action(event, risar_epicrisis)
@@ -285,6 +316,7 @@ def represent_epicrisis(event, action=None):
         for (code, prop) in action.propsByCode.iteritems()
     )
     epicrisis['newborn_inspections'] = represent_newborn_inspections(event)
+    epicrisis['info'] = make_epicrisis_info(epicrisis)
     return epicrisis
 
 

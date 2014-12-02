@@ -29,9 +29,8 @@
             <tab heading="Информация о родоразрешении">
                 <div class="panel panel-default" style="border-color: #ffffff;">
                     <div class="panel-body">
-                        <b>Беременность закончилась</b> родами при сроке 36 недель (12.05.2014 17:00), закончившиеся смертью матери. <b>Место родоразрешения:</b> Пензенский городской родильный дома №1. </br>
-                        Были осуществлены манипуляции и проведены операции.</br>
-                        <b>Дети (2)</b>: Мальчик живой, девочка мертвая.
+                        <span ng-if="chart.epicrisis" ng-bind-html="chart.epicrisis.info">
+                        </span>
                         <div class="text-right"><a class="pseudo-btn"><span class="glyphicon glyphicon-pencil"></span> Изменить</a> </div>
                     </div>
 
