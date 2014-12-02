@@ -3,7 +3,8 @@
 import datetime
 import re
 
-from application.lib.const import PAYER_EVENT_CODES, STATIONARY_EVENT_CODES
+from application.lib.const import PAYER_EVENT_CODES, STATIONARY_EVENT_CODES, DIAGNOSTIC_EVENT_CODES, \
+    POLICLINIC_EVENT_CODES, PAID_EVENT_CODE, OMS_EVENT_CODE, DMS_EVENT_CODE, BUDGET_EVENT_CODE
 from application.lib.agesex import AgeSex
 from application.lib.settings import Settings
 from application.models.client import ClientDocument
@@ -107,16 +108,15 @@ class Event(db.Model):
         """
         from .actions import ActionProperty_OrgStructure, ActionProperty, ActionType, Action
         from .exists import OrgStructure
-        if self.orgStructure_id:
-            return self.orgStructure
-        prop = ActionProperty_OrgStructure.query.join(ActionProperty, ActionType, Action).filter(
-            Action.event == self,
-            Action.status < 2,
-            ActionType.flatCode == 'moving',
-        ).orderby(Action.begDate.desc()).first()
-        if not prop:
-            return None
-        return OrgStructure.query.get(prop.value)
+        if self.is_stationary:
+            prop = ActionProperty_OrgStructure.query.join(ActionProperty, Action, ActionType).filter(
+                Action.event == self,
+                Action.status < 2,
+                ActionType.flatCode == 'moving',
+            ).order_by(Action.begDate.desc()).first()
+            return OrgStructure.query.get(prop.value) if prop else None
+        else:
+            return self.orgStructure if self.orgStructure_id else None
 
     @property
     def date(self):
@@ -125,23 +125,50 @@ class Event(db.Model):
 
     @property
     def is_closed(self):
-        # Текущая дата больше, чем дата завершения + 2 рабочих дня
-        # согласно какому-то мегаприказу МЗ и главврача ФНКЦ
-        # Установлен результат обращения
         from application.lib.data import addPeriod
-        return self.is_pre_closed and datetime.date.today() > addPeriod(
-            self.execDate.date(),
-            Settings.getInt('Event.BlockTime', 2),
-            False
-        )
+        if self.is_stationary:
+            # Текущая дата больше, чем дата завершения + 2 рабочих дня
+            # согласно какому-то мегаприказу МЗ и главврача ФНКЦ
+            # Установлен результат обращения
+            return self.is_pre_closed and datetime.date.today() > addPeriod(
+                self.execDate.date(),
+                Settings.getInt('Event.BlockTime', 2),
+                False
+            )
+        else:
+            return self.is_pre_closed
 
     @property
     def is_pre_closed(self):
         return self.execDate and (self.result_id is not None)
 
     @property
+    def is_policlinic(self):
+        return self.eventType.requestType.code in POLICLINIC_EVENT_CODES
+
+    @property
     def is_stationary(self):
         return self.eventType.requestType.code in STATIONARY_EVENT_CODES
+
+    @property
+    def is_diagnostic(self):
+        return self.eventType.requestType.code in DIAGNOSTIC_EVENT_CODES
+
+    @property
+    def is_paid(self):
+        return self.eventType.finance.code == PAID_EVENT_CODE
+
+    @property
+    def is_oms(self):
+        return self.eventType.finance.code == OMS_EVENT_CODE
+
+    @property
+    def is_dms(self):
+        return self.eventType.finance.code == DMS_EVENT_CODE
+
+    @property
+    def is_budget(self):
+        return self.eventType.finance.code == BUDGET_EVENT_CODE
 
     def __unicode__(self):
         return unicode(self.eventType)
@@ -247,6 +274,9 @@ class EventType(db.Model):
 
     def __int__(self):
         return self.id
+
+    def __unicode__(self):
+        return self.name
 
 
 class EventType_Action(db.Model):

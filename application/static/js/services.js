@@ -40,6 +40,17 @@ angular.module('WebMis20.services', []).
                 });
                 return instance.result;
             },
+            error: function (head, message) {
+                var MBController = function ($scope) {
+                    $scope.head_msg = head;
+                    $scope.message = message;
+                };
+                var instance = $modal.open({
+                    templateUrl: '/WebMis20/modal-MessageBox-error.html',
+                    controller: MBController
+                });
+                return instance.result;
+            },
             question: function (head, question) {
                 var MBController = function ($scope) {
                     $scope.head_msg = head;
@@ -64,6 +75,20 @@ angular.module('WebMis20.services', []).
             </div>\
             <div class="modal-footer">\
                 <button type="button" class="btn btn-success" ng-click="$close()">Ок</button>\
+            </div>'
+        );
+    }]).
+    run(['$templateCache', function ($templateCache) {
+        $templateCache.put('/WebMis20/modal-MessageBox-error.html',
+            '<div class="modal-header" xmlns="http://www.w3.org/1999/html">\
+                <button type="button" class="close" ng-click="$dismiss()">&times;</button>\
+                <h4 class="modal-title">[[head_msg]]</h4>\
+            </div>\
+            <div class="modal-body">\
+                <p ng-bind-html="message"></p>\
+            </div>\
+            <div class="modal-footer">\
+                <button type="button" class="btn btn-danger" ng-click="$dismiss()">Ок</button>\
             </div>'
         );
     }]).

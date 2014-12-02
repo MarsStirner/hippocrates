@@ -186,6 +186,9 @@ class Client(db.Model):
         else:
             return formatDays(days)
 
+    @property
+    def is_adult(self):
+        return self.age_tuple()[3] >= 18
 
     @property
     def nameText(self):
@@ -193,9 +196,8 @@ class Client(db.Model):
 
     @property
     def shortNameText(self):
-        words = self.firstName.split() + self.patrName.split()
-        initials = ['%s.' % word[0].upper() for word in words if word]
-        return u'%s %s' % (self.lastName, u' '.join(initials))
+        from application.lib.utils import initialize_name
+        return initialize_name(self.lastName, self.firstName, self.patrName)
 
     @property
     def sex(self):
@@ -365,6 +367,10 @@ class ClientAddress(db.Model):
     @property
     def corpus(self):
         return self.address.corpus if self.address else ''
+
+    @property
+    def is_russian(self):
+        return bool(self.KLADRCode)
 
     def set_deleted(self, val):
         self.deleted = val

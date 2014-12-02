@@ -103,6 +103,12 @@ def add_or_update_doc(client, data):
     # todo: check for existing records ?
     err_msg = u'Ошибка сохранения документа'
     doc_id = data.get('id')
+    deleted = data.get('deleted', 0)
+    if deleted:
+        doc = ClientDocument.query.get(doc_id)
+        doc.deleted = deleted
+        return doc
+
     doc_type = safe_traverse(data, 'doc_type', 'id')
     if not doc_type:
         raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Тип документа')
@@ -117,7 +123,6 @@ def add_or_update_doc(client, data):
     origin = data.get('origin')
     if not origin:
         raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Выдан')
-    deleted = data.get('deleted', 0)
 
     if doc_id:
         doc = ClientDocument.query.get(doc_id)
@@ -128,7 +133,6 @@ def add_or_update_doc(client, data):
         doc.endDate = end_date
         doc.origin = origin
         doc.client = client
-        doc.deleted = deleted
     else:
         doc = ClientDocument(doc_type, serial, number, beg_date, end_date, origin, client)
     return doc
@@ -182,7 +186,7 @@ def add_or_update_address(client, data):
                 raise ClientSaveException(msg_err, u'Отсутствует обязательное поле Адрес в свободном виде.')
             client_addr.freeInput = free_input
         else:
-            raise ClientSaveException(msg_err, u'попытка сохранения адреса из справочника адресов '
+            raise ClientSaveException(msg_err, u'неизвестная ошибка сохранения адреса из справочника адресов. '
                                       u'Свяжитесь с администратором.')
 
         client_addr.localityType = loc_type

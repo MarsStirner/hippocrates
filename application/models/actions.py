@@ -128,6 +128,16 @@ class ActionProperty(db.Model):
         setattr(self, self.__get_property_name(), value)
 
     @property
+    def value_raw(self):
+        value_object = self.value_object
+        if not value_object:
+            return None
+        if self.type.isVector:
+            return [item.value_ for item in value_object]
+        else:
+            return value_object[0].value_
+
+    @property
     def value(self):
         value_object = self.value_object
         if not value_object:
@@ -288,6 +298,10 @@ class ActionProperty__ValueType(db.Model):
     def format_value(cls, prop, json_data):
         return json_data
 
+    @classmethod
+    def mark_as_deleted(cls, prop):
+        pass
+
     def set_raw_value(self, value):
         if isinstance(value, dict):
             value = value['id']
@@ -416,8 +430,8 @@ class ActionProperty_Diagnosis(ActionProperty__ValueType):
     def format_value(cls, property, json_data):
         from blueprints.event.lib.utils import create_or_update_diagnosis, delete_diagnosis
         from application.lib.utils import safe_traverse
-        action = property.action
 
+        action = property.action
         if property.type.isVector:
             diag_list = []
             for diag_data in json_data:
@@ -430,9 +444,29 @@ class ActionProperty_Diagnosis(ActionProperty__ValueType):
                     diag_list.append(d)
             return diag_list
         else:
-            d = create_or_update_diagnosis(action.event, json_data, action)
-            db.session.add(d)
+            current_value = property.value_raw
+            if json_data is not None:
+                d = create_or_update_diagnosis(action.event, json_data, action)
+                if current_value is not None and current_value != d.id:
+                    delete_diagnosis(None, current_value)
+                db.session.add(d)
+            else:
+                if current_value is not None:
+                    delete_diagnosis(None, current_value)
+                d = None
             return d
+
+    @classmethod
+    def mark_as_deleted(cls, prop):
+        from blueprints.event.lib.utils import delete_diagnosis
+        value = prop.value
+        if prop.type.isVector:
+            for diag in value:
+                delete_diagnosis(diag)
+        else:
+            if value:
+                delete_diagnosis(value)
+
 
 
 class ActionProperty_Integer_Base(ActionProperty__ValueType):

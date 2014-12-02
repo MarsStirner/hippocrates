@@ -23,7 +23,7 @@ var WebMis20 = angular.module('WebMis20', [
     'mgcrea.ngStrap.affix',
     'duScroll'
 ])
-.config(function ($interpolateProvider, datepickerConfig, datepickerPopupConfig) {
+.config(function ($interpolateProvider, datepickerConfig, datepickerPopupConfig, paginationConfig) {
     $interpolateProvider.startSymbol('[[');
     $interpolateProvider.endSymbol(']]');
     datepickerConfig.showWeek = false;
@@ -33,6 +33,10 @@ var WebMis20 = angular.module('WebMis20', [
     datepickerPopupConfig.clearText = 'Убрать';
     datepickerPopupConfig.closeText = 'Готово';
 //    datepickerPopupConfig.appendToBody=true;
+    paginationConfig.firstText = 'Первая';
+    paginationConfig.lastText = 'Последняя';
+    paginationConfig.previousText = 'Предыдущая';
+    paginationConfig.nextText = 'Следующая';
 }).config(['$tooltipProvider', function($tooltipProvider){
     $tooltipProvider.setTriggers({
         'mouseenter': 'mouseleave',
@@ -332,7 +336,7 @@ var WebMis20 = angular.module('WebMis20', [
 .filter('flt_not_deleted', function() {
     return function(items) {
         var out = [];
-        if(items) {
+        if (items && items instanceof Array) {
             items.forEach(function(item){
                 if (!item.hasOwnProperty('deleted') ||
                     (item.hasOwnProperty('deleted') && item.deleted === 0)) {
@@ -723,8 +727,10 @@ var WebMis20 = angular.module('WebMis20', [
 
             // 2-way binding
             function select() {
-                scope.selectAll.select(scope.key, this.checked);
-                scope.$root.$digest(); // Это может негативно влиять на производительность, но оно нужно.
+                scope.$apply(angular.bind(this, function () {
+                    scope.selectAll.select(scope.key, this.checked);
+                }));
+//                scope.$root.$digest(); // Это может негативно влиять на производительность, но оно нужно.
             }
             scope.$watch('selectAll._selected', function (n, o) {
                 inputElement[0].checked = scope.selectAll.selected(scope.key);
@@ -1085,16 +1091,14 @@ var aux = {
     }
 };
 function safe_traverse(object, attrs) {
-    var o = object, attr;
-    if (typeof attrs === "string") {
-        attrs = attrs.split('.');
-    }
+    var o = object,
+        attr,
+        default_val = arguments[2];
     for (var i = 0; i < attrs.length; ++i) {
         attr = attrs[i];
-        if (o !== null && o.hasOwnProperty(attr)) {
-            o = o[attr];
-        } else {
-            return
+        o = o[attr];
+        if (o === undefined || (o === null && i < attrs.length - 1)) {
+            return default_val;
         }
     }
     return o;
@@ -1132,7 +1136,7 @@ if (!String.prototype.format) {
 if (!String.prototype.formatNonEmpty) {
     String.prototype.formatNonEmpty = function() {
         var args = arguments;
-        return this.replace(/{([\w\u0400-\u04FF\s\.,</>]*)\|?(\d+)\|?([\w\u0400-\u04FF\s\.,</>]*)}/g, function(match, prefix, number, suffix) {
+        return this.replace(/{([\w\u0400-\u04FF\s\.,</>()]*)\|?(\d+)\|?([\w\u0400-\u04FF\s\.,</>()]*)}/g, function(match, prefix, number, suffix) {
             return typeof args[number] != 'undefined'
                 ? (args[number] ? (prefix + args[number] + suffix): '')
                 : ''

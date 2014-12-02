@@ -1,114 +1,43 @@
 /**
  * Created by mmalkov on 11.07.14.
  */
-var EventDiagnosesCtrl = function($scope, RefBookService, $http) {
-    $scope.rbDiagnosisType = RefBookService.get('rbDiagnosisType');
-    $scope.rbDiseaseCharacter = RefBookService.get('rbDiseaseCharacter');
-    $scope.rbDiseasePhases = RefBookService.get('rbDiseasePhases');
-    $scope.rbDiseaseStage = RefBookService.get('rbDiseaseStage');
-    $scope.rbHealthGroup = RefBookService.get('rbHealthGroup');
-    $scope.rbDispanser = RefBookService.get('rbDispanser');
-    $scope.rbTraumaType = RefBookService.get('rbTraumaType');
-    $scope.Person = RefBookService.get('Person');
-
-    $scope.$on('event_loaded', function() {
-        $scope.diagnoses = $scope.event.diagnoses || [];
-    });
-
-    $scope.diag_edit = [];
-    $scope.diag_edit_start = function (index) {
-        if (!$scope.diag_edit[index]) {
-            $scope.diag_edit[index] = angular.extend({}, $scope.diagnoses[index])
-        }
-    };
-    $scope.diag_edit_save = function (index) {
-        if ($scope.diag_edit[index]) {
-            $scope.diagnoses[index] = $scope.diag_edit[index];
-            $scope.diagnoses[index]._dirty = true;
-            $scope.diagnoses[index].client_id = $scope.event.info.client_id;
-            $scope.diagnoses[index].event_id = $scope.event.info.id;
-            $http.post(url_for_event_api_diagnosis_save, $scope.diagnoses[index]).then(function () {
-                $scope.diag_edit[index] = undefined;
-                delete $scope.diagnoses[index]._first;
-            });
-        }
-    };
-    $scope.diag_edit_stop = function (index) {
-        if ($scope.diag_edit[index]) {
-            if ($scope.diag_edit[index]._first) {
-                $scope.diagnoses.splice(index, 1);
-            }
-            $scope.diag_edit[index] = undefined;
-        }
-    };
-    $scope.diag_edit_new = function () {
-        $scope.diagnoses.splice(0, 0, {
-            person: $scope.Person.get(current_user_id),
-            _new: true,
-            _first: true
-        });
-        $scope.diag_edit_start(0);
-    };
-    $scope.diag_edit_save_disabled = function (index) {
-        var q = $scope.diag_edit[index];
-        return !q.diagnosis_type;
-    };
-
+var EventDiagnosesCtrl = function ($scope) {
 };
 var EventMainInfoCtrl = function ($scope, $http, RefBookService, EventType, $window, $timeout, Settings, $modal, $filter) {
     $scope.Organisation = RefBookService.get('Organisation');
-    $scope.Person = RefBookService.get('vrbPersonWithSpeciality');
     $scope.Contract = RefBookService.get('Contract');
     $scope.rbRequestType = RefBookService.get('rbRequestType');
     $scope.rbFinance = RefBookService.get('rbFinance');
     $scope.rbEventType = new EventType();
     $scope.OrgStructure = RefBookService.get('OrgStructure');
-    $scope.rbDocumentType = RefBookService.get('rbDocumentType');
-    $scope.rbOrder = RefBookService.get('EventOrder');
-    $scope.rbPrimary = RefBookService.get('EventPrimary');
     $scope.rbResult = RefBookService.get('rbResult');
     $scope.rbAcheResult = RefBookService.get('rbAcheResult');
 
     var event_created = !$scope.event.is_new();
-    $scope.formcnf = {
-        request_type: {
-            disabled: event_created
-        },
-        finance: {
-            disabled: event_created
-        },
-        contract: {
-            disabled: event_created
-        },
-        event_type: {
-            disabled: event_created
-        },
-        exec_person: {
-            disabled: event_created || !current_user.current_role_maybe('admin', 'rRegistartor', 'clinicRegistrator')
-        },
-        org_structure: {
-            disabled: event_created
-        },
-        primacy: {
-            disabled: event_created
-        },
-        order: {
-            disabled: event_created
-        },
-        set_date: {
-            disabled: event_created
-        },
-        exec_date: {
-            disabled: $scope.event.closed()
-        },
-        result: {
-            disabled: $scope.event.closed(),
-            show: current_user.current_role_maybe('admin', 'doctor')
-        },
-        ache_result: {
-            disabled: !$scope.event.closed(),
-            show: current_user.current_role_maybe('admin', 'doctor')
+    $scope.widget_disabled = function (widget_name) {
+        if (['request_type', 'finance', 'contract', 'event_type', 'dms',
+             'exec_person', 'org_structure', 'set_date'
+        ].has(widget_name)
+        ) {
+            return event_created || $scope.event.ro;
+        } else if (widget_name === 'exec_person') {
+            return event_created || $scope.event.ro || !current_user.current_role_maybe('admin', 'rRegistartor', 'clinicRegistrator');
+        } else if (['result', 'ache_result'].has(widget_name)) {
+            return $scope.event.ro || current_user_id !== safe_traverse($scope.event, ['info', 'exec_person', 'id']);
+        } else if (['exec_date'].has(widget_name)) {
+            return $scope.event.ro;
         }
+    };
+    $scope.services_added = function () {
+        return $scope.event.is_new() && $scope.event.services.length;
+    };
+    $scope.cmb_result_available = function () {
+        return current_user.current_role_maybe('admin', 'doctor', 'clinicDoctor') || (
+            current_user.current_role_maybe('rRegistartor', 'clinicRegistrator') && $scope.formstate.is_diagnostic()
+        );
+    };
+    $scope.cmb_ache_result_available = function () {
+        return current_user.current_role_maybe('admin', 'doctor', 'clinicDoctor');
     };
 
     $scope.finance_is_oms = function(){return $scope._finance.code == '2'};
@@ -190,7 +119,7 @@ var EventMainInfoCtrl = function ($scope, $http, RefBookService, EventType, $win
     $scope.process_policies = function (_finance, _contract) {
         if(!$scope.check_policy()) {
             $scope.show_policy_errors();
-            $scope.finance.selected = $scope.rbFinance.get_by_code(4);
+//            $scope.finance.selected = $scope.rbFinance.get_by_code(4);
         } else {
             if($scope.finance_is_dms() && _contract){
                 var _break = false;
@@ -313,9 +242,8 @@ var PolicyInvalidModalCtrl = function ($scope, $modalInstance, policy_errors, po
         $modalInstance.dismiss('cancel');
     };
 };
-var EventPaymentCtrl = function($scope, RefBookService, Settings, $http, $modal) {
+var EventPaymentCtrl = function($scope, RefBookService, Settings, $http, $modal, MessageBox) {
     $scope.rbDocumentType = RefBookService.get('rbDocumentType');
-    $scope.Organisation = RefBookService.get('Organisation');
 
     var event_created = !$scope.event.is_new();
     function isNotEmpty(val) { return val !== undefined && val !== null; }
@@ -345,17 +273,20 @@ var EventPaymentCtrl = function($scope, RefBookService, Settings, $http, $modal)
         return ($scope.payer_tabs.org.active && $scope.formstate.is_paid() && $scope.event.info.client.info.age_tuple[3] < 18);
     };
     $scope.payer_info_disabled = function () {
-        return event_created && false;
+        return $scope.event.ro;
     };
     $scope.contract_info_disabled = function () {
         return event_created || $scope.integration1CODVD_enabled();
     };
     $scope.btn_edit_contract_info_visible = function () {
         var lc = $scope.event.payment && $scope.event.payment.local_contract || null;
-        return !(lc && lc.date_contract && lc.number_contract || $scope.integration1CODVD_enabled());
+        return !(lc && lc.date_contract && lc.number_contract || $scope.integration1CODVD_enabled() || $scope.event.ro);
     };
     $scope.import_payer_btn_disabled = function () {
-        return event_created && $scope.contract_available();
+        return $scope.event.ro;
+    };
+    $scope.btn_delete_lc_disabled = function () {
+        return $scope.event.ro;
     };
     $scope.payer_tabs = {
         person: {
@@ -371,13 +302,16 @@ var EventPaymentCtrl = function($scope, RefBookService, Settings, $http, $modal)
     $scope.refresh_tabs = function (org_active) {
         $scope.payer_tabs.person.active = !org_active;
         $scope.payer_tabs.org.active = Boolean(org_active);
-//        $scope.payer_tabs.person.disabled = event_created && $scope.payer_tabs.org.active;
-//        $scope.payer_tabs.org.disabled = event_created && $scope.payer_tabs.person.active;
+        $scope.payer_tabs.person.disabled = $scope.event.ro; //event_created && $scope.payer_tabs.org.active;
+        $scope.payer_tabs.org.disabled = $scope.event.ro; // event_created && $scope.payer_tabs.person.active;
     };
 
     $scope.contract_available = function () {
         var event = $scope.event;
         return event.payment && event.payment.local_contract && event.payment.local_contract.id;
+    };
+    $scope.payer_info_filled = function () {
+        return $scope.payer_is_person() || $scope.payer_is_org();
     };
 
     $scope.contract_is_shared = function () {
@@ -438,6 +372,27 @@ var EventPaymentCtrl = function($scope, RefBookService, Settings, $http, $modal)
         }
     };
 
+    $scope.import_payer_info = function (from) {
+        function process_import() {
+            if (from === 'self') {
+                $scope.get_payer($scope.event.info.client_id);
+            } else if (from === 'parent') {
+                $scope.open_relatives_modal();
+            } else if (from === 'prev') {
+                $scope.open_prev_event_contract_modal();
+            }
+        }
+        if ($scope.payer_info_filled()) {
+            MessageBox.question(
+                'Изменение данных плательщика',
+                'Данные плательщика будут изменены. Продолжить?'
+            ).then(function () {
+                process_import();
+            });
+        } else {
+            process_import();
+        }
+    };
     $scope.get_payer = function(client_id) {
         $http.get(url_api_client_payment_info_get, {
             params: {
@@ -473,6 +428,7 @@ var EventPaymentCtrl = function($scope, RefBookService, Settings, $http, $modal)
         ).then(function (prev_con_info) {
             $modal.open({
                 templateUrl: 'modal-prev-event-contract.html',
+                windowClass: 'modal-scrollable',
                 size: 'lg',
                 controller: PrevEventContractModalCtrl,
                 scope: $scope,
@@ -531,7 +487,7 @@ var PrevEventContractModalCtrl = function ($scope, $modalInstance, model, $filte
         } else if ($scope.is_payer_person(lcon)) {
             return 'Физ. лицо:<br>{<strong>ФИО</strong> |0|<br>} {<strong>документ</strong> |1|<br>} {<strong>адрес</strong> |2|<br>}'.formatNonEmpty(
                 '{0} {1} {2} {3| г.р.}'.formatNonEmpty(lcon.last_name, lcon.first_name, lcon.patr_name, lcon.birth_date),
-                '{0}{ серия |0}{ |1}{ номер |2}'.formatNonEmpty(lcon.doc_type.name, lcon.serial_left, lcon.serial_right, lcon.number),
+                '{0}{ серия |0}{ |1}{ номер |2}'.formatNonEmpty(safe_traverse(lcon, ['doc_type', 'name']), lcon.serial_left, lcon.serial_right, lcon.number),
                 '{0}'.formatNonEmpty(lcon.reg_address)
             );
         } else {
@@ -638,11 +594,6 @@ var EventServicesCtrl = function($scope, $http) {
         $scope.query = '';
     };
 
-
-    // ng-class="{'success': service.fully_paid || (service.is_new && service.coord_person_id) || (!service.is_new && service.coord_actions && service.coord_actions.length==service.amount),
-    // 'warning': service.partially_paid || (!service.is_new && service.coord_actions && service.coord_actions.length<service.amount),
-    // 'info': service.is_new && !(service.is_new && service.coord_person_id),
-    // 'danger': !service.fully_paid && !service.partially_paid && !service.is_new && !service.coord_actions.length}"
     $scope.get_class = function (service) {
         var result = [];
         if (service.check_payment() || service.check_coord()) {
@@ -662,13 +613,15 @@ var EventServicesCtrl = function($scope, $http) {
         $scope.query_clear();
     });
 
+    $scope.search_disabled = function () {
+        return $scope.event.ro;
+    };
 };
 
 var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $document, PrintingService, Settings,
-        $filter, $modal, $interval, ActionTypeTreeModal, WMEventServices, WMEventFormState, MessageBox) {
+        $filter, $modal, WMEventServices, WMEventFormState, MessageBox) {
     $scope.aux = aux;
     $scope.current_role_maybe = current_user.current_role_maybe;
-    $scope.Organisation = RefBookService.get('Organisation');
     $scope.Settings = new Settings();
     $scope.alerts = [];
     $scope.eventServices = WMEventServices;
@@ -708,120 +661,64 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
             });
     };
 
-    $scope.open_action_tree = function (at_class) {
-        ActionTypeTreeModal.open(at_class, $scope.event_id, $scope.event.info.client.info)
-            .result.then(function (result) {
-                if(typeof (result) === 'object'){
-                    $scope.child_window = result;
-                } else {
-                    $scope.event.reload();
-                }
-            });
-    };
-
-    $scope.save_event = function (close_event) {
-        if (typeof (close_event) === 'undefined') {
-            close_event = false;
-        }
+    $scope.save_event = function () {
         $scope.editing.submit_attempt = true;
         if ($scope.eventForm.$valid) {
-            $scope.event.save(close_event).
-                then(function (result) {
-                    $scope.eventForm.$setPristine();
-                    if ($scope.event.is_new()) {
-                        if (result.error_text) {
-                            MessageBox.info('Внимание!', result.error_text).then(function () {
-                                $window.open(url_for_event_html_event_info + '?event_id=' + result.event_id, '_self');
-                            });
-                        } else {
+            $scope.event.save()
+            .then(function (result) {
+                $scope.eventForm.$setPristine();
+                if ($scope.event.is_new()) {
+                    if (result.error_text) {
+                        MessageBox.info('Внимание!', result.error_text).then(function () {
                             $window.open(url_for_event_html_event_info + '?event_id=' + result.event_id, '_self');
-                        }
+                        });
+                    } else {
+                        $window.open(url_for_event_html_event_info + '?event_id=' + result.event_id, '_self');
+                    }
+                } else {
+                    if (result.error_text) {
+                        MessageBox.info('Внимание!', result.error_text).then(function () {
+                            $scope.event.reload().then(function () {
+                                $scope.$broadcast('event_loaded');
+                            });
+                        });
                     } else {
                         $scope.event.reload().then(function () {
                             $scope.$broadcast('event_loaded');
                         });
                     }
-                    if (close_event) {
-                        alert("Обращение закрыто");
-                    }
-                }, function (message) {
-                    alert(message);
-                });
+                }
+            }, function (message) {
+                MessageBox.info('Ошибка сохранения', message);
+            });
         } else {
             var formelm = $('#eventForm').find('.ng-invalid:not(ng-form):first');
             $document.scrollToElement(formelm, 100, 1500);
         }
     };
 
-
-    $scope.open_delete_event_modal = function() {
-        var modalInstance = $modal.open({
-            templateUrl: 'modal-delete-record.html',
-            controller: DeleteRecordModalCtrl,
-            resolve: {
-                message: function(){
-                    return 'текущее обращение';
-                }
-            },
-            scope: $scope
-        });
-        modalInstance.result.then(function () {
-            $scope.delete_event();
-        });
-    };
-
-
-    $scope.delete_event = function (){
-        if(!$scope.event_has_payments()){
-            $http.post(
-                url_for_delete_event, {
-                    event_id: $scope.event_id
-                }
-            ).success(function() {
-                if (window.opener){
+    $scope.delete_event = function () {
+        if($scope.event_has_payments()) {
+            alert('Невозможно удалить обращение! По нему была совершена оплата.');
+            return;
+        }
+        MessageBox.question(
+            'Удаление обращения',
+            'Вы уверены, что хотите удалить текущее обращение?'
+        ).then(function () {
+            $scope.eventServices.delete_event(
+                event
+            ).then(function () {
+                if (window.opener) {
                     window.opener.focus();
                     window.close();
                 }
-            }).error(function(response) {
+            }, function (response) {
                 var rr = response.result;
                 var message = rr.name + ': ' + (rr.data ? rr.data.err_msg : '');
                 alert(message);
             });
-        } else {
-            alert('Невозможно удалить обращение! По нему была совершена оплата.');
-        }
-
-    };
-
-    $scope.event_mandatoryResult = function() {
-        return $scope.Settings.get_string('Event.mandatoryResult') == '1';
-    };
-
-    $scope.event_check_results = function() {
-        if (!$scope.event.info.result){
-            alert("Необходимо задать результат");
-            return false
-        }
-        if (!$scope.formstate.is_diagnostic() && !$scope.event.info.ache_result && $scope.event_mandatoryResult()){
-            alert("Необходимо задать исход заболевания/госпитализации");
-            return false
-        }
-        return true;
-    };
-    $scope.event_check_final_diagnosis = function() {
-        var final_diagnosis = $scope.event.get_final_diagnosis()
-        if (!final_diagnosis){
-            alert("Необходимо указать заключительный диагноз.");
-            return false
-        } else if (final_diagnosis.length > 1){
-            alert("В обращении не может быть больше одного заключительного диагноза.");
-            return false
-        }
-        if(!final_diagnosis[0].result){
-            alert("Необходимо указать результат заключительного диагноза");
-            return false
-        }
-        return true
+        });
     };
 
     $scope.event_has_payments = function () {
@@ -831,51 +728,22 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
         return !$scope.event.is_new() && $scope.event.payment && !$scope.event_has_payments();
     };
 
-    $scope.open_unclosed_actions_modal = function(unclosed_actions) {
-        var modalInstance = $modal.open({
-            templateUrl: 'modal-unclosed-actions.html',
-            controller: UnclosedActionsModalCtrl,
-            resolve: {
-                unclosed_actions: function(){
-                    return unclosed_actions;
-                }
-            },
-            scope: $scope
+    $scope.close_event = function() {
+        $scope.eventServices.check_can_close_event($scope.event)
+        .then(function () {
+            $scope.eventServices.close_event($scope.event)
+            .then(function (response) {
+                MessageBox.info('Данные сохранены', response.data.meta.name)
+                .then(function () {
+                    $scope.eventForm.$setPristine();
+                    $window.location.reload(true);
+                });
+            }, function () {
+                alert('Ошибка закрытия обращения');
+            });
+        }, function () {
+            alert('Ошибка закрытия обращения');
         });
-        modalInstance.result.then(function () {
-            $scope.save_event(true);
-        });
-    };
-
-    $scope.open_delete_action_modal = function(action) {
-        var modalInstance = $modal.open({
-            templateUrl: 'modal-delete-record.html',
-            controller: DeleteRecordModalCtrl,
-            resolve: {
-                message: function(){
-                    return 'действие "' + action.name +'"';
-                }
-            },
-            scope: $scope
-        });
-        modalInstance.result.then(function () {
-            $scope.delete_action(action);
-        });
-    };
-
-    $scope.close_event = function(){
-        if (!$scope.event.is_closed){
-            var unclosed_actions = $scope.event.get_unclosed_actions();
-            if (!$scope.event_check_results()){
-                return false;
-            } else if (!$scope.formstate.is_diagnostic() && !$scope.event_check_final_diagnosis()){
-                return false;
-            } else if (unclosed_actions.length){
-                $scope.open_unclosed_actions_modal(unclosed_actions);
-            } else {
-                $scope.save_event(true);
-            }
-        }
     };
 
     $scope.cancel_editing = function(){
@@ -902,46 +770,6 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
         $scope.alerts.push(error);
     });
 
-    // todo: action data not here
-    $scope.action_type_tree = [];
-    $scope.action_type_popped = null;
-    $scope.at_pop_toggle = function (at_class) {
-        if ($scope.action_type_popped === at_class) {
-            $scope.action_type_popped = null;
-        } else {
-            $scope.action_type_popped = at_class;
-        }
-    };
-
-    $scope.hidden_nodes = [];
-    $scope.toggle_vis = function (node_id) {
-        if ($scope.hidden_nodes.has(node_id)) {
-            $scope.hidden_nodes.splice($scope.hidden_nodes.indexOf(node_id), 1);
-        } else {
-            $scope.hidden_nodes.push(node_id);
-        }
-    };
-    $scope.subtree_shown = function (node_id) {
-        return !$scope.hidden_nodes.has(node_id);
-    };
-
-    $scope.open_action = function (action_id) {
-        $scope.child_window = window.open(url_for_schedule_html_action + '?action_id=' + action_id);
-    };
-
-    $scope.delete_action = function (action) {
-        $http.post(
-            url_for_event_api_delete_action, {
-                action_id: action.id
-            }
-        ).success(function() {
-            $scope.event.info.actions.remove(action);
-        }).error(function() {
-            alert('error');
-        });
-    };
-    // action data end
-
     $scope.$watch('event.info.contract', function(new_val, old_val) {
         if (new_val != old_val) {
             $scope.$broadcast('form_state_change', {
@@ -951,52 +779,11 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
         }
     }, true);
 
-    var interval;
-    $scope.clearInterval = function() {
-        $interval.cancel(interval);
-        interval = undefined;
-    };
-
-    $scope.$watch('child_window.document', function (n, o) {
-        if (n && n!=o) {
-            $scope.clearInterval();
-            interval = $interval(function () {
-                if ($scope.child_window.closed) {
-                    $scope.event.reload().then(function () {
-                            $scope.$broadcast('event_loaded');
-                        });
-                    $scope.clearInterval();
-                    $scope.child_window = {};
-                }
-            }, 500);
-        }
-    });
-
     $scope.initialize();
-};
-
-var UnclosedActionsModalCtrl = function ($scope, $modalInstance, unclosed_actions) {
-    $scope.unclosed_actions = unclosed_actions;
-    $scope.accept = function() {
-        $modalInstance.close();
-    };
-    $scope.cancel = function() {
-        $modalInstance.dismiss('cancel');
-    };
-};
-
-var DeleteRecordModalCtrl = function ($scope, $modalInstance, message) {
-    $scope.message = message;
-    $scope.accept = function() {
-        $modalInstance.close();
-    };
-    $scope.cancel = function() {
-        $modalInstance.dismiss('cancel');
-    };
 };
 
 WebMis20.controller('EventDiagnosesCtrl', ['$scope', 'RefBookService', '$http', EventDiagnosesCtrl]);
 WebMis20.controller('EventMainInfoCtrl', ['$scope', '$http', 'RefBookService', 'EventType', '$window', '$timeout', 'Settings', '$modal', '$filter', EventMainInfoCtrl]);
-WebMis20.controller('EventPaymentCtrl', ['$scope', 'RefBookService', 'Settings', '$http', '$modal', EventPaymentCtrl]);
+WebMis20.controller('EventPaymentCtrl', ['$scope', 'RefBookService', 'Settings', '$http', '$modal', 'MessageBox', EventPaymentCtrl]);
 WebMis20.controller('EventServicesCtrl', ['$scope', '$http', EventServicesCtrl]);
-WebMis20.controller('EventInfoCtrl', ['$scope', 'WMEvent', '$http', 'RefBookService', '$window', '$document', 'PrintingService', 'Settings', '$filter', '$modal', '$interval', 'ActionTypeTreeModal', 'WMEventServices', 'WMEventFormState', 'MessageBox', EventInfoCtrl]);
+WebMis20.controller('EventInfoCtrl', ['$scope', 'WMEvent', '$http', 'RefBookService', '$window', '$document', 'PrintingService', 'Settings', '$filter', '$modal', 'WMEventServices', 'WMEventFormState', 'MessageBox', EventInfoCtrl]);

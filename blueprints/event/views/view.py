@@ -48,7 +48,8 @@ def new_event():
 
 def get_event_form(**kwargs):
     # В зависимости от ролей и прав разный лейаут
-    if current_user.role_in('admin', 'doctor', 'clinicDoctor', 'rRegistartor', 'clinicRegistrator'):
+    if current_user.role_in('admin', 'doctor', 'clinicDoctor', 'diagDoctor',
+                            'rRegistartor', 'clinicRegistrator'):
         return render_template('event/event_info.html', **kwargs)
     return abort(403)
 

@@ -170,7 +170,7 @@ def api_thesaurus(code=None):
 @app.route('/api/kladr/city/search/<search_query>/')
 @app.route('/api/kladr/city/search/<search_query>/<limit>/')
 @cache.memoize(86400)
-def kladr_search_city(search_query=None, limit=30):
+def kladr_search_city(search_query=None, limit=300):
     result = []
     if search_query is None:
         return jsonify([])
@@ -190,7 +190,7 @@ def kladr_search_city(search_query=None, limit=30):
 @app.route('/api/kladr/street/search/<city_code>/<search_query>/')
 @app.route('/api/kladr/street/search/<city_code>/<search_query>/<limit>/')
 @cache.memoize(86400)
-def kladr_search_street(city_code=None, search_query=None, limit=30):
+def kladr_search_street(city_code=None, search_query=None, limit=100):
     result = []
     if city_code is None or search_query is None:
         return jsonify([])

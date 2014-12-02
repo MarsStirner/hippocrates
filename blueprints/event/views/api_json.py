@@ -1,41 +1,40 @@
 # -*- coding: utf-8 -*-
 
 import datetime
-from application.lib.agesex import recordAcceptableEx
-from application.lib.const import STATIONARY_EVENT_CODES
 
 from flask import request, abort
-from flask.ext.login import current_user
-from application.lib.user import UserUtils
-from application.models.schedule import ScheduleClientTicket
-from application.models.utils import safe_current_user_id
+from sqlalchemy import desc
 
 from config import ORGANISATION_INFIS_CODE
-from application.models.actions import ActionType, Action
+from application.models.actions import Action
 from application.models.client import Client
 from application.models.enums import EventPrimary, EventOrder
-from application.models.event import (Event, EventType, Diagnosis, Diagnostic, EventPayment, Visit,
-                                      rbVisitType, rbScene, Event_Persons)
-from application.models.exists import Person, OrgStructure, rbRequestType
+from application.models.event import (Event, EventType, Diagnosis, Diagnostic, EventPayment, Visit)
+from application.models.exists import Person, rbRequestType, rbResult, Contract
 from application.systemwide import db
-from application.lib.utils import (jsonify, safe_traverse, get_new_uuid, logger, get_new_event_ext_id, safe_datetime)
-from blueprints.event.app import module
+from application.lib.utils import (jsonify, safe_traverse, logger, safe_datetime, get_utc_datetime_with_tz)
+from application.models.schedule import ScheduleClientTicket
+from application.models.utils import safe_current_user_id
 from application.models.exists import (Organisation, )
-from application.lib.jsonify import EventVisualizer, ClientVisualizer
-from blueprints.event.lib.utils import (EventSaveException, create_services, create_or_update_local_contract,
-    create_or_update_diagnosis)
+from application.lib.jsonify import EventVisualizer
+from blueprints.event.app import module
+from blueprints.event.lib.utils import (EventSaveException, create_services, save_event)
 from application.lib.sphinx_search import SearchEventService
-from application.lib.data import get_planned_end_datetime, int_get_atl_dict_all
+from application.lib.data import get_planned_end_datetime, int_get_atl_dict_all, delete_action
+from application.lib.agesex import recordAcceptableEx
+from application.lib.const import STATIONARY_EVENT_CODES
+from application.lib.user import UserUtils
 
 
 @module.errorhandler(EventSaveException)
 def handle_event_error(err):
-    return jsonify({
-        'name': err.message,
-        'data': {
-            'err_msg': err.data
-        }
-    }, 422, 'error')
+    base_msg = u'Ошибка сохранения данных обращения'
+    code = err.data and err.data.get('code') or 500
+    msg = err.message or base_msg
+    ext_msg = err.data and err.data.get('ext_msg') or ''
+    if ext_msg:
+        msg = u'%s: %s' % (msg, ext_msg)
+    return jsonify(None, code, msg)
 
 
 @module.route('/api/event_info.json')
@@ -43,19 +42,7 @@ def api_event_info():
     event_id = int(request.args['event_id'])
     event = Event.query.get(event_id)
     vis = EventVisualizer()
-    data = {
-        'event': vis.make_event(event),
-    }
-    if current_user.role_in('admin'):
-        data['diagnoses'] = vis.make_diagnoses(event)
-        data['payment'] = vis.make_event_payment(event)
-        data['services'] = vis.make_event_services(event_id)
-    elif current_user.role_in('doctor', 'clinicDoctor'):
-        data['diagnoses'] = vis.make_diagnoses(event)
-    elif current_user.role_in(('rRegistartor', 'clinicRegistrator')):
-        data['payment'] = vis.make_event_payment(event)
-        data['services'] = vis.make_event_services(event_id)
-    return jsonify(data)
+    return jsonify(vis.make_event_info_for_current_role(event))
 
 
 @module.route('/api/event_new.json', methods=['GET'])
@@ -78,9 +65,10 @@ def api_event_new_get():
         setDate = datetime.datetime.now()
         note = ''
         exec_person_id = safe_current_user_id()
-    event.execPerson_id = exec_person_id
-    event.execPerson = Person.query.get(exec_person_id)
-    event.orgStructure = event.execPerson.org_structure
+    if not event.is_diagnostic:
+        event.execPerson_id = exec_person_id
+        event.execPerson = Person.query.get(exec_person_id)
+        event.orgStructure = event.execPerson.org_structure
     event.client = Client.query.get(client_id)
     event.setDate = setDate
     event.note = note
@@ -106,128 +94,42 @@ def api_event_stationary_open_get():
 
 @module.route('api/event_save.json', methods=['POST'])
 def api_event_save():
-    event_data = request.json['event']
-    diagnoses = request.json['diagnoses']
-    close_event = request.json['close_event']
+    all_data = request.json
+    event_data = all_data.get('event')
     event_id = event_data.get('id')
-    is_diagnostic = event_data['event_type']['request_type']['code'] == '4'
-    if is_diagnostic:
-        execPerson = None
-    else:
-        execPerson = Person.query.get(event_data['exec_person']['id'])
-    err_msg = u'Ошибка сохранения данных обращения'
-    create_mode = not event_id
-    if event_id:
-        event = Event.query.get(event_id)
-        event.deleted = event_data['deleted']
-        event.eventType = EventType.query.get(event_data['event_type']['id'])
-        event.execPerson = execPerson
-        event.setDate = safe_datetime(event_data['set_date'])
-        event.contract_id = event_data['contract']['id']
-        event.isPrimaryCode = event_data['is_primary']['id']
-        event.order = event_data['order']['id']
-        event.orgStructure_id = event_data['org_structure']['id']
-        event.result_id = event_data['result']['id'] if event_data.get('result') else None
-        event.rbAcheResult_id = event_data['ache_result']['id'] if event_data.get('ache_result') else None
-        event.note = event_data['note']
-
-        local_contract = safe_traverse(request.json, 'payment', 'local_contract')
-        if local_contract:
-            lcon = create_or_update_local_contract(event, local_contract)
-            event.localContract = lcon
-        db.session.add(event)
-    else:
-        event = Event()
-        event.setPerson_id = current_user.get_id()
-        event.eventType = EventType.query.get(event_data['event_type']['id'])
-        event.client_id = event_data['client_id']
-        event.execPerson = execPerson
-        event.setDate = safe_datetime(event_data['set_date'])
-        event.externalId = get_new_event_ext_id(event.eventType.id, event.client_id)
-        event.contract_id = event_data['contract']['id']
-        event.isPrimaryCode = event_data['is_primary']['id']
-        event.order = event_data['order']['id']
-        event.org_id = event_data['organisation']['id']
-        event.orgStructure_id = event_data['org_structure']['id']
-        event.payStatus = 0
-        event.note = event_data['note']
-        event.uuid = get_new_uuid()
-
-        local_contract = safe_traverse(request.json, 'payment', 'local_contract')
-        if event.payer_required:
-            if not local_contract:
-                raise EventSaveException(err_msg, u'Не заполнена информация о плательщике.')
-            lcon = create_or_update_local_contract(event, local_contract)
-            event.localContract = lcon
-        db.session.add(event)
-
-        if not is_diagnostic:
-            visit = Visit.make_default(event)
-            db.session.add(visit)
-            executives = Event_Persons()
-            executives.person = event.execPerson
-            executives.event = event
-            executives.begDate = event.setDate
-            db.session.add(executives)
-
-    for diagnosis in diagnoses:
-        create_or_update_diagnosis(event, diagnosis)
-
-    if close_event:
-        exec_date = event_data['exec_date']
-        event.execDate = safe_datetime(exec_date) if exec_date else datetime.datetime.now()
 
     try:
-        db.session.commit()
+        result = save_event(event_id, all_data)
     except EventSaveException:
         raise
     except Exception, e:
         logger.error(e, exc_info=True)
-        db.session.rollback()
-        return jsonify({'name': err_msg,
-                        'data': {
-                            'err_msg': 'INTERNAL SERVER ERROR'
-                        }},
-                       500, 'save event data error')
-    else:
-        response_result = {
-            'id': int(event)
-        }
-        services_data = request.json.get('services', [])
-        contract_id = event_data['contract']['id']
-        if create_mode:
-            try:
-                actions, errors = create_services(event.id, services_data, contract_id)
-            except Exception, e:
-                db.session.rollback()
-                logger.error(u'Ошибка сохранения услуг при создании обращения %s: %s' % (event.id, e), exc_info=True)
-                response_result['error_text'] = u'Обращение создано, но произошла ошибка при сохранении услуг. ' \
-                                                u'Свяжитесь с администратором.'
-            else:
-                if errors:
-                    err_msg = u'Обращение создано, но произошла ошибка при сохранении следующих услуг:' \
-                              u'<br><br> - %s<br>Свяжитесь с администратором.' % (u'<br> - '.join(errors))
-                    response_result['error_text'] = err_msg
+        raise EventSaveException()
 
-            if request.json.get('ticket_id'):
-                ticket = ScheduleClientTicket.query.get(int(request.json['ticket_id']))
-                ticket.event_id = int(event)
-                db.session.commit()
-        else:
-            try:
-                actions, errors = create_services(event.id, services_data, contract_id)
-            except Exception, e:
-                db.session.rollback()
-                logger.error(u'Ошибка сохранения услуг для обращения %s: %s' % (event.id, e), exc_info=True)
-                raise EventSaveException(u'Ошибка сохранения услуг', u'Свяжитесь с администратором.')
-            else:
-                if errors:
-                    err_msg = u'\n\n - %s\nСвяжитесь с администратором.' % (
-                        u'\n - '.join(errors)
-                    )
-                    raise EventSaveException(u'Произошла ошибка при сохранении следующих услуг', err_msg)
+    return jsonify(result)
 
-    return jsonify(response_result)
+
+@module.route('api/event_close.json', methods=['POST'])
+def api_event_close():
+    all_data = request.json
+    event_data = all_data['event']
+    event_id = event_data['id']
+    event = Event.query.get(event_id)
+
+    error_msg = {}
+    if not UserUtils.can_close_event(event, error_msg):
+        return jsonify(None, 403, u'Невозможно закрыть обращение: %s.' % error_msg['message'])
+
+    if not event_data['exec_date']:
+        event_data['exec_date'] = get_utc_datetime_with_tz().isoformat()
+    try:
+        save_event(event_id, all_data)
+    except EventSaveException:
+        raise
+    except Exception, e:
+        logger.error(e, exc_info=True)
+        raise EventSaveException()
+    return jsonify(None, result_name=u'Обращение закрыто')
 
 
 @module.route('/api/events/diagnosis.json', methods=['POST'])
@@ -294,6 +196,14 @@ def api_diagnosis_delete():
     if data['diagnostic_id']:
         Diagnostic.query.filter(Diagnostic.id == data['diagnostic_id']).update({'deleted': 1})
     db.session.commit()
+
+
+@module.route('/api/events/diagnosis', methods=['GET'])
+def api_diagnosis_get():
+    event_id = int(request.args['event_id'])
+    event = Event.query.get(event_id)
+    vis = EventVisualizer()
+    return jsonify(vis.make_diagnoses(event))
 
 
 @module.route('/api/service/service_price.json', methods=['GET'])
@@ -526,16 +436,15 @@ def api_service_delete_service():
 @module.route('api/delete_action.json', methods=['POST'])
 def api_delete_action():
     action_id = int(request.json['action_id'])
-    if action_id:
-        action = Action.query.get(action_id)
-        if not action:
-            return jsonify(None, 404, 'Action %s not found' % action_id)
-        if not UserUtils.can_delete_action(action):
-            return jsonify(None, 403, 'User cannot delete action %s' % action)
-        action.deleted = 1
+    if not action_id:
+        return jsonify(None, 404, "Argument 'action_id' cannot be found.")
+    action = Action.query.get(action_id)
+    ok, code, msg = delete_action(action)
+    if ok:
         db.session.commit()
-
-    return jsonify(None)
+        return jsonify(None)
+    else:
+        return jsonify(None, code, msg)
 
 
 @module.route('api/delete_event.json', methods=['POST'])
@@ -545,24 +454,8 @@ def api_delete_event():
         return abort(404)
     event = Event.query.get_or_404(event_id)
 
-    def can_delete_event(event):
-        # TODO: check payments
-        if current_user.has_right('evtDelAll') or current_user.has_right('adm'):
-            return True, ''
-        elif current_user.has_right('evtDelOwn'):
-            if event.execPerson_id == current_user.id:
-                return True, ''
-            elif event.createPerson_id == current_user.id:
-                # Проверка, что все действия не были изменены после создания обращения
-                # или, что не появилось новых действий
-                for action in event.actions:
-                    if action.modifyPerson_id != event.createPerson_id:
-                        return False, u'В обращении были созданы новые или отредактированы первоначальные документы'
-                return True, ''
-        return False, u'У пользователя нет прав на удаление обращения'
-
-    ok, msg = can_delete_event(event)
-    if ok:
+    msg = {}
+    if UserUtils.can_delete_event(event, msg):
         event.deleted = 1
         db.session.add(event)
         db.session.query(Action).filter(
@@ -584,7 +477,7 @@ def api_delete_event():
         return jsonify(None)
 
     return jsonify({
-        'name': msg,
+        'name': msg['message'],
         'data': {
             'err_msg': u'Удаление запрещено'
         }
@@ -593,8 +486,6 @@ def api_delete_event():
 
 @module.route('/api/events.json', methods=["POST"])
 def api_get_events():
-    from application.models.event import Event
-    from application.models.exists import Contract
     flt = request.get_json()
     base_query = Event.query.join(Client)
     context = EventVisualizer()
@@ -604,10 +495,10 @@ def api_get_events():
             'pages': 1,
             'items': [context.make_short_event(event)] if event else []
         })
+    if 'external_id' in flt:
+        base_query = base_query.filter(Event.externalId == flt['external_id'])
     if 'client_id' in flt:
         base_query = base_query.filter(Event.client_id == flt['client_id'])
-    if 'exec_person_id' in flt:
-        base_query = base_query.filter(Event.execPerson_id == flt['exec_person_id'])
     if 'beg_date' in flt:
         base_query = base_query.filter(Event.setDate >= datetime.datetime.strptime(flt['beg_date'], '%Y-%m-%d').date())
     if 'unfinished' in flt:
@@ -618,9 +509,44 @@ def api_get_events():
         base_query = base_query.join(EventType).filter(EventType.requestType_id == flt['request_type_id'])
     if 'finance_id' in flt:
         base_query = base_query.join(Contract).filter(Contract.finance_id == flt['finance_id'])
+    if 'speciality_id' in flt:
+        base_query = base_query.join(Event.execPerson).filter(Person.speciality_id == flt['speciality_id'])
+    if 'exec_person_id' in flt:
+        base_query = base_query.filter(Event.execPerson_id == flt['exec_person_id'])
+    if 'result_id' in flt:
+        base_query = base_query.filter(Event.result_id == flt['result_id'])
+
+    order_options = flt.get('sorting_params')
+    if order_options:
+        desc_order = order_options['order'] == 'DESC'
+        col_name = order_options['column_name']
+        if col_name == 'id':
+            base_query = base_query.order_by(Event.id.desc() if desc_order else Event.id)
+        if col_name == 'external_id':
+            # that's bad
+            ext_id_order_1 = u'CAST(SUBSTR(%s, 1, 4) AS UNSIGNED)' % Event.externalId
+            ext_id_order_2 = u'CAST(SUBSTR(%s, 6) AS UNSIGNED)' % Event.externalId
+            if desc_order:
+                ext_id_order_1 = desc(ext_id_order_1)
+                ext_id_order_2 = desc(ext_id_order_2)
+            base_query = base_query.order_by(ext_id_order_1, ext_id_order_2)
+        elif col_name == 'type_name':
+            base_query = base_query.join(EventType).order_by(EventType.name.desc() if desc_order else EventType.name)
+        elif col_name == 'beg_date':
+            base_query = base_query.order_by(Event.setDate.desc() if desc_order else Event.setDate)
+        elif col_name == 'end_date':
+            base_query = base_query.order_by(Event.execDate.desc() if desc_order else Event.execDate)
+        elif col_name == 'client_full_name':
+            base_query = base_query.order_by(Client.lastName.desc() if desc_order else Client.lastName)
+        elif col_name == 'person_short_name':
+            base_query = base_query.join(Event.execPerson).order_by(Person.lastName.desc() if desc_order else Person.lastName)
+        elif col_name == 'result_text':
+            base_query = base_query.join(rbResult).order_by(rbResult.name.desc() if desc_order else rbResult.name)
+    else:
+        base_query = base_query.order_by(Event.setDate)
+
     per_page = int(flt.get('per_page', 20))
     page = int(flt.get('page', 1))
-    base_query = base_query.order_by(Event.setDate)
     paginate = base_query.paginate(page, per_page, False)
     return jsonify({
         'pages': paginate.pages,

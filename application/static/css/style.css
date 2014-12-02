@@ -716,3 +716,41 @@ a.pseudo-btn {
     font-weight: normal;
 
 }
+.thesaurus-tree{
+    max-height: calc(100% - 305px);
+    height: 100%;
+    overflow-y: auto;
+}
+.full-height{
+    height: 100%;
+}
+.aside.full-height .wysiwyg-panel{
+    max-height: 190px!important;
+    overflow-y: auto!important;
+}
+.aside.full-height{
+    max-width: 800px;
+    overflow-y: hidden;
+}
+
+.inline-checkbox {
+    margin: 0;
+    padding-bottom: 0;
+}
+.dropdown-menu {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.cursor-default {
+    cursor: auto;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.header-sorter {
+    margin-left: 10px;
+    cursor: pointer;
+}

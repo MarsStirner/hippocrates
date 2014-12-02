@@ -382,6 +382,16 @@ def format_date(d):
         return d
 
 
+def get_utc_datetime_with_tz(dt=None):
+    """Получить датувремя в ютс с таймзоной.
+    С последующим .isoformat() результат будет в таком же формате,
+    как в запросе из браузера"""
+    if not dt:
+        dt = datetime.datetime.now()
+    dt_with_tz = timezone(TIME_ZONE).localize(dt)
+    return dt_with_tz.astimezone(timezone('UTC'))
+
+
 def get_new_uuid():
     """Сгенерировать новый uuid уникальный в пределах бд.
     @rtype: application.models.exist.UUID
@@ -478,6 +488,14 @@ def parse_id(request_data, identifier, allow_empty=False):
         except ValueError:
             return False
     return _id
+
+
+def initialize_name(last_name, first_name, patr_name):
+    last_name, first_name, patr_name = [name if name else u'' for name in (last_name, first_name, patr_name)]
+    words = first_name.split() + patr_name.split()
+    initials = ['%s.' % word[0].upper() for word in words if word]
+    return u'%s %s' % (last_name, u' '.join(initials))
+
 
 from sqlalchemy.sql import expression
 from sqlalchemy.ext import compiler

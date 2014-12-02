@@ -36,54 +36,45 @@ angular.module('WebMis20.directives.wysiwyg', ['WebMis20.directives.goodies'])
     this.getThesaurus = function (code) {
         var defer = $q.defer();
         if (cache.hasOwnProperty(code)) {
-            defer.resolve(cache[code])
+            defer.resolve(cache[code]);
         } else {
             $http.get(rbThesaurus_root + code)
             .success(function (data) {
                 var result = cache[code] = new Thesaurus(data.result);
                 defer.resolve(result)
-            })
+            });
         }
         return defer.promise;
     }
 }])
-.service('AsideThesaurus', ['ThesaurusService', '$modal', '$q', '$templateCache', function (ThesaurusService, $modal, $q, $templateCache) {
-    var widgets = {}; // зарегистрированные виджеты, которые будут дизейблиться при открытии тезауруса (чтобы не открыть несколько тезаурусов)
-
-    // Функции для апдейта зарегистрированных виджетов
-    function onStateChange(state) {
-        angular.forEach(widgets, function (value, key) {
-            value.call(null, state);
-        });
-    }
-    function disableWidgets() {onStateChange(true)}
-    function enableWidgets() {onStateChange(false)}
-
+.service('AsideThesaurus', ['ThesaurusService', '$modal', '$templateCache', function (ThesaurusService, $modal, $templateCache) {
     // Рендер вида
     function buildList(list) {
-        return '<ul>{0}</ul>'.format(list.map(buildNode).join(''))
+        return '<ul>{0}</ul>'.format(list.map(buildNode).join(''));
     }
     function buildNode(node) {
         if (!node.children.length) {
-            return '<li><a ng-click="select(\'{0}\')"><i class="fa fa-angle-double-right">&nbsp;</i>{1}</a></li>'.format(node.id, node.name)
+            return '<li><a ng-click="select(\'{0}\')"><i class="fa fa-angle-double-right">&nbsp;</i>{1}</a></li>'.format(node.id, node.name);
         } else {
-            return '<li><a ng-click="select(\'{0}\')"><i class="fa fa-angle-double-right">&nbsp;</i>{1}</a>{2}</li>'.format(node.id, node.name, buildList(node.children))
+            return '<li><a ng-click="select(\'{0}\')"><i class="fa fa-angle-double-right">&nbsp;</i>{1}</a>{2}</li>'.format(node.id, node.name, buildList(node.children));
         }
     }
-    this.openThesaurus = function (code, selectCallback) {
-        disableWidgets(true);
-        var defer = $q.defer();
+    function buildView(thesaurus_tree_nodes) {
+        var tree = buildList(thesaurus_tree_nodes),
+            editor = '<wysiwyg ng-model="model.text" get-wysiwyg-api="getWysiwygApi(api)" />';
+        return editor + '<hr>' + '<div class="thesaurus-tree ui-treeview">' + tree + '</div>';
+    }
+    this.openThesaurus = function (code, editor_model, close_promise) {
         var myAside;
-        ThesaurusService.getThesaurus(code).then(function (thesaurus) {
+        return ThesaurusService.getThesaurus(code).then(function (thesaurus) {
             myAside = $modal.open({
                 windowTemplateUrl: '/WebMis20/aside-thesaurus.html',
-                template: $templateCache.get('/WebMis20/aside-thesaurus/tree.html').format(buildList(thesaurus.tree.children)),
-                backdrop: false,
-                windowClass: 'aside',
+                template: $templateCache.get('/WebMis20/aside-thesaurus/tree.html').format(buildView(thesaurus.tree.children)),
+                backdrop: true,
                 controller: function ($scope) {
                     function renderThesaurusTemplate(node_id) {
                         var node = thesaurus.dict[node_id];
-                        if (!node) {return ''}
+                        if (!node) { return ''; }
                         var template = node.template;
                         if (template.indexOf('%s') > -1) {
                             return template.replace('%s', renderThesaurusTemplate(node.parent_id));
@@ -91,35 +82,42 @@ angular.module('WebMis20.directives.wysiwyg', ['WebMis20.directives.goodies'])
                             return template;
                         }
                     }
-                    $scope.select = function (node_id) {
-                        selectCallback.call(null, renderThesaurusTemplate(node_id).replace('%n', '\n') + ' ');
+                    $scope.model = {
+                        text: editor_model
                     };
+                    $scope.getWysiwygApi = function (api) {
+                        $scope.wysiwygApi = api;
+                    };
+                    $scope.select = function (node_id) {
+                        var text = renderThesaurusTemplate(node_id).replace('%n', '\n') + ' ';
+                        $scope.wysiwygApi.insertText(text);
+                    };
+                    $scope.$on('$destroy', function () {
+                        close_promise.resolve($scope.model.text);
+                    });
                 }
             });
-            myAside.result.then(enableWidgets, enableWidgets);
-            defer.resolve(myAside);
+
+            return close_promise.promise.then(function (edited_text) {
+                return edited_text;
+            });
         });
-        return defer.promise;
     };
-    this.registerWidget = function (hashKey, setter) {
-        widgets[hashKey] = setter
-    }
 }])
-.directive('wysiwygOpenThesaurus', ['AsideThesaurus', function (AsideThesaurus) {
+.directive('wysiwygOpenThesaurus', ['AsideThesaurus', '$q', function (AsideThesaurus, $q) {
     return {
         restrict: 'A',
         link: function (scope, element, attributes) {
-            AsideThesaurus.registerWidget(scope.$id, function onStateChange(value) {
-                attributes.$set('disabled', value)
-            });
-            scope.$on('$destroy', function() {
-                AsideThesaurus.registerWidget(scope.$$hashKey)
-            });
             var jqElement = $(element);
             jqElement.click(function (event) {
                 event.preventDefault();
                 var code = scope.$eval(attributes.wysiwygOpenThesaurus);
-                AsideThesaurus.openThesaurus(code, scope.insertText);
+                var close = $q.defer();
+                AsideThesaurus.openThesaurus(
+                    code, scope.$model.$modelValue, close
+                ).then(function (result) {
+                    scope.replaceContent(result);
+                });
             })
         }
     }
@@ -155,13 +153,14 @@ angular.module('WebMis20.directives.wysiwyg', ['WebMis20.directives.goodies'])
         scope: {
             userOptions: '=',
             thesaurusCode: '@',
-            complainsCode: '@'
+            complainsCode: '@',
+            getWysiwygApi: '&?'
         },
         require: '^ngModel',
         link: function (scope, element, attributes, ngModel) {
             scope.$model = ngModel;
             var toolbar = $($templateCache.get('/WebMis20/wysiwyg-toolbar.html'));
-            var editor = $('<div style="padding: 10px; overflow: auto; min-height: 40px; max-height: 500px" contenteditable></div>');
+            var editor = $('<div style="padding: 10px; overflow: auto; min-height: 40px; max-height: 500px" class="wysiwyg-panel" contenteditable></div>');
             var replace = $('<div class="panel panel-default" style="padding: 0"></div>');
             toolbar.find('.dropdown-menu input')
                 .click(function() {return false;})
@@ -297,11 +296,13 @@ angular.module('WebMis20.directives.wysiwyg', ['WebMis20.directives.goodies'])
             }
 
             editor.on('mouseup keyup mouseout', function () {
-                if (editor.is(':focus')) {
-                    saveSelection();
-                    updateToolbar();
-                    updateModel();
-                }
+                scope.$apply(function () {
+                    if (editor.is(':focus')) {
+                        saveSelection();
+                        updateToolbar();
+                        updateModel();
+                    }
+                });
             });
 
             scope.insertText = function (myValue) {
@@ -311,7 +312,21 @@ angular.module('WebMis20.directives.wysiwyg', ['WebMis20.directives.goodies'])
                 saveSelection();
                 updateModel();
             };
-            
+            scope.replaceContent = function (text) {
+                editor.focus();
+                document.execCommand('selectAll');
+                execCommand('insertHTML', text);
+                saveSelection();
+                updateModel();
+            };
+            if (angular.isDefined(scope.getWysiwygApi)) {
+                scope.getWysiwygApi({
+                    api: {
+                        insertText: scope.insertText
+                    }
+                });
+            }
+
             scope.$watch('$model.$modelValue', function (n, o) {
                 if (updateModelLock) {
                     updateModelLock = false
@@ -373,8 +388,8 @@ angular.module('WebMis20.directives.wysiwyg', ['WebMis20.directives.goodies'])
             <div class="btn-group">\
                 <a class="btn" data-edit="insertunorderedlist" title="Bullet list"><i class="fa fa-list-ul"></i></a>\
                 <a class="btn" data-edit="insertorderedlist" title="Number list"><i class="fa fa-list-ol"></i></a>\
-                <a class="btn" data-edit="outdent" title="Reduce indent (Shift+Tab)"><i class="fa fa-indent-left"></i></a>\
-                <a class="btn" data-edit="indent" title="Indent (Tab)"><i class="fa fa-indent-right"></i></a>\
+                <a class="btn" data-edit="outdent" title="Reduce indent (Shift+Tab)"><i class="fa fa-indent"></i></a>\
+                <a class="btn" data-edit="indent" title="Indent (Tab)"><i class="fa fa-outdent"></i></a>\
             </div>\
             <div class="btn-group">\
                 <a class="btn" data-edit="justifyleft" title="Align Left (Ctrl/Cmd+L)"><i class="fa fa-align-left"></i></a>\
@@ -400,10 +415,7 @@ angular.module('WebMis20.directives.wysiwyg', ['WebMis20.directives.goodies'])
     <button type="button" class="close" ng-click="$dismiss()">&times;</button>\
     <h4 class="aside-title">Тезаурус</h4>\
 </div>\
-<div class="aside-body ui-treeview">{0}</div>\
-<div class="aside-footer">\
-    <button type="button" class="btn btn-default" ng-click="$dismiss()">Закрыть</button>\
-</div>'
+<div class="aside-body full-height modal-scrollable">{0}</div>'
     );
     $templateCache.put('/WebMis20/aside-thesaurus/custom.html',
 "<div tabindex=\"-1\" role=\"dialog\" class=\"modal fade\" ng-class=\"{in: animate}\" ng-style=\"{'z-index': 1050 + index*10, display: 'block'}\" ng-click=\"close($event)\">\
@@ -411,10 +423,12 @@ angular.module('WebMis20.directives.wysiwyg', ['WebMis20.directives.goodies'])
 </div>"
     );
     $templateCache.put('/WebMis20/aside-thesaurus.html',
-'<div class="aside right fade in" tabindex="-1" role="dialog">\
-    <div class="aside-dialog">\
-        <div class="aside-content">\
-            <div ng-transclude></div>\
+'<div tabindex="-1" role="dialog" class="modal fade full-height" ng-class="{in: animate}" ng-style="{\'z-index\': 1050 + index*10, display: \'block\'}" ng-click="close($event)">\
+    <div class="aside right full-height">\
+        <div class="aside-dialog full-height">\
+            <div class="aside-content full-height">\
+                <div class="full-height" ng-transclude></div>\
+            </div>\
         </div>\
     </div>\
 </div>'

@@ -1,7 +1,8 @@
 /**
  * Created by mmalkov on 14.07.14.
  */
-var ActionEditorCtrl = function ($scope, $http, $window, WMAction, PrintingService, PrintingDialog, RefBookService) {
+var ActionEditorCtrl = function ($scope, $window, WMAction, PrintingService, PrintingDialog, RefBookService,
+        WMEventCache, $q, MessageBox) {
     var params = aux.getQueryParams(location.search);
     $scope.ps = new PrintingService("action");
     $scope.ps_resolve = function () {
@@ -16,6 +17,9 @@ var ActionEditorCtrl = function ($scope, $http, $window, WMAction, PrintingServi
         $scope.action.get(params.action_id).success(function (data) {
             update_print_templates(data);
             process_printing();
+            WMEventCache.get($scope.action.action.event_id).then(function (event) {
+                $scope.event = event;
+            });
         });
     } else if (params.event_id && params.action_type_id) {
         $scope.action.get_new(
@@ -24,7 +28,11 @@ var ActionEditorCtrl = function ($scope, $http, $window, WMAction, PrintingServi
         ).success(function (data) {
             update_print_templates(data);
         });
+        WMEventCache.get(params.event_id).then(function (event) {
+            $scope.event = event;
+        });
     }
+
     function update_print_templates (data) {
         $scope.ps.set_context(data.result.action.action_type.context_name);
     }
@@ -55,20 +63,60 @@ var ActionEditorCtrl = function ($scope, $http, $window, WMAction, PrintingServi
     };
 
     $scope.save_action = function (need_to_print) {
-        if ($scope.action.is_new() && need_to_print) {
-            $window.sessionStorage.setItem('open_action_print_dlg', true);
+        $scope.check_can_save_action()
+        .then(function () {
+            if ($scope.action.is_new() && need_to_print) {
+                $window.sessionStorage.setItem('open_action_print_dlg', true);
+            }
+            return $scope.action.save().
+                then(function (result) {
+                    if ($scope.action.is_new()) {
+                        $window.open(url_for_schedule_html_action + '?action_id=' + result.action.id, '_self');
+                    } else {
+                        $scope.action.get(result.action.id);
+                    }
+                });
+        });
+    };
+    $scope.check_can_save_action = function () {
+        function check_diagnoses_conflicts(event, action) {
+            var deferred = $q.defer();
+            var self_diagnoses = action.action.properties.map(function (prop) {
+                    return prop.type.type_name === 'Diagnosis' ? prop.value : undefined;
+                }).reduce(function (diag_list, cur_elem) {
+                    if (cur_elem !== undefined && cur_elem !== null) {
+                        if (cur_elem instanceof Array) {
+                            diag_list = diag_list.concat(cur_elem);
+                        } else {
+                            diag_list.push(cur_elem);
+                        }
+                    }
+                    return diag_list;
+                }, []).filter(function (diag) {
+                    return diag.deleted === 0;
+                }),
+                fin_diagnoses = self_diagnoses.filter(function (diag) {
+                    return diag.diagnosis_type.code === '1';
+                }),
+                event_has_closed_fin_diagnoses = event.diagnoses.some(function (diag) {
+                    return diag.diagnosis_type.code === '1' && diag.action.status.code === 'finished';
+                });
+            if (action.action.status.code === 'finished' && fin_diagnoses.length && event_has_closed_fin_diagnoses) {
+                return MessageBox.error(
+                    'Невозможно сохранить действие',
+                    'В обращении уже есть закрытые осмотры с заключительным дагнозом. Нельзя указывать больше одного ' +
+                    'заключительного диагноза в обращении.'
+                );
+            }
+            deferred.resolve();
+            return deferred.promise;
         }
-        return $scope.action.save().
-            then(function (result) {
-                if ($scope.action.is_new()) {
-                    $window.open(url_for_schedule_html_action + '?action_id=' + result.action.id, '_self');
-                } else {
-                    $scope.action.get(result.action.id);
-                }
-            });
+
+        return check_diagnoses_conflicts($scope.event, $scope.action);
     };
     $scope.is_med_doc = function () { return $scope.action.action.action_type && $scope.action.action.action_type.class === 0; };
     $scope.is_diag_lab = function () { return $scope.action.action.action_type && $scope.action.action.action_type.class === 1; };
     $scope.is_treatment = function () { return $scope.action.action.action_type && $scope.action.action.action_type.class === 2; };
 };
-WebMis20.controller('ActionEditorCtrl', ['$scope', '$http', '$window', 'WMAction', 'PrintingService', 'PrintingDialog', 'RefBookService', ActionEditorCtrl]);
+WebMis20.controller('ActionEditorCtrl', ['$scope', '$window', 'WMAction', 'PrintingService', 'PrintingDialog',
+    'RefBookService', 'WMEventCache', '$q', 'MessageBox', ActionEditorCtrl]);

@@ -74,23 +74,24 @@ angular.module('WebMis20.directives').
                     };
 
                     scope.amount_disabled = function () {
-                        return scope.service.fully_paid || scope.service.fully_coord;
+                        return scope.service.fully_paid || scope.service.fully_coord || scope.event.ro;
                     };
                     scope.btn_coordinate_visible = function () {
-                        return !scope.service.fully_coord && !scope.service.all_actions_closed;
+                        return !scope.service.fully_coord && !scope.service.all_actions_closed && !scope.event.ro;
                     };
                     scope.btn_cancel_coordinate_visible = function () {
-                        return scope.service.fully_coord && !scope.service.all_actions_closed;
+                        return scope.service.fully_coord && !scope.service.all_actions_closed && !scope.event.ro;
                     };
                     scope.btn_delete_visible = function () {
                         var s = scope.service;
                         return !(
                             s.fully_paid || s.partially_paid || s.fully_coord || s.partially_coord ||
-                            scope.service.all_actions_closed
+                            scope.service.all_actions_closed || scope.event.ro
                         );
                     };
                     scope.lab_components_disabled = function () {
-                        return scope.service.fully_paid || scope.service.fully_coord || scope.service.all_actions_closed;
+                        return (scope.service.fully_paid || scope.service.fully_coord ||
+                            scope.service.all_actions_closed || scope.event.ro);
                     };
                 },
                 template:
@@ -200,19 +201,20 @@ angular.module('WebMis20.directives').
                     };
 
                     scope.amount_disabled = function () {
-                        return scope.action.account || scope.action.is_coordinated();
+                        return scope.action.account || scope.action.is_coordinated() || scope.event.ro;
                     };
                     scope.btn_coordinate_visible = function () {
-                        return !scope.action.is_coordinated() && !scope.action.is_closed();
+                        return !scope.action.is_coordinated() && !scope.action.is_closed() && !scope.event.ro;
                     };
                     scope.btn_cancel_coordinate_visible = function () {
-                        return scope.action.is_coordinated() && !scope.action.is_closed();
+                        return scope.action.is_coordinated() && !scope.action.is_closed() && !scope.event.ro;
                     };
                     scope.btn_delete_visible = function () {
-                        return !(scope.action.is_paid_for() || scope.action.is_coordinated() || scope.action.is_closed());
+                        return !(scope.action.is_paid_for() || scope.action.is_coordinated() ||
+                            scope.action.is_closed() || scope.event.ro);
                     };
                     scope.lab_components_disabled = function () {
-                        return scope.action.account || scope.action.is_coordinated() || scope.action.is_closed();
+                        return scope.action.account || scope.action.is_coordinated() || scope.action.is_closed() || scope.event.ro;
                     };
                 },
                 template:
@@ -251,7 +253,7 @@ angular.module('WebMis20.directives').
     <span class="glyphicon" ng-class="{\'glyphicon-ok\': action.is_coordinated(), \'glyphicon-remove\':!action.is_coordinated()}"></span>\
 </td>\
 <td nowrap class="text-right">\
-    <span class="glyphicon glyphicon-info-sign"\
+    <span class="glyphicon glyphicon-info-sign" ng-if="action.action_id"\
         popover-trigger="mouseenter" popover-popup-delay=\'1000\' popover-placement="left" popover="[[get_info_text()]]"></span>\
     <ui-print-button ps="get_ps()" resolve="get_ps_resolve()" ng-if="action.action_id"></ui-print-button>\
     <button type="button" class="btn btn-sm btn-danger" title="Убрать из списка услуг"\
@@ -261,6 +263,41 @@ angular.module('WebMis20.directives').
 </td>'
             };
         }
-    ])
+    ]).
+    directive('wmEventServiceListHeader', [function () {
+        return {
+            restrict: 'A',
+            link: function (scope, element, attrs) {
+                scope.all_accounted = false;
+                scope.$watch(function () {
+                    return scope.event.services.map(function (sg) {
+                        return sg.account_all;
+                    }).every(Boolean);
+                }, function (n, o) {
+                    scope.all_accounted = n;
+                });
+                scope.account_all = function () {
+                    scope.event.services.forEach(function (sg) {
+                        sg.account_all = scope.all_accounted;
+                    });
+                };
+            },
+            template:
+'<th></th>\
+<th>Код</th>\
+<th>Услуга</th>\
+<th class="nowrap">Тип действия</th>\
+<th class="nowrap" ng-show="formstate.is_paid()">Цена (руб.)</th>\
+<th>Количество</th>\
+<th class="nowrap" ng-show="formstate.is_paid()">Сумма к оплате (руб.)</th>\
+<th ng-show="formstate.is_paid()">\
+    <div class="checkbox inline-checkbox"><input type="checkbox" ng-model="all_accounted" ng-change="account_all()">Считать</div>\
+</th>\
+<th ng-show="formstate.is_paid()">Оплачено</th>\
+<th ng-show="formstate.is_dms()">Согласовать</th>\
+<th ng-show="formstate.is_dms()">Согласовано</th>\
+<th></th>'
+        };
+    }])
 ;
 

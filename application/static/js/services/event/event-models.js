@@ -1,6 +1,21 @@
 'use strict';
 
 angular.module('WebMis20.services.models').
+    service('WMEventCache', ['WMEvent', '$q', function (WMEvent, $q) {
+        var cache = {};
+        this.get = function (event_id) {
+            if (cache.hasOwnProperty(event_id)) {
+                var deferred = $q.defer();
+                deferred.resolve(cache[event_id]);
+                return deferred.promise;
+            }
+            var event = new WMEvent(event_id);
+            return event.reload().then(function () {
+                return cache[event_id] = event;
+            });
+        };
+        return this;
+    }]).
     factory('WMEvent', ['$http', '$q', 'WMClient', 'WMEventServiceGroup', 'WMEventPaymentList',
         function($http, $q, WMClient, WMEventServiceGroup, WMEventPaymentList) {
             var WMEvent = function(event_id, client_id, ticket_id) {
@@ -11,6 +26,9 @@ angular.module('WebMis20.services.models').
                 this.payment = null;
                 this.diagnoses = [];
                 this.services = [];
+                this.ro = false;
+                this.can_create_actions = [false, false, false, false];
+                return this;
             };
 
             WMEvent.prototype.reload = function() {
@@ -22,11 +40,12 @@ angular.module('WebMis20.services.models').
                 } : {
                     event_id: this.event_id
                 };
-                var deferred = $q.defer();
-                $http.get(url, {
+                return $http.get(url, {
                     params: params
                 }).success(function (data) {
                     self.info = data.result.event;
+                    self.ro = data.result.ro;
+                    self.can_create_actions = data.result.can_create_actions;
                     var client_info = self.info.client;
                     self.info.client = new WMClient();
                     self.info.client.init_from_obj({
@@ -43,12 +62,7 @@ angular.module('WebMis20.services.models').
                         return new WMEventServiceGroup(service, self.payment.payments);
                     }) || [];
                     self.is_closed = self.closed();
-                    deferred.resolve();
-                }).
-                error(function(data) {
-                    deferred.reject('error load event');
                 });
-                return deferred.promise;
             };
 
             WMEvent.prototype.save = function(close_event) {
@@ -61,38 +75,19 @@ angular.module('WebMis20.services.models').
                     services: this.services,
                     ticket_id: this.ticket_id,
                     close_event: close_event
-                }).
-                    success(function(response) {
-                        var event_id = response.result.id,
-                            error_text = response.result.error_text;
-                        deferred.resolve({
-                            event_id: event_id,
-                            error_text: error_text
-                        });
-                    }).
-                    error(function(response) {
-                        var rr = response.result;
-                        var message = rr.name + ': ' + (rr.data ? rr.data.err_msg : '');
-                        deferred.reject(message);
+                })
+                .success(function(response) {
+                    var event_id = response.result.id,
+                        error_text = response.result.error_text;
+                    deferred.resolve({
+                        event_id: event_id,
+                        error_text: error_text
                     });
+                })
+                .error(function(response) {
+                    deferred.reject(response.meta.name);
+                });
                 return deferred.promise;
-            };
-
-            WMEvent.prototype.get_unclosed_actions = function() {
-                var unclosed_actions = [];
-                this.info.actions.forEach(function(item){
-                    if (item.status < 2){
-                        unclosed_actions.push(item);
-                    }
-                });
-                return unclosed_actions
-            };
-
-            WMEvent.prototype.get_final_diagnosis = function() {
-                var final_diagnosis = this.diagnoses.filter(function(item){
-                    return item.diagnosis_type.code == 1;
-                });
-                return final_diagnosis.length ? final_diagnosis : null
             };
 
             WMEvent.prototype.is_new = function() {

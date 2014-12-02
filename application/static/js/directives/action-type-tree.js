@@ -219,7 +219,7 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
                 $scope.create_action = function (node_id) {
                     $scope.action_window = window.open(url_for_schedule_html_action + '?action_type_id=' + node_id + '&event_id=' + $scope.event_id);
                     $scope.$close($scope.action_window);
-                }
+                };
                 $scope.create_actions = function () {
                     $http.post(
                         url_schedule_api_create_lab_direction,
@@ -235,7 +235,10 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
                         }
                     ).success(function (data) {
                         $scope.$close('created')
-                    })
+                    }).error(function (data) {
+                        var msg = 'Невозможно создать направление на лаб. исследование: {0}.'.format(data.meta.name);
+                        alert(msg);
+                    });
                 };
                 $scope.open_assignments = function (action) {
                     return self_service.openAppointmentModal(action, false);
@@ -361,7 +364,7 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
     $templateCache.put('/WebMis20/modal-laboratory-create.html',
         '<div class="modal-header" xmlns="http://www.w3.org/1999/html">\
             <button type="button" class="close" ng-click="cancel()">&times;</button>\
-            <h4 class="modal-title" id="myModalLabel">Новое направление на лаб.исследование</h4>\
+            <h4 class="modal-title" id="myModalLabel">Новое направление на лаб. исследование</h4>\
         </div>\
         <div class="modal-body modal-scrollable">\
             <div class="row">\
