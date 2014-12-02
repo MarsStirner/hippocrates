@@ -22,7 +22,7 @@ var WebMis20 = angular.module('WebMis20', [
     'mgcrea.ngStrap.affix',
     'duScroll'
 ])
-.config(function ($interpolateProvider, datepickerConfig, datepickerPopupConfig) {
+.config(function ($interpolateProvider, datepickerConfig, datepickerPopupConfig, paginationConfig) {
     $interpolateProvider.startSymbol('[[');
     $interpolateProvider.endSymbol(']]');
     datepickerConfig.showWeek = false;
@@ -32,6 +32,10 @@ var WebMis20 = angular.module('WebMis20', [
     datepickerPopupConfig.clearText = 'Убрать';
     datepickerPopupConfig.closeText = 'Готово';
 //    datepickerPopupConfig.appendToBody=true;
+    paginationConfig.firstText = 'Первая';
+    paginationConfig.lastText = 'Последняя';
+    paginationConfig.previousText = 'Предыдущая';
+    paginationConfig.nextText = 'Следующая';
 }).config(['$tooltipProvider', function($tooltipProvider){
     $tooltipProvider.setTriggers({
         'mouseenter': 'mouseleave',

@@ -768,6 +768,7 @@ class EventVisualizer(object):
             'end_date': event.execDate,
             'type_name': event.eventType.name,
             'person_short_name': event.execPerson.shortNameText if event.execPerson else u'Нет',
+            'result_text': safe_traverse_attrs(event, 'result', 'name', default=''),
             'text_description': u'{0} №{1} от {2}, {3}'.format(
                 u'История болезни' if event.is_stationary else u'Обращение',
                 event.externalId,
