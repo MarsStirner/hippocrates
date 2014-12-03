@@ -853,7 +853,7 @@ class EventVisualizer(object):
             'person': pvis.make_person_ws(diagnostic.person) if diagnostic.person else None,
             'notes': diagnostic.notes,
             'action_id': diagnostic.action_id,
-            'action': aviz.make_small_action_info(diagnostic.action),
+            'action': aviz.make_small_action_info(diagnostic.action) if diagnostic.action else None,
             'result': diagnostic.result,
             'ache_result': diagnostic.rbAcheResult,
             'event_id': diagnostic.event_id,
