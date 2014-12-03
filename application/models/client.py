@@ -172,6 +172,8 @@ class Client(db.Model):
         elif years > 1:
             return formatYearsMonths(years, months-12*years)
         elif months > 1:
+            # TODO: отрефакторить магию, здесь неясен смысл divmod(bd.month + months, 12)
+            #  в декабре это вызывало проблемы с определением возраста пациента младше года
             add_year, new_month = divmod(bd.month + months, 12)
             if new_month:
                 new_day = min(bd.day, calendar.monthrange(bd.year+add_year, new_month)[1])
