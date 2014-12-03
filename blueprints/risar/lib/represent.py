@@ -66,7 +66,8 @@ def represent_event(event):
         'anamnesis': represent_anamnesis(event),
         'epicrisis': represent_epicrisis(event),
         'checkups': represent_checkups(event),
-        'risk_rate': get_risk_rate(get_all_diagnoses(event.actions))
+        'risk_rate': get_risk_rate(get_all_diagnoses(event.actions)),
+        'pregnancy_week': get_pregnancy_week(represent_mother_action(event))
     }
 
 
@@ -100,6 +101,13 @@ def get_risk_rate(diagnoses):
             risk_rate = {'value': 1, 'note': u"У пациентки выявлен низкий риск невынашивания "}
     return risk_rate
 
+
+def get_pregnancy_week(mother_action):
+    menstruation_last_date = mother_action['menstruation_last_date']
+    if mother_action['menstruation_last_date']:
+        date = datetime.date.today()
+        return (date - menstruation_last_date).days/7 + 1
+    return None
 
 @cache.memoize()
 def get_action_type_id(flat_code):
@@ -258,7 +266,8 @@ def represent_ticket(ticket):
         'event_id': ticket.client_ticket.event_id if ticket.client_ticket else None,
         'note': ticket.client_ticket.note if ticket.client else None,
         'checkup_n': checkup_n,
-        'risk_rate': get_risk_rate(get_all_diagnoses(event.actions))
+        'risk_rate': get_risk_rate(get_all_diagnoses(event.actions)),
+        'pregnancy_week': get_pregnancy_week(represent_mother_action(event))
     }
 
 

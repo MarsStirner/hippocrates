@@ -15,6 +15,7 @@ var CheckupCtrl = function ($scope, RisarApi) {
             $scope.client_id = data.event.client.id;
             $scope.checkup = data.event.checkups.filter(function(elem){return elem.id == checkup_id})[0]
             if (!$scope.checkup) create_new_checkup();
+            if ($scope.pregnancy_week && !$scope.checkup.pregnancy_week) {$scope.checkup.pregnancy_week = $scope.pregnancy_week};
         })
     };
 

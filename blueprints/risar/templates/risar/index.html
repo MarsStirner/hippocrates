@@ -29,7 +29,7 @@
                                                         'fa-circle text-success':row.risk_rate.value==1}"
                                              tooltip="[[row.risk_rate.note]]"></span></td>
                         <td><a ng-href="{{ url_for('.html_chart') }}?ticket_id=[[ row.client_ticket_id ]]">[[ row.client.full_name ]]</a></td>
-                        <td>31</td>
+                        <td><b>[[ row.pregnancy_week ]]</b><i class="fa fa-question" ng-if="!row.pregnancy_week"></i></td>
                         <td ng-bind="(row.checkup_n)?('Повторный осмотр: ' + row.checkup_n):('Первичный осмотр')"></td>
                     </tr>
                     </tbody>
