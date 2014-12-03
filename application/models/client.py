@@ -173,8 +173,11 @@ class Client(db.Model):
             return formatYearsMonths(years, months-12*years)
         elif months > 1:
             add_year, new_month = divmod(bd.month + months, 12)
-            new_day = min(bd.day, calendar.monthrange(bd.year+add_year, new_month)[1])
-            fmonth_date = datetime.date(bd.year+add_year, new_month, new_day)
+            if new_month:
+                new_day = min(bd.day, calendar.monthrange(bd.year+add_year, new_month)[1])
+                fmonth_date = datetime.date(bd.year+add_year, new_month, new_day)
+            else:
+                fmonth_date = bd
             return formatMonthsWeeks(months, (date-fmonth_date).days/7)
         else:
             return formatDays(days)
