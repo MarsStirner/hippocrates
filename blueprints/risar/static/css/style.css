@@ -206,3 +206,10 @@ box-shadow: inset 0 3px 8px rgba(0,0,0,0.125);
 .fa.ng-scope.fa-circle.text-warning{
     color: #FFD700
 }
+
+.error-border {
+    border: solid;
+    border-width: 1px;
+    border-color: #a94442;
+    border-radius: 3px;
+}

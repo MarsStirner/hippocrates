@@ -288,7 +288,14 @@ def make_epicrisis_info(epicrisis):
     elif epicrisis['pregnancy_final'] == u'абортом':
         info += ' {0} {1}.'.format(epicrisis['abort_date'], epicrisis['abort_time'])
 
-    info += u" <b>Место родоразрешения</b>: {0}.</br>".format(epicrisis['LPU'].shortName)
+    info += u" <b>Место родоразрешения</b>: {0}.<br>".format(epicrisis['LPU'].shortName)
+
+    if epicrisis['manipulations'] and epicrisis['operations']:
+        info += u'Были осуществлены пособия и манипуляции и проведены операции.'
+    elif epicrisis['manipulations']:
+        info += u'Были осуществлены пособия и манипуляции.'
+    elif epicrisis['operations']:
+        info += u'Были проведены операции.'
 
     if (epicrisis['newborn_inspections'] and
             not (epicrisis['pregnancy_final'] == u'абортом' or

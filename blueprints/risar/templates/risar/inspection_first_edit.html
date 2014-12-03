@@ -516,10 +516,14 @@
                         <th class="text-right">Диагнозы <span>&nbsp;</span></th>
                         <td>&nbsp;</td>
                     </tr>
+
                     <tr>
                         <td class="text-right">Основной <span class="text-danger">*</span></td>
-                        <td><div class="row"><div class="col-md-5">
-                            <ui-mkb ng-model="checkup.diag" name="mkb" ng-required="true"></ui-mkb></div></div></td>
+                        <td><div class="row">
+                            <div class="col-md-5">
+                                <ui-mkb ng-class="{'has-error': CheckupFirstEditForm.mkb.$invalid}"
+                                        ng-model="checkup.diag" name="mkb" ng-required="true"></ui-mkb>
+                            </div></div></td>
                     </tr>
                     <tr>
                         <td class="text-right">Расшифровка основного <span>&nbsp;</span></td>
