@@ -18,8 +18,13 @@
                     ([[ chart.external_id ]])
                 </h2>
             </div>
-            <div class="col-md-2 achievements">
-                <b>[[ pregnancy_week ]]</b><i class="fa fa-question" ng-if="!pregnancy_week"></i>
+            <div class="col-md-1">
+                <img src="{{ url_for('.static', filename='i/birth_date.ico') }}">
+                <span ng-if="chart.epicrisis.ch_b_date" tooltip="Фактическая дата родов"><b>[[chart.epicrisis.ch_b_date]]</b></span>
+                <span ng-if="!chart.epicrisis.ch_b_date" tooltip="Предполагаемая дата родов"><b>[[birth_date]]</b></span>
+            </div>
+            <div class="col-md-3 achievements text-right">
+                <span ng-if="pregnancy_week" class="label label-default">[[ pregnancy_week ]]</span><i class="fa fa-question" ng-if="!pregnancy_week"></i>
                 <i class="fa" ng-class="{'fa-question':chart.risk_rate.value==0,
                                          'fa-circle text-danger':chart.risk_rate.value==3,
                                          'fa-circle text-warning':chart.risk_rate.value==2,
@@ -29,9 +34,7 @@
                 <i class="fa fa-exclamation-triangle text-success"></i>
                 <i class="fa fa-exclamation-triangle text-warning"></i>
                 <i class="fa fa-exclamation-triangle"></i>
-            </div>
-            <div class="col-md-2">
-                <button class="btn btn-default btn-block">146%</button>
+                <span class="label label-default">146</span>
             </div>
             <div class="col-md-12 col-lg-12">
                 <div class="alert-warning small-marginal">Случай беременности. На учёте в <b>[[ chart.person.organisation.short_name ]]</b>
