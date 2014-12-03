@@ -1103,6 +1103,17 @@ function safe_traverse(object, attrs) {
     }
     return o;
 }
+
+function indexOf(array, elem) {
+  var index, _i, _ref;
+  for (index = _i = 0, _ref = array.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; index = 0 <= _ref ? ++_i : --_i) {
+    if (angular.equals(array[index], elem)) {
+      return index;
+    }
+  }
+  return -1;
+};
+
 if (!HTMLElement.prototype.hasOwnProperty('getOffsetRect')) {
     HTMLElement.prototype.getOffsetRect = function () {
         // (1)
