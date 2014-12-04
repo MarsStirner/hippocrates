@@ -714,9 +714,8 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
                     window.close();
                 }
             }, function (response) {
-                var rr = response.result;
-                var message = rr.name + ': ' + (rr.data ? rr.data.err_msg : '');
-                alert(message);
+                var rr = response.data.meta;
+                MessageBox.error('Невозможно удалить обращение', safe_traverse(response, ['data', 'meta', 'name']));
             });
         });
     };

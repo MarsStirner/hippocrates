@@ -241,9 +241,7 @@ class UserUtils(object):
         if current_user.has_right('adm', 'evtDelAll'):
             return True
         elif current_user.has_right('evtDelOwn') and not event.is_closed:
-            if event.execPerson_id == current_user.id:
-                return True
-            elif event.createPerson_id == current_user.id:
+            if current_user.id in (event.execPerson_id, event.createPerson_id):
                 if event.payments:
                     out_msg['message'] = u'В обращении есть платежи по услугам'
                     return False

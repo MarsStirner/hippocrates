@@ -476,12 +476,7 @@ def api_delete_event():
         db.session.commit()
         return jsonify(None)
 
-    return jsonify({
-        'name': msg['message'],
-        'data': {
-            'err_msg': u'Удаление запрещено'
-        }
-    }, 403, 'delete event error')
+    return jsonify(None, 403, msg.get('message', ''))
 
 
 @module.route('/api/events.json', methods=["POST"])
