@@ -18,7 +18,7 @@ from application.models.utils import safe_current_user_id
 from application.models.exists import (Organisation, )
 from application.lib.jsonify import EventVisualizer
 from blueprints.event.app import module
-from blueprints.event.lib.utils import (EventSaveException, create_services, save_event)
+from blueprints.event.lib.utils import (EventSaveException, create_services, save_event, save_executives)
 from application.lib.sphinx_search import SearchEventService
 from application.lib.data import get_planned_end_datetime, int_get_atl_dict_all, delete_action
 from application.lib.agesex import recordAcceptableEx
@@ -124,6 +124,7 @@ def api_event_close():
         event_data['exec_date'] = get_utc_datetime_with_tz().isoformat()
     try:
         save_event(event_id, all_data)
+        save_executives(event_id)
     except EventSaveException:
         raise
     except Exception, e:
