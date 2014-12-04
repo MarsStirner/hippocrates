@@ -896,6 +896,7 @@ class rbRequestType(db.Model):
             'id': self.id,
             'code': self.code,
             'name': self.name,
+            'relevant': bool(self.relevant)
         }
 
     def __int__(self):

@@ -27,6 +27,19 @@ angular.module('WebMis20.services', []).
             }
         }
     }]).
+    service('AgeSex', [function() {
+        return {
+            sex_acceptable: function (client, sex) {
+                return ! (sex && sex !== client.sex_raw);
+            },
+            age_acceptable: function (client, selector) {
+                return ! (
+                    selector[0] != 0 && client.age_tuple[selector[0] - 1] < selector[1] ||
+                    selector[2] != 0 && client.age_tuple[selector[2] - 1] > selector[3]
+                );
+            }
+        }
+    }]).
     service('MessageBox', ['$modal', function ($modal) {
         return {
             info: function (head, message) {

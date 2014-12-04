@@ -1,5 +1,4 @@
 <div ng-controller="EventMainInfoCtrl">
-    <script type="text/ng-template" id="modal-policy-invalid.html">{% include "event/_modal_policy_invalid.html" %}</script>
 {#    <h4>[[ event.info.organisation.short_name ]]</h4>#}
     <ng-form name="event_maininfo_form" toc-element="Информация об обращении">
         <legend xmlns="http://www.w3.org/1999/html">Информация об обращении</legend>
@@ -13,12 +12,10 @@
                         <div class="col-md-4">
                             <label for="request_type">Тип обращения</label>
                             <ui-select id="request_type" name="request_type" theme="select2"
-                                       ng-model="request_type.selected"
+                                       ng-model="request_type.selected" ng-change="on_request_type_changed()"
                                        ng-disabled="widget_disabled('request_type') || services_added()">
                                 <ui-select-match placeholder="Тип обращения">[[$select.selected.name]]</ui-select-match>
-                                <ui-select-choices repeat="rt in rbRequestType.objects
-                                                 | filter: filter_rb_request_type()
-                                                 | filter: $select.search">
+                                <ui-select-choices repeat="rt in rbRequestType.objects | filter: filter_rb_request_type() | filter: $select.search">
                                     <div ng-bind-html="rt.name | highlight: $select.search"></div>
                                 </ui-select-choices>
                             </ui-select>
@@ -26,11 +23,11 @@
                         <div class="col-md-4">
                             <label for="finance">Источник финансирования</label>
                             <ui-select id="finance" name="finance" theme="select2"
-                                       ng-model="finance.selected"
+                                       ng-model="finance.selected" ng-change="on_finance_changed()"
                                        ng-disabled="widget_disabled('finance') || services_added()">
                                 <ui-select-match placeholder="Источник финансирования">[[$select.selected.name]]</ui-select-match>
                                 <ui-select-choices repeat="f in rbFinance.objects
-                                                 | event_type_filter: rbFinance.objects && rbEventType.get_finances_by_rt(request_type.selected.id)
+                                                 | event_type_filter: rbEventType.get_finances_by_rt(request_type.selected.id)
                                                  | filter: $select.search">
                                     <div ng-bind-html="f.name | highlight: $select.search"></div>
                                 </ui-select-choices>
@@ -40,11 +37,11 @@
                              ng-class="{'has-error': event_maininfo_form.contract.$invalid && editing.submit_attempt}">
                             <label for="contract">Договор</label>
                             <ui-select id="contract" name="contract" theme="select2"
-                                       ng-model="event.info.contract" ng-required="true"
+                                       ng-model="event.info.contract" ng-required="true" ng-change="on_contract_changed()"
                                        ng-disabled="widget_disabled('contract') || services_added()">
                                 <ui-select-match placeholder="Договор">[[$select.selected.number]] [[$select.selected.date]]
                                                              [[$select.selected.resolution]]</ui-select-match>
-                                <ui-select-choices repeat="c in contracts | filter: $select.search">
+                                <ui-select-choices repeat="c in Contract.objects | contract_filter:event.info | filter: $select.search">
                                     <div ng-bind-html="(c.number+' '+c.date+' '+c.resolution) | highlight: $select.search"></div>
                                 </ui-select-choices>
                             </ui-select>
@@ -56,26 +53,24 @@
                              ng-class="{'has-error': event_maininfo_form.event_type.$invalid && editing.submit_attempt}">
                             <label for="event_type">Тип события</label>
                             <ui-select id="event_type" name="event_type" theme="select2"
-                                       ng-model="event.info.event_type" ng-required="true"
+                                       ng-model="event.info.event_type" ng-required="true" ng-change="on_event_type_changed()"
                                        ng-disabled="widget_disabled('event_type') || services_added()">
                                 <ui-select-match placeholder="Тип события">[[$select.selected.name]]</ui-select-match>
                                 <ui-select-choices repeat='et in rbEventType.objects
-                                                 | event_type_filter: rbEventType.objects && rbEventType.get_filtered_by_rtf(request_type.selected.id, finance.selected.id)
+                                                 | event_type_filter: rbEventType.get_filtered_by_rtf(request_type.selected.id, finance.selected.id)
                                                  | filter: $select.search '>
                                     <div ng-bind-html="et.name | highlight: $select.search"></div>
                                 </ui-select-choices>
                             </ui-select>
                         </div>
-                        <div class="col-md-4" ng-if="finance.selected.code == '3'"
+                        <div class="col-md-4" ng-show="formstate.is_dms()"
                              ng-class="{'has-error': event_maininfo_form.dms.$invalid && editing.submit_attempt}">
                             <label for="dms">Полис ДМС</label>
                             <ui-select id="dms" name="dms" theme="select2"
-                                       ng-model="dms.selected" ng-required="finance.selected.code == '3'"
+                                       ng-model="dms.selected" ng-required="formstate.is_dms()" ng-change="on_dms_changed()"
                                        ng-disabled="widget_disabled('dms') || services_added()">
                                 <ui-select-match placeholder="Полис ДМС">[[$select.selected.policy_text]]</ui-select-match>
-                                <ui-select-choices repeat='policy in event.info.client.voluntary_policies
-                                                 | filter: check_dms
-                                                 | filter: $select.search '>
+                                <ui-select-choices repeat="policy in dms_policies | filter: $select.search">
                                     <div ng-bind-html="policy.policy_text | highlight: $select.search"></div>
                                 </ui-select-choices>
                             </ui-select>
@@ -136,7 +131,7 @@
                         </div>
                     </div>
                 </li>
-                <li class="list-group-item">
+                <li class="list-group-item" ng-if="cmb_result_available() || cmb_ache_result_available()">
                     <div class="row">
                         <div class="col-md-3" ng-if="cmb_result_available()">
                             <label for="result" class="control-label">Результат обращения</label>
@@ -167,7 +162,7 @@
     </ng-form>
 {#<div>#}
 {#    <p>debug:</p>#}
-{#    <p>[[event.info | json]]</p>#}
+{#    <pre>[[event.info | json]]</pre>#}
 {#    <p>[[request_type.selected | json]]</p>#}
 {#    <p>[[finance.selected | json]]</p>#}
 {#</div>#}

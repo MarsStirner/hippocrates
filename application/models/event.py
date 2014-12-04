@@ -5,7 +5,7 @@ import re
 
 from application.lib.const import PAYER_EVENT_CODES, STATIONARY_EVENT_CODES, DIAGNOSTIC_EVENT_CODES, \
     POLICLINIC_EVENT_CODES, PAID_EVENT_CODE, OMS_EVENT_CODE, DMS_EVENT_CODE, BUDGET_EVENT_CODE
-from application.lib.agesex import AgeSex
+from application.lib.agesex import AgeSex, parseAgeSelector
 from application.lib.settings import Settings
 from application.models.client import ClientDocument
 from application.models.exists import Person, rbPost, rbCashOperation, rbService
@@ -246,11 +246,11 @@ class EventType(db.Model):
     @classmethod
     def get_default_et(cls):
         """Тип события (обращения по умолчанию).
-        Должно браться из настроек, а сейчас это поликлиника(бюджет) -
-        EventType.code = '09'
+        Должно браться из настроек, а сейчас это поликлиника(пл) -
+        EventType.code = '02'
 
         """
-        return cls.query.filter_by(code='09').first()
+        return cls.query.filter_by(code='02').first()
 
     def __json__(self):
         return {
@@ -270,6 +270,9 @@ class EventType(db.Model):
             'medical_kind': self.rbMedicalKind,
             'service': self.service,
             'request_type': self.requestType,
+            'sex': self.sex,
+            'age': self.age,
+            'age_tuple': parseAgeSelector(self.age)
         }
 
     def __int__(self):
