@@ -286,8 +286,8 @@ angular.module('WebMis20.services').
             is_new = null;
         return {
             set_state: function (request_type, finance, is_new) {
-                rt = request_type;
-                fin = finance;
+                rt = request_type || {};
+                fin = finance || {};
                 is_new = is_new;
             },
             is_new: function () {
