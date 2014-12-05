@@ -27,7 +27,9 @@ var EventMainInfoCtrl = function ($scope, RefBookService, EventType, $filter, Me
         } else if (widget_name === 'exec_person') {
             return event_created || $scope.event.ro || !current_user.current_role_maybe('admin', 'rRegistartor', 'clinicRegistrator');
         } else if (['result', 'ache_result'].has(widget_name)) {
-            return $scope.event.ro || current_user_id !== safe_traverse($scope.event, ['info', 'exec_person', 'id']);
+            return $scope.event.ro || (!current_user.current_role_maybe('admin') &&
+                current_user_id !== safe_traverse($scope.event, ['info', 'exec_person', 'id'])
+            );
         } else if (['exec_date'].has(widget_name)) {
             return $scope.event.ro;
         }
