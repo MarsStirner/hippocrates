@@ -45,8 +45,12 @@ div.das-form > .row {
     padding: 0 6px;
 }
 
-.achievements img{
+.achievements svg{
     vertical-align: inherit;
+    position:absolute;
+    top:-30px;
+    height: 70px;
+    width: 70px;
 }
 .small-marginal {
     margin-bottom: 5px;
