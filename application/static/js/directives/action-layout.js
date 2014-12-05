@@ -166,14 +166,15 @@ angular.module('WebMis20.ActionLayout', ['WebMis20.validators', 'WebMis20.direct
                             if (context.tag.tagName === 'table') {
                                 template = '<tr>\
                                     <td><label>{0}</label></td>\
-                                    <td class="text-center"><input type="checkbox" ng-model="{1}.is_assigned" ng-if="{2}"></td>\
-                                    <td>{3}</td>\
-                                    <td class="text-center">{4}</td>\
+                                    <td class="text-center"><input type="checkbox" ng-model="{1}.is_assigned" ng-if="{2}" ng-disabled={3}></td>\
+                                    <td>{4}</td>\
                                     <td class="text-center">{5}</td>\
+                                    <td class="text-center">{6}</td>\
                                 </tr>'.format(
                                     property_name,
                                     property_code,
                                     property_is_assignable,
+                                    scope.action.ro,
                                     inner_template.format(property_code),
                                     property.type.unit ? property.type.unit.code : '',
                                     property.type.norm ? property.type.norm : ''
