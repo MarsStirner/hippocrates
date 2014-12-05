@@ -508,11 +508,11 @@ angular.module('WebMis20.directives')
         return {
             restrict: 'E',
             replace: true,
-            template:
-                '<button class="btn btn-default" ng-click="print_templates()" title="Печать" ng-disabled="disabled()">\
+            template: function(el, attributes) {
+                var btnText = el.html();
+                return '<button class="btn btn-default" ng-click="print_templates()" title="Печать" ng-disabled="disabled()">\
                     <i class="glyphicon glyphicon-print"></i>\
-                    <i class="glyphicon glyphicon-remove text-danger" ng-show="disabled()"></i>\
-                 </button>',
+                    <i class="glyphicon glyphicon-remove text-danger" ng-show="disabled()"></i>' + btnText +'</button>'},
             scope: {
                 $ps: '=ps',
                 beforePrint: '&?'

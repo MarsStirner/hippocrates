@@ -67,8 +67,14 @@ var CheckupFirstEditCtrl = function ($scope, $window, $document, RisarApi, Confi
     }
 };
 
-var CheckupSecondEditCtrl = function ($scope, $window, $document, RisarApi, Config) {
-
+var CheckupSecondEditCtrl = function ($scope, $window, $document, RisarApi, Config, PrintingService) {
+    $scope.ps = new PrintingService("risar");
+    $scope.ps.set_context("risar");
+    $scope.ps_resolve = function () {
+        return {
+            event_id: $scope.chart.id
+        }
+    };
     $scope.save = function () {
         if($scope.checkup){
             $scope.checkup.flat_code = 'risarSecondInspection';
