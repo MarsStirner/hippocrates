@@ -36,7 +36,8 @@ div.das-form > .row {
 }
 
 .achievements {
-    font-size: 28px;
+    font-size: 26px;
+    line-height: 26px;
 }
 
 .achievements a.btn{
@@ -44,6 +45,9 @@ div.das-form > .row {
     padding: 0 6px;
 }
 
+.achievements img{
+    vertical-align: inherit;
+}
 .small-marginal {
     margin-bottom: 5px;
 }
