@@ -436,8 +436,9 @@ class ActionProperty_Diagnosis(ActionProperty__ValueType):
         from blueprints.event.lib.utils import delete_diagnosis
         value = prop.value
         if prop.type.isVector:
-            for diag in value:
-                delete_diagnosis(diag)
+            if value:
+                for diag in value:
+                    delete_diagnosis(diag)
         else:
             if value:
                 delete_diagnosis(value)
