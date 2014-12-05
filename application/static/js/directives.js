@@ -7,6 +7,7 @@ angular.module('WebMis20.directives')
         return {
             restrict: 'E',
             require: '^ngModel',
+            scope: true,
             link: function (scope, element, attrs, ctrl) {
                 var _id = attrs.id,
                     name = attrs.name,
@@ -15,16 +16,20 @@ angular.module('WebMis20.directives')
                     placeholder = attrs.placeholder,
                     ngModel = attrs.ngModel,
                     refBook = attrs.refBook,
-                    extra_filter = attrs.extraFilter;
+                    extraFilter = attrs.extraFilter,
+                    getName = attrs.customName ? scope.$eval(attrs.customName) : function (selected) {
+                        return selected ? selected.name : undefined;
+                    };
+                scope.getName = getName;
                 if (!ngModel) throw new Error('<rb-select> must have ng-model attribute');
                 if (!refBook) throw new Error('<rb-select> must have rb attribute');
                 var uiSelect = $('<ui-select></ui-select>');
-                var uiSelectMatch = $('<ui-select-match>[[ $select.selected.name ]]</ui-select-match>');
+                var uiSelectMatch = $('<ui-select-match>[[getName($select.selected)]]</ui-select-match>');
                 var uiSelectChoices = $(
                     '<ui-select-choices repeat="item in $refBook.objects | {0}filter: $select.search track by item.id">\
-                        <div ng-bind-html="item.name | highlight: $select.search"></div>\
+                        <div ng-bind-html="getName(item) | highlight: $select.search"></div>\
                     </ui-select-choices>'
-                    .format(extra_filter?(extra_filter + ' | '):'')
+                    .format(extraFilter?(extraFilter + ' | '):'')
                 );
                 if (_id) uiSelect.attr('id', _id);
                 if (name) uiSelect.attr('name', name);
@@ -822,7 +827,9 @@ angular.module('WebMis20.directives')
     .directive('wmSortableHeader', [function () {
         return {
             restrict: 'A',
+            controllerAs: 'wmSortableHeaderCtrl',
             controller: function () {
+                this.orders = ['DESC', 'ASC'];
                 this.sort_cols = [];
                 this.register_col = function (col) {
                     this.sort_cols.push(col);
@@ -849,14 +856,12 @@ angular.module('WebMis20.directives')
                 scope.order = undefined;
                 scope.column_name = attrs.wmSortableColumn;
 
-                var orders = [undefined, 'DESC', 'ASC'];
-
                 element.click(function () {
                     scope.$apply(function () {
                         allColsCtrl.clear_other(scope);
-                        var cur_idx = orders.indexOf(scope.order),
-                            total_choices = orders.length;
-                        scope.order = orders[(cur_idx < total_choices - 1 ? (cur_idx + 1) : 0)];
+                        scope.order = (scope.order === allColsCtrl.orders[0]) ?
+                            allColsCtrl.orders[1] :
+                            allColsCtrl.orders[0];
                         scope.onChangeOrder({
                             params: {
                                 order: scope.order,

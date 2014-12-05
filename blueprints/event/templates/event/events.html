@@ -49,7 +49,8 @@
                         <wm-person-select id="filter-exec-person" ng-model="flt.exec_person" placeholder="Лечащий врач"></wm-person-select>
 
                         <label for="filter-result">Результат</label>
-                        <rb-select id="filter-result" ng-model="flt.result" placeholder="Результат" ref-book="rbResult"></rb-select>
+                        <rb-select id="filter-result" ng-model="flt.result" placeholder="Результат" ref-book="rbResult"
+                            custom-name="rbResultFormatter"></rb-select>
                     </div>
                     <div class="panel-footer panel-default">
                         <div class="btn-group">
