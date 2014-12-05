@@ -18,7 +18,7 @@ angular.module('WebMis20.directives')
                 'treatments': 2
             };
             scope.can_delete_action = function (action) {
-                return action.status.code !== 'finished' && action.can_delete;
+                return current_user.current_role_maybe('admin') || (action.status.code !== 'finished' && action.can_delete);
             };
             scope.can_create_action = function () {
                 return scope.event.can_create_actions[at_class[scope.actionTypeGroup]] && !scope.event.ro;
