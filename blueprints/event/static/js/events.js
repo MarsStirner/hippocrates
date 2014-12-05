@@ -30,6 +30,20 @@ var EventListCtrl = function ($scope, $http, $window) {
             $scope.page = page;
             $scope.pages = data.result.pages;
             $scope.results = data.result.items;
+            if (!$scope.current_sorting) {
+                $scope.current_sorting = {
+                    order: 'ASC',
+                    column_name: 'beg_date'
+                };
+                var i,
+                    columns = $scope.wmSortableHeaderCtrl.sort_cols;
+                for (i = 0; i < columns.length; ++i) {
+                    if (columns[i].column_name === 'beg_date') {
+                        columns[i].order = 'ASC';
+                        break;
+                    }
+                }
+            }
         });
     };
     $scope.get_clients = function (query) {
@@ -117,6 +131,9 @@ var EventListCtrl = function ($scope, $http, $window) {
     };
     $scope.open_event = function (event_id) {
         $window.open(url_for_event_html_event_info + '?event_id=' + event_id);
+    };
+    $scope.rbResultFormatter = function (selected) {
+        return selected ? '{0} ({1})'.format(selected.name, selected.event_purpose.name) : undefined;
     };
 
     $scope.clients = [];

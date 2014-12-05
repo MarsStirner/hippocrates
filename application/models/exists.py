@@ -923,6 +923,7 @@ class rbResult(db.Model):
             'name': self.name,
             'continued': bool(self.continued),
             'regional_code': self.regionalCode,
+            'event_purpose': self.eventPurpose
         }
 
     def __int__(self):
