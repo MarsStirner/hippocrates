@@ -529,7 +529,7 @@ angular.module('WebMis20.directives')
                     return !scope.$ps.is_available();
                 };
                 scope.print_templates = function(){
-                    if (scope.beforePrint){
+                    if (scope.beforePrint) {
                         scope.beforePrint().then(function () {
                             // чтобы диалог печати не вызывался до обновления страницы после сохранения действия
                             if (!window.sessionStorage.getItem('open_action_print_dlg')) {

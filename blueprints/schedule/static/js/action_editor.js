@@ -63,7 +63,7 @@ var ActionEditorCtrl = function ($scope, $window, WMAction, PrintingService, Pri
     };
 
     $scope.save_action = function (need_to_print) {
-        $scope.check_can_save_action()
+        return $scope.check_can_save_action()
         .then(function () {
             if ($scope.action.is_new() && need_to_print) {
                 $window.sessionStorage.setItem('open_action_print_dlg', true);
@@ -76,6 +76,21 @@ var ActionEditorCtrl = function ($scope, $window, WMAction, PrintingService, Pri
                         $scope.action.get(result.action.id);
                     }
                 });
+        }, function (result) {
+            var deferred = $q.defer();
+            if (need_to_print) {
+                if (!result.silent) {
+                    MessageBox.info('Невозможно сохранить действие', result.message)
+                    .then(function () {
+                        deferred.resolve();
+                    });
+                } else {
+                    deferred.resolve();
+                }
+            } else {
+                return MessageBox.error('Невозможно сохранить действие', result.message);
+            }
+            return deferred.promise;
         });
     };
     $scope.check_can_save_action = function () {
@@ -102,17 +117,26 @@ var ActionEditorCtrl = function ($scope, $window, WMAction, PrintingService, Pri
                     return diag.diagnosis_type.code === '1' && diag.action.status.code === 'finished';
                 });
             if (action.action.status.code === 'finished' && fin_diagnoses.length && event_has_closed_fin_diagnoses) {
-                return MessageBox.error(
-                    'Невозможно сохранить действие',
-                    'В обращении уже есть закрытые осмотры с заключительным дагнозом. Нельзя указывать больше одного ' +
-                    'заключительного диагноза в обращении.'
-                );
+                deferred.reject({
+                    silent: false,
+                    message: 'В обращении уже есть закрытые осмотры с заключительным дагнозом. ' +
+                        'Нельзя указывать больше одного заключительного диагноза в обращении.'
+                });
             }
             deferred.resolve();
             return deferred.promise;
         }
 
-        return check_diagnoses_conflicts($scope.event, $scope.action);
+        var deferred = $q.defer();
+        if (action.ro) {
+            deferred.reject({
+                silent: true,
+                message: 'Действие открыто в режиме чтения'
+            });
+        } else {
+            return check_diagnoses_conflicts($scope.event, $scope.action);
+        }
+        return deferred.promise;
     };
     $scope.is_med_doc = function () { return $scope.action.action.action_type && $scope.action.action.action_type.class === 0; };
     $scope.is_diag_lab = function () { return $scope.action.action.action_type && $scope.action.action.action_type.class === 1; };
