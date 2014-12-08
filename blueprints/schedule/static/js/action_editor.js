@@ -28,7 +28,7 @@ var ActionEditorCtrl = function ($scope, $window, WMAction, PrintingService, Pri
         ).success(function (data) {
             update_print_templates(data);
         });
-        WMEventCache.get(params.event_id).then(function (event) {
+        WMEventCache.get(parseInt(params.event_id)).then(function (event) {
             $scope.event = event;
         });
     }
@@ -114,7 +114,13 @@ var ActionEditorCtrl = function ($scope, $window, WMAction, PrintingService, Pri
                     return diag.diagnosis_type.code === '1';
                 }),
                 event_has_closed_fin_diagnoses = event.diagnoses.some(function (diag) {
-                    return diag.diagnosis_type.code === '1' && diag.action.status.code === 'finished';
+                    var diag_action_id = safe_traverse(diag, ['action', 'id']);
+                    return (
+                        // рассматриваем только другие действия в обращении,
+                        // считаем, что без id может быть только текущее действие
+                        diag_action_id && diag_action_id !== action.action.id &&
+                        diag.diagnosis_type.code === '1' &&
+                        safe_traverse(diag, ['action', 'status', 'code']) === 'finished');
                 });
             if (action.action.status.code === 'finished' && fin_diagnoses.length && event_has_closed_fin_diagnoses) {
                 deferred.reject({
