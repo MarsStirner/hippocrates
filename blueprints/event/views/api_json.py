@@ -495,18 +495,23 @@ def api_get_events():
         base_query = base_query.filter(Event.externalId == flt['external_id'])
     if 'client_id' in flt:
         base_query = base_query.filter(Event.client_id == flt['client_id'])
-    if 'beg_date' in flt:
-        base_query = base_query.filter(Event.setDate >= datetime.datetime.strptime(flt['beg_date'], '%Y-%m-%d').date())
+    if 'beg_date_from' in flt:
+        base_query = base_query.filter(Event.setDate >= safe_datetime(flt['beg_date_from']))
+    if 'beg_date_to' in flt:
+        base_query = base_query.filter(Event.setDate <= safe_datetime(flt['beg_date_to']))
     if 'unfinished' in flt:
         base_query = base_query.filter(Event.execDate.is_(None))
-    elif 'end_date' in flt:
-        base_query = base_query.filter(Event.execDate <= datetime.datetime.strptime(flt['end_date'], '%Y-%m-%d').date())
+    else:
+        if 'end_date_from' in flt:
+            base_query = base_query.filter(Event.execDate >= safe_datetime(flt['end_date_from']))
+        if 'end_date_to' in flt:
+            base_query = base_query.filter(Event.execDate <= safe_datetime(flt['end_date_to']))
     if 'request_type_id' in flt:
         base_query = base_query.join(EventType).filter(EventType.requestType_id == flt['request_type_id'])
     if 'finance_id' in flt:
-        base_query = base_query.join(Contract).filter(Contract.finance_id == flt['finance_id'])
+        base_query = base_query.join(EventType).filter(EventType.finance_id == flt['finance_id'])
     if 'speciality_id' in flt:
-        base_query = base_query.join(Event.execPerson).filter(Person.speciality_id == flt['speciality_id'])
+        base_query = base_query.outerjoin(Event.execPerson).filter(Person.speciality_id == flt['speciality_id'])
     if 'exec_person_id' in flt:
         base_query = base_query.filter(Event.execPerson_id == flt['exec_person_id'])
     if 'result_id' in flt:
@@ -535,9 +540,9 @@ def api_get_events():
         elif col_name == 'client_full_name':
             base_query = base_query.order_by(Client.lastName.desc() if desc_order else Client.lastName)
         elif col_name == 'person_short_name':
-            base_query = base_query.join(Event.execPerson).order_by(Person.lastName.desc() if desc_order else Person.lastName)
+            base_query = base_query.outerjoin(Event.execPerson).order_by(Person.lastName.desc() if desc_order else Person.lastName)
         elif col_name == 'result_text':
-            base_query = base_query.join(rbResult).order_by(rbResult.name.desc() if desc_order else rbResult.name)
+            base_query = base_query.outerjoin(rbResult).order_by(rbResult.name.desc() if desc_order else rbResult.name)
     else:
         base_query = base_query.order_by(Event.setDate)
 
@@ -546,6 +551,7 @@ def api_get_events():
     paginate = base_query.paginate(page, per_page, False)
     return jsonify({
         'pages': paginate.pages,
+        'total': paginate.total,
         'items': [
             context.make_short_event(event)
             for event in paginate.items
