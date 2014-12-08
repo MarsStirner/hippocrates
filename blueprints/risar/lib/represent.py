@@ -67,7 +67,7 @@ def represent_event(event):
         'epicrisis': represent_epicrisis(event),
         'checkups': represent_checkups(event),
         'risk_rate': get_risk_rate(get_all_diagnoses(event.actions)),
-        'pregnancy_week': get_pregnancy_week(represent_mother_action(event))
+        'pregnancy_week': get_pregnancy_week(event)
     }
 
 
@@ -102,12 +102,31 @@ def get_risk_rate(diagnoses):
     return risk_rate
 
 
-def get_pregnancy_week(mother_action):
-    menstruation_last_date = mother_action['menstruation_last_date']
-    if mother_action['menstruation_last_date']:
-        date = datetime.date.today()
-        return (date - menstruation_last_date).days/7 + 1
+def get_pregnancy_week(event):
+    date = datetime.datetime.today()
+    inspection_pregnancy_week, inspection_date = None, None
+    inspections = Action.query.join(ActionType).filter(
+        Action.event == event,
+        Action.deleted == 0,
+        ActionType.flatCode.in_(checkup_flat_codes)).order_by(Action.begDate.desc())
+    for inspection in inspections:
+        if inspection.propsByCode['pregnancy_week'].value:
+            inspection_pregnancy_week, inspection_date = inspection.propsByCode['pregnancy_week'].value, inspection.begDate
+            break
+
+    ch_b_date = get_action(event, risar_epicrisis).propsByCode['ch_b_date'].value
+    if ch_b_date:
+        return inspection_pregnancy_week + (ch_b_date - inspection_date).days/7  # на какой неделе произошли роды
+
+    if inspection_pregnancy_week:
+        return inspection_pregnancy_week + (date - inspection_date).days/7
+
+    mother_action = get_action(event, risar_mother_anamnesis)
+    menstruation_last_date = mother_action.propsByCode['menstruation_last_date'].value
+    if menstruation_last_date:
+        return (date - menstruation_last_date).days/7 + 1  # расчет срока беременности по дате последней менструации
     return None
+
 
 @cache.memoize()
 def get_action_type_id(flat_code):

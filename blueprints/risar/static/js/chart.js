@@ -18,14 +18,12 @@ var ChartCtrl = function ($scope, $modal, RisarApi, RisarNotificationService, Co
                     'Пациентка поставлена на учёт: <b>[[ chart.person.name ]]</b>. <a href="#">Изменить</a> <a ng-click="cancel_created()">Отменить</a>',
                     'success')
             }
-            var mld = safe_traverse(event_info, ['event','anamnesis','mother','menstruation_last_date']);
-            if (mld) {
-                var pregnancy_week = moment().diff(moment(mld), 'weeks') + 1;
-                if (pregnancy_week > 40) pregnancy_week = '40+';
-                $scope.pregnancy_week = pregnancy_week;
-            } else {
-                $scope.pregnancy_week = ''
+            if ($scope.chart.pregnancy_week > 40) {
+                $scope.pregnancy_week = '40+'}
+            else {
+                $scope.pregnancy_week = $scope.chart.pregnancy_week
             }
+            var mld = safe_traverse(event_info, ['event','anamnesis','mother','menstruation_last_date']);
             if (mld){
                 $scope.birth_date = moment(mld).add(280, 'days').format("DD.MM.YYYY");
             }
