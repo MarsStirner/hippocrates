@@ -10,8 +10,10 @@ var EventListCtrl = function ($scope, $http, $window) {
         if ($scope.flt.id) model.id = $scope.flt.id;
         if ($scope.flt.external_id) model.external_id = $scope.flt.external_id;
         if ($scope.flt.client) model.client_id = $scope.flt.client.id;
-        if ($scope.flt.beg_date) model.beg_date = moment($scope.flt.beg_date).format('YYYY-MM-DD');
-        if ($scope.flt.end_date) model.end_date = moment($scope.flt.end_date).format('YYYY-MM-DD');
+        if ($scope.flt.beg_date_from) model.beg_date_from = moment($scope.flt.beg_date_from).startOf('day').toDate();
+        if ($scope.flt.beg_date_to) model.beg_date_to = moment($scope.flt.beg_date_to).endOf('day').toDate();
+        if ($scope.flt.end_date_from) model.end_date_from = moment($scope.flt.end_date_from).startOf('day').toDate();
+        if ($scope.flt.end_date_to) model.end_date_to = moment($scope.flt.end_date_to).endOf('day').toDate();
         if ($scope.flt.unfinished) model.unfinished = $scope.flt.unfinished;
         if ($scope.flt.finance_type) model.finance_id = $scope.flt.finance_type.id;
         if ($scope.flt.request_type) model.request_type_id = $scope.flt.request_type.id;
@@ -20,8 +22,11 @@ var EventListCtrl = function ($scope, $http, $window) {
         if ($scope.flt.result) model.result_id = $scope.flt.result.id;
         return model;
     }
-    $scope.get_data = function (page) {
+    $scope.get_data = function (page, reset_sorting) {
         var flt = get_model(page);
+        if (reset_sorting) {
+            $scope.reset_sorting();
+        }
         if ($scope.current_sorting) {
             flt.sorting_params = $scope.current_sorting;
         }
@@ -30,19 +35,9 @@ var EventListCtrl = function ($scope, $http, $window) {
             $scope.page = page;
             $scope.pages = data.result.pages;
             $scope.results = data.result.items;
+            $scope.total = data.result.total;
             if (!$scope.current_sorting) {
-                $scope.current_sorting = {
-                    order: 'ASC',
-                    column_name: 'beg_date'
-                };
-                var i,
-                    columns = $scope.wmSortableHeaderCtrl.sort_cols;
-                for (i = 0; i < columns.length; ++i) {
-                    if (columns[i].column_name === 'beg_date') {
-                        columns[i].order = 'ASC';
-                        break;
-                    }
-                }
+                $scope.reset_sorting();
             }
         });
     };
@@ -64,49 +59,25 @@ var EventListCtrl = function ($scope, $http, $window) {
             id: null,
             external_id: undefined,
             client: undefined,
-            beg_date: moment().toDate(),
-            end_date: null,
+            beg_date_from: moment().startOf('day').toDate(),
+            beg_date_to: moment().endOf('day').toDate(),
             finance_type: undefined,
             request_type: undefined,
             exec_person: null,
             unfinished: true
         };
+        $scope.reset_sorting();
         $scope.get_data();
     };
     $scope.on_unfinished_changed = function () {
         if ($scope.flt.unfinished) {
-            $scope.flt.end_date = null;
+            $scope.flt.end_date_from = null;
+            $scope.flt.end_date_to = null;
         }
-    };
-    var sort_locally = function (col_name, order) {
-        if (order === undefined) {
-            col_name = 'beg_date';
-            order = 'ASC';
-        }
-
-        $scope.results.sort(function (a, b) {
-            if (a[col_name] < b[col_name]) {
-                return order === 'ASC' ? -1 : 1;
-            }
-            if (a[col_name] > b[col_name]) {
-                return order === 'DESC' ? -1 : 1;
-            }
-            return 0;
-        });
     };
     $scope.sort_by_column = function (params) {
-        var order = params.order,
-            col_name = params.column_name;
-        if (order === undefined) {
-            $scope.current_sorting = undefined;
-        } else {
-            $scope.current_sorting = params;
-        }
-        if ($scope.pages === 1) {
-            sort_locally(col_name, order);
-        } else if ($scope.pages > 1) {
-            $scope.get_data($scope.page);
-        }
+        $scope.current_sorting = params;
+        $scope.get_data($scope.page);
     };
     $scope.clear = function () {
         $scope.page = 1;
@@ -115,8 +86,10 @@ var EventListCtrl = function ($scope, $http, $window) {
             id: null,
             external_id: undefined,
             client: undefined,
-            beg_date: null,
-            end_date: null,
+            beg_date_from: null,
+            beg_date_to: null,
+            end_date_from: null,
+            end_date_to: null,
             finance_type: undefined,
             request_type: undefined,
             speciality: undefined,
@@ -134,6 +107,21 @@ var EventListCtrl = function ($scope, $http, $window) {
     };
     $scope.rbResultFormatter = function (selected) {
         return selected ? '{0} ({1})'.format(selected.name, selected.event_purpose.name) : undefined;
+    };
+    $scope.reset_sorting = function () {
+        $scope.current_sorting = {
+            order: 'ASC',
+            column_name: 'beg_date'
+        };
+        var i,
+            columns = $scope.wmSortableHeaderCtrl.sort_cols;
+        for (i = 0; i < columns.length; ++i) {
+            if (columns[i].column_name === 'beg_date') {
+                columns[i].order = 'ASC';
+            } else {
+                columns[i].order = undefined;
+            }
+        }
     };
 
     $scope.clients = [];

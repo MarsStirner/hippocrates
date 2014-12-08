@@ -19,17 +19,21 @@ angular.module('WebMis20.directives')
                     extraFilter = attrs.extraFilter,
                     getName = attrs.customName ? scope.$eval(attrs.customName) : function (selected) {
                         return selected ? selected.name : undefined;
-                    };
+                    },
+                    orderBy = attrs.orderBy;
                 scope.getName = getName;
                 if (!ngModel) throw new Error('<rb-select> must have ng-model attribute');
                 if (!refBook) throw new Error('<rb-select> must have rb attribute');
                 var uiSelect = $('<ui-select></ui-select>');
                 var uiSelectMatch = $('<ui-select-match>[[getName($select.selected)]]</ui-select-match>');
                 var uiSelectChoices = $(
-                    '<ui-select-choices repeat="item in $refBook.objects | {0}filter: $select.search track by item.id">\
+                    '<ui-select-choices repeat="item in $refBook.objects | {0}filter: $select.search {1} track by item.id">\
                         <div ng-bind-html="getName(item) | highlight: $select.search"></div>\
                     </ui-select-choices>'
-                    .format(extraFilter?(extraFilter + ' | '):'')
+                    .format(
+                        extraFilter ? (extraFilter + ' | '): '',
+                        orderBy ? ('| orderBy: ' + orderBy) : ''
+                    )
                 );
                 if (_id) uiSelect.attr('id', _id);
                 if (name) uiSelect.attr('name', name);
