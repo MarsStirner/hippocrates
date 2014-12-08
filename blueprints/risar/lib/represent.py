@@ -114,17 +114,21 @@ def get_pregnancy_week(event):
             inspection_pregnancy_week, inspection_date = inspection.propsByCode['pregnancy_week'].value, inspection.begDate
             break
 
-    ch_b_date = get_action(event, risar_epicrisis).propsByCode['ch_b_date'].value
-    if ch_b_date:
-        return inspection_pregnancy_week + (ch_b_date - inspection_date).days/7  # на какой неделе произошли роды
+    epicrisis = get_action(event, risar_epicrisis)
+
+    if epicrisis:
+        ch_b_date = epicrisis.propsByCode['ch_b_date'].value
+        if ch_b_date:
+            return inspection_pregnancy_week + (ch_b_date - inspection_date).days/7  # на какой неделе произошли роды
 
     if inspection_pregnancy_week:
         return inspection_pregnancy_week + (date - inspection_date).days/7
 
     mother_action = get_action(event, risar_mother_anamnesis)
-    menstruation_last_date = mother_action.propsByCode['menstruation_last_date'].value
-    if menstruation_last_date:
-        return (date - menstruation_last_date).days/7 + 1  # расчет срока беременности по дате последней менструации
+    if mother_action:
+        menstruation_last_date = mother_action.propsByCode['menstruation_last_date'].value
+        if menstruation_last_date:
+            return (date.date() - menstruation_last_date).days/7 + 1  # расчет срока беременности по дате последней менструации
     return None
 
 
@@ -286,8 +290,8 @@ def represent_ticket(ticket):
         'note': ticket.client_ticket.note if ticket.client else None,
         'checkup_n': checkup_n,
         'risk_rate': get_risk_rate(get_all_diagnoses(event.actions)),
-        'pregnancy_week': get_pregnancy_week(represent_mother_action(event))
-    }
+        'pregnancy_week': get_pregnancy_week(event)
+    } if event else None
 
 
 def represent_intolerance(obj):

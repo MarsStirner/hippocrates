@@ -5,7 +5,8 @@ var CheckupCtrl = function ($scope, RisarApi) {
     var checkup_id = $scope.checkup_id = params.checkup_id
     var event_id = $scope.event_id = params.event_id;
     var create_new_checkup = function (){
-        $scope.checkup = {height: NaN,
+        $scope.checkup = {beg_date: new Date(),
+                          height: NaN,
                           weight: NaN}
     }
     var reload_checkup = function () {

@@ -41,6 +41,7 @@
                     </svg>
                     <span style="padding-left:70px;" ng-if="chart.epicrisis.ch_b_date" tooltip="Фактическая дата родов">[[chart.epicrisis.ch_b_date]]</span>
                     <span style="padding-left:70px;" ng-if="!chart.epicrisis.ch_b_date" tooltip="Предполагаемая дата родов">[[birth_date]]</span>
+                    <i class="fa fa-question" class="" tooltip="Предполагаемая дата родов" ng-if="!chart.epicrisis.ch_b_date && !birth_date"></i>
                 </span>
             </div>
             <div class="col-md-12 col-lg-12">
