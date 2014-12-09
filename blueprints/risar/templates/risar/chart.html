@@ -20,7 +20,7 @@
             </div>
             <div class="col-md-4 achievements">
                 <span class="pull-right">
-                    <span ng-if="pregnancy_week" class="label label-default">[[ pregnancy_week ]]</span><i class="fa fa-question" ng-if="!pregnancy_week"></i>
+                    <span ng-if="pregnancy_week" class="label label-default" tooltip="Срок беременности">[[ pregnancy_week ]]</span><i class="fa fa-question" ng-if="!pregnancy_week" tooltip="Срок беременности"></i>
                     <i class="fa" ng-class="{'fa-question':chart.risk_rate.value==0,
                                              'fa-circle text-danger':chart.risk_rate.value==3,
                                              'fa-circle text-warning':chart.risk_rate.value==2,
@@ -30,7 +30,7 @@
                     <i class="fa fa-exclamation-triangle text-success"></i>
                     <i class="fa fa-exclamation-triangle text-warning"></i>
                     <i class="fa fa-exclamation-triangle"></i>
-                    <span class="label label-default">60</span>
+                    <span class="label label-default" tooltip="Процент заполненности карты">60</span>
                 </span>
                 <span class="pull-left">
                     <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.0" id="Layer_1" x="0px" y="0px" width="100px" height="70px" viewBox="-34.621 15 100 70" enable-background="new -34.621 15 100 70" xml:space="preserve">
@@ -125,8 +125,8 @@
                             </tr>
                             <tr>
                                 <td>Заболевания</td>
-                                <td>Перенесенные: <span ng-repeat="diag in chart.anamnesis.mother.finished_diseases"> [[diag.code]][[$last ? '' : ', ']]</span>[[chart.anamnesis.mother.finished_diseases ? '' : 'нет']], Текущие: <span ng-repeat="diag in chart.anamnesis.mother.current_diseases"> [[diag.code]]</span>[[chart.anamnesis.mother.current_diseases ? '' : 'нет']]</td>
-                                <td>Перенесенные: <span ng-repeat="diag in chart.anamnesis.father.finished_diseases"> [[diag.code]][[$last ? '' : ', ']]</span>[[chart.anamnesis.father.finished_diseases ? '' : 'нет']], Текущие: <span ng-repeat="diag in chart.anamnesis.father.current_diseases"> [[diag.code]]</span>[[chart.anamnesis.father.current_diseases ? '' : 'нет']]</td>
+                                <td>Перенесенные: <span ng-repeat="diag in chart.anamnesis.mother.finished_diseases" tooltip="[[ diag.name ]]"> [[diag.code]][[$last ? '' : ', ']]</span>[[chart.anamnesis.mother.finished_diseases ? '' : 'нет']], Текущие: <span ng-repeat="diag in chart.anamnesis.mother.current_diseases" tooltip="[[ diag.name ]]"> [[diag.code]][[$last ? '' : ', ']]</span>[[chart.anamnesis.mother.current_diseases ? '' : 'нет']]</td>
+                                <td>Перенесенные: <span ng-repeat="diag in chart.anamnesis.father.finished_diseases" tooltip="[[ diag.name ]]"> [[diag.code]][[$last ? '' : ', ']]</span>[[chart.anamnesis.father.finished_diseases ? '' : 'нет']], Текущие: <span ng-repeat="diag in chart.anamnesis.father.current_diseases" tooltip="[[ diag.name ]]"> [[diag.code]][[$last ? '' : ', ']]</span>[[chart.anamnesis.father.current_diseases ? '' : 'нет']]</td>
                             </tr>
                             <tr>
                                 <td>Вредные привычки</td>

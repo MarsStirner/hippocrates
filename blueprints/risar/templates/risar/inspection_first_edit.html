@@ -130,18 +130,27 @@
                         </div></td>
                     </tr>
                     <tr>
-                        <td class="text-right">АД правая рука <span class="text-danger">*</span> </td>
-                        <td><div class="row" ng-class="{'has-error': CheckupFirstEditForm.ad_right.$invalid}">
+                        <td class="text-right">АД правая рука<span class="text-danger">*</span> </td>
+                        <td><div class="row" ng-class="{'has-error': CheckupFirstEditForm.ad_right_high.$invalid || CheckupFirstEditForm.ad_right_low.$invalid}" >
                             <div class="col-md-2">
-                                <input name="ad_right" ng-model="checkup.ad_right" class="form-control" ng-required="true">
+                                <input name="ad_right_high" ng-model="checkup.ad_right_high"
+                                       maxlength="3" ng-required="true" class="form-control blood_presure" >
+                                <span>/</span>
+                                <input name="ad_right_low" ng-model="checkup.ad_right_low"
+                                       maxlength="3" ng-required="true" class="form-control blood_presure">
                             </div>
-                        </div></td>
+                            </div>
+                        </td>
                     </tr>
                     <tr>
                         <td class="text-right">АД левая рука <span class="text-danger">*</span></td>
-                        <td><div class="row"ng-class="{'has-error': CheckupFirstEditForm.ad_left.$invalid}">
+                        <td><div class="row" ng-class="{'has-error': CheckupFirstEditForm.ad_left_high.$invalid || CheckupFirstEditForm.ad_left_low.$invalid}">
                             <div class="col-md-2">
-                                <input name="ad_left" ng-model="checkup.ad_left" class="form-control" ng-required="true">
+                                <input maxlength="3" name="ad_left_high" ng-model="checkup.ad_left_high"
+                                       class="form-control blood_presure" ng-required="true">
+                                <span>/</span>
+                                <input maxlength="3" name="ad_left_low" ng-model="checkup.ad_left_low"
+                                       class="form-control blood_presure" ng-required="true"
                             </div>
                         </div></td>
                     </tr>

@@ -37,7 +37,7 @@ div.das-form > .row {
 
 .achievements {
     font-size: 26px;
-    line-height: 26px;
+    line-height: 30px;
 }
 
 .achievements a.btn{
@@ -220,4 +220,9 @@ box-shadow: inset 0 3px 8px rgba(0,0,0,0.125);
     border-width: 1px;
     border-color: #a94442;
     border-radius: 3px;
+}
+
+.blood_presure {
+   display: inline;
+   width: 45%;
 }
