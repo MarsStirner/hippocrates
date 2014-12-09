@@ -40,6 +40,25 @@ angular.module('WebMis20.services', []).
             }
         }
     }]).
+    service('WMWindowSync', ['$window', '$rootScope', '$interval', function ($window, $rootScope, $interval) {
+        return {
+            openTab: function (url, onCloseCallback) {
+                var interval,
+                    clearInterval = function() {
+                        $interval.cancel(interval);
+                        interval = undefined;
+                    };
+                var w = $window.open(url);
+                interval = $interval(function () {
+                    if (w.closed) {
+                        (onCloseCallback || angular.noop)();
+                        clearInterval();
+                        w = undefined;
+                    }
+                }, 500);
+            }
+        }
+    }]).
     service('MessageBox', ['$modal', function ($modal) {
         return {
             info: function (head, message) {

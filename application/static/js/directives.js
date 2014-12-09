@@ -882,8 +882,8 @@ angular.module('WebMis20.directives')
             }
         }
     }])
-    .directive('wmDiagnosis', ['DiagnosisModal', 'WMEventServices', 'WMEventCache',
-            function(DiagnosisModal, WMEventServices, WMEventCache) {
+    .directive('wmDiagnosis', ['DiagnosisModal', 'WMEventServices', 'WMEventCache', 'WMWindowSync',
+            function(DiagnosisModal, WMEventServices, WMEventCache, WMWindowSync) {
         return{
             restrict: 'E',
             replace: true,
@@ -922,9 +922,15 @@ angular.module('WebMis20.directives')
                     DiagnosisModal.openDiagnosisModal(diagnosis, $scope.action);
                 };
                 $scope.open_action = function (action_id) {
-                    if(action_id && $scope.clickable){
-                        window.open(url_for_schedule_html_action + '?action_id=' + action_id);
+                    if(action_id && $scope.clickable) {
+                        var url = url_for_schedule_html_action + '?action_id=' + action_id;
+                        WMWindowSync.openTab(url, $scope.update_event);
                     }
+                };
+                $scope.update_event = function () {
+                    $scope.event.reload().then(function () {
+                        $scope.$root.$broadcast('event_loaded');
+                    });
                 };
             },
             template:
@@ -995,7 +1001,7 @@ angular.module('WebMis20.directives')
                 scope.add_new_btn_visible = function () {
                     return scope.canAddNew && (scope.listMode ? true : !scope.model)
                 };
-                if (scope.action || scope.event) {
+                if (scope.action) {
                     WMEventCache.get(scope.action.action.event_id).then(function (event) {
                         scope.event = event;
                     });
