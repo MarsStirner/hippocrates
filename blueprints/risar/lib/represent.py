@@ -12,7 +12,7 @@ from application.systemwide import cache, db
 from ..risar_config import pregnancy_apt_codes, risar_anamnesis_pregnancy, transfusion_apt_codes, \
     risar_anamnesis_transfusion, mother_codes, father_codes, risar_father_anamnesis, risar_mother_anamnesis, \
     checkup_flat_codes, risar_epicrisis, risar_newborn_inspection
-from ..lib.utils import risk_rates_diagID, risk_rates_blockID
+from ..lib.utils import risk_rates_diagID, risk_rates_blockID, week_postfix
 
 __author__ = 'mmalkov'
 
@@ -313,12 +313,15 @@ def make_epicrisis_info(epicrisis):
             epicrisis['funiculus'] or epicrisis['afterbirth'] or epicrisis['other_complications']:
         info += u' с осложнениями'
 
-    info += u' при сроке %.2f.' % epicrisis['body_weight_gain']
+    week = u'недель' if 5 <= epicrisis['pregnancy_duration'] <= 20 else (u'недел' + week_postfix[epicrisis['pregnancy_duration'] % 10])
+    info += u' при сроке {0} {1}'.format(epicrisis['pregnancy_duration'], week)
 
     if epicrisis['pregnancy_final'] == u'родами':
-        info += ' {0} {1}.'.format(epicrisis['ch_b_date'], epicrisis['ch_b_time'])
+        info += ' {0} {1}.'.format(epicrisis['ch_b_date'].strftime("%d.%m.%y"), epicrisis['ch_b_time'])
     elif epicrisis['pregnancy_final'] == u'абортом':
-        info += ' {0} {1}.'.format(epicrisis['abort_date'], epicrisis['abort_time'])
+        info += ' {0} {1}.'.format(epicrisis['abort_date'].strftime("%d.%m.%y"), epicrisis['abort_time'])
+    elif epicrisis['pregnancy_final'] in (u'смертью матери во время родов', u'смертью матери после родов', u'смертью матери во время/после аборта'):
+        info += ' {0} {1}.'.format(epicrisis['death_date'].strftime("%d.%m.%y"), epicrisis['death_time'])
 
     info += u" <b>Место родоразрешения</b>: {0}.<br>".format(epicrisis['LPU'].shortName)
 
