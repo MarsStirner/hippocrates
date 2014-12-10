@@ -129,7 +129,9 @@ var EventMainInfoCtrl = function ($scope, RefBookService, EventType, $filter, Me
             if (errors.err) {
                 MessageBox.error('Ошибка полиса ОМС', errors.err).
                 then(angular.noop, function () {
-                    set_finance('4');
+                    if (!event_created) {
+                        set_finance('4');
+                    }
                 });
             }
         } else if ($scope.formstate.is_dms()) {
@@ -165,11 +167,11 @@ var EventMainInfoCtrl = function ($scope, RefBookService, EventType, $filter, Me
             errors['err'] = 'У пациента не указан полис ОМС';
             return null;
         } else {
-            if (!policy.beg_date || moment(policy.beg_date).isAfter($scope.event.info.set_date)) {
+            if (!policy.beg_date || moment(policy.beg_date).startOf('d').isAfter($scope.event.info.set_date)) {
                 errors['err'] = 'Дата начала действия полиса не установлена или превышает дату создания обращения';
                 return null;
             }
-            if (moment($scope.event.info.set_date).isAfter(policy.end_date)) {
+            if (moment($scope.event.info.set_date).isAfter(moment(policy.end_date).endOf('d'))) {
                 errors['err'] = 'Дата создания обращения превышает дату окончания действия полиса';
                 return null;
             }
@@ -183,8 +185,8 @@ var EventMainInfoCtrl = function ($scope, RefBookService, EventType, $filter, Me
             return [];
         } else {
             policies = policies.filter(function (policy) {
-                return !(!policy.beg_date || moment(policy.beg_date).isAfter($scope.event.info.set_date)) &&
-                    !(!policy.end_date || moment($scope.event.info.set_date).isAfter(policy.end_date));
+                return !(!policy.beg_date || moment(policy.beg_date).startOf('d').isAfter($scope.event.info.set_date)) &&
+                    !(!policy.end_date || moment($scope.event.info.set_date).isAfter(moment(policy.end_date).endOf('d')));
             });
             if (!policies.length) {
                 errors['err'] = 'У пациента нет ни одного валидного полиса ДМС';
