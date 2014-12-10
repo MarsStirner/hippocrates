@@ -938,6 +938,13 @@ class ClientPolicy(db.Model):
         self.name = insurer['full_name'] if not insurer['id'] else None
         self.client = client
 
+    def is_valid(self, moment=None):
+        if moment is None:
+            moment = datetime.date.today()
+        from application.lib.utils import safe_date
+        moment = safe_date(moment)
+        return bool(self.begDate and self.begDate <= moment and (not self.endDate or moment <= self.endDate))
+
     def __unicode__(self):
         return (' '.join([self.policyType.name,
                           unicode(self.insurer) if self.insurer else '',

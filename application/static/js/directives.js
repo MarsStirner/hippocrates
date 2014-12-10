@@ -49,40 +49,59 @@ angular.module('WebMis20.directives')
             }
         };
     }])
-    .directive('wmDate', ['$timeout', function ($timeout) {
+    .directive('wmDate', ['$timeout', '$compile', function ($timeout, $compile) {
         return {
             restrict: 'E',
-            replace: true,
-            scope: {
-                id: '@',
-                ngModel: '=',
-                ngRequired: '=',
-                ngDisabled: '=',
-                ngChange: '=',
-                maxDate: '='
-            },
+            scope: true,
+            require: 'ngModel',
             controller: function ($scope) {
                 $scope.popup = { opened: false };
                 $scope.open_datepicker_popup = function (prev_state) {
                     $timeout(function () {
                         $scope.popup.opened = !prev_state;
-                        if (!$scope.ngModel) {
-                            $scope.ngModel = new Date();
+                        if (!$scope.ngModelCtrl.$modelValue) {
+                            $scope.ngModelCtrl.$setViewValue(new Date());
                         }
                     });
                 };
             },
-            template: ['<div class="input-group">',
-                        '<input type="text" id="[[id]]_inner" name="[[id]]" class="form-control"',
-                        'is-open="popup.opened" ng-model="ngModel" autocomplete="off" max="maxDate"',
-                        'datepicker_popup="dd.MM.yyyy" ng-required="ngRequired" ng-disabled="ngDisabled" ng-change="ngChange"' +
-                        'manual-date ui-mask="99.99.9999" date-mask />',
-                        '<span class="input-group-btn">',
-                        '<button type="button" class="btn btn-default" ng-click="open_datepicker_popup(popup.opened)" ng-disabled="ngDisabled">',
-                        '<i class="glyphicon glyphicon-calendar"></i></button>',
-                        '</span>',
-                        '</div>'
-            ].join('\n')
+            link: function (scope, element, attrs, ngModelCtrl) {
+                scope.ngModelCtrl = ngModelCtrl;
+                var _id = attrs.id,
+                    name = attrs.name,
+                    ngDisabled = attrs.ngDisabled,
+                    ngModel = attrs.ngModel,
+                    ngRequired = attrs.ngRequired,
+                    ngChange = attrs.ngChange,
+                    maxDate = attrs.maxDate;
+                if (!ngModel) throw new Error('<wm-date> must have ng-model attribute');
+                var wmdate = $('<div class="input-group"></div>'),
+                    date_input = $('\
+                        <input type="text" class="form-control" autocomplete="off" datepicker_popup="dd.MM.yyyy"\
+                            is-open="popup.opened" manual-date ui-mask="99.99.9999" date-mask />'
+                    ),
+                    button = $('\
+                        <button type="button" class="btn btn-default" ng-click="open_datepicker_popup(popup.opened)">\
+                            <i class="glyphicon glyphicon-calendar"></i>\
+                        </button>'
+                    ),
+                    button_wrap = $('<span class="input-group-btn"></span>');
+                if (_id) date_input.attr('id', _id);
+                if (name) date_input.attr('name', name);
+                date_input.attr('ng-model', ngModel);
+                if (ngDisabled) {
+                    date_input.attr('ng-disabled', ngDisabled);
+                    button.attr('ng-disabled', ngDisabled);
+                }
+                if (ngRequired) date_input.attr('ng-required', ngRequired);
+                if (ngChange) date_input.attr('ng-change', ngChange);
+                if (maxDate) date_input.attr('max', maxDate);
+
+                button_wrap.append(button);
+                wmdate.append(date_input, button_wrap);
+                $(element).replaceWith(wmdate);
+                $compile(wmdate)(scope);
+            }
         };
     }])
     .directive('manualDate', [function() {

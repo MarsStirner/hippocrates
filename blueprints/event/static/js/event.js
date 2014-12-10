@@ -76,7 +76,7 @@ var EventMainInfoCtrl = function ($scope, RefBookService, EventType, $filter, Me
         $scope.on_event_type_changed();
     };
     $scope.on_event_type_changed = function () {
-        $scope.event.info.contract = get_available_contracts()[0];
+        set_contract();
         $scope.update_form_state();
         $scope.update_policies();
         $scope.on_contract_changed();
@@ -93,7 +93,7 @@ var EventMainInfoCtrl = function ($scope, RefBookService, EventType, $filter, Me
                     $scope.dms.selected = undefined;
                 });
             } else {
-                $scope.dms.selected = matched_policies[0];
+                set_dms_policy(matched_policies[0]);
             }
         }
     };
@@ -111,6 +111,9 @@ var EventMainInfoCtrl = function ($scope, RefBookService, EventType, $filter, Me
             $scope.event.info.contract = matched_contracts[0];
         }
     };
+    $scope.on_set_date_changed = function () {
+        $scope.on_event_type_changed();
+    };
 
     $scope.update_form_state = function () {
         $scope.formstate.set_state(
@@ -124,7 +127,10 @@ var EventMainInfoCtrl = function ($scope, RefBookService, EventType, $filter, Me
             var errors = {},
                 policy = get_available_oms_policy($scope.event.info.client, errors);
             if (errors.err) {
-                MessageBox.error('Ошибка полиса ОМС', errors.err);
+                MessageBox.error('Ошибка полиса ОМС', errors.err).
+                then(angular.noop, function () {
+                    set_finance('4');
+                });
             }
         } else if ($scope.formstate.is_dms()) {
             var errors = {},
@@ -133,7 +139,7 @@ var EventMainInfoCtrl = function ($scope, RefBookService, EventType, $filter, Me
                 MessageBox.error('Ошибка полиса ДМС', errors.err);
             } else {
                 $scope.dms_policies = policies;
-                $scope.dms.selected = policies;
+                set_dms_policy(policies[0]);
             }
         }
     };
@@ -186,6 +192,26 @@ var EventMainInfoCtrl = function ($scope, RefBookService, EventType, $filter, Me
             }
         }
         return policies;
+    }
+    function set_finance(code) {
+        $scope.finance.selected = $scope.rbFinance.get_by_code(code);
+        $scope.on_finance_changed();
+    }
+    function set_contract() {
+        var cur_contract = $scope.event.info.contract,
+            available_contracts = get_available_contracts();
+        if (available_contracts.every(function (avail_contract) {
+            return !angular.equals(cur_contract, avail_contract);
+        })) {
+            $scope.event.info.contract = available_contracts[0];
+        }
+    }
+    function set_dms_policy(policy) {
+        if ($scope.dms_policies.every(function (avail_policy) {
+            return !angular.equals($scope.dms.selected, avail_policy);
+        })) {
+            $scope.dms.selected = policy;
+        }
     }
 
     $scope.$on('event_loaded', function() {
