@@ -217,7 +217,7 @@ def kladr_street(code=None):
 
 @app.route('/clear_cache/')
 def clear_cache():
-    cache.delete_memoized(api_refbook)
+    cache.clear()
     import os
     import shutil
     nginx_cache_path = '/var/cache/nginx'

@@ -303,12 +303,11 @@ def api_search_services():
     def make_response(service_data):
         at_id = service_data['action_type_id']
         at_data = ats_apts.get(at_id)
-        if at_data:
-            if not recordAcceptableEx(client.sexCode,
-                                      client_age,
-                                      at_data[6],
-                                      at_data[5]):
-                return None
+        if not at_data:
+            return None
+
+        if not recordAcceptableEx(client.sexCode, client_age, at_data[6], at_data[5]):
+            return None
 
         service = {
             'at_id': at_id,
@@ -319,7 +318,7 @@ def api_search_services():
             'is_lab': False
         }
 
-        if at_data and at_data[9]:
+        if at_data[9]:
             prop_types = at_data[9]
             prop_types = [prop_type[:2] for prop_type in prop_types if recordAcceptableEx(client.sexCode,
                                                                                           client_age,
