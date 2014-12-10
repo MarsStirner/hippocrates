@@ -31,7 +31,8 @@ var rcWizardDirective = {
         this.currentIndex = 0;
         this.firstIndex = 0;
         this.navigationLength = 0;
-        
+        this.currentStep = {};
+
         this.addStep = function (step) {
           
           steps.push(step);
@@ -62,7 +63,7 @@ var rcWizardDirective = {
           if (steps.length)
           
           var currentStep = (steps.length > self.currentIndex) ? steps[self.currentIndex] : null;
-          
+
           if (0 < steps.length && !currentStep) return;
           
           if (0 < steps.length && currentStep.submitController) {
@@ -73,9 +74,9 @@ var rcWizardDirective = {
         };
         
         var onForward = function(currentStep) {
-          
-          if (0 < steps.length && 
-            currentStep.formController && 
+
+          if (0 < steps.length &&
+            currentStep.formController &&
             currentStep.formController.$invalid) return;
           
           wizardElement.bootstrapWizard('next');
@@ -115,7 +116,8 @@ var rcWizardDirective = {
           // automatically focus on the first input of the current tab. This
           // allows for easier keyboard-ony navigation.
           if (steps.length > currentIndex && steps[currentIndex].element) {
-            steps[currentIndex].element.find('input').first().focus();
+//            steps[currentIndex].element.find('input').first().focus();
+            self.currentStep = steps[currentIndex];
           }
         };
         
