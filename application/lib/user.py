@@ -199,6 +199,10 @@ class UserUtils(object):
                 out_msg['message'] = base_msg % unicode(event_type)
                 return False
             client = event.client
+            if not (client.policy and client.policy.is_valid(event.setDate)):
+                out_msg['message'] = u'Нельзя создавать обращения %s для пациентов без ' \
+                                     u'действующего полиса ОМС' % unicode(event_type)
+                return False
             if client.is_adult:
                 out_msg['message'] = u'Нельзя создавать обращения %s для пациентов старше 18 лет' % unicode(event_type)
                 return False

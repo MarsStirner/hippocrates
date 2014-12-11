@@ -230,7 +230,8 @@ var WebMis20 = angular.module('WebMis20', [
     return function(items, event_info) {
         var out = [];
         if (angular.isArray(items) && event_info && event_info.event_type) {
-            var client_info = event_info.client;
+            var client_info = event_info.client,
+                event_set_date = event_info.set_date ? moment(event_info.set_date) : undefined;
 
             items.forEach(function(item) {
                 var itemMatches = false;
@@ -261,10 +262,10 @@ var WebMis20 = angular.module('WebMis20', [
                     }
                 }
 
-                if (event_info.set_date){
-                    var item_begDate = new Date(item.begDate);
-                    var item_endDate = new Date(item.endDate);
-                    if (!(item_begDate <= event_info.set_date && item_endDate >= event_info.set_date)){
+                if (event_set_date) {
+                    var item_begDate = moment(item.begDate);
+                    var item_endDate = moment(item.endDate);
+                    if (!(item_begDate <= event_set_date && item_endDate >= event_set_date)){
                         itemMatches = false;
                     }
                 }

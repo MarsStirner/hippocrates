@@ -107,7 +107,7 @@
                              ng-class="{'has-error': event_maininfo_form.set_date.$invalid && editing.submit_attempt}">
                             <label for="set_date" class="control-label">Дата начала</label>
                             <wm-date id="set_date" name="set_date" ng-model="event.info.set_date" ng-required="true"
-                                     ng-disabled="widget_disabled('set_date')">
+                                     ng-disabled="widget_disabled('set_date')" ng-change="on_set_date_changed()">
                             </wm-date>
                         </div>
                         <div class="col-md-2"
