@@ -27,8 +27,15 @@ var EventMainInfoCtrl = function ($scope, RefBookService, EventType, $filter, Me
         } else if (widget_name === 'exec_person') {
             return event_created || $scope.event.ro || !current_user.current_role_maybe('admin', 'rRegistartor', 'clinicRegistrator');
         } else if (['result', 'ache_result'].has(widget_name)) {
-            return $scope.event.ro || (!current_user.current_role_maybe('admin') &&
-                current_user_id !== safe_traverse($scope.event, ['info', 'exec_person', 'id'])
+            return !(current_user.current_role_maybe('admin') ||
+                !$scope.event.ro && (
+                    ($scope.formstate.is_policlinic() && (
+                        current_user_id === safe_traverse($scope.event, ['info', 'exec_person', 'id']) ||
+                        current_user_id === safe_traverse($scope.event, ['info', 'create_person_id'])
+                    )) || (
+                        $scope.formstate.is_diagnostic() && $scope.userHasResponsibilityByAction
+                    )
+                )
             );
         } else if (['exec_date'].has(widget_name)) {
             return $scope.event.ro;
@@ -38,12 +45,10 @@ var EventMainInfoCtrl = function ($scope, RefBookService, EventType, $filter, Me
         return $scope.event.is_new() && $scope.event.services.length;
     };
     $scope.cmb_result_available = function () {
-        return current_user.current_role_maybe('admin', 'doctor', 'clinicDoctor') || (
-            current_user.current_role_maybe('rRegistartor', 'clinicRegistrator') && $scope.formstate.is_diagnostic()
-        );
+        return !$scope.create_mode;
     };
     $scope.cmb_ache_result_available = function () {
-        return current_user.current_role_maybe('admin', 'doctor', 'clinicDoctor');
+        return !$scope.create_mode && current_user.current_role_maybe('admin', 'doctor', 'clinicDoctor');
     };
 
     $scope.filter_rb_request_type = function() {
@@ -226,6 +231,11 @@ var EventMainInfoCtrl = function ($scope, RefBookService, EventType, $filter, Me
             $scope.on_event_type_changed();
             $scope.event.info.contract = get_available_contract($scope.event.info.contract);
         });
+        $scope.userHasResponsibilityByAction = $scope.event.info.actions ?
+            $scope.event.info.actions.some(function (action) {
+                return [action.person_id, action.create_person_id, action.set_person_id].has(current_user_id);
+            }) :
+            false;
     });
 };
 var EventPaymentCtrl = function($scope, RefBookService, Settings, $http, $modal, MessageBox) {

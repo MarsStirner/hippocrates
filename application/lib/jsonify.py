@@ -790,6 +790,7 @@ class EventVisualizer(object):
         cvis = ClientVisualizer()
         return {
             'id': event.id,
+            'create_person_id': event.createPerson_id,
             'deleted': event.deleted,
             'external_id': event.externalId,
             'order': EventOrder(event.order),
@@ -912,6 +913,9 @@ class EventVisualizer(object):
             'begDate': action.begDate,
             'endDate': action.endDate,
             'person_text': safe_unicode(action.person),
+            'person_id': action.person_id,
+            'set_person_id': action.setPerson_id,
+            'create_person_id': action.createPerson_id,
             'can_read': UserUtils.can_read_action(action),
             'can_edit': UserUtils.can_edit_action(action),
             'can_delete': UserUtils.can_delete_action(action),
