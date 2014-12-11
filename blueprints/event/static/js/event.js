@@ -88,10 +88,14 @@ var EventMainInfoCtrl = function ($scope, RefBookService, EventType, $filter, Me
                     return policy.insurer.id === contract.payer.id;
                 });
             if (!matched_policies.length) {
-                MessageBox.error('Ошибка полиса ДМС', 'У пациента нет полиса ДМС, связанного с выбранным договором')
-                .then(angular.noop, function () {
+                if ($scope.create_mode) {
+                    MessageBox.error('Ошибка полиса ДМС', 'У пациента нет полиса ДМС, связанного с выбранным договором')
+                    .then(angular.noop, function () {
+                        $scope.dms.selected = undefined;
+                    });
+                } else {
                     $scope.dms.selected = undefined;
-                });
+                }
             } else {
                 set_dms_policy(matched_policies[0]);
             }
@@ -123,26 +127,23 @@ var EventMainInfoCtrl = function ($scope, RefBookService, EventType, $filter, Me
         );
     };
     $scope.update_policies = function () {
-        if ($scope.formstate.is_oms()) {
+        if ($scope.formstate.is_oms() && $scope.create_mode) {
             var errors = {},
                 policy = get_available_oms_policy($scope.event.info.client, errors);
             if (errors.err) {
                 MessageBox.error('Ошибка полиса ОМС', errors.err).
                 then(angular.noop, function () {
-                    if (!event_created) {
-                        set_finance('4');
-                    }
+                    set_finance('4');
                 });
             }
         } else if ($scope.formstate.is_dms()) {
             var errors = {},
                 policies = get_available_dms_policies($scope.event.info.client, errors);
-            if (errors.err) {
+            if ($scope.create_mode && errors.err) {
                 MessageBox.error('Ошибка полиса ДМС', errors.err);
-            } else {
-                $scope.dms_policies = policies;
-                set_dms_policy(policies[0]);
             }
+            $scope.dms_policies = policies;
+            set_dms_policy(policies[0]);
         }
     };
 
@@ -617,6 +618,7 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
     $scope.client_id = params.client_id;
     $scope.ticket_id = params.ticket_id;
     var event = $scope.event = new WMEvent($scope.event_id, $scope.client_id, $scope.ticket_id);
+    $scope.create_mode = $scope.event.is_new();
     $scope.editing = {
         submit_attempt: false
     };
