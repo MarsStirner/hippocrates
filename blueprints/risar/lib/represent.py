@@ -119,7 +119,7 @@ def get_pregnancy_week(event):
     if epicrisis:
         ch_b_date = epicrisis.propsByCode['ch_b_date'].value
         if ch_b_date:
-            return inspection_pregnancy_week + (ch_b_date - inspection_date).days/7  # на какой неделе произошли роды
+            return inspection_pregnancy_week + (ch_b_date - inspection_date.date()).days/7  # на какой неделе произошли роды
 
     if inspection_pregnancy_week:
         return inspection_pregnancy_week + (date - inspection_date).days/7
@@ -308,43 +308,47 @@ def represent_intolerance(obj):
 
 
 def make_epicrisis_info(epicrisis):
-    info = u'<b>Беременность закончилась</b> ' + epicrisis['pregnancy_final']
-    if epicrisis['delivery_waters'] or epicrisis['weakness'] or epicrisis['perineal_tear'] or epicrisis['eclampsia'] or \
-            epicrisis['funiculus'] or epicrisis['afterbirth'] or epicrisis['other_complications']:
-        info += u' с осложнениями'
+    # todo: переделать
+    try:
+        pregnancy_final = epicrisis['pregnancy_final']['name'] if epicrisis['pregnancy_final'] else ''
+        info = u'<b>Беременность закончилась</b> ' + pregnancy_final
+        if epicrisis['delivery_waters'] or epicrisis['weakness'] or epicrisis['perineal_tear'] or epicrisis['eclampsia'] or \
+                epicrisis['funiculus'] or epicrisis['afterbirth'] or epicrisis['other_complications']:
+            info += u' с осложнениями'
 
-    week = u'недель' if 5 <= epicrisis['pregnancy_duration'] <= 20 else (u'недел' + week_postfix[epicrisis['pregnancy_duration'] % 10])
-    info += u' при сроке {0} {1}'.format(epicrisis['pregnancy_duration'], week)
+        week = u'недель' if 5 <= epicrisis['pregnancy_duration'] <= 20 else (u'недел' + week_postfix[epicrisis['pregnancy_duration'] % 10])
+        info += u' при сроке {0} {1}'.format(epicrisis['pregnancy_duration'], week)
 
-    if epicrisis['pregnancy_final'] == u'родами':
-        info += ' {0} {1}.'.format(epicrisis['ch_b_date'].strftime("%d.%m.%y"), epicrisis['ch_b_time'])
-    elif epicrisis['pregnancy_final'] == u'абортом':
-        info += ' {0} {1}.'.format(epicrisis['abort_date'].strftime("%d.%m.%y"), epicrisis['abort_time'])
-    elif epicrisis['pregnancy_final'] in (u'смертью матери во время родов', u'смертью матери после родов', u'смертью матери во время/после аборта'):
-        info += ' {0} {1}.'.format(epicrisis['death_date'].strftime("%d.%m.%y"), epicrisis['death_time'])
+        if pregnancy_final == u'родами':
+            info += ' {0} {1}.'.format(epicrisis['ch_b_date'].strftime("%d.%m.%y"), epicrisis['ch_b_time'])
+        elif pregnancy_final == u'абортом':
+            info += ' {0} {1}.'.format(epicrisis['abort_date'].strftime("%d.%m.%y"), epicrisis['abort_time'])
+        elif pregnancy_final in (u'смертью матери во время родов', u'смертью матери после родов', u'смертью матери во время/после аборта'):
+            info += ' {0} {1}.'.format(epicrisis['death_date'].strftime("%d.%m.%y"), epicrisis['death_time'])
 
-    info += u" <b>Место родоразрешения</b>: {0}.<br>".format(epicrisis['LPU'].shortName)
+        info += u" <b>Место родоразрешения</b>: {0}.<br>".format(epicrisis['LPU'].shortName)
 
-    if epicrisis['manipulations'] and epicrisis['operations']:
-        info += u'Были осуществлены пособия и манипуляции и проведены операции.'
-    elif epicrisis['manipulations']:
-        info += u'Были осуществлены пособия и манипуляции.'
-    elif epicrisis['operations']:
-        info += u'Были проведены операции.'
+        if epicrisis['manipulations'] and epicrisis['operations']:
+            info += u'Были осуществлены пособия и манипуляции и проведены операции.'
+        elif epicrisis['manipulations']:
+            info += u'Были осуществлены пособия и манипуляции.'
+        elif epicrisis['operations']:
+            info += u'Были проведены операции.'
 
-    if (epicrisis['newborn_inspections'] and
-            not (epicrisis['pregnancy_final'] == u'абортом' or
-                 epicrisis['pregnancy_final'] == u'смертью матери во время/после аборта')):
-        info += u'<b>Дети</b> ({}): '.format(epicrisis['newborn_inspections'].length)
+        if (epicrisis['newborn_inspections'] and
+                not (pregnancy_final == u'абортом' or
+                     pregnancy_final == u'смертью матери во время/после аборта')):
+            info += u'<b>Дети</b> ({}): '.format(len(epicrisis['newborn_inspections']))
 
-        for child in epicrisis['newborn_inspections']:
-            if child['sexCode'] == 1:
-                info += u'мальчик '
-                info += u'живой' if child['alive'] else u'мертвый'
-            else:
-                info += u'девочка '
-                info += u'живая' if child['alive'] else u'мертвая'
-
+            for child in epicrisis['newborn_inspections']:
+                if child['sexCode'] == 1:
+                    info += u' мальчик '
+                    info += u'живой' if child['alive'] else u'мертвый'
+                else:
+                    info += u' девочка '
+                    info += u'живая' if child['alive'] else u'мертвая'
+    except:
+        info = ''
     return info
 
 

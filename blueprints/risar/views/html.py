@@ -56,3 +56,8 @@ def html_inspection_edit():
 @module.route('/epicrisis.html')
 def html_epicrisis():
     return render_template('risar/epicrisis.html')
+
+
+@module.route('/epicrisis_edit.html')
+def html_epicrisis_edit():
+    return render_template('risar/epicrisis_edit.html')

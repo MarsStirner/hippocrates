@@ -724,6 +724,49 @@ angular.module('WebMis20.directives')
           };
         }
       ])
+    .directive("refbookRadio", [
+    '$window', function($window) {
+      return {
+        restrict: "A",
+        scope: {
+          required: '=',
+          disabled: '=ngDisabled',
+          inline: '=',
+          keyAttr: '@',
+          valueAttr: '@'
+        },
+        require: '?ngModel',
+        template: function(el, attrs) {
+          var itemTpl, name, template;
+          itemTpl = el.html() || '{{item.label}}';
+          name = "fsRadio_" + "{{item.code}}";
+          return template = "<div class='fs-widget-root fs-radio fs-racheck' ng-class=\"{disabled: disabled, enabled: !disabled}\">\n  <div class=\"fs-radio-item\"\n     ng-repeat=\"item in $refBook.objects\" >\n    <input\n     fs-null-form\n     type=\"radio\"\n     ng-model=\"$parent.selectedItem\"\n     name=\"" + name + "\"\n     ng-value=\"item\"\n     ng-disabled=\"disabled\"\n     id=\"" + name + "_[[$index]]\" />\n\n    <label for=\"" + name + "_[[$index]]\">\n      <span class='fs-radio-btn'><span></span></span>\n\n      " + itemTpl + "\n    </label>\n  </div>\n</div>";
+        },
+        controller: function($scope, $element, $attrs, $filter) {
+            $scope.$watchCollection('$refBook', function() {
+                if($scope.$refBook){
+                    var index = indexOf($scope.$refBook.objects, $scope.selectedItem);
+                    return $scope.selectedItem = index>=0 ? $scope.$refBook.objects[index] : $scope.selectedItem;
+                }
+
+            });
+        },
+        link: function(scope, element, attrs, ngModelCtrl, transcludeFn) {
+          if (ngModelCtrl) {
+            scope.$watch('selectedItem', function(newValue, oldValue) {
+              if (!angular.equals(newValue, oldValue)) {
+                return ngModelCtrl.$setViewValue(scope.selectedItem);
+              }
+            });
+
+            return ngModelCtrl.$render = function() {
+                return scope.selectedItem = ngModelCtrl.$modelValue;
+            };
+          }
+        }
+      };
+    }
+    ])
     .directive('uiPrintVariable', ['$compile', 'RefBookService', function ($compile, RefBookService) {
         var ui_select_template =
             '<div fs-select="" items="$refBook.objects" ng-required="true" ng-model="model" class="validatable">[[item.name]]</div>';

@@ -9,6 +9,12 @@ var EpicrisisCtrl = function ($scope, RisarApi) {
             $scope.chart = data.event;
         })
     };
-
+    $scope.save = function () {
+        var model = $scope.chart.epicrisis;
+        RisarApi.epicrisis.save($scope.chart.id, model)
+        .then(function (data) {
+            $scope.chart.epicrisis = data;
+        })
+    }
     reload_epicrisis();
 }

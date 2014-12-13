@@ -42,12 +42,12 @@ WebMis20
             var url = '{0}'.format(Config.url.api_attach_lpu);
             return wrapper('POST', url, {client_id: client_id}, data);
         }
-    }
+    };
     this.checkup = {
             save: function (event_id, data) {
                 return wrapper('POST', Config.url.api_checkup_save.format(event_id), {}, data);
             }
-    }
+    };
     this.anamnesis = {
         get: function (event_id) {
             var url = Config.url.api_anamnesis + event_id;
@@ -108,6 +108,11 @@ WebMis20
                 var url = '{0}{1}/{2}'.format(Config.url.api_anamnesis_intolerances, data.type.code, (data.id||''));
                 return wrapper('POST', url, {client_id: client_id}, data);
             }
+        }
+    };
+    this.epicrisis = {
+        save: function (event_id, data) {
+            return wrapper('POST', Config.url.api_epicrisis.format(event_id), {}, data);
         }
     };
 }])
