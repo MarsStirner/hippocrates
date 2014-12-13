@@ -744,7 +744,7 @@ angular.module('WebMis20.directives')
         },
         controller: function($scope, $element, $attrs, $filter) {
             $scope.$watchCollection('$refBook', function() {
-                if($scope.$refBook){
+                if($scope.$refBook && $scope.selectedItem){
                     var index = indexOf($scope.$refBook.objects, $scope.selectedItem);
                     return $scope.selectedItem = index>=0 ? $scope.$refBook.objects[index] : $scope.selectedItem;
                 }
