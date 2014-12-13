@@ -742,15 +742,6 @@ angular.module('WebMis20.directives')
           name = "fsRadio_" + "{{item.code}}";
           return template = "<div class='fs-widget-root fs-radio fs-racheck' ng-class=\"{disabled: disabled, enabled: !disabled}\">\n  <div class=\"fs-radio-item\"\n     ng-repeat=\"item in $refBook.objects\" >\n    <input\n     fs-null-form\n     type=\"radio\"\n     ng-model=\"$parent.selectedItem\"\n     name=\"" + name + "\"\n     ng-value=\"item\"\n     ng-disabled=\"disabled\"\n     id=\"" + name + "_[[$index]]\" />\n\n    <label for=\"" + name + "_[[$index]]\">\n      <span class='fs-radio-btn'><span></span></span>\n\n      " + itemTpl + "\n    </label>\n  </div>\n</div>";
         },
-        controller: function($scope, $element, $attrs, $filter) {
-            $scope.$watchCollection('$refBook', function() {
-                if($scope.$refBook && $scope.selectedItem){
-                    var index = indexOf($scope.$refBook.objects, $scope.selectedItem);
-                    return $scope.selectedItem = index>=0 ? $scope.$refBook.objects[index] : $scope.selectedItem;
-                }
-
-            });
-        },
         link: function(scope, element, attrs, ngModelCtrl, transcludeFn) {
           if (ngModelCtrl) {
             scope.$watch('selectedItem', function(newValue, oldValue) {
@@ -758,7 +749,12 @@ angular.module('WebMis20.directives')
                 return ngModelCtrl.$setViewValue(scope.selectedItem);
               }
             });
-
+            scope.$watchCollection('$refBook', function(newValue, oldValue) {
+                if (!angular.equals(newValue, oldValue)) {
+                    var index = indexOf(scope.$refBook.objects, ngModelCtrl.$modelValue);
+                    return scope.selectedItem = index>=0 ? scope.$refBook.objects[index] : ngModelCtrl.$modelValue;
+                }
+            });
             return ngModelCtrl.$render = function() {
                 return scope.selectedItem = ngModelCtrl.$modelValue;
             };
