@@ -749,14 +749,19 @@ angular.module('WebMis20.directives')
                 return ngModelCtrl.$setViewValue(scope.selectedItem);
               }
             });
-            scope.$watchCollection('$refBook', function(newValue, oldValue) {
+            scope.$watchCollection('$refBook.objects', function(newValue, oldValue) {
                 if (!angular.equals(newValue, oldValue)) {
                     var index = indexOf(scope.$refBook.objects, ngModelCtrl.$modelValue);
                     return scope.selectedItem = index>=0 ? scope.$refBook.objects[index] : ngModelCtrl.$modelValue;
                 }
             });
             return ngModelCtrl.$render = function() {
-                return scope.selectedItem = ngModelCtrl.$modelValue;
+                if(scope.$refBook){
+                    var index = indexOf(scope.$refBook.objects, ngModelCtrl.$modelValue);
+                    return scope.selectedItem = index>=0 ? scope.$refBook.objects[index] : ngModelCtrl.$modelValue;
+                } else {
+                    return scope.selectedItem = ngModelCtrl.$modelValue;
+                }
             };
           }
         }
