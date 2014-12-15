@@ -260,12 +260,20 @@ class ActionPropertyType(db.Model):
     unit = db.relationship('rbUnit')
     template = db.relationship('ActionPropertyTemplate')
 
+    @classmethod
+    def parse_value_domain(cls, value_domain, type_name):
+        if type_name == 'Diagnosis':
+            from application.lib.utils import parse_json
+            return parse_json(value_domain)
+        return None
+
     def __json__(self):
         result = {
             'id': self.id,
             'name': self.name,
             'code': self.code,
             'domain': self.valueDomain,
+            'domain_obj': ActionPropertyType.parse_value_domain(self.valueDomain, self.typeName),
             'is_assignable': self.isAssignable,
             'ro': self.readOnly,
             'mandatory': self.mandatory,

@@ -910,6 +910,7 @@ angular.module('WebMis20.directives')
                 model: '=',
                 action: '=?',
                 event: '=?',
+                params: '=?',
                 listMode: '=',
                 canAddNew: '=',
                 canDelete: '=',
@@ -919,7 +920,7 @@ angular.module('WebMis20.directives')
             controller: function ($scope) {
                 $scope.add_new_diagnosis = function () {
                     var new_diagnosis = WMEventServices.get_new_diagnosis($scope.action.action);
-                    DiagnosisModal.openDiagnosisModal(new_diagnosis, $scope.action).then(function () {
+                    DiagnosisModal.openDiagnosisModal(new_diagnosis, $scope.action, $scope.params).then(function () {
                         if ($scope.listMode) {
                             $scope.model.push(new_diagnosis);
                         }
@@ -938,7 +939,7 @@ angular.module('WebMis20.directives')
                     WMEventServices.delete_diagnosis($scope.event.diagnoses, diagnosis);
                 };
                 $scope.edit_diagnosis = function (diagnosis) {
-                    DiagnosisModal.openDiagnosisModal(diagnosis, $scope.action);
+                    DiagnosisModal.openDiagnosisModal(diagnosis, $scope.action, $scope.params);
                 };
                 $scope.open_action = function (action_id) {
                     if(action_id && $scope.clickable) {
@@ -1030,11 +1031,12 @@ angular.module('WebMis20.directives')
     }])
 .service('DiagnosisModal', ['$modal', 'WMEventCache', function ($modal, WMEventCache) {
     return {
-        openDiagnosisModal: function (model, action) {
+        openDiagnosisModal: function (model, action, params) {
             var locModel = angular.copy(model);
             var Controller = function ($scope) {
                 $scope.model = locModel;
                 $scope.diag_type_codes = ['2', '3', '7', '9', '11'];
+                $scope.params = params;
 
                 $scope.event = null;
                 WMEventCache.get(action.action.event_id).then(function (event) {
@@ -1175,7 +1177,7 @@ angular.module('WebMis20.directives')
                 <div class="row marginal">\
                     <div class="col-md-9">\
                         <label for="diagnosis_description" class="control-label">Описание диагноза</label>\
-                        <wysiwyg ng-model="model.diagnosis_description"/>\
+                        <wysiwyg ng-model="model.diagnosis_description" thesaurus-code="[[params.thesaurus_code]]"/>\
                     </div>\
                 </div>\
                 <div class="row marginal">\

@@ -23,8 +23,9 @@ angular.module('WebMis20.ActionLayout', ['WebMis20.validators', 'WebMis20.direct
                         if (tag.children && tag.children.length) {console.log('"ap" tags don\'t support children');}
                         var property = scope.action.get_property(tag.id);
                         if (property === undefined) return '{' + tag.id + '}';
-                        var property_code = 'action.get_property(' + tag.id + ')';
-                        var property_is_assignable = 'action.is_assignable(' + tag.id + ')';
+                        var property_code = 'action.get_property(' + tag.id + ')',
+                            property_value_domain_obj = property_code + '.type.domain_obj',
+                            property_is_assignable = 'action.is_assignable(' + tag.id + ')';
 
                         if (scope.action.ro) {
                             switch (property.type.type_name) {
@@ -143,8 +144,9 @@ angular.module('WebMis20.ActionLayout', ['WebMis20.validators', 'WebMis20.direct
                                     inner_template = '<rb-select ref-book="{1}" ng-model="{0}.value" extra-filter="{2}"></rb-select>'.format('{0}', rbTable, extra_filter);
                                     break;
                                 case 'Diagnosis':
-                                    inner_template = '<wm-diagnosis model="{0}.value" action="action" can-add-new="true" ' +
-                                        'can-delete="true" can-edit="true" list-mode="{0}"></wm-diagnosis>'.format(property.type.vector);
+                                    inner_template = ('<wm-diagnosis model="{0}.value" action="action" params="{1}" ' +
+                                        'can-add-new="true" can-delete="true" can-edit="true" list-mode="{2}">' +
+                                        '</wm-diagnosis>').format('{0}', property_value_domain_obj, property.type.vector);
                                     break;
                                 default:
                                     inner_template = '<span ng-bind="{0}.value"></span>';
