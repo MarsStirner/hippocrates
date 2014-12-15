@@ -373,8 +373,8 @@ def represent_newborn_inspections(event):
     newborn_inspections = [dict((code, prop.value) for (code, prop) in inspect .propsByCode.iteritems())
                            for inspect in actions]
     for inspection in newborn_inspections:
-        if inspection['sexCode'] == '1':
-            inspection.sex = 'мужской'
-        elif inspection['sexCode'] == '2':
-            inspection.sex = 'женский'
+        if inspection['sexCode'] == 1:
+            inspection['sex'] = u'мужской'
+        elif inspection['sexCode'] == 2:
+            inspection['sex'] = u'женский'
     return newborn_inspections

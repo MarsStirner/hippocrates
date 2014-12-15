@@ -16,5 +16,8 @@ var EpicrisisCtrl = function ($scope, RisarApi) {
             $scope.chart.epicrisis = data;
         })
     }
+    $scope.add_child = function (){
+        $scope.chart.epicrisis.newborn_inspections.push({});
+    }
     reload_epicrisis();
 }
