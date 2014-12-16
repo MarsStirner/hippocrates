@@ -1,0 +1,79 @@
+{% extends 'risar/base.html' %}
+
+{% block title %}> {{ module_name }}{% endblock %}
+
+{% block main %}
+    <div ng-controller="EventSearchCtrl">
+        <ul class="breadcrumb">
+            <li><a href="{{ url_for('.index_html') }}">Рабочий стол</a></li>
+            <li>Поиск карты пациентки</li>
+        </ul>
+        <div class="row">
+            <div class="col-md-6">
+                <table class="table table-condensed">
+                    <tbody>
+                    <tr>
+                        <th class="col-md-4">Страна</th>
+                        <td class="col-md-8">-</td>
+                    </tr>
+                    <tr>
+                        <th>Регион</th>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <th>Район</th>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <th>ЛПУ</th>
+                        <td>
+                            <ui-select ng-model="query.org" theme="select2" ng-change="refresh_doctors()">
+                                <ui-select-match>[[ $select.selected.short_name ]]</ui-select-match>
+                                <ui-select-choices repeat="org in organisations | filter: {short_name: $select.search} | limitTo:50">
+                                    <div ng-bind-html="org.short_name | highlight: $select.search"></div>
+                                </ui-select-choices>
+                            </ui-select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Врач</th>
+                        <td>
+                            <ui-select ng-model="query.person" theme="select2">
+                                <ui-select-match>[[ $select.selected.name ]]</ui-select-match>
+                                <ui-select-choices repeat="doc in doctors | filter: {name: $select.search} | limitTo:50">
+                                    <div ng-bind-html="doc.name | highlight: $select.search"></div>
+                                </ui-select-choices>
+                            </ui-select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            <button ng-click="perform()" class="btn btn-default">Поиск</button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-md-6">
+                <table class="table table-condensed">
+                    <thead>
+                    <tr>
+                        <th>ФИО</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="row in results">
+                        <td>[[ row.name ]]</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block modules_js %}
+    {{ super() }}
+    <script src="{{ url_for('.static', filename='js/search.js', v=version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/risar.js', v=version) }}"></script>
+{% endblock %}

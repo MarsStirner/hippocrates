@@ -15,6 +15,9 @@ WebMis20
         api_anamnesis_pregnancies: '{{ url_for('.api_0_pregnancies_get') }}',
         api_anamnesis_transfusions: '{{ url_for('.api_0_transfusions_get') }}',
         api_anamnesis_intolerances: '{{ url_for('.api_0_intolerances_get') }}',
+        api_event_search: '{{ url_for('.api_0_event_search') }}',
+        api_event_search_lpu_list: '{{ url_for('.api_0_lpu_list') }}',
+        api_event_search_lpu_doctors_list: '{{ url_for('.api_0_lpu_doctors_list') }}',
         chart_html: '{{ url_for('.html_chart') }}',
         index_html: '{{ url_for('.index_html') }}',
         inpection_edit_html:'{{ url_for('.html_inspection_edit') }}'

@@ -29,6 +29,19 @@ WebMis20
             all: all
         });
     };
+    this.search_event = {
+        get: function (query) {
+            return wrapper('GET', Config.url.api_event_search, query)
+        },
+        lpu_list: function () {
+            return wrapper('GET', Config.url.api_event_search_lpu_list)
+        },
+        lpu_doctors_list: function (org_id) {
+            return wrapper('GET', Config.url.api_event_search_lpu_doctors_list, {
+                org_id: org_id
+            })
+        }
+    };
     this.chart = {
         get: function (event_id, ticket_id) {
             return wrapper('GET', Config.url.api_chart + ((event_id)?(event_id):''), {ticket_id: ticket_id});
@@ -42,12 +55,12 @@ WebMis20
             var url = '{0}'.format(Config.url.api_attach_lpu);
             return wrapper('POST', url, {client_id: client_id}, data);
         }
-    }
+    };
     this.checkup = {
             save: function (event_id, data) {
                 return wrapper('POST', Config.url.api_checkup_save.format(event_id), {}, data);
             }
-    }
+    };
     this.anamnesis = {
         get: function (event_id) {
             var url = Config.url.api_anamnesis + event_id;

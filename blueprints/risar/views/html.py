@@ -12,6 +12,11 @@ def index_html():
     return render_template('risar/index.html')
 
 
+@module.route('/search.html')
+def html_search():
+    return render_template('risar/search.html')
+
+
 @module.route('/chart.html')
 def html_chart():
     return render_template('risar/chart.html')
