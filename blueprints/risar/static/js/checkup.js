@@ -5,7 +5,8 @@ var CheckupCtrl = function ($scope, RisarApi) {
     var checkup_id = $scope.checkup_id = params.checkup_id
     var event_id = $scope.event_id = params.event_id;
     var create_new_checkup = function (){
-        $scope.checkup = {height: NaN,
+        $scope.checkup = {beg_date: new Date(),
+                          height: NaN,
                           weight: NaN}
     }
     var reload_checkup = function () {
@@ -15,6 +16,7 @@ var CheckupCtrl = function ($scope, RisarApi) {
             $scope.client_id = data.event.client.id;
             $scope.checkup = data.event.checkups.filter(function(elem){return elem.id == checkup_id})[0]
             if (!$scope.checkup) create_new_checkup();
+            if ($scope.chart.pregnancy_week && !$scope.checkup.pregnancy_week) {$scope.checkup.pregnancy_week = $scope.chart.pregnancy_week};
         })
     };
 
@@ -66,7 +68,14 @@ var CheckupFirstEditCtrl = function ($scope, $window, $document, RisarApi, Confi
     }
 };
 
-var CheckupSecondEditCtrl = function ($scope, $window, $document, RisarApi, Config) {
+var CheckupSecondEditCtrl = function ($scope, $window, $document, RisarApi, Config, PrintingService) {
+    $scope.ps = new PrintingService("risar");
+    $scope.ps.set_context("risar");
+    $scope.ps_resolve = function () {
+        return {
+            event_id: $scope.chart.id
+        }
+    };
     $scope.save = function () {
         if($scope.checkup){
             $scope.checkup.flat_code = 'risarSecondInspection';

@@ -7,23 +7,23 @@ from collections import defaultdict
 from dateutil.parser import parse as dateutil_parse
 from flask import abort, request
 from flask.ext.login import current_user
-from application.lib.user import UserUtils
 
 from application.models.event import Event
 from application.systemwide import db, cache
 from application.lib.sphinx_search import SearchPerson
 from application.lib.utils import (jsonify, safe_traverse, parse_id, safe_date, safe_time_as_dt, safe_datetime,
-                                   safe_traverse_attrs, format_date)
+                                   safe_traverse_attrs, format_date, initialize_name, logger)
 from application.lib.utils import public_endpoint
 from blueprints.schedule.app import module
 from blueprints.schedule.lib.data import delete_schedules
-from application.models.exists import (rbSpeciality, rbReasonOfAbsence, Person)
+from application.models.exists import (rbSpeciality, rbReasonOfAbsence, Person, vrbPersonWithSpeciality)
 from application.models.actions import Action, ActionType
 from application.models.schedule import (Schedule, ScheduleTicket, ScheduleClientTicket, rbAppointmentType,
     rbAttendanceType, QuotingByTime)
 from application.lib.jsonify import ScheduleVisualizer, ActionVisualizer
 from application.lib.data import (create_new_action, create_action, update_action, int_get_atl_flat,
     get_planned_end_datetime)
+from application.lib.user import UserUtils
 
 
 __author__ = 'mmalkov'
@@ -125,6 +125,7 @@ def api_copy_schedule_description():
 @module.route('/api/day_schedule.json', methods=['GET'])
 def api_day_schedule():
     person_id = parse_id(request.args, 'person_id')
+    proc_office_id = parse_id(request.args, 'proc_office_id')
     if person_id is False:
         return abort(400)
     try:
@@ -133,9 +134,13 @@ def api_day_schedule():
     except ValueError:
         return abort(400)
 
-    context = ScheduleVisualizer()
+    viz = ScheduleVisualizer()
     person = Person.query.get(person_id)
-    return jsonify(context.make_person_schedule_description(person, start_date, end_date))
+    if proc_office_id:
+        result = viz.make_procedure_office_schedule_description(proc_office_id, start_date, end_date, person)
+    else:
+        result = viz.make_person_schedule_description(person, start_date, end_date)
+    return jsonify(result)
 
 
 @module.route('/api/schedule-description.json', methods=['POST'])
@@ -299,18 +304,41 @@ def api_search_persons():
         query_string = request.args['q']
     except (KeyError, ValueError):
         return abort(404)
-    result = SearchPerson.search(query_string)
+    try:
+        result = SearchPerson.search(query_string)
 
-    def cat(item):
-        return {
-            'display': u'#%d - %s %s %s (%s)' % (
-                item['id'], item['lastname'], item['firstname'], item['patrname'], item['speciality']),
-            'name': u'%s %s %s' % (item['lastname'], item['firstname'], item['patrname']),
-            'speciality': item['speciality'],
-            'id': item['id'],
-            'tokens': [item['lastname'], item['firstname'], item['patrname']] + item['speciality'].split(),
-        }
-    data = map(cat, result['result']['items'])
+        def cat(item):
+            return {
+                'id': item['id'],
+                'name': u'%s %s %s' % (item['lastname'], item['firstname'], item['patrname']),
+                'full_name': u'%s %s %s (%s)' % (
+                    item['lastname'], item['firstname'], item['patrname'], item['speciality']),
+                'short_name': u'%s%s%s' % (
+                    initialize_name(item['lastname'], item['firstname'], item['patrname']),
+                    u', ' if item['speciality'] else u'',
+                    item['speciality']),
+                'speciality': {
+                    'id': item['speciality_id'],
+                    'code': item['speciality_code'],
+                    'name': item['speciality']
+                } if item['speciality_id'] else None,
+                'org_structure': {
+                    'id': item['orgstructure_id'],
+                    'code': item['orgstructure_code'],
+                    'name': item['orgstructure']
+                } if item['orgstructure_id'] else None,
+
+                'tokens': [item['lastname'], item['firstname'], item['patrname']] + item['speciality'].split(),
+            }
+        data = map(cat, result['result']['items'])
+    except Exception, e:
+        logger.critical(u'Ошибка в сервисе поиска врача через sphinx: %s' % e, exc_info=True)
+        query_string = query_string.split()
+        data = vrbPersonWithSpeciality.query.filter(
+            *[vrbPersonWithSpeciality.name.like(u'%%%s%%' % q) for q in query_string]
+        ).order_by(
+            vrbPersonWithSpeciality.name
+        ).all()
     return jsonify(data)
 
 
@@ -479,7 +507,14 @@ def api_action_post():
         action = update_action(action, **data)
     else:
         at_id = action_desc['action_type']['id']
+        if not at_id:
+            return jsonify(None, 404, u'Невозможно создать действие без указания типа action_type.id')
         event_id = action_desc['event_id']
+        if not UserUtils.can_create_action(event_id, at_id):
+            return jsonify(None, 403, (
+                u'У пользовател нет прав на создание действия с ActionType id = %s '
+                u'для обращения с event id = %s') % (at_id, event_id)
+            )
         action = create_new_action(at_id, event_id, properties=properties_desc, data=data)
 
     db.session.add(action)
@@ -596,9 +631,7 @@ def api_create_lab_direction():
     event = Event.query.get(event_id)
     org_structure = event.current_org_structure
     if not org_structure:
-        return jsonify({
-            'message': u'Пациент не привязан ни к одному из отделений.'
-        }, 422, 'ERROR')
+        return jsonify(None, 422, u'Пациент не привязан ни к одному из отделений')
 
     for j in ja['directions']:
         action_type_id = j['type_id']
@@ -616,3 +649,15 @@ def api_create_lab_direction():
 
     db.session.commit()
     return jsonify(None)
+
+
+@module.route('/api/schedule/procedure_offices.json', methods=['GET'])
+def api_procedure_offices_get():
+    proc_offices = Person.query.filter(Person.id.in_(
+        # I have a dream one day
+        # all the procedures will get their own entity.
+        [710, 879, 751, 555, 557, 553, 554, 752, 552, 556, 935,
+         915, 916, 917, 913, 911, 912, 914, 962, 961, 608, 920,
+         924, 709, 963, 936, 934, 934, 943, 944, 1200]
+    ))
+    return jsonify([po for po in proc_offices])

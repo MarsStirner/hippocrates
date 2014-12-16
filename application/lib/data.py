@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from application.lib.user import UserUtils
 
 import requests
 
@@ -215,6 +216,18 @@ def update_action(action, **kwargs):
     return action
 
 
+def delete_action(action):
+    if not action:
+        return False, 404, u'Действие с id = %s не найдено' % action.id
+    if not UserUtils.can_delete_action(action):
+        return False, 403, u'У пользователя нет прав на удаление действия с id = %s' % action.id
+    action.deleted = 1
+    for prop in action.properties:
+        prop.deleted = 1
+        mark_ap_value_as_deleted(prop)
+    return True, 200, ''
+
+
 def set_ap_value(prop, value):
     """
 
@@ -228,6 +241,11 @@ def set_ap_value(prop, value):
         prop.set_value(safe_traverse(value, 'id'), True)
     else:
         prop.set_value(value)
+
+
+def mark_ap_value_as_deleted(prop):
+    value_class = prop.get_value_class()
+    value_class.mark_as_deleted(prop)
 
 
 def create_JT(action, orgstructure_id):

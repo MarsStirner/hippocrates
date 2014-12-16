@@ -1,0 +1,304 @@
+{% extends 'risar/base.html' %}
+{% import 'risar/_macros.html' as rimacros %}
+
+{% block title %}> {{ module_name }}{% endblock %}
+
+{% block main %}
+    <div ng-controller="EpicrisisCtrl" ng-cloak>
+        <ul class="breadcrumb">
+            <li><a href="{{ url_for('.index_html') }}">Рабочий стол</a></li>
+            <li><a ng-href="{{ url_for('.html_chart') }}?event_id=[[ chart.id ]]">Карта пациентки</a></li>
+            <li>Эпикриз</li>
+        </ul>
+        <div class="row small-marginal">
+            <div class="col-lg-10 col-md-10">
+                <h2>
+                    Эпикриз -
+                    <a ng-href="{{ url_for('patients.patient') }}?client_id=[[ chart.client.id ]]">[[ chart.client.full_name ]]</a>
+                    ([[ chart.external_id ]])
+                </h2>
+            </div>
+            <div class="col-md-12 col-lg-12">
+                <div class="alert-warning small-marginal">Случай беременности. На учёте в <b>[[ chart.person.organisation.short_name ]]</b>
+                    у <b>[[ chart.person.name ]]</b>
+                    с <b>[[ chart.set_date | asDate ]]</b>
+                </div>
+            </div>
+        </div>
+        <tabset>
+            <tab heading="Информация о родоразрешении">
+                <div class="panel panel-default" style="border-color: #ffffff;">
+                    <div class="panel-body">
+                        <span ng-if="chart.epicrisis" ng-bind-html="chart.epicrisis.info">
+                        </span>
+                        <div class="text-right"><a class="print_link"><span class="glyphicon glyphicon-pencil"></span> Изменить</a> </div>
+                    </div>
+
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="panel panel-default">
+                            <div class="panel-heading"> Диагнозы
+                                <a class="print_link pull-right" href="#"><span class="glyphicon glyphicon-pencil"></span> Изменить</a>
+                            </div>
+                            <div class="panel-body">
+                                <div class="row">
+                                    <div class="col-md-4">Основной диагноз:</div>
+                                    <div class="col-md-8">[[chart.epicrisis.main_diagnosis.code]] - [[chart.epicrisis.main_diagnosis.name]]</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-4">Сопутствующий диагноз:</div>
+                                    <div class="col-md-8">[[chart.epicrisis.attend_diagnosis.code]] - [[chart.epicrisis.attend_diagnosis.name]]</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-4">Диагноз осложнения:</div>
+                                    <div class="col-md-8">[[chart.epicrisis.complicating_diagnosis.code]] - [[chart.epicrisis.complicating_diagnosis.name]]</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">&nbsp;</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">&nbsp;</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="panel panel-default">
+                            <div class="panel-heading"> Данные случая
+                                <a class="print_link pull-right" href="#"><span class="glyphicon glyphicon-pencil"></span> Изменить</a>
+                            </div>
+                            <div class="panel-body">
+                                <div class="row">
+                                    <div class="col-md-5">Беременность (по счёту):</div>
+                                    <div class="col-md-7">[[chart.epicrisis.pregnancy_times]]</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-5">Роды (по счёту):</div>
+                                    <div class="col-md-7">[[chart.epicrisis.childbirth_times]]</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-5">Число посещений акушера-гинеколога:</div>
+                                    <div class="col-md-7">[[chart.epicrisis.visits]]</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-5">Прибавка массы:</div>
+                                    <div class="col-md-7">[[chart.epicrisis.mass]]</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-5">Особенности течения беременности:</div>
+                                    <div class="col-md-7">[[chart.epicrisis.pregnancy_speciality]]</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="panel panel-default" ng-if="chart.epicrisis.death_date || chart.epicrisis.reason_of_death">
+                            <div class="panel-heading"> Смерть
+                                <a class="print_link pull-right" href="#"><span class="glyphicon glyphicon-pencil"></span> Изменить</a>
+                            </div>
+                            <div class="panel-body">
+                                <div class="row">
+                                    <div class="col-md-4">Дата смерти:</div>
+                                    <div class="col-md-8">[[chart.epicrisis.death_date]]</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-4">Причины смерти:</div>
+                                    <div class="col-md-8">[[chart.epicrisis.reason_of_death]]</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">&nbsp;</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">&nbsp;</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">&nbsp;</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">&nbsp;</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">&nbsp;</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="panel panel-default">
+                            <div class="panel-heading"> Осложнения
+                                <a class="print_link pull-right" href="#"><span class="glyphicon glyphicon-pencil"></span> Изменить</a>
+                            </div>
+                            <div class="panel-body">
+                                <div class="row">
+                                    <div class="col-md-5">Излитие околоплодных вод:</div>
+                                    <div class="col-md-7">[[chart.epicrisis.delivery_waters]]</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-5">Слабость родовых сил:</div>
+                                    <div class="col-md-7">[[chart.epicrisis.weakness]]</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-5">Разрыв промежностей (степень):</div>
+                                    <div class="col-md-7">[[chart.epicrisis.perineal_tear]]</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-5">Нефропатия/эклампсия в родах:</div>
+                                    <div class="col-md-7">[[chart.epicrisis.eclampsia]]</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-5">Патология пуповины:</div>
+                                    <div class="col-md-7">[[chart.epicrisis.funiculus]]</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-5">Патология плаценты:</div>
+                                    <div class="col-md-7">[[chart.epicrisis.afterbirth]]</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-5">Другие осложнения при родах:</div>
+                                    <div class="col-md-7">[[chart.epicrisis.other_complications]]</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="panel panel-default">
+                            <div class="panel-heading"> Пособия и манипуляции
+                                <a class="print_link pull-right" href="#"><span class="glyphicon glyphicon-pencil"></span> Изменить</a>
+                            </div>
+                            <div class="panel-body">
+                                <div class="row">
+                                    <div class="col-md-6">Вскрытие околоплодного пузыря:</div>
+                                    <div class="col-md-6">[[chart.epicrisis.caul]]</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">Ручное обследование матки:</div>
+                                    <div class="col-md-6">[[chart.epicrisis.calfbed]]</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">Эпизио/перинеотомия:</div>
+                                    <div class="col-md-6">[[chart.epicrisis.perineotomy]]</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">Ручное выделение последа:</div>
+                                    <div class="col-md-6">[[chart.epicrisis.secundines]]</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">Другие пособия и манипуляции:</div>
+                                    <div class="col-md-6">[[chart.epicrisis.other_manipulations]]</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">&nbsp;</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">&nbsp;</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">&nbsp;</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">&nbsp;</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="panel panel-default">
+                            <div class="panel-heading"> Операции
+                                <a class="print_link pull-right" href="#"><span class="glyphicon glyphicon-pencil"></span> Изменить</a>
+                            </div>
+                            <div class="panel-body">
+                                <div class="row">
+                                    <div class="col-md-5">Кесарево сечение:</div>
+                                    <div class="col-md-7">[[chart.epicrisis.caesarean_section]]</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-5">Акушерские щипцы:</div>
+                                    <div class="col-md-7">[[chart.epicrisis.obstetrical_forceps]]</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-5">Вакуум-экстракция:</div>
+                                    <div class="col-md-7">[[chart.epicrisis.vacuum_extraction]]</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-5">Показания к операции:</div>
+                                    <div class="col-md-7">[[chart.epicrisisindication.indication]]</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-5">Особенности операции:</div>
+                                    <div class="col-md-7">[[chart.epicrisis.specialities]]</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-5">Обезболивание:</div>
+                                    <div class="col-md-7">[[chart.epicrisis.anesthetization]]</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-5">Гистерэктомия:</div>
+                                    <div class="col-md-7">[[chart.epicrisis.hysterectomy]]</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-5">Осложнения:</div>
+                                    <div class="col-md-7">[[chart.epicrisis.operation_complication]]</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-5">Плодоразрушающие операции:</div>
+                                    <div class="col-md-7">[[chart.epicrisis.embryotomy]]</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </tab>
+            <tab heading="Информация о детях">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>№</th>
+                            <th>Живой</th>
+                            <th>Дата и время рождения</th>
+                            <th>Пол</th>
+                            <th>Масса, кг</th>
+                            <th>Длина, см</th>
+                            <th>Степень доношенности</th>
+                            <th>Оценка по Апгар на минуту</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="inspection in chart.epicrisis.newborn_inspections">
+                            <td>[[$index+1]]</td>
+                            <td>[[inspection.alive ? 'да': 'нет']]</td>
+                            <td>[[inspection.birth_date |asDate ]] [[inspection.birth_time]]</td>
+                            <td>[[inspection.sex]]</td>
+                            <td>[[inspection.weight]]</td>
+                            <td>[[inspection.length]]</td>
+                            <td>[[inspection.maturity_rate]]</td>
+                            <td>[[inspection.apgar_score]]</td>
+                            <td class="col-md-1 nowrap">
+                                <button class="btn btn-primary"><span class="glyphicon glyphicon-pencil"></span> Изменить</button>
+                                <button class="btn btn-danger"><span class="glyphicon glyphicon-trash"></span> Удалить</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="8">&nbsp;</td>
+                            <td>
+                                <button class="btn btn-success"><span class="glyphicon glyphicon-plus"></span> Добавить</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </tab>
+        </tabset>
+    </div>
+{% endblock %}
+
+{% block modules_js %}
+    {{ super() }}
+    <script src="{{ url_for('.static', filename='js/risar.js', v=version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/epicrisis.js', v=version) }}"></script>
+{% endblock %}

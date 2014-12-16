@@ -9,7 +9,7 @@ from sqlalchemy.orm import aliased
 from sqlalchemy.sql.functions import current_date
 from sqlalchemy.sql.expression import between
 from flask import json
-from application.lib.user import UserUtils
+from flask.ext.login import current_user
 
 from application.systemwide import db
 from application.lib.data import int_get_atl_dict_all
@@ -18,11 +18,13 @@ from application.lib.agesex import recordAcceptableEx
 from application.lib.utils import safe_unicode, safe_dict, logger, safe_traverse_attrs, format_date
 from application.models.enums import EventPrimary, EventOrder, ActionStatus, Gender
 from application.models.event import Event, EventType, Diagnosis
-from application.models.schedule import Schedule, rbReceptionType, ScheduleClientTicket, ScheduleTicket, QuotingByTime, \
-    Office, rbAttendanceType
+from application.models.schedule import (Schedule, rbReceptionType, ScheduleClientTicket, ScheduleTicket,
+    QuotingByTime, Office, rbAttendanceType)
 from application.models.actions import Action, ActionProperty, ActionType
 from application.models.client import Client
-from application.models.exists import rbRequestType, rbService, ContractTariff, Contract, Person, rbSpeciality, Organisation
+from application.models.exists import (rbRequestType, rbService, ContractTariff, Contract, Person, rbSpeciality,
+    Organisation, rbContactType)
+from application.lib.user import UserUtils
 
 
 __author__ = 'mmalkov'
@@ -315,6 +317,29 @@ class ScheduleVisualizer(object):
             'quotas': quotas
         }
 
+    def make_procedure_office_schedule_description(self, proc_office_id, start_date, end_date, person):
+        # Пока что процедурные кабинеты являются персонами. Потом должны быть выделены в отдельную сущность.
+        schedules_by_date = Schedule.query.outerjoin(
+            Schedule.tickets
+        ).filter(
+            Schedule.person_id == proc_office_id,
+            start_date <= Schedule.date, Schedule.date < end_date,
+            Schedule.deleted == 0
+        ).order_by(
+            Schedule.date,
+            Schedule.begTime,
+            ScheduleTicket.begTime
+        ).options(
+            db.contains_eager(Schedule.tickets).contains_eager('schedule')
+        )
+        schedules = self.make_schedule_description(schedules_by_date, start_date, end_date)
+
+        return {
+            'schedules': schedules,
+            'person': self.make_person(person),
+            'proc_office': True
+        }
+
     def make_copy_schedule_description(self, person, from_start_date, from_end_date, to_start_date, to_end_date):
         """Копировать чистое расписание без записей пациентов и причин
         отсутствия с одного месяца на другой.
@@ -419,6 +444,19 @@ class ClientVisualizer(object):
         else:
             raise ValueError('Relation info does not match Client')
 
+    def make_contacts_info(self, client):
+        def make_contact(contact):
+            return {
+                'id': contact.id,
+                'deleted': contact.deleted,
+                'contact_type': contact.contactType,
+                'contact_text': contact.contact,
+                'notes': contact.notes
+            }
+        return ([make_contact(contact)
+                for contact in client.contacts.join(rbContactType).order_by(rbContactType.idx)]
+                if client.id else [])
+
     def make_client_info(self, client):
         """Полные данные пациента.
         Используется при редактировании данных пациента.
@@ -442,8 +480,7 @@ class ClientVisualizer(object):
             'intolerances': client.intolerances.all() if client.id else None,
             'soc_statuses': client.soc_statuses,
             'relations': relations,
-            'contacts': client.contacts.all() if client.id else None,
-            'phones': client.phones if client.id else None,
+            'contacts': self.make_contacts_info(client),
             'document_history': document_history,
             # 'identifications': identifications,
         }
@@ -458,7 +495,7 @@ class ClientVisualizer(object):
             'live_address': live_addr,
             'compulsory_policy': client.compulsoryPolicy,
             'voluntary_policies': client.voluntaryPolicies,
-            'phones': client.phones
+            'contacts': self.make_contacts_info(client)
         }
 
     def make_client_info_for_event(self, client):
@@ -474,7 +511,8 @@ class ClientVisualizer(object):
             'info': client,
             'id_document': client.id_document,
             'compulsory_policy': client.compulsoryPolicy,
-            'voluntary_policies': client.voluntaryPolicies
+            'voluntary_policies': client.voluntaryPolicies,
+            'contacts': self.make_contacts_info(client)
         }
 
     def make_short_client_info(self, client):
@@ -701,6 +739,26 @@ class PrintTemplateVisualizer(object):
 
 
 class EventVisualizer(object):
+    def make_event_info_for_current_role(self, event):
+        data = {
+            'event': self.make_event(event),
+            'ro': not UserUtils.can_edit_event(event) if event.id else False,
+            'can_create_actions': (
+                [UserUtils.can_create_action(event.id, None, cl) for cl in range(4)]
+                if event.id else [False] * 4
+            )
+        }
+        if current_user.role_in('admin'):
+            data['diagnoses'] = self.make_diagnoses(event)
+            data['payment'] = self.make_event_payment(event)
+            data['services'] = self.make_event_services(event.id)
+        elif current_user.role_in('doctor', 'clinicDoctor', 'diagDoctor'):
+            data['diagnoses'] = self.make_diagnoses(event)
+        elif current_user.role_in(('rRegistartor', 'clinicRegistrator')):
+            data['payment'] = self.make_event_payment(event)
+            data['services'] = self.make_event_services(event.id)
+        return data
+
     def make_short_event(self, event):
         return {
             'id': event.id,
@@ -711,6 +769,7 @@ class EventVisualizer(object):
             'end_date': event.execDate,
             'type_name': event.eventType.name,
             'person_short_name': event.execPerson.shortNameText if event.execPerson else u'Нет',
+            'result_text': safe_traverse_attrs(event, 'result', 'name', default=''),
             'text_description': u'{0} №{1} от {2}, {3}'.format(
                 u'История болезни' if event.is_stationary else u'Обращение',
                 event.externalId,
@@ -783,16 +842,19 @@ class EventVisualizer(object):
         :return:
         """
         pvis = PersonTreeVisualizer()
+        aviz = ActionVisualizer()
         return {
             'id': diagnostic.id,
             'set_date': diagnostic.setDate,
             'end_date': diagnostic.endDate,
             'diagnosis_type': diagnostic.diagnosisType,
+            'deleted': diagnostic.deleted,
             'diagnosis': self.make_diagnosis_record(diagnostic.diagnosis),
             'character': diagnostic.character,
             'person': pvis.make_person_ws(diagnostic.person) if diagnostic.person else None,
             'notes': diagnostic.notes,
             'action_id': diagnostic.action_id,
+            'action': aviz.make_small_action_info(diagnostic.action),
             'result': diagnostic.result,
             'ache_result': diagnostic.rbAcheResult,
             'event_id': diagnostic.event_id,
@@ -1078,12 +1140,26 @@ class ActionVisualizer(object):
                     for prop in action.properties
                 ]
             },
-            'ro': not UserUtils.can_edit_action(action),
+            #FIXME: Мелочь, конечно, но использование двойного отрицания не особо красиво. Зачем здесь делать "not", чтобы потом в интефейсе проверять "!ro".
+            'ro': not UserUtils.can_edit_action(action) if action.id else False,
             'layout': self.make_action_layout(action),
         }
         if action_is_bak_lab(action):
             result['bak_lab_info'] = self.make_bak_lab_info(action)
         return result
+
+    def make_small_action_info(self, action):
+        return {
+            'id': action.id,
+            'action_type': action.actionType,
+            'event_id': action.event_id,
+            'beg_date': action.begDate,
+            'end_date': action.endDate,
+            'planned_end_date': action.plannedEndDate,
+            'status': ActionStatus(action.status),
+            'set_person_id': action.setPerson_id,
+            'person_id': action.person_id,
+        }
 
     def make_action_layout(self, action):
         """

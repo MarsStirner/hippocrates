@@ -262,7 +262,7 @@ var ScheduleMonthCtrl = function ($scope, $http, $modal, RefBook, PersonTreeUpda
         if (!new_value || new_value == old_value) return;
         var path = $location.path() + '?person_id=' + new_value;
         $location.url(path).replace();
-        window.history.pushState(null, document.title, location.origin + location.pathname + '?person_id=' + new_value);
+//        window.history.pushState(null, document.title, location.origin + location.pathname + '?person_id=' + new_value);
         $scope.reloadSchedule();
     });
 

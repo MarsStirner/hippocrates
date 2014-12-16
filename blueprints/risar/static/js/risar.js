@@ -123,6 +123,11 @@ WebMis20
             }
         }
     };
+    this.epicrisis = {
+        save: function (event_id, data) {
+            return wrapper('POST', Config.url.api_epicrisis.format(event_id), {}, data);
+        }
+    };
 }])
 .filter('underlineNoVal', function () {
     return function(value, label) {

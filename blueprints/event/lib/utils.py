@@ -2,18 +2,161 @@
 
 import datetime
 from application.lib.data import create_new_action, update_action, ActionException
+from application.lib.user import UserUtils
 from application.models.actions import Action, ActionType
-from application.models.event import EventLocalContract, Diagnostic, Diagnosis
-from application.lib.utils import safe_date, safe_traverse, safe_datetime, logger
-from application.models.exists import rbDocumentType
+from application.models.client import Client
+from application.models.event import EventLocalContract, Diagnostic, Diagnosis, Event, EventType, Visit, Event_Persons
+from application.lib.utils import safe_date, safe_traverse, safe_datetime, logger, get_new_event_ext_id, get_new_uuid
+from application.models.exists import rbDocumentType, Person
 from application.lib.settings import Settings
+from application.models.schedule import ScheduleClientTicket
 from application.systemwide import db
+from flask.ext.login import current_user
 
 
 class EventSaveException(Exception):
-    def __init__(self, message, data=None):
+    def __init__(self, message=u'', data=None):
         super(EventSaveException, self).__init__(message)
         self.data = data
+
+
+def create_new_event(event_data, local_contract_data):
+    base_msg = u'Невозможно создать обращение: %s.'
+    event = Event()
+    event.setPerson_id = current_user.get_id()
+    event.eventType = EventType.query.get(event_data['event_type']['id'])
+    event.client_id = event_data['client_id']
+    event.client = Client.query.get(event_data['client_id'])
+    exec_person_id = safe_traverse(event_data, 'exec_person', 'id')
+    if exec_person_id and not event.is_diagnostic:
+        event.execPerson = Person.query.get(exec_person_id)
+    event.setDate = safe_datetime(event_data['set_date'])
+    event.externalId = get_new_event_ext_id(event.eventType.id, event.client_id)
+    event.contract_id = event_data['contract']['id']
+    event.isPrimaryCode = event_data['is_primary']['id']
+    event.order = event_data['order']['id']
+    event.org_id = event_data['organisation']['id']
+    event.orgStructure_id = event_data['org_structure']['id']
+    event.payStatus = 0
+    event.note = event_data['note']
+    event.uuid = get_new_uuid()
+
+    error_msg = {}
+    if not UserUtils.can_create_event(event, error_msg):
+        raise EventSaveException(base_msg % error_msg['message'], {
+            'code': 403
+        })
+
+    if event.payer_required:
+        if not local_contract_data:
+            raise EventSaveException(base_msg % error_msg['message'], {
+                'code': 422,
+                'ext_msg': u'Не заполнена информация о плательщике.'
+            })
+        lcon = create_or_update_local_contract(event, local_contract_data)
+        event.localContract = lcon
+
+    if not event.is_diagnostic:
+        visit = Visit.make_default(event)
+        db.session.add(visit)
+        executives = Event_Persons()
+        executives.person = event.execPerson
+        executives.event = event
+        executives.begDate = event.setDate
+        db.session.add(executives)
+    return event
+
+
+def update_event(event_id, event_data, local_contract_data):
+    event = Event.query.get(event_id)
+    event.eventType = EventType.query.get(event_data['event_type']['id'])
+    exec_person_id = safe_traverse(event_data, 'exec_person', 'id')
+    if exec_person_id and not event.is_diagnostic:
+        event.execPerson = Person.query.get(exec_person_id)
+    event.setDate = safe_datetime(event_data['set_date'])
+    event.execDate = safe_datetime(event_data['exec_date'])
+    event.contract_id = event_data['contract']['id']
+    event.isPrimaryCode = event_data['is_primary']['id']
+    event.order = event_data['order']['id']
+    event.orgStructure_id = event_data['org_structure']['id']
+    event.result_id = safe_traverse(event_data, 'result', 'id')
+    event.rbAcheResult_id = safe_traverse(event_data, 'ache_result', 'id')
+    event.note = event_data['note']
+
+    if local_contract_data:
+        lcon = create_or_update_local_contract(event, local_contract_data)
+        event.localContract = lcon
+    return event
+
+
+def save_event(event_id, data):
+    event_data = data.get('event')
+    if not event_data:
+        raise EventSaveException(data={
+            'ext_msg': u'Отсутствует основная информация об обращении'
+        })
+    create_mode = not event_id
+    local_contract_data = safe_traverse(data, 'payment', 'local_contract')
+    services_data = data.get('services', [])
+    if event_id:
+        event = update_event(event_id, event_data, local_contract_data)
+        db.session.add(event)
+    else:
+        event = create_new_event(event_data, local_contract_data)
+    db.session.add(event)
+
+    result = {}
+    try:
+        db.session.commit()
+    except Exception, e:
+        logger.error(e, exc_info=True)
+        db.session.rollback()
+        raise EventSaveException()
+    else:
+        result['id'] = int(event)
+
+        # save ticket reference
+        if create_mode:
+            ticket_id = data.get('ticket_id')
+            if ticket_id:
+                ticket = ScheduleClientTicket.query.get(int(ticket_id))
+                ticket.event_id = int(event)
+                db.session.commit()
+
+        # save actions
+        contract_id = event_data['contract']['id']
+        if create_mode:
+            try:
+                actions, errors = create_services(event.id, services_data, contract_id)
+            except Exception, e:
+                db.session.rollback()
+                logger.error(u'Ошибка сохранения услуг при создании обращения %s: %s' % (event.id, e), exc_info=True)
+                result['error_text'] = u'Обращение создано, но произошла ошибка при сохранении услуг. ' \
+                                       u'Свяжитесь с администратором.'
+            else:
+                if errors:
+                    err_msg = u'Обращение создано, но произошла ошибка при сохранении следующих услуг:' \
+                              u'<br><br> - %s<br>Свяжитесь с администратором.' % (u'<br> - '.join(errors))
+                    result['error_text'] = err_msg
+        else:
+            try:
+                actions, errors = create_services(event.id, services_data, contract_id)
+            except Exception, e:
+                db.session.rollback()
+                logger.error(u'Ошибка сохранения услуг для обращения %s: %s' % (event.id, e), exc_info=True)
+                raise EventSaveException(u'Ошибка сохранения услуг', {
+                    'ext_msg': u'Свяжитесь с администратором.'
+                })
+            else:
+                if errors:
+                    err_msg = u'<br><br> - %s<br>Свяжитесь с администратором.' % (
+                        u'<br> - '.join(errors)
+                    )
+                    raise EventSaveException(u'Произошла ошибка при сохранении следующих услуг', {
+                        'ext_msg': err_msg
+                    })
+
+    return result
 
 
 def create_new_local_contract(lc_info):
@@ -27,10 +170,14 @@ def create_new_local_contract(lc_info):
         lcon.numberContract = ''
     else:
         if not date:
-            raise EventSaveException(err_msg, u'Не указана дата заключения договора.')
+            raise EventSaveException(data={
+                'ext_msg': u'Не указана дата заключения договора'
+            })
         lcon.dateContract = date
         if number is None:
-            raise EventSaveException(err_msg, u'Не указан номер договора.')
+            raise EventSaveException(data={
+                'ext_msg': u'Не указана дата заключения договора'
+            })
         lcon.numberContract = number
 
     lcon.coordAgent = lc_info.get('coord_agent', '')
@@ -283,12 +430,14 @@ def create_or_update_diagnosis(event, json_data, action=None):
     return diag
 
 
-def delete_diagnosis(diagnostic):
+def delete_diagnosis(diagnostic, diagnostic_id=None):
     """
     :type diagnostic: application.models.event.Diagnostic
     :param diagnostic:
     :return:
     """
+    if diagnostic is None and diagnostic_id:
+        diagnostic = Diagnostic.query.get(diagnostic_id)
     diagnostic.deleted = 1
     for ds in diagnostic.diagnoses:
         ds.deleted = 1

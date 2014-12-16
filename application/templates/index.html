@@ -14,14 +14,18 @@
       <blockquote class="danger">
           <h2>Добро пожаловать, {% if current_user.firstName %}{{ current_user.firstName }}{% else %}{{ current_user.lastName }}{% endif %}!<small> Для продолжения работы выберите нужный пункт</small> </h2>
       </blockquote>
-        {% if current_user.role_in('clinicDoctor') %}
+        {% if current_user.role_in('clinicDoctor', 'diagDoctor') %}
           <div class="row lander">
             <div class="col-md-4">
               <a href="{{ url_for('schedule.doctor_schedule_day') }}" title="Обслуживание пациентов" class="btn btn-primary btn-block">
                 <h3>Приём пациентов</h3>
                 <strong>Вы сможете:</strong>
                 <ul>
+                  {% if current_user.role_in('diagDoctor') %}
+                  <li>Посмотреть график процедурных кабинетов</li>
+                  {% else %}
                   <li>Посмотреть свой график </li>
+                  {% endif %}
                   <li>Произвести приём пациента </li>
                   <li>Записать пациента  </li>
                 </ul>

@@ -56,3 +56,13 @@ def html_inspection_edit():
         return render_template('risar/inspection_first_edit.html')
     elif flat_code == 'risarSecondInspection':
         return render_template('risar/inspection_second_edit.html')
+
+
+@module.route('/epicrisis.html')
+def html_epicrisis():
+    return render_template('risar/epicrisis.html')
+
+
+@module.route('/epicrisis_edit.html')
+def html_epicrisis_edit():
+    return render_template('risar/epicrisis_edit.html')

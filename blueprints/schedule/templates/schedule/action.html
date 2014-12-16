@@ -2,8 +2,8 @@
 {% import "_macros.html" as macros %}
 {% block main %}
 <div ng-controller="ActionEditorCtrl">
-<legend xmlns="http://www.w3.org/1999/html">
-    <div class="pull-right text-right col-md-4">
+<legend wm-page-header>
+    <div class="pull-right text-right col-md-1">
         <ui-print-button ps="ps" resolve="ps_resolve()" before-print="save_action(true)"></ui-print-button>
         <button class="btn btn-success" ng-click="save_action()" title="Сохранить"><span class="glyphicon glyphicon-ok"></span></button>
     </div>

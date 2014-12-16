@@ -62,10 +62,6 @@ angular.module('WebMis20.services.models').
                     var contacts = data.client_data.contacts;
                     self.contacts = contacts !== null ? contacts : [];
                 }
-                function add_phones() {
-                    var phones = data.client_data.phones;
-                    self.phones = phones !== null ? phones : [];
-                }
 
                 self.info = data.client_data.info;
                 if (info_type === 'for_editing') {
@@ -83,12 +79,12 @@ angular.module('WebMis20.services.models').
                     add_policies();
                     add_addresses();
                     add_relations();
-                    add_phones();
+                    add_contacts();
                 } else if (info_type === 'for_servicing') {
                     add_id_doc();
                     add_policies();
                     add_addresses();
-                    add_phones();
+                    add_contacts();
                     self.appointments = data.appointments;
                     self.events = data.events;
                 }

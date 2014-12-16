@@ -11,8 +11,8 @@ from application.models.exists import rbAttachType
 from application.systemwide import cache, db
 from ..risar_config import pregnancy_apt_codes, risar_anamnesis_pregnancy, transfusion_apt_codes, \
     risar_anamnesis_transfusion, mother_codes, father_codes, risar_father_anamnesis, risar_mother_anamnesis, \
-    checkup_flat_codes
-from ..lib.utils import risk_rates_diagID, risk_rates_blockID
+    checkup_flat_codes, risar_epicrisis, risar_newborn_inspection
+from ..lib.utils import risk_rates_diagID, risk_rates_blockID, week_postfix
 
 __author__ = 'mmalkov'
 
@@ -64,9 +64,10 @@ def represent_event(event):
             }
         },
         'anamnesis': represent_anamnesis(event),
-        'epicrisis': None,
+        'epicrisis': represent_epicrisis(event),
         'checkups': represent_checkups(event),
-        'risk_rate': get_risk_rate(get_all_diagnoses(event.actions))
+        'risk_rate': get_risk_rate(get_all_diagnoses(event.actions)),
+        'pregnancy_week': get_pregnancy_week(event)
     }
 
 
@@ -99,6 +100,36 @@ def get_risk_rate(diagnoses):
         elif diag.DiagID in risk_rates_diagID['low'] or diag.BlockID in risk_rates_blockID['low']:
             risk_rate = {'value': 1, 'note': u"У пациентки выявлен низкий риск невынашивания "}
     return risk_rate
+
+
+def get_pregnancy_week(event):
+    date = datetime.datetime.today()
+    inspection_pregnancy_week, inspection_date = None, None
+    inspections = Action.query.join(ActionType).filter(
+        Action.event == event,
+        Action.deleted == 0,
+        ActionType.flatCode.in_(checkup_flat_codes)).order_by(Action.begDate.desc())
+    for inspection in inspections:
+        if inspection.propsByCode['pregnancy_week'].value:
+            inspection_pregnancy_week, inspection_date = inspection.propsByCode['pregnancy_week'].value, inspection.begDate
+            break
+
+    epicrisis = get_action(event, risar_epicrisis)
+
+    if epicrisis:
+        ch_b_date = epicrisis.propsByCode['ch_b_date'].value
+        if ch_b_date:
+            return inspection_pregnancy_week + (ch_b_date - inspection_date.date()).days/7  # на какой неделе произошли роды
+
+    if inspection_pregnancy_week:
+        return inspection_pregnancy_week + (date - inspection_date).days/7
+
+    mother_action = get_action(event, risar_mother_anamnesis)
+    if mother_action:
+        menstruation_last_date = mother_action.propsByCode['menstruation_last_date'].value
+        if menstruation_last_date:
+            return (date.date() - menstruation_last_date).days/7 + 1  # расчет срока беременности по дате последней менструации
+    return None
 
 
 @cache.memoize()
@@ -258,8 +289,9 @@ def represent_ticket(ticket):
         'event_id': ticket.client_ticket.event_id if ticket.client_ticket else None,
         'note': ticket.client_ticket.note if ticket.client else None,
         'checkup_n': checkup_n,
-        'risk_rate': get_risk_rate(get_all_diagnoses(event.actions))
-    }
+        'risk_rate': get_risk_rate(get_all_diagnoses(event.actions)),
+        'pregnancy_week': get_pregnancy_week(event)
+    } if event else None
 
 
 def represent_intolerance(obj):
@@ -273,3 +305,76 @@ def represent_intolerance(obj):
         'power': AllergyPower(obj.power),
         'note': obj.notes,
     }
+
+
+def make_epicrisis_info(epicrisis):
+    # todo: переделать
+    try:
+        pregnancy_final = epicrisis['pregnancy_final']['name'] if epicrisis['pregnancy_final'] else ''
+        info = u'<b>Беременность закончилась</b> ' + pregnancy_final
+        if epicrisis['delivery_waters'] or epicrisis['weakness'] or epicrisis['perineal_tear'] or epicrisis['eclampsia'] or \
+                epicrisis['funiculus'] or epicrisis['afterbirth'] or epicrisis['other_complications']:
+            info += u' с осложнениями'
+
+        week = u'недель' if 5 <= epicrisis['pregnancy_duration'] <= 20 else (u'недел' + week_postfix[epicrisis['pregnancy_duration'] % 10])
+        info += u' при сроке {0} {1}'.format(epicrisis['pregnancy_duration'], week)
+
+        if pregnancy_final == u'родами':
+            info += ' {0} {1}.'.format(epicrisis['ch_b_date'].strftime("%d.%m.%y"), epicrisis['ch_b_time'])
+        elif pregnancy_final == u'абортом':
+            info += ' {0} {1}.'.format(epicrisis['abort_date'].strftime("%d.%m.%y"), epicrisis['abort_time'])
+        elif pregnancy_final in (u'смертью матери во время родов', u'смертью матери после родов', u'смертью матери во время/после аборта'):
+            info += ' {0} {1}.'.format(epicrisis['death_date'].strftime("%d.%m.%y"), epicrisis['death_time'])
+
+        info += u" <b>Место родоразрешения</b>: {0}.<br>".format(epicrisis['LPU'].shortName)
+
+        if epicrisis['manipulations'] and epicrisis['operations']:
+            info += u'Были осуществлены пособия и манипуляции и проведены операции.'
+        elif epicrisis['manipulations']:
+            info += u'Были осуществлены пособия и манипуляции.'
+        elif epicrisis['operations']:
+            info += u'Были проведены операции.'
+
+        if (epicrisis['newborn_inspections'] and
+                not (pregnancy_final == u'абортом' or
+                     pregnancy_final == u'смертью матери во время/после аборта')):
+            info += u'<b>Дети</b> ({}): '.format(len(epicrisis['newborn_inspections']))
+
+            for child in epicrisis['newborn_inspections']:
+                if child['sexCode'] == 1:
+                    info += u' мальчик '
+                    info += u'живой' if child['alive'] else u'мертвый'
+                else:
+                    info += u' девочка '
+                    info += u'живая' if child['alive'] else u'мертвая'
+    except:
+        info = ''
+    return info
+
+
+def represent_epicrisis(event, action=None):
+    if action is None:
+        action = get_action(event, risar_epicrisis)
+    if action is None:
+        return
+    epicrisis = dict(
+        (code, prop.value)
+        for (code, prop) in action.propsByCode.iteritems()
+    )
+    epicrisis['newborn_inspections'] = represent_newborn_inspections(event)
+    epicrisis['info'] = make_epicrisis_info(epicrisis)
+    return epicrisis
+
+
+def represent_newborn_inspections(event):
+    actions = Action.query.join(ActionType).filter(Action.event == event, Action.deleted == 0,
+                                                   ActionType.flatCode == risar_newborn_inspection).all()
+
+    newborn_inspections = [dict((code, prop.value) for (code, prop) in inspect .propsByCode.iteritems())
+                           for inspect in actions]
+    for inspection in newborn_inspections:
+        if inspection['sexCode'] == 1:
+            inspection['sex'] = u'мужской'
+        elif inspection['sexCode'] == 2:
+            inspection['sex'] = u'женский'
+    return newborn_inspections

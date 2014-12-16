@@ -61,17 +61,17 @@
                 </tr>
                 <tr>
                     <td>основной</td>
-                    <td ng-repeat="checkup in chart.checkups">[[ checkup.diag | format:'{code} - {name}' ]]</td>
+                    <td ng-repeat="checkup in chart.checkups">[[ checkup.diag | format:'{code}' ]]</td>
                     <td></td>
                 </tr>
                 <tr>
                     <td>сопутствующие</td>
-                    <td ng-repeat="checkup in chart.checkups"><p ng-repeat="diag in checkup.diag2">[[ diag | format:'{code} - {name}' ]]</p></td>
+                    <td ng-repeat="checkup in chart.checkups"><p ng-repeat="diag in checkup.diag2">[[ diag | format:'{code}' ]]</p></td>
                     <td></td>
                 </tr>
                 <tr>
                     <td>осложнения</td>
-                    <td ng-repeat="checkup in chart.checkups"><p ng-repeat="diag in checkup.diag3">[[ diag | format:'{code} - {name}' ]]</p></td>
+                    <td ng-repeat="checkup in chart.checkups"><p ng-repeat="diag in checkup.diag3">[[ diag | format:'{code}' ]]</p></td>
                     <td></td>
                 </tr>
                 <tr>
@@ -149,17 +149,17 @@
                 </tr>
                 <tr>
                     <td>Положение</td>
-                    <td ng-repeat="checkup in chart.checkups"><i class="glyphicon glyphicon-arrow-up text-success"></i> [[ checkup.fetus_position ]]</td>
+                    <td ng-repeat="checkup in chart.checkups"><i class="glyphicon glyphicon-arrow-up text-success"></i> [[ checkup.fetus_position.name ]]</td>
                     <td></td>
                 </tr>
                 <tr>
                     <td>Предлежание</td>
-                    <td ng-repeat="checkup in chart.checkups"><i class="glyphicon glyphicon-arrow-up text-success"></i> [[ checkup.presenting_part ]]</td>
+                    <td ng-repeat="checkup in chart.checkups"><i class="glyphicon glyphicon-arrow-up text-success"></i> [[ checkup.presenting_part.name ]]</td>
                     <td></td>
                 </tr>
                 <tr>
                     <td>Характер СС</td>
-                    <td ng-repeat="checkup in chart.checkups"><i class="glyphicon glyphicon-arrow-up text-success"></i> [[ checkup.fetus_heartbeat ]]</td>
+                    <td ng-repeat="checkup in chart.checkups"><i class="glyphicon glyphicon-arrow-up text-success"></i> [[ checkup.fetus_heartbeat.name ]]</td>
                     <td></td>
                 </tr>
                 <tr>
