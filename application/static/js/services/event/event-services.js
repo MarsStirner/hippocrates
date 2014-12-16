@@ -44,7 +44,7 @@ angular.module('WebMis20.services').
         function check_event_unclosed_actions(event) {
             var deferred = $q.defer();
             var unclosed_actions = event.info.actions.filter(function (action) {
-                return action.status != 2;
+                return action.status.code !== 'finished';
             }).map(function (action) {
                 return action.name;
             });
