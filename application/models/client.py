@@ -129,7 +129,6 @@ class Client(db.Model):
     events = db.relationship(
         u'Event',
         lazy='dynamic',
-        order_by='desc(Event.createDatetime)',
         primaryjoin='and_(Event.deleted == 0, Event.client_id == Client.id)'
     )
     appointments = db.relationship(

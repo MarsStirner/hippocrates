@@ -12,7 +12,7 @@ from application.context_processors import *
 from application.lib.data import get_kladr_city, get_kladr_street
 from application.lib.utils import public_endpoint, jsonify, roles_require, rights_require, request_wants_json
 from application.models import *
-from lib.user import UserAuth, AnonymousUser
+from lib.user import UserAuth, AnonymousUser, UserProfileManager
 from forms import LoginForm, RoleForm
 
 
@@ -35,6 +35,9 @@ def check_valid_login():
 
 @app.route('/')
 def index():
+    default_url = UserProfileManager.get_default_url()
+    if default_url != '/':
+        return redirect(default_url)
     return render_template('index.html')
 
 
@@ -54,7 +57,7 @@ def login():
                 session_save_user(user)
                 # Tell Flask-Principal the identity changed
                 identity_changed.send(current_app._get_current_object(), identity=Identity(user.id))
-                return redirect(request.args.get('next') or request.referrer or url_for('index'))
+                return redirect(request.args.get('next') or request.referrer or UserProfileManager.get_default_url())
             else:
                 errors.append(u'Аккаунт неактивен')
         else:

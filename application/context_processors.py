@@ -2,7 +2,7 @@
 from pytz import timezone
 from application.app import app
 from datetime import datetime
-from application.lib.user import UserUtils
+from application.lib.user import UserUtils, UserProfileManager
 from version import version as _version, last_change_date
 
 from config import TIME_ZONE
@@ -31,24 +31,42 @@ def print_subsystem():
 @app.context_processor
 def general_menu():
     menu_items = list()
-    menu_items.append(dict(link='patients.index',
-                           title=u'Обслуживание пациентов',
-                           roles=('admin', 'rRegistartor', 'clinicRegistrator')))
-    menu_items.append(dict(link='schedule.person_schedule_monthview',
-                           title=u'Формирование графика врача',
-                           roles=('admin', 'rRegistartor', 'clinicRegistrator')))
-    menu_items.append(dict(link='schedule.index',
-                           title=u'График работы',
-                           roles=('admin', 'rRegistartor', 'clinicRegistrator')))
-    menu_items.append(dict(link='schedule.doctor_schedule_day',
-                           title=u'Приём пациентов',
-                           roles=('admin', 'clinicDoctor', 'diagDoctor')))
-    menu_items.append(dict(link='patients.search',
-                           title=u'Поиск пациентов',
-                           roles=('admin', 'clinicDoctor', 'diagDoctor')))
-    menu_items.append(dict(link='event.get_events',
-                           title=u'Обращения',
-                           roles=('admin', 'rRegistartor', 'clinicRegistrator', 'clinicDoctor', 'diagDoctor')))
+    menu_items.append(dict(
+        link='index',
+        title=u'Главная страница',
+        homepage=True,
+        visible=(UserProfileManager.has_ui_doctor() or UserProfileManager.has_ui_registrator())
+    ))
+    menu_items.append(dict(
+        link='patients.index',
+        title=u'Обслуживание пациентов',
+        visible=(UserProfileManager.has_ui_registrator() or UserProfileManager.has_ui_registrator_cut())
+    ))
+    menu_items.append(dict(
+        link='schedule.person_schedule_monthview',
+        title=u'Формирование графика врача',
+        visible=(UserProfileManager.has_ui_registrator())
+    ))
+    menu_items.append(dict(
+        link='schedule.index',
+        title=u'График работы',
+        visible=(UserProfileManager.has_ui_registrator())
+    ))
+    menu_items.append(dict(
+        link='schedule.doctor_schedule_day',
+        title=u'Приём пациентов',
+        visible=(UserProfileManager.has_ui_doctor())
+    ))
+    menu_items.append(dict(
+        link='patients.search',
+        title=u'Поиск пациентов',
+        visible=(UserProfileManager.has_ui_doctor())
+    ))
+    menu_items.append(dict(
+        link='event.get_events',
+        title=u'Обращения',
+        visible=(UserProfileManager.has_ui_registrator() or UserProfileManager.has_ui_doctor())
+    ))
     return dict(main_menu=menu_items)
 
 
