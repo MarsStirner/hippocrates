@@ -48,7 +48,7 @@ var EventMainInfoCtrl = function ($scope, RefBookService, EventType, $filter, Me
         return !$scope.create_mode;
     };
     $scope.cmb_ache_result_available = function () {
-        return !$scope.create_mode && current_user.current_role_maybe('admin', 'doctor', 'clinicDoctor');
+        return !$scope.create_mode && !$scope.formstate.is_diagnostic();
     };
 
     $scope.filter_rb_request_type = function() {
