@@ -4,7 +4,6 @@ import datetime
 import itertools
 
 from collections import defaultdict
-from application.lib.const import VOL_POLICY_CODES
 
 from sqlalchemy.orm import aliased
 from sqlalchemy.sql.functions import current_date
@@ -25,7 +24,8 @@ from application.models.actions import Action, ActionProperty, ActionType
 from application.models.client import Client
 from application.models.exists import (rbRequestType, rbService, ContractTariff, Contract, Person, rbSpeciality,
     Organisation, rbContactType)
-from application.lib.user import UserUtils
+from application.lib.user import UserUtils, UserProfileManager
+from application.lib.const import VOL_POLICY_CODES, STATIONARY_EVENT_CODES
 
 __author__ = 'mmalkov'
 
@@ -540,10 +540,14 @@ class ClientVisualizer(object):
 
     def make_client_info_for_servicing(self, client):
         """Данные пациента, используемые в интерфейсах работы регистратора и врача."""
+        if UserProfileManager.has_ui_registrator_cut():
+            event_filter = 'stationary'
+        else:
+            event_filter = None
         return {
             'client_data': self.make_client_info_for_view_frame(client),
             'appointments': self.make_appointments(client.id),
-            'events': self.make_events(client)
+            'events': self.make_events(client, event_filter)
         }
 
     def make_appointments(self, client_id, every=False):
@@ -652,13 +656,12 @@ class ClientVisualizer(object):
             for row in load_all
         ]
 
-    def make_events(self, client):
-        return map(
-            self.make_event,
-            (client.events.join(EventType).join(rbRequestType)
-             # .filter(db.or_(rbRequestType.code == u'policlinic', rbRequestType.code == u'4'))
-             .order_by(Event.setDate.desc()))
-        )
+    def make_events(self, client, event_filter):
+        events = client.events
+        if event_filter == 'stationary':
+            events = events.join(EventType, rbRequestType).filter(rbRequestType.code.in_(STATIONARY_EVENT_CODES))
+        events = events.order_by(Event.setDate.desc())
+        return map(self.make_event, events)
 
     def make_person(self, person):
         if person is None:

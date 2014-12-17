@@ -62,6 +62,7 @@
         url_api_search_persons = '{{ url_for('schedule.api_search_persons') }}',
         url_api_procedure_offices_get = '{{ url_for('schedule.api_procedure_offices_get') }}',
         url_schedule_index = '{{ url_for('schedule.index') }}',
+        url_wm10_create_event = '{{ "{0}patients/{{0}}/appeals/new/".format(config['WEBMIS10_URL']) }}',
         current_user = {{ current_user.export_js() | tojson | safe }},
         current_user_id = {{ current_user.id|default('undefined') }};
 </script>
