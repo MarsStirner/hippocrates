@@ -226,7 +226,9 @@ var EventMainInfoCtrl = function ($scope, RefBookService, EventType, $filter, Me
         $scope.event.info.set_date = new Date($scope.event.info.set_date);
         $scope.rbEventType.initialize($scope.event.info.client)
         .then(function () {
-            $scope.event.info.event_type = $scope.rbEventType.get_available_et($scope.event.info.event_type);
+            if ($scope.create_mode) {
+                $scope.event.info.event_type = $scope.rbEventType.get_available_et($scope.event.info.event_type);
+            }
             set_rt_finance_choices();
             $scope.on_event_type_changed();
             $scope.event.info.contract = get_available_contract($scope.event.info.contract);
