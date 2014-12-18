@@ -1,0 +1,56 @@
+{% extends 'anareports/base.html' %}
+
+{% block title %}> {{ module_name }}{% endblock %}
+
+{% block main %}
+    <legend xmlns="http://www.w3.org/1999/html"><h2>Аналитические отчёты</h2></legend>
+    <div ng-controller="IndexCtrl" class="container">
+    <table class="table table-condensed">
+        <thead>
+        <tr>
+            <th>Код</th>
+            <th>Наименование</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="template in ps.templates">
+            <td>
+                [[ template.code ]]
+            </td>
+            <td>
+                <a href="#" ng-click="print_template(template)">[[ template.name ]]</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    </div>
+    {#- Шаблон для модального окна -#}
+    <script type="text/ng-template" id="modal-print.html">
+        <div class="modal-header" xmlns="http://www.w3.org/1999/html">
+            <button type="button" class="close" ng-click="cancel()">&times;</button>
+            <h4 class="modal-title" id="myModalLabel">Печать документов</h4>
+        </div>
+        <div>
+            <form name="printing_meta">
+                <div class="modal-body">
+                    <p ng-bind="template.name"></p>
+                    <div class="row" ng-repeat="var_meta in template.meta">
+                        <div class="col-md-3">
+                            <label ng-bind="var_meta.title"></label>
+                        </div>
+                        <div class="col-md-9" ui-print-variable meta="var_meta" model="model[var_meta.name]">
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-primary" ng-click="print()" ng-disabled="printing_meta.$invalid">Печать</button>
+            <button type="button" class="btn btn-default" ng-click="cancel()">Отмена</button>
+        </div>
+    </script>
+{% endblock %}
+{% block modules_js %}
+    {{ super() }}
+    <script src="{{ url_for('.static', filename='js/index.js', v=version) }}"></script>
+{% endblock %}
