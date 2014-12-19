@@ -3,6 +3,7 @@
  */
 var IndexCtrl = function ($scope, $modal, PrintingService) {
     $scope.aux = aux;
+    $scope.query = "";
     var ps = $scope.ps = new PrintingService('free');
     ps.set_context('free');
 

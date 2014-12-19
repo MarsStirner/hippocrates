@@ -5,6 +5,10 @@
 {% block main %}
     <legend xmlns="http://www.w3.org/1999/html"><h2>Аналитические отчёты</h2></legend>
     <div ng-controller="IndexCtrl" class="container">
+    <div class="input-group">
+        <span class="input-group-addon"><i class="fa fa-search"></i></span>
+        <input type="text" class="form-control" placeholder="Поиск" ng-model="query">
+    </div>
     <table class="table table-condensed">
         <thead>
         <tr>
@@ -13,7 +17,7 @@
         </tr>
         </thead>
         <tbody>
-        <tr ng-repeat="template in ps.templates">
+        <tr ng-repeat="template in ps.templates | filter:query">
             <td>
                 [[ template.code ]]
             </td>
