@@ -601,6 +601,7 @@ angular.module('WebMis20.directives')
             OrgStructure: ui_select_template,
             Person:  ui_select_template,
             Service: ui_select_template,
+            MKB: '<ui-mkb ng-model="model"></ui-mkb>',
             SpecialVariable: 'Special Variable'
         };
         return {

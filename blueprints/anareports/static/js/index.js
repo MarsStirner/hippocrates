@@ -32,7 +32,7 @@ var IndexCtrl = function ($scope, $modal, PrintingService) {
                 else if (typeName == 'Boolean')
                     context[name] = Boolean(value);
 
-                else if (['Organisation', 'OrgStructure', 'Person', 'Service'].has(typeName))
+                else if (['Organisation', 'OrgStructure', 'Person', 'Service', 'MKB'].has(typeName))
                     context[name] = value ? value.id : null;
 
                 else if (typeName == 'SpecialVariable') {
