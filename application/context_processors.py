@@ -30,43 +30,40 @@ def print_subsystem():
 
 @app.context_processor
 def general_menu():
-    menu_items = list()
-    menu_items.append(dict(
+    menu_items = [dict(
         link='index',
         title=u'Главная страница',
         homepage=True,
         visible=(UserProfileManager.has_ui_doctor() or UserProfileManager.has_ui_registrator())
-    ))
-    menu_items.append(dict(
+    ), dict(
         link='patients.index',
         title=u'Обслуживание пациентов',
         visible=(UserProfileManager.has_ui_registrator() or UserProfileManager.has_ui_registrator_cut())
-    ))
-    menu_items.append(dict(
+    ), dict(
         link='schedule.person_schedule_monthview',
         title=u'Формирование графика врача',
         visible=(UserProfileManager.has_ui_registrator())
-    ))
-    menu_items.append(dict(
+    ), dict(
         link='schedule.index',
         title=u'График работы',
         visible=(UserProfileManager.has_ui_registrator())
-    ))
-    menu_items.append(dict(
+    ), dict(
         link='schedule.doctor_schedule_day',
         title=u'Приём пациентов',
         visible=(UserProfileManager.has_ui_doctor())
-    ))
-    menu_items.append(dict(
+    ), dict(
         link='patients.search',
         title=u'Поиск пациентов',
         visible=(UserProfileManager.has_ui_doctor())
-    ))
-    menu_items.append(dict(
+    ), dict(
         link='event.get_events',
         title=u'Обращения',
         visible=(UserProfileManager.has_ui_registrator() or UserProfileManager.has_ui_doctor())
-    ))
+    ), dict(
+        link='anareports.index_html',
+        title=u'Аналитические отчёты',
+        visible=True
+    )]
     return dict(main_menu=menu_items)
 
 
