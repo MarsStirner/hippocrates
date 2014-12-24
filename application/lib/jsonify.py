@@ -24,7 +24,8 @@ from application.models.actions import Action, ActionProperty, ActionType
 from application.models.client import Client
 from application.models.exists import (rbRequestType, rbService, ContractTariff, Contract, Person, rbSpeciality,
     Organisation, rbContactType)
-from application.lib.user import UserUtils
+from application.lib.user import UserUtils, UserProfileManager
+from application.lib.const import VOL_POLICY_CODES, STATIONARY_EVENT_CODES
 
 
 __author__ = 'mmalkov'
@@ -488,7 +489,7 @@ class ClientVisualizer(object):
     def make_client_info_for_view_frame(self, client):
         """Данные пациента для фрейма информации о пациенте."""
         reg_addr, live_addr = self.make_addresses_info(client)
-        return {
+        info = {
             'info': client,
             'id_document': client.id_document,
             'reg_address': reg_addr,
@@ -497,10 +498,16 @@ class ClientVisualizer(object):
             'voluntary_policies': client.voluntaryPolicies,
             'contacts': self.make_contacts_info(client)
         }
+        return info
 
-    def make_client_info_for_event(self, client):
+    def make_client_info_for_event(self, client, event):
         """Данные пациента, используемые в интерфейсе обращения."""
         info = self.make_client_info_for_view_frame(client)
+        if event.id:
+            info['voluntary_policies'] = [
+                vpol for vpol in client.policies_all
+                if vpol.policyType.code in VOL_POLICY_CODES
+            ]
         info['relations'] = [self.make_relation_info(client.id, relation) for relation in client.client_relations]
         info['work_org_id'] = client.works[0].org_id if client.works else None,  # FIXME: ...
         return info
@@ -534,10 +541,14 @@ class ClientVisualizer(object):
 
     def make_client_info_for_servicing(self, client):
         """Данные пациента, используемые в интерфейсах работы регистратора и врача."""
+        if UserProfileManager.has_ui_registrator_cut():
+            event_filter = 'stationary'
+        else:
+            event_filter = None
         return {
             'client_data': self.make_client_info_for_view_frame(client),
             'appointments': self.make_appointments(client.id),
-            'events': self.make_events(client)
+            'events': self.make_events(client, event_filter)
         }
 
     def make_appointments(self, client_id, every=False):
@@ -646,13 +657,12 @@ class ClientVisualizer(object):
             for row in load_all
         ]
 
-    def make_events(self, client):
-        return map(
-            self.make_event,
-            (client.events.join(EventType).join(rbRequestType)
-             # .filter(db.or_(rbRequestType.code == u'policlinic', rbRequestType.code == u'4'))
-             .order_by(Event.setDate.desc()))
-        )
+    def make_events(self, client, event_filter):
+        events = client.events
+        if event_filter == 'stationary':
+            events = events.join(EventType, rbRequestType).filter(rbRequestType.code.in_(STATIONARY_EVENT_CODES))
+        events = events.order_by(Event.setDate.desc())
+        return map(self.make_event, events)
 
     def make_person(self, person):
         if person is None:
@@ -784,13 +794,14 @@ class EventVisualizer(object):
         cvis = ClientVisualizer()
         return {
             'id': event.id,
+            'create_person_id': event.createPerson_id,
             'deleted': event.deleted,
             'external_id': event.externalId,
             'order': EventOrder(event.order),
             'order_': event.order,
             'is_primary': EventPrimary(event.isPrimaryCode),
             'is_primary_': event.isPrimaryCode,
-            'client': cvis.make_client_info_for_event(event.client),
+            'client': cvis.make_client_info_for_event(event.client, event),
             'client_id': event.client.id,
             'set_date': event.setDate,
             'exec_date': event.execDate,
@@ -854,7 +865,7 @@ class EventVisualizer(object):
             'person': pvis.make_person_ws(diagnostic.person) if diagnostic.person else None,
             'notes': diagnostic.notes,
             'action_id': diagnostic.action_id,
-            'action': aviz.make_small_action_info(diagnostic.action),
+            'action': aviz.make_small_action_info(diagnostic.action) if diagnostic.action else None,
             'result': diagnostic.result,
             'ache_result': diagnostic.rbAcheResult,
             'event_id': diagnostic.event_id,
@@ -906,6 +917,9 @@ class EventVisualizer(object):
             'begDate': action.begDate,
             'endDate': action.endDate,
             'person_text': safe_unicode(action.person),
+            'person_id': action.person_id,
+            'set_person_id': action.setPerson_id,
+            'create_person_id': action.createPerson_id,
             'can_read': UserUtils.can_read_action(action),
             'can_edit': UserUtils.can_edit_action(action),
             'can_delete': UserUtils.can_delete_action(action),

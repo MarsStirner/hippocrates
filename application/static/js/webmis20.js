@@ -271,8 +271,9 @@ var WebMis20 = angular.module('WebMis20', [
 .filter('contract_filter', function() {
     return function(items, event_info) {
         var out = [];
-        if (angular.isArray(items) && event_info) {
-            var client_info = event_info.client;
+        if (angular.isArray(items) && event_info && event_info.event_type) {
+            var client_info = event_info.client,
+                event_set_date = event_info.set_date ? moment(event_info.set_date) : undefined;
 
             items.forEach(function(item) {
                 var itemMatches = false;
@@ -303,10 +304,10 @@ var WebMis20 = angular.module('WebMis20', [
                     }
                 }
 
-                if (event_info.set_date){
-                    var item_begDate = new Date(item.begDate);
-                    var item_endDate = new Date(item.endDate);
-                    if (!(item_begDate <= event_info.set_date && item_endDate >= event_info.set_date)){
+                if (event_set_date) {
+                    var item_begDate = moment(item.begDate);
+                    var item_endDate = moment(item.endDate);
+                    if (!(item_begDate <= event_set_date && item_endDate >= event_set_date)){
                         itemMatches = false;
                     }
                 }
@@ -314,9 +315,6 @@ var WebMis20 = angular.module('WebMis20', [
                     out.push(item);
                 }
             });
-            if (out.length && out.indexOf(event_info.contract) == -1){
-                event_info.contract = out[0];
-            }
         }
         return out;
     }
@@ -640,17 +638,28 @@ var WebMis20 = angular.module('WebMis20', [
     };
     return Action;
 }])
-.factory('EventType', ['RefBook', function (RefBook) {
+.factory('EventType', ['RefBook', 'AgeSex', function (RefBook, AgeSex) {
     var EventType = function () {
-        RefBook.call(this, 'EventType')
+        RefBook.call(this, 'EventType');
     };
 
     EventType.prototype = new RefBook('EventType');
+    EventType.prototype.initialize = function (client) {
+        var self = this;
+        return self.loading.then(function () {
+            self.objects = self.objects.filter(function (item) {
+                return AgeSex.sex_acceptable(client.info, item.sex) &&
+                    AgeSex.age_acceptable(client.info, item.age_tuple);
+            });
+        });
+    };
     EventType.prototype.get_finances_by_rt = function(rt_id) {
         return this.get_filtered_by_rt(rt_id).map(function(el) {
             return el.finance;
         }).filter(function(el) {
             return el !== undefined && el != null;
+        }).sort(function (a, b) {
+            return a.id - b.id;
         });
     };
     EventType.prototype.get_filtered_by_rt = function(rt_id) {
@@ -664,9 +673,13 @@ var WebMis20 = angular.module('WebMis20', [
                 el.request_type.id === rt_id && el.finance.id === fin_id;
         });
     };
+    EventType.prototype.get_available_et = function (event_type) {
+        return this.objects.some(function (o) {
+            return angular.equals(o, event_type);
+        }) ? event_type : undefined;
+    };
     return EventType;
-    }
-])
+}])
 .factory('SelectAll', function () {
     var SelectAll = function (source) {
         this._source = source;

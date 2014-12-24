@@ -9,11 +9,10 @@ var CreateEventModalCtrl = function ($scope, $modalInstance) {
         $modalInstance.close(true);
     };
 };
-var ClientModalCtrl = function ($scope, $modalInstance, client, PrintingService, $modal, $interval) {
+var ClientModalCtrl = function ($scope, $modalInstance, client, PrintingService, $modal, WMWindowSync) {
     $scope.current_user = current_user;
     $scope.client = client;
     $scope.client_id = client.client_id;
-    $scope.child_window = {};
     $scope.alerts = [];
 
     $scope.ps = new PrintingService('registry');
@@ -45,22 +44,26 @@ var ClientModalCtrl = function ($scope, $modalInstance, client, PrintingService,
 
     $scope.new_event = function(client_id, ticket_id) {
         var query = '?client_id=' + client_id;
-        if (ticket_id){
+        if (ticket_id) {
             query += '&ticket_id=' + ticket_id;
         }
-        $scope.child_window = window.open(url_event_new_event_html + query, '_blank');
+        var url = url_event_new_event_html + query;
+        WMWindowSync.openTab(url, $scope.reload_client);
     };
 
     $scope.new_appointment = function(client_id) {
-        $scope.child_window = window.open(url_schedule_appointment_html + '?client_id=' + client_id, '_blank');
+        var url = url_schedule_appointment_html + '?client_id=' + client_id;
+        WMWindowSync.openTab(url, $scope.reload_client);
     };
 
     $scope.open_event = function(event_id) {
-        $scope.child_window = window.open(url_for_event_html_event_info + '?event_id=' + event_id, '_blank');
+        var url = url_for_event_html_event_info + '?event_id=' + event_id;
+        WMWindowSync.openTab(url, $scope.reload_client);
     };
 
     $scope.open_client = function (client_id) {
-        $scope.child_window = window.open(url_client_html + '?client_id=' + client_id, '_blank');
+        var url = url_client_html + '?client_id=' + client_id;
+        WMWindowSync.openTab(url, $scope.reload_client);
     };
 
     $scope.modal_create_event = function() {
@@ -75,27 +78,16 @@ var ClientModalCtrl = function ($scope, $modalInstance, client, PrintingService,
         })
     };
 
-    $scope.$on('printing_error', function (event, error) {
-        $scope.alerts.push(error);
-    });
-
-    var interval;
-    $scope.clearInterval = function() {
-        $interval.cancel(interval);
-        interval = undefined;
+    $scope.create_stationary_event = function (client_id) {
+        var url = url_wm10_create_event.format(client_id);
+        WMWindowSync.openTab(url, $scope.reload_client);
+    };
+    $scope.reload_client = function () {
+        $scope.client.reload('for_servicing');
     };
 
-    $scope.$watch('child_window.document', function (n, o) {
-        if (n && n!=o) {
-            $scope.clearInterval();
-            interval = $interval(function () {
-                if ($scope.child_window.closed) {
-                    $scope.client.reload('for_servicing');
-                    $scope.clearInterval();
-                    $scope.child_window = {};
-                }
-            }, 500);
-        }
+    $scope.$on('printing_error', function (event, error) {
+        $scope.alerts.push(error);
     });
 
     $modalInstance.result.then(function () {
@@ -126,8 +118,11 @@ var ClientSearch = function ($scope, WMClient, $modal) {
     });
 
     $scope.modal_client = function() {
+        var template = current_user.current_role === 'admNurse' ?
+            'modal-client-cut.html' :
+            'modal-client.html';
         var modalInstance = $modal.open({
-            templateUrl: 'modal-client.html',
+            templateUrl: template,
             resolve: {
                 client: function () {
                     return $scope.client;
