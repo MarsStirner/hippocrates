@@ -1,6 +1,6 @@
 
 'use strict';
-var EpicrisisCtrl = function ($scope, RisarApi) {
+var EpicrisisCtrl = function ($timeout, $scope, RisarApi) {
     var params = aux.getQueryParams(window.location.search);
     var event_id = $scope.event_id = params.event_id;
     var reload_epicrisis = function () {
@@ -18,6 +18,10 @@ var EpicrisisCtrl = function ($scope, RisarApi) {
     }
     $scope.add_child = function (){
         $scope.chart.epicrisis.newborn_inspections.push({});
+        $timeout(function(){
+            $('#childrenTab a:last').tab('show');
+        }, 0);
+
     }
     reload_epicrisis();
 }

@@ -589,16 +589,14 @@
                         <h2>Шаг 6. Сведения о родившихся детях</h2>
                             <div class="row">
                                 <div class="col-md-2">
-                                    <ul class="nav nav-pills nav-stacked  marginal">
-                                      <li ng-class="{'active': $index==0}" ng-repeat="child in chart.epicrisis.newborn_inspections"><a href="#tab[[$index]]" data-toggle="pill"> Ребенок [[$index+1]]</a></li>
+                                    <ul class="nav nav-pills nav-stacked  marginal" id="childrenTab">
+                                        <li><a ng-click="add_child()"> Добавить</a></li>
+                                        <li ng-class="{'active': $index==0}" ng-repeat="child in chart.epicrisis.newborn_inspections"><a href="#tab[[$index]]" data-toggle="pill"> Ребенок [[$index+1]]</a></li>
                                     </ul>
-                                    <div>
-                                    <button style="width:100%;"  type="button" class="btn btn-primary text-left" ng-click="add_child()"> Добавить</button>
-                                    </div>
                                 </div>
                                 <div class="col-md-10">
                                     <div class="tab-content">
-                                        <div ng-class="{'active': $index==0}" class="tab-pane"id="tab[[$index]]" ng-repeat="child in chart.epicrisis.newborn_inspections">
+                                        <div ng-class="{'active': $index==0}" class="tab-pane" id="tab[[$index]]" ng-repeat="child in chart.epicrisis.newborn_inspections">
                                             <table class="table">
                                                 <thead>
                                                 <tr>
