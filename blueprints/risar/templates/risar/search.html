@@ -38,10 +38,10 @@
                     <tr>
                         <th>Врач</th>
                         <td>
-                            <ui-select ng-model="query.person" theme="select2">
+                            <ui-select ng-model="query.person" theme="select2" ng-change="perform()">
                                 <ui-select-match>[[ $select.selected.name ]]</ui-select-match>
-                                <ui-select-choices repeat="doc in doctors | filter: {name: $select.search} | limitTo:50">
-                                    <div ng-bind-html="doc.name | highlight: $select.search"></div>
+                                <ui-select-choices repeat="doc in doctors | filter: {full_name: $select.search} | limitTo:50">
+                                    <div ng-bind-html="doc.full_name | highlight: $select.search"></div>
                                 </ui-select-choices>
                             </ui-select>
                         </td>
@@ -63,7 +63,7 @@
                     </thead>
                     <tbody>
                     <tr ng-repeat="row in results">
-                        <td>[[ row.name ]]</td>
+                        <td><a ng-href="{{ url_for('.html_chart') }}?event_id=[[ row.event_id ]]">[[ row.name ]]</a></td>
                     </tr>
                     </tbody>
                 </table>

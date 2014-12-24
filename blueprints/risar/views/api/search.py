@@ -2,8 +2,8 @@
 from flask import request
 
 from application.lib.utils import jsonify
-from application.models.event import Event
-from application.models.exists import Organisation, Person
+from application.models.event import Event, EventType
+from application.models.exists import Organisation, Person, rbRequestType
 from blueprints.risar.app import module
 
 __author__ = 'mmalkov'
@@ -12,7 +12,9 @@ __author__ = 'mmalkov'
 @module.route('/api/0/search/', methods=['POST', 'GET'])
 def api_0_event_search():
     data = request.args
-    query = Event.query
+    query = Event.query \
+        .join(EventType, rbRequestType) \
+        .filter(rbRequestType.code == 'pregnancy')
     if 'org_id' in data:
         query = query.filter(Event.org_id == data['org_id'])
     if 'doc_id' in data:
@@ -53,6 +55,7 @@ def api_0_lpu_doctors_list():
         {
             'id': row.id,
             'name': row.nameText,
+            'full_name': u'%s%s' % (row.nameText, u' (%s)' % row.speciality if row.speciality else ''),
             'code': row.code,
             'federal_code': row.federalCode,
             'regional_code': row.regionalCode,
