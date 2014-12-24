@@ -367,14 +367,16 @@ def represent_epicrisis(event, action=None):
 
 
 def represent_newborn_inspections(event):
+    newborn_inspections = []
     actions = Action.query.join(ActionType).filter(Action.event == event, Action.deleted == 0,
                                                    ActionType.flatCode == risar_newborn_inspection).all()
 
-    newborn_inspections = [dict((code, prop.value) for (code, prop) in inspect .propsByCode.iteritems())
-                           for inspect in actions]
-    for inspection in newborn_inspections:
+    for action in actions:
+        inspection = dict((code, prop.value) for (code, prop) in action.propsByCode.iteritems())
+        inspection['id'] = action.id
         if inspection['sexCode'] == 1:
             inspection['sex'] = u'мужской'
         elif inspection['sexCode'] == 2:
             inspection['sex'] = u'женский'
+        newborn_inspections.append(inspection)
     return newborn_inspections
