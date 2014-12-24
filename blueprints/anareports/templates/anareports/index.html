@@ -38,7 +38,7 @@
             <form name="printing_meta">
                 <div class="modal-body">
                     <p ng-bind="template.name"></p>
-                    <div class="row" ng-repeat="var_meta in template.meta">
+                    <div class="row" ng-repeat="var_meta in template.meta | filter:{type:'!SpecialVariable'}">
                         <div class="col-md-3">
                             <label ng-bind="var_meta.title"></label>
                         </div>
