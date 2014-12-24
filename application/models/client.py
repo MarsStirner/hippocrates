@@ -129,7 +129,6 @@ class Client(db.Model):
     events = db.relationship(
         u'Event',
         lazy='dynamic',
-        order_by='desc(Event.createDatetime)',
         primaryjoin='and_(Event.deleted == 0, Event.client_id == Client.id)'
     )
     appointments = db.relationship(
@@ -179,9 +178,14 @@ class Client(db.Model):
         elif years > 1:
             return formatYearsMonths(years, months-12*years)
         elif months > 1:
+            # TODO: отрефакторить магию, здесь неясен смысл divmod(bd.month + months, 12)
+            #  в декабре это вызывало проблемы с определением возраста пациента младше года
             add_year, new_month = divmod(bd.month + months, 12)
-            new_day = min(bd.day, calendar.monthrange(bd.year+add_year, new_month)[1])
-            fmonth_date = datetime.date(bd.year+add_year, new_month, new_day)
+            if new_month:
+                new_day = min(bd.day, calendar.monthrange(bd.year+add_year, new_month)[1])
+                fmonth_date = datetime.date(bd.year+add_year, new_month, new_day)
+            else:
+                fmonth_date = bd
             return formatMonthsWeeks(months, (date-fmonth_date).days/7)
         else:
             return formatDays(days)
@@ -1021,6 +1025,13 @@ class ClientPolicy(db.Model):
         self.insurer_id = int(insurer['id']) if insurer['id'] else None
         self.name = insurer['full_name'] if not insurer['id'] else None
         self.client = client
+
+    def is_valid(self, moment=None):
+        if moment is None:
+            moment = datetime.date.today()
+        from application.lib.utils import safe_date
+        moment = safe_date(moment)
+        return bool(self.begDate and self.begDate <= moment and (not self.endDate or moment <= self.endDate))
 
     def __unicode__(self):
         return (' '.join([self.policyType.name,

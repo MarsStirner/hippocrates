@@ -382,6 +382,14 @@ def format_date(d):
         return d
 
 
+def parse_json(json_string):
+    try:
+        result = json.loads(json_string)
+    except ValueError:
+        result = None
+    return result
+
+
 def get_utc_datetime_with_tz(dt=None):
     """Получить датувремя в ютс с таймзоной.
     С последующим .isoformat() результат будет в таком же формате,

@@ -918,6 +918,7 @@ class rbRequestType(db.Model):
             'id': self.id,
             'code': self.code,
             'name': self.name,
+            'relevant': bool(self.relevant)
         }
 
     def __int__(self):
@@ -944,6 +945,7 @@ class rbResult(db.Model):
             'name': self.name,
             'continued': bool(self.continued),
             'regional_code': self.regionalCode,
+            'event_purpose': self.eventPurpose
         }
 
     def __int__(self):

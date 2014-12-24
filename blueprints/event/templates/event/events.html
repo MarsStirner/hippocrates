@@ -12,15 +12,29 @@
                         <label for="filter-id">Идентификатор обращения</label>
                         <input class="form-control" id="filter-id" type="text" ng-model="flt.external_id" placeholder="Идентификатор">
 
-                        <label for="filter-beg-date">Начато</label>
-                        <wm-date id="filter-beg-date" ng-model="flt.beg_date"></wm-date>
+                        <label for="filter-beg-date-from">Начато</label>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <wm-date id="filter-beg-date-from" ng-model="flt.beg_date_from"></wm-date>
+                            </div>
+                            <div class="col-md-6">
+                                <wm-date id="filter-beg-date-to" ng-model="flt.beg_date_to"></wm-date>
+                            </div>
+                        </div>
 
                         <label class="checkbox">
                             <input type="checkbox" ng-model="flt.unfinished" ng-change="on_unfinished_changed()">Только незавершённые
                         </label>
 
                         <label for="filter-end-date">Завершено</label>
-                        <wm-date id="filter-end-date" ng-model="flt.end_date" ng-disabled="flt.unfinished"></wm-date>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <wm-date id="filter-end-date-from" ng-model="flt.end_date_from" ng-disabled="flt.unfinished"></wm-date>
+                            </div>
+                            <div class="col-md-6">
+                                <wm-date id="filter-end-date-to" ng-model="flt.end_date_to" ng-disabled="flt.unfinished"></wm-date>
+                            </div>
+                        </div>
 
                         <label for="filter-client">Пациент</label>
                         <ui-select id="filter-client" ng-model="flt.client" theme="select2">
@@ -49,11 +63,12 @@
                         <wm-person-select id="filter-exec-person" ng-model="flt.exec_person" placeholder="Лечащий врач"></wm-person-select>
 
                         <label for="filter-result">Результат</label>
-                        <rb-select id="filter-result" ng-model="flt.result" placeholder="Результат" ref-book="rbResult"></rb-select>
+                        <rb-select id="filter-result" ng-model="flt.result" placeholder="Результат" ref-book="rbResult"
+                            custom-name="rbResultFormatter" order-by="rbResultFormatter"></rb-select>
                     </div>
                     <div class="panel-footer panel-default">
                         <div class="btn-group">
-                            <button class="btn btn-default" ng-click="get_data(1)">Получить данные</button>
+                            <button class="btn btn-default" ng-click="get_data(1, true)">Получить данные</button>
                             <button class="btn btn-default dropdown-toggle" data-toggle="dropdown">
                                 <span class="caret"></span>
                                 <span class="sr-only">Toggle Dropdown</span>
@@ -85,7 +100,7 @@
                     <th wm-sortable-column="external_id" on-change-order="sort_by_column(params)">№ обращения</th>
                     <th wm-sortable-column="type_name" on-change-order="sort_by_column(params)">Тип</th>
                     <th wm-sortable-column="beg_date" on-change-order="sort_by_column(params)">Начато</th>
-                    <th wm-sortable-column="end_date" on-change-order="sort_by_column(params)">Закончено</th>
+                    <th wm-sortable-column="end_date" on-change-order="sort_by_column(params)">Завершено</th>
                     <th wm-sortable-column="client_full_name" on-change-order="sort_by_column(params)">Пациент</th>
                     <th wm-sortable-column="person_short_name" on-change-order="sort_by_column(params)">Врач</th>
                     <th wm-sortable-column="result_text" on-change-order="sort_by_column(params)">Результат</th>
@@ -101,6 +116,11 @@
                     <td>[[ event.person_short_name ]]</td>
                     <td>[[ event.result_text ]]</td>
                 </tr>
+                </tbody>
+                <tbody>
+                    <tr>
+                        <td colspan="7" class="text-right">Всего записей: [[total]]</td>
+                    </tr>
                 </tbody>
             </table>
             <div class="center-block">

@@ -1,0 +1,9 @@
+@media print {
+    h1, div#header, div#footer, div.navbar, form, button { display: none !important; }
+    .visible-print  { display: inherit !important; }
+    .hidden-print   { display: none !important; }
+    a:after {content:"" !important;}
+    .row-fluid .offset8:first-child {margin-left: 60%;}
+    .row-fluid .span4 {width: 40%;}
+    #wrap > #container {padding-top: 0px;}
+}

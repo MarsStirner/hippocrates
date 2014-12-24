@@ -142,9 +142,10 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
         return deferred.promise;
     }
 }])
-.service('ActionTypeTreeModal', ['$modal', '$http', 'ActionTypeTreeService', function ($modal, $http, ActionTypeTreeService) {
+.service('ActionTypeTreeModal', ['$modal', '$http', 'ActionTypeTreeService', 'WMWindowSync',
+        function ($modal, $http, ActionTypeTreeService, WMWindowSync) {
     return {
-        open: function (at_group, event_id, client_info) {
+        open: function (at_group, event_id, client_info, onCreateCallback) {
             var self_service = this;
             var at_class = undefined, tissue = undefined, templateUrl;
             switch (at_group) {
@@ -217,8 +218,9 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
                     })
                 };
                 $scope.create_action = function (node_id) {
-                    $scope.action_window = window.open(url_for_schedule_html_action + '?action_type_id=' + node_id + '&event_id=' + $scope.event_id);
-                    $scope.$close($scope.action_window);
+                    var url = url_for_schedule_html_action + '?action_type_id=' + node_id + '&event_id=' + $scope.event_id;
+                    WMWindowSync.openTab(url, onCreateCallback);
+                    $scope.$close();
                 };
                 $scope.create_actions = function () {
                     $http.post(
@@ -234,7 +236,8 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
                             })
                         }
                     ).success(function (data) {
-                        $scope.$close('created')
+                        $scope.$close('created');
+                        (onCreateCallback || angular.noop)();
                     }).error(function (data) {
                         var msg = 'Невозможно создать направление на лаб. исследование: {0}.'.format(data.meta.name);
                         alert(msg);
