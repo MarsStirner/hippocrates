@@ -8,7 +8,6 @@ from ...lib.represent import get_action, represent_epicrisis
 from ...risar_config import risar_epicrisis
 
 
-
 @module.route('/api/0/chart/<int:event_id>/epicrisis', methods=['GET', 'POST'])
 def api_0_chart_epicrisis(event_id):
     event = Event.query.get(event_id)
@@ -21,7 +20,7 @@ def api_0_chart_epicrisis(event_id):
     else:
         action = get_action(event, risar_epicrisis, True)
         for code, value in request.get_json().iteritems():
-            if code not in ('id', ) and code in action.propsByCode:
+            if code not in ('id', 'newborn_inspections', ) and code in action.propsByCode:
                 action.propsByCode[code].value = value
         db.session.commit()
     return jsonify(represent_epicrisis(event, action))

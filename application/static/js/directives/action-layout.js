@@ -23,8 +23,9 @@ angular.module('WebMis20.ActionLayout', ['WebMis20.validators', 'WebMis20.direct
                         if (tag.children && tag.children.length) {console.log('"ap" tags don\'t support children');}
                         var property = scope.action.get_property(tag.id);
                         if (property === undefined) return '{' + tag.id + '}';
-                        var property_code = 'action.get_property(' + tag.id + ')';
-                        var property_is_assignable = 'action.is_assignable(' + tag.id + ')';
+                        var property_code = 'action.get_property(' + tag.id + ')',
+                            property_value_domain_obj = property_code + '.type.domain_obj',
+                            property_is_assignable = 'action.is_assignable(' + tag.id + ')';
 
                         if (scope.action.ro) {
                             switch (property.type.type_name) {
@@ -134,17 +135,18 @@ angular.module('WebMis20.ActionLayout', ['WebMis20.validators', 'WebMis20.direct
                                 case 'ReferenceRb':
                                     var domain = property.type.domain.split(';'),
                                         rbTable = domain[0],
-                                        rb_codes = domain[1].split(',').map(function (code) {
+                                        rb_codes = domain[1] ? (domain[1].split(',').map(function (code) {
                                             return "'{0}'".format(code.trim());
                                         }).filter(function (code) {
                                             return code !== "''";
-                                        }),
+                                        })) : [],
                                         extra_filter = rb_codes.length ? 'attribute:\'code\':[{0}]'.format(rb_codes.join(',')) : '';
                                     inner_template = '<rb-select ref-book="{1}" ng-model="{0}.value" extra-filter="{2}"></rb-select>'.format('{0}', rbTable, extra_filter);
                                     break;
                                 case 'Diagnosis':
-                                    inner_template = '<wm-diagnosis model="{0}.value" action="action" can-add-new="true" ' +
-                                        'can-delete="true" can-edit="true" list-mode="{0}"></wm-diagnosis>'.format(property.type.vector);
+                                    inner_template = ('<wm-diagnosis model="{0}.value" action="action" params="{1}" ' +
+                                        'can-add-new="true" can-delete="true" can-edit="true" list-mode="{2}">' +
+                                        '</wm-diagnosis>').format('{0}', property_value_domain_obj, property.type.vector);
                                     break;
                                 default:
                                     inner_template = '<span ng-bind="{0}.value"></span>';
@@ -166,14 +168,15 @@ angular.module('WebMis20.ActionLayout', ['WebMis20.validators', 'WebMis20.direct
                             if (context.tag.tagName === 'table') {
                                 template = '<tr>\
                                     <td><label>{0}</label></td>\
-                                    <td class="text-center"><input type="checkbox" ng-model="{1}.is_assigned" ng-if="{2}"></td>\
-                                    <td>{3}</td>\
-                                    <td class="text-center">{4}</td>\
+                                    <td class="text-center"><input type="checkbox" ng-model="{1}.is_assigned" ng-if="{2}" ng-disabled={3}></td>\
+                                    <td>{4}</td>\
                                     <td class="text-center">{5}</td>\
+                                    <td class="text-center">{6}</td>\
                                 </tr>'.format(
                                     property_name,
                                     property_code,
                                     property_is_assignable,
+                                    scope.action.ro,
                                     inner_template.format(property_code),
                                     property.type.unit ? property.type.unit.code : '',
                                     property.type.norm ? property.type.norm : ''

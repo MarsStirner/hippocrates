@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import hashlib
+from flask import url_for
 from application.lib.utils import safe_traverse_attrs
 
 from application.systemwide import db
@@ -199,6 +200,10 @@ class UserUtils(object):
                 out_msg['message'] = base_msg % unicode(event_type)
                 return False
             client = event.client
+            if not (client.policy and client.policy.is_valid(event.setDate)):
+                out_msg['message'] = u'Нельзя создавать обращения %s для пациентов без ' \
+                                     u'действующего полиса ОМС' % unicode(event_type)
+                return False
             if client.is_adult:
                 out_msg['message'] = u'Нельзя создавать обращения %s для пациентов старше 18 лет' % unicode(event_type)
                 return False
@@ -241,9 +246,7 @@ class UserUtils(object):
         if current_user.has_right('adm', 'evtDelAll'):
             return True
         elif current_user.has_right('evtDelOwn') and not event.is_closed:
-            if event.execPerson_id == current_user.id:
-                return True
-            elif event.createPerson_id == current_user.id:
+            if current_user.id in (event.execPerson_id, event.createPerson_id):
                 if event.payments:
                     out_msg['message'] = u'В обращении есть платежи по услугам'
                     return False
@@ -355,3 +358,50 @@ class UserUtils(object):
             current_user.has_right('adm') or (
                 current_user.has_right(readRight) and
                 current_user.id in (action.createPerson_id, action.person_id)))
+
+
+class UserProfileManager(object):
+    user = None
+
+    admin = 'admin'  # Администратор
+    reg_clinic = 'clinicRegistrator'  # Регистратор поликлиники
+    doctor_clinic = 'clinicDoctor'  # Врач поликлиники
+    doctor_diag = 'diagDoctor'  # Врач диагностики
+    nurse_admission = 'admNurse'  # Медсестра приемного отделения
+
+    ui_groups = {
+        'doctor': [admin, doctor_clinic, doctor_diag],
+        'registrator': [admin, reg_clinic],
+        'registrator_cut': [admin, nurse_admission]
+    }
+
+    @classmethod
+    def _get_user(cls):
+        return cls.user or current_user
+
+    @classmethod
+    def set_user(cls, user):
+        cls.user = user
+
+    @classmethod
+    def _get_user_role(cls):
+        user = cls.user or current_user
+        return user.current_role if not user.is_anonymous() else None
+
+    @classmethod
+    def has_ui_registrator(cls):
+        return cls._get_user_role() in cls.ui_groups['registrator']
+
+    @classmethod
+    def has_ui_registrator_cut(cls):
+        return cls._get_user_role() in cls.ui_groups['registrator_cut']
+
+    @classmethod
+    def has_ui_doctor(cls):
+        return cls._get_user_role() in cls.ui_groups['doctor']
+
+    @classmethod
+    def get_default_url(cls):
+        if cls._get_user_role() == cls.nurse_admission:
+            return url_for('patients.index')
+        return url_for('index')

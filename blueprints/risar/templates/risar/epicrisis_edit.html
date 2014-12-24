@@ -399,13 +399,13 @@
                                 <tr>
                                     <th class="text-right">Вскрытие околоплодного пузыря</th>
                                     <td><div>
-                                    <div class="radio">
+                                    <div class="radio-inline">
                                         <label>
                                             <input type="radio" ng-click="chart.epicrisis.caul = true" ng-checked="chart.epicrisis.caul">
                                             Да
                                         </label>
                                     </div>
-                                    <div class="radio">
+                                    <div class="radio-inline">
                                         <label>
                                             <input type="radio" ng-click="chart.epicrisis.caul = false" ng-checked="!chart.epicrisis.caul">
                                             Нет
@@ -416,13 +416,13 @@
                                 <tr>
                                     <th class="text-right">Ручное обследование матки</th>
                                     <td><div>
-                                    <div class="radio">
+                                    <div class="radio-inline">
                                         <label>
                                             <input type="radio" ng-click="chart.epicrisis.calfbed = true" ng-checked="chart.epicrisis.calfbed">
                                             Да
                                         </label>
                                     </div>
-                                    <div class="radio">
+                                    <div class="radio-inline">
                                         <label>
                                             <input type="radio" ng-click="chart.epicrisis.calfbed = false" ng-checked="!chart.epicrisis.calfbed">
                                             Нет
@@ -443,13 +443,13 @@
                                 <tr>
                                     <th class="text-right">Ручное выделение последа</th>
                                     <td><div>
-                                    <div class="radio">
+                                    <div class="radio-inline">
                                         <label>
                                             <input type="radio" ng-click="chart.epicrisis.secundines = true" ng-checked="chart.epicrisis.secundines">
                                             Да
                                         </label>
                                     </div>
-                                    <div class="radio">
+                                    <div class="radio-inline">
                                         <label>
                                             <input type="radio" ng-click="chart.epicrisis.secundines = false" ng-checked="!chart.epicrisis.secundines">
                                             Нет
@@ -501,13 +501,13 @@
                                 <tr>
                                     <th class="text-right">Вакуум-экстракция</th>
                                     <td><div>
-                                    <div class="radio">
+                                    <div class="radio-inline">
                                         <label>
                                             <input type="radio" ng-click="chart.epicrisis.vacuum_extraction = true" ng-checked="chart.epicrisis.vacuum_extraction">
                                             Да
                                         </label>
                                     </div>
-                                    <div class="radio">
+                                    <div class="radio-inline">
                                         <label>
                                             <input type="radio" ng-click="chart.epicrisis.vacuum_extraction = false" ng-checked="!chart.epicrisis.vacuum_extraction">
                                             Нет
@@ -568,13 +568,13 @@
                                 <tr>
                                     <th class="text-right">Плодоразрушающие операции</th>
                                     <td><div>
-                                    <div class="radio">
+                                    <div class="radio-inline">
                                         <label>
                                             <input type="radio" ng-click="chart.epicrisis.embryotomy = true" ng-checked="chart.epicrisis.embryotomy">
                                             Да
                                         </label>
                                     </div>
-                                    <div class="radio">
+                                    <div class="radio-inline">
                                         <label>
                                             <input type="radio" ng-click="chart.epicrisis.embryotomy = false" ng-checked="!chart.epicrisis.embryotomy">
                                             Нет
@@ -590,10 +590,10 @@
                             <div class="row">
                                 <div class="col-md-2">
                                     <ul class="nav nav-pills nav-stacked  marginal">
-                                      <li ng-class="{'active': $index==0}" ng-repeat="child in chart.epicrisis.newborn_inspections"><a href="#tab[[$index]]" data-toggle="pill">Ребенок [[$index+1]]</a></li>
+                                      <li ng-class="{'active': $index==0}" ng-repeat="child in chart.epicrisis.newborn_inspections"><a href="#tab[[$index]]" data-toggle="pill"> Ребенок [[$index+1]]</a></li>
                                     </ul>
                                     <div>
-                                    <button type="button" class="btn btn-primary" ng-click="add_child()"><span class="glyphicon glyphicon-plus"></span> Добавить</button>
+                                    <button style="width:100%;"  type="button" class="btn btn-primary text-left" ng-click="add_child()"> Добавить</button>
                                     </div>
                                 </div>
                                 <div class="col-md-10">
@@ -610,13 +610,13 @@
                                                     <tr>
                                                         <th class="text-right">Пол</th>
                                                         <td>
-                                                            <div class="radio">
+                                                            <div class="radio-inline">
                                                                 <label>
                                                                     <input type="radio" name="optionsRadiosm" ng-click="child.sexCode = 1" ng-checked="child.sexCode == 1">
                                                                     мужской
                                                                 </label>
                                                             </div>
-                                                            <div class="radio">
+                                                            <div class="radio-inline">
                                                                 <label>
                                                                     <input type="radio" name="optionsRadiosf" ng-click="child.sexCode = 2" ng-checked="child.sexCode == 2">
                                                                     женский
@@ -648,13 +648,13 @@
                                                     <tr>
                                                         <th class="text-right">Живой</th>
                                                         <td>
-                                                            <div class="radio">
+                                                            <div class="radio-inline">
                                                                 <label>
                                                                     <input type="radio" name="optionsRadios" ng-click="child.alive = true" ng-checked="child.alive">
                                                                     Да
                                                                 </label>
                                                             </div>
-                                                            <div class="radio">
+                                                            <div class="radio-inline">
                                                                 <label>
                                                                     <input type="radio" name="optionsRadios" ng-click="child.alive = false" ng-checked="!child.alive">
                                                                     Нет

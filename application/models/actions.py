@@ -271,12 +271,20 @@ class ActionPropertyType(db.Model):
     unit = db.relationship('rbUnit')
     template = db.relationship('ActionPropertyTemplate')
 
+    @classmethod
+    def parse_value_domain(cls, value_domain, type_name):
+        if type_name == 'Diagnosis':
+            from application.lib.utils import parse_json
+            return parse_json(value_domain)
+        return None
+
     def __json__(self):
         result = {
             'id': self.id,
             'name': self.name,
             'code': self.code,
             'domain': self.valueDomain,
+            'domain_obj': ActionPropertyType.parse_value_domain(self.valueDomain, self.typeName),
             'is_assignable': self.isAssignable,
             'ro': self.readOnly,
             'mandatory': self.mandatory,
@@ -461,8 +469,9 @@ class ActionProperty_Diagnosis(ActionProperty__ValueType):
         from blueprints.event.lib.utils import delete_diagnosis
         value = prop.value
         if prop.type.isVector:
-            for diag in value:
-                delete_diagnosis(diag)
+            if value:
+                for diag in value:
+                    delete_diagnosis(diag)
         else:
             if value:
                 delete_diagnosis(value)

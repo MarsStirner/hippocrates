@@ -5,11 +5,12 @@
 <legend wm-page-header>
     <div class="pull-right text-right col-md-1">
         <ui-print-button ps="ps" resolve="ps_resolve()" before-print="save_action(true)"></ui-print-button>
-        <button class="btn btn-success" ng-click="save_action()" title="Сохранить"><span class="glyphicon glyphicon-ok"></span></button>
+        <button class="btn btn-success" title="Сохранить" ng-click="save_action()" ng-if="!action.ro">
+            <span class="glyphicon glyphicon-ok"></span>
+        </button>
     </div>
     <h3>[[ action.action.action_type.name ]] -
-                <a href="{{ url_for('patients.patient') }}?client_id=[[action.action.client.id]]">
-                            [[ action.action.client.full_name ]]</a>
+        <a href="{{ url_for('patients.patient') }}?client_id=[[action.action.client.id]]">[[ action.action.client.full_name ]]</a>
     </h3>
 </legend>
 <div>

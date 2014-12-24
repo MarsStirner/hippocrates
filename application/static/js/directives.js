@@ -7,6 +7,7 @@ angular.module('WebMis20.directives')
         return {
             restrict: 'E',
             require: '^ngModel',
+            scope: true,
             link: function (scope, element, attrs, ctrl) {
                 var _id = attrs.id,
                     name = attrs.name,
@@ -16,16 +17,24 @@ angular.module('WebMis20.directives')
                     placeholder = attrs.placeholder,
                     ngModel = attrs.ngModel,
                     refBook = attrs.refBook,
-                    extra_filter = attrs.extraFilter;
+                    extraFilter = attrs.extraFilter,
+                    getName = attrs.customName ? scope.$eval(attrs.customName) : function (selected) {
+                        return selected ? selected.name : undefined;
+                    },
+                    orderBy = attrs.orderBy;
+                scope.getName = getName;
                 if (!ngModel) throw new Error('<rb-select> must have ng-model attribute');
                 if (!refBook) throw new Error('<rb-select> must have rb attribute');
                 var uiSelect = $('<ui-select></ui-select>');
-                var uiSelectMatch = $('<ui-select-match>[[ $select.selected.name ]]</ui-select-match>');
+                var uiSelectMatch = $('<ui-select-match>[[getName($select.selected)]]</ui-select-match>');
                 var uiSelectChoices = $(
-                    '<ui-select-choices repeat="item in $refBook.objects | {0}filter: $select.search track by item.id">\
-                        <div ng-bind-html="item.name | highlight: $select.search"></div>\
+                    '<ui-select-choices repeat="item in $refBook.objects | {0}filter: $select.search {1} track by item.id">\
+                        <div ng-bind-html="getName(item) | highlight: $select.search"></div>\
                     </ui-select-choices>'
-                    .format(extra_filter?(extra_filter + ' | '):'')
+                    .format(
+                        extraFilter ? (extraFilter + ' | '): '',
+                        orderBy ? ('| orderBy: ' + orderBy) : ''
+                    )
                 );
                 if (_id) uiSelect.attr('id', _id);
                 if (name) uiSelect.attr('name', name);
@@ -42,40 +51,59 @@ angular.module('WebMis20.directives')
             }
         };
     }])
-    .directive('wmDate', ['$timeout', function ($timeout) {
+    .directive('wmDate', ['$timeout', '$compile', function ($timeout, $compile) {
         return {
             restrict: 'E',
-            replace: true,
-            scope: {
-                id: '@',
-                ngModel: '=',
-                ngRequired: '=',
-                ngDisabled: '=',
-                ngChange: '=',
-                maxDate: '='
-            },
+            scope: true,
+            require: 'ngModel',
             controller: function ($scope) {
                 $scope.popup = { opened: false };
                 $scope.open_datepicker_popup = function (prev_state) {
                     $timeout(function () {
                         $scope.popup.opened = !prev_state;
-                        if (!$scope.ngModel) {
-                            $scope.ngModel = new Date();
+                        if (!$scope.ngModelCtrl.$modelValue) {
+                            $scope.ngModelCtrl.$setViewValue(new Date());
                         }
                     });
                 };
             },
-            template: ['<div class="input-group">',
-                        '<input type="text" id="[[id]]_inner" name="[[id]]" class="form-control"',
-                        'is-open="popup.opened" ng-model="ngModel" autocomplete="off" max="maxDate"',
-                        'datepicker_popup="dd.MM.yyyy" ng-required="ngRequired" ng-disabled="ngDisabled" ng-change="ngChange"' +
-                        'manual-date ui-mask="99.99.9999" date-mask />',
-                        '<span class="input-group-btn">',
-                        '<button type="button" class="btn btn-default" ng-click="open_datepicker_popup(popup.opened)" ng-disabled="ngDisabled">',
-                        '<i class="glyphicon glyphicon-calendar"></i></button>',
-                        '</span>',
-                        '</div>'
-            ].join('\n')
+            link: function (scope, element, attrs, ngModelCtrl) {
+                scope.ngModelCtrl = ngModelCtrl;
+                var _id = attrs.id,
+                    name = attrs.name,
+                    ngDisabled = attrs.ngDisabled,
+                    ngModel = attrs.ngModel,
+                    ngRequired = attrs.ngRequired,
+                    ngChange = attrs.ngChange,
+                    maxDate = attrs.maxDate;
+                if (!ngModel) throw new Error('<wm-date> must have ng-model attribute');
+                var wmdate = $('<div class="input-group"></div>'),
+                    date_input = $('\
+                        <input type="text" class="form-control" autocomplete="off" datepicker_popup="dd.MM.yyyy"\
+                            is-open="popup.opened" manual-date ui-mask="99.99.9999" date-mask />'
+                    ),
+                    button = $('\
+                        <button type="button" class="btn btn-default" ng-click="open_datepicker_popup(popup.opened)">\
+                            <i class="glyphicon glyphicon-calendar"></i>\
+                        </button>'
+                    ),
+                    button_wrap = $('<span class="input-group-btn"></span>');
+                if (_id) date_input.attr('id', _id);
+                if (name) date_input.attr('name', name);
+                date_input.attr('ng-model', ngModel);
+                if (ngDisabled) {
+                    date_input.attr('ng-disabled', ngDisabled);
+                    button.attr('ng-disabled', ngDisabled);
+                }
+                if (ngRequired) date_input.attr('ng-required', ngRequired);
+                if (ngChange) date_input.attr('ng-change', ngChange);
+                if (maxDate) date_input.attr('max', maxDate);
+
+                button_wrap.append(button);
+                wmdate.append(date_input, button_wrap);
+                $(element).replaceWith(wmdate);
+                $compile(wmdate)(scope);
+            }
         };
     }])
     .directive('manualDate', [function() {
@@ -526,7 +554,7 @@ angular.module('WebMis20.directives')
                     return !scope.$ps.is_available();
                 };
                 scope.print_templates = function(){
-                    if (scope.beforePrint){
+                    if (scope.beforePrint) {
                         scope.beforePrint().then(function () {
                             // чтобы диалог печати не вызывался до обновления страницы после сохранения действия
                             if (!window.sessionStorage.getItem('open_action_print_dlg')) {
@@ -789,6 +817,7 @@ angular.module('WebMis20.directives')
             OrgStructure: ui_select_template,
             Person:  ui_select_template,
             Service: ui_select_template,
+            MKB: '<ui-mkb ng-model="model"></ui-mkb>',
             SpecialVariable: 'Special Variable'
         };
         return {
@@ -1038,7 +1067,9 @@ angular.module('WebMis20.directives')
     .directive('wmSortableHeader', [function () {
         return {
             restrict: 'A',
+            controllerAs: 'wmSortableHeaderCtrl',
             controller: function () {
+                this.orders = ['DESC', 'ASC'];
                 this.sort_cols = [];
                 this.register_col = function (col) {
                     this.sort_cols.push(col);
@@ -1065,14 +1096,12 @@ angular.module('WebMis20.directives')
                 scope.order = undefined;
                 scope.column_name = attrs.wmSortableColumn;
 
-                var orders = [undefined, 'DESC', 'ASC'];
-
                 element.click(function () {
                     scope.$apply(function () {
                         allColsCtrl.clear_other(scope);
-                        var cur_idx = orders.indexOf(scope.order),
-                            total_choices = orders.length;
-                        scope.order = orders[(cur_idx < total_choices - 1 ? (cur_idx + 1) : 0)];
+                        scope.order = (scope.order === allColsCtrl.orders[0]) ?
+                            allColsCtrl.orders[1] :
+                            allColsCtrl.orders[0];
                         scope.onChangeOrder({
                             params: {
                                 order: scope.order,
@@ -1089,8 +1118,8 @@ angular.module('WebMis20.directives')
             }
         }
     }])
-    .directive('wmDiagnosis', ['DiagnosisModal', 'WMEventServices', 'WMEventCache',
-            function(DiagnosisModal, WMEventServices, WMEventCache) {
+    .directive('wmDiagnosis', ['DiagnosisModal', 'WMEventServices', 'WMEventCache', 'WMWindowSync',
+            function(DiagnosisModal, WMEventServices, WMEventCache, WMWindowSync) {
         return{
             restrict: 'E',
             replace: true,
@@ -1098,6 +1127,7 @@ angular.module('WebMis20.directives')
                 model: '=',
                 action: '=?',
                 event: '=?',
+                params: '=?',
                 listMode: '=',
                 canAddNew: '=',
                 canDelete: '=',
@@ -1107,7 +1137,7 @@ angular.module('WebMis20.directives')
             controller: function ($scope) {
                 $scope.add_new_diagnosis = function () {
                     var new_diagnosis = WMEventServices.get_new_diagnosis($scope.action.action);
-                    DiagnosisModal.openDiagnosisModal(new_diagnosis, $scope.action).then(function () {
+                    DiagnosisModal.openDiagnosisModal(new_diagnosis, $scope.action, $scope.params).then(function () {
                         if ($scope.listMode) {
                             $scope.model.push(new_diagnosis);
                         }
@@ -1126,12 +1156,18 @@ angular.module('WebMis20.directives')
                     WMEventServices.delete_diagnosis($scope.event.diagnoses, diagnosis);
                 };
                 $scope.edit_diagnosis = function (diagnosis) {
-                    DiagnosisModal.openDiagnosisModal(diagnosis, $scope.action);
+                    DiagnosisModal.openDiagnosisModal(diagnosis, $scope.action, $scope.params);
                 };
                 $scope.open_action = function (action_id) {
-                    if(action_id && $scope.clickable){
-                        window.open(url_for_schedule_html_action + '?action_id=' + action_id);
+                    if(action_id && $scope.clickable) {
+                        var url = url_for_schedule_html_action + '?action_id=' + action_id;
+                        WMWindowSync.openTab(url, $scope.update_event);
                     }
+                };
+                $scope.update_event = function () {
+                    $scope.event.reload().then(function () {
+                        $scope.$root.$broadcast('event_loaded');
+                    });
                 };
             },
             template:
@@ -1202,7 +1238,7 @@ angular.module('WebMis20.directives')
                 scope.add_new_btn_visible = function () {
                     return scope.canAddNew && (scope.listMode ? true : !scope.model)
                 };
-                if (scope.action || scope.event) {
+                if (scope.action) {
                     WMEventCache.get(scope.action.action.event_id).then(function (event) {
                         scope.event = event;
                     });
@@ -1212,11 +1248,12 @@ angular.module('WebMis20.directives')
     }])
 .service('DiagnosisModal', ['$modal', 'WMEventCache', function ($modal, WMEventCache) {
     return {
-        openDiagnosisModal: function (model, action) {
+        openDiagnosisModal: function (model, action, params) {
             var locModel = angular.copy(model);
             var Controller = function ($scope) {
                 $scope.model = locModel;
                 $scope.diag_type_codes = ['2', '3', '7', '9', '11'];
+                $scope.params = params;
 
                 $scope.event = null;
                 WMEventCache.get(action.action.event_id).then(function (event) {
@@ -1357,7 +1394,7 @@ angular.module('WebMis20.directives')
                 <div class="row marginal">\
                     <div class="col-md-9">\
                         <label for="diagnosis_description" class="control-label">Описание диагноза</label>\
-                        <wysiwyg ng-model="model.diagnosis_description"/>\
+                        <wysiwyg ng-model="model.diagnosis_description" thesaurus-code="[[params.thesaurus_code]]"/>\
                     </div>\
                 </div>\
                 <div class="row marginal">\

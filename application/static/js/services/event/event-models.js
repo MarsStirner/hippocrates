@@ -2,16 +2,30 @@
 
 angular.module('WebMis20.services.models').
     service('WMEventCache', ['WMEvent', '$q', function (WMEvent, $q) {
-        var cache = {};
+        var cache = {},
+            loading = {};
         this.get = function (event_id) {
+            var deferred_from_cache,
+                deferred_next_request;
             if (cache.hasOwnProperty(event_id)) {
-                var deferred = $q.defer();
-                deferred.resolve(cache[event_id]);
-                return deferred.promise;
+                deferred_from_cache = $q.defer();
+                deferred_from_cache.resolve(cache[event_id]);
+                return deferred_from_cache.promise;
+            } else if (loading.hasOwnProperty(event_id)) {
+                return loading[event_id].promise;
             }
             var event = new WMEvent(event_id);
+            deferred_next_request = $q.defer();
+            loading[event_id] = deferred_next_request;
             return event.reload().then(function () {
-                return cache[event_id] = event;
+                if (!cache.hasOwnProperty(event_id)) {
+                    cache[event_id] = event;
+                }
+                if (loading.hasOwnProperty(event_id)) {
+                    loading[event_id].resolve(event);
+                    loading[event_id] = undefined;
+                }
+                return event;
             });
         };
         return this;

@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 
 import datetime
+
+from flask.ext.login import current_user
+from sqlalchemy import func
+
 from application.lib.data import create_new_action, update_action, ActionException
 from application.lib.user import UserUtils
 from application.models.actions import Action, ActionType
@@ -11,7 +15,6 @@ from application.models.exists import rbDocumentType, Person
 from application.lib.settings import Settings
 from application.models.schedule import ScheduleClientTicket
 from application.systemwide import db
-from flask.ext.login import current_user
 
 
 class EventSaveException(Exception):
@@ -157,6 +160,28 @@ def save_event(event_id, data):
                     })
 
     return result
+
+
+def save_executives(event_id):
+    event = Event.query.get(event_id)
+    if not event or not event.execDate:
+        return
+    try:
+        last_executive = db.session.query(
+            func.max(Event_Persons.id)
+        ).filter(
+            Event_Persons.event_id == event.id
+        ).first()
+        if last_executive:
+            db.session.query(Event_Persons).filter(
+                Event_Persons.id == last_executive[0]
+            ).update({
+                Event_Persons.endDate: event.execDate
+            }, synchronize_session=False)
+            db.session.commit()
+    except Exception, e:
+        db.rollback()
+        raise EventSaveException(u'Ошибка закрытия обращения')
 
 
 def create_new_local_contract(lc_info):

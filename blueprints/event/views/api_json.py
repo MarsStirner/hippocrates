@@ -18,7 +18,7 @@ from application.models.utils import safe_current_user_id
 from application.models.exists import (Organisation, )
 from application.lib.jsonify import EventVisualizer
 from blueprints.event.app import module
-from blueprints.event.lib.utils import (EventSaveException, create_services, save_event)
+from blueprints.event.lib.utils import (EventSaveException, create_services, save_event, save_executives)
 from application.lib.sphinx_search import SearchEventService
 from application.lib.data import get_planned_end_datetime, int_get_atl_dict_all, delete_action
 from application.lib.agesex import recordAcceptableEx
@@ -124,6 +124,7 @@ def api_event_close():
         event_data['exec_date'] = get_utc_datetime_with_tz().isoformat()
     try:
         save_event(event_id, all_data)
+        save_executives(event_id)
     except EventSaveException:
         raise
     except Exception, e:
@@ -230,12 +231,11 @@ def api_search_services():
     def make_response(service_data):
         at_id = service_data['action_type_id']
         at_data = ats_apts.get(at_id)
-        if at_data:
-            if not recordAcceptableEx(client.sexCode,
-                                      client_age,
-                                      at_data[6],
-                                      at_data[5]):
-                return None
+        if not at_data:
+            return None
+
+        if not recordAcceptableEx(client.sexCode, client_age, at_data[6], at_data[5]):
+            return None
 
         service = {
             'at_id': at_id,
@@ -246,7 +246,7 @@ def api_search_services():
             'is_lab': False
         }
 
-        if at_data and at_data[9]:
+        if at_data[9]:
             prop_types = at_data[9]
             prop_types = [prop_type[:2] for prop_type in prop_types if recordAcceptableEx(client.sexCode,
                                                                                           client_age,
@@ -476,12 +476,7 @@ def api_delete_event():
         db.session.commit()
         return jsonify(None)
 
-    return jsonify({
-        'name': msg['message'],
-        'data': {
-            'err_msg': u'Удаление запрещено'
-        }
-    }, 403, 'delete event error')
+    return jsonify(None, 403, msg.get('message', ''))
 
 
 @module.route('/api/events.json', methods=["POST"])
@@ -499,18 +494,23 @@ def api_get_events():
         base_query = base_query.filter(Event.externalId == flt['external_id'])
     if 'client_id' in flt:
         base_query = base_query.filter(Event.client_id == flt['client_id'])
-    if 'beg_date' in flt:
-        base_query = base_query.filter(Event.setDate >= datetime.datetime.strptime(flt['beg_date'], '%Y-%m-%d').date())
+    if 'beg_date_from' in flt:
+        base_query = base_query.filter(Event.setDate >= safe_datetime(flt['beg_date_from']))
+    if 'beg_date_to' in flt:
+        base_query = base_query.filter(Event.setDate <= safe_datetime(flt['beg_date_to']))
     if 'unfinished' in flt:
         base_query = base_query.filter(Event.execDate.is_(None))
-    elif 'end_date' in flt:
-        base_query = base_query.filter(Event.execDate <= datetime.datetime.strptime(flt['end_date'], '%Y-%m-%d').date())
+    else:
+        if 'end_date_from' in flt:
+            base_query = base_query.filter(Event.execDate >= safe_datetime(flt['end_date_from']))
+        if 'end_date_to' in flt:
+            base_query = base_query.filter(Event.execDate <= safe_datetime(flt['end_date_to']))
     if 'request_type_id' in flt:
         base_query = base_query.join(EventType).filter(EventType.requestType_id == flt['request_type_id'])
     if 'finance_id' in flt:
-        base_query = base_query.join(Contract).filter(Contract.finance_id == flt['finance_id'])
+        base_query = base_query.join(EventType).filter(EventType.finance_id == flt['finance_id'])
     if 'speciality_id' in flt:
-        base_query = base_query.join(Event.execPerson).filter(Person.speciality_id == flt['speciality_id'])
+        base_query = base_query.outerjoin(Event.execPerson).filter(Person.speciality_id == flt['speciality_id'])
     if 'exec_person_id' in flt:
         base_query = base_query.filter(Event.execPerson_id == flt['exec_person_id'])
     if 'result_id' in flt:
@@ -539,9 +539,9 @@ def api_get_events():
         elif col_name == 'client_full_name':
             base_query = base_query.order_by(Client.lastName.desc() if desc_order else Client.lastName)
         elif col_name == 'person_short_name':
-            base_query = base_query.join(Event.execPerson).order_by(Person.lastName.desc() if desc_order else Person.lastName)
+            base_query = base_query.outerjoin(Event.execPerson).order_by(Person.lastName.desc() if desc_order else Person.lastName)
         elif col_name == 'result_text':
-            base_query = base_query.join(rbResult).order_by(rbResult.name.desc() if desc_order else rbResult.name)
+            base_query = base_query.outerjoin(rbResult).order_by(rbResult.name.desc() if desc_order else rbResult.name)
     else:
         base_query = base_query.order_by(Event.setDate)
 
@@ -550,6 +550,7 @@ def api_get_events():
     paginate = base_query.paginate(page, per_page, False)
     return jsonify({
         'pages': paginate.pages,
+        'total': paginate.total,
         'items': [
             context.make_short_event(event)
             for event in paginate.items
