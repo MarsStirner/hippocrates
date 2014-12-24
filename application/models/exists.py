@@ -302,6 +302,10 @@ class Person(db.Model):
         from application.lib.utils import initialize_name
         return initialize_name(self.lastName, self.firstName, self.patrName)
 
+    @property
+    def full_name(self):
+        return u'%s%s' % (self.nameText, u' (%s)' % self.speciality if self.speciality else '')
+
     def __unicode__(self):
         return self.nameText
 
@@ -319,10 +323,7 @@ class Person(db.Model):
             'org_structure': self.org_structure,
             'academic_degree': self.academicDegree,
             'academic_title': self.academicTitle,
-            'full_name': u'%s%s' % (
-                self.nameText,
-                u' (%s)' % self.speciality if self.speciality else ''
-            )
+            'full_name': self.full_name
         }
 
     def __int__(self):
@@ -1445,6 +1446,13 @@ class rbUserProfile(db.Model):
     withDep = db.Column(db.Integer, nullable=False, server_default=u"'0'")
 
     rights = db.relationship(u'rbUserRight', secondary=u'rbUserProfile_Right', lazy=False)
+
+    def __json__(self):
+        return {
+            'id': self.id,
+            'code': self.code,
+            'name': self.name,
+        }
 
 
 class rbUserProfileRight(db.Model):

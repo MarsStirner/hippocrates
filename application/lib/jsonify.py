@@ -732,6 +732,13 @@ class PersonTreeVisualizer(object):
             'persons': [],
         }
 
+    def make_person_with_profile(self, person, profile):
+        return {
+            'id': person.id,
+            'full_name': person.full_name,
+            'profile': profile
+        }
+
     def make_tree(self, persons):
         specs = defaultdict(list)
         for person in persons:

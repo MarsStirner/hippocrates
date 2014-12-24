@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %} > Выбор замещаемого врача{% endblock %}
+
+{% block modules_css %}
+<style type="text/css">
+      body {
+        background-color: #f5f5f5;
+      }
+</style>
+{% endblock %}
+
+{% block content %}
+    <div ng-controller="SelectMasterUserCtrl">
+    <div class="col-md-offset-2 col-md-8">
+        <div class="row">
+        <form ng-submit="submit()" class="form-sel-doctor" method="POST">
+            <h2 class="vmargin10 marginal">Выбор врача для ассистирования</h2>
+            <input type="text" class="form-control marginal" placeholder="ФИО, профиль, специальность..."
+                ng-model="search.$">
+            <div class="scrollable marginal">
+                <div class="col-md-6" ng-repeat="user in users | filter:search">
+                    <div class="panel panel-default cursor-pointer" ng-click="select_user(user)">
+                        <div class="panel-body" ng-class="{'bg-info': user_selected(user)}">
+                            <span ng-bind="user.full_name"></span><br>
+                            <span class="text-muted" ng-bind="user.profile.name"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center">
+                <button type="submit" ng-disabled="!user_selected()" class="btn btn-success btn-lg">Выбрать врача</button>
+            </div>
+        </form>
+        </div>
+    </div>
+    </div>
+{% endblock %}
+{% block modules_js %}
+    <script src="{{ url_for('static', filename='js/controllers/select_master_user.js', v=version) }}"></script>
+{% endblock %}

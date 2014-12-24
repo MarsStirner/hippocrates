@@ -56,6 +56,16 @@ body.loading .loader {
     margin: 10px 0;
 }
 
+.navbar-static-top .user-text-assist {
+    margin: 5px 0 0 0;
+}
+.navbar-static-top .user-text-assist .assist-user-text {
+    font-style: italic;
+}
+.navbar-static-top .user-text-assist .assist-icon {
+    font-size: larger;
+}
+
 .form-signin {
     max-width: 300px;
     padding: 19px 29px 29px;
@@ -80,6 +90,28 @@ body.loading .loader {
     height: auto;
     margin-bottom: 15px;
     padding: 7px 9px;
+}
+
+.form-sel-doctor {
+    padding: 19px 29px 29px;
+    margin: 0 auto 20px;
+    background-color: #fff;
+    border: 1px solid #e5e5e5;
+    -webkit-border-radius: 5px;
+       -moz-border-radius: 5px;
+            border-radius: 5px;
+    -webkit-box-shadow: 0 1px 2px rgba(0,0,0,.05);
+       -moz-box-shadow: 0 1px 2px rgba(0,0,0,.05);
+            box-shadow: 0 1px 2px rgba(0,0,0,.05);
+}
+.form-sel-doctor .scrollable {
+    overflow-y: auto;
+    height: 500px;
+}
+.form-sel-doctor .profile-text {
+    font-size: smaller;
+    font-weight: bold;
+    font-style: italic;
 }
 
 /* Form customizations */
