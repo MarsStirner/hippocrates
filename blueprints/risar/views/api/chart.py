@@ -42,7 +42,7 @@ def default_ET_Heuristic():
             rbFinance.code == '2',  # ОМС
             EventType.deleted == 0,
         ) \
-        .orderby(EventType.createDatetime.desc())\
+        .order_by(EventType.createDatetime.desc())\
         .first()
 
 
