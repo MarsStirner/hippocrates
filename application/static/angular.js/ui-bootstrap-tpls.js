@@ -1103,7 +1103,7 @@ angular.module('ui.bootstrap.datepicker', ['ui.bootstrap.position'])
 function ($compile, $parse, $document, $position, dateFilter, datepickerPopupConfig, datepickerConfig) {
   return {
     restrict: 'EA',
-    require: 'ngModel',
+    require: '^ngModel',
     link: function(originalScope, element, attrs, ngModel) {
       var scope = originalScope.$new(), // create a child scope so we are not polluting original one
           dateFormat,

@@ -15,7 +15,7 @@ angular.module('ui.mask', [])
   .directive('uiMask', ['uiMaskConfig', '$parse', function (maskConfig, $parse) {
     return {
       priority: 100,
-      require: 'ngModel',
+      require: '^ngModel',
       restrict: 'A',
       compile: function uiMaskCompilingFunction(){
         var options = maskConfig;

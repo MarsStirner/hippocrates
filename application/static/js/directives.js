@@ -54,33 +54,43 @@ angular.module('WebMis20.directives')
     .directive('wmDate', ['$timeout', '$compile', function ($timeout, $compile) {
         return {
             restrict: 'E',
-            scope: true,
-            require: 'ngModel',
-            controller: function ($scope) {
-                $scope.popup = { opened: false };
-                $scope.open_datepicker_popup = function (prev_state) {
+            require: '^ngModel',
+            link: function (original_scope, element, attrs, ngModelCtrl) {
+                var scope = original_scope.$new(false);
+                scope.popup = { opened: false };
+                scope.open_datepicker_popup = function (prev_state) {
                     $timeout(function () {
-                        $scope.popup.opened = !prev_state;
-                        if (!$scope.ngModelCtrl.$modelValue) {
-                            $scope.ngModelCtrl.$setViewValue(new Date());
+                        scope.popup.opened = !prev_state;
+                        if (!ngModelCtrl.$modelValue) {
+                            ngModelCtrl.$setViewValue(new Date());
                         }
                     });
                 };
-            },
-            link: function (scope, element, attrs, ngModelCtrl) {
-                scope.ngModelCtrl = ngModelCtrl;
+                ngModelCtrl.$parsers.unshift(function(_) {
+                    var viewValue = ngModelCtrl.$viewValue;
+                    if (!viewValue || viewValue instanceof Date) {
+                        return viewValue;
+                    }
+                    var d = moment(viewValue.replace('_', ''), "DD.MM.YYYY", true);
+                    if (moment(d).isValid()) {
+                        ngModelCtrl.$setValidity('date', true);
+                        ngModelCtrl.$setViewValue(d.toDate());
+                        return d;
+                    } else {
+                        ngModelCtrl.$setValidity('date', false);
+                        return undefined;
+                    }
+                });
                 var _id = attrs.id,
                     name = attrs.name,
                     ngDisabled = attrs.ngDisabled,
-                    ngModel = attrs.ngModel,
                     ngRequired = attrs.ngRequired,
-                    ngChange = attrs.ngChange,
+                    style = attrs.style,
                     maxDate = attrs.maxDate;
-                if (!ngModel) throw new Error('<wm-date> must have ng-model attribute');
                 var wmdate = $('<div class="input-group"></div>'),
                     date_input = $('\
                         <input type="text" class="form-control" autocomplete="off" datepicker_popup="dd.MM.yyyy"\
-                            is-open="popup.opened" manual-date ui-mask="99.99.9999" date-mask />'
+                            is-open="popup.opened" ui-mask="99.99.9999" date-mask />'
                     ),
                     button = $('\
                         <button type="button" class="btn btn-default" ng-click="open_datepicker_popup(popup.opened)">\
@@ -90,42 +100,21 @@ angular.module('WebMis20.directives')
                     button_wrap = $('<span class="input-group-btn"></span>');
                 if (_id) date_input.attr('id', _id);
                 if (name) date_input.attr('name', name);
-                date_input.attr('ng-model', ngModel);
                 if (ngDisabled) {
                     date_input.attr('ng-disabled', ngDisabled);
                     button.attr('ng-disabled', ngDisabled);
                 }
+                if (style) {
+                    wmdate.attr('style', style);
+                    element.removeAttr('style');
+                }
                 if (ngRequired) date_input.attr('ng-required', ngRequired);
-                if (ngChange) date_input.attr('ng-change', ngChange);
                 if (maxDate) date_input.attr('max', maxDate);
 
                 button_wrap.append(button);
                 wmdate.append(date_input, button_wrap);
-                $(element).replaceWith(wmdate);
+                $(element).append(wmdate);
                 $compile(wmdate)(scope);
-            }
-        };
-    }])
-    .directive('manualDate', [function() {
-        return {
-            restrict: 'A',
-            require: '^ngModel',
-            link: function(scope, elm, attrs, ctrl) {
-                ctrl.$parsers.unshift(function(_) {
-                    var viewValue = ctrl.$viewValue;
-                    if (!viewValue || viewValue instanceof Date) {
-                        return viewValue;
-                    }
-                    var d = moment(viewValue.replace('_', ''), "DD.MM.YYYY", true);
-                    if (moment(d).isValid()) {
-                        ctrl.$setValidity('date', true);
-                        ctrl.$setViewValue(d.toDate());
-                        return d;
-                    } else {
-                        ctrl.$setValidity('date', false);
-                        return undefined;
-                    }
-                });
             }
         };
     }])
