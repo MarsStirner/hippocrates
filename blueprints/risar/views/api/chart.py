@@ -6,7 +6,7 @@ from application.lib.utils import jsonify, get_new_event_ext_id, safe_traverse
 from application.models.client import Client, ClientAttach
 from application.models.enums import EventPrimary, EventOrder
 from application.models.event import Event, EventType
-from application.models.exists import Organisation, Person, rbAttachType
+from application.models.exists import Organisation, Person, rbAttachType, rbRequestType, rbFinance
 from application.models.schedule import ScheduleClientTicket
 from application.systemwide import db
 from blueprints.risar.app import module
@@ -34,6 +34,18 @@ def api_0_chart_delete(ticket_id):
     return jsonify(None)
 
 
+def default_ET_Heuristic():
+    return EventType.query \
+        .join(rbRequestType, rbFinance) \
+        .filter(
+            rbRequestType.code == 'pregnancy',  # Случай беременности
+            rbFinance.code == '2',  # ОМС
+            EventType.deleted == 0,
+        ) \
+        .order_by(EventType.createDatetime.desc())\
+        .first()
+
+
 @module.route('/api/0/chart/')
 @module.route('/api/0/chart/<int:event_id>')
 def api_0_chart(event_id=None):
@@ -48,7 +60,10 @@ def api_0_chart(event_id=None):
         event = ticket.event
         if not event:
             event = Event()
-            event.eventType = EventType.get_default_et()  # FIXME: Risar has different EventType
+            ET = default_ET_Heuristic()
+            if ET is None:
+                return jsonify(None, 400, u'Не настроет тип события - Случай беременности ОМС')
+            event.eventType = ET
             event.organisation = Organisation.query.filter_by(infisCode=str(ORGANISATION_INFIS_CODE)).first()
             event.isPrimaryCode = EventPrimary.primary[0]
             event.order = EventOrder.planned[0]

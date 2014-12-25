@@ -62,7 +62,7 @@ def general_menu():
     ), dict(
         link='risar.index_html',
         title=u'АРМ Акушера-гинеколога',
-        roles=('admin', 'obstetrician')
+        roles=UserProfileManager.has_ui_obstetrician()
     ), dict(
         link='anareports.index_html',
         title=u'Аналитические отчёты',

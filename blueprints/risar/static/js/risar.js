@@ -29,6 +29,19 @@ WebMis20
             all: all
         });
     };
+    this.search_event = {
+        get: function (query) {
+            return wrapper('GET', Config.url.api_event_search, query)
+        },
+        lpu_list: function () {
+            return wrapper('GET', Config.url.api_event_search_lpu_list)
+        },
+        lpu_doctors_list: function (org_id) {
+            return wrapper('GET', Config.url.api_event_search_lpu_doctors_list, {
+                org_id: org_id
+            })
+        }
+    };
     this.chart = {
         get: function (event_id, ticket_id) {
             return wrapper('GET', Config.url.api_chart + ((event_id)?(event_id):''), {ticket_id: ticket_id});
