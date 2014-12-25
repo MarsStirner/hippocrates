@@ -289,9 +289,9 @@ def represent_ticket(ticket):
         'event_id': ticket.client_ticket.event_id if ticket.client_ticket else None,
         'note': ticket.client_ticket.note if ticket.client else None,
         'checkup_n': checkup_n,
-        'risk_rate': get_risk_rate(get_all_diagnoses(event.actions)),
-        'pregnancy_week': get_pregnancy_week(event)
-    } if event else None
+        'risk_rate': get_risk_rate(get_all_diagnoses(event.actions)) if event else None,
+        'pregnancy_week': get_pregnancy_week(event) if event else None,
+    }
 
 
 def represent_intolerance(obj):
