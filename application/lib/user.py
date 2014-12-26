@@ -107,6 +107,12 @@ class User(UserMixin):
         else:
             return any((right in current_rights) for right in rights)
 
+    def id_any_in(self, *id_list):
+        my_ids = [self.id]
+        if self.master:
+            my_ids.append(self.master.id)
+        return any(id_ in my_ids for id_ in id_list)
+
     def set_roles_rights(self, person):
         if person.user_profiles:
             for role in person.user_profiles:
@@ -118,6 +124,9 @@ class User(UserMixin):
 
     def set_master(self, master_user):
         self.master = master_user
+
+    def get_main_user(self):
+        return self.master or self
 
     def format_name(self, is_master=False):
         if is_master:
@@ -131,7 +140,7 @@ class User(UserMixin):
 
     def export_js(self):
         return {
-            'id': self.get_id(),
+            'id': self.id,
             'roles': self.roles,
             'is_admin': self.is_admin(),
             'current_role': self.current_role,
@@ -268,7 +277,7 @@ class UserUtils(object):
         return event and (
             current_user.has_right('adm') or (
                 event.is_closed and
-                current_user.id in (event.createPerson_id, event.execPerson_id) and
+                current_user.id_any_in(event.createPerson_id, event.execPerson_id) and
                 current_user.has_right('evtEditClosed')
             ) or not event.is_closed)
 
@@ -283,7 +292,7 @@ class UserUtils(object):
         if current_user.has_right('adm', 'evtDelAll'):
             return True
         elif current_user.has_right('evtDelOwn') and not event.is_closed:
-            if current_user.id in (event.execPerson_id, event.createPerson_id):
+            if current_user.id_any_in(event.execPerson_id, event.createPerson_id):
                 if event.payments:
                     out_msg['message'] = u'В обращении есть платежи по услугам'
                     return False
@@ -322,7 +331,7 @@ class UserUtils(object):
         if current_user.has_right('adm'):
             return True
         # Состояние пользователя
-        if not current_user.id in (event.execPerson_id, event.createPerson_id):
+        if not current_user.id_any_in(event.execPerson_id, event.createPerson_id):
             out_msg['message'] = u'Пользователь не является создателем или ответственным за обращение'
             return False
         # есть ли ограничения на закрытие обращений определенных EventType
@@ -360,7 +369,7 @@ class UserUtils(object):
                     current_user.has_right('actDelAll') or (
                         # либо только своих
                         current_user.has_right('actDelOwn') and (
-                            current_user.id in (action.createPerson_id, action.person_id))))))
+                            current_user.id_any_in(action.createPerson_id, action.person_id))))))
 
     @staticmethod
     def can_create_action(event_id, at_id, class_=None):
@@ -386,7 +395,7 @@ class UserUtils(object):
                     current_user.has_right('editOtherpeopleAction') or (
                         # либо право на свои определённых классов
                         current_user.has_right(updateRight) and
-                        current_user.id in (action.createPerson_id, action.person_id)))))
+                        current_user.id_any_in(action.createPerson_id, action.person_id)))))
 
     @staticmethod
     def can_read_action(action):
@@ -394,7 +403,7 @@ class UserUtils(object):
         return action and (
             current_user.has_right('adm') or (
                 current_user.has_right(readRight) and
-                current_user.id in (action.createPerson_id, action.person_id)))
+                current_user.id_any_in(action.createPerson_id, action.person_id)))
 
 
 class UserProfileManager(object):
@@ -427,6 +436,10 @@ class UserProfileManager(object):
         return user.current_role if not user.is_anonymous() else None
 
     @classmethod
+    def has_ui_admin(cls):
+        return cls._get_user_role() == cls.admin
+
+    @classmethod
     def has_ui_registrator(cls):
         return cls._get_user_role() in cls.ui_groups['registrator']
 
@@ -437,6 +450,10 @@ class UserProfileManager(object):
     @classmethod
     def has_ui_doctor(cls):
         return cls._get_user_role() in cls.ui_groups['doctor']
+
+    @classmethod
+    def has_ui_diag_doctor(cls):
+        return cls._get_user_role() == cls.doctor_diag
 
     @classmethod
     def has_ui_assistant(cls):

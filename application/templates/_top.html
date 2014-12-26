@@ -26,7 +26,7 @@
                 <span class="navbar-text user-text-assist">
                     <span class="glyphicon glyphicon-user"></span>
                     <span> {{ current_user.format_name() }}<span class="assist-user-text">, ассистирую:<br>
-                        <a href="{{ url_for('doctor_to_assist') }}" title="Выбрать врача"><span class="fa fa-user-md assist-icon"></span></a>
+                        <a href="{{ url_for('doctor_to_assist', next=request.url) }}" title="Выбрать врача"><span class="fa fa-user-md assist-icon"></span></a>
                         {% if current_user.master %}
                         <span>{{ current_user.master.format_name(is_master=True) }}</span>
                         {% else %}

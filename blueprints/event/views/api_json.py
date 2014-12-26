@@ -3,6 +3,7 @@
 import datetime
 
 from flask import request, abort
+from flask.ext.login import current_user
 from sqlalchemy import desc
 
 from config import ORGANISATION_INFIS_CODE
@@ -14,7 +15,6 @@ from application.models.exists import Person, rbRequestType, rbResult, Contract
 from application.systemwide import db
 from application.lib.utils import (jsonify, safe_traverse, logger, safe_datetime, get_utc_datetime_with_tz)
 from application.models.schedule import ScheduleClientTicket
-from application.models.utils import safe_current_user_id
 from application.models.exists import (Organisation, )
 from application.lib.jsonify import EventVisualizer
 from blueprints.event.app import module
@@ -64,7 +64,7 @@ def api_event_new_get():
         client_id = int(request.args['client_id'])
         setDate = datetime.datetime.now()
         note = ''
-        exec_person_id = safe_current_user_id()
+        exec_person_id = current_user.get_main_user().id
     if not event.is_diagnostic:
         event.execPerson_id = exec_person_id
         event.execPerson = Person.query.get(exec_person_id)

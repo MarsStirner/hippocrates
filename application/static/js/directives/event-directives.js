@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('WebMis20.directives')
-.directive('wmActionList', ['$window', 'ActionTypeTreeModal', 'MessageBox', 'WMEventServices', 'WMWindowSync',
-        function ($window, ActionTypeTreeModal, MessageBox, WMEventServices, WMWindowSync) {
+.directive('wmActionList', ['$window', 'ActionTypeTreeModal', 'MessageBox', 'WMEventServices', 'WMWindowSync', 'CurrentUser',
+        function ($window, ActionTypeTreeModal, MessageBox, WMEventServices, WMWindowSync, CurrentUser) {
     return {
         restrict: 'E',
         scope: {
@@ -18,7 +18,7 @@ angular.module('WebMis20.directives')
                 'treatments': 2
             };
             scope.can_delete_action = function (action) {
-                return current_user.current_role_maybe('admin') || (action.status.code !== 'finished' && action.can_delete);
+                return CurrentUser.current_role_in('admin') || (action.status.code !== 'finished' && action.can_delete);
             };
             scope.can_create_action = function () {
                 return scope.event.can_create_actions[at_class[scope.actionTypeGroup]] && !scope.event.ro;

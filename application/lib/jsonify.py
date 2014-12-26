@@ -9,7 +9,6 @@ from sqlalchemy.orm import aliased
 from sqlalchemy.sql.functions import current_date
 from sqlalchemy.sql.expression import between
 from flask import json
-from flask.ext.login import current_user
 
 from application.systemwide import db
 from application.lib.data import int_get_atl_dict_all
@@ -764,13 +763,13 @@ class EventVisualizer(object):
                 if event.id else [False] * 4
             )
         }
-        if current_user.role_in('admin'):
+        if UserProfileManager.has_ui_admin():
             data['diagnoses'] = self.make_diagnoses(event)
             data['payment'] = self.make_event_payment(event)
             data['services'] = self.make_event_services(event.id)
-        elif current_user.role_in('doctor', 'clinicDoctor', 'diagDoctor'):
+        elif UserProfileManager.has_ui_doctor():
             data['diagnoses'] = self.make_diagnoses(event)
-        elif current_user.role_in(('rRegistartor', 'clinicRegistrator')):
+        elif UserProfileManager.has_ui_registrator():
             data['payment'] = self.make_event_payment(event)
             data['services'] = self.make_event_services(event.id)
         return data

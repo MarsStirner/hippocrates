@@ -19,7 +19,7 @@
         <td>[[ record.createPerson.name ]]</td>
         <td>[[ record.note ]]</td>
         <td width="1%">
-            {% if current_user.role_in(('admin', 'rRegistartor', 'clinicRegistrator')) %}
+            {% if user_profiles_mng.has_ui_registrator() %}
                 <button ng-if="!record.event_id" ng-click="new_event(client_id, record.id)" class="btn btn-sm btn-success" title="Создать обращение">
                     <span class="glyphicon glyphicon-plus"></span>
                 </button>

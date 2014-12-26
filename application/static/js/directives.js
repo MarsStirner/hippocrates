@@ -1029,7 +1029,7 @@ angular.module('WebMis20.directives')
             }
         }
     }])
-.service('DiagnosisModal', ['$modal', 'WMEventCache', function ($modal, WMEventCache) {
+.service('DiagnosisModal', ['$modal', 'WMEventCache', 'CurrentUser', function ($modal, WMEventCache, CurrentUser) {
     return {
         openDiagnosisModal: function (model, action, params) {
             var locModel = angular.copy(model);
@@ -1043,7 +1043,8 @@ angular.module('WebMis20.directives')
                     $scope.event = event;
                     $scope.can_set_final_diag = (
                         // только лечащий врач
-                        current_user_id === event.info.exec_person.id &&
+                        (CurrentUser.id === event.info.exec_person.id ||
+                            CurrentUser.get_main_user().id === event.info.exec_person.id) &&
                         // в текущем действии еще нет заключительных диагнозов
                         action.action.properties.filter(function (prop) {
                             return (prop.type.type_name === 'Diagnosis' && (

@@ -7,6 +7,7 @@ from application.lib.utils import public_endpoint, roles_require
 from application.models.client import Client
 from application.lib.utils import breadcrumb
 from blueprints.schedule.app import module
+from application.lib.user import UserProfileManager
 
 # noinspection PyUnresolvedReferences
 from . import api_html, api_json
@@ -37,7 +38,7 @@ def appointment():
 
 
 @module.route('/person_month/')
-@roles_require('clinicRegistrator')
+@roles_require(*UserProfileManager.ui_groups['registrator'])
 def person_schedule_monthview():
     try:
         return render_template('schedule/person_schedule_monthview.html')
@@ -46,7 +47,7 @@ def person_schedule_monthview():
 
 
 @module.route('/doctor/')
-@roles_require('clinicDoctor', 'diagDoctor')
+@roles_require(*UserProfileManager.ui_groups['doctor'])
 @breadcrumb(u'Приём пациентов')
 def doctor_schedule_day():
     try:

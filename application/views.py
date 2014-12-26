@@ -26,7 +26,6 @@ login_manager.anonymous_user = AnonymousUser
 @app.before_request
 def check_valid_login():
     login_valid = current_user.is_authenticated()
-
     if (request.endpoint and
             'static' not in request.endpoint and
             not current_user.is_admin() and
@@ -34,6 +33,16 @@ def check_valid_login():
 
         if not login_valid or not getattr(current_user, 'current_role', None):
             return redirect(url_for('login', next=request.url))
+
+
+@app.before_request
+def check_user_profile_settings():
+    if request.endpoint and 'static' not in request.endpoint:
+        if (request.endpoint not in ('doctor_to_assist', 'api_doctors_to_assist') and
+            UserProfileManager.has_ui_assistant() and
+            not current_user.master
+        ):
+            return redirect(url_for('doctor_to_assist', next=request.url))
 
 
 @app.route('/')
@@ -165,7 +174,10 @@ def api_doctors_to_assist():
     ).options(
         lazyload('*'),
         joinedload(Person.speciality)
-    ).all()
+    ).order_by(
+        Person.lastName,
+        Person.firstName
+    )
     res = [viz.make_person_with_profile(person, profile) for person, profile in persons]
     return jsonify(res)
 

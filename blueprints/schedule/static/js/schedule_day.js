@@ -1,5 +1,5 @@
 var ScheduleDayCtrl = function ($scope, $http, WMClient, PrintingService, $interval, WMAppointmentDialog, $location,
-        $anchorScroll, WMProcedureOffices) {
+        $anchorScroll, WMProcedureOffices, CurrentUser) {
     $scope.client_id = null;
     $scope.client = null;
     $scope.person = {};
@@ -21,7 +21,7 @@ var ScheduleDayCtrl = function ($scope, $http, WMClient, PrintingService, $inter
         });
     };
     $scope.loadData = function () {
-        var person_id = current_user_id,
+        var person_id = CurrentUser.get_main_user().id,
             proc_office_id = safe_traverse($scope.proc_office, ['selected', 'id']);
         $http.get(
             url_schedule_api_day_schedule, {
@@ -55,7 +55,7 @@ var ScheduleDayCtrl = function ($scope, $http, WMClient, PrintingService, $inter
     };
 
     $scope.initialize = function () {
-        if (current_user.current_role === 'diagDoctor') {
+        if (CurrentUser.get_main_user().current_role === 'diagDoctor') {
             $scope.mode = $scope.modes[1];
             $scope.load_proc_offices();
         }
@@ -158,4 +158,4 @@ var ScheduleDayCtrl = function ($scope, $http, WMClient, PrintingService, $inter
     });
 };
 WebMis20.controller('ScheduleDayCtrl', ['$scope', '$http', 'WMClient', 'PrintingService', '$interval',
-    'WMAppointmentDialog', '$location', '$anchorScroll', 'WMProcedureOffices', ScheduleDayCtrl]);
+    'WMAppointmentDialog', '$location', '$anchorScroll', 'WMProcedureOffices', 'CurrentUser', ScheduleDayCtrl]);
