@@ -39,7 +39,8 @@
                     <div class="col-md-6">
                         <div class="panel panel-default">
                             <div class="panel-heading"> Диагнозы
-                                <a class="print_link pull-right" href="#"><span class="glyphicon glyphicon-pencil"></span> Изменить</a>
+                                <a class="print_link pull-right"
+                                   href="{{ url_for('.html_epicrisis_edit') }}?event_id=[[ chart.id ]]#tab_first"><span class="glyphicon glyphicon-pencil"></span> Изменить</a>
                             </div>
                             <div class="panel-body">
                                 <div class="row">
@@ -66,17 +67,10 @@
                     <div class="col-md-6">
                         <div class="panel panel-default">
                             <div class="panel-heading"> Данные случая
-                                <a class="print_link pull-right" href="#"><span class="glyphicon glyphicon-pencil"></span> Изменить</a>
+                                <a class="print_link pull-right"
+                                   href="{{ url_for('.html_epicrisis_edit') }}?event_id=[[ chart.id ]]#tab_first"><span class="glyphicon glyphicon-pencil"></span> Изменить</a>
                             </div>
                             <div class="panel-body">
-                                <div class="row">
-                                    <div class="col-md-5">Беременность (по счёту):</div>
-                                    <div class="col-md-7">[[chart.epicrisis.pregnancy_times]]</div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-5">Роды (по счёту):</div>
-                                    <div class="col-md-7">[[chart.epicrisis.childbirth_times]]</div>
-                                </div>
                                 <div class="row">
                                     <div class="col-md-5">Число посещений акушера-гинеколога:</div>
                                     <div class="col-md-7">[[chart.epicrisis.visits]]</div>
@@ -96,8 +90,9 @@
                 <div class="row">
                     <div class="col-md-6">
                         <div class="panel panel-default" ng-if="chart.epicrisis.death_date || chart.epicrisis.reason_of_death">
-                            <div class="panel-heading"> Смерть
-                                <a class="print_link pull-right" href="#"><span class="glyphicon glyphicon-pencil"></span> Изменить</a>
+                            <div class="panel-heading"> Смерть матери
+                                <a class="print_link pull-right"
+                                   href="{{ url_for('.html_epicrisis_edit') }}?event_id=[[ chart.id ]]#tab_second"><span class="glyphicon glyphicon-pencil"></span> Изменить</a>
                             </div>
                             <div class="panel-body">
                                 <div class="row">
@@ -128,17 +123,18 @@
                     </div>
                     <div class="col-md-6">
                         <div class="panel panel-default">
-                            <div class="panel-heading"> Осложнения
-                                <a class="print_link pull-right" href="#"><span class="glyphicon glyphicon-pencil"></span> Изменить</a>
+                            <div class="panel-heading"> Осложнения при родах
+                                <a class="print_link pull-right"
+                                   href="{{ url_for('.html_epicrisis_edit') }}?event_id=[[ chart.id ]]#tab_third"><span class="glyphicon glyphicon-pencil"></span> Изменить</a>
                             </div>
                             <div class="panel-body">
                                 <div class="row">
                                     <div class="col-md-5">Излитие околоплодных вод:</div>
-                                    <div class="col-md-7">[[chart.epicrisis.delivery_waters]]</div>
+                                    <div class="col-md-7">[[chart.epicrisis.delivery_waters.name]]</div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-5">Слабость родовых сил:</div>
-                                    <div class="col-md-7">[[chart.epicrisis.weakness]]</div>
+                                    <div class="col-md-7">[[chart.epicrisis.weakness.name]]</div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-5">Разрыв промежностей (степень):</div>
@@ -146,15 +142,23 @@
                                 </div>
                                 <div class="row">
                                     <div class="col-md-5">Нефропатия/эклампсия в родах:</div>
-                                    <div class="col-md-7">[[chart.epicrisis.eclampsia]]</div>
+                                    <div class="col-md-7">[[chart.epicrisis.eclampsia.name]]</div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-5">Патология пуповины:</div>
-                                    <div class="col-md-7">[[chart.epicrisis.funiculus]]</div>
+                                    <div class="col-md-7">[[chart.epicrisis.funiculus.name]]</div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-5">Патология плаценты:</div>
-                                    <div class="col-md-7">[[chart.epicrisis.afterbirth]]</div>
+                                    <div class="col-md-7">[[chart.epicrisis.afterbirth.name]]</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-5">Инфекции в родах:</div>
+                                    <div class="col-md-7">[[chart.epicrisis.infections_during_birth]]</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-5">Инфекции после родов:</div>
+                                    <div class="col-md-7">[[chart.epicrisis.infections_after_birth]]</div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-5">Другие осложнения при родах:</div>
@@ -168,8 +172,9 @@
                 <div class="row">
                     <div class="col-md-6">
                         <div class="panel panel-default">
-                            <div class="panel-heading"> Пособия и манипуляции
-                                <a class="print_link pull-right" href="#"><span class="glyphicon glyphicon-pencil"></span> Изменить</a>
+                            <div class="panel-heading"> Пособия и манипуляции при родах
+                                <a class="print_link pull-right"
+                                   href="{{ url_for('.html_epicrisis_edit') }}?event_id=[[ chart.id ]]#tab_fourth"><span class="glyphicon glyphicon-pencil"></span> Изменить</a>
                             </div>
                             <div class="panel-body">
                                 <div class="row">
@@ -209,17 +214,18 @@
                     </div>
                     <div class="col-md-6">
                         <div class="panel panel-default">
-                            <div class="panel-heading"> Операции
-                                <a class="print_link pull-right" href="#"><span class="glyphicon glyphicon-pencil"></span> Изменить</a>
+                            <div class="panel-heading"> Операции при родах
+                                <a class="print_link pull-right"
+                                   href="{{ url_for('.html_epicrisis_edit') }}?event_id=[[ chart.id ]]#tab_fifth"><span class="glyphicon glyphicon-pencil"></span> Изменить</a>
                             </div>
                             <div class="panel-body">
                                 <div class="row">
                                     <div class="col-md-5">Кесарево сечение:</div>
-                                    <div class="col-md-7">[[chart.epicrisis.caesarean_section]]</div>
+                                    <div class="col-md-7">[[chart.epicrisis.caesarean_section.name]]</div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-5">Акушерские щипцы:</div>
-                                    <div class="col-md-7">[[chart.epicrisis.obstetrical_forceps]]</div>
+                                    <div class="col-md-7">[[chart.epicrisis.obstetrical_forceps.name]]</div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-5">Вакуум-экстракция:</div>
@@ -227,19 +233,19 @@
                                 </div>
                                 <div class="row">
                                     <div class="col-md-5">Показания к операции:</div>
-                                    <div class="col-md-7">[[chart.epicrisisindication.indication]]</div>
+                                    <div class="col-md-7">[[chart.epicrisisindication.indication.name]]</div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-5">Особенности операции:</div>
-                                    <div class="col-md-7">[[chart.epicrisis.specialities]]</div>
+                                    <div class="col-md-7">[[chart.epicrisis.specialities.name]]</div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-5">Обезболивание:</div>
-                                    <div class="col-md-7">[[chart.epicrisis.anesthetization]]</div>
+                                    <div class="col-md-7">[[chart.epicrisis.anesthetization.name]]</div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-5">Гистерэктомия:</div>
-                                    <div class="col-md-7">[[chart.epicrisis.hysterectomy]]</div>
+                                    <div class="col-md-7">[[chart.epicrisis.hysterectomy.name]]</div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-5">Осложнения:</div>
@@ -265,7 +271,9 @@
                             <th>Масса, кг</th>
                             <th>Длина, см</th>
                             <th>Степень доношенности</th>
-                            <th>Оценка по Апгар на минуту</th>
+                            <th>Оценка по Апгар на 1 минуту жизни</th>
+                            <th>Оценка по Апгар на 5 минуту жизни</th>
+                            <th>Оценка по Апгар на 10 минуту жизни</th>
                             <th></th>
                         </tr>
                     </thead>
@@ -277,17 +285,20 @@
                             <td>[[inspection.sex]]</td>
                             <td>[[inspection.weight]]</td>
                             <td>[[inspection.length]]</td>
-                            <td>[[inspection.maturity_rate]]</td>
-                            <td>[[inspection.apgar_score]]</td>
+                            <td>[[inspection.maturity_rate.name]]</td>
+                            <td>[[inspection.apgar_score_1]]</td>
+                            <td>[[inspection.apgar_score_5]]</td>
+                            <td>[[inspection.apgar_score_10]]</td>
                             <td class="col-md-1 nowrap">
                                 <button class="btn btn-primary"><span class="glyphicon glyphicon-pencil"></span> Изменить</button>
                                 <button class="btn btn-danger"><span class="glyphicon glyphicon-trash"></span> Удалить</button>
                             </td>
                         </tr>
                         <tr>
-                            <td colspan="8">&nbsp;</td>
+                            <td colspan="10">&nbsp;</td>
                             <td>
-                                <button class="btn btn-success"><span class="glyphicon glyphicon-plus"></span> Добавить</button>
+                                <a class="btn btn-success"
+                                   href="{{ url_for('.html_epicrisis_edit') }}?event_id=[[ chart.id ]]#tab_last"><span class="glyphicon glyphicon-plus"></span> Добавить</a>
                             </td>
                         </tr>
                     </tbody>

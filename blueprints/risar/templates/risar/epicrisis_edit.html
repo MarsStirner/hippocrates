@@ -30,7 +30,7 @@
                 <nav class="navbar navbar-default" role="navigation">
                     <div class="container-fluid">
                         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-                        <ul class="nav navbar-nav nav-pills" style="margin: 7.5px -15px">
+                        <ul class="nav navbar-nav nav-pills" style="margin: 7.5px -15px"  id="EpicrisisTabs">
                             <li class="active">
                                 <a class="active" href="#first" data-toggle="tab">
                                     <span class="badge">1</span>
@@ -72,7 +72,7 @@
                     </div>
                 </nav>
                 <div class="tab-content marginal">
-                    <form class="tab-pane active" id="first" name="firstForm"  novalidate rc-submit rc-step>
+                    <ng-form class="tab-pane active" id="first" name="firstForm"  novalidate rc-submit rc-step>
                         <h3>Шаг 1. Общая информация</h3>
                             <div class="row" ng-class="{'has-error': firstForm.pregnancy_final.$invalid}" >
                                 <div class="col-md-2" for="pregnancy_final" class="control-label text-right">Беременность закончилась</div>
@@ -226,7 +226,7 @@
                                     </tr>
                                 </tbody>
                             </table>
-                    </form>
+                    </ng-form>
                     <ng-form class="tab-pane" id="second" name="secondForm"  novalidate rc-submit rc-step>
                         <h3>Шаг 2. Информация о смерти матери</h3>
                         <table class="table table-condensed">
@@ -612,7 +612,7 @@
                             <div class="row">
                                 <div class="col-md-2">
                                     <ul class="nav nav-pills nav-stacked  marginal" id="childrenTab">
-                                        <li><a ng-click="add_child()"> Добавить</a></li>
+                                        <li><a href="#tabAdd" ng-click="add_child()"> Добавить</a></li>
                                         <li ng-class="{'active': $index==0}" ng-repeat="child in chart.epicrisis.newborn_inspections"><a href="#tab[[$index]]" data-toggle="pill"> Ребенок [[$index+1]]</a></li>
                                     </ul>
                                 </div>
@@ -774,10 +774,10 @@
                     <a class="pseudo-btn" ng-href="{{ url_for('.html_chart') }}?event_id=[[ chart.id ]]">Перейти на карту пациентки</a>
                     </div>
                     <div class="pull-right">
-                        <a class="btn btn-success btn-lg"
+                        <a class="btn btn-success"
                            ng-click="save()"
                            ng-disabled="rc.sampleWizard.currentStep.formController.$invalid && rc.sampleWizard.currentStep.formController.$dirty">Сохранить</a>
-                        <a class="btn btn-primary btn-lg"
+                        <a class="btn btn-primary"
                            ng-click="save(); rc.sampleWizard.forward()"
                            ng-show="rc.sampleWizard.currentIndex < rc.sampleWizard.navigationLength"
                            ng-disabled="rc.sampleWizard.currentStep.formController.$invalid && rc.sampleWizard.currentStep.formController.$dirty">

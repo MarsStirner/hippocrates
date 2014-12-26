@@ -23,5 +23,20 @@ var EpicrisisCtrl = function ($timeout, $scope, RisarApi) {
         }, 0);
 
     }
-    reload_epicrisis();
+    var init = function () {
+        var hash = document.location.hash;
+        var prefix = "tab_";
+        hash = hash.replace(/\//, '')
+        if (hash) {
+            $('#EpicrisisTabs a[href='+hash.replace(prefix,"")+']').tab('show') ;
+        }
+
+        // Change hash for page-reload
+        $('#EpicrisisTabs a').on('shown.bs.tab', function (e) {
+            window.location.hash = e.target.hash.replace("#", "#" + prefix);
+        })
+        reload_epicrisis();
+    };
+    init();
+
 }
