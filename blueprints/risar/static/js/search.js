@@ -1,7 +1,10 @@
 /**
  * Created by mmalkov on 24.09.14.
  */
-var EventSearchCtrl = function ($scope, RisarApi) {
+
+'use strict';
+
+var EventSearchCtrl = function ($scope, RisarApi, TimeoutCallback) {
     var default_orgs = [{
         full_name: 'Все',
         short_name: 'Все'
@@ -15,10 +18,11 @@ var EventSearchCtrl = function ($scope, RisarApi) {
         person: default_docs[0]
     };
     $scope.results = [];
-    $scope.perform = function () {
+    var perform = function () {
         RisarApi.search_event.get({
             org_id: $scope.query.org.id,
-            doc_id: $scope.query.person.id
+            doc_id: $scope.query.person.id,
+            fio: $scope.query.fio || undefined
         }).then(function (result) {
             $scope.results = result;
         })
@@ -35,9 +39,15 @@ var EventSearchCtrl = function ($scope, RisarApi) {
         .then(function (result) {
             $scope.doctors = default_docs.concat(result);
             $scope.query.person = default_docs[0];
-            $scope.perform();
+            perform();
         })
     };
 
-    $scope.refresh_organisations()
+    $scope.refresh_organisations();
+
+    var tc = new TimeoutCallback(perform, 600);
+
+    $scope.perform = function () {
+        tc.start();
+    }
 };

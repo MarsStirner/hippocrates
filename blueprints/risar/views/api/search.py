@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 from flask import request
+from application.lib.sphinx_search import SearchPatient
 
 from application.lib.utils import jsonify
+from application.models.client import Client
 from application.models.event import Event, EventType
 from application.models.exists import Organisation, Person, rbRequestType
 from blueprints.risar.app import module
@@ -19,6 +21,10 @@ def api_0_event_search():
         query = query.filter(Event.org_id == data['org_id'])
     if 'doc_id' in data:
         query = query.filter(Event.execPerson_id == data['doc_id'])
+    if 'fio' in request.args and request.args['fio']:
+        query = query.filter(Event.client_id.in_(
+            (item['id'] for item in SearchPatient.search(request.args['fio'])['result']['items'])
+        ))
     return jsonify([
         {
             'event_id': row.id,
@@ -26,6 +32,8 @@ def api_0_event_search():
             'name': row.client.nameText,
             'set_date': row.setDate,
             'exec_date': row.execDate,
+            'external_id': row.externalId,
+            'exec_person_name': row.execPerson.nameText,
         }
         for row in query
     ])

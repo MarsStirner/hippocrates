@@ -9,60 +9,71 @@
             <li>Поиск карты пациентки</li>
         </ul>
         <div class="row">
-            <div class="col-md-6">
-                <table class="table table-condensed">
-                    <tbody>
-                    <tr>
-                        <th class="col-md-4">Страна</th>
-                        <td class="col-md-8">-</td>
-                    </tr>
-                    <tr>
-                        <th>Регион</th>
-                        <td>-</td>
-                    </tr>
-                    <tr>
-                        <th>Район</th>
-                        <td>-</td>
-                    </tr>
-                    <tr>
-                        <th>ЛПУ</th>
-                        <td>
-                            <ui-select ng-model="query.org" theme="select2" ng-change="refresh_doctors()">
-                                <ui-select-match>[[ $select.selected.short_name ]]</ui-select-match>
-                                <ui-select-choices repeat="org in organisations | filter: {short_name: $select.search} | limitTo:50">
-                                    <div ng-bind-html="org.short_name | highlight: $select.search"></div>
-                                </ui-select-choices>
-                            </ui-select>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>Врач</th>
-                        <td>
-                            <ui-select ng-model="query.person" theme="select2" ng-change="perform()">
-                                <ui-select-match>[[ $select.selected.name ]]</ui-select-match>
-                                <ui-select-choices repeat="doc in doctors | filter: {full_name: $select.search} | limitTo:50">
-                                    <div ng-bind-html="doc.full_name | highlight: $select.search"></div>
-                                </ui-select-choices>
-                            </ui-select>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="2">
-                            <button ng-click="perform()" class="btn btn-default">Поиск</button>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-            <div class="col-md-6">
+            <form class="col-md-4">
+{#                <div class="form-group">#}
+{#                    <label>Страна</label>#}
+{#                    <div class="form-control-static">-</div>#}
+{#                </div>#}
+{#                <div class="form-group">#}
+{#                    <label>Регион</label>#}
+{#                    <div class="form-control-static">-</div>#}
+{#                </div>#}
+{#                <div class="form-group">#}
+{#                    <label>Район</label>#}
+{#                    <div class="form-control-static">-</div>#}
+{#                </div>#}
+                <div class="form-group">
+                    <label>ЛПУ</label>
+                    <div class="form-control-static">
+                        <ui-select ng-model="query.org" theme="select2" ng-change="refresh_doctors()">
+                            <ui-select-match>[[ $select.selected.short_name ]]</ui-select-match>
+                            <ui-select-choices repeat="org in organisations | filter: {short_name: $select.search} | limitTo:50">
+                                <div ng-bind-html="org.short_name | highlight: $select.search"></div>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Врач</label>
+                    <div class="form-control-static">
+                        <ui-select ng-model="query.person" theme="select2" ng-change="perform()">
+                            <ui-select-match>[[ $select.selected.name ]]</ui-select-match>
+                            <ui-select-choices repeat="doc in doctors | filter: {full_name: $select.search} | limitTo:50">
+                                <div ng-bind-html="doc.full_name | highlight: $select.search"></div>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>ФИО пациентки</label>
+                    <input class="form-control" ng-model="query.fio" ng-change="perform()">
+                </div>
+                <div class="form-group">
+                    <label>Степень риска</label>
+                    <div class="form-control-static">-</div>
+                </div>
+                <div class="form-group">
+                    <label>Дата родов</label>
+                    <div class="form-control-static">-</div>
+                </div>
+                <div class="form-group">
+                    <label>Дата осмотра</label>
+                    <div class="form-control-static">-</div>
+                </div>
+            </form>
+            <div class="col-md-8">
                 <table class="table table-condensed">
                     <thead>
                     <tr>
+                        <th>№ карты</th>
+                        <th>Врач</th>
                         <th>ФИО</th>
                     </tr>
                     </thead>
                     <tbody>
                     <tr ng-repeat="row in results">
+                        <td>[[ row.external_id ]]</td>
+                        <td>[[ row.exec_person_name ]]</td>
                         <td><a ng-href="{{ url_for('.html_chart') }}?event_id=[[ row.event_id ]]">[[ row.name ]]</a></td>
                     </tr>
                     </tbody>

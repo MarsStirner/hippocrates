@@ -31,7 +31,7 @@ WebMis20
     };
     this.search_event = {
         get: function (query) {
-            return wrapper('GET', Config.url.api_event_search, query)
+            return wrapper('POST', Config.url.api_event_search, query)
         },
         lpu_list: function () {
             return wrapper('GET', Config.url.api_event_search_lpu_list)
