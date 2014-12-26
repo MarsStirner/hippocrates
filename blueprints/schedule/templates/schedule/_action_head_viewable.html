@@ -3,10 +3,10 @@
         <div class="col-md-9">
             <div class="form-group">
                 <label class="col-md-2 control-label">Назначено</label>
-                <div class="col-md-3" ng-bind="action.action.direction_date | asDate"></div>
+                <div class="col-md-3 form-control-static" ng-bind="action.action.direction_date | asDate"></div>
                 <label class="col-md-1 control-label">План</label>
-                <div class="col-md-3" ng-bind="action.action.planned_end_date | asDate"></div>
-                <div class="col-md-2"><label ng-if="action.is_urgent">Срочно</label></div>
+                <div class="col-md-3 form-control-static" ng-bind="action.action.planned_end_date | asDate"></div>
+                <div class="col-md-2 form-control-static"><label ng-if="action.is_urgent">Срочно</label></div>
             </div>
         </div>
     </div>
@@ -15,7 +15,7 @@
         <div class="col-md-9">
             <div class="form-group">
                 <label class="col-md-2 control-label">Назначил</label>
-                <div class="col-md-10" ng-bind="action.action.set_person.name"></div>
+                <div class="col-md-10 form-control-static" ng-bind="action.action.set_person.name"></div>
             </div>
         </div>
     </div>
@@ -24,7 +24,7 @@
         <div class="col-md-9">
             <div class="form-group">
                 <label class="col-md-2 control-label">Согласовано</label>
-                <div class="col-md-3" ng-bind="action.action.coord_date | asDate"></div>
+                <div class="col-md-3 form-control-static" ng-bind="action.action.coord_date | asDate"></div>
             </div>
         </div>
     </div>
