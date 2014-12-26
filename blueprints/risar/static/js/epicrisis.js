@@ -7,6 +7,10 @@ var EpicrisisCtrl = function ($timeout, $scope, RisarApi) {
         RisarApi.chart.get(event_id)
         .then(function (data) {
             $scope.chart = data.event;
+            if (!$scope.chart.epicrisis){
+                $scope.chart.epicrisis = {'newborn_inspections' : [{}]};
+            }
+
         })
     };
     $scope.save = function () {
