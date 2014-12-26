@@ -6,6 +6,7 @@ from flask import render_template, abort, request, redirect, url_for, flash, ses
 from flask.ext.principal import Identity, AnonymousIdentity, identity_changed
 from flask.ext.principal import identity_loaded, Permission, RoleNeed, UserNeed, ActionNeed
 from flask.ext.login import login_user, logout_user, login_required, current_user
+from sqlalchemy.orm import lazyload, joinedload
 
 from application.app import app, db, login_manager, cache
 from application.context_processors import *
@@ -14,6 +15,8 @@ from application.lib.utils import public_endpoint, jsonify, roles_require, right
 from application.models import *
 from lib.user import UserAuth, AnonymousUser, UserProfileManager
 from forms import LoginForm, RoleForm
+from application.lib.jsonify import PersonTreeVisualizer
+from application.models.exists import rbUserProfile, Person
 
 
 login_manager.login_view = 'login'
@@ -23,7 +26,6 @@ login_manager.anonymous_user = AnonymousUser
 @app.before_request
 def check_valid_login():
     login_valid = current_user.is_authenticated()
-
     if (request.endpoint and
             'static' not in request.endpoint and
             not current_user.is_admin() and
@@ -31,6 +33,16 @@ def check_valid_login():
 
         if not login_valid or not getattr(current_user, 'current_role', None):
             return redirect(url_for('login', next=request.url))
+
+
+@app.before_request
+def check_user_profile_settings():
+    if request.endpoint and 'static' not in request.endpoint:
+        if (request.endpoint not in ('doctor_to_assist', 'api_doctors_to_assist') and
+            UserProfileManager.has_ui_assistant() and
+            not current_user.master
+        ):
+            return redirect(url_for('doctor_to_assist', next=request.url))
 
 
 @app.route('/')
@@ -57,7 +69,7 @@ def login():
                 session_save_user(user)
                 # Tell Flask-Principal the identity changed
                 identity_changed.send(current_app._get_current_object(), identity=Identity(user.id))
-                return redirect(request.args.get('next') or request.referrer or UserProfileManager.get_default_url())
+                return redirect_after_user_change()
             else:
                 errors.append(u'Аккаунт неактивен')
         else:
@@ -70,20 +82,27 @@ def session_save_user(user):
     session['hippo_user'] = user
 
 
+def redirect_after_user_change():
+    next_url = request.args.get('next') or request.referrer or UserProfileManager.get_default_url()
+    if UserProfileManager.has_ui_assistant() and not current_user.master:
+        next_url = url_for('.doctor_to_assist', next=next_url)
+    return redirect(next_url)
+
+
 @app.route('/select_role/', methods=['GET', 'POST'])
 @public_endpoint
 def select_role():
     form = RoleForm()
-
     errors = list()
-
     form.roles.choices = current_user.roles
 
-    # Validate form input
     if form.is_submitted():
         current_user.current_role = form.roles.data
         identity_changed.send(current_app._get_current_object(), identity=Identity(current_user.id))
-        return redirect(request.args.get('next') or request.referrer or url_for('index'))
+        if not UserProfileManager.has_ui_assistant() and current_user.master:
+            current_user.set_master(None)
+            identity_changed.send(current_app._get_current_object(), identity=Identity(current_user.id))
+        return redirect_after_user_change()
     return render_template('user/select_role.html', form=form, errors=errors)
 
 
@@ -98,6 +117,24 @@ def logout():
     # Tell Flask-Principal the user is anonymous
     identity_changed.send(current_app._get_current_object(), identity=AnonymousIdentity())
     return redirect(request.args.get('next') or '/')
+
+
+@app.route('/doctor_to_assist/', methods=['GET', 'POST'])
+def doctor_to_assist():
+    if request.method == "POST":
+        user_id = request.json['user_id']
+        profile_id = request.json['profile_id']
+        master_user = UserAuth.get_by_id(user_id)
+        profile = rbUserProfile.query.get(profile_id)
+        master_user.current_role = (profile.code, profile.name)
+        current_user.set_master(master_user)
+        identity_changed.send(current_app._get_current_object(), identity=Identity(current_user.id))
+        return jsonify({
+            'redirect_url': request.args.get('next') or UserProfileManager.get_default_url()
+        })
+    if not UserProfileManager.has_ui_assistant():
+        return redirect(UserProfileManager.get_default_url())
+    return render_template('user/select_master_user.html')
 
 
 @app.route('/api/rb/')
@@ -127,6 +164,22 @@ def api_refbook(name):
 @cache.memoize(86400)
 def api_roles(user_login):
     return jsonify(UserAuth.get_roles_by_login(user_login.strip()))
+
+
+@app.route('/api/doctors_to_assist')
+def api_doctors_to_assist():
+    viz = PersonTreeVisualizer()
+    persons = db.session.query(Person).add_entity(rbUserProfile).join(Person.user_profiles).filter(
+        rbUserProfile.code.in_([UserProfileManager.doctor_clinic, UserProfileManager.doctor_diag])
+    ).options(
+        lazyload('*'),
+        joinedload(Person.speciality)
+    ).order_by(
+        Person.lastName,
+        Person.firstName
+    )
+    res = [viz.make_person_with_profile(person, profile) for person, profile in persons]
+    return jsonify(res)
 
 
 @cache.memoize(86400)

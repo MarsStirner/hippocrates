@@ -2,11 +2,14 @@
 
 import hashlib
 from flask import url_for
-from application.lib.utils import safe_traverse_attrs
+from flask.ext.login import UserMixin, AnonymousUserMixin, current_user
 
 from application.systemwide import db
+from application.lib.utils import safe_traverse_attrs, initialize_name
 from application.models.exists import Person, vrbPersonWithSpeciality
-from flask.ext.login import UserMixin, AnonymousUserMixin, current_user
+from ..models.actions import ActionType_User
+from ..models.exists import rbUserProfile
+
 
 from application.models.enums import ActionStatus
 from application.lib.user_rights import (urEventPoliclinicPaidCreate, urEventPoliclinicOmsCreate,
@@ -25,7 +28,9 @@ class User(UserMixin):
                                   if not callable(value) and not key.startswith('__')))
         self.roles = list()
         self._current_role = None
+        self._current_role_name = None
         self.rights = dict()
+        self.current_rights = []
         self.post = dict()
         if person.post:
             self.post.update(dict((key, value)
@@ -41,6 +46,7 @@ class User(UserMixin):
         self.action_type_org_structures = atos
         self.action_type_personally = []
         self.info = vrbPersonWithSpeciality.query.get(self.id)
+        self.master = None
 
     @property
     def current_role(self):
@@ -48,17 +54,24 @@ class User(UserMixin):
 
     @current_role.setter
     def current_role(self, value):
-        self._current_role = value
-        from ..models.actions import ActionType_User
-        from ..models.exists import rbUserProfile
+        """
+        @type value: str|tuple
+        :param value: profile_code|(profile_code, profile_name)
+        """
+        if isinstance(value, tuple):
+            code, name = value
+        else:
+            code, name = value, ''
+        self._current_role = code
+        self._current_role_name = name
         self.action_type_personally = [
             record.actionType_id
             for record in ActionType_User.query.outerjoin(rbUserProfile).filter(db.or_(
                 ActionType_User.person_id == self.id,
-                rbUserProfile.code == value
+                rbUserProfile.code == code
             ))
         ]
-        self.current_rights = self.rights[value]
+        self.current_rights = self.rights[code]
 
     def is_active(self):
         return self.deleted == 0
@@ -86,7 +99,19 @@ class User(UserMixin):
 
     def has_right(self, *rights):
         current_rights = set(self.current_rights)
-        return any((right in current_rights) for right in rights)
+        if self.master:
+            return any(
+                (right in current_rights and self.master.has_right(right))
+                for right in rights
+            )
+        else:
+            return any((right in current_rights) for right in rights)
+
+    def id_any_in(self, *id_list):
+        my_ids = [self.id]
+        if self.master:
+            my_ids.append(self.master.id)
+        return any(id_ in my_ids for id_ in id_list)
 
     def set_roles_rights(self, person):
         if person.user_profiles:
@@ -97,16 +122,33 @@ class User(UserMixin):
                     for right in role.rights:
                         self.rights[role.code].append(right.code)
 
+    def set_master(self, master_user):
+        self.master = master_user
+
+    def get_main_user(self):
+        return self.master or self
+
+    def format_name(self, is_master=False):
+        if is_master:
+            return u'{0}, {1} ({2})'.format(
+                initialize_name(self.lastName, self.firstName, self.patrName),
+                safe_traverse_attrs(self.speciality, 'name'),
+                self._current_role_name
+            )
+        else:
+            return u'{0} {1}'.format(self.lastName, self.firstName)
+
     def export_js(self):
         return {
-            'id': self.get_id(),
+            'id': self.id,
             'roles': self.roles,
             'is_admin': self.is_admin(),
             'current_role': self.current_role,
             'rights': self.rights,
             'action_type_org_structures': sorted(getattr(self, 'action_type_org_structures', set())),
             'action_type_personally': sorted(getattr(self, 'action_type_personally', [])),
-            'info': getattr(self, 'info', {})
+            'info': getattr(self, 'info', {}),
+            'master': self.master.export_js() if self.master else None
         }
 
 
@@ -133,6 +175,10 @@ class UserAuth():
         if person and cls.__check_password(person.password, password):
             return User(person)
         return None
+
+    @classmethod
+    def get_by_id(cls, person_id):
+        return User(Person.query.get(person_id))
 
     @classmethod
     def __get_by_login(cls, login):
@@ -231,7 +277,7 @@ class UserUtils(object):
         return event and (
             current_user.has_right('adm') or (
                 event.is_closed and
-                current_user.id in (event.createPerson_id, event.execPerson_id) and
+                current_user.id_any_in(event.createPerson_id, event.execPerson_id) and
                 current_user.has_right('evtEditClosed')
             ) or not event.is_closed)
 
@@ -246,7 +292,7 @@ class UserUtils(object):
         if current_user.has_right('adm', 'evtDelAll'):
             return True
         elif current_user.has_right('evtDelOwn') and not event.is_closed:
-            if current_user.id in (event.execPerson_id, event.createPerson_id):
+            if current_user.id_any_in(event.execPerson_id, event.createPerson_id):
                 if event.payments:
                     out_msg['message'] = u'В обращении есть платежи по услугам'
                     return False
@@ -285,7 +331,7 @@ class UserUtils(object):
         if current_user.has_right('adm'):
             return True
         # Состояние пользователя
-        if not current_user.id in (event.execPerson_id, event.createPerson_id):
+        if not current_user.id_any_in(event.execPerson_id, event.createPerson_id):
             out_msg['message'] = u'Пользователь не является создателем или ответственным за обращение'
             return False
         # есть ли ограничения на закрытие обращений определенных EventType
@@ -323,7 +369,7 @@ class UserUtils(object):
                     current_user.has_right('actDelAll') or (
                         # либо только своих
                         current_user.has_right('actDelOwn') and (
-                            current_user.id in (action.createPerson_id, action.person_id))))))
+                            current_user.id_any_in(action.createPerson_id, action.person_id))))))
 
     @staticmethod
     def can_create_action(event_id, at_id, class_=None):
@@ -349,7 +395,7 @@ class UserUtils(object):
                     current_user.has_right('editOtherpeopleAction') or (
                         # либо право на свои определённых классов
                         current_user.has_right(updateRight) and
-                        current_user.id in (action.createPerson_id, action.person_id)))))
+                        current_user.id_any_in(action.createPerson_id, action.person_id)))))
 
     @staticmethod
     def can_read_action(action):
@@ -357,7 +403,7 @@ class UserUtils(object):
         return action and (
             current_user.has_right('adm') or (
                 current_user.has_right(readRight) and
-                current_user.id in (action.createPerson_id, action.person_id)))
+                current_user.id_any_in(action.createPerson_id, action.person_id)))
 
 
 class UserProfileManager(object):
@@ -368,9 +414,10 @@ class UserProfileManager(object):
     doctor_clinic = 'clinicDoctor'  # Врач поликлиники
     doctor_diag = 'diagDoctor'  # Врач диагностики
     nurse_admission = 'admNurse'  # Медсестра приемного отделения
+    nurse_assist = 'assistNurse'  # Медсестра (ассистент врача)
 
     ui_groups = {
-        'doctor': [admin, doctor_clinic, doctor_diag],
+        'doctor': [admin, doctor_clinic, doctor_diag, nurse_assist],
         'registrator': [admin, reg_clinic],
         'registrator_cut': [admin, nurse_admission]
     }
@@ -389,6 +436,10 @@ class UserProfileManager(object):
         return user.current_role if not user.is_anonymous() else None
 
     @classmethod
+    def has_ui_admin(cls):
+        return cls._get_user_role() == cls.admin
+
+    @classmethod
     def has_ui_registrator(cls):
         return cls._get_user_role() in cls.ui_groups['registrator']
 
@@ -399,6 +450,14 @@ class UserProfileManager(object):
     @classmethod
     def has_ui_doctor(cls):
         return cls._get_user_role() in cls.ui_groups['doctor']
+
+    @classmethod
+    def has_ui_diag_doctor(cls):
+        return cls._get_user_role() == cls.doctor_diag
+
+    @classmethod
+    def has_ui_assistant(cls):
+        return cls._get_user_role() == cls.nurse_assist
 
     @classmethod
     def get_default_url(cls):

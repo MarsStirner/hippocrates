@@ -414,7 +414,8 @@ var WebMis20 = angular.module('WebMis20', [
 
     return Settings;
 }])
-.factory('PrintingService', ['$window', '$http', '$rootScope', '$timeout', function ($window, $http, $rootScope, $timeout) {
+.factory('PrintingService', ['$window', '$http', '$rootScope', '$timeout', 'CurrentUser',
+        function ($window, $http, $rootScope, $timeout, CurrentUser) {
     var PrintingService = function (context_type) {
         if (arguments.length >= 3) {
             this.target = arguments[2]
@@ -456,7 +457,7 @@ var WebMis20 = angular.module('WebMis20', [
                         {}, item.context, {
                             'currentOrgStructure': "",
                             'currentOrganisation': 3479,
-                            'currentPerson': current_user_id
+                            'currentPerson': CurrentUser.get_main_user().id
                         }
                     )
                 }

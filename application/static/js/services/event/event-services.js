@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('WebMis20.services').
-    service('WMEventServices', ['$http', '$injector', '$q', 'MessageBox', 'Settings', 'WMEventFormState',
-            function ($http, $injector, $q, MessageBox, Settings, WMEventFormState) {
+    service('WMEventServices', ['$http', '$injector', '$q', 'MessageBox', 'Settings', 'WMEventFormState', 'CurrentUser',
+            function ($http, $injector, $q, MessageBox, Settings, WMEventFormState, CurrentUser) {
         function contains_sg (event, at_id, service_id) {
             return event.services.some(function (sg) {
                 return sg.at_id === at_id && (sg.service_id !== undefined ? sg.service_id === service_id : true);
@@ -128,7 +128,7 @@ angular.module('WebMis20.services').
                 }
             },
             coordinate: function (action, off) {
-                var user = off ? null : {id: current_user_id},
+                var user = off ? null : {id: current_user_id}, // fix it if it will be used
                     date = off ? null : new Date();
                 if ((action.is_coordinated() && off) || (!action.is_coordinated() && !off)) {
                     action.coord_person = user;
@@ -210,7 +210,7 @@ angular.module('WebMis20.services').
                         'client_id': null
                     },
                     'character': null,
-                    'person': current_user.info,
+                    'person': CurrentUser.get_main_user().info,
                     'notes': null,
                     'action_id': null,
                     'action': action_info ? action_info : null,

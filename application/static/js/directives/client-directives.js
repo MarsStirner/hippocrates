@@ -313,7 +313,6 @@ angular.module('WebMis20.directives').
                 link: function(scope, elm, attrs, formCtrl) {
                     scope.cbtForm = formCtrl;
                     scope.rbBloodType = RefBookService.get('rbBloodType');
-                    scope.rbPerson = RefBookService.get('vrbPersonWithSpeciality');
 
                     scope.$watch('cbtForm.$dirty', function(n, o) {
                         if (n !== o) {
@@ -346,13 +345,9 @@ angular.module('WebMis20.directives').
             <div class="form-group col-md-5"\
                  ng-class="{\'has-error\': (cbtForm.$dirty || modelBloodType.id) && cbtForm.cbt_person.$invalid}">\
                 <label for="cbt_person[[idPostfix]]" class="control-label">Врач, установивший группу крови</label>\
-                <ui-select class="form-control" id="cbt_person[[idPostfix]]" name="cbt_person" theme="select2"\
-                           ng-model="modelBloodType.person" ng-disabled="!edit_mode()" ng-required="cbtForm.$dirty">\
-                    <ui-select-match placeholder="">[[$select.selected.name]]</ui-select-match>\
-                    <ui-select-choices repeat="p in rbPerson.objects | filter: $select.search track by p.id">\
-                        <div ng-bind-html="p.name | highlight: $select.search"></div>\
-                    </ui-select-choices>\
-                </ui-select>\
+                <wm-person-select id="cbt_person[[idPostfix]]" name="cbt_person"\
+                    ng-model="modelBloodType.person" ng-disabled="!edit_mode()" ng-required="cbtForm.$dirty">\
+                </wm-person-select>\
             </div>\
         </div>\
     </div>\

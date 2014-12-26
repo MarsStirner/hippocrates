@@ -2,8 +2,9 @@
  * Created by mmalkov on 14.07.14.
  */
 angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodies'])
-.service('ActionTypeTreeService', ['$http', '$q', function ($http, $q) {
-    var trees = [];
+.service('ActionTypeTreeService', ['$http', '$q', 'CurrentUser', function ($http, $q, CurrentUser) {
+    var trees = [],
+        cur_user = CurrentUser.get_main_user();
     var Tree = function () {
         var TreeItem = function (source) {
             if (!source) {
@@ -59,11 +60,11 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
             return ! (sex && sex != client_info.sex_raw);
         }
         function os_acceptable(orgstructures) {
-            return orgstructures && aux.any_in(current_user.action_type_org_structures, orgstructures)
+            return orgstructures && aux.any_in(cur_user.action_type_org_structures, orgstructures)
         }
         self.os_acceptable = os_acceptable;
         function personally_acceptable(id) {
-            return current_user.action_type_personally.length && current_user.action_type_personally.has(id)
+            return cur_user.action_type_personally.length && cur_user.action_type_personally.has(id)
         }
         self.personally_acceptable = personally_acceptable;
         function keywords_acceptable(keywords, item) {

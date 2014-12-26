@@ -67,14 +67,14 @@ def create_action(action_type_id, event_id, src_action=None, assigned=None, prop
     now_date = now.date()
     actionType = ActionType.query.get(int(action_type_id))
     event = Event.query.get(int(event_id))
-    current_user_p = Person.query.get(current_user.get_id())
+    main_user_p = Person.query.get(current_user.get_main_user().id)
 
     action = Action()
     action.actionType = actionType
     action.event = event
     action.event_id = event.id  # need for now
     action.begDate = now  # todo
-    action.setPerson = current_user_p
+    action.setPerson = main_user_p
     action.office = actionType.office or u''
     action.amount = actionType.amount if actionType.amountEvaluation in (0, 7) else 1
     action.status = actionType.defaultStatus
@@ -108,7 +108,7 @@ def create_action(action_type_id, event_id, src_action=None, assigned=None, prop
     elif actionType.defaultPersonInEvent == DP_EVENT_EXEC_PERSON:
         action.person = event.execPerson
     elif actionType.defaultPersonInEvent == DP_CURRENT_USER:
-        action.person = current_user_p
+        action.person = main_user_p
 
     action.plannedEndDate = get_planned_end_datetime(action_type_id)
     action.uuid = get_new_uuid()

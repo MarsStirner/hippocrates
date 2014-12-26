@@ -58,14 +58,14 @@
                              toc-element toc-name="tocEventForm" form-safe-close>
                         <wm-client-info client="event.info.client"></wm-client-info>
                         {% include "event/_main_info.html" %}
-                        {% if current_user.role_in('admin', 'doctor', 'clinicDoctor', 'diagDoctor') %}
+                        {% if user_profiles_mng.has_ui_doctor() %}
                             {% include "event/_diagnoses.html" %}
                         {% endif %}
-                        {% if current_user.role_in('admin', 'rRegistartor', 'clinicRegistrator') %}
+                        {% if user_profiles_mng.has_ui_registrator() %}
                             {% include "event/_services.html" %}
                             {% include "event/_payment.html" %}
                         {% endif %}
-                        {% if current_user.role_in('admin', 'doctor', 'clinicDoctor', 'diagDoctor') %}
+                        {% if user_profiles_mng.has_ui_doctor() %}
                             <div class="marginal" ng-if="!formstate.is_diagnostic() && !event.is_new()">
                                 <ng-form name="eventMedDocActionsForm" toc-element="Медицинские документы">
                                     <legend>Медицинские документы</legend>

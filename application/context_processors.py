@@ -70,5 +70,6 @@ def general_menu():
 @app.context_processor
 def user_utils():
     return {
-        'user_utils': UserUtils()
+        'user_utils': UserUtils(),
+        'user_profiles_mng': UserProfileManager()
     }

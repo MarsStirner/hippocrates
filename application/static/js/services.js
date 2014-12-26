@@ -59,6 +59,22 @@ angular.module('WebMis20.services', []).
             }
         }
     }]).
+    service('CurrentUser', [function () {
+        // пока инициализация через глобального юзера, а потом через rest
+        angular.extend(this, current_user);
+        this.get_main_user = function () {
+            return this.master || this;
+        };
+        this.has_right = function () {
+            return [].clone.call(arguments).filter(aux.func_in(this.get_user().rights)).length > 0;
+        };
+        this.has_role = function () {
+            return [].clone.call(arguments).filter(aux.func_in(this.roles)).length > 0;
+        };
+        this.current_role_in = function () {
+            return [].clone.call(arguments).has(this.current_role);
+        };
+    }]).
     service('MessageBox', ['$modal', function ($modal) {
         return {
             info: function (head, message) {

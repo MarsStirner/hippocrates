@@ -9,8 +9,7 @@ var CreateEventModalCtrl = function ($scope, $modalInstance) {
         $modalInstance.close(true);
     };
 };
-var ClientModalCtrl = function ($scope, $modalInstance, client, PrintingService, $modal, WMWindowSync) {
-    $scope.current_user = current_user;
+var ClientModalCtrl = function ($scope, $modalInstance, client, PrintingService, $modal, WMWindowSync, CurrentUser) {
     $scope.client = client;
     $scope.client_id = client.client_id;
     $scope.alerts = [];
@@ -97,7 +96,7 @@ var ClientModalCtrl = function ($scope, $modalInstance, client, PrintingService,
     });
 };
 
-var ClientSearch = function ($scope, WMClient, $modal) {
+var ClientSearch = function ($scope, WMClient, $modal, CurrentUser) {
     $scope.aux = aux;
     $scope.params = aux.getQueryParams(document.location.search);
     $scope.query = "";
@@ -118,7 +117,7 @@ var ClientSearch = function ($scope, WMClient, $modal) {
     });
 
     $scope.modal_client = function() {
-        var template = current_user.current_role === 'admNurse' ?
+        var template = CurrentUser.current_role_in('admNurse') ?
             'modal-client-cut.html' :
             'modal-client.html';
         var modalInstance = $modal.open({
@@ -133,5 +132,5 @@ var ClientSearch = function ($scope, WMClient, $modal) {
         });
     };
 };
-WebMis20.controller('ClientSearch', ['$scope', 'WMClient', '$modal', ClientSearch]);
+WebMis20.controller('ClientSearch', ['$scope', 'WMClient', '$modal', 'CurrentUser', ClientSearch]);
 

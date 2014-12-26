@@ -26,7 +26,7 @@ class EventSaveException(Exception):
 def create_new_event(event_data, local_contract_data):
     base_msg = u'Невозможно создать обращение: %s.'
     event = Event()
-    event.setPerson_id = current_user.get_id()
+    event.setPerson_id = current_user.get_main_user().id
     event.eventType = EventType.query.get(event_data['event_type']['id'])
     event.client_id = event_data['client_id']
     event.client = Client.query.get(event_data['client_id'])

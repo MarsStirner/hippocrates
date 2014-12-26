@@ -1,23 +1,15 @@
 # -*- encoding: utf-8 -*-
 
 from flask import request, render_template, abort, redirect
-from jinja2 import TemplateNotFound
+
 from application.app import app
 from ..app import module
-from flask.ext.login import current_user
+from application.lib.utils import breadcrumb
+from application.models.event import Event
+from application.lib.user import UserProfileManager
 
 # noinspection PyUnresolvedReferences
 from . import api_json
-from application.lib.utils import breadcrumb
-from application.models.event import Event
-
-
-@module.route('/')
-def index():
-    try:
-        return render_template('event/index.html')
-    except TemplateNotFound:
-        abort(404)
 
 
 @module.route('/event.html')
@@ -48,8 +40,7 @@ def new_event():
 
 def get_event_form(**kwargs):
     # В зависимости от ролей и прав разный лейаут
-    if current_user.role_in('admin', 'doctor', 'clinicDoctor', 'diagDoctor',
-                            'rRegistartor', 'clinicRegistrator'):
+    if UserProfileManager.has_ui_registrator() or UserProfileManager.has_ui_doctor():
         return render_template('event/event_info.html', **kwargs)
     return abort(403)
 

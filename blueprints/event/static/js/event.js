@@ -3,7 +3,7 @@
  */
 var EventDiagnosesCtrl = function ($scope) {
 };
-var EventMainInfoCtrl = function ($scope, RefBookService, EventType, $filter, MessageBox) {
+var EventMainInfoCtrl = function ($scope, RefBookService, EventType, $filter, MessageBox, CurrentUser) {
     $scope.Organisation = RefBookService.get('Organisation');
     $scope.Contract = RefBookService.get('Contract');
     $scope.rbRequestType = RefBookService.get('rbRequestType');
@@ -18,20 +18,21 @@ var EventMainInfoCtrl = function ($scope, RefBookService, EventType, $filter, Me
     $scope.finance = {};
     $scope.dms = {};
 
-    var event_created = !$scope.event.is_new();
+    var event_created = !$scope.event.is_new(),
+        main_user = CurrentUser.get_main_user();
     $scope.widget_disabled = function (widget_name) {
         if (['request_type', 'finance', 'contract', 'event_type', 'dms',
              'exec_person', 'org_structure', 'set_date'
         ].has(widget_name)) {
             return event_created || $scope.event.ro;
         } else if (widget_name === 'exec_person') {
-            return event_created || $scope.event.ro || !current_user.current_role_maybe('admin', 'rRegistartor', 'clinicRegistrator');
+            return event_created || $scope.event.ro || !CurrentUser.current_role_in('admin', 'rRegistartor', 'clinicRegistrator');
         } else if (['result', 'ache_result'].has(widget_name)) {
-            return !(current_user.current_role_maybe('admin') ||
+            return !(CurrentUser.current_role_in('admin') ||
                 !$scope.event.ro && (
                     ($scope.formstate.is_policlinic() && (
-                        current_user_id === safe_traverse($scope.event, ['info', 'exec_person', 'id']) ||
-                        current_user_id === safe_traverse($scope.event, ['info', 'create_person_id'])
+                        main_user.id === safe_traverse($scope.event, ['info', 'exec_person', 'id']) ||
+                        main_user.id === safe_traverse($scope.event, ['info', 'create_person_id'])
                     )) || (
                         $scope.formstate.is_diagnostic() && $scope.userHasResponsibilityByAction
                     )
@@ -235,12 +236,12 @@ var EventMainInfoCtrl = function ($scope, RefBookService, EventType, $filter, Me
         });
         $scope.userHasResponsibilityByAction = $scope.event.info.actions ?
             $scope.event.info.actions.some(function (action) {
-                return [action.person_id, action.create_person_id, action.set_person_id].has(current_user_id);
+                return [action.person_id, action.create_person_id, action.set_person_id].has(main_user.id);
             }) :
             false;
     });
 };
-var EventPaymentCtrl = function($scope, RefBookService, Settings, $http, $modal, MessageBox) {
+var EventPaymentCtrl = function($scope, RefBookService, Settings, $http, $modal, MessageBox, CurrentUser) {
     $scope.rbDocumentType = RefBookService.get('rbDocumentType');
 
     var event_created = !$scope.event.is_new();
@@ -321,7 +322,7 @@ var EventPaymentCtrl = function($scope, RefBookService, Settings, $http, $modal,
     };
 
     $scope.payment_box_visible = function () {
-        return current_user.current_role_maybe('admin');
+        return CurrentUser.current_role_in('admin');
     };
 
     $scope.$on('event_loaded', function() {
@@ -619,7 +620,6 @@ var EventServicesCtrl = function($scope, $http) {
 var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $document, PrintingService, Settings,
         $filter, $modal, WMEventServices, WMEventFormState, MessageBox) {
     $scope.aux = aux;
-    $scope.current_role_maybe = current_user.current_role_maybe;
     $scope.Settings = new Settings();
     $scope.alerts = [];
     $scope.eventServices = WMEventServices;
@@ -767,8 +767,10 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
 };
 
 WebMis20.controller('EventDiagnosesCtrl', ['$scope', 'RefBookService', '$http', EventDiagnosesCtrl]);
-WebMis20.controller('EventMainInfoCtrl', ['$scope', 'RefBookService', 'EventType', '$filter', 'MessageBox', EventMainInfoCtrl]);
-WebMis20.controller('EventPaymentCtrl', ['$scope', 'RefBookService', 'Settings', '$http', '$modal', 'MessageBox', EventPaymentCtrl]);
+WebMis20.controller('EventMainInfoCtrl', ['$scope', 'RefBookService', 'EventType', '$filter', 'MessageBox',
+    'CurrentUser', EventMainInfoCtrl]);
+WebMis20.controller('EventPaymentCtrl', ['$scope', 'RefBookService', 'Settings', '$http', '$modal', 'MessageBox',
+    'CurrentUser', EventPaymentCtrl]);
 WebMis20.controller('EventServicesCtrl', ['$scope', '$http', EventServicesCtrl]);
 WebMis20.controller('EventInfoCtrl', ['$scope', 'WMEvent', '$http', 'RefBookService', '$window', '$document',
     'PrintingService', 'Settings', '$filter', '$modal', 'WMEventServices', 'WMEventFormState', 'MessageBox', EventInfoCtrl]);

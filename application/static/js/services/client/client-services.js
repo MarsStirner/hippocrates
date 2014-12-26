@@ -1,7 +1,8 @@
 'use strict';
 
 angular.module('WebMis20.services').
-    service('WMClientServices', ['MessageBox', 'RefBookService', function (MessageBox, RefBookService) {
+    service('WMClientServices', ['MessageBox', 'RefBookService', 'CurrentUser',
+            function (MessageBox, RefBookService, CurrentUser) {
         function get_actual_address (client, entity) {
             var addrs =  client[entity].filter(function (el) {
                 return el.deleted === 0;
@@ -274,7 +275,7 @@ angular.module('WebMis20.services').
                     'date': null,
                     'person': null
                 });
-                bt[0].person = RefBookService.get('vrbPersonWithSpeciality').get(current_user_id);
+                bt[0].person = CurrentUser.info;
             },
             delete_blood_type: function(client, bt) {
                 var self = this;
