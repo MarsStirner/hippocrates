@@ -18,7 +18,7 @@
             <h2 class="vmargin10 marginal">Выберите врача для ассистирования</h2>
             <input type="text" class="form-control marginal" placeholder="ФИО, профиль, специальность..."
                 ng-model="search.$">
-            <div class="scrollable marginal">
+            <div class="scrollable row">
                 <div class="col-md-6" ng-repeat="user in users | filter:search">
                     <button type="button" class="btn btn-lg btn-default btn-block marginal text-left"
                             ng-click="select_user_and_go(user)">
