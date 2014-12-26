@@ -6,9 +6,10 @@ var SelectMasterUserCtrl = function ($scope, $http, $window) {
             $scope.users = data.result;
         });
     };
-    $scope.select_user = function (user) {
+    $scope.select_user_and_go = function (user) {
         $scope.user.selected_id = user.id;
         $scope.user.selected_prof_id = user.profile.id;
+        $scope.submit();
     };
     $scope.user_selected = function (user) {
         if (user === undefined) {

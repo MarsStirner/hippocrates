@@ -24,14 +24,16 @@
             <li>
                 {% if user_profiles_mng.has_ui_assistant() %}
                 <span class="navbar-text user-text-assist">
-                    <span class="glyphicon glyphicon-user"></span>
-                    <span> {{ current_user.format_name() }}<span class="assist-user-text">, ассистирую:<br>
-                        <a href="{{ url_for('doctor_to_assist', next=request.url) }}" title="Выбрать врача"><span class="fa fa-user-md assist-icon"></span></a>
-                        {% if current_user.master %}
-                        <span>{{ current_user.master.format_name(is_master=True) }}</span>
-                        {% else %}
-                        не выбрано
-                        {% endif %}</span>
+                    <span>
+                        <span class="nowrap">
+                            <span class="glyphicon glyphicon-user"></span> {{ current_user.format_name() }}<span class="assist-user-text">, ассистирую:</span>
+                        </span>
+                        <br>
+                        <span class="assist-user-text">
+                            <a href="{{ url_for('doctor_to_assist', next=request.url) }}" title="Выбрать врача"><span class="fa fa-user-md assist-icon"></span></a>
+                            {% if current_user.master %}<span>{{ current_user.master.format_name(is_master=True) }}</span>
+                            {% else %}не выбрано{% endif %}
+                        </span>
                     </span>
                 </span>
                 {% else %}
