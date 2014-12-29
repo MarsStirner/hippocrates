@@ -31,7 +31,7 @@
                     <div class="panel-body">
                         <span ng-if="chart.epicrisis" ng-bind-html="chart.epicrisis.info">
                         </span>
-                        <div class="text-right"><a class="print_link"><span class="glyphicon glyphicon-pencil"></span> Изменить</a> </div>
+                        <div class="text-right"><a class="print_link" href="{{ url_for('.html_epicrisis_edit') }}?event_id=[[ chart.id ]]"><span class="glyphicon glyphicon-pencil"></span> Изменить</a> </div>
                     </div>
 
                 </div>
@@ -290,8 +290,8 @@
                             <td>[[inspection.apgar_score_5]]</td>
                             <td>[[inspection.apgar_score_10]]</td>
                             <td class="col-md-1 nowrap">
-                                <button class="btn btn-primary"><span class="glyphicon glyphicon-pencil"></span> Изменить</button>
-                                <button class="btn btn-danger"><span class="glyphicon glyphicon-trash"></span> Удалить</button>
+                                <a class="btn btn-primary" href="{{ url_for('.html_epicrisis_edit') }}?event_id=[[ chart.id ]]#tab_child[[$index]]"><span class="glyphicon glyphicon-pencil"></span> Изменить</a>
+                                <a class="btn btn-danger"><span class="glyphicon glyphicon-trash"></span> Удалить</a>
                             </td>
                         </tr>
                         <tr>

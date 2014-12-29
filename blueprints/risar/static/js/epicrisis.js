@@ -10,6 +10,14 @@ var EpicrisisCtrl = function ($timeout, $scope, RisarApi) {
             if (!$scope.chart.epicrisis){
                 $scope.chart.epicrisis = {'newborn_inspections' : [{}]};
             }
+            $timeout(function(){
+                var hash = document.location.hash;
+                var prefix = "tab_";
+                hash = hash.replace(/\//, '')
+                if (hash) {
+                    $('.nav-pills a[href='+hash.replace(prefix,"")+']').tab('show') ;
+                }
+            }, 0);
 
         })
     };
@@ -32,11 +40,11 @@ var EpicrisisCtrl = function ($timeout, $scope, RisarApi) {
         var prefix = "tab_";
         hash = hash.replace(/\//, '')
         if (hash) {
-            $('#EpicrisisTabs a[href='+hash.replace(prefix,"")+']').tab('show') ;
+            $('.nav-pills a[href='+hash.replace(prefix,"")+']').tab('show') ;
         }
 
         // Change hash for page-reload
-        $('#EpicrisisTabs a').on('shown.bs.tab', function (e) {
+        $('.nav-pills a').on('shown.bs.tab', function (e) {
             window.location.hash = e.target.hash.replace("#", "#" + prefix);
         })
         reload_epicrisis();
