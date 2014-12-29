@@ -130,10 +130,9 @@ class User(UserMixin):
 
     def format_name(self, is_master=False):
         if is_master:
-            return u'{0}, {1} ({2})'.format(
+            return u'{0}, {1}'.format(
                 initialize_name(self.lastName, self.firstName, self.patrName),
-                safe_traverse_attrs(self.speciality, 'name'),
-                self._current_role_name
+                safe_traverse_attrs(self.speciality, 'name')
             )
         else:
             return u'{0} {1}'.format(self.lastName, self.firstName)

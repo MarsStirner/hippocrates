@@ -59,10 +59,18 @@ body.loading .loader {
 .navbar-static-top .user-text-assist {
     margin: 5px 0 0 0;
 }
-.navbar-static-top .user-text-assist .assist-user-text {
-    font-style: italic;
+.navbar-inverse .navbar-text {
+    color: inherit;
 }
-.navbar-static-top .user-text-assist .assist-icon {
+.navbar-static-top .user-text-assist .popover {
+    width: 300px;
+    max-width: 300px;
+    color: #333;
+}
+.navbar-static-top .user-text-assist .popover .btn{
+   font-size: 14px;
+}
+.navbar-static-top .assist-icon {
     font-size: larger;
 }
 
