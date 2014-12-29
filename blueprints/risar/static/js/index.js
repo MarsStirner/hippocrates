@@ -2,6 +2,7 @@
  * Created by mmalkov on 24.09.14.
  */
 var IndexCtrl = function ($scope, RisarApi) {
+    $scope.query = "";
     $scope.date = null;
     $scope.tickets = [];
     $scope.$watch('date', function (n, o) {
