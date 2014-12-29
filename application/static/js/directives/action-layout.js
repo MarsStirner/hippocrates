@@ -4,7 +4,7 @@
 'use strict';
 
 angular.module('WebMis20.ActionLayout', ['WebMis20.validators', 'WebMis20.directives.personTree', 'WebMis20.directives.wysiwyg'])
-.directive('wmActionLayout', ['$compile', 'SelectAll', function ($compile, SelectAll) {
+.directive('wmActionLayout', ['$compile', 'SelectAll', '$filter', function ($compile, SelectAll, $filter) {
     return {
         restrict: 'E',
         scope: {
@@ -13,6 +13,18 @@ angular.module('WebMis20.ActionLayout', ['WebMis20.validators', 'WebMis20.direct
         link: function (scope, element) {
             var current_element = element;
             var v_groups_count = 0; // Must be set to zero before complete rebuild
+            scope.layout_tools = {
+                format_Diagnosis: function (diag) {
+                    return '{0}: {1} - {2}{ (|3|)}, {4} - {5}'.formatNonEmpty(
+                        safe_traverse(diag, ['diagnosis_type', 'name']),
+                        safe_traverse(diag, ['diagnosis', 'mkb', 'code']),
+                        safe_traverse(diag, ['diagnosis', 'mkb', 'name']),
+                        safe_traverse(diag, ['character', 'name']),
+                        $filter('asDate')(diag.set_date),
+                        $filter('asDate')(diag.end_date)
+                    );
+                }
+            };
 
             function build(tag) {
                 var context = arguments[1];
@@ -60,10 +72,10 @@ angular.module('WebMis20.ActionLayout', ['WebMis20.validators', 'WebMis20.direct
                                 case 'Diagnosis':
                                     if (property.type.vector) {
                                         inner_template =
-                                            '<div ng-repeat="$v in {0}.value">[[ $v.diagnosis_type.name ]]: [[ $v.diagnosis.mkb.code ]] - [[ $v.diagnosis.mkb.name ]] ([[ $v.character.name ]])</div>';
+                                            '<div ng-repeat="$v in {0}.value" ng-bind="layout_tools.format_Diagnosis($v)"></div>';
                                     } else {
                                         inner_template =
-                                            '<span>[[ {0}.value.diagnosis_type.name ]]: [[ {0}.value.diagnosis.mkb.code ]] - [[ {0}.value.diagnosis.mkb.name ]] ([[ {0}.value.character.name ]])</span>';
+                                            '<span ng-bind="layout_tools.format_Diagnosis({0}.value)"></span>';
                                     }
                                     break;
 
