@@ -383,6 +383,10 @@ div.select2-container {
     margin-left: 20px;
 }
 
+.tmargin20 {
+    margin-top: 20px;
+}
+
 .nomarpad {
     margin: 0;
     padding: 0;
@@ -398,6 +402,13 @@ div.select2-container {
 
 .btn-group-justified > .btn-group{
       width:100%;
+}
+
+.mkb-button {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    padding-left: 10px;
+    padding-right: 10px;
 }
 
 .tab-content {

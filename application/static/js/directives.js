@@ -1109,7 +1109,7 @@ angular.module('WebMis20.directives')
                             </ui-select>\
                         </div>\
                     </div>\
-                    <div class="col-md-3">\
+                    <div class="col-md-offset-1 col-md-3">\
                         <div class="form-group" ng-class="{\'has-error\': DiagnosisForm.set_date.$invalid}">\
                             <label for="diagnosis_date" class="control-label">Дата начала</label>\
                             <wm-date name="set_date" ng-model="model.set_date" ng-required="true">\
@@ -1125,9 +1125,8 @@ angular.module('WebMis20.directives')
                     </div>\
                 </div>\
                 <div class="row marginal">\
-                    <div class="col-md-3">\
-                        <div class="form-group"\
-                        ng-class="{\'has-error\': DiagnosisForm.mkb.$invalid}">\
+                    <div class="col-md-8">\
+                        <div class="form-group" ng-class="{\'has-error\': DiagnosisForm.mkb.$invalid}">\
                             <label for="MKB" class="control-label">МКБ</label>\
                             <ui-mkb ng-model="model.diagnosis.mkb" name="mkb" ng-required="true"></ui-mkb>\
                         </div>\
@@ -1144,7 +1143,7 @@ angular.module('WebMis20.directives')
                     </div>\
                 </div>\
                 <div class="row marginal">\
-                    <div class="col-md-4">\
+                    <div class="col-md-6">\
                         <div class="form-group"\
                         ng-class="{\'has-error\': model.person == null}">\
                             <label for="diagnosis_person" class="control-label">Врач</label>\
@@ -1177,19 +1176,19 @@ angular.module('WebMis20.directives')
                     </div>\
                 </div>\
                 <div class="row marginal">\
-                    <div class="col-md-9">\
+                    <div class="col-md-11">\
                         <label for="diagnosis_description" class="control-label">Описание диагноза</label>\
                         <wysiwyg ng-model="model.diagnosis_description" thesaurus-code="[[params.thesaurus_code]]"/>\
                     </div>\
                 </div>\
-                <div class="row marginal">\
+                <div class="row">\
                     <div class="col-md-12">\
                         <button class="btn btn-default btn-sm" ng-click="expanded=!expanded">\
                             <span class="glyphicon glyphicon-chevron-[[expanded ? \'down\' : \'right\']]"></span>\
                         </button>\
                     </div>\
                 </div>\
-                <div class="row marginal" ng-if="expanded">\
+                <div class="row tmargin20 marginal" ng-if="expanded">\
                     <div class="col-md-3">\
                         <label for="phase" class="control-label">Фаза</label>\
                         <ui-select class="form-control" name="phase" theme="select2"\
@@ -1243,8 +1242,8 @@ angular.module('WebMis20.directives')
                         </ui-select>\
                     </div>\
                 </div>\
-                <div class="row marginal" ng-if="expanded">\
-                    <div class="col-md-6">\
+                <div class="row" ng-if="expanded">\
+                    <div class="col-md-11">\
                     <label for="notes" class="control-label">Примечание</label>\
                     <textarea class="form-control" id="notes" name="notes" rows="2" autocomplete="off" ng-model="model.notes"></textarea>\
                     </div>\

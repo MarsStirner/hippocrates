@@ -707,24 +707,30 @@ var WebMis20 = angular.module('WebMis20', [
         restrict: 'E',
         require: '?ngModel',
         template:
-            '<button class="btn btn-default btn-block [[ngRequired && !$model.$modelValue ? \'error-border\' : \'\']]" ng-click="to_show()">[[ $model.$modelValue.code ]] [[$model.$modelValue.name]] <span class="caret"></span></button>' +
+            '<a class="btn btn-default btn-block mkb-button [[ngRequired && !$model.$modelValue ? \'error-border\' : \'\']]" ng-click="to_show()">' +
+                '[[ $model.$modelValue.code ]] [[$model.$modelValue.name]]' +
+                '<span class="caret" ng-if="!$model.$modelValue"></span>' +
+            '</a>' +
             '<div class="well well-sm popupable" ng-show="shown" ng-mouseleave="to_hide_delay()" ng-mouseenter="to_hide_cancel()">' +
                 '<input type="text" ng-model="query" class="form-control" />' +
-                '<table class="table table-condensed table-hover table-clickable">' +
+                '<table class="table table-condensed table-clickable">' +
                     '<thead><tr><th>Код</th><th>Наименование</th></tr></thead>' +
                     '<tbody>' +
-                        '<tr ng-repeat="row in $RefBook.objects | filter:query | limitTo:100" ng-click="onClick(row)">' +
+                        '<tr ng-repeat="row in $RefBook.objects | filter:query | limitTo:100" ng-click="onClick(row)"' +
+                            'ng-class="{\'bg-primary\': is_selected(row.code)}">' +
                             '<td ng-bind="row.code"></td><td ng-bind="row.name"></td>' +
                         '</tr>' +
                     '</tbody>' +
                 '</table>' +
             '</div>',
-        scope: {ngRequired: '='},
+        scope: {
+            ngRequired: '='
+        },
         link: function (scope, element, attributes, ngModel) {
             scope.$model = ngModel;
             scope.$RefBook = RefBookService.get('MKB');
-            var input_elem = $(element[0][0]);
-            var div_elem = $(element[0][1]);
+            var div_elem = $(element[0].childNodes[1]);
+            var btn_elem = $(element[0].childNodes[0]);
             var timeout = null;
             scope.shown = false;
             scope.query='';
@@ -734,7 +740,8 @@ var WebMis20 = angular.module('WebMis20', [
                 } else {
                     scope.query = '';
                 }
-                div_elem.width(input_elem.width());
+                var btn_width = btn_elem.width();
+                div_elem.width(Math.max(btn_width, 500));
                 scope.shown = true;
             };
             scope.to_hide_delay = function () {
@@ -756,6 +763,9 @@ var WebMis20 = angular.module('WebMis20', [
                 return actual.split(' ').filter(function (part) {
                     return part.startswith(expected)
                 }).length > 0;
+            };
+            scope.is_selected = function (mkb_code) {
+                return scope.$model.$modelValue && scope.$model.$modelValue.code === mkb_code;
             };
             function to_hide () {
                 timeout = null;
