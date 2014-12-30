@@ -64,17 +64,19 @@ def api_0_chart(event_id=None):
             if ET is None:
                 return jsonify(None, 400, u'Не настроет тип события - Случай беременности ОМС')
             event.eventType = ET
-            event.organisation = Organisation.query.filter_by(infisCode=str(ORGANISATION_INFIS_CODE)).first()
+
+            exec_person_id = ticket.ticket.schedule.person_id
+            exec_person = Person.query.get(exec_person_id)
+            event.execPerson = exec_person
+            event.orgStructure = exec_person.org_structure
+            event.organisation = exec_person.organisation
+
             event.isPrimaryCode = EventPrimary.primary[0]
             event.order = EventOrder.planned[0]
 
             client_id = ticket.client_id
             setDate = ticket.ticket.begDateTime
             note = ticket.note
-            exec_person_id = ticket.ticket.schedule.person_id
-            event.execPerson_id = exec_person_id
-            event.execPerson = Person.query.get(exec_person_id)
-            event.orgStructure = event.execPerson.org_structure
             event.client = Client.query.get(client_id)
             event.setDate = setDate
             event.note = note
