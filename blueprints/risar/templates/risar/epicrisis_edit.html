@@ -613,12 +613,12 @@
                                 <div class="col-md-2">
                                     <button type="button" class="btn btn-primary text-left marginal" ng-click="add_child()"><span class="glyphicon glyphicon-plus"></span> Добавить</button>
                                     <ul class="nav nav-pills nav-stacked  marginal" id="childrenTabs">
-                                        <li ng-class="{'active': $index==0}" ng-repeat="child in chart.epicrisis.newborn_inspections"><a href="#child[[$index]]" data-toggle="pill"> Ребенок [[$index+1]]</a></li>
+                                        <li ng-class="{'active': $index==0}" ng-repeat="child in chart.epicrisis.newborn_inspections"><a href="#child[[$index+1]]" data-toggle="pill"> Ребенок [[$index+1]]</a></li>
                                     </ul>
                                 </div>
                                 <div class="col-md-10">
                                     <div class="tab-content">
-                                        <div ng-class="{'active': $index==0}" class="tab-pane" id="child[[$index]]" ng-repeat="child in chart.epicrisis.newborn_inspections">
+                                        <div ng-class="{'active': $index==0}" class="tab-pane" id="child[[$index+1]]" ng-repeat="child in chart.epicrisis.newborn_inspections">
                                             <table class="table">
                                                 <thead>
                                                 <tr>
