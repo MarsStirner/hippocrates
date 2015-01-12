@@ -705,7 +705,7 @@
                                                         <td>
                                                             <div class="row" ng-class="{'has-error': lastForm.maturity_rate_[[$index]].$invalid}">
                                                                 <div class="col-md-4">
-                                                                <rb-select ng-model="checkup.maturity_rate" ng-required="true"
+                                                                <rb-select ng-model="child.maturity_rate" ng-required="true"
                                                                            ref-book="rbRisarMaturity_Rate" name="maturity_rate_[[$index]]"></rb-select>
                                                             </div></div>
                                                         </td>
@@ -771,6 +771,14 @@
                                                         </td>
                                                     </tr>
                                                     <tr ng-if="!child.alive">
+                                                        <th class="text-right">Причина смерти</th>
+                                                        <td>
+                                                            <div class="row" ng-class="{'has-error': lastForm.death_reason_[[$index]].$invalid}">
+                                                            <div class="col-md-2">
+                                                                <input ng-model="child.death_reason" ng-required="true" class="form-control" name="death_reason_[[$index]]">
+                                                            </div>
+                                                            </div>
+                                                        </td>
                                                     </tr>
                                                 </tbody>
                                             </table>
