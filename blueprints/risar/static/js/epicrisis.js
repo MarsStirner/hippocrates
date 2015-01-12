@@ -1,8 +1,9 @@
 
 'use strict';
-var EpicrisisCtrl = function ($timeout, $scope, RisarApi) {
+var EpicrisisCtrl = function ($timeout, $scope, RefBookService, RisarApi) {
     var params = aux.getQueryParams(window.location.search);
     var event_id = $scope.event_id = params.event_id;
+    $scope.rbRisarPregnancy_Final = RefBookService.get('rbRisarPregnancy_Final');
 
     var open_tab = function (tab_name){
         var prefix = "tab_";
@@ -20,7 +21,8 @@ var EpicrisisCtrl = function ($timeout, $scope, RisarApi) {
         .then(function (data) {
             $scope.chart = data.event;
             if (!$scope.chart.epicrisis){
-                $scope.chart.epicrisis = {'newborn_inspections' : [{}]};
+                $scope.chart.epicrisis = {'pregnancy_final': $scope.rbRisarPregnancy_Final.get_by_code('rodami'),
+                                          'newborn_inspections' : [{}]};
             }
             $timeout(function(){
                 var hash = document.location.hash;
@@ -45,6 +47,25 @@ var EpicrisisCtrl = function ($timeout, $scope, RisarApi) {
         }, 0);
 
     }
+
+    $scope.newborn_inspection_delete = function(inspection){
+        if(inspection.id){
+            RisarApi.epicrisis.newborn_inspections.delete(inspection.id)
+            .then(function () {
+                inspection.deleted = 1;
+            })
+        };
+    }
+
+    $scope.newborn_inspection_restore = function(inspection){
+        if(inspection.id){
+            RisarApi.epicrisis.newborn_inspections.undelete(inspection.id)
+            .then(function () {
+                inspection.deleted = 0;
+            })
+        };
+    }
+
     var init = function () {
         var hash = document.location.hash;
         if (hash) {

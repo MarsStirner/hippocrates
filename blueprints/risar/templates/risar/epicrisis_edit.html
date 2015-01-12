@@ -238,21 +238,11 @@
                             </thead>
                             <tbody>
                                 <tr>
-                                    <th class="text-right" ng-class="{'text-danger': secondForm.death.$invalid}">Смерть матери</th>
-                                    <td><div class="row">
-                                        <div class="col-md-3">
-                                            <input ng-model="chart.epicrisis.death" class="checkbox" type="checkbox"
-                                                   ng-required="true" name="death">
-                                        </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
                                     <td class="text-right">Причина смерти матери</td>
                                     <td><div class="row" ng-class="{'has-error': secondForm.reason_of_death.$invalid}">
                                         <div class="col-md-3">
                                         <input ng-model="chart.epicrisis.reason_of_death" class="form-control"
-                                               ng-required="true" ng-disabled="!chart.epicrisis.death" name="reason_of_death">
+                                               ng-required="true"name="reason_of_death">
                                         </div></div>
                                     </td>
 
@@ -260,7 +250,7 @@
                                 <tr>
                                     <td class="text-right">Дата смерти матери</td>
                                     <td>
-                                        <wm-date name="death_date" ng-disabled="!chart.epicrisis.death" ng-class="{'has-error': secondForm.death_date.$invalid}"
+                                        <wm-date name="death_date" ng-class="{'has-error': secondForm.death_date.$invalid}"
                                                  ng-required="true" ng-model="chart.epicrisis.death_date" style="width: 250px"></wm-date>
                                     </td>
                                 </tr>
@@ -270,7 +260,7 @@
                                         <div class="row">
                                         <div class="col-md-2">
                                         <div fs-time ng-model="chart.epicrisis.death_time" ng-required="true" name="death_time"
-                                             ng-disabled="!chart.epicrisis.death" ng-class="{'has-error': secondForm.death_time.$invalid}"></div>
+                                              ng-class="{'has-error': secondForm.death_time.$invalid}"></div>
                                         </div>
                                         </div>
                                     </td>
@@ -280,7 +270,7 @@
                                     <td>
                                         <div class="row">
                                             <div class="col-md-5">
-                                                 <ui-mkb ng-disabled="!chart.epicrisis.death" ng-model="chart.epicrisis.pat_diagnosis"
+                                                 <ui-mkb ng-model="chart.epicrisis.pat_diagnosis"
                                                          name="pat_diagnosis" ng-required="true"
                                                          ng-class="{'has-error': secondForm.pat_diagnosis.$invalid}"></ui-mkb>
                                             </div>
@@ -291,7 +281,7 @@
                                     <td class="text-right"><span tooltip="Заключение лечебно-контрольной комиссии">Заключение ЛКК</span></td>
                                     <td>
                                         <div class="row"><div class="col-md-7">
-                                            <wysiwyg ng-disabled="!chart.epicrisis.death" ng-model="chart.epicrisis.control_expert_conclusion" />
+                                            <wysiwyg ng-model="chart.epicrisis.control_expert_conclusion" />
                                         </div></div>
                                 </tr>
                             </tbody>
@@ -691,7 +681,7 @@
                                                             </div>
                                                         </td>
                                                     </tr>
-                                                    <tr>
+                                                    <tr ng-if="child.alive">
                                                         <th class="text-right">Дата рождения</th>
                                                         <td>
                                                             <wm-date ng-model="child.birth_date" ng-required="true"
@@ -699,7 +689,7 @@
                                                                      style="width: 250px" name="birth_date_[[$index]]"></wm-date>
                                                         </td>
                                                     </tr>
-                                                    <tr>
+                                                    <tr ng-if="child.alive">
                                                         <th class="text-right">Время рождения</th>
                                                         <td>
                                                             <div class="row" ng-class="{'has-error': lastForm.birth_time_[[$index]].$invalid}">
@@ -710,7 +700,7 @@
                                                             </div>
                                                         </td>
                                                     </tr>
-                                                    <tr>
+                                                    <tr ng-if="child.alive">
                                                         <th class="text-right">Степень доношенности</th>
                                                         <td>
                                                             <div class="row" ng-class="{'has-error': lastForm.maturity_rate_[[$index]].$invalid}">
@@ -720,12 +710,12 @@
                                                             </div></div>
                                                         </td>
                                                     </tr>
-                                                    <tr>
+                                                    <tr ng-if="child.alive">
                                                         <th class="text-right">Оценка по Апгар</th>
                                                         <td>&nbsp;
                                                         </td>
                                                     </tr>
-                                                    <tr>
+                                                    <tr ng-if="child.alive">
                                                         <td class="text-right">на 1 минуту жизни</td>
                                                         <td>
                                                             <div class="row">
@@ -737,7 +727,7 @@
                                                             </div>
                                                         </td>
                                                     </tr>
-                                                    <tr>
+                                                    <tr ng-if="child.alive">
                                                         <td class="text-right">на 5 минуту жизни</td>
                                                         <td>
                                                             <div class="row">
@@ -749,7 +739,7 @@
                                                             </div>
                                                         </td>
                                                     </tr>
-                                                    <tr>
+                                                    <tr ng-if="child.alive">
                                                         <td class="text-right">на 10 минуту жизни</td>
                                                         <td>
                                                             <div class="row">
@@ -760,6 +750,27 @@
                                                             </div>
                                                             </div>
                                                         </td>
+                                                    </tr>
+                                                    <tr ng-if="!child.alive">
+                                                        <th class="text-right">Дата смерти</th>
+                                                        <td>
+                                                            <wm-date ng-model="child.birth_date" ng-required="true"
+                                                                     ng-class="{'has-error': lastForm.birth_date_[[$index]].$invalid}"
+                                                                     style="width: 250px" name="birth_date_[[$index]]"></wm-date>
+                                                        </td>
+                                                    </tr>
+                                                    <tr ng-if="!child.alive">
+                                                        <th class="text-right">Время смерти</th>
+                                                        <td>
+                                                            <div class="row" ng-class="{'has-error': lastForm.birth_time_[[$index]].$invalid}">
+                                                                <div class="col-md-2">
+                                                                    <div fs-time ng-required="true"
+                                                                         ng-model="child.birth_time" name="birth_time_[[$index]]"></div>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr ng-if="!child.alive">
                                                     </tr>
                                                 </tbody>
                                             </table>

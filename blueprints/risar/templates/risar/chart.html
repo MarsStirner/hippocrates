@@ -163,7 +163,7 @@
                 <div class="panel panel-default">
                     <div class="panel-heading">Эпикриз (<a ng-href="{{ url_for('.html_epicrisis') }}?event_id=[[ chart.id ]]">подробнее</a>)
                     <a class="pull-right" ng-href="{{ url_for('.html_epicrisis_edit') }}?event_id=[[ chart.id ]]"
-                       title="">Заполнить эпикриз</a></div>
+                       title="">[[chart.epicrisis ? 'Изменить': 'Заполнить эпикриз']]</a></div>
                     <div class="panel-body">
                         <span ng-if="!chart.epicrisis">Отсутствует</span>
                         <span ng-if="chart.epicrisis" ng-bind-html="chart.epicrisis.info">

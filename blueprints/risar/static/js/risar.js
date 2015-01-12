@@ -126,6 +126,15 @@ WebMis20
     this.epicrisis = {
         save: function (event_id, data) {
             return wrapper('POST', Config.url.api_epicrisis.format(event_id), {}, data);
+        },
+
+        newborn_inspections: {
+            delete: function(id){
+                return wrapper('DELETE', Config.url.api_newborn_inspection.format(id));
+            },
+            undelete: function (id) {
+                return wrapper('POST', Config.url.api_newborn_inspection.format(id) + '/undelete');
+            }
         }
     };
 }])

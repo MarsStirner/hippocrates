@@ -280,18 +280,20 @@
                     <tbody>
                         <tr ng-repeat="inspection in chart.epicrisis.newborn_inspections">
                             <td>[[$index+1]]</td>
-                            <td>[[inspection.alive ? 'да': 'нет']]</td>
-                            <td>[[inspection.birth_date |asDate ]] [[inspection.birth_time]]</td>
-                            <td>[[inspection.sex]]</td>
-                            <td>[[inspection.weight]]</td>
-                            <td>[[inspection.length]]</td>
-                            <td>[[inspection.maturity_rate.name]]</td>
-                            <td>[[inspection.apgar_score_1]]</td>
-                            <td>[[inspection.apgar_score_5]]</td>
-                            <td>[[inspection.apgar_score_10]]</td>
-                            <td class="col-md-1 nowrap">
+                            <td ng-if="inspection.deleted" colspan="10" class="text-center">
+                                Удалено. <a ng-click="newborn_inspection_restore(inspection)" style="cursor: pointer">Восстановить</a>?</td>
+                            <td ng-if="!inspection.deleted">[[inspection.alive ? 'да': 'нет']]</td>
+                            <td ng-if="!inspection.deleted">[[inspection.birth_date |asDate ]] [[inspection.birth_time]]</td>
+                            <td ng-if="!inspection.deleted">[[inspection.sex]]</td>
+                            <td ng-if="!inspection.deleted">[[inspection.weight]]</td>
+                            <td ng-if="!inspection.deleted">[[inspection.length]]</td>
+                            <td ng-if="!inspection.deleted">[[inspection.maturity_rate.name]]</td>
+                            <td ng-if="!inspection.deleted">[[inspection.apgar_score_1]]</td>
+                            <td ng-if="!inspection.deleted">[[inspection.apgar_score_5]]</td>
+                            <td ng-if="!inspection.deleted">[[inspection.apgar_score_10]]</td>
+                            <td ng-if="!inspection.deleted" class="col-md-1 nowrap">
                                 <a class="btn btn-primary" href="{{ url_for('.html_epicrisis_edit') }}?event_id=[[ chart.id ]]#tab_child[[$index+1]]"><span class="glyphicon glyphicon-pencil"></span> Изменить</a>
-                                <a class="btn btn-danger"><span class="glyphicon glyphicon-trash"></span> Удалить</a>
+                                <a class="btn btn-danger" ng-click="newborn_inspection_delete(inspection)"><span class="glyphicon glyphicon-trash"></span> Удалить</a>
                             </td>
                         </tr>
                         <tr>
