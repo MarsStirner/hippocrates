@@ -308,45 +308,56 @@ def represent_intolerance(obj):
 
 
 def make_epicrisis_info(epicrisis):
-    # todo: переделать
     try:
+        info = u'<b>Беременность закончилась</b> '
         pregnancy_final = epicrisis['pregnancy_final']['name'] if epicrisis['pregnancy_final'] else ''
-        info = u'<b>Беременность закончилась</b> ' + pregnancy_final
-        if epicrisis['delivery_waters'] or epicrisis['weakness'] or epicrisis['perineal_tear'] or epicrisis['eclampsia'] or \
-                epicrisis['funiculus'] or epicrisis['afterbirth'] or epicrisis['other_complications']:
-            info += u' с осложнениями'
-
         week = u'недель' if 5 <= epicrisis['pregnancy_duration'] <= 20 else (u'недел' + week_postfix[epicrisis['pregnancy_duration'] % 10])
+        is_dead = bool(epicrisis['death_date'] or ['reason_of_death'])
+        is_complications = bool(epicrisis['delivery_waters'] or epicrisis['weakness'] or epicrisis['perineal_tear'] or
+                                epicrisis['eclampsia'] or epicrisis['funiculus'] or epicrisis['afterbirth'] or
+                                epicrisis['other_complications'])
+        is_manipulations = bool(epicrisis['caul'] or epicrisis['calfbed'] or epicrisis['perineotomy'] or
+                                epicrisis['secundines'] or epicrisis['other_manipulations'])
+        is_operations = bool(epicrisis['caesarean_section'] or epicrisis['obstetrical_forceps'] or
+                             epicrisis['vacuum_extraction'] or epicrisis['embryotomy'])
+
+        if is_dead:
+            info += u'смертью матери при '
+            if pregnancy_final == u'родами':
+                info += u'родах'
+            elif pregnancy_final == u'абортом':
+                info += u'аборте'
+        else:
+            info += pregnancy_final
+
+        if is_complications:
+            info += u' с осложнениями'
         info += u' при сроке {0} {1}'.format(epicrisis['pregnancy_duration'], week)
 
         if pregnancy_final == u'родами':
-            info += ' {0} {1}.'.format(epicrisis['ch_b_date'].strftime("%d.%m.%y"), epicrisis['ch_b_time'])
+            info += u' {0} {1}.<br>'.format(epicrisis['ch_b_date'].strftime("%d.%m.%y"), epicrisis['ch_b_time'])
         elif pregnancy_final == u'абортом':
-            info += ' {0} {1}.'.format(epicrisis['abort_date'].strftime("%d.%m.%y"), epicrisis['abort_time'])
-        elif pregnancy_final in (u'смертью матери во время родов', u'смертью матери после родов', u'смертью матери во время/после аборта'):
-            info += ' {0} {1}.'.format(epicrisis['death_date'].strftime("%d.%m.%y"), epicrisis['death_time'])
+            info += u' {0} {1}.<br>'.format(epicrisis['abort_date'].strftime("%d.%m.%y"), epicrisis['abort_time'])
 
-        info += u" <b>Место родоразрешения</b>: {0}.<br>".format(epicrisis['LPU'].shortName)
+        info += u"<b>Место родоразрешения</b>: {0}.<br>".format(epicrisis['LPU'].shortName)
 
-        if epicrisis['manipulations'] and epicrisis['operations']:
-            info += u'Были осуществлены пособия и манипуляции и проведены операции.'
-        elif epicrisis['manipulations']:
-            info += u'Были осуществлены пособия и манипуляции.'
-        elif epicrisis['operations']:
-            info += u'Были проведены операции.'
+        if is_manipulations and is_operations:
+            info += u'Были осуществлены пособия и манипуляции и проведены операции. '
+        elif is_manipulations:
+            info += u'Были осуществлены пособия и манипуляции. '
+        elif is_operations:
+            info += u'Были проведены операции. '
 
-        if (epicrisis['newborn_inspections'] and
-                not (pregnancy_final == u'абортом' or
-                     pregnancy_final == u'смертью матери во время/после аборта')):
+        if epicrisis['newborn_inspections'] and pregnancy_final != u'абортом':
             info += u'<b>Дети</b> ({}): '.format(len(epicrisis['newborn_inspections']))
 
+            children_info = []
             for child in epicrisis['newborn_inspections']:
                 if child['sexCode'] == 1:
-                    info += u' мальчик '
-                    info += u'живой' if child['alive'] else u'мертвый'
+                    children_info.append(u'мальчик ' + (u'живой' if child['alive'] else u'мертвый'))
                 else:
-                    info += u' девочка '
-                    info += u'живая' if child['alive'] else u'мертвая'
+                    children_info.append(u'девочка ' + (u'живая' if child['alive'] else u'мертвая'))
+            info += ', '.join(children_info) + '.'
     except:
         info = ''
     return info
