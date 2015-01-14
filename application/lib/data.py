@@ -1,21 +1,23 @@
 # -*- coding: utf-8 -*-
-from application.lib.user import UserUtils
 
 import requests
 
+from collections import defaultdict
 from datetime import datetime, time, timedelta
 from flask.ext.login import current_user
+from sqlalchemy.orm.util import aliased
 
 from config import VESTA_URL
 from application.systemwide import db, cache
 from application.app import cache
-from application.lib.utils import logger, get_new_uuid, safe_traverse
+from application.lib.utils import logger, get_new_uuid, safe_traverse, group_concat
+from application.lib.agesex import parseAgeSelector, recordAcceptableEx
 from application.models.actions import Action, ActionType, ActionPropertyType, ActionProperty, Job, JobTicket, \
-    TakenTissueJournal
-from application.models.exists import Person
-from application.models.event import Event
-from application.lib.agesex import recordAcceptableEx
+    TakenTissueJournal, OrgStructure_ActionType
+from application.models.exists import Person, ContractTariff
+from application.models.event import Event, EventType_Action, EventType
 from application.lib.calendar import calendar
+from application.lib.user import UserUtils
 
 
 # планируемая дата выполнения (default planned end date)
@@ -433,9 +435,7 @@ def get_kladr_street(code):
 
 
 @cache.memoize(86400)
-def int_get_atl_flat(at_class):
-    from application.lib.agesex import parseAgeSelector
-
+def int_get_atl_flat(at_class, event_type_id=None, contract_id=None):
     id_list = {}
 
     def schwing(t):
@@ -447,31 +447,114 @@ def int_get_atl_flat(at_class):
         id_list[t[0]] = t
         return t
 
-    raw = db.text(
-        ur'''SELECT
-            ActionType.id, ActionType.name, ActionType.code, ActionType.flatCode, ActionType.group_id,
-            ActionType.age, ActionType.sex,
-            GROUP_CONCAT(OrgStructure_ActionType.master_id SEPARATOR ' '),
-            ActionType.isRequiredTissue
-            FROM ActionType
-            LEFT JOIN OrgStructure_ActionType ON OrgStructure_ActionType.actionType_id = ActionType.id
-            WHERE ActionType.class = {at_class} AND ActionType.deleted = 0 AND ActionType.hidden = 0
-            GROUP BY ActionType.id'''.format(at_class=at_class))
-        # This was goddamn unsafe, but I can't get it working other way
-    result = map(schwing, db.session.execute(raw))
-    raw = db.text(
-        ur'''SELECT actionType_id, id, name, age, sex FROM ActionPropertyType
-        WHERE isAssignable != 0 AND actionType_id IN ('{0}') AND deleted = 0'''.format("','".join(map(str, id_list.keys())))
+    def _filter_atl(query):
+        """
+        Отфильтровать сырые AT по возможности их создания для выбранного
+        типа события и по существованию соответствующих позиций в прайсе услуг.
+
+        В итоговый результат нужно также включить внутренние узлы дерева для
+        возможности построения этого самого дерева в интерфейсе. Поэтому к
+        отфильтрованным AT сначала добавляются все возможные промежуточные
+        узлы, а затем лишние убираются.
+        """
+        at_2 = aliased(ActionType, name='AT2')
+        internal_nodes_q = db.session.query(ActionType.id.distinct().label('id'), ActionType.group_id).join(
+            at_2, ActionType.id == at_2.group_id
+        ).filter(
+            ActionType.deleted == 0, at_2.deleted == 0,
+            ActionType.hidden == 0, at_2.hidden == 0,
+            ActionType.class_ == at_class, at_2.class_ == at_class
+        ).subquery('AllInternalNodes')
+        # filter atl query by EventType_Action reference and include *all* internal AT tree nodes in result
+        ats = query.outerjoin(
+            internal_nodes_q, ActionType.id == internal_nodes_q.c.id
+        ).outerjoin(
+            EventType_Action, db.and_(EventType_Action.actionType_id == ActionType.id,
+                                      EventType_Action.eventType_id == event_type_id)
+        ).filter(
+            db.or_(internal_nodes_q.c.id != None, EventType_Action.id != None)
+        )
+        # filter atl query by contract tariffs
+        need_price_list = EventType.query.get(event_type_id).createOnlyActionsWithinPriceList
+        if contract_id and need_price_list:
+            ats = ats.outerjoin(
+                ContractTariff, db.and_(ActionType.service_id == ContractTariff.service_id,
+                                        ContractTariff.master_id == contract_id,
+                                        ContractTariff.eventType_id == event_type_id)
+            ).filter(
+                db.or_(internal_nodes_q.c.id != None, ContractTariff.id != None)
+            )
+
+        result = map(schwing, ats)
+
+        # remove unnecessary internal nodes
+        internal_nodes = dict((at_id, gid) for at_id, gid in db.session.query(internal_nodes_q))
+        used_internal_nodes = set()
+        for item in result:
+            at_id = item[0]
+            gid = item[4]
+            if at_id not in internal_nodes and gid:
+                used_internal_nodes.add(gid)
+        while used_internal_nodes:
+            at_id = used_internal_nodes.pop()
+            try:
+                internal_nodes.pop(at_id)
+            except KeyError:
+                # db inconsistency, e.g. at with parent node of another class
+                continue
+            if at_id in internal_nodes:
+                used_internal_nodes.append(internal_nodes['at_id'])
+
+        exclude_ids = internal_nodes.keys()
+        result = [item for item in result if item[0] not in exclude_ids]
+        # and from external reference
+        for at_id in exclude_ids:
+            del id_list[at_id]
+        return result
+
+
+    ats = db.session.query(
+        ActionType.id,
+        ActionType.name,
+        ActionType.code,
+        ActionType.flatCode,
+        ActionType.group_id,
+        ActionType.age,
+        ActionType.sex,
+        group_concat(OrgStructure_ActionType.master_id, ' '),
+        ActionType.isRequiredTissue
+    ).outerjoin(OrgStructure_ActionType).filter(
+        ActionType.class_ == at_class,
+        ActionType.deleted == 0,
+        ActionType.hidden == 0
+    ).group_by(ActionType.id)
+
+    if event_type_id:
+        result = _filter_atl(ats)
+    else:
+        result = map(schwing, ats)
+
+    apts = db.session.query(
+        ActionPropertyType.actionType_id,
+        ActionPropertyType.id,
+        ActionPropertyType.name,
+        ActionPropertyType.age,
+        ActionPropertyType.sex
+    ).filter(
+        ActionPropertyType.isAssignable != 0,
+        ActionPropertyType.actionType_id.in_(id_list.keys()),
+        ActionPropertyType.deleted == 0
     )
+    # Да, данные в итоговом результате заполняются через id_list
     map(lambda (at_id, apt_id, name, age, sex):
         id_list[at_id][9].append(
             (apt_id, name, list(parseAgeSelector(age)), sex)
-        ), db.session.execute(raw)
-    )
+        ),
+        apts)
     return result
 
 
-@cache.cached(86400)
+@cache.cached(86400, key_prefix='AT_dict_all')
 def int_get_atl_dict_all():
     all_at_apt = {}
     for class_ in range(4):
