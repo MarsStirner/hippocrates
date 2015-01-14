@@ -1,41 +1,70 @@
 # -*- coding: utf-8 -*-
 from flask import request
-from application.lib.sphinx_search import SearchPatient
+import datetime
 
 from application.lib.utils import jsonify
-from application.models.client import Client
-from application.models.event import Event, EventType
-from application.models.exists import Organisation, Person, rbRequestType
+from application.models.exists import Organisation, Person
 from blueprints.risar.app import module
 
 __author__ = 'mmalkov'
 
 
+def search_events(**kwargs):
+    from calendar import timegm
+    from application.lib.sphinx_search import Search, SearchConfig
+    from application.lib.utils import safe_date
+
+    import pprint
+    pprint.pprint(kwargs)
+
+    query = Search(indexes=['events'], config=SearchConfig)
+    if 'fio' in kwargs and kwargs['fio']:
+        query = query.match(kwargs['fio'])
+    if 'org_id' in kwargs:
+        query = query.filter(org_id__eq=int(kwargs['org_id']))
+    if 'doc_id' in kwargs:
+        query = query.filter(exec_person_id__eq=int(kwargs['doc_id']))
+    if 'external_id' in kwargs:
+        query = query.filter(external_id__eq=kwargs['external_id'])
+    if 'risk' in kwargs:
+        query = query.filter(risk__eq=kwargs['risk'])
+    if 'bdate' in kwargs:
+        query = query.filter(bdate__eq=int(timegm(safe_date(kwargs['bdate']).timetuple())/86400))
+    if 'psdate' in kwargs:
+        query = query.filter(psdate__eq=int(timegm(safe_date(kwargs['psdate']).timetuple())/86400))
+    if 'checkup_date' in kwargs:
+        query = query.filter(checkups__eq=int(timegm(safe_date(kwargs['checkup_date']).timetuple())/86400))
+    if 'quick' in kwargs:
+        query = query.filter(exec_date__eq=0)
+    result = query.limit(0, 100).ask()
+    return result
+
+
 @module.route('/api/0/search/', methods=['POST', 'GET'])
 def api_0_event_search():
-    data = request.args
-    query = Event.query \
-        .join(EventType, rbRequestType) \
-        .filter(rbRequestType.code == 'pregnancy')
-    if 'org_id' in data:
-        query = query.filter(Event.org_id == data['org_id'])
-    if 'doc_id' in data:
-        query = query.filter(Event.execPerson_id == data['doc_id'])
-    if 'fio' in request.args and request.args['fio']:
-        query = query.filter(Event.client_id.in_(
-            (item['id'] for item in SearchPatient.search(request.args['fio'])['result']['items'])
-        ))
+    data = dict(request.args)
+    if request.json:
+        data.update(request.json)
+    result = search_events(**data)
     return jsonify([
         {
-            'event_id': row.id,
-            'client_id': row.client_id,
-            'name': row.client.nameText,
-            'set_date': row.setDate,
-            'exec_date': row.execDate,
-            'external_id': row.externalId,
-            'exec_person_name': row.execPerson.nameText,
+            'event_id': row['id'],
+            'client_id': row['client_id'],
+            'name': row['name'],
+            'set_date': datetime.date.fromtimestamp(row['set_date'] * 86400) if row['set_date'] else None,
+            'exec_date': datetime.date.fromtimestamp(row['exec_date'] * 86400) if row['exec_date'] else None,
+            'external_id': row['external_id'],
+            'exec_person_name': row['person_name'],
+            'risk': row['risk'],
+            'mdate': datetime.date.fromtimestamp(row['modify_date']),
+            'week': min(
+                45,
+                datetime.timedelta(
+                    datetime.date.today() - datetime.date.fromtimestamp(row['psdate'] * 86400)
+                ).days / 7)
+            if row['psdate'] else None
         }
-        for row in query
+        for row in result['result']['items']
     ])
 
 

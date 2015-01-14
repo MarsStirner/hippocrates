@@ -15,15 +15,23 @@ var EventSearchCtrl = function ($scope, RisarApi, TimeoutCallback) {
     }];
     $scope.query = {
         org: default_orgs[0],
-        person: default_docs[0]
+        person: default_docs[0],
+        checkup_date: null,
+        bdate: null
     };
     $scope.results = [];
     var perform = function () {
-        RisarApi.search_event.get({
+        var data = {
             org_id: $scope.query.org.id,
             doc_id: $scope.query.person.id,
-            fio: $scope.query.fio || undefined
-        }).then(function (result) {
+            fio: $scope.query.fio || undefined,
+            //risk: $scope.query.risk === 'любая' && undefined || $scope.query.risk,
+            checkup_date: $scope.query.checkup_date || undefined,
+            bdate: $scope.query.bdate || undefined
+        };
+        console.log(JSON.stringify($scope.query));
+        console.log(JSON.stringify(data));
+        RisarApi.search_event.get(data).then(function (result) {
             $scope.results = result;
         })
     };
