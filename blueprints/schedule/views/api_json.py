@@ -599,10 +599,13 @@ prescriptionFlatCodes = (
 @module.route('/api/action-type-list-flat.json')
 def api_atl_get_flat():
     at_class = int(request.args['at_class'])
+    event_type_id = parse_id(request.args, 'event_type_id') or None
+    contract_id = parse_id(request.args, 'contract_id') or None
     if not (0 <= at_class < 4):
         return abort(401)
+    result = int_get_atl_flat(at_class, event_type_id, contract_id)
 
-    return jsonify(int_get_atl_flat(at_class))
+    return jsonify(result)
 
 
 @cache.memoize(86400)

@@ -234,6 +234,7 @@ class EventType(db.Model):
     age_eu = db.Column(db.Integer)
     age_ec = db.Column(db.SmallInteger)
     requestType_id = db.Column(db.Integer, db.ForeignKey('rbRequestType.id'))
+    createOnlyActionsWithinPriceList = db.Column(db.SmallInteger)
 
     counter = db.relationship(u'rbCounter')
     rbMedicalKind = db.relationship(u'rbMedicalKind')

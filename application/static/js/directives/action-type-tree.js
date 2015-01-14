@@ -125,13 +125,16 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
             return render_node('root');
         }
     };
-    this.get = function (at_class) {
-        var deferred = $q.defer();
+    this.get = function (filter_params) {
+        var deferred = $q.defer(),
+            at_class = filter_params.at_class;
         if (! trees[at_class]) {
             trees[at_class] = new Tree();
             $http.get(url_for_schedule_api_atl_get_flat, {
                 params: {
-                    at_class: at_class
+                    at_class: at_class,
+                    event_type_id: filter_params.event_type_id,
+                    contract_id: filter_params.contract_id
                 }
             }).success(function (data) {
                 trees[at_class].set_data(data.result);
@@ -146,9 +149,12 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
 .service('ActionTypeTreeModal', ['$modal', '$http', 'ActionTypeTreeService', 'WMWindowSync',
         function ($modal, $http, ActionTypeTreeService, WMWindowSync) {
     return {
-        open: function (at_group, event_id, client_info, onCreateCallback) {
+        open: function (event_id, client_info, filter_params, onCreateCallback) {
             var self_service = this;
-            var at_class = undefined, tissue = undefined, templateUrl;
+            var at_class = undefined,
+                tissue = undefined,
+                templateUrl,
+                at_group = filter_params.at_group;
             switch (at_group) {
                 case 'medical_documents':
                     at_class = 0;
@@ -171,6 +177,8 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
                 default:
                     throw 'bee-dah!'
             }
+            filter_params.at_class = at_class;
+            delete filter_params.at_group;
             var Controller = function ($scope, $modalInstance) {
                 var service;
                 $scope.prepared2create = [];
@@ -248,7 +256,7 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
                     return self_service.openAppointmentModal(action, false);
                 };
 
-                ActionTypeTreeService.get(at_class).then(function (tree) {
+                ActionTypeTreeService.get(filter_params).then(function (tree) {
                     service = tree;
                     var os_check = false,
                         personal_check = false;

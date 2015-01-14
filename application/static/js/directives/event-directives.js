@@ -29,7 +29,15 @@ angular.module('WebMis20.directives')
             };
 
             scope.open_action_tree = function (at_class) {
-                ActionTypeTreeModal.open(at_class, scope.event.event_id, scope.event.info.client.info, scope.update_event);
+                ActionTypeTreeModal.open(
+                    scope.event.event_id,
+                    scope.event.info.client.info,
+                    {
+                        at_group: at_class,
+                        event_type_id: scope.event.info.event_type.id,
+                        contract_id: scope.event.info.contract.id
+                    },
+                    scope.update_event);
             };
 
             scope.update_event = function () {
