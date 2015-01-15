@@ -98,8 +98,13 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
                             return age_acceptable(client_info, item[2]) && sex_acceptable(client_info, item[3])
                         });
                         filtered[key] = clone;
-                        for (var id = value.gid; id; value = self.lookup[id], id = value.gid) {
-                            if (id && !filtered.hasOwnProperty(id)) {
+                        for (var id = value.gid, value = self.lookup[id]; id; id = value.gid, value = self.lookup[id]) {
+                            if (id && !filtered.hasOwnProperty(id) &&
+                                // для лаб. исследований признак isRequiredTissue будет стоять у конкретных
+                                // исследований. Для рендера промежуточных узлов, достаточно, чтобы этот признак
+                                // стоял только у корневого элемента.
+                                (value.gid === null ? tissue_acceptable(value, tissue_required) : true)
+                            ) {
                                 filtered[id] =  self.lookup[id].clone();
                             }
                         }
