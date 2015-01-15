@@ -4,7 +4,6 @@ import calendar
 import datetime
 
 from collections import defaultdict
-from dateutil.parser import parse as dateutil_parse
 from flask import abort, request
 from flask.ext.login import current_user
 
@@ -640,7 +639,7 @@ def api_create_lab_direction():
         action_type_id = j['type_id']
         assigned = j['assigned']
         data = {
-            'plannedEndDate': dateutil_parse(j['planned_end_date'])
+            'plannedEndDate': safe_datetime(j['planned_end_date'])
         }
         action = create_new_action(
             action_type_id,
