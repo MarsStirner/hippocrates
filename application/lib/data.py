@@ -488,24 +488,20 @@ def int_get_atl_flat(at_class, event_type_id=None, contract_id=None):
         result = map(schwing, ats)
 
         # remove unnecessary internal nodes
-        internal_nodes = dict((at_id, gid) for at_id, gid in db.session.query(internal_nodes_q))
+        all_internal_nodes = dict((at_id, gid) for at_id, gid in db.session.query(internal_nodes_q))
         used_internal_nodes = set()
         for item in result:
             at_id = item[0]
             gid = item[4]
-            if at_id not in internal_nodes and gid:
+            if at_id not in all_internal_nodes and gid:
                 used_internal_nodes.add(gid)
         while used_internal_nodes:
             at_id = used_internal_nodes.pop()
-            try:
-                internal_nodes.pop(at_id)
-            except KeyError:
-                # db inconsistency, e.g. at with parent node of another class
-                continue
-            if at_id in internal_nodes:
-                used_internal_nodes.append(internal_nodes['at_id'])
+            if at_id in all_internal_nodes:
+                used_internal_nodes.add(all_internal_nodes[at_id])
+                del all_internal_nodes[at_id]
 
-        exclude_ids = internal_nodes.keys()
+        exclude_ids = all_internal_nodes.keys()
         result = [item for item in result if item[0] not in exclude_ids]
         # and from external reference
         for at_id in exclude_ids:
