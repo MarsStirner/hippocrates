@@ -43,7 +43,12 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
             self.lookup = {};
             data.map(function (item) {
                 self.lookup[item[0]] =  new TreeItem(item)
-            })
+            });
+            angular.forEach(self.lookup, function (tree_item, at_id) {
+                if (tree_item.gid && self.lookup.hasOwnProperty(tree_item.gid)) {
+                    self.lookup[tree_item.gid].children.push(at_id);
+                }
+            });
         };
         function tissue_acceptable(action_type, tissue_required) {
             // split at_class 1 in diag action types and lab action types
@@ -99,12 +104,7 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
                         });
                         filtered[key] = clone;
                         for (var id = value.gid, value = self.lookup[id]; id; id = value.gid, value = self.lookup[id]) {
-                            if (id && !filtered.hasOwnProperty(id) &&
-                                // для лаб. исследований признак isRequiredTissue будет стоять у конкретных
-                                // исследований. Для рендера промежуточных узлов, достаточно, чтобы этот признак
-                                // стоял только у корневого элемента.
-                                (value.gid === null ? tissue_acceptable(value, tissue_required) : true)
-                            ) {
+                            if (id && !filtered.hasOwnProperty(id)) {
                                 filtered[id] =  self.lookup[id].clone();
                             }
                         }
