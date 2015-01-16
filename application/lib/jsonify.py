@@ -6,8 +6,7 @@ import itertools
 from collections import defaultdict
 
 from sqlalchemy.orm import aliased
-from sqlalchemy.sql.functions import current_date
-from sqlalchemy.sql.expression import between
+from sqlalchemy.sql.expression import between, func
 from flask import json
 
 from application.lib.agesex import recordAcceptableEx
@@ -947,7 +946,7 @@ class EventVisualizer(object):
             ContractTariff.service_id == ActionType.service_id,
             Action.deleted == 0,
             ContractTariff.deleted == 0,
-            between(current_date(), ContractTariff.begDate, ContractTariff.endDate)
+            between(func.date(Event.setDate), ContractTariff.begDate, ContractTariff.endDate)
         )
 
         ats_apts = int_get_atl_dict_all()
