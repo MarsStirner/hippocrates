@@ -2,7 +2,6 @@
 
 import requests
 
-from collections import defaultdict
 from datetime import datetime, time, timedelta
 from flask.ext.login import current_user
 from sqlalchemy.orm.util import aliased
@@ -14,6 +13,7 @@ from application.lib.utils import logger, get_new_uuid, safe_traverse, group_con
 from application.lib.agesex import parseAgeSelector, recordAcceptableEx
 from application.models.actions import Action, ActionType, ActionPropertyType, ActionProperty, Job, JobTicket, \
     TakenTissueJournal, OrgStructure_ActionType
+from application.models.enums import ActionStatus
 from application.models.exists import Person, ContractTariff
 from application.models.event import Event, EventType_Action, EventType
 from application.lib.calendar import calendar
@@ -120,6 +120,12 @@ def create_action(action_type_id, event_id, src_action=None, assigned=None, prop
         for field, value in data.items():
             if field in Action.__table__.columns:
                 setattr(action, field, value)
+
+    # some restrictions
+    if action.status == ActionStatus.finished[0] and not action.endDate:
+        action.endDate = now
+    elif action.endDate and action.status != ActionStatus.finished[0]:
+        action.status = ActionStatus.finished[0]
 
     # properties
     if assigned is None:
