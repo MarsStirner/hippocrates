@@ -467,6 +467,10 @@ angular.module('WebMis20.services.models').
                     this.refresh();
                 }
             };
+            WMEventPaymentList.prototype.set_payments = function (payments) {
+                this.payments = payments;
+                this.refresh();
+            };
             WMEventPaymentList.prototype.refresh = function () {
                 var bank = this.total_in;
                 this.charges.sort(function (a, b) {
