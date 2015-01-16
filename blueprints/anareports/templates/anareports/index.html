@@ -12,11 +12,13 @@
     <table class="table table-condensed">
         <thead>
         <tr>
+            <th>№ п/п</th>
             <th>Наименование</th>
         </tr>
         </thead>
         <tbody>
         <tr ng-repeat="template in ps.templates | filter:query">
+            <td>[[ $index + 1 ]]</td>
             <td>
                 <a href="#" ng-click="print_template(template)">[[ template.name ]]</a>
             </td>
