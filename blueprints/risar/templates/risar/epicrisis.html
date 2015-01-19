@@ -72,16 +72,25 @@
                             </div>
                             <div class="panel-body">
                                 <div class="row">
-                                    <div class="col-md-5  text-right">Число посещений акушера-гинеколога:</div>
-                                    <div class="col-md-7">[[chart.epicrisis.visits]]</div>
+                                    <div class="col-md-6  text-right">Дата постановки на учёт:</div>
+                                    <div class="col-md-6">[[chart.set_date|asDate]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-md-5  text-right">Прибавка массы:</div>
-                                    <div class="col-md-7">[[chart.epicrisis.mass]]</div>
+                                    <div class="col-md-6  text-right">Срок беременности при постановке на учёт:</div>
+                                    <div class="col-md-6">
+                                        <span tooltip="Рассчитывается исходя из текущего срока беременности, даты родоразрешения и даты постановки на учёт">[[chart.epicrisis.registration_pregnancy_week]]</span></div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-md-5  text-right">Особенности течения беременности:</div>
-                                    <div class="col-md-7">[[chart.epicrisis.pregnancy_speciality]]</div>
+                                    <div class="col-md-6  text-right">Число посещений акушера-гинеколога:</div>
+                                    <div class="col-md-6">[[chart.checkups.length]]</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6  text-right">Прибавка массы:</div>
+                                    <div class="col-md-6"></div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6  text-right">Особенности течения беременности:</div>
+                                    <div class="col-md-6">[[chart.epicrisis.pregnancy_speciality]]</div>
                                 </div>
                             </div>
                         </div>
@@ -129,40 +138,40 @@
                             </div>
                             <div class="panel-body">
                                 <div class="row">
-                                    <div class="col-md-5 text-right">Излитие околоплодных вод:</div>
-                                    <div class="col-md-7">[[chart.epicrisis.delivery_waters.name]]</div>
+                                    <div class="col-md-6 text-right">Излитие околоплодных вод:</div>
+                                    <div class="col-md-6">[[chart.epicrisis.delivery_waters.name]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-md-5 text-right">Слабость родовых сил:</div>
-                                    <div class="col-md-7">[[chart.epicrisis.weakness.name]]</div>
+                                    <div class="col-md-6 text-right">Слабость родовых сил:</div>
+                                    <div class="col-md-6">[[chart.epicrisis.weakness.name]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-md-5 text-right">Разрыв промежностей (степень):</div>
-                                    <div class="col-md-7">[[chart.epicrisis.perineal_tear]]</div>
+                                    <div class="col-md-6 text-right">Разрыв промежностей (степень):</div>
+                                    <div class="col-md-6">[[chart.epicrisis.perineal_tear]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-md-5 text-right">Нефропатия/эклампсия в родах:</div>
-                                    <div class="col-md-7">[[chart.epicrisis.eclampsia.name]]</div>
+                                    <div class="col-md-6 text-right">Нефропатия/эклампсия в родах:</div>
+                                    <div class="col-md-6">[[chart.epicrisis.eclampsia.name]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-md-5 text-right">Патология пуповины:</div>
-                                    <div class="col-md-7">[[chart.epicrisis.funiculus.name]]</div>
+                                    <div class="col-md-6 text-right">Патология пуповины:</div>
+                                    <div class="col-md-6">[[chart.epicrisis.funiculus.name]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-md-5 text-right">Патология плаценты:</div>
-                                    <div class="col-md-7">[[chart.epicrisis.afterbirth.name]]</div>
+                                    <div class="col-md-6 text-right">Патология плаценты:</div>
+                                    <div class="col-md-6">[[chart.epicrisis.afterbirth.name]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-md-5 text-right">Инфекции в родах:</div>
-                                    <div class="col-md-7">[[chart.epicrisis.infections_during_birth]]</div>
+                                    <div class="col-md-6 text-right">Инфекции в родах:</div>
+                                    <div class="col-md-6">[[chart.epicrisis.infections_during_birth]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-md-5 text-right">Инфекции после родов:</div>
-                                    <div class="col-md-7">[[chart.epicrisis.infections_after_birth]]</div>
+                                    <div class="col-md-6 text-right">Инфекции после родов:</div>
+                                    <div class="col-md-6">[[chart.epicrisis.infections_after_birth]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-md-5 text-right">Другие осложнения при родах:</div>
-                                    <div class="col-md-7">[[chart.epicrisis.other_complications]]</div>
+                                    <div class="col-md-6 text-right">Другие осложнения при родах:</div>
+                                    <div class="col-md-6">[[chart.epicrisis.other_complications]]</div>
                                 </div>
                             </div>
                         </div>
@@ -220,40 +229,40 @@
                             </div>
                             <div class="panel-body">
                                 <div class="row">
-                                    <div class="col-md-5  text-right">Кесарево сечение:</div>
-                                    <div class="col-md-7">[[chart.epicrisis.caesarean_section.name]]</div>
+                                    <div class="col-md-6  text-right">Кесарево сечение:</div>
+                                    <div class="col-md-6">[[chart.epicrisis.caesarean_section.name]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-md-5  text-right">Акушерские щипцы:</div>
-                                    <div class="col-md-7">[[chart.epicrisis.obstetrical_forceps.name]]</div>
+                                    <div class="col-md-6  text-right">Акушерские щипцы:</div>
+                                    <div class="col-md-6">[[chart.epicrisis.obstetrical_forceps.name]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-md-5  text-right">Вакуум-экстракция:</div>
-                                    <div class="col-md-7">[[chart.epicrisis.vacuum_extraction]]</div>
+                                    <div class="col-md-6  text-right">Вакуум-экстракция:</div>
+                                    <div class="col-md-6">[[chart.epicrisis.vacuum_extraction]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-md-5  text-right">Показания к операции:</div>
-                                    <div class="col-md-7">[[chart.epicrisisindication.indication.name]]</div>
+                                    <div class="col-md-6  text-right">Показания к операции:</div>
+                                    <div class="col-md-6">[[chart.epicrisisindication.indication.name]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-md-5  text-right">Особенности операции:</div>
-                                    <div class="col-md-7">[[chart.epicrisis.specialities.name]]</div>
+                                    <div class="col-md-6  text-right">Особенности операции:</div>
+                                    <div class="col-md-6">[[chart.epicrisis.specialities.name]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-md-5  text-right">Обезболивание:</div>
-                                    <div class="col-md-7">[[chart.epicrisis.anesthetization.name]]</div>
+                                    <div class="col-md-6  text-right">Обезболивание:</div>
+                                    <div class="col-md-6">[[chart.epicrisis.anesthetization.name]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-md-5  text-right">Гистерэктомия:</div>
-                                    <div class="col-md-7">[[chart.epicrisis.hysterectomy.name]]</div>
+                                    <div class="col-md-6  text-right">Гистерэктомия:</div>
+                                    <div class="col-md-6">[[chart.epicrisis.hysterectomy.name]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-md-5  text-right">Осложнения:</div>
-                                    <div class="col-md-7">[[chart.epicrisis.operation_complication]]</div>
+                                    <div class="col-md-6  text-right">Осложнения:</div>
+                                    <div class="col-md-6">[[chart.epicrisis.operation_complication]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-md-5  text-right">Плодоразрушающие операции:</div>
-                                    <div class="col-md-7">[[chart.epicrisis.embryotomy]]</div>
+                                    <div class="col-md-6  text-right">Плодоразрушающие операции:</div>
+                                    <div class="col-md-6">[[chart.epicrisis.embryotomy]]</div>
                                 </div>
                             </div>
                         </div>

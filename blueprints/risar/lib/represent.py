@@ -372,6 +372,9 @@ def represent_epicrisis(event, action=None):
         (code, prop.value)
         for (code, prop) in action.propsByCode.iteritems()
     )
+    finish_date = epicrisis['ch_b_date'] if epicrisis['pregnancy_final']['code'] == 'rodami' else epicrisis['abort_date']
+    pregnancy_week = get_pregnancy_week(event)
+    epicrisis['registration_pregnancy_week'] = pregnancy_week - (finish_date - event.setDate.date()).days/7
     epicrisis['newborn_inspections'] = represent_newborn_inspections(event)
     epicrisis['info'] = make_epicrisis_info(epicrisis)
     return epicrisis
