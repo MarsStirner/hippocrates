@@ -55,15 +55,15 @@
             </div>
             {%- if current_user.role_in('overseer1', 'overseer2', 'overseer3') -%}
             <div class="col-md-4">
-{#                Поциентки по степени риска<br>#}
+                Пациентки по степени риска<br>
                 <nvd3-pie-chart
                         id="noid"
                         data="slices"
                         width="350"
                         height="350"
-                        x="slices_x()"
-                        y="slices_y()"
-                        color="slices_c()"
+                        x="slices_x"
+                        y="slices_y"
+                        color="slices_c"
                         nodata="Нет данных"
                         showlegend="true"
                         showlabels="true"

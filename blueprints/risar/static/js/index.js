@@ -14,36 +14,57 @@ var IndexCtrl = function ($scope, RisarApi) {
     $scope.slices = [
         {
             key: 'Низкая',
-            value: 50,
+            value: 0,
             color: '#30D040'
         },
         {
             key: 'Средняя',
-            value: 200,
+            value: 0,
             color: '#E0C030'
         },
         {
             key: 'Высокая',
-            value: 100,
+            value: 0,
             color: '#E05030'
         }
     ];
-    $scope.slices_x = function () {
-        return function (d) {
-            return d.key;
-        }
+    $scope.slices_x = function (d) {
+        return d.key;
     };
-    $scope.slices_y = function () {
-        return function (d) {
-            return d.value;
-        }
+    $scope.slices_y = function (d) {
+        return d.value;
     };
-    $scope.slices_c = function () {
-        return function (d, i) {
-            // А это, ребятки, костыль, потому что где-то в d3 или nv - багулечка
-            return d.data.color;
-        }
+    $scope.slices_c = function (d, i) {
+        // А это, ребятки, костыль, потому что где-то в d3 или nv - багулечка
+        return d.data.color;
     };
+    $scope.refresh_diagram = function () {
+        RisarApi.current_stats.get().then(function (result) {
+            $scope.slices = [];
+            if (result['низкая']) {
+                $scope.slices.push({
+                    key: 'Низкая',
+                    value: result['низкая'],
+                    color: '#30D040'
+                })
+            }
+            if (result['средняя']) {
+                $scope.slices.push({
+                    key: 'Средняя',
+                    value: result['средняя'],
+                    color: '#E0C030'
+                })
+            }
+            if (result['высокая']) {
+                $scope.slices.push({
+                    key: 'Высокая',
+                    value: result['высокая'],
+                    color: '#E05030'
+                })
+            }
+        })
+    };
+    $scope.refresh_diagram();
     $scope.date = new Date();
     $scope.declOfNum = function (number, titles){
         if (number == undefined){
