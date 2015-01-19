@@ -26,15 +26,21 @@ var EventMainInfoCtrl = function ($scope, RefBookService, EventType, $filter, Me
         ].has(widget_name)) {
             return event_created || $scope.event.ro;
         } else if (widget_name === 'exec_person') {
-            return event_created || $scope.event.ro || !CurrentUser.current_role_in('admin', 'rRegistartor', 'clinicRegistrator');
+            return event_created || $scope.event.ro || !CurrentUser.current_role_in('admin', 'clinicRegistrator');
         } else if (['result', 'ache_result'].has(widget_name)) {
             return !(CurrentUser.current_role_in('admin') ||
                 !$scope.event.ro && (
-                    ($scope.formstate.is_policlinic() && (
-                        main_user.id === safe_traverse($scope.event, ['info', 'exec_person', 'id']) ||
-                        main_user.id === safe_traverse($scope.event, ['info', 'create_person_id'])
-                    )) || (
-                        $scope.formstate.is_diagnostic() && $scope.userHasResponsibilityByAction
+                    (
+                        ($scope.formstate.is_policlinic() && (
+                            main_user.id === safe_traverse($scope.event, ['info', 'exec_person', 'id']) ||
+                            main_user.id === safe_traverse($scope.event, ['info', 'create_person_id'])
+                        )) || (
+                            $scope.formstate.is_diagnostic() && $scope.userHasResponsibilityByAction
+                        )
+                    ) && (
+                        CurrentUser.current_role_in('clinicRegistrator') ?
+                            $scope.formstate.is_paid() :
+                            true
                     )
                 )
             );
