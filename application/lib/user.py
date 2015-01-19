@@ -418,7 +418,7 @@ class UserProfileManager(object):
     ui_groups = {
         'doctor': [admin, doctor_clinic, doctor_diag, nurse_assist],
         'registrator': [admin, reg_clinic],
-        'registrator_cut': [admin, nurse_admission]
+        'registrator_cut': [nurse_admission]
     }
 
     @classmethod
