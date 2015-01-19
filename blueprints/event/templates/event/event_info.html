@@ -17,6 +17,7 @@
                 <div class="toc-affix" bs-affix>
                     <toc-affix toc-name="tocEventForm">
                     <hr>
+                    {% if event.is_closed and user_profiles_mng.has_ui_registrator() %}
                     <div class="row">
                         <div class="col-md-6">
                             <button type="button" ng-click="save_event()" class="btn btn-block btn-success"
@@ -26,6 +27,7 @@
                             <button type="button" ng-click="cancel_editing()" class="btn btn-block btn-default">Отмена</button>
                         </div>
                     </div>
+                    {%- endif %}
                     {% if user_utils.can_close_event(event) %}
                     <div class="row vmargin10">
                         <div class="col-md-12">
