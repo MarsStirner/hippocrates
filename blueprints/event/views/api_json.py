@@ -482,7 +482,7 @@ def api_delete_event():
 @module.route('/api/events.json', methods=["POST"])
 def api_get_events():
     flt = request.get_json()
-    base_query = Event.query.join(Client)
+    base_query = Event.query.join(Client).filter(Event.deleted == 0)
     context = EventVisualizer()
     if 'id' in flt:
         event = base_query.filter(Event.id == flt['id']).first()
