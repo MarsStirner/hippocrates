@@ -2,7 +2,7 @@
 import datetime
 import itertools
 from flask import request
-from application.lib.utils import jsonify
+from application.lib.apiutils import api_method
 from application.models.schedule import Schedule
 from application.models.utils import safe_current_user_id
 from blueprints.risar.app import module
@@ -13,6 +13,7 @@ __author__ = 'mmalkov'
 
 @module.route('/api/0/schedule/')
 @module.route('/api/0/schedule/<int:person_id>')
+@api_method
 def api_0_schedule(person_id=None):
     all_tickets = bool(request.args.get('all', False))
     if not person_id:
@@ -21,8 +22,8 @@ def api_0_schedule(person_id=None):
     schedule_list = Schedule.query\
         .filter(Schedule.date == for_date, Schedule.person_id == person_id)\
         .order_by(Schedule.begTime).all()
-    return jsonify([
+    return [
         represent_ticket(ticket)
         for ticket in itertools.chain(*(schedule.tickets for schedule in schedule_list))
         if all_tickets or ticket.client_ticket
-    ])
+    ]

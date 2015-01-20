@@ -1,18 +1,19 @@
 # -*- coding: utf-8 -*-
 import datetime
 import itertools
-from application.lib.data import create_action
 
-from application.lib.utils import safe_traverse_attrs
+from application.lib.utils import safe_traverse_attrs, safe_traverse
 from application.models.actions import Action, ActionType
 from application.models.client import BloodHistory
-from application.models.enums import Gender, AllergyPower, IntoleranceType
+from application.models.enums import Gender, AllergyPower, IntoleranceType, PrenatalRiskRate
 from application.models.exists import rbAttachType
-from application.systemwide import cache, db
+from blueprints.risar.lib.card_attrs import get_card_attrs_action
+from blueprints.risar.lib.utils import get_action, action_apt_values, get_action_type_id
 from ..risar_config import pregnancy_apt_codes, risar_anamnesis_pregnancy, transfusion_apt_codes, \
     risar_anamnesis_transfusion, mother_codes, father_codes, risar_father_anamnesis, risar_mother_anamnesis, \
     checkup_flat_codes, risar_epicrisis, risar_newborn_inspection
-from ..lib.utils import risk_rates_diagID, risk_rates_blockID, week_postfix
+from ..lib.utils import week_postfix
+
 
 __author__ = 'mmalkov'
 
@@ -66,7 +67,7 @@ def represent_event(event):
         'anamnesis': represent_anamnesis(event),
         'epicrisis': represent_epicrisis(event),
         'checkups': represent_checkups(event),
-        'risk_rate': get_risk_rate(get_all_diagnoses(event.actions)),
+        'risk_rate': PrenatalRiskRate(get_card_attrs_action(event, auto=False)['prenatal_risk_572'].value),
         'pregnancy_week': get_pregnancy_week(event)
     }
 
@@ -77,29 +78,6 @@ def get_lpu_attached(attachments):
         'plan_lpu': attachments.join(rbAttachType).filter(rbAttachType.code == 10).first(),
         'extra_lpu': attachments.join(rbAttachType).filter(rbAttachType.code == 11).first()
     }
-
-
-def get_all_diagnoses(actions):
-    result = []
-    if actions:
-        for action in actions:
-            for property in action.properties:
-                if property.type.typeName == 'MKB' and property.value:
-                    result.extend(property.value) if isinstance(property.value, list) else result.append(property.value)
-    return result
-
-
-def get_risk_rate(diagnoses):
-    risk_rate = {'value': 0, 'note': u"У пациентки риск невынашивания не выявлен"}
-    for diag in diagnoses:
-        if diag.DiagID in risk_rates_diagID['high'] or diag.BlockID in risk_rates_blockID['high']:
-            risk_rate = {'value': 3, 'note': u"Внимание! У пациентки выявлен высокий риск невынашивания "}
-            break
-        elif diag.DiagID in risk_rates_diagID['middle'] or diag.BlockID in risk_rates_blockID['middle']:
-            risk_rate = {'value': 2, 'note':  u"У пациентки выявлен средний риск невынашивания "}
-        elif diag.DiagID in risk_rates_diagID['low'] or diag.BlockID in risk_rates_blockID['low']:
-            risk_rate = {'value': 1, 'note': u"У пациентки выявлен низкий риск невынашивания "}
-    return risk_rate
 
 
 def get_pregnancy_week(event):
@@ -132,19 +110,6 @@ def get_pregnancy_week(event):
     return None
 
 
-@cache.memoize()
-def get_action_type_id(flat_code):
-    selectable = db.select((ActionType.id, ), whereclause=ActionType.flatCode == flat_code, from_obj=ActionType)
-    row = db.session.execute(selectable).first()
-    if not row:
-        return None
-    return row[0]
-
-
-def action_apt_values(action, codes):
-    return dict((key, safe_traverse_attrs(action.propsByCode.get(key), 'value')) for key in codes)
-
-
 def represent_anamnesis(event):
     return {
         'mother': represent_mother_action(event),
@@ -164,42 +129,6 @@ def represent_anamnesis(event):
             for obj in itertools.chain(event.client.allergies, event.client.intolerances)
         ]
     }
-
-
-def get_action(event, flat_code, create=False):
-    """
-    :type flat_code: list|tuple|basestring|None
-    :param event:
-    :param flat_code:
-    :return:
-    """
-    query = Action.query.join(ActionType).filter(Action.event == event, Action.deleted == 0)
-    if isinstance(flat_code, (list, tuple)):
-        query = query.filter(ActionType.flatCode.in_(flat_code))
-    elif isinstance(flat_code, basestring):
-        query = query.filter(ActionType.flatCode == flat_code)
-    elif flat_code is None:
-        return
-    else:
-        raise TypeError('flat_code must be list|tuple|basestring|None')
-    action = query.first()
-    if action is None and create:
-        action = create_action(get_action_type_id(flat_code), event)
-    return action
-
-
-def get_action_by_id(action_id, event, flat_code, create=False):
-    """
-    :param action_id:
-    :return:
-    """
-    action = None
-    if action_id:
-        query = Action.query.filter(Action.id == action_id, Action.deleted == 0)
-        action = query.first()
-    elif create:
-        action = create_action(get_action_type_id(flat_code), event)
-    return action
 
 
 def represent_mother_action(event, action=None):
@@ -289,7 +218,7 @@ def represent_ticket(ticket):
         'event_id': ticket.client_ticket.event_id if ticket.client_ticket else None,
         'note': ticket.client_ticket.note if ticket.client else None,
         'checkup_n': checkup_n,
-        'risk_rate': get_risk_rate(get_all_diagnoses(event.actions)) if event else None,
+        'risk_rate': PrenatalRiskRate(get_card_attrs_action(event)['prenatal_risk_572'].value) if event else None,
         'pregnancy_week': get_pregnancy_week(event) if event else None,
     }
 
@@ -372,7 +301,7 @@ def represent_epicrisis(event, action=None):
         (code, prop.value)
         for (code, prop) in action.propsByCode.iteritems()
     )
-    finish_date = epicrisis['ch_b_date'] if epicrisis['pregnancy_final']['code'] == 'rodami' else epicrisis['abort_date']
+    finish_date = epicrisis['ch_b_date'] if safe_traverse(epicrisis, 'pregnancy_final', 'code') == 'rodami' else epicrisis['abort_date']
     pregnancy_week = get_pregnancy_week(event)
     epicrisis['registration_pregnancy_week'] = pregnancy_week - (finish_date - event.setDate.date()).days/7
     epicrisis['newborn_inspections'] = represent_newborn_inspections(event)

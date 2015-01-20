@@ -53,3 +53,10 @@ class AllergyPower(Enum):
 class IntoleranceType(Enum):
     allergy = 0, u'Аллергия'
     medicine = 1, u'Медикаментозная непереносимость'
+
+
+class PrenatalRiskRate(Enum):
+    undefined = 0, u'не определен'
+    low = 1, u'низкий'
+    medium = 2, u'средний'
+    high = 3, u'высокий'

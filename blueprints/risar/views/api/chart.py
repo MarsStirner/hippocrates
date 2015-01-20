@@ -6,7 +6,6 @@ from flask import request
 from application.lib.data import create_action
 from application.lib.utils import get_new_event_ext_id, safe_traverse
 from application.lib.apiutils import api_method, ApiException
-from application.models.actions import ActionType
 from application.models.client import Client, ClientAttach
 from application.models.enums import EventPrimary, EventOrder
 from application.models.event import Event, EventType
@@ -14,6 +13,7 @@ from application.models.exists import Organisation, Person, rbAttachType, rbRequ
 from application.models.schedule import ScheduleClientTicket
 from application.systemwide import db
 from blueprints.risar.app import module
+from blueprints.risar.lib.card_attrs import default_AT_Heuristic
 from blueprints.risar.lib.represent import represent_event
 from blueprints.risar.risar_config import attach_codes
 
@@ -48,10 +48,6 @@ def default_ET_Heuristic():
         ) \
         .order_by(EventType.createDatetime.desc())\
         .first()
-
-
-def default_AT_Heuristic():
-    return ActionType.query.filter(ActionType.flatCode == 'cardAttributes').first()
 
 
 @module.route('/api/0/chart/')

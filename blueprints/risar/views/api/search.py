@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
-from flask import request
 import datetime
 
-from application.lib.utils import jsonify
+from flask import request
+
+from application.lib.apiutils import api_method
+from application.models.enums import PrenatalRiskRate
 from application.models.exists import Organisation, Person
 from blueprints.risar.app import module
+
 
 __author__ = 'mmalkov'
 
@@ -17,7 +20,7 @@ def search_events(**kwargs):
     import pprint
     pprint.pprint(kwargs)
 
-    query = Search(indexes=['events'], config=SearchConfig)
+    query = Search(indexes=['risar_events'], config=SearchConfig)
     if 'fio' in kwargs and kwargs['fio']:
         query = query.match(kwargs['fio'])
     if 'org_id' in kwargs:
@@ -41,12 +44,13 @@ def search_events(**kwargs):
 
 
 @module.route('/api/0/search/', methods=['POST', 'GET'])
+@api_method
 def api_0_event_search():
     data = dict(request.args)
     if request.json:
         data.update(request.json)
     result = search_events(**data)
-    return jsonify([
+    return [
         {
             'event_id': row['id'],
             'client_id': row['client_id'],
@@ -55,30 +59,31 @@ def api_0_event_search():
             'exec_date': datetime.date.fromtimestamp(row['exec_date'] * 86400) if row['exec_date'] else None,
             'external_id': row['external_id'],
             'exec_person_name': row['person_name'],
-            'risk': row['risk'],
+            'risk': PrenatalRiskRate(row['risk']),
             'mdate': datetime.date.fromtimestamp(row['modify_date']),
+            'pddate': datetime.date.fromtimestamp(row['bdate'] * 86400) if row['bdate'] else None,
             'week': min(
                 45,
-                datetime.timedelta(
-                    datetime.date.today() - datetime.date.fromtimestamp(row['psdate'] * 86400)
-                ).days / 7)
+                (datetime.date.today() - datetime.date.fromtimestamp(row['psdate'] * 86400)).days / 7)
             if row['psdate'] else None
         }
         for row in result['result']['items']
-    ])
+    ]
 
 
 @module.route('/api/0/lpu_list.json', methods=['POST', 'GET'])
+@api_method
 def api_0_lpu_list():
     query = Organisation.query
     query = query.filter(
         Organisation.deleted == 0,
         Organisation.isHospital == 1,  # This is not right, however, f**k it
     )
-    return jsonify(query.all())
+    return query.all()
 
 
 @module.route('/api/0/lpu_doctors_list.json', methods=['POST', 'GET'])
+@api_method
 def api_0_lpu_doctors_list():
     query = Person.query
     query = query.filter(
@@ -88,7 +93,7 @@ def api_0_lpu_doctors_list():
         query = query.filter(
             Person.org_id == request.args['org_id']
         )
-    return jsonify([
+    return [
         {
             'id': row.id,
             'name': row.nameText,
@@ -100,4 +105,4 @@ def api_0_lpu_doctors_list():
             'org_id': row.org_id,
         }
         for row in query
-    ])
+    ]

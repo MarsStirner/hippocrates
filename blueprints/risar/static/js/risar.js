@@ -210,4 +210,28 @@ WebMis20
         }
     }
 })
+.directive('riskRateIcon', function () {
+    return {
+        restrict: 'A',
+        template: '<span class="fa" ng-class="icon_class(riskRateIcon.id)" tooltip="[[tooltip(riskRateIcon.id)]]"></span>',
+        scope: {
+            riskRateIcon: '='
+        },
+        link: function (scope) {
+            scope.icon_class = function (rate) {
+                if (rate == 1) return 'fa-circle text-success';
+                if (rate == 2) return 'fa-circle text-warning';
+                if (rate == 3) return 'fa-circle text-danger';
+                return 'fa-question';
+            };
+            scope.tooltip = function (rate) {
+                if (rate == 1) return 'У пациентки выявлен низкий риск невынашивания';
+                if (rate == 2) return 'У пациентки выявлен средний риск невынашивания';
+                if (rate == 3) return 'Внимание! У пациентки выявлен высокий риск невынашивания';
+                return 'У пациентки риск невынашивания не выявлен';
+
+            }
+        }
+    }
+})
 ;

@@ -80,6 +80,9 @@ class Action(db.Model):
             if prop.type.code
         )
 
+    def __getitem__(self, item):
+        return self.propsByCode[item]
+
 
 class ActionProperty(db.Model):
     __tablename__ = u'ActionProperty'
@@ -578,9 +581,15 @@ class ActionProperty_ExtReferenceRb(ActionProperty__ValueType):
         if not hasattr(self, 'table_name'):
             domain = ActionProperty.query.get(self.id).type.valueDomain
             self.table_name = domain.split(';')[0]
-        response = requests.get(u'{0}v1/{1}/code/{2}'.format(app.config['VESTA_URL'], self.table_name, self.value_))
-        result = response.json()['data']
-        return {'id': result['_id'], 'name': result['name'], 'code': result['code']}
+        try:
+            response = requests.get(u'{0}v1/{1}/code/{2}'.format(app.config['VESTA_URL'], self.table_name, self.value_))
+            result = response.json()['data']
+        except Exception, e:
+            import traceback
+            traceback.print_exc()
+            return
+        else:
+            return {'id': result['_id'], 'name': result['name'], 'code': result['code']}
 
     @value.setter
     def value(self, val):

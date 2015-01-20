@@ -17,7 +17,8 @@ var EventSearchCtrl = function ($scope, RisarApi, TimeoutCallback) {
         org: default_orgs[0],
         person: default_docs[0],
         checkup_date: null,
-        bdate: null
+        bdate: null,
+        risk: {id:0}
     };
     $scope.results = [];
     var perform = function () {
@@ -27,7 +28,8 @@ var EventSearchCtrl = function ($scope, RisarApi, TimeoutCallback) {
             fio: $scope.query.fio || undefined,
             //risk: $scope.query.risk === 'любая' && undefined || $scope.query.risk,
             checkup_date: $scope.query.checkup_date || undefined,
-            bdate: $scope.query.bdate || undefined
+            bdate: $scope.query.bdate || undefined,
+            risk: $scope.query.risk.id || undefined
         };
         console.log(JSON.stringify($scope.query));
         console.log(JSON.stringify(data));
