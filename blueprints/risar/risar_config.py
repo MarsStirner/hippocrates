@@ -27,4 +27,4 @@ father_codes = ['name', 'phone', 'HIV', 'fluorography'] + common_codes
 
 checkup_flat_codes = ['risarFirstInspection', 'risarSecondInspection']
 
-attach_codes = {'plan_lpu': 10, 'extra_lpu': 11}
+attach_codes = {'plan_lpu': '10', 'extra_lpu': '11'}
