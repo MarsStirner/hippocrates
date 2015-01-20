@@ -21,7 +21,9 @@ var WebMis20 = angular.module('WebMis20', [
     'formstamp',
     'rcWizard',
     'mgcrea.ngStrap.affix',
-    'duScroll'
+    'duScroll',
+    'nvd3ChartDirectives',
+    'legendDirectives'
 ])
 .config(function ($interpolateProvider, datepickerConfig, datepickerPopupConfig, paginationConfig) {
     $interpolateProvider.startSymbol('[[');

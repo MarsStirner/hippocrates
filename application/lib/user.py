@@ -369,12 +369,17 @@ class UserProfileManager(object):
     doctor_diag = 'diagDoctor'  # Врач диагностики
     nurse_admission = 'admNurse'  # Медсестра приемного отделения
     obstetrician = 'obstetrician'  # Акушер-игнеколог
+    overseer1 = 'overseer1'
+    overseer2 = 'overseer2'
+    overseer3 = 'overseer3'
 
     ui_groups = {
         'doctor': [admin, doctor_clinic, doctor_diag],
         'registrator': [admin, reg_clinic],
         'registrator_cut': [admin, nurse_admission],
         'obstetrician': [admin, obstetrician],
+        'risar': [admin, obstetrician, overseer1, overseer2, overseer3],
+        'overseers': [admin, overseer1, overseer2, overseer3],
     }
 
     @classmethod
@@ -405,6 +410,10 @@ class UserProfileManager(object):
     @classmethod
     def has_ui_obstetrician(cls):
         return cls._get_user_role() in cls.ui_groups['obstetrician']
+
+    @classmethod
+    def has_ui_risar(cls):
+        return cls._get_user_role() in cls.ui_groups['risar']
 
     @classmethod
     def get_default_url(cls):

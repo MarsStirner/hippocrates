@@ -20,6 +20,7 @@ WebMis20
         api_event_search: '{{ url_for('.api_0_event_search') }}',
         api_event_search_lpu_list: '{{ url_for('.api_0_lpu_list') }}',
         api_event_search_lpu_doctors_list: '{{ url_for('.api_0_lpu_doctors_list') }}',
+        api_current_stats: '{{ url_for('.api_0_current_stats') }}',
         chart_html: '{{ url_for('.html_chart') }}',
         index_html: '{{ url_for('.index_html') }}',
         inpection_edit_html:'{{ url_for('.html_inspection_edit') }}'
