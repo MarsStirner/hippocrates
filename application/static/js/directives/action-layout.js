@@ -43,7 +43,7 @@ angular.module('WebMis20.ActionLayout', ['WebMis20.validators', 'WebMis20.direct
                             switch (property.type.type_name) {
                                 case 'Constructor':
                                 case 'Text':
-                                case 'HTML':
+                                case 'Html':
                                 case 'Жалобы':
                                     inner_template = '<span ng-bind-html="{0}.value"></span>'; break;
                                 case 'String':
