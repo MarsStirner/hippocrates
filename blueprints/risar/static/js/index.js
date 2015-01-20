@@ -41,24 +41,24 @@ var IndexCtrl = function ($scope, RisarApi) {
     $scope.refresh_diagram = function () {
         RisarApi.current_stats.get().then(function (result) {
             $scope.slices = [];
-            if (result['низкая']) {
+            if (result['1']) {
                 $scope.slices.push({
                     key: 'Низкая',
-                    value: result['низкая'],
+                    value: result['1'],
                     color: '#30D040'
                 })
             }
-            if (result['средняя']) {
+            if (result['2']) {
                 $scope.slices.push({
                     key: 'Средняя',
-                    value: result['средняя'],
+                    value: result['2'],
                     color: '#E0C030'
                 })
             }
-            if (result['высокая']) {
+            if (result['3']) {
                 $scope.slices.push({
                     key: 'Высокая',
-                    value: result['высокая'],
+                    value: result['3'],
                     color: '#E05030'
                 })
             }

@@ -6,7 +6,7 @@ import itertools
 from flask import request
 
 from application.lib.apiutils import api_method
-from application.models.actions import ActionType, Action, ActionProperty, ActionPropertyType, ActionProperty_String
+from application.models.actions import ActionType, Action, ActionProperty, ActionPropertyType, ActionProperty_Integer
 from application.models.event import Event
 from application.models.schedule import Schedule
 from application.models.utils import safe_current_user_id
@@ -40,7 +40,7 @@ def api_0_schedule(person_id=None):
 def api_0_current_stats():
     result = collections.defaultdict(lambda: 0)
     selectable = db.select(
-        (ActionProperty_String.value,),
+        (ActionProperty_Integer.value_,),
         whereclause=db.and_(
             ActionType.flatCode == 'cardAttributes',
             ActionPropertyType.code == 'prenatal_risk_572',
@@ -48,19 +48,12 @@ def api_0_current_stats():
             ActionProperty.action_id == Action.id,
             ActionPropertyType.id == ActionProperty.type_id,
             ActionType.id == Action.actionType_id,
-            ActionProperty_String.id == ActionProperty.id,
+            ActionProperty_Integer.id == ActionProperty.id,
             Event.execDate.is_(None),
         ),
         from_obj=(
-            Event, Action, ActionType, ActionProperty, ActionPropertyType, ActionProperty_String
+            Event, Action, ActionType, ActionProperty, ActionPropertyType, ActionProperty_Integer
         ))
-    # query = Event.query.\
-    #     join(Action, ActionProperty).\
-    #     join(ActionType, onCond=(ActionType.flatCode == 'cardAttributes')).\
-    #     join(ActionPropertyType, onCond=db.and_(ActionPropertyType.id == ActionProperty.type_id, ActionPropertyType.code == 'prenatal_risk_572')).\
-    #     join(ActionProperty_String).\
-    #     filter(Event.execDate.is_(None))
-
     for (value, ) in db.session.execute(selectable):
         result[value] += 1
     return result
