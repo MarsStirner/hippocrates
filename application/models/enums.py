@@ -48,3 +48,8 @@ class AllergyPower(Enum):
     medium = 2, u'средняя'
     high = 3, u'высокая'
     strict = 4, u'строгая'
+
+
+class PaymentType(Enum):
+    cash = 0, u'наличный'
+    noncash = 1, u'безналичный'

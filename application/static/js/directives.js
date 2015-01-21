@@ -333,7 +333,7 @@ angular.module('WebMis20.directives')
                 var e = $(element);
                 var subelement = $(
                     '<alert ng-repeat="alert in ' + attrs.uiAlertList + '" type="alert.type" close="alerts.splice(index, 1)">\
-                        <span ng-bind="alert.text"></span> [<span ng-bind="alert.code"></span>]\
+                        <span ng-bind="alert.text"></span> <span ng-if="alert.code">[[ [alert.code] ]]</span>\
                         <span ng-if="alert.data.detailed_msg">\
                             <a href="javascript:void(0);"  ng-click="show_details = !show_details">\
                                 [[show_details ? "[Скрыть]" : "[Подробнее]"]]\
@@ -530,7 +530,7 @@ angular.module('WebMis20.directives')
                     <button type="button" class="btn btn-default" ng-click="cancel()">Отмена</button>\
                 </div>')
     }])
-    .directive('uiPrintButton', ['PrintingDialog', function (PrintingDialog) {
+    .directive('uiPrintButton', ['PrintingDialog', 'MessageBox', function (PrintingDialog, MessageBox) {
         return {
             restrict: 'E',
             replace: true,
@@ -541,7 +541,8 @@ angular.module('WebMis20.directives')
                  </button>',
             scope: {
                 $ps: '=ps',
-                beforePrint: '&?'
+                beforePrint: '&?',
+                lazyLoadContext: '@?'
             },
             link: function (scope, element, attrs) {
                 var resolver_call = attrs.resolve;
@@ -564,10 +565,19 @@ angular.module('WebMis20.directives')
                     }
                 };
                 scope.open_print_window = function () {
-                    PrintingDialog.open(
-                        scope.$ps,
-                        scope.$parent.$eval(resolver_call)
-                    );
+                    if (!scope.$ps.is_loaded()) {
+                        scope.$ps.set_context(scope.lazyLoadContext)
+                        .then(function () {
+                            PrintingDialog.open(scope.$ps, scope.$parent.$eval(resolver_call));
+                        }, function () {
+                            MessageBox.error(
+                                'Печать недоступна',
+                                'Сервис печати недоступен. Свяжитесь с админитсратором.'
+                            );
+                        });
+                    } else {
+                        PrintingDialog.open(scope.$ps, scope.$parent.$eval(resolver_call));
+                    }
                 };
             }
         }
@@ -1432,7 +1442,9 @@ angular.module('WebMis20.validators', [])
             }
 
             ngModelCtrl.$parsers.push(function (val) {
-                if (angular.isNumber(val)) {
+                if (val === undefined) {
+                    return val;
+                } else if (angular.isNumber(val)) {
                     return val;
                 }
                 var clean = clear_char_duplicates(val.replace(regex, ''), '.');

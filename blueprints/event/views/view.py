@@ -40,7 +40,10 @@ def new_event():
 
 def get_event_form(**kwargs):
     # В зависимости от ролей и прав разный лейаут
-    if UserProfileManager.has_ui_registrator() or UserProfileManager.has_ui_doctor():
+    if (UserProfileManager.has_ui_registrator() or
+        UserProfileManager.has_ui_doctor() or
+        UserProfileManager.has_ui_cashier()
+    ):
         return render_template('event/event_info.html', **kwargs)
     return abort(403)
 

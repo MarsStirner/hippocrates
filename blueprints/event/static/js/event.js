@@ -247,7 +247,7 @@ var EventMainInfoCtrl = function ($scope, RefBookService, EventType, $filter, Me
             false;
     });
 };
-var EventPaymentCtrl = function($scope, RefBookService, Settings, $http, $modal, MessageBox, CurrentUser) {
+var EventPaymentCtrl = function($scope, RefBookService, Settings, $http, $modal, MessageBox) {
     $scope.rbDocumentType = RefBookService.get('rbDocumentType');
 
     var event_created = !$scope.event.is_new();
@@ -325,10 +325,6 @@ var EventPaymentCtrl = function($scope, RefBookService, Settings, $http, $modal,
 
     $scope.get_shared_contract_warning = function () {
         return "Этот договор также используется в других обращениях.Редактирование данных плательщика приведет к созданию нового договора.";
-    };
-
-    $scope.payment_box_visible = function () {
-        return CurrentUser.current_role_in('admin');
     };
 
     $scope.$on('event_loaded', function() {
@@ -455,23 +451,6 @@ var EventPaymentCtrl = function($scope, RefBookService, Settings, $http, $modal,
             alert(message);
         });
     };
-
-    $scope.payment_sum = null;
-    $scope.process_payment = function () {
-        $http.post(
-            url_for_event_api_service_make_payment, {
-                event_id: $scope.event.info.id,
-                sum: $scope.payment_sum
-            }
-        ).success(function() {
-            alert('ok');
-            $scope.payment_sum = null;
-        }).error(function() {
-            alert('error');
-        });
-//        $scope.event.reload();
-    }
-
 };
 
 var PrevEventContractModalCtrl = function ($scope, $modalInstance, model, $filter) {
@@ -776,7 +755,7 @@ WebMis20.controller('EventDiagnosesCtrl', ['$scope', 'RefBookService', '$http', 
 WebMis20.controller('EventMainInfoCtrl', ['$scope', 'RefBookService', 'EventType', '$filter', 'MessageBox',
     'CurrentUser', EventMainInfoCtrl]);
 WebMis20.controller('EventPaymentCtrl', ['$scope', 'RefBookService', 'Settings', '$http', '$modal', 'MessageBox',
-    'CurrentUser', EventPaymentCtrl]);
+    EventPaymentCtrl]);
 WebMis20.controller('EventServicesCtrl', ['$scope', '$http', EventServicesCtrl]);
 WebMis20.controller('EventInfoCtrl', ['$scope', 'WMEvent', '$http', 'RefBookService', '$window', '$document',
     'PrintingService', 'Settings', '$filter', '$modal', 'WMEventServices', 'WMEventFormState', 'MessageBox', EventInfoCtrl]);

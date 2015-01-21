@@ -711,10 +711,13 @@ class PersonTreeVisualizer(object):
         }
 
     def make_person_ws(self, person):
+        name = person.shortNameText
+        speciality = self.make_short_speciality(person.speciality) if person.speciality else None
         return {
             'id': person.id,
-            'name': person.shortNameText,
-            'speciality': self.make_short_speciality(person.speciality) if person.speciality else None
+            'name': name,
+            'speciality': speciality,
+            'full_name': u'%s%s' % (name, u' (%s)' % speciality['name'] if speciality else u'')
         }
 
     def make_short_speciality(self, speciality):
@@ -769,6 +772,9 @@ class EventVisualizer(object):
         elif UserProfileManager.has_ui_doctor():
             data['diagnoses'] = self.make_diagnoses(event)
         elif UserProfileManager.has_ui_registrator():
+            data['payment'] = self.make_event_payment(event)
+            data['services'] = self.make_event_services(event.id)
+        elif UserProfileManager.has_ui_cashier():
             data['payment'] = self.make_event_payment(event)
             data['services'] = self.make_event_services(event.id)
         return data
@@ -957,6 +963,7 @@ class EventVisualizer(object):
             'id': local_contract.id,
             'number_contract': local_contract.numberContract,
             'date_contract': local_contract.dateContract,
+            'coord_text': local_contract.coordText,
             'first_name': local_contract.firstName,
             'last_name': local_contract.lastName,
             'patr_name': local_contract.patrName,
@@ -1123,6 +1130,28 @@ class EventVisualizer(object):
             )
 
         return services_grouped
+
+    def make_search_event_info(self, event):
+        pviz = PersonTreeVisualizer()
+        cviz = ClientVisualizer()
+
+        def make_short_et(event_type):
+            return {
+                'id': event_type.id,
+                'name': event_type.name,
+                'print_context': event_type.printContext
+            }
+
+        return {
+            'id': event.id,
+            'external_id': event.externalId,
+            'exec_person': pviz.make_person_ws(event.execPerson),
+            'set_date': event.setDate,
+            'exec_date': event.execDate,
+            'event_type': make_short_et(event.eventType),
+            'client': cviz.make_short_client_info(event.client),
+            'contract': self.make_event_local_contract(event)
+        }
 
 
 class ActionVisualizer(object):

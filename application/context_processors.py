@@ -63,6 +63,10 @@ def general_menu():
         link='anareports.index_html',
         title=u'Аналитические отчёты',
         visible=True
+    ), dict(
+        link='accounting.cashbook_html',
+        title=u'Расчет пациентов',
+        visible=UserProfileManager.has_ui_cashier()
     )]
     return dict(main_menu=menu_items)
 

@@ -63,7 +63,7 @@
                         {% if user_profiles_mng.has_ui_doctor() %}
                             {% include "event/_diagnoses.html" %}
                         {% endif %}
-                        {% if user_profiles_mng.has_ui_registrator() %}
+                        {% if user_profiles_mng.has_ui_registrator() or user_profiles_mng.has_ui_cashier() %}
                             {% include "event/_services.html" %}
                             {% include "event/_payment.html" %}
                         {% endif %}
