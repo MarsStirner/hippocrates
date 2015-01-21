@@ -68,7 +68,7 @@
             <div class="form-group">
                 <label for="person" class="col-md-2 control-label">Исполнитель</label>
                 <div class="col-md-6">
-                    <wm-person-select id="person" name="person" ng-model="action.action.person"></wm-person-select>
+                    <wm-person-select id="person" name="person" ng-model="action.action.person" theme="bootstrap" placeholder="Введите ФИО врача или специальность"></wm-person-select>
                 </div>
                 <div ng-if="!is_med_doc()">
                     <label for="office" class="col-md-1 control-label">Кабинет</label>
