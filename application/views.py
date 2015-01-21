@@ -1,4 +1,5 @@
 # -*- encoding: utf-8 -*-
+import urllib2
 
 import requests
 
@@ -7,12 +8,14 @@ from flask.ext.principal import Identity, AnonymousIdentity, identity_changed
 from flask.ext.principal import identity_loaded, Permission, RoleNeed, UserNeed, ActionNeed
 from flask.ext.login import login_user, logout_user, login_required, current_user
 from sqlalchemy.orm import lazyload, joinedload
+from itsdangerous import json
 
 from application.app import app, db, login_manager, cache
 from application.context_processors import *
 from application.lib.data import get_kladr_city, get_kladr_street
 from application.lib.utils import public_endpoint, jsonify, roles_require, rights_require, request_wants_json
 from application.models import *
+from config import COLDSTAR_URL, CASTIEL_AUTH_TOKEN
 from lib.user import UserAuth, AnonymousUser, UserProfileManager
 from forms import LoginForm, RoleForm
 from application.lib.jsonify import PersonTreeVisualizer
@@ -25,14 +28,44 @@ login_manager.anonymous_user = AnonymousUser
 
 @app.before_request
 def check_valid_login():
-    login_valid = current_user.is_authenticated()
     if (request.endpoint and
             'static' not in request.endpoint and
             not current_user.is_admin() and
             not getattr(app.view_functions[request.endpoint], 'is_public', False)):
 
-        if not login_valid or not getattr(current_user, 'current_role', None):
-            return redirect(url_for('login', next=request.url))
+        login_valid = False
+
+        auth_token = request.cookies.get(CASTIEL_AUTH_TOKEN)
+        if auth_token:
+            result = requests.post(COLDSTAR_URL + 'cas/api/check', data=json.dumps({'token': auth_token}))
+            if result.status_code == 200:
+                answer = result.json()
+                if answer['success']:
+                    if not current_user.is_authenticated():
+                        user = UserAuth.get_by_id(answer['user_id'])
+                        if login_user(user):
+                            session_save_user(user)
+                            # Tell Flask-Principal the identity changed
+                            identity_changed.send(current_app._get_current_object(), identity=Identity(answer['user_id']))
+                            return redirect(request.url or UserProfileManager.get_default_url())
+                        else:
+                            pass
+                            # errors.append(u'Аккаунт неактивен')
+                    login_valid = True
+                else:
+                    # Remove the user information from the session
+                    logout_user()
+                    # Remove session keys set by Flask-Principal
+                    for key in ('identity.name', 'identity.auth_type', 'hippo_user', 'crumbs'):
+                        session.pop(key, None)
+                    # Tell Flask-Principal the user is anonymous
+                    identity_changed.send(current_app._get_current_object(), identity=AnonymousIdentity())
+
+        if not login_valid:
+            # return redirect(url_for('login', next=request.url))
+            return redirect(COLDSTAR_URL + 'cas/user/login?back=%s' % urllib2.quote(request.url))
+        if not getattr(current_user, 'current_role', None):
+            return redirect(url_for('select_role', next=request.url))
 
 
 @app.before_request
@@ -116,6 +149,9 @@ def logout():
         session.pop(key, None)
     # Tell Flask-Principal the user is anonymous
     identity_changed.send(current_app._get_current_object(), identity=AnonymousIdentity())
+    token = request.cookies.get(CASTIEL_AUTH_TOKEN)
+    if token:
+        requests.post(COLDSTAR_URL + 'cas/api/release', data=json.dumps({'token': token}))
     return redirect(request.args.get('next') or '/')
 
 
