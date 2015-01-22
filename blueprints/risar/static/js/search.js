@@ -4,7 +4,7 @@
 
 'use strict';
 
-var EventSearchCtrl = function ($scope, RisarApi, TimeoutCallback) {
+var EventSearchCtrl = function ($scope, RisarApi, TimeoutCallback, RefBookService) {
     var default_orgs = [{
         full_name: 'Все',
         short_name: 'Все'
@@ -18,7 +18,7 @@ var EventSearchCtrl = function ($scope, RisarApi, TimeoutCallback) {
         person: default_docs[0],
         checkup_date: null,
         bdate: null,
-        risk: {id:0}
+        risk: {id:undefined}
     };
     $scope.results = [];
     var perform = function () {
@@ -29,7 +29,7 @@ var EventSearchCtrl = function ($scope, RisarApi, TimeoutCallback) {
             //risk: $scope.query.risk === 'любая' && undefined || $scope.query.risk,
             checkup_date: $scope.query.checkup_date || undefined,
             bdate: $scope.query.bdate || undefined,
-            risk: $scope.query.risk.id || undefined
+            risk: $scope.query.risk.id
         };
         console.log(JSON.stringify($scope.query));
         console.log(JSON.stringify(data));
@@ -52,6 +52,15 @@ var EventSearchCtrl = function ($scope, RisarApi, TimeoutCallback) {
             perform();
         })
     };
+    $scope.risks_rb = RefBookService.get('PrenatalRiskRate');
+    $scope.risks = [];
+    $scope.$watch('risks_rb.objects', function (n) {
+        $scope.risks = [{
+            id: undefined,
+            code: 'all',
+            name: 'Все'
+        }].concat(n)
+    });
 
     $scope.refresh_organisations();
 

@@ -51,9 +51,9 @@
                 <div class="form-group">
                     <label>Степень риска</label>
                     <div class="form-control-static">
-                        <ui-select ng-model="query.risk" theme="select2" ng-change="perform()" ref-book="PrenatalRiskRate">
+                        <ui-select ng-model="query.risk" theme="select2" ng-change="perform()">
                             <ui-select-match>[[ $select.selected.name ]]</ui-select-match>
-                            <ui-select-choices repeat="item in $refBook.objects | filter:$select.search">
+                            <ui-select-choices repeat="item in risks | filter:$select.search">
                                 <div ng-bind-html="item.name | highlight: $select.search"></div>
                             </ui-select-choices>
                         </ui-select>
