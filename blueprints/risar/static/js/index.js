@@ -11,23 +11,7 @@ var IndexCtrl = function ($scope, RisarApi) {
         })
     });
     // Подгрузки данных пока нет
-    $scope.slices = [
-        {
-            key: 'Низкая',
-            value: 0,
-            color: '#30D040'
-        },
-        {
-            key: 'Средняя',
-            value: 0,
-            color: '#E0C030'
-        },
-        {
-            key: 'Высокая',
-            value: 0,
-            color: '#E05030'
-        }
-    ];
+    $scope.slices = [];
     $scope.slices_x = function (d) {
         return d.key;
     };
@@ -41,6 +25,13 @@ var IndexCtrl = function ($scope, RisarApi) {
     $scope.refresh_diagram = function () {
         RisarApi.current_stats.get().then(function (result) {
             $scope.slices = [];
+            if (result['0']) {
+                $scope.slices.push({
+                    key: 'Не определена',
+                    value: result['0'],
+                    color: '#707070'
+                })
+            }
             if (result['1']) {
                 $scope.slices.push({
                     key: 'Низкая',
