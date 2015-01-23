@@ -36,9 +36,9 @@
 {#                    <path fill="silver" stroke="gray" d="M51.446,47.218l-0.282-0.462c0,0-8.154-0.461-11.171-0.69c-1.384-0.106-2.811-0.37-3.946-0.621  c-0.703-1.283-2.248-2.179-4.053-2.179c-1.057,0-2.014,0.318-2.779,0.828c-1.973,1.055-5.692,1.052-8.338,1.062  c-3.758,0.028-7.458-0.412-10.785-0.742c-5.744-0.585-8.17-3.033-4.818-6.607c19.652-20.932-32.086-22.769-37.173-16.965  c-3.113,3.688,36.113,4.81,23.64,19.229c-4.841,0.981-9.434,2.758-11.424,4.801c-1.67-0.784-3.696-1.381-5.566-0.965  c-1.874,2.118-1.542,4.995,0,6.145c1.765,0.377,3.69-0.116,5.319-0.799c2.117,3.083,8.237,5.649,14.896,5.649  c6.447,0,10.416-2.43,13.851-4.255c3.448-1.827,16.699-3.394,19.803-1.234c0.024,0.018,0.048,0.028,0.071,0.042  c0.817,0.752,1.988,1.234,3.302,1.234c1.657,0,3.086-0.761,3.856-1.876c1.385-0.259,3.186-0.579,4.052-0.655  C41.439,48.022,51.446,47.218,51.446,47.218z"/>#}
 {#                    </svg>#}
                     <i class="fa fa-exclamation-triangle text-success"></i>
-                    <span ng-if="chart.epicrisis.ch_b_date" tooltip="Фактическая дата родов">[[chart.epicrisis.ch_b_date | asDate]]</span>
-                    <span ng-if="!chart.epicrisis.ch_b_date" tooltip="Предполагаемая дата родов">[[birth_date]]</span>
-                    <i class="fa fa-question" class="" tooltip="Предполагаемая дата родов" ng-if="!chart.epicrisis.ch_b_date && !birth_date"></i>
+                    <span ng-if="chart.epicrisis.delivery_date" tooltip="Фактическая дата родов">[[chart.epicrisis.delivery_date | asDate]]</span>
+                    <span ng-if="!chart.epicrisis.delivery_date" tooltip="Предполагаемая дата родов">[[birth_date]]</span>
+                    <i class="fa fa-question" class="" tooltip="Предполагаемая дата родов" ng-if="!chart.epicrisis.delivery_date && !birth_date"></i>
                 </span>
             </div>
             <div class="col-md-12 col-lg-12 col-sm-12">

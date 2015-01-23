@@ -89,32 +89,32 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                    <tr ng-if="chart.epicrisis.pregnancy_final.code =='rodami'">
-                                        <th class="text-right">Роды при сроке (недель)</th>
+                                    <tr>
+                                        <th class="text-right">[[ chart.epicrisis.pregnancy_final.code =='abortom' ? 'Аборт при сроке (недель)': 'Роды при сроке (недель)']]</th>
                                         <td>
                                             <div class="row">
                                             <div class="col-md-2">
                                                 <input ng-model="chart.epicrisis.pregnancy_duration" class="form-control"
-                                                       ng-required="chart.epicrisis.pregnancy_final.code =='rodami'">
+                                                       ng-required>
                                             </div>
                                             </div>
                                         </td>
                                     </tr>
-                                    <tr ng-if="chart.epicrisis.pregnancy_final.code =='rodami'">
-                                        <th class="text-right">Дата родов</th>
+                                    <tr>
+                                        <th class="text-right">[[chart.epicrisis.pregnancy_final.code =='abortom'? 'Дата аборта': 'Дата родов']]</th>
                                         <td>
-                                            <wm-date ng-model="chart.epicrisis.ch_b_date" ng-class="{'has-error': firstForm.ch_b_date.$invalid}"
-                                                     style="width: 250px" ng-required="chart.epicrisis.pregnancy_final.code =='rodami'"
-                                                     name="ch_b_date"></wm-date>
+                                            <wm-date ng-model="chart.epicrisis.delivery_date" ng-class="{'has-error': firstForm.delivery_date.$invalid}"
+                                                     style="width: 250px" ng-required
+                                                     name="delivery_date"></wm-date>
                                         </td>
                                     </tr>
-                                    <tr ng-if="chart.epicrisis.pregnancy_final.code =='rodami'">
-                                        <th class="text-right">Время родов</th>
+                                    <tr>
+                                        <th class="text-right">[[ chart.epicrisis.pregnancy_final.code =='abortom' ? 'Время аборта':'Время родов']]</th>
                                         <td>
-                                            <div class="row" ng-class="{'has-error': firstForm.ch_b_time.$invalid}">
+                                            <div class="row" ng-class="{'has-error': firstForm.delivery_time.$invalid}">
                                                 <div class="col-md-2">
-                                                    <div fs-time ng-model="chart.epicrisis.ch_b_time"
-                                                         name="ch_b_time" ng-required="chart.epicrisis.pregnancy_final.code =='rodami'"></div>
+                                                    <div fs-time ng-model="chart.epicrisis.delivery_time"
+                                                         name="delivery_time" ng-required></div>
                                                 </div>
                                             </div>
                                         </td>
@@ -143,36 +143,6 @@
                                                     <rb-select name="state" ng-model="chart.epicrisis.abort"
                                                                ref-book="rbRisarAbort" ng-required="chart.epicrisis.pregnancy_final.code =='abortom'"></rb-select>
                                                 </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr ng-if="chart.epicrisis.pregnancy_final.code =='abortom'">
-                                        <th class="text-right">Аборт при сроке (недель)</th>
-                                        <td>
-                                            <div class="row" ng-class="{'has-error': firstForm.abort_week.$invalid}">
-                                            <div class="col-md-2">
-                                                <input ng-model="chart.epicrisis.abort_week" class="form-control"
-                                                       ng-required="chart.epicrisis.pregnancy_final.code =='abortom'">
-                                            </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr ng-if="chart.epicrisis.pregnancy_final.code =='abortom'">
-                                        <th class="text-right">Дата аборта</th>
-                                        <td>
-                                            <wm-date ng-class="{'has-error': firstForm.abort_date.$invalid}"
-                                                     ng-model="chart.epicrisis.abort_date" style="width: 250px" name="abort_date"
-                                                     ng-required="chart.epicrisis.pregnancy_final.code =='abortom'"></wm-date>
-                                        </td>
-                                    </tr>
-                                    <tr ng-if="chart.epicrisis.pregnancy_final.code =='abortom'">
-                                        <th class="text-right">Время аборта</th>
-                                        <td>
-                                            <div class="row">
-                                            <div class="col-md-2">
-                                            <div fs-time ng-model="chart.epicrisis.abort_time" ng-class="{'has-error': firstForm.abort_time.$invalid}"
-                                                 ng-required="chart.epicrisis.pregnancy_final.code =='abortom'" name="abort_time"></div>
-                                            </div>
                                             </div>
                                         </td>
                                     </tr>

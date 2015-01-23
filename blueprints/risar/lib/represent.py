@@ -95,9 +95,9 @@ def get_pregnancy_week(event):
     epicrisis = get_action(event, risar_epicrisis)
 
     if epicrisis:
-        ch_b_date = epicrisis.propsByCode['ch_b_date'].value
-        if ch_b_date:
-            return inspection_pregnancy_week + (ch_b_date - inspection_date.date()).days/7  # на какой неделе произошли роды
+        delivery_date = epicrisis.propsByCode['delivery_date'].value
+        if delivery_date:
+            return inspection_pregnancy_week + (delivery_date - inspection_date.date()).days/7  # на какой неделе произошли роды
 
     if inspection_pregnancy_week:
         return inspection_pregnancy_week + (date - inspection_date).days/7
@@ -263,10 +263,7 @@ def make_epicrisis_info(epicrisis):
             info += u' с осложнениями'
         info += u' при сроке {0} {1}'.format(epicrisis['pregnancy_duration'], week)
 
-        if pregnancy_final == u'родами':
-            info += u' {0} {1}.<br>'.format(epicrisis['ch_b_date'].strftime("%d.%m.%y"), epicrisis['ch_b_time'])
-        elif pregnancy_final == u'абортом':
-            info += u' {0} {1}.<br>'.format(epicrisis['abort_date'].strftime("%d.%m.%y"), epicrisis['abort_time'])
+        info += u' {0} {1}.<br>'.format(epicrisis['delivery_date'].strftime("%d.%m.%y"), epicrisis['delivery_time'])
 
         info += u"<b>Место родоразрешения</b>: {0}.<br>".format(epicrisis['LPU'].shortName)
 
@@ -301,7 +298,7 @@ def represent_epicrisis(event, action=None):
         (code, prop.value)
         for (code, prop) in action.propsByCode.iteritems()
     )
-    finish_date = epicrisis['ch_b_date'] if safe_traverse(epicrisis, 'pregnancy_final', 'code') == 'rodami' else epicrisis['abort_date']
+    finish_date = epicrisis['delivery_date']
     pregnancy_week = get_pregnancy_week(event)
     epicrisis['registration_pregnancy_week'] = pregnancy_week - (finish_date - event.setDate.date()).days/7
     epicrisis['newborn_inspections'] = represent_newborn_inspections(event)
