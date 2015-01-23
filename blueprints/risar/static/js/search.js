@@ -13,12 +13,22 @@ var EventSearchCtrl = function ($scope, RisarApi, TimeoutCallback, RefBookServic
         full_name: 'Все',
         name: 'Все'
     }];
+    $scope.closed_items = [{
+        name: 'Все'
+    }, {
+        name: 'Закрытые',
+        value: true
+    }, {
+        name: 'Открытые',
+        value: false
+    }];
     $scope.query = {
         org: default_orgs[0],
         person: default_docs[0],
         checkup_date: null,
         bdate: null,
-        risk: {id:undefined}
+        risk: [],
+        closed: $scope.closed_items[0]
     };
     $scope.results = [];
     var perform = function () {
@@ -26,10 +36,10 @@ var EventSearchCtrl = function ($scope, RisarApi, TimeoutCallback, RefBookServic
             org_id: $scope.query.org.id,
             doc_id: $scope.query.person.id,
             fio: $scope.query.fio || undefined,
-            //risk: $scope.query.risk === 'любая' && undefined || $scope.query.risk,
             checkup_date: $scope.query.checkup_date || undefined,
             bdate: $scope.query.bdate || undefined,
-            risk: $scope.query.risk.id
+            risk: get_risk_list(), //$scope.query.risk.id,
+            closed: $scope.query.closed.value
         };
         console.log(JSON.stringify($scope.query));
         console.log(JSON.stringify(data));
@@ -49,18 +59,9 @@ var EventSearchCtrl = function ($scope, RisarApi, TimeoutCallback, RefBookServic
         .then(function (result) {
             $scope.doctors = default_docs.concat(result);
             $scope.query.person = default_docs[0];
-            perform();
         })
     };
     $scope.risks_rb = RefBookService.get('PrenatalRiskRate');
-    $scope.risks = [];
-    $scope.$watch('risks_rb.objects', function (n) {
-        $scope.risks = [{
-            id: undefined,
-            code: 'all',
-            name: 'Все'
-        }].concat(n)
-    });
 
     $scope.refresh_organisations();
 
@@ -68,5 +69,17 @@ var EventSearchCtrl = function ($scope, RisarApi, TimeoutCallback, RefBookServic
 
     $scope.perform = function () {
         tc.start();
+    };
+    function get_risk_list () {
+        if ($scope.query.risk.length) {
+            return _.pluck($scope.query.risk, 'id')
+        }
     }
+
+    $scope.$watchCollection('query', function () {
+        tc.start()
+    });
+    $scope.$watchCollection('query.risk', function () {
+        tc.start()
+    });
 };

@@ -17,9 +17,6 @@ def search_events(**kwargs):
     from application.lib.sphinx_search import Search, SearchConfig
     from application.lib.utils import safe_date
 
-    import pprint
-    pprint.pprint(kwargs)
-
     query = Search(indexes=['risar_events'], config=SearchConfig)
     if 'fio' in kwargs and kwargs['fio']:
         query = query.match(kwargs['fio'])
@@ -30,15 +27,22 @@ def search_events(**kwargs):
     if 'external_id' in kwargs:
         query = query.filter(external_id__eq=kwargs['external_id'])
     if 'risk' in kwargs:
-        query = query.filter(risk__eq=kwargs['risk'])
+        if isinstance(kwargs['risk'], basestring):
+            risk = map(int, kwargs['risk'].split(','))
+        else:
+            risk = kwargs['risk']
+        query = query.filter(risk__in=risk)
     if 'bdate' in kwargs:
         query = query.filter(bdate__eq=int(timegm(safe_date(kwargs['bdate']).timetuple())/86400))
     if 'psdate' in kwargs:
         query = query.filter(psdate__eq=int(timegm(safe_date(kwargs['psdate']).timetuple())/86400))
     if 'checkup_date' in kwargs:
         query = query.filter(checkups__eq=int(timegm(safe_date(kwargs['checkup_date']).timetuple())/86400))
-    if 'quick' in kwargs:
-        query = query.filter(exec_date__eq=0)
+    if 'closed' in kwargs:
+        if kwargs['closed']:
+            query = query.filter(exec_date__neq=0)
+        else:
+            query = query.filter(exec_date__eq=0)
     result = query.limit(0, 100).ask()
     return result
 
