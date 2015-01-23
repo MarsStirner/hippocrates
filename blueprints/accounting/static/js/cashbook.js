@@ -48,7 +48,7 @@ var CashPaymentModal = function ($modal, RefBookService) {
             <div class="col-md-8">\
                 <input type="text" id="new_act" class="form-control" ng-model="model.new_act" autocomplete="off">\
             </div>\
-            <span class="text-muted">* Новый номер будет перезаписан вместо предыдущего</span>\
+            <span class="text-muted col-md-12">* Новый номер будет перезаписан вместо предыдущего</span>\
         </div>\
         <hr>\
         <div class="form-group"\

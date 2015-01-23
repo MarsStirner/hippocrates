@@ -67,7 +67,7 @@ class SearchEvent():
     def search(query):
         search = Search(indexes=['events'], config=SearchConfig)
         search = search.match(query)
-        search = search.limit(0, 100)
+        search = search.limit(0, 50)
         result = search.ask()
         return result
 

@@ -541,11 +541,6 @@ def api_event_search():
     viz = EventVisualizer()
     events = []
     for event in result['result']['items']:
-        event = Event.query.options(
-            joinedload(Event.execPerson),
-            joinedload(Event.client),
-            joinedload(Event.eventType),
-            joinedload(Event.localContract)
-        ).filter(Event.id == event['id']).first()
+        event = Event.query.filter(Event.id == event['id']).first()
         events.append(viz.make_search_event_info(event))
     return jsonify(events)
