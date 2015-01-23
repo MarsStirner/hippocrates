@@ -8,12 +8,13 @@
         <ul class="breadcrumb">
             <li><a href="{{ url_for('.index_html') }}">Рабочий стол</a></li>
             <li><a ng-href="{{ url_for('.html_chart') }}?event_id=[[ chart.id ]]">Карта пациентки</a></li>
-            <li>Эпикриз</li>
+            <li><a ng-href="{{ url_for('.html_epicrisis') }}?event_id=[[ chart.id ]]">Эпикриз</a></li>
+            <li>Ввод данных по эпикризу родоразрешения</li>
         </ul>
         <div class="row small-marginal">
             <div class="col-lg-10 col-md-10">
                 <h2>
-                    Формирование эпикриза родоразрешения
+                    Ввод данных по эпикризу родоразрешения
                     <a ng-href="{{ url_for('patients.patient') }}?client_id=[[ chart.client.id ]]">[[ chart.client.full_name ]]</a>
                     ([[ chart.external_id ]])
                 </h2>
@@ -62,9 +63,15 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="#last" data-toggle="tab">
+                                <a href="#sixth" data-toggle="tab">
                                     <span class="badge">6</span>
                                     <span>Сведения о родившихся детях</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#last" data-toggle="tab">
+                                    <span class="badge">7</span>
+                                    <span>Закрытие случая</span>
                                 </a>
                             </li>
                         </ul>
@@ -567,7 +574,7 @@
                             </tbody>
                         </table>
                     </ng-form>
-                    <ng-form class="tab-pane" id="last" name="lastForm" novalidate rc-submit rc-step>
+                    <ng-form class="tab-pane" id="sixth" name="sixthForm" novalidate rc-submit rc-step>
                         <h2>Шаг 6. Сведения о родившихся детях</h2>
                             <div class="row">
                                 <div class="col-md-2">
@@ -590,7 +597,7 @@
                                                     <tr>
                                                         <th class="text-right">Пол</th>
                                                         <td>
-                                                            <div ng-class="{'has-error': lastForm.optionsSex_[[$index]].$invalid}">
+                                                            <div ng-class="{'has-error': sixthForm.optionsSex_[[$index]].$invalid}">
                                                             <div class="radio-inline">
                                                                 <label>
                                                                     <input type="radio" name="optionsSex_[[$index]]"
@@ -612,7 +619,7 @@
                                                     <tr>
                                                         <th class="text-right">Вес</th>
                                                         <td>
-                                                            <div class="row" ng-class="{'has-error': lastForm.weight_[[$index]].$invalid}">
+                                                            <div class="row" ng-class="{'has-error': sixthForm.weight_[[$index]].$invalid}">
                                                             <div class="col-md-2">
                                                                 <input ng-model="child.weight" ng-required="true" class="form-control" name="weight_[[$index]]">
                                                             </div>
@@ -622,7 +629,7 @@
                                                     <tr>
                                                         <th class="text-right">Длина</th>
                                                         <td>
-                                                            <div class="row" ng-class="{'has-error': lastForm.length_[[$index]].$invalid}">
+                                                            <div class="row" ng-class="{'has-error': sixthForm.length_[[$index]].$invalid}">
                                                             <div class="col-md-2">
                                                                 <input ng-model="child.length" ng-required="true"
                                                                        class="form-control" name="length_[[$index]]">
@@ -633,7 +640,7 @@
                                                     <tr>
                                                         <th class="text-right">Живой</th>
                                                         <td>
-                                                            <div ng-class="{'has-error': lastForm.optionsAlive_[[$index]].$invalid}">
+                                                            <div ng-class="{'has-error': sixthForm.optionsAlive_[[$index]].$invalid}">
                                                                 <div class="radio-inline">
                                                                     <label>
                                                                         <input type="radio" name="optionsAlive_[[$index]]"
@@ -655,14 +662,14 @@
                                                         <th class="text-right">Дата рождения</th>
                                                         <td>
                                                             <wm-date ng-model="child.birth_date" ng-required="true"
-                                                                     ng-class="{'has-error': lastForm.birth_date_[[$index]].$invalid}"
+                                                                     ng-class="{'has-error': sixthForm.birth_date_[[$index]].$invalid}"
                                                                      style="width: 250px" name="birth_date_[[$index]]"></wm-date>
                                                         </td>
                                                     </tr>
                                                     <tr ng-if="child.alive">
                                                         <th class="text-right">Время рождения</th>
                                                         <td>
-                                                            <div class="row" ng-class="{'has-error': lastForm.birth_time_[[$index]].$invalid}">
+                                                            <div class="row" ng-class="{'has-error': sixthForm.birth_time_[[$index]].$invalid}">
                                                                 <div class="col-md-2">
                                                                     <div fs-time ng-required="true"
                                                                          ng-model="child.birth_time" name="birth_time_[[$index]]"></div>
@@ -673,7 +680,7 @@
                                                     <tr ng-if="child.alive">
                                                         <th class="text-right">Степень доношенности</th>
                                                         <td>
-                                                            <div class="row" ng-class="{'has-error': lastForm.maturity_rate_[[$index]].$invalid}">
+                                                            <div class="row" ng-class="{'has-error': sixthForm.maturity_rate_[[$index]].$invalid}">
                                                                 <div class="col-md-4">
                                                                 <rb-select ng-model="child.maturity_rate" ng-required="true"
                                                                            ref-book="rbRisarMaturity_Rate" name="maturity_rate_[[$index]]"></rb-select>
@@ -725,14 +732,14 @@
                                                         <th class="text-right">Дата смерти</th>
                                                         <td>
                                                             <wm-date ng-model="child.birth_date" ng-required="true"
-                                                                     ng-class="{'has-error': lastForm.birth_date_[[$index]].$invalid}"
+                                                                     ng-class="{'has-error': sixthForm.birth_date_[[$index]].$invalid}"
                                                                      style="width: 250px" name="birth_date_[[$index]]"></wm-date>
                                                         </td>
                                                     </tr>
                                                     <tr ng-if="!child.alive">
                                                         <th class="text-right">Время смерти</th>
                                                         <td>
-                                                            <div class="row" ng-class="{'has-error': lastForm.birth_time_[[$index]].$invalid}">
+                                                            <div class="row" ng-class="{'has-error': sixthForm.birth_time_[[$index]].$invalid}">
                                                                 <div class="col-md-2">
                                                                     <div fs-time ng-required="true"
                                                                          ng-model="child.birth_time" name="birth_time_[[$index]]"></div>
@@ -743,7 +750,7 @@
                                                     <tr ng-if="!child.alive">
                                                         <th class="text-right">Причина смерти</th>
                                                         <td>
-                                                            <div class="row" ng-class="{'has-error': lastForm.death_reason_[[$index]].$invalid}">
+                                                            <div class="row" ng-class="{'has-error': sixthForm.death_reason_[[$index]].$invalid}">
                                                             <div class="col-md-2">
                                                                 <input ng-model="child.death_reason" ng-required="true" class="form-control" name="death_reason_[[$index]]">
                                                             </div>
@@ -757,6 +764,28 @@
                                 </div>
                             </div>
                     </ng-form>
+                    <ng-form class="tab-pane" id="last" name="lastForm" novalidate rc-submit rc-step>
+                        <h2>Шаг 7. Закрытие случая</h2>
+                        <div class="row">
+                            <div class="col-md-3">
+                                Дата закрытия случая
+                            </div>
+                            <div class="col-md-9">
+                                <wm-date ng-class="{'has-error': lastForm.exec_date.$invalid}" name="exec_date"
+                                         ng-model="chart.exec_date" style="width: 250px" ng-required="true"></wm-date>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3">
+                                Время закрытия случая
+                            </div>
+                            <div class="col-md-9">
+                                <wm-time ng-class="{'has-error': lastForm.exec_time.$invalid}" name="exec_time"
+                                         ng-model="chart.exec_date" style="width: 250px" ng-required="true"></wm-time>
+                            </div>
+                        </div>
+
+                    </ng-form>
                 </div>
                 <div class="form-group">
                     <div class="pull-left">
@@ -764,7 +793,7 @@
                     </div>
                     <div class="pull-right">
                         <a class="btn btn-success"
-                           ng-click="save()"
+                           ng-click="rc.sampleWizard.currentIndex == rc.sampleWizard.navigationLength ? close_event() : save()"
                            ng-disabled="rc.sampleWizard.currentStep.formController.$invalid && rc.sampleWizard.currentStep.formController.$dirty">Сохранить</a>
                         <a class="btn btn-primary"
                            ng-click="save(); rc.sampleWizard.forward()"

@@ -53,6 +53,9 @@ WebMis20
         },
         delete: function (ticket_id) {
             return wrapper('DELETE', Config.url.api_chart_delete + ticket_id);
+        },
+        close_event: function (event_id, data) {
+            return wrapper('POST', Config.url.api_chart_close.format(event_id), {}, data);
         }
     };
     this.attach_lpu = {

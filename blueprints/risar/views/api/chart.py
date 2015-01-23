@@ -4,7 +4,7 @@ from datetime import datetime
 from flask import request
 
 from application.lib.data import create_action
-from application.lib.utils import get_new_event_ext_id, safe_traverse
+from application.lib.utils import get_new_event_ext_id, safe_traverse, safe_datetime
 from application.lib.apiutils import api_method, ApiException
 from application.models.client import Client, ClientAttach
 from application.models.enums import EventPrimary, EventOrder
@@ -105,6 +105,20 @@ def api_0_chart(event_id=None):
         'event': represent_event(event),
         'automagic': automagic
     }
+
+
+@module.route('/api/0/chart_close/')
+@module.route('/api/0/chart_close/<int:event_id>', methods=['POST'])
+@api_method
+def api_0_chart_close(event_id=None):
+    if not event_id:
+        raise ApiException(400, u'Either event_id must be provided')
+    else:
+        data = request.get_json()
+        event = Event.query.get(event_id)
+        event.execDate = safe_datetime(data['exec_date'])
+        db.session.commit()
+    return represent_event(event)
 
 
 @module.route('/api/0/chart/attach_lpu/', methods=['POST'])

@@ -40,6 +40,14 @@ var EpicrisisCtrl = function ($timeout, $scope, RefBookService, RisarApi) {
             $scope.chart.epicrisis = data;
         })
     }
+
+    $scope.close_event = function () {
+        RisarApi.chart.close_event($scope.chart.id, $scope.chart)
+        .then(function (data) {
+            $scope.chart = data;
+        })
+    }
+
     $scope.add_child = function (){
         $scope.chart.epicrisis.newborn_inspections.push({});
         $timeout(function(){
