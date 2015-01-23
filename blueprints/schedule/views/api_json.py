@@ -478,6 +478,8 @@ def api_action_new_get():
 def api_action_post():
     action_desc = request.get_json()
     action_id = action_desc['id']
+    set_person_id = safe_traverse(action_desc, 'set_person', 'id')
+    person_id = safe_traverse(action_desc, 'person', 'id')
     data = {
         'begDate': safe_datetime(action_desc['beg_date']),
         'endDate': safe_datetime(action_desc['end_date']),
@@ -485,8 +487,10 @@ def api_action_post():
         'directionDate': safe_datetime(action_desc['direction_date']),
         'isUrgent': action_desc['is_urgent'],
         'status': action_desc['status']['id'],
-        'setPerson_id': safe_traverse(action_desc, 'set_person', 'id'),
-        'person_id':  safe_traverse(action_desc, 'person', 'id'),
+        'setPerson_id': set_person_id,
+        'person_id':  person_id,
+        'setPerson': Person.query.get(set_person_id) if set_person_id else None,
+        'person':  Person.query.get(person_id) if person_id else None,
         'note': action_desc['note'],
         'amount': action_desc['amount'],
         'account': action_desc['account'] or 0,

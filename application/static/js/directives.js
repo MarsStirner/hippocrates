@@ -239,19 +239,20 @@ angular.module('WebMis20.directives')
                 };
 
                 var template = '\
-    <ui-select {0} {1} theme="select2" class="form-control" autocomplete="off" ng-model="{2}" {3} {4} {5}>\
-        <ui-select-match placeholder="{6}"><span ng-bind="$select.selected.full_name || $select.selected.short_name"></span></ui-select-match>\
+    <ui-select {0} {1} theme="{2}" autocomplete="off" ng-model="{3}" {4} {5} {6}>\
+        <ui-select-match placeholder="{7}"><span ng-bind="$select.selected.full_name || $select.selected.short_name"></span></ui-select-match>\
         <ui-select-choices refresh="refresh_choices($select.search)" repeat="person in persons | filter: $select.search">\
             <span ng-bind-html="person.short_name | highlight: $select.search"></span>\
         </ui-select-choices>\
     </ui-select>'.format(
                     attrs.id ? 'id="{0}"'.format(attrs.id) : '',
                     attrs.name ? 'name="{0}"'.format(attrs.name) : '',
+                    attrs.theme ? attrs.theme : 'select2',
                     attrs.ngModel,
-                    attrs.ngDisabled ? 'ng-disabled="{0}"'.format(attrs.ngDisabled) : '', // 3
-                    attrs.ngRequired ? 'ng-required="{0}"'.format(attrs.ngRequired) : '', // 4
-                    attrs.ngChange ? 'ng-change="{0}"'.format(attrs.ngChange) : '', // 5
-                    attrs.placeholder ? attrs.placeholder : 'не выбрано' // 6
+                    attrs.ngDisabled ? 'ng-disabled="{0}"'.format(attrs.ngDisabled) : '', // 4
+                    attrs.ngRequired ? 'ng-required="{0}"'.format(attrs.ngRequired) : '', // 5
+                    attrs.ngChange ? 'ng-change="{0}"'.format(attrs.ngChange) : '', // 6
+                    attrs.placeholder ? attrs.placeholder : 'не выбрано' // 7
                 );
                 var elm = $compile(template)(scope);
                 element.replaceWith(elm);

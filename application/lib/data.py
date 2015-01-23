@@ -118,7 +118,7 @@ def create_action(action_type_id, event_id, src_action=None, assigned=None, prop
     # set changed attributes
     if data:
         for field, value in data.items():
-            if field in Action.__table__.columns:
+            if field in Action.__table__.columns or hasattr(action, field):
                 setattr(action, field, value)
 
     # some restrictions
