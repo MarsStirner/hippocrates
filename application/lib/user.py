@@ -32,7 +32,7 @@ class User(UserMixin):
         self.rights = dict()
         self.current_rights = []
         self.post = dict()
-        if person.post:
+        if person.post_id:
             self.post.update(dict((key, value)
                              for key, value in person.post.__dict__.iteritems()
                              if not callable(value) and not key.startswith('__')))

@@ -375,6 +375,12 @@ def safe_traverse_attrs(obj, *args, **kwargs):
         return safe_traverse_attrs(getattr(obj, args[0]), *args[1:], **kwargs)
 
 
+def safe_bool(val):
+    if isinstance(val, (str, unicode)):
+        return val.lower() not in ('0', 'false', '\x00', '')
+    return bool(val)
+
+
 def format_date(d):
     if isinstance(d, datetime.date):
         return d.strftime('%d.%m.%Y')

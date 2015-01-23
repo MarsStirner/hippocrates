@@ -84,6 +84,30 @@
             </div>
           </div>
         {% endif %}
+        {% if user_profiles_mng.has_ui_cashier() %}
+          <div class="row lander">
+            <div class="col-md-6">
+              <a href="{{ url_for('accounting.cashbook_html') }}" title="Расчет" class="btn btn-primary btn-block">
+                <h3>Расчет</h3>
+                <strong>Вы сможете:</strong>
+                <ul>
+                  <li>Найти обращение для оплаты </li>
+                  <li>Вести учёт денежных средств </li>
+                  <li>Вести номера договоров </li>
+                </ul>
+              </a>
+            </div>
+            <div class="col-md-6">
+              <a href="{{ url_for('accounting.cashbook_operations') }}" title="Журнал операций" class="btn btn-success btn-block">
+                <h3>Журнал операций</h3>
+                <strong>Вы сможете:</strong>
+                <ul>
+                  <li>Сформировать и распечатать журнал кассовых операций</li>
+                </ul>
+              </a>
+            </div>
+          </div>
+        {% endif %}
       {% endblock %}
    </div> <!-- /container -->
    <div id="push"></div>

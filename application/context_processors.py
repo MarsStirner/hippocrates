@@ -34,7 +34,7 @@ def general_menu():
         link='index',
         title=u'Главная страница',
         homepage=True,
-        visible=(UserProfileManager.has_ui_doctor() or UserProfileManager.has_ui_registrator())
+        visible=(not UserProfileManager.has_ui_registrator_cut())
     ), dict(
         link='patients.index',
         title=u'Обслуживание пациентов',
@@ -66,6 +66,10 @@ def general_menu():
     ), dict(
         link='accounting.cashbook_html',
         title=u'Расчет пациентов',
+        visible=UserProfileManager.has_ui_cashier()
+    ), dict(
+        link='accounting.cashbook_operations',
+        title=u'Журнал операций',
         visible=UserProfileManager.has_ui_cashier()
     )]
     return dict(main_menu=menu_items)

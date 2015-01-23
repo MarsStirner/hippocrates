@@ -11,7 +11,7 @@ from application.models.event import Event
 from application.systemwide import db, cache
 from application.lib.sphinx_search import SearchPerson
 from application.lib.utils import (jsonify, safe_traverse, parse_id, safe_date, safe_time_as_dt, safe_datetime,
-                                   safe_traverse_attrs, format_date, initialize_name, logger)
+                                   safe_traverse_attrs, format_date, initialize_name, logger, safe_bool)
 from application.lib.utils import public_endpoint
 from blueprints.schedule.app import module
 from blueprints.schedule.lib.data import delete_schedules
@@ -301,6 +301,7 @@ def api_persons_tree_schedule_info():
 def api_search_persons():
     try:
         query_string = request.args['q']
+        only_doctors = safe_bool(request.args.get('only_doctors', True))
     except (KeyError, ValueError):
         return abort(404)
     try:
@@ -329,15 +330,23 @@ def api_search_persons():
 
                 'tokens': [item['lastname'], item['firstname'], item['patrname']] + item['speciality'].split(),
             }
-        data = map(cat, result['result']['items'])
+        if only_doctors:
+            result = filter(lambda item: item['orgstructure_id'] and item['speciality_id'], result['result']['items'])
+        data = map(cat, result)
     except Exception, e:
-        logger.critical(u'Ошибка в сервисе поиска врача через sphinx: %s' % e, exc_info=True)
+        logger.critical(u'Ошибка в сервисе поиска сотрудника через sphinx: %s' % e, exc_info=True)
         query_string = query_string.split()
         data = vrbPersonWithSpeciality.query.filter(
             *[vrbPersonWithSpeciality.name.like(u'%%%s%%' % q) for q in query_string]
         ).order_by(
             vrbPersonWithSpeciality.name
-        ).all()
+        )
+        if only_doctors:
+            data.filter(
+                vrbPersonWithSpeciality.speciality_id != None,
+                vrbPersonWithSpeciality.orgStructure_id != None
+            )
+        data = data.all()
     return jsonify(data)
 
 

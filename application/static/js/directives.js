@@ -224,6 +224,7 @@ angular.module('WebMis20.directives')
     .directive('wmPersonSelect', ['$compile', '$http', function ($compile, $http) {
         return {
             restrict: 'E',
+            scope: true,
             require: 'ngModel',
             link: function (scope, element, attrs) {
                 scope.persons = [];
@@ -231,7 +232,8 @@ angular.module('WebMis20.directives')
                     if (!query) { return; }
                     $http.get(url_api_search_persons, {
                         params: {
-                            q: query
+                            q: query,
+                            only_doctors: scope.$eval(attrs.onlyDoctors || "true") ? undefined : false
                         }
                     }).success(function (data) {
                         scope.persons = data.result;
@@ -770,7 +772,7 @@ angular.module('WebMis20.directives')
         return {
             restrict: 'E',
             scope: {
-                onSelect: '&'
+                onSelect: '&?'
             },
             template:
                 '<div class="ui-treeview">\
@@ -851,9 +853,7 @@ angular.module('WebMis20.directives')
                         scope.$parent.$ctrl.$set_query(node.name);
                         scope.$parent.$ctrl.$select(node);
                     }
-                    if (scope.onSelect) {
-                        scope.onSelect()(node);
-                    }
+                    scope.onSelect(node);
                 }
             }
         }

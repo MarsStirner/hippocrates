@@ -780,6 +780,8 @@ class EventVisualizer(object):
         return data
 
     def make_short_event(self, event):
+        event_type = event.eventType
+        et_name = safe_traverse_attrs(event_type, 'name', default=u'')
         return {
             'id': event.id,
             'client_id': event.client_id,
@@ -787,16 +789,25 @@ class EventVisualizer(object):
             'external_id': event.externalId,
             'beg_date': event.setDate,
             'end_date': event.execDate,
-            'type_name': event.eventType.name,
+            'type_name': et_name,
             'person_short_name': event.execPerson.shortNameText if event.execPerson else u'Нет',
+            'event_type': self.make_short_event_type(event_type),
             'result_text': safe_traverse_attrs(event, 'result', 'name', default=''),
             'text_description': u'{0} №{1} от {2}, {3}'.format(
                 u'История болезни' if event.is_stationary else u'Обращение',
                 event.externalId,
                 format_date(event.setDate),
-                safe_traverse_attrs(event, 'eventType', 'name', default=u'')
+                et_name
             )
         }
+
+    def make_short_event_type(self, event_type):
+        return {
+            'id': event_type.id,
+            'name': event_type.name,
+            'print_context': event_type.printContext
+        }
+
     def make_event(self, event):
         """
         @type event: Event
@@ -1135,22 +1146,28 @@ class EventVisualizer(object):
         pviz = PersonTreeVisualizer()
         cviz = ClientVisualizer()
 
-        def make_short_et(event_type):
-            return {
-                'id': event_type.id,
-                'name': event_type.name,
-                'print_context': event_type.printContext
-            }
-
         return {
             'id': event.id,
             'external_id': event.externalId,
-            'exec_person': pviz.make_person_ws(event.execPerson),
+            'exec_person': pviz.make_person_ws(event.execPerson) if event.execPerson else None,
             'set_date': event.setDate,
             'exec_date': event.execDate,
-            'event_type': make_short_et(event.eventType),
+            'event_type': self.make_short_event_type(event.eventType),
             'client': cviz.make_short_client_info(event.client),
             'contract': self.make_event_local_contract(event)
+        }
+
+    def make_search_payments_list(self, payment):
+        pviz = PersonTreeVisualizer()
+        cviz = ClientVisualizer()
+        return {
+            'date': payment.date,
+            'cashbox': payment.cashBox,
+            'cashier_person': pviz.make_person(payment.createPerson),
+            'cash_operation': payment.cashOperation,
+            'sum': payment.sum,
+            'client': cviz.make_short_client_info(payment.event.client),
+            'event': self.make_short_event(payment.event)
         }
 
 

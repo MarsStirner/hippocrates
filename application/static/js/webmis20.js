@@ -1003,7 +1003,13 @@ var aux = {
         }
         var date = moment(val);
         return date.isValid() ? date.toDate() : null;
-
+    },
+    format_date: function (val) {
+        if (!val) {
+            return null;
+        }
+        var date = moment(val);
+        return date.isValid() ? date.format('YYYY-MM-DD') : null;
     },
     make_tree: function (array, masterField) {
         /**
