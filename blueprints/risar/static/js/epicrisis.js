@@ -51,7 +51,7 @@ var EpicrisisCtrl = function ($timeout, $scope, RefBookService, RisarApi) {
     $scope.add_child = function (){
         $scope.chart.epicrisis.newborn_inspections.push({});
         $timeout(function(){
-            $('#childrenTab a:last').tab('show');
+            $('#childrenTabs a:last').tab('show');
         }, 0);
 
     }
@@ -77,7 +77,7 @@ var EpicrisisCtrl = function ($timeout, $scope, RefBookService, RisarApi) {
     var init = function () {
         var hash = document.location.hash;
         if (hash) {
-            hash.match('child') ? open_tab('#last') : open_tab(hash);
+            hash.match('child') ? open_tab('#sixth') : open_tab(hash);
         }
         reload_epicrisis();
     };
