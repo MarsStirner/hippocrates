@@ -405,7 +405,7 @@ class EventPayment(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     createDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now)
-    createPerson_id = db.Column(db.Integer, index=True, default=safe_current_user_id)
+    createPerson_id = db.Column(db.Integer, db.ForeignKey('Person.id'), index=True, default=safe_current_user_id)
     modifyDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now, onupdate=datetime.datetime.now)
     modifyPerson_id = db.Column(db.Integer, index=True, default=safe_current_user_id, onupdate=safe_current_user_id)
     deleted = db.Column(db.Integer, nullable=False, default=0)
@@ -423,6 +423,7 @@ class EventPayment(db.Model):
     service_id = db.Column(db.Integer, db.ForeignKey('rbService.id'))
     localContract_id = db.Column(db.Integer, db.ForeignKey('Event_LocalContract.id'))
 
+    createPerson = db.relationship('Person')
     cashOperation = db.relationship(u'rbCashOperation')
 
     def __json__(self):

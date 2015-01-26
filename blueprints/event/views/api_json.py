@@ -5,6 +5,7 @@ import datetime
 from flask import request, abort
 from flask.ext.login import current_user
 from sqlalchemy import desc
+from sqlalchemy.orm import joinedload
 
 from config import ORGANISATION_INFIS_CODE
 from application.models.actions import Action
@@ -19,7 +20,7 @@ from application.models.exists import (Organisation, )
 from application.lib.jsonify import EventVisualizer
 from blueprints.event.app import module
 from blueprints.event.lib.utils import (EventSaveException, create_services, save_event, save_executives)
-from application.lib.sphinx_search import SearchEventService
+from application.lib.sphinx_search import SearchEventService, SearchEvent
 from application.lib.data import get_planned_end_datetime, int_get_atl_dict_all, delete_action
 from application.lib.agesex import recordAcceptableEx
 from application.lib.const import STATIONARY_EVENT_CODES
@@ -349,31 +350,6 @@ def api_client_payment_info_get():
     return jsonify(res)
 
 
-@module.route('/api/event_payment/make_payment.json', methods=['POST'])
-def api_service_make_payment():
-    # for tests
-    pay_data = request.json
-    event_id = pay_data['event_id']
-
-    event = Event.query.get(event_id)
-
-    payment = EventPayment()
-    payment.master_id = event_id
-    payment.date = datetime.date.today()
-    payment.sum = pay_data['sum']
-    payment.typePayment = 0
-    payment.cashBox = ''
-    payment.sumDiscount = 0
-    payment.action_id = None
-    payment.service_id = None
-
-    event.payments.append(payment)
-    db.session.add(event)
-    db.session.commit()
-
-    return jsonify(None)
-
-
 @module.route('/api/event_payment/service_remove_coord.json', methods=['POST'])
 def api_service_remove_coord():
     # not used
@@ -556,3 +532,15 @@ def api_get_events():
             for event in paginate.items
         ]
     })
+
+
+@module.route('/api/event/search.json', methods=['GET'])
+def api_event_search():
+    query = request.args['q']
+    result = SearchEvent.search(query)
+    viz = EventVisualizer()
+    events = []
+    for event in result['result']['items']:
+        event = Event.query.filter(Event.id == event['id']).first()
+        events.append(viz.make_search_event_info(event))
+    return jsonify(events)

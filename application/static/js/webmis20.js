@@ -430,20 +430,25 @@ var WebMis20 = angular.module('WebMis20', [
         if (context === this.context) return;
         this.context = context;
         var t = this;
-        $http.get(url_print_templates + context + '.json')
+        return $http.get(url_print_templates + context + '.json')
         .success(function (data) {
             t.templates = data.result.sort(function (left, right) {
                 return (left.code < right.code) ? -1 : (left.code > right.code ? 1 : 0)
             });
+            t.loaded = true;
         })
         .error(function (data, status) {
             if (data === '' && status === 0) {
                 t.not_available = true;
             }
+            t.loaded = false;
         });
     };
     PrintingService.prototype.is_available = function () {
-        return Boolean(this.context) && !this.not_available;
+        return this.loaded !== undefined ? Boolean(this.context) && !this.not_available : true;
+    };
+    PrintingService.prototype.is_loaded = function () {
+        return Boolean(this.context) && this.loaded;
     };
     PrintingService.prototype.print_template = function(template_data_list, separated) { // [ {template_id, context}, ... ]
         var self = this;
@@ -998,7 +1003,13 @@ var aux = {
         }
         var date = moment(val);
         return date.isValid() ? date.toDate() : null;
-
+    },
+    format_date: function (val) {
+        if (!val) {
+            return null;
+        }
+        var date = moment(val);
+        return date.isValid() ? date.format('YYYY-MM-DD') : null;
     },
     make_tree: function (array, masterField) {
         /**

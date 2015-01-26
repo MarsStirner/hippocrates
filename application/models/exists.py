@@ -284,13 +284,13 @@ class Person(db.Model):
     academicdegree_id = db.Column(db.Integer, db.ForeignKey('rbAcademicDegree.id'))
     academicTitle_id = db.Column(db.Integer, db.ForeignKey('rbAcademicTitle.id'))
 
-    post = db.relationship('rbPost', lazy=False)
+    post = db.relationship('rbPost')
     speciality = db.relationship('rbSpeciality', lazy=False)
-    organisation = db.relationship('Organisation', lazy=False)
-    org_structure = db.relationship('OrgStructure', lazy=False)
-    academicDegree = db.relationship('rbAcademicDegree', lazy=False)
-    academicTitle = db.relationship('rbAcademicTitle', lazy=False)
-    tariffCategory = db.relationship('rbTariffCategory', lazy=False)
+    organisation = db.relationship('Organisation')
+    org_structure = db.relationship('OrgStructure',)
+    academicDegree = db.relationship('rbAcademicDegree')
+    academicTitle = db.relationship('rbAcademicTitle')
+    tariffCategory = db.relationship('rbTariffCategory')
     user_profiles = db.relation('rbUserProfile', secondary='Person_Profiles')
 
     @property
@@ -318,11 +318,7 @@ class Person(db.Model):
             'speciality': self.speciality,
             'federal_code': self.federalCode,
             'regional_code': self.regionalCode,
-            'post': self.post,
-            'organisation': self.organisation,
             'org_structure': self.org_structure,
-            'academic_degree': self.academicDegree,
-            'academic_title': self.academicTitle,
             'full_name': self.full_name
         }
 

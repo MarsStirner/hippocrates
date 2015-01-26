@@ -711,10 +711,13 @@ class PersonTreeVisualizer(object):
         }
 
     def make_person_ws(self, person):
+        name = person.shortNameText
+        speciality = self.make_short_speciality(person.speciality) if person.speciality else None
         return {
             'id': person.id,
-            'name': person.shortNameText,
-            'speciality': self.make_short_speciality(person.speciality) if person.speciality else None
+            'name': name,
+            'speciality': speciality,
+            'full_name': u'%s%s' % (name, u' (%s)' % speciality['name'] if speciality else u'')
         }
 
     def make_short_speciality(self, speciality):
@@ -771,9 +774,14 @@ class EventVisualizer(object):
         elif UserProfileManager.has_ui_registrator():
             data['payment'] = self.make_event_payment(event)
             data['services'] = self.make_event_services(event.id)
+        elif UserProfileManager.has_ui_cashier():
+            data['payment'] = self.make_event_payment(event)
+            data['services'] = self.make_event_services(event.id)
         return data
 
     def make_short_event(self, event):
+        event_type = event.eventType
+        et_name = safe_traverse_attrs(event_type, 'name', default=u'')
         return {
             'id': event.id,
             'client_id': event.client_id,
@@ -781,16 +789,25 @@ class EventVisualizer(object):
             'external_id': event.externalId,
             'beg_date': event.setDate,
             'end_date': event.execDate,
-            'type_name': event.eventType.name,
+            'type_name': et_name,
             'person_short_name': event.execPerson.shortNameText if event.execPerson else u'Нет',
+            'event_type': self.make_short_event_type(event_type),
             'result_text': safe_traverse_attrs(event, 'result', 'name', default=''),
             'text_description': u'{0} №{1} от {2}, {3}'.format(
                 u'История болезни' if event.is_stationary else u'Обращение',
                 event.externalId,
                 format_date(event.setDate),
-                safe_traverse_attrs(event, 'eventType', 'name', default=u'')
+                et_name
             )
         }
+
+    def make_short_event_type(self, event_type):
+        return {
+            'id': event_type.id,
+            'name': event_type.name,
+            'print_context': event_type.printContext
+        }
+
     def make_event(self, event):
         """
         @type event: Event
@@ -957,6 +974,7 @@ class EventVisualizer(object):
             'id': local_contract.id,
             'number_contract': local_contract.numberContract,
             'date_contract': local_contract.dateContract,
+            'coord_text': local_contract.coordText,
             'first_name': local_contract.firstName,
             'last_name': local_contract.lastName,
             'patr_name': local_contract.patrName,
@@ -1123,6 +1141,34 @@ class EventVisualizer(object):
             )
 
         return services_grouped
+
+    def make_search_event_info(self, event):
+        pviz = PersonTreeVisualizer()
+        cviz = ClientVisualizer()
+
+        return {
+            'id': event.id,
+            'external_id': event.externalId,
+            'exec_person': pviz.make_person_ws(event.execPerson) if event.execPerson else None,
+            'set_date': event.setDate,
+            'exec_date': event.execDate,
+            'event_type': self.make_short_event_type(event.eventType),
+            'client': cviz.make_short_client_info(event.client),
+            'contract': self.make_event_local_contract(event)
+        }
+
+    def make_search_payments_list(self, payment):
+        pviz = PersonTreeVisualizer()
+        cviz = ClientVisualizer()
+        return {
+            'date': payment.date,
+            'cashbox': payment.cashBox,
+            'cashier_person': pviz.make_person(payment.createPerson),
+            'cash_operation': payment.cashOperation,
+            'sum': payment.sum,
+            'client': cviz.make_short_client_info(payment.event.client),
+            'event': self.make_short_event(payment.event)
+        }
 
 
 class ActionVisualizer(object):
