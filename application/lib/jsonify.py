@@ -13,7 +13,7 @@ from application.systemwide import db
 from application.lib.data import int_get_atl_dict_all
 from application.lib.action.utils import action_is_bak_lab, action_is_lab
 from application.lib.agesex import recordAcceptableEx
-from application.lib.utils import safe_unicode, safe_dict, logger, safe_traverse_attrs, format_date
+from application.lib.utils import safe_unicode, safe_dict, logger, safe_traverse_attrs, format_date, safe_date
 from application.models.enums import EventPrimary, EventOrder, ActionStatus, Gender
 from application.models.event import Event, EventType, Diagnosis
 from application.models.schedule import (Schedule, rbReceptionType, ScheduleClientTicket, ScheduleTicket,
@@ -789,7 +789,9 @@ class EventVisualizer(object):
             'client_full_name': event.client.nameText,
             'external_id': event.externalId,
             'beg_date': event.setDate,
+            'beg_date_date': safe_date(event.setDate),  # ffs chrome timezones
             'end_date': event.execDate,
+            'end_date_date': safe_date(event.execDate),
             'type_name': et_name,
             'person_short_name': event.execPerson.shortNameText if event.execPerson else u'Нет',
             'event_type': self.make_short_event_type(event_type),
@@ -1162,6 +1164,7 @@ class EventVisualizer(object):
         pviz = PersonTreeVisualizer()
         cviz = ClientVisualizer()
         return {
+            'id': payment.id,
             'date': payment.date,
             'cashbox': payment.cashBox,
             'cashier_person': pviz.make_person(payment.createPerson),
