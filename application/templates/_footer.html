@@ -15,6 +15,7 @@
         url_event_new = '{{ url_for('event.api_event_new_get') }}',
         url_event_save = '{{ url_for('event.api_event_save') }}',
         url_event_close = '{{ url_for('event.api_event_close') }}',
+        url_event_search = '{{ url_for('event.api_event_search') }}',
         url_for_event_html_event_info = '{{ url_for('event.html_event_info') }}',
         url_event_new_event_html = '{{ url_for('event.new_event') }}',
         url_api_event_stationary_open_get = '{{ url_for('event.api_event_stationary_open_get') }}',
@@ -31,7 +32,6 @@
         url_api_prev_event_payment_info_get = '{{ url_for('event.api_prev_event_payment_info_get') }}',
         url_for_event_api_search_services = '{{ url_for('event.api_search_services') }}',
         url_for_event_api_service_delete_service = '{{ url_for('event.api_service_delete_service') }}',
-        url_for_event_api_service_make_payment = '{{ url_for('event.api_service_make_payment') }}',
         url_for_event_api_service_coordinate = '{{ url_for('event.api_service_coordinate') }}',
         url_for_event_api_service_remove_coord = '{{ url_for('event.api_service_remove_coord') }}',
         url_for_event_api_service_change_account = '{{ url_for('event.api_service_change_account') }}',
@@ -65,6 +65,8 @@
         url_api_procedure_offices_get = '{{ url_for('schedule.api_procedure_offices_get') }}',
         url_schedule_index = '{{ url_for('schedule.index') }}',
         url_wm10_create_event = '{{ "{0}patients/{{0}}/appeals/new/".format(config['WEBMIS10_URL']) }}',
+        url_api_event_make_payment = '{{ url_for('accounting.api_event_make_payment') }}',
+        url_api_get_event_payments = '{{ url_for('accounting.api_get_event_payments') }}',
         current_user = {{ current_user.export_js() | tojson | safe }},
         current_user_id = {{ current_user.id|default('undefined') }};
 </script>
@@ -101,6 +103,7 @@
 <script src="{{ url_for('static', filename='js/directives/action-layout.js', v=version) }}"></script>
 <script src="{{ url_for('static', filename='js/directives/bootstrap-wysiwyg.js', v=version) }}"></script>
 <script src="{{ url_for('static', filename='js/directives/client-search.js', v=version) }}"></script>
+<script src="{{ url_for('static', filename='js/directives/event-search.js', v=version) }}"></script>
 <script src="{{ url_for('static', filename='js/directives/client-info.js', v=version) }}"></script>
 <script src="{{ url_for('static', filename='js/services.js', v=version) }}"></script>
 <script src="{{ url_for('static', filename='js/services/appointment_dialog.js', v=version) }}"></script>

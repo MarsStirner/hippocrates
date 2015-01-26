@@ -61,6 +61,17 @@ class SearchEventService():
         return result
 
 
+class SearchEvent():
+
+    @staticmethod
+    def search(query):
+        search = Search(indexes=['events'], config=SearchConfig)
+        search = search.match(query)
+        search = search.limit(0, 50)
+        result = search.ask()
+        return result
+
+
 if __name__ == '__main__':
     data = SearchPerson.search(u'аллерг')
     data = SearchPatient.search(u'Тапка')

@@ -32,7 +32,7 @@ class User(UserMixin):
         self.rights = dict()
         self.current_rights = []
         self.post = dict()
-        if person.post:
+        if person.post_id:
             self.post.update(dict((key, value)
                              for key, value in person.post.__dict__.iteritems()
                              if not callable(value) and not key.startswith('__')))
@@ -278,7 +278,10 @@ class UserUtils(object):
                 event.is_closed and
                 current_user.id_any_in(event.createPerson_id, event.execPerson_id) and
                 current_user.has_right('evtEditClosed')
-            ) or not event.is_closed)
+            ) or (
+                not event.is_closed  # and current_user.has_right('clientEventUpdate')
+            )
+        )
 
     @staticmethod
     def can_delete_event(event, out_msg=None):
@@ -414,11 +417,13 @@ class UserProfileManager(object):
     doctor_diag = 'diagDoctor'  # Врач диагностики
     nurse_admission = 'admNurse'  # Медсестра приемного отделения
     nurse_assist = 'assistNurse'  # Медсестра (ассистент врача)
+    cashier = 'kassir'  # Кассир
 
     ui_groups = {
         'doctor': [admin, doctor_clinic, doctor_diag, nurse_assist],
         'registrator': [admin, reg_clinic],
-        'registrator_cut': [nurse_admission]
+        'registrator_cut': [nurse_admission],
+        'cashier': [admin, cashier]
     }
 
     @classmethod
@@ -457,6 +462,10 @@ class UserProfileManager(object):
     @classmethod
     def has_ui_assistant(cls):
         return cls._get_user_role() == cls.nurse_assist
+
+    @classmethod
+    def has_ui_cashier(cls):
+        return cls._get_user_role() in cls.ui_groups['cashier']
 
     @classmethod
     def get_default_url(cls):
