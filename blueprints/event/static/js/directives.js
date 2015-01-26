@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('WebMis20.directives').
-    directive('wmEventServiceGroup', ['WMEventFormState', 'WMEventServices', 'ActionTypeTreeModal',
-        function(WMEventFormState, WMEventServices, ActionTypeTreeModal) {
+    directive('wmEventServiceGroup', ['WMEventFormState', 'WMEventServices', 'ActionTypeTreeModal', 'CurrentUser',
+        function(WMEventFormState, WMEventServices, ActionTypeTreeModal, CurrentUser) {
             return {
                 restrict: 'A',
                 scope: {
@@ -76,6 +76,9 @@ angular.module('WebMis20.directives').
                     scope.amount_disabled = function () {
                         return scope.service.fully_paid || scope.service.fully_coord || scope.event.ro;
                     };
+                    scope.account_disabled = function () {
+                        return !CurrentUser.current_role_in('clinicRegistrator');
+                    };
                     scope.btn_coordinate_visible = function () {
                         return !scope.service.fully_coord && !scope.service.all_actions_closed && !scope.event.ro;
                     };
@@ -112,7 +115,7 @@ angular.module('WebMis20.directives').
 </td>\
 <td ng-bind="service.total_sum" class="text-right" ng-show="formstate.is_paid()"></td>\
 <td class="text-center" ng-show="formstate.is_paid()">\
-    <input type="checkbox" title="Выбрать для оплаты" ng-model="service.account_all">\
+    <input type="checkbox" title="Выбрать для оплаты" ng-model="service.account_all" ng-disabled="account_disabled()">\
 </td>\
 <td ng-bind="service.paid_count" class="text-center" ng-show="formstate.is_paid()"></td>\
 <td class="text-center" ng-show="formstate.is_dms()">\
@@ -135,8 +138,9 @@ angular.module('WebMis20.directives').
             };
         }
     ]).
-    directive('wmEventServiceRecord', ['WMEventFormState', 'WMEventServices', 'ActionTypeTreeModal', '$filter', 'RefBookService',
-        function(WMEventFormState, WMEventServices, ActionTypeTreeModal, $filter, RefBookService) {
+    directive('wmEventServiceRecord', [
+        'WMEventFormState', 'WMEventServices', 'ActionTypeTreeModal', '$filter', 'RefBookService', 'CurrentUser',
+        function(WMEventFormState, WMEventServices, ActionTypeTreeModal, $filter, RefBookService, CurrentUser) {
             return {
                 restrict: 'A',
                 scope: {
@@ -203,6 +207,9 @@ angular.module('WebMis20.directives').
                     scope.amount_disabled = function () {
                         return scope.action.account || scope.action.is_coordinated() || scope.event.ro;
                     };
+                    scope.account_disabled = function () {
+                        return !CurrentUser.current_role_in('clinicRegistrator');
+                    };
                     scope.btn_coordinate_visible = function () {
                         return !scope.action.is_coordinated() && !scope.action.is_closed() && !scope.event.ro;
                     };
@@ -234,7 +241,8 @@ angular.module('WebMis20.directives').
 </td>\
 <td ng-bind="action.sum" class="text-right" ng-show="formstate.is_paid()"></td>\
 <td class="text-center" ng-show="formstate.is_paid()">\
-    <input type="checkbox" title="Выбрать услугу для оплаты" ng-model="action.account" ng-change="change_action_choice_for_payment()">\
+    <input type="checkbox" title="Выбрать услугу для оплаты" ng-model="action.account"\
+        ng-change="change_action_choice_for_payment()" ng-disabled="account_disabled()">\
 </td>\
 <td class="text-center" ng-show="formstate.is_paid()">\
     <span class="glyphicon" ng-class="{\'glyphicon-ok\': action.is_paid_for(), \'glyphicon-remove\':!action.is_paid_for()}"></span>\
@@ -255,7 +263,8 @@ angular.module('WebMis20.directives').
 <td nowrap class="text-right">\
     <span class="glyphicon glyphicon-info-sign" ng-if="action.action_id"\
         popover-trigger="mouseenter" popover-popup-delay=\'1000\' popover-placement="left" popover="[[get_info_text()]]"></span>\
-    <ui-print-button ps="get_ps()" resolve="get_ps_resolve()" ng-if="action.action_id"></ui-print-button>\
+    <ui-print-button ps="get_ps()" resolve="get_ps_resolve()" lazy-load-context="[[service.print_context]]"\
+        ng-if="action.action_id"></ui-print-button>\
     <button type="button" class="btn btn-sm btn-danger" title="Убрать из списка услуг"\
             ng-show="btn_delete_visible()"\
             ng-click="eventServices.remove_action(event, action, service)"><span class="glyphicon glyphicon-trash"></span>\
@@ -264,7 +273,7 @@ angular.module('WebMis20.directives').
             };
         }
     ]).
-    directive('wmEventServiceListHeader', [function () {
+    directive('wmEventServiceListHeader', ['CurrentUser', function (CurrentUser) {
         return {
             restrict: 'A',
             link: function (scope, element, attrs) {
@@ -281,6 +290,9 @@ angular.module('WebMis20.directives').
                         sg.account_all = scope.all_accounted;
                     });
                 };
+                scope.account_disabled = function () {
+                    return !CurrentUser.current_role_in('clinicRegistrator');
+                };
             },
             template:
 '<th></th>\
@@ -291,7 +303,10 @@ angular.module('WebMis20.directives').
 <th>Количество</th>\
 <th class="nowrap" ng-show="formstate.is_paid()">Сумма к оплате (руб.)</th>\
 <th ng-show="formstate.is_paid()">\
-    <div class="checkbox inline-checkbox"><input type="checkbox" ng-model="all_accounted" ng-change="account_all()">Считать</div>\
+    <div class="checkbox inline-checkbox">\
+        <input type="checkbox" ng-model="all_accounted" ng-change="account_all()"\
+            ng-disabled="account_disabled()">Считать\
+    </div>\
 </th>\
 <th ng-show="formstate.is_paid()">Оплачено</th>\
 <th ng-show="formstate.is_dms()">Согласовать</th>\

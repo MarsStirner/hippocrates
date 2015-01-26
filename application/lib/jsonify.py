@@ -760,6 +760,7 @@ class EventVisualizer(object):
         data = {
             'event': self.make_event(event),
             'ro': not UserUtils.can_edit_event(event) if event.id else False,
+            'has_access_to_payment_info': UserUtils.can_edit_event_payment_info(event) if event.id else False,
             'can_create_actions': (
                 [UserUtils.can_create_action(event.id, None, cl) for cl in range(4)]
                 if event.id else [False] * 4
