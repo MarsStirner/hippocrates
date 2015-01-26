@@ -33,12 +33,16 @@ var EpicrisisCtrl = function ($timeout, $scope, RefBookService, RisarApi) {
         })
     };
 
-    $scope.save = function () {
-        var model = $scope.chart.epicrisis;
-        RisarApi.epicrisis.save($scope.chart.id, model)
-        .then(function (data) {
-            $scope.chart.epicrisis = data;
-        })
+    $scope.save = function (form_controller) {
+        form_controller.submit_attempt = true;
+        if (form_controller.$valid){
+            var model = $scope.chart.epicrisis;
+            RisarApi.epicrisis.save($scope.chart.id, model)
+            .then(function (data) {
+                $scope.chart.epicrisis = data;
+            })
+        }
+
     }
 
     $scope.close_event = function () {
