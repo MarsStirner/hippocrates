@@ -109,7 +109,7 @@ var CashPaymentModal = function ($modal, RefBookService) {
                     $scope.accept = function () {
                         $http.post(
                             url_api_event_make_payment, {
-                                //event_id: event.id,
+                                event_id: event.id,
                                 payment_date: moment($scope.model.payment_date).format('YYYY-MM-DD'),
                                 cash_operation: $scope.model.cash_operation,
                                 payment_type: $scope.model.payment_type,
