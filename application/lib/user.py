@@ -279,9 +279,13 @@ class UserUtils(object):
                 current_user.id_any_in(event.createPerson_id, event.execPerson_id) and
                 current_user.has_right('evtEditClosed')
             ) or (
-                not event.is_closed  # and current_user.has_right('clientEventUpdate')
+                not event.is_closed and current_user.has_right('clientEventUpdate')
             )
         )
+
+    @staticmethod
+    def can_edit_event_payment_info(event):
+        return event and (current_user.has_right('evtPaymentInfoUpdate') and not event.is_closed)
 
     @staticmethod
     def can_delete_event(event, out_msg=None):
