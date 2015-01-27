@@ -280,7 +280,7 @@ def make_epicrisis_info(epicrisis):
 
             children_info = []
             for child in epicrisis['newborn_inspections']:
-                if child['sexCode'] == 1:
+                if child['sex'].value == 1:
                     children_info.append(u'мальчик ' + (u'живой' if child['alive'] else u'мертвый'))
                 else:
                     children_info.append(u'девочка ' + (u'живая' if child['alive'] else u'мертвая'))
@@ -315,9 +315,6 @@ def represent_newborn_inspections(event):
     for action in actions:
         inspection = dict((code, prop.value) for (code, prop) in action.propsByCode.iteritems())
         inspection['id'] = action.id
-        if inspection['sexCode'] == 1:
-            inspection['sex'] = u'мужской'
-        elif inspection['sexCode'] == 2:
-            inspection['sex'] = u'женский'
+        inspection['sex'] = Gender(inspection['sexCode']) if inspection['sexCode'] is not None else None
         newborn_inspections.append(inspection)
     return newborn_inspections
