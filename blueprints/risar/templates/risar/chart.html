@@ -98,6 +98,12 @@
                                 <td>Текущие</td>
                                 <td><span ng-repeat="diag in chart.anamnesis.mother.current_diseases" tooltip="[[ diag.name ]]"> [[diag.code]][[$last ? '' : ', ']]</span>[[chart.anamnesis.mother.current_diseases ? '' : 'нет']]</td>
                             </tr>
+                            <tr>
+                                <td>Вредные привычки</td>
+                                <td></td>
+                                <td>[[(!chart.anamnesis.mother.alcohol && !chart.anamnesis.mother.smoking && !chart.anamnesis.mother.toxic && !chart.anamnesis.mother.drugs) ? 'нет': '' ]]
+                                    <span ng-repeat="h in chart.bad_habits_mother | filter:{value: true} ">[[h.text]][[$last ? '' : ', ']]</span></td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
