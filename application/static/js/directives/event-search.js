@@ -106,8 +106,8 @@ angular.module('WebMis20.directives').
             <td ng-bind-html="event.client.birth_date | asDate | highlight: query" ng-click="onEventSelect(event)"></td>\
             <td ng-bind-html="event.client.sex.name" ng-click="onEventSelect(event)"></td>\
             <td ng-bind-html="event.exec_person.full_name | highlight: query" ng-click="onEventSelect(event)"></td>\
-            <td ng-bind-html="event.set_date | asDate | highlight: query" ng-click="onEventSelect(event)"></td>\
-            <td ng-bind-html="event.exec_date | asDate | highlight: query" ng-click="onEventSelect(event)"></td>\
+            <td ng-bind-html="event.beg_date_date | asDate | highlight: query" ng-click="onEventSelect(event)"></td>\
+            <td ng-bind-html="event.end_date_date | asDate | highlight: query" ng-click="onEventSelect(event)"></td>\
             <td ng-bind-html="event.event_type.name | highlight: query" ng-click="onEventSelect(event)"></td>\
             <td ng-bind-html="event.contract.coord_text | highlight: query" ng-click="onEventSelect(event)"></td>\
             <td ng-class="{\'bg-muted\': event.id !== event_id}" class="cursor-default nowrap">\

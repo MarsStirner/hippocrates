@@ -1154,7 +1154,9 @@ class EventVisualizer(object):
             'external_id': event.externalId,
             'exec_person': pviz.make_person_ws(event.execPerson) if event.execPerson else None,
             'set_date': event.setDate,
+            'beg_date_date': safe_date(event.setDate),  # ffs chrome timezones
             'exec_date': event.execDate,
+            'end_date_date': safe_date(event.execDate),
             'event_type': self.make_short_event_type(event.eventType),
             'client': cviz.make_short_client_info(event.client),
             'contract': self.make_event_local_contract(event)
