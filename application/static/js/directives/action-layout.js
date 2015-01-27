@@ -45,8 +45,7 @@ angular.module('WebMis20.ActionLayout', ['WebMis20.validators', 'WebMis20.direct
                                 case 'Text':
                                 case 'Html':
                                 case 'Жалобы':
-                                    property.value = $sce.trustAsHtml(property.value);
-                                    inner_template = '<span ng-bind-html="{0}.value"></span>'; break;
+                                    inner_template = '<span ng-bind-html="{0}.value | trustHtml"></span>'; break;
                                 case 'String':
                                 case 'Integer':
                                 case 'Double':
