@@ -4,7 +4,7 @@
 'use strict';
 
 angular.module('WebMis20.ActionLayout', ['WebMis20.validators', 'WebMis20.directives.personTree', 'WebMis20.directives.wysiwyg'])
-.directive('wmActionLayout', ['$compile', 'SelectAll', '$filter', function ($compile, SelectAll, $filter) {
+.directive('wmActionLayout', ['$compile', 'SelectAll', '$filter', '$sce', function ($compile, SelectAll, $filter, $sce) {
     return {
         restrict: 'E',
         scope: {
@@ -45,6 +45,7 @@ angular.module('WebMis20.ActionLayout', ['WebMis20.validators', 'WebMis20.direct
                                 case 'Text':
                                 case 'Html':
                                 case 'Жалобы':
+                                    property.value = $sce.trustAsHtml(property.value);
                                     inner_template = '<span ng-bind-html="{0}.value"></span>'; break;
                                 case 'String':
                                 case 'Integer':
