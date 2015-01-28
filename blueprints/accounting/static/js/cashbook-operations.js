@@ -21,7 +21,13 @@ var CashBookOperationsCtrl = function ($scope, $http, $window, RefBookService, P
     $scope.max_size = 8;
     $scope.current_sorting = undefined;
     $scope.rbPaymentType = new RefBookService.get('PaymentType');
-    $scope.ps = new PrintingService('');
+    $scope.ps = new PrintingService('cashbook_list');
+    $scope.ps.set_context('cashOperations');
+    $scope.cash_op_resolve = function () {
+        return {
+            'payments_id_list': $scope.results.map(function (payment) { return payment.id; })
+        }
+    };
 
     $scope.get_data = function (page, reset_sorting) {
         var flt = get_model(page);
@@ -37,6 +43,10 @@ var CashBookOperationsCtrl = function ($scope, $http, $window, RefBookService, P
             $scope.pages = data.result.pages;
             $scope.results = data.result.items;
             $scope.metrics = data.result.metrics;
+            $scope.prints = {};
+            angular.forEach($scope.results, function (payment) {
+                $scope.prints[payment.id] = new PrintingService('event');
+            });
             if (!$scope.current_sorting) {
                 $scope.reset_sorting();
             }
@@ -82,6 +92,13 @@ var CashBookOperationsCtrl = function ($scope, $http, $window, RefBookService, P
             } else {
                 columns[i].order = undefined;
             }
+        }
+    };
+
+    $scope.get_ps_resolve = function (payment) {
+        return {
+            event_id: payment.event.id,
+            payment_id: payment.id
         }
     };
 

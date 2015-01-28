@@ -250,7 +250,6 @@ var EventMainInfoCtrl = function ($scope, RefBookService, EventType, $filter, Me
 var EventPaymentCtrl = function($scope, RefBookService, Settings, $http, $modal, MessageBox) {
     $scope.rbDocumentType = RefBookService.get('rbDocumentType');
 
-    var event_created = !$scope.event.is_new();
     function isNotEmpty(val) { return val !== undefined && val !== null; }
 
     $scope.payer_is_person = function() {
@@ -278,20 +277,29 @@ var EventPaymentCtrl = function($scope, RefBookService, Settings, $http, $modal,
         return ($scope.payer_tabs.org.active && $scope.formstate.is_paid() && $scope.event.info.client.info.age_tuple[3] < 18);
     };
     $scope.payer_info_disabled = function () {
-        return $scope.event.ro;
+        return !$scope.event.has_access_to_payment_info;
     };
     $scope.contract_info_disabled = function () {
-        return event_created || $scope.integration1CODVD_enabled();
+        return !(
+            $scope.event.has_access_to_payment_info && (
+                !$scope.integration1CODVD_enabled() &&
+                ($scope.create_mode || $scope.editing.contract_edited)
+            )
+        );
     };
     $scope.btn_edit_contract_info_visible = function () {
         var lc = $scope.event.payment && $scope.event.payment.local_contract || null;
-        return !(lc && lc.date_contract && lc.number_contract || $scope.integration1CODVD_enabled() || $scope.event.ro);
+        return ($scope.event.has_access_to_payment_info &&
+            !$scope.integration1CODVD_enabled() && (
+                !lc || !lc.date_contract || !lc.number_contract
+            )
+        );
     };
     $scope.import_payer_btn_disabled = function () {
-        return $scope.event.ro;
+        return !$scope.event.has_access_to_payment_info;
     };
     $scope.btn_delete_lc_disabled = function () {
-        return $scope.event.ro;
+        return !$scope.event.has_access_to_payment_info;
     };
     $scope.payer_tabs = {
         person: {
@@ -307,8 +315,8 @@ var EventPaymentCtrl = function($scope, RefBookService, Settings, $http, $modal,
     $scope.refresh_tabs = function (org_active) {
         $scope.payer_tabs.person.active = !org_active;
         $scope.payer_tabs.org.active = Boolean(org_active);
-        $scope.payer_tabs.person.disabled = $scope.event.ro; //event_created && $scope.payer_tabs.org.active;
-        $scope.payer_tabs.org.disabled = $scope.event.ro; // event_created && $scope.payer_tabs.person.active;
+        $scope.payer_tabs.person.disabled = $scope.event.ro || !$scope.event.has_access_to_payment_info; //event_created && $scope.payer_tabs.org.active;
+        $scope.payer_tabs.org.disabled = $scope.event.ro || !$scope.event.has_access_to_payment_info; // event_created && $scope.payer_tabs.person.active;
     };
 
     $scope.contract_available = function () {
@@ -617,7 +625,8 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
     var event = $scope.event = new WMEvent($scope.event_id, $scope.client_id, $scope.ticket_id);
     $scope.create_mode = $scope.event.is_new();
     $scope.editing = {
-        submit_attempt: false
+        submit_attempt: false,
+        contract_edited: false
     };
 
     $scope.initialize = function() {
@@ -673,6 +682,7 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
                         });
                     }
                 }
+                $scope.editing.contract_edited = false;
             }, function (message) {
                 MessageBox.info('Ошибка сохранения', message);
             });

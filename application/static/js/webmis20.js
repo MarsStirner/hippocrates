@@ -325,6 +325,9 @@ var WebMis20 = angular.module('WebMis20', [
             '';
     }
 })
+.filter('trustHtml', function ($sce) {
+    return $sce.trustAsHtml;
+})
 // Services
 .factory('RefBook', ['$http', '$rootScope', function ($http, $rootScope) {
     var RefBook = function (name) {

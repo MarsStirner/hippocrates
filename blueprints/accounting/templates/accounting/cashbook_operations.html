@@ -6,7 +6,7 @@
     <div ng-controller="CashBookOperationsCtrl">
         <legend>
             <div class="pull-right">
-                <ui-print-button ps="ps" resolve="ps_resolve(event.id)"></ui-print-button>
+                <ui-print-button ps="ps" resolve="cash_op_resolve()"></ui-print-button>
             </div>
             <h2>Журнал операций</h2>
         </legend>
@@ -99,22 +99,27 @@
                     <th wm-sortable-column="event_beg_date" on-change-order="sort_by_column(params)">Назначено</th>
                     <th wm-sortable-column="event_end_date" on-change-order="sort_by_column(params)">Окончено</th>
                     <th wm-sortable-column="event_exec_person_name" on-change-order="sort_by_column(params)">Врач</th>
+                    <th></th>
                 </tr>
                 </thead>
                 <tbody>
-                <tr ng-repeat="payment in results" ng-click="open_event(payment.event.id)">
-                    <td>[[ payment.date | asDate ]]</td>
-                    <td>[[ payment.cashbox ]]</td>
-                    <td class="nowrap">[[ payment.cashier_person.name ]]</td>
-                    <td>[[ payment.cash_operation.name ]]</td>
-                    <td>[[ payment.sum ]]</td>
-                    <td>[[ payment.client.full_name ]]</td>
-                    <td>[[ payment.client.birth_date | asDate ]]</td>
-                    <td>[[ payment.client.sex.name ]]</td>
-                    <td>[[ payment.event.type_name ]]</td>
-                    <td>[[ payment.event.beg_date | asDate ]]</td>
-                    <td>[[ payment.event.beg_date | asDate ]]</td>
-                    <td>[[ payment.event.person_short_name ]]</td>
+                <tr ng-repeat="payment in results">
+                    <td ng-click="open_event(payment.event.id)">[[ payment.date | asDate ]]</td>
+                    <td ng-click="open_event(payment.event.id)">[[ payment.cashbox ]]</td>
+                    <td class="nowrap" ng-click="open_event(payment.event.id)">[[ payment.cashier_person.name ]]</td>
+                    <td ng-click="open_event(payment.event.id)">[[ payment.cash_operation.name ]]</td>
+                    <td ng-click="open_event(payment.event.id)">[[ payment.sum ]]</td>
+                    <td ng-click="open_event(payment.event.id)">[[ payment.client.full_name ]]</td>
+                    <td ng-click="open_event(payment.event.id)">[[ payment.client.birth_date | asDate ]]</td>
+                    <td ng-click="open_event(payment.event.id)">[[ payment.client.sex.name ]]</td>
+                    <td ng-click="open_event(payment.event.id)">[[ payment.event.type_name ]]</td>
+                    <td ng-click="open_event(payment.event.id)">[[ payment.event.beg_date_date | asDate ]]</td>
+                    <td ng-click="open_event(payment.event.id)">[[ payment.event.end_date_date | asDate ]]</td>
+                    <td ng-click="open_event(payment.event.id)">[[ payment.event.person_short_name ]]</td>
+                    <td class="bg-muted">
+                        <ui-print-button ps="prints[payment.id]" resolve="get_ps_resolve(payment)"
+                            lazy-load-context="cashOrder"></ui-print-button>
+                    </td>
                 </tr>
                 </tbody>
                 <tbody>

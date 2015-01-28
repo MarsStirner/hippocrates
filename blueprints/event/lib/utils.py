@@ -431,8 +431,6 @@ def create_or_update_diagnosis(event, json_data, action=None):
         if action:
             diag.action = action
         # etc
-        diag.stage_id = None
-        diag.dispanser_id = None
         diag.sanatorium = 0
         diag.hospital = 0
 
