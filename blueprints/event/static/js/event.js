@@ -291,7 +291,7 @@ var EventPaymentCtrl = function($scope, RefBookService, Settings, $http, $modal,
         var lc = $scope.event.payment && $scope.event.payment.local_contract || null;
         return ($scope.event.has_access_to_payment_info &&
             !$scope.integration1CODVD_enabled() && (
-                !lc || !lc.date_contract || !lc.number_contract
+                !lc || !lc.date_contract || !lc.number_contract || !lc.coord_text
             )
         );
     };
