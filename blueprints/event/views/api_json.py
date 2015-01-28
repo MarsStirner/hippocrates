@@ -74,10 +74,7 @@ def api_event_new_get():
     event.setDate = setDate
     event.note = note
     v = EventVisualizer()
-    return jsonify({
-        'event': v.make_event(event),
-        'payment': v.make_event_payment(None)
-    })
+    return jsonify(v.make_new_event(event))
 
 
 @module.route('/api/event/event_stationary_open.json', methods=['GET'])

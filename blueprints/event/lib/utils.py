@@ -265,6 +265,7 @@ def create_or_update_local_contract(event, lc_info):
     lc_id = lc_info.get('id')
     number_contract = lc_info.get('number_contract', '')
     date_contract = safe_date(lc_info.get('date_contract'))
+    coord_text = lc_info.get('coord_text', '')
     last_name = lc_info.get('last_name', '')
     first_name = lc_info.get('first_name', '')
     patr_name = lc_info.get('patr_name', '')
@@ -287,6 +288,7 @@ def create_or_update_local_contract(event, lc_info):
                 lc = EventLocalContract.query.get(lc_id)
                 lc.numberContract = number_contract
                 lc.dateContract = date_contract
+                lc.coordText = coord_text
                 lc.lastName = last_name
                 lc.firstName = first_name
                 lc.patrName = patr_name
