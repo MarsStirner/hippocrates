@@ -147,7 +147,7 @@
 </legend>
 <div class="panel panel-default">
     <div class="panel-body">
-        <div class="row">
+        <div class="row form-group">
             <div class="col-md-2"
                 ng-class="{'has-error': payerForm.date_contract.$invalid && editing.submit_attempt}">
                 <label for="date_contract">Дата заключения</label>
@@ -166,6 +166,14 @@
                 <button type="button" class="btn btn-default pull-right" ng-show="btn_edit_contract_info_visible()"
                         ng-click="editing.contract_edited = true"><span class="glyphicon glyphicon-pencil"></span>
                 </button>
+            </div>
+        </div>
+        <div class="row form-group">
+            <div class="col-md-6">
+                <label for="notes">Обстоятельства</label>
+                <textarea class="form-control" id="coord_text" name="coord_text" rows="1" autocomplete="off"
+                    ng-model="event.payment.local_contract.coord_text" ng-disabled="contract_info_disabled()">
+                </textarea>
             </div>
         </div>
     </div>
