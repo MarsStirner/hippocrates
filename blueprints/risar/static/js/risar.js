@@ -269,7 +269,7 @@ WebMis20
                         var uniq = _.random(0x100000000);
                     } while (scope.func_map.hasOwnProperty(uniq));
                     scope.func_map[uniq] = arg.click;
-                    wrapper = '<a ng-click="func_map[{0}]()">{1}</a>'.format(String(uniq), wrapper)
+                    wrapper = '<a style="cursor:pointer" ng-click="func_map[{0}]()">{1}</a>'.format(String(uniq), wrapper)
                 }
                 if (arg.hasOwnProperty('text')) {
                     return wrapper.format(compile(arg.text));
