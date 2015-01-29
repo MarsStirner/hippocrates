@@ -71,7 +71,8 @@ def calc_risk_rate(event):
             return 1
         return 0
 
-    return max(0, *map(diag_to_risk_rate, get_all_diagnoses(event)))  # Ноль нужен на случай, если диагнозов совсем неь
+    all_diagnoses = get_all_diagnoses(event)
+    return max(*map(diag_to_risk_rate, all_diagnoses)) if all_diagnoses else 0
 
 
 def get_pregnancy_start_date(event):
