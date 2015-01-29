@@ -26,6 +26,7 @@ def get_card_attrs_action(event, auto=True):
     ).first()
     if action is None and auto:
         action = create_action(default_AT_Heuristic().id, event)
+        reevaluate_card_attrs(event, action)
     return action
 
 
@@ -102,14 +103,15 @@ def get_predicted_d_date(start_date):
         return start_date + datetime.timedelta(weeks=40)
 
 
-def reevaluate_card_attrs(event):
+def reevaluate_card_attrs(event, action=None):
     """
     Пересчёт атрибутов карточки беременной
     :param event: карточка беременной, обращение
     :type event: application.models.event.Event
     """
     preg_start_date = get_pregnancy_start_date(event)
-    action = get_card_attrs_action(event)
+    if action is None:
+        action = get_card_attrs_action(event)
     action['prenatal_risk_572'].value = calc_risk_rate(event)
     action['pregnancy_start_date'].value = preg_start_date
     action['predicted_delivery_date'].value = get_predicted_d_date(preg_start_date)
