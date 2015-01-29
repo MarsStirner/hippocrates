@@ -20,10 +20,13 @@ def get_card_attrs_action(event, auto=True):
     :return: действие с атрибутами
     :rtype: Action|NoneType
     """
-    return Action.query.join(ActionType).filter(
+    action = Action.query.join(ActionType).filter(
         Action.event == event,
         ActionType.flatCode == 'cardAttributes',
-    ).first() or auto and create_action(default_AT_Heuristic().id, event)
+    ).first()
+    if action is None and auto:
+        action = create_action(default_AT_Heuristic().id, event)
+    return action
 
 
 def default_AT_Heuristic():
