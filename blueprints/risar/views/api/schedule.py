@@ -7,7 +7,8 @@ from flask import request
 
 from application.lib.apiutils import api_method
 from application.models.actions import ActionType, Action, ActionProperty, ActionPropertyType, ActionProperty_Integer
-from application.models.event import Event
+from application.models.event import Event, EventType
+from application.models.exists import rbRequestType
 from application.models.schedule import Schedule
 from application.models.utils import safe_current_user_id
 from application.systemwide import db
@@ -44,15 +45,20 @@ def api_0_current_stats():
         whereclause=db.and_(
             ActionType.flatCode == 'cardAttributes',
             ActionPropertyType.code == 'prenatal_risk_572',
+            rbRequestType.code == 'pregnancy',
             Action.event_id == Event.id,
             ActionProperty.action_id == Action.id,
             ActionPropertyType.id == ActionProperty.type_id,
             ActionType.id == Action.actionType_id,
             ActionProperty_Integer.id == ActionProperty.id,
             Event.execDate.is_(None),
+            EventType.id == Event.eventType_id,
+            rbRequestType.id == EventType.requestType_id,
+            Event.deleted == 0,
+            Action.deleted == 0,
         ),
         from_obj=(
-            Event, Action, ActionType, ActionProperty, ActionPropertyType, ActionProperty_Integer
+            Event, EventType, rbRequestType, Action, ActionType, ActionProperty, ActionPropertyType, ActionProperty_Integer
         ))
     for (value, ) in db.session.execute(selectable):
         result[value] += 1
