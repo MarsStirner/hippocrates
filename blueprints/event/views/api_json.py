@@ -237,9 +237,10 @@ def api_search_services():
 
         service = {
             'at_id': at_id,
-            'at_code': service_data['code'],
-            'at_name': service_data['name'],
-            'service_name': service_data['service'],
+            'code': service_data['ct_code'],
+            'name': service_data['ct_name'],
+            'at_code': service_data['at_code'],
+            'at_name': service_data['at_name'],
             'price': service_data['price'],
             'is_lab': False
         }

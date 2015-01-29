@@ -18,7 +18,7 @@ from application.models.enums import EventPrimary, EventOrder, ActionStatus, Gen
 from application.models.event import Event, EventType, Diagnosis
 from application.models.schedule import (Schedule, rbReceptionType, ScheduleClientTicket, ScheduleTicket,
     QuotingByTime, Office, rbAttendanceType)
-from application.models.actions import Action, ActionProperty, ActionType
+from application.models.actions import Action, ActionProperty, ActionType, ActionType_Service
 from application.models.client import Client
 from application.models.exists import (rbRequestType, rbService, ContractTariff, Contract, Person, rbSpeciality,
     Organisation, rbContactType)
@@ -1035,14 +1035,14 @@ class EventVisualizer(object):
 
     def make_event_services(self, event_id):
 
-        def make_raw_service_group(action, service_id, at_code, at_name, service_name, price, at_context, ct_code):
+        def make_raw_service_group(action, service_id, at_code, at_name, ct_code, ct_name, price, at_context):
             service = {
                 'at_id': action.actionType_id,
                 'service_id': service_id,
+                'code': ct_code,
+                'name': ct_name,
                 'at_code': at_code,
-                'ct_code': ct_code,
                 'at_name': at_name,
-                'service_name': service_name,
                 'action': action,
                 'price': price,
                 'is_lab': False,
@@ -1112,36 +1112,40 @@ class EventVisualizer(object):
         person_vis = PersonTreeVisualizer()
         query = db.session.query(
             Action,
-            ActionType.service_id,
+            ActionType_Service.service_id,
             ActionType.code,
             ActionType.name,
-            rbService.name,
+            ContractTariff.code,
+            ContractTariff.name,
             ContractTariff.price,
-            ActionType.context,
-            ContractTariff.code
+            ActionType.context
         ).join(
             Event,
             EventType,
             Contract,
             ContractTariff,
-            ActionType
+            ActionType,
+            ActionType_Service
         ).join(
-            rbService, ActionType.service_id == rbService.id
+            rbService, ActionType_Service.service_id == rbService.id
         ).filter(
             Action.event_id == event_id,
             ContractTariff.eventType_id == EventType.id,
-            ContractTariff.service_id == ActionType.service_id,
+            ContractTariff.service_id == ActionType_Service.service_id,
             Action.deleted == 0,
             ContractTariff.deleted == 0,
+            between(func.date(Event.setDate),
+                    ActionType_Service.begDate,
+                    func.coalesce(ActionType_Service.endDate, func.curdate())),
             between(func.date(Event.setDate), ContractTariff.begDate, ContractTariff.endDate)
         )
 
         ats_apts = int_get_atl_dict_all()
 
         services_by_at = defaultdict(list)
-        for a, service_id, at_code, at_name, service_name, price, at_context, ct_code in query:
+        for a, service_id, at_code, at_name, ct_code, ct_name, price, at_context in query:
             services_by_at[(a.actionType_id, service_id)].append(
-                make_raw_service_group(a, service_id, at_code, at_name, service_name, price, at_context, ct_code)
+                make_raw_service_group(a, service_id, at_code, at_name, ct_code, ct_name, price, at_context)
             )
         services_grouped = []
         for key, service_group in services_by_at.iteritems():

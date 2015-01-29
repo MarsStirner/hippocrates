@@ -161,11 +161,11 @@ angular.module('WebMis20.services.models').
                 if (service_data === undefined) {
                     service_data = {
                         at_id: null,
+                        service_id: undefined,
+                        code: null,
+                        name: null,
                         at_code: null,
                         at_name: null,
-                        ct_code: null,
-                        service_id: undefined,
-                        service_name: null,
                         actions: [],
                         price: undefined,
                         is_lab: null,
