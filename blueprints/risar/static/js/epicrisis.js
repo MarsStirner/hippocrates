@@ -14,15 +14,16 @@ var EpicrisisCtrl = function ($timeout, $scope, RefBookService, RisarApi) {
         $('.nav-pills a').on('shown.bs.tab', function (e) {
             window.location.hash = e.target.hash.replace("#", "#" + prefix);
         })
-    }
+    };
 
     var reload_epicrisis = function () {
         RisarApi.chart.get(event_id)
-        .then(function (data) {
-            $scope.chart = data.event;
-            if (!$scope.chart.epicrisis){
-                $scope.chart.epicrisis = {'pregnancy_final': $scope.rbRisarPregnancy_Final.get_by_code('rodami'),
-                                          'newborn_inspections' : [{}]};
+        .then(function (event) {
+            $scope.chart = event;
+            if (!$scope.chart.epicrisis) {
+                $scope.chart.epicrisis = {
+                    pregnancy_final: $scope.rbRisarPregnancy_Final.get_by_code('rodami'),
+                    newborn_inspections : [{}]};
             }
             $timeout(function(){
                 var hash = document.location.hash;
@@ -43,14 +44,14 @@ var EpicrisisCtrl = function ($timeout, $scope, RefBookService, RisarApi) {
             })
         }
 
-    }
+    };
 
     $scope.close_event = function () {
         RisarApi.chart.close_event($scope.chart.id, $scope.chart)
         .then(function (data) {
             $scope.chart = data;
         })
-    }
+    };
 
     $scope.add_child = function (){
         $scope.chart.epicrisis.newborn_inspections.push({});
@@ -58,7 +59,7 @@ var EpicrisisCtrl = function ($timeout, $scope, RefBookService, RisarApi) {
             $('#childrenTabs a:last').tab('show');
         }, 0);
 
-    }
+    };
 
     $scope.newborn_inspection_delete = function(inspection){
         if(inspection.id){
@@ -66,8 +67,8 @@ var EpicrisisCtrl = function ($timeout, $scope, RefBookService, RisarApi) {
             .then(function () {
                 inspection.deleted = 1;
             })
-        };
-    }
+        }
+    };
 
     $scope.newborn_inspection_restore = function(inspection){
         if(inspection.id){
@@ -75,8 +76,8 @@ var EpicrisisCtrl = function ($timeout, $scope, RefBookService, RisarApi) {
             .then(function () {
                 inspection.deleted = 0;
             })
-        };
-    }
+        }
+    };
 
     var init = function () {
         var hash = document.location.hash;
@@ -87,4 +88,4 @@ var EpicrisisCtrl = function ($timeout, $scope, RefBookService, RisarApi) {
     };
     init();
 
-}
+};
