@@ -4,7 +4,8 @@
 'use strict';
 
 WebMis20
-.service('RisarApi', ['$http', 'Config', '$q', function ($http, Config, $q) {
+.service('RisarApi', ['$http', 'Config', '$q', 'RisarNotificationService', function ($http, Config, $q, RisarNotificationService) {
+    var self = this;
     var wrapper = function (method, url, params, data) {
         var defer = $q.defer();
         $http({
@@ -17,6 +18,12 @@ WebMis20
             defer.resolve(data.result)
         })
         .error(function (data, code) {
+            var text = (code === 500) ? 'Внутренняя ошибка сервера.<br/>{0}' : 'Ошибка.<br/>{0}';
+            RisarNotificationService.notify(
+                code,
+                text.format(data.meta.name),
+                'danger'
+            );
             defer.reject(data.meta)
         });
         return defer.promise;
