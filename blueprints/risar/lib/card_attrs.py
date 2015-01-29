@@ -3,6 +3,7 @@ import itertools
 import datetime
 from application.lib.data import create_action
 from application.models.actions import Action, ActionType
+from application.systemwide import db
 from blueprints.risar.lib.utils import get_action, get_action_list
 from blueprints.risar.risar_config import checkup_flat_codes, risar_mother_anamnesis
 from .utils import risk_rates_blockID, risk_rates_diagID
@@ -27,6 +28,8 @@ def get_card_attrs_action(event, auto=True):
     if action is None and auto:
         action = create_action(default_AT_Heuristic().id, event)
         reevaluate_card_attrs(event, action)
+        db.session.add(action)
+        db.session.commit()
     return action
 
 
