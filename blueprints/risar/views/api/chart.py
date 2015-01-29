@@ -68,7 +68,6 @@ def api_0_chart(event_id=None):
             at = default_AT_Heuristic()
             if not at:
                 raise ApiException(500, u'Нет типа действия с flatCode = cardAttributes')
-            ext = create_action(at.id, event)
             ET = default_ET_Heuristic()
             if ET is None:
                 raise ApiException(500, u'Не настроен тип события - Случай беременности ОМС')
@@ -92,6 +91,7 @@ def api_0_chart(event_id=None):
             event.externalId = get_new_event_ext_id(event.eventType.id, ticket.client_id)
             event.payStatus = 0
             db.session.add(event)
+            ext = create_action(at.id, event)
             db.session.add(ext)
             ticket.event = event
             db.session.add(ticket)
