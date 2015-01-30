@@ -77,7 +77,7 @@ angular.module('WebMis20.directives').
                         return scope.service.fully_paid || scope.service.fully_coord || scope.event.ro;
                     };
                     scope.account_disabled = function () {
-                        return !CurrentUser.current_role_in('clinicRegistrator');
+                        return !CurrentUser.current_role_in('admin', 'clinicRegistrator');
                     };
                     scope.btn_coordinate_visible = function () {
                         return !scope.service.fully_coord && !scope.service.all_actions_closed && !scope.event.ro;
@@ -208,7 +208,7 @@ angular.module('WebMis20.directives').
                         return scope.action.account || scope.action.is_coordinated() || scope.event.ro;
                     };
                     scope.account_disabled = function () {
-                        return !CurrentUser.current_role_in('clinicRegistrator');
+                        return !CurrentUser.current_role_in('admin', 'clinicRegistrator');
                     };
                     scope.btn_coordinate_visible = function () {
                         return !scope.action.is_coordinated() && !scope.action.is_closed() && !scope.event.ro;
@@ -291,7 +291,7 @@ angular.module('WebMis20.directives').
                     });
                 };
                 scope.account_disabled = function () {
-                    return !CurrentUser.current_role_in('clinicRegistrator');
+                    return !CurrentUser.current_role_in('admin', 'clinicRegistrator');
                 };
             },
             template:
