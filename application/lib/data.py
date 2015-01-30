@@ -5,6 +5,7 @@ import requests
 from datetime import datetime, time, timedelta
 from flask.ext.login import current_user
 from sqlalchemy.orm.util import aliased
+from sqlalchemy.sql.expression import between, func
 
 from config import VESTA_URL
 from application.systemwide import db, cache
@@ -12,9 +13,9 @@ from application.app import cache
 from application.lib.utils import logger, get_new_uuid, safe_traverse, group_concat
 from application.lib.agesex import parseAgeSelector, recordAcceptableEx
 from application.models.actions import Action, ActionType, ActionPropertyType, ActionProperty, Job, JobTicket, \
-    TakenTissueJournal, OrgStructure_ActionType
+    TakenTissueJournal, OrgStructure_ActionType, ActionType_Service
 from application.models.enums import ActionStatus
-from application.models.exists import Person, ContractTariff
+from application.models.exists import Person, ContractTariff, Contract
 from application.models.event import Event, EventType_Action, EventType
 from application.lib.calendar import calendar
 from application.lib.user import UserUtils
@@ -471,24 +472,41 @@ def int_get_atl_flat(at_class, event_type_id=None, contract_id=None):
             ActionType.hidden == 0, at_2.hidden == 0,
             ActionType.class_ == at_class, at_2.class_ == at_class
         ).subquery('AllInternalNodes')
-        # filter atl query by EventType_Action reference and include *all* internal AT tree nodes in result
+        # 1) filter atl query by EventType_Action reference and include *all* internal AT tree nodes in result
         ats = query.outerjoin(
             internal_nodes_q, ActionType.id == internal_nodes_q.c.id
         ).outerjoin(
             EventType_Action, db.and_(EventType_Action.actionType_id == ActionType.id,
                                       EventType_Action.eventType_id == event_type_id)
-        ).filter(
-            db.or_(internal_nodes_q.c.id != None, EventType_Action.id != None)
         )
-        # filter atl query by contract tariffs
+        # 2) filter atl query by contract tariffs if necessary
         need_price_list = EventType.query.get(event_type_id).createOnlyActionsWithinPriceList
         if contract_id and need_price_list:
             ats = ats.outerjoin(
-                ContractTariff, db.and_(ActionType.service_id == ContractTariff.service_id,
+                ActionType_Service, db.and_(ActionType.id == ActionType_Service.master_id,
+                                            between(func.curdate(),
+                                                    ActionType_Service.begDate,
+                                                    func.coalesce(ActionType_Service.endDate, func.curdate())))
+            ).outerjoin(
+                ContractTariff, db.and_(ActionType_Service.service_id == ContractTariff.service_id,
                                         ContractTariff.master_id == contract_id,
-                                        ContractTariff.eventType_id == event_type_id)
+                                        ContractTariff.eventType_id == event_type_id,
+                                        ContractTariff.deleted == 0,
+                                        between(func.curdate(), ContractTariff.begDate, ContractTariff.endDate))
+            ).outerjoin(
+                Contract, db.and_(Contract.id == ContractTariff.master_id,
+                                  Contract.deleted == 0)
             ).filter(
-                db.or_(internal_nodes_q.c.id != None, ContractTariff.id != None)
+                db.or_(db.and_(EventType_Action.id != None,
+                               ContractTariff.id != None,
+                               Contract.id != None,
+                               ActionType_Service.id != None),
+                       internal_nodes_q.c.id != None)
+            )
+        else:
+            # filter for 1)
+            ats = ats.filter(
+                db.or_(internal_nodes_q.c.id != None, EventType_Action.id != None)
             )
 
         result = map(schwing, ats)

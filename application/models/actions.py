@@ -729,7 +729,7 @@ class ActionType(db.Model):
     mnem = db.Column(db.String(32), server_default=u"''")
     layout = db.Column(db.Text)
 
-    service = db.relationship(u'rbService', foreign_keys='ActionType.service_id')
+    services = db.relationship(u'ActionType_Service')
     nomenclatureService = db.relationship(u'rbService', foreign_keys='ActionType.nomenclativeService_id')
     property_types = db.relationship(u'ActionPropertyType', lazy='dynamic')
     group = db.relationship(u'ActionType', remote_side=[id])
@@ -787,10 +787,11 @@ class ActionType_Service(db.Model):
     __tablename__ = u'ActionType_Service'
 
     id = db.Column(db.Integer, primary_key=True)
-    master_id = db.Column(db.Integer, nullable=False, index=True)
+    master_id = db.Column(db.Integer, db.ForeignKey('ActionType.id'), nullable=False, index=True)
     idx = db.Column(db.Integer, nullable=False, server_default=u"'0'")
-    finance_id = db.Column(db.Integer, index=True)
-    service_id = db.Column(db.Integer, index=True)
+    service_id = db.Column(db.Integer, db.ForeignKey('rbService.id'), index=True, nullable=False)
+    begDate = db.Column(db.Date, nullable=False)
+    endDate = db.Column(db.Date)
 
 
 class ActionType_TissueType(db.Model):
