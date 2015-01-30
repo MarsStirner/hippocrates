@@ -14,7 +14,7 @@ from application.models.schedule import ScheduleClientTicket
 from application.systemwide import db
 from blueprints.risar.app import module
 from blueprints.risar.lib.card_attrs import default_AT_Heuristic
-from blueprints.risar.lib.represent import represent_event
+from blueprints.risar.lib.represent import represent_event, represent_chart_for_routing
 from blueprints.risar.risar_config import attach_codes
 
 
@@ -107,6 +107,29 @@ def api_0_chart(event_id=None):
         'event': represent_event(event),
         'automagic': automagic
     }
+
+
+@module.route('/api/0/mini_chart/')
+@module.route('/api/0/mini_chart/<int:event_id>')
+@api_method
+def api_0_mini_chart(event_id=None):
+    event = Event.query.get(event_id)
+    if not event:
+        raise ApiException(404, u'Обращение не найдено')
+    if event.eventType.requestType.code != 'pregnancy':
+        raise ApiException(400, u'Обращение не является случаем беременности')
+    return represent_chart_for_routing(event)
+
+
+@module.route('/api/0/event_routing', methods=['POST'])
+@api_method
+def api_0_event_routing():
+    return [
+        {
+            'id': row.id,
+            'name': row.shortName,
+        } for row in Organisation.query.filter(Organisation.isHospital == 1)
+    ]
 
 
 @module.route('/api/0/chart_close/')

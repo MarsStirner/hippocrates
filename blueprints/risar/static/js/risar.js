@@ -90,11 +90,21 @@ WebMis20
                     return event_info.event;
                 });
         },
+        get_mini: function(event_id) {
+            return wrapper('GET', Config.url.api_mini_chart + event_id)
+        },
         delete: function (ticket_id) {
             return wrapper('DELETE', Config.url.api_chart_delete + ticket_id);
         },
         close_event: function (event_id, data) {
             return wrapper('POST', Config.url.api_chart_close.format(event_id), {}, data);
+        }
+    };
+    this.event_routing = {
+        get: function (diagnoses) {
+            return wrapper('POST', Config.url.api_event_routing, {}, {
+                diagnoses: diagnoses
+            })
         }
     };
     this.attach_lpu = {

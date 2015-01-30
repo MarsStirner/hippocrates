@@ -17,6 +17,11 @@ def html_search():
     return render_template('risar/search.html')
 
 
+@module.route('/routing.html')
+def html_routing():
+    return render_template('risar/event_routing.html')
+
+
 @module.route('/chart.html')
 def html_chart():
     return render_template('risar/chart.html')
