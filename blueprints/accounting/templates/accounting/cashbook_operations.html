@@ -1,6 +1,6 @@
 {% extends 'accounting/base.html' %}
 
-{% block title %}> Журнал операций{% endblock %}
+{% block title %}> Журнал кассовых операций{% endblock %}
 
 {% block main %}
     <div ng-controller="CashBookOperationsCtrl">
@@ -8,7 +8,7 @@
             <div class="pull-right">
                 <ui-print-button ps="ps" resolve="cash_op_resolve()"></ui-print-button>
             </div>
-            <h2>Журнал операций</h2>
+            <h2>Журнал кассовых операций</h2>
         </legend>
         <div class="col-md-3">
             <!-- Filter -->
