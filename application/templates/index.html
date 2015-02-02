@@ -10,12 +10,13 @@
   {% include '_top.html' %}
   <div id="container" class="container">
     {% block content %}
-      <!-- Jumbotron -->
       <blockquote class="danger">
-          <h2>Добро пожаловать, {% if current_user.firstName %}{{ current_user.firstName }}{% else %}{{ current_user.lastName }}{% endif %}!<small> Для продолжения работы выберите нужный пункт</small> </h2>
+          <h2>Добро пожаловать, {% if current_user.firstName %}{{ current_user.firstName }}{% else %}{{ current_user.lastName }}{% endif %}!
+              <small> Для продолжения работы выберите нужный пункт</small>
+          </h2>
       </blockquote>
         {% if user_profiles_mng.has_ui_doctor() %}
-          <div class="row lander">
+          <div class="row lander marginal">
             <div class="col-md-4">
               <a href="{{ url_for('schedule.doctor_schedule_day') }}" title="Обслуживание пациентов" class="btn btn-primary btn-block">
                 <h3>Приём пациентов</h3>
@@ -45,7 +46,7 @@
           </div>
         {% endif %}
         {% if user_profiles_mng.has_ui_registrator() %}
-          <div class="row lander">
+          <div class="row lander marginal">
             <div class="col-md-4">
               <a href="{{ url_for('patients.index') }}" title="Обслуживание пациентов" class="btn btn-primary btn-block">
                 <h3>Обслуживание пациентов</h3>
@@ -85,8 +86,8 @@
           </div>
         {% endif %}
         {% if user_profiles_mng.has_ui_cashier() %}
-          <div class="row lander">
-            <div class="col-md-6">
+          <div class="row lander marginal">
+            <div class="col-md-4">
               <a href="{{ url_for('accounting.cashbook_html') }}" title="Расчет" class="btn btn-primary btn-block">
                 <h3>Расчет</h3>
                 <strong>Вы сможете:</strong>
@@ -97,20 +98,21 @@
                 </ul>
               </a>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
               <a href="{{ url_for('accounting.cashbook_operations') }}" title="Журнал кассовых операций" class="btn btn-success btn-block">
                 <h3>Журнал кассовых операций</h3>
                 <strong>Вы сможете:</strong>
                 <ul>
                   <li>Сформировать и распечатать журнал кассовых операций</li>
                 </ul>
+                <br/>
               </a>
             </div>
           </div>
         {% endif %}
-      {% endblock %}
-   </div> <!-- /container -->
-   <div id="push"></div>
+    {% endblock %}
+    </div>
+    <div id="push"></div>
   </div>
   {% include '_bottom.html' %}
   {% include '_footer.html' %}
