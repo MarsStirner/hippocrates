@@ -257,6 +257,13 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
                         alert(msg);
                     });
                 };
+                $scope.validate = function (model_val) {
+                    var result = {
+                        type: 'directionDate',
+                        success: moment(model_val).isAfter(moment())
+                    };
+                    return result;
+                };
                 $scope.open_assignments = function (action) {
                     return self_service.openAppointmentModal(action, false);
                 };
@@ -419,6 +426,7 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
                         </ul>\
                     </div>\
                 </div>\
+                <ng-form name="labDirectionsForm">\
                 <div class="col-md-6">\
                     <table class="table table-condensed">\
                     <thead>\
@@ -432,17 +440,25 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
                         <tr ng-repeat="action in prepared2create">\
                             <td ng-if="!action.assignable.length" ng-bind="action.type_name"></td>\
                             <td ng-if="action.assignable.length"><a ng-click="open_assignments(action)" ng-bind="action.type_name"></a></td>\
-                            <td><div fs-datetime ng-model="action.planned_end_date"></div></td>\
+                            <td><div fs-datetime ng-model="action.planned_end_date" class="validatable"\
+                                    wm-validate="validate"></div>\
+                            </td>\
                             <td><button class="btn btn-danger btn-sm" ng-click="prepared2create.splice($index, 1)"><i class="glyphicon glyphicon-trash"></i></button></td>\
                         </tr>\
                     </tbody>\
                     </table>\
+                    <div ng-if="labDirectionsForm.$invalid && labDirectionsForm.$error.directionDate"\
+                        class="alert alert-danger">\
+                        Планируемая дата и время выполнения не могут быть раньше текущей даты и времени\
+                    </div>\
                 </div>\
+                </ng-form>\
             </div>\
         </div>\
         <div class="modal-footer">\
             <button type="button" class="btn btn-default" ng-click="cancel()">Закрыть</button>\
-            <button type="button" class="btn btn-success" ng-click="create_actions()">Создать направления</button>\
+            <button type="button" class="btn btn-success" ng-click="create_actions()"\
+                ng-disabled="labDirectionsForm.$invalid">Создать направления</button>\
         </div>'
     );
     $templateCache.put('/WebMis20/modal-action-assignments.html',

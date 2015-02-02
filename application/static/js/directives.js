@@ -1480,4 +1480,18 @@ angular.module('WebMis20.validators', [])
             });
         }
     };
-});
+})
+.directive('wmValidate', [function () {
+    return {
+        restrict: 'A',
+        require: 'ngModel',
+        link: function (scope, element, attrs, ngModelCtrl) {
+            ngModelCtrl.$parsers.push(function (val) {
+                var validate_func = scope.$eval(attrs.wmValidate),
+                    result = validate_func(val);
+                ngModelCtrl.$setValidity(result.type, result.success);
+                return val;
+            });
+        }
+    };
+}]);
