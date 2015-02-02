@@ -67,7 +67,8 @@ class SearchEvent():
     def search(query):
         search = Search(indexes=['events'], config=SearchConfig)
         search = search.match(query)
-        search = search.limit(0, 50)
+        # sphinxit uses set - an unordered data structure - for storing query order params
+        search = search.limit(0, 50).order_by('@weight DESC, event_date', 'DESC')
         result = search.ask()
         return result
 

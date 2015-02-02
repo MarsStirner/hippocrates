@@ -69,7 +69,7 @@ def general_menu():
         visible=UserProfileManager.has_ui_cashier()
     ), dict(
         link='accounting.cashbook_operations',
-        title=u'Журнал операций',
+        title=u'Журнал кассовых операций',
         visible=UserProfileManager.has_ui_cashier()
     )]
     return dict(main_menu=menu_items)
