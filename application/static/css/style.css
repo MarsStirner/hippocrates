@@ -518,14 +518,16 @@ blockquote.danger{
     width: 300%;
 }
 
-.lander a.btn{
+.lander a.btn {
     text-align: left;
     padding: 10px;
 }
-
-.lander a h3{
+.lander a h3 {
     text-decoration: underline;
     margin-top: 10px;
+}
+.lander a ul li {
+    white-space: normal;
 }
 
 .validatable.ng-invalid {
