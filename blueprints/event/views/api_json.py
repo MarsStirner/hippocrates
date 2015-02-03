@@ -77,7 +77,7 @@ def api_event_new_get():
     return jsonify(v.make_new_event(event))
 
 
-@module.route('/api/event/event_stationary_open.json', methods=['GET'])
+@module.route('/api/event_stationary_opened.json', methods=['GET'])
 def api_event_stationary_open_get():
     client_id = int(request.args['client_id'])
     events = Event.query.join(EventType, rbRequestType).filter(
@@ -131,7 +131,7 @@ def api_event_close():
     return jsonify(None, result_name=u'Обращение закрыто')
 
 
-@module.route('/api/events/diagnosis.json', methods=['POST'])
+@module.route('/api/diagnosis.json', methods=['POST'])
 def api_diagnosis_save():
     current_datetime = datetime.datetime.now()
     data = request.json
@@ -187,7 +187,7 @@ def api_diagnosis_save():
     return jsonify(None)
 
 
-@module.route('/api/events/diagnosis.json', methods=['DELETE'])
+@module.route('/api/diagnosis.json', methods=['DELETE'])
 def api_diagnosis_delete():
     data = request.json
     if data['diagnosis_id']:
@@ -197,7 +197,7 @@ def api_diagnosis_delete():
     db.session.commit()
 
 
-@module.route('/api/events/diagnosis', methods=['GET'])
+@module.route('/api/diagnosis', methods=['GET'])
 def api_diagnosis_get():
     event_id = int(request.args['event_id'])
     event = Event.query.get(event_id)
@@ -532,7 +532,7 @@ def api_get_events():
     })
 
 
-@module.route('/api/event/search.json', methods=['GET'])
+@module.route('/api/search.json', methods=['GET'])
 def api_event_search():
     query = request.args['q']
     result = SearchEvent.search(query)

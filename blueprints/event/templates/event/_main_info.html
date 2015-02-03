@@ -77,6 +77,7 @@
                         </div>
                     </div>
                 </li>
+                {% if not event.is_stationary %}
                 <li class="list-group-item">
                     <div class="row">
                         <div class="col-md-4" ng-hide="formstate.is_diagnostic()"
@@ -101,6 +102,7 @@
                         </div>
                     </div>
                 </li>
+                {% endif %}
                 <li class="list-group-item">
                     <div class="row">
                         <div class="col-md-3"

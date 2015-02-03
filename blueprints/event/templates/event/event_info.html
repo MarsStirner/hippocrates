@@ -16,7 +16,7 @@
                 <div class="toc-affix" bs-affix>
                     <toc-affix toc-name="tocEventForm">
                     <hr>
-                    {% if (event.is_closed and user_profiles_mng.has_ui_registrator()) or not event.is_closed %}
+                    {% if (event.is_closed and user_profiles_mng.has_ui_registrator()) or (not event.is_closed and user_utils.can_edit_event(event)) %}
                     <div class="row">
                         <div class="col-md-6">
                             <button type="button" ng-click="save_event()" class="btn btn-block btn-success"
@@ -58,6 +58,9 @@
                     <ng-form name="eventForm" id="eventForm" role="form" novalidate
                              toc-element toc-name="tocEventForm" form-safe-close>
                         <wm-client-info client="event.info.client"></wm-client-info>
+                        {% if event and event.is_stationary %}
+                            {% include "event/_stationary_info.html" %}
+                        {% endif %}
                         {% include "event/_main_info.html" %}
                         {% if user_profiles_mng.has_ui_doctor() %}
                             {% include "event/_diagnoses.html" %}
@@ -66,29 +69,35 @@
                             {% include "event/_services.html" %}
                             {% include "event/_payment.html" %}
                         {% endif %}
-                        {% if user_profiles_mng.has_ui_doctor() %}
-                            <div class="marginal" ng-if="!formstate.is_diagnostic() && !event.is_new()">
+                        {% if user_utils.can_read_actions_meddoc(event) %}
+                            <div class="marginal">
                                 <ng-form name="eventMedDocActionsForm" toc-element="Медицинские документы">
                                     <legend>Медицинские документы</legend>
                                     <wm-action-list actions="event.info.actions" event="event"
                                             action-type-group="medical_documents"></wm-action-list>
                                 </ng-form>
                             </div>
-                            <div class="marginal" ng-if="!event.is_new()">
+                        {% endif %}
+                        {% if user_utils.can_read_actions_diagnostic(event) %}
+                            <div class="marginal">
                                 <ng-form name="eventDiagActionsForm" toc-element="Диагностика">
                                     <legend>Диагностика</legend>
                                     <wm-action-list actions="event.info.actions" event="event"
                                             action-type-group="diagnostics"></wm-action-list>
                                 </ng-form>
                             </div>
-                            <div class="marginal" ng-if="!event.is_new()">
+                        {% endif %}
+                        {% if user_utils.can_read_actions_lab(event) %}
+                            <div class="marginal">
                                 <ng-form name="eventLabActionsForm" toc-element="Лаб.исследования">
                                     <legend>Лаб.исследования</legend>
                                     <wm-action-list actions="event.info.actions" event="event"
                                             action-type-group="lab"></wm-action-list>
                                 </ng-form>
                             </div>
-                            <div class="marginal" ng-if="!formstate.is_diagnostic() && !event.is_new()">
+                        {% endif %}
+                        {% if user_utils.can_read_actions_treatment(event) %}
+                            <div class="marginal">
                                 <ng-form name="eventCureActionsForm" toc-element="Лечение">
                                     <legend>Лечение</legend>
                                     <wm-action-list actions="event.info.actions" event="event"

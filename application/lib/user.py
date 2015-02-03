@@ -274,13 +274,13 @@ class UserUtils(object):
     @staticmethod
     def can_edit_event(event):
         return event and (
-            current_user.has_right('adm') or (
+            current_user.has_right('adm') or ((
                 event.is_closed and
                 current_user.id_any_in(event.createPerson_id, event.execPerson_id) and
                 current_user.has_right('evtEditClosed')
             ) or (
                 not event.is_closed and current_user.has_right('clientEventUpdate')
-            )
+            ) and not event.is_stationary)  # TODO: or check exec_person.id?
         )
 
     @staticmethod
@@ -288,6 +288,22 @@ class UserUtils(object):
         return current_user.has_right('adm') or (
             (current_user.has_right('evtPaymentInfoUpdate') and (
                 not event.is_closed if event else True)
+            )
+        )
+
+    @staticmethod
+    def can_read_dignoses(event):
+        return event and (
+            current_user.has_right('adm') or (
+                UserProfileManager.has_ui_doctor() and not event.is_diagnostic
+            )
+        )
+
+    @staticmethod
+    def can_edit_dignoses(event):
+        return event and (
+            current_user.has_right('adm') or (
+                UserProfileManager.has_ui_doctor() and not UserProfileManager.has_ui_diag_doctor()
             )
         )
 
@@ -415,6 +431,42 @@ class UserUtils(object):
                 current_user.has_right(readRight) and
                 current_user.id_any_in(action.createPerson_id, action.person_id)))
 
+    @staticmethod
+    def can_read_actions_meddoc(event):
+        readRight = u'client%sRead' % modeRights[0]
+        return event and (
+            current_user.has_right('adm') or (
+                current_user.has_right(readRight) and (not event.is_diagnostic)
+            )
+        )
+
+    @staticmethod
+    def can_read_actions_diagnostic(event):
+        readRight = u'client%sRead' % modeRights[1]
+        return event and (
+            current_user.has_right('adm') or (
+                current_user.has_right(readRight)
+            )
+        )
+
+    @staticmethod
+    def can_read_actions_lab(event):
+        readRight = u'client%sRead' % modeRights[1]
+        return event and (
+            current_user.has_right('adm') or (
+                current_user.has_right(readRight)
+            )
+        )
+
+    @staticmethod
+    def can_read_actions_treatment(event):
+        readRight = u'client%sRead' % modeRights[2]
+        return event and (
+            current_user.has_right('adm') or (
+                current_user.has_right(readRight) and (not event.is_diagnostic)
+            )
+        )
+
 
 class UserProfileManager(object):
     user = None
@@ -429,6 +481,7 @@ class UserProfileManager(object):
 
     ui_groups = {
         'doctor': [admin, doctor_clinic, doctor_diag, nurse_assist],
+        'diag_doctor': [admin, doctor_diag, nurse_assist],
         'registrator': [admin, reg_clinic],
         'registrator_cut': [nurse_admission],
         'cashier': [admin, cashier]
@@ -443,8 +496,10 @@ class UserProfileManager(object):
         cls.user = user
 
     @classmethod
-    def _get_user_role(cls):
+    def _get_user_role(cls, for_master_user=False):
         user = cls.user or current_user
+        if for_master_user:
+            user = user.get_main_user()
         return user.current_role if not user.is_anonymous() else None
 
     @classmethod
@@ -461,11 +516,11 @@ class UserProfileManager(object):
 
     @classmethod
     def has_ui_doctor(cls):
-        return cls._get_user_role() in cls.ui_groups['doctor']
+        return cls._get_user_role(True) in cls.ui_groups['doctor']
 
     @classmethod
     def has_ui_diag_doctor(cls):
-        return cls._get_user_role() == cls.doctor_diag
+        return cls._get_user_role(True) in cls.ui_groups['diag_doctor']
 
     @classmethod
     def has_ui_assistant(cls):

@@ -21,7 +21,7 @@ angular.module('WebMis20.directives')
                 return CurrentUser.current_role_in('admin') || (action.status.code !== 'finished' && action.can_delete);
             };
             scope.can_create_action = function () {
-                return scope.event.can_create_actions[at_class[scope.actionTypeGroup]] && !scope.event.ro;
+                return scope.event.can_create_actions[at_class[scope.actionTypeGroup]];
             };
             scope.open_action = function (action_id) {
                 var url = url_for_schedule_html_action + '?action_id=' + action_id;
