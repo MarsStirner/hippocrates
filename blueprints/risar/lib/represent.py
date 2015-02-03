@@ -91,6 +91,7 @@ def represent_chart_for_routing(event):
     extra_attach = event.client.attachments.join(rbAttachType).filter(rbAttachType.code == 11).first()
     return {
         'id': event.id,
+        'client_id': event.client_id,
         'diagnoses': diagnoses,
         'plan_lpu': plan_attach.org if plan_attach else {},
         'extra_lpu': extra_attach.org if plan_attach else {},

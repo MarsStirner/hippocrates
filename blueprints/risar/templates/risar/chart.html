@@ -38,7 +38,7 @@
                     <i class="fa fa-exclamation-triangle text-success"></i>
                     <span ng-if="chart.epicrisis.delivery_date" tooltip="Фактическая дата родов">[[chart.epicrisis.delivery_date | asDate]]</span>
                     <span ng-if="!chart.epicrisis.delivery_date" tooltip="Предполагаемая дата родов">[[birth_date]]</span>
-                    <i class="fa fa-question" class="" tooltip="Предполагаемая дата родов" ng-if="!chart.epicrisis.delivery_date && !birth_date"></i>
+                    <i class="fa fa-question" tooltip="Предполагаемая дата родов" ng-if="!chart.epicrisis.delivery_date && !birth_date"></i>
                 </span>
             </div>
             <div class="col-md-12 col-lg-12 col-sm-12">
@@ -167,13 +167,21 @@
                         <tbody>
                         <tr>
                             <td>Экстренное</td>
-                            <td><span tooltip="Выбрано пользователем [[chart.client.attach_lpu.extra_lpu.modifyPerson]] [[chart.client.attach_lpu.extra_lpu.begDate]]"
-                                    >[[chart.client.attach_lpu.extra_lpu.org.short_name]]</span></td>
+                            <td>
+                                <span tooltip="Выбрано пользователем [[chart.client.attach_lpu.extra_lpu.modifyPerson]] [[chart.client.attach_lpu.extra_lpu.begDate]]">
+                                    [[chart.client.attach_lpu.extra_lpu.org.short_name]]
+                                </span>
+                            </td>
+                            <td><a class="btn-link" ng-href="{{ url_for('.html_routing') }}?event_id=[[ chart.id ]]&emergency=1">Изменить</a></td>
                         </tr>
                         <tr>
                             <td>Плановое</td>
-                            <td><span tooltip="Выбрано пользователем [[chart.client.attach_lpu.extra_lpu.modifyPerson]] [[chart.client.attach_lpu.extra_lpu.begDate]]"
-                                    >[[chart.client.attach_lpu.plan_lpu.org.short_name]]</span></td>
+                            <td>
+                                <span tooltip="Выбрано пользователем [[chart.client.attach_lpu.extra_lpu.modifyPerson]] [[chart.client.attach_lpu.extra_lpu.begDate]]">
+                                    [[chart.client.attach_lpu.plan_lpu.org.short_name]]
+                                </span>
+                            </td>
+                            <td><a class="btn-link" ng-href="{{ url_for('.html_routing') }}?event_id=[[ chart.id ]]">Изменить</a></td>
                         </tr>
                         </tbody>
                     </table>

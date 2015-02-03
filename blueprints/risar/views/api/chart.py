@@ -219,3 +219,31 @@ def api_1_attach_lpu():
             result[attach_type] = obj
     db.session.commit()
     return result
+
+
+@module.route('/api/0/client/<int:client_id>/attach_lpu', methods=['POST'])
+@api_method
+def api_0_mini_attach_lpu(client_id):
+    data = request.get_json()
+    now = datetime.now()
+    attach_type = data['attach_type']
+    attach_type_code = attach_codes.get(attach_type, str(attach_type))
+    org_id = data['org_id']
+    attach = ClientAttach.query.join(rbAttachType).filter(
+        rbAttachType.code == attach_type_code,
+        ClientAttach.endDate.is_(None),
+        ClientAttach.client_id == client_id,
+    ).order_by(ClientAttach.modifyDatetime.desc()).first()
+    if not attach:
+        attach = ClientAttach()
+        attach.begDate = now
+        attach.attachType = rbAttachType.query.filter(rbAttachType.code == attach_type_code).first()
+        attach.client_id = client_id
+        db.session.add(attach)
+    if attach.LPU_id != org_id:
+        attach.LPU_id = org_id
+        db.session.commit()
+        return True
+    else:
+        db.session.rollback()
+        return False
