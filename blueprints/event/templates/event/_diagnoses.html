@@ -1,6 +1,6 @@
-<div ng-controller="EventDiagnosesCtrl" ng-if="!formstate.is_diagnostic()">
-    <ng-form name="eventDiagnosesForm" toc-element="Диагнозы">
+<div ng-controller="EventDiagnosesCtrl">
+    <ng-form name="eventDiagnosesForm" toc-element="Диагнозы" ng-show="can_view_diagnoses()">
         <legend>Диагнозы</legend>
-        <wm-diagnosis model="event.diagnoses" event="event" clickable="true" list-mode="true"></wm-diagnosis>
+        <wm-diagnosis model="event.diagnoses" event="event" clickable="can_open_diagnoses()" list-mode="true"></wm-diagnosis>
     </ng-form>
 </div>

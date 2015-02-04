@@ -21,7 +21,7 @@ from application.models.schedule import (Schedule, ScheduleTicket, ScheduleClien
     rbAttendanceType, QuotingByTime)
 from application.lib.jsonify import ScheduleVisualizer, ActionVisualizer
 from application.lib.data import (create_new_action, create_action, update_action, int_get_atl_flat,
-    get_planned_end_datetime)
+    get_planned_end_datetime, get_patient_location)
 from application.lib.user import UserUtils
 
 
@@ -644,7 +644,7 @@ def api_create_lab_direction():
     ja = request.get_json()
     event_id = ja['event_id']
     event = Event.query.get(event_id)
-    org_structure = event.current_org_structure
+    org_structure = get_patient_location(event)
     if not org_structure:
         return jsonify(None, 422, u'Пациент не привязан ни к одному из отделений')
 

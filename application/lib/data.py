@@ -2,23 +2,25 @@
 
 import requests
 
-from datetime import datetime, time, timedelta
+from datetime import datetime, time, timedelta, date
 from flask.ext.login import current_user
 from sqlalchemy.orm.util import aliased
 from sqlalchemy.sql.expression import between, func
 
 from config import VESTA_URL
 from application.systemwide import db, cache
-from application.app import cache
 from application.lib.utils import logger, get_new_uuid, safe_traverse, group_concat
 from application.lib.agesex import parseAgeSelector, recordAcceptableEx
-from application.models.actions import Action, ActionType, ActionPropertyType, ActionProperty, Job, JobTicket, \
-    TakenTissueJournal, OrgStructure_ActionType, ActionType_Service
+from application.models.actions import (Action, ActionType, ActionPropertyType, ActionProperty, Job, JobTicket,
+    TakenTissueJournal, OrgStructure_ActionType, ActionType_Service, ActionProperty_OrgStructure,
+    OrgStructure_HospitalBed, ActionProperty_HospitalBed, ActionProperty_Integer)
 from application.models.enums import ActionStatus
-from application.models.exists import Person, ContractTariff, Contract
+from application.models.exists import Person, ContractTariff, Contract, OrgStructure
 from application.models.event import Event, EventType_Action, EventType
 from application.lib.calendar import calendar
 from application.lib.user import UserUtils
+from application.lib.const import (STATIONARY_MOVING_CODE, STATIONARY_ORG_STRUCT_STAY_CODE, STATIONARY_HOSP_BED_CODE,
+    STATIONARY_LEAVED_CODE, STATIONARY_HOSP_LENGTH_CODE)
 
 
 # планируемая дата выполнения (default planned end date)
@@ -581,3 +583,114 @@ def int_get_atl_dict_all():
         flat = int_get_atl_flat(class_)
         all_at_apt.update(dict([(at[0], at) for at in flat]))
     return all_at_apt
+
+
+def get_patient_location(event, dt=None):
+    if event.is_stationary:
+        query = _get_os_moving_query(event, dt)
+        query = query.join(
+            ActionProperty
+        ).join(
+            ActionPropertyType, db.and_(ActionProperty.type_id == ActionPropertyType.id,
+                                        ActionPropertyType.actionType_id == ActionType.id)
+        ).join(
+            ActionProperty_OrgStructure, ActionProperty.id == ActionProperty_OrgStructure.id
+        ).join(
+            OrgStructure
+        ).filter(
+            ActionPropertyType.code == STATIONARY_ORG_STRUCT_STAY_CODE
+        ).with_entities(
+            OrgStructure
+        )
+        current_os = query.first()
+    else:
+        current_os = event.orgStructure
+    return current_os
+
+
+def get_patient_hospital_bed(event, dt=None):
+    query = _get_os_moving_query(event, dt)
+    query = query.join(
+        ActionProperty
+    ).join(
+        ActionPropertyType, db.and_(ActionProperty.type_id == ActionPropertyType.id,
+                                    ActionPropertyType.actionType_id == ActionType.id)
+    ).join(
+        ActionProperty_HospitalBed, ActionProperty.id == ActionProperty_HospitalBed.id
+    ).join(
+        OrgStructure_HospitalBed
+    ).filter(
+        ActionPropertyType.code == STATIONARY_HOSP_BED_CODE
+    ).with_entities(
+        OrgStructure_HospitalBed
+    )
+    hb = query.first()
+    return hb
+
+
+def _get_os_moving_query(event, dt=None):
+    query = db.session.query(Action).join(
+        ActionType
+    ).filter(
+        Action.event_id == event.id,
+        Action.deleted == 0,
+        ActionType.flatCode == STATIONARY_MOVING_CODE
+    )
+    if dt:
+        query = query.filter(Action.begDate <= dt)
+    else:
+        query = query.filter(Action.status != ActionStatus.finished[0])
+    query = query.order_by(Action.begDate.desc())
+    return query
+
+
+def get_hosp_length(event):
+    def _from_hosp_release():
+        query = _get_hosp_release_query(event)
+        query = query.join(
+            ActionProperty
+        ).join(
+            ActionPropertyType, db.and_(ActionProperty.type_id == ActionPropertyType.id,
+                                        ActionPropertyType.actionType_id == ActionType.id)
+        ).join(
+            ActionProperty_Integer, ActionProperty.id == ActionProperty_Integer.id
+        ).filter(
+            ActionPropertyType.code == STATIONARY_HOSP_LENGTH_CODE
+        ).with_entities(
+            ActionProperty_Integer
+        )
+        hosp_length = query.first()
+        return hosp_length.value if hosp_length else None
+
+    def _calculate_not_finished():
+        date_start = event.setDate.date()
+        date_to = date.today()
+        hosp_length = (date_to - date_start).days
+        if event.is_day_hospital:
+            hosp_length += 1
+        return hosp_length
+
+    # 1) from hospital release document
+    duration = _from_hosp_release()
+    if duration is not None:
+        hosp_length = duration
+    elif event.is_closed:
+        # 2) incorrect case
+        hosp_length = None
+    else:
+        # 3) calculate not yet finished stay length
+        hosp_length = _calculate_not_finished()
+    return hosp_length
+
+
+def _get_hosp_release_query(event):
+    query = db.session.query(Action).join(
+        ActionType
+    ).filter(
+        Action.event_id == event.id,
+        Action.deleted == 0,
+        ActionType.flatCode == STATIONARY_LEAVED_CODE
+    ).filter(
+        Action.status == ActionStatus.finished[0]
+    ).order_by(Action.begDate.desc())
+    return query

@@ -10,7 +10,7 @@ from sqlalchemy.sql.expression import between, func
 from flask import json
 
 from application.systemwide import db
-from application.lib.data import int_get_atl_dict_all
+from application.lib.data import int_get_atl_dict_all, get_patient_location, get_patient_hospital_bed, get_hosp_length
 from application.lib.action.utils import action_is_bak_lab, action_is_lab
 from application.lib.agesex import recordAcceptableEx
 from application.lib.utils import safe_unicode, safe_dict, logger, safe_traverse_attrs, format_date, safe_date
@@ -765,6 +765,8 @@ class EventVisualizer(object):
             'event': self.make_event(event),
             'ro': not UserUtils.can_edit_event(event) if event.id else False,
             'has_access_to_payment_info': UserUtils.can_edit_event_payment_info(event),
+            'can_read_diagnoses': UserUtils.can_read_dignoses(event),
+            'can_edit_diagnoses': UserUtils.can_edit_dignoses(event),
             'can_create_actions': (
                 [UserUtils.can_create_action(event.id, None, cl) for cl in range(4)]
                 if event.id else [False] * 4
@@ -784,6 +786,8 @@ class EventVisualizer(object):
         elif UserProfileManager.has_ui_cashier():
             data['payment'] = self.make_event_payment(event)
             data['services'] = self.make_event_services(event.id)
+        if event.is_stationary:
+            data['stationary_info'] = self.make_event_stationary_info(event)
         return data
 
     def make_short_event(self, event):
@@ -1184,6 +1188,20 @@ class EventVisualizer(object):
             'sum': payment.sum,
             'client': cviz.make_short_client_info(payment.event.client),
             'event': self.make_short_event(payment.event)
+        }
+
+    def make_event_stationary_info(self, event):
+        pviz = PersonTreeVisualizer()
+        hosp_length = get_hosp_length(event)
+        patient_cur_os = get_patient_location(event)
+        hospital_bed = get_patient_hospital_bed(event)
+        return {
+            'admission_date': event.setDate,
+            'discharge_date': event.execDate,
+            'hosp_length': hosp_length,
+            'patient_current_os': patient_cur_os,
+            'hospital_bed': hospital_bed,
+            'attending_doctor': pviz.make_person_ws(event.execPerson) if event.execPerson else None
         }
 
 

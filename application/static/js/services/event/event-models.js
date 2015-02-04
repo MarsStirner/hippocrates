@@ -42,6 +42,8 @@ angular.module('WebMis20.services.models').
                 this.services = [];
                 this.ro = false;
                 this.has_access_to_payment_info = false;
+                this.can_read_diagnoses = false;
+                this.can_edit_diagnoses = false;
                 this.can_create_actions = [false, false, false, false];
                 return this;
             };
@@ -61,6 +63,8 @@ angular.module('WebMis20.services.models').
                     self.info = data.result.event;
                     self.ro = data.result.ro;
                     self.has_access_to_payment_info = data.result.has_access_to_payment_info;
+                    self.can_read_diagnoses = data.result.can_read_diagnoses;
+                    self.can_edit_diagnoses = data.result.can_edit_diagnoses;
                     self.can_create_actions = data.result.can_create_actions;
                     var client_info = self.info.client;
                     self.info.client = new WMClient();
@@ -68,6 +72,7 @@ angular.module('WebMis20.services.models').
                         client_data: client_info
                     }, 'for_event');
                     self.diagnoses = data.result.diagnoses || [];
+                    self.stationary_info = data.result.stationary_info;
 
                     var p = data.result.payment;
                     self.payment = {

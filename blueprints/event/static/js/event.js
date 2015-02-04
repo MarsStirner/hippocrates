@@ -2,6 +2,12 @@
  * Created by mmalkov on 11.07.14.
  */
 var EventDiagnosesCtrl = function ($scope) {
+    $scope.can_view_diagnoses = function () {
+        return $scope.event.can_read_diagnoses;
+    };
+    $scope.can_open_diagnoses = function () {
+        return $scope.event.can_edit_diagnoses;
+    };
 };
 var EventMainInfoCtrl = function ($scope, RefBookService, EventType, $filter, MessageBox, CurrentUser) {
     $scope.Organisation = RefBookService.get('Organisation');
@@ -246,6 +252,26 @@ var EventMainInfoCtrl = function ($scope, RefBookService, EventType, $filter, Me
             }) :
             false;
     });
+};
+var EventStationaryInfoCtrl = function($scope, $filter) {
+    $scope.format_admission_date = function (date) {
+        return date ? $filter('asDateTime')(date) : '&nbsp;';
+    };
+    $scope.format_discharge_date = function (date) {
+        return date ? $filter('asDateTime')(date) : '&nbsp;';
+    };
+    $scope.format_hosp_length = function (hosp_length) {
+        return angular.isNumber(hosp_length) ? String(hosp_length) : '&nbsp;';
+    };
+    $scope.format_os = function (os) {
+        return os ? (os.name) : '&nbsp;';
+    };
+    $scope.format_hosp_bed = function (hosp_bed) {
+        return hosp_bed ? (hosp_bed.name) : '&nbsp;';
+    };
+    $scope.format_doctor = function (doctor) {
+        return doctor ? (doctor.full_name) : '&nbsp;';
+    };
 };
 var EventPaymentCtrl = function($scope, RefBookService, Settings, $http, $modal, MessageBox) {
     $scope.rbDocumentType = RefBookService.get('rbDocumentType');
@@ -764,6 +790,7 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
 WebMis20.controller('EventDiagnosesCtrl', ['$scope', 'RefBookService', '$http', EventDiagnosesCtrl]);
 WebMis20.controller('EventMainInfoCtrl', ['$scope', 'RefBookService', 'EventType', '$filter', 'MessageBox',
     'CurrentUser', EventMainInfoCtrl]);
+WebMis20.controller('EventStationaryInfoCtrl', ['$scope', '$filter', EventStationaryInfoCtrl]);
 WebMis20.controller('EventPaymentCtrl', ['$scope', 'RefBookService', 'Settings', '$http', '$modal', 'MessageBox',
     EventPaymentCtrl]);
 WebMis20.controller('EventServicesCtrl', ['$scope', '$http', EventServicesCtrl]);

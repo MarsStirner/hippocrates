@@ -930,9 +930,6 @@ class OrgStructure_HospitalBed(db.Model):
             'org_structure_id': self.master_id,
             'code': self.code,
             'name': self.name,
-            'type': self.type,
-            'profile': self.profile,
-            'schedule': self.schedule
         }
 
     @property

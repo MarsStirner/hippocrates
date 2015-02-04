@@ -1,0 +1,24 @@
+<div ng-controller="EventStationaryInfoCtrl">
+<ng-form name="event_stationary_info_form" toc-element="Текущий статус пациента">
+    <legend>Текущий статус пациента</legend>
+    <div class="well well-sm">
+        <div class="row">
+            <div class="col-md-6">
+                <dl class="dl-horizontal novmargin">
+                    <dt>Дата поступления:</dt><dd ng-bind-html="format_admission_date(event.stationary_info.admission_date)"></dd>
+                    <dt>Дата выписки:</dt><dd ng-bind-html="format_discharge_date(event.stationary_info.discharge_date)"></dd>
+                    <dt>Продолжительность<br>госпитализации (дн.):</dt><br>
+                        <dd ng-bind-html="format_hosp_length(event.stationary_info.hosp_length)"></dd>
+                </dl>
+            </div>
+            <div class="col-md-6">
+                <dl class="dl-horizontal novmargin pull-right">
+                    <dt>Отделение<br>пребывания:</dt><br><dd ng-bind-html="format_os(event.stationary_info.patient_current_os)"></dd>
+                    <dt>Койка:</dt><dd ng-bind-html="format_hosp_bed(event.stationary_info.hospital_bed)"></dd>
+                    <dt>Лечащий врач:</dt><dd ng-bind-html="format_doctor(event.stationary_info.attending_doctor)"></dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</ng-form>
+</div>
