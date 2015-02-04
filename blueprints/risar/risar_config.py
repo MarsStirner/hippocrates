@@ -16,7 +16,7 @@ transfusion_apt_codes = ['date', 'type', 'blood_type', 'reaction']
 common_codes = [
     'education', 'work_group', 'professional_properties',
     'infertility', 'infertility_period', 'infertility_cause', 'infertility_type', 'infertility_treatment',
-    'blood_type', 'finished_diseases', 'current_diseases', 'hereditary',
+    'blood_type', 'diseases', 'hereditary',
     'alcohol', 'smoking', 'toxic', 'drugs']
 
 mother_codes = [

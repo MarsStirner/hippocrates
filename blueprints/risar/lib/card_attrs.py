@@ -45,7 +45,7 @@ def get_all_diagnoses(event):
         itertools.chain(*[
             prop.value if isinstance(prop.value, list) else [prop.value]
             for prop in action.properties
-            if prop.type.typeName == 'MKB' and prop.value
+            if prop.type.typeName == 'Diagnosis' and prop.value
         ])
         for action in event.actions
     ])
@@ -59,11 +59,11 @@ def calc_risk_rate(event):
     :rtype: int
     """
     def diag_to_risk_rate(diag):
-        if diag.DiagID in risk_rates_diagID['high'] or diag.BlockID in risk_rates_blockID['high']:
+        if diag.diagnosis.mkb.DiagID in risk_rates_diagID['high'] or diag.diagnosis.mkb.BlockID in risk_rates_blockID['high']:
             return 3
-        elif diag.DiagID in risk_rates_diagID['middle'] or diag.BlockID in risk_rates_blockID['middle']:
+        elif diag.diagnosis.mkb.DiagID in risk_rates_diagID['middle'] or diag.diagnosis.mkb.BlockID in risk_rates_blockID['middle']:
             return 2
-        elif diag.DiagID in risk_rates_diagID['low'] or diag.BlockID in risk_rates_blockID['low']:
+        elif diag.diagnosis.mkb.DiagID in risk_rates_diagID['low'] or diag.diagnosis.mkb.BlockID in risk_rates_blockID['low']:
             return 1
         return 0
 

@@ -7,7 +7,7 @@ from application.models.actions import Action, ActionType
 from application.models.client import BloodHistory
 from application.models.enums import Gender, AllergyPower, IntoleranceType, PrenatalRiskRate
 from application.models.exists import rbAttachType
-from blueprints.risar.lib.card_attrs import get_card_attrs_action
+from blueprints.risar.lib.card_attrs import get_card_attrs_action, get_all_diagnoses
 from blueprints.risar.lib.utils import get_action, action_apt_values, get_action_type_id
 from ..risar_config import pregnancy_apt_codes, risar_anamnesis_pregnancy, transfusion_apt_codes, \
     risar_anamnesis_transfusion, mother_codes, father_codes, risar_father_anamnesis, risar_mother_anamnesis, \
@@ -16,6 +16,13 @@ from ..lib.utils import week_postfix
 
 
 __author__ = 'mmalkov'
+
+
+def represent_prop_value(prop):
+    if prop.value is None:
+        return [] if prop.type.isVector else None
+    else:
+        return prop.value
 
 
 def represent_event(event):
@@ -69,7 +76,8 @@ def represent_event(event):
         'epicrisis': represent_epicrisis(event),
         'checkups': represent_checkups(event),
         'risk_rate': PrenatalRiskRate(get_card_attrs_action(event, auto=False)['prenatal_risk_572'].value),
-        'pregnancy_week': get_pregnancy_week(event)
+        'pregnancy_week': get_pregnancy_week(event),
+        'diagnoses': list(get_all_diagnoses(event))
     }
 
 
@@ -139,7 +147,7 @@ def represent_mother_action(event, action=None):
         return
 
     represent_mother = dict((
-        (prop.type.code, prop.value)
+        (prop.type.code, represent_prop_value(prop))
         for prop in action.properties
         if prop.type.code in mother_codes),
 

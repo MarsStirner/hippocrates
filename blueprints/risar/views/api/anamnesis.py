@@ -6,7 +6,7 @@ from flask.ext.login import current_user
 
 from application.lib.apiutils import api_method, ApiException
 from application.lib.data import create_action
-from application.models.actions import Action
+from application.models.actions import Action, ActionProperty_Diagnosis
 from application.lib.utils import safe_traverse
 from application.models.client import ClientAllergy, ClientIntoleranceMedicament, BloodHistory
 from application.models.event import Event
@@ -250,7 +250,7 @@ def api_0_chart_mother(event_id):
     else:
         action = get_action(event, risar_mother_anamnesis, True)
         for code, value in request.get_json().iteritems():
-            if code not in ('id', 'blood_type') and code in action.propsByCode:
+            if code not in ('id', 'blood_type', 'diseases') and code in action.propsByCode:
                 action.propsByCode[code].value = value
             elif code == 'blood_type' and value:
                 mother_blood_type = BloodHistory.query \
@@ -260,6 +260,9 @@ def api_0_chart_mother(event_id):
                 if mother_blood_type and value['id'] != mother_blood_type.bloodType_id or not mother_blood_type:
                     n = BloodHistory(value['id'], datetime.date.today(), current_user.id, event.client)
                     db.session.add(n)
+            elif code == 'diseases' and value:
+                property = action.propsByCode['diseases']
+                property.value = ActionProperty_Diagnosis.format_value(property, value)
         db.session.commit()
         reevaluate_card_attrs(event)
         db.session.commit()

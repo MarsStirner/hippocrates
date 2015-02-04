@@ -1121,20 +1121,35 @@ angular.module('WebMis20.directives')
                 canAddNew: '=',
                 canDelete: '=',
                 canEdit: '=',
-                clickable: '='
+                clickable: '=',
+                risar: '='
             },
             controller: function ($scope) {
                 $scope.add_new_diagnosis = function () {
                     var new_diagnosis = WMEventServices.get_new_diagnosis($scope.action.action);
-                    DiagnosisModal.openDiagnosisModal(new_diagnosis, $scope.action, $scope.params).then(function () {
-                        if ($scope.listMode) {
-                            $scope.model.push(new_diagnosis);
-                        }
-                        else {
-                            $scope.model = new_diagnosis;
-                        }
-                        WMEventServices.add_diagnosis($scope.event, new_diagnosis);
-                    });
+                    if ($scope.risar) {
+                        DiagnosisModal.openDiagnosisModalRisar(new_diagnosis, $scope.event, $scope.action, $scope.params).then(function () {
+                            if ($scope.listMode) {
+                                $scope.model.push(new_diagnosis);
+                            }
+                            else {
+                                $scope.model = new_diagnosis;
+                            }
+                            WMEventServices.add_diagnosis($scope.event, new_diagnosis);
+                        });
+                    }
+                    else {
+                        DiagnosisModal.openDiagnosisModal(new_diagnosis, $scope.action, $scope.params).then(function () {
+                            if ($scope.listMode) {
+                                $scope.model.push(new_diagnosis);
+                            }
+                            else {
+                                $scope.model = new_diagnosis;
+                            }
+                            WMEventServices.add_diagnosis($scope.event, new_diagnosis);
+                        });
+                    }
+
                 };
                 $scope.delete_diagnosis = function (diagnosis) {
                     if ($scope.listMode) {
@@ -1145,7 +1160,11 @@ angular.module('WebMis20.directives')
                     WMEventServices.delete_diagnosis($scope.event.diagnoses, diagnosis);
                 };
                 $scope.edit_diagnosis = function (diagnosis) {
-                    DiagnosisModal.openDiagnosisModal(diagnosis, $scope.action, $scope.params);
+                    if ($scope.risar) {
+                        DiagnosisModal.openDiagnosisModalRisar(diagnosis, $scope.event, $scope.action, $scope.params);
+                    } else {
+                        DiagnosisModal.openDiagnosisModal(diagnosis, $scope.action, $scope.params);
+                    }
                 };
                 $scope.open_action = function (action_id) {
                     if(action_id && $scope.clickable) {
@@ -1270,6 +1289,48 @@ angular.module('WebMis20.directives')
                     }
                 });
 
+                $scope.filter_type = function() {
+                    return function(elem) {
+                        return $scope.diag_type_codes.has(elem.code);
+                    };
+                };
+                $scope.result_required = function () {
+                    return safe_traverse($scope.model, ['diagnosis_type', 'code']) === '1';
+                };
+            };
+            var instance = $modal.open({
+                templateUrl: '/WebMis20/modal-edit-diagnosis.html',
+                size: 'lg',
+                controller: Controller
+            });
+            return instance.result.then(function() {
+                angular.extend(model, locModel);
+            });
+        },
+        openDiagnosisModalRisar: function (model, event, action, params) {
+            var locModel = angular.copy(model);
+            var Controller = function ($scope) {
+                $scope.model = locModel;
+                $scope.diag_type_codes = ['2', '3', '7', '9', '11'];
+                $scope.params = params;
+
+                $scope.can_set_final_diag = (
+//                        // только лечащий врач
+//                        current_user_id === event.info.exec_person.id &&
+                    // в текущем действии еще нет заключительных диагнозов
+                    !(action.diseases instanceof Array ? (
+                                action.diseases.length && action.diseases.some(function (diag) {
+                                    return diag.diagnosis_type.code === '1' && diag.deleted === 0;
+                                })
+                            ) :(action.diseases && action.diseases.diagnosis_type.code === '1' && diag.deleted === 0)) &&
+                    // в других *закрытых* действиях нет заключительных диагнозов
+                    event.diagnoses.filter(function (diag) {
+                        return diag.diagnosis_type.code === '1' && diag.action.status.code === 'finished';
+                    }).length === 0
+                );
+                if ($scope.can_set_final_diag) {
+                    $scope.diag_type_codes.push('1');
+                }
                 $scope.filter_type = function() {
                     return function(elem) {
                         return $scope.diag_type_codes.has(elem.code);
