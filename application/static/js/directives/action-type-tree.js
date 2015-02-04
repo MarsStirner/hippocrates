@@ -257,7 +257,7 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
                         alert(msg);
                     });
                 };
-                $scope.validate = function (model_val) {
+                $scope.validate_direction_date = function (model_val) {
                     var result = {
                         type: 'directionDate',
                         success: moment(model_val).isAfter(moment())
@@ -441,7 +441,7 @@ angular.module('WebMis20.directives.ActionTypeTree', ['WebMis20.directives.goodi
                             <td ng-if="!action.assignable.length" ng-bind="action.type_name"></td>\
                             <td ng-if="action.assignable.length"><a ng-click="open_assignments(action)" ng-bind="action.type_name"></a></td>\
                             <td><div fs-datetime ng-model="action.planned_end_date" class="validatable"\
-                                    wm-validate="validate"></div>\
+                                    wm-validate="validate_direction_date"></div>\
                             </td>\
                             <td><button class="btn btn-danger btn-sm" ng-click="prepared2create.splice($index, 1)"><i class="glyphicon glyphicon-trash"></i></button></td>\
                         </tr>\
