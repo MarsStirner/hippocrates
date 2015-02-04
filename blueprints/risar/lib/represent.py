@@ -3,6 +3,7 @@ import datetime
 import itertools
 
 from application.lib.utils import safe_traverse_attrs, safe_traverse
+from application.lib.jsonify import EventVisualizer
 from application.models.actions import Action, ActionType
 from application.models.client import BloodHistory
 from application.models.enums import Gender, AllergyPower, IntoleranceType, PrenatalRiskRate
@@ -160,13 +161,14 @@ def represent_mother_action(event, action=None):
     )
 
     if represent_mother is not None:
+        evis = EventVisualizer()
         mother_blood_type = BloodHistory.query \
             .filter(BloodHistory.client_id == event.client_id) \
             .order_by(BloodHistory.bloodDate.desc()) \
             .first()
         if mother_blood_type:
             represent_mother['blood_type'] = mother_blood_type.bloodType
-
+        represent_mother['diseases'] = [evis.make_diagnostic_record(diag) for diag in represent_mother['diseases']]
     return represent_mother
 
 

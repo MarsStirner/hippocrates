@@ -480,7 +480,6 @@ class ActionProperty_Diagnosis(ActionProperty__ValueType):
                 delete_diagnosis(value)
 
 
-
 class ActionProperty_Integer_Base(ActionProperty__ValueType):
     __tablename__ = u'ActionProperty_Integer'
 

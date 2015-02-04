@@ -2,6 +2,7 @@
 import itertools
 import datetime
 from application.lib.data import create_action
+from application.lib.jsonify import EventVisualizer
 from application.models.actions import Action, ActionType
 from application.systemwide import db
 from blueprints.risar.lib.utils import get_action, get_action_list
@@ -48,14 +49,8 @@ def get_all_diagnoses(event):
     :type event: application.models.event.Event
     :return: list of DiagIDs
     """
-    return itertools.chain(*[
-        itertools.chain(*[
-            prop.value if isinstance(prop.value, list) else [prop.value]
-            for prop in action.properties
-            if prop.type.typeName == 'Diagnosis' and prop.value
-        ])
-        for action in event.actions
-    ])
+    evis = EventVisualizer()
+    return evis.make_diagnoses(event)
 
 
 def calc_risk_rate(event):
@@ -66,11 +61,11 @@ def calc_risk_rate(event):
     :rtype: int
     """
     def diag_to_risk_rate(diag):
-        if diag.diagnosis.mkb.DiagID in risk_rates_diagID['high'] or diag.diagnosis.mkb.BlockID in risk_rates_blockID['high']:
+        if diag['diagnosis']['mkb'].DiagID in risk_rates_diagID['high'] or diag['diagnosis']['mkb'].BlockID in risk_rates_blockID['high']:
             return 3
-        elif diag.diagnosis.mkb.DiagID in risk_rates_diagID['middle'] or diag.diagnosis.mkb.BlockID in risk_rates_blockID['middle']:
+        elif diag['diagnosis']['mkb'].DiagID in risk_rates_diagID['middle'] or diag['diagnosis']['mkb'].BlockID in risk_rates_blockID['middle']:
             return 2
-        elif diag.diagnosis.mkb.DiagID in risk_rates_diagID['low'] or diag.diagnosis.mkb.BlockID in risk_rates_blockID['low']:
+        elif diag['diagnosis']['mkb'].DiagID in risk_rates_diagID['low'] or diag['diagnosis']['mkb'].BlockID in risk_rates_blockID['low']:
             return 1
         return 0
 
