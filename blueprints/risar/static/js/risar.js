@@ -4,7 +4,10 @@
 'use strict';
 
 WebMis20
-.service('RisarApi', ['$http', 'Config', '$q', function ($http, Config, $q) {
+.service('RisarApi', [
+    '$http', 'Config', '$q', 'RisarNotificationService', '$window',
+    function ($http, Config, $q, RisarNotificationService, $window) {
+    var self = this;
     var wrapper = function (method, url, params, data) {
         var defer = $q.defer();
         $http({
@@ -17,6 +20,12 @@ WebMis20
             defer.resolve(data.result)
         })
         .error(function (data, code) {
+            var text = (code === 500) ? 'Внутренняя ошибка сервера.<br/>{0}' : 'Ошибка.<br/>{0}';
+            RisarNotificationService.notify(
+                code,
+                text.format(data.meta.name),
+                'danger'
+            );
             defer.reject(data.meta)
         });
         return defer.promise;
@@ -49,7 +58,37 @@ WebMis20
     };
     this.chart = {
         get: function (event_id, ticket_id) {
-            return wrapper('GET', Config.url.api_chart + ((event_id)?(event_id):''), {ticket_id: ticket_id});
+            return wrapper('GET', Config.url.api_chart + ((event_id)?(event_id):''), {ticket_id: ticket_id})
+                .then(function (event_info) {
+                    var chart = event_info.event,
+                        automagic = event_info.automagic;
+                    if (automagic) {
+                        RisarNotificationService.notify(
+                            200,
+                            [
+                                'Пациентка поставлена на учёт: ',
+                                {
+                                    bold: true,
+                                    text: chart.person.name
+                                }, '. ',
+                                {
+                                    link: '#',
+                                    text: 'Изменить'
+                                }, ' ',
+                                {
+                                    click: function () {
+                                        self.chart.delete(ticket_id).then(function success() {
+                                            $window.location.replace(Config.url.index_html);
+                                        })
+                                    },
+                                    text: 'Отменить'
+                                }
+                            ],
+                            'success'
+                        );
+                    }
+                    return event_info.event;
+                });
         },
         delete: function (ticket_id) {
             return wrapper('DELETE', Config.url.api_chart_delete + ticket_id);
@@ -192,7 +231,7 @@ WebMis20
 .directive('alertNotify', function (RisarNotificationService, $compile) {
     return {
         restrict: 'AE',
-        scope: true,
+        scope: {},
         link: function (scope, element, attributes) {
             var template =
                 '<div class="alert alert-{0} abs-alert" role="alert">\
@@ -205,15 +244,52 @@ WebMis20
             scope.$dismiss = function (id) {
                 RisarNotificationService.dismiss(id);
             };
-            var recompile = function (n) {
+            function compile (arg) {
+                if (_.isArray(arg)) {
+                    return arg.map(compile).join('');
+                } else if (typeof arg === 'string') {
+                    return arg;
+                } else if (typeof arg !== 'object') {
+                    return '';
+                }
+                var wrapper = '{0}';
+                if (arg.hasOwnProperty('bold') && arg.bold) {
+                    wrapper = '<b>{0}</b>'.format(wrapper)
+                }
+                if (arg.hasOwnProperty('italic') && arg.bold) {
+                    wrapper = '<i>{0}</i>'.format(wrapper)
+                }
+                if (arg.hasOwnProperty('underline') && arg.bold) {
+                    wrapper = '<u>{0}</u>'.format(wrapper)
+                }
+                if (arg.hasOwnProperty('link')) {
+                    wrapper = '<a href={0}>{1}</a>'.format(arg.link, wrapper);
+                } else if (arg.hasOwnProperty('click')) {
+                    do {
+                        var uniq = _.random(0x100000000);
+                    } while (scope.func_map.hasOwnProperty(uniq));
+                    scope.func_map[uniq] = arg.click;
+                    wrapper = '<a style="cursor:pointer" ng-click="func_map[{0}]()">{1}</a>'.format(String(uniq), wrapper)
+                }
+                if (arg.hasOwnProperty('text')) {
+                    return wrapper.format(compile(arg.text));
+                }
+                return '';
+            }
+            function recompile (n) {
+                scope.func_map = {};
                 var html = n.map(function (notification) {
-                    return template.format(notification.severity || 'info', notification.message, notification.id)
+                    return template.format(
+                        notification.severity || 'info',
+                        compile(notification.message),
+                        notification.id
+                    )
                 }).join('\n');
                 var replace_element = $('<div>{0}</div>'.format(html));
                 element.replaceWith(replace_element);
                 $compile(replace_element)(scope);
                 element = replace_element;
-            };
+            }
             RisarNotificationService.register(recompile);
         }
     }

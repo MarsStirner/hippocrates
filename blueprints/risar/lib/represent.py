@@ -75,7 +75,7 @@ def represent_event(event):
         'anamnesis': represent_anamnesis(event),
         'epicrisis': represent_epicrisis(event),
         'checkups': represent_checkups(event),
-        'risk_rate': PrenatalRiskRate(get_card_attrs_action(event, auto=False)['prenatal_risk_572'].value),
+        'risk_rate': PrenatalRiskRate(get_card_attrs_action(event, auto=True)['prenatal_risk_572'].value),
         'pregnancy_week': get_pregnancy_week(event),
         'diagnoses': list(get_all_diagnoses(event))
     }

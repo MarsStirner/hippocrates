@@ -24,10 +24,10 @@ var AnamnesisCtrl = function ($scope, RisarApi) {
     var event_id = $scope.event_id = params.event_id;
     var reload_anamnesis = function () {
         RisarApi.chart.get(event_id)
-        .then(function (data) {
-            $scope.chart = data.event;
-            $scope.client_id = data.event.client.id;
-            $scope.hooks.forEach(function (hook) {hook(data.event)});
+        .then(function (event) {
+            $scope.chart = event;
+            $scope.client_id = event.client.id;
+            $scope.hooks.forEach(function (hook) {hook(event)});
         })
     };
     reload_anamnesis();

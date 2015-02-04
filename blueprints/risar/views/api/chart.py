@@ -57,18 +57,17 @@ def api_0_chart(event_id=None):
     automagic = False
     ticket_id = request.args.get('ticket_id')
     if not event_id and not ticket_id:
-        raise ApiException(400, u'Either event_id or ticket_id must be provided')
+        raise ApiException(400, u'Должен быть указан параметр event_id или ticket_id')
     if ticket_id:
         ticket = ScheduleClientTicket.query.get(ticket_id)
         if not ticket:
-            raise ApiException(404, 'ScheduleClientTicket not found')
+            raise ApiException(404, u'Талончик на приём не найден')
         event = ticket.event
         if not event:
             event = Event()
             at = default_AT_Heuristic()
             if not at:
                 raise ApiException(500, u'Нет типа действия с flatCode = cardAttributes')
-            ext = create_action(at.id, event)
             ET = default_ET_Heuristic()
             if ET is None:
                 raise ApiException(500, u'Не настроен тип события - Случай беременности ОМС')
@@ -92,6 +91,7 @@ def api_0_chart(event_id=None):
             event.externalId = get_new_event_ext_id(event.eventType.id, ticket.client_id)
             event.payStatus = 0
             db.session.add(event)
+            ext = create_action(at.id, event)
             db.session.add(ext)
             ticket.event = event
             db.session.add(ticket)
@@ -100,7 +100,9 @@ def api_0_chart(event_id=None):
     else:
         event = Event.query.get(event_id)
         if not event:
-            raise ApiException(404, 'Event not found')
+            raise ApiException(404, u'Обращение не найдено')
+    if event.eventType.requestType.code != 'pregnancy':
+        raise ApiException(400, u'Обращение не является случаем беременности')
     return {
         'event': represent_event(event),
         'automagic': automagic

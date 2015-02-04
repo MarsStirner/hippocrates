@@ -4,26 +4,20 @@
 
 'use strict';
 
-var ChartCtrl = function ($scope, $modal, RisarApi, RisarNotificationService, Config, $timeout) {
+var ChartCtrl = function ($scope, $modal, RisarApi) {
     var params = aux.getQueryParams(window.location.search);
     var ticket_id = params.ticket_id;
     var event_id = params.event_id;
     var reload_chart = function () {
         RisarApi.chart.get(event_id, ticket_id)
-        .then(function (event_info) {
-            $scope.chart = event_info.event;
-            if (event_info.automagic) {
-                RisarNotificationService.notify(
-                    200,
-                    'Пациентка поставлена на учёт: <b>[[ chart.person.name ]]</b>. <a href="#">Изменить</a> <a ng-click="cancel_created()">Отменить</a>',
-                    'success')
-            }
+        .then(function (event) {
+            $scope.chart = event;
             if ($scope.chart.pregnancy_week > 40) {
                 $scope.pregnancy_week = '40+'}
             else {
                 $scope.pregnancy_week = $scope.chart.pregnancy_week
             }
-            var mld = safe_traverse(event_info, ['event','anamnesis','mother','menstruation_last_date']);
+            var mld = safe_traverse(event, ['anamnesis','mother','menstruation_last_date']);
             if (mld){
                 $scope.birth_date = moment(mld).add(280, 'days').format("DD.MM.YYYY");
             }
@@ -44,11 +38,6 @@ var ChartCtrl = function ($scope, $modal, RisarApi, RisarNotificationService, Co
             templateUrl: '/WebMis20/RISAR/modal/attach_lpu.html',
             scope: scope,
             size: 'lg'
-        })
-    };
-    $scope.cancel_created = function () {
-        RisarApi.chart.delete(ticket_id).then(function success() {
-            window.location.replace(Config.url.index_html);
         })
     };
     $scope.attach_lpu_edit = function () {

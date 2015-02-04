@@ -3,6 +3,7 @@ import itertools
 import datetime
 from application.lib.data import create_action
 from application.models.actions import Action, ActionType
+from application.systemwide import db
 from blueprints.risar.lib.utils import get_action, get_action_list
 from blueprints.risar.risar_config import checkup_flat_codes, risar_mother_anamnesis
 from .utils import risk_rates_blockID, risk_rates_diagID
@@ -20,10 +21,16 @@ def get_card_attrs_action(event, auto=True):
     :return: действие с атрибутами
     :rtype: Action|NoneType
     """
-    return Action.query.join(ActionType).filter(
+    action = Action.query.join(ActionType).filter(
         Action.event == event,
         ActionType.flatCode == 'cardAttributes',
-    ).first() or auto and create_action(default_AT_Heuristic().id, event)
+    ).first()
+    if action is None and auto:
+        action = create_action(default_AT_Heuristic().id, event)
+        reevaluate_card_attrs(event, action)
+        db.session.add(action)
+        db.session.commit()
+    return action
 
 
 def default_AT_Heuristic():
@@ -67,7 +74,8 @@ def calc_risk_rate(event):
             return 1
         return 0
 
-    return max(*map(diag_to_risk_rate, get_all_diagnoses(event)))
+    all_diagnoses = list(get_all_diagnoses(event))
+    return max(map(diag_to_risk_rate, all_diagnoses)) if all_diagnoses else 0
 
 
 def get_pregnancy_start_date(event):
@@ -99,14 +107,15 @@ def get_predicted_d_date(start_date):
         return start_date + datetime.timedelta(weeks=40)
 
 
-def reevaluate_card_attrs(event):
+def reevaluate_card_attrs(event, action=None):
     """
     Пересчёт атрибутов карточки беременной
     :param event: карточка беременной, обращение
     :type event: application.models.event.Event
     """
     preg_start_date = get_pregnancy_start_date(event)
-    action = get_card_attrs_action(event)
+    if action is None:
+        action = get_card_attrs_action(event)
     action['prenatal_risk_572'].value = calc_risk_rate(event)
     action['pregnancy_start_date'].value = preg_start_date
     action['predicted_delivery_date'].value = get_predicted_d_date(preg_start_date)
