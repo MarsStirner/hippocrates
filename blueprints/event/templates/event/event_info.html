@@ -7,8 +7,13 @@
             <div class="pull-right text-right col-md-1">
                 <ui-print-button ps="ps" resolve="ps_resolve()" ng-if="!event.is_new()"></ui-print-button>
             </div>
-            <h2>[[event.is_new() ? 'Создание обращения' : 'Обращение № ' + event.info.external_id]], пациент
-                <a href="{{ url_for('patients.patient') }}?client_id=[[event.info.client_id]]">[[ event.info.client.info.full_name ]]</a>
+            <h2>
+                {% if event and event.is_stationary %}История болезни №
+                {% elif event and not event.is_stationary %}Обращение №
+                {% elif not event and event.is_stationary %}Создание госпитализации
+                {% elif not event and not event.is_stationary %}Создание обращения
+                {% endif %}{{ event.externalId }}, пациент
+                <a href="{{ url_for('patients.patient', client_id=event.client_id) }}">[[ event.info.client.info.full_name ]]</a>
             </h2>
         </legend>
         <div class="row">
