@@ -296,7 +296,7 @@
                                 Удалено. <a ng-click="newborn_inspection_restore(inspection)" style="cursor: pointer">Восстановить</a>?</td>
                             <td ng-if="!inspection.deleted">[[inspection.alive ? 'да': 'нет']]</td>
                             <td ng-if="!inspection.deleted">[[inspection.birth_date |asDate ]] [[inspection.birth_time]]</td>
-                            <td ng-if="!inspection.deleted">[[inspection.sex]]</td>
+                            <td ng-if="!inspection.deleted">[[inspection.sex.code == 'male' ? 'Мужской': 'Женский']]</td>
                             <td ng-if="!inspection.deleted">[[inspection.weight]]</td>
                             <td ng-if="!inspection.deleted">[[inspection.length]]</td>
                             <td ng-if="!inspection.deleted">[[inspection.maturity_rate.name]]</td>

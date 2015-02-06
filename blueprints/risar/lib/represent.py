@@ -336,7 +336,8 @@ def represent_epicrisis(event, action=None):
     )
     finish_date = epicrisis['delivery_date']
     pregnancy_week = get_pregnancy_week(event)
-    epicrisis['registration_pregnancy_week'] = pregnancy_week - (finish_date - event.setDate.date()).days/7
+    epicrisis['registration_pregnancy_week'] = pregnancy_week - (finish_date - event.setDate.date()).days/7 if \
+        pregnancy_week and finish_date else None
     epicrisis['newborn_inspections'] = represent_newborn_inspections(event)
     epicrisis['info'] = make_epicrisis_info(epicrisis)
     return epicrisis
