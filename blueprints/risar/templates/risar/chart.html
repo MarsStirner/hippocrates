@@ -55,19 +55,19 @@
                     <table class="table table-condensed table-personal-data">
                         <tbody>
                         <tr>
-                            <td>Дата рождения:</td>
-                            <td>[[ chart.client.birth_date | asDate ]] ([[ chart.client.age ]])</td>
+                            <td class="col-lg-2 col-md-2 text-right">Дата рождения:</td>
+                            <td class="col-lg-10 col-md-10">[[ chart.client.birth_date | asDate ]] ([[ chart.client.age ]])</td>
                         </tr>
                         <tr ng-if="chart.client.snils">
-                            <td>СНИЛС:</td>
+                            <td class="text-right">СНИЛС:</td>
                             <td>[[ chart.client.snils ]]</td>
                         </tr>
                         <tr ng-if="chart.client.cmi_policy">
-                            <td>Полис ОМС:</td>
+                            <td class="text-right">Полис ОМС:</td>
                             <td>Номер [[ chart.client.cmi_policy.serial ]] [[ chart.client.cmi_policy.number ]], выдан [[ chart.client.cmi_policy.insurer.short_name ]] [[ chart.client.cmi_policy.beg_date | asDate ]]</td>
                         </tr>
                         <tr ng-if="chart.anamnesis.father.phone || chart.client.phone">
-                            <td>Контактные данные:</td>
+                            <td class="text-right">Контактные данные:</td>
                             <td>пациентки: [[chart.client.phone.contact_text]], отца ребёнка: <span tooltip="[[chart.anamnesis.father.name]]" class="bottom_dotted">[[ chart.anamnesis.father.phone ]]</span></td>
                         </tr>
                         </tbody>
@@ -79,11 +79,11 @@
                     <table class="table">
                         <tbody>
                             <tr>
-                                <td class="col-lg-3 col-md-4 text-right">Беременности:</td>
-                                <td class="col-lg-7 col-md-7">Предыдущие</br>
+                                <td class="col-lg-2 col-md-2 text-right">Беременности:</td>
+                                <td class="col-lg-8 col-md-8">Предыдущие</br>
                                 Многоплодные
                                 </td>
-                                <td class="col-lg-2 col-md-1"><a ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ chart.id ]]#pregnancies">[[chart.anamnesis.pregnancies.length]]</a></br>
+                                <td class="col-lg-2 col-md-2"><a ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ chart.id ]]#pregnancies">[[chart.anamnesis.pregnancies.length]]</a></br>
                                 [[chart.anamnesis.mother.multifetation ? 'да' : 'нет']]
                                 </td>
                             </tr>
@@ -98,9 +98,9 @@
                             </tr>
                             <tr>
                                 <td class="text-right">Вредные привычки:</td>
-                                <td></td>
                                 <td>[[(!chart.anamnesis.mother.alcohol && !chart.anamnesis.mother.smoking && !chart.anamnesis.mother.toxic && !chart.anamnesis.mother.drugs) ? 'нет': '' ]]
                                     <span ng-repeat="h in chart.bad_habits_mother | filter:{value: true} ">[[h.text]][[$last ? '' : ', ']]</span></td>
+                                <td></td>
                             </tr>
                         </tbody>
                     </table>
