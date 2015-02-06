@@ -75,6 +75,50 @@ angular.module('WebMis20.services', []).
             return [].clone.call(arguments).has(this.current_role);
         };
     }]).
+    service('IdleUserModal', ['$modal', 'Idle', function ($modal, Idle) {
+        return {
+            open: function () {
+                var IUController = function ($scope) {
+                    $scope.countdown = Idle._options().timeout;
+                    $scope.idletime_min = Math.floor(Idle._options().idle / 60) || 1;
+                    $scope.$on('IdleWarn', function(e, countdown) {
+                        $scope.countdown = countdown;
+                    });
+                    $scope.$on('IdleTimeout', function() {
+                        $scope.countdown = 0;
+                        $scope.$dismiss('Так и не вернулся...');
+                    });
+                    $scope.cancel_idle = function () {
+                        $scope.$close('Успел!');
+                    };
+                };
+                var instance = $modal.open({
+                    templateUrl: '/WebMis20/modal-IdleUser.html',
+                    controller: IUController,
+                    backdrop: 'static',
+                    windowClass: 'idle-modal'
+                });
+                return instance.result;
+            }
+        };
+    }]).
+    run(['$templateCache', function ($templateCache) {
+        $templateCache.put('/WebMis20/modal-IdleUser.html',
+            '<div class="modal-header" xmlns="http://www.w3.org/1999/html">\
+                <h3 class="modal-title">Внимание!</h3>\
+            </div>\
+            <div class="modal-body">\
+                <div>\
+                  <p>Вы неактивны более <b>[[idletime_min]]</b> минут.<br>\
+                    Автоматический выход из системы произойдет через:</p>\
+                    <h1 class="idle-countdown"><span class="label label-danger">[[countdown]]</span><small> секунд</small></h1>\
+                </div>\
+            </div>\
+            <div class="modal-footer">\
+                <button type="button" class="btn btn-success btn-lg" ng-click="cancel_idle()">Остаться в системе</button>\
+            </div>'
+        );
+    }]).
     service('MessageBox', ['$modal', function ($modal) {
         return {
             info: function (head, message) {

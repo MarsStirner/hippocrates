@@ -1,6 +1,5 @@
 # -*- encoding: utf-8 -*-
 import urllib2
-
 import requests
 
 from flask import render_template, abort, request, redirect, url_for, flash, session, current_app
@@ -20,6 +19,7 @@ from lib.user import UserAuth, AnonymousUser, UserProfileManager
 from forms import LoginForm, RoleForm
 from application.lib.jsonify import PersonTreeVisualizer
 from application.models.exists import rbUserProfile, Person
+from application.lib.settings import Settings
 
 
 login_manager.login_view = 'login'
@@ -64,7 +64,7 @@ def check_valid_login():
         if not login_valid:
             # return redirect(url_for('login', next=request.url))
             return redirect(COLDSTAR_URL + 'cas/user/login?back=%s' % urllib2.quote(request.url))
-        if not getattr(current_user, 'current_role', None):
+        if not getattr(current_user, 'current_role', None) and request.endpoint != 'wm_config':
             return redirect(url_for('select_role', next=request.url))
 
 
@@ -76,6 +76,12 @@ def check_user_profile_settings():
             not current_user.master
         ):
             return redirect(url_for('doctor_to_assist', next=request.url))
+
+
+@app.route('/wm_config.js')
+def wm_config():
+    settings = Settings()
+    return render_template('config.js', settings=settings)
 
 
 @app.route('/')

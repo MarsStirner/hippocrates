@@ -20,9 +20,16 @@ var WebMis20 = angular.module('WebMis20', [
     'ui.mask',
     'formstamp',
     'mgcrea.ngStrap.affix',
-    'duScroll'
+    'duScroll',
+    'ngIdle'
 ])
-.config(function ($interpolateProvider, datepickerConfig, datepickerPopupConfig, paginationConfig) {
+.config([
+    '$interpolateProvider', 'datepickerConfig', 'datepickerPopupConfig', 'paginationConfig',
+    '$tooltipProvider', 'IdleProvider', 'WMConfig',
+    function (
+        $interpolateProvider, datepickerConfig, datepickerPopupConfig, paginationConfig,
+        $tooltipProvider, IdleProvider, WMConfig
+    ) {
     $interpolateProvider.startSymbol('[[');
     $interpolateProvider.endSymbol(']]');
     datepickerConfig.showWeek = false;
@@ -36,19 +43,21 @@ var WebMis20 = angular.module('WebMis20', [
     paginationConfig.lastText = 'Последняя';
     paginationConfig.previousText = 'Предыдущая';
     paginationConfig.nextText = 'Следующая';
-}).config(['$tooltipProvider', function($tooltipProvider){
     $tooltipProvider.setTriggers({
         'mouseenter': 'mouseleave',
         'click': 'click',
         'focus': 'blur',
         'never': 'mouseleave',
         'show_popover': 'hide_popover'
-    })
+    });
+    IdleProvider.idle(WMConfig.settings.user_idle_timeout);
+    IdleProvider.timeout(WMConfig.settings.logout_warning_timeout);
+    //$IdleProvider.keepalive(false);
 }])
 // Workaround for bug #1404
 // https://github.com/angular/angular.js/issues/1404
 // Source: http://plnkr.co/edit/hSMzWC?p=preview
-    .config(['$provide', function($provide) {
+.config(['$provide', function($provide) {
     $provide.decorator('ngModelDirective', ['$delegate', function($delegate) {
         var ngModel = $delegate[0], controller = ngModel.controller;
         ngModel.controller = ['$scope', '$element', '$attrs', '$injector', function(scope, element, attrs, $injector) {
@@ -932,7 +941,22 @@ var WebMis20 = angular.module('WebMis20', [
         }
       };
     }
-  ]);
+  ])
+.run(['Idle', '$rootScope', 'IdleUserModal', 'IdleTitle', 'Idle', function (Idle, $rootScope, IdleUserModal, IdleTitle, Idle) {
+    Idle.watch();
+    IdleTitle.idleMessage('[[minutes]]:[[seconds]] до истечения времени сессии!');
+    $rootScope.$on('IdleStart', function () {
+        Idle.setTracking(false);
+        IdleUserModal.open()
+        .then(function cancelIdle (result) {
+            Idle.setTracking(true);
+            Idle.interrupt();
+            alert('Пользователь вернулся: ' + result);
+        }, function logoutAfterIdle (result) {
+            alert('Логаут: ' + result);
+        });
+    });
+}]);
 
 angular.module('WebMis20.services.models', []);
 
