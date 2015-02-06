@@ -97,6 +97,27 @@ WebMis20
             return wrapper('POST', Config.url.api_chart_close.format(event_id), {}, data);
         }
     };
+    this.event_routing = {
+        get_destinations: function (diagnoses) {
+            return wrapper('POST', Config.url.api_event_routing, {}, {
+                diagnoses: diagnoses
+            })
+        },
+        get_chart: function(event_id) {
+            return wrapper('GET', Config.url.api_mini_chart + event_id)
+        },
+        attach_client: function (client_id, attachments) {
+            return wrapper('POST', Config.url.api_attach_lpu_mini.format(client_id), {}, attachments)
+                .then(function (changed) {
+                    if (changed) {
+                        RisarNotificationService.notify(200, 'ЛПУ направления изменено', 'success')
+                    } else {
+                        RisarNotificationService.notify(200, 'ЛПУ направления оставлено без изменений', 'info')
+                    }
+
+                })
+        }
+    };
     this.attach_lpu = {
         save: function (client_id, data) {
             var url = '{0}'.format(Config.url.api_attach_lpu);
@@ -196,11 +217,9 @@ WebMis20
 .service('RisarNotificationService', function () {
     var self = this;
     var recompilers = [];
-    var indices = {};
     this.notifications = [];
     this.notify = function (code, message, severity) {
         var id = Math.floor(Math.random() * 65536);
-        indices[id] = self.notifications.length;
         self.notifications.push({
             id: id,
             code: code,
@@ -211,13 +230,10 @@ WebMis20
         return id;
     };
     this.dismiss = function (id) {
-        var index = indices[id];
-        if (_.isNumber(index)) {
-            self.notifications.splice(index, 1);
-            notify_recompilers();
-        } else {
-            console.log('Tried dismissing missing message');
-        }
+        self.notifications = self.notifications.filter(function (notification) {
+            return notification.id != id;
+        });
+        notify_recompilers();
     };
     this.register = function (recompile_function) {
         recompilers.push(recompile_function);
@@ -234,7 +250,7 @@ WebMis20
         scope: {},
         link: function (scope, element, attributes) {
             var template =
-                '<div class="alert alert-{0} abs-alert" role="alert">\
+                '<div class="alert alert-{0}" role="alert">\
                     <button type="button" class="close" ng-click="$dismiss({2})">\
                         <span aria-hidden="true">&times;</span>\
                         <span class="sr-only">Close</span>\
@@ -285,7 +301,7 @@ WebMis20
                         notification.id
                     )
                 }).join('\n');
-                var replace_element = $('<div>{0}</div>'.format(html));
+                var replace_element = $('<div class="abs-alert">{0}</div>'.format(html));
                 element.replaceWith(replace_element);
                 $compile(replace_element)(scope);
                 element = replace_element;

@@ -7,9 +7,12 @@ WebMis20
     url: {
         api_schedule: '{{ url_for('.api_0_schedule') }}',
         api_chart: '{{ url_for('.api_0_chart') }}',
+        api_mini_chart: '{{ url_for('.api_0_mini_chart') }}',
+        api_event_routing: '{{ url_for('.api_0_event_routing') }}',
         api_chart_delete: '{{ url_for('.api_0_chart_delete') }}',
         api_chart_close: '{{ url_for('.api_0_chart_close') }}{0}',
         api_attach_lpu: '{{ url_for('.api_0_attach_lpu') }}',
+        api_attach_lpu_mini: '/risar/api/0/client/{0}/attach_lpu',
         api_checkup_save: '{{ url_for('.api_0_checkup') }}{0}',
         api_anamnesis_mother: '{{ url_for('.api_0_chart') }}{0}/mother',
         api_anamnesis_father: '{{ url_for('.api_0_chart') }}{0}/father',
