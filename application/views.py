@@ -63,7 +63,7 @@ def check_valid_login():
 
         if not login_valid:
             # return redirect(url_for('login', next=request.url))
-            return redirect(COLDSTAR_URL + 'cas/user/login?back=%s' % urllib2.quote(request.url))
+            return redirect(COLDSTAR_URL + 'cas/login?back=%s' % urllib2.quote(request.url))
         if not getattr(current_user, 'current_role', None):
             return redirect(url_for('select_role', next=request.url))
 
