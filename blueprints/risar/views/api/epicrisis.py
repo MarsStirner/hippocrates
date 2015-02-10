@@ -3,7 +3,7 @@ from flask import request
 from ...app import module
 from application.lib.apiutils import api_method, ApiException
 from application.models.event import Event
-from application.models.actions import Action
+from application.models.actions import Action, ActionProperty_Diagnosis
 from application.systemwide import db
 from ...lib.represent import represent_epicrisis, risar_newborn_inspection
 from blueprints.risar.lib.utils import get_action, get_action_by_id
@@ -13,6 +13,8 @@ from ...risar_config import risar_epicrisis
 @module.route('/api/0/chart/<int:event_id>/epicrisis', methods=['GET', 'POST'])
 @api_method
 def api_0_chart_epicrisis(event_id):
+    diag_codes = ('attend_diagnosis', 'complicating_diagnosis', 'operation_complication', 'main_diagnosis',
+                  'pat_diagnosis')
     event = Event.query.get(event_id)
     if not event:
         raise ApiException(404, 'Event not found')
@@ -23,8 +25,11 @@ def api_0_chart_epicrisis(event_id):
     else:
         action = get_action(event, risar_epicrisis, True)
         for code, value in request.get_json().iteritems():
-            if code not in ('id', 'newborn_inspections', ) and code in action.propsByCode:
+            if code not in ('id', 'newborn_inspections', ) + diag_codes and code in action.propsByCode:
                 action.propsByCode[code].value = value
+            elif code in diag_codes and value:
+                property = action.propsByCode[code]
+                property.value = ActionProperty_Diagnosis.format_value(property, value)
 
         for child_inspection in request.json['newborn_inspections']:
             if child_inspection:

@@ -282,8 +282,11 @@ def api_0_chart_father(event_id):
     else:
         action = get_action(event, risar_father_anamnesis, True)
         for code, value in request.get_json().iteritems():
-            if code not in ('id', ) and code in action.propsByCode:
+            if code not in ('id', 'finished_diseases', 'current_diseases') and code in action.propsByCode:
                 action.propsByCode[code].value = value
+            elif (code == 'finished_diseases' or code == 'current_diseases') and value:
+                property = action.propsByCode[code]
+                property.value = ActionProperty_Diagnosis.format_value(property, value)
         db.session.commit()
         reevaluate_card_attrs(event)
         db.session.commit()

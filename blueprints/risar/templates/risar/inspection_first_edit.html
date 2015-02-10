@@ -525,44 +525,30 @@
                         <th class="text-right">Диагнозы <span>&nbsp;</span></th>
                         <td>&nbsp;</td>
                     </tr>
-
                     <tr>
                         <td class="text-right">Основной <span class="text-danger">*</span></td>
-                        <td><div class="row">
-                            <div class="col-md-5">
-                                <ui-mkb ng-class="{'has-error': CheckupFirstEditForm.mkb.$invalid}"
-                                        ng-model="checkup.diag" name="mkb" ng-required="true"></ui-mkb>
-                            </div></div></td>
-                    </tr>
-                    <tr>
-                        <td class="text-right">Расшифровка основного <span>&nbsp;</span></td>
-                        <td><div class="row"><div class="col-md-7"><wysiwyg ng-model="checkup.diagwr" /></div></div></td>
+{#                        ng-class="{'has-error': CheckupFirstEditForm.mkb.$invalid}"#}
+                        <td>
+                            <wm-diagnosis model="checkup.diag" list-mode="false"
+                                          can-add-new="true" can-delete="true" can-edit="true"
+                                          action="checkup" event="chart" risar="true"></wm-diagnosis>
+                        </td>
                     </tr>
                     <tr>
                         <td class="text-right">Сопутствующие <span>&nbsp;</span></td>
-                        <td><div class="row">
-                            <div class="col-md-5" ng-model="checkup.diag2" placeholder="Выберите диагноз" refbook-multiselect ref-book="MKB">
-                                <strong>[[ item.code ]]</strong> - [[ item.name ]]
-                            </div>
-                            </div>
+                        <td>
+                            <wm-diagnosis model="checkup.diag2" list-mode="true"
+                                          can-add-new="true" can-delete="true" can-edit="true"
+                                          action="checkup" event="chart" risar="true"></wm-diagnosis>
                         </td>
-                    </tr>
-                    <tr>
-                        <td class="text-right">Расшифровка сопутствующего <span>&nbsp;</span></td>
-                        <td><div class="row"><div class="col-md-7"><wysiwyg ng-model="checkup.diagwr2" /></div></div></td>
                     </tr>
                     <tr>
                         <td class="text-right">Осложнения <span>&nbsp;</span></td>
-                        <td><div class="row">
-                            <div class="col-md-5" ng-model="checkup.diag3" placeholder="Выберите диагноз" refbook-multiselect ref-book="MKB">
-                                <strong>[[ item.code ]]</strong> - [[ item.name ]]
-                            </div>
-                            </div>
+                        <td>
+                            <wm-diagnosis model="checkup.diag3" list-mode="true"
+                                          can-add-new="true" can-delete="true" can-edit="true"
+                                          action="checkup" event="chart" risar="true"></wm-diagnosis>
                         </td>
-                    </tr>
-                    <tr>
-                        <td class="text-right">Расшифровка осложнения <span>&nbsp;</span></td>
-                        <td><div class="row"><div class="col-md-7"><wysiwyg ng-model="checkup.diagwr3" /></div></div></td>
                     </tr>
                     <tr>
                         <td class="text-right">Плановая дата следующей явки <span class="text-danger">*</span></td>
@@ -593,4 +579,5 @@
     {{ super() }}
     <script src="{{ url_for('.static', filename='js/checkup.js', v=version) }}"></script>
     <script src="{{ url_for('.static', filename='js/risar.js', v=version) }}"></script>
+    <script src="{{ url_for('static', filename='js/services/event/event-services.js', v=version) }}"></script>
 {% endblock %}

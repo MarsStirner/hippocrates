@@ -877,7 +877,7 @@ class EventVisualizer(object):
             'sanatorium': diagnostic.sanatorium,
             'hospital': diagnostic.hospital,
             'diagnosis_description': diagnostic.diagnosis_description
-        }
+        } if diagnostic else None
 
     def make_diagnosis_record(self, diagnosis):
         """

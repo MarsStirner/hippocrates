@@ -161,10 +161,11 @@
                                         <th class="text-right">Основной диагноз <span class="text-danger">*</span></th>
                                         <td>
                                             <div class="row">
+{#                                            ng-class="{'has-error': firstForm.main_diagnosis.$invalid && firstForm.submit_attempt}"#}
                                             <div class="col-md-7">
-                                                <ui-mkb ng-model="chart.epicrisis.main_diagnosis" name="main_diagnosis"
-                                                        ng-class="{'has-error': firstForm.main_diagnosis.$invalid && firstForm.submit_attempt}"
-                                                        ng-required="true"></ui-mkb>
+                                                <wm-diagnosis model="chart.epicrisis.main_diagnosis" list-mode="false"
+                                                              can-add-new="true" can-delete="true" can-edit="true"
+                                                              action="chart.epicrisis" event="chart" risar="true"></wm-diagnosis>
                                             </div>
                                             </div>
                                         </td>
@@ -172,21 +173,17 @@
                                     <tr>
                                         <th class="text-right">Сопутствующий диагноз <span>&nbsp;</span></th>
                                         <td>
-                                            <div class="row">
-                                            <div class="col-md-7">
-                                                <ui-mkb ng-model="chart.epicrisis.attend_diagnosis" name="mkb"></ui-mkb>
-                                            </div>
-                                            </div>
+                                            <wm-diagnosis model="chart.epicrisis.attend_diagnosis" list-mode="true"
+                                                          can-add-new="true" can-delete="true" can-edit="true"
+                                                          action="chart.epicrisis" event="chart" risar="true"></wm-diagnosis>
                                         </td>
                                     </tr>
                                     <tr>
                                         <th class="text-right">Диагноз осложнения <span>&nbsp;</span></th>
                                         <td>
-                                            <div class="row">
-                                            <div class="col-md-7">
-                                                <ui-mkb ng-model="chart.epicrisis.complicating_diagnosis" name="mkb"></ui-mkb>
-                                            </div>
-                                            </div>
+                                            <wm-diagnosis model="chart.epicrisis.complicating_diagnosis" list-mode="true"
+                                                          can-add-new="true" can-delete="true" can-edit="true"
+                                                          action="chart.epicrisis" event="chart" risar="true"></wm-diagnosis>
                                         </td>
                                     </tr>
                                     <tr>
@@ -252,11 +249,10 @@
                                     <td class="text-right">Патологоанатомический диагноз <span class="text-danger">*</span></td>
                                     <td>
                                         <div class="row">
-                                            <div class="col-md-5">
-                                                 <ui-mkb ng-model="chart.epicrisis.pat_diagnosis"
-                                                         name="pat_diagnosis" ng-required="true"
-                                                         ng-class="{'has-error': secondForm.pat_diagnosis.$invalid && secondForm.submit_attempt}"></ui-mkb>
-                                            </div>
+{#                                            ng-class="{'has-error': secondForm.pat_diagnosis.$invalid && secondForm.submit_attempt}"#}
+                                            <wm-diagnosis model="chart.epicrisis.pat_diagnosis" list-mode="false"
+                                                          can-add-new="true" can-delete="true" can-edit="true"
+                                                          action="chart.epicrisis" event="chart" risar="true"></wm-diagnosis>
                                         </div>
                                     </td>
                                 </tr>
@@ -554,9 +550,9 @@
                                     <th class="text-right">Осложнения операции</th>
                                     <td>
                                         <div class="row">
-                                        <div class="col-md-5" ng-model="chart.epicrisis.operation_complication" placeholder="Выберите диагноз" refbook-multiselect ref-book="MKB">
-                                            <strong>[[ item.code ]]</strong> - [[ item.name ]]
-                                        </div>
+                                            <wm-diagnosis model="chart.epicrisis.operation_complication" list-mode="true"
+                                                          can-add-new="true" can-delete="true" can-edit="true"
+                                                          action="chart.epicrisis" event="chart" risar="true"></wm-diagnosis>
                                         </div>
                                     </td>
                                 </tr>
@@ -819,4 +815,5 @@
     {{ super() }}
     <script src="{{ url_for('.static', filename='js/epicrisis.js', v=version) }}"></script>
     <script src="{{ url_for('.static', filename='js/risar.js', v=version) }}"></script>
+    <script src="{{ url_for('static', filename='js/services/event/event-services.js', v=version) }}"></script>
 {% endblock %}

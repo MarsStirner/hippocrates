@@ -4,6 +4,7 @@ from flask import request
 from application.lib.apiutils import api_method, ApiException
 from application.lib.utils import safe_datetime
 from application.models.event import Event
+from application.models.actions import ActionProperty_Diagnosis
 from application.systemwide import db
 from ...app import module
 from blueprints.risar.lib.card_attrs import reevaluate_card_attrs
@@ -25,8 +26,11 @@ def api_0_checkup(event_id):
     else:
         action.begDate = safe_datetime(data['beg_date'])
         for code, value in data.iteritems():
-            if code not in ('id', 'flatCode', 'person', 'beg_date') and code in action.propsByCode:
+            if code not in ('id', 'flatCode', 'person', 'beg_date', 'diag', 'diag2', 'diag3') and code in action.propsByCode:
                 action.propsByCode[code].value = value
+            elif code in ('diag', 'diag2', 'diag3') and value:
+                property = action.propsByCode[code]
+                property.value = ActionProperty_Diagnosis.format_value(property, value)
         db.session.commit()
         reevaluate_card_attrs(event)
         db.session.commit()

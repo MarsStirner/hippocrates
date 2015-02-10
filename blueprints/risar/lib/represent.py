@@ -193,8 +193,10 @@ def represent_mother_action(event, action=None):
             .first()
         if mother_blood_type:
             represent_mother['blood_type'] = mother_blood_type.bloodType
-        represent_mother['finished_diseases'] = [evis.make_diagnostic_record(diag) for diag in represent_mother['finished_diseases']]
-        represent_mother['current_diseases'] = [evis.make_diagnostic_record(diag) for diag in represent_mother['current_diseases']]
+        represent_mother['finished_diseases'] = [evis.make_diagnostic_record(diag) for diag in
+                                                 represent_mother['finished_diseases']] if represent_mother['finished_diseases'] else []
+        represent_mother['current_diseases'] = [evis.make_diagnostic_record(diag) for diag in
+                                                represent_mother['current_diseases']] if represent_mother['current_diseases'] else []
     return represent_mother
 
 
@@ -208,6 +210,13 @@ def represent_father_action(event, action=None):
         for prop in action.properties
         if prop.type.code in father_codes
     )
+
+    if represent_father is not None:
+        evis = EventVisualizer()
+        represent_father['finished_diseases'] = [evis.make_diagnostic_record(diag) for diag in
+                                                 represent_father['finished_diseases']] if represent_father['finished_diseases'] else []
+        represent_father['current_diseases'] = [evis.make_diagnostic_record(diag) for diag in
+                                                represent_father['current_diseases']] if represent_father['current_diseases'] else []
     return represent_father
 
 
@@ -221,6 +230,7 @@ def represent_checkups(event):
 
 
 def represent_checkup(action):
+    evis = EventVisualizer()
     result = dict(
         (code, prop.value)
         for (code, prop) in action.propsByCode.iteritems()
@@ -229,6 +239,10 @@ def represent_checkup(action):
     result['person'] = action.person
     result['flatCode'] = action.actionType.flatCode
     result['id'] = action.id
+    if result:
+        result['diag'] = evis.make_diagnostic_record(result['diag'])
+        for code in ('diag2', 'diag3'):
+            result[code] = [evis.make_diagnostic_record(diag) for diag in result[code]] if result[code] else []
     return result
 
 
@@ -341,6 +355,12 @@ def represent_epicrisis(event, action=None):
         pregnancy_week and finish_date else None
     epicrisis['newborn_inspections'] = represent_newborn_inspections(event)
     epicrisis['info'] = make_epicrisis_info(epicrisis)
+    if epicrisis:
+        evis = EventVisualizer()
+        epicrisis['main_diagnosis'] = evis.make_diagnostic_record(epicrisis['main_diagnosis'])
+        epicrisis['pat_diagnosis'] = evis.make_diagnostic_record(epicrisis['pat_diagnosis'])
+        for code in ('attend_diagnosis', 'complicating_diagnosis', 'operation_complication'):
+            epicrisis[code] = [evis.make_diagnostic_record(diag) for diag in epicrisis[code]] if epicrisis[code] else []
     return epicrisis
 
 

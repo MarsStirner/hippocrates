@@ -23,7 +23,10 @@ var EpicrisisCtrl = function ($timeout, $scope, RefBookService, RisarApi) {
             if (!$scope.chart.epicrisis) {
                 $scope.chart.epicrisis = {
                     pregnancy_final: $scope.rbRisarPregnancy_Final.get_by_code('rodami'),
-                    newborn_inspections : [{}]};
+                    newborn_inspections : [{}],
+                    attend_diagnosis: [],
+                    complicating_diagnosis: [],
+                    operation_complication:[]};
             }
             $timeout(function(){
                 var hash = document.location.hash;

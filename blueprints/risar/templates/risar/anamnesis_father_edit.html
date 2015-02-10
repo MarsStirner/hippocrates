@@ -89,16 +89,14 @@
                     <td>Причина</td>
                     <td><input ng-model="chart.anamnesis.father.infertility_cause" class="form-control" ng-disabled="!chart.anamnesis.father.infertility"></td>
                 </tr>
-
                 <tr>
                     <th>Перенесенные заболевания</th>
                     <td>
-                        <div ng-model="chart.anamnesis.father.finished_diseases" placeholder="Выберите диагноз" refbook-multiselect ref-book="MKB">
-                            <strong>[[ item.code ]]</strong> - [[ item.name ]]
-                        </div>
+                        <wm-diagnosis model="chart.anamnesis.father.finished_diseases" list-mode="true"
+                                      can-add-new="true" can-delete="true" can-edit="true"
+                                      action="chart.anamnesis.father" event="chart" risar="true"></wm-diagnosis>
                     </td>
                 </tr>
-
                 <tr>
                     <th>Наследственность</th>
                     <td><input ng-model="chart.anamnesis.father.hereditary" class="form-control"></td>
@@ -107,9 +105,9 @@
                 <tr>
                     <th>Текущие заболевания</th>
                     <td>
-                        <div ng-model="chart.anamnesis.father.current_diseases" placeholder="Выберите диагноз" refbook-multiselect ref-book="MKB">
-                            <strong>[[ item.code ]]</strong> - [[ item.name ]]
-                        </div>
+                        <wm-diagnosis model="chart.anamnesis.father.current_diseases" list-mode="true"
+                                      can-add-new="true" can-delete="true" can-edit="true"
+                                      action="chart.anamnesis.father" event="chart" risar="true"></wm-diagnosis>
                     </td>
                 </tr>
 
@@ -152,4 +150,5 @@
     {{ super() }}
     <script src="{{ url_for('.static', filename='js/anamnesis.js', v=version) }}"></script>
     <script src="{{ url_for('.static', filename='js/risar.js', v=version) }}"></script>
+    <script src="{{ url_for('static', filename='js/services/event/event-services.js', v=version) }}"></script>
 {% endblock %}

@@ -7,7 +7,9 @@ var CheckupCtrl = function ($scope, RisarApi) {
     var create_new_checkup = function (){
         $scope.checkup = {beg_date: new Date(),
                           height: NaN,
-                          weight: NaN}
+                          weight: NaN,
+                          diag2:[],
+                          diag3:[]}
     };
     var reload_checkup = function () {
         RisarApi.chart.get(event_id)
@@ -15,7 +17,11 @@ var CheckupCtrl = function ($scope, RisarApi) {
             $scope.chart = event;
             $scope.client_id = event.client.id;
             $scope.checkup = event.checkups.filter(function(elem){return elem.id == checkup_id})[0];
-            if (!$scope.checkup) create_new_checkup();
+            if (!$scope.checkup) create_new_checkup()
+            else {
+                $scope.checkup.diag2 = $scope.checkup.diag2 ? $scope.checkup.diag2 : [];
+                $scope.checkup.diag3 = $scope.checkup.diag2 ? $scope.checkup.diag3 : [];
+            };
             if ($scope.chart.pregnancy_week && !$scope.checkup.pregnancy_week) {
                 $scope.checkup.pregnancy_week = $scope.chart.pregnancy_week
             }

@@ -1184,7 +1184,7 @@ angular.module('WebMis20.directives')
                 scope.add_new_btn_visible = function () {
                     return scope.canAddNew && (scope.listMode ? true : !scope.model)
                 };
-                if (scope.action) {
+                if (scope.action && ! scope.risar) {
                     WMEventCache.get(scope.action.action.event_id).then(function (event) {
                         scope.event = event;
                     });
@@ -1377,7 +1377,7 @@ angular.module('WebMis20.directives')
                             <td ng-click="open_action(model.action_id)">[[model.set_date | asDate]]</td>\
                             <td ng-click="open_action(model.action_id)">[[model.end_date | asDate]]</td>\
                             <td ng-click="open_action(model.action_id)">[[model.diagnosis_type.name]]</td>\
-                            <td ng-click="open_action(model.action_id)">[[model.diagnosis.mkb.code]] [[model.diagnosis.mkb.name]]</td>\
+                            <td ng-click="open_action(model.action_id)"><span tooltip="[[ model.diagnosis.mkb.name ]]">[[model.diagnosis.mkb.code]]</span></td>\
                             <td ng-click="open_action(model.action_id)">[[model.person.name]]</td>\
                             <td ng-click="open_action(model.action_id)">[[model.diagnosis_description]]</td>\
                             <td>\
@@ -1395,7 +1395,7 @@ angular.module('WebMis20.directives')
                             <td ng-click="open_action(diag.action_id)">[[diag.set_date | asDate]]</td>\
                             <td ng-click="open_action(diag.action_id)">[[diag.end_date | asDate]]</td>\
                             <td ng-click="open_action(diag.action_id)">[[diag.diagnosis_type.name]]</td>\
-                            <td ng-click="open_action(diag.action_id)">[[diag.diagnosis.mkb.code]] [[diag.diagnosis.mkb.name]]</td>\
+                            <td ng-click="open_action(diag.action_id)"><span tooltip="[[diag.diagnosis.mkb.name]]">[[diag.diagnosis.mkb.code]]</span></td>\
                             <td ng-click="open_action(diag.action_id)">[[diag.person.name]]</td>\
                             <td ng-click="open_action(diag.action_id)">[[diag.diagnosis_description]]</td>\
                             <td>\
