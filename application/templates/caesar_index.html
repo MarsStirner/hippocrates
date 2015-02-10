@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <!-- Jumbotron -->
+    <div class="jumbotron">
+        <div class="container">
+            <h1>Система администрирования ЛПУ</h1>
+            <p class="lead">Добро пожаловать в систему администрирования ЛПУ. Модули, доступные для работы,
+                представлены ниже или через главное меню.</p>
+        </div>
+    </div>
+    <div class="container">
+        {%- for module in main_menu -%}
+            {%- if loop.index > 2 and loop.index % 2 != 0 -%}
+                </div>{# close div row #}
+            {%- endif -%}
+            {%- if loop.index % 2 != 0 -%}
+                <div class="row">
+                    <div class="col-md-6">
+            {%- else -%}
+                    <div class="col-md-6">
+            {%- endif -%}
+                        {%- include 'module_item.html' -%}
+                    </div>
+        {%- endfor -%}
+        </div> {# close div row #}
+    </div>
+
+{% endblock %}

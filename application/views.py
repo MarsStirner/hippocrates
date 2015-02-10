@@ -1,5 +1,6 @@
 # -*- encoding: utf-8 -*-
 import urllib2
+from jinja2 import TemplateNotFound
 
 import requests
 
@@ -14,12 +15,13 @@ from application.systemwide import login_manager, cache
 from application.lib.data import get_kladr_city, get_kladr_street
 from application.lib.utils import public_endpoint, jsonify, roles_require, rights_require, request_wants_json
 # from application.models import *
+from application.utils import admin_permission
 from lib.user import UserAuth, AnonymousUser, UserProfileManager
 from forms import LoginForm, RoleForm
 from application.lib.jsonify import PersonTreeVisualizer
 from application.models.exists import rbUserProfile, Person
 from application.app import app
-from application.models import models, enums, event, actions, exists, schedule, client
+from application.models import enums, event, actions, exists, schedule, client
 from application.systemwide import db
 
 
@@ -84,7 +86,40 @@ def index():
     default_url = UserProfileManager.get_default_url()
     if default_url != '/':
         return redirect(default_url)
-    return render_template('index.html')
+    return render_template(app.config['INDEX_HTML'])
+
+
+@app.route('/settings/', methods=['GET', 'POST'])
+@admin_permission.require(http_exception=403)
+def settings():
+    from application.models.caesar import Settings
+    from wtforms import StringField
+    from wtforms.validators import DataRequired
+    from flask.ext.wtf import Form
+    try:
+        class ConfigVariablesForm(Form):
+            pass
+
+        variables = db.session.query(Settings).order_by('id').all()
+        for variable in variables:
+            setattr(ConfigVariablesForm,
+                    variable.code,
+                    StringField(variable.code, validators=[DataRequired()], default="", description=variable.name))
+
+        form = ConfigVariablesForm()
+        for variable in variables:
+            form[variable.code].value = variable.value
+
+        if form.validate_on_submit():
+            for variable in variables:
+                variable.value = form.data[variable.code]
+            db.session.commit()
+            flash(u'Настройки изменены')
+            return redirect(url_for('settings'))
+
+        return render_template('settings.html', form=form)
+    except TemplateNotFound:
+        abort(404)
 
 
 @app.route('/login/', methods=['GET', 'POST'])

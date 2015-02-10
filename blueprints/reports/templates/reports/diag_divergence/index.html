@@ -1,0 +1,119 @@
+{% extends 'reports/base.html' %}
+
+{% block title %}> {{ module_name }} > Расхождение диагнозов{% endblock %}
+
+{% block content %}
+
+    {% include 'reports/_nav_menu.html' %}
+    <legend>
+        Расхождение диагнозов {% if request.form.get('start') and request.form.get('end') %}({{ request.form.get('start') }} - {{ request.form.get('end') }}){% endif %}
+    </legend>
+    <form class="form-inline" id="filter" method="POST" action="{{ url_for('.diag_divergence') }}">
+        {{ form.hidden_tag() }}
+        <label for="from">Даты с:</label>
+        <input type="text" id="from" name="start" class="span2" />
+        <label for="to">по</label>
+        <input type="text" id="to" name="end" class="span2" />
+      <button type="submit" class="btn btn-primary">Выбрать</button>
+    </form>
+    {% if errors %}
+        {% for error in errors %}
+        <div class="alert alert-error">
+          <button type="button" class="close" data-dismiss="alert">&times;</button>
+          {{ error|safe }}
+        </div>
+        {% endfor %}
+    {% endif %}
+    <hr>
+    {% if diag_divergence and diag_divergence is iterable %}
+        {% include 'reports/_filter_results_form.html' %}
+
+        <label><legend>Количество пациентов с расхождением диагноза приемного отделения и клинического диагноза.</legend></label>
+        <table class="table table-striped table-bordered table-condensed" style="width:50%;">
+            <thead>
+                <tr>
+                    <th style="text-align: center;">Количество пациентов</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="text-align: center;">{{ diag_divergence.rowcount }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <label for="result_table"><legend>Расхождение диагноза, установленного в приемном отделении с клиническим окончательным.</legend></label>
+        <table class="table table-striped table-bordered table-condensed result_table" style="width:70%;">
+            <thead>
+                <tr>
+                    <th width="5%">№п/п</th>
+                    <th width="5%">№ИБ</th>
+                    <th>Фамилия Имя Отчество</th>
+                    <th>Дата рождения</th>
+                    <th>Окончательный клинический диагноз</th>
+                    <th>Диагноз врача приемного</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in diag_divergence %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ item.externalId }}</td>
+                    <td>{{ item.lastName }} {{ item.firstName }} {{ item.patrName }}</td>
+                    <td>{{ item.birthDate }}</td>
+                    <td>{% if item.MKB %}{{ item.MKB }}{% endif %}</td>
+                    <td>{% if item.DiagID %}{{ item.DiagID }}{% endif %}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+
+    {% if diag_divergence1 and diag_divergence1 is iterable %}
+        <label><legend>Количество пациентов с расхождением диагноза при поступлении и диагноза врача приемного отделения.</legend></label>
+        <table class="table table-striped table-bordered table-condensed" style="width:50%;">
+            <thead>
+                <tr>
+                    <th style="text-align: center;">Количество пациентов</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="text-align: center;">{{ diag_divergence1.rowcount }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <label for="result_table1"><legend>Расхождение диагнозов при поступлении в Центр.</legend></label>
+        <table class="table table-striped table-bordered table-condensed result_table" style="width:70%;">
+            <thead>
+                <tr>
+                    <th width="5%">№п/п</th>
+                    <th width="5%">№ИБ</th>
+                    <th width="40%">Фамилия Имя Отчество</th>
+                    <th width="10%">Дата рождения</th>
+                    <th width="20%">Диагноз при поступлении</th>
+                    <th width="20%">Диагноз приемного</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in diag_divergence1 %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ item.externalId }}</td>
+                    <td>{{ item.lastName }} {{ item.firstName }} {{ item.patrName }}</td>
+                    <td>{{ item.birthDate }}</td>
+                    <td>{% if item.MKB1 %}{{ item.MKB1 }}{% endif %}</td>
+                    <td>{% if item.MKB2 %}{{ item.MKB2 }}{% endif %}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+    {% if diag_divergence or diag_divergence1 %}<button type="button" class="btn btn-primary" id="print" onclick="window.print();"><i class="icon-print icon-white"></i> Распечатать</button>{% endif %}
+
+{% endblock %}
+
+{% block modules_js %}
+{{ super() }}
+{% endblock %}

@@ -1,16 +1,11 @@
 # -*- coding: utf-8 -*-
-import datetime
-import functools
 
-from pytz import timezone
-from flask import g, current_app, request, make_response
+from flask import g
 from flask.ext.principal import Permission, RoleNeed
-from flask.ext.login import LoginManager
 
 from .systemwide import db
 from application.models.caesar import Settings, Roles
 from application.app import app
-from config import TIME_ZONE
 
 
 def create_config_func(module_name, config_table):
@@ -38,10 +33,9 @@ def create_config_func(module_name, config_table):
 
     return _config
 
+permissions = dict()
 
 with app.app_context():
-    permissions = dict()
-    login_manager = LoginManager()
     try:
         roles = db.session.query(Roles).all()
     except Exception, e:

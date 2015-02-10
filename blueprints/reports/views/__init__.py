@@ -1,0 +1,2 @@
+# -*- encoding: utf-8 -*-
+from . import index, anaesthesia_amount, diag_divergence, discharged, list_of_operations, more_then_21, paid, patients_process, policlinic, sickness_rate_blocks, sickness_rate_diagnosis

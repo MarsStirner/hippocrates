@@ -27,53 +27,6 @@ def print_subsystem():
 
 
 @app.context_processor
-def general_menu():
-    menu_items = [dict(
-        link='index',
-        title=u'Главная страница',
-        homepage=True,
-        visible=(not UserProfileManager.has_ui_registrator_cut())
-    ), dict(
-        link='patients.index',
-        title=u'Обслуживание пациентов',
-        visible=(UserProfileManager.has_ui_registrator() or UserProfileManager.has_ui_registrator_cut())
-    ), dict(
-        link='schedule.person_schedule_monthview',
-        title=u'Формирование графика врача',
-        visible=(UserProfileManager.has_ui_registrator())
-    ), dict(
-        link='schedule.index',
-        title=u'График работы',
-        visible=(UserProfileManager.has_ui_registrator())
-    ), dict(
-        link='schedule.doctor_schedule_day',
-        title=u'Приём пациентов',
-        visible=(UserProfileManager.has_ui_doctor())
-    ), dict(
-        link='patients.search',
-        title=u'Поиск пациентов',
-        visible=(UserProfileManager.has_ui_doctor())
-    ), dict(
-        link='event.get_events',
-        title=u'Обращения',
-        visible=(UserProfileManager.has_ui_registrator() or UserProfileManager.has_ui_doctor())
-    ), dict(
-        link='anareports.index_html',
-        title=u'Аналитические отчёты',
-        visible=True
-    ), dict(
-        link='accounting.cashbook_html',
-        title=u'Расчет пациентов',
-        visible=UserProfileManager.has_ui_cashier()
-    ), dict(
-        link='accounting.cashbook_operations',
-        title=u'Журнал кассовых операций',
-        visible=UserProfileManager.has_ui_cashier()
-    )]
-    return dict(main_menu=menu_items)
-
-
-@app.context_processor
 def user_utils():
     return {
         'user_utils': UserUtils(),

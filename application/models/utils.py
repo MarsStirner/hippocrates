@@ -8,7 +8,7 @@ def safe_current_user_id():
 
 
 def get_model_by_name(name):
-    from application.models import *
+    from application.models import exists, schedule, actions, client, event
     for mod in (exists, schedule, actions, client, event):
         if hasattr(mod, name):
             return getattr(mod, name)

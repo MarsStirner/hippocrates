@@ -1,0 +1,115 @@
+{% if errors %}
+    {% for error in errors %}
+    <div class="alert alert-error">
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+      {{ error|safe }}
+    </div>
+    {% endfor %}
+{% endif %}
+{% if pat_org and pat_org is iterable %}
+<legend>Пациенты по отделениям</legend>
+<div>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Отделение</th>
+                <th><div class="text-right">Количество</div></th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for item in pat_org %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ item.name }}</td>
+                <td><div class="text-right">{{ item.number }}</div></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+{% if hosp_by_fs and hosp_by_fs is iterable %}
+<legend>Поступило в Центр (по источникам финансирования)</legend>
+<div>
+    <table class="table" style="width:40%;">
+        <thead>
+            <tr>
+                <th width="5%">№п/п</th>
+                <th>Источник финансирования</th>
+                <th><div class="text-right">Количество</div></th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for item in hosp_by_fs %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ item.name }}</td>
+                <td><div class="text-right">{{ item.number }}</div></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+{% if hosp_figures %}
+<legend>Показатели госпитализации Центра</legend>
+<div>
+    <table class="table" style="width:40%;">
+        <thead>
+            <tr>
+                <th></th>
+                <th>за предыдущие сутки</th>
+                <th>Всего</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Поступили</td>
+                <td>{% if hosp_figures.totalondate %}{{ hosp_figures.totalondate }}{% else %}0{% endif %}</td>
+                <td>{% if hosp_figures.total %}{{ hosp_figures.total }}{% else %}0{% endif %}</td>
+            </tr>
+            <tr>
+                <td>Поступили до 1 года </td>
+                <td>{% if hosp_figures.postupondatebefore1 %}{{ hosp_figures.postupondatebefore1 }}{% else %}0{% endif %}</td>
+                <td>{% if hosp_figures.postupbefore1 %}{{ hosp_figures.postupbefore1 }}{% else %}0{% endif %}</td>
+            </tr>
+            <tr>
+                <td>Поступили старше 15 лет </td>
+                <td>{% if hosp_figures.postupondateafter15 %}{{ hosp_figures.postupondateafter15 }}{% else %}0{% endif %}</td>
+                <td>{% if hosp_figures.postupafter15 %}{{ hosp_figures.postupafter15 }}{% else %}0{% endif %}</td>
+            </tr>
+            <tr>
+                <td>Поступили старше 18 лет</td>
+                <td>{% if hosp_figures.postupondateafter18 %}{{ hosp_figures.postupondateafter18 }}{% else %}0{% endif %}</td>
+                <td>{% if hosp_figures.postupafter18 %}{{ hosp_figures.postupafter18 }}{% else %}0{% endif %}</td>
+            </tr>
+            <tr>
+                <td>В ОРИТ</td>
+                <td>{% if hosp_figures.oritondate %}{{ hosp_figures.oritondate }}{% else %}0{% endif %}</td>
+                <td>{% if hosp_figures.orittotal %}{{ hosp_figures.orittotal }}{% else %}0{% endif %}</td>
+            </tr>
+            <tr>
+                <td>Первичные</td>
+                <td>{% if hosp_figures.pervtotalondate %}{{ hosp_figures.pervtotalondate }}{% else %}0{% endif %}</td>
+                <td>{% if hosp_figures.pervtotal %}{{ hosp_figures.pervtotal }}{% else %}0{% endif %}</td>
+            </tr>
+            <tr>
+                <td>Повторные</td>
+                <td>{% if hosp_figures.povttotalondate %}{{ hosp_figures.povttotalondate }}{% else %}0{% endif %}</td>
+                <td>{% if hosp_figures.povttotal %}{{ hosp_figures.povttotal }}{% else %}0{% endif %}</td>
+            </tr>
+            <tr>
+                <td>Переоткрыто ИБ</td>
+                <td>{% if hosp_figures.reopenondate %}{{ hosp_figures.reopenondate }}{% else %}0{% endif %}</td>
+                <td>{% if hosp_figures.reopentotal %}{{ hosp_figures.reopentotal }}{% else %}0{% endif %}</td>
+            </tr>
+            <tr>
+                <td>Отказов от(в) госпитализации</td>
+                <td>{% if hosp_figures.gospondate %}{{ hosp_figures.gospondate }}{% else %}0{% endif %}</td>
+                <td>{% if hosp_figures.gosptotal %}{{ hosp_figures.gosptotal }}{% else %}0{% endif %}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+{% endif %}
