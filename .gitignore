@@ -32,7 +32,7 @@ nosetests.xml
 .project
 .pydevproject
 .idea
-config_local.py
+config_*.py
 #forms_prototype
 .fuse_*
 gen-py

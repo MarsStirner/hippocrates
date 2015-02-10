@@ -10,16 +10,17 @@ from flask.ext.login import login_user, logout_user, login_required, current_use
 from sqlalchemy.orm import lazyload, joinedload
 from itsdangerous import json
 
-from application.app import app, db, login_manager, cache
-from application.context_processors import *
+from application.systemwide import login_manager, cache
 from application.lib.data import get_kladr_city, get_kladr_street
 from application.lib.utils import public_endpoint, jsonify, roles_require, rights_require, request_wants_json
-from application.models import *
-from config import COLDSTAR_URL, CASTIEL_AUTH_TOKEN
+# from application.models import *
 from lib.user import UserAuth, AnonymousUser, UserProfileManager
 from forms import LoginForm, RoleForm
 from application.lib.jsonify import PersonTreeVisualizer
 from application.models.exists import rbUserProfile, Person
+from application.app import app
+from application.models import models, enums, event, actions, exists, schedule, client
+from application.systemwide import db
 
 
 login_manager.login_view = 'login'
@@ -35,9 +36,9 @@ def check_valid_login():
 
         login_valid = False
 
-        auth_token = request.cookies.get(CASTIEL_AUTH_TOKEN)
+        auth_token = request.cookies.get(app.config['CASTIEL_AUTH_TOKEN'])
         if auth_token:
-            result = requests.post(COLDSTAR_URL + 'cas/api/check', data=json.dumps({'token': auth_token, 'prolong': True}))
+            result = requests.post(app.config['COLDSTAR_URL'] + 'cas/api/check', data=json.dumps({'token': auth_token, 'prolong': True}))
             if result.status_code == 200:
                 answer = result.json()
                 if answer['success']:
@@ -63,7 +64,7 @@ def check_valid_login():
 
         if not login_valid:
             # return redirect(url_for('login', next=request.url))
-            return redirect(COLDSTAR_URL + 'cas/login?back=%s' % urllib2.quote(request.url))
+            return redirect(app.config['COLDSTAR_URL'] + 'cas/login?back=%s' % urllib2.quote(request.url))
         if not getattr(current_user, 'current_role', None):
             return redirect(url_for('select_role', next=request.url))
 
@@ -149,9 +150,9 @@ def logout():
         session.pop(key, None)
     # Tell Flask-Principal the user is anonymous
     identity_changed.send(current_app._get_current_object(), identity=AnonymousIdentity())
-    token = request.cookies.get(CASTIEL_AUTH_TOKEN)
+    token = request.cookies.get(app.config['CASTIEL_AUTH_TOKEN'])
     if token:
-        requests.post(COLDSTAR_URL + 'cas/api/release', data=json.dumps({'token': token}))
+        requests.post(app.config['COLDSTAR_URL'] + 'cas/api/release', data=json.dumps({'token': token}))
     return redirect(request.args.get('next') or '/')
 
 

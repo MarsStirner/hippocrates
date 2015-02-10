@@ -6,8 +6,8 @@ from datetime import datetime, time, timedelta, date
 from flask.ext.login import current_user
 from sqlalchemy.orm.util import aliased
 from sqlalchemy.sql.expression import between, func
+from application.app import app
 
-from config import VESTA_URL
 from application.systemwide import db, cache
 from application.lib.utils import logger, get_new_uuid, safe_traverse, group_concat
 from application.lib.agesex import parseAgeSelector, recordAcceptableEx
@@ -405,7 +405,7 @@ def get_kladr_city(code):
         code = code[:-2]
     result = dict()
     try:
-        url = u'{0}kladr/city/{1}/'.format(VESTA_URL, code)
+        url = u'{0}kladr/city/{1}/'.format(app.config['VESTA_URL'], code)
         response = requests.get(url)
         response_json = response.json()
     except (requests.ConnectionError, requests.exceptions.MissingSchema, ValueError) as e:
@@ -429,7 +429,7 @@ def get_kladr_street(code):
         code = code[:-2]
     data = dict()
     try:
-        url = u'{0}kladr/street/{1}/'.format(VESTA_URL, code)
+        url = u'{0}kladr/street/{1}/'.format(app.config['VESTA_URL'], code)
         response = requests.get(url)
         response_json = response.json()
     except (requests.ConnectionError, requests.exceptions.MissingSchema, ValueError) as e:

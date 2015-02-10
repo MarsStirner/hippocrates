@@ -5,8 +5,6 @@ from datetime import datetime
 from application.lib.user import UserUtils, UserProfileManager
 from version import version as _version, last_change_date
 
-from config import TIME_ZONE
-
 @app.context_processor
 def copyright():
     return dict(copy_year=datetime.today().year)
@@ -14,7 +12,7 @@ def copyright():
 
 @app.context_processor
 def version():
-    change_date = timezone(TIME_ZONE).localize(last_change_date)
+    change_date = timezone(app.config['TIME_ZONE']).localize(last_change_date)
     return dict(version=_version, change_date=change_date)
 
 

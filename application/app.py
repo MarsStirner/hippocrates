@@ -1,33 +1,33 @@
 # -*- coding: utf-8 -*-
-import os
-from flask import Flask, jsonify
-from flask.ext.principal import Principal
-from flask.ext.babel import Babel
-from flask.ext.login import LoginManager, current_user
-from flask_beaker import BeakerSession
+from flask import Flask
 import pytz
 from werkzeug.contrib.profiler import ProfilerMiddleware
-# from application.middleware import Gzip
-from systemwide import db, cache
-from autoload import load_blueprints
-import config
 
 app = Flask(__name__)
-app.config.from_object(config)
-
-db.init_app(app)
-from models import *
-
-babel = Babel(app)
 
 
-login_manager = LoginManager(app)
-Principal(app)
+# noinspection PyUnresolvedReferences
+def bootstrap_app():
+    from systemwide import db, cache, babel, principal, login_manager, beaker_session
 
-BeakerSession(app)
+    db.init_app(app)
+    babel.init_app(app)
+    login_manager.init_app(app)
+    principal.init_app(app)
+    beaker_session.init_app(app)
+    cache.init_app(app)
 
+    @babel.timezoneselector
+    def get_timezone():
+        return pytz.timezone(app.config['TIME_ZONE'])
 
-cache.init_app(app)
+    if app.config['PROFILE']:
+        app.wsgi_app = ProfilerMiddleware(app.wsgi_app, restrictions=[30])
+
+    import models
+    import views
+    import application.context_processors
+
 
 
 @app.context_processor
@@ -41,22 +41,6 @@ def enum():
 @app.context_processor
 def lpu_style():
     return {
-        'LPU_STYLE': config.LPU_STYLE
+        'LPU_STYLE': app.config['LPU_STYLE']
     }
 
-
-@babel.timezoneselector
-def get_timezone():
-    return pytz.timezone(app.config['TIME_ZONE'])
-
-#Register blueprints
-blueprints_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', app.config['BLUEPRINTS_DIR']))
-load_blueprints(app, apps_path=blueprints_path)
-
-# Import all views
-from views import *
-
-if app.config['PROFILE']:
-    app.wsgi_app = ProfilerMiddleware(app.wsgi_app, restrictions=[30])
-
-# Gzip(app)

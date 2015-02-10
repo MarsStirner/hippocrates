@@ -15,7 +15,6 @@ from application.models.exists import rbUserProfile, UUID, rbCounter, rbAccounti
 from application.models.client import Client
 from application.app import app
 from pysimplelogs.logger import SimpleLogger
-from config import DEBUG, PROJECT_NAME, SIMPLELOGS_URL, TIME_ZONE
 from version import version
 
 
@@ -155,16 +154,16 @@ def rights_require(*right_codes):
 
 
 # инициализация логгера
-logger = SimpleLogger.get_logger(SIMPLELOGS_URL,
-                                 PROJECT_NAME,
-                                 dict(name=PROJECT_NAME, version=version),
-                                 DEBUG)
+logger = SimpleLogger.get_logger(app.config['SIMPLELOGS_URL'],
+                                 app.config['PROJECT_NAME'],
+                                 dict(name=app.config['PROJECT_NAME'], version=version),
+                                 app.config['DEBUG'])
 
 
 class WebMisJsonEncoder(json.JSONEncoder):
     def default(self, o):
         if isinstance(o, datetime.datetime):
-            return timezone(TIME_ZONE).localize(o).astimezone(tz=timezone('UTC')).isoformat()
+            return timezone(app.config['TIME_ZONE']).localize(o).astimezone(tz=timezone('UTC')).isoformat()
         elif isinstance(o, (datetime.date, datetime.time)):
             return o.isoformat()
         elif isinstance(o, Decimal):
@@ -273,7 +272,7 @@ def string_to_datetime(date_string, formats=None):
                 continue
         else:
             raise ValueError
-        return timezone('UTC').localize(dt).astimezone(tz=timezone(TIME_ZONE)).replace(tzinfo=None)
+        return timezone('UTC').localize(dt).astimezone(tz=timezone(app.config['TIME_ZONE'])).replace(tzinfo=None)
     else:
         return date_string
 
@@ -402,7 +401,7 @@ def get_utc_datetime_with_tz(dt=None):
     как в запросе из браузера"""
     if not dt:
         dt = datetime.datetime.now()
-    dt_with_tz = timezone(TIME_ZONE).localize(dt)
+    dt_with_tz = timezone(app.config['TIME_ZONE']).localize(dt)
     return dt_with_tz.astimezone(timezone('UTC'))
 
 

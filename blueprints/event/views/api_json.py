@@ -5,14 +5,13 @@ import datetime
 from flask import request, abort
 from flask.ext.login import current_user
 from sqlalchemy import desc
-from sqlalchemy.orm import joinedload
 
-from config import ORGANISATION_INFIS_CODE
+from application.app import app
 from application.models.actions import Action
 from application.models.client import Client
 from application.models.enums import EventPrimary, EventOrder
-from application.models.event import (Event, EventType, Diagnosis, Diagnostic, EventPayment, Visit)
-from application.models.exists import Person, rbRequestType, rbResult, Contract
+from application.models.event import (Event, EventType, Diagnosis, Diagnostic, Visit)
+from application.models.exists import Person, rbRequestType, rbResult
 from application.systemwide import db
 from application.lib.utils import (jsonify, safe_traverse, logger, safe_datetime, get_utc_datetime_with_tz)
 from application.models.schedule import ScheduleClientTicket
@@ -50,7 +49,7 @@ def api_event_info():
 def api_event_new_get():
     event = Event()
     event.eventType = EventType.get_default_et()
-    event.organisation = Organisation.query.filter_by(infisCode=str(ORGANISATION_INFIS_CODE)).first()
+    event.organisation = Organisation.query.filter_by(infisCode=str(app.config['ORGANISATION_INFIS_CODE'])).first()
     event.isPrimaryCode = EventPrimary.primary[0]
     event.order = EventOrder.planned[0]
 

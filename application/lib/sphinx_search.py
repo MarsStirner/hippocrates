@@ -2,15 +2,15 @@
 from sphinxit.core.helpers import BaseSearchConfig
 from sphinxit.core.nodes import Count, OR, RawAttr
 from sphinxit.core.processor import Search, Snippet
-from config import DEBUG, SEARCHD_CONNECTION
+from application.app import app
 
 
 class SearchConfig(BaseSearchConfig):
-    DEBUG = DEBUG
+    DEBUG = app.config['DEBUG']
     WITH_META = True
     WITH_STATUS = DEBUG
-    if SEARCHD_CONNECTION:
-        SEARCHD_CONNECTION = SEARCHD_CONNECTION
+    if app.config['SEARCHD_CONNECTION']:
+        SEARCHD_CONNECTION = app.config['SEARCHD_CONNECTION']
 
 
 class SearchPerson():

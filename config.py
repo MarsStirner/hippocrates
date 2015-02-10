@@ -53,11 +53,11 @@ TITLE = u'WebMIS 2.0'
 COPYRIGHT_COMPANY = u'КОРУС Консалтинг ИТ'
 LPU_STYLE = 'FNKC'
 
-try:
-    from config_local import *
-except ImportError:
-    # no local config found
-    pass
+# try:
+#     from config_local import *
+# except ImportError:
+#     # no local config found
+#     pass
 
 SQLALCHEMY_DATABASE_URI = '{0}://{1}:{2}@{3}:{4}/{5}{6}'.format(DB_DRIVER,
                                                        DB_USER,
