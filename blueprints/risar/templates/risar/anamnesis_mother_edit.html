@@ -106,9 +106,9 @@
                     <td><input ng-model="chart.anamnesis.mother.infertility_cause" class="form-control" ng-disabled="!chart.anamnesis.mother.infertility"></td>
                 </tr>
                 <tr>
-                    <th>Заболевания</th>
+                    <th>Перенесенные заболевания</th>
                     <td>
-                        <wm-diagnosis model="chart.anamnesis.mother.diseases" list-mode="true"
+                        <wm-diagnosis model="chart.anamnesis.mother.finished_diseases" list-mode="true"
                                       can-add-new="true" can-delete="true" can-edit="true"
                                       action="chart.anamnesis.mother" event="chart" risar="true"></wm-diagnosis>
                     </td>
@@ -116,6 +116,14 @@
                 <tr>
                     <th>Наследственность</th>
                     <td><input ng-model="chart.anamnesis.mother.hereditary" class="form-control"></td>
+                </tr>
+                <tr>
+                    <th>Текущие заболевания</th>
+                    <td>
+                        <wm-diagnosis model="chart.anamnesis.mother.current_diseases" list-mode="true"
+                                      can-add-new="true" can-delete="true" can-edit="true"
+                                      action="chart.anamnesis.mother" event="chart" risar="true"></wm-diagnosis>
+                    </td>
                 </tr>
                 <tr>
                     <th>Вредные привычки</th>

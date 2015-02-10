@@ -229,7 +229,8 @@ var IntolerancesCtrl = function ($scope, $modal, $timeout, RisarApi) {
 var AnamnesisMotherEditCtrl = function ($scope, RisarApi) {
     $scope.hooks.push(function (chart) {
         if (!chart.anamnesis.mother) {
-            chart.anamnesis.mother = {};
+            chart.anamnesis.mother = {finished_diseases: [],
+                                      current_diseases: []};
         }
     });
     $scope.save = function () {
@@ -243,7 +244,8 @@ var AnamnesisMotherEditCtrl = function ($scope, RisarApi) {
 var AnamnesisFatherEditCtrl = function ($scope, RisarApi) {
     $scope.hooks.push(function (chart) {
         if (!chart.anamnesis.father) {
-            chart.anamnesis.father = {};
+            chart.anamnesis.father = {finished_diseases: [],
+                                      current_diseases: []};
         }
     });
     $scope.save = function () {

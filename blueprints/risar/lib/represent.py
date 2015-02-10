@@ -193,7 +193,8 @@ def represent_mother_action(event, action=None):
             .first()
         if mother_blood_type:
             represent_mother['blood_type'] = mother_blood_type.bloodType
-        represent_mother['diseases'] = [evis.make_diagnostic_record(diag) for diag in represent_mother['diseases']]
+        represent_mother['finished_diseases'] = [evis.make_diagnostic_record(diag) for diag in represent_mother['finished_diseases']]
+        represent_mother['current_diseases'] = [evis.make_diagnostic_record(diag) for diag in represent_mother['current_diseases']]
     return represent_mother
 
 
