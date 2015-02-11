@@ -16,6 +16,10 @@ DB_PASSWORD = 'db_password'
 DB_NAME = 'db_name'
 DB_CONNECT_OPTIONS = ''
 
+DB_CAESAR_NAME = 'caesar'
+DB_KLADR_NAME = 'kladr'
+DB_LPU_NAME = 'lpu_db_name'
+
 SERVER_HOST = '127.0.0.1'
 SERVER_PORT = 5000
 
@@ -62,19 +66,22 @@ INDEX_HTML = 'hippo_index.html'
 #     # no local config found
 #     pass
 
-SQLALCHEMY_DATABASE_URI = '{0}://{1}:{2}@{3}:{4}/{5}{6}'.format(DB_DRIVER,
+db_uri_format = '{0}://{1}:{2}@{3}:{4}/{5}{6}'
+
+SQLALCHEMY_DATABASE_URI = db_uri_format.format(DB_DRIVER,
                                                        DB_USER,
                                                        DB_PASSWORD,
                                                        DB_HOST,
                                                        DB_PORT,
-                                                       DB_NAME,
+                                                       DB_LPU_NAME,
                                                        DB_CONNECT_OPTIONS)
 
 SQLALCHEMY_BINDS = {
-    'kladr':        '{0}://{1}:{2}@{3}:{4}/kladr{5}'.format(DB_DRIVER,
+    'kladr':        db_uri_format.format(DB_DRIVER,
                                                        DB_USER,
                                                        DB_PASSWORD,
                                                        DB_HOST,
                                                        DB_PORT,
+                                                       DB_CAESAR_NAME,
                                                        DB_CONNECT_OPTIONS)
 }
