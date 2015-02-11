@@ -1,0 +1,24 @@
+{% extends "risar_config/_base.html" %}
+{% block content %}
+    <div class="row" ng-controller="SetupMainCtrl">
+        <div class="col-md-3 col-lg-2">{# Левый столбец #}
+            <ul class="nav nav-pills nav-stacked">
+                <li role="presentation" ng-class="{active: page == 0}">
+                    <a href="#" ng-click="page = 0">Настройки маршрутизации беременных</a>
+                </li>
+                <li role="presentation" ng-class="{active: page == 1}">
+                    <a href="#" ng-click="page = 1">Настройки мероприятий</a>
+                </li>
+            </ul>
+            <button class="btn btn-success btn-block btn-pill" ng-click="save()">Сохранить изменения</button>
+        </div>
+        <div class="col-md-9 col-lg-10">{# Правый столбец #}
+            <div ng-show="page === 0">
+                {% include "risar_config/routing.html" %}
+            </div>
+            <div ng-show="page === 1">
+                <h1>Настройки мероприятий</h1>
+            </div>
+        </div>
+    </div>
+{% endblock %}

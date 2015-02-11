@@ -1,9 +1,16 @@
 # -*- coding: utf-8 -*
+from sqlalchemy import Table
 
 from application.systemwide import db
 from application.lib.agesex import AgeSex
 
 # from application.models.actions import Action
+
+organisation_mkb_assoc = Table(
+    'Organisation_MKB', db.metadata,
+    db.Column('mkb_id', db.ForeignKey('MKB.id')),
+    db.Column('org_id', db.ForeignKey('Organisation.id')),
+)
 
 
 class rbThesaurus(db.Model):
@@ -118,6 +125,7 @@ class Organisation(db.Model):
     net = db.relationship('rbNet')
     OKPF = db.relationship('rbOKPF')
     OKFS = db.relationship('rbOKFS')
+    mkbs = db.relationship('MKB', secondary=organisation_mkb_assoc)
 
     def __unicode__(self):
         return self.fullName

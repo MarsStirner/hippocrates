@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ru" ng-app="RisarSetupApp">
+<head>
+    {% include '_header.html' %}
+{#    <link href="{{ url_for('.static', filename='css/style.css') }}" rel="stylesheet">#}
+    <script src="{{ url_for('static', filename='angular.js/angular.js') }}"></script>
+    <script src="{{ url_for('static', filename='angular.js/angular-sanitize.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='angular.js/ui-bootstrap-tpls.js') }}"></script>
+    <script src="{{ url_for('.static', filename='js/app.js') }}"></script>
+    {% block modules_css %}{% endblock %}
+</head>
+<body ng-cloak>
+<div id="wrap">
+    {% include '_top.html' %}
+    <div class="container-fluid">
+    {% block content %}{% endblock %}
+    </div>
+    <div id="push"></div>
+</div>
+{% include '_bottom.html' %}
+{% include '_footer.html' %}
+{% block modules_js %}{% endblock %}
+</body>
+</html>

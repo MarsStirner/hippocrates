@@ -30,6 +30,10 @@ def general_menu():
         title=u'Отчёты',
         visible=True,
     ), dict(
+        link='risar_config.index',
+        title=u'РИСАР',
+        visible=True,
+    ), dict(
         link='print_subsystem.index',
         title=u'Печать',
         visible=True,
@@ -45,12 +49,14 @@ from blueprints.print_subsystem.app import module as print_subsystem_module
 from blueprints.dict.app import module as dict_module
 from blueprints.logging.app import module as logging_module
 from blueprints.reports.app import module as reports_module
+from blueprints.risar_config.app import module as risar_config_module
 from blueprints.tfoms.app import module as tfoms_module
 
 app.register_blueprint(print_subsystem_module, url_prefix='/print_subsystem')
 app.register_blueprint(dict_module, url_prefix='/dict')
 app.register_blueprint(logging_module, url_prefix='/logging')
 app.register_blueprint(reports_module, url_prefix='/reports')
+app.register_blueprint(risar_config_module, url_prefix='/risar_config')
 app.register_blueprint(tfoms_module, url_prefix='/tfoms')
 
 if __name__ == "__main__":
