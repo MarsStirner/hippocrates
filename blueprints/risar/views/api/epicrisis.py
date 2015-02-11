@@ -35,8 +35,10 @@ def api_0_chart_epicrisis(event_id):
             if child_inspection:
                 child_action = get_action_by_id(child_inspection.get('id'), event,  risar_newborn_inspection, True)
                 for code, value in child_inspection.iteritems():
-                    if code not in ('id', ) and code in child_action.propsByCode:
+                    if code not in ('id', 'sex') and code in child_action.propsByCode:
                         child_action.propsByCode[code].value = value
+                    elif code == 'sex':
+                        child_action.propsByCode['sexCode'].value = 1 if value['code'] == 'male' else 2
                 db.session.add(child_action)
         db.session.commit()
     return represent_epicrisis(event, action)

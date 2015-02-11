@@ -292,7 +292,7 @@ def make_epicrisis_info(epicrisis):
         info = u'<b>Беременность закончилась</b> '
         pregnancy_final = epicrisis['pregnancy_final']['name'] if epicrisis['pregnancy_final'] else ''
         week = u'недель' if 5 <= epicrisis['pregnancy_duration'] <= 20 else (u'недел' + week_postfix[epicrisis['pregnancy_duration'] % 10])
-        is_dead = bool(epicrisis['death_date'] or ['reason_of_death'])
+        is_dead = bool(epicrisis['death_date'] or epicrisis['reason_of_death'])
         is_complications = bool(epicrisis['delivery_waters'] or epicrisis['weakness'] or epicrisis['perineal_tear'] or
                                 epicrisis['eclampsia'] or epicrisis['funiculus'] or epicrisis['afterbirth'] or
                                 epicrisis['other_complications'])
