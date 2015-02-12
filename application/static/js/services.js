@@ -75,8 +75,8 @@ angular.module('WebMis20.services', []).
             return [].clone.call(arguments).has(this.current_role);
         };
     }]).
-    service('IdleTimer', ['$http', '$log', '$document', 'TimeoutCallback', 'WMConfig', 'IdleUserModal',
-            function ($http, $log, $document, TimeoutCallback, WMConfig, IdleUserModal) {
+    service('IdleTimer', ['$http', '$log', '$document', '$window', 'TimeoutCallback', 'WMConfig', 'IdleUserModal',
+            function ($http, $log, $document, $window, TimeoutCallback, WMConfig, IdleUserModal) {
         var last_ping_time = null,
             last_activity_time = null,
             token_expire_time = null,
@@ -118,7 +118,9 @@ angular.module('WebMis20.services', []).
             $log.debug('new token deadline: {0} / {1}'.format(token_expire_time, new Date(token_expire_time * 1E3)));
             set_warning_timer();
         }
-
+        function process_logout() {
+            $window.open(WMConfig.url.logout, '_self');
+        }
         function _set_tracking(on) {
             if (on) {
                 $document.find('body').on(user_activity_events, _onUserAction);
@@ -190,6 +192,9 @@ angular.module('WebMis20.services', []).
                 check_token().then(function (result) {
                     if (result && result.data.deadline <= token_expire_time) {
                         show_logout_warning();
+                    } else {
+                        $log.debug('User is active in another system.');
+                        set_token_expire_time(result.data.deadline);
                     }
                 });
             }
@@ -209,11 +214,16 @@ angular.module('WebMis20.services', []).
                     if (result && token_expire_time <= result.data.deadline) {
                         $log.info('Warning timer has expired, but logout won\'t be processed' +
                             ' because user was active in another system.');
+                        _set_tracking(true);
+                        ping_timer.start_interval();
+                        set_token_expire_time(result.data.deadline);
                     } else {
                         $log.info('User is still idle. Logging off.');
+                        process_logout();
                     }
                 }, function () {
                     $log.info('Error checking token before logout. Logging off.');
+                    process_logout();
                 });
             });
         }
