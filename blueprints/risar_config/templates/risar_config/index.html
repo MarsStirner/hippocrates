@@ -1,4 +1,4 @@
-{% extends "risar_config/_base.html" %}
+{% extends "caesar_base.html" %}
 {% block content %}
     <div class="row" ng-controller="SetupMainCtrl">
         <div class="col-md-3 col-lg-2">{# Левый столбец #}
@@ -21,4 +21,8 @@
             </div>
         </div>
     </div>
+{% endblock %}
+{% block modules_js %}
+{{ super() }}
+<script src="{{ url_for('.static', filename='js/app.js') }}"></script>
 {% endblock %}

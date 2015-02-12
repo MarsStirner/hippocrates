@@ -10,7 +10,6 @@ __author__ = 'viruzzz-kun'
 
 
 @module.route('/')
-@public_endpoint
 def index():
     try:
         return render_template('risar_config/index.html')

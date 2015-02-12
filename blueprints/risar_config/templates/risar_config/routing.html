@@ -12,17 +12,15 @@
     <table class="table table-condensed">
         <thead>
         <tr>
-            <th>Название ЛПУ</th>
-            <th>Обслуживаемые диагнозы</th>
+            <th class="col-md-4">Название ЛПУ</th>
+            <th class="col-md-8">Обслуживаемые диагнозы</th>
         </tr>
         </thead>
         <tbody>
         <tr ng-repeat="row in list">
             <td>[[ row.name ]]</td>
             <td>
-                <fs-multiselect ng-model="row.diagnoses" theme="select2" items="MKB.objects">
-                    [[ MKB.code ]]
-                </fs-multiselect>
+                <span wm-multiselect ng-model="row.diagnoses" items="MKB.objects" limit="100">[[ item.code ]]</span>
                 <button class="btn btn-primary" ng-click="copy_clipboard(row)">Копировать</button>
                 <button class="btn btn-primary" ng-click="paste_clipboard(row)" ng-disabled="!clipboard">Вставить</button>
             </td>

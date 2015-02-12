@@ -2,26 +2,11 @@
  * Created by mmalkov on 04.02.15.
  */
 
-RisarSetupApp = angular.module('RisarSetupApp', ['ngSanitize', 'ui.bootstrap', 'formstamp', 'WebMis20.']);
-RisarSetupApp.config(function ($interpolateProvider, $tooltipProvider) {
-    $interpolateProvider.startSymbol('[[');
-    $interpolateProvider.endSymbol(']]');
-    $tooltipProvider.setTriggers({
-        'mouseenter': 'mouseleave',
-        'click': 'click',
-        'focus': 'blur',
-        'never': 'mouseleave',
-        'show_popover': 'hide_popover'
-    })
-});
-
-RisarSetupApp.controller('SetupMainCtrl', function ($scope, $window) {
+angular.module('WebMis20')
+.controller('SetupMainCtrl', function ($scope, $window) {
     $scope.page = 0;
-    $scope.save = function () {
-    }
-});
-
-RisarSetupApp.controller('RisarRoutingSetup', function ($scope, $http, RefBookService) {
+})
+.controller('RisarRoutingSetup', function ($scope, $http, RefBookService) {
     $scope.query = '';
     $scope.list = [];
     $scope.clipboard = null;
@@ -29,7 +14,9 @@ RisarSetupApp.controller('RisarRoutingSetup', function ($scope, $http, RefBookSe
     $scope.copy_clipboard = function (row) {
         $scope.clipboard = row.diagnoses;
     };
-    $scope.paste_clipboard = function (row) {};
+    $scope.paste_clipboard = function (row) {
+        row.diagnoses = row.diagnoses.concat($scope.clipboard.clone());
+    };
     $scope.save = function () {
         $http.post('/risar_config/api/routing.json', $scope.list);
     };
