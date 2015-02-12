@@ -20,15 +20,14 @@ var WebMis20 = angular.module('WebMis20', [
     'ui.mask',
     'formstamp',
     'mgcrea.ngStrap.affix',
-    'duScroll',
-    'ngIdle'
+    'duScroll'
 ])
 .config([
     '$interpolateProvider', 'datepickerConfig', 'datepickerPopupConfig', 'paginationConfig',
-    '$tooltipProvider', 'IdleProvider', 'WMConfig',
+    '$tooltipProvider',
     function (
         $interpolateProvider, datepickerConfig, datepickerPopupConfig, paginationConfig,
-        $tooltipProvider, IdleProvider, WMConfig
+        $tooltipProvider
     ) {
     $interpolateProvider.startSymbol('[[');
     $interpolateProvider.endSymbol(']]');
@@ -50,9 +49,6 @@ var WebMis20 = angular.module('WebMis20', [
         'never': 'mouseleave',
         'show_popover': 'hide_popover'
     });
-    IdleProvider.idle(WMConfig.settings.user_idle_timeout);
-    IdleProvider.timeout(WMConfig.settings.logout_warning_timeout);
-    //$IdleProvider.keepalive(false);
 }])
 // Workaround for bug #1404
 // https://github.com/angular/angular.js/issues/1404
@@ -942,20 +938,8 @@ var WebMis20 = angular.module('WebMis20', [
       };
     }
   ])
-.run(['Idle', '$rootScope', 'IdleUserModal', 'IdleTitle', 'Idle', function (Idle, $rootScope, IdleUserModal, IdleTitle, Idle) {
-    Idle.watch();
-    IdleTitle.idleMessage('[[minutes]]:[[seconds]] до истечения времени сессии!');
-    $rootScope.$on('IdleStart', function () {
-        Idle.setTracking(false);
-        IdleUserModal.open()
-        .then(function cancelIdle (result) {
-            Idle.setTracking(true);
-            Idle.interrupt();
-            alert('Пользователь вернулся: ' + result);
-        }, function logoutAfterIdle (result) {
-            alert('Логаут: ' + result);
-        });
-    });
+.run(['IdleTimer', function (IdleTimer) {
+    IdleTimer.start();
 }]);
 
 angular.module('WebMis20.services.models', []);

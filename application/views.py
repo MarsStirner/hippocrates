@@ -1,6 +1,7 @@
 # -*- encoding: utf-8 -*-
 import urllib2
 import requests
+import config
 
 from flask import render_template, abort, request, redirect, url_for, flash, session, current_app
 from flask.ext.principal import Identity, AnonymousIdentity, identity_changed
@@ -12,7 +13,7 @@ from itsdangerous import json
 from application.app import app, db, login_manager, cache
 from application.context_processors import *
 from application.lib.data import get_kladr_city, get_kladr_street
-from application.lib.utils import public_endpoint, jsonify, roles_require, rights_require, request_wants_json
+from application.lib.utils import public_endpoint, jsonify, roles_require, rights_require, request_wants_json, safe_bool
 from application.models import *
 from config import COLDSTAR_URL, CASTIEL_AUTH_TOKEN
 from lib.user import UserAuth, AnonymousUser, UserProfileManager
@@ -38,7 +39,7 @@ def check_valid_login():
         auth_token = request.cookies.get(CASTIEL_AUTH_TOKEN)
         if auth_token:
             result = requests.post(COLDSTAR_URL + 'cas/api/check', data=json.dumps({'token': auth_token}))
-            if result.status_code == 200:
+            if result.status_code == 200:  # and safe_bool(result.data.success):
                 answer = result.json()
                 if answer['success']:
                     if not current_user.is_authenticated():
@@ -63,7 +64,7 @@ def check_valid_login():
 
         if not login_valid:
             # return redirect(url_for('login', next=request.url))
-            return redirect(COLDSTAR_URL + 'cas/user/login?back=%s' % urllib2.quote(request.url))
+            return redirect(COLDSTAR_URL + 'cas/login?back=%s' % urllib2.quote(request.url))
         if not getattr(current_user, 'current_role', None) and request.endpoint != 'wm_config':
             return redirect(url_for('select_role', next=request.url))
 
@@ -81,7 +82,7 @@ def check_user_profile_settings():
 @app.route('/wm_config.js')
 def wm_config():
     settings = Settings()
-    return render_template('config.js', settings=settings)
+    return render_template('config.html', settings=settings, config=config)
 
 
 @app.route('/')
