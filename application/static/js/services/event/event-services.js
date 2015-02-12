@@ -127,7 +127,7 @@ angular.module('WebMis20.services').
                 }
             },
             coordinate: function (action, off) {
-                var user = off ? null : {id: current_user_id}, // fix it if it will be used
+                var user = off ? null : {id: CurrentUser.id},
                     date = off ? null : new Date();
                 if ((action.is_coordinated() && off) || (!action.is_coordinated() && !off)) {
                     action.coord_person = user;

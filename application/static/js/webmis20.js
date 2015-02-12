@@ -2,6 +2,8 @@
  * Created by mmalkov on 10.02.14.
  */
 var WebMis20 = angular.module('WebMis20', [
+    'hitsl.core',
+    'hitsl.ui',
     'WebMis20.services',
     'WebMis20.services.dialogs',
     'WebMis20.services.models',
@@ -11,71 +13,8 @@ var WebMis20 = angular.module('WebMis20', [
     'WebMis20.ActionLayout',
     'WebMis20.directives.goodies',
     'WebMis20.controllers',
-    'WebMis20.LoadingIndicator',
-    'WebMis20.validators',
-    'ui.bootstrap',
-    'ui.select',
-    'ngSanitize',
-    'sf.treeRepeat',
-    'ui.mask',
-    'formstamp',
-    'mgcrea.ngStrap.affix',
-    'duScroll'
+    'WebMis20.validators'
 ])
-.config(function ($interpolateProvider, datepickerConfig, datepickerPopupConfig, paginationConfig) {
-    $interpolateProvider.startSymbol('[[');
-    $interpolateProvider.endSymbol(']]');
-    datepickerConfig.showWeek = false;
-    datepickerConfig.startingDay = 1;
-    datepickerPopupConfig.currentText = 'Сегодня';
-    datepickerPopupConfig.toggleWeeksText = 'Недели';
-    datepickerPopupConfig.clearText = 'Убрать';
-    datepickerPopupConfig.closeText = 'Готово';
-//    datepickerPopupConfig.appendToBody=true;
-    paginationConfig.firstText = 'Первая';
-    paginationConfig.lastText = 'Последняя';
-    paginationConfig.previousText = 'Предыдущая';
-    paginationConfig.nextText = 'Следующая';
-}).config(['$tooltipProvider', function($tooltipProvider){
-    $tooltipProvider.setTriggers({
-        'mouseenter': 'mouseleave',
-        'click': 'click',
-        'focus': 'blur',
-        'never': 'mouseleave',
-        'show_popover': 'hide_popover'
-    })
-}])
-// Workaround for bug #1404
-// https://github.com/angular/angular.js/issues/1404
-// Source: http://plnkr.co/edit/hSMzWC?p=preview
-    .config(['$provide', function($provide) {
-    $provide.decorator('ngModelDirective', ['$delegate', function($delegate) {
-        var ngModel = $delegate[0], controller = ngModel.controller;
-        ngModel.controller = ['$scope', '$element', '$attrs', '$injector', function(scope, element, attrs, $injector) {
-            var $interpolate = $injector.get('$interpolate');
-            attrs.$set('name', $interpolate(attrs.name || '')(scope));
-            $injector.invoke(controller, this, {
-                '$scope': scope,
-                '$element': element,
-                '$attrs': attrs
-            });
-        }];
-        return $delegate;
-    }]);
-    $provide.decorator('formDirective', ['$delegate', function($delegate) {
-        var form = $delegate[0], controller = form.controller;
-        form.controller = ['$scope', '$element', '$attrs', '$injector', function(scope, element, attrs, $injector) {
-            var $interpolate = $injector.get('$interpolate');
-            attrs.$set('name', $interpolate(attrs.name || attrs.ngForm || '')(scope));
-            $injector.invoke(controller, this, {
-                '$scope': scope,
-                '$element': element,
-                '$attrs': attrs
-            });
-        }];
-        return $delegate;
-    }]);
-}])
 .filter('asDateTime', function ($filter) {
     return function (data) {
         if (!data) return data;

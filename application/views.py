@@ -13,7 +13,8 @@ from itsdangerous import json
 
 from application.systemwide import login_manager, cache
 from application.lib.data import get_kladr_city, get_kladr_street
-from application.lib.utils import public_endpoint, jsonify, roles_require, rights_require, request_wants_json
+from application.lib.utils import public_endpoint, jsonify, roles_require, rights_require, request_wants_json, \
+    api_method
 # from application.models import *
 from application.utils import admin_permission
 from lib.user import UserAuth, AnonymousUser, UserProfileManager
@@ -145,6 +146,17 @@ def login():
             errors.append(u'Неверная пара логин/пароль')
 
     return render_template('user/login.html', form=form, errors=errors)
+
+
+@app.route('/api/current-user.json')
+@api_method
+def api_current_user():
+    return current_user.export_js()
+
+
+@app.route('/config.js')
+def config_js():
+    return render_template('config.js')
 
 
 def session_save_user(user):
