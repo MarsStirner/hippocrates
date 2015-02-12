@@ -38,8 +38,8 @@ def check_valid_login():
 
         auth_token = request.cookies.get(CASTIEL_AUTH_TOKEN)
         if auth_token:
-            result = requests.post(COLDSTAR_URL + 'cas/api/check', data=json.dumps({'token': auth_token}))
-            if result.status_code == 200:  # and safe_bool(result.data.success):
+            result = requests.post(COLDSTAR_URL + 'cas/api/check', data=json.dumps({'token': auth_token, 'prolong': True}))
+            if result.status_code == 200:
                 answer = result.json()
                 if answer['success']:
                     if not current_user.is_authenticated():

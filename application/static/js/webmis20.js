@@ -236,7 +236,7 @@ var WebMis20 = angular.module('WebMis20', [
         var out = [];
         if (angular.isArray(items) && event_info && event_info.event_type) {
             var client_info = event_info.client,
-                event_set_date = event_info.set_date ? moment(event_info.set_date) : undefined;
+                event_set_date = aux.format_date(event_info.set_date);
 
             items.forEach(function(item) {
                 var itemMatches = false;
@@ -268,8 +268,8 @@ var WebMis20 = angular.module('WebMis20', [
                 }
 
                 if (event_set_date) {
-                    var item_begDate = moment(item.begDate);
-                    var item_endDate = moment(item.endDate);
+                    var item_begDate = aux.format_date(item.begDate);
+                    var item_endDate = aux.format_date(item.endDate);
                     if (!(item_begDate <= event_set_date && item_endDate >= event_set_date)){
                         itemMatches = false;
                     }
