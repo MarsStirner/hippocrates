@@ -7,24 +7,32 @@ angular.module('WebMis20.LoadingIndicator', []).
     factory('requestInterceptor', function ($q, $rootScope) {
         $rootScope.pendingRequests = 0;
         return {
-               'request': function (config) {
-                    $rootScope.pendingRequests++;
-                    return config || $q.when(config);
-                },
+           'request': function (config) {
+               if (!config.silent) {
+                   $rootScope.pendingRequests++;
+               }
+               return config || $q.when(config);
+            },
 
-                'requestError': function(rejection) {
+            'requestError': function(rejection) {
+                if (!safe_traverse(rejection, 'silent')) {
                     $rootScope.pendingRequests--;
-                    return $q.reject(rejection);
-                },
-
-                'response': function(response) {
-                    $rootScope.pendingRequests--;
-                    return response || $q.when(response);
-                },
-
-                'responseError': function(rejection) {
-                    $rootScope.pendingRequests--;
-                    return $q.reject(rejection);
                 }
+                return $q.reject(rejection);
+            },
+
+            'response': function(response) {
+                if (!response.config.silent) {
+                   $rootScope.pendingRequests--;
+                }
+                return response || $q.when(response);
+            },
+
+            'responseError': function(rejection) {
+                if (!rejection.config.silent) {
+                    $rootScope.pendingRequests--;
+                }
+                return $q.reject(rejection);
             }
-        });
+        }
+    });
