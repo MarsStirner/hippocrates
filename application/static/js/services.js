@@ -113,10 +113,10 @@ angular.module('WebMis20.services', []).
         function get_current_time() {
             return new Date().getTime();
         }
-        function set_token_expire_time(deadline) {
+        function set_token_expire_time(deadline, token_live_time) {
             token_expire_time = deadline;
             $log.debug('new token deadline: {0} / {1}'.format(token_expire_time, new Date(token_expire_time * 1E3)));
-            set_warning_timer();
+            set_warning_timer(token_live_time);
         }
         function process_logout() {
             $window.open(WMConfig.url.logout, '_self');
@@ -131,7 +131,7 @@ angular.module('WebMis20.services', []).
         function _init_warning_timer() {
             check_token().then(function (result) {
                 if (result) {
-                    set_token_expire_time(result.data.deadline);
+                    set_token_expire_time(result.data.deadline, result.data.ttl);
                 }
             });
         }
@@ -163,28 +163,29 @@ angular.module('WebMis20.services', []).
                         $log.error('Could not prolong token on ping timer ({0})'.format(result.message));
                     } else {
                         last_ping_time = cur_time;
-                        set_token_expire_time(result.deadline);
+                        set_token_expire_time(result.deadline, result.ttl);
                     }
                 }).error(function () {
                     $log.error('Could not prolong token on ping timer (unknown error)');
                 });
             }
         }
-        function set_warning_timer() {
-            var token_live_time = token_expire_time * 1E3 - new Date().getTime(),
-                warning_time = WMConfig.settings.logout_warning_timeout * 1E3;
+        function set_warning_timer(token_live_time) {
+            var warning_time = WMConfig.settings.logout_warning_timeout * 1E3,
+                token_live_time = Math.floor(token_live_time * 1E3),
+                to;
             if (token_live_time < 0) {
                 $log.error('Token has already expired!');
             } else if (token_live_time < warning_time) {
                 $log.warn('Logout warning time is greater than token lifetime.');
             } else {
-                var to = Math.floor((token_live_time - warning_time));
+                to = token_live_time - warning_time;
                 $log.info('show warning dialog in (msec): ' + to);
                 token_life_timer.start(to);
             }
         }
         function check_show_idle_warning() {
-            var cur_time = new Date().getTime();
+            var cur_time = get_current_time();
             if ((cur_time - last_activity_time) < ping_timeout) {
                 $log.debug('fire ping instead of showing warning dialog');
                 ping_cas();
@@ -194,7 +195,7 @@ angular.module('WebMis20.services', []).
                         show_logout_warning();
                     } else {
                         $log.debug('User is active in another system.');
-                        set_token_expire_time(result.data.deadline);
+                        set_token_expire_time(result.data.deadline, result.data.ttl);
                     }
                 });
             }
@@ -216,7 +217,7 @@ angular.module('WebMis20.services', []).
                             ' because user was active in another system.');
                         _set_tracking(true);
                         ping_timer.start_interval();
-                        set_token_expire_time(result.data.deadline);
+                        set_token_expire_time(result.data.deadline, result.data.ttl);
                     } else {
                         $log.info('User is still idle. Logging off.');
                         process_logout();
