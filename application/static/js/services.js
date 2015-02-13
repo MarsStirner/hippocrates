@@ -139,6 +139,8 @@ angular.module('WebMis20.services', []).
             // do not prolong
             return $http.post(WMConfig.url.coldstar.cas_check_token, {
                 token: get_current_token()
+            }, {
+                silent: true
             }).then(function (result) {
                 if (!result.data.success) {
                     $log.error('Could not check token lifetime ({0}). You should be logged off.'.format(result.data.message));
@@ -157,6 +159,8 @@ angular.module('WebMis20.services', []).
                 $log.debug('prolonging token (current expire time: {0} / {1})'.format(token_expire_time, new Date(token_expire_time * 1E3)));
                 $http.post(WMConfig.url.coldstar.cas_prolong_token, { // TODO: url
                     token: get_current_token()
+                }, {
+                    silent: true
                 }).success(function (result) {
                     if (!result.success) {
                         // TODO: накапливать ошибки и делать логаут?
