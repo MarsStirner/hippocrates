@@ -72,7 +72,7 @@ def check_valid_login():
 @app.before_request
 def check_user_profile_settings():
     if request.endpoint and 'static' not in request.endpoint:
-        if (request.endpoint not in ('doctor_to_assist', 'api_doctors_to_assist', 'logout') and
+        if (request.endpoint not in ('doctor_to_assist', 'api_doctors_to_assist', 'logout', 'wm_config') and
             UserProfileManager.has_ui_assistant() and
             not current_user.master
         ):
