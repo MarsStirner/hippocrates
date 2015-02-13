@@ -20,15 +20,15 @@ def general_menu():
     ), dict(
         link='dict.index',
         title=u'Справочники',
-        visible=True,
+        visible=UserProfileManager.has_ui_admin(),
     ), dict(
         link='logging.index',
         title=u'Журнал',
-        visible=True,
+        visible=UserProfileManager.has_ui_admin(),
     ), dict(
         link='reports.index',
         title=u'Отчёты',
-        visible=True,
+        visible=UserProfileManager.has_ui_admin(),
     ), dict(
         link='risar_config.index',
         title=u'РИСАР',
@@ -36,11 +36,11 @@ def general_menu():
     ), dict(
         link='print_subsystem.index',
         title=u'Печать',
-        visible=True,
+        visible=UserProfileManager.has_ui_admin(),
     ), dict(
         link='tfoms.index',
         title=u'ТФОМС',
-        visible=True,
+        visible=UserProfileManager.has_ui_admin(),
     )]
     return dict(main_menu=menu_items)
 
