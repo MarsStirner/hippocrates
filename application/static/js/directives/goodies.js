@@ -2,20 +2,34 @@
  * Created by mmalkov on 15.07.14.
  */
 angular.module('WebMis20.directives.goodies', [])
-.factory('TimeoutCallback', ['$timeout', function ($timeout) {
+.factory('TimeoutCallback', ['$timeout', '$interval', function ($timeout, $interval) {
     var Timeout = function (callback, timeout) {
         this.timeout = timeout;
         this.hideki = null;
+        this.interval_promise = null;
         this.callback = callback;
     };
     Timeout.prototype.kill = function () {
         if (this.hideki) {
-            $timeout.cancel(this.hideki)
+            $timeout.cancel(this.hideki);
+        }
+        if (this.interval_promise) {
+            $interval.cancel(this.interval_promise);
         }
     };
-    Timeout.prototype.start = function () {
+    Timeout.prototype.start = function (timeout) {
         this.kill();
-        this.hideki = $timeout(this.callback, this.timeout)
+        if (timeout !== undefined) {
+            this.timeout = timeout;
+        }
+        this.hideki = $timeout(this.callback, this.timeout);
+    };
+    Timeout.prototype.start_interval = function (count, timeout) {
+        this.kill();
+        if (timeout !== undefined) {
+            this.timeout = timeout;
+        }
+        this.interval_promise = $interval(this.callback, this.timeout, count || 0, false);
     };
     return Timeout;
 }])

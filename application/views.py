@@ -1,7 +1,7 @@
 # -*- encoding: utf-8 -*-
 import urllib2
-
 import requests
+import config
 
 from flask import render_template, abort, request, redirect, url_for, flash, session, current_app
 from flask.ext.principal import Identity, AnonymousIdentity, identity_changed
@@ -13,13 +13,14 @@ from itsdangerous import json
 from application.app import app, db, login_manager, cache
 from application.context_processors import *
 from application.lib.data import get_kladr_city, get_kladr_street
-from application.lib.utils import public_endpoint, jsonify, roles_require, rights_require, request_wants_json
+from application.lib.utils import public_endpoint, jsonify, roles_require, rights_require, request_wants_json, safe_bool
 from application.models import *
 from config import COLDSTAR_URL, CASTIEL_AUTH_TOKEN
 from lib.user import UserAuth, AnonymousUser, UserProfileManager
 from forms import LoginForm, RoleForm
 from application.lib.jsonify import PersonTreeVisualizer
 from application.models.exists import rbUserProfile, Person
+from application.lib.settings import Settings
 
 
 login_manager.login_view = 'login'
@@ -64,18 +65,24 @@ def check_valid_login():
         if not login_valid:
             # return redirect(url_for('login', next=request.url))
             return redirect(COLDSTAR_URL + 'cas/login?back=%s' % urllib2.quote(request.url))
-        if not getattr(current_user, 'current_role', None):
+        if not getattr(current_user, 'current_role', None) and request.endpoint != 'wm_config':
             return redirect(url_for('select_role', next=request.url))
 
 
 @app.before_request
 def check_user_profile_settings():
     if request.endpoint and 'static' not in request.endpoint:
-        if (request.endpoint not in ('doctor_to_assist', 'api_doctors_to_assist', 'logout') and
+        if (request.endpoint not in ('doctor_to_assist', 'api_doctors_to_assist', 'logout', 'wm_config') and
             UserProfileManager.has_ui_assistant() and
             not current_user.master
         ):
             return redirect(url_for('doctor_to_assist', next=request.url))
+
+
+@app.route('/wm_config.js')
+def wm_config():
+    settings = Settings()
+    return render_template('config.html', settings=settings, config=config)
 
 
 @app.route('/')

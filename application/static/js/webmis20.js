@@ -22,7 +22,13 @@ var WebMis20 = angular.module('WebMis20', [
     'mgcrea.ngStrap.affix',
     'duScroll'
 ])
-.config(function ($interpolateProvider, datepickerConfig, datepickerPopupConfig, paginationConfig) {
+.config([
+    '$interpolateProvider', 'datepickerConfig', 'datepickerPopupConfig', 'paginationConfig',
+    '$tooltipProvider',
+    function (
+        $interpolateProvider, datepickerConfig, datepickerPopupConfig, paginationConfig,
+        $tooltipProvider
+    ) {
     $interpolateProvider.startSymbol('[[');
     $interpolateProvider.endSymbol(']]');
     datepickerConfig.showWeek = false;
@@ -36,19 +42,18 @@ var WebMis20 = angular.module('WebMis20', [
     paginationConfig.lastText = 'Последняя';
     paginationConfig.previousText = 'Предыдущая';
     paginationConfig.nextText = 'Следующая';
-}).config(['$tooltipProvider', function($tooltipProvider){
     $tooltipProvider.setTriggers({
         'mouseenter': 'mouseleave',
         'click': 'click',
         'focus': 'blur',
         'never': 'mouseleave',
         'show_popover': 'hide_popover'
-    })
+    });
 }])
 // Workaround for bug #1404
 // https://github.com/angular/angular.js/issues/1404
 // Source: http://plnkr.co/edit/hSMzWC?p=preview
-    .config(['$provide', function($provide) {
+.config(['$provide', function($provide) {
     $provide.decorator('ngModelDirective', ['$delegate', function($delegate) {
         var ngModel = $delegate[0], controller = ngModel.controller;
         ngModel.controller = ['$scope', '$element', '$attrs', '$injector', function(scope, element, attrs, $injector) {
@@ -932,7 +937,10 @@ var WebMis20 = angular.module('WebMis20', [
         }
       };
     }
-  ]);
+  ])
+.run(['IdleTimer', function (IdleTimer) {
+    IdleTimer.start();
+}]);
 
 angular.module('WebMis20.services.models', []);
 
