@@ -1,0 +1,59 @@
+{% extends 'risar/base.html' %}
+
+{% block title %}> {{ module_name }}{% endblock %}
+
+{% block main %}
+    <div ng-controller="EventRoutingCtrl">
+        <div alert-notify></div>
+        <ul class="breadcrumb">
+            <li><a href="{{ url_for('.index_html') }}">Рабочий стол</a></li>
+            <li><a ng-href="{{ url_for('.html_chart') }}?event_id=[[ chart.id ]]">Карта пациентки</a></li>
+            <li>Выбор ЛПУ для {% if 'emergency' in request.args %}экстренного{% else %}планового{% endif %} случая</li>
+        </ul>
+        <div class="row marginal">
+            <div class="col-md-10">
+                <ui-select ng-model="chart.lpu" theme="select2" ref-book="Organisation">
+                    <ui-select-match>[[ $select.selected.short_name ]]</ui-select-match>
+                    <ui-select-choices repeat="org in $refBook.objects | filter: {is_hospital: true, short_name: $select.search} | limitTo:50">
+                        <div ng-bind-html="org.short_name | highlight: $select.search"></div>
+                    </ui-select-choices>
+                </ui-select>
+            </div>
+            <div class="col-md-2">
+                <button ng-click="save()" class="btn btn-success btn-block">Сохранить</button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="panel panel-default">
+                    <div class="panel-heading">Диагнозы</div>
+                    <div class="panel-body">
+                        <div fs-checkbox items="chart.diagnoses" ng-model="selected_diagnoses">
+                            <span tooltip="[[ item.name ]]">[[ item.code ]]</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="panel panel-default">
+                    <div class="panel-heading">ЛПУ</div>
+                    <table class="table table-condensed">
+                        <tbody>
+                        <tr ng-repeat="row in results">
+                            <td>[[ $index + 1 ]]</td>
+                            <td>[[ row.name ]]</td>
+                            <td><a class="btn-link" ng-click="select_lpu(row)">Выбрать</a></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block modules_js %}
+    {{ super() }}
+    <script src="{{ url_for('.static', filename='js/event_routing.js', v=version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/risar.js', v=version) }}"></script>
+{% endblock %}

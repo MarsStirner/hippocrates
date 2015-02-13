@@ -25,6 +25,7 @@ from application.models.exists import (rbRequestType, rbService, ContractTariff,
 from application.lib.user import UserUtils, UserProfileManager
 from application.lib.const import VOL_POLICY_CODES, STATIONARY_EVENT_CODES
 
+
 __author__ = 'mmalkov'
 
 
@@ -911,7 +912,7 @@ class EventVisualizer(object):
             'sanatorium': diagnostic.sanatorium,
             'hospital': diagnostic.hospital,
             'diagnosis_description': diagnostic.diagnosis_description
-        }
+        } if diagnostic else None
 
     def make_diagnosis_record(self, diagnosis):
         """

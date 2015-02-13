@@ -139,6 +139,13 @@ class Client(db.Model):
                     'ScheduleClientTicket.client_id == Client.id)',
         innerjoin=True
     )
+    attachments = db.relationship(
+        u'ClientAttach',
+        primaryjoin='and_('
+                    'ClientAttach.client_id==Client.id, '
+                    'ClientAttach.deleted==0)',
+        order_by="desc(ClientAttach.id)",
+        lazy='dynamic')
 
     def __init__(self):
         self.init_on_load()
@@ -438,7 +445,7 @@ class ClientAllergy(db.Model):
                         nullable=False,
                         default=0)
 
-    def __init__(self, name, power, date, notes, client):
+    def __init__(self, name=None, power=None, date=None, notes=None, client=None):
         self.name = name
         self.power = power
         self.createDate = date
@@ -460,6 +467,88 @@ class ClientAllergy(db.Model):
 
     def __int__(self):
         return self.id
+
+
+class ClientAttach(db.Model):
+    __tablename__ = u'ClientAttach'
+
+    id = db.Column(db.Integer, primary_key=True)
+    createDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now)
+    createPerson_id = db.Column(db.Integer, index=True, default=safe_current_user_id)
+    modifyDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now,
+                               onupdate=datetime.datetime.now)
+    modifyPerson_id = db.Column(db.ForeignKey('Person.id'), index=True, default=safe_current_user_id,
+                                onupdate=safe_current_user_id)
+    deleted = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    client_id = db.Column(db.ForeignKey('Client.id'), nullable=False, index=True)
+    attachType_id = db.Column(db.ForeignKey('rbAttachType.id'), nullable=False, index=True)
+    LPU_id = db.Column(db.ForeignKey('Organisation.id'), nullable=False, index=True)
+    orgStructure_id = db.Column(db.ForeignKey('OrgStructure.id'), index=True)
+    begDate = db.Column(db.Date, nullable=False)
+    endDate = db.Column(db.Date)
+    document_id = db.Column(db.ForeignKey('ClientDocument.id'), index=True)
+
+    client = db.relationship(u'Client')
+    self_document = db.relationship(u'ClientDocument')
+    org = db.relationship(u'Organisation')
+    orgStructure = db.relationship(u'OrgStructure')
+    attachType = db.relationship(u'rbAttachType')
+    modifyPerson = db.relationship(u'Person')
+
+    @property
+    def code(self):
+        return self.attachType.code
+
+    @property
+    def name(self):
+        return self.attachType.name
+
+    @property
+    def outcome(self):
+        return self.attachType.outcome
+
+    @property
+    def document(self):
+        if self.document_id:
+            return self.self_document
+        else:
+            return self.getClientDocument()
+
+    def getClientDocument(self):
+        documents = ClientDocument.query.filter(ClientDocument.clientId == self.client_id).\
+            filter(ClientDocument.deleted == 0).all()
+        documents = [document for document in documents if document.documentType and document.documentType.group.code == "1"]
+        return documents[-1]
+
+    def __json__(self):
+        return {
+            'id': self.id,
+            'deleted': self.deleted,
+            'org': self.org,
+            'attach_type': self.attachType,
+            'begDate': self.begDate,
+            'modifyPerson': self.modifyPerson.shortNameText
+        }
+
+    def __int__(self):
+        return self.id
+
+    def __unicode__(self):
+        try:
+            result = self.name
+            if self.outcome:
+                result += ' ' + unicode(self.endDate)
+            elif self.attachType.temporary:
+                result += ' ' + self.org.shortName
+                if self.begDate:
+                    result += u' c ' + unicode(self.begDate)
+                if self.endDate:
+                    result += u' по ' + unicode(self.endDate)
+            else:
+                result += ' ' + self.org.shortName
+        except AttributeError:
+            result = ''
+        return result
 
 
 class ClientIntoleranceMedicament(db.Model):
@@ -501,7 +590,7 @@ class ClientIntoleranceMedicament(db.Model):
                         nullable=False,
                         default=0)
 
-    def __init__(self, name, power, date, notes, client):
+    def __init__(self, name=None, power=None, date=None, notes=None, client=None):
         self.name = name
         self.power = power
         self.createDate = date

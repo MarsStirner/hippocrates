@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 import datetime
+import requests
+from werkzeug.utils import cached_property
 from application.systemwide import db
 from exists import FDRecord
+from application.app import app
 from application.models.utils import safe_current_user_id, get_model_by_name
 
 __author__ = 'mmalkov'
@@ -68,6 +71,17 @@ class Action(db.Model):
     @property
     def properties_ordered(self):
         return sorted(self.properties, key=lambda ap: ap.type.idx)
+
+    @cached_property
+    def propsByCode(self):
+        return dict(
+            (prop.type.code, prop)
+            for prop in self.properties
+            if prop.type.code
+        )
+
+    def __getitem__(self, item):
+        return self.propsByCode[item]
 
 
 class ActionProperty(db.Model):
@@ -141,18 +155,16 @@ class ActionProperty(db.Model):
         self.set_value(value)
 
     def set_value(self, value, raw=False):
+        if self.type.isVector and not (isinstance(value, (list, tuple)) or value is None):
+            raise Exception(u'Tried assigning non-list value (%s) to vector action property (%s)' % (value, self.type.name))
+        if not self.type.isVector and isinstance(value, (list, tuple)):
+            raise Exception(u'Tried assigning list value (%s) to non-vector action property (%s)' % (value, self.type.name))
         value_object = self.value_object
         value_class = self.get_value_class()
 
-        def set_value(val_object, value):
-            if raw and hasattr(val_object, 'value_'):
-                val_object.value_ = value
-            else:
-                val_object.value = value
-
         def make_value(value, index=0):
             val = value_class()
-            set_value(val, value)
+            val.set_value(value)
             val.index = index
             val.property_object = self
             db.session.add(val)
@@ -169,15 +181,17 @@ class ActionProperty(db.Model):
                 if value is None:
                     delete_value(value_object[0])
                 else:
-                    set_value(value_object[0], value)
+                    value_object[0].set_value(value)
         else:
             if value:
                 m = min(len(value_object), len(value))
                 for i in xrange(m):
-                    value_object[i].value = value[i]
+                    value_object[i].set_value(value[i])
+
                 if len(value_object) < len(value):
                     for i in xrange(m, len(value)):
                         value_object.append(make_value(value[i], i))
+
                 elif len(value_object) > len(value):
                     for i in xrange(len(value_object) - 1, m - 1, -1):
                         delete_value(value_object[i])
@@ -298,6 +312,20 @@ class ActionProperty__ValueType(db.Model):
     @classmethod
     def mark_as_deleted(cls, prop):
         pass
+
+    def set_raw_value(self, value):
+        if isinstance(value, dict):
+            value = value['id']
+        if hasattr(self, 'value_'):
+            self.value_ = value
+        else:
+            self.value = value
+
+    def set_value(self, value):
+        if isinstance(value, dict):
+            return self.set_raw_value(value)
+        else:
+            self.value = value
 
 
 class ActionProperty_Action(ActionProperty__ValueType):
@@ -452,7 +480,6 @@ class ActionProperty_Diagnosis(ActionProperty__ValueType):
                 delete_diagnosis(value)
 
 
-
 class ActionProperty_Integer_Base(ActionProperty__ValueType):
     __tablename__ = u'ActionProperty_Integer'
 
@@ -497,6 +524,18 @@ class ActionProperty_OperationType(ActionProperty_Integer_Base):
         self.value_ = val.id if val is not None else None
 
 
+class ActionProperty_Boolean(ActionProperty_Integer_Base):
+    property_object = db.relationship('ActionProperty', backref='_value_Boolean')
+
+    @property
+    def value(self):
+        return bool(self.value_)
+
+    @value.setter
+    def value(self, val):
+        self.value_ = 1 if val else 0
+
+
 class ActionProperty_RLS(ActionProperty_Integer_Base):
 
     def get_value(self):
@@ -516,9 +555,46 @@ class ActionProperty_ReferenceRb(ActionProperty_Integer_Base):
 
     @value.setter
     def value(self, val):
-        self.value_ = val.id if val is not None else None
+        self.value_ = val['id'] if val is not None else None
 
     property_object = db.relationship('ActionProperty', backref='_value_ReferenceRb')
+
+
+class ActionProperty_ExtReferenceRb(ActionProperty__ValueType):
+    __tablename__ = u'ActionProperty_ExtRef'
+
+    id = db.Column(db.Integer, db.ForeignKey('ActionProperty.id'), primary_key=True, nullable=False)
+    index = db.Column(db.Integer, primary_key=True, nullable=False, server_default=u"'0'")
+    value_ = db.Column('value', db.Text, nullable=False)
+
+    def set_raw_value(self, value):
+        if isinstance(value, dict):
+            value = value['code']
+        if hasattr(self, 'value_'):
+            self.value_ = value
+        else:
+            self.value = value
+
+    @property
+    def value(self):
+        if not hasattr(self, 'table_name'):
+            domain = ActionProperty.query.get(self.id).type.valueDomain
+            self.table_name = domain.split(';')[0]
+        try:
+            response = requests.get(u'{0}v1/{1}/code/{2}'.format(app.config['VESTA_URL'], self.table_name, self.value_))
+            result = response.json()['data']
+        except Exception, e:
+            import traceback
+            traceback.print_exc()
+            return
+        else:
+            return {'id': result['_id'], 'name': result['name'], 'code': result['code']}
+
+    @value.setter
+    def value(self, val):
+        self.value_ = val['code'] if val is not None else None
+
+    property_object = db.relationship('ActionProperty', backref='_value_ExtReferenceRb')
 
 
 class ActionProperty_Table(ActionProperty_Integer_Base):

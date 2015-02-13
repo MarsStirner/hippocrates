@@ -1,6 +1,6 @@
 //     Underscore.js 1.7.0
 //     http://underscorejs.org
-//     (c) 2009-2014 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+//     (c) 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
 //     Underscore may be freely distributed under the MIT license.
 
 (function() {
@@ -138,11 +138,10 @@
   // Handles raw objects in addition to array-likes. Treats all
   // sparse array-likes as if they were dense.
   _.each = _.forEach = function(obj, iteratee, context) {
-    if (obj == null) return obj;
     iteratee = optimizeCb(iteratee, context);
-    var i, length = obj.length;
+    var i, length;
     if (isArrayLike(obj)) {
-      for (i = 0; i < length; i++) {
+      for (i = 0, length = obj.length; i < length; i++) {
         iteratee(obj[i], i, obj);
       }
     } else {
@@ -156,14 +155,12 @@
 
   // Return the results of applying the iteratee to each element.
   _.map = _.collect = function(obj, iteratee, context) {
-    if (obj == null) return [];
     iteratee = cb(iteratee, context);
     var keys = !isArrayLike(obj) && _.keys(obj),
         length = (keys || obj).length,
-        results = Array(length),
-        currentKey;
+        results = Array(length);
     for (var index = 0; index < length; index++) {
-      currentKey = keys ? keys[index] : index;
+      var currentKey = keys ? keys[index] : index;
       results[index] = iteratee(obj[currentKey], currentKey, obj);
     }
     return results;
@@ -182,7 +179,6 @@
     }
 
     return function(obj, iteratee, memo, context) {
-      if (obj == null) return memo;
       iteratee = optimizeCb(iteratee, context, 4);
       var keys = !isArrayLike(obj) && _.keys(obj),
           length = (keys || obj).length,
@@ -216,13 +212,11 @@
         accumulator = {};
       }
     }
-    if (obj == null) return accumulator;
     iteratee = optimizeCb(iteratee, context, 4);
-    var keys = obj.length !== +obj.length && _.keys(obj),
-      length = (keys || obj).length,
-      index, currentKey;
-    for (index = 0; index < length; index++) {
-      currentKey = keys ? keys[index] : index;
+    var keys = !isArrayLike(obj) && _.keys(obj),
+      length = (keys || obj).length;
+    for (var index = 0; index < length; index++) {
+      var currentKey = keys ? keys[index] : index;
       if (iteratee(accumulator, obj[currentKey], currentKey, obj) === false) break;
     }
     return accumulator;
@@ -243,7 +237,6 @@
   // Aliased as `select`.
   _.filter = _.select = function(obj, predicate, context) {
     var results = [];
-    if (obj == null) return results;
     predicate = cb(predicate, context);
     _.each(obj, function(value, index, list) {
       if (predicate(value, index, list)) results.push(value);
@@ -259,13 +252,11 @@
   // Determine whether all of the elements match a truth test.
   // Aliased as `all`.
   _.every = _.all = function(obj, predicate, context) {
-    if (obj == null) return true;
     predicate = cb(predicate, context);
     var keys = !isArrayLike(obj) && _.keys(obj),
-        length = (keys || obj).length,
-        index, currentKey;
-    for (index = 0; index < length; index++) {
-      currentKey = keys ? keys[index] : index;
+        length = (keys || obj).length;
+    for (var index = 0; index < length; index++) {
+      var currentKey = keys ? keys[index] : index;
       if (!predicate(obj[currentKey], currentKey, obj)) return false;
     }
     return true;
@@ -274,13 +265,11 @@
   // Determine if at least one element in the object matches a truth test.
   // Aliased as `any`.
   _.some = _.any = function(obj, predicate, context) {
-    if (obj == null) return false;
     predicate = cb(predicate, context);
     var keys = !isArrayLike(obj) && _.keys(obj),
-        length = (keys || obj).length,
-        index, currentKey;
-    for (index = 0; index < length; index++) {
-      currentKey = keys ? keys[index] : index;
+        length = (keys || obj).length;
+    for (var index = 0; index < length; index++) {
+      var currentKey = keys ? keys[index] : index;
       if (predicate(obj[currentKey], currentKey, obj)) return true;
     }
     return false;
@@ -289,7 +278,6 @@
   // Determine if the array or object contains a given value (using `===`).
   // Aliased as `includes` and `include`.
   _.contains = _.includes = _.include = function(obj, target, fromIndex) {
-    if (obj == null) return false;
     if (!isArrayLike(obj)) obj = _.values(obj);
     return _.indexOf(obj, target, typeof fromIndex == 'number' && fromIndex) >= 0;
   };
@@ -516,9 +504,9 @@
 
   // Internal implementation of a recursive `flatten` function.
   var flatten = function(input, shallow, strict, startIndex) {
-    var output = [], idx = 0, value;
+    var output = [], idx = 0;
     for (var i = startIndex || 0, length = input && input.length; i < length; i++) {
-      value = input[i];
+      var value = input[i];
       if (isArrayLike(value) && (_.isArray(value) || _.isArguments(value))) {
         //flatten current level of array or arguments object
         if (!shallow) value = flatten(value, shallow, strict);
@@ -629,9 +617,8 @@
   // pairs, or two parallel arrays of the same length -- one of keys, and one of
   // the corresponding values.
   _.object = function(list, values) {
-    if (list == null) return {};
     var result = {};
-    for (var i = 0, length = list.length; i < length; i++) {
+    for (var i = 0, length = list && list.length; i < length; i++) {
       if (values) {
         result[list[i]] = values[i];
       } else {
@@ -979,6 +966,21 @@
       values[i] = obj[keys[i]];
     }
     return values;
+  };
+
+  // Returns the results of applying the iteratee to each element of the object
+  // In contrast to _.map it returns an object
+  _.mapValues = function(obj, iteratee, context) {
+    iteratee = cb(iteratee, context);
+    var keys =  _.keys(obj),
+          length = keys.length,
+          results = {},
+          currentKey;
+      for (var index = 0; index < length; index++) {
+        currentKey = keys[index];
+        results[currentKey] = iteratee(obj[currentKey], currentKey, obj);
+      }
+      return results;
   };
 
   // Convert an object into a list of `[key, value]` pairs.

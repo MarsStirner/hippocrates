@@ -52,12 +52,12 @@ DP_CURRENT_USER = 4
 class ActionException(Exception): pass
 
 
-def create_action(action_type_id, event_id, src_action=None, assigned=None, properties=None, data=None):
+def create_action(action_type_id, event, src_action=None, assigned=None, properties=None, data=None):
     """
     Базовое создание действия, например для отправки клиентской стороне.
 
     :param action_type_id: action_type_id int
-    :param event_id: event_id int
+    :param event: event_id or Event int
     :param src_action: другое действие Action, из которого будут браться данные
     :param assigned: список id ActionPropertyType, которые должны быть отмечены назначенными
     :param properties: список словарей с данными по ActionProperty, включая value
@@ -65,13 +65,16 @@ def create_action(action_type_id, event_id, src_action=None, assigned=None, prop
     :return: Action model
     """
     # TODO: transfer some checks from ntk
-    if not action_type_id or not event_id:
+    if not action_type_id or not event:
         raise AttributeError
 
     now = datetime.now()
     now_date = now.date()
     actionType = ActionType.query.get(int(action_type_id))
-    event = Event.query.get(int(event_id))
+    if isinstance(event, (int, basestring)):
+        event = Event.query.get(int(event))
+    if event is None:
+        raise ValueError('Event neither refer to existing Event nor newly created model')
     main_user_p = Person.query.get(current_user.get_main_user().id)
 
     action = Action()

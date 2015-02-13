@@ -756,8 +756,18 @@ button.text-left {
     padding-left: 10px;
 }
 
+a.pseudo-btn {
+    padding: 6px 12px;
+    cursor: pointer;
+    text-decoration: underline;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
 .label-no-bold {
     font-weight: normal;
+
 }
 .thesaurus-tree{
     max-height: calc(100% - 305px);

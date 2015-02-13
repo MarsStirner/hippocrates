@@ -25,7 +25,7 @@ var WebMis20 = angular.module('WebMis20', [
 })
 .filter('asDate', function ($filter) {
     return function (data) {
-        if (!data) return ' ';
+        if (!data) return data;
         var result = moment(data);
         if (!result.isValid()) return data;
         return result.format('DD.MM.YYYY');
@@ -75,6 +75,47 @@ var WebMis20 = angular.module('WebMis20', [
         }
     }
 })
+.filter('danet', function () {
+    return function (data) {
+        if (data === true) return 'да';
+        if (data === false) return 'нет';
+        return data;
+    }
+})
+.filter('format', function () {
+    return function (data, format) {
+        if (data instanceof Array) {
+            return data.map(function (item) {
+                return format.replace(/{\s*?(.+?)\s*?}/g, function (str, match) {
+                    return item.hasOwnProperty(match) ? item[match] : match
+                })
+            })
+        } else if (data instanceof Object) {
+            return format.replace(/{(.+?)}/g, function (str, match) {
+                return data.hasOwnProperty(match) ? data[match] : match
+            })
+        } else {
+            return data
+        }
+    }
+})
+.filter('escape', function () {
+        return function (data) {
+            if (data instanceof Array) {
+                return data.map(function (item) {
+                    if (typeof item === 'string' || item instanceof String) {
+                        return item.replace('<', '&lt;').replace('>', '&gt;').replace('&', '&amp;');
+                    } else {
+                        return item;
+                    }
+                })
+            } else if (typeof data === 'string' || data instanceof String) {
+                return data.replace('<', '&lt;').replace('>', '&gt;').replace('&', '&amp;');
+            } else {
+                return data;
+            }
+        }
+    })
 .filter('join', function ($filter) {
     return function (data, char) {
         if (data instanceof Array)
@@ -266,6 +307,20 @@ var WebMis20 = angular.module('WebMis20', [
 })
 .filter('trustHtml', function ($sce) {
     return $sce.trustAsHtml;
+})
+.filter('organisation_filter', function() {
+    return function(items) {
+        var out = [];
+        if(items) {
+            items.forEach(function(item){
+                if (!item.hasOwnProperty('is_hospital') ||
+                    (item.hasOwnProperty('is_hospital') && item.is_hospital)) {
+                    out.push(item);
+                }
+            });
+        }
+        return out;
+    };
 })
 // Services
 .factory('RefBook', ['$http', '$rootScope', function ($http, $rootScope) {

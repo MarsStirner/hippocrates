@@ -135,6 +135,9 @@ angular.module('hitsl.ui', [
     'ui.mask',               // /static/angular-ui-utils/mask_edited.js
     'formstamp',             // /static/angular-formstamp/formstamp.js
     'mgcrea.ngStrap.affix',  // /static/js/angular-strap.js
-    'duScroll'               // /static/angular-scroll/angular-scroll.js
+    'duScroll',              // /static/angular-scroll/angular-scroll.js
+    'rcWizard',
+    'nvd3ChartDirectives',
+    'legendDirectives'
 ])
 ;

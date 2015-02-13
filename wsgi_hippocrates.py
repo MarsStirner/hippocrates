@@ -10,13 +10,13 @@ bootstrap_app()
 
 @app.context_processor
 def general_menu():
+    from flask.ext.login import current_user
     from application.lib.user import UserProfileManager
-
     menu_items = [dict(
         link='index',
         title=u'Главная страница',
         homepage=True,
-        visible=(not UserProfileManager.has_ui_registrator_cut())
+        visible=(UserProfileManager.has_ui_doctor() or UserProfileManager.has_ui_registrator())
     ), dict(
         link='patients.index',
         title=u'Обслуживание пациентов',
@@ -42,19 +42,22 @@ def general_menu():
         title=u'Обращения',
         visible=(UserProfileManager.has_ui_registrator() or UserProfileManager.has_ui_doctor())
     ), dict(
+        link='risar.index_html',
+        title={
+            'obstetrician': u'АРМ Акушера-гинеколога',
+            'overseer1': u'АРМ Куратора 1 уровня',
+            'overseer2': u'АРМ Куратора 2 уровня',
+            'overseer3': u'АРМ Куратора 3 уровня',
+            }.get(getattr(current_user, 'current_role', None), u'АРМ Администратора РИСАР'),
+        visible=UserProfileManager.has_ui_risar()
+    ), dict(
         link='anareports.index_html',
         title=u'Аналитические отчёты',
         visible=True
-    ), dict(
-        link='accounting.cashbook_html',
-        title=u'Расчет пациентов',
-        visible=UserProfileManager.has_ui_cashier()
-    ), dict(
-        link='accounting.cashbook_operations',
-        title=u'Журнал кассовых операций',
-        visible=UserProfileManager.has_ui_cashier()
     )]
     return dict(main_menu=menu_items)
+
+
 
 
 from blueprints.accounting.app import module as accounting_module

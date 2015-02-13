@@ -1,0 +1,112 @@
+{% extends 'risar/base.html' %}
+
+{% block title %}> {{ module_name }}{% endblock %}
+
+{% block main %}
+    <div ng-controller="EventSearchCtrl">
+        <ul class="breadcrumb">
+            <li><a href="{{ url_for('.index_html') }}">Рабочий стол</a></li>
+            <li>Поиск карты пациентки</li>
+        </ul>
+        <div class="row">
+            <form class="col-md-4">
+{#                <div class="form-group">#}
+{#                    <label>Страна</label>#}
+{#                    <div class="form-control-static">-</div>#}
+{#                </div>#}
+{#                <div class="form-group">#}
+{#                    <label>Регион</label>#}
+{#                    <div class="form-control-static">-</div>#}
+{#                </div>#}
+{#                <div class="form-group">#}
+{#                    <label>Район</label>#}
+{#                    <div class="form-control-static">-</div>#}
+{#                </div>#}
+                <div class="form-group">
+                    <label>ЛПУ</label>
+                    <div class="form-control-static">
+                        <ui-select ng-model="query.org" theme="select2" ng-change="refresh_doctors()">
+                            <ui-select-match>[[ $select.selected.short_name ]]</ui-select-match>
+                            <ui-select-choices repeat="org in organisations | filter: {short_name: $select.search} | limitTo:50">
+                                <div ng-bind-html="org.short_name | highlight: $select.search"></div>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Врач</label>
+                    <div class="form-control-static">
+                        <ui-select ng-model="query.person" theme="select2">
+                            <ui-select-match>[[ $select.selected.name ]]</ui-select-match>
+                            <ui-select-choices repeat="doc in doctors | filter: {full_name: $select.search} | limitTo:50">
+                                <div ng-bind-html="doc.full_name | highlight: $select.search"></div>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>ФИО пациентки</label>
+                    <input class="form-control" ng-model="query.fio">
+                </div>
+                <div class="form-group">
+                    <label>Степень риска</label>
+                    <div class="form-control-static">
+                        <div fs-checkbox="" items="risks_rb.objects" ng-model="query.risk">
+                            [[ item.name ]]
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Дата родов</label>
+                    <div class="form-control-static">
+                        <wm-date ng-model="query.bdate"></wm-date>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Дата осмотра</label>
+                    <div class="form-control-static">
+                        <wm-date ng-model="query.checkup_date"></wm-date>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Закрытые обращения</label>
+                    <div class="form-control-static">
+                        <div fs-radio="" items="closed_items" ng-model="query.closed">
+                            [[ item.name ]]
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <div class="col-md-8">
+                <table class="table table-condensed">
+                    <thead>
+                    <tr>
+                        <th>Риск</th>
+                        <th>№ карты</th>
+                        <th>ФИО</th>
+                        <th>Врач</th>
+                        <th>Срок</th>
+                        <th>Дата ред. карты</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="row in results">
+                        <td risk-rate-icon="row.risk"></td>
+                        <td>[[ row.external_id ]]</td>
+                        <td><a ng-href="{{ url_for('.html_chart') }}?event_id=[[ row.event_id ]]">[[ row.name ]]</a></td>
+                        <td>[[ row.exec_person_name ]]</td>
+                        <td>[[ row.week ]]</td>
+                        <td>[[ row.mdate | asDate ]]</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block modules_js %}
+    {{ super() }}
+    <script src="{{ url_for('.static', filename='js/search.js', v=version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/risar.js', v=version) }}"></script>
+{% endblock %}

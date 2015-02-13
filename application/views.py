@@ -239,6 +239,14 @@ def api_refbook(name):
                 res = ref_book.query.order_by(ref_book.id).all()
                 res = jsonify(res)
             return res
+    if name is None:
+        return jsonify([])
+    else:
+        result = []
+        response = requests.get(u'{0}v1/{1}/'.format(app.config['VESTA_URL'], name))
+        for i, item in enumerate(response.json()['data']):
+            result.append({'id': item['_id'], 'name': item['name'], 'code': item['code']})
+        return jsonify(result)
     return abort(404)
 
 

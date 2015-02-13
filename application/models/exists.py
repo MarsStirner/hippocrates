@@ -138,7 +138,8 @@ class Organisation(db.Model):
             'title': self.title,
             # 'net': self.net,
             'infis': self.infisCode,
-            'is_insurer': bool(self.isInsurer)
+            'is_insurer': bool(self.isInsurer),
+            'is_hospital': bool(self.isHospital)
         }
 
     def __int__(self):
@@ -383,6 +384,27 @@ class rbAccountingSystem(db.Model):
             'name': self.name,
             'is_editable': bool(self.isEditable),
             'show_in_client_info': bool(self.showInClientInfo),
+        }
+
+    def __int__(self):
+        return self.id
+
+
+class rbAttachType(db.Model):
+    __tablename__ = u'rbAttachType'
+
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(8), nullable=False, index=True)
+    name = db.Column(db.String(64), nullable=False, index=True)
+    temporary = db.Column(db.Integer, nullable=False)
+    outcome = db.Column(db.Integer, nullable=False)
+    finance_id = db.Column(db.Integer, nullable=False, index=True)
+
+    def __json__(self):
+        return {
+            'id': self.id,
+            'code': self.code,
+            'name': self.name
         }
 
     def __int__(self):

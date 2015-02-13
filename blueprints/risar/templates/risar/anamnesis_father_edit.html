@@ -1,0 +1,154 @@
+{% extends 'risar/base.html' %}
+{% import 'risar/_macros.html' as rimacros %}
+
+{% block title %}> {{ module_name }}{% endblock %}
+
+{% block main %}
+    <div ng-controller="AnamnesisCtrl" ng-cloak>
+        <ul class="breadcrumb">
+            <li><a href="{{ url_for('.index_html') }}">Рабочий стол</a></li>
+            <li><a ng-href="{{ url_for('.html_chart') }}?event_id=[[ chart.id ]]">Карта пациентки</a></li>
+            <li><a ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ chart.id ]]">Анамнез пациентки</a></li>
+            <li>Ввод данных об отце</li>
+        </ul>
+        <div class="row small-marginal">
+            <div class="col-md-12">
+                {{ rimacros.page_title('Ввод данных об отце') }}
+            </div>
+        </div>
+        <div ng-controller="AnamnesisFatherEditCtrl">
+            <table class="table table-condensed">
+                <thead>
+                <tr>
+                    <th class="col-md-4"></th>
+                    <th class="col-md-8"></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <th>ФИО</th>
+                    <td><input ng-model="chart.anamnesis.father.name" class="form-control"></td>
+                </tr>
+
+                <tr>
+                    <th>Образование</th>
+                    <td><rb-select ng-model="chart.anamnesis.father.education" ref-book="rbRisarEducation"></rb-select></td>
+                </tr>
+
+                <tr>
+                    <th>Общественно-профессиональная группа</th>
+                    <td><rb-select ng-model="chart.anamnesis.father.work_group" ref-book="rbRisarWork_Group"></rb-select></td>
+                </tr>
+
+                <tr>
+                    <th>Профессиональные вредности</th>
+                    <td><rb-select ng-model="chart.anamnesis.father.professional_properties" ref-book="rbRisarProfessional_Properties"></rb-select></td>
+                </tr>
+
+                <tr>
+                    <th>Группа крови и резус-фактор</th>
+                    <td><div class="row"><div class="col-md-4"><rb-select ng-model="chart.anamnesis.father.blood_type" ref-book="rbBloodType"></rb-select></div></div></td>
+                </tr>
+
+                <tr>
+                    <th>Телефон</th>
+                    <td><input ng-model="chart.anamnesis.father.phone" class="form-control"></td>
+                </tr>
+
+                <tr>
+                    <th>ВИЧ</th>
+                    <td><input ng-model="chart.anamnesis.father.HIV" class="checkbox" type="checkbox"></td>
+                </tr>
+
+                <tr>
+                    <th>Флюорография</th>
+                    <td><input ng-model="chart.anamnesis.father.fluorography" class="form-control"></td>
+                </tr>
+
+                <tr>
+                    <th>Бесплодие</th>
+                    <td><input ng-model="chart.anamnesis.father.infertility" class="checkbox" type="checkbox"></td>
+                </tr>
+
+                <tr>
+                    <td>Вид</td>
+                    <td><input ng-model="chart.anamnesis.father.infertility_type" class="form-control" ng-disabled="!chart.anamnesis.father.infertility"></td>
+                </tr>
+
+                <tr>
+                    <td>Длительность, мес</td>
+                    <td><input ng-model="chart.anamnesis.father.infertility_period" class="form-control" type="number" valid-number ng-disabled="!chart.anamnesis.father.infertility"></td>
+                </tr>
+
+                <tr>
+                    <td>Лечение</td>
+                    <td><input ng-model="chart.anamnesis.father.infertility_treatment" class="form-control" ng-disabled="!chart.anamnesis.father.infertility"></td>
+                </tr>
+
+                <tr>
+                    <td>Причина</td>
+                    <td><input ng-model="chart.anamnesis.father.infertility_cause" class="form-control" ng-disabled="!chart.anamnesis.father.infertility"></td>
+                </tr>
+                <tr>
+                    <th>Перенесенные заболевания</th>
+                    <td>
+                        <wm-diagnosis model="chart.anamnesis.father.finished_diseases" list-mode="true"
+                                      can-add-new="true" can-delete="true" can-edit="true"
+                                      action="chart.anamnesis.father" event="chart" risar="true"></wm-diagnosis>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Наследственность</th>
+                    <td><input ng-model="chart.anamnesis.father.hereditary" class="form-control"></td>
+                </tr>
+
+                <tr>
+                    <th>Текущие заболевания</th>
+                    <td>
+                        <wm-diagnosis model="chart.anamnesis.father.current_diseases" list-mode="true"
+                                      can-add-new="true" can-delete="true" can-edit="true"
+                                      action="chart.anamnesis.father" event="chart" risar="true"></wm-diagnosis>
+                    </td>
+                </tr>
+
+                <tr>
+                    <th>Вредные привычки</th>
+                    <td>&nbsp;</td>
+                </tr>
+
+                <tr>
+                    <td>Алкоголь</td>
+                    <td><input ng-model="chart.anamnesis.father.alcohol" class="checkbox" type="checkbox"></td>
+                </tr>
+
+                <tr>
+                    <td>Курение</td>
+                    <td><input ng-model="chart.anamnesis.father.smoking" class="checkbox" type="checkbox"></td>
+                </tr>
+
+                <tr>
+                    <td>Токсические вещества</td>
+                    <td><input ng-model="chart.anamnesis.father.toxic" class="checkbox" type="checkbox"></td>
+                </tr>
+
+                <tr>
+                    <td>Наркотики</td>
+                    <td><input ng-model="chart.anamnesis.father.drugs" class="checkbox" type="checkbox"></td>
+                </tr>
+                </tbody>
+            </table>
+
+            <div class="text-right">
+                <a class="pseudo-btn" ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ chart.id ]]">Перейти на форму анамнеза пациентки</a>
+                <button class="btn btn-success" ng-click="save()">Сохранить</button>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block modules_js %}
+    {{ super() }}
+    <script src="{{ url_for('.static', filename='js/anamnesis.js', v=version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/risar.js', v=version) }}"></script>
+    <script src="{{ url_for('static', filename='js/services/event/event-services.js', v=version) }}"></script>
+{% endblock %}
