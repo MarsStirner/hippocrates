@@ -42,4 +42,4 @@ def api_routing_post():
             if 'id' in mkb
         ]
     db.session.commit()
-    return api_routing_get()
+    return map(represent_organisation, Organisation.query.filter(Organisation.isHospital == 1))
