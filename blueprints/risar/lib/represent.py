@@ -89,19 +89,26 @@ def represent_chart_for_routing(event):
         ActionType.flatCode.in_(checkup_flat_codes)
     ).order_by(Action.begDate.desc()).first()
     if last_checkup is None:
-        diagnoses = []
+        diagnostics = []
     else:
-        diagnoses = list(itertools.chain(*[
+        diagnostics = itertools.chain.from_iterable(
             prop.value if isinstance(prop.value, list) else [prop.value]
             for prop in last_checkup.properties
-            if prop.type.typeName == 'MKB' and prop.value
-        ]))
+            if prop.type.typeName == 'Diagnosis' and prop.value
+        )
+    mkbs = [
+        diagnose.mkb
+        for diagnose in itertools.chain.from_iterable(
+            diagnostic.diagnoses
+            for diagnostic in diagnostics
+        )
+    ]
     plan_attach = event.client.attachments.join(rbAttachType).filter(rbAttachType.code == 10).first()
     extra_attach = event.client.attachments.join(rbAttachType).filter(rbAttachType.code == 11).first()
     return {
         'id': event.id,
         'client_id': event.client_id,
-        'diagnoses': diagnoses,
+        'diagnoses': mkbs,
         'plan_lpu': plan_attach.org if plan_attach else {},
         'extra_lpu': extra_attach.org if plan_attach else {},
     }

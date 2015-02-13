@@ -124,11 +124,17 @@ def api_0_mini_chart(event_id=None):
 @module.route('/api/0/event_routing', methods=['POST'])
 @api_method
 def api_0_event_routing():
+    from application.models.exists import MKB, organisation_mkb_assoc
+    diagnoses = request.get_json().get('diagnoses', None)
+    query = Organisation.query.filter(Organisation.isHospital == 1)
+    if diagnoses:
+        query = query.join(organisation_mkb_assoc, MKB).filter(MKB.id.in_([d['id'] for d in diagnoses]))
     return [
         {
             'id': row.id,
             'name': row.shortName,
-        } for row in Organisation.query.filter(Organisation.isHospital == 1)
+            'diagnoses': row.mkbs,
+        } for row in query
     ]
 
 
