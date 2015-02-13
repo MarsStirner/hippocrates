@@ -110,7 +110,7 @@ def represent_chart_for_routing(event):
         'client_id': event.client_id,
         'diagnoses': mkbs,
         'plan_lpu': plan_attach.org if plan_attach else {},
-        'extra_lpu': extra_attach.org if plan_attach else {},
+        'extra_lpu': extra_attach.org if extra_attach else {},
     }
 
 
