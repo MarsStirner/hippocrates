@@ -15,10 +15,12 @@ angular.module('WebMis20')
         $scope.clipboard = row.diagnoses;
     };
     $scope.paste_clipboard = function (row) {
-        row.diagnoses = row.diagnoses.concat($scope.clipboard.clone());
+        row.diagnoses = _.listSetList(row.diagnoses.concat($scope.clipboard.clone()), 'id');
     };
     $scope.save = function () {
-        $http.post('/risar_config/api/routing.json', $scope.list);
+        $http.post('/risar_config/api/routing.json', $scope.list).success(function (data) {
+            $scope.list = data.result;
+        })
     };
     $http.get('/risar_config/api/routing.json').success(function (data) {
         $scope.list = data.result;

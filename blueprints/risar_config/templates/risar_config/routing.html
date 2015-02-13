@@ -17,7 +17,7 @@
         </tr>
         </thead>
         <tbody>
-        <tr ng-repeat="row in list">
+        <tr ng-repeat="row in list | filter:query">
             <td>[[ row.name ]]</td>
             <td>
                 <span wm-multiselect ng-model="row.diagnoses" items="MKB.objects" limit="100">[[ item.code ]]</span>
