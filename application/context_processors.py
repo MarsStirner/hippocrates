@@ -35,27 +35,27 @@ def general_menu():
     ), dict(
         link='patients.index',
         title=u'Обслуживание пациентов',
-        visible=(UserProfileManager.has_ui_registrator() or UserProfileManager.has_ui_registrator_cut())
+        visible=(not UserProfileManager.has_ui_doctor_stat() and (UserProfileManager.has_ui_registrator() or UserProfileManager.has_ui_registrator_cut()))
     ), dict(
         link='schedule.person_schedule_monthview',
         title=u'Формирование графика врача',
-        visible=(UserProfileManager.has_ui_registrator())
+        visible=(not UserProfileManager.has_ui_doctor_stat() and UserProfileManager.has_ui_registrator())
     ), dict(
         link='schedule.index',
         title=u'График работы',
-        visible=(UserProfileManager.has_ui_registrator())
+        visible=(not UserProfileManager.has_ui_doctor_stat() and UserProfileManager.has_ui_registrator())
     ), dict(
         link='schedule.doctor_schedule_day',
         title=u'Приём пациентов',
-        visible=(UserProfileManager.has_ui_doctor())
+        visible=(not UserProfileManager.has_ui_doctor_stat() and UserProfileManager.has_ui_doctor())
     ), dict(
         link='patients.search',
         title=u'Поиск пациентов',
-        visible=(UserProfileManager.has_ui_doctor())
+        visible=(not UserProfileManager.has_ui_doctor_stat() and UserProfileManager.has_ui_doctor())
     ), dict(
         link='event.get_events',
         title=u'Обращения',
-        visible=(UserProfileManager.has_ui_registrator() or UserProfileManager.has_ui_doctor())
+        visible=(not UserProfileManager.has_ui_doctor_stat() and (UserProfileManager.has_ui_registrator() or UserProfileManager.has_ui_doctor()))
     ), dict(
         link='anareports.index_html',
         title=u'Аналитические отчёты',
