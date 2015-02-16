@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from application.systemwide import db
 from application.models.exists import Person
+from flask import url_for
 from flask.ext.login import UserMixin, AnonymousUserMixin, current_user
 import hashlib
 
@@ -168,3 +169,50 @@ class UserUtils(object):
                  current_user.id == event.createPerson_id)
             )
         )
+
+
+class UserProfileManager(object):
+    user = None
+
+    admin = 'admin'  # Администратор
+    reg_clinic = 'clinicRegistrator'  # Регистратор поликлиники
+    doctor_clinic = 'clinicDoctor'  # Врач поликлиники
+    doctor_diag = 'diagDoctor'  # Врач диагностики
+    nurse_admission = 'admNurse'  # Медсестра приемного отделения
+
+    ui_groups = {
+        'doctor': [admin, doctor_clinic, doctor_diag],
+        'registrator': [admin, reg_clinic],
+        'registrator_cut': [admin, nurse_admission]
+    }
+
+    @classmethod
+    def _get_user(cls):
+        return cls.user or current_user
+
+    @classmethod
+    def set_user(cls, user):
+        cls.user = user
+
+    @classmethod
+    def _get_user_role(cls):
+        user = cls.user or current_user
+        return user.current_role if not user.is_anonymous() else None
+
+    @classmethod
+    def has_ui_registrator(cls):
+        return cls._get_user_role() in cls.ui_groups['registrator']
+
+    @classmethod
+    def has_ui_registrator_cut(cls):
+        return cls._get_user_role() in cls.ui_groups['registrator_cut']
+
+    @classmethod
+    def has_ui_doctor(cls):
+        return cls._get_user_role() in cls.ui_groups['doctor']
+
+    @classmethod
+    def get_default_url(cls):
+        if cls._get_user_role() == cls.nurse_admission:
+            return url_for('patients.index')
+        return url_for('index')
