@@ -37,8 +37,8 @@ def api_0_chart_epicrisis(event_id):
                 for code, value in child_inspection.iteritems():
                     if code not in ('id', 'sex') and code in child_action.propsByCode:
                         child_action.propsByCode[code].value = value
-                    elif code == 'sex':
-                        child_action.propsByCode['sexCode'].value = 1 if value['code'] == 'male' else 2
+                    elif code == 'sex' and value:
+                        child_action.propsByCode['sex'].value = 1 if value['code'] == 'male' else 2
                 db.session.add(child_action)
         db.session.commit()
     return represent_epicrisis(event, action)

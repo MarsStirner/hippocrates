@@ -379,6 +379,6 @@ def represent_newborn_inspections(event):
     for action in actions:
         inspection = dict((code, prop.value) for (code, prop) in action.propsByCode.iteritems())
         inspection['id'] = action.id
-        inspection['sex'] = Gender(inspection['sexCode']) if inspection['sexCode'] is not None else None
+        inspection['sex'] = Gender(inspection['sex']) if inspection['sex'] is not None else None
         newborn_inspections.append(inspection)
     return newborn_inspections
