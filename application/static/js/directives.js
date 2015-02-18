@@ -1383,13 +1383,12 @@ angular.module('WebMis20.directives')
                 <table class="table table-condensed">\
                     <thead>\
                         <tr>\
-                            <th class="col-md-1">Дата начала</th>\
-                            <th class="col-md-1">Дата окончания</th>\
+                            <th class="col-md-2">Дата начала</th>\
+                            <th class="col-md-2">Дата окончания</th>\
                             <th class="col-md-2">Тип</th>\
                             <th class="col-md-2">Код МКБ</th>\
                             <th class="col-md-2">Врач</th>\
-                            <th class="col-md-2">Описание</th>\
-                            <th class="col-md-1"></th>\
+                            <th class="col-md-1">Описание</th>\
                             <th class="col-md-1"></th>\
                         </tr>\
                     </thead>\
@@ -1401,12 +1400,10 @@ angular.module('WebMis20.directives')
                             <td ng-click="open_action(model.action_id)"><span tooltip="[[ model.diagnosis.mkb.name ]]">[[model.diagnosis.mkb.code]]</span></td>\
                             <td ng-click="open_action(model.action_id)">[[model.person.name]]</td>\
                             <td ng-click="open_action(model.action_id)">[[model.diagnosis_description]]</td>\
-                            <td>\
+                            <td style="white-space:nowrap;">\
                                 <button type="button" class="btn btn-sm btn-primary" title="Редактировать" ng-if="canEdit"\
                                         ng-click="edit_diagnosis(model)"><span class="glyphicon glyphicon-pencil"></span>\
                                 </button>\
-                            </td>\
-                            <td>\
                                 <button type="button" class="btn btn-sm btn-danger" title="Удалить" ng-if="canDelete"\
                                         ng-click="delete_diagnosis(model)"><span class="glyphicon glyphicon-trash"></span>\
                                 </button>\
@@ -1419,12 +1416,10 @@ angular.module('WebMis20.directives')
                             <td ng-click="open_action(diag.action_id)"><span tooltip="[[diag.diagnosis.mkb.name]]">[[diag.diagnosis.mkb.code]]</span></td>\
                             <td ng-click="open_action(diag.action_id)">[[diag.person.name]]</td>\
                             <td ng-click="open_action(diag.action_id)">[[diag.diagnosis_description]]</td>\
-                            <td>\
+                            <td style="white-space:nowrap;">\
                                 <button type="button" class="btn btn-sm btn-primary" title="Редактировать" ng-if="canEdit"\
                                         ng-click="edit_diagnosis(diag)"><span class="glyphicon glyphicon-pencil"></span>\
                                 </button>\
-                            </td>\
-                            <td>\
                                 <button type="button" class="btn btn-sm btn-danger" title="Удалить" ng-if="canDelete"\
                                         ng-click="delete_diagnosis(diag)"><span class="glyphicon glyphicon-trash"></span>\
                                 </button>\
@@ -1691,7 +1686,7 @@ angular.module('WebMis20.directives')
                     </div>\
                     <div class="col-md-2">\
                         <div class="form-group" ng-class="{\'has-error\': DiagnosisForm.end_date.$invalid}">\
-                            <wm-date name="end_date" ng-model="model.end_date">\
+                            <wm-date name="end_date" ng-model="model.end_date" ng-required="[[params.required.end_date]]">\
                             </wm-date>\
                         </div>\
                     </div>\

@@ -111,7 +111,8 @@
                         <wm-diagnosis model="chart.anamnesis.mother.finished_diseases" list-mode="true"
                                       can-add-new="true" can-delete="true" can-edit="true"
                                       action="chart.anamnesis.mother" event="chart"
-                                      params="{defaults:{diagnosis_type:rbDiagnosisType.get_by_code('2')}}" risar="true"></wm-diagnosis>
+                                      params="{defaults:{diagnosis_type:rbDiagnosisType.get_by_code('2')},
+                                               required:{end_date:true}}" risar="true"></wm-diagnosis>
                     </td>
                 </tr>
                 <tr>

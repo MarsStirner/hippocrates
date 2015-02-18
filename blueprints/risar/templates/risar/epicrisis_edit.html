@@ -256,7 +256,8 @@
                                             <wm-diagnosis model="chart.epicrisis.pat_diagnosis" list-mode="false"
                                                           can-add-new="true" can-delete="true" can-edit="true"
                                                           action="chart.epicrisis" event="chart" risar="true"
-                                                          params="{defaults:{diagnosis_type:rbDiagnosisType.get_by_code('2')}}"></wm-diagnosis>
+                                                          params="{defaults:{diagnosis_type:rbDiagnosisType.get_by_code('2')},
+                                                                   required:{end_date:true}}"></wm-diagnosis>
                                         </div>
                                     </td>
                                 </tr>
