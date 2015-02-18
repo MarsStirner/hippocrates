@@ -1383,14 +1383,14 @@ angular.module('WebMis20.directives')
                 <table class="table table-condensed">\
                     <thead>\
                         <tr>\
-                            <th>Дата начала</th>\
-                            <th>Дата окончания</th>\
-                            <th>Тип</th>\
-                            <th>Код МКБ</th>\
-                            <th>Врач</th>\
-                            <th>Описание</th>\
-                            <th></th>\
-                            <th></th>\
+                            <th class="col-md-1">Дата начала</th>\
+                            <th class="col-md-1">Дата окончания</th>\
+                            <th class="col-md-2">Тип</th>\
+                            <th class="col-md-2">Код МКБ</th>\
+                            <th class="col-md-2">Врач</th>\
+                            <th class="col-md-2">Описание</th>\
+                            <th class="col-md-1"></th>\
+                            <th class="col-md-1"></th>\
                         </tr>\
                     </thead>\
                     <tbody>\
@@ -1629,7 +1629,7 @@ angular.module('WebMis20.directives')
                              ng-class="{\'has-error\': DiagnosisForm.diagnosis_type.$invalid}">\
                             <ui-select class="form-control" name="diagnosis_type" theme="select2"\
                                 ng-model="model.diagnosis_type" ref-book="rbDiagnosisType"\
-                                ng-required="true">\
+                                ng-required="true" ng-disabled="[[params.disabled.diagnosis_type]]">\
                                 <ui-select-match placeholder="не выбрано">[[ $select.selected.name ]]</ui-select-match>\
                                 <ui-select-choices repeat="dt in ($refBook.objects | filter: $select.search | filter: filter_type()) track by dt.id">\
                                     <span ng-bind-html="dt.name | highlight: $select.search"></span>\

@@ -160,15 +160,13 @@
                                     <tr>
                                         <th class="text-right">Основной диагноз <span class="text-danger">*</span></th>
                                         <td>
-                                            <div class="row">
 {#                                            ng-class="{'has-error': firstForm.main_diagnosis.$invalid && firstForm.submit_attempt}"#}
-                                            <div class="col-md-7">
-                                                <wm-diagnosis model="chart.epicrisis.main_diagnosis" list-mode="false"
-                                                              can-add-new="true" can-delete="true" can-edit="true"
-                                                              action="chart.epicrisis" event="chart" risar="true"
-                                                              params="{defaults:{diagnosis_type:rbDiagnosisType.get_by_code('2')}}"></wm-diagnosis>
-                                            </div>
-                                            </div>
+                                            <wm-diagnosis model="chart.epicrisis.main_diagnosis" list-mode="false"
+                                                          can-add-new="true" can-delete="true" can-edit="true"
+                                                          action="chart.epicrisis" event="chart" risar="true"
+                                                          params="{defaults:{diagnosis_type:rbDiagnosisType.get_by_code('2')},
+                                                                   disabled:{diagnosis_type:true}}"></wm-diagnosis>
+
                                         </td>
                                     </tr>
                                     <tr>
@@ -177,7 +175,8 @@
                                             <wm-diagnosis model="chart.epicrisis.attend_diagnosis" list-mode="true"
                                                           can-add-new="true" can-delete="true" can-edit="true"
                                                           action="chart.epicrisis" event="chart" risar="true"
-                                                          params="{defaults:{diagnosis_type:rbDiagnosisType.get_by_code('11')}}"></wm-diagnosis>
+                                                          params="{defaults:{diagnosis_type:rbDiagnosisType.get_by_code('11')},
+                                                                   disabled:{diagnosis_type:true}}"></wm-diagnosis>
                                         </td>
                                     </tr>
                                     <tr>
@@ -186,7 +185,8 @@
                                             <wm-diagnosis model="chart.epicrisis.complicating_diagnosis" list-mode="true"
                                                           can-add-new="true" can-delete="true" can-edit="true"
                                                           action="chart.epicrisis" event="chart" risar="true"
-                                                          params="{defaults:{diagnosis_type:rbDiagnosisType.get_by_code('3')}}"></wm-diagnosis>
+                                                          params="{defaults:{diagnosis_type:rbDiagnosisType.get_by_code('3')},
+                                                                   disabled:{diagnosis_type:true}}"></wm-diagnosis>
                                         </td>
                                     </tr>
                                     <tr>
