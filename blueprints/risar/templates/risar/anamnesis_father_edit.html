@@ -94,7 +94,8 @@
                     <td>
                         <wm-diagnosis model="chart.anamnesis.father.finished_diseases" list-mode="true"
                                       can-add-new="true" can-delete="true" can-edit="true"
-                                      action="chart.anamnesis.father" event="chart" risar="true"></wm-diagnosis>
+                                      action="chart.anamnesis.father" event="chart"
+                                      params="{defaults:{diagnosis_type:rbDiagnosisType.get_by_code('2')}}" risar="true"></wm-diagnosis>
                     </td>
                 </tr>
                 <tr>
@@ -107,7 +108,8 @@
                     <td>
                         <wm-diagnosis model="chart.anamnesis.father.current_diseases" list-mode="true"
                                       can-add-new="true" can-delete="true" can-edit="true"
-                                      action="chart.anamnesis.father" event="chart" risar="true"></wm-diagnosis>
+                                      action="chart.anamnesis.father" event="chart"
+                                      params="{defaults:{diagnosis_type:rbDiagnosisType.get_by_code('2')}}" risar="true"></wm-diagnosis>
                     </td>
                 </tr>
 

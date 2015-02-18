@@ -1136,8 +1136,17 @@ angular.module('WebMis20.directives')
                 risar: '='
             },
             controller: function ($scope) {
+                $scope.set_defaults = function (diagnosis){
+                    var defaults = $scope.params['defaults']
+                    for (var key in defaults) {
+                        diagnosis[key] = defaults[key];
+                    }
+                }
                 $scope.add_new_diagnosis = function () {
                     var new_diagnosis = WMEventServices.get_new_diagnosis($scope.action.action);
+                    if ($scope.params['defaults']){
+                        $scope.set_defaults(new_diagnosis)
+                    }
                     if ($scope.risar) {
                         DiagnosisModal.openDiagnosisModalRisar(new_diagnosis, $scope.event, $scope.action, $scope.params).then(function () {
                             if ($scope.listMode) {

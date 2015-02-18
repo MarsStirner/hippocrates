@@ -4,8 +4,9 @@
 
 'use strict';
 
-var AnamnesisCtrl = function ($scope, RisarApi) {
+var AnamnesisCtrl = function ($scope, RisarApi, RefBookService) {
     $scope.hooks = [];
+    $scope.rbDiagnosisType = RefBookService.get('rbDiagnosisType');
     var tabs = $scope.tabs = {
         motherfather: true,
         pregnancies: false,

@@ -165,7 +165,8 @@
                                             <div class="col-md-7">
                                                 <wm-diagnosis model="chart.epicrisis.main_diagnosis" list-mode="false"
                                                               can-add-new="true" can-delete="true" can-edit="true"
-                                                              action="chart.epicrisis" event="chart" risar="true"></wm-diagnosis>
+                                                              action="chart.epicrisis" event="chart" risar="true"
+                                                              params="{defaults:{diagnosis_type:rbDiagnosisType.get_by_code('2')}}"></wm-diagnosis>
                                             </div>
                                             </div>
                                         </td>
@@ -175,7 +176,8 @@
                                         <td>
                                             <wm-diagnosis model="chart.epicrisis.attend_diagnosis" list-mode="true"
                                                           can-add-new="true" can-delete="true" can-edit="true"
-                                                          action="chart.epicrisis" event="chart" risar="true"></wm-diagnosis>
+                                                          action="chart.epicrisis" event="chart" risar="true"
+                                                          params="{defaults:{diagnosis_type:rbDiagnosisType.get_by_code('11')}}"></wm-diagnosis>
                                         </td>
                                     </tr>
                                     <tr>
@@ -183,7 +185,8 @@
                                         <td>
                                             <wm-diagnosis model="chart.epicrisis.complicating_diagnosis" list-mode="true"
                                                           can-add-new="true" can-delete="true" can-edit="true"
-                                                          action="chart.epicrisis" event="chart" risar="true"></wm-diagnosis>
+                                                          action="chart.epicrisis" event="chart" risar="true"
+                                                          params="{defaults:{diagnosis_type:rbDiagnosisType.get_by_code('3')}}"></wm-diagnosis>
                                         </td>
                                     </tr>
                                     <tr>
@@ -252,7 +255,8 @@
 {#                                            ng-class="{'has-error': secondForm.pat_diagnosis.$invalid && secondForm.submit_attempt}"#}
                                             <wm-diagnosis model="chart.epicrisis.pat_diagnosis" list-mode="false"
                                                           can-add-new="true" can-delete="true" can-edit="true"
-                                                          action="chart.epicrisis" event="chart" risar="true"></wm-diagnosis>
+                                                          action="chart.epicrisis" event="chart" risar="true"
+                                                          params="{defaults:{diagnosis_type:rbDiagnosisType.get_by_code('2')}}"></wm-diagnosis>
                                         </div>
                                     </td>
                                 </tr>
@@ -552,7 +556,8 @@
                                         <div class="row">
                                             <wm-diagnosis model="chart.epicrisis.operation_complication" list-mode="true"
                                                           can-add-new="true" can-delete="true" can-edit="true"
-                                                          action="chart.epicrisis" event="chart" risar="true"></wm-diagnosis>
+                                                          action="chart.epicrisis" event="chart" risar="true"
+                                                          params="{defaults:{diagnosis_type:rbDiagnosisType.get_by_code('2')}}"></wm-diagnosis>
                                         </div>
                                     </td>
                                 </tr>

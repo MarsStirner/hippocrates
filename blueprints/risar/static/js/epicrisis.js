@@ -4,6 +4,7 @@ var EpicrisisCtrl = function ($timeout, $scope, RefBookService, RisarApi) {
     var params = aux.getQueryParams(window.location.search);
     var event_id = $scope.event_id = params.event_id;
     $scope.rbRisarPregnancy_Final = RefBookService.get('rbRisarPregnancy_Final');
+    $scope.rbDiagnosisType = RefBookService.get('rbDiagnosisType');
 
     var open_tab = function (tab_name){
         var prefix = "tab_";

@@ -1,6 +1,7 @@
 
 'use strict';
-var CheckupCtrl = function ($scope, RisarApi) {
+var CheckupCtrl = function ($scope, RisarApi, RefBookService) {
+    $scope.rbDiagnosisType = RefBookService.get('rbDiagnosisType');
     var params = aux.getQueryParams(window.location.search);
     var checkup_id = $scope.checkup_id = params.checkup_id;
     var event_id = $scope.event_id = params.event_id;
@@ -103,5 +104,5 @@ var CheckupSecondEditCtrl = function ($scope, $window, $document, RisarApi, Conf
     }
 };
 
-WebMis20.controller('CheckupCtrl', ['$scope', 'RisarApi', CheckupCtrl]);
+WebMis20.controller('CheckupCtrl', ['$scope', 'RisarApi', 'RefBookService', CheckupCtrl]);
 WebMis20.controller('CheckupFirstEditCtrl', ['$scope', '$window', '$document', 'RisarApi', 'Config', CheckupFirstEditCtrl]);
