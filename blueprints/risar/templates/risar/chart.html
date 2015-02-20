@@ -164,13 +164,13 @@
                     <table class="table table-condensed">
                         <tbody>
                         <tr>
-                            <td>Экстренное</td>
-                            <td>
+                            <td class="col-md-3">Экстренное</td>
+                            <td class="col-md-3">
                                 <span tooltip="Выбрано пользователем [[chart.client.attach_lpu.extra_lpu.modifyPerson]] [[chart.client.attach_lpu.extra_lpu.begDate]]">
                                     [[chart.client.attach_lpu.extra_lpu.org.short_name]]
                                 </span>
                             </td>
-                            <td><a class="btn-link" ng-href="{{ url_for('.html_routing') }}?event_id=[[ chart.id ]]&emergency=1">Изменить</a></td>
+                            <td class="col-md-6"><a class="btn-link" ng-href="{{ url_for('.html_routing') }}?event_id=[[ chart.id ]]&emergency=1">Изменить</a></td>
                         </tr>
                         <tr>
                             <td>Плановое</td>
@@ -211,6 +211,17 @@
                                     [[ chart.progress.checkups.complete ]]/[[ chart.progress.checkups.total ]]
                                 </progressbar>
                             </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="panel panel-default">
+                    <div class="panel-heading">Дополнительно</div>
+                    <table class="table table-condensed">
+                        <tbody>
+                        <tr>
+                            <td class="col-md-6">Диагнозы случая</td>
+                            <td class="col-md-6"><a class="btn-link" ng-href="{{ url_for('.html_event_diagnoses') }}?event_id=[[ chart.id ]]">Изменить</a></td>
                         </tr>
                         </tbody>
                     </table>

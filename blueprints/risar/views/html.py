@@ -71,3 +71,8 @@ def html_epicrisis():
 @module.route('/epicrisis_edit.html')
 def html_epicrisis_edit():
     return render_template('risar/epicrisis_edit.html')
+
+
+@module.route('/event_diagnoses.html')
+def html_event_diagnoses():
+    return render_template('risar/event_diagnoses.html')
