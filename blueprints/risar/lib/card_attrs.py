@@ -49,8 +49,21 @@ def get_all_diagnoses(event):
     :type event: application.models.event.Event
     :return: list of DiagIDs
     """
+    result = []
     evis = EventVisualizer()
-    return evis.make_diagnoses(event)
+    for action in event.actions:
+        for prop in action.properties:
+            if prop.type.typeName == 'Diagnosis' and prop.value:
+                if prop.type.isVector:
+                    for diagnostic in prop.value:
+                        diag = evis.make_diagnostic_record(diagnostic)
+                        diag['action_property_name'] = prop.type.name
+                        result.append(diag)
+                else:
+                    diag = evis.make_diagnostic_record(prop.value)
+                    diag['action_property_name'] = prop.type.name
+                    result.append(diag)
+    return result
 
 
 def calc_risk_rate(event):

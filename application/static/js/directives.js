@@ -1270,23 +1270,25 @@ angular.module('WebMis20.directives')
             var locModel = angular.copy(model);
             var Controller = function ($scope) {
                 $scope.model = locModel;
+                $scope.action = action ? action : model.action;
                 $scope.diag_type_codes = ['2', '3', '7', '9', '11'];
                 $scope.params = params;
 
-                $scope.can_set_final_diag = (
-//                        // только лечащий врач
-//                        current_user_id === event.info.exec_person.id &&
-                    // в текущем действии еще нет заключительных диагнозов
-                    !(action.diseases instanceof Array ? (
-                                action.diseases.length && action.diseases.some(function (diag) {
-                                    return diag.diagnosis_type.code === '1' && diag.deleted === 0;
-                                })
-                            ) :(action.diseases && action.diseases.diagnosis_type.code === '1' && diag.deleted === 0)) &&
-                    // в других *закрытых* действиях нет заключительных диагнозов
-                    event.diagnoses.filter(function (diag) {
-                        return diag.diagnosis_type.code === '1' && diag.action.status.code === 'finished';
-                    }).length === 0
-                );
+                $scope.can_set_final_diag = true; //TODO
+//                $scope.can_set_final_diag = (
+////                        // только лечащий врач
+////                        current_user_id === event.info.exec_person.id &&
+//                    // в текущем действии еще нет заключительных диагнозов
+//                    !($scope.action.diseases instanceof Array ? (
+//                                $scope.action.diseases.length && $scope.action.diseases.some(function (diag) {
+//                                    return diag.diagnosis_type.code === '1' && diag.deleted === 0;
+//                                })
+//                            ) :($scope.action.diseases && $scope.action.diseases.diagnosis_type.code === '1' && diag.deleted === 0)) &&
+//                    // в других *закрытых* действиях нет заключительных диагнозов
+//                    event.diagnoses.filter(function (diag) {
+//                        return diag.diagnosis_type.code === '1' && diag.action.status.code === 'finished';
+//                    }).length === 0
+//                );
                 if ($scope.can_set_final_diag) {
                     $scope.diag_type_codes.push('1');
                 }
@@ -1380,7 +1382,7 @@ angular.module('WebMis20.directives')
     $templateCache.put('/WebMis20/wm-diagnosis-risar.html',
         '<div class="row">\
             <div class="col-md-12">\
-                <table class="table table-condensed">\
+                <table class="table table-condensed" ng-if="action">\
                     <thead>\
                         <tr>\
                             <th class="col-md-2">Дата начала</th>\
@@ -1416,6 +1418,42 @@ angular.module('WebMis20.directives')
                             <td ng-click="open_action(diag.action_id)"><span tooltip="[[diag.diagnosis.mkb.name]]">[[diag.diagnosis.mkb.code]]</span></td>\
                             <td ng-click="open_action(diag.action_id)">[[diag.person.name]]</td>\
                             <td ng-click="open_action(diag.action_id)">[[diag.diagnosis_description]]</td>\
+                            <td style="white-space:nowrap;">\
+                                <button type="button" class="btn btn-sm btn-primary" title="Редактировать" ng-if="canEdit"\
+                                        ng-click="edit_diagnosis(diag)"><span class="glyphicon glyphicon-pencil"></span>\
+                                </button>\
+                                <button type="button" class="btn btn-sm btn-danger" title="Удалить" ng-if="canDelete"\
+                                        ng-click="delete_diagnosis(diag)"><span class="glyphicon glyphicon-trash"></span>\
+                                </button>\
+                            </td>\
+                        </tr>\
+                        <tr ng-show="add_new_btn_visible()">\
+                            <td colspan="6">\
+                                <button type="button" class="btn btn-sm btn-primary" title="Добавить"\
+                                        ng-click="add_new_diagnosis()">Добавить\
+                                </button>\
+                            </td>\
+                        </tr>\
+                    </tbody>\
+                </table>\
+                <table class="table table-condensed" ng-if="listMode && !action">\
+                    <thead>\
+                        <tr>\
+                            <th class="col-md-1">Диагноз</th>\
+                            <th class="col-md-2">Тип</th>\
+                            <th class="col-md-1">Начало</th>\
+                            <th class="col-md-1">Окончание</th>\
+                            <th ng-if="!action" class="col-md-3">Контекст</th>\
+                            <th class="col-md-1"></th>\
+                        </tr>\
+                    </thead>\
+                    <tbody>\
+                        <tr ng-if="listMode" class="[[clickable && diag.action_id ? \'row-clickable\' : \'\']]" ng-repeat="diag in model | flt_not_deleted">\
+                            <td ng-click="open_action(diag.action_id)"  style="text-align:center;"><span tooltip="[[diag.diagnosis.mkb.name]]">[[diag.diagnosis.mkb.code]]</span></td>\
+                            <td ng-click="open_action(diag.action_id)">[[diag.diagnosis_type.name]]</td>\
+                            <td ng-click="open_action(diag.action_id)">[[diag.set_date | asDate]] </br> [[diag.person.name]]</td>\
+                            <td ng-click="open_action(diag.action_id)">[[diag.end_date | asDate]]</td>\
+                            <td ng-if="!action" ng-click="open_action(diag.action_id)">[[diag.action.action_type.name]] - [[diag.action_property_name]]</td>\
                             <td style="white-space:nowrap;">\
                                 <button type="button" class="btn btn-sm btn-primary" title="Редактировать" ng-if="canEdit"\
                                         ng-click="edit_diagnosis(diag)"><span class="glyphicon glyphicon-pencil"></span>\

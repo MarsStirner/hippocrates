@@ -12,8 +12,9 @@ from application.models.event import Event, EventType
 from application.models.exists import Organisation, Person, rbAttachType, rbRequestType, rbFinance
 from application.models.schedule import ScheduleClientTicket
 from application.systemwide import db
+from blueprints.event.lib.utils import create_or_update_diagnosis
 from blueprints.risar.app import module
-from blueprints.risar.lib.card_attrs import default_AT_Heuristic
+from blueprints.risar.lib.card_attrs import default_AT_Heuristic, get_all_diagnoses
 from blueprints.risar.lib.represent import represent_event, represent_chart_for_routing
 from blueprints.risar.risar_config import attach_codes
 
@@ -107,6 +108,23 @@ def api_0_chart(event_id=None):
         'event': represent_event(event),
         'automagic': automagic
     }
+
+
+@module.route('/api/0/save_diagnoses/', methods=['POST'])
+@module.route('/api/0/save_diagnoses/<int:event_id>', methods=['POST'])
+@api_method
+def api_0_save_diagnoses(event_id=None):
+    diagnoses = request.get_json()
+    if not event_id:
+        raise ApiException(400, u'Должен быть указан параметр event_id')
+    event = Event.query.get(event_id)
+    if not event:
+        raise ApiException(404, u'Обращение не найдено')
+    for diagnosis in diagnoses:
+        diag = create_or_update_diagnosis(event, diagnosis)
+        db.session.add(diag)
+    db.session.commit()
+    return list(get_all_diagnoses(event))
 
 
 @module.route('/api/0/mini_chart/')
