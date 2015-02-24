@@ -63,6 +63,7 @@ def get_all_diagnoses(event):
                     diag = evis.make_diagnostic_record(prop.value)
                     diag['action_property_name'] = prop.type.name
                     result.append(diag)
+    result.sort(key=lambda x: x['set_date'])
     return result
 
 

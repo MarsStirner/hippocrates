@@ -1171,13 +1171,14 @@ angular.module('WebMis20.directives')
                     }
 
                 };
-                $scope.delete_diagnosis = function (diagnosis) {
+                $scope.delete_diagnosis = function (diagnosis, deleted) {
+                    deleted = (typeof deleted == 'undefined') ? 1 : deleted;
                     if ($scope.listMode) {
-                        WMEventServices.delete_diagnosis($scope.model, diagnosis);
+                        WMEventServices.delete_diagnosis($scope.model, diagnosis, deleted);
                     } else {
                         $scope.model = null;
                     }
-                    WMEventServices.delete_diagnosis($scope.event.diagnoses, diagnosis);
+                    WMEventServices.delete_diagnosis($scope.event.diagnoses, diagnosis, deleted);
                 };
                 $scope.edit_diagnosis = function (diagnosis) {
                     if ($scope.risar) {
@@ -1448,13 +1449,14 @@ angular.module('WebMis20.directives')
                         </tr>\
                     </thead>\
                     <tbody>\
-                        <tr ng-if="listMode" class="[[clickable && diag.action_id ? \'row-clickable\' : \'\']]" ng-repeat="diag in model | flt_not_deleted">\
-                            <td ng-click="open_action(diag.action_id)"  style="text-align:center;"><span tooltip="[[diag.diagnosis.mkb.name]]">[[diag.diagnosis.mkb.code]]</span></td>\
-                            <td ng-click="open_action(diag.action_id)">[[diag.diagnosis_type.name]]</td>\
-                            <td ng-click="open_action(diag.action_id)">[[diag.set_date | asDate]] </br> [[diag.person.name]]</td>\
-                            <td ng-click="open_action(diag.action_id)">[[diag.end_date | asDate]]</td>\
-                            <td ng-if="!action" ng-click="open_action(diag.action_id)">[[diag.action.action_type.name]] - [[diag.action_property_name]]</td>\
-                            <td style="white-space:nowrap;">\
+                        <tr ng-if="listMode" class="[[clickable && diag.action_id ? \'row-clickable\' : \'\']]" ng-repeat="diag in model">\
+                            <td ng-if="diag.deleted" colspan="6" style="text-align:center;">Диагноз [[diag.diagnosis.mkb.code]] был удален. <a ng-click="delete_diagnosis(diag, 0)" style="cursor: pointer">Восстановить</a>?</td>\
+                            <td ng-if="diag.deleted == 0" ng-click="open_action(diag.action_id)" style="text-align:center;"><span tooltip="[[diag.diagnosis.mkb.name]]">[[diag.diagnosis.mkb.code]]</span></td>\
+                            <td ng-if="diag.deleted == 0" ng-click="open_action(diag.action_id)">[[diag.diagnosis_type.name]]</td>\
+                            <td ng-if="diag.deleted == 0" ng-click="open_action(diag.action_id)">[[diag.set_date | asDate]] </br> [[diag.person.name]]</td>\
+                            <td ng-if="diag.deleted == 0" ng-click="open_action(diag.action_id)">[[diag.end_date | asDate]]</td>\
+                            <td ng-if="diag.deleted == 0" ng-click="open_action(diag.action_id)">[[diag.action.action_type.name]] - [[diag.action_property_name]]</td>\
+                            <td ng-if="diag.deleted == 0" style="white-space:nowrap;">\
                                 <button type="button" class="btn btn-sm btn-primary" title="Редактировать" ng-if="canEdit"\
                                         ng-click="edit_diagnosis(diag)"><span class="glyphicon glyphicon-pencil"></span>\
                                 </button>\
