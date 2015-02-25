@@ -911,7 +911,8 @@ class EventVisualizer(object):
             'dispanser': diagnostic.dispanser,
             'sanatorium': diagnostic.sanatorium,
             'hospital': diagnostic.hospital,
-            'diagnosis_description': diagnostic.diagnosis_description
+            'diagnosis_description': diagnostic.diagnosis_description,
+            'modify_person': pvis.make_person_ws(diagnostic.modifyPerson) if diagnostic.modifyPerson else None
         } if diagnostic else None
 
     def make_diagnosis_record(self, diagnosis):

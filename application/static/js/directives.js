@@ -85,6 +85,7 @@ angular.module('WebMis20.directives')
                     name = attrs.name,
                     ngDisabled = attrs.ngDisabled,
                     ngRequired = attrs.ngRequired,
+                    ngModel = attrs.ngModel,
                     style = attrs.style,
                     maxDate = attrs.maxDate;
                 var wmdate = $('<div class="input-group"></div>'),
@@ -100,6 +101,7 @@ angular.module('WebMis20.directives')
                     button_wrap = $('<span class="input-group-btn"></span>');
                 if (_id) date_input.attr('id', _id);
                 if (name) date_input.attr('name', name);
+                date_input.attr('ng-model', ngModel);
                 if (ngDisabled) {
                     date_input.attr('ng-disabled', ngDisabled);
                     button.attr('ng-disabled', ngDisabled);
@@ -1172,7 +1174,9 @@ angular.module('WebMis20.directives')
 
                 };
                 $scope.delete_diagnosis = function (diagnosis, deleted) {
-                    deleted = (typeof deleted == 'undefined') ? 1 : deleted;
+                    if (arguments.length == 1) {
+                        deleted = 1;
+                    }
                     if ($scope.listMode) {
                         WMEventServices.delete_diagnosis($scope.model, diagnosis, deleted);
                     } else {
@@ -1454,7 +1458,7 @@ angular.module('WebMis20.directives')
                             <td ng-if="diag.deleted == 0" ng-click="open_action(diag.action_id)" style="text-align:center;"><span tooltip="[[diag.diagnosis.mkb.name]]">[[diag.diagnosis.mkb.code]]</span></td>\
                             <td ng-if="diag.deleted == 0" ng-click="open_action(diag.action_id)">[[diag.diagnosis_type.name]]</td>\
                             <td ng-if="diag.deleted == 0" ng-click="open_action(diag.action_id)">[[diag.set_date | asDate]] </br> [[diag.person.name]]</td>\
-                            <td ng-if="diag.deleted == 0" ng-click="open_action(diag.action_id)">[[diag.end_date | asDate]]</td>\
+                            <td ng-if="diag.deleted == 0" ng-click="open_action(diag.action_id)">[[diag.end_date | asDate]] </br> [[diag.end_date ? diag.modify_person.name : ""]]</td>\
                             <td ng-if="diag.deleted == 0" ng-click="open_action(diag.action_id)">[[diag.action.action_type.name]] - [[diag.action_property_name]]</td>\
                             <td ng-if="diag.deleted == 0" style="white-space:nowrap;">\
                                 <button type="button" class="btn btn-sm btn-primary" title="Редактировать" ng-if="canEdit"\

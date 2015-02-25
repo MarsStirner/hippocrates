@@ -483,7 +483,7 @@ class Diagnostic(db.Model):
     createDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now)
     createPerson_id = db.Column(db.Integer, index=True, default=safe_current_user_id)
     modifyDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now, onupdate=datetime.datetime.now)
-    modifyPerson_id = db.Column(db.Integer, index=True, default=safe_current_user_id, onupdate=safe_current_user_id)
+    modifyPerson_id = db.Column(db.ForeignKey('Person.id'), index=True, default=safe_current_user_id, onupdate=safe_current_user_id)
     deleted = db.Column(db.Integer, nullable=False, server_default=u"'0'", default=0)
     event_id = db.Column(db.ForeignKey('Event.id'), nullable=False, index=True)
     diagnosis_id = db.Column(db.ForeignKey('Diagnosis.id'), index=True)
@@ -524,6 +524,7 @@ class Diagnostic(db.Model):
     traumaType = db.relationship('rbTraumaType')
     healthGroup = db.relationship('rbHealthGroup', lazy=False)
     action = db.relationship('Action')
+    modifyPerson = db.relationship('Person', foreign_keys=[modifyPerson_id])
 
     def __int__(self):
         return self.id
