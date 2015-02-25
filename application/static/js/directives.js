@@ -1406,7 +1406,7 @@ angular.module('WebMis20.directives')
                             <td ng-click="open_action(model.action_id)">[[model.diagnosis_type.name]]</td>\
                             <td ng-click="open_action(model.action_id)"><span tooltip="[[ model.diagnosis.mkb.name ]]">[[model.diagnosis.mkb.code]]</span></td>\
                             <td ng-click="open_action(model.action_id)">[[model.person.name]]</td>\
-                            <td ng-click="open_action(model.action_id)">[[model.diagnosis_description]]</td>\
+                            <td ng-click="open_action(model.action_id)">[[model.diagnosis_description ? \'есть\': \'нет\']]</td>\
                             <td style="white-space:nowrap;">\
                                 <button type="button" class="btn btn-sm btn-primary" title="Редактировать" ng-if="canEdit"\
                                         ng-click="edit_diagnosis(model)"><span class="glyphicon glyphicon-pencil"></span>\
@@ -1422,7 +1422,7 @@ angular.module('WebMis20.directives')
                             <td ng-click="open_action(diag.action_id)">[[diag.diagnosis_type.name]]</td>\
                             <td ng-click="open_action(diag.action_id)"><span tooltip="[[diag.diagnosis.mkb.name]]">[[diag.diagnosis.mkb.code]]</span></td>\
                             <td ng-click="open_action(diag.action_id)">[[diag.person.name]]</td>\
-                            <td ng-click="open_action(diag.action_id)">[[diag.diagnosis_description]]</td>\
+                            <td ng-click="open_action(diag.action_id)">[[model.diagnosis_description ? \'есть\': \'нет\']]</td>\
                             <td style="white-space:nowrap;">\
                                 <button type="button" class="btn btn-sm btn-primary" title="Редактировать" ng-if="canEdit"\
                                         ng-click="edit_diagnosis(diag)"><span class="glyphicon glyphicon-pencil"></span>\
