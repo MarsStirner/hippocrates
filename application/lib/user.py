@@ -475,6 +475,7 @@ class UserProfileManager(object):
     reg_clinic = 'clinicRegistrator'  # Регистратор поликлиники
     doctor_clinic = 'clinicDoctor'  # Врач поликлиники
     doctor_diag = 'diagDoctor'  # Врач диагностики
+    doctor_stat = 'statDoctor'  # Врач медицинский статистик
     nurse_admission = 'admNurse'  # Медсестра приемного отделения
     nurse_assist = 'assistNurse'  # Медсестра (ассистент врача)
     cashier = 'kassir'  # Кассир
@@ -517,6 +518,10 @@ class UserProfileManager(object):
     @classmethod
     def has_ui_doctor(cls):
         return cls._get_user_role(True) in cls.ui_groups['doctor']
+
+    @classmethod
+    def has_ui_doctor_stat(cls):
+        return cls._get_user_role() == cls.doctor_stat
 
     @classmethod
     def has_ui_diag_doctor(cls):
