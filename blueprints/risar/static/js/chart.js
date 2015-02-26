@@ -31,24 +31,5 @@ var ChartCtrl = function ($scope, $modal, RisarApi) {
 //                {value:$scope.chart.anamnesis.father.drugs,text: 'наркотики'}];
         })
     };
-    var open_attach_lpu_edit = function () {
-        var scope = $scope.$new();
-        scope.model = $scope.chart.client.attach_lpu;
-        return $modal.open({
-            templateUrl: '/WebMis20/RISAR/modal/attach_lpu.html',
-            scope: scope,
-            size: 'lg'
-        })
-    };
-    $scope.attach_lpu_edit = function () {
-        open_attach_lpu_edit().result.then(function (result) {
-            RisarApi.attach_lpu.save($scope.chart.client.id, result).then(function(result){
-                $scope.chart.client.attach_lpu = result;
-            });
-        }, function(){
-            reload_chart();
-        });
-    };
-
     reload_chart();
 };

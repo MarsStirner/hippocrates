@@ -160,7 +160,7 @@
                     </table>
                 </div>
                 <div class="panel panel-default">
-                    <div class="panel-heading">ЛПУ родоразрешения <a class="print_link pull-right" href="#" ng-click="attach_lpu_edit()"><span class="glyphicon glyphicon-pencil"></span> [[(chart.client.attach_lpu.extra_lpu || chart.client.attach_lpu.plan_lpu) ? 'Изменить' : 'Указать']]</a></div>
+                    <div class="panel-heading">ЛПУ родоразрешения</div>
                     <table class="table table-condensed">
                         <tbody>
                         <tr>
@@ -235,5 +235,4 @@
     {{ super() }}
     <script src="{{ url_for('.static', filename='js/chart.js', v=version) }}"></script>
     <script src="{{ url_for('.static', filename='js/risar.js', v=version) }}"></script>
-    <script type="text/ng-template" id="/WebMis20/RISAR/modal/attach_lpu.html">{% include 'risar/modals/_modal_attach_lpu.html' %}</script>
 {% endblock %}
