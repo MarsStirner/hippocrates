@@ -1617,3 +1617,12 @@ class rbMethodOfAdministration(db.Model):
             'code': self.code,
             'name': self.name,
         }
+
+
+class FileMeta(db.Model):
+    __tablename__ = u'FileMeta'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(128), nullable=False)
+    path = db.Column(db.String(256))
+    external_id = db.Column(db.Integer)

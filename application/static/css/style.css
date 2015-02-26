@@ -751,6 +751,13 @@ ng-form {
     overflow-y: scroll;
 }
 
+
+.modal-scrollable-block {
+    overflow: auto;
+    border: solid;
+    height: 600px;
+}
+
 button.text-left {
     text-align: left;
     padding-left: 10px;

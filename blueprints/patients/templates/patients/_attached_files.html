@@ -1,0 +1,20 @@
+<ng-form name="mainInfoForm" toc-element="Копии документов">
+    <legend>Копии документов</legend>
+    <div class="row">
+    <div class="col-md-11">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <button type="button" class="btn btn-primary" ng-click="open_scanning_modal()">Прикрепить файл</button>
+                <hr>
+                <div class="row">
+                    <ul>
+                        <li ng-repeat="fa in client.file_attaches">
+                            <a ng-click="open_scanning_modal(fa.id)">[[ fa.file.name ]]</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+</ng-form>

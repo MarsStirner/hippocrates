@@ -125,6 +125,9 @@ class Client(db.Model):
         primaryjoin='and_(ClientWork.client_id==Client.id, ClientWork.deleted == 0)',
         order_by="desc(ClientWork.id)"
     )
+    file_attaches = db.relationship(
+        u'ClientFileAttach'
+    )
 
     events = db.relationship(
         u'Event',
@@ -1222,3 +1225,16 @@ class AddressHouse(db.Model):
 
     def __int__(self):
         return self.id
+
+
+class ClientFileAttach(db.Model):
+    __tablename__ = u'ClientFileAttach'
+
+    id = db.Column(db.Integer, primary_key=True)
+    client_id = db.Column(db.Integer, db.ForeignKey('Client.id'), nullable=False)
+    filemeta_id = db.Column(db.Integer, db.ForeignKey('FileMeta.id'), nullable=False)
+    document_id = db.Column(db.Integer, db.ForeignKey('ClientDocument.id'))
+    policy_id = db.Column(db.Integer, db.ForeignKey('ClientPolicy.id'))
+    idx = db.Column(db.Integer, nullable=False, server_default='0')
+
+    filemeta = db.relationship('FileMeta')

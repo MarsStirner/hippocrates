@@ -2,8 +2,8 @@
 
 angular.module('WebMis20.controllers').
     controller('ClientCtrl',
-        ['$scope', '$http', '$modal', 'WMClient', 'WMClientServices', 'PrintingService', 'RefBookService', '$window', '$document',
-        function ($scope, $http, $modal, WMClient, WMClientServices, PrintingService, RefBookService, $window, $document) {
+        ['$scope', '$http', '$modal', 'WMClient', 'WMClientServices', 'PrintingService', 'RefBookService', '$window', '$document', 'ScanningModal',
+        function ($scope, $http, $modal, WMClient, WMClientServices, PrintingService, RefBookService, $window, $document, ScanningModal) {
             $scope.records = [];
             $scope.aux = aux;
             $scope.params = aux.getQueryParams(document.location.search);
@@ -116,5 +116,14 @@ angular.module('WebMis20.controllers').
             }, function(message) {
                 alert(message);
             });
+
+            $scope.open_scanning_modal = function (cfa_id) {
+                ScanningModal.open($scope.client_id, cfa_id)
+                .then(function () {
+                    $scope.client.reload();
+                }, function () {
+                    $scope.client.reload();
+                });
+            };
         }
     ]);

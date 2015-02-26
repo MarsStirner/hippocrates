@@ -3,11 +3,12 @@
 from flask import abort, request
 
 from application.systemwide import db
-from application.lib.utils import jsonify, logger, parse_id, public_endpoint
+from application.lib.utils import jsonify, logger, parse_id, public_endpoint, safe_int
 from blueprints.patients.app import module
 from application.lib.sphinx_search import SearchPatient
 from application.lib.jsonify import ClientVisualizer
-from application.models.client import Client
+from application.models.client import Client, ClientFileAttach
+from application.models.exists import FileMeta
 from blueprints.patients.lib.utils import *
 
 
@@ -304,3 +305,58 @@ def api_kladr_street_get():
     res = Street.query.filter(Street.CODE.startswith(city[:-2]), Street.NAME.startswith(street)).all()
     return jsonify([{'name': r.NAME,
                     'code': r.CODE} for r in res])
+
+
+STORAGE_PATH = './attached_files'
+import base64
+import datetime
+import os
+
+
+@module.route('/api/client_file_attach.json', methods=['POST', 'GET'])
+def api_patient_file_attach():
+    if request.method == 'GET':
+        data = request.args
+        cfa_id = data.get('client_file_attach_id')
+        cfa = ClientFileAttach.query.get(cfa_id)
+        filepath = cfa.filemeta.path
+        try:
+            with open(filepath, 'rb') as f:
+                file_encoded = base64.b64encode(f.read())
+        except IOError:
+            return jsonify(u'File not found', 404, 'ERROR')
+        return jsonify({
+            'image': file_encoded
+        })
+
+    data = request.json
+    cfa_id = data.get('client_file_attach_id')
+    client_id = safe_int(data.get('client_id'))
+    filetype = data.get('filetype', 'img')
+    attach_type = data.get('attach_type', 'misc')
+    file_extension = data.get('file_extension', 'png')
+    file_add_date = datetime.datetime.now()
+    if cfa_id:
+        pass
+    else:
+        filename = u'{filetype}_{attach_type}_{date:%y%m%d_%H%M}.{ext}'.format(
+            filetype=filetype, attach_type=attach_type, date=file_add_date, ext=file_extension
+        )
+        filepath = os.path.join(STORAGE_PATH, filename)
+        img_string = data.get('image')
+        try:
+            with open(filepath, 'wb') as f:
+                f.write(base64.b64decode(img_string))
+        except IOError:
+            logger.error(u'Ошибка сохранения файла средствами МИС')
+            return jsonify(u'Ошибка сохранения файла', 500, 'ERROR')
+        else:
+            fm = FileMeta()
+            fm.name = filename
+            fm.path = filepath
+            cfa = ClientFileAttach()
+            cfa.client_id = client_id
+            cfa.filemeta = fm
+            db.session.add(cfa)
+            db.session.commit()
+    return jsonify(None)

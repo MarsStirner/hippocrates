@@ -289,6 +289,115 @@ angular.module('WebMis20.services', []).
             </div>'
         );
     }]).
+    service('ScanningModal', ['$modal', '$http', 'WMConfig', '$timeout', function ($modal, $http, WMConfig, $timeout) {
+        return {
+            open: function (client_id, cfa_id) {
+                var ScanController = function ($scope) {
+                    $scope.mode = 'scanning';
+                    $scope.device_list = [];
+                    $scope.selected = { device: {name: 'test'} };
+                    $scope.file = { encoded: null };
+                    $scope.get_device_list = function () {
+                        $http.get(WMConfig.url.scanserver.list).success(function (data) {
+                            $scope.device_list = data.devices;
+                        });
+                    };
+                    $scope.start_scan = function () {
+                        $http.post(WMConfig.url.scanserver.scan, {
+                            name: $scope.selected.device.name
+                        }).success(function (data) {
+                            $scope.file.encoded = data.image;
+                        });
+                    };
+                    $scope.save_image = function () {
+                        $http.post(WMConfig.url.api_patient_file_attach, {
+                            image: $scope.file.encoded,
+                            client_id: client_id
+                        }).success(function () {
+                            alert('Сохранено');
+                        }).error(function () {
+                            alert('Ошибка сохранения');
+                        });
+                    };
+                    if (cfa_id) {
+                        $http.get(WMConfig.url.api_patient_file_attach, {
+                            params: {
+                                client_file_attach_id: cfa_id
+                            }
+                        }).success(function (data) {
+                            $scope.file.encoded = data.result.image;
+                        }).error(function () {
+                            alert('Ошибка открытия файла. Файл был удален.');
+                        });
+                    }
+                };
+                var instance = $modal.open({
+                    templateUrl: '/WebMis20/modal-Scanning.html',
+                    controller: ScanController,
+                    backdrop: 'static',
+                    size: 'lg'
+                });
+                return instance.result;
+            }
+        };
+    }]).
+    run(['$templateCache', function ($templateCache) {
+        $templateCache.put('/WebMis20/modal-Scanning.html',
+            '<div class="modal-header" xmlns="http://www.w3.org/1999/html">\
+                <div class="btn-group pull-right">\
+                    <label class="btn btn-lg btn-primary" ng-model="mode" btn-radio="\'scanning\'">Сканировать</label>\
+                    <label class="btn btn-lg btn-primary" ng-model="mode" btn-radio="\'select_existing\'">Выбрать существующий</label>\
+                </div>\
+                <h3 class="modal-title">Добавление документа</h3>\
+            </div>\
+            <div class="modal-body">\
+                <div class="row">\
+                <div class="col-md-4">\
+                    <div ng-show="mode === \'scanning\'">\
+                    <button type="button" class="btn btn-info btn-sm" ng-click="get_device_list()">\
+                        Получить список доступных устройств\
+                    </button>\
+                    <button type="button" class="btn btn-warning btn-sm" ng-click="start_scan()"\
+                        ng-disabled="!selected.device">\
+                        Начать сканирование\
+                    </button>\
+                    <div class="radio" ng-repeat="dev in device_list">\
+                        <label>\
+                            <input type="radio" id="dev[[$index]]" ng-model="selected.device"\
+                                ng-value="dev">[[dev.model]]\
+                        </label>\
+                    </div>\
+                    <hr>\
+                    </div>\
+                    <div ng-show="mode === \'select_existing\'">\
+                        <h3>Выбрать из файловой системы</h3>\
+                        <input type="file" wm-input-file file-encoded="file.encoded">\
+                    </div>\
+                </div>\
+                <div class="col-md-8">\
+                    <div class="btn-toolbar" role="toolbar" aria-label="...">\
+                        <div class="btn-group btn-group-lg" role="group" aria-label="...">\
+                            <button type="button" class="btn btn-default"><span class="fa fa-rotate-left"></span></button>\
+                            <button type="button" class="btn btn-default"><span class="fa fa-rotate-right"></span></button>\
+                            <button type="button" class="btn btn-default"><span class="fa fa-crop"></span></button>\
+                        </div>\
+                    </div>\
+                    <div class="modal-scrollable-block">\
+                        <figure ng-show="file.encoded">\
+                            <img ng-src="data:image/png;base64,[[file.encoded]]" alt="Полученное изображение" id="scanned_image" />\
+                        </figure>\
+                    </div>\
+                </div>\
+                </div>\
+            </div>\
+            <div class="modal-footer">\
+                <button type="button" class="btn btn-success" ng-click="save_image()" ng-disabled="!file.encoded">\
+                    Сохранить\
+                </button>\
+                <button type="button" class="btn btn-danger" ng-click="$dismiss()">Закрыть</button>\
+            </div>'
+        );
+    }]).
     service('MessageBox', ['$modal', function ($modal) {
         return {
             info: function (head, message) {

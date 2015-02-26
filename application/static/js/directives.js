@@ -913,6 +913,29 @@ angular.module('WebMis20.directives')
             }
         }
     }])
+    .directive('wmInputFile', [function () {
+        return {
+            restrict: 'A',
+            scope: {
+                file_b64: '=fileEncoded'
+            },
+            link: function (scope, elem, attrs) {
+                scope.file = null;
+                var reader = new FileReader();
+                reader.onloadend = function () {
+                    scope.$apply(function () {
+                        scope.file_b64 = window.btoa(reader.result);
+                    });
+                };
+                elem.change(function (event) {
+                    scope.file = event.target.files[0];
+                    console.log(scope.file);
+                    console.log('starting reading/encoding file');
+                    reader.readAsBinaryString(scope.file);
+                });
+            }
+        }
+    }])
     .directive('wmDiagnosis', ['DiagnosisModal', 'WMEventServices', 'WMEventCache', 'WMWindowSync',
             function(DiagnosisModal, WMEventServices, WMEventCache, WMWindowSync) {
         return{

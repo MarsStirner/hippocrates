@@ -465,6 +465,7 @@ class ClientVisualizer(object):
         documents = [safe_dict(doc) for doc in client.documents_all] if client.id else []
         policies = [safe_dict(policy) for policy in client.policies_all] if client.id else []
         document_history = documents + policies
+        files = [self.make_file_attach_info(fa) for fa in client.file_attaches]
         # identifications = [self.make_identification_info(identification) for identification in client.identifications]
         return {
             'info': client,
@@ -480,7 +481,18 @@ class ClientVisualizer(object):
             'relations': relations,
             'contacts': self.make_contacts_info(client),
             'document_history': document_history,
+            'file_attaches': files
             # 'identifications': identifications,
+        }
+
+    def make_file_attach_info(self, file_attach):
+        filemeta = file_attach.filemeta
+        return {
+            'id': file_attach.id,
+            'file': {
+                'name': filemeta.name,
+                'path': filemeta.path
+            }
         }
 
     def make_client_info_for_view_frame(self, client):
