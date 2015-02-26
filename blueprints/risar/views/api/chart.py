@@ -146,6 +146,7 @@ def api_0_event_routing():
     diagnoses = request.get_json().get('diagnoses', None)
     query = Organisation.query.filter(Organisation.isHospital == 1)
     if diagnoses:
+        # Без этого можно обойтись, но так хоть немного меньше надо будет проверить.
         query = query.join(organisation_mkb_assoc, MKB).filter(MKB.id.in_([d['id'] for d in diagnoses]))
     return [
         {
@@ -153,6 +154,8 @@ def api_0_event_routing():
             'name': row.shortName,
             'diagnoses': row.mkbs,
         } for row in query
+        # Страшный костыль, потому что не получается сделать нормальный запрос
+        if not diagnoses or all(d['id'] in (m.id for m in row.mkbs) for d in diagnoses)
     ]
 
 

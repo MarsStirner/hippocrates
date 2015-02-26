@@ -26,6 +26,7 @@ var EventRoutingCtrl = function ($scope, $window, RisarApi, TimeoutCallback, Ref
     var organisations = RefBookService.get('Organisation');
     $scope.select_lpu = function (organisation) {
         $scope.chart.lpu = organisations.get(organisation.id);
+        $scope.save();
     };
     $scope.save = function () {
         RisarApi.event_routing.attach_client($scope.chart.client_id, {
