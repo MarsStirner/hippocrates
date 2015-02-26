@@ -66,8 +66,8 @@ var ScheduleCtrl = function ($scope, $http, RefBook, PersonTreeUpdater, WMAppoin
             month: $scope.month,
             day: 1
         });
+        var end_date = moment(start_date).endOf('month');
         start_date = start_date.subtract(start_date.isoWeekday() - 1, 'days');
-        var end_date = moment(start_date).subtract(start_date.date() - 1, 'd').add(1, 'M').subtract(1, 'd');
         var chosen_page = -1;
         var pages = [];
         while (start_date <= end_date) {
