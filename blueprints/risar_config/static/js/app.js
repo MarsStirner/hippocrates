@@ -15,7 +15,7 @@ angular.module('WebMis20')
         $scope.clipboard = row.diagnoses;
     };
     $scope.paste_clipboard = function (row) {
-        row.diagnoses = _.listSetList(row.diagnoses.concat($scope.clipboard.clone()), 'id');
+        row.diagnoses = _.distinct(row.diagnoses.concat($scope.clipboard.clone()), 'id');
     };
     $scope.save = function () {
         $http.post('/risar_config/api/routing.json', $scope.list).success(function (data) {
@@ -25,4 +25,15 @@ angular.module('WebMis20')
     $http.get('/risar_config/api/routing.json').success(function (data) {
         $scope.list = data.result;
     })
-});
+})
+.filter('orgdiag', function () {
+    return function (orgs, query) {
+        query = query.toUpperCase();
+        return orgs.filter(function (org) {
+            return !query || org.diagnoses.filter(function (diagnosis) {
+                return !query || diagnosis.code.contains(query) || diagnosis.name.toUpperCase().contains(query)
+            }).length > 0;
+        })
+    }
+})
+;

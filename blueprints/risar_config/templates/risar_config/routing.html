@@ -17,12 +17,14 @@
         </tr>
         </thead>
         <tbody>
-        <tr ng-repeat="row in list | filter:query">
+        <tr ng-repeat="row in list | orgdiag:query">
             <td>[[ row.name ]]</td>
             <td>
-                <span wm-multiselect ng-model="row.diagnoses" items="MKB.objects" limit="100">[[ item.code ]]</span>
-                <button class="btn btn-primary" ng-click="copy_clipboard(row)">Копировать</button>
-                <button class="btn btn-primary" ng-click="paste_clipboard(row)" ng-disabled="!clipboard">Вставить</button>
+                <div wm-multiselect ng-model="row.diagnoses" items="MKB.objects" limit="100">[[ item.code ]]</div>
+                <div class="pull-right">
+                    <button class="btn btn-primary" ng-click="copy_clipboard(row)">Копировать</button>
+                    <button class="btn btn-primary" ng-click="paste_clipboard(row)" ng-disabled="!clipboard">Вставить</button>
+                </div>
             </td>
         </tr>
         </tbody>

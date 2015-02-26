@@ -165,8 +165,7 @@ function indexOf(array, elem) {
     }
   }
   return -1;
-};
-
+}
 if (!HTMLElement.prototype.hasOwnProperty('getOffsetRect')) {
     HTMLElement.prototype.getOffsetRect = function () {
         // (1)
@@ -221,6 +220,11 @@ if (!String.prototype.endswith) {
         return this.indexOf(suffix, this.length - suffix.length) !== -1;
     }
 }
+if (!String.prototype.contains) {
+    String.prototype.contains = function (infix) {
+        return this.indexOf(infix) !== -1;
+    }
+}
 
 // Array.prototype
 
@@ -263,7 +267,7 @@ _.mixin({
     findCmp: function (array, item, cmpFunction) {
         return _.find(array, _.partial(cmpFunction, item));
     },
-    listSetList: function (array) {
+    distinct: function (array) {
         var attr = arguments[1];
         var cmp;
         if (_.isUndefined(attr)) {

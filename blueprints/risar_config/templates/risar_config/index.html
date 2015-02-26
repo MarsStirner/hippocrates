@@ -3,11 +3,12 @@
     <div class="row" ng-controller="SetupMainCtrl">
         <div class="col-md-3 col-lg-2">{# Левый столбец #}
             <ul class="nav nav-pills nav-stacked">
+                <li><a>Настройки</a></li>
                 <li role="presentation" ng-class="{active: page == 0}">
-                    <a href="#" ng-click="page = 0">Настройки маршрутизации беременных</a>
+                    <a href="#" ng-click="page = 0">Маршрутизация беременных</a>
                 </li>
                 <li role="presentation" ng-class="{active: page == 1}">
-                    <a href="#" ng-click="page = 1">Настройки мероприятий</a>
+                    <a href="#" ng-click="page = 1">Мероприятия</a>
                 </li>
             </ul>
 {#            <button class="btn btn-success btn-block btn-pill" ng-click="save()">Сохранить изменения</button>#}
