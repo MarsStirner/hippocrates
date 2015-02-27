@@ -289,7 +289,7 @@ angular.module('WebMis20.services', []).
             </div>'
         );
     }]).
-    service('ScanningModal', ['$modal', '$http', 'WMConfig', '$timeout', function ($modal, $http, WMConfig, $timeout) {
+    service('ScanningModal', ['$modal', '$http', 'WMConfig', function ($modal, $http, WMConfig) {
         return {
             open: function (client_id, cfa_id) {
                 var ScanController = function ($scope) {
@@ -297,6 +297,7 @@ angular.module('WebMis20.services', []).
                     $scope.device_list = [];
                     $scope.selected = { device: {name: 'test'} };
                     $scope.file = { encoded: null };
+
                     $scope.get_device_list = function () {
                         $http.get(WMConfig.url.scanserver.list).success(function (data) {
                             $scope.device_list = data.devices;
@@ -318,6 +319,9 @@ angular.module('WebMis20.services', []).
                         }).error(function () {
                             alert('Ошибка сохранения');
                         });
+                    };
+                    $scope.clear_image = function () {
+                        $scope.file.encoded = null;
                     };
                     if (cfa_id) {
                         $http.get(WMConfig.url.api_patient_file_attach, {
@@ -354,12 +358,9 @@ angular.module('WebMis20.services', []).
                 <div class="row">\
                 <div class="col-md-4">\
                     <div ng-show="mode === \'scanning\'">\
+                    <h4>Выбор устройства</h4>\
                     <button type="button" class="btn btn-info btn-sm" ng-click="get_device_list()">\
                         Получить список доступных устройств\
-                    </button>\
-                    <button type="button" class="btn btn-warning btn-sm" ng-click="start_scan()"\
-                        ng-disabled="!selected.device">\
-                        Начать сканирование\
                     </button>\
                     <div class="radio" ng-repeat="dev in device_list">\
                         <label>\
@@ -368,14 +369,22 @@ angular.module('WebMis20.services', []).
                         </label>\
                     </div>\
                     <hr>\
+                    <h4>Параметры сканирования</h4>\
+                    <button type="button" class="btn btn-warning btn-sm" ng-click="start_scan()"\
+                        ng-disabled="!selected.device">\
+                        Начать сканирование\
+                    </button>\
                     </div>\
                     <div ng-show="mode === \'select_existing\'">\
-                        <h3>Выбрать из файловой системы</h3>\
+                        <h4>Выбрать из файловой системы</h4>\
                         <input type="file" wm-input-file file-encoded="file.encoded">\
                     </div>\
                 </div>\
                 <div class="col-md-8">\
                     <div class="btn-toolbar" role="toolbar" aria-label="...">\
+                        <div class="btn-group btn-group-lg pull-right" role="group" aria-label="...">\
+                            <button type="button" class="btn btn-default" ng-click="clear_image()"><span class="fa fa-times"></span></button>\
+                        </div>\
                         <div class="btn-group btn-group-lg" role="group" aria-label="...">\
                             <button type="button" class="btn btn-default"><span class="fa fa-rotate-left"></span></button>\
                             <button type="button" class="btn btn-default"><span class="fa fa-rotate-right"></span></button>\
@@ -384,7 +393,7 @@ angular.module('WebMis20.services', []).
                     </div>\
                     <div class="modal-scrollable-block">\
                         <figure ng-show="file.encoded">\
-                            <img ng-src="data:image/png;base64,[[file.encoded]]" alt="Полученное изображение" id="scanned_image" />\
+                            <img ng-src="data:image/png;base64,[[file.encoded]]" style="max-height: 1000px" alt="Полученное изображение" id="scanned_image" />\
                         </figure>\
                     </div>\
                 </div>\
