@@ -8,7 +8,7 @@ from application.models.actions import Action, ActionType
 from application.models.client import BloodHistory
 from application.models.enums import Gender, AllergyPower, IntoleranceType, PrenatalRiskRate
 from application.models.exists import rbAttachType
-from blueprints.risar.lib.card_attrs import get_card_attrs_action, get_all_diagnoses
+from blueprints.risar.lib.card_attrs import get_card_attrs_action, get_all_diagnoses, check_disease
 from blueprints.risar.lib.utils import get_action, action_apt_values, get_action_type_id
 from ..risar_config import pregnancy_apt_codes, risar_anamnesis_pregnancy, transfusion_apt_codes, \
     risar_anamnesis_transfusion, mother_codes, father_codes, risar_father_anamnesis, risar_mother_anamnesis, \
@@ -31,6 +31,7 @@ def represent_event(event):
     :type event: application.models.event.Event
     """
     client = event.client
+    all_diagnoses = list(get_all_diagnoses(event))
 
     return {
         'id': event.id,
@@ -78,7 +79,8 @@ def represent_event(event):
         'checkups': represent_checkups(event),
         'risk_rate': PrenatalRiskRate(get_card_attrs_action(event, auto=True)['prenatal_risk_572'].value),
         'pregnancy_week': get_pregnancy_week(event),
-        'diagnoses': list(get_all_diagnoses(event))
+        'diagnoses': all_diagnoses,
+        'has_diseases': check_disease(all_diagnoses)
     }
 
 

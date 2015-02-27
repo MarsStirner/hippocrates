@@ -5,7 +5,8 @@ from application.lib.data import create_action
 from application.lib.jsonify import EventVisualizer
 from application.models.actions import Action, ActionType
 from application.systemwide import db
-from blueprints.risar.lib.utils import get_action, get_action_list
+from blueprints.risar.lib.utils import get_action, get_action_list, HIV_diags, syphilis_diags, hepatitis_diags, \
+    tuberculosis_diags, scabies_diags, pediculosis_diags
 from blueprints.risar.risar_config import checkup_flat_codes, risar_mother_anamnesis
 from .utils import risk_rates_blockID, risk_rates_diagID
 
@@ -128,3 +129,27 @@ def reevaluate_card_attrs(event, action=None):
     action['prenatal_risk_572'].value = calc_risk_rate(event)
     action['pregnancy_start_date'].value = preg_start_date
     action['predicted_delivery_date'].value = get_predicted_d_date(preg_start_date)
+
+
+def check_disease(diagnoses):
+    has_disease = {'has_HIV': False,
+                   'has_syphilis': False,
+                   'has_hepatitis': False,
+                   'has_tuberculosis': False,
+                   'has_scabies': False,
+                   'has_pediculosis': False}
+    for diag in diagnoses:
+        diag_id = diag['diagnosis']['mkb'].DiagID
+        if filter(lambda x: x in diag_id, HIV_diags):
+            has_disease['has_HIV'] = True
+        if filter(lambda x: x in diag_id, syphilis_diags):
+            has_disease['has_syphilis'] = True
+        if filter(lambda x: x in diag_id, hepatitis_diags):
+            has_disease['has_hepatitis'] = True
+        if filter(lambda x: x in diag_id, tuberculosis_diags):
+            has_disease['has_tuberculosis'] = True
+        if filter(lambda x: x in diag_id, scabies_diags):
+            has_disease['has_scabies'] = True
+        if filter(lambda x: x in diag_id, pediculosis_diags):
+            has_disease['has_pediculosis'] = True
+    return has_disease

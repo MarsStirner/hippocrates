@@ -141,21 +141,59 @@
                     <div class="panel-heading">Особенности</div>
                     <table class="table table.condensed">
                         <tbody>
-                        <tr ng-repeat="char in chart.anamnesis.intolerances" ng-class="{
-                        'success text-success': char.power.code == 'low',
-                        'warning text-warning': ['medium', 'unknown'].has(char.power.code),
-                        'danger text-danger': ['high', 'strict'].has(char.power.code),
-                        }">
-                            <td class="text-center "><span class="fa" ng-class="{
-                        'fa-question': char.power.code == 'unknown',
-                        'fa-exclamation': char.power.code == 'low',
-                        'fa-exclamation-triangle': char.power.code == 'medium',
-                        'fa-exclamation-circle': char.power.code == 'high',
-                        'fa-times-circle': char.power.code == 'strict',
-                        }"></span></td>
-                            <td>[[ char.type.name ]]</td>
-                            <td><b ng-class="{'bottom_dotted': char.note}" tooltip="[[ char.note ]]">[[ char.name ]]</b></td>
-                        </tr>
+                            <tr>
+                                <td class="col-md-6 text-right">Группа крови:</td>
+                                <td class="col-md-6">[[chart.anamnesis.mother.blood_type.name]]</td>
+                            </tr>
+                            <tr>
+                                <td class="col-md-6 text-right">Вич:</td>
+                                <td class="col-md-6">[[chart.has_diseases.has_HIV ? 'Положительно': 'Отрицательно']]</td>
+                            </tr>
+                            <tr>
+                                <td class="col-md-6 text-right">Сифилис:</td>
+                                <td class="col-md-6">[[chart.has_diseases.has_syphilis ? 'Положительно': 'Отрицательно']]</td>
+                            </tr>
+                            <tr>
+                                <td class="col-md-6 text-right">Гепатит:</td>
+                                <td class="col-md-6">[[chart.has_diseases.has_hepatitis ? 'Положительно': 'Отрицательно']]</td>
+                            </tr>
+                            <tr>
+                                <td class="col-md-6 text-right">Туберкулез:</td>
+                                <td class="col-md-6">[[chart.has_diseases.has_tuberculosis ? 'Положительно': 'Отрицательно']]</td>
+                            </tr>
+                            <tr>
+                                <td class="col-md-6 text-right">Чесотка:</td>
+                                <td class="col-md-6">[[chart.has_diseases.has_scabies ? 'Положительно': 'Отрицательно']]</td>
+                            </tr>
+                            <tr>
+                                <td class="col-md-6 text-right">Педикулез:</td>
+                                <td class="col-md-6">[[chart.has_diseases.has_pediculosis ? 'Положительно': 'Отрицательно']]</td>
+                            </tr>
+                            <tr>
+                                <td class="col-md-6 text-right">Аллергия:</td>
+                                <td class="col-md-6">
+                                    <div ng-repeat="char in chart.anamnesis.intolerances | filter: {type:{code: 'allergy'}}" ng-class="{
+                                    'success text-success': char.power.code == 'low',
+                                    'warning text-warning': ['medium', 'unknown'].has(char.power.code),
+                                    'danger text-danger': ['high', 'strict'].has(char.power.code),
+                                    }">
+                                    <b ng-class="{'bottom_dotted': char.note}" tooltip="[[ char.note ]]">[[ char.name ]]</b>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="col-md-5 text-right">Непереносимости:</td>
+                                <td class="col-md-7">
+                                    <div ng-repeat="char in chart.anamnesis.intolerances | filter: {type:{code: 'medicine'}}" ng-class="{
+                                    'success text-success': char.power.code == 'low',
+                                    'warning text-warning': ['medium', 'unknown'].has(char.power.code),
+                                    'danger text-danger': ['high', 'strict'].has(char.power.code),
+                                    }">
+                                    <b ng-class="{'bottom_dotted': char.note}" tooltip="[[ char.note ]]">[[ char.name ]]</b>
+                                    </div>
+                                </td>
+                            </tr>
+
                         </tbody>
                     </table>
                 </div>
@@ -164,16 +202,16 @@
                     <table class="table table-condensed">
                         <tbody>
                         <tr>
-                            <td class="col-md-3">Экстренное</td>
-                            <td class="col-md-3">
+                            <td class="col-md-3 text-right">Экстренное:</td>
+                            <td class="col-md-6">
                                 <span tooltip="Выбрано пользователем [[chart.client.attach_lpu.extra_lpu.modifyPerson]] [[chart.client.attach_lpu.extra_lpu.begDate]]">
                                     [[chart.client.attach_lpu.extra_lpu.org.short_name]]
                                 </span>
                             </td>
-                            <td class="col-md-6"><a class="btn-link" ng-href="{{ url_for('.html_routing') }}?event_id=[[ chart.id ]]&emergency=1">Изменить</a></td>
+                            <td class="col-md-3"><a class="btn-link" ng-href="{{ url_for('.html_routing') }}?event_id=[[ chart.id ]]&emergency=1">Изменить</a></td>
                         </tr>
                         <tr>
-                            <td>Плановое</td>
+                            <td class="text-right">Плановое:</td>
                             <td>
                                 <span tooltip="Выбрано пользователем [[chart.client.attach_lpu.extra_lpu.modifyPerson]] [[chart.client.attach_lpu.extra_lpu.begDate]]">
                                     [[chart.client.attach_lpu.plan_lpu.org.short_name]]
@@ -189,7 +227,7 @@
                     <table class="table table-condensed">
                         <tbody>
                         <tr>
-                            <td class="col-md-6">Лабораторные исследования:</td>
+                            <td class="col-md-6 text-right">Лабораторные исследования:</td>
                             <td class="col-md-6">
                                 <progressbar class="progress" value="chart.progress.lab.percent">
                                     [[ chart.progress.lab.complete ]]/[[ chart.progress.lab.total ]]
@@ -197,7 +235,7 @@
                             </td>
                         </tr>
                         <tr>
-                            <td>Функциональные исследования:</td>
+                            <td class="text-right">Функциональные исследования:</td>
                             <td>
                                 <progressbar class="progress" value="chart.progress.func.percent">
                                     [[ chart.progress.func.complete ]]/[[ chart.progress.func.total ]]
@@ -205,7 +243,7 @@
                             </td>
                         </tr>
                         <tr>
-                            <td>Осмотры специалистами:</td>
+                            <td class="text-right">Осмотры специалистами:</td>
                             <td>
                                 <progressbar class="progress" value="chart.progress.checkups.percent">
                                     [[ chart.progress.checkups.complete ]]/[[ chart.progress.checkups.total ]]
