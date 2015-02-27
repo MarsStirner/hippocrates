@@ -112,7 +112,7 @@ def add_or_update_doc(client, data):
     doc_type = safe_traverse(data, 'doc_type', 'id')
     if not doc_type:
         raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Тип документа')
-    serial = data.get('serial')
+    serial = data.get('serial') or ''
     number = data.get('number')
     if not number:
         raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Номер документа')
