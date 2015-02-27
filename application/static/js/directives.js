@@ -1120,8 +1120,8 @@ angular.module('WebMis20.directives')
             }
         }
     }])
-    .directive('wmDiagnosis', ['DiagnosisModal', 'WMEventServices', 'WMEventCache', 'WMWindowSync',
-            function(DiagnosisModal, WMEventServices, WMEventCache, WMWindowSync) {
+    .directive('wmDiagnosis', ['$timeout', 'DiagnosisModal', 'WMEventServices', 'WMEventCache', 'WMWindowSync',
+            function($timeout, DiagnosisModal, WMEventServices, WMEventCache, WMWindowSync) {
         return{
             restrict: 'E',
             replace: true,
@@ -1150,7 +1150,9 @@ angular.module('WebMis20.directives')
                         $scope.set_defaults(new_diagnosis)
                     }
                     if ($scope.risar) {
-                        DiagnosisModal.openDiagnosisModalRisar(new_diagnosis, $scope.event, $scope.action, $scope.params).then(function () {
+                        var sequence = $scope.action && $scope.listMode;
+                        DiagnosisModal.openDiagnosisModalRisar(new_diagnosis, $scope.event, $scope.action, $scope.params, sequence).then(function (rslt) {
+                            var result = rslt[0], restart = rslt[1];
                             if ($scope.listMode) {
                                 $scope.model.push(new_diagnosis);
                             }
@@ -1158,6 +1160,9 @@ angular.module('WebMis20.directives')
                                 $scope.model = new_diagnosis;
                             }
                             WMEventServices.add_diagnosis($scope.event, new_diagnosis);
+                            if (sequence && restart) {
+                                $timeout($scope.add_new_diagnosis)
+                            }
                         });
                     }
                     else {
@@ -1271,11 +1276,12 @@ angular.module('WebMis20.directives')
                 angular.extend(model, locModel);
             });
         },
-        openDiagnosisModalRisar: function (model, event, action, params) {
+        openDiagnosisModalRisar: function (model, event, action, params, sequence) {
             var locModel = angular.copy(model);
             var Controller = function ($scope) {
                 $scope.model = locModel;
                 $scope.action = action ? action : model.action;
+                $scope.sequence = sequence;
                 $scope.diag_type_codes = ['2', '3', '7', '9', '11'];
                 $scope.params = params;
 
@@ -1311,8 +1317,9 @@ angular.module('WebMis20.directives')
                 size: 'lg',
                 controller: Controller
             });
-            return instance.result.then(function() {
+            return instance.result.then(function(rslt) {
                 angular.extend(model, locModel);
+                return rslt
             });
         }
     }
@@ -1404,7 +1411,7 @@ angular.module('WebMis20.directives')
                             <td ng-click="open_action(model.action_id)">[[model.set_date | asDate]]</td>\
                             <td ng-click="open_action(model.action_id)">[[model.end_date | asDate]]</td>\
                             <td ng-click="open_action(model.action_id)">[[model.diagnosis_type.name]]</td>\
-                            <td ng-click="open_action(model.action_id)"><span tooltip="[[ model.diagnosis.mkb.name ]]">[[model.diagnosis.mkb.code]]</span></td>\
+                            <td ng-click="open_action(model.action_id)"><span class="bottom_dotted" tooltip="[[ model.diagnosis.mkb.name ]]">[[model.diagnosis.mkb.code]]</span></td>\
                             <td ng-click="open_action(model.action_id)">[[model.person.name]]</td>\
                             <td ng-click="open_action(model.action_id)">[[model.diagnosis_description ? \'есть\': \'нет\']]</td>\
                             <td style="white-space:nowrap;">\
@@ -1420,7 +1427,7 @@ angular.module('WebMis20.directives')
                             <td ng-click="open_action(diag.action_id)">[[diag.set_date | asDate]]</td>\
                             <td ng-click="open_action(diag.action_id)">[[diag.end_date | asDate]]</td>\
                             <td ng-click="open_action(diag.action_id)">[[diag.diagnosis_type.name]]</td>\
-                            <td ng-click="open_action(diag.action_id)"><span tooltip="[[diag.diagnosis.mkb.name]]">[[diag.diagnosis.mkb.code]]</span></td>\
+                            <td ng-click="open_action(diag.action_id)"><span class="bottom_dotted" tooltip="[[diag.diagnosis.mkb.name]]">[[diag.diagnosis.mkb.code]]</span></td>\
                             <td ng-click="open_action(diag.action_id)">[[diag.person.name]]</td>\
                             <td ng-click="open_action(diag.action_id)">[[model.diagnosis_description ? \'есть\': \'нет\']]</td>\
                             <td style="white-space:nowrap;">\
@@ -1455,7 +1462,7 @@ angular.module('WebMis20.directives')
                     <tbody>\
                         <tr ng-if="listMode" class="[[clickable && diag.action_id ? \'row-clickable\' : \'\']]" ng-repeat="diag in model">\
                             <td ng-if="diag.deleted" colspan="6" style="text-align:center;">Диагноз [[diag.diagnosis.mkb.code]] был удален. <a ng-click="delete_diagnosis(diag, 0)" style="cursor: pointer">Восстановить</a>?</td>\
-                            <td ng-if="diag.deleted == 0" ng-click="open_action(diag.action_id)" style="text-align:center;"><span tooltip="[[diag.diagnosis.mkb.name]]">[[diag.diagnosis.mkb.code]]</span></td>\
+                            <td ng-if="diag.deleted == 0" ng-click="open_action(diag.action_id)" style="text-align:center;"><span class="bottom_dotted" tooltip="[[diag.diagnosis.mkb.name]]">[[diag.diagnosis.mkb.code]]</span></td>\
                             <td ng-if="diag.deleted == 0" ng-click="open_action(diag.action_id)">[[diag.diagnosis_type.name]]</td>\
                             <td ng-if="diag.deleted == 0" ng-click="open_action(diag.action_id)">[[diag.set_date | asDate]] </br> [[diag.person.name]]</td>\
                             <td ng-if="diag.deleted == 0" ng-click="open_action(diag.action_id)">[[diag.end_date | asDate]] </br> [[diag.end_date ? diag.modify_person.name : ""]]</td>\
@@ -1762,7 +1769,8 @@ angular.module('WebMis20.directives')
             </ng-form>\
         </div>\
         <div class="modal-footer">\
-            <button type="button" class="btn btn-success" ng-click="$close()"\
+            <label ng-hide="!sequence"><input type="checkbox" class="checkbox checkbox-inline" ng-model="restart">Добавить ещё одно сведение</label>\
+            <button type="button" class="btn btn-success" ng-click="$close([model, restart])"\
             ng-disabled="DiagnosisForm.$invalid">Сохранить</button>\
             <button type="button" class="btn btn-default" ng-click="$dismiss()">Отмена</button>\
         </div>')
