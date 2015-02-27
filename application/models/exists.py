@@ -1448,6 +1448,9 @@ class MKB(db.Model):
     duration = db.Column(db.Integer, nullable=False)
     service_id = db.Column(db.Integer, index=True)
     MKBSubclass_id = db.Column(db.Integer)
+    deleted = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+
+    __mapper_args__ = {'order_by': DiagID}
 
     def __unicode__(self):
         return self.DiagID

@@ -13,8 +13,7 @@ from itsdangerous import json
 
 from application.systemwide import login_manager, cache
 from application.lib.data import get_kladr_city, get_kladr_street
-from application.lib.utils import public_endpoint, jsonify, roles_require, rights_require, request_wants_json, \
-    api_method
+from application.lib.utils import public_endpoint, jsonify, request_wants_json, api_method
 # from application.models import *
 from application.utils import admin_permission
 from lib.user import UserAuth, AnonymousUser, UserProfileManager
@@ -68,18 +67,26 @@ def check_valid_login():
         if not login_valid:
             # return redirect(url_for('login', next=request.url))
             return redirect(app.config['COLDSTAR_URL'] + 'cas/login?back=%s' % urllib2.quote(request.url))
-        if not getattr(current_user, 'current_role', None):
+        if not getattr(current_user, 'current_role', None) and request.endpoint != 'wm_config':
             return redirect(url_for('select_role', next=request.url))
 
 
 @app.before_request
 def check_user_profile_settings():
     if request.endpoint and 'static' not in request.endpoint:
-        if (request.endpoint not in ('doctor_to_assist', 'api_doctors_to_assist', 'logout') and
+        if (request.endpoint not in ('doctor_to_assist', 'api_doctors_to_assist', 'logout', 'wm_config') and
             UserProfileManager.has_ui_assistant() and
             not current_user.master
         ):
             return redirect(url_for('doctor_to_assist', next=request.url))
+
+
+@app.route('/wm_config.js')
+def wm_config():
+    from application.lib.settings import Settings
+    import config
+    settings = Settings()
+    return render_template('config.html', settings=settings, config=config)
 
 
 @app.route('/')
@@ -233,10 +240,15 @@ def api_refbook(name):
     for mod in (exists, schedule, actions, client, event):
         if hasattr(mod, name):
             ref_book = getattr(mod, name)
+
+            _order = ref_book.id
+            if hasattr(ref_book, '__mapper_args__') and 'order_by' in ref_book.__mapper_args__:
+                _order = ref_book.__mapper_args__['order_by']
+
             if 'deleted' in ref_book.__dict__:
-                res = jsonify(ref_book.query.filter_by(deleted=0).order_by(ref_book.id).all())
+                res = jsonify(ref_book.query.filter_by(deleted=0).order_by(_order).all())
             else:
-                res = ref_book.query.order_by(ref_book.id).all()
+                res = ref_book.query.order_by(_order).all()
                 res = jsonify(res)
             return res
     if name is None:

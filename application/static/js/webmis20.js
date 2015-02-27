@@ -926,7 +926,10 @@ var WebMis20 = angular.module('WebMis20', [
         }
       };
     }
-  ]);
+  ])
+.run(['IdleTimer', function (IdleTimer) {
+    IdleTimer.start();
+}]);
 
 angular.module('WebMis20.services.models', []);
 
