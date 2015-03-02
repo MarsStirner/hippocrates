@@ -132,13 +132,14 @@ def reevaluate_card_attrs(event, action=None):
 
 
 def check_disease(diagnoses):
+    unclosed_diagnosis = filter(lambda x: not x['end_date'], diagnoses)
     has_disease = {'has_HIV': False,
                    'has_syphilis': False,
                    'has_hepatitis': False,
                    'has_tuberculosis': False,
                    'has_scabies': False,
                    'has_pediculosis': False}
-    for diag in diagnoses:
+    for diag in unclosed_diagnosis:
         diag_id = diag['diagnosis']['mkb'].DiagID
         if filter(lambda x: x in diag_id, HIV_diags):
             has_disease['has_HIV'] = True

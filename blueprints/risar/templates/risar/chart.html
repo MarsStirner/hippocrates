@@ -172,24 +172,16 @@
                             <tr>
                                 <td class="col-md-6 text-right">Аллергия:</td>
                                 <td class="col-md-6">
-                                    <div ng-repeat="char in chart.anamnesis.intolerances | filter: {type:{code: 'allergy'}}" ng-class="{
-                                    'success text-success': char.power.code == 'low',
-                                    'warning text-warning': ['medium', 'unknown'].has(char.power.code),
-                                    'danger text-danger': ['high', 'strict'].has(char.power.code),
-                                    }">
-                                    <b ng-class="{'bottom_dotted': char.note}" tooltip="[[ char.note ]]">[[ char.name ]]</b>
+                                    <div ng-repeat="char in chart.anamnesis.intolerances | filter: {type:{code: 'allergy'}}" class="danger text-danger">
+                                    <b ng-if="['high', 'strict'].has(char.power.code)" ng-class="{'bottom_dotted': char.note}" tooltip="[[ char.note ]]">[[ char.name ]]</b>
                                     </div>
                                 </td>
                             </tr>
                             <tr>
                                 <td class="col-md-5 text-right">Непереносимости:</td>
                                 <td class="col-md-7">
-                                    <div ng-repeat="char in chart.anamnesis.intolerances | filter: {type:{code: 'medicine'}}" ng-class="{
-                                    'success text-success': char.power.code == 'low',
-                                    'warning text-warning': ['medium', 'unknown'].has(char.power.code),
-                                    'danger text-danger': ['high', 'strict'].has(char.power.code),
-                                    }">
-                                    <b ng-class="{'bottom_dotted': char.note}" tooltip="[[ char.note ]]">[[ char.name ]]</b>
+                                    <div ng-repeat="char in chart.anamnesis.intolerances | filter: {type:{code: 'medicine'}}" class="danger text-danger">
+                                    <b ng-if="['high', 'strict'].has(char.power.code)" ng-class="{'bottom_dotted': char.note}" tooltip="[[ char.note ]]">[[ char.name ]]</b>
                                     </div>
                                 </td>
                             </tr>
