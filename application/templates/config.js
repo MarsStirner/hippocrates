@@ -55,4 +55,20 @@ angular.module('hitsl.ui')
         return $delegate;
     }]);
 }])
-;
+.constant('WMConfig', {
+    url: {
+        logout: '{{ url_for("logout") }}',
+        coldstar: {
+            cas_check_token: '{{ config.COLDSTAR_URL + "cas/api/check/" }}',
+            cas_prolong_token: '{{ config.COLDSTAR_URL + "cas/api/prolong/" }}'
+        }
+    },
+    settings: {
+        user_idle_timeout: {{ settings.getInt('Auth.UserIdleTimeout', 15 * 60) };},
+        {
+            {
+                settings.getInt('Auth.LogoutWarningTimeout', 200)
+            }
+        }
+    }
+})

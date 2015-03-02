@@ -81,14 +81,6 @@ def check_user_profile_settings():
             return redirect(url_for('doctor_to_assist', next=request.url))
 
 
-@app.route('/wm_config.js')
-def wm_config():
-    from application.lib.settings import Settings
-    import config
-    settings = Settings()
-    return render_template('config.html', settings=settings, config=config)
-
-
 @app.route('/')
 def index():
     default_url = UserProfileManager.get_default_url()
@@ -99,7 +91,7 @@ def index():
 
 @app.route('/settings/', methods=['GET', 'POST'])
 @admin_permission.require(http_exception=403)
-def settings():
+def settings_html():
     from application.models.caesar import Settings
     from wtforms import StringField
     from wtforms.validators import DataRequired
@@ -123,7 +115,7 @@ def settings():
                 variable.value = form.data[variable.code]
             db.session.commit()
             flash(u'Настройки изменены')
-            return redirect(url_for('settings'))
+            return redirect(url_for('settings_html'))
 
         return render_template('settings.html', form=form)
     except TemplateNotFound:
@@ -163,7 +155,9 @@ def api_current_user():
 
 @app.route('/config.js')
 def config_js():
-    return render_template('config.js')
+    from application.lib.settings import Settings
+    settings = Settings()
+    return render_template('config.js', settings=settings, config=app.config)
 
 
 def session_save_user(user):
