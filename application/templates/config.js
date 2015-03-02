@@ -64,11 +64,8 @@ angular.module('hitsl.ui')
         }
     },
     settings: {
-        user_idle_timeout: {{ settings.getInt('Auth.UserIdleTimeout', 15 * 60) };},
-        {
-            {
-                settings.getInt('Auth.LogoutWarningTimeout', 200)
-            }
-        }
+        user_idle_timeout: {{ settings.getInt('Auth.UserIdleTimeout', 15 * 60) }},
+        logout_warning_timeout: {{ settings.getInt('Auth.LogoutWarningTimeout', 200) }}
     }
 })
+;
