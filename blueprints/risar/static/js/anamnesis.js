@@ -7,6 +7,8 @@
 var AnamnesisCtrl = function ($scope, RisarApi, RefBookService) {
     $scope.hooks = [];
     $scope.rbDiagnosisType = RefBookService.get('rbDiagnosisType');
+    $scope.menstruation_max_date= new Date();
+    $scope.menstruation_max_date.setDate($scope.menstruation_max_date.getDate() - 1);
     var tabs = $scope.tabs = {
         motherfather: true,
         pregnancies: false,
