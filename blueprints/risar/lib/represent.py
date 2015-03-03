@@ -124,34 +124,20 @@ def get_lpu_attached(attachments):
     }
 
 
-def get_pregnancy_week(event):
-    date = datetime.datetime.today()
-    inspection_pregnancy_week, inspection_date = None, None
-    inspections = Action.query.join(ActionType).filter(
-        Action.event == event,
-        Action.deleted == 0,
-        ActionType.flatCode.in_(checkup_flat_codes)).order_by(Action.begDate.desc())
-    for inspection in inspections:
-        if inspection.propsByCode['pregnancy_week'].value:
-            inspection_pregnancy_week, inspection_date = inspection.propsByCode['pregnancy_week'].value, inspection.begDate
-            break
-
-    epicrisis = get_action(event, risar_epicrisis)
-
-    if epicrisis:
-        delivery_date = epicrisis.propsByCode['delivery_date'].value
-        if delivery_date:
-            return inspection_pregnancy_week + (delivery_date - inspection_date.date()).days/7  # на какой неделе произошли роды
-
-    if inspection_pregnancy_week:
-        return inspection_pregnancy_week + (date - inspection_date).days/7
-
-    mother_action = get_action(event, risar_mother_anamnesis)
-    if mother_action:
-        menstruation_last_date = mother_action.propsByCode['menstruation_last_date'].value
-        if menstruation_last_date:
-            return (date.date() - menstruation_last_date).days/7 + 1  # расчет срока беременности по дате последней менструации
-    return None
+def get_pregnancy_week(event, date=None):
+    """
+    :type event: application.models.event.Event
+    :type date: datetime.date | None
+    :param event: Карточка пациентки
+    :param date: Интересующая дата или None (тогда - дата окончания беременности)
+    :return: число недель от начала беременности на дату
+    """
+    action = get_card_attrs_action(event)
+    start_date = action['pregnancy_start_date'].value
+    if date is None:
+        date = action['predicted_delivery_date'].value
+    if start_date:  # assume that date is not None
+        return (min(date, datetime.date.today()) - start_date).days / 7
 
 
 def represent_anamnesis(event):
@@ -359,9 +345,7 @@ def represent_epicrisis(event, action=None):
         for (code, prop) in action.propsByCode.iteritems()
     )
     finish_date = epicrisis['delivery_date']
-    pregnancy_week = get_pregnancy_week(event)
-    epicrisis['registration_pregnancy_week'] = pregnancy_week - (finish_date - event.setDate.date()).days/7 if \
-        pregnancy_week and finish_date else None
+    epicrisis['registration_pregnancy_week'] = get_pregnancy_week(event, event.setDate.date()) if finish_date else None
     epicrisis['newborn_inspections'] = represent_newborn_inspections(event)
     epicrisis['info'] = make_epicrisis_info(epicrisis)
     if epicrisis:
