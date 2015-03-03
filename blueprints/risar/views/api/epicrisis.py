@@ -5,6 +5,7 @@ from application.lib.apiutils import api_method, ApiException
 from application.models.event import Event
 from application.models.actions import Action, ActionProperty_Diagnosis
 from application.systemwide import db
+from blueprints.risar.lib.card_attrs import reevaluate_card_attrs
 from ...lib.represent import represent_epicrisis, risar_newborn_inspection
 from blueprints.risar.lib.utils import get_action, get_action_by_id
 from ...risar_config import risar_epicrisis
@@ -40,6 +41,8 @@ def api_0_chart_epicrisis(event_id):
                     elif code == 'sex' and value:
                         child_action.propsByCode['sex'].value = 1 if value['code'] == 'male' else 2
                 db.session.add(child_action)
+        db.session.commit()
+        reevaluate_card_attrs(event)
         db.session.commit()
     return represent_epicrisis(event, action)
 

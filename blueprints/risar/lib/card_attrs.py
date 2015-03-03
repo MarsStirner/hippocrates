@@ -7,7 +7,7 @@ from application.models.actions import Action, ActionType
 from application.systemwide import db
 from blueprints.risar.lib.utils import get_action, get_action_list, HIV_diags, syphilis_diags, hepatitis_diags, \
     tuberculosis_diags, scabies_diags, pediculosis_diags
-from blueprints.risar.risar_config import checkup_flat_codes, risar_mother_anamnesis
+from blueprints.risar.risar_config import checkup_flat_codes, risar_mother_anamnesis, risar_epicrisis
 from .utils import risk_rates_blockID, risk_rates_diagID
 
 __author__ = 'viruzzz-kun'
@@ -68,13 +68,15 @@ def get_all_diagnoses(event):
     return result
 
 
-def calc_risk_rate(event):
+def reevaluate_risk_rate(event, action=None):
     """
-    Расчёт риска невынашивания
+    Пересчёт риска невынашивания
     :param event: обращение
     :type event: application.models.event.Event
-    :rtype: int
     """
+    if action is None:
+        action = get_card_attrs_action(event)
+
     def diag_to_risk_rate(diag):
         if diag['diagnosis']['mkb'].DiagID in risk_rates_diagID['high'] or diag['diagnosis']['mkb'].BlockID in risk_rates_blockID['high']:
             return 3
@@ -85,36 +87,53 @@ def calc_risk_rate(event):
         return 0
 
     all_diagnoses = list(get_all_diagnoses(event))
-    return max(map(diag_to_risk_rate, all_diagnoses)) if all_diagnoses else 0
+    action['prenatal_risk_572'].value = max(map(diag_to_risk_rate, all_diagnoses)) if all_diagnoses else 0
 
 
-def get_pregnancy_start_date(event):
+def reevaluate_dates(event, action=None):
     """
-    Вычислить дату начала беременности
+    Пересчёт даты начала беременности и предполагаемой даты родов
     :param event: обращение
+    :param action: атрибуты карточки пациентки
     :type event: application.models.event.Event
-    :rtype: datetime.date | None
-    :return:
-    """
-    for inspection in get_action_list(event, checkup_flat_codes).order_by(Action.begDate.desc()):
-        if inspection.propsByCode['pregnancy_week'].value:
-            return (inspection.begDate - datetime.timedelta(weeks=int(inspection.propsByCode['pregnancy_week'].value))).date()
-
-    mother_action = get_action(event, risar_mother_anamnesis)
-    if mother_action:
-        return mother_action.propsByCode['menstruation_last_date'].value
-
-
-def get_predicted_d_date(start_date):
-    """
-    Вычисление предполагаемой даты родов
-    :param start_date: дата начала беременности
-    :type start_date: datetime.date
+    :type action: Action
     :rtype: datetime.date
     :return:
     """
-    if start_date:
-        return start_date + datetime.timedelta(weeks=40)
+
+    if action is None:
+        action = get_card_attrs_action(event)
+
+    start_date, delivery_date, p_week = None, None, None
+
+    # Сначала смотрим по осмотрам, если таковые есть
+    for inspection in get_action_list(event, checkup_flat_codes).order_by(Action.begDate.desc()):
+        if inspection.propsByCode['pregnancy_week'].value:
+            # Установленная неделя беременности. Может быть как меньше, так и больше 40
+            p_week = int(inspection.propsByCode['pregnancy_week'].value)
+            # вычисленная дата начала беременности
+            start_date = (inspection.begDate - datetime.timedelta(weeks=p_week)).date()
+            break
+
+    if start_date is None:
+        mother_action = get_action(event, risar_mother_anamnesis)
+        if mother_action:
+            # если есть анамнез матери, то находим дату начала беременности из него
+            start_date = mother_action.propsByCode['menstruation_last_date'].value
+
+    epicrisis = get_action(event, risar_epicrisis)
+
+    if epicrisis:
+        # Если есть эпикриз, то есть точная дата окончания беременности - дата родоразрешения
+        delivery_date = epicrisis.propsByCode['delivery_date'].value
+    elif start_date:
+        # если эпикриза нет, но известна дата начала беременности, можно вычислить дату окончания
+        # если в осмотрах фигурировала неделя беременности, то она нам интересна, если была больше 40
+        weeks = 40 if p_week is None else max(p_week, 40)
+        delivery_date = start_date + datetime.timedelta(weeks=weeks)
+
+    action['pregnancy_start_date'].value = start_date
+    action['predicted_delivery_date'].value = delivery_date
 
 
 def reevaluate_card_attrs(event, action=None):
@@ -123,12 +142,10 @@ def reevaluate_card_attrs(event, action=None):
     :param event: карточка беременной, обращение
     :type event: application.models.event.Event
     """
-    preg_start_date = get_pregnancy_start_date(event)
     if action is None:
         action = get_card_attrs_action(event)
-    action['prenatal_risk_572'].value = calc_risk_rate(event)
-    action['pregnancy_start_date'].value = preg_start_date
-    action['predicted_delivery_date'].value = get_predicted_d_date(preg_start_date)
+    reevaluate_risk_rate(event, action)
+    reevaluate_dates(event, action)
 
 
 def check_disease(diagnoses):
