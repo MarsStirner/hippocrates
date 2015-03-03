@@ -137,6 +137,10 @@ def get_pregnancy_week(event, date=None):
     if date is None:
         date = action['predicted_delivery_date'].value
     if start_date:  # assume that date is not None
+        if isinstance(date, datetime.datetime):
+            date = date.date()
+        if isinstance(start_date, datetime.datetime):
+            start_date = start_date.date()
         return (min(date, datetime.date.today()) - start_date).days / 7
 
 
@@ -238,6 +242,7 @@ def represent_checkup(action):
         result['diag'] = evis.make_diagnostic_record(result['diag'])
         for code in ('diag2', 'diag3'):
             result[code] = [evis.make_diagnostic_record(diag) for diag in result[code]] if result[code] else []
+    result['calculated_pregnancy_week'] = get_pregnancy_week(action.event, action.begDate)
     return result
 
 

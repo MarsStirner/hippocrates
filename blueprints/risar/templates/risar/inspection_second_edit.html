@@ -98,9 +98,18 @@
                                 </tr>
                                 <tr>
                                     <th class="text-right">Срок беременности <span class="text-danger">*</span></th>
-                                    <td><div class="row"
-                                             ng-class="{'has-error': firstForm.pregnancy_week.$invalid}"><div class="col-md-1">
-                                        <input name="pregnancy_week" ng-model="checkup.pregnancy_week" class="form-control" type="number" valid-number ng-required="true"></div></div></td>
+                                    <td>
+                                        <div class="row"
+                                             ng-class="{'has-error': firstForm.pregnancy_week.$invalid}">
+                                            <div class="col-md-1">
+                                                <input name="pregnancy_week" ng-model="checkup.pregnancy_week"
+                                                       class="form-control" type="number" valid-number ng-required="true">
+                                            </div>
+                                            <div class="col-md-4">
+                                                <span class="form-control-static">Расчётный: [[ checkup.calculated_pregnancy_week ]]</span>
+                                            </div>
+                                        </div>
+                                    </td>
                                 </tr>
                                 <tr>
                                     <th class="text-right">Общее состояние <span class="text-danger">*</span></th>
