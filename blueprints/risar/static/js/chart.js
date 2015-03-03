@@ -8,6 +8,15 @@ var ChartCtrl = function ($scope, $modal, RisarApi) {
     var params = aux.getQueryParams(window.location.search);
     var ticket_id = params.ticket_id;
     var event_id = params.event_id;
+    $scope.has_desease = function(has_diag){
+        if (has_diag){
+            return 'Положительно'
+        } else if ($scope.chart.checkups.length){
+            return 'Отрицательно'
+        } else {
+            return 'Нет данных'
+        }
+    }
     var reload_chart = function () {
         RisarApi.chart.get(event_id, ticket_id)
         .then(function (event) {
