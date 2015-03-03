@@ -263,6 +263,7 @@ def api_0_chart_mother(event_id):
             elif (code == 'finished_diseases' or code == 'current_diseases') and value:
                 property = action.propsByCode[code]
                 property.value = ActionProperty_Diagnosis.format_value(property, value)
+        db.session.add(action)
         db.session.commit()
         reevaluate_card_attrs(event)
         db.session.commit()

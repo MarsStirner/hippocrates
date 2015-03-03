@@ -13,9 +13,8 @@ var ChartCtrl = function ($scope, $modal, RisarApi) {
             return 'Положительно'
         } else if ($scope.chart.checkups.length){
             return 'Отрицательно'
-        } else {
-            return 'Нет данных'
         }
+        return 'Нет данных'
     }
     var reload_chart = function () {
         RisarApi.chart.get(event_id, ticket_id)
