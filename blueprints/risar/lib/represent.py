@@ -85,26 +85,22 @@ def represent_event(event):
 
 
 def represent_chart_for_routing(event):
-    last_checkup = Action.query.join(ActionType).filter(
-        Action.event == event,
-        Action.deleted == 0,
-        ActionType.flatCode.in_(checkup_flat_codes)
-    ).order_by(Action.begDate.desc()).first()
-    if last_checkup is None:
-        diagnostics = []
-    else:
-        diagnostics = itertools.chain.from_iterable(
-            prop.value if isinstance(prop.value, list) else [prop.value]
-            for prop in last_checkup.properties
-            if prop.type.typeName == 'Diagnosis' and prop.value
-        )
     mkbs = [
         diagnose.mkb
         for diagnose in itertools.chain.from_iterable(
             diagnostic.diagnoses
-            for diagnostic in diagnostics
+            for diagnostic in itertools.chain.from_iterable(
+                prop.value if isinstance(prop.value, list) else [prop.value]
+                for prop in itertools.chain.from_iterable(
+                    action.properties
+                    for action in event.actions
+                )
+                if prop.type.typeName == 'Diagnosis' and prop.value
+            )
+            if not diagnostic.endDate
         )
     ]
+    mkbs.sort(key=lambda x: x.DiagID)
     plan_attach = event.client.attachments.join(rbAttachType).filter(rbAttachType.code == 10).first()
     extra_attach = event.client.attachments.join(rbAttachType).filter(rbAttachType.code == 11).first()
     return {
