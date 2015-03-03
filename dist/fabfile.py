@@ -182,6 +182,11 @@ def restore_database():
         local('alembic upgrade head')
 
 
+def set_crontab():
+    # FIXME: реализовать загрузку crontab из fabric_inc/crontab.ini
+    pass
+
+
 def deploy():
     prepare_virtual_env()
     configure_db()
@@ -191,6 +196,7 @@ def deploy():
     activate_web_config()
     install_requirements()
     restore_database()
+    set_crontab()
     print green(u'Установка прошла успешно!')
 
 
@@ -201,6 +207,7 @@ def alt_deploy():
     configure_webserver()
     activate_web_config()
     restore_database()
+    set_crontab()
     print green(u'Установка прошла успешно!')
 
 
