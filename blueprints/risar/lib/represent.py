@@ -298,7 +298,7 @@ def represent_intolerance(obj):
 
 def make_epicrisis_info(epicrisis):
     try:
-        info = u'<b>Беременность закончилась</b> '
+        info = u'Беременность закончилась '
         pregnancy_final = epicrisis['pregnancy_final']['name'] if epicrisis['pregnancy_final'] else ''
         week = u'недель' if 5 <= epicrisis['pregnancy_duration'] <= 20 else (u'недел' + week_postfix[epicrisis['pregnancy_duration'] % 10])
         is_dead = bool(epicrisis['death_date'] or epicrisis['reason_of_death'])
@@ -317,22 +317,22 @@ def make_epicrisis_info(epicrisis):
             elif pregnancy_final == u'абортом':
                 info += u'аборте'
         else:
-            info += pregnancy_final
+            info += u'<b>' + pregnancy_final + u'</b>'
 
         if is_complications:
-            info += u' с осложнениями'
-        info += u' при сроке {0} {1}'.format(epicrisis['pregnancy_duration'], week)
+            info += u' <b>с осложнениями</b>'
+        info += u' при сроке <b>{0} {1}</b>'.format(epicrisis['pregnancy_duration'], week)
 
-        info += u' {0} {1}.<br>'.format(epicrisis['delivery_date'].strftime("%d.%m.%y"), epicrisis['delivery_time'])
+        info += u' - <b>{0} {1}</b>.<br>'.format(epicrisis['delivery_date'].strftime("%d.%m.%Y"), epicrisis['delivery_time'].strftime("%H:%M"))
 
-        info += u"<b>Место родоразрешения</b>: {0}.<br>".format(epicrisis['LPU'].shortName)
+        info += u"Место родоразрешения: <b>{0}</b>.<br>".format(epicrisis['LPU'].shortName)
 
         if is_manipulations and is_operations:
-            info += u'Были осуществлены пособия и манипуляции и проведены операции. '
+            info += u'Были осуществлены <b>пособия и манипуляции</b> и проведены <b>операции</b>.<br>'
         elif is_manipulations:
-            info += u'Были осуществлены пособия и манипуляции. '
+            info += u'Были осуществлены <b>пособия и манипуляции</b>.<br>'
         elif is_operations:
-            info += u'Были проведены операции. '
+            info += u'Были проведены <b>операции</b>.<br>'
 
         if epicrisis['newborn_inspections'] and pregnancy_final != u'абортом':
             info += u'<b>Дети</b> ({}): '.format(len(epicrisis['newborn_inspections']))
@@ -340,9 +340,9 @@ def make_epicrisis_info(epicrisis):
             children_info = []
             for child in epicrisis['newborn_inspections']:
                 if child['sex'].value == 1:
-                    children_info.append(u'мальчик ' + (u'живой' if child['alive'] else u'мертвый'))
+                    children_info.append(u'<b>мальчик - ' + (u'живой</b>' if child['alive'] else u'мертвый</b>'))
                 else:
-                    children_info.append(u'девочка ' + (u'живая' if child['alive'] else u'мертвая'))
+                    children_info.append(u'<b>девочка - ' + (u'живая</b>' if child['alive'] else u'мертвая</b>'))
             info += ', '.join(children_info) + '.'
     except:
         info = ''
