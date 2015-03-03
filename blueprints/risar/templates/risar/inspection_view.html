@@ -61,17 +61,17 @@
                 </tr>
                 <tr>
                     <td>основной</td>
-                    <td ng-repeat="checkup in chart.checkups">[[ checkup.diag | format:'{code}' ]]</td>
+                    <td ng-repeat="checkup in chart.checkups"><span class="bottom_dotted" tooltip="[[ checkup.diag.diagnosis.mkb.name ]]">[[ checkup.diag.diagnosis.mkb.code ]]</span></td>
                     <td></td>
                 </tr>
                 <tr>
                     <td>сопутствующие</td>
-                    <td ng-repeat="checkup in chart.checkups"><p ng-repeat="diag in checkup.diag2">[[ diag | format:'{code}' ]]</p></td>
+                    <td ng-repeat="checkup in chart.checkups"><p ng-repeat="diag in checkup.diag2"><span class="bottom_dotted" tooltip="[[ diag.diagnosis.mkb.name ]]">[[ diag.diagnosis.mkb.code ]]</span></p></td>
                     <td></td>
                 </tr>
                 <tr>
                     <td>осложнения</td>
-                    <td ng-repeat="checkup in chart.checkups"><p ng-repeat="diag in checkup.diag3">[[ diag | format:'{code}' ]]</p></td>
+                    <td ng-repeat="checkup in chart.checkups"><p ng-repeat="diag in checkup.diag3"><span class="bottom_dotted" tooltip="[[ diag.diagnosis.mkb.name ]]">[[ diag.diagnosis.mkb.code ]]</span></p></td>
                     <td></td>
                 </tr>
                 <tr>
