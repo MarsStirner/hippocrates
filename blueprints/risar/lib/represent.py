@@ -137,7 +137,7 @@ def get_pregnancy_week(event, date=None):
             date = date.date()
         if isinstance(start_date, datetime.datetime):
             start_date = start_date.date()
-        return (min(date, datetime.date.today()) - start_date).days / 7
+        return (min(date, datetime.date.today()) - start_date).days / 7 + 1
 
 
 def represent_anamnesis(event):

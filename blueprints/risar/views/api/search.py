@@ -54,6 +54,7 @@ def api_0_event_search():
     if request.json:
         data.update(request.json)
     result = search_events(**data)
+    today = datetime.date.today()
     return [
         {
             'event_id': row['id'],
@@ -66,10 +67,10 @@ def api_0_event_search():
             'risk': PrenatalRiskRate(row['risk']),
             'mdate': datetime.date.fromtimestamp(row['modify_date']),
             'pddate': datetime.date.fromtimestamp(row['bdate'] * 86400) if row['bdate'] else None,
-            'week': min(
-                45,
-                (datetime.date.today() - datetime.date.fromtimestamp(row['psdate'] * 86400)).days / 7)
-            if row['psdate'] else None
+            'week':((
+                (min(today, datetime.date.fromtimestamp(row['bdate'] * 86400)) if row['bdate'] else today) -
+                datetime.date.fromtimestamp(row['psdate'] * 86400)
+            ).days / 7 + 1) if row['psdate'] else None
         }
         for row in result['result']['items']
     ]

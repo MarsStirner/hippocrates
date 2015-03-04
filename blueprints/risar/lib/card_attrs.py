@@ -104,36 +104,52 @@ def reevaluate_dates(event, action=None):
     if action is None:
         action = get_card_attrs_action(event)
 
+    prev_start_date, prev_delivery_date = action['pregnancy_start_date'].value, action['predicted_delivery_date'].value
     start_date, delivery_date, p_week = None, None, None
+    epicrisis = get_action(event, risar_epicrisis)
 
-    # Сначала смотрим по осмотрам, если таковые есть
-    for inspection in get_action_list(event, checkup_flat_codes).order_by(Action.begDate.desc()):
-        if inspection.propsByCode['pregnancy_week'].value:
-            # Установленная неделя беременности. Может быть как меньше, так и больше 40
-            p_week = int(inspection.propsByCode['pregnancy_week'].value)
-            # вычисленная дата начала беременности
-            start_date = (inspection.begDate - datetime.timedelta(weeks=p_week)).date()
-            break
+    if epicrisis and epicrisis['pregnancy_duration'].value:
+        # Установленная неделя беременности. Может быть как меньше, так и больше 40
+        p_week = int(epicrisis['pregnancy_duration'].value)
+        # вычисленная дата начала беременности
+        start_date = (epicrisis['delivery_date'].value + datetime.timedelta(weeks=-p_week, days=1))
+        # Точная дата окончания беременности - дата родоразрешения
+        delivery_date = epicrisis['delivery_date'].value
 
-    if start_date is None:
+    if not start_date:
+        # Сначала смотрим по осмотрам, если таковые есть
+        for inspection in get_action_list(event, checkup_flat_codes).order_by(Action.begDate.desc()):
+            if inspection['pregnancy_week'].value:
+                # Установленная неделя беременности. Может быть как меньше, так и больше 40
+                p_week = int(inspection['pregnancy_week'].value)
+                # вычисленная дата начала беременности
+                start_date = (inspection.begDate.date() + datetime.timedelta(weeks=-p_week, days=1))
+                break
+
+    if not start_date:
         mother_action = get_action(event, risar_mother_anamnesis)
         if mother_action:
             # если есть анамнез матери, то находим дату начала беременности из него
-            start_date = mother_action.propsByCode['menstruation_last_date'].value
+            start_date = mother_action['menstruation_last_date'].value
 
-    epicrisis = get_action(event, risar_epicrisis)
+    if not start_date:
+        action['pregnancy_start_date'].value = None
+        action['predicted_delivery_date'].value = None
+        return
 
-    if epicrisis:
-        # Если есть эпикриз, то есть точная дата окончания беременности - дата родоразрешения
-        delivery_date = epicrisis.propsByCode['delivery_date'].value
-    elif start_date:
+    if not epicrisis:
         # если эпикриза нет, но известна дата начала беременности, можно вычислить дату окончания
         # если в осмотрах фигурировала неделя беременности, то она нам интересна, если была больше 40
         weeks = 40 if p_week is None else max(p_week, 40)
         delivery_date = start_date + datetime.timedelta(weeks=weeks)
 
-    action['pregnancy_start_date'].value = start_date
-    action['predicted_delivery_date'].value = delivery_date
+    if abs((start_date - prev_start_date).days) > 3:
+        # Не надо трогать дату начала беременности, если она не слишком отличается от предыдущей вычисленной
+        action['pregnancy_start_date'].value = start_date
+    if epicrisis or abs((delivery_date - prev_delivery_date).days) > 3:
+        # Не надо трогать дату родоразрешения, если она не слишком отличается от предыдущей вычисленной при отсутствии
+        # эпикриза
+        action['predicted_delivery_date'].value = delivery_date
 
 
 def reevaluate_card_attrs(event, action=None):
