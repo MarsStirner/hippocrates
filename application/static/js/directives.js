@@ -905,7 +905,7 @@ angular.module('WebMis20.directives')
                         });
                     });
                 });
-                element.addClass('cursor-pointer');
+                element.addClass('cursor-pointer text-nowrap');
                 var arrow = $('<span class="fa header-sorter"></span>');
                 arrow.attr('ng-class', "{'fa-caret-down': order === 'DESC', 'fa-caret-up': order === 'ASC'}");
                 element.append(arrow);
