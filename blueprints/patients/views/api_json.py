@@ -343,7 +343,8 @@ def api_patient_file_attach():
             filetype=filetype, attach_type=attach_type, date=file_add_date, ext=file_extension
         )
         filepath = os.path.join(STORAGE_PATH, filename)
-        img_string = data.get('image')
+        uri_string = data.get('image')
+        img_string = uri_string.split(',')[1]  # seems legit
         try:
             with open(filepath, 'wb') as f:
                 f.write(base64.b64decode(img_string))

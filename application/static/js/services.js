@@ -296,7 +296,10 @@ angular.module('WebMis20.services', []).
                     $scope.mode = 'scanning';
                     $scope.device_list = [];
                     $scope.selected = { device: {name: 'test'} };
+                    $scope.image = null;
                     $scope.file = { encoded: null };
+                    var scales = [5, 10, 15, 30, 50, 75, 90, 100, 125, 150, 200, 300, 400, 500];
+                    $scope.scalePct = 100;
 
                     $scope.get_device_list = function () {
                         $http.get(WMConfig.url.scanserver.list).success(function (data) {
@@ -307,12 +310,14 @@ angular.module('WebMis20.services', []).
                         $http.post(WMConfig.url.scanserver.scan, {
                             name: $scope.selected.device.name
                         }).success(function (data) {
-                            $scope.file.encoded = data.image;
+                            $scope.image = new Image();
+                            $scope.image.src = 'data:image/png;base64,' + data.image;
+                            $scope.file.encoded = $scope.image;
                         });
                     };
                     $scope.save_image = function () {
                         $http.post(WMConfig.url.api_patient_file_attach, {
-                            image: $scope.file.encoded,
+                            image: $scope.file.encoded.src,
                             client_id: client_id
                         }).success(function () {
                             alert('Сохранено');
@@ -322,6 +327,25 @@ angular.module('WebMis20.services', []).
                     };
                     $scope.clear_image = function () {
                         $scope.file.encoded = null;
+                        $scope.image = null;
+                    };
+                    $scope.reset_image = function () {
+                        $scope.$broadcast('resetImage');
+                    };
+                    $scope.rotate = function (w) {
+                        var angle = w === 'left' ? -15 : 15;
+                        $scope.$broadcast('rotateImage', {
+                            angle: angle
+                        });
+                    };
+                    $scope.zoom = function (how) {
+                        $scope.scalePct = scales[scales.indexOf($scope.scalePct) + how];
+                        $scope.$broadcast('zoomImage', {
+                            scalePct: $scope.scalePct
+                        });
+                    };
+                    $scope.crop = function (action) {
+                        $scope.$broadcast('cropImage' + action);
                     };
                     if (cfa_id) {
                         $http.get(WMConfig.url.api_patient_file_attach, {
@@ -329,7 +353,9 @@ angular.module('WebMis20.services', []).
                                 client_file_attach_id: cfa_id
                             }
                         }).success(function (data) {
-                            $scope.file.encoded = data.result.image;
+                            $scope.image = new Image();
+                            $scope.image.src = 'data:image/png;base64,' + data.result.image;
+                            $scope.file.encoded = $scope.image;
                         }).error(function () {
                             alert('Ошибка открытия файла. Файл был удален.');
                         });
@@ -377,24 +403,52 @@ angular.module('WebMis20.services', []).
                     </div>\
                     <div ng-show="mode === \'select_existing\'">\
                         <h4>Выбрать из файловой системы</h4>\
-                        <input type="file" wm-input-file file-encoded="file.encoded">\
+                        <input type="file" wm-input-file file="file">\
+                    </div>\
+                    <div id="help_canvas">\
                     </div>\
                 </div>\
                 <div class="col-md-8">\
-                    <div class="btn-toolbar" role="toolbar" aria-label="...">\
+                    <div class="btn-toolbar marginal bg-muted" role="toolbar" aria-label="...">\
                         <div class="btn-group btn-group-lg pull-right" role="group" aria-label="...">\
-                            <button type="button" class="btn btn-default" ng-click="clear_image()"><span class="fa fa-times"></span></button>\
+                            <button type="button" class="btn btn-default" ng-click="reset_image()" title="Вернуться к исходному изображению">\
+                                <span class="fa fa-refresh"></span>\
+                            </button>\
+                            <button type="button" class="btn btn-default" ng-click="clear_image()" title="Очистить область изображения">\
+                                <span class="fa fa-times"></span>\
+                            </button>\
+                        </div>\
+                        <div class="btn-group btn-group-lg rmargin10" role="group" aria-label="...">\
+                            <button type="button" class="btn btn-default" ng-click="rotate(\'left\')" title="Повернуть против часовой стрелки">\
+                                <span class="fa fa-rotate-left"></span>\
+                            </button>\
+                            <button type="button" class="btn btn-default" ng-click="rotate(\'right\')" title="Повернуть по часовой стрелке">\
+                                <span class="fa fa-rotate-right"></span>\
+                            </button>\
+                        </div>\
+                        <div class="btn-group btn-group-lg rmargin10" role="group" aria-label="...">\
+                            <button type="button" class="btn btn-default" ng-click="zoom(1)" title="Увеличить">\
+                                <span class="fa fa-plus"></span>\
+                            </button>\
+                            <label class="label label-default">[[scalePct]] %</label>\
+                            <button type="button" class="btn btn-default" ng-click="zoom(-1)" title="Уменьшить">\
+                                <span class="fa fa-minus"></span>\
+                            </button>\
                         </div>\
                         <div class="btn-group btn-group-lg" role="group" aria-label="...">\
-                            <button type="button" class="btn btn-default"><span class="fa fa-rotate-left"></span></button>\
-                            <button type="button" class="btn btn-default"><span class="fa fa-rotate-right"></span></button>\
-                            <button type="button" class="btn btn-default"><span class="fa fa-crop"></span></button>\
+                            <button type="button" class="btn btn-default" ng-click="crop(\'Start\')" title="Обрезать изображение">\
+                                <span class="fa fa-crop"></span>\
+                            </button>\
+                            <button type="button" class="btn btn-default btn-success" ng-click="crop(\'Apply\')" title="Подтвердить">\
+                                <span class="fa fa-check"></span>\
+                            </button>\
+                            <button type="button" class="btn btn-default btn-danger" ng-click="crop(\'Cancel\')" title="Отменить">\
+                                <span class="fa fa-times"></span>\
+                            </button>\
                         </div>\
                     </div>\
                     <div class="modal-scrollable-block">\
-                        <figure ng-show="file.encoded">\
-                            <img ng-src="data:image/png;base64,[[file.encoded]]" style="max-height: 1000px" alt="Полученное изображение" id="scanned_image" />\
-                        </figure>\
+                        <wm-image-editor id="image_editor" model-image="file.encoded"></wm-image-editor>\
                     </div>\
                 </div>\
                 </div>\
