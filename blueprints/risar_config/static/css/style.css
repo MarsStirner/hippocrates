@@ -45,3 +45,15 @@ a.icon {
     padding: 10px 15px;
     text-align: left;
 }
+
+h2 { /* Fix me if you don't like me */
+    margin-top: 0;
+}
+
+.small-left-margin {
+    margin-left: 20px;
+}
+
+ul.breadcrumbs {
+    margin-bottom: 5px;
+}
