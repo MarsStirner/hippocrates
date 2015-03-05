@@ -280,5 +280,14 @@ _.mixin({
             if (_.isUndefined(_.findCmp(result, item, cmp))) result.push(item);
         });
         return result;
+    },
+    deepCopy: function (obj) {
+        if (_.isArray(obj)) {
+            return obj.map(_.deepCopy);
+        } else if (_.isObject(obj)) {
+            return _.mapObject(obj, _.deepCopy);
+        } else {
+            return obj;
+        }
     }
 });
