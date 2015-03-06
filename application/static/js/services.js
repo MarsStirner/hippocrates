@@ -290,14 +290,29 @@ angular.module('WebMis20.services', []).
         );
     }]).
     service('ScanningModal', ['$modal', '$http', 'WMConfig', function ($modal, $http, WMConfig) {
+        function _getFileInfo(file) {
+            var type = file.type,
+                data;
+            if (type === 'image') {
+                data = file.image.src
+            } else {
+                data = window.btoa(file.binary);
+            }
+            return {
+                type: type,
+                mime: file.mime,
+                size: file.size,
+                data: data
+            }
+        }
         return {
             open: function (client_id, cfa_id) {
-                var ScanController = function ($scope) {
+                var FileEditController = function ($scope) {
                     $scope.mode = 'scanning';
                     $scope.device_list = [];
                     $scope.selected = { device: {name: 'test'} };
                     $scope.image = null;
-                    $scope.file = { encoded: null };
+                    $scope.file = { image: null };
                     var scales = [5, 10, 15, 30, 50, 75, 90, 100, 125, 150, 200, 300, 400, 500];
                     $scope.scalePct = 100;
 
@@ -317,7 +332,7 @@ angular.module('WebMis20.services', []).
                     };
                     $scope.save_image = function () {
                         $http.post(WMConfig.url.api_patient_file_attach, {
-                            image: $scope.file.encoded.src,
+                            file: _getFileInfo($scope.file),
                             client_id: client_id
                         }).success(function () {
                             alert('Сохранено');
@@ -326,7 +341,7 @@ angular.module('WebMis20.services', []).
                         });
                     };
                     $scope.clear_image = function () {
-                        $scope.file.encoded = null;
+                        $scope.file.image = null;
                         $scope.image = null;
                     };
                     $scope.reset_image = function () {
@@ -347,6 +362,13 @@ angular.module('WebMis20.services', []).
                     $scope.crop = function (action) {
                         $scope.$broadcast('cropImage' + action);
                     };
+
+                    $scope.correctFileSelected = function () {
+                        return $scope.file.type === 'image' ?
+                            $scope.file.image && $scope.file.image.src :
+                            $scope.file.binary;
+                    };
+
                     if (cfa_id) {
                         $http.get(WMConfig.url.api_patient_file_attach, {
                             params: {
@@ -355,7 +377,7 @@ angular.module('WebMis20.services', []).
                         }).success(function (data) {
                             $scope.image = new Image();
                             $scope.image.src = 'data:image/png;base64,' + data.result.image;
-                            $scope.file.encoded = $scope.image;
+                            $scope.file.image = $scope.image;
                         }).error(function () {
                             alert('Ошибка открытия файла. Файл был удален.');
                         });
@@ -363,7 +385,7 @@ angular.module('WebMis20.services', []).
                 };
                 var instance = $modal.open({
                     templateUrl: '/WebMis20/modal-Scanning.html',
-                    controller: ScanController,
+                    controller: FileEditController,
                     backdrop: 'static',
                     size: 'lg'
                 });
@@ -448,13 +470,13 @@ angular.module('WebMis20.services', []).
                         </div>\
                     </div>\
                     <div class="modal-scrollable-block">\
-                        <wm-image-editor id="image_editor" model-image="file.encoded"></wm-image-editor>\
+                        <wm-image-editor id="image_editor" model-image="file.image"></wm-image-editor>\
                     </div>\
                 </div>\
                 </div>\
             </div>\
             <div class="modal-footer">\
-                <button type="button" class="btn btn-success" ng-click="save_image()" ng-disabled="!file.encoded">\
+                <button type="button" class="btn btn-success" ng-click="save_image()" ng-disabled="!correctFileSelected()">\
                     Сохранить\
                 </button>\
                 <button type="button" class="btn btn-danger" ng-click="$dismiss()">Закрыть</button>\

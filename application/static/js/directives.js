@@ -913,7 +913,7 @@ angular.module('WebMis20.directives')
             }
         }
     }])
-    .directive('wmInputFile', [function () {
+    .directive('wmInputFile', ['$log', function ($log) {
         return {
             restrict: 'A',
             scope: {
@@ -923,21 +923,30 @@ angular.module('WebMis20.directives')
                 var reader = new FileReader(),
                     is_image = false;
                 reader.onloadend = function () {
-                    if (is_image) {
-                        scope.$apply(function () {
-                            scope.file.encoded = new Image();
-                            scope.file.encoded.src = reader.result;
-                        });
-                    } else {
-                        console.log('file is not an image');
-                    }
+                    scope.$apply(function () {
+                        if (is_image) {
+                            scope.file.image = new Image();
+                            scope.file.image.src = reader.result;
+                            scope.file.binary = null;
+                        } else {
+                            $log.info('file is not an image');
+                            scope.file.binary = reader.result;
+                            scope.file.image = null;
+                        }
+                        console.log(scope.file);
+                    });
                 };
                 elem.change(function (event) {
                     var file = event.target.files[0];
+                    scope.file.mime = file.type;
+                    scope.file.size = file.size;
                     is_image = /image/.test(file.type);
-                    console.log(file);
-                    console.log('starting reading/encoding file');
-                    reader.readAsDataURL(file);
+                    scope.file.type = is_image ? 'image' : 'other';
+                    if (is_image) {
+                        reader.readAsDataURL(file);
+                    } else {
+                        reader.readAsBinaryString(file);
+                    }
                 });
             }
         }
@@ -1140,13 +1149,13 @@ angular.module('WebMis20.directives')
                 }
 
                 scope.$watch('modelImage', function (n, o) {
+                    _clearOldData();
                     if (n) {
-                        _clearOldData();
                         _initNewImage(n);
-                    }
-                    if (n && n.src) {
-                        $log.debug('draw image from watch');
-                        drawImage();
+                        if (n.src) {
+                            $log.debug('draw image from watch');
+                            drawImage();
+                        }
                     }
                 });
             }

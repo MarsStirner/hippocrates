@@ -313,6 +313,48 @@ import datetime
 import os
 
 
+def get_file_ext_from_mimetype(mime):
+    if not mime:
+        return ''
+    ext = ''
+    if mime.startswith('image'):
+        ext = mime.split('/')[1]
+    elif mime == 'application/pdf':
+        ext = 'pdf'
+    return ext
+
+
+def generate_filename(file_info):
+    template = u'{filetypename}_Лист_№{idx}_{date:%y%m%d_%H%M}{ext}'
+
+    filetypename = file_info.get('filetypename', u'Файл')
+    idx = 1
+    attach_date = file_info.get('attach_date', datetime.datetime.now())
+    file_ext = get_file_ext_from_mimetype(file_info.get('mime'))
+    file_ext = '.' + file_ext if file_ext else ''
+    filename = template.format(
+        filetypename=filetypename, idx=idx, date=attach_date, ext=file_ext
+    )
+    return filename
+
+
+def store_file(filepath, file_type, file_data):
+    if file_type == 'image':
+        uri_string = file_data
+        data_string = uri_string.split(',')[1]  # seems legit
+        data_string = base64.b64decode(data_string)
+    else:
+        data_string = base64.b64decode(file_data)  # file_data.encode('utf-8')
+    try:
+        with open(filepath, 'wb') as f:
+            f.write(data_string)
+    except IOError:
+        logger.error(u'Ошибка сохранения файла средствами МИС')
+        return False, u'Ошибка сохранения файла'
+    # TODO: manage exceptions
+    return True, ''
+
+
 @module.route('/api/client_file_attach.json', methods=['POST', 'GET'])
 def api_patient_file_attach():
     if request.method == 'GET':
@@ -332,25 +374,23 @@ def api_patient_file_attach():
     data = request.json
     cfa_id = data.get('client_file_attach_id')
     client_id = safe_int(data.get('client_id'))
-    filetype = data.get('filetype', 'img')
-    attach_type = data.get('attach_type', 'misc')
-    file_extension = data.get('file_extension', 'png')
-    file_add_date = datetime.datetime.now()
+    file_info = data.get('file')
+    if not file_info:
+        raise Exception
+    file_type = file_info.get('type')
+    file_data = file_info.get('data')
+    if not file_data:
+        raise Exception
+
     if cfa_id:
         pass
     else:
-        filename = u'{filetype}_{attach_type}_{date:%y%m%d_%H%M}.{ext}'.format(
-            filetype=filetype, attach_type=attach_type, date=file_add_date, ext=file_extension
-        )
+        filename = generate_filename(file_info)
         filepath = os.path.join(STORAGE_PATH, filename)
-        uri_string = data.get('image')
-        img_string = uri_string.split(',')[1]  # seems legit
-        try:
-            with open(filepath, 'wb') as f:
-                f.write(base64.b64decode(img_string))
-        except IOError:
-            logger.error(u'Ошибка сохранения файла средствами МИС')
-            return jsonify(u'Ошибка сохранения файла', 500, 'ERROR')
+
+        ok, msg = store_file(filepath, file_type, file_data)
+        if not ok:
+            return jsonify(msg, 500, 'ERROR')
         else:
             fm = FileMeta()
             fm.name = filename
