@@ -8,12 +8,12 @@
     <ul class="breadcrumb">
         <li><a href="{{ url_for('.index_html') }}">Рабочий стол</a></li>
         <li><a ng-href="{{ url_for('.html_chart') }}?event_id=[[ chart.id ]]">Карта пациентки</a></li>
-        <li>Осмотры беременной акушером-гинекологом</li>
+        <li>Осмотры акушером-гинекологом беременной</li>
     </ul>
         <div class="row small-marginal">
             <div class="col-lg-10 col-md-10">
                 <h2>
-                    Осмотры беременной акушером-гинекологом
+                    Осмотры акушером-гинекологом беременной
                     <a ng-href="{{ url_for('patients.patient') }}?client_id=[[ chart.client.id ]]">[[ chart.client.full_name ]]</a>
                     ([[ chart.external_id ]])
                 </h2>
