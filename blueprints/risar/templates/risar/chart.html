@@ -92,8 +92,8 @@
                                 <td>Перенесенные</br>
                                 Текущие
                                 </td>
-                                <td><span ng-repeat="diag in chart.anamnesis.mother.finished_diseases" tooltip="[[ diag.diagnosis.mkb.name ]]"> [[diag.diagnosis.mkb.code]][[$last ? '' : ', ']]</span>[[chart.anamnesis.mother.finished_diseases ? '' : 'нет']]</br>
-                                <span ng-repeat="diag in chart.anamnesis.mother.current_diseases" tooltip="[[ diag.diagnosis.mkb.name ]]"> [[diag.diagnosis.mkb.code]][[$last ? '' : ', ']]</span>[[chart.anamnesis.mother.current_diseases ? '' : 'нет']]
+                                <td><span class="bottom_dotted"ng-repeat="diag in chart.anamnesis.mother.finished_diseases" tooltip="[[ diag.diagnosis.mkb.name ]]"> [[diag.diagnosis.mkb.code]][[$last ? '' : ', ']]</span>[[chart.anamnesis.mother.finished_diseases ? '' : 'нет']]</br>
+                                <span class="bottom_dotted" ng-repeat="diag in chart.anamnesis.mother.current_diseases" tooltip="[[ diag.diagnosis.mkb.name ]]"> [[diag.diagnosis.mkb.code]][[$last ? '' : ', ']]</span>[[chart.anamnesis.mother.current_diseases ? '' : 'нет']]
                                 </td>
                             </tr>
                             <tr>
