@@ -45,15 +45,19 @@
                             <div class="panel-body">
                                 <div class="row">
                                     <div class="col-md-5  text-right">Основной диагноз:</div>
-                                    <div class="col-md-7">[[chart.epicrisis.main_diagnosis.code]] - [[chart.epicrisis.main_diagnosis.name]]</div>
+                                    <div class="col-md-7">[[chart.epicrisis.main_diagnosis.diagnosis.mkb.code]] - [[chart.epicrisis.main_diagnosis.diagnosis.mkb.name]]</div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-5  text-right">Сопутствующий диагноз:</div>
-                                    <div class="col-md-7">[[chart.epicrisis.attend_diagnosis.code]] - [[chart.epicrisis.attend_diagnosis.name]]</div>
+                                    <div class="col-md-7"><span ng-repeat="diag in chart.epicrisis.attend_diagnosis" >[[diag.diagnosis.mkb.code]] - [[diag.diagnosis.mkb.name]]
+                                    <span ng-if="chart.epicrisis.attend_diagnosis.length>1"><br></span></span>
+                                    </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-5  text-right">Диагноз осложнения:</div>
-                                    <div class="col-md-7">[[chart.epicrisis.complicating_diagnosis.code]] - [[chart.epicrisis.complicating_diagnosis.name]]</div>
+                                    <div class="col-md-7"><span ng-repeat="diag in chart.epicrisis.complicating_diagnosis">[[diag.diagnosis.mkb.code]] - [[diag.diagnosis.mkb.name]]
+                                    <span ng-if="chart.epicrisis.complicating_diagnosis.length>1"><br></span></span>
+                                    </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-12">&nbsp;</div>
@@ -106,20 +110,23 @@
                             <div class="panel-body">
                                 <div class="row">
                                     <div class="col-md-5 text-right">Дата смерти:</div>
-                                    <div class="col-md-7">[[chart.epicrisis.death_date]]</div>
+                                    <div class="col-md-7">[[chart.epicrisis.death_date|asDate]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-md-5 text-right">Причины смерти:</div>
+                                    <div class="col-md-5 text-right">Время смерти:</div>
+                                    <div class="col-md-7">[[chart.epicrisis.death_time|asTime]]</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-5 text-right">Причина смерти:</div>
                                     <div class="col-md-7">[[chart.epicrisis.reason_of_death]]</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-md-12">&nbsp;</div>
+                                    <div class="col-md-5 text-right">Патологоанатомический диагноз:</div>
+                                    <div class="col-md-7"><span tooltip="[[ chart.epicrisis.pat_diagnosis.diagnosis.mkb.name ]]">[[chart.epicrisis.pat_diagnosis.diagnosis.mkb.code]]</span></div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-md-12">&nbsp;</div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-12">&nbsp;</div>
+                                    <div class="col-md-5 text-right">Заключение ЛКК:</div>
+                                    <div class="col-md-7">[[chart.epicrisis.control_expert_conclusion]]</div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-12">&nbsp;</div>
@@ -242,7 +249,7 @@
                                 </div>
                                 <div class="row">
                                     <div class="col-md-6  text-right">Показания к операции:</div>
-                                    <div class="col-md-6">[[chart.epicrisisindication.indication.name]]</div>
+                                    <div class="col-md-6">[[chart.epicrisis.indication.name]]</div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-6  text-right">Особенности операции:</div>
@@ -258,7 +265,8 @@
                                 </div>
                                 <div class="row">
                                     <div class="col-md-6  text-right">Осложнения:</div>
-                                    <div class="col-md-6">[[chart.epicrisis.operation_complication]]</div>
+                                    <div class="col-md-6"><span ng-repeat="diag in chart.epicrisis.operation_complication" tooltip="[[diag.diagnosis.mkb.name]]">[[diag.diagnosis.mkb.code]]
+                                    <span ng-if="chart.epicrisis.operation_complication.length>1"><br></span></span></div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-6  text-right">Плодоразрушающие операции:</div>
