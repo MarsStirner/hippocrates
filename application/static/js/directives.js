@@ -930,7 +930,7 @@ angular.module('WebMis20.directives')
                             scope.file.binary = null;
                         } else {
                             $log.info('file is not an image');
-                            scope.file.binary = reader.result;
+                            scope.file.binary_b64 = reader.result;
                             scope.file.image = null;
                         }
                         console.log(scope.file);
@@ -945,7 +945,7 @@ angular.module('WebMis20.directives')
                     if (is_image) {
                         reader.readAsDataURL(file);
                     } else {
-                        reader.readAsBinaryString(file);
+                        reader.readAsDataURL(file);
                     }
                 });
             }

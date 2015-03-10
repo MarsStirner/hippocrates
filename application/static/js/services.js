@@ -296,7 +296,7 @@ angular.module('WebMis20.services', []).
             if (type === 'image') {
                 data = file.image.src
             } else {
-                data = window.btoa(file.binary);
+                data = file.binary_b64;
             }
             return {
                 type: type,
@@ -366,7 +366,7 @@ angular.module('WebMis20.services', []).
                     $scope.correctFileSelected = function () {
                         return $scope.file.type === 'image' ?
                             $scope.file.image && $scope.file.image.src :
-                            $scope.file.binary;
+                            $scope.file.binary_b64;
                     };
 
                     if (cfa_id) {

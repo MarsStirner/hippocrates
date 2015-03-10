@@ -311,16 +311,17 @@ STORAGE_PATH = './attached_files'
 import base64
 import datetime
 import os
+import mimetypes
 
 
 def get_file_ext_from_mimetype(mime):
-    if not mime:
-        return ''
+    ext_list = mimetypes.guess_all_extensions(mime)
     ext = ''
-    if mime.startswith('image'):
-        ext = mime.split('/')[1]
-    elif mime == 'application/pdf':
-        ext = 'pdf'
+    if ext_list:
+        if len(ext_list) == 1:
+            ext = ext_list[0]
+        elif '.xls' in ext_list:
+            ext = '.xls'
     return ext
 
 
@@ -331,20 +332,16 @@ def generate_filename(file_info):
     idx = 1
     attach_date = file_info.get('attach_date', datetime.datetime.now())
     file_ext = get_file_ext_from_mimetype(file_info.get('mime'))
-    file_ext = '.' + file_ext if file_ext else ''
     filename = template.format(
         filetypename=filetypename, idx=idx, date=attach_date, ext=file_ext
     )
     return filename
 
 
-def store_file(filepath, file_type, file_data):
-    if file_type == 'image':
-        uri_string = file_data
-        data_string = uri_string.split(',')[1]  # seems legit
-        data_string = base64.b64decode(data_string)
-    else:
-        data_string = base64.b64decode(file_data)  # file_data.encode('utf-8')
+def store_file(filepath, file_data):
+    uri_string = file_data
+    data_string = uri_string.split(',')[1]  # seems legit
+    data_string = base64.b64decode(data_string)
     try:
         with open(filepath, 'wb') as f:
             f.write(data_string)
@@ -377,7 +374,6 @@ def api_patient_file_attach():
     file_info = data.get('file')
     if not file_info:
         raise Exception
-    file_type = file_info.get('type')
     file_data = file_info.get('data')
     if not file_data:
         raise Exception
@@ -388,7 +384,7 @@ def api_patient_file_attach():
         filename = generate_filename(file_info)
         filepath = os.path.join(STORAGE_PATH, filename)
 
-        ok, msg = store_file(filepath, file_type, file_data)
+        ok, msg = store_file(filepath, file_data)
         if not ok:
             return jsonify(msg, 500, 'ERROR')
         else:
