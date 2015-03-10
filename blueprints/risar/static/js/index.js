@@ -3,9 +3,9 @@
  */
 var IndexCtrl = function ($scope, RisarApi) {
     $scope.query = "";
-    $scope.date = null;
+    $scope.search_date = {date:new Date()}; // и это костыль. этот для работы wmDate
     $scope.tickets = [];
-    $scope.$watch('date', function (n, o) {
+    $scope.$watch('search_date.date', function (n, o) {
         RisarApi.schedule(n).then(function (tickets) {
             $scope.tickets = tickets;
         })
@@ -56,7 +56,6 @@ var IndexCtrl = function ($scope, RisarApi) {
         })
     };
     $scope.refresh_diagram();
-    $scope.date = new Date();
     $scope.declOfNum = function (number, titles){
         if (number == undefined){
             number = 0;

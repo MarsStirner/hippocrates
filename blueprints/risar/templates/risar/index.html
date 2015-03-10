@@ -21,7 +21,7 @@
             <div class="{% if current_user.role_in('overseer1', 'overseer2', 'overseer3') %}col-md-8{% else %}col-md-12{% endif %}">
                 {% if not current_user.role_in('overseer3') %}
                     <div class="panel panel-default">
-                        <div class="panel-heading">Пациенток на <span style="display: inline-block; margin-bottom: -5px; margin-right:10px"><wm-date ng-model="date" style="width: 250px"></wm-date></span>: [[ tickets.length ]]</div>
+                        <div class="panel-heading">Пациенток на <span style="display: inline-block; margin-bottom: -5px; margin-right:10px"><wm-date ng-model="search_date.date" style="width: 250px"></wm-date></span>: [[ tickets.length ]]</div>
 {#                        <legend>Пациенток на <span style="display: inline-block; margin-bottom: -5px; margin-right:10px"><wm-date ng-model="date" style="width: 250px"></wm-date></span>: [[ tickets.length ]]</legend>#}
                         <table class="table table-condensed table-hover">
                             <thead>
