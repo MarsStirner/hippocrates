@@ -111,13 +111,17 @@
                     </tr>
                     <tr>
                         <td>Перенесенные заболевания</td>
-                        <td ng-bind-html="chart.anamnesis.mother.finished_diseases | format:'{code} - {name}' | escape | join:'<br/> '"></td>
-                        <td ng-bind-html="chart.anamnesis.father.finished_diseases | format:'{code} - {name}' | escape | join:'<br/> '"></td>
+                        <td><div ng-repeat="diag in chart.anamnesis.mother.finished_diseases"
+                                 tooltip="[[ diag.diagnosis.mkb.name ]]"><span class="bottom_dotted">[[diag.diagnosis.mkb.code]]</span>[[chart.anamnesis.mother.finished_diseases.length ? '' : 'нет']]</div></td>
+                        <td><div ng-repeat="diag in chart.anamnesis.father.finished_diseases"
+                                 tooltip="[[ diag.diagnosis.mkb.name ]]"><span class="bottom_dotted">[[diag.diagnosis.mkb.code]]</span>[[chart.anamnesis.father.finished_diseases.length ? '' : 'нет']]</div></td>
                     </tr>
                     <tr>
                         <td>Текущие заболевания</td>
-                        <td ng-bind-html="chart.anamnesis.mother.current_diseases | format:'{code} - {name}' | escape | join:'<br/> '"></td>
-                        <td ng-bind-html="chart.anamnesis.father.current_diseases | format:'{code} - {name}' | escape | join:'<br/> '"></td>
+                        <td><div ng-repeat="diag in chart.anamnesis.mother.current_diseases"
+                                 tooltip="[[ diag.diagnosis.mkb.name ]]"><span class="bottom_dotted">[[diag.diagnosis.mkb.code]]</span>[[chart.anamnesis.mother.current_diseases.length ? '' : 'нет']]</div></td>
+                        <td><div ng-repeat="diag in chart.anamnesis.father.current_diseases"
+                                 tooltip="[[ diag.diagnosis.mkb.name ]]"><span class="bottom_dotted">[[diag.diagnosis.mkb.code]]</span>[[chart.anamnesis.father.current_diseases.length ? '' : 'нет']]</div></td>
                     </tr>
                     <tr>
                         <td>Наследственность</td>
