@@ -143,10 +143,10 @@ def reevaluate_dates(event, action=None):
         weeks = 40 if p_week is None else max(p_week, 40)
         delivery_date = start_date + datetime.timedelta(weeks=weeks)
 
-    if abs((start_date - prev_start_date).days) > 3:
+    if not prev_start_date or abs((start_date - prev_start_date).days) > 3:
         # Не надо трогать дату начала беременности, если она не слишком отличается от предыдущей вычисленной
         action['pregnancy_start_date'].value = start_date
-    if epicrisis or abs((delivery_date - prev_delivery_date).days) > 3:
+    if not prev_delivery_date or epicrisis or abs((delivery_date - prev_delivery_date).days) > 3:
         # Не надо трогать дату родоразрешения, если она не слишком отличается от предыдущей вычисленной при отсутствии
         # эпикриза
         action['predicted_delivery_date'].value = delivery_date
