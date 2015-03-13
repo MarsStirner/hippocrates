@@ -1429,7 +1429,7 @@ angular.module('WebMis20.directives')
                             <td ng-click="open_action(diag.action_id)">[[diag.diagnosis_type.name]]</td>\
                             <td ng-click="open_action(diag.action_id)"><span class="bottom_dotted" tooltip="[[diag.diagnosis.mkb.name]]">[[diag.diagnosis.mkb.code]]</span></td>\
                             <td ng-click="open_action(diag.action_id)">[[diag.person.name]]</td>\
-                            <td ng-click="open_action(diag.action_id)">[[model.diagnosis_description ? \'есть\': \'нет\']]</td>\
+                            <td ng-click="open_action(diag.action_id)">[[diag.diagnosis_description ? \'есть\': \'нет\']]</td>\
                             <td style="white-space:nowrap;">\
                                 <button type="button" class="btn btn-sm btn-primary" title="Редактировать" ng-if="canEdit"\
                                         ng-click="edit_diagnosis(diag)"><span class="glyphicon glyphicon-pencil"></span>\
