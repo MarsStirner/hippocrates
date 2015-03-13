@@ -510,19 +510,8 @@
                     <tr>
                         <td class="text-right">Возможность сохранения беременности <span class="text-danger">*</span></td>
                         <td><div ng-class="{'has-error': CheckupFirstEditForm.save.$invalid}">
-
-                        <div class="radio">
-                            <label>
-                                <input type="radio" name="optionsRadios" ng-click="checkup.save = true" ng-checked="checkup.save">
-                                Да
-                            </label>
-                        </div>
-                        <div class="radio">
-                            <label>
-                                <input type="radio" name="optionsRadios" ng-click="checkup.save = false" ng-checked="!checkup.save">
-                                Нет
-                            </label>
-                        </div>
+                            <input type="radio" ng-model="checkup.save" ng-value="true" required>  Да <br/>
+                            <input type="radio" ng-model="checkup.save" ng-value="false" required> Нет <br/>
                         </div></td>
                     </tr>
                     <tr>
