@@ -222,15 +222,16 @@ def doctor_to_assist():
     return render_template('user/select_master_user.html')
 
 
-@app.route('/api/rb/')
-@app.route('/api/rb/<name>')
 @cache.memoize(86400)
-def api_refbook(name):
+def api_refbook_int(name):
+    if name is None:
+        return []
+
     for mod in (enums,):
         if hasattr(mod, name):
             ref_book = getattr(mod, name)
-            res = jsonify(ref_book.rb()['objects'])
-            return res
+            return ref_book.rb()['objects']
+
     for mod in (exists, schedule, actions, client, event):
         if hasattr(mod, name):
             ref_book = getattr(mod, name)
@@ -240,28 +241,35 @@ def api_refbook(name):
                 _order = ref_book.__mapper_args__['order_by']
 
             if 'deleted' in ref_book.__dict__:
-                res = jsonify(ref_book.query.filter_by(deleted=0).order_by(_order).all())
+                return ref_book.query.filter_by(deleted=0).order_by(_order).all()
             else:
-                res = ref_book.query.order_by(_order).all()
-                res = jsonify(res)
-            return res
-    if name is None:
-        return jsonify([])
-    else:
-        result = []
-        response = requests.get(u'{0}v1/{1}/'.format(app.config['VESTA_URL'], name))
-        for i, item in enumerate(response.json()['data']):
-            result.append({'id': item['_id'], 'name': item['name'], 'code': item['code']})
-        return jsonify(result)
-    return abort(404)
+                return ref_book.query.order_by(_order).all()
+
+    response = requests.get(u'{0}v1/{1}/'.format(app.config['VESTA_URL'], name))
+    return [
+        {'id': item['_id'], 'name': item['name'], 'code': item['code']}
+        for item in response.json()['data']
+    ]
+
+
+@app.route('/api/rb/')
+@app.route('/api/rb/<name>')
+@api_method
+def api_refbook(name):
+    return api_refbook_int(name)
+
+
+@cache.memoize(86400)
+def api_roles_int(user_login):
+    return UserAuth.get_roles_by_login(user_login.strip())
 
 
 @app.route('/api/roles/')
 @app.route('/api/roles/<user_login>')
 @public_endpoint
-@cache.memoize(86400)
+@api_method
 def api_roles(user_login):
-    return jsonify(UserAuth.get_roles_by_login(user_login.strip()))
+    return api_roles_int(user_login)
 
 
 @app.route('/api/doctors_to_assist')
@@ -302,14 +310,12 @@ def int_api_thesaurus(code):
     return flat
 
 
-
 @app.route('/api/rbThesaurus/')
 @app.route('/api/rbThesaurus/<code>')
-@public_endpoint
+@api_method
 def api_thesaurus(code=None):
-    if not code:
-        return jsonify(None)
-    return jsonify(int_api_thesaurus(code))
+    if code:
+        return int_api_thesaurus(code)
 
 
 @app.route('/api/kladr/city/search/')
