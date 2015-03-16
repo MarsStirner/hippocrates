@@ -12,10 +12,22 @@ from blueprints.risar.app import module
 __author__ = 'mmalkov'
 
 
-def search_events(**kwargs):
+def sphinx_days(date_string):
     from calendar import timegm
+    from pytz import timezone
+    from application.app import app
+
+    date_string = date_string[:10]
+    # Шайтан!
+    date = datetime.datetime.strptime(date_string, '%Y-%m-%d') \
+        .replace(tzinfo=timezone(app.config['TIME_ZONE'])) \
+        .astimezone(timezone('UTC')) \
+        .date()
+    return int(timegm(date.timetuple()) / 86400)
+
+
+def search_events(**kwargs):
     from application.lib.sphinx_search import Search, SearchConfig
-    from application.lib.utils import safe_date
 
     query = Search(indexes=['risar_events'], config=SearchConfig)
     if 'fio' in kwargs and kwargs['fio']:
@@ -33,11 +45,11 @@ def search_events(**kwargs):
             risk = kwargs['risk']
         query = query.filter(risk__in=risk)
     if 'bdate' in kwargs:
-        query = query.filter(bdate__eq=int(timegm(safe_date(kwargs['bdate']).timetuple())/86400))
+        query = query.filter(bdate__eq=sphinx_days(kwargs['bdate']))
     if 'psdate' in kwargs:
-        query = query.filter(psdate__eq=int(timegm(safe_date(kwargs['psdate']).timetuple())/86400))
+        query = query.filter(psdate__eq=sphinx_days(kwargs['psdate']))
     if 'checkup_date' in kwargs:
-        query = query.filter(checkups__eq=int(timegm(safe_date(kwargs['checkup_date']).timetuple())/86400))
+        query = query.filter(checkups__eq=sphinx_days(kwargs['checkup_date']))
     if 'closed' in kwargs:
         if kwargs['closed']:
             query = query.filter(exec_date__neq=0)
