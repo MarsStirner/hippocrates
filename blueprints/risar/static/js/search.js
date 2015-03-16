@@ -22,14 +22,17 @@ var EventSearchCtrl = function ($scope, RisarApi, TimeoutCallback, RefBookServic
         name: 'Открытые',
         value: false
     }];
-    $scope.query = {
-        org: default_orgs[0],
-        person: default_docs[0],
-        checkup_date: null,
-        bdate: null,
-        risk: [],
-        closed: $scope.closed_items[0]
+    $scope.reset_filters = function () {
+        $scope.query = {
+            org: default_orgs[0],
+            person: default_docs[0],
+            checkup_date: null,
+            bdate: null,
+            risk: [],
+            closed: $scope.closed_items[0]
+        };
     };
+    $scope.reset_filters();
     $scope.results = [];
     var perform = function () {
         var data = {
