@@ -137,7 +137,7 @@ def reevaluate_dates(event, action=None):
         action['predicted_delivery_date'].value = None
         return
 
-    if not epicrisis:
+    if not delivery_date:
         # если эпикриза нет, но известна дата начала беременности, можно вычислить дату окончания
         # если в осмотрах фигурировала неделя беременности, то она нам интересна, если была больше 40
         weeks = 40 if p_week is None else max(p_week, 40)
