@@ -59,6 +59,42 @@ class rbFinance(db.Model):
         return self.id
 
 
+class rbPacientModel(db.Model):
+    __tablename__ = u'rbPacientModel'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    code = db.Column(db.Unicode(32), nullable=False)
+    name = db.Column(db.UnicodeText, nullable=False)
+
+    def __json__(self):
+        return {
+            'id': self.id,
+            'code': self.code,
+            'name': self.name,
+        }
+
+    def __int__(self):
+        return self.id
+
+
+class rbTreatment(db.Model):
+    __tablename__ = u'rbTreatment'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    code = db.Column(db.Unicode(32), nullable=False)
+    name = db.Column(db.UnicodeText, nullable=False)
+
+    def __json__(self):
+        return {
+            'id': self.id,
+            'code': self.code,
+            'name': self.name,
+        }
+
+    def __int__(self):
+        return self.id
+
+
 class rbBloodType(db.Model):
     __tablename__ = 'rbBloodType'
 
@@ -1650,3 +1686,97 @@ class rbMethodOfAdministration(db.Model):
             'code': self.code,
             'name': self.name,
         }
+
+
+class QuotaCatalog(db.Model):
+    __tablename__ = u'QuotaCatalog'
+
+    id = db.Column(db.Integer, primary_key=True)
+    finance_id = db.Column(db.ForeignKey('rbFinance.id'), nullable=False, index=True)
+    createDatetime = db.Column(db.DateTime, nullable=False)
+    createPerson_id = db.Column(db.Integer, index=True)
+    modifyDatetime = db.Column(db.DateTime, nullable=False)
+    modifyPerson_id = db.Column(db.Integer, index=True)
+    begDate = db.Column(db.Date, nullable=False)
+    endDate = db.Column(db.Date, nullable=False)
+    catalogNumber = db.Column(db.Unicode(45), nullable=False, server_default=u"''")
+    documentDate = db.Column(db.Date, nullable=True)
+    documentNumber = db.Column(db.Unicode(45), nullable=True)
+    documentCorresp = db.Column(db.Unicode(256), nullable=True)
+    comment = db.Column(db.UnicodeText, nullable=True)
+
+
+class QuotaType(db.Model):
+    __tablename__ = u'QuotaType'
+
+    id = db.Column(db.Integer, primary_key=True)
+    catalog_id = db.Column(db.ForeignKey('QuotaCatalog.id'), nullable=False, index=True)
+    createDatetime = db.Column(db.DateTime, nullable=False)
+    createPerson_id = db.Column(db.Integer, index=True)
+    modifyDatetime = db.Column(db.DateTime, nullable=False)
+    modifyPerson_id = db.Column(db.Integer, index=True)
+    deleted = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    class_ = db.Column(u'class', db.Integer, nullable=False)
+    profile_code = db.Column(db.String(16))
+    group_code = db.Column(db.String(16))
+    type_code = db.Column(db.String(16))
+    code = db.Column(db.String(16), nullable=False)
+    name = db.Column(db.Unicode(255), nullable=False)
+    teenOlder = db.Column(db.Integer, nullable=False)
+    price = db.Column(db.Float(asdecimal=True), nullable=False, server_default=u"'0'")
+
+    def __unicode__(self):
+        return self.name
+
+
+class VMPQuotaDetails(db.Model):
+    __tablename__ = u'VMPQuotaDetails'
+
+    id = db.Column(db.Integer, primary_key=True)
+    pacientModel_id = db.Column(db.ForeignKey('rbPacientModel.id'), nullable=False, index=True)
+    treatment_id = db.Column(db.ForeignKey('rbTreatment.id'), nullable=False, index=True)
+    quotaType_id = db.Column(db.ForeignKey('QuotaType.id'), nullable=False, index=True)
+
+
+class MKB_VMPQuotaFilter(db.Model):
+    __tablename__ = u'MKB_VMPQuotaFilter'
+
+    id = db.Column(db.Integer, primary_key=True)
+    MKB_id = db.Column(db.ForeignKey('MKB.id'), nullable=False, index=True)
+    quotaDetails_id = db.Column(db.ForeignKey('VMPQuotaDetails.id'), nullable=False, index=True)
+
+
+class ClientQuoting(db.Model):
+    __tablename__ = u'Client_Quoting'
+    __table_args__ = (
+        db.Index(u'deleted_prevTalon_event_id', u'deleted', u'prevTalon_event_id'),
+    )
+
+    id = db.Column(db.Integer, primary_key=True)
+    createDatetime = db.Column(db.DateTime, nullable=False)
+    createPerson_id = db.Column(db.Integer, index=True)
+    modifyDatetime = db.Column(db.DateTime, nullable=False)
+    modifyPerson_id = db.Column(db.Integer, index=True)
+    deleted = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    master_id = db.Column(db.ForeignKey('Client.id'), index=True)
+    identifier = db.Column(db.Unicode(16))
+    quotaTicket = db.Column(db.Unicode(20))
+    quotaDetails_id = db.Column(db.ForeignKey('VMPQuotaDetails.id'), nullable=False, index=True)
+    stage = db.Column(db.Integer)
+    directionDate = db.Column(db.DateTime, nullable=False)
+    freeInput = db.Column(db.Unicode(128))
+    org_id = db.Column(db.Integer)
+    amount = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    MKB = db.Column(db.Unicode(8), nullable=False)
+    status = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    request = db.Column(db.Integer, nullable=False, server_default=u"'0'")
+    statment = db.Column(db.Unicode(255))
+    dateRegistration = db.Column(db.DateTime, nullable=False)
+    dateEnd = db.Column(db.DateTime, nullable=False)
+    orgStructure_id = db.Column(db.Integer)
+    regionCode = db.Column(db.String(13), index=True)
+    event_id = db.Column(db.Integer, index=True)
+    prevTalon_event_id = db.Column(db.Integer)
+    version = db.Column(db.Integer, nullable=False)
+
+    master = db.relationship(u'Client')

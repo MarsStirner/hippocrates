@@ -6,7 +6,7 @@ from collections import defaultdict
 from flask import g
 import jinja2
 from sqlalchemy import Column, Integer, String, Unicode, DateTime, ForeignKey, Date, Float, or_, Boolean, Text, \
-    SmallInteger, Time, Index, BigInteger, Enum, Table, BLOB
+    SmallInteger, Time, Index, BigInteger, Enum, Table, BLOB, UnicodeText
 
 
 # from application.database import db
@@ -2271,7 +2271,7 @@ class ClientQuoting(Info):
     master_id = Column(ForeignKey('Client.id'), index=True)
     identifier = Column(String(16))
     quotaTicket = Column(String(20))
-    quotaType_id = Column(Integer)
+    quotaDetails_id = Column(ForeignKey(u'VMPQuotaDetails.id'), nullable=False, index=True)
     stage = Column(Integer)
     directionDate = Column(DateTime, nullable=False)
     freeInput = Column(String(128))
@@ -2285,8 +2285,6 @@ class ClientQuoting(Info):
     dateEnd = Column(DateTime, nullable=False)
     orgStructure_id = Column(Integer)
     regionCode = Column(String(13), index=True)
-    pacientModel_id = Column(Integer, nullable=False)
-    treatment_id = Column(Integer, nullable=False)
     event_id = Column(Integer, index=True)
     prevTalon_event_id = Column(Integer)
     version = Column(Integer, nullable=False)
@@ -3920,23 +3918,62 @@ class Prescriptionsto1c(Info):
     sendTime = Column(DateTime, nullable=False, server_default=u'CURRENT_TIMESTAMP')
 
 
-class Quotatype(Info):
+class QuotaCatalog(Info):
+    __tablename__ = u'QuotaCatalog'
+
+    id = Column(Integer, primary_key=True)
+    finance_id = Column(ForeignKey('rbFinance.id'), nullable=False, index=True)
+    createDatetime = Column(DateTime, nullable=False)
+    createPerson_id = Column(Integer, index=True)
+    modifyDatetime = Column(DateTime, nullable=False)
+    modifyPerson_id = Column(Integer, index=True)
+    begDate = Column(Date, nullable=False)
+    endDate = Column(Date, nullable=False)
+    catalogNumber = Column(Unicode(45), nullable=False, server_default=u"''")
+    documentDate = Column(Date, nullable=True)
+    documentNumber = Column(Unicode(45), nullable=True)
+    documentCorresp = Column(Unicode(256), nullable=True)
+    comment = Column(UnicodeText, nullable=True)
+
+
+class QuotaType(Info):
     __tablename__ = u'QuotaType'
 
     id = Column(Integer, primary_key=True)
+    catalog_id = Column(ForeignKey('QuotaCatalog.id'), nullable=False, index=True)
     createDatetime = Column(DateTime, nullable=False)
     createPerson_id = Column(Integer, index=True)
     modifyDatetime = Column(DateTime, nullable=False)
     modifyPerson_id = Column(Integer, index=True)
     deleted = Column(Integer, nullable=False, server_default=u"'0'")
     class_ = Column(u'class', Integer, nullable=False)
+    profile_code = Column(String(16))
     group_code = Column(String(16))
+    type_code = Column(String(16))
     code = Column(String(16), nullable=False)
     name = Column(Unicode(255), nullable=False)
     teenOlder = Column(Integer, nullable=False)
+    price = Column(Float(asdecimal=True), nullable=False, server_default=u"'0'")
 
     def __unicode__(self):
         return self.name
+
+
+class VMPQuotaDetails(Info):
+    __tablename__ = u'VMPQuotaDetails'
+
+    id = Column(Integer, primary_key=True)
+    pacientModel_id = Column(ForeignKey('rbPacientModel.id'), nullable=False, index=True)
+    treatment_id = Column(ForeignKey('rbTreatment.id'), nullable=False, index=True)
+    quotaType_id = Column(ForeignKey('QuotaType.id'), nullable=False, index=True)
+
+
+class MKB_VMPQuotaFilter(Info):
+    __tablename__ = u'MKB_VMPQuotaFilter'
+
+    id = Column(Integer, primary_key=True)
+    MKB_id = Column(ForeignKey('MKB.id'), nullable=False, index=True)
+    quotaDetails_id = Column(ForeignKey('VMPQuotaDetails.id'), nullable=False, index=True)
 
 
 class Quoting(Info):
@@ -5344,9 +5381,6 @@ class Rbpacientmodel(RBInfo):
     id = Column(Integer, primary_key=True)
     code = Column(String(32), nullable=False)
     name = Column(Text, nullable=False)
-    quotaType_id = Column(ForeignKey('QuotaType.id'), nullable=False, index=True)
-
-    quotaType = relationship(u'Quotatype')
 
     def __init__(self):
         RBInfo.__init__(self)
@@ -5874,9 +5908,6 @@ class Rbtreatment(RBInfo):
     id = Column(Integer, primary_key=True)
     code = Column(String(32), nullable=False)
     name = Column(Text, nullable=False)
-    pacientModel_id = Column(ForeignKey('rbPacientModel.id'), nullable=False, index=True)
-
-    pacientModel = relationship(u'Rbpacientmodel')
 
 
 class Rbtrfubloodcomponenttype(RBInfo):
@@ -6550,7 +6581,7 @@ class v_Client_Quoting(Info):
     event_id = Column(u'event_id', Integer, ForeignKey("Event.id"))
     prevTalon_event_id = Column(u'prevTalon_event_id', Integer)
 
-    quotaType = relationship(u"Quotatype")
+    quotaType = relationship(u"QuotaType")
     organisation = relationship(u"Organisation")
     orgstructure = relationship(u"Orgstructure")
     pacientModel = relationship(u"Rbpacientmodel")
