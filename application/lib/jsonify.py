@@ -21,7 +21,7 @@ from application.models.schedule import (Schedule, rbReceptionType, ScheduleClie
 from application.models.actions import Action, ActionProperty, ActionType, ActionType_Service
 from application.models.client import Client
 from application.models.exists import (rbRequestType, rbService, ContractTariff, Contract, Person, rbSpeciality,
-    Organisation, rbContactType)
+    Organisation, rbContactType, FileGroupDocument, FileMeta, rbDocumentType)
 from application.lib.user import UserUtils, UserProfileManager
 from application.lib.const import VOL_POLICY_CODES, STATIONARY_EVENT_CODES
 
@@ -465,7 +465,8 @@ class ClientVisualizer(object):
         documents = [safe_dict(doc) for doc in client.documents_all] if client.id else []
         policies = [safe_dict(policy) for policy in client.policies_all] if client.id else []
         document_history = documents + policies
-        files = [self.make_file_attach_info(fa) for fa in client.file_attaches]
+        file_attaches_query = client.file_attaches.join(FileGroupDocument, FileMeta)
+        files = [self.make_file_attach_info(fa) for fa in file_attaches_query]
         # identifications = [self.make_identification_info(identification) for identification in client.identifications]
         return {
             'info': client,
@@ -486,12 +487,30 @@ class ClientVisualizer(object):
         }
 
     def make_file_attach_info(self, file_attach):
-        filemeta = file_attach.filemeta
+        """
+
+        :type file_attach: application.models.client.ClientFileAttach
+        :return:
+        """
+        def make_file_info(filemeta):
+            return {
+                'id': filemeta.id,
+                'name': filemeta.name,
+                'idx': filemeta.idx
+            }
+
+        file_document = file_attach.file_document
         return {
             'id': file_attach.id,
-            'file': {
-                'name': filemeta.name,
-                'path': filemeta.path
+            'attach_date': file_attach.attachDate,
+            'doc_type': file_attach.documentType,
+            'relation_type': file_attach.relationType,
+            'file_document': {
+                'id': file_document.id,
+                'name': file_document.name,
+                'files': [
+                    make_file_info(fm) for fm in file_document.files
+                ]
             }
         }
 

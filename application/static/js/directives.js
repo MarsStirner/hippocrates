@@ -20,7 +20,8 @@ angular.module('WebMis20.directives')
                     getName = attrs.customName ? scope.$eval(attrs.customName) : function (selected) {
                         return selected ? selected.name : undefined;
                     },
-                    orderBy = attrs.orderBy;
+                    orderBy = attrs.orderBy,
+                    ngChange = attrs.ngChange;
                 scope.getName = getName;
                 if (!ngModel) throw new Error('<rb-select> must have ng-model attribute');
                 if (!refBook) throw new Error('<rb-select> must have rb attribute');
@@ -42,6 +43,7 @@ angular.module('WebMis20.directives')
                 if (ngModel) uiSelect.attr('ng-model', ngModel);
                 if (placeholder) uiSelectMatch.attr('placeholder', placeholder);
                 if (refBook) uiSelect.attr('ref-book', refBook);
+                if (ngChange) uiSelect.attr('ng-change', ngChange);
                 uiSelect.append(uiSelectMatch);
                 uiSelect.append(uiSelectChoices);
                 $(element).replaceWith(uiSelect);
@@ -917,7 +919,8 @@ angular.module('WebMis20.directives')
         return {
             restrict: 'A',
             scope: {
-                file: '='
+                file: '=',
+                onChange: '&?'
             },
             link: function (scope, elem, attrs) {
                 var reader = new FileReader(),
@@ -927,7 +930,7 @@ angular.module('WebMis20.directives')
                         if (is_image) {
                             scope.file.image = new Image();
                             scope.file.image.src = reader.result;
-                            scope.file.binary = null;
+                            scope.file.binary_b64 = null;
                         } else {
                             $log.info('file is not an image');
                             scope.file.binary_b64 = reader.result;
@@ -938,16 +941,26 @@ angular.module('WebMis20.directives')
                 };
                 elem.change(function (event) {
                     var file = event.target.files[0];
-                    scope.file.mime = file.type;
-                    scope.file.size = file.size;
-                    is_image = /image/.test(file.type);
-                    scope.file.type = is_image ? 'image' : 'other';
-                    if (is_image) {
-                        reader.readAsDataURL(file);
-                    } else {
-                        reader.readAsDataURL(file);
+                    scope.file.selected = Boolean(file);
+                    if (scope.file.selected) {
+                        scope.file.mime = file.type;
+                        scope.file.size = file.size;
+                        scope.file.name = file.name;
+                        is_image = /image/.test(file.type);
+                        scope.file.type = is_image ? 'image' : 'other';
+                        if (is_image) {
+                            reader.readAsDataURL(file);
+                        } else {
+                            reader.readAsDataURL(file);
+                        }
+                        scope.onChange();
                     }
                 });
+                scope.$watch('file.selected', function (n, o) {
+                    if (n !== true) {
+                        elem.val('');
+                    }
+                })
             }
         }
     }])
@@ -1150,12 +1163,10 @@ angular.module('WebMis20.directives')
 
                 scope.$watch('modelImage', function (n, o) {
                     _clearOldData();
-                    if (n) {
+                    if (n && n.src) {
                         _initNewImage(n);
-                        if (n.src) {
-                            $log.debug('draw image from watch');
-                            drawImage();
-                        }
+                        $log.debug('draw image from watch');
+                        drawImage();
                     }
                 });
             }

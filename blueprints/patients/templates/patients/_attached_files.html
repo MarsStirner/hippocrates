@@ -4,12 +4,15 @@
     <div class="col-md-11">
         <div class="panel panel-default">
             <div class="panel-body">
-                <button type="button" class="btn btn-primary" ng-click="open_scanning_modal()">Прикрепить файл</button>
+                <button type="button" class="btn btn-primary" ng-click="add_new_file()">Прикрепить файл</button>
                 <hr>
                 <div class="row">
                     <ul>
                         <li ng-repeat="fa in client.file_attaches">
-                            <a ng-click="open_scanning_modal(fa.id)">[[ fa.file.name ]]</a>
+                            <a ng-click="edit_file(fa.id)">[[ fa.file_document.name ]]</a> (Страницы
+                            <span ng-repeat="page in fa.file_document.files">
+                                <a href="javascript:void(0)" ng-click="edit_file(fa.id)">[[page.idx + 1]]</a>
+                            </span>)
                         </li>
                     </ul>
                 </div>

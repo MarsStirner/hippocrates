@@ -2,8 +2,8 @@
 
 angular.module('WebMis20.controllers').
     controller('ClientCtrl',
-        ['$scope', '$http', '$modal', 'WMClient', 'WMClientServices', 'PrintingService', 'RefBookService', '$window', '$document', 'ScanningModal',
-        function ($scope, $http, $modal, WMClient, WMClientServices, PrintingService, RefBookService, $window, $document, ScanningModal) {
+        ['$scope', '$http', '$modal', 'WMClient', 'WMClientServices', 'PrintingService', 'RefBookService', '$window', '$document', 'FileEditModal',
+        function ($scope, $http, $modal, WMClient, WMClientServices, PrintingService, RefBookService, $window, $document, FileEditModal) {
             $scope.records = [];
             $scope.aux = aux;
             $scope.params = aux.getQueryParams(document.location.search);
@@ -117,8 +117,23 @@ angular.module('WebMis20.controllers').
                 alert(message);
             });
 
-            $scope.open_scanning_modal = function (cfa_id) {
-                ScanningModal.open($scope.client_id, cfa_id)
+            $scope.add_new_file = function (document_id, policy_id) {
+                FileEditModal.addNew($scope.client_id, {
+                    attachType: 'client',
+                    document_id: document_id,
+                    policy_id: policy_id,
+                    client: $scope.client
+                })
+                .then(function () {
+                    $scope.client.reload();
+                }, function () {
+                    $scope.client.reload();
+                });
+            };
+            $scope.edit_file = function (cfa_id) {
+                FileEditModal.open(cfa_id, {
+                    attachType: 'client'
+                })
                 .then(function () {
                     $scope.client.reload();
                 }, function () {

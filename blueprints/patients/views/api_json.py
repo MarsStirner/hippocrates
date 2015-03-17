@@ -8,7 +8,7 @@ from blueprints.patients.app import module
 from application.lib.sphinx_search import SearchPatient
 from application.lib.jsonify import ClientVisualizer
 from application.models.client import Client, ClientFileAttach
-from application.models.exists import FileMeta
+from application.models.exists import FileMeta, FileGroupDocument
 from blueprints.patients.lib.utils import *
 
 
@@ -315,6 +315,8 @@ import mimetypes
 
 
 def get_file_ext_from_mimetype(mime):
+    if not mime:
+        return ''
     ext_list = mimetypes.guess_all_extensions(mime)
     ext = ''
     if ext_list:
@@ -325,38 +327,44 @@ def get_file_ext_from_mimetype(mime):
     return ext
 
 
-def generate_filename(file_info):
-    template = u'{filetypename}_Лист_№{idx}_{date:%y%m%d_%H%M}{ext}'
-
-    filetypename = file_info.get('filetypename', u'Файл')
-    idx = 1
-    attach_date = file_info.get('attach_date', datetime.datetime.now())
-    file_ext = get_file_ext_from_mimetype(file_info.get('mime'))
-    filename = template.format(
-        filetypename=filetypename, idx=idx, date=attach_date, ext=file_ext
-    )
+def generate_filename(name, mime, descname=None, idx=None, date=None, relation_type=None):
+    file_ext = get_file_ext_from_mimetype(mime)
+    if name:
+        filename = u"{0}_{1:%y%m%d_%H%M}{2}".format(name, date, file_ext)
+    else:
+        template = u'{descname}_{reltype}Лист_№{idx}_{date:%y%m%d_%H%M}{ext}'
+        date = date or datetime.datetime.now()
+        filename = template.format(
+            descname=descname, idx=idx, date=date,
+            reltype=u'({0})_'.format(relation_type) if relation_type else u'',
+            ext=file_ext
+        )
     return filename
 
 
-def store_file(filepath, file_data):
+def store_file_locally(filepath, file_data):
     uri_string = file_data
     data_string = uri_string.split(',')[1]  # seems legit
     data_string = base64.b64decode(data_string)
+    dirname = os.path.dirname(filepath)
     try:
+        if not os.path.exists(dirname):
+            os.makedirs(dirname)
         with open(filepath, 'wb') as f:
             f.write(data_string)
-    except IOError:
-        logger.error(u'Ошибка сохранения файла средствами МИС')
+    except IOError, e:
+        logger.error(u'Ошибка сохранения файла средствами МИС: %s' % e, exc_info=True)
         return False, u'Ошибка сохранения файла'
     # TODO: manage exceptions
     return True, ''
 
 
-@module.route('/api/client_file_attach.json', methods=['POST', 'GET'])
+@module.route('/api/client_file_attach.json', methods=['POST', 'GET', 'DELETE'])
 def api_patient_file_attach():
     if request.method == 'GET':
         data = request.args
-        cfa_id = data.get('client_file_attach_id')
+        cfa_id = data.get('cfa_id')
+        page = data.get('page') or 1
         cfa = ClientFileAttach.query.get(cfa_id)
         filepath = cfa.filemeta.path
         try:
@@ -368,32 +376,86 @@ def api_patient_file_attach():
             'image': file_encoded
         })
 
-    data = request.json
-    cfa_id = data.get('client_file_attach_id')
-    client_id = safe_int(data.get('client_id'))
-    file_info = data.get('file')
-    if not file_info:
-        raise Exception
-    file_data = file_info.get('data')
-    if not file_data:
-        raise Exception
+    elif request.method == 'POST':
+        data = request.json
+        client_id = safe_int(data.get('client_id'))
+        file_attach = data.get('file_attach')
+        if not file_attach:
+            raise Exception
+        cfa_id = file_attach.get('id')
 
-    if cfa_id:
-        pass
-    else:
-        filename = generate_filename(file_info)
-        filepath = os.path.join(STORAGE_PATH, filename)
-
-        ok, msg = store_file(filepath, file_data)
-        if not ok:
-            return jsonify(msg, 500, 'ERROR')
+        if cfa_id:
+            pass
         else:
-            fm = FileMeta()
-            fm.name = filename
-            fm.path = filepath
+            attach_date = file_attach.get('attach_date') or datetime.datetime.now()
+            doc_type = file_attach.get('doc_type')
+            relation_type = file_attach.get('relation_type')
+
+            file_document = file_attach.get('file_document')
+            document_name = file_document.get('name')
+            files_pages = file_document.get('files')
+
+            fgd = FileGroupDocument()
+            fgd.name = document_name
             cfa = ClientFileAttach()
             cfa.client_id = client_id
-            cfa.filemeta = fm
+            cfa.attachDate = attach_date
+            cfa.documentType_id = safe_traverse(doc_type, 'id')
+            cfa.relationType_id = safe_traverse(relation_type, 'id')
+            cfa.file_document = fgd
+            db.session.add(fgd)
             db.session.add(cfa)
-            db.session.commit()
-    return jsonify(None)
+            try:
+                db.session.commit()
+            except Exception, e:
+                # todo:
+                raise
+
+            new_file_list = []
+            f_descname = safe_traverse(doc_type, 'name', default=u'Файл')
+            f_relation_type = safe_traverse(relation_type, 'leftName', default=u'')
+            for file_page in files_pages:
+                f_meta = file_page.get('meta')
+                f_file = file_page.get('file')
+                f_name = f_meta.get('name')
+                f_idx = f_meta.get('idx')
+                f_mime = f_file.get('mime')
+
+                filename = generate_filename(f_name, f_mime, date=attach_date) if f_name else (
+                    generate_filename(None, f_mime, descname=f_descname, idx=f_idx, date=attach_date, relation_type=f_relation_type)
+                )
+
+                fm = FileMeta()
+                fm.name = filename
+                fm.filegroup = fgd  # не очень оптимальная связка, появляется селект
+                fm.idx = f_idx
+                fm.deleted = 1
+                try:
+                    db.session.commit()
+                except Exception, e:
+                    # todo:
+                    raise
+                else:
+                    new_file_list.append(fm)
+
+                # При интеграции с ЗХПД
+                # if config.secure_person_data_storage_enabled:
+                #     store_in_external_system()
+                #     ...
+
+                # TODO: при сохранении файлов для другой связанной сущности изменить префикс директории
+                directory = 'c%s' % client_id
+                filepath = os.path.join(directory, filename)
+                fullpath = os.path.join(STORAGE_PATH, filepath)
+                ok, msg = store_file_locally(fullpath, f_file.get('data'))
+                if not ok:
+                    return jsonify(msg, 500, 'ERROR')
+                else:
+                    fm.query.filter(FileMeta.id == fm.id).update({
+                        'deleted': 0,
+                        'path': filepath
+                    })
+        return jsonify(None)
+
+    elif request.method == 'DELETE':
+        return

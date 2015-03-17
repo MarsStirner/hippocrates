@@ -289,199 +289,447 @@ angular.module('WebMis20.services', []).
             </div>'
         );
     }]).
-    service('ScanningModal', ['$modal', '$http', 'WMConfig', function ($modal, $http, WMConfig) {
-        function _getFileInfo(file) {
-            var type = file.type,
-                data;
-            if (type === 'image') {
-                data = file.image.src
-            } else {
-                data = file.binary_b64;
-            }
-            return {
-                type: type,
-                mime: file.mime,
-                size: file.size,
-                data: data
-            }
+    service('FileEditModal', ['$modal', '$http', 'WMConfig', function ($modal, $http, WMConfig) {
+        function _getTemplate(openMode, attachType) {
+            var template = '\
+    <div class="modal-header">\
+        <h3 class="modal-title">Добавление документа</h3>\
+    </div>\
+    <div class="modal-body">\
+        <div class="row">\
+            <div class="col-md-4">\
+                <div class="btn-group">\
+                    <label class="btn btn-default" ng-model="mode" btn-radio="\'scanning\'">Сканировать</label>\
+                    <label class="btn btn-default" ng-model="mode" btn-radio="\'select_existing\'">Выбрать файл</label>\
+                </div>\
+            </div>\
+            <div id="pages" class="col-md-8">\
+                <div class="row">\
+                    <div class="col-md-8 form-inline">\
+                        <label class="control-label">Имя файла</label>\
+                        <input type="text" class="form-control" ng-model="currentFile.name" style="width: inherit;">\
+                        <button type="button" class="btn btn-sm btn-primary" ng-click="generateFileName(true)" title="Сформировать имя файла">\
+                            <span class="glyphicon glyphicon-repeat"></span>\
+                        </button>\
+                    </div>\
+                    <div class="col-md-4">\
+                        <button type="button" class="btn btn-sm btn-success pull-right" ng-click="addPage()">\
+                            <span class="glyphicon glyphicon-plus" title="Добавить страницу"></span>\
+                        </button>\
+                        <pagination total-items="file_attach.file_document.totalPages()" items-per-page="1" ng-model="selected.currentPage" ng-change="pageChanged()"\
+                            previous-text="&lsaquo;" next-text="&rsaquo;" class="pagination-nomargin pull-right"></pagination>\
+                    </div>\
+                </div>\
+            </div>\
+        </div>\
+        <hr>\
+        <div class="row">\
+        <div class="col-md-4">\
+            {0}\
+            {1}\
+        </div>\
+        <div class="col-md-8">\
+            <div id="image_editor" ng-show="imageSelected()">\
+            <div class="btn-toolbar marginal bg-muted" role="toolbar" aria-label="...">\
+                <div class="btn-group btn-group-lg pull-right" role="group" aria-label="...">\
+                    <button type="button" class="btn btn-default" ng-click="reset_image()" title="Вернуться к исходному изображению">\
+                        <span class="fa fa-refresh"></span>\
+                    </button>\
+                    <button type="button" class="btn btn-default" ng-click="clear_image()" title="Очистить область изображения">\
+                        <span class="fa fa-times"></span>\
+                    </button>\
+                </div>\
+                <div class="btn-group btn-group-lg rmargin10" role="group" aria-label="...">\
+                    <button type="button" class="btn btn-default" ng-click="rotate(\'left\')" title="Повернуть против часовой стрелки">\
+                        <span class="fa fa-rotate-left"></span>\
+                    </button>\
+                    <button type="button" class="btn btn-default" ng-click="rotate(\'right\')" title="Повернуть по часовой стрелке">\
+                        <span class="fa fa-rotate-right"></span>\
+                    </button>\
+                </div>\
+                <div class="btn-group btn-group-lg rmargin10" role="group" aria-label="...">\
+                    <button type="button" class="btn btn-default" ng-click="zoom(1)" title="Увеличить">\
+                        <span class="fa fa-plus"></span>\
+                    </button>\
+                    <label class="label label-default">[[scalePct]] %</label>\
+                    <button type="button" class="btn btn-default" ng-click="zoom(-1)" title="Уменьшить">\
+                        <span class="fa fa-minus"></span>\
+                    </button>\
+                </div>\
+                <div class="btn-group btn-group-lg" role="group" aria-label="...">\
+                    <button type="button" class="btn btn-default" ng-click="crop(\'Start\')" title="Обрезать изображение">\
+                        <span class="fa fa-crop"></span>\
+                    </button>\
+                    <button type="button" class="btn btn-default btn-success" ng-click="crop(\'Apply\')" title="Подтвердить">\
+                        <span class="fa fa-check"></span>\
+                    </button>\
+                    <button type="button" class="btn btn-default btn-danger" ng-click="crop(\'Cancel\')" title="Отменить">\
+                        <span class="fa fa-times"></span>\
+                    </button>\
+                </div>\
+            </div>\
+            <div class="modal-scrollable-block">\
+                <wm-image-editor id="image_editor" model-image="currentFile.file.image"></wm-image-editor>\
+            </div>\
+            </div>\
+            <div ng-show="notImageSelected()"><span>Предпросмотр недоступен. Выбранный файл не является изображением.</span></div>\
+        </div>\
+        </div>\
+    </div>\
+    <div class="modal-footer">\
+        <button type="button" class="btn btn-success" ng-click="save_image()" ng-disabled="!correctFileSelected()">\
+            Сохранить\
+        </button>\
+        <button type="button" class="btn btn-danger" ng-click="$dismiss()">Закрыть</button>\
+    </div>';
+            var addFileTemplate = '\
+    <div ng-show="mode === \'scanning\'">\
+        <ol>\
+        <li><h4>Выбрать устройство</h4></li>\
+        <button type="button" class="btn btn-primary btn-sm" ng-click="get_device_list()">\
+            Получить список доступных устройств\
+        </button>\
+        <div class="radio" ng-repeat="dev in device_list">\
+            <label>\
+                <input type="radio" id="dev[[$index]]" ng-model="selected.device"\
+                    ng-value="dev">[[dev.model]]\
+            </label>\
+        </div>\
+        <hr>\
+        <li><h4>Настроить параметры сканирования</h4></li>\
+        <label>Качество изображения</label>\
+        <select><option>Хорошее</option></select>\
+        <label>Режим сканирования</label>\
+        <select><option>Цветной</option></select>\
+        <hr>\
+        <li><h4>Начать сканирование</h4></li>\
+        <button type="button" class="btn btn-warning btn-sm" ng-click="start_scan()"\
+            ng-disabled="!selected.device">\
+            Получить изображение\
+        </button>\
+        </ol>\
+    </div>\
+    <div ng-show="mode === \'select_existing\'">\
+        <input type="file" wm-input-file file="currentFile.file" on-change="generateFileName()"\
+            accept="image/*,.pdf,.txt,.odt,.doc,.docx,.ods,.xls,.xlsx">\
+    </div>\
+    <hr>';
+            var metaInfoTemplate = '\
+    <div id="metaInfoBlock" class="modal-scrollable-block2">\
+        <legend>Информация о документе</legend>\
+        <ng-form name="metaInfoForm">\
+            <div class="form-group">\
+                <label for="docName">Наименование</label>\
+                <input type="text" class="form-control" id="docName" ng-model="file_attach.file_document.name">\
+            </div>\
+            <div class="form-group">\
+                <label for="documentType">Тип документа</label>\
+                <rb-select id="documentType" ng-model="file_attach.doc_type" ref-book="rbDocumentType"\
+                    placeholder="Тип документа" ng-change="generateFileDocumentName()">\
+                </rb-select>\
+            </div>\
+            <label class="radio-inline">\
+                <input type="radio" id="relType" ng-model="file_attach.rel_type" ng-value="\'own\'" ng>Документ пациента\
+            </label>\
+            <label class="radio-inline">\
+                <input type="radio" id="relType" ng-model="file_attach.rel_type" ng-value="\'relative\'">Документ родственника\
+            </label>\
+            <div class="form-group" ng-show="file_attach.rel_type === \'relative\'">\
+                <label for="relativeType">Родство с пациентом</label>\
+                <wm-relation-type-rb id="relativeType" class="form-control" name="relativeType"\
+                    client="client.info" direct="false" ng-model="file_attach.relation_type"\
+                    ng-change="generateFileDocumentName()" ng-required="relativeRequired()">\
+                </wm-relation-type-rb>\
+            </div>\
+            <div class="form-group" ng-show="file_attach.rel_type === \'own\'">\
+                <label for="relDocType">Связанный документ</label>\
+                <span id="conDoc"></span>\
+            </div>\
+        </ng-form>\
+    </div>';
+
+            template = template.format(
+                openMode === 'new' ? (addFileTemplate) : '',
+                attachType === 'client' ? (metaInfoTemplate) : ''
+            );
+            return template;
         }
-        return {
-            open: function (client_id, cfa_id) {
-                var FileEditController = function ($scope) {
-                    $scope.mode = 'scanning';
-                    $scope.device_list = [];
-                    $scope.selected = { device: {name: 'test'} };
-                    $scope.image = null;
-                    $scope.file = { image: null };
-                    var scales = [5, 10, 15, 30, 50, 75, 90, 100, 125, 150, 200, 300, 400, 500];
-                    $scope.scalePct = 100;
 
-                    $scope.get_device_list = function () {
-                        $http.get(WMConfig.url.scanserver.list).success(function (data) {
-                            $scope.device_list = data.devices;
-                        });
-                    };
-                    $scope.start_scan = function () {
-                        $http.post(WMConfig.url.scanserver.scan, {
-                            name: $scope.selected.device.name
-                        }).success(function (data) {
-                            $scope.image = new Image();
-                            $scope.image.src = 'data:image/png;base64,' + data.image;
-                            $scope.file.encoded = $scope.image;
-                        });
-                    };
-                    $scope.save_image = function () {
-                        $http.post(WMConfig.url.api_patient_file_attach, {
-                            file: _getFileInfo($scope.file),
-                            client_id: client_id
-                        }).success(function () {
-                            alert('Сохранено');
-                        }).error(function () {
-                            alert('Ошибка сохранения');
-                        });
-                    };
-                    $scope.clear_image = function () {
-                        $scope.file.image = null;
-                        $scope.image = null;
-                    };
-                    $scope.reset_image = function () {
-                        $scope.$broadcast('resetImage');
-                    };
-                    $scope.rotate = function (w) {
-                        var angle = w === 'left' ? -15 : 15;
-                        $scope.$broadcast('rotateImage', {
-                            angle: angle
-                        });
-                    };
-                    $scope.zoom = function (how) {
-                        $scope.scalePct = scales[scales.indexOf($scope.scalePct) + how];
-                        $scope.$broadcast('zoomImage', {
-                            scalePct: $scope.scalePct
-                        });
-                    };
-                    $scope.crop = function (action) {
-                        $scope.$broadcast('cropImage' + action);
-                    };
+        var WMFile = function (source) {
+            if (!source) {
+                this.mime = null;
+                this.size = null;
+                this.name = null;
+                this.type = null;
+                this.image = null;
+                this.binary_b64 = null;
+            } else {
+                this.mime = source.mime;
+                this.size = source.size;
+                this.name = source.name;
+                if (this.mime === null || this.mime === undefined) {
+                    this.type = this.image = this.binary_b64 = null;
+                } else if (/image/.test(this.mime)) {
+                    this.type = 'image';
+                    this.image = source.image;
+                    this.binary_b64 = null;
+                } else {
+                    this.type = 'other';
+                    this.binary_b64 = source.binary_b64;
+                    this.image = null;
+                }
+            }
+        };
 
-                    $scope.correctFileSelected = function () {
-                        return $scope.file.type === 'image' ?
-                            $scope.file.image && $scope.file.image.src :
-                            $scope.file.binary_b64;
-                    };
+        var WMFileMeta = function (source, idx) {
+            if (!source) {
+                this.id = null;
+                this.name = null;
+                this.idx = idx;
+                this.setFile();
+            } else {
+                angular.extend(this, source);
+                this.file = new WMFile(source); // TODO
+            }
+        };
+        WMFileMeta.prototype.setFile = function (file) {
+            this.file = new WMFile(file);
+        };
+        WMFileMeta.prototype.isImage = function () {
+            return this.file.type === 'image' && this.file.image.src;
+        };
+        WMFileMeta.prototype.isNotImage = function () {
+            return this.file.type === 'other' && this.file.binary_b64;
+        };
 
-                    if (cfa_id) {
-                        $http.get(WMConfig.url.api_patient_file_attach, {
-                            params: {
-                                client_file_attach_id: cfa_id
-                            }
-                        }).success(function (data) {
-                            $scope.image = new Image();
-                            $scope.image.src = 'data:image/png;base64,' + data.result.image;
-                            $scope.file.image = $scope.image;
-                        }).error(function () {
-                            alert('Ошибка открытия файла. Файл был удален.');
-                        });
+        var WMFileDocument = function (source) {
+            if (!source) {
+                this.id = null;
+                this.name = null;
+                this.files = [];
+            } else {
+                angular.extend(this, source);
+                this.files = [];
+                angular.forEach(source.files, function (file) {
+                    this.files.push(new WMFileMeta(file));
+                }, this);
+            }
+        };
+        WMFileDocument.prototype.addPage = function () {
+            this.files.push(new WMFileMeta(null, this.files.length));
+        };
+        WMFileDocument.prototype.getFile = function (pageNum) {
+            return this.files[pageNum - 1];
+        };
+        WMFileDocument.prototype.totalPages = function () {
+            return this.files.length;
+        };
+
+        var WMFileAttach = function (source) {
+            if (!source) {
+                this.id = null;
+                this.attach_date = null;
+                this.doc_type = null;
+                this.relation_type = null;
+                this.file_document = new WMFileDocument();
+            } else {
+                angular.extend(this, source);
+                this.file_document = new WMFileDocument(source.file_document);
+            }
+            this.rel_type = this.relation_type ? 'relative': 'own';
+        };
+
+        function makeAttachFileDocumentInfo(fileAttach) {
+            angular.forEach(fileAttach.file_document.files, function (fileMeta, key) {
+                var fileinfo = fileMeta.file,
+                    data = fileinfo.type === 'image' ? fileinfo.image.src : fileinfo.binary_b64;
+
+                fileAttach.file_document.files[key] = {
+                    meta: {
+                        id: fileMeta.id,
+                        name: fileMeta.name,
+                        idx: fileMeta.idx
+                    },
+                    file: {
+                        mime: fileinfo.mime,
+                        data: data
                     }
                 };
+            });
+            return fileAttach;
+        }
+
+        function capitalize(text) {
+            return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+        }
+        function unspace(text) {
+            return text.replace(/ /g, '_');
+        }
+
+        var FileEditController = function ($scope, file_attach, client_id, client) {
+            $scope.client = client;
+            $scope.mode = 'scanning';
+            $scope.device_list = [];
+            $scope.selected = {
+                device: {},
+                currentPage: 1
+            };
+            $scope.file_attach = file_attach;
+            $scope.currentFile = $scope.file_attach.file_document.getFile($scope.selected.currentPage);
+            var scales = [5, 10, 15, 30, 50, 75, 90, 100, 125, 150, 200, 300, 400, 500];
+            $scope.scalePct = 100;
+
+            $scope.get_device_list = function () {
+                $http.get(WMConfig.url.scanserver.list).success(function (data) {
+                    $scope.device_list = data.devices;
+                });
+            };
+            $scope.start_scan = function () {
+                $http.post(WMConfig.url.scanserver.scan, {
+                    name: $scope.selected.device.name
+                }).success(function (data) {
+                    $scope.image = new Image();
+                    $scope.image.src = 'data:image/png;base64,' + data.image;
+                    $scope.file.encoded = $scope.image;
+                });
+            };
+            $scope.save_image = function () {
+                $http.post(WMConfig.url.api_patient_file_attach, {
+                    client_id: client_id,
+                    file_attach: makeAttachFileDocumentInfo($scope.file_attach)
+                }).success(function () {
+                    alert('Сохранено');
+                }).error(function () {
+                    alert('Ошибка сохранения');
+                });
+            };
+            $scope.clear_image = function () {
+                $scope.file.image = null;
+                $scope.image = null;
+            };
+            $scope.reset_image = function () {
+                $scope.$broadcast('resetImage');
+            };
+            $scope.rotate = function (w) {
+                var angle = w === 'left' ? -15 : 15;
+                $scope.$broadcast('rotateImage', {
+                    angle: angle
+                });
+            };
+            $scope.zoom = function (how) {
+                $scope.scalePct = scales[scales.indexOf($scope.scalePct) + how];
+                $scope.$broadcast('zoomImage', {
+                    scalePct: $scope.scalePct
+                });
+            };
+            $scope.crop = function (action) {
+                $scope.$broadcast('cropImage' + action);
+            };
+
+            $scope.addPage = function () {
+                $scope.file_attach.file_document.addPage();
+                $scope.selected.currentPage = $scope.file_attach.file_document.totalPages();
+                $scope.pageChanged();
+            };
+            $scope.pageChanged = function () {
+                $scope.currentFile.file.selected = false;
+                $scope.currentFile = $scope.file_attach.file_document.getFile($scope.selected.currentPage);
+            };
+            $scope.generateFileName = function (force) {
+                if ($scope.currentFile.name && !force) {
+                    return
+                }
+                var docFileName = $scope.file_attach.file_document.name,
+                    name = '{0}{_(|1|)}_Лист_№{2}'.formatNonEmpty(
+                    unspace(docFileName ? docFileName :
+                        safe_traverse($scope.file_attach, ['doc_type', 'name'], 'Файл')
+                    ),
+                    docFileName ? '' : safe_traverse($scope.file_attach, ['relation_type', 'leftName'], ''),
+                    $scope.currentFile.idx + 1
+                );
+                $scope.currentFile.name = name;
+            };
+            $scope.generateFileDocumentName = function () {
+                var name = '{0}{ (|1|)}'.formatNonEmpty(
+                    safe_traverse($scope.file_attach, ['doc_type', 'name'], 'Документ'),
+                    safe_traverse($scope.file_attach, ['relation_type', 'leftName'], '')
+                );
+                $scope.file_attach.file_document.name = name;
+            };
+            $scope.$watch('file_attach.rel_type', function (n, o) {
+                if (n !== 'relative') {
+                    $scope.file_attach.relation_type = null;
+                    $scope.generateFileDocumentName();
+                }
+            });
+
+            $scope.imageSelected = function () {
+                return $scope.currentFile.isImage();
+            };
+            $scope.notImageSelected = function () {
+                return $scope.currentFile.isNotImage();
+            };
+            $scope.correctFileSelected = function () {
+                return true || $scope.file.type === 'image' ? // TODO
+                    $scope.imageSelected() :
+                    $scope.notImageSelected();
+            };
+
+            //if (cfa_id) {
+            //    $http.get(WMConfig.url.api_patient_file_attach, {
+            //        params: {
+            //            client_file_attach_id: cfa_id
+            //        }
+            //    }).success(function (data) {
+            //        $scope.image = new Image();
+            //        $scope.image.src = 'data:image/png;base64,' + data.result.image;
+            //        $scope.file.image = $scope.image;
+            //    }).error(function () {
+            //        alert('Ошибка открытия файла. Файл был удален.');
+            //    });
+            //}
+        };
+        return {
+            addNew: function (client_id, params) {
+                var file_attach = new WMFileAttach();
+                file_attach.file_document.addPage();
                 var instance = $modal.open({
-                    templateUrl: '/WebMis20/modal-Scanning.html',
+                    template: _getTemplate('new', params.attachType),
                     controller: FileEditController,
                     backdrop: 'static',
-                    size: 'lg'
+                    size: 'lg',
+                    windowClass: 'modal-full-screen',
+                    resolve: {
+                        file_attach: function () {
+                            return file_attach;
+                        },
+                        client_id: function () {
+                            return client_id;
+                        },
+                        client: function () {
+                            return params.client;
+                        }
+                    }
+                });
+                return instance.result;
+            },
+            open: function (cfa_id, params) {
+                var loaded_files = null; // ?
+                var instance = $modal.open({
+                    template: _getTemplate('open', params.attachType),
+                    controller: FileEditController,
+                    backdrop: 'static',
+                    size: 'lg',
+                    windowClass: 'modal-full-screen',
+                    resolve: {
+                        file: function () {
+                            return loaded_files;
+                        }
+                    }
                 });
                 return instance.result;
             }
         };
-    }]).
-    run(['$templateCache', function ($templateCache) {
-        $templateCache.put('/WebMis20/modal-Scanning.html',
-            '<div class="modal-header" xmlns="http://www.w3.org/1999/html">\
-                <div class="btn-group pull-right">\
-                    <label class="btn btn-lg btn-primary" ng-model="mode" btn-radio="\'scanning\'">Сканировать</label>\
-                    <label class="btn btn-lg btn-primary" ng-model="mode" btn-radio="\'select_existing\'">Выбрать существующий</label>\
-                </div>\
-                <h3 class="modal-title">Добавление документа</h3>\
-            </div>\
-            <div class="modal-body">\
-                <div class="row">\
-                <div class="col-md-4">\
-                    <div ng-show="mode === \'scanning\'">\
-                    <h4>Выбор устройства</h4>\
-                    <button type="button" class="btn btn-info btn-sm" ng-click="get_device_list()">\
-                        Получить список доступных устройств\
-                    </button>\
-                    <div class="radio" ng-repeat="dev in device_list">\
-                        <label>\
-                            <input type="radio" id="dev[[$index]]" ng-model="selected.device"\
-                                ng-value="dev">[[dev.model]]\
-                        </label>\
-                    </div>\
-                    <hr>\
-                    <h4>Параметры сканирования</h4>\
-                    <button type="button" class="btn btn-warning btn-sm" ng-click="start_scan()"\
-                        ng-disabled="!selected.device">\
-                        Начать сканирование\
-                    </button>\
-                    </div>\
-                    <div ng-show="mode === \'select_existing\'">\
-                        <h4>Выбрать из файловой системы</h4>\
-                        <input type="file" wm-input-file file="file">\
-                    </div>\
-                    <div id="help_canvas">\
-                    </div>\
-                </div>\
-                <div class="col-md-8">\
-                    <div class="btn-toolbar marginal bg-muted" role="toolbar" aria-label="...">\
-                        <div class="btn-group btn-group-lg pull-right" role="group" aria-label="...">\
-                            <button type="button" class="btn btn-default" ng-click="reset_image()" title="Вернуться к исходному изображению">\
-                                <span class="fa fa-refresh"></span>\
-                            </button>\
-                            <button type="button" class="btn btn-default" ng-click="clear_image()" title="Очистить область изображения">\
-                                <span class="fa fa-times"></span>\
-                            </button>\
-                        </div>\
-                        <div class="btn-group btn-group-lg rmargin10" role="group" aria-label="...">\
-                            <button type="button" class="btn btn-default" ng-click="rotate(\'left\')" title="Повернуть против часовой стрелки">\
-                                <span class="fa fa-rotate-left"></span>\
-                            </button>\
-                            <button type="button" class="btn btn-default" ng-click="rotate(\'right\')" title="Повернуть по часовой стрелке">\
-                                <span class="fa fa-rotate-right"></span>\
-                            </button>\
-                        </div>\
-                        <div class="btn-group btn-group-lg rmargin10" role="group" aria-label="...">\
-                            <button type="button" class="btn btn-default" ng-click="zoom(1)" title="Увеличить">\
-                                <span class="fa fa-plus"></span>\
-                            </button>\
-                            <label class="label label-default">[[scalePct]] %</label>\
-                            <button type="button" class="btn btn-default" ng-click="zoom(-1)" title="Уменьшить">\
-                                <span class="fa fa-minus"></span>\
-                            </button>\
-                        </div>\
-                        <div class="btn-group btn-group-lg" role="group" aria-label="...">\
-                            <button type="button" class="btn btn-default" ng-click="crop(\'Start\')" title="Обрезать изображение">\
-                                <span class="fa fa-crop"></span>\
-                            </button>\
-                            <button type="button" class="btn btn-default btn-success" ng-click="crop(\'Apply\')" title="Подтвердить">\
-                                <span class="fa fa-check"></span>\
-                            </button>\
-                            <button type="button" class="btn btn-default btn-danger" ng-click="crop(\'Cancel\')" title="Отменить">\
-                                <span class="fa fa-times"></span>\
-                            </button>\
-                        </div>\
-                    </div>\
-                    <div class="modal-scrollable-block">\
-                        <wm-image-editor id="image_editor" model-image="file.image"></wm-image-editor>\
-                    </div>\
-                </div>\
-                </div>\
-            </div>\
-            <div class="modal-footer">\
-                <button type="button" class="btn btn-success" ng-click="save_image()" ng-disabled="!correctFileSelected()">\
-                    Сохранить\
-                </button>\
-                <button type="button" class="btn btn-danger" ng-click="$dismiss()">Закрыть</button>\
-            </div>'
-        );
     }]).
     service('MessageBox', ['$modal', function ($modal) {
         return {

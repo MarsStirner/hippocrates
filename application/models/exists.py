@@ -1619,6 +1619,13 @@ class rbMethodOfAdministration(db.Model):
         }
 
 
+class FileGroupDocument(db.Model):
+    __tablename__ = u'FileGroupDocument'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(128))
+
+
 class FileMeta(db.Model):
     __tablename__ = u'FileMeta'
 
@@ -1626,3 +1633,8 @@ class FileMeta(db.Model):
     name = db.Column(db.String(128), nullable=False)
     path = db.Column(db.String(256))
     external_id = db.Column(db.Integer)
+    filegroup_id = db.Column(db.Integer, db.ForeignKey('FileGroupDocument.id'), nullable=False)
+    idx = db.Column(db.Integer, nullable=False, default='0')
+    deleted = db.Column(db.SmallInteger, nullable=False, default='0')
+
+    filegroup = db.relationship('FileGroupDocument', backref='files')
