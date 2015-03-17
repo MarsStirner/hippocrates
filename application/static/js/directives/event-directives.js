@@ -58,21 +58,33 @@ angular.module('WebMis20.directives')
                     });
                 });
             };
+            scope.current_sorting = '-begDate';
+            scope.sort_by_column = function(params){
+                scope.current_sorting = (params.order === 'DESC' ? '-' : '+') + params.column_name;
+            };
+            var columns = scope.wmSortableHeaderCtrl.sort_cols;
+            for (var i = 0; i < columns.length; ++i) {
+                if (columns[i].column_name === 'begDate') {
+                    columns[i].order = 'DESC';
+                } else {
+                    columns[i].order = undefined;
+                }
+            }
         },
         template:
 '<table class="table table-condensed table-hover table-clickable">\
-    <thead>\
+    <thead wm-sortable-header>\
     <tr>\
-        <th>Тип действия</th>\
-        <th>Состояние</th>\
-        <th>Начало</th>\
-        <th>Конец</th>\
-        <th>Исполнитель</th>\
+        <th wm-sortable-column="name" on-change-order="sort_by_column(params)">Тип действия</th>\
+        <th wm-sortable-column="status.name" on-change-order="sort_by_column(params)">Состояние</th>\
+        <th wm-sortable-column="begDate" on-change-order="sort_by_column(params)">Начало</th>\
+        <th wm-sortable-column="endDate" on-change-order="sort_by_column(params)">Конец</th>\
+        <th wm-sortable-column="person_text" on-change-order="sort_by_column(params)">Исполнитель</th>\
         <th></th>\
     </tr>\
     </thead>\
     <tbody>\
-    <tr ng-repeat="action in actions | action_group_filter: actionTypeGroup" ng-class="{\'success\': action.status.code == \'finished\'}">\
+    <tr ng-repeat="action in actions | action_group_filter: actionTypeGroup | orderBy:current_sorting" ng-class="{\'success\': action.status.code == \'finished\'}">\
         <td ng-click="open_action(action.id)">[[ action.name ]]</td>\
         <td ng-click="open_action(action.id)">[[action.status.name]]</td>\
         <td ng-click="open_action(action.id)">[[ action.begDate | asDate ]]</td>\

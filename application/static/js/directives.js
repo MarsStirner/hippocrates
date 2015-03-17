@@ -1112,7 +1112,7 @@ angular.module('WebMis20.directives')
                         });
                     });
                 });
-                element.addClass('cursor-pointer');
+                element.addClass('cursor-pointer text-nowrap');
                 var arrow = $('<span class="fa header-sorter"></span>');
                 arrow.attr('ng-class', "{'fa-caret-down': order === 'DESC', 'fa-caret-up': order === 'ASC'}");
                 element.append(arrow);
@@ -1139,11 +1139,11 @@ angular.module('WebMis20.directives')
             },
             controller: function ($scope) {
                 $scope.set_defaults = function (diagnosis){
-                    var defaults = $scope.params['defaults']
+                    var defaults = $scope.params['defaults'];
                     for (var key in defaults) {
                         diagnosis[key] = defaults[key];
                     }
-                }
+                };
                 $scope.add_new_diagnosis = function () {
                     var new_diagnosis = WMEventServices.get_new_diagnosis($scope.action.action);
                     if ($scope.params['defaults']){
@@ -1836,7 +1836,7 @@ angular.module('WebMis20.validators', [])
                     if (ctrl.$viewValue) {
                         ctrl.$setViewValue('');
                         ctrl.$render();
-                    };
+                    }
                     ctrl.$setValidity('text', true);
                     $(element).attr('disabled', true);
                 } else {
@@ -1847,7 +1847,9 @@ angular.module('WebMis20.validators', [])
             });
             ctrl.$parsers.unshift(function(viewValue) {
                 if (evalue && regexp) {
-                    if ($(element).attr('ui-mask')){viewValue = viewValue.replace(/_$/, '')};
+                    if ($(element).attr('ui-mask')) {
+                        viewValue = viewValue.replace(/_$/, '')
+                    }
                     ctrl.$setValidity('text', viewValue && regexp.test(viewValue));
                 }
                 return viewValue
