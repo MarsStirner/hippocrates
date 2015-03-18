@@ -59,6 +59,7 @@ COPYRIGHT_COMPANY = u'КОРУС Консалтинг ИТ'
 LPU_STYLE = 'FNKC'
 
 INDEX_HTML = 'hippo_index.html'
+FILE_STORAGE_PATH = ''
 
 # try:
 #     from config_local import *

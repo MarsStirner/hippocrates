@@ -2,8 +2,8 @@
 
 angular.module('WebMis20.controllers').
     controller('ClientCtrl',
-        ['$scope', '$http', '$modal', 'WMClient', 'WMClientServices', 'PrintingService', 'RefBookService', '$window', '$document',
-        function ($scope, $http, $modal, WMClient, WMClientServices, PrintingService, RefBookService, $window, $document) {
+        ['$scope', '$http', '$modal', 'WMClient', 'WMClientServices', 'PrintingService', 'RefBookService', '$window', '$document', 'FileEditModal',
+        function ($scope, $http, $modal, WMClient, WMClientServices, PrintingService, RefBookService, $window, $document, FileEditModal) {
             $scope.records = [];
             $scope.aux = aux;
             $scope.params = aux.getQueryParams(document.location.search);
@@ -116,5 +116,31 @@ angular.module('WebMis20.controllers').
             }, function(message) {
                 alert(message);
             });
+
+            $scope.add_new_file = function (document_id, policy_id) {
+                FileEditModal.addNew($scope.client_id, {
+                    attachType: 'client',
+                    document_id: document_id,
+                    policy_id: policy_id,
+                    client: $scope.client
+                })
+                .then(function () {
+                    $scope.client.reload();
+                }, function () {
+                    $scope.client.reload();
+                });
+            };
+            $scope.open_file = function (cfa_id, idx) {
+                FileEditModal.open(cfa_id, {
+                    attachType: 'client',
+                    idx: idx,
+                    client: $scope.client
+                })
+                .then(function () {
+                    $scope.client.reload();
+                }, function () {
+                    $scope.client.reload();
+                });
+            };
         }
     ]);
