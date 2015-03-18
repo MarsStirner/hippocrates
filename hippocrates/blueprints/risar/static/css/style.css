@@ -1,0 +1,229 @@
+.progress {
+    margin-bottom: 0;
+}
+
+/*table.table-personal-data > tbody > tr > th {*/
+    /*text-align: right;*/
+/*}*/
+
+h2 { /* Fix me if you don't like me */
+    margin-top: 0;
+}
+
+.gender-icon-padding {
+    padding-right: 10px;
+}
+
+.gender-icon-female {
+    color: hotpink;
+}
+
+.gender-icon-male {
+    color: royalblue;
+}
+
+div.das-form > .row {
+    min-height: 34px;
+    padding-bottom: 10px;
+}
+
+.custom-4-digit-shit {
+    width: 4em;
+}
+
+.small-left-margin {
+    margin-left: 20px;
+}
+
+.achievements {
+    font-size: 160%;
+    line-height: 30px;
+}
+
+.achievements a.btn{
+    font-size: 28px;
+    padding: 0 6px;
+}
+
+.achievements svg{
+    vertical-align: inherit;
+    position:absolute;
+    top:-30px;
+    height: 70px;
+    width: 70px;
+}
+.small-marginal {
+    margin-bottom: 5px;
+}
+
+table.table > tbody > tr > td, table.table > thead > tr > th {
+    padding-left: 15px;
+}
+
+ul.breadcrumbs {
+    margin-bottom: 5px;
+}
+
+span.empty-value {
+    border-bottom: 1px solid #000000;
+    width: 24px;
+    display: inline-block;
+}
+
+/* RISAR Navbar */
+
+.navbar-inverse {
+    /*background: #5A966E; *//* Old browsers */
+    
+    background: #5A966E; /* Old browsers */
+    background: -moz-linear-gradient(top, #A5D663 0%, #83c783 0%, #52b152 0%, #5A966E 68%, #5A966E 100%, #002400 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#A5D663), color-stop(0%,#83c783), color-stop(0%,#52b152), color-stop(68%,#5A966E), color-stop(100%,#5A966E), color-stop(100%,#002400)); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top, #A5D663 0%,#83c783 0%,#52b152 0%,#5A966E 68%,#5A966E 100%,#002400 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top, #A5D663 0%,#83c783 0%,#52b152 0%,#5A966E 68%,#5A966E 100%,#002400 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top, #A5D663 0%,#83c783 0%,#52b152 0%,#5A966E 68%,#5A966E 100%,#002400 100%); /* IE10+ */
+    background: linear-gradient(to bottom, #A5D663 0%,#83c783 0%,#52b152 0%,#5A966E 68%,#5A966E 100%,#002400 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#A5D663', endColorstr='#002400',GradientType=0 ); /* IE6-9 */
+
+    border-color: rgb(70, 130, 90);
+}
+.navbar-inverse .navbar-brand {
+    color: #fff;
+}
+.navbar-inverse .navbar-brand:hover,
+.navbar-inverse .navbar-brand:focus {
+    color: #fff;
+    background-color: transparent;
+}
+.navbar-inverse .navbar-text {
+    color: #fff;
+}
+.navbar-inverse .navbar-nav > li > a {
+    color: #fff;
+}
+.navbar-inverse .navbar-nav > li > a:hover,
+.navbar-inverse .navbar-nav > li > a:focus {
+    color: #fff;
+    background-color: transparent;
+}
+.navbar-inverse .navbar-nav > .active > a,
+.navbar-inverse .navbar-nav > .active > a:hover,
+.navbar-inverse .navbar-nav > .active > a:focus {
+    color: #fff;
+    background-color: rgb(70, 130, 90);
+}
+.navbar-inverse .navbar-nav > .disabled > a,
+.navbar-inverse .navbar-nav > .disabled > a:hover,
+.navbar-inverse .navbar-nav > .disabled > a:focus {
+    color: #444;
+    background-color: transparent;
+}
+.navbar-inverse .navbar-toggle {
+    border-color: #333;
+}
+.navbar-inverse .navbar-toggle:hover,
+.navbar-inverse .navbar-toggle:focus {
+    background-color: #333;
+}
+.navbar-inverse .navbar-toggle .icon-bar {
+    background-color: #fff;
+}
+.navbar-inverse .navbar-collapse,
+.navbar-inverse .navbar-form {
+    border-color: #101010;
+}
+.navbar-inverse .navbar-nav > .open > a,
+.navbar-inverse .navbar-nav > .open > a:hover,
+.navbar-inverse .navbar-nav > .open > a:focus {
+    color: #fff;
+    background-color: rgb(70, 130, 90);
+}
+@media (max-width: 767px) {
+    .navbar-inverse .navbar-nav .open .dropdown-menu > .dropdown-header {
+        border-color: rgb(70, 130, 90);
+    }
+    .navbar-inverse .navbar-nav .open .dropdown-menu .divider {
+        background-color: rgb(70, 130, 90);
+    }
+    .navbar-inverse .navbar-nav .open .dropdown-menu > li > a {
+        color: #fff;
+    }
+    .navbar-inverse .navbar-nav .open .dropdown-menu > li > a:hover,
+    .navbar-inverse .navbar-nav .open .dropdown-menu > li > a:focus {
+        color: #fff;
+        background-color: transparent;
+    }
+    .navbar-inverse .navbar-nav .open .dropdown-menu > .active > a,
+    .navbar-inverse .navbar-nav .open .dropdown-menu > .active > a:hover,
+    .navbar-inverse .navbar-nav .open .dropdown-menu > .active > a:focus {
+        color: #fff;
+        background-color: rgb(70, 130, 90);
+    }
+    .navbar-inverse .navbar-nav .open .dropdown-menu > .disabled > a,
+    .navbar-inverse .navbar-nav .open .dropdown-menu > .disabled > a:hover,
+    .navbar-inverse .navbar-nav .open .dropdown-menu > .disabled > a:focus {
+        color: #444;
+        background-color: transparent;
+    }
+}
+.navbar-inverse .navbar-link {
+    color: #fff;
+}
+.navbar-inverse .navbar-link:hover {
+    color: #fff;
+}
+.abs-alert{
+    position: absolute;
+    left: 30%;
+    right: 30%;
+    top: -15px;
+    z-index: 1100;
+}
+.inline-datepicker{
+    display: inherit;
+    width: 100%;
+}
+.inline-datepicker input{
+    background-color: #fff;
+    background-image: none;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    display: inherit;
+    font-size: inherit;
+    height: inherit;
+    line-height: inherit;
+    padding: 0;
+    float: inherit !important;
+    cursor: pointer;
+    color: #428bca;
+}
+.inline-datepicker .input-group-btn{
+    display: none;
+}
+.bottom_dotted {
+    border-bottom: 1px dotted;
+}
+
+.navbar-default .navbar-nav>.active>a {
+box-shadow: inset 0 3px 8px rgba(0,0,0,0.125);
+}
+
+.print_link{
+    padding: 0 7px 0 7px;
+}
+
+.fa.ng-scope.fa-circle.text-warning{
+    color: #FFD700
+}
+
+.error-border {
+    border: solid;
+    border-width: 1px;
+    border-color: #a94442;
+    border-radius: 3px;
+}
+
+.blood_presure {
+   display: inline;
+   width: 45%;
+}

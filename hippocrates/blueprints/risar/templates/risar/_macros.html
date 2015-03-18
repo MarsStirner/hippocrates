@@ -1,0 +1,11 @@
+{% macro page_title(title) %}
+<h2>
+    {{ title }}
+    <a ng-href="{{ url_for('patients.patient') }}?client_id=[[ chart.client.id ]]">[[ chart.client.full_name ]]</a>
+    ([[ chart.external_id ]])
+</h2>
+<div class="alert-warning small-marginal">Случай беременности. На учёте в <b>[[ chart.person.organisation.short_name ]]</b>
+    у <b>[[ chart.person.name ]]</b>
+    с <b>[[ chart.set_date | asDate ]]</b>
+</div>
+{% endmacro %}
