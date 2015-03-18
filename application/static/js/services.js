@@ -464,28 +464,32 @@ angular.module('WebMis20.services', []).
                 this.image = null;
                 this.binary_b64 = null;
             } else {
-                this.mime = source.mime;
-                this.size = source.size;
-                this.name = source.name;
-                if (this.mime === null || this.mime === undefined) {
-                    this.type = this.image = this.binary_b64 = null;
-                } else if (/image/.test(this.mime)) {
-                    this.type = 'image';
-                    this.image = source.image;
-                    this.binary_b64 = null;
-                } else {
-                    this.type = 'other';
-                    this.binary_b64 = source.binary_b64;
-                    this.image = null;
-                }
+                this.load(source);
+            }
+        };
+        WMFile.prototype.load = function (source) {
+            this.mime = source.mime;
+            this.size = source.size;
+            this.name = source.name;
+            if (this.mime === null || this.mime === undefined) {
+                this.type = this.image = this.binary_b64 = null;
+            } else if (/image/.test(this.mime)) {
+                this.type = 'image';
+                this.image = new Image();
+                this.image.src = "data:{0};base64,".format(this.mime) + source.data;
+                this.binary_b64 = null;
+            } else {
+                this.type = 'other';
+                this.binary_b64 = source.data;
+                this.image = null;
             }
         };
 
-        var WMFileMeta = function (source, idx) {
+        var WMFileMeta = function (source, idx, id) {
             if (!source) {
-                this.id = null;
+                this.id = id || null;
                 this.name = null;
-                this.idx = idx;
+                this.idx = idx || null;
                 this.setFile();
             } else {
                 angular.extend(this, source);
@@ -501,6 +505,9 @@ angular.module('WebMis20.services', []).
         WMFileMeta.prototype.isNotImage = function () {
             return this.file.type === 'other' && this.file.binary_b64;
         };
+        WMFileMeta.prototype.isLoaded = function () {
+            return this.file.type === 'image' ? Boolean(this.file.image.src) : Boolean(this.file.binary_b64);
+        };
 
         var WMFileDocument = function (source) {
             if (!source) {
@@ -511,7 +518,7 @@ angular.module('WebMis20.services', []).
                 angular.extend(this, source);
                 this.files = [];
                 angular.forEach(source.files, function (file) {
-                    this.files.push(new WMFileMeta(file));
+                    this.files[file.idx] = new WMFileMeta(file);
                 }, this);
             }
         };
@@ -523,6 +530,13 @@ angular.module('WebMis20.services', []).
         };
         WMFileDocument.prototype.totalPages = function () {
             return this.files.length;
+        };
+        WMFileDocument.prototype.setPages = function (pages) {
+            angular.forEach(pages, function (fm) {
+                if (!this.files.hasOwnProperty(fm[1])) {
+                    this.files[fm[1]] = new WMFileMeta(null, fm[1], fm[0]);
+                }
+            }, this);
         };
 
         var WMFileAttach = function (source) {
@@ -634,6 +648,17 @@ angular.module('WebMis20.services', []).
             $scope.pageChanged = function () {
                 $scope.currentFile.file.selected = false;
                 $scope.currentFile = $scope.file_attach.file_document.getFile($scope.selected.currentPage);
+                if ($scope.currentFile.id && !$scope.currentFile.isLoaded()) {
+                    $http.get(WMConfig.url.api_patient_file_attach, {
+                        params: {
+                            file_meta_id: $scope.currentFile.id
+                        }
+                    }).success(function (data) {
+                        $scope.currentFile.file.load(data.result);
+                    }).error(function () {
+                        alert('Ошибка открытия файла. Файл был удален.');
+                    });
+                }
             };
             $scope.generateFileName = function (force) {
                 if ($scope.currentFile.name && !force) {
@@ -674,20 +699,6 @@ angular.module('WebMis20.services', []).
                     $scope.imageSelected() :
                     $scope.notImageSelected();
             };
-
-            //if (cfa_id) {
-            //    $http.get(WMConfig.url.api_patient_file_attach, {
-            //        params: {
-            //            client_file_attach_id: cfa_id
-            //        }
-            //    }).success(function (data) {
-            //        $scope.image = new Image();
-            //        $scope.image.src = 'data:image/png;base64,' + data.result.image;
-            //        $scope.file.image = $scope.image;
-            //    }).error(function () {
-            //        alert('Ошибка открытия файла. Файл был удален.');
-            //    });
-            //}
         };
         return {
             addNew: function (client_id, params) {
@@ -714,20 +725,42 @@ angular.module('WebMis20.services', []).
                 return instance.result;
             },
             open: function (cfa_id, params) {
-                var loaded_files = null; // ?
-                var instance = $modal.open({
-                    template: _getTemplate('open', params.attachType),
-                    controller: FileEditController,
-                    backdrop: 'static',
-                    size: 'lg',
-                    windowClass: 'modal-full-screen',
-                    resolve: {
-                        file: function () {
-                            return loaded_files;
-                        }
+                var idx = params.idx,
+                    file_attach;
+                return $http.get(WMConfig.url.api_patient_file_attach, {
+                    params: {
+                        cfa_id: cfa_id,
+                        idx: idx
                     }
+                }).success(function (data) {
+                    file_attach = new WMFileAttach(data.result.cfa);
+                    file_attach.file_document.setPages(data.result.other_pages);
+                    return open_modal();
+                }).error(function () {
+                    alert('Ошибка открытия файла. Файл был удален.');
                 });
-                return instance.result;
+
+                function open_modal() {
+                    var instance = $modal.open({
+                        template: _getTemplate('open', params.attachType),
+                        controller: FileEditController,
+                        backdrop: 'static',
+                        size: 'lg',
+                        windowClass: 'modal-full-screen',
+                        resolve: {
+                            file_attach: function () {
+                                return file_attach;
+                            },
+                            client_id: function () {
+                                return params.client.client_id;
+                            },
+                            client: function () {
+                                return params.client;
+                            }
+                        }
+                    });
+                    return instance.result;
+                }
             }
         };
     }]).

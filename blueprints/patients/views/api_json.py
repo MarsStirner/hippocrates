@@ -307,11 +307,12 @@ def api_kladr_street_get():
                     'code': r.CODE} for r in res])
 
 
-STORAGE_PATH = './attached_files'
 import base64
 import datetime
 import os
 import mimetypes
+from application.app import app
+from sqlalchemy import func
 
 
 def get_file_ext_from_mimetype(mime):
@@ -363,18 +364,33 @@ def store_file_locally(filepath, file_data):
 def api_patient_file_attach():
     if request.method == 'GET':
         data = request.args
-        cfa_id = data.get('cfa_id')
-        page = data.get('page') or 1
-        cfa = ClientFileAttach.query.get(cfa_id)
-        filepath = cfa.filemeta.path
-        try:
-            with open(filepath, 'rb') as f:
-                file_encoded = base64.b64encode(f.read())
-        except IOError:
-            return jsonify(u'File not found', 404, 'ERROR')
-        return jsonify({
-            'image': file_encoded
-        })
+        cviz = ClientVisualizer()
+
+        file_meta_id = safe_int(data.get('file_meta_id'))
+        if file_meta_id:
+            fm = FileMeta.query.get(file_meta_id)
+            return jsonify(cviz.make_file_info(fm))
+        else:
+            cfa_id = safe_int(data.get('cfa_id'))
+            idx = safe_int(data.get('idx')) or 0
+
+            cfa_query_result = ClientFileAttach.query.join(FileGroupDocument, FileMeta).filter(
+                ClientFileAttach.id == cfa_id,
+                FileMeta.idx == idx
+            ).first()
+            cfa = cviz.make_file_attach_info(cfa_query_result, True, [idx]) if cfa_query_result else None
+            other_file_pages = db.session.query(
+                FileMeta.id, FileMeta.idx
+            ).select_from(ClientFileAttach).join(
+                FileGroupDocument, FileMeta
+            ).filter(
+                ClientFileAttach.id == cfa_id
+            ).all()
+
+            return jsonify({
+                'cfa': cfa,
+                'other_pages': other_file_pages
+            })
 
     elif request.method == 'POST':
         data = request.json
@@ -446,7 +462,7 @@ def api_patient_file_attach():
                 # TODO: при сохранении файлов для другой связанной сущности изменить префикс директории
                 directory = 'c%s' % client_id
                 filepath = os.path.join(directory, filename)
-                fullpath = os.path.join(STORAGE_PATH, filepath)
+                fullpath = os.path.join(app.config['FILE_STORAGE_PATH'], filepath)
                 ok, msg = store_file_locally(fullpath, f_file.get('data'))
                 if not ok:
                     return jsonify(msg, 500, 'ERROR')

@@ -130,9 +130,11 @@ angular.module('WebMis20.controllers').
                     $scope.client.reload();
                 });
             };
-            $scope.edit_file = function (cfa_id) {
+            $scope.open_file = function (cfa_id, idx) {
                 FileEditModal.open(cfa_id, {
-                    attachType: 'client'
+                    attachType: 'client',
+                    idx: idx,
+                    client: $scope.client
                 })
                 .then(function () {
                     $scope.client.reload();

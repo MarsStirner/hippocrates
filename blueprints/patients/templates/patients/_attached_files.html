@@ -9,9 +9,9 @@
                 <div class="row">
                     <ul>
                         <li ng-repeat="fa in client.file_attaches">
-                            <a ng-click="edit_file(fa.id)">[[ fa.file_document.name ]]</a> (Страницы
+                            <a ng-click="open_file(fa.id)">[[ fa.file_document.name ]]</a> (Страницы
                             <span ng-repeat="page in fa.file_document.files">
-                                <a href="javascript:void(0)" ng-click="edit_file(fa.id)">[[page.idx + 1]]</a>
+                                <a href="javascript:void(0)" ng-click="open_file(fa.id, page.idx)">[[page.idx + 1]]</a>
                             </span>)
                         </li>
                     </ul>

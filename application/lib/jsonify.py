@@ -2,6 +2,8 @@
 
 import datetime
 import itertools
+import os
+import base64
 
 from collections import defaultdict
 
@@ -9,6 +11,7 @@ from sqlalchemy.orm import aliased
 from sqlalchemy.sql.expression import between, func
 from flask import json
 
+from application.app import app
 from application.systemwide import db
 from application.lib.data import int_get_atl_dict_all, get_patient_location, get_patient_hospital_bed, get_hosp_length
 from application.lib.action.utils import action_is_bak_lab, action_is_lab
@@ -486,18 +489,12 @@ class ClientVisualizer(object):
             # 'identifications': identifications,
         }
 
-    def make_file_attach_info(self, file_attach):
+    def make_file_attach_info(self, file_attach, with_data=True, file_idx_list=None):
         """
 
         :type file_attach: application.models.client.ClientFileAttach
         :return:
         """
-        def make_file_info(filemeta):
-            return {
-                'id': filemeta.id,
-                'name': filemeta.name,
-                'idx': filemeta.idx
-            }
 
         file_document = file_attach.file_document
         return {
@@ -509,9 +506,34 @@ class ClientVisualizer(object):
                 'id': file_document.id,
                 'name': file_document.name,
                 'files': [
-                    make_file_info(fm) for fm in file_document.files
+                    self.make_file_info(fm, with_data) for fm in file_document.files if (
+                        (fm.idx in file_idx_list) if file_idx_list else True
+                    )
                 ]
             }
+        }
+
+    def make_file_info(self, file_meta, with_data=True):
+        def get_file_data(fullpath):
+            try:
+                with open(fullpath, 'rb') as f:
+                    file_encoded = base64.b64encode(f.read())
+            except IOError, e:
+                logger.error(u'Невозможно загрузить файл %s' % fullpath, exc_info=True)
+                return None
+            return file_encoded
+
+        if file_meta.id and with_data:
+            fullpath = os.path.join(app.config['FILE_STORAGE_PATH'], file_meta.path)
+            data = get_file_data(fullpath)
+        else:
+            data = None
+        return {
+            'id': file_meta.id,
+            'name': file_meta.name,
+            'idx': file_meta.idx,
+            'mime': file_meta.mimetype,
+            'data': data
         }
 
     def make_client_info_for_view_frame(self, client):

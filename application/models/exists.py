@@ -1623,15 +1623,16 @@ class FileGroupDocument(db.Model):
     __tablename__ = u'FileGroupDocument'
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(128))
+    name = db.Column(db.Unicode(128))
 
 
 class FileMeta(db.Model):
     __tablename__ = u'FileMeta'
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(128), nullable=False)
-    path = db.Column(db.String(256))
+    name = db.Column(db.Unicode(128), nullable=False)
+    mimetype = db.Column(db.String(128), nullable=False, default='')
+    path = db.Column(db.Unicode(256))
     external_id = db.Column(db.Integer)
     filegroup_id = db.Column(db.Integer, db.ForeignKey('FileGroupDocument.id'), nullable=False)
     idx = db.Column(db.Integer, nullable=False, default='0')

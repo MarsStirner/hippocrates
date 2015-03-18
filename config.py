@@ -53,6 +53,8 @@ TITLE = u'WebMIS 2.0'
 COPYRIGHT_COMPANY = u'КОРУС Консалтинг ИТ'
 LPU_STYLE = 'FNKC'
 
+FILE_STORAGE_PATH = ''
+
 try:
     from config_local import *
 except ImportError:
