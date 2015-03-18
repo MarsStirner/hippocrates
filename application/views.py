@@ -192,10 +192,15 @@ def api_refbook(name):
     for mod in (exists, schedule, actions, client, event):
         if hasattr(mod, name):
             ref_book = getattr(mod, name)
+
+            _order = ref_book.id
+            if hasattr(ref_book, '__mapper_args__') and 'order_by' in ref_book.__mapper_args__:
+                _order = ref_book.__mapper_args__['order_by']
+
             if 'deleted' in ref_book.__dict__:
-                res = jsonify(ref_book.query.filter_by(deleted=0).order_by(ref_book.id).all())
+                res = jsonify(ref_book.query.filter_by(deleted=0).order_by(_order).all())
             else:
-                res = ref_book.query.order_by(ref_book.id).all()
+                res = ref_book.query.order_by(_order).all()
                 res = jsonify(res)
             return res
     return abort(404)
