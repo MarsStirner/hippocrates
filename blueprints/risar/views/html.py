@@ -46,6 +46,11 @@ def html_inspection():
     return render_template('risar/inspection_view.html')
 
 
+@module.route('/inspection/gravidograma.html')
+def html_gravidograma():
+    return render_template('risar/gravidograma.html')
+
+
 @module.route('/inspection_edit.html')
 def html_inspection_edit():
     event_id = request.args['event_id']

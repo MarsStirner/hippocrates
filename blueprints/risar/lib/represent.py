@@ -74,6 +74,7 @@ def represent_event(event):
                 'percent': 900 / 10,
             }
         },
+        'card_attributes': represent_card_attributes(event),
         'anamnesis': represent_anamnesis(event),
         'epicrisis': represent_epicrisis(event),
         'checkups': represent_checkups(event),
@@ -138,6 +139,13 @@ def get_pregnancy_week(event, date=None):
         if isinstance(start_date, datetime.datetime):
             start_date = start_date.date()
         return (min(date, datetime.date.today()) - start_date).days / 7 + 1
+
+
+def represent_card_attributes(event):
+    action = get_card_attrs_action(event)
+    return {
+        'pregnancy_start_date': action['pregnancy_start_date'].value
+    }
 
 
 def represent_anamnesis(event):

@@ -1,0 +1,94 @@
+{% extends 'risar/base.html' %}
+{% import 'risar/_macros.html' as rimacros %}
+
+{% block title %}> {{ module_name }}{% endblock %}
+
+{% block main %}
+    <div ng-controller="GravidogramaCtrl" ng-cloak>
+        <ul class="breadcrumb">
+            <li><a href="{{ url_for('.index_html') }}">Рабочий стол</a></li>
+            <li><a ng-href="{{ url_for('.html_chart') }}?event_id=[[ chart.id ]]">Карта пациентки</a></li>
+            <li>Гравидограмма</li>
+        </ul>
+        <div class="row small-marginal">
+            <div class="col-md-12">
+                Гравидограмма
+            </div>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-heading"></div>
+            <nvd3-line-chart
+                    data="gravidograma_data"
+                    id="gravidograma"
+                    width="700"
+                    height="250"
+                    showXAxis="true"
+                    showYAxis="true"
+                    tooltips="true"
+                    interactive="true"
+                    margin="{left:60,top:20,bottom:20,right:20}"
+                    forcex="[5, 42]"
+                    forcey="[0,40]"
+                    xAxisTickFormat="xAxisTickFormat"
+                    ><svg></svg>
+            </nvd3-line-chart>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>5-6</th>
+                        <th>7-8</th>
+                        <th>9-10</th>
+                        <th>11-12</th>
+                        <th>13-14</th>
+                        <th>15-16</th>
+                        <th>17-18</th>
+                        <th>19-20</th>
+                        <th>21-22</th>
+                        <th>23-24</th>
+                        <th>25-26</th>
+                        <th>27-28</th>
+                        <th>29-30</th>
+                        <th>31-32</th>
+                        <th>33-34</th>
+                        <th>35-36</th>
+                        <th>37-38</th>
+                        <th>39-40</th>
+                        <th>41-42</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Окружность живота</td>
+                        <td ng-repeat="n in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]">[[ abdominal[n] ]]</td>
+                    </tr>
+                    <tr>
+                        <td>Состояние шейки матки</td>
+                        <td ng-repeat="n in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]"></td>
+                    </tr>
+                    <tr>
+                        <td>Предлежание плода</td>
+                        <td ng-repeat="n in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]">
+                            <span tooltip="[[ presenting_part[n][1] ]]">[[ presenting_part[n][0] ]]
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Сердцебиение</td>
+                        <td ng-repeat="n in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]">[[ fetus_heart_rate[n] ]]</td>
+                    </tr>
+                    <tr>
+                        <td>Отеки</td>
+                        <td ng-repeat="n in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]">[[ edema[n] ]]</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}
+
+{% block modules_js %}
+    {{ super() }}
+    <script src="{{ url_for('.static', filename='js/risar.js', v=version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/gravidograma.js', v=version) }}"></script>
+{% endblock %}
