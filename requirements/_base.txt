@@ -20,4 +20,5 @@ fabric
 mock
 PyYAML
 
--e git+https://github.com/KorusConsulting/pysimplelogs.git#egg=pysimplelogs
+-e git+https://github.com/hitsl/pysimplelogs.git#egg=pysimplelogs
+-e git+https://github.com/hitsl/nemesis.git#egg=nemesis

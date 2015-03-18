@@ -36,3 +36,5 @@ config_*.py
 #forms_prototype
 .fuse_*
 gen-py
+
+nemesis
