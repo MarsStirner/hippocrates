@@ -1,0 +1,143 @@
+{% extends 'accounting/hippo_base.html' %}
+
+{% block title %}> Журнал кассовых операций{% endblock %}
+
+{% block main %}
+    <div ng-controller="CashBookOperationsCtrl">
+        <legend>
+            <div class="pull-right">
+                <ui-print-button ps="ps" resolve="cash_op_resolve()"></ui-print-button>
+            </div>
+            <h2>Журнал кассовых операций</h2>
+        </legend>
+        <div class="col-md-3">
+            <!-- Filter -->
+            <div>
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        Фильтр
+                    </div>
+                    <div class="panel-body">
+                        <label for="filter-beg-date">С</label>
+                        <div class="row">
+                            <div class="col-md-10">
+                                <wm-date id="filter-beg-date" ng-model="flt.beg_date"></wm-date>
+                            </div>
+                        </div>
+
+                        <label for="filter-end-date">По</label>
+                        <div class="row">
+                            <div class="col-md-10">
+                                <wm-date id="filter-end-date" ng-model="flt.end_date"></wm-date>
+                            </div>
+                        </div>
+
+                        <label for="filter-cashbox">Касса</label>
+                        <input type="text" id="filter-cashbox" class="form-control" autocomplete="off" ng-model="flt.cashbox">
+
+                        <label for="filter-cashier-person">Кассир</label>
+                        <wm-person-select id="filter-cashier-person" ng-model="flt.cashier_person" placeholder="Кассир"
+                                only-doctors="false"></wm-person-select>
+
+                        <label for="filter-payment-type">Тип оплаты</label>
+                        <select class="form-control" id="filter-payment-type"
+                                ng-model="flt.payment_type"
+                                ng-options="pt as pt.name for pt in rbPaymentType.objects track by pt.id">
+                            <option value="">Не выбрано</option>
+                        </select>
+
+                        <label for="filter-cash-operation">Кассовая операция</label>
+                        <rb-select id="filter-cash-operation" ng-model="flt.cash_operation" placeholder="Кассовая операция"
+                                   ref-book="rbCashOperation"></rb-select>
+
+                        <label for="filter-event-purpose">Назначение обращения</label>
+                        <rb-select id="filter-event-purpose" ng-model="flt.event_purpose" placeholder="Назначение обращения"
+                                   ref-book="rbEventTypePurpose"></rb-select> {# FIXME: code != '0' #}
+
+                        <label for="filter-event-type">Тип обращения</label>
+                        <rb-select id="filter-event-type" ng-model="flt.event_type" placeholder="Тип обращения"
+                                   ref-book="EventType"></rb-select>
+
+                        <label for="filter-org-struct">Подразделение</label>
+                        <wm-custom-dropdown id="filter-org-struct" ng-model="flt.org_struct">
+                            <wm-org-structure-tree></wm-org-structure-tree>
+                        </wm-custom-dropdown>
+
+                        <label for="filter-exec-person">Врач</label>
+                        <wm-person-select id="filter-exec-person" ng-model="flt.exec_person" placeholder="Лечащий врач"></wm-person-select>
+                    </div>
+                    <div class="panel-footer panel-default">
+                        <button class="btn btn-default" ng-click="get_data(1, true)">Получить данные</button>
+                        <div class="btn-group">
+                            <button class="btn btn-default" ng-click="clear()">Сбросить</button>
+                            <button class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                                <span class="caret"></span>
+                                <span class="sr-only">Toggle Dropdown</span>
+                            </button>
+                            <ul class="dropdown-menu" role="menu">
+                                <li><a ng-click="clear_all()">Сбросить и очистить результаты</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-9">
+            <!-- Main -->
+            <table class="table table-condensed table-hover">
+                <thead wm-sortable-header>
+                <tr>
+                    <th wm-sortable-column="date" on-change-order="sort_by_column(params)">Дата</th>
+                    <th wm-sortable-column="cashbox" on-change-order="sort_by_column(params)">Касса</th>
+                    <th wm-sortable-column="cashier_name" on-change-order="sort_by_column(params)">Кассир</th>
+                    <th wm-sortable-column="cash_operation" on-change-order="sort_by_column(params)">Операция</th>
+                    <th wm-sortable-column="sum" on-change-order="sort_by_column(params)">Сумма</th>
+                    <th wm-sortable-column="client_name" on-change-order="sort_by_column(params)">Пациент</th>
+                    <th wm-sortable-column="client_bd" on-change-order="sort_by_column(params)">Дата рождения</th>
+                    <th wm-sortable-column="client_sex" on-change-order="sort_by_column(params)">Пол</th>
+                    <th wm-sortable-column="event_type_name" on-change-order="sort_by_column(params)">Обращение</th>
+                    <th wm-sortable-column="event_beg_date" on-change-order="sort_by_column(params)">Назначено</th>
+                    <th wm-sortable-column="event_end_date" on-change-order="sort_by_column(params)">Окончено</th>
+                    <th wm-sortable-column="event_exec_person_name" on-change-order="sort_by_column(params)">Врач</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="payment in results">
+                    <td ng-click="open_event(payment.event.id)">[[ payment.date | asDate ]]</td>
+                    <td ng-click="open_event(payment.event.id)">[[ payment.cashbox ]]</td>
+                    <td class="nowrap" ng-click="open_event(payment.event.id)">[[ payment.cashier_person.name ]]</td>
+                    <td ng-click="open_event(payment.event.id)">[[ payment.cash_operation.name ]]</td>
+                    <td ng-click="open_event(payment.event.id)">[[ payment.sum ]]</td>
+                    <td ng-click="open_event(payment.event.id)">[[ payment.client.full_name ]]</td>
+                    <td ng-click="open_event(payment.event.id)">[[ payment.client.birth_date | asDate ]]</td>
+                    <td ng-click="open_event(payment.event.id)">[[ payment.client.sex.name ]]</td>
+                    <td ng-click="open_event(payment.event.id)">[[ payment.event.type_name ]]</td>
+                    <td ng-click="open_event(payment.event.id)">[[ payment.event.beg_date_date | asDate ]]</td>
+                    <td ng-click="open_event(payment.event.id)">[[ payment.event.end_date_date | asDate ]]</td>
+                    <td ng-click="open_event(payment.event.id)">[[ payment.event.person_short_name ]]</td>
+                    <td class="bg-muted">
+                        <ui-print-button ps="prints[payment.id]" resolve="get_ps_resolve(payment)"
+                            lazy-load-context="cashOrder"></ui-print-button>
+                    </td>
+                </tr>
+                </tbody>
+                <tbody>
+                    <tr>
+                        <td colspan="8" class="text-right">Позиций: [[metrics.total]]</td>
+                        <td colspan="2" class="text-right">Приход: [[metrics.income | currency]]</td>
+                        <td colspan="2" class="text-right">Расход: [[metrics.expense | currency]]</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="center-block">
+                <pagination page="page" ng-model="page" total-items="pages" items-per-page="1" max-size="max_size" ng-change="get_data(page)" ng-show="pages > 1" boundary-links="true"></pagination>
+            </div>
+        </div>
+{#    <pre>[[ flt | json ]]</pre>#}
+    </div>
+{% endblock %}
+{% block modules_js %}
+    {{ super() }}
+    <script src="{{ url_for('.static', filename='js/cashbook-operations.js', v=version) }}"></script>
+{% endblock %}

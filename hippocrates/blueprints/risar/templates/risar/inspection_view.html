@@ -1,0 +1,179 @@
+{% extends 'risar/base.html' %}
+{% import 'risar/_macros.html' as rimacros %}
+
+{% block title %}> {{ module_name }}{% endblock %}
+
+{% block main %}
+    <div ng-controller="ChartCtrl" ng-cloak>
+    <ul class="breadcrumb">
+        <li><a href="{{ url_for('.index_html') }}">Рабочий стол</a></li>
+        <li><a ng-href="{{ url_for('.html_chart') }}?event_id=[[ chart.id ]]">Карта пациентки</a></li>
+        <li>Осмотры акушером-гинекологом беременной</li>
+    </ul>
+        <div class="row small-marginal">
+            <div class="col-lg-10 col-md-10">
+                <h2>
+                    Осмотры акушером-гинекологом беременной
+                    <a ng-href="{{ url_for('patients.patient') }}?client_id=[[ chart.client.id ]]">[[ chart.client.full_name ]]</a>
+                    ([[ chart.external_id ]])
+                </h2>
+            </div>
+            <div class="col-md-2 achievements text-right">
+                <a class="btn" href="#"><i class="fa fa-table" style="width: 32px"></i></a>
+                <a class="btn" href="{{ url_for('.html_gravidograma') }}?event_id=[[ chart.id ]]"><i class="fa fa-line-chart" tooltip="Гравидограмма" style="width: 32px"></i></a>
+                <a class="btn" href="#"><i class="fa fa-info" style="width: 32px"></i></a>
+            </div>
+            <div class="col-md-12 col-lg-12">
+                <div class="alert-warning small-marginal">Случай беременности. На учёте в <b>[[ chart.person.organisation.short_name ]]</b>
+                    у <b>[[ chart.person.name ]]</b>
+                    с <b>[[ chart.set_date | asDate ]]</b>
+                </div>
+            </div>
+        </div>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th width="10%" nowrap>Данные осмотра <a ng-href="{{ url_for('.html_inspection_edit') }}?event_id=[[ chart.id ]]" class="btn btn-xs btn-success" title="Добавить новый осмотр"><i class="glyphicon glyphicon-plus"></i></a></th>
+                    <th width="10%" nowrap ng-repeat="checkup in chart.checkups">
+                        <a ng-href="{{ url_for('.html_inspection_edit') }}?event_id=[[ chart.id ]]&checkup_id=[[ checkup.id ]]">[[ checkup.beg_date | asDate ]]</a>
+                        <div class="btn-group">
+                          <button type="button" class="btn btn-xs btn-default dropdown-toggle" data-toggle="dropdown">
+                            <span class="caret"></span>
+                          </button>
+                          <ul class="dropdown-menu" role="menu">
+                            <li><a href="#">Копировать</a></li>
+                            <li><a href="#">Удалить</a></li>
+                          </ul>
+                        </div>
+                    </th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th>Срок беременности</th>
+                    <td ng-repeat="checkup in chart.checkups">[[ checkup.pregnancy_week ]]</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <th>Диагнозы</th>
+                    <td colspan="[[ chart.checkups.length + 1 ]]"></td>
+                </tr>
+                <tr>
+                    <td>основной</td>
+                    <td ng-repeat="checkup in chart.checkups"><span class="bottom_dotted" tooltip="[[ checkup.diag.diagnosis.mkb.name ]]">[[ checkup.diag.diagnosis.mkb.code ]]</span></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>сопутствующие</td>
+                    <td ng-repeat="checkup in chart.checkups"><p ng-repeat="diag in checkup.diag2"><span class="bottom_dotted" tooltip="[[ diag.diagnosis.mkb.name ]]">[[ diag.diagnosis.mkb.code ]]</span></p></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>осложнения</td>
+                    <td ng-repeat="checkup in chart.checkups"><p ng-repeat="diag in checkup.diag3"><span class="bottom_dotted" tooltip="[[ diag.diagnosis.mkb.name ]]">[[ diag.diagnosis.mkb.code ]]</span></p></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <th>Масса тела</th>
+                    <td ng-repeat="checkup in chart.checkups"><i class="glyphicon glyphicon-arrow-up text-success"></i> [[ checkup.weight ]]</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <th>Прибавка в массе</th>
+                    <td ng-repeat="checkup in chart.checkups"><i class="glyphicon glyphicon-arrow-up text-success"></i></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <th>Молочные железы</th>
+                    <td ng-repeat="checkup in chart.checkups"><i class="glyphicon glyphicon-arrow-up text-success"></i><p ng-repeat="item in checkup.breast">[[ item | format:'{name}' ]]</p></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <th>Соски</th>
+                    <td ng-repeat="checkup in chart.checkups"><i class="glyphicon glyphicon-arrow-up text-success"></i><p ng-repeat="item in checkup.nipples">[[ item | format:'{name}' ]]</p></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <th>Отёки</th>
+                    <td ng-repeat="checkup in chart.checkups"><i class="glyphicon glyphicon-arrow-up text-success"></i> [[ checkup.edama ]]</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <th>АД левая рука</th>
+                    <td ng-repeat="checkup in chart.checkups"><i class="glyphicon glyphicon-arrow-up text-success"></i> [[ checkup.ad_left ]]</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <th>АД правая рука</th>
+                    <td ng-repeat="checkup in chart.checkups"><i class="glyphicon glyphicon-arrow-up text-success"></i> [[ checkup.ad_right ]]</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <th>Окружность живота</th>
+                    <td ng-repeat="checkup in chart.checkups"><i class="glyphicon glyphicon-arrow-up text-success"></i> [[ checkup.abdominal ]]</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <th>Матка</th>
+                    <td colspan="[[ chart.checkups.length + 1 ]]"></td>
+                </tr>
+                <tr>
+                    <td>Высота дна</td>
+                    <td ng-repeat="checkup in chart.checkups"><i class="glyphicon glyphicon-arrow-up text-success"></i> [[ checkup.fundal_height ]]</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Состояние</td>
+                    <td ng-repeat="checkup in chart.checkups"><i class="glyphicon glyphicon-arrow-up text-success"></i> [[ checkup.metra_state.name ]]</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Длина шейки</td>
+                    <td ng-repeat="checkup in chart.checkups"><i class="glyphicon glyphicon-arrow-up text-success"></i> [[ checkup.cervix_length.name ]]</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Цервикальный канал</td>
+                    <td ng-repeat="checkup in chart.checkups"><i class="glyphicon glyphicon-arrow-up text-success"></i> [[ checkup.cervical_canal.name ]]</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Консистенция</td>
+                    <td ng-repeat="checkup in chart.checkups"><i class="glyphicon glyphicon-arrow-up text-success"></i> [[ checkup.cervix_consistency.name ]]</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <th>Плод</th>
+                    <td colspan="[[ chart.checkups.length + 1 ]]"></td>
+                </tr>
+                <tr>
+                    <td>Положение</td>
+                    <td ng-repeat="checkup in chart.checkups"><i class="glyphicon glyphicon-arrow-up text-success"></i> [[ checkup.fetus_position.name ]]</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Предлежание</td>
+                    <td ng-repeat="checkup in chart.checkups"><i class="glyphicon glyphicon-arrow-up text-success"></i> [[ checkup.presenting_part.name ]]</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Характер СС</td>
+                    <td ng-repeat="checkup in chart.checkups"><i class="glyphicon glyphicon-arrow-up text-success"></i> [[ checkup.fetus_heartbeat.name ]]</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Частота СС</td>
+                    <td ng-repeat="checkup in chart.checkups"><i class="glyphicon glyphicon-arrow-up text-success"></i> [[ checkup.fetus_heart_rate ]]</td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
+
+{% block modules_js %}
+    {{ super() }}
+    <script src="{{ url_for('.static', filename='js/chart.js', v=version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/risar.js', v=version) }}"></script>
+{% endblock %}

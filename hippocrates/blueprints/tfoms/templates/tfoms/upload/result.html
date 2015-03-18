@@ -1,0 +1,34 @@
+{% if errors %}
+    <div class="alert alert-error">
+    {%- for error in errors -%}
+        {{ error|safe }}
+        {%- if not loop.last -%}<br/>{%- endif -%}
+    {%- endfor -%}
+    </div>
+{% endif %}
+{% if messages %}
+    <div class="alert alert-success">
+    {%- for message in messages -%}
+        {{ message|safe }}
+        {%- if not loop.last -%}<br/>{%- endif -%}
+    {%- endfor -%}
+    </div>
+{% endif %}
+{% if result %}
+<table class="table table-striped table-bordered table-condensed" id="reports_table">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Сообщение об ошибке</th>
+        </tr>
+    </thead>
+    <tbody>
+        {%- for key, value in result.iteritems() -%}
+        <tr>
+            <td>{{ key }}</td>
+            <td>{{ value }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endif %}

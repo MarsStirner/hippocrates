@@ -1,0 +1,23 @@
+<ul class="nav nav-tabs" id="tpl_types">
+    <li{% if request.path == url_for('.add_new_template', template_type='patients')  or
+    request.path == url_for('.add_new_template') or
+    request.path == url_for('.settings_template', template_type='patients', id=request.view_args.get('id', 0)) or
+    request.path == url_for('.delete_template', template_type='patients', action='delete_template', id=request.view_args.get('id', 0)) or
+    request.path == url_for('.add_new_template', template_type='patients', action='add_new' ) %} class="active"{% endif %}><a href="{{ url_for('.add_new_template', template_type='patients') }}">
+        Сведения о персональных данных (XML)</a></li>
+    <li{% if request.path == url_for('.add_new_template', template_type='services') or
+            request.path == url_for('.settings_template', template_type='services', id=request.view_args.get('id', 0)) or
+            request.path == url_for('.delete_template', template_type='services', action='delete_template', id=request.view_args.get('id', 0)) or
+            request.path == url_for('.add_new_template', template_type='services', action='add_new' )%} class="active"{% endif %}><a href="{{ url_for('.add_new_template', template_type='services') }}">
+        Сведения об оказанной мед.помощи (XML)</a></li>
+    <li{% if request.path == url_for('.add_new_template', template_type='policlinic') or
+            request.path == url_for('.settings_template', template_type='policlinic', id=request.view_args.get('id', 0)) or
+            request.path == url_for('.delete_template', template_type='policlinic', action='delete_template', id=request.view_args.get('id', 0)) or
+            request.path == url_for('.add_new_template', template_type='policlinic', action='add_new' )%} class="active"{% endif %}><a href="{{ url_for('.add_new_template', template_type='policlinic') }}">
+        Поликлиника (DBF)</a></li>
+    <li{% if request.path == url_for('.add_new_template', template_type='hospital') or
+            request.path == url_for('.settings_template', template_type='hospital', id=request.view_args.get('id', 0)) or
+            request.path == url_for('.delete_template', template_type='hospital', action='delete_template', id=request.view_args.get('id', 0)) or
+            request.path == url_for('.add_new_template', template_type='hospital', action='add_new' )%} class="active"{% endif %}><a href="{{ url_for('.add_new_template', template_type='hospital') }}">
+        Стационар (DBF)</a></li>
+</ul>

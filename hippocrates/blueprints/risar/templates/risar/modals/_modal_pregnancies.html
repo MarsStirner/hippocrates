@@ -1,0 +1,44 @@
+<div class="modal-header" xmlns="http://www.w3.org/1999/html">
+    <h3 class="modal-title">Сведения о беременности</h3>
+</div>
+<div class="modal-body">
+    <div class="das-form">
+        <div class="row">
+            <div class="col-md-4">Номер беременности по порядку</div>
+            <div class="col-lg-1 col-md-2 col-xs-2"><input class="form-control validatable" type="text" ng-model="model.number" valid-number max-val="100"/></div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">Год рождения ребенка</div>
+            <div class="col-lg-1 col-md-2 col-xs-2"><input class="form-control validatable" type="text" ng-model="model.year" ui-mask="9999" validator-regexp="'^[12]\\d{3}$'"></div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">Исход беременности</div>
+            <div class="col-md-8"><rb-select ref-book="rbRisarPregnancyResult" ng-model="model.pregnancyResult" /></div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">Ребёнок живой</div>
+            <div class="col-md-8"><input type="checkbox" class="checkbox" ng-model="model.alive"></div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">Масса при рождении</div>
+            <div class="col-md-2"><input ng-disabled="!model.alive" class="form-control validatable" type="number" ng-model="model.weight" valid-number/></div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">Причина смерти</div>
+            <div class="col-md-8"><input ng-disabled="model.alive" class="form-control" type="text" ng-model="model.cause_of_death" /></div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">Особенности родов</div>
+            <div class="col-md-8"><input class="form-control" type="text" ng-model="model.note" /></div>
+        </div>
+    </div>
+</div>
+<div class="modal-footer">
+    <div class="pull-left">
+        <div class="checkbox"><label><input type="checkbox" ng-model="restart"> Создать ещё один</label></div>
+    </div>
+    <div>
+        <button class="btn btn-success" ng-click="$close([model, restart])">Сохранить</button>
+        <button class="btn btn-default" ng-click="$dismiss()">Отменить</button>
+    </div>
+</div>

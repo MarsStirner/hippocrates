@@ -1,0 +1,59 @@
+/*body {*/
+    /*padding-top: 60px;*/
+/*}*/
+.container > hr {
+    margin: 60px 0;
+}
+.footer > hr {
+    margin: 20px 0;
+}
+#wrap {
+    min-height: 100%; height: auto !important; height: 100%; margin: 0 auto -60px;
+}
+
+html, body {height: 100%;}
+#bottom, #push {height:60px;}
+#footer {height:60px;}
+
+.container > hr {
+    margin: 10px 0;
+}
+
+/* Form customizations */
+form.icon {
+    display: inline;
+}
+
+form.icon button {
+    border: none;
+    background: transparent;
+    text-decoration: none;
+    padding: 0;
+    line-height: normal;
+}
+
+a.icon {
+    text-decoration: none;
+}
+
+.marketing {
+    margin: 60px 0;
+}
+
+.btn-pill {
+    margin-top: 2px !important;
+    padding: 10px 15px;
+    text-align: left;
+}
+
+h2 { /* Fix me if you don't like me */
+    margin-top: 0;
+}
+
+.small-left-margin {
+    margin-left: 20px;
+}
+
+ul.breadcrumbs {
+    margin-bottom: 5px;
+}

@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <title>Template &middot; Bootstrap</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- Le styles -->
+    <link href="bootstrap/css/bootstrap.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    <link href="bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="./bootstrap/js/html5shiv.js"></script>
+    <![endif]-->
+
+      <script src="jquery-ui/js/jquery-1.9.1.js"></script>
+      <script src="jquery-ui/js/jquery-ui-1.10.2.custom.min.js"></script>
+      <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.2/themes/flick/jquery-ui.css" />
+      <script>
+      $(function() {
+        $( "#from" ).datepicker({
+          changeMonth: true,
+          onClose: function( selectedDate ) {
+            $( "#to" ).datepicker( "option", "minDate", selectedDate );
+          }
+        });
+        $( "#to" ).datepicker({
+          defaultDate: "+1w",
+          changeMonth: true,
+          onClose: function( selectedDate ) {
+            $( "#from" ).datepicker( "option", "maxDate", selectedDate );
+          }
+        });
+      });
+      </script>
+  </head>
+
+  <body>
+  <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <div class="nav-collapse collapse">
+            <ul class="nav">
+              <li class="">
+                <a href="#"><i class="icon-home icon-white"></i></a>
+              </li>
+              <li class="">
+                <a href="#">Справочники</a>
+              </li>
+              <li class="">
+                <a href="#">Логирование</a>
+              </li>
+              <li class="active">
+                <a href="#">ТРФУ</a>
+              </li>
+              <li class="">
+                <a href="#">Ещё модуль</a>
+              </li>
+              <li class="">
+                <a href="#">Ещё модуль</a>
+              </li>
+              <li class="">
+                <a href="#">Ещё модуль</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="application_menu">
+        <div class="navbar">
+          <div class="navbar-inner">
+            <div class="container">
+              <ul class="nav">
+                <li><a href="index.html">Главная</a></li>
+                <li><a href="download.html">Выгрузка</a></li>
+                <li><a href="upload.html">Загрузка</a></li>
+                <li class="active"><a href="reports.html">Отчёты</a></li>
+                <li><a class="dropdown-toggle" data-toggle="dropdown" href="#">Настройка <b class="caret"></b></a>
+                    <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+                      <li><a href="settings_template.html">Шаблоны</a></li>
+                      <li><a href="settings.html">Общие настройки</a></li>
+                    </ul>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div><!-- /.navbar -->
+      </div>
+
+      <legend>Отчёты по выгрузкам в ТФОМС</legend>
+        <form class="form-inline">
+            <label for="from">Даты с:</label>
+            <input type="text" id="from" name="from" class="span2" />
+            <label for="to">по</label>
+            <input type="text" id="to" name="to" class="span2" />
+          <button type="submit" class="btn btn-primary">Выбрать</button>
+        </form>
+      <hr>
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>Дата выгрузки</th>
+                <th>Номер реестра</th>
+                <th>Количество записей</th>
+                <th>УЕТ</th>
+                <th>Сумма (руб.)</th>
+                <th>Оплачено</th>
+                <th>Отказано</th>
+            </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>04/02/2013</td>
+                    <td><a href="#myModal" data-toggle="modal">1234567</a></td>
+                    <td>15</td>
+                    <td>???</td>
+                    <td>100500</td>
+                    <td><span class="label label-success"><i class="icon-ok icon-white"></i></span></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>04/02/2013</td>
+                    <td><a href="#myModal" data-toggle="modal">1234567</a></td>
+                    <td>15</td>
+                    <td>???</td>
+                    <td>100500</td>
+                    <td><span class="label label-success"><i class="icon-ok icon-white"></i></span></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>04/02/2013</td>
+                    <td><a href="#myModal" data-toggle="modal">1234567</a></td>
+                    <td>15</td>
+                    <td>???</td>
+                    <td>100500</td>
+                    <td></td>
+                    <td><span class="label label-important"><i class="icon-remove icon-white icon-white"></i></span></td>
+                </tr>
+                <tr>
+                    <td>04/02/2013</td>
+                    <td><a href="#myModal" data-toggle="modal">1234567</a></td>
+                    <td>15</td>
+                    <td>???</td>
+                    <td>100500</td>
+                    <td><span class="label label-success"><i class="icon-ok icon-white"></i></span></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>04/02/2013</td>
+                    <td><a href="#myModal" data-toggle="modal">1234567</a></td>
+                    <td>15</td>
+                    <td>???</td>
+                    <td>100500</td>
+                    <td></td>
+                    <td><span class="label label-important"><i class="icon-remove icon-white icon-white"></i></span></td>
+                </tr>
+                <tr>
+                    <td>04/02/2013</td>
+                    <td><a href="#myModal" data-toggle="modal">1234567</a></td>
+                    <td>15</td>
+                    <td>???</td>
+                    <td>100500</td>
+                    <td></td>
+                    <td><span class="label label-important"><i class="icon-remove icon-white icon-white"></i></span></td>
+                </tr>
+                <tr>
+                    <td>04/02/2013</td>
+                    <td><a href="#myModal" data-toggle="modal">1234567</a></td>
+                    <td>15</td>
+                    <td>???</td>
+                    <td>100500</td>
+                    <td><span class="label label-success"><i class="icon-ok icon-white"></i></span></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>04/02/2013</td>
+                    <td><a href="#myModal" data-toggle="modal">1234567</a></td>
+                    <td>15</td>
+                    <td>???</td>
+                    <td>100500</td>
+                    <td><span class="label label-success"><i class="icon-ok icon-white"></i></span></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>04/02/2013</td>
+                    <td><a href="#myModal" data-toggle="modal">1234567</a></td>
+                    <td>15</td>
+                    <td>???</td>
+                    <td>100500</td>
+                    <td><span class="label label-success"><i class="icon-ok icon-white"></i></span></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>04/02/2013</td>
+                    <td><a href="#myModal" data-toggle="modal">1234567</a></td>
+                    <td>15</td>
+                    <td>???</td>
+                    <td>100500</td>
+                    <td><span class="label label-success"><i class="icon-ok icon-white"></i></span></td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="row-fluid">
+            <div class="span4">
+                <div class="pagination">
+                  <ul>
+                    <li><a href="#">Назад</a></li>
+                    <li><a href="#">1</a></li>
+                    <li><a href="#">2</a></li>
+                    <li><a href="#">3</a></li>
+                    <li><a href="#">4</a></li>
+                    <li><a href="#">5</a></li>
+                    <li><a href="#">Вперёд</a></li>
+                  </ul>
+                </div>
+            </div>
+            <div class="span4 offset4">
+                <table class="table">
+                    <thead>
+                    <th colspan="2">Итого:</th>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th>Выгружено реестров</th>
+                            <td>123</td>
+                        </tr>
+                        <tr>
+                            <th>Общая сумма</th>
+                            <td>100500 руб.</td>
+                        </tr>
+                        <tr>
+                            <th>Сумма оплаченных</th>
+                            <td>100000 руб.</td>
+                        </tr>
+                        <tr>
+                            <th>Сумма отказанных</th>
+                            <td>500 руб.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Modal -->
+        <div id="myModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            <h3 id="myModalLabel">Информация о реестре</h3>
+          </div>
+          <div class="modal-body">
+            <dl class="dl-horizontal">
+                <dt>ФИО:</dt><dd>Иванов И. И.</dd>
+                <dt>Дата рождения:</dt><dd>19.01.1919</dd>
+                <dt>Пол:</dt><dd>Мужской</dd>
+                <dt>Код:</dt><dd></dd>
+                <dt>Наименование услуги:</dt><dd></dd>
+                <dt>Выполнено:</dt><dd></dd>
+                <dt>Ед.Уч.:</dt><dd></dd>
+                <dt>Количество:</dt><dd></dd>
+                <dt>УЕТ:</dt><dd></dd>
+                <dt>Сумма:</dt><dd></dd>
+                <dt>Подтверждение:</dt><dd></dd>
+                <dt>Дата подтверждения:</dt><dd></dd>
+                <dt>Причина отказа:</dt><dd></dd>
+                <dt>Примечание:</dt><dd></dd>
+            </dl>
+          </div>
+        </div>
+      <hr>
+
+      <div class="footer">
+        <p>&copy; Корус Консалтинг ИТ 2013</p>
+      </div>
+
+    </div> <!-- /container -->
+
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="bootstrap/js/bootstrap.js"></script>
+  </body>
+</html>

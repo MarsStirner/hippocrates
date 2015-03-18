@@ -1,0 +1,823 @@
+{% extends 'risar/base.html' %}
+{% import 'risar/_macros.html' as rimacros %}
+
+{% block title %}> {{ module_name }}{% endblock %}
+
+{% block main %}
+    <div ng-controller="EpicrisisCtrl" ng-cloak>
+        <ul class="breadcrumb">
+            <li><a href="{{ url_for('.index_html') }}">Рабочий стол</a></li>
+            <li><a ng-href="{{ url_for('.html_chart') }}?event_id=[[ chart.id ]]">Карта пациентки</a></li>
+            <li><a ng-href="{{ url_for('.html_epicrisis') }}?event_id=[[ chart.id ]]">Эпикриз</a></li>
+            <li>Ввод данных по эпикризу родоразрешения</li>
+        </ul>
+        <div class="row small-marginal">
+            <div class="col-lg-10 col-md-10">
+                <h2>
+                    Ввод данных по эпикризу родоразрешения
+                    <a ng-href="{{ url_for('patients.patient') }}?client_id=[[ chart.client.id ]]">[[ chart.client.full_name ]]</a>
+                    ([[ chart.external_id ]])
+                </h2>
+            </div>
+            <div class="col-md-12 col-lg-12">
+                <div class="alert-warning small-marginal">Случай беременности. На учёте в <b>[[ chart.person.organisation.short_name ]]</b>
+                    у <b>[[ chart.person.name ]]</b>
+                    с <b>[[ chart.set_date | asDate ]]</b>
+                </div>
+            </div>
+        </div>
+        <div rc-wizard="sampleWizard" id="sampleWizard">
+            <div>
+                <nav class="navbar navbar-default" role="navigation">
+                    <div class="container-fluid">
+                        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                        <ul class="nav navbar-nav nav-pills" style="margin: 7.5px -15px"  id="EpicrisisTabs">
+                            <li class="active">
+                                <a class="active" href="#first" data-toggle="tab">
+                                    <span class="badge">1</span>
+                                    <span>Общая информация</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#second" data-toggle="tab">
+                                    <span class="badge">2</span>
+                                    <span>Информация о смерти матери</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#third" data-toggle="tab">
+                                    <span class="badge">3</span>
+                                    <span>Осложнения при родах</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#fourth" data-toggle="tab">
+                                    <span class="badge">4</span>
+                                    <span>Пособия и манипуляции при родах</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#fifth" data-toggle="tab">
+                                    <span class="badge">5</span>
+                                    <span>Операции при родах</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#sixth" data-toggle="tab">
+                                    <span class="badge">6</span>
+                                    <span>Сведения о родившихся детях</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#last" data-toggle="tab">
+                                    <span class="badge">7</span>
+                                    <span>Закрытие случая</span>
+                                </a>
+                            </li>
+                        </ul>
+                        </div>
+                    </div>
+                </nav>
+                <div class="tab-content marginal">
+                    <ng-form class="tab-pane active" id="first" name="firstForm"  novalidate rc-submit rc-step>
+                        <h3>Шаг 1. Общая информация</h3>
+                            <div class="row" ng-class="{'has-error': firstForm.pregnancy_final.$invalid}" >
+                                <div class="col-md-3" for="pregnancy_final" class="control-label text-right">Беременность закончилась</div>
+                                <div class="col-md-9" name="pregnancy_final" ng-model="chart.epicrisis.pregnancy_final"
+                                     refbook-radio ref-book="rbRisarPregnancy_Final" ng-required="true">
+                                  [[ item.name ]]
+                                </div>
+                            </div>
+                            <table class="table table-condensed" ng-if="chart.epicrisis.pregnancy_final.code">
+                                <thead>
+                                <tr>
+                                    <th class="col-md-3"></th>
+                                    <th class="col-md-9"></th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <th class="text-right">[[ chart.epicrisis.pregnancy_final.code =='abortom' ? 'Аборт при сроке (недель)': 'Роды при сроке (недель)']]  <span class="text-danger">*</span></th>
+                                        <td>
+                                            <div class="row" ng-class="{'has-error': firstForm.pregnancy_duration.$invalid && firstForm.submit_attempt}">
+                                            <div class="col-md-2">
+                                                <input ng-model="chart.epicrisis.pregnancy_duration" class="form-control" name="pregnancy_duration"
+                                                       ng-required="true">
+                                            </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-right">[[chart.epicrisis.pregnancy_final.code =='abortom'? 'Дата аборта': 'Дата родов']]  <span class="text-danger">*</span></th>
+                                        <td>
+                                            <div class="row" ng-class="{'has-error': firstForm.delivery_date.$invalid && firstForm.submit_attempt}">
+                                            <div class="col-md-2">
+                                            <wm-date ng-model="chart.epicrisis.delivery_date"
+                                                     style="width: 250px" ng-required="true"
+                                                     name="delivery_date"></wm-date>
+                                            </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-right">[[ chart.epicrisis.pregnancy_final.code =='abortom' ? 'Время аборта':'Время родов']]  <span class="text-danger">*</span></th>
+                                        <td>
+                                            <div class="row" ng-class="{'has-error': firstForm.delivery_time.$invalid && firstForm.submit_attempt}">
+                                                <div class="col-md-2">
+                                                    <div fs-time ng-model="chart.epicrisis.delivery_time"
+                                                         name="delivery_time" ng-required="true"></div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr ng-if="chart.epicrisis.pregnancy_final.code =='rodami'">
+                                        <th class="text-right">ЛПУ родоразрешения  <span class="text-danger">*</span></th>
+                                        <td>
+                                            <div class="row" ng-class="{'has-error': firstForm.LPU.$invalid  && firstForm.submit_attempt}">
+                                                <div class="col-md-7">
+                                                <ui-select ng-model="chart.epicrisis.LPU" theme="select2" class="form-control" name="LPU"
+                                                           ref-book="Organisation" autocomplete="off" ng-required="chart.epicrisis.pregnancy_final.code =='rodami'">
+                                                    <ui-select-match placeholder="не выбрано">[[ $select.selected.short_name ]]</ui-select-match>
+                                                    <ui-select-choices repeat="item in $refBook.objects | organisation_filter | filter: $select.search | limitTo: 50">
+                                                        <span ng-bind-html="item.full_name | highlight: $select.search"></span>
+                                                    </ui-select-choices>
+                                                </ui-select>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr ng-if="chart.epicrisis.pregnancy_final.code =='abortom'">
+                                        <th class="text-right">Вид аборта  <span class="text-danger">*</span></th>
+                                        <td>
+                                            <div class="row" ng-class="{'has-error': firstForm.state.$invalid  && firstForm.submit_attempt}">
+                                                <div class="col-md-3">
+                                                    <rb-select name="state" ng-model="chart.epicrisis.abort"
+                                                               ref-book="rbRisarAbort" ng-required="chart.epicrisis.pregnancy_final.code =='abortom'"></rb-select>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-right">Основной диагноз <span class="text-danger">*</span></th>
+                                        <td>
+{#                                            ng-class="{'has-error': firstForm.main_diagnosis.$invalid && firstForm.submit_attempt}"#}
+                                            <wm-diagnosis model="chart.epicrisis.main_diagnosis" list-mode="false"
+                                                          can-add-new="true" can-delete="true" can-edit="true"
+                                                          action="chart.epicrisis" event="chart" risar="true"
+                                                          params="{defaults:{diagnosis_type:rbDiagnosisType.get_by_code('2')},
+                                                                   disabled:{diagnosis_type:true}}"></wm-diagnosis>
+
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-right">Сопутствующий диагноз <span>&nbsp;</span></th>
+                                        <td>
+                                            <wm-diagnosis model="chart.epicrisis.attend_diagnosis" list-mode="true"
+                                                          can-add-new="true" can-delete="true" can-edit="true"
+                                                          action="chart.epicrisis" event="chart" risar="true"
+                                                          params="{defaults:{diagnosis_type:rbDiagnosisType.get_by_code('9')},
+                                                                   disabled:{diagnosis_type:true}}"></wm-diagnosis>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-right">Диагноз осложнения <span>&nbsp;</span></th>
+                                        <td>
+                                            <wm-diagnosis model="chart.epicrisis.complicating_diagnosis" list-mode="true"
+                                                          can-add-new="true" can-delete="true" can-edit="true"
+                                                          action="chart.epicrisis" event="chart" risar="true"
+                                                          params="{defaults:{diagnosis_type:rbDiagnosisType.get_by_code('3')},
+                                                                   disabled:{diagnosis_type:true}}"></wm-diagnosis>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-right">Особенности течения беременности <span>&nbsp;</span></th>
+                                        <td>
+                                            <div class="row"><div class="col-md-7">
+                                                <wysiwyg ng-model="chart.epicrisis.pregnancy_speciality" />
+                                            </div></div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-right">Оказанная помощь <span>&nbsp;</span></th>
+                                        <td>
+                                            <div class="row"><div class="col-md-7">
+                                                <wysiwyg ng-model="chart.epicrisis.help" />
+                                            </div></div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                    </ng-form>
+                    <ng-form class="tab-pane" id="second" name="secondForm"  novalidate rc-submit rc-step>
+                        <h3>Шаг 2. Информация о смерти матери</h3>
+                        <table class="table table-condensed">
+                            <thead>
+                            <tr>
+                                <th class="col-md-3"></th>
+                                <th class="col-md-9"></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="text-right">Причина смерти матери <span class="text-danger">*</span></td>
+                                    <td><div class="row"
+                                             ng-class="{'has-error': secondForm.reason_of_death.$invalid && secondForm.submit_attempt}">
+                                        <div class="col-md-3">
+                                        <input ng-model="chart.epicrisis.reason_of_death" class="form-control"
+                                               ng-required="true" name="reason_of_death">
+                                        </div></div>
+                                    </td>
+
+                                </tr>
+                                <tr>
+                                    <td class="text-right">Дата смерти матери <span class="text-danger">*</span></td>
+                                    <td>
+                                        <wm-date name="death_date"
+                                                 ng-class="{'has-error': secondForm.death_date.$invalid && secondForm.submit_attempt}"
+                                                 ng-required="true" ng-model="chart.epicrisis.death_date" style="width: 250px"></wm-date>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-right">Время смерти матери <span class="text-danger">*</span></td>
+                                    <td>
+                                        <div class="row">
+                                        <div class="col-md-2">
+                                        <div fs-time ng-model="chart.epicrisis.death_time" ng-required="true" name="death_time"
+                                              ng-class="{'has-error': secondForm.death_time.$invalid && secondForm.submit_attempt}"></div>
+                                        </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-right">Патологоанатомический диагноз <span class="text-danger">*</span></td>
+                                    <td>
+                                        <div class="row">
+{#                                            ng-class="{'has-error': secondForm.pat_diagnosis.$invalid && secondForm.submit_attempt}"#}
+                                            <wm-diagnosis model="chart.epicrisis.pat_diagnosis" list-mode="false"
+                                                          can-add-new="true" can-delete="true" can-edit="true"
+                                                          action="chart.epicrisis" event="chart" risar="true"
+                                                          params="{defaults:{diagnosis_type:rbDiagnosisType.get_by_code('2')},
+                                                                   required:{end_date:true}}"></wm-diagnosis>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-right"><span tooltip="Заключение лечебно-контрольной комиссии">Заключение ЛКК <span>&nbsp;</span></span></td>
+                                    <td>
+                                        <div class="row"><div class="col-md-7">
+                                            <wysiwyg ng-model="chart.epicrisis.control_expert_conclusion" />
+                                        </div></div>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </ng-form>
+                    <ng-form class="tab-pane" id="third" name="thirdForm" novalidate rc-submit rc-step>
+                        <h3>Шаг 3. Осложнения при родах</h3>
+                        <table class="table table-condensed">
+                            <thead>
+                            <tr>
+                                <th class="col-md-3"></th>
+                                <th class="col-md-9"></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <th class="text-right">Излитие околоплодных вод</th>
+                                    <td>
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <rb-select name="state" ng-model="chart.epicrisis.delivery_waters" ref-book="rbRisarDelivery_Waters"></rb-select>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="text-right">Слабость родовых сил</th>
+                                    <td>
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <rb-select name="state" ng-model="chart.epicrisis.weakness" ref-book="rbRisarWeakness"></rb-select>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="text-right">Разрыв промежностей (степень)</th>
+                                    <td>
+                                        <div class="row">
+                                        <div class="col-md-4">
+                                            <input ng-model="chart.epicrisis.perineal_tear" class="form-control">
+                                        </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="text-right">Анемия после родов (Hb<110 г/л)</th>
+                                    <td>
+                                        <div class="row">
+                                        <div class="col-md-4">
+                                            <input ng-model="chart.epicrisis.poor_blood" class="form-control">
+                                        </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="text-right">Нефропатия/эклампсия в родах</th>
+                                    <td>
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <rb-select name="state" ng-model="chart.epicrisis.eclampsia" ref-book="rbRisarEclampsia"></rb-select>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="text-right">Патология пуповины</th>
+                                    <td>
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <rb-select name="state" ng-model="chart.epicrisis.funiculus" ref-book="rbRisarFuniculus"></rb-select>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="text-right">Патология плаценты</th>
+                                    <td>
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <rb-select name="state" ng-model="chart.epicrisis.afterbirth" ref-book="rbRisarAfterbirth"></rb-select>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="text-right">Инфекции в родах</th>
+                                    <td>
+                                        <div class="row">
+                                        <div class="col-md-4">
+                                            <input ng-model="chart.epicrisis.infections_during_birth" class="form-control">
+                                        </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="text-right">Инфекции после родов</th>
+                                    <td>
+                                        <div class="row">
+                                        <div class="col-md-4">
+                                            <input ng-model="chart.epicrisis.infections_after_birth" class="form-control">
+                                        </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="text-right">Другие осложнения при родах</th>
+                                    <td>
+                                        <div class="row"><div class="col-md-7">
+                                            <wysiwyg ng-model="chart.epicrisis.other_complications" />
+                                        </div></div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </ng-form>
+                    <ng-form class="tab-pane" id="fourth" name="fourthForm" novalidate rc-submit rc-step>
+                        <h3>Шаг 4. Пособия и манипуляции при родах</h3>
+                        <table class="table table-condensed">
+                            <thead>
+                            <tr>
+                                <th class="col-md-3"></th>
+                                <th class="col-md-9"></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <th class="text-right">Вскрытие околоплодного пузыря</th>
+                                    <td><div>
+                                    <div class="radio-inline">
+                                        <label>
+                                            <input type="radio" ng-click="chart.epicrisis.caul = true" ng-checked="chart.epicrisis.caul">
+                                            Да
+                                        </label>
+                                    </div>
+                                    <div class="radio-inline">
+                                        <label>
+                                            <input type="radio" ng-click="chart.epicrisis.caul = false" ng-checked="!chart.epicrisis.caul">
+                                            Нет
+                                        </label>
+                                    </div>
+                                    </div></td>
+                                </tr>
+                                <tr>
+                                    <th class="text-right">Ручное обследование матки</th>
+                                    <td><div>
+                                    <div class="radio-inline">
+                                        <label>
+                                            <input type="radio" ng-click="chart.epicrisis.calfbed = true" ng-checked="chart.epicrisis.calfbed">
+                                            Да
+                                        </label>
+                                    </div>
+                                    <div class="radio-inline">
+                                        <label>
+                                            <input type="radio" ng-click="chart.epicrisis.calfbed = false" ng-checked="!chart.epicrisis.calfbed">
+                                            Нет
+                                        </label>
+                                    </div>
+                                    </div></td>
+                                </tr>
+                                <tr>
+                                    <th class="text-right">Эпизио/перинеотомия</th>
+                                    <td>
+                                        <div class="row">
+                                        <div class="col-md-4">
+                                            <input ng-model="chart.epicrisis.perineotomy" class="form-control">
+                                        </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="text-right">Ручное выделение последа</th>
+                                    <td><div>
+                                    <div class="radio-inline">
+                                        <label>
+                                            <input type="radio" ng-click="chart.epicrisis.secundines = true" ng-checked="chart.epicrisis.secundines">
+                                            Да
+                                        </label>
+                                    </div>
+                                    <div class="radio-inline">
+                                        <label>
+                                            <input type="radio" ng-click="chart.epicrisis.secundines = false" ng-checked="!chart.epicrisis.secundines">
+                                            Нет
+                                        </label>
+                                    </div>
+                                    </div></td>
+                                </tr>
+                                <tr>
+                                    <th class="text-right">Другие пособия и манипуляции</th>
+                                    <td>
+                                        <div class="row"><div class="col-md-7">
+                                            <wysiwyg ng-model="chart.epicrisis.other_manipulations" />
+                                        </div></div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </ng-form>
+                    <ng-form class="tab-pane" id="fifth" name="fifthForm" novalidate rc-submit rc-step>
+                        <h3>Шаг 5. Операции при родах</h3>
+                        <table class="table table-condensed">
+                            <thead>
+                            <tr>
+                                <th class="col-md-3"></th>
+                                <th class="col-md-9"></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <th class="text-right">Кесарево сечение</th>
+                                    <td>
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <rb-select name="state" ng-model="chart.epicrisis.caesarean_section" ref-book="rbRisarCaesarean_Section"></rb-select>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="text-right">Акушерские щипцы</th>
+                                    <td>
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <rb-select name="state" ng-model="chart.epicrisis.obstetrical_forceps" ref-book="rbRisarObstetrical_Forceps"></rb-select>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="text-right">Вакуум-экстракция</th>
+                                    <td><div>
+                                    <div class="radio-inline">
+                                        <label>
+                                            <input type="radio" ng-click="chart.epicrisis.vacuum_extraction = true" ng-checked="chart.epicrisis.vacuum_extraction">
+                                            Да
+                                        </label>
+                                    </div>
+                                    <div class="radio-inline">
+                                        <label>
+                                            <input type="radio" ng-click="chart.epicrisis.vacuum_extraction = false" ng-checked="!chart.epicrisis.vacuum_extraction">
+                                            Нет
+                                        </label>
+                                    </div>
+                                    </div></td>
+                                </tr>
+                                <tr>
+                                    <th class="text-right">Показания к операции</th>
+                                    <td>
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <rb-select name="state" ng-model="chart.epicrisis.indication" ref-book="rbRisarIndication"></rb-select>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="text-right">Особенности операции</th>
+                                    <td>
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <rb-select name="state" ng-model="chart.epicrisis.specialities" ref-book="rbRisarSpecialities"></rb-select>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="text-right">Обезболивание</th>
+                                    <td>
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <rb-select name="state" ng-model="chart.epicrisis.anesthetization" ref-book="rbRisarAnesthetization"></rb-select>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="text-right">Гистерэктомия</th>
+                                    <td>
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <rb-select name="state" ng-model="chart.epicrisis.hysterectomy" ref-book="rbRisarHysterectomy"></rb-select>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="text-right">Осложнения операции</th>
+                                    <td>
+                                        <div class="row">
+                                            <wm-diagnosis model="chart.epicrisis.operation_complication" list-mode="true"
+                                                          can-add-new="true" can-delete="true" can-edit="true"
+                                                          action="chart.epicrisis" event="chart" risar="true"
+                                                          params="{defaults:{diagnosis_type:rbDiagnosisType.get_by_code('2')}}"></wm-diagnosis>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="text-right">Плодоразрушающие операции</th>
+                                    <td><div>
+                                    <div class="radio-inline">
+                                        <label>
+                                            <input type="radio" ng-click="chart.epicrisis.embryotomy = true" ng-checked="chart.epicrisis.embryotomy">
+                                            Да
+                                        </label>
+                                    </div>
+                                    <div class="radio-inline">
+                                        <label>
+                                            <input type="radio" ng-click="chart.epicrisis.embryotomy = false" ng-checked="!chart.epicrisis.embryotomy">
+                                            Нет
+                                        </label>
+                                    </div>
+                                    </div></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </ng-form>
+                    <ng-form class="tab-pane" id="sixth" name="sixthForm" novalidate rc-submit rc-step>
+                        <h2>Шаг 6. Сведения о родившихся детях</h2>
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <button type="button" class="btn btn-primary text-left marginal" ng-click="add_child()"><span class="glyphicon glyphicon-plus"></span> Добавить</button>
+                                    <ul class="nav nav-pills nav-stacked  marginal" id="childrenTabs">
+                                        <li ng-class="{'active': $index==0}" ng-repeat="child in chart.epicrisis.newborn_inspections"><a href="#child[[$index+1]]" data-toggle="pill"> Ребенок [[$index+1]]</a></li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-10">
+                                    <div class="tab-content">
+                                        <div ng-class="{'active': $index==0}" class="tab-pane" id="child[[$index+1]]" ng-repeat="child in chart.epicrisis.newborn_inspections">
+                                            <table class="table">
+                                                <thead>
+                                                <tr>
+                                                    <th class="col-md-3"></th>
+                                                    <th class="col-md-9"></th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <th class="text-right">Пол <span class="text-danger">*</span></th>
+                                                        <td>
+                                                            <div ng-class="{'has-error': sixthForm.optionsSex_[[$index]].$invalid && sixthForm.submit_attempt}">
+                                                            <div class="radio-inline">
+                                                                <label>
+                                                                    <input type="radio" name="optionsSex_[[$index]]"
+                                                                           ng-model="child.sex.code" value = "male" required>
+                                                                    мужской
+                                                                </label>
+                                                            </div>
+                                                            <div class="radio-inline">
+                                                                <label>
+                                                                    <input type="radio" name="optionsSex_[[$index]]"
+                                                                           ng-model="child.sex.code" value = "female" required>
+                                                                    женский
+                                                                </label>
+                                                            </div>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+
+                                                    <tr>
+                                                        <th class="text-right">Вес <span class="text-danger">*</span></th>
+                                                        <td>
+                                                            <div class="row" ng-class="{'has-error': sixthForm.weight_[[$index]].$invalid && sixthForm.submit_attempt}">
+                                                            <div class="col-md-2">
+                                                                <input ng-model="child.weight" ng-required="true" class="form-control" name="weight_[[$index]]">
+                                                            </div>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th class="text-right">Длина <span class="text-danger">*</span></th>
+                                                        <td>
+                                                            <div class="row" ng-class="{'has-error': sixthForm.length_[[$index]].$invalid && sixthForm.submit_attempt}">
+                                                            <div class="col-md-2">
+                                                                <input ng-model="child.length" ng-required="true"
+                                                                       class="form-control" name="length_[[$index]]">
+                                                            </div>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th class="text-right">Живой <span class="text-danger">*</span></th>
+                                                        <td>
+                                                            <div ng-class="{'has-error': sixthForm.optionsAlive_[[$index]].$invalid && sixthForm.submit_attempt}">
+                                                                <div class="radio-inline">
+                                                                    <label>
+                                                                        <input type="radio" name="optionsAlive_[[$index]]"
+                                                                               ng-model="child.alive" data-ng-value="true" required>
+                                                                        Да
+                                                                    </label>
+                                                                </div>
+                                                                <div class="radio-inline">
+                                                                    <label>
+                                                                        <input type="radio" name="optionsAlive_[[$index]]"
+                                                                               ng-model="child.alive" data-ng-value="false" required>
+                                                                        Нет
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr ng-if="child.alive">
+                                                        <th class="text-right">Дата рождения <span class="text-danger">*</span></th>
+                                                        <td>
+                                                            <wm-date ng-model="child.birth_date" ng-required="true"
+                                                                     ng-class="{'has-error': sixthForm.birth_date_[[$index]].$invalid && sixthForm.submit_attempt}"
+                                                                     style="width: 250px" name="birth_date_[[$index]]"></wm-date>
+                                                        </td>
+                                                    </tr>
+                                                    <tr ng-if="child.alive">
+                                                        <th class="text-right">Время рождения <span class="text-danger">*</span></th>
+                                                        <td>
+                                                            <div class="row" ng-class="{'has-error': sixthForm.birth_time_[[$index]].$invalid && sixthForm.submit_attempt}">
+                                                                <div class="col-md-2">
+                                                                    <div fs-time ng-required="true"
+                                                                         ng-model="child.birth_time" name="birth_time_[[$index]]"></div>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr ng-if="child.alive">
+                                                        <th class="text-right">Степень доношенности <span class="text-danger">*</span></th>
+                                                        <td>
+                                                            <div class="row" ng-class="{'has-error': sixthForm.maturity_rate_[[$index]].$invalid && sixthForm.submit_attempt}">
+                                                                <div class="col-md-4">
+                                                                <rb-select ng-model="child.maturity_rate" ng-required="true"
+                                                                           ref-book="rbRisarMaturity_Rate" name="maturity_rate_[[$index]]"></rb-select>
+                                                            </div></div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr ng-if="child.alive">
+                                                        <th class="text-right">Оценка по Апгар <span>&nbsp;</span></th>
+                                                        <td>&nbsp;
+                                                        </td>
+                                                    </tr>
+                                                    <tr ng-if="child.alive">
+                                                        <td class="text-right">на 1 минуту жизни <span>&nbsp;</span></td>
+                                                        <td>
+                                                            <div class="row">
+                                                            <div class="col-md-2">
+                                                                <input name="first_minute" ng-model="child.apgar_score_1"
+                                                                       class="form-control" type="number"
+                                                                       min="0" max="10" valid-number/>
+                                                            </div>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr ng-if="child.alive">
+                                                        <td class="text-right">на 5 минуту жизни <span>&nbsp;</span></td>
+                                                        <td>
+                                                            <div class="row">
+                                                            <div class="col-md-2">
+                                                                <input name="fifth_minute" ng-model="child.apgar_score_5"
+                                                                       class="form-control" type="number"
+                                                                       min="0" max="10" valid-number/>
+                                                            </div>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr ng-if="child.alive">
+                                                        <td class="text-right">на 10 минуту жизни <span>&nbsp;</span></td>
+                                                        <td>
+                                                            <div class="row">
+                                                            <div class="col-md-2">
+                                                                <input name="tenth_minute" ng-model="child.apgar_score_10"
+                                                                       class="form-control" type="number"
+                                                                       min="0" max="10" valid-number/>
+                                                            </div>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr ng-if="!child.alive">
+                                                        <th class="text-right">Дата смерти <span class="text-danger">*</span></th>
+                                                        <td>
+                                                            <wm-date ng-model="child.birth_date" ng-required="true"
+                                                                     ng-class="{'has-error': sixthForm.birth_date_[[$index]].$invalid && sixthForm.submit_attempt}"
+                                                                     style="width: 250px" name="birth_date_[[$index]]"></wm-date>
+                                                        </td>
+                                                    </tr>
+                                                    <tr ng-if="!child.alive">
+                                                        <th class="text-right">Время смерти <span class="text-danger">*</span></th>
+                                                        <td>
+                                                            <div class="row" ng-class="{'has-error': sixthForm.birth_time_[[$index]].$invalid && sixthForm.submit_attempt}">
+                                                                <div class="col-md-2">
+                                                                    <div fs-time ng-required="true"
+                                                                         ng-model="child.birth_time" name="birth_time_[[$index]]"></div>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr ng-if="!child.alive">
+                                                        <th class="text-right">Причина смерти <span class="text-danger">*</span></th>
+                                                        <td>
+                                                            <div class="row" ng-class="{'has-error': sixthForm.death_reason_[[$index]].$invalid && sixthForm.submit_attempt}">
+                                                            <div class="col-md-2">
+                                                                <input ng-model="child.death_reason" ng-required="true" class="form-control" name="death_reason_[[$index]]">
+                                                            </div>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                    </ng-form>
+                    <ng-form class="tab-pane" id="last" name="lastForm" novalidate rc-submit rc-step>
+                        <h2>Шаг 7. Закрытие случая</h2>
+                        <div class="row">
+                            <div class="col-md-3 text-right">
+                                Дата закрытия случая
+                            </div>
+                            <div class="col-md-9">
+                                <wm-date ng-class="{'has-error': lastForm.exec_date.$invalid}" name="exec_date"
+                                         ng-model="chart.exec_date" style="width: 250px" ng-required="true"></wm-date>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3  text-right">
+                                Время закрытия случая
+                            </div>
+                            <div class="col-md-9">
+                                <wm-time ng-class="{'has-error': lastForm.exec_time.$invalid}" name="exec_time"
+                                         ng-model="chart.exec_date" style="width: 250px" ng-required="true"></wm-time>
+                            </div>
+                        </div>
+
+                    </ng-form>
+                </div>
+                <div class="form-group">
+                    <div class="pull-right">
+                        <a class="pseudo-btn" ng-href="{{ url_for('.html_epicrisis') }}?event_id=[[ chart.id ]]">Перейти на форму эпикриза пациентки</a>
+                        <a class="btn btn-success"
+                           tooltip="[[rc.sampleWizard.currentStep.formController.$invalid && rc.sampleWizard.currentStep.formController.submit_attempt ? 'Заполните все обязательные поля': '']]"
+                           ng-click="rc.sampleWizard.currentIndex == rc.sampleWizard.navigationLength ? close_event() : save(rc.sampleWizard.currentStep.formController)">
+                            Сохранить</a>
+                        <a class="btn btn-primary"
+                           ng-click="save(rc.sampleWizard.currentStep.formController); rc.sampleWizard.forward()"
+                           tooltip="[[rc.sampleWizard.currentStep.formController.$invalid && rc.sampleWizard.currentStep.formController.submit_attempt ? 'Заполните все обязательные поля': '']]"
+                           ng-show="rc.sampleWizard.currentIndex < rc.sampleWizard.navigationLength">
+                            Сохранить и продолжить
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block modules_js %}
+    {{ super() }}
+    <script src="{{ url_for('.static', filename='js/epicrisis.js', v=version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/risar.js', v=version) }}"></script>
+    <script src="{{ url_for('static', filename='js/services/event/event-services.js', v=version) }}"></script>
+{% endblock %}

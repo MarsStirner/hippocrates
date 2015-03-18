@@ -1,0 +1,22 @@
+@media screen and (min-width: 800px) {
+  body {
+    font: normal 62.5%/1.5em Arial, Helvetica, sans-serif;
+  }
+}
+@media screen and (min-width: 1400px) {
+  body {
+    font: normal 72.5%/1.5em Arial, Helvetica, sans-serif;
+  }
+}
+@media screen and (min-width: 1600px) {
+  body {
+    font: normal 82.5%/1.5em Arial, Helvetica, sans-serif;
+  }
+}
+@media screen and (min-width: 1800px) {
+  body {
+    font: normal 92.5%/1.5em Arial, Helvetica, sans-serif;
+  }
+}
+#wrap > #container { width: 116em; }
+ul, ol, table { font-size: 1.3em; }

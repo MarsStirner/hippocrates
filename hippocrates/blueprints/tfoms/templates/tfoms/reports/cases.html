@@ -1,0 +1,126 @@
+{% extends 'tfoms/base.html' %}
+
+{% block title %}> {{ module_name }} > Отчёты{% endblock %}
+
+{% block modules_css %}
+<link href="{{ url_for('.static', filename='css/style.css') }}" rel="stylesheet">
+<link href="{{ url_for('static', filename='jquery-ui/css/cupertino/jquery-ui-1.10.2.custom.min.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+
+    {% include 'tfoms/_nav_menu.html' %}
+
+    <legend>Услуги по счёту №{{ data.account.number }} ({{ data.account.date|datetimeformat('%d/%m/%Y') }})</legend>
+    {% if data.items %}
+        <table class="table table-striped table-bordered table-condensed" id="table_cases">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Дата оказания услуги</th>
+                    <th>ФИО</th>
+                    <th>Пол</th>
+                    <th>Дата рождения</th>
+                    <th>Общая сумма за услугу</th>
+                    <th>Количество оказанных услуг</th>
+                    <th>Единица учета услуги</th>
+                    <th>Дата загрузки из ТФОМС</th>
+                    <th>Файл, загруженный из ТФОМС</th>
+                    <th>Причина отказа</th>
+                    <th>Примечание</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for case in data.items %}
+                <tr{% if case.refuseTypeCode %} class="error"{% endif %}>
+                    <td>{{ case.id }}</td>
+                    <td>{{ case.serviceDate|datetimeformat('%d/%m/%Y') }}</td>
+                    <td>{{ case.lastName }} {{ case.firstName }} {{ case.patrName }}</td>
+                    <td>{% if case.sex == 1 %}М{% elif case.sex == 2 %}Ж{% endif %}</td>
+                    <td>{% if case.birthDate %}{{ case.birthDate|datetimeformat('%d/%m/%Y') }}{% endif %}</td>
+                    <td>{{ case.price|float }}</td>
+                    <td>{{ case.amount|float }}</td>
+                    <td>{{ case.unitName }}</td>
+                    <td>{% if case.date %}{{ case.date|datetimeformat('%d/%m/%Y') }}{% endif %}</td>
+                    <td>{{ case.fileName }}</td>
+                    <td>{% if case.refuseTypeCode %}<strong>{{ case.refuseTypeCode }}</strong> {% endif %}{{ case.refuseTypeName|default("", True) }}</td>
+                    <td id="note_{{ case.id }}">{{ case.note }}</td>
+                    <td>
+                        {%- if case.doNotUploadAnymore -%}
+                            <button onclick="show_confirm({{ case.id }}, false);" id="btn_in_{{ case.id }}" class="btn btn-small" title="Включить в выгрузку"><nobr>Вернуть в выгрузку</nobr></button>
+                            <button onclick="show_confirm({{ case.id }}, true);" id="btn_out_{{ case.id }}" class="btn btn-small btn-danger hide" title="Больше не выгружать"><nobr>Не выгружать</nobr></button>
+                        {%- else -%}
+                            <button onclick="show_confirm({{ case.id }}, false);" id="btn_in_{{ case.id }}" class="btn btn-small hide" title="Включить в выгрузку"><nobr>Вернуть в выгрузку</nobr></button>
+                            <button onclick="show_confirm({{ case.id }}, true);" id="btn_out_{{ case.id }}" class="btn btn-small btn-danger" title="Больше не выгружать"><nobr>Не выгружать</nobr></button>
+                        {%- endif -%}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <div class="row-fluid">
+            <div class="span12" id="page_container"></div>
+        </div>
+    {% else %}
+        <div class="alert alert-error">
+            Услуги отсутствуют
+        </div>
+    {% endif %}
+<div id="myModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h3 id="myModalLabel">Подтвердите и оставьте комментарий</h3>
+    </div>
+    <div class="modal-body">
+        <p>
+            <label>Оставьте комментарий:</label>
+            <textarea rows="5" id="case_note" name="case_note" style="width: 98%"></textarea>
+        </p>
+    </div>
+    <div class="modal-footer">
+        <button class="btn" data-dismiss="modal" aria-hidden="true">Закрыть</button>
+        <button class="btn btn-primary" onclick="change_upload_status();$('#myModal').modal('hide');">Подтвердить</button>
+    </div>
+</div>
+{% endblock %}
+{% block modules_js %}
+{{ super() }}
+<script type="text/javascript">
+    paginate_table($('#table_cases'), $('#page_container'));
+    var case_id;
+    var case_status;
+    function show_confirm(id, status){
+        $('#case_note').val($('#note_'+id).text());
+        $('#myModal').modal();
+        case_id = id;
+        case_status = status;
+    }
+    function change_upload_status(){
+        if (case_id){
+            $.ajax({
+                url: "{{ url_for('.change_case_status') }}" + case_id + '/',
+                crossDomain: true,
+                cache: false, // обязательно для IE
+                dataType: 'json',
+                type: 'POST',
+                data: {status: case_status, note: $('#case_note').val()},
+                success: function (data) {
+                    if(data['result']){
+                        if (case_status){
+                            $('#btn_in_'+case_id).removeClass('hide');
+                            $('#btn_out_'+case_id).addClass('hide');
+                        } else {
+                            $('#btn_in_'+case_id).addClass('hide');
+                            $('#btn_out_'+case_id).removeClass('hide');
+                        }
+                        if ($('#case_note').val()){
+                            $('#note_'+case_id).text($('#case_note').val());
+                        }
+                    }
+                }
+            });
+        }
+    }
+</script>
+{% endblock %}

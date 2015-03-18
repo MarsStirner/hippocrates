@@ -1,0 +1,587 @@
+{% extends 'risar/base.html' %}
+{% import 'risar/_macros.html' as rimacros %}
+
+{% block title %}> {{ module_name }}{% endblock %}
+
+{% block main %}
+    <div ng-controller="CheckupCtrl" ng-cloak>
+        <ul class="breadcrumb">
+            <li><a href="{{ url_for('.index_html') }}">Рабочий стол</a></li>
+            <li><a ng-href="{{ url_for('.html_chart') }}?event_id=[[ chart.id ]]">Карта пациентки</a></li>
+            <li><a ng-href="{{ url_for('.html_inspection') }}?event_id=[[ chart.id ]]">Осмотры акушера-гинеколога беременной</a></li>
+            <li>Ввод данных первичного осмотра</li>
+        </ul>
+        <div class="row small-marginal">
+            <div class="col-lg-10 col-md-10">
+                <h2>
+                    Ввод данных первичного осмотра
+                    <a ng-href="{{ url_for('patients.patient') }}?client_id=[[ chart.client.id ]]">[[ chart.client.full_name ]]</a>
+                    ([[ chart.external_id ]])
+                </h2>
+            </div>
+            <div class="col-md-12 col-lg-12">
+                <div class="alert-warning small-marginal">Случай беременности. На учёте в <b>[[ chart.person.organisation.short_name ]]</b>
+                    у <b>[[ chart.person.name ]]</b>
+                    с <b>[[ chart.set_date | asDate ]]</b>
+                </div>
+            </div>
+        </div>
+        <div ng-controller="CheckupFirstEditCtrl">
+            <ng-form id="CheckupFirstEditForm" name="CheckupFirstEditForm">
+            <table class="table table-condensed">
+                <thead>
+                <tr>
+                    <th class="col-md-3"></th>
+                    <th class="col-md-9"></th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th class="text-right">Дата осмотра <span>&nbsp;</span></th>
+                        <td><wm-date ng-model="checkup.beg_date" style="width: 250px"></wm-date></td>
+                    </tr>
+                    <tr>
+                        <th class="text-right">Время осмотра <span>&nbsp;</span></th>
+                        <td>
+                            <wm-time ng-model="checkup.beg_date" style="width: 250px"></wm-time>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="text-right">Общая информация <span>&nbsp;</span></th>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">Рост <span class="text-danger">*</span></td>
+                        <td><div class="row"
+                                 ng-class="{'has-error': CheckupFirstEditForm.height.$invalid}">
+                            <div class="col-md-2">
+                                <input id="height" name="height" ng-model="checkup.height" class="form-control" ng-required="true">
+                            </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">Масса до беременности, кг <span class="text-danger">*</span></td>
+                        <td><div class="row"
+                                 ng-class="{'has-error': CheckupFirstEditForm.weight_before.$invalid}">
+                            <div class="col-md-2">
+                                <input name="weight_before" ng-model="checkup.weight_before" class="form-control" ng-required="true">
+                            </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">Масса при осмотре, кг <span class="text-danger">*</span></td>
+                        <td><div class="row"
+                                 ng-class="{'has-error': CheckupFirstEditForm.weight.$invalid}">
+                            <div class="col-md-2">
+                                <input name="weight" ng-model="checkup.weight" class="form-control" ng-required="true">
+                            </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">Массо-ростовой коэффициент (МРК) <span>&nbsp;</span></td>
+                        <td><div class="row">
+                            <div class="col-md-2">
+                                <input disabled ng-model="checkup.hw_ratio" class="form-control">
+                            </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">Индекс массы тела <span>&nbsp;</span></td>
+                        <td><div class="row"><div class="col-md-2"><input disabled ng-model="checkup.BMI"
+                                                                          class="form-control"></div></div></td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">Общее состояние <span class="text-danger">*</span></td>
+                        <td><div class="row" ng-class="{'has-error': CheckupFirstEditForm.state.$invalid}">
+                            <div class="col-md-4">
+                            <rb-select name="state" ng-model="checkup.state" ref-book="rbRisarState" ng-required="true"></rb-select>
+                            </div>
+                        </div></td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">Подкожно-жировая клетчатка <span class="text-danger">*</span></td>
+                        <td><div class="row" ng-class="{'has-error': CheckupFirstEditForm.subcutaneous_fat.$invalid}">
+                            <div class="col-md-4">
+                            <rb-select name="subcutaneous_fat" ng-model="checkup.subcutaneous_fat"
+                                       ref-book="rbRisarSubcutaneous_Fat" ng-required="true"></rb-select>
+                            </div>
+                        </div></td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">Состояние вен <span class="text-danger">*</span></td>
+                        <td><div class="row" ng-class="{'has-error': CheckupFirstEditForm.vein.$invalid}">
+                            <div class="col-md-4">
+                            <rb-select name="vein" ng-model="checkup.vein" ref-book="rbRisarVein"
+                                       ng-required="true"></rb-select>
+                            </div>
+                        </div></td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">Язык <span class="text-danger">*</span></td>
+                        <td><div class="row" ng-class="{'has-error': CheckupFirstEditForm.tongue.$invalid}">
+                            <div class="col-md-4">
+                            <rb-select name="tongue" ng-model="checkup.tongue" ref-book="rbRisarTongue"
+                                       ng-required="true"></rb-select>
+                            </div>
+                        </div></td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">АД правая рука<span class="text-danger">*</span> </td>
+                        <td><div class="row" ng-class="{'has-error': CheckupFirstEditForm.ad_right_high.$invalid || CheckupFirstEditForm.ad_right_low.$invalid}" >
+                            <div class="col-md-2">
+                                <input name="ad_right_high" ng-model="checkup.ad_right_high"
+                                       maxlength="3" ng-required="true" class="form-control blood_presure" >
+                                <span>/</span>
+                                <input name="ad_right_low" ng-model="checkup.ad_right_low"
+                                       maxlength="3" ng-required="true" class="form-control blood_presure">
+                            </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">АД левая рука <span class="text-danger">*</span></td>
+                        <td><div class="row" ng-class="{'has-error': CheckupFirstEditForm.ad_left_high.$invalid || CheckupFirstEditForm.ad_left_low.$invalid}">
+                            <div class="col-md-2">
+                                <input maxlength="3" name="ad_left_high" ng-model="checkup.ad_left_high"
+                                       class="form-control blood_presure" ng-required="true">
+                                <span>/</span>
+                                <input maxlength="3" name="ad_left_low" ng-model="checkup.ad_left_low"
+                                       class="form-control blood_presure" ng-required="true"
+                            </div>
+                        </div></td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">ССС: пульс <span class="text-danger">*</span></td>
+                        <td><div class="row"
+                                 ng-class="{'has-error': CheckupFirstEditForm.heart_rate.$invalid}">
+                            <div class="col-md-2">
+                                <input name="heart_rate" ng-model="checkup.heart_rate" class="form-control" type="number" valid-number ng-required="true" />
+                            </div></div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="text-right">Соматический статус <span>&nbsp;</span></th>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">Жалобы <span class="text-danger">*</span></td>
+                        <td><div ng-class="{'text-danger': CheckupFirstEditForm.complaints.$invalid}">
+                            <div name="complaints" refbook-checkbox ref-book="rbRisarComplaints" ng-model="checkup.complaints" ng-required="true">
+                                [[ item.name ]]
+                            </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">Кожа <span class="text-danger">*</span></td>
+                        <td><div ng-class="{'text-danger': CheckupFirstEditForm.skin.$invalid}">
+                            <div name="skin" refbook-checkbox ref-book="rbRisarSkin" ng-model="checkup.skin" ng-required="true">
+                                [[ item.name ]]
+                            </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">Лимфоузлы <span class="text-danger">*</span></td>
+                        <td><div ng-class="{'text-danger': CheckupFirstEditForm.lymph.$invalid}">
+                            <div name="lymph" refbook-checkbox ng-model="checkup.lymph" ref-book="rbRisarLymph" ng-required="true">
+                                [[ item.name ]]
+                            </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">Тоны сердца <span class="text-danger">*</span></td>
+                        <td><div ng-class="{'text-danger': CheckupFirstEditForm.heart_tones.$invalid}">
+                            <div name="heart_tones" refbook-checkbox ng-model="checkup.heart_tones" ref-book="rbRisarHeart_Tones" ng-required="true">
+                                [[ item.name ]]
+                            </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">Пульс <span class="text-danger">*</span></td>
+                        <td><div ng-class="{'text-danger': CheckupFirstEditForm.pulse.$invalid}">
+                            <div name="pulse" refbook-checkbox ng-model="checkup.pulse" ref-book="rbRisarPulse" ng-required="true">
+                                [[ item.name ]]
+                            </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">Молочные железы <span class="text-danger">*</span></td>
+                        <td><div ng-class="{'text-danger': CheckupFirstEditForm.breast.$invalid}">
+                            <div name="breast" refbook-checkbox ng-model="checkup.breast" ref-book="rbRisarBreast" ng-required="true">
+                                [[ item.name ]]
+                            </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">Состояние сосков <span class="text-danger">*</span></td>
+                        <td><div ng-class="{'text-danger': CheckupFirstEditForm.nipples.$invalid}">
+                            <div name="nipples" refbook-checkbox ng-model="checkup.nipples" ref-book="rbRisarNipples" ng-required="true">
+                                [[ item.name ]]
+                            </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">Полость рта <span class="text-danger">*</span></td>
+                        <td><div ng-class="{'text-danger': CheckupFirstEditForm.mouth.$invalid}">
+                            <div name="mouth" refbook-checkbox ng-model="checkup.mouth" ref-book="rbRisarMouth" ng-required="true">
+                                [[ item.name ]]
+                            </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">Органы дыхания <span class="text-danger">*</span></td>
+                        <td><div ng-class="{'text-danger': CheckupFirstEditForm.breathe.$invalid}">
+                            <div name="breathe" refbook-checkbox ng-model="checkup.breathe" ref-book="rbRisarBreathe" ng-required="true">
+                                [[ item.name ]]
+                            </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">Органы брюшной полости <span class="text-danger">*</span></td>
+                        <td><div ng-class="{'text-danger': CheckupFirstEditForm.stomach.$invalid}">
+                            <div name="stomach" refbook-checkbox ng-model="checkup.stomach" ref-book="rbRisarStomach" ng-required="true">
+                                [[ item.name ]]
+                            </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">Печень <span class="text-danger">*</span></td>
+                        <td><div ng-class="{'text-danger': CheckupFirstEditForm.liver.$invalid}">
+                            <div name="liver" refbook-checkbox ng-model="checkup.liver" ref-book="rbRisarLiver" ng-required="true">
+                                [[ item.name ]]
+                            </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">Мочевыводящая система <span class="text-danger">*</span></td>
+                        <td><div ng-class="{'text-danger': CheckupFirstEditForm.urinoexcretory.$invalid}">
+                            <div name="urinoexcretory" refbook-checkbox ng-model="checkup.urinoexcretory" ref-book="rbRisarUrinoexcretory" ng-required="true">
+                                [[ item.name ]]
+                            </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="text-right">Акушерский статус <span>&nbsp;</span></th>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <th class="text-right">Ромб Михаэлиса <span>&nbsp;</span></th>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">Горизонтальная диагональ <span>&nbsp;</span></td>
+                        <td><div class="row"><div class="col-md-2"><input ng-model="checkup.MikHHor" class="form-control"></div></div></td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">Вертикальная диагональ <span>&nbsp;</span></td>
+                        <td><div class="row"><div class="col-md-2"><input ng-model="checkup.MikhVert" class="form-control"></div></div></td>
+                    </tr>
+                    <tr>
+                        <th class="text-right">Размеры таза <span>&nbsp;</span></th>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">Ds. Sp <span class="text-danger">*</span></td>
+                        <td><div class="row"
+                                 ng-class="{'has-error': CheckupFirstEditForm.DsSP.$invalid}">
+                            <div class="col-md-2">
+                            <input name="DsSP" ng-model="checkup.DsSP" class="form-control" ng-required="true"></div></div></td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">Ds. Cr <span class="text-danger">*</span></td>
+                        <td><div class="row"
+                                 ng-class="{'has-error': CheckupFirstEditForm.DsCr.$invalid}"><div class="col-md-2">
+                            <input name="DsCr" ng-model="checkup.DsCr" class="form-control" ng-required="true"></div></div></td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">Ds. Tr <span class="text-danger">*</span></td>
+                        <td><div class="row"
+                                 ng-class="{'has-error': CheckupFirstEditForm.DsTr.$invalid}"><div class="col-md-2">
+                            <input name="DsTr" ng-model="checkup.DsTr" class="form-control" ng-required="true"></div></div></td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">C. Ext <span class="text-danger">*</span></td>
+                        <td><div class="row"
+                                 ng-class="{'has-error': CheckupFirstEditForm.CExt.$invalid}"><div class="col-md-2">
+                            <input name="CExt" ng-model="checkup.CExt" class="form-control" ng-required="true"></div></div></td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">C. Diag <span>&nbsp;</span></td>
+                        <td><div class="row"><div class="col-md-2"><input ng-model="checkup.CDiag" class="form-control"></div></div></td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">C. Vera <span>&nbsp;</span></td>
+                        <td><div class="row"><div class="col-md-2"><input ng-model="checkup.CVera" class="form-control"></div></div></td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">Индекс Соловьёва <span class="text-danger">*</span></td>
+                        <td><div class="row"
+                                 ng-class="{'has-error': CheckupFirstEditForm.soloviev_index.$invalid}"><div class="col-md-2">
+                            <input name="soloviev_index" ng-model="checkup.soloviev_index" class="form-control" ng-required="true"></div></div></td>
+                    </tr>
+                    <tr>
+                        <th class="text-right">Форма таза <span>&nbsp;</span></th>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">Степень сужения таза <span>&nbsp;</span></td>
+                        <td><div class="row"><div class="col-md-4">
+                            <rb-select ng-model="checkup.pelvis_narrowness" ref-book="rbRisarPelvis_Narrowness"></rb-select>
+                            </div></div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">Форма таза <span>&nbsp;</span></td>
+                        <td><div class="row"><div class="col-md-4">
+                            <rb-select ng-model="checkup.pelvis_form" ref-book="rbRisarPelvis_Form"></rb-select>
+                            </div></div></td>
+                    </tr>
+                    <tr>
+                        <th class="text-right">Окружность живота <span>&nbsp;</span></th>
+                        <td><div class="row"><div class="col-md-4"><input ng-model="checkup.abdominal" class="form-control"></div></div></td>
+                    </tr>
+                    <tr>
+                        <th class="text-right">Плод <span>&nbsp;</span></th>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">Положение <span>&nbsp;</span></td>
+                        <td><div class="row"><div class="col-md-4">
+                            <rb-select ng-model="checkup.fetus_position" ref-book="rbRisarFetus_Position"></rb-select>
+                        </div></div></td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">Позиция <span>&nbsp;</span></td>
+                        <td><div class="row"><div class="col-md-4">
+                            <rb-select ng-model="checkup.fetus_position_2" ref-book="rbRisarFetus_Position_2"></rb-select>
+                        </div></div></td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">Вид плода <span>&nbsp;</span></td>
+                        <td><div class="row"><div class="col-md-4"><rb-select ng-model="checkup.fetus_type" ref-book="rbRisarFetus_Type"></rb-select>
+                        </div></div></td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">Предлежащая часть <span>&nbsp;</span></td>
+                        <td><div class="row"><div class="col-md-4"><rb-select ng-model="checkup.presenting_part" ref-book="rbRisarPresenting_Part"></rb-select>
+                        </div></div></td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">Сердцебиение <span>&nbsp;</span></td>
+                        <td>
+                            <div refbook-checkbox ng-model="checkup.fetus_heartbeat" ref-book="rbRisarFetus_Heartbeat">
+                                [[ item.name ]]
+                            </div>
+                    </tr>
+                    <tr>
+                        <td class="text-right">ЧСС, уд/мин<span>&nbsp;</span></td>
+                        <td><div class="row"><div class="col-md-2"><input ng-model="checkup.fetus_heart_rate" class="form-control"></div></div></td>
+                    </tr>
+                    <tr>
+                        <th class="text-right">Матка <span>&nbsp;</span></th>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">Тело матки <span>&nbsp;</span></td>
+                        <td>
+                            <div refbook-checkbox ng-model="checkup.body_of_womb" ref-book="rbRisarBody_Of_Womb">
+                                [[ item.name ]]
+                            </div>
+                    </tr>
+                    <tr>
+                        <td class="text-right">Высота стояния дна матки <span>&nbsp;</span></td>
+                        <td><div class="row"><div class="col-md-2"><input ng-model="checkup.fundal_height" class="form-control"></div></div></td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">Состояние матки <span class="text-danger">*</span></td>
+                        <td><div class="row" ng-class="{'has-error': CheckupFirstEditForm.metra_state.$invalid}">
+                            <div class="col-md-4"><rb-select name="metra_state" ng-model="checkup.metra_state" ref-book="rbRisarMetra_State" ng-required="true"></rb-select>
+                        </div></div></td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">Длина шейки <span>&nbsp;</span></td>
+                        <td><div class="row"><div class="col-md-4"><rb-select ng-model="checkup.cervix_length" ref-book="rbRisarCervix_Length"></rb-select>
+                        </div></div></td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">Позиция шейки <span>&nbsp;</span></td>
+                        <td><div class="row"><div class="col-md-4"><rb-select ng-model="checkup.cervix_position" ref-book="rbRisarCervix_Position"></rb-select>
+                        </div></div></td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">Зрелость шейки <span>&nbsp;</span></td>
+                        <td><div class="row"><div class="col-md-4"><rb-select ng-model="checkup.cervix_maturity" ref-book="rbRisarCervix_Maturity"></rb-select>
+                        </div></div></td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">Консистенция шейки <span>&nbsp;</span></td>
+                        <td><div class="row"><div class="col-md-4"><rb-select ng-model="checkup.cervix_consistency" ref-book="rbRisarCervix_Consistency"></rb-select>
+                        </div></div></td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">Цервикальный канал <span>&nbsp;</span></td>
+                        <td><div class="row"><div class="col-md-4"><rb-select ng-model="checkup.cervical_canal" ref-book="rbRisarCervical_Canal"></rb-select>
+                        </div></div></td>
+                    </tr>
+                    <tr>
+                        <th class="text-right">Специальный статус <span>&nbsp;</span></th>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">Влагалище <span class="text-danger">*</span></td>
+                        <td><div class="row" ng-class="{'has-error': CheckupFirstEditForm.vagina.$invalid}">
+                            <div class="col-md-4"><rb-select name="vagina" ng-model="checkup.vagina" ref-book="rbRisarVagina" ng-required="true"></rb-select></div>
+                        </div></td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">Шейка матки <span class="text-danger">*</span></td>
+                        <td><div class="row" ng-class="{'has-error': CheckupFirstEditForm.cervix.$invalid}">
+                            <div class="col-md-4"><rb-select name="cervix" ng-model="checkup.cervix" ref-book="rbRisarCervix" ng-required="true"></rb-select></div>
+                        </div></td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">Придатки <span>&nbsp;</span></td>
+                        <td><div class="row" ng-class="{'has-error': CheckupFirstEditForm.appendages.$invalid}">
+                            <div class="col-md-4"><rb-select name="appendages" ng-model="checkup.appendages" ref-book="rbRisarAppendages"></rb-select></div>
+                        </div></td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">Околоматочное пространство <span>&nbsp;</span></td>
+                        <td><div class="row"><div class="col-md-4"><rb-select ng-model="checkup.parametrium" ref-book="rbRisarParametrium"></rb-select></div></div></td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">Особенности <span>&nbsp;</span></td>
+                        <td><div class="row"><div class="col-md-7"><wysiwyg ng-model="checkup.features" /></div></div></td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">Наружные половые органы <span>&nbsp;</span></td>
+                        <td><div class="row"><div class="col-md-7"><wysiwyg ng-model="checkup.externalia" /></div></div></td>
+                    </tr>
+                    <tr>
+                        <th class="text-right">Взято на анализ <span>&nbsp;</span></th>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">Отделяемое из влагалища <span>&nbsp;</span></td>
+                        <td><input ng-model="checkup.vagina_secretion" class="checkbox" type="checkbox"></td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">Отделяемое из цервикального канала <span>&nbsp;</span></td>
+                        <td><input ng-model="checkup.cervical_canal_secretion" class="checkbox" type="checkbox"></td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">Мазок на онкоцитологию <span>&nbsp;</span></td>
+                        <td><input ng-model="checkup.onco_smear" class="checkbox" type="checkbox"></td>
+                    </tr>
+                    <tr>
+                        <th class="text-right">Заключение <span>&nbsp;</span></th>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">Беременность (недель) <span class="text-danger">*</span></td>
+                        <td>
+                            <div class="row"
+                                 ng-class="{'has-error': CheckupFirstEditForm.pregnancy_week.$invalid}">
+                                <div class="col-md-4">
+                                    <input name="pregnancy_week" ng-model="checkup.pregnancy_week" class="form-control"
+                                           type="number" valid-number ng-required="true">
+                                </div>
+                                <div class="col-md-4">
+                                    <span class="form-control-static">Расчётный: [[ checkup.calculated_pregnancy_week ]]</span>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">Возможность сохранения беременности <span class="text-danger">*</span></td>
+                        <td><div ng-class="{'has-error': CheckupFirstEditForm.save.$invalid}">
+                            <input type="radio" ng-model="checkup.save" ng-value="true" required>  Да <br/>
+                            <input type="radio" ng-model="checkup.save" ng-value="false" required> Нет <br/>
+                        </div></td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">Изменение условий труда <span>&nbsp;</span></td>
+                        <td><div class="row"><div class="col-md-4">
+                            <rb-select ng-model="checkup.craft" ref-book="rbRisarCraft"></rb-select></div></div></td>
+                    </tr>
+                    <tr>
+                        <th class="text-right">Диагнозы <span>&nbsp;</span></th>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">Основной <span class="text-danger">*</span></td>
+{#                        ng-class="{'has-error': CheckupFirstEditForm.mkb.$invalid}"#}
+                        <td>
+                            <wm-diagnosis model="checkup.diag" list-mode="false"
+                                          can-add-new="true" can-delete="true" can-edit="true"
+                                          action="checkup" event="chart" risar="true"
+                                          params="{defaults:{diagnosis_type:rbDiagnosisType.get_by_code('2')},
+                                                   disabled:{diagnosis_type:true}}" ></wm-diagnosis>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">Сопутствующие <span>&nbsp;</span></td>
+                        <td>
+                            <wm-diagnosis model="checkup.diag2" list-mode="true"
+                                          can-add-new="true" can-delete="true" can-edit="true"
+                                          action="checkup" event="chart" risar="true"
+                                          params="{defaults:{diagnosis_type:rbDiagnosisType.get_by_code('9')},
+                                                   disabled:{diagnosis_type:true}}"></wm-diagnosis>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">Осложнения <span>&nbsp;</span></td>
+                        <td>
+                            <wm-diagnosis model="checkup.diag3" list-mode="true"
+                                          can-add-new="true" can-delete="true" can-edit="true"
+                                          action="checkup" event="chart" risar="true"
+                                          params="{defaults:{diagnosis_type:rbDiagnosisType.get_by_code('3')},
+                                                   disabled:{diagnosis_type:true}}"></wm-diagnosis>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">Плановая дата следующей явки <span class="text-danger">*</span></td>
+                        <td><div class="row" ng-class="{'has-error': CheckupFirstEditForm.next_date.$invalid}">
+                            <div class="col-md-5"><wm-date name="next_date" ng-model="checkup.next_date" style="width: 250px" ng-required="true"></wm-date></div>
+                        </div></td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">Примечания <span>&nbsp;</span></td>
+                        <td><div class="row"><div class="col-md-7"><wysiwyg ng-model="checkup.notes" /></div></div></td>
+                    </tr>
+                    <tr>
+                        <td class="text-right">Рекомендации <span>&nbsp;</span></td>
+                        <td><div class="row"><div class="col-md-7"><wysiwyg ng-model="checkup.recommendations" /></div></div></td>
+                    </tr>
+                </tbody>
+            </table>
+            </ng-form>
+            <div class="text-right">
+                <a class="pseudo-btn" ng-href="{{ url_for('.html_inspection') }}?event_id=[[ chart.id ]]">Перейти на форму осмотров пациентки</a>
+                <button tooltip="[[CheckupFirstEditForm.$invalid ? 'Заполните все обязательные поля': '']]" class="btn btn-success" ng-click="save()">Сохранить</button>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block modules_js %}
+    {{ super() }}
+    <script src="{{ url_for('.static', filename='js/checkup.js', v=version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/risar.js', v=version) }}"></script>
+    <script src="{{ url_for('static', filename='js/services/event/event-services.js', v=version) }}"></script>
+{% endblock %}

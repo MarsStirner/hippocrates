@@ -1,0 +1,268 @@
+{% extends 'risar/base.html' %}
+{% import 'risar/_macros.html' as rimacros %}
+
+{% block title %}> {{ module_name }}{% endblock %}
+
+{% block main %}
+    <div ng-controller="AnamnesisCtrl" ng-cloak>
+    <ul class="breadcrumb">
+        <li><a href="{{ url_for('.index_html') }}">Рабочий стол</a></li>
+        <li><a ng-href="{{ url_for('.html_chart') }}?event_id=[[ chart.id ]]">Карта пациентки</a></li>
+        <li>Анамнез пациентки</li>
+    </ul>
+        <div class="row small-marginal">
+        <div class="col-md-12">
+            {{ rimacros.page_title('Анамнез пациентки') }}
+        </div>
+        </div>
+        <tabset justified="true">
+            <tab heading="Сведения о матери и об отце" active="tabs.motherfather" ng-controller="MotherFatherCtrl">
+                <div class="row">
+                    <div class="col-md-6" style="padding-left: 30px; padding-right: 30px">
+                        <p>
+                            Менструации с <b ng-bind-html="chart.anamnesis.mother.menstruation_start_age | underlineNoVal:'лет'"></b>,
+                            длительность <b ng-bind-html="chart.anamnesis.mother.menstruation_duration | underlineNoVal:'дней'"></b>,
+                            продолжительность цикла <b ng-bind-html="chart.anamnesis.mother.menstruation_period | underlineNoVal:'дней'"></b>,
+                            нарушения: <b ng-bind-html="chart.anamnesis.mother.menstruation_disorders | danet | underlineNoVal"></b>.
+                        </p>
+                        <p>
+                            Дата последней менструации <b ng-bind-html="chart.anamnesis.mother.menstruation_last_date | asDate | underlineNoVal"></b>.
+                        </p>
+                        <p>
+                            Половая жизнь с <b ng-bind-html="chart.anamnesis.mother.sex_life_start_age | underlineNoVal:'лет'"></b>.
+                            Вид контрацепции: <b ng-bind-html="chart.anamnesis.mother.contraception_type | underlineNoVal"></b>.
+                        </p>
+                        <p>Способ оплодотворения: <b ng-bind-html="chart.anamnesis.mother.fertilization_type | danet | underlineNoVal"></b>.</p>
+                        <p>Доход семьи: <b ng-bind-html="chart.anamnesis.mother.family_income | underlineNoVal"></b></p>
+                    </div>
+                    <div class="col-md-6">
+                        <p>ФИО отца: <b ng-bind-html="chart.anamnesis.father.name | underlineNoVal"></b></p>
+                        <p>Телефон отца: <b ng-bind-html="chart.anamnesis.father.phone | underlineNoVal"></b></p>
+                        <p>Данные исследований отца:
+                        <ul class="list-unstyled" style="padding-left: 30px;">
+                            <li>ВИЧ: <b ng-bind-html="chart.anamnesis.father.HIV | danet | underlineNoVal"></b></li>
+                            <li>Флюорография: <b ng-bind-html="chart.anamnesis.father.fluorography | underlineNoVal"></b></li>
+                        </ul>
+                    </div>
+                </div>
+                <table class="table table-condensed">
+                    <thead>
+                    <tr>
+                        <th class="col-md-2">Критерий</th>
+                        <th class="col-md-5 text-center">
+                            <i class="fa fa-female gender-icon-padding gender-icon-female"></i>Мать
+                            <a class="pseudo-btn" ng-href="{{ url_for('.html_anamnesis_mother_edit') }}?event_id=[[ chart.id ]]"><span class="glyphicon glyphicon-pencil"></span> Изменить</a>
+                        </th>
+                        <th class="col-md-5 text-center">
+                            <i class="fa fa-male gender-icon-padding gender-icon-male"></i>Отец
+                            <a class="pseudo-btn" ng-href="{{ url_for('.html_anamnesis_father_edit') }}?event_id=[[ chart.id ]]"><span class="glyphicon glyphicon-pencil"></span> Изменить</a>
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>Образование</td>
+                        <td ng-bind="chart.anamnesis.mother.education.name"></td>
+                        <td ng-bind="chart.anamnesis.father.education.name"></td>
+                    </tr>
+                    <tr>
+                        <td>Общественно-профессиональная группа</td>
+                        <td ng-bind="chart.anamnesis.mother.work_group.name"></td>
+                        <td ng-bind="chart.anamnesis.father.work_group.name"></td>
+                    </tr>
+                    <tr>
+                        <td>Профессиональные и экологические вредности</td>
+                        <td ng-bind="chart.anamnesis.mother.professional_properties.name"></td>
+                        <td ng-bind="chart.anamnesis.father.professional_properties.name"></td>
+                    </tr>
+                    <tr>
+                        <td>Бесплодие</td>
+                        <td ng-bind="chart.anamnesis.mother.infertility | danet"></td>
+                        <td ng-bind="chart.anamnesis.father.infertility | danet"></td>
+                    </tr>
+                    <tr>
+                        <td><span class="small-left-margin">Вид</span></td>
+                        <td ng-bind="chart.anamnesis.mother.infertility_type"></td>
+                        <td ng-bind="chart.anamnesis.father.infertility_type"></td>
+                    </tr>
+                    <tr>
+                        <td><span class="small-left-margin">Длительность</span></td>
+                        <td ng-bind="chart.anamnesis.mother.infertility_period"></td>
+                        <td ng-bind="chart.anamnesis.father.infertility_period"></td>
+                    </tr>
+                    <tr>
+                        <td><span class="small-left-margin">Причина</span></td>
+                        <td ng-bind="chart.anamnesis.mother.infertility_cause"></td>
+                        <td ng-bind="chart.anamnesis.father.infertility_cause"></td>
+                    </tr>
+                    <tr>
+                        <td><span class="small-left-margin">Лечение</span></td>
+                        <td ng-bind="chart.anamnesis.mother.infertility_treatment"></td>
+                        <td ng-bind="chart.anamnesis.father.infertility_treatment"></td>
+                    </tr>
+                    <tr ng-if="warnings.blood_type">
+                        <td rowspan="2">Группа крови и резус-фактор</td>
+                        <td colspan="2" class="text-center text-danger bg-danger">[[ warnings.blood_type ]]</td>
+                    </tr>
+                    <tr>
+                        <td ng-if="!warnings.blood_type">Тип крови и резус-фактор</td>
+                        <td ng-bind="chart.anamnesis.mother.blood_type.name"></td>
+                        <td ng-bind="chart.anamnesis.father.blood_type.name"></td>
+                    </tr>
+                    <tr>
+                        <td>Перенесенные заболевания</td>
+                        <td><div ng-repeat="diag in chart.anamnesis.mother.finished_diseases"
+                                 tooltip="[[ diag.diagnosis.mkb.name ]]"><span class="bottom_dotted">[[diag.diagnosis.mkb.code]]</span>[[chart.anamnesis.mother.finished_diseases.length ? '' : 'нет']]</div></td>
+                        <td><div ng-repeat="diag in chart.anamnesis.father.finished_diseases"
+                                 tooltip="[[ diag.diagnosis.mkb.name ]]"><span class="bottom_dotted">[[diag.diagnosis.mkb.code]]</span>[[chart.anamnesis.father.finished_diseases.length ? '' : 'нет']]</div></td>
+                    </tr>
+                    <tr>
+                        <td>Текущие заболевания</td>
+                        <td><div ng-repeat="diag in chart.anamnesis.mother.current_diseases"
+                                 tooltip="[[ diag.diagnosis.mkb.name ]]"><span class="bottom_dotted">[[diag.diagnosis.mkb.code]]</span>[[chart.anamnesis.mother.current_diseases.length ? '' : 'нет']]</div></td>
+                        <td><div ng-repeat="diag in chart.anamnesis.father.current_diseases"
+                                 tooltip="[[ diag.diagnosis.mkb.name ]]"><span class="bottom_dotted">[[diag.diagnosis.mkb.code]]</span>[[chart.anamnesis.father.current_diseases.length ? '' : 'нет']]</div></td>
+                    </tr>
+                    <tr>
+                        <td>Наследственность</td>
+                        <td ng-bind="chart.anamnesis.mother.hereditary"></td>
+                        <td ng-bind="chart.anamnesis.father.hereditary"></td>
+                    </tr>
+                    <tr>
+                        <td>Вредные привычки</td>
+                        <td ng-bind="chart.anamnesis.mother.bad_habits"></td>
+                        <td ng-bind="chart.anamnesis.father.bad_habits"></td>
+                    </tr>
+                    <tr>
+                        <td><span class="small-left-margin">Алкоголь</span></td>
+                        <td class="text-center"><i style="font-size: 24px" class="fa" ng-class="{'fa-times text-success': !chart.anamnesis.mother.alcohol, 'fa-check text-danger': chart.anamnesis.mother.alcohol}"></i></td>
+                        <td class="text-center"><i style="font-size: 24px" class="fa" ng-class="{'fa-times text-success': !chart.anamnesis.father.alcohol, 'fa-check text-danger': chart.anamnesis.father.alcohol}"></i></td>
+                    </tr>
+                    <tr>
+                        <td><span class="small-left-margin">Курение</span></td>
+                        <td class="text-center"><i style="font-size: 24px" class="fa" ng-class="{'fa-times text-success': !chart.anamnesis.mother.smoking, 'fa-check text-danger': chart.anamnesis.mother.smoking}"></i></td>
+                        <td class="text-center"><i style="font-size: 24px" class="fa" ng-class="{'fa-times text-success': !chart.anamnesis.father.smoking, 'fa-check text-danger': chart.anamnesis.father.smoking}"></i></td>
+                    </tr>
+                    <tr>
+                        <td><span class="small-left-margin">Токсичные вещества</span></td>
+                        <td class="text-center"><i style="font-size: 24px" class="fa" ng-class="{'fa-times text-success': !chart.anamnesis.mother.toxic, 'fa-check text-danger': chart.anamnesis.mother.toxic}"></i></td>
+                        <td class="text-center"><i style="font-size: 24px" class="fa" ng-class="{'fa-times text-success': !chart.anamnesis.father.toxic, 'fa-check text-danger': chart.anamnesis.father.toxic}"></i></td>
+                    </tr>
+                    <tr>
+                        <td><span class="small-left-margin">Наркотики</span></td>
+                        <td class="text-center"><i style="font-size: 24px" class="fa" ng-class="{'fa-times text-success': !chart.anamnesis.mother.drugs, 'fa-check text-danger': chart.anamnesis.mother.drugs}"></i></td>
+                        <td class="text-center"><i style="font-size: 24px" class="fa" ng-class="{'fa-times text-success': !chart.anamnesis.father.drugs, 'fa-check text-danger': chart.anamnesis.father.drugs}"></i></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </tab>
+            <tab heading="Предыдущие беременности" active="tabs.pregnancies" ng-controller="PregnanciesCtrl">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>№</th>
+                        <th>Исход беременности</th>
+                        <th>Сведения о детях</th>
+                        <th>Особенности</th>
+                        <th>&nbsp;</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="p in chart.anamnesis.pregnancies">
+                        <td ng-if="p.deleted" colspan="5" class="text-center">Удалено. <a ng-click="restore(p)" style="cursor: pointer">Восстановить</a>?</td>
+                        <td ng-if="!p.deleted" ng-bind="p.number"></td>
+                        <td ng-if="!p.deleted" ng-bind="p.result.name"></td>
+                        <td ng-if="!p.deleted">[[ (p.alive)?('живой'):('мёртвый') ]]; [[ (p.alive)?(p.weight):(p.cause_of_death) ]]</td>
+                        <td ng-if="!p.deleted" ng-bind="p.note"></td>
+                        <td ng-if="!p.deleted" class="col-md-1 nowrap">
+                            <button class="btn btn-default" ng-click="edit(p)">Изменить</button>
+                            <button class="btn btn-danger" ng-click="remove(p)">Удалить</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">&nbsp;</td>
+                        <td>
+                            <a class="pseudo-btn" ng-click="add()">Добавить</a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </tab>
+            <tab heading="Переливания крови" active="tabs.transfusions" ng-controller="TransfusionsCtrl">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Дата</th>
+                        <th>Вид</th>
+                        <th>Группа крови донора</th>
+                        <th>Реакция</th>
+                        <th>&nbsp;</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="t in chart.anamnesis.transfusions">
+                        <td ng-if="t.deleted" colspan="6" class="text-center">Удалено. <a ng-click="restore(t)" style="cursor: pointer">Восстановить</a>?</td>
+                        <td ng-if="!t.deleted" ng-bind="t.datetime | asDateTime"></td>
+                        <td ng-if="!t.deleted" ng-bind="t.type"></td>
+                        <td ng-if="!t.deleted" ng-bind="t.blood_type.name"></td>
+                        <td ng-if="!t.deleted" ng-bind="t.reaction"></td>
+                        <td ng-if="!t.deleted" class="col-md-1 nowrap">
+                            <button class="btn btn-default" ng-click="edit(t)">Изменить</button>
+                            <button class="btn btn-danger" ng-click="remove(t)">Удалить</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">&nbsp;</td>
+                        <td>
+                            <a class="pseudo-btn" ng-click="add()">Добавить</a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </tab>
+            <tab heading="Аллергии и непереносимости" active="tabs.intolerances" ng-controller="IntolerancesCtrl">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Тип</th>
+                        <th>Дата установления</th>
+                        <th>Наименование</th>
+                        <th>Степень</th>
+                        <th>Примечания</th>
+                        <th>&nbsp;</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="t in chart.anamnesis.intolerances">
+                        <td ng-if="t.deleted" colspan="6" class="text-center">Удалено. <a ng-click="restore(t)" style="cursor: pointer">Восстановить</a>?</td>
+                        <td ng-if="!t.deleted" ng-bind="t.type.name" class="col-md-2"></td>
+                        <td ng-if="!t.deleted" ng-bind="t.date | asDate"></td>
+                        <td ng-if="!t.deleted" ng-bind="t.name"></td>
+                        <td ng-if="!t.deleted" ng-bind="t.power.name"></td>
+                        <td ng-if="!t.deleted" ng-bind="t.note"></td>
+                        <td ng-if="!t.deleted" class="col-md-1 nowrap">
+                            <button class="btn btn-default" ng-click="edit(t)">Изменить</button>
+                            <button class="btn btn-danger" ng-click="remove(t)">Удалить</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="5">&nbsp;</td>
+                        <td>
+                            <a class="pseudo-btn" ng-click="add()">Добавить</a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </tab>
+        </tabset>
+    </div>
+{% endblock %}
+
+{% block modules_js %}
+    {{ super() }}
+    <script src="{{ url_for('.static', filename='js/anamnesis.js', v=version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/risar.js', v=version) }}"></script>
+    <script type="text/ng-template" id="/WebMis20/RISAR/modal/pregnancies.html">{% include 'risar/modals/_modal_pregnancies.html' %}</script>
+    <script type="text/ng-template" id="/WebMis20/RISAR/modal/transfusions.html">{% include 'risar/modals/_modal_transfusions.html' %}</script>
+    <script type="text/ng-template" id="/WebMis20/RISAR/modal/intolerances.html">{% include 'risar/modals/_modal_intolerances.html' %}</script>
+{% endblock %}

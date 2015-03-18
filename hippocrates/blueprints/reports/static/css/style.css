@@ -1,0 +1,173 @@
+
+
+      /* Main marketing message and sign up button */
+      .jumbotron {
+        margin: 60px 0 0 0;
+        text-align: center;
+      }
+      .jumbotron h1 {
+        font-size: 50px;
+        line-height: 1;
+      }
+      .jumbotron .lead {
+        font-size: 24px;
+        line-height: 1.25;
+      }
+      .jumbotron .btn {
+        font-size: 21px;
+        padding: 14px 24px;
+      }
+
+      /* Supporting marketing content */
+      .marketing {
+        margin: 60px 0;
+      }
+      .marketing p + h4 {
+        margin-top: 28px;
+      }
+
+      /* Customize the navbar links to be fill the entire space of the .navbar */
+      .application_menu .navbar .navbar-inner {
+        padding: 0;
+      }
+      .application_menu .navbar .nav {
+        margin: 0;
+        display: table;
+        width: 100%;
+      }
+      .application_menu .navbar .nav>li {
+        display: table-cell;
+        width: 1%;
+        float: none;
+        position: relative;
+      }
+      .application_menu .navbar .nav>li>a {
+        font-weight: bold;
+        text-align: center;
+        border-left: 1px solid rgba(255,255,255,.75);
+        border-right: 1px solid rgba(0,0,0,.1);
+      }
+      .application_menu .navbar .nav>li:first-child a {
+        border-left: 0;
+        border-radius: 3px 0 0 3px;
+      }
+      .application_menu .navbar .nav>li:last-child a {
+        border-right: 0;
+        border-radius: 0 3px 3px 0;
+      }
+
+      .loader {
+            display:    none;
+            position:   fixed;
+            z-index:    1000;
+            top:        0;
+            left:       0;
+            height:     100%;
+            width:      100%;
+            background: rgba( 255, 255, 255, .8 )
+            url('../i/ajax-loader.gif')
+            50% 50%
+            no-repeat;
+        }
+
+        /* When the body has the loading class, we turn
+           the scrollbar off with overflow:hidden */
+        body.loading {
+            overflow: hidden;
+        }
+
+        /* Anytime the body has the loading class, our
+           modal element will be visible */
+        body.loading .loader {
+            display: block;
+        }
+
+      .tree {
+          width: 10px;
+          height: 10px;
+          padding: 0;
+          margin: 1px 0px 0px 0px;
+
+          /**margin-right: .3em;*/
+          line-height: 13px;
+          vertical-align: text-top;
+          background-image: url('../i/download.png');
+          background-position: -45px -3px;
+          background-repeat: no-repeat;
+          display: inline-block;
+      }
+
+      blockquote {
+          border-color: #B94A48;
+      }
+
+      .col-wrap{
+            overflow: hidden;
+      }
+
+      .col{
+        margin-bottom: -9999px !important;
+        padding-bottom: 9999px !important;
+      }
+
+    .col-base{
+        margin-top: -15px; /* cut off top portion of bottom wells */
+    }
+
+    .application_menu .navbar .nav>li>div>a {
+    font-weight: bold;
+    text-align: center;
+    border-left: 1px solid rgba(255,255,255,.75);
+    border-right: 1px solid rgba(0,0,0,.1);
+    }
+    .application_menu .navbar .nav>li>div>a {
+    float: none;
+    padding: 10px 15px 10px;
+    color: #777;
+    text-decoration: none;
+    text-shadow: 0 1px 0 #fff;
+    }
+    .application_menu .nav>li>div>a {
+    display: block;
+    }
+
+    .application_menu .navbar .nav>li>div>.dropdown-menu:before {
+    position: absolute;
+    top: -7px;
+    left: 9px;
+    display: inline-block;
+    border-right: 7px solid transparent;
+    border-bottom: 7px solid #ccc;
+    border-left: 7px solid transparent;
+    border-bottom-color: rgba(0,0,0,0.2);
+    content: '';
+    }
+    .application_menu .navbar .nav>li>div>.dropdown-menu:after {
+    position: absolute;
+    top: -6px;
+    left: 10px;
+    display: inline-block;
+    border-right: 6px solid transparent;
+    border-bottom: 6px solid #fff;
+    border-left: 6px solid transparent;
+    content: '';
+    }
+
+    #wrap {
+        min-height: 100%; height: auto !important; height: 100%; margin: 0 auto -60px;
+    }
+
+    html, body {height: 100%;}
+    #bottom, #push { height:60px;}
+    #footer { height:60px; }
+    #wrap > #container {
+        padding-top: 60px;
+        }
+
+    body{
+        padding-top:0px;
+    }
+
+    .container > hr {
+        margin: 10px 0;
+    }

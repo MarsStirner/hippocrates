@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    {% include '_header.html' %}
+    {% block modules_css %}
+        <style>
+        #wrap > #container {
+            padding-top: 20px!important;
+        }
+        </style>
+        <link href="{{ url_for('.static', filename='css/font-override.css') }}" rel="stylesheet">
+    {% endblock %}
+  </head>
+  <body>
+  <div id="wrap">
+
+  <div id="container" class="container">
+
+    {% block content %}{% endblock %}
+
+   </div> <!-- /container -->
+   <div id="push"></div>
+  </div>
+  {% include '_footer.html' %}
+  {% block modules_js %}{% endblock %}
+
+  </body>
+</html>
