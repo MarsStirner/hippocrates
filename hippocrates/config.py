@@ -64,6 +64,7 @@ FILE_STORAGE_PATH = ''
 try:
     from config_local import *
 except ImportError:
+    print('no local config')
     # no local config found
     pass
 
@@ -74,7 +75,7 @@ SQLALCHEMY_DATABASE_URI = db_uri_format.format(DB_DRIVER,
                                                        DB_PASSWORD,
                                                        DB_HOST,
                                                        DB_PORT,
-                                                       DB_LPU_NAME,
+                                                       DB_NAME,
                                                        DB_CONNECT_OPTIONS)
 
 SQLALCHEMY_BINDS = {
