@@ -61,11 +61,11 @@ LPU_STYLE = 'FNKC'
 INDEX_HTML = 'hippo_index.html'
 FILE_STORAGE_PATH = ''
 
-# try:
-#     from config_local import *
-# except ImportError:
-#     # no local config found
-#     pass
+try:
+    from config_local import *
+except ImportError:
+    # no local config found
+    pass
 
 db_uri_format = '{0}://{1}:{2}@{3}:{4}/{5}{6}'
 
