@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
+import os
 from nemesis.app import app, bootstrap_app
 import config
 
 __author__ = 'viruzzz-kun'
 
 app.config.from_object(config)
-bootstrap_app()
+bootstrap_app(os.path.join(os.path.dirname(__file__), 'templates'))
 
 
 @app.context_processor
@@ -46,8 +47,6 @@ def general_menu():
         visible=True
     )]
     return dict(main_menu=menu_items)
-
-
 
 
 from blueprints.accounting.app import module as accounting_module
