@@ -58,10 +58,15 @@ angular.module('hitsl.ui')
 .constant('WMConfig', {
     url: {
         logout: '{{ url_for("logout") }}',
+        api_patient_file_attach: '{{ url_for("patients.api_patient_file_attach") }}',
         coldstar: {
             cas_check_token: '{{ config.COLDSTAR_URL + "cas/api/check/" }}',
             cas_prolong_token: '{{ config.COLDSTAR_URL + "cas/api/prolong/" }}'
-        }
+        },
+        scanserver: {
+            list: '{{ config.SCANSERVER_URL + "scanners" }}',
+            scan: '{{ config.SCANSERVER_URL + "scan" }}'
+        },
     },
     settings: {
         user_idle_timeout: {{ settings.getInt('Auth.UserIdleTimeout', 15 * 60) }},

@@ -12,7 +12,7 @@
                             <a ng-click="open_file(fa.id)">[[ fa.file_document.name ]]</a> (Страницы
                             <span ng-repeat="page in fa.file_document.files">
                                 <a href="javascript:void(0)" ng-click="open_file(fa.id, page.idx)">[[page.idx + 1]]</a>
-                            </span>)
+                            </span>) от [[fa.attach_date | asDate]]
                         </li>
                     </ul>
                 </div>

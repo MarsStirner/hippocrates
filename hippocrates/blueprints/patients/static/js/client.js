@@ -8,7 +8,6 @@ angular.module('WebMis20.controllers').
             $scope.aux = aux;
             $scope.params = aux.getQueryParams(document.location.search);
             $scope.rbGender = RefBookService.get('Gender');
-            $scope.rbPerson = RefBookService.get('vrbPersonWithSpeciality');
             $scope.alerts = [];
             $scope.clientServices = WMClientServices;
 
@@ -75,11 +74,7 @@ angular.module('WebMis20.controllers').
                         $scope.clientForm.$setPristine();
                         window.open(url_client_html + '?client_id=' + new_client_id, '_self');
                     } else {
-                        $scope.client.reload().then(function() {
-                            $scope.refresh_form();
-                        }, function() {
-                            // todo: onerror?
-                        });
+                        $scope.reloadClient();
                     }
                 }, function(message) {
                     alert(message);
@@ -111,11 +106,13 @@ angular.module('WebMis20.controllers').
                 }
             };
 
-            client.reload().then(function() {
-                $scope.refresh_form();
-            }, function(message) {
-                alert(message);
-            });
+            $scope.reloadClient = function() {
+                client.reload().then(function() {
+                    $scope.refresh_form();
+                }, function(message) {
+                    alert(message);
+                });
+            };
 
             $scope.add_new_file = function (document_id, policy_id) {
                 FileEditModal.addNew($scope.client_id, {
@@ -125,9 +122,9 @@ angular.module('WebMis20.controllers').
                     client: $scope.client
                 })
                 .then(function () {
-                    $scope.client.reload();
+                    $scope.reloadClient();
                 }, function () {
-                    $scope.client.reload();
+                    $scope.reloadClient();
                 });
             };
             $scope.open_file = function (cfa_id, idx) {
@@ -137,10 +134,12 @@ angular.module('WebMis20.controllers').
                     client: $scope.client
                 })
                 .then(function () {
-                    $scope.client.reload();
+                    $scope.reloadClient();
                 }, function () {
-                    $scope.client.reload();
+                    $scope.reloadClient();
                 });
             };
+
+            $scope.reloadClient();
         }
     ]);

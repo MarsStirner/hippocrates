@@ -3,7 +3,7 @@
 from flask import abort, request
 
 from nemesis.systemwide import db
-from nemesis.lib.utils import jsonify, logger, parse_id, public_endpoint, safe_int
+from nemesis.lib.utils import jsonify, logger, parse_id, public_endpoint, safe_int, safe_traverse, safe_traverse_attrs
 from blueprints.patients.app import module
 from nemesis.lib.sphinx_search import SearchPatient
 from nemesis.lib.jsonify import ClientVisualizer
@@ -360,6 +360,44 @@ def store_file_locally(filepath, file_data):
     return True, ''
 
 
+def save_new_file(file_info, filename, fgd, client_id):
+    f_meta = file_info.get('meta')
+    f_file = file_info.get('file')
+    f_idx = f_meta.get('idx')
+    f_mime = f_file.get('mime')
+
+    fm = FileMeta()
+    fm.name = filename
+    fm.mimetype = f_mime
+    fm.filegroup = fgd  # не очень оптимальная связка, появляется селект
+    fm.idx = f_idx
+    fm.deleted = 1
+    try:
+        db.session.flush([fm])
+    except Exception, e:
+        # todo:
+        raise
+
+    # При интеграции с ЗХПД
+    # if config.secure_person_data_storage_enabled:
+    #     store_in_external_system()
+    #     ...
+
+    # TODO: при сохранении файлов для другой связанной сущности изменить префикс директории
+    directory = 'c%s' % client_id
+    filepath = os.path.join(directory, filename)
+    fullpath = os.path.join(app.config['FILE_STORAGE_PATH'], filepath)
+    ok, msg = store_file_locally(fullpath, f_file.get('data'))
+    if not ok:
+        return ok, msg
+    else:
+        fm.query.filter(FileMeta.id == fm.id).update({
+            'deleted': 0,
+            'path': filepath
+        }, synchronize_session=False)
+        return True, ''
+
+
 @module.route('/api/client_file_attach.json', methods=['POST', 'GET', 'DELETE'])
 def api_patient_file_attach():
     if request.method == 'GET':
@@ -374,22 +412,27 @@ def api_patient_file_attach():
             cfa_id = safe_int(data.get('cfa_id'))
             idx = safe_int(data.get('idx')) or 0
 
-            cfa_query_result = ClientFileAttach.query.join(FileGroupDocument, FileMeta).filter(
+            cfa_query_result = ClientFileAttach.query.join(
+                FileGroupDocument
+            ).outerjoin(
+                FileMeta
+            ).filter(
                 ClientFileAttach.id == cfa_id,
-                FileMeta.idx == idx
             ).first()
             cfa = cviz.make_file_attach_info(cfa_query_result, True, [idx]) if cfa_query_result else None
-            other_file_pages = db.session.query(
+            file_pages = db.session.query(
                 FileMeta.id, FileMeta.idx
             ).select_from(ClientFileAttach).join(
                 FileGroupDocument, FileMeta
             ).filter(
-                ClientFileAttach.id == cfa_id
+                ClientFileAttach.id == cfa_id,
+                FileMeta.deleted == 0
             ).all()
+            file_pages = [dict(id=fm_id, idx=idx) for fm_id, idx in file_pages]
 
             return jsonify({
                 'cfa': cfa,
-                'other_pages': other_file_pages
+                'file_pages': file_pages
             })
 
     elif request.method == 'POST':
@@ -401,7 +444,47 @@ def api_patient_file_attach():
         cfa_id = file_attach.get('id')
 
         if cfa_id:
-            pass
+            doc_type = file_attach.get('doc_type')
+            relation_type = file_attach.get('relation_type')
+            cfa = ClientFileAttach.query.get(cfa_id)
+            cfa.documentType_id = safe_traverse(doc_type, 'id')
+            cfa.relationType_id = safe_traverse(relation_type, 'id')
+            db.session.add(cfa)
+
+            file_document = file_attach.get('file_document')
+            document_name = file_document.get('name')
+            fgd = cfa.file_document
+            fgd.name = document_name
+            db.session.add(fgd)
+
+            file_pages = file_document.get('files')
+            for file_page in file_pages:
+                fm_id = safe_traverse(file_page, 'meta', 'id')
+                f_idx = safe_int(safe_traverse(file_page, 'meta', 'idx')) or 0
+                f_name = safe_traverse(file_page, 'meta', 'name') or ''
+                if fm_id:
+                    fm = FileMeta.query.get(fm_id)
+                    fm.name = f_name
+                    fm.idx = f_idx
+                    db.session.add(fm)
+                else:
+                    f_mime = safe_traverse(file_page, 'file', 'mime')
+                    attach_date = cfa.attachDate
+                    f_descname = safe_traverse_attrs(cfa, 'documentType', 'name')
+                    f_relation_type = safe_traverse_attrs(cfa, 'relationType', 'leftName')
+                    filename = generate_filename(f_name, f_mime, date=attach_date) if f_name else (
+                        generate_filename(None, f_mime, descname=f_descname, idx=f_idx, date=attach_date, relation_type=f_relation_type)
+                    )
+                    ok, msg = save_new_file(file_page, filename, fgd, client_id)
+                    if not ok:
+                        return jsonify(msg, 500, 'ERROR')
+            try:
+                db.session.commit()
+            except Exception, e:
+                # todo:
+                raise
+            return jsonify(None)
+
         else:
             attach_date = file_attach.get('attach_date') or datetime.datetime.now()
             doc_type = file_attach.get('doc_type')
@@ -409,7 +492,7 @@ def api_patient_file_attach():
 
             file_document = file_attach.get('file_document')
             document_name = file_document.get('name')
-            files_pages = file_document.get('files')
+            file_pages = file_document.get('files')
 
             fgd = FileGroupDocument()
             fgd.name = document_name
@@ -427,51 +510,61 @@ def api_patient_file_attach():
                 # todo:
                 raise
 
-            new_file_list = []
             f_descname = safe_traverse(doc_type, 'name', default=u'Файл')
             f_relation_type = safe_traverse(relation_type, 'leftName', default=u'')
-            for file_page in files_pages:
+            for file_page in file_pages:
                 f_meta = file_page.get('meta')
                 f_file = file_page.get('file')
-                f_name = f_meta.get('name')
+                f_name = f_meta.get('name') or ''
                 f_idx = f_meta.get('idx')
                 f_mime = f_file.get('mime')
 
                 filename = generate_filename(f_name, f_mime, date=attach_date) if f_name else (
                     generate_filename(None, f_mime, descname=f_descname, idx=f_idx, date=attach_date, relation_type=f_relation_type)
                 )
-
-                fm = FileMeta()
-                fm.name = filename
-                fm.filegroup = fgd  # не очень оптимальная связка, появляется селект
-                fm.idx = f_idx
-                fm.deleted = 1
-                try:
-                    db.session.commit()
-                except Exception, e:
-                    # todo:
-                    raise
-                else:
-                    new_file_list.append(fm)
-
-                # При интеграции с ЗХПД
-                # if config.secure_person_data_storage_enabled:
-                #     store_in_external_system()
-                #     ...
-
-                # TODO: при сохранении файлов для другой связанной сущности изменить префикс директории
-                directory = 'c%s' % client_id
-                filepath = os.path.join(directory, filename)
-                fullpath = os.path.join(app.config['FILE_STORAGE_PATH'], filepath)
-                ok, msg = store_file_locally(fullpath, f_file.get('data'))
+                ok, msg = save_new_file(file_page, filename, fgd, client_id)
                 if not ok:
                     return jsonify(msg, 500, 'ERROR')
                 else:
-                    fm.query.filter(FileMeta.id == fm.id).update({
-                        'deleted': 0,
-                        'path': filepath
-                    })
+                    db.session.commit()
+
         return jsonify(None)
 
     elif request.method == 'DELETE':
-        return
+        data = request.args
+        cfa_id = safe_int(data.get('cfa_id'))
+        fm_id = safe_int(data.get('file_meta_id'))
+        if cfa_id:
+            cfa = ClientFileAttach.query.get(cfa_id)
+            cfa.deleted = 1
+            db.session.add(cfa)
+            FileMeta.query.join(FileGroupDocument, ClientFileAttach).filter(
+                FileMeta.filegroup_id == FileGroupDocument.id,
+                FileGroupDocument.id == ClientFileAttach.filegroup_id,
+                ClientFileAttach.id == cfa_id
+            ).update({
+                FileMeta.deleted: 1
+            })
+            try:
+                db.session.commit()
+            except Exception, e:
+                # todo:
+                raise
+            return jsonify(None)
+        elif fm_id:
+            fm = FileMeta.query.get(fm_id)
+            fm.deleted = 1
+            db.session.add(fm)
+            FileMeta.query.filter(FileMeta.idx > fm.idx, FileMeta.deleted == 0).update({
+                'idx': FileMeta.idx - 1
+            })
+            try:
+                db.session.commit()
+            except Exception, e:
+                # todo:
+                raise
+            return jsonify(None)
+        else:
+            raise Exception
+
+        return jsonify(None)
