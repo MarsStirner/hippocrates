@@ -437,6 +437,7 @@ def api_patient_file_attach():
 
     elif request.method == 'POST':
         data = request.json
+        cviz = ClientVisualizer()
         client_id = safe_int(data.get('client_id'))
         file_attach = data.get('file_attach')
         if not file_attach:
@@ -483,7 +484,10 @@ def api_patient_file_attach():
             except Exception, e:
                 # todo:
                 raise
-            return jsonify(None)
+            result = cviz.make_file_attach_info(cfa, False)
+            return jsonify({
+                'cfa': result
+            })
 
         else:
             attach_date = file_attach.get('attach_date') or datetime.datetime.now()
@@ -528,7 +532,10 @@ def api_patient_file_attach():
                 else:
                     db.session.commit()
 
-        return jsonify(None)
+            result = cviz.make_file_attach_info(cfa, False)
+            return jsonify({
+                'cfa': result
+            })
 
     elif request.method == 'DELETE':
         data = request.args
