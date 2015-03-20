@@ -55,6 +55,7 @@ var GravidogramaCtrl = function ($scope, RisarApi, RefBookService) {
                 if(event.checkups[i].ad_left_high){ $scope.blood_pressure.left_systolic.push([day_num, event.checkups[i].ad_left_high])};
                 if(event.checkups[i].ad_left_low){$scope.blood_pressure.left_diastolic.push([day_num, event.checkups[i].ad_left_low])};
             }
+            $scope.refreshCharts();
         })
     };
 
@@ -119,5 +120,11 @@ var GravidogramaCtrl = function ($scope, RisarApi, RefBookService) {
     $scope.xAxisTickFormat = function(d){
         return $scope.xStr[Math.floor(d/14)];
     }
+
+    $scope.refreshCharts = function () {
+        for (var i = 0; i < nv.graphs.length; i++) {
+            nv.graphs[i].update();
+        }
+    };
     reload_checkup();
 };
