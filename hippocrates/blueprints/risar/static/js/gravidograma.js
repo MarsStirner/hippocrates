@@ -6,6 +6,11 @@ var GravidogramaCtrl = function ($scope, RisarApi, RefBookService) {
     var event_id = $scope.event_id = params.event_id;
     $scope.rbRisarComplaints = RefBookService.get('rbRisarComplaints');
 
+    $scope.blood_pressure = {right_systolic:[],
+        right_diastolic: [],
+        left_systolic: [],
+        left_diastolic: []
+    };
     $scope.data = [];
     $scope.abdominal = new Array(19);
     $scope.presenting_part = new Array(19);
@@ -25,6 +30,7 @@ var GravidogramaCtrl = function ($scope, RisarApi, RefBookService) {
                 $scope.abdominal[index] = event.checkups[i].abdominal;
                 $scope.fetus_heart_rate[index] = event.checkups[i].fetus_heart_rate;
 
+                // предлежание плода
                 if (event.checkups[i].presenting_part){
                     var short_name = event.checkups[i].presenting_part.name.split(' ').reduce(function(prev, curr){
                         var str = prev + curr[0].toUpperCase();
@@ -33,6 +39,7 @@ var GravidogramaCtrl = function ($scope, RisarApi, RefBookService) {
                     $scope.presenting_part[index] = [short_name, event.checkups[i].presenting_part.name];
                 }
 
+                // проверяем были жалобы на отеки
                 if(event.checkups[i].complaints){
                     var edema = $scope.rbRisarComplaints.get_by_code("oteki");
                     $scope.edema[index] = indexOf(event.checkups[i].complaints, edema)>0 ? '+' : '-';
@@ -42,12 +49,17 @@ var GravidogramaCtrl = function ($scope, RisarApi, RefBookService) {
                 if (event.checkups[i].fundal_height && day_num>0){
                     $scope.data.push([day_num, event.checkups[i].fundal_height]);
                 }
+
+                if (event.checkups[i].ad_right_high) {$scope.blood_pressure.right_systolic.push([day_num, event.checkups[i].ad_right_high])};
+                if(event.checkups[i].ad_right_low){$scope.blood_pressure.right_diastolic.push([day_num, event.checkups[i].ad_right_low])};
+                if(event.checkups[i].ad_left_high){ $scope.blood_pressure.left_systolic.push([day_num, event.checkups[i].ad_left_high])};
+                if(event.checkups[i].ad_left_low){$scope.blood_pressure.left_diastolic.push([day_num, event.checkups[i].ad_left_low])};
             }
         })
     };
 
-    $scope.xStr = ['5 - 6', '7 - 8', '9 - 10', '11 - 12', '13 - 14', '15 - 16', '17 - 18', '19 - 20', '21 - 22', '23 - 24', '25 - 26',
-        '27 - 28', '29 - 30', '31 - 32', '33 - 34', '35 - 36', '37 - 38', '39 - 40', '41 - 42'];
+    $scope.xStr = ['5-6', '7-8', '9-10', '11-12', '13-14', '15-16', '17-18', '19-20', '21-22', '23-24', '25-26',
+        '27-28', '29-30', '31-32', '33-34', '35-36', '37-38', '39-40', '41-42'];
 
     $scope.gravidograma_data = [
         {
@@ -65,14 +77,47 @@ var GravidogramaCtrl = function ($scope, RisarApi, RefBookService) {
         "values": $scope.data
         }
     ];
+
+    $scope.blood_pressure_right = [
+        {
+        "key": "верхняя граница",
+        "values":[[0, 130], [266, 130]]
+        },
+        {
+        "key": "нижняя граница",
+        "values":[[0, 90], [266, 90]]
+        },
+        {
+        "key": "систолическое",
+        "values": $scope.blood_pressure.right_systolic
+        },
+        {
+        "key": "диастолическое",
+        "values": $scope.blood_pressure.right_diastolic
+        }
+    ];
+
+    $scope.blood_pressure_left = [
+        {
+        "key": "верхняя граница",
+        "values":[[0, 130], [266, 130]]
+        },
+        {
+        "key": "нижняя граница",
+        "values":[[0, 90], [266, 90]]
+        },
+        {
+        "key": "систолическое",
+        "values": $scope.blood_pressure.left_systolic
+        },
+        {
+        "key": "диастолическое",
+        "values": $scope.blood_pressure.left_diastolic
+        }
+    ];
+
     $scope.xAxisTickFormat = function(d){
         return $scope.xStr[Math.floor(d/14)];
     }
-    $scope.xFunction = function(){
-        return function(d){
-            return $scope.xStr[Math.floor(d[0]/14)];
-        };
-    }
-
     reload_checkup();
 };
