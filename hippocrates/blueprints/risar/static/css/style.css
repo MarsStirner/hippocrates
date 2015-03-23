@@ -227,3 +227,33 @@ box-shadow: inset 0 3px 8px rgba(0,0,0,0.125);
    display: inline;
    width: 45%;
 }
+
+.rotateText {
+    vertical-align: middle;
+    text-align: right;
+}
+
+.vertical-text {
+	display: inline-block;
+	overflow: hidden;
+	width: 1.5em;
+}
+.vertical-text__inner {
+	display: inline-block;
+	white-space: nowrap;
+	line-height: 1.5;
+	transform: translate(0,100%) rotate(-90deg);
+	transform-origin: 0 0;
+    vertical-align: bottom;
+}
+/* This element stretches the parent to be square
+   by using the mechanics of vertical margins  */
+.vertical-text__inner:after {
+	content: "";
+	display: block;
+	margin: 0 0 100%;
+}
+
+nvd3-line-chart svg {
+    height: inherit;
+}
