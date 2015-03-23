@@ -131,7 +131,8 @@ angular.module('WebMis20.controllers').
                 FileEditModal.open(cfa_id, {
                     attachType: 'client',
                     idx: idx,
-                    client: $scope.client
+                    client: $scope.client,
+                    editMode: true
                 })
                 .then(function () {
                     $scope.reloadClient();
