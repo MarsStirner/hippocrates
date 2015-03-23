@@ -477,11 +477,11 @@
                 <div class="form-group">
                     <div class="pull-right">
                         <a class="pseudo-btn" ng-href="{{ url_for('.html_inspection') }}?event_id=[[ chart.id ]]">Перейти на форму осмотров пациентки</a>
-                        <a class="btn btn-success btn-lg"
+                        <a class="btn btn-success"
                            ng-click="save()"
                            ng-show="rc.sampleWizard.currentIndex < rc.sampleWizard.navigationLength"
                            ng-disabled="rc.sampleWizard.currentStep.formController.$invalid && rc.sampleWizard.currentStep.formController.$dirty">Сохранить</a>
-                        <a class="btn btn-primary btn-lg"
+                        <a class="btn btn-primary"
                            ng-click="save(); rc.sampleWizard.forward()"
                            ng-show="rc.sampleWizard.currentIndex < rc.sampleWizard.navigationLength"
                            ng-disabled="rc.sampleWizard.currentStep.formController.$invalid && rc.sampleWizard.currentStep.formController.$dirty">
