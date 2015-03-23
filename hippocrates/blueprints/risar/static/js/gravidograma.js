@@ -67,18 +67,18 @@ var GravidogramaCtrl = function ($scope, RisarApi, RefBookService) {
         "key": "верхняя граница",
         "values":[[64, 11.5], [78, 15.7], [92, 19], [106, 21.8], [120, 24], [134, 25], [148, 27], [162, 28.7], [176, 31.4],
             [190, 32], [204, 33.9], [218, 35.6], [232, 37.3], [246, 38.2], [260, 35.8]],
-        "color": 'FF6633'
+        "color": '#FF6633'
         },
         {
         "key": "нижняя граница",
         "values":[[64, 10.8], [78, 12.5], [92, 14], [106, 16.8], [120, 18.8], [134, 21.8], [148, 23.4], [162, 23.7], [176, 26.8],
             [190, 29.4], [204, 31.3], [218, 32.2], [232, 32.7], [246, 35.2], [260, 34.8]],
-        "color": '6699CC'
+        "color": '#6699CC'
         },
         {
         "key": "данные пациентки",
         "values": $scope.data,
-        "color": '66CC33'
+        "color": '#66CC33'
         }
     ];
 
@@ -86,22 +86,22 @@ var GravidogramaCtrl = function ($scope, RisarApi, RefBookService) {
         {
         "key": "верхняя граница",
         "values":[[0, 130], [266, 130]],
-        "color": 'FF6633'
+        "color": '#FF6633'
         },
         {
         "key": "нижняя граница",
         "values":[[0, 90], [266, 90]],
-        "color": '6699CC'
+        "color": '#6699CC'
         },
         {
         "key": "систолическое",
         "values": $scope.blood_pressure.right_systolic,
-        "color": '339933'
+        "color": '#339933'
         },
         {
         "key": "диастолическое",
         "values": $scope.blood_pressure.right_diastolic,
-        "color": '66CC33'
+        "color": '#66CC33'
         }
     ];
 
@@ -109,22 +109,22 @@ var GravidogramaCtrl = function ($scope, RisarApi, RefBookService) {
         {
         "key": "верхняя граница",
         "values":[[0, 130], [266, 130]],
-        "color": 'FF6633'
+        "color": '#FF6633'
         },
         {
         "key": "нижняя граница",
         "values":[[0, 90], [266, 90]],
-        "color": '6699CC'
+        "color": '#6699CC'
         },
         {
         "key": "систолическое",
         "values": $scope.blood_pressure.left_systolic,
-        "color": '339933'
+        "color": '#339933'
         },
         {
         "key": "диастолическое",
         "values": $scope.blood_pressure.left_diastolic,
-        "color": '66CC33'
+        "color": '#66CC33'
         }
     ];
 

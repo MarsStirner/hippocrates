@@ -11,6 +11,7 @@ bootstrap_app(os.path.join(os.path.dirname(__file__), 'templates'))
 
 @app.context_processor
 def general_menu():
+    from flask.ext.login import current_user
     from nemesis.lib.user import UserProfileManager
     menu_items = [dict(
         link='index',
@@ -41,6 +42,15 @@ def general_menu():
         link='event.get_events',
         title=u'Обращения',
         visible=(UserProfileManager.has_ui_registrator() or UserProfileManager.has_ui_doctor())
+    ), dict(
+        link='risar.index_html',
+        title={
+            'obstetrician': u'АРМ Акушера-гинеколога',
+            'overseer1': u'АРМ Куратора 1 уровня',
+            'overseer2': u'АРМ Куратора 2 уровня',
+            'overseer3': u'АРМ Куратора 3 уровня',
+            }.get(getattr(current_user, 'current_role', None), u'АРМ Администратора РИСАР'),
+        visible=UserProfileManager.has_ui_risar()
     ), dict(
         link='anareports.index_html',
         title=u'Аналитические отчёты',
