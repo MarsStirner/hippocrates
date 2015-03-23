@@ -114,11 +114,11 @@ angular.module('WebMis20.controllers').
                 });
             };
 
-            $scope.add_new_file = function (document_id, policy_id) {
+            $scope.add_new_file = function (documentInfo, policyInfo) {
                 FileEditModal.addNew($scope.client_id, {
                     attachType: 'client',
-                    document_id: document_id,
-                    policy_id: policy_id,
+                    documentInfo: documentInfo,
+                    policyInfo: policyInfo,
                     client: $scope.client
                 })
                 .then(function () {
@@ -127,7 +127,7 @@ angular.module('WebMis20.controllers').
                     $scope.reloadClient();
                 });
             };
-            $scope.open_file = function (cfa_id, idx) {
+            $scope.openFile = function (cfa_id, idx) {
                 FileEditModal.open(cfa_id, {
                     attachType: 'client',
                     idx: idx,

@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import datetime
+
 from flask import abort, request
 
 from nemesis.systemwide import db
@@ -7,9 +9,13 @@ from nemesis.lib.utils import jsonify, logger, parse_id, public_endpoint, safe_i
 from blueprints.patients.app import module
 from nemesis.lib.sphinx_search import SearchPatient
 from nemesis.lib.jsonify import ClientVisualizer
-from nemesis.models.client import Client, ClientFileAttach
+from nemesis.models.client import Client, ClientFileAttach, ClientDocument, ClientPolicy
 from nemesis.models.exists import FileMeta, FileGroupDocument
-from blueprints.patients.lib.utils import *
+from hippocrates.blueprints.patients.lib.utils import (set_client_main_info, ClientSaveException, add_or_update_doc,
+    add_or_update_address, add_or_update_copy_address, add_or_update_policy, add_or_update_blood_type,
+    add_or_update_allergy, add_or_update_intolerance, add_or_update_soc_status, add_or_update_relation,
+    add_or_update_contact, generate_filename, save_new_file, delete_client_file_attach_and_relations
+)
 
 
 __author__ = 'mmalkov'
@@ -75,6 +81,7 @@ def api_patient_get():
         return jsonify({
             'client_data': context.make_client_info(client)
         })
+
 
 @module.route('/api/appointments.json')
 @public_endpoint
@@ -307,97 +314,6 @@ def api_kladr_street_get():
                     'code': r.CODE} for r in res])
 
 
-import base64
-import datetime
-import os
-import mimetypes
-from nemesis.app import app
-from sqlalchemy import func
-
-
-def get_file_ext_from_mimetype(mime):
-    if not mime:
-        return ''
-    ext_list = mimetypes.guess_all_extensions(mime)
-    ext = ''
-    if ext_list:
-        if len(ext_list) == 1:
-            ext = ext_list[0]
-        elif '.xls' in ext_list:
-            ext = '.xls'
-    return ext
-
-
-def generate_filename(name, mime, descname=None, idx=None, date=None, relation_type=None):
-    file_ext = get_file_ext_from_mimetype(mime)
-    if name:
-        filename = u"{0}_{1:%y%m%d_%H%M}{2}".format(name, date, file_ext)
-    else:
-        template = u'{descname}_{reltype}Лист_№{idx}_{date:%y%m%d_%H%M}{ext}'
-        date = date or datetime.datetime.now()
-        filename = template.format(
-            descname=descname, idx=idx, date=date,
-            reltype=u'({0})_'.format(relation_type) if relation_type else u'',
-            ext=file_ext
-        )
-    return filename
-
-
-def store_file_locally(filepath, file_data):
-    uri_string = file_data
-    data_string = uri_string.split(',')[1]  # seems legit
-    data_string = base64.b64decode(data_string)
-    dirname = os.path.dirname(filepath)
-    try:
-        if not os.path.exists(dirname):
-            os.makedirs(dirname)
-        with open(filepath, 'wb') as f:
-            f.write(data_string)
-    except IOError, e:
-        logger.error(u'Ошибка сохранения файла средствами МИС: %s' % e, exc_info=True)
-        return False, u'Ошибка сохранения файла'
-    # TODO: manage exceptions
-    return True, ''
-
-
-def save_new_file(file_info, filename, fgd, client_id):
-    f_meta = file_info.get('meta')
-    f_file = file_info.get('file')
-    f_idx = f_meta.get('idx')
-    f_mime = f_file.get('mime')
-
-    fm = FileMeta()
-    fm.name = filename
-    fm.mimetype = f_mime
-    fm.filegroup = fgd  # не очень оптимальная связка, появляется селект
-    fm.idx = f_idx
-    fm.deleted = 1
-    try:
-        db.session.flush([fm])
-    except Exception, e:
-        # todo:
-        raise
-
-    # При интеграции с ЗХПД
-    # if config.secure_person_data_storage_enabled:
-    #     store_in_external_system()
-    #     ...
-
-    # TODO: при сохранении файлов для другой связанной сущности изменить префикс директории
-    directory = 'c%s' % client_id
-    filepath = os.path.join(directory, filename)
-    fullpath = os.path.join(app.config['FILE_STORAGE_PATH'], filepath)
-    ok, msg = store_file_locally(fullpath, f_file.get('data'))
-    if not ok:
-        return ok, msg
-    else:
-        fm.query.filter(FileMeta.id == fm.id).update({
-            'deleted': 0,
-            'path': filepath
-        }, synchronize_session=False)
-        return True, ''
-
-
 @module.route('/api/client_file_attach.json', methods=['POST', 'GET', 'DELETE'])
 def api_patient_file_attach():
     if request.method == 'GET':
@@ -447,10 +363,22 @@ def api_patient_file_attach():
         if cfa_id:
             doc_type = file_attach.get('doc_type')
             relation_type = file_attach.get('relation_type')
+
+            document_id = safe_traverse(file_attach, 'document_info', 'id')
+            policy_id = safe_traverse(file_attach, 'policy_info', 'id')
+
             cfa = ClientFileAttach.query.get(cfa_id)
             cfa.documentType_id = safe_traverse(doc_type, 'id')
             cfa.relationType_id = safe_traverse(relation_type, 'id')
             db.session.add(cfa)
+            if document_id:
+                c_doc = ClientDocument.query.get(document_id)
+                c_doc.file_attach = cfa
+                db.session.add(c_doc)
+            elif policy_id:
+                c_pol = ClientPolicy.query.get(policy_id)
+                c_pol.file_attach = cfa
+                db.session.add(c_pol)
 
             file_document = file_attach.get('file_document')
             document_name = file_document.get('name')
@@ -494,6 +422,9 @@ def api_patient_file_attach():
             doc_type = file_attach.get('doc_type')
             relation_type = file_attach.get('relation_type')
 
+            document_id = safe_traverse(file_attach, 'document_info', 'id')
+            policy_id = safe_traverse(file_attach, 'policy_info', 'id')
+
             file_document = file_attach.get('file_document')
             document_name = file_document.get('name')
             file_pages = file_document.get('files')
@@ -507,6 +438,14 @@ def api_patient_file_attach():
             cfa.relationType_id = safe_traverse(relation_type, 'id')
             cfa.file_document = fgd
             db.session.add(fgd)
+            if document_id:
+                c_doc = ClientDocument.query.get(document_id)
+                c_doc.file_attach = cfa
+                db.session.add(c_doc)
+            elif policy_id:
+                c_pol = ClientPolicy.query.get(policy_id)
+                c_pol.file_attach = cfa
+                db.session.add(c_pol)
             db.session.add(cfa)
             try:
                 db.session.commit()
@@ -542,21 +481,7 @@ def api_patient_file_attach():
         cfa_id = safe_int(data.get('cfa_id'))
         fm_id = safe_int(data.get('file_meta_id'))
         if cfa_id:
-            cfa = ClientFileAttach.query.get(cfa_id)
-            cfa.deleted = 1
-            db.session.add(cfa)
-            FileMeta.query.join(FileGroupDocument, ClientFileAttach).filter(
-                FileMeta.filegroup_id == FileGroupDocument.id,
-                FileGroupDocument.id == ClientFileAttach.filegroup_id,
-                ClientFileAttach.id == cfa_id
-            ).update({
-                FileMeta.deleted: 1
-            })
-            try:
-                db.session.commit()
-            except Exception, e:
-                # todo:
-                raise
+            delete_client_file_attach_and_relations(cfa_id)
             return jsonify(None)
         elif fm_id:
             fm = FileMeta.query.get(fm_id)

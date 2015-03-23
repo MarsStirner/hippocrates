@@ -9,10 +9,9 @@
                 <div class="row">
                     <ul>
                         <li ng-repeat="fa in client.file_attaches">
-                            <a ng-click="open_file(fa.id)">[[ fa.file_document.name ]]</a> (Страницы
-                            <span ng-repeat="page in fa.file_document.files">
-                                <a href="javascript:void(0)" ng-click="open_file(fa.id, page.idx)">[[page.idx + 1]]</a>
-                            </span>) от [[fa.attach_date | asDate]]
+                            <wm-client-file-attach-item model-attach="fa"
+                                on-open="openFile(fa_id, page_idx)">
+                            </wm-client-file-attach-item>
                         </li>
                     </ul>
                 </div>
