@@ -511,8 +511,12 @@ def get_file_ext_from_mimetype(mime):
     if ext_list:
         if len(ext_list) == 1:
             ext = ext_list[0]
+        elif '.jpg' in ext_list:
+            ext = '.jpg'
         elif '.xls' in ext_list:
             ext = '.xls'
+        else:
+            ext = ext_list[0]
     return ext
 
 

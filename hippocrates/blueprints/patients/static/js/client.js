@@ -10,8 +10,7 @@ angular.module('WebMis20.controllers').
             $scope.rbGender = RefBookService.get('Gender');
             $scope.alerts = [];
             $scope.clientServices = WMClientServices;
-
-            $scope.currentDate= new Date();
+            $scope.currentDate = new Date();
 
             $scope.client_id = $scope.params.client_id;
             var client = $scope.client = new WMClient($scope.client_id);

@@ -61,7 +61,9 @@ angular.module('hitsl.ui')
         api_patient_file_attach: '{{ url_for("patients.api_patient_file_attach") }}',
         coldstar: {
             cas_check_token: '{{ config.COLDSTAR_URL + "cas/api/check/" }}',
-            cas_prolong_token: '{{ config.COLDSTAR_URL + "cas/api/prolong/" }}'
+            cas_prolong_token: '{{ config.COLDSTAR_URL + "cas/api/prolong/" }}',
+            scan_get_device_list: '{{ config.COLDSTAR_URL + "scan/list/" }}',
+            scan_process_scan: '{{ config.COLDSTAR_URL + "scan/scan" }}'
         },
         scanserver: {
             list: '{{ config.SCANSERVER_URL + "scanners" }}',

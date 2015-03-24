@@ -11,7 +11,7 @@ from nemesis.lib.sphinx_search import SearchPatient
 from nemesis.lib.jsonify import ClientVisualizer
 from nemesis.models.client import Client, ClientFileAttach, ClientDocument, ClientPolicy
 from nemesis.models.exists import FileMeta, FileGroupDocument
-from hippocrates.blueprints.patients.lib.utils import (set_client_main_info, ClientSaveException, add_or_update_doc,
+from blueprints.patients.lib.utils import (set_client_main_info, ClientSaveException, add_or_update_doc,
     add_or_update_address, add_or_update_copy_address, add_or_update_policy, add_or_update_blood_type,
     add_or_update_allergy, add_or_update_intolerance, add_or_update_soc_status, add_or_update_relation,
     add_or_update_contact, generate_filename, save_new_file, delete_client_file_attach_and_relations
