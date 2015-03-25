@@ -15,6 +15,11 @@
                 Гравидограмма
             </div>
         </div>
+            <div class="text-right marginal">
+                <div class="btn-group">
+                    <ui-print-button ps="ps" resolve="ps_resolve()">Печать</ui-print-button>
+                </div>
+            </div>
             <table class="table table-bordered">
                 <tbody>
                     <tr>
@@ -30,10 +35,12 @@
                                     tooltips="true"
                                     interactive="true"
                                     margin="{left:30,top:20,bottom:20,right:20}"
-                                    forcex="[0,266]"
+                                    forcex="[0, 266]"
+                                    forcey="[0, 160]"
                                     yAxisTickValues="[0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160]"
                                     xAxisTickValues="[0, 8, 22, 36, 50, 64, 78, 92, 106, 120, 134, 148, 162, 176, 190, 204, 218, 232, 246, 260]"
                                     xAxisTickFormat="xAxisTickFormat"
+                                    showLegend="true"
                                     ><svg></svg>
                             </nvd3-line-chart>
                         </td>
@@ -52,9 +59,11 @@
                                     interactive="true"
                                     margin="{left:30,top:20,bottom:20,right:20}"
                                     forcex="[0,266]"
+                                    forcey="[0, 160]"
                                     yAxisTickValues="[0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160]"
                                     xAxisTickValues="[0,8, 22, 36, 50, 64, 78, 92, 106, 120, 134, 148, 162, 176, 190, 204, 218, 232, 246, 260]"
                                     xAxisTickFormat="xAxisTickFormat"
+                                    showLegend="true"
                                     ><svg></svg>
                             </nvd3-line-chart>
                         </td>
@@ -81,6 +90,7 @@
                                     xAxisTickFormat="xAxisTickFormat"
                                     yAxisTickValues="[0, 5, 10, 15, 20, 25, 30, 35, 40]"
                                     xAxisTickValues="[0, 8, 22, 36, 50, 64, 78, 92, 106, 120, 134, 148, 162, 176, 190, 204, 218, 232, 246, 260]"
+                                    showLegend="true"
                                     ><svg></svg>
                             </nvd3-line-chart>
                         </td>

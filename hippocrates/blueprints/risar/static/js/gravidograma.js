@@ -1,10 +1,30 @@
 
 'use strict';
 
-var GravidogramaCtrl = function ($scope, RisarApi, RefBookService) {
+var GravidogramaCtrl = function ($scope, RisarApi, RefBookService, PrintingService) {
     var params = aux.getQueryParams(window.location.search);
     var event_id = $scope.event_id = params.event_id;
     $scope.rbRisarComplaints = RefBookService.get('rbRisarComplaints');
+
+
+    $scope.ps = new PrintingService("risar_gravidograma");
+    $scope.ps.set_context("risar_gravidograma");
+    $scope.ps_resolve = function () {
+        $scope.xml_blood_pressure_right = d3.select('#blood_pressure_right svg').node().parentNode.innerHTML;
+        $scope.xml_blood_pressure_left = d3.select('#blood_pressure_right svg').node().parentNode.innerHTML;
+        $scope.xml_gravidograma = d3.select('#gravidograma svg').node().parentNode.innerHTML;
+
+        return {
+            event_id: $scope.chart.id,
+            blood_pressure_right: $scope.xml_blood_pressure_right,
+            blood_pressure_left: $scope.xml_blood_pressure_left,
+            gravidograma: $scope.xml_gravidograma,
+            abdominal: $scope.abdominal,
+            fetus_heart_rate: $scope.fetus_heart_rate,
+            presenting_part: $scope.presenting_part,
+            edema: $scope.edema
+        }
+    };
 
     $scope.blood_pressure = {right_systolic:[],
         right_diastolic: [],
@@ -127,7 +147,6 @@ var GravidogramaCtrl = function ($scope, RisarApi, RefBookService) {
         "color": '#66CC33'
         }
     ];
-
     $scope.xAxisTickFormat = function(d){
         return $scope.xStr[Math.floor(d/14)];
     }
