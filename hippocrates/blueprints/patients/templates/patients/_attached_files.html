@@ -1,4 +1,4 @@
-<ng-form name="mainInfoForm" toc-element="Копии документов">
+<ng-form name="fileAttachForm" toc-element="Копии документов">
     <legend>Копии документов</legend>
     <div class="row">
     <div class="col-md-11">
@@ -12,6 +12,10 @@
                             <wm-client-file-attach-item model-attach="fa"
                                 on-open="openFile(fa_id, page_idx)">
                             </wm-client-file-attach-item>
+                            <button type="button" class="btn btn-default btn-sm" ng-click="printFileAttach(fa)"
+                                title="Печать всех страниц документа">
+                                <span class="glyphicon glyphicon-print"></span>
+                            </button>
                         </li>
                     </ul>
                 </div>
