@@ -32,7 +32,7 @@
                             Половая жизнь с <b ng-bind-html="chart.anamnesis.mother.sex_life_start_age | underlineNoVal:'лет'"></b>.
                             Вид контрацепции: <b ng-bind-html="chart.anamnesis.mother.contraception_type | underlineNoVal"></b>.
                         </p>
-                        <p>Способ оплодотворения: <b ng-bind-html="chart.anamnesis.mother.fertilization_type | danet | underlineNoVal"></b>.</p>
+                        <p>Способ оплодотворения: <b ng-bind-html="chart.anamnesis.mother.fertilization_type.name | underlineNoVal"></b>.</p>
                         <p>Доход семьи: <b ng-bind-html="chart.anamnesis.mother.family_income | underlineNoVal"></b></p>
                     </div>
                     <div class="col-md-6">
