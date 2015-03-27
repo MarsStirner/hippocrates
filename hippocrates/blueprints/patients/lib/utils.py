@@ -547,8 +547,7 @@ def store_file_locally(filepath, file_data):
             f.write(data_string)
     except IOError, e:
         logger.error(u'Ошибка сохранения файла средствами МИС: %s' % e, exc_info=True)
-        return False, u'Ошибка сохранения файла'
-    # TODO: manage exceptions
+        return False, u'Ошибка сохранения файла: %s' % e
     return True, ''
 
 
@@ -564,11 +563,8 @@ def save_new_file(file_info, filename, fgd, client_id):
     fm.filegroup = fgd  # не очень оптимальная связка, появляется селект
     fm.idx = f_idx
     fm.deleted = 1
-    try:
-        db.session.flush([fm])
-    except Exception, e:
-        # todo:
-        raise
+
+    db.session.flush([fm])
 
     # При интеграции с ЗХПД
     # if config.secure_person_data_storage_enabled:
@@ -612,8 +608,4 @@ def delete_client_file_attach_and_relations(cfa_id):
     ClientPolicy.query.filter(ClientPolicy.cfa_id == cfa_id).update({
         ClientPolicy.cfa_id: None
     })
-    try:
-        db.session.commit()
-    except Exception, e:
-        # todo:
-        raise
+    db.session.commit()
