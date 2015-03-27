@@ -33,6 +33,15 @@ var ChartCtrl = function ($scope, $modal, RisarApi) {
                 {value:$scope.chart.anamnesis.mother.smoking, text: 'курение'},
                 {value:$scope.chart.anamnesis.mother.toxic, text: 'токсические вечества'},
                 {value:$scope.chart.anamnesis.mother.drugs,text: 'наркотики'}];
+
+            function get_mass_gain(prev, curr, i){
+                if (i == $scope.chart.checkups.length - 1){
+                    curr.weight_gain = curr.weight_before ? curr.weight - curr.weight_before : 0;
+                }
+                prev.weight_gain = curr.weight ? prev.weight - curr.weight : 0;
+                return curr
+            }
+            $scope.chart.checkups.reduce(get_mass_gain);
 //            $scope.chart.bad_habits_father = [{value:$scope.chart.anamnesis.father.alcohol, text: 'алкоголь'},
 //                {value:$scope.chart.anamnesis.father.smoking, text: 'курение'},
 //                {value:$scope.chart.anamnesis.father.toxic, text: 'токсические вечества'},
