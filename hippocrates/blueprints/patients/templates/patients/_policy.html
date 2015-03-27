@@ -6,10 +6,21 @@
         <ng-form name="cpolForm" toc-element toc-dynamic="cpol.insurer.short_name">
             <div class="row">
                 <div class="col-md-11">
-                    <wm-policy p-type="0" id-postfix="c[[$index]]"
-                        model-policy="cpol"
-                        edit-mode="cpol.id ? edit.activated : true">
-                    </wm-policy>
+                    <div class="panel panel-default">
+                    <div class="panel-body">
+                        <wm-policy p-type="0" id-postfix="c[[$index]]"
+                            model-policy="cpol"
+                            edit-mode="cpol.id ? edit.activated : true">
+                        </wm-policy>
+                        <h5 class="attach-file-copy-heading">Копия документа</h5>
+                        <wm-client-file-attach attach-type="policy"
+                            model-attach="cpol.file_attach"
+                            model-doc="cpol"
+                            on-add="add_new_file(documentInfo, policyInfo)"
+                            on-open="openFile(cfa_id, idx)">
+                        </wm-client-file-attach>
+                    </div>
+                    </div>
                 </div>
                 <div class="col-md-1">
                     <div class="row" ng-show="cpol.id">
@@ -36,10 +47,21 @@
         <ng-form name="vpolForm" toc-element toc-dynamic="vpol.insurer.short_name">
             <div class="row">
                 <div class="col-md-11">
-                    <wm-policy p-type="1" id-postfix="v[[$index]]"
-                        model-policy="vpol"
-                        edit-mode="vpol.id ? edit.activated : true">
-                    </wm-policy>
+                    <div class="panel panel-default">
+                    <div class="panel-body">
+                        <wm-policy p-type="1" id-postfix="v[[$index]]"
+                            model-policy="vpol"
+                            edit-mode="vpol.id ? edit.activated : true">
+                        </wm-policy>
+                        <h5 class="attach-file-copy-heading">Копия документа</h5>
+                        <wm-client-file-attach attach-type="policy"
+                            model-attach="vpol.file_attach"
+                            model-doc="vpol"
+                            on-add="add_new_file(documentInfo, policyInfo)"
+                            on-open="openFile(cfa_id, idx)">
+                        </wm-client-file-attach>
+                    </div>
+                    </div>
                 </div>
                 <div class="col-md-1">
                     <div class="row" ng-show="vpol.id">
