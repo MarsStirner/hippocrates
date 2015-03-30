@@ -59,6 +59,7 @@ COPYRIGHT_COMPANY = u'КОРУС Консалтинг ИТ'
 LPU_STYLE = 'FNKC'
 
 INDEX_HTML = 'hippo_index.html'
+SCANSERVER_URL = ''
 FILE_STORAGE_PATH = ''
 
 try:
