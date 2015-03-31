@@ -21,6 +21,9 @@ var EpicrisisCtrl = function ($timeout, $scope, RefBookService, RisarApi) {
         RisarApi.chart.get(event_id)
         .then(function (event) {
             $scope.chart = event;
+            var first_checkup = $scope.chart.checkups[$scope.chart.checkups.length-1];
+            $scope.weight_gain = $scope.chart.checkups[0].weight - first_checkup.weight; //прибавка массы за всю беременность
+
             if (!$scope.chart.epicrisis) {
                 $scope.chart.epicrisis = {
                     pregnancy_final: $scope.rbRisarPregnancy_Final.get_by_code('rodami'),
