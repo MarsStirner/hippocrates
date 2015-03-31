@@ -3,27 +3,45 @@
 </div>
 <div class="modal-body">
     <div class="das-form">
-        <div class="row">
-            <div class="col-md-4">Тип</div>
-            <div class="col-md-4" ng-if="!model.id"><rb-select ref-book="IntoleranceType" ng-model="model.type" /></div>
-            <div class="col-md-8" ng-if="model.id" ng-bind="model.type.name"></div>
-        </div>
-        <div class="row">
-            <div class="col-md-4">Дата установления</div>
-            <div class="col-md-4"><div fs-date ng-model="model.date"></div></div>
-        </div>
-        <div class="row">
-            <div class="col-md-4">Наименование</div>
-            <div class="col-md-8"><input class="form-control" type="text" ng-model="model.name" /></div>
-        </div>
-        <div class="row">
-            <div class="col-md-4">Степень</div>
-            <div class="col-md-8"><rb-select ref-book="AllergyPower" ng-model="model.power" /></div>
-        </div>
-        <div class="row">
-            <div class="col-md-4">Примечания</div>
-            <div class="col-md-8"><input class="form-control" type="text" ng-model="model.note" /></div>
-        </div>
+        <table class="table table-condensed">
+            <thead>
+                <tr>
+                    <th class="col-md-3"></th>
+                    <th class="col-md-9"></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th class="text-right">Тип</th>
+                    <td ng-if="!model.id"><div class="col-md-4" ><rb-select ref-book="IntoleranceType" ng-model="model.type" /></div></td>
+                    <td ng-if="model.id"><div class="col-md-12" ng-bind="model.type.name"></div></td>
+                </tr>
+                <tr>
+                    <th class="text-right">Дата установления</th>
+                    <td>
+                        <div class="col-md-4"><div fs-date ng-model="model.date"></div></div>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="text-right">Наименование</th>
+                    <td>
+                        <div class="col-md-8"><input class="form-control" type="text" ng-model="model.name" /></div>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="text-right">Степень</th>
+                    <td>
+                        <div class="col-md-8"><rb-select ref-book="AllergyPower" ng-model="model.power" /></div>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="text-right">Примечания</th>
+                    <td>
+                        <div class="col-md-8"><input class="form-control" type="text" ng-model="model.note" /></div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 </div>
 <div class="modal-footer">

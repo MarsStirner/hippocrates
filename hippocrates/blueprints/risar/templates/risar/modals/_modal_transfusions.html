@@ -3,22 +3,32 @@
 </div>
 <div class="modal-body">
     <div class="das-form">
-        <div class="row">
-            <div class="col-md-2">Дата</div>
-            <div class="col-lg-2 col-md-3 col-xs-3"><div fs-date ng-model="model.date"></div></div>
-        </div>
-        <div class="row">
-            <div class="col-md-2">Вид</div>
-            <div class="col-md-10"><rb-select ref-book="rbBloodTransfusionType" ng-model="model.type" /></div>
-        </div>
-        <div class="row">
-            <div class="col-md-2">Группа крови донора</div>
-            <div class="col-lg-2 col-md-3 col-xs-3"><rb-select ref-book="rbBloodType" ng-model="model.blood_type" /></div>
-        </div>
-        <div class="row">
-            <div class="col-md-2">Реакция</div>
-            <div class="col-md-10"><input class="form-control" type="text" ng-model="model.reaction" /></div>
-        </div>
+        <table class="table table-condensed">
+            <thead>
+                <tr>
+                    <th class="col-md-3"></th>
+                    <th class="col-md-9"></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th class="text-right">Дата</th>
+                    <td><div class="col-lg-3 col-md-3 col-xs-3"><div fs-date ng-model="model.date"></div></div></td>
+                </tr>
+                <tr>
+                    <th class="text-right">Вид</th>
+                    <td><div class="col-md-10"><rb-select ref-book="rbBloodTransfusionType" ng-model="model.type" /></div></td>
+                </tr>
+                <tr>
+                    <th class="text-right">Группа крови донора</th>
+                    <td><div class="col-lg-3 col-md-3 col-xs-3"><rb-select ref-book="rbBloodType" ng-model="model.blood_type" /></div></td>
+                </tr>
+                <tr>
+                    <th class="text-right">Реакция</th>
+                    <td><div class="col-md-10"><input class="form-control" type="text" ng-model="model.reaction" /></div></td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 </div>
 <div class="modal-footer">
