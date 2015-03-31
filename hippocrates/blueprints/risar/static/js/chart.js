@@ -36,7 +36,7 @@ var ChartCtrl = function ($scope, $modal, RisarApi) {
 
             function get_mass_gain(prev, curr, i){
                 if (i == $scope.chart.checkups.length - 1){
-                    curr.weight_gain = curr.weight_before ? curr.weight - curr.weight_before : 0;
+                    curr.weight_gain = 0;
                 }
                 prev.weight_gain = curr.weight ? prev.weight - curr.weight : 0;
                 return curr
