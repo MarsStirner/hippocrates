@@ -42,12 +42,16 @@ var GravidogramaCtrl = function ($scope, RisarApi, RefBookService, PrintingServi
         $scope.xml_blood_pressure_right = d3.select('#blood_pressure_right svg').node().parentNode.innerHTML;
         $scope.xml_blood_pressure_left = d3.select('#blood_pressure_right svg').node().parentNode.innerHTML;
         $scope.xml_gravidograma = d3.select('#gravidograma svg').node().parentNode.innerHTML;
+        $scope.xml_weight_gain_data = d3.select('#weight_gain_data svg').node().parentNode.innerHTML;
 
         return {
             event_id: $scope.chart.id,
             blood_pressure_right: $scope.xml_blood_pressure_right,
             blood_pressure_left: $scope.xml_blood_pressure_left,
             gravidograma: $scope.xml_gravidograma,
+            weight_gain_data: {chart: $scope.xml_weight_gain_data,
+                               title: $scope.weight_gain_title,
+                               weight: $scope.weight},
             abdominal: $scope.abdominal,
             fetus_heart_rate: $scope.fetus_heart_rate,
             presenting_part: $scope.presenting_part,
