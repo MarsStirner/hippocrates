@@ -67,10 +67,6 @@ angular.module('hitsl.ui')
             scan_get_device_list: '{{ config.COLDSTAR_URL + "scan/list/" }}',
             scan_process_scan: '{{ config.COLDSTAR_URL + "scan/scan" }}'
         },
-        scanserver: {
-            list: '{{ config.SCANSERVER_URL + "scanners" }}',
-            scan: '{{ config.SCANSERVER_URL + "scan" }}'
-        },
     },
     settings: {
         user_idle_timeout: {{ settings.getInt('Auth.UserIdleTimeout', 15 * 60) }},
