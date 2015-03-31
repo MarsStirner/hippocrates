@@ -5,7 +5,36 @@ var GravidogramaCtrl = function ($scope, RisarApi, RefBookService, PrintingServi
     var params = aux.getQueryParams(window.location.search);
     var event_id = $scope.event_id = params.event_id;
     $scope.rbRisarComplaints = RefBookService.get('rbRisarComplaints');
+    $scope.blood_pressure = {right_systolic:[],
+        right_diastolic: [],
+        left_systolic: [],
+        left_diastolic: []
+    };
+    $scope.patient_gravidograma = [];
+    $scope.weight_gain = [];
+    $scope.weight_gain_upper = [];
+    $scope.weight_gain_lower = [];
+    $scope.weight_gain_title = '';
 
+    $scope.abdominal = new Array(19);
+    $scope.presenting_part = new Array(19);
+    $scope.fetus_heart_rate = new Array(19);
+    $scope.edema = new Array(19);
+    $scope.weight = new Array(19);
+
+    // граничные значения для графика прибавки массы в зависимости от МРК
+    var weight_gain_upper_1 = [[36, 0.68], [50, 1.1], [64, 1.3], [78, 1.4], [92, 2.2], [106, 3], [120, 3.7], [134, 4.6], [148, 5.6], [162, 6.5], [176, 7.2],
+            [190, 8.01], [204, 8.5], [218, 9.4], [232, 10.1], [246, 10.8], [260, 11.21]];
+    var weight_gain_lower_1 = [[36, -0.48], [50, -0.3], [64, 0.3], [78, 0.5], [92, 1.2], [106, 1.8], [120, 2.5], [134, 3.4], [148, 4.2], [162, 5], [176, 5.9],
+            [190, 6.61], [204, 7.5], [218, 8.3], [232, 8.9], [246, 9.4], [260, 10.25]];
+    var weight_gain_upper_2 = [[36, -0.2], [50, 0.1], [64, 0.3], [78, 0.7], [92, 1.2], [106, 1.5], [120, 2.65], [134, 3.8], [148, 4.2], [162, 4.9], [176, 5.9],
+            [190, 6.3], [204, 7], [218, 7.5], [232, 8.5], [246, 8.7], [260, 8.9]];
+    var weight_gain_lower_2 = [[36, -1.2], [50, -1.3], [64, -1.25], [78, -0.7], [92, -0.5], [106, 0.5], [120, 1.25], [134, 2.5], [148, 2.9], [162, 3.9], [176, 4.2],
+            [190, 4.02], [204, 5.6], [218, 6.5], [232, 7.4], [246, 7.5], [260, 7.7]];
+    var weight_gain_upper_3 = [[36, 0.6], [50, 1.1], [64, 1.5], [78, 1.9], [92, 3.5], [106, 4.5], [120, 5.54], [134, 6.5], [148, 7.54], [162, 8.54], [176, 9.1],
+            [190, 9.9], [204, 10.9], [218, 11.2], [232, 11.9], [246, 12.5], [260, 12.97]];
+    var weight_gain_lower_3 = [[36, -0.6], [50, -0.6], [64, -0.6], [78, 0.5], [92, 1.3], [106, 2.5], [120, 3.74], [134, 4.5], [148, 5.5], [162, 6.5], [176, 7.9],
+            [190, 8.9], [204, 9.5], [218, 9.9], [232, 10.8], [246, 11], [260, 11.17]];
 
     $scope.ps = new PrintingService("risar_gravidograma");
     $scope.ps.set_context("risar_gravidograma");
@@ -26,54 +55,70 @@ var GravidogramaCtrl = function ($scope, RisarApi, RefBookService, PrintingServi
         }
     };
 
-    $scope.blood_pressure = {right_systolic:[],
-        right_diastolic: [],
-        left_systolic: [],
-        left_diastolic: []
-    };
-    $scope.data = [];
-    $scope.abdominal = new Array(19);
-    $scope.presenting_part = new Array(19);
-    $scope.fetus_heart_rate = new Array(19);
-    $scope.edema = new Array(19);
-
     var reload_checkup = function () {
         RisarApi.chart.get(event_id)
         .then(function (event) {
             $scope.chart = event;
+
+            var first_checkup = $scope.chart.checkups[$scope.chart.checkups.length-1];
+            var hw_ratio = first_checkup.height ? Math.round((first_checkup.weight/first_checkup.height)*100) : NaN;
+
+            // прибавка массы
+            if (!hw_ratio || (hw_ratio>=35 && hw_ratio<=41)){
+                $scope.weight_gain_upper.push.apply($scope.weight_gain_upper, weight_gain_upper_1);
+                $scope.weight_gain_lower.push.apply($scope.weight_gain_lower, weight_gain_lower_1);
+                $scope.weight_gain_title = 'нормостенического телосложения (M +/- 16; 10,73 +/- 3,25)';
+            } else if (hw_ratio >=42) {
+                $scope.weight_gain_upper.push.apply($scope.weight_gain_upper, weight_gain_upper_2);
+                $scope.weight_gain_lower.push.apply($scope.weight_gain_lower, weight_gain_lower_2);
+                $scope.weight_gain_title = 'с ожирением (M +/- 16; 8,3 +/- 2,12)';
+            } else {
+                $scope.weight_gain_upper.push.apply($scope.weight_gain_upper, weight_gain_upper_3);
+                $scope.weight_gain_lower.push.apply($scope.weight_gain_lower, weight_gain_lower_3);
+                $scope.weight_gain_title = 'с дефицитом массы теля (M +/- 16; 12,07 +/- 2,8)';
+            }
+            $scope.refreshCharts();
             var pregnancy_start_date =  moment($scope.chart.card_attributes.pregnancy_start_date);
             for (var i in event.checkups) {
-                var checkups_beg_date = moment(event.checkups[i].beg_date)
+                var checkup = event.checkups[i];
+                var checkups_beg_date = moment(checkup.beg_date);
                 var day_num = (checkups_beg_date.diff(pregnancy_start_date, 'days')) - 27; // интересует начиная с 5ой недели
                 var index = Math.floor(day_num/14);
 
-                $scope.abdominal[index] = event.checkups[i].abdominal;
-                $scope.fetus_heart_rate[index] = event.checkups[i].fetus_heart_rate;
+                $scope.abdominal[index] = checkup.abdominal;
+                $scope.fetus_heart_rate[index] = checkup.fetus_heart_rate;
 
                 // предлежание плода
-                if (event.checkups[i].presenting_part){
-                    var short_name = event.checkups[i].presenting_part.name.split(' ').reduce(function(prev, curr){
+                if (checkup.presenting_part){
+                    var short_name = checkup.presenting_part.name.split(' ').reduce(function(prev, curr){
                         var str = prev + curr[0].toUpperCase();
                         return str
                     }, "");
-                    $scope.presenting_part[index] = [short_name, event.checkups[i].presenting_part.name];
+                    $scope.presenting_part[index] = [short_name, checkup.presenting_part.name];
                 }
 
                 // проверяем были жалобы на отеки
-                if(event.checkups[i].complaints){
+                if(checkup.complaints){
                     var edema = $scope.rbRisarComplaints.get_by_code("oteki");
-                    $scope.edema[index] = indexOf(event.checkups[i].complaints, edema)>0 ? '+' : '-';
+                    $scope.edema[index] = indexOf(checkup.complaints, edema)>0 ? '+' : '-';
                 }
 
-
-                if (event.checkups[i].fundal_height && day_num>0){
-                    $scope.data.push([day_num, event.checkups[i].fundal_height]);
+                // высота стояния дна матки
+                if (checkup.fundal_height && day_num>0){
+                    $scope.patient_gravidograma.push([day_num, checkup.fundal_height]);
                 }
 
-                if (event.checkups[i].ad_right_high) {$scope.blood_pressure.right_systolic.push([day_num, event.checkups[i].ad_right_high])};
-                if(event.checkups[i].ad_right_low){$scope.blood_pressure.right_diastolic.push([day_num, event.checkups[i].ad_right_low])};
-                if(event.checkups[i].ad_left_high){ $scope.blood_pressure.left_systolic.push([day_num, event.checkups[i].ad_left_high])};
-                if(event.checkups[i].ad_left_low){$scope.blood_pressure.left_diastolic.push([day_num, event.checkups[i].ad_left_low])};
+                // давление
+                if(checkup.ad_right_high) {$scope.blood_pressure.right_systolic.push([day_num, checkup.ad_right_high])};
+                if(checkup.ad_right_low){$scope.blood_pressure.right_diastolic.push([day_num, checkup.ad_right_low])};
+                if(checkup.ad_left_high){ $scope.blood_pressure.left_systolic.push([day_num, checkup.ad_left_high])};
+                if(checkup.ad_left_low){$scope.blood_pressure.left_diastolic.push([day_num, checkup.ad_left_low])};
+
+                //прибавка массы
+                if(checkup.weight && first_checkup.weight){
+                    $scope.weight_gain.push([day_num, checkup.weight-first_checkup.weight]);
+                    $scope.weight[index] = checkup.weight;
+                };
             }
             $scope.refreshCharts();
         })
@@ -97,7 +142,7 @@ var GravidogramaCtrl = function ($scope, RisarApi, RefBookService, PrintingServi
         },
         {
         "key": "данные пациентки",
-        "values": $scope.data,
+        "values": $scope.patient_gravidograma,
         "color": '#66CC33'
         }
     ];
@@ -147,6 +192,25 @@ var GravidogramaCtrl = function ($scope, RisarApi, RefBookService, PrintingServi
         "color": '#66CC33'
         }
     ];
+
+    $scope.weight_gain_data = [
+        {
+        "key": "верхняя граница",
+        "values": $scope.weight_gain_upper,
+        "color": '#FF6633'
+        },
+        {
+        "key": "нижняя граница",
+        "values": $scope.weight_gain_lower,
+        "color": '#6699CC'
+        },
+        {
+        "key": "прибавка массы",
+        "values": $scope.weight_gain,
+        "color": '#339933'
+        }
+    ];
+
     $scope.xAxisTickFormat = function(d){
         return $scope.xStr[Math.floor(d/14)];
     }

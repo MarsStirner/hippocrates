@@ -15,129 +15,182 @@
                 Гравидограмма
             </div>
         </div>
-            <div class="text-right marginal">
-                <div class="btn-group">
-                    <ui-print-button ps="ps" resolve="ps_resolve()">Печать</ui-print-button>
-                </div>
+        <div class="text-right marginal">
+            <div class="btn-group">
+                <ui-print-button ps="ps" resolve="ps_resolve()">Печать</ui-print-button>
             </div>
-            <table class="table table-bordered">
-                <tbody>
-                    <tr>
-                        <td class="rotateText"><div class="vertical-text"><div class="vertical-text__inner">Артериальное давление правой руки</div></div></td>
-                        <td colspan="19">
-                            <nvd3-line-chart
-                                    data="blood_pressure_right"
-                                    id="blood_pressure_right"
-                                    width="1200"
-                                    height="430"
-                                    showXAxis="true"
-                                    showYAxis="true"
-                                    tooltips="true"
-                                    interactive="true"
-                                    margin="{left:30,top:20,bottom:20,right:20}"
-                                    forcex="[0, 266]"
-                                    forcey="[0, 160]"
-                                    yAxisTickValues="[0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160]"
-                                    xAxisTickValues="[0, 8, 22, 36, 50, 64, 78, 92, 106, 120, 134, 148, 162, 176, 190, 204, 218, 232, 246, 260]"
-                                    xAxisTickFormat="xAxisTickFormat"
-                                    showLegend="true"
-                                    ><svg></svg>
-                            </nvd3-line-chart>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="rotateText"><div class="vertical-text"><div class="vertical-text__inner">Артериальное давление левой руки</div></div></td>
-                        <td colspan="19">
-                            <nvd3-line-chart
-                                    data="blood_pressure_left"
-                                    id="blood_pressure_left"
-                                    width="1200"
-                                    height="430"
-                                    showXAxis="true"
-                                    showYAxis="true"
-                                    tooltips="true"
-                                    interactive="true"
-                                    margin="{left:30,top:20,bottom:20,right:20}"
-                                    forcex="[0,266]"
-                                    forcey="[0, 160]"
-                                    yAxisTickValues="[0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160]"
-                                    xAxisTickValues="[0,8, 22, 36, 50, 64, 78, 92, 106, 120, 134, 148, 162, 176, 190, 204, 218, 232, 246, 260]"
-                                    xAxisTickFormat="xAxisTickFormat"
-                                    showLegend="true"
-                                    ><svg></svg>
-                            </nvd3-line-chart>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Окружность живота</td>
-                        <td ng-repeat="n in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]">[[ abdominal[n] ]]</td>
-                    </tr>
-                    <tr>
-                        <td class="rotateText"><div class="vertical-text"><div class="vertical-text__inner">Высота стояния дна матки</div></div></td>
-                        <td colspan="19">
-                            <nvd3-line-chart
-                                    data="gravidograma_data"
-                                    id="gravidograma"
-                                    width="1200"
-                                    height="430"
-                                    showXAxis="true"
-                                    showYAxis="true"
-                                    tooltips="true"
-                                    interactive="true"
-                                    margin="{left:30,top:20,bottom:20,right:20}"
-                                    forcex="[0,266]"
-                                    forcey="[0,40]"
-                                    xAxisTickFormat="xAxisTickFormat"
-                                    yAxisTickValues="[0, 5, 10, 15, 20, 25, 30, 35, 40]"
-                                    xAxisTickValues="[0, 8, 22, 36, 50, 64, 78, 92, 106, 120, 134, 148, 162, 176, 190, 204, 218, 232, 246, 260]"
-                                    showLegend="true"
-                                    ><svg></svg>
-                            </nvd3-line-chart>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th></th>
-                        <th>5-6</th>
-                        <th>7-8</th>
-                        <th>9-10</th>
-                        <th>11-12</th>
-                        <th>13-14</th>
-                        <th>15-16</th>
-                        <th>17-18</th>
-                        <th>19-20</th>
-                        <th>21-22</th>
-                        <th>23-24</th>
-                        <th>25-26</th>
-                        <th>27-28</th>
-                        <th>29-30</th>
-                        <th>31-32</th>
-                        <th>33-34</th>
-                        <th>35-36</th>
-                        <th>37-38</th>
-                        <th>39-40</th>
-                        <th>41-42</th>
-                    </tr>
-                    <tr>
-                        <td>Состояние шейки матки</td>
-                        <td ng-repeat="n in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]"></td>
-                    </tr>
-                    <tr>
-                        <td>Предлежание плода</td>
-                        <td ng-repeat="n in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]">
-                            <span tooltip="[[ presenting_part[n][1] ]]">[[ presenting_part[n][0] ]]
-                            </span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Сердцебиение</td>
-                        <td ng-repeat="n in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]">[[ fetus_heart_rate[n] ]]</td>
-                    </tr>
-                    <tr>
-                        <td>Отеки</td>
-                        <td ng-repeat="n in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]">[[ edema[n] ]]</td>
-                    </tr>
-                </tbody>
-            </table>
+        </div>
+        <table class="table table-bordered">
+            <tbody>
+                <tr>
+                    <td class="rotateText"><div class="vertical-text"><div class="vertical-text__inner">Артериальное давление правой руки</div></div></td>
+                    <td colspan="19">
+                        <nvd3-line-chart
+                                data="blood_pressure_right"
+                                id="blood_pressure_right"
+                                width="1200"
+                                height="430"
+                                showXAxis="true"
+                                showYAxis="true"
+                                tooltips="true"
+                                interactive="true"
+                                margin="{left:30,top:20,bottom:20,right:20}"
+                                forcex="[0, 266]"
+                                forcey="[0, 160]"
+                                yAxisTickValues="[0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160]"
+                                xAxisTickValues="[0, 8, 22, 36, 50, 64, 78, 92, 106, 120, 134, 148, 162, 176, 190, 204, 218, 232, 246, 260]"
+                                xAxisTickFormat="xAxisTickFormat"
+                                showLegend="true"
+                                ><svg></svg>
+                        </nvd3-line-chart>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="rotateText"><div class="vertical-text"><div class="vertical-text__inner">Артериальное давление левой руки</div></div></td>
+                    <td colspan="19">
+                        <nvd3-line-chart
+                                data="blood_pressure_left"
+                                id="blood_pressure_left"
+                                width="1200"
+                                height="430"
+                                showXAxis="true"
+                                showYAxis="true"
+                                tooltips="true"
+                                interactive="true"
+                                margin="{left:30,top:20,bottom:20,right:20}"
+                                forcex="[0,266]"
+                                forcey="[0, 160]"
+                                yAxisTickValues="[0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160]"
+                                xAxisTickValues="[0,8, 22, 36, 50, 64, 78, 92, 106, 120, 134, 148, 162, 176, 190, 204, 218, 232, 246, 260]"
+                                xAxisTickFormat="xAxisTickFormat"
+                                showLegend="true"
+                                ><svg></svg>
+                        </nvd3-line-chart>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Окружность живота</td>
+                    <td ng-repeat="n in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]">[[ abdominal[n] ]]</td>
+                </tr>
+                <tr>
+                    <td class="rotateText"><div class="vertical-text"><div class="vertical-text__inner">Высота стояния дна матки</div></div></td>
+                    <td colspan="19">
+                        <nvd3-line-chart
+                                data="gravidograma_data"
+                                id="gravidograma"
+                                width="1200"
+                                height="430"
+                                showXAxis="true"
+                                showYAxis="true"
+                                tooltips="true"
+                                interactive="true"
+                                margin="{left:30,top:20,bottom:20,right:20}"
+                                forcex="[0,266]"
+                                forcey="[0,40]"
+                                xAxisTickFormat="xAxisTickFormat"
+                                yAxisTickValues="[0, 5, 10, 15, 20, 25, 30, 35, 40]"
+                                xAxisTickValues="[0, 8, 22, 36, 50, 64, 78, 92, 106, 120, 134, 148, 162, 176, 190, 204, 218, 232, 246, 260]"
+                                showLegend="true"
+                                ><svg></svg>
+                        </nvd3-line-chart>
+                    </td>
+                </tr>
+                <tr>
+                    <th></th>
+                    <th>5-6</th>
+                    <th>7-8</th>
+                    <th>9-10</th>
+                    <th>11-12</th>
+                    <th>13-14</th>
+                    <th>15-16</th>
+                    <th>17-18</th>
+                    <th>19-20</th>
+                    <th>21-22</th>
+                    <th>23-24</th>
+                    <th>25-26</th>
+                    <th>27-28</th>
+                    <th>29-30</th>
+                    <th>31-32</th>
+                    <th>33-34</th>
+                    <th>35-36</th>
+                    <th>37-38</th>
+                    <th>39-40</th>
+                    <th>41-42</th>
+                </tr>
+                <tr>
+                    <td>Состояние шейки матки</td>
+                    <td ng-repeat="n in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]"></td>
+                </tr>
+                <tr>
+                    <td>Предлежание плода</td>
+                    <td ng-repeat="n in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]">
+                        <span tooltip="[[ presenting_part[n][1] ]]">[[ presenting_part[n][0] ]]
+                        </span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Сердцебиение</td>
+                    <td ng-repeat="n in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]">[[ fetus_heart_rate[n] ]]</td>
+                </tr>
+                <tr>
+                    <td>Отеки</td>
+                    <td ng-repeat="n in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]">[[ edema[n] ]]</td>
+                </tr>
+            </tbody>
+        </table>
+        <table class="table table-bordered">
+            <caption>Средняя величина прибавки массы тела у беременных [[ weight_gain_title ]]</caption>
+            <tbody>
+                <tr>
+                    <td></td>
+                    <td colspan="19">
+                        <nvd3-line-chart
+                                data="weight_gain_data"
+                                id="weight_gain_data"
+                                width="1200"
+                                height="430"
+                                showXAxis="true"
+                                showYAxis="true"
+                                tooltips="true"
+                                interactive="true"
+                                margin="{left:30, top:20, bottom:20, right:20}"
+                                forcex="[0, 266]"
+                                forcey="[-2, 13]"
+                                xAxisTickValues="[0, 8, 22, 36, 50, 64, 78, 92, 106, 120, 134, 148, 162, 176, 190, 204, 218, 232, 246, 260]"
+                                xAxisTickFormat="xAxisTickFormat"
+                                showLegend="true"
+                                ><svg></svg>
+                        </nvd3-line-chart>
+                    </td>
+                </tr>
+                <tr>
+                    <th></th>
+                    <th>5-6</th>
+                    <th>7-8</th>
+                    <th>9-10</th>
+                    <th>11-12</th>
+                    <th>13-14</th>
+                    <th>15-16</th>
+                    <th>17-18</th>
+                    <th>19-20</th>
+                    <th>21-22</th>
+                    <th>23-24</th>
+                    <th>25-26</th>
+                    <th>27-28</th>
+                    <th>29-30</th>
+                    <th>31-32</th>
+                    <th>33-34</th>
+                    <th>35-36</th>
+                    <th>37-38</th>
+                    <th>39-40</th>
+                    <th>41-42</th>
+                </tr>
+                <tr>
+                    <td>Масса, кг </td>
+                    <td ng-repeat="n in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]">[[ weight[n] ]]</td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 {% endblock %}
 
