@@ -418,12 +418,17 @@ def api_schedule_lock():
         Schedule.date == date,
         Schedule.deleted == 0
     )
-    reasonOfAbsence = rbReasonOfAbsence.query.filter(rbReasonOfAbsence.code == roa).first()
-    if not scheds.count() or not reasonOfAbsence:
-        return abort(404)
-    scheds.update({
-        Schedule.reasonOfAbsence_id: reasonOfAbsence.id
-    }, synchronize_session=False)
+    if roa is None:
+        scheds.update({
+            Schedule.reasonOfAbsence_id: None
+        }, synchronize_session=False)
+    else:
+        reasonOfAbsence = rbReasonOfAbsence.query.filter(rbReasonOfAbsence.code == roa).first()
+        if not scheds.count() or not reasonOfAbsence:
+            return abort(404)
+        scheds.update({
+            Schedule.reasonOfAbsence_id: reasonOfAbsence.id
+        }, synchronize_session=False)
     db.session.commit()
     return ''
 

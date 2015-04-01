@@ -97,16 +97,21 @@ var DaySetupModalCtrl = function ($scope, $modalInstance, selected_days, model, 
         $scope.times_valid = valid;
     };
 };
-var DayFreeModalCtrl = function ($scope, $modalInstance, day, roas) {
-    $scope.day = day;
-    $scope.roa = day.roa ? (day.roa.code) : (null);
+var DayFreeModalCtrl = function ($scope, $modalInstance, roa) {
+    $scope.model = {
+        roa: (roa)?(roa.code):(null)
+    };
+    $scope.roa_set_on_start = Boolean(roa);
     $scope.accept = function () {
-        $modalInstance.close(this.roa);
+        $modalInstance.close($scope.model.roa);
     };
     $scope.cancel = function () {
         $modalInstance.dismiss('cancel');
     };
-    $scope.roas = roas;
+    $scope.remove_roa = function () {
+        // $modalInstance.close(null);
+        $scope.model.roa = null;
+    };
 };
 var ScheduleMonthCtrl = function ($scope, $http, $modal, RefBook, PersonTreeUpdater, $location) {
     $scope.reception_types = new RefBook('rbReceptionType');
@@ -423,11 +428,8 @@ var ScheduleMonthCtrl = function ($scope, $http, $modal, RefBook, PersonTreeUpda
             templateUrl: 'modal-DayFree.html',
             controller: DayFreeModalCtrl,
             resolve: {
-                day: function () {
-                    return day;
-                },
-                roas: function () {
-                    return $scope.rbReasonOfAbsence.objects
+                roa: function () {
+                    return day.roa;
                 }
             }
         });
@@ -437,10 +439,14 @@ var ScheduleMonthCtrl = function ($scope, $http, $modal, RefBook, PersonTreeUpda
                 date: day.date,
                 roa: roa
             }).success(function () {
-                window.open(url_schedule_api_html_day_free +
-                '?person_id=' + $scope.person_id +
-                '&date=' + day.date,
-                    '_self');
+                if (roa) {
+                    window.open(url_schedule_api_html_day_free +
+                    '?person_id=' + $scope.person_id +
+                    '&date=' + day.date,
+                        '_self');
+                } else {
+                    $scope.reloadSchedule();
+                }
             });
         })
     };

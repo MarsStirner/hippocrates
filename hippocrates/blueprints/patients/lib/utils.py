@@ -1,11 +1,20 @@
 # -*- coding: utf-8 -*-
 
-from nemesis.models.client import ClientAllergy, ClientContact, ClientDocument, \
-    ClientIntoleranceMedicament, ClientSocStatus, ClientPolicy, \
-    BloodHistory, ClientAddress, ClientRelation, Address
+import base64
+import datetime
+import os
+import mimetypes
+
+from nemesis.app import app
+from nemesis.systemwide import db
+from nemesis.lib.utils import logger, safe_date, safe_traverse, get_new_uuid
+from nemesis.models.client import (ClientAllergy, ClientContact, ClientDocument,
+   ClientIntoleranceMedicament, ClientSocStatus, ClientPolicy, BloodHistory, ClientAddress,
+   ClientRelation, Address, ClientFileAttach
+)
 from nemesis.models.enums import AddressType
-from nemesis.models.exists import rbSocStatusClass
-from nemesis.lib.utils import safe_date, safe_traverse, get_new_uuid
+from nemesis.models.exists import rbSocStatusClass, FileMeta, FileGroupDocument
+
 
 
 # def format_snils(snils):
@@ -105,8 +114,7 @@ def add_or_update_doc(client, data):
     doc_id = data.get('id')
     deleted = data.get('deleted', 0)
     if deleted:
-        doc = ClientDocument.query.get(doc_id)
-        doc.deleted = deleted
+        doc = delete_document(doc_id, deleted)
         return doc
 
     doc_type = safe_traverse(data, 'doc_type', 'id')
@@ -135,6 +143,15 @@ def add_or_update_doc(client, data):
         doc.client = client
     else:
         doc = ClientDocument(doc_type, serial, number, beg_date, end_date, origin, client)
+    return doc
+
+
+def delete_document(doc_id, deleted):
+    doc = ClientDocument.query.get(doc_id)
+    doc.deleted = deleted
+    if doc.cfa_id:
+        cfa = delete_client_file_attach(doc.cfa_id)
+        db.session.add(cfa)
     return doc
 
 
@@ -235,20 +252,23 @@ def add_or_update_policy(client, data):
     policy_id = data.get('id')
     pol_type = safe_traverse(data, 'policy_type', 'id')
     deleted = data.get('deleted', 0)
+    if deleted:
+        policy = delete_policy(policy_id, deleted)
+        return policy
+
     serial = data.get('serial') or ''
     number = data.get('number')
     beg_date = safe_date(data.get('beg_date'))
     end_date = safe_date(data.get('end_date'))
     insurer = data['insurer']
-    if not deleted:
-        if not pol_type:
-            raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Тип полиса')
-        if not number:
-            raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Номер полиса')
-        if not beg_date:
-            raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Дата выдачи')
-        if not (insurer['id'] or insurer['full_name']):
-            raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Страховая медицинская организация')
+    if not pol_type:
+        raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Тип полиса')
+    if not number:
+        raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Номер полиса')
+    if not beg_date:
+        raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Дата выдачи')
+    if not (insurer['id'] or insurer['full_name']):
+        raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Страховая медицинская организация')
 
     if policy_id:
         policy = ClientPolicy.query.get(policy_id)
@@ -260,9 +280,17 @@ def add_or_update_policy(client, data):
         policy.insurer_id = insurer['id']
         policy.name = insurer['full_name'] if not insurer['id'] else None
         policy.client = client
-        policy.deleted = deleted
     else:
         policy = ClientPolicy(pol_type, serial, number, beg_date, end_date, insurer, client)
+    return policy
+
+
+def delete_policy(policy_id, deleted):
+    policy = ClientPolicy.query.get(policy_id)
+    policy.deleted = deleted
+    if policy.cfa_id:
+        cfa = delete_client_file_attach(policy.cfa_id)
+        db.session.add(cfa)
     return policy
 
 
@@ -355,7 +383,7 @@ def add_or_update_soc_status(client, data):
         soc_status = ClientSocStatus.query.get(soc_status_id)
         soc_status.deleted = deleted
         if soc_status.self_document:
-            soc_status.self_document.deleted = deleted
+            doc = delete_document(soc_status.self_document.id, deleted)
         return soc_status
 
     soc_status_type = safe_traverse(data, 'ss_type', 'id')
@@ -473,3 +501,111 @@ def add_or_update_contact(client, data):
 #     id_ext.identifier = id_info['identifier']
 #     id_ext.modifyDatetime = now
 #     return id_ext
+
+
+def get_file_ext_from_mimetype(mime):
+    if not mime:
+        return ''
+    ext_list = mimetypes.guess_all_extensions(mime)
+    ext = ''
+    if ext_list:
+        if len(ext_list) == 1:
+            ext = ext_list[0]
+        elif '.jpg' in ext_list:
+            ext = '.jpg'
+        elif '.xls' in ext_list:
+            ext = '.xls'
+        else:
+            ext = ext_list[0]
+    return ext
+
+
+def generate_filename(name, mime, descname=None, idx=None, date=None, relation_type=None):
+    file_ext = get_file_ext_from_mimetype(mime)
+    if name:
+        filename = u"{0}_{1:%y%m%d_%H%M}{2}".format(name, date, file_ext)
+    else:
+        template = u'{descname}_{reltype}Лист_№{idx}_{date:%y%m%d_%H%M}{ext}'
+        date = date or datetime.datetime.now()
+        filename = template.format(
+            descname=descname, idx=idx, date=date,
+            reltype=u'({0})_'.format(relation_type) if relation_type else u'',
+            ext=file_ext
+        )
+    return filename
+
+
+def store_file_locally(filepath, file_data):
+    uri_string = file_data
+    data_string = uri_string.split(',')[1]  # seems legit
+    data_string = base64.b64decode(data_string)
+    dirname = os.path.dirname(filepath)
+    try:
+        if not os.path.exists(dirname):
+            os.makedirs(dirname)
+        with open(filepath, 'wb') as f:
+            f.write(data_string)
+    except IOError, e:
+        logger.error(u'Ошибка сохранения файла средствами МИС: %s' % e, exc_info=True)
+        return False, u'Ошибка сохранения файла: %s' % e
+    return True, ''
+
+
+def save_new_file(file_info, filename, fgd, client_id):
+    f_meta = file_info.get('meta')
+    f_file = file_info.get('file')
+    f_idx = f_meta.get('idx')
+    f_mime = f_file.get('mime')
+
+    fm = FileMeta()
+    fm.name = filename
+    fm.mimetype = f_mime
+    fm.filegroup = fgd  # не очень оптимальная связка, появляется селект
+    fm.idx = f_idx
+    fm.deleted = 1
+
+    db.session.flush([fm])
+
+    # При интеграции с ЗХПД
+    # if config.secure_person_data_storage_enabled:
+    #     store_in_external_system()
+    #     ...
+
+    # TODO: при сохранении файлов для другой связанной сущности изменить префикс директории
+    directory = 'c%s' % client_id
+    filepath = os.path.join(directory, filename)
+    fullpath = os.path.join(app.config['FILE_STORAGE_PATH'], filepath)
+    ok, msg = store_file_locally(fullpath, f_file.get('data'))
+    if not ok:
+        return ok, msg
+    else:
+        fm.query.filter(FileMeta.id == fm.id).update({
+            'deleted': 0,
+            'path': filepath
+        }, synchronize_session=False)
+        return True, ''
+
+
+def delete_client_file_attach(cfa_id):
+    cfa = ClientFileAttach.query.get(cfa_id)
+    cfa.deleted = 1
+    db.session.add(cfa)
+    FileMeta.query.join(FileGroupDocument, ClientFileAttach).filter(
+        FileMeta.filegroup_id == FileGroupDocument.id,
+        FileGroupDocument.id == ClientFileAttach.filegroup_id,
+        ClientFileAttach.id == cfa_id
+    ).update({
+        FileMeta.deleted: 1
+    }, synchronize_session=False)
+    return cfa
+
+
+def delete_client_file_attach_and_relations(cfa_id):
+    cfa = delete_client_file_attach(cfa_id)
+    ClientDocument.query.filter(ClientDocument.cfa_id == cfa_id).update({
+        ClientDocument.cfa_id: None
+    })
+    ClientPolicy.query.filter(ClientPolicy.cfa_id == cfa_id).update({
+        ClientPolicy.cfa_id: None
+    })
+    db.session.commit()

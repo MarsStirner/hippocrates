@@ -1,4 +1,4 @@
-<ng-form name="mainInfoForm" toc-element="Копии документов">
+<ng-form name="fileAttachForm" toc-element="Копии документов">
     <legend>Копии документов</legend>
     <div class="row">
     <div class="col-md-11">
@@ -9,10 +9,13 @@
                 <div class="row">
                     <ul>
                         <li ng-repeat="fa in client.file_attaches">
-                            <a ng-click="open_file(fa.id)">[[ fa.file_document.name ]]</a> (Страницы
-                            <span ng-repeat="page in fa.file_document.files">
-                                <a href="javascript:void(0)" ng-click="open_file(fa.id, page.idx)">[[page.idx + 1]]</a>
-                            </span>)
+                            <wm-client-file-attach-item model-attach="fa"
+                                on-open="openFile(fa_id, page_idx)">
+                            </wm-client-file-attach-item>
+                            <button type="button" class="btn btn-default btn-sm" ng-click="printFileAttach(fa)"
+                                title="Печать всех страниц документа">
+                                <span class="glyphicon glyphicon-print"></span>
+                            </button>
                         </li>
                     </ul>
                 </div>

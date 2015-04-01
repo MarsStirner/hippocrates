@@ -2,17 +2,17 @@
 
 angular.module('WebMis20.controllers').
     controller('ClientCtrl',
-        ['$scope', '$http', '$modal', 'WMClient', 'WMClientServices', 'PrintingService', 'RefBookService', '$window', '$document', 'FileEditModal',
-        function ($scope, $http, $modal, WMClient, WMClientServices, PrintingService, RefBookService, $window, $document, FileEditModal) {
+        ['$scope', '$http', '$modal', 'WMClient', 'WMClientServices', 'PrintingService', 'RefBookService', '$window',
+         '$document', 'FileEditModal', 'WMConfig', '$q', '$timeout',
+        function ($scope, $http, $modal, WMClient, WMClientServices, PrintingService, RefBookService, $window, $document,
+                  FileEditModal, WMConfig, $q, $timeout) {
             $scope.records = [];
             $scope.aux = aux;
             $scope.params = aux.getQueryParams(document.location.search);
             $scope.rbGender = RefBookService.get('Gender');
-            $scope.rbPerson = RefBookService.get('vrbPersonWithSpeciality');
             $scope.alerts = [];
             $scope.clientServices = WMClientServices;
-
-            $scope.currentDate= new Date();
+            $scope.currentDate = new Date();
 
             $scope.client_id = $scope.params.client_id;
             var client = $scope.client = new WMClient($scope.client_id);
@@ -75,11 +75,7 @@ angular.module('WebMis20.controllers').
                         $scope.clientForm.$setPristine();
                         window.open(url_client_html + '?client_id=' + new_client_id, '_self');
                     } else {
-                        $scope.client.reload().then(function() {
-                            $scope.refresh_form();
-                        }, function() {
-                            // todo: onerror?
-                        });
+                        $scope.reloadClient();
                     }
                 }, function(message) {
                     alert(message);
@@ -111,36 +107,97 @@ angular.module('WebMis20.controllers').
                 }
             };
 
-            client.reload().then(function() {
-                $scope.refresh_form();
-            }, function(message) {
-                alert(message);
-            });
+            $scope.reloadClient = function() {
+                client.reload().then(function() {
+                    $scope.refresh_form();
+                }, function(message) {
+                    alert(message);
+                });
+            };
 
-            $scope.add_new_file = function (document_id, policy_id) {
+            $scope.add_new_file = function (documentInfo, policyInfo) {
                 FileEditModal.addNew($scope.client_id, {
                     attachType: 'client',
-                    document_id: document_id,
-                    policy_id: policy_id,
+                    documentInfo: documentInfo,
+                    policyInfo: policyInfo,
                     client: $scope.client
                 })
                 .then(function () {
-                    $scope.client.reload();
+                    $scope.reloadClient();
                 }, function () {
-                    $scope.client.reload();
+                    $scope.reloadClient();
                 });
             };
-            $scope.open_file = function (cfa_id, idx) {
+            $scope.openFile = function (cfa_id, idx) {
                 FileEditModal.open(cfa_id, {
                     attachType: 'client',
                     idx: idx,
-                    client: $scope.client
+                    client: $scope.client,
+                    editMode: true
                 })
                 .then(function () {
-                    $scope.client.reload();
+                    $scope.reloadClient();
                 }, function () {
-                    $scope.client.reload();
+                    $scope.reloadClient();
                 });
             };
+            $scope.printFileAttach = function (fa) {
+                function makeDocument(fa) {
+                    var deferred = $q.defer();
+                    var html = '<html><style>{0}</style><body>{1}</body></html>'.format(
+                        '@media print {\
+                            img {\
+                                max-width: 100% !important;\
+                            }\
+                        }',
+                        '{0}'
+                    );
+                    var pages = [],
+                        promises = [];
+                    angular.forEach(fa.file_document.files, function (fileMeta) {
+                        var idx = fileMeta.idx,
+                            promise;
+                        pages[idx] = new Image();
+                        promise = $http.get(WMConfig.url.api_patient_file_attach, {
+                            params: {
+                                file_meta_id: fileMeta.id
+                            }
+                        }).success(function (data) {
+                            pages[idx].src = "data:{0};base64,".format(data.result.mime) + data.result.data;
+                        }).error(function () {
+                            pages[idx] = document.createElement('p');
+                            pages[idx].innerHTML = 'Ошибка загрузки {0} страницы документа'.format(idx);
+                        });
+                        promises.push(promise);
+                    });
+
+                    $q.all(promises).then(function composeDocument() {
+                        var html_pages = '';
+                        angular.forEach(pages, function (elem) {
+                            html_pages += '<div style="page-break-after: always">{0}</div>'.format(elem.outerHTML)
+                        });
+                        html = html.format(html_pages);
+                        deferred.resolve(html);
+                    }, function () {
+                        deferred.reject('Ошбика формирования документа на печать');
+                    });
+                    return deferred.promise;
+                }
+                // browser prevents opening a window if it was triggered not from user actions
+                // i.e. user click event and corresponding callback function.
+                // Using promises results in calling new functions, that are not directly fired by user.
+                var w = $window.open();
+                makeDocument(fa).then(function openPrintWindow(html) {
+                    w.document.open();
+                    w.document.write(html);
+                    w.document.close();
+                    $timeout(w.print, 300);
+                }, function (error) {
+                    w.close();
+                    alert(error);
+                });
+            };
+
+            $scope.reloadClient();
         }
     ]);

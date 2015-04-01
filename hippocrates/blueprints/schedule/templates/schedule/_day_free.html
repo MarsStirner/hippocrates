@@ -3,19 +3,17 @@
     <h4 class="modal-title" id="myModalLabel">Блокировка дня и перенос пациентов</h4>
 </div>
 <div class="modal-body">
-    <div class="row">
-        <div class="col-md-12">
-            <p>
-
-            </p>
-        </div>
-    </div>
-    <div class="row">
+    <div class="row vmargin10">
         <div class="col-md-4">
             <label for="absent">Причина отсутствия</label>
         </div>
         <div class="col-md-8">
-            <select id="absent" class="form-control" ng-options="item.code as item.name for item in roas" ng-model="roa"></select>
+            <select id="absent" class="form-control" ref-book="rbReasonOfAbsence" ng-options="item.code as item.name for item in $refBook.objects" ng-model="model.roa"></select>
+        </div>
+    </div>
+    <div class="row vmargin10" ng-if="roa_set_on_start">
+        <div class="col-md-offset-4 col-md-8">
+            <button type="button" class="btn btn-primary" ng-click="remove_roa()">Убрать причину отсутствия</button>
         </div>
     </div>
 </div>

@@ -5,11 +5,24 @@
         <ng-form name="idDocForm">
             <div class="row">
                 <div class="col-md-11">
-                    <wm-document id-postfix="c[[$index]]"
-                        group-code="1"
-                        model-document="doc"
-                        edit-mode="doc.id ? edit.activated : true">
-                    </wm-document>
+                    <div class="panel panel-default">
+                    <div class="panel-body">
+                        <wm-document id-postfix="c[[$index]]"
+                            group-code="1"
+                            model-document="doc"
+                            edit-mode="doc.id ? edit.activated : true">
+                        </wm-document>
+{#                        <div ng-if="doc.file_attach">#}
+{#                            <h5 class="attach-file-copy-heading">Копия документа</h5>#}
+{#                            <wm-client-file-attach attach-type="document"#}
+{#                                model-attach="doc.file_attach"#}
+{#                                model-doc="doc"#}
+{#                                on-add="add_new_file(documentInfo, policyInfo)"#}
+{#                                on-open="openFile(cfa_id, idx)">#}
+{#                            </wm-client-file-attach>#}
+{#                        </div>#}
+                    </div>
+                    </div>
                 </div>
                 <div class="col-md-1">
                     <div class="row" ng-show="doc.id">
