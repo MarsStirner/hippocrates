@@ -84,6 +84,7 @@
                     <div class="panel-body">
                         <h5>Младенческая смертность в текущем году: <b>17,87 &#8240;</b></h5>
                         </br>
+                        </br>
                         <h5>Соотношение умерших и живых детей</h5>
                         <nvd3-multi-bar-chart
                             data="infants_death"
@@ -96,8 +97,33 @@
                             showYAxis="true"
     {#                        showlegend="true"#}
                             showlabels="true"
-                            tooltipcontent="toolTipContentFunction()"
+                            tooltipcontent="toolTipContentFunction_infants_death()"
                                 >
+                                <svg></svg>
+                        </nvd3-multi-bar-chart>
+                    </div>
+                </div>
+                <div class="panel panel-default">
+                    <div class="panel-heading">Материнская смертность</div>
+                    <div class="panel-body">
+                        <h5>Материнская смертность в текущем году: <b>59</b></h5>
+                    </div>
+                </div>
+                <div class="panel panel-default">
+                    <div class="panel-heading">Исходы беременностей за текущий год</div>
+                    <div class="panel-body">
+                        <nvd3-multi-bar-chart
+                            data="pregnancy_results"
+                            id="pregnancy_results"
+                            width="550"
+                            height="350"
+                            tooltips="true"
+                            interactive="true"
+                            showXAxis="false"
+                            showYAxis="true"
+    {#                        showlegend="true"#}
+                            showlabels="true"
+                            tooltipcontent="toolTipContentFunction_pregnancy_results()">
                                 <svg></svg>
                         </nvd3-multi-bar-chart>
                     </div>

@@ -8,21 +8,38 @@ var IndexCtrl = function ($scope, RisarApi) {
     $scope.infants_death = [
                   {
                       "key": "Умершие",
-                      "values": [ [ 1 , 10] , [ 2 , 12] ],
+                      "values": [ [ 1, 10] , [ 2, 12] ],
                       "color": "#6699CC"
                   },
                   {
                       "key": "Живые",
-                      "values": [ [ 3 , 34] , [ 4 , 38]],
+                      "values": [ [ 3, 34] , [ 4, 38]],
                       "color": "#FF6633"
-                 },
+                  }
              ];
 
-    $scope.toolTipContentFunction = function(){
+    $scope.pregnancy_results = [
+                  {
+                      "key": "Количество абортов",
+                      "values": [ [ 1, 61] ],
+                      "color": "#6699CC"
+                  },
+                  {
+                      "key": "Количество родов",
+                      "values": [ [ 2, 1234] ],
+                      "color": "#FF6633"
+                  }
+
+    ];
+    $scope.toolTipContentFunction_infants_death = function(){
         return function(key, x, y, e, graph) {
             var month = x%2 ? ' за ' + moment().add(-1, 'month').format("MMMM"): ' за ' + moment().format("MMMM");
-            return  '<h4>' + key + month + '</h4>' +
-                '<p>' +  y + '</p>'
+            return  key + month + '<p>' +  y + '</p>'
+        }
+    }
+    $scope.toolTipContentFunction_pregnancy_results = function(){
+        return function(key, x, y, e, graph) {
+            return  key + '<p>' +  y + '</p>'
         }
     }
     $scope.$watch('search_date.date', function (n, o) {
