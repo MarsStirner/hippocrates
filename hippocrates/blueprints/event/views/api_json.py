@@ -578,7 +578,8 @@ def api_event_actions(event_id=None, at_group=None, page=None, per_page=None, or
 
     action_query = Action.query.join(ActionType).filter(
         Action.event_id == event_id,
-        Action.deleted == 0
+        Action.deleted == 0,
+        ActionType.class_ == at_class
     ).options(
         joinedload(Action.actionType, innerjoin=True)
     )
