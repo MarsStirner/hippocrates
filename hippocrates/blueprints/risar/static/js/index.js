@@ -5,6 +5,26 @@ var IndexCtrl = function ($scope, RisarApi) {
     $scope.query = "";
     $scope.search_date = {date:new Date()}; // и это костыль. этот для работы wmDate
     $scope.tickets = [];
+    $scope.infants_death = [
+                  {
+                      "key": "Умершие",
+                      "values": [ [ 1 , 10] , [ 2 , 12] ],
+                      "color": "#6699CC"
+                  },
+                  {
+                      "key": "Живые",
+                      "values": [ [ 3 , 34] , [ 4 , 38]],
+                      "color": "#FF6633"
+                 },
+             ];
+
+    $scope.toolTipContentFunction = function(){
+        return function(key, x, y, e, graph) {
+            var month = x%2 ? ' за ' + moment().add(-1, 'month').format("MMMM"): ' за ' + moment().format("MMMM");
+            return  '<h4>' + key + month + '</h4>' +
+                '<p>' +  y + '</p>'
+        }
+    }
     $scope.$watch('search_date.date', function (n, o) {
         RisarApi.schedule(n).then(function (tickets) {
             $scope.tickets = tickets;
