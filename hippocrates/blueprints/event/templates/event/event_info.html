@@ -13,7 +13,15 @@
                 {% elif not event and event.is_stationary %}Создание госпитализации
                 {% elif not event and not event.is_stationary %}Создание обращения
                 {% endif %}{{ event.externalId }}, пациент
-                <a href="{{ url_for('patients.patient', client_id=event.client_id) }}">[[ event.info.client.info.full_name ]]</a>
+                {% if user_profiles_mng.has_ui_doctor() %}
+                <a href="{{ url_for('patients.patient_info_full', client_id=event.client_id) }}" tooltip="Просмотр регистрационной карты">
+                    [[ event.info.client.info.full_name ]]
+                </a>
+                {% elif user_profiles_mng.has_ui_registrator() %}
+                <a href="{{ url_for('patients.patient', client_id=event.client_id) }}" tooltip="Редактирование регистрационной карты">
+                    [[ event.info.client.info.full_name ]]
+                </a>
+                {% else %}[[ event.info.client.info.full_name ]]{% endif %}
             </h2>
         </legend>
         <div class="row">
