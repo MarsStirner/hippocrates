@@ -16,10 +16,18 @@ var ChartCtrl = function ($scope, $modal, RisarApi) {
         }
         return 'Нет данных'
     }
+
+    $scope.declOfNum = function (number, titles)
+    {
+        var cases = [2, 0, 1, 1, 1, 2];
+        return titles[ (number%100>4 && number%100<20)? 2 : cases[(number%10<5)?number%10:5] ];
+    }
+
     var reload_chart = function () {
         RisarApi.chart.get(event_id, ticket_id)
         .then(function (event) {
             $scope.chart = event;
+            $scope.first_checkup = $scope.chart.checkups[$scope.chart.checkups.length-1];
             if ($scope.chart.pregnancy_week > 40) {
                 $scope.pregnancy_week = '40+'}
             else {
@@ -36,9 +44,10 @@ var ChartCtrl = function ($scope, $modal, RisarApi) {
 
             function get_mass_gain(prev, curr, i){
                 if (i == $scope.chart.checkups.length - 1){
-                    curr.weight_gain = 0;
+                    curr.weight_gain = [0, 0];
                 }
-                prev.weight_gain = curr.weight ? prev.weight - curr.weight : 0;
+                var num_days = moment(prev.beg_date).diff(moment(curr.beg_date), 'days')
+                prev.weight_gain = curr.weight ? [prev.weight - curr.weight, num_days ] : [0, num_days];
                 return curr
             }
             $scope.chart.checkups.reduce(get_mass_gain);

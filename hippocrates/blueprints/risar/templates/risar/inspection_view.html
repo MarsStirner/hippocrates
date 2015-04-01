@@ -81,7 +81,9 @@
                 </tr>
                 <tr>
                     <th>Прибавка в массе</th>
-                    <td ng-repeat="checkup in chart.checkups"><i class="glyphicon glyphicon-arrow-up text-success"></i>[[ checkup.weight_gain ]]</td>
+                    <td ng-repeat="checkup in chart.checkups"><i class="glyphicon glyphicon-arrow-up text-success"></i>
+                        <span tooltip="Прибавка в массе на расчётный срок [[ checkup.pregnancy_week ]] [[declOfNum(checkup.pregnancy_week, ['неделя', 'недели', 'недель'])]]">
+                            [[checkup.weight-first_checkup.weight]]</span>/<span tooltip="Прибавка в массе за [[ checkup.weight_gain[1] ]] [[declOfNum(checkup.weight_gain[1], ['день', 'дня', 'дней'])]]">[[ checkup.weight_gain[0] ]]</span></td>
                     <td></td>
                 </tr>
                 <tr>
