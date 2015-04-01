@@ -202,8 +202,8 @@
                     <tbody>
                     <tr ng-repeat="t in chart.anamnesis.transfusions">
                         <td ng-if="t.deleted" colspan="6" class="text-center">Удалено. <a ng-click="restore(t)" style="cursor: pointer">Восстановить</a>?</td>
-                        <td ng-if="!t.deleted" ng-bind="t.datetime | asDateTime"></td>
-                        <td ng-if="!t.deleted" ng-bind="t.type"></td>
+                        <td ng-if="!t.deleted" ng-bind="t.date | asDate"></td>
+                        <td ng-if="!t.deleted" ng-bind="t.type.name"></td>
                         <td ng-if="!t.deleted" ng-bind="t.blood_type.name"></td>
                         <td ng-if="!t.deleted" ng-bind="t.reaction"></td>
                         <td ng-if="!t.deleted" class="col-md-1 nowrap">
