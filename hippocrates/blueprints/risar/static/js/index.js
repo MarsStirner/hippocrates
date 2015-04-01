@@ -9,12 +9,12 @@ var IndexCtrl = function ($scope, RisarApi) {
                   {
                       "key": "Умершие",
                       "values": [ [ 1, 10] , [ 2, 12] ],
-                      "color": "#6699CC"
+                      "color": "#FF6633"
                   },
                   {
                       "key": "Живые",
                       "values": [ [ 3, 34] , [ 4, 38]],
-                      "color": "#FF6633"
+                      "color": "#339933"
                   }
              ];
 
@@ -22,12 +22,12 @@ var IndexCtrl = function ($scope, RisarApi) {
                   {
                       "key": "Количество абортов",
                       "values": [ [ 1, 61] ],
-                      "color": "#6699CC"
+                      "color": "#FF6633"
                   },
                   {
                       "key": "Количество родов",
                       "values": [ [ 2, 1234] ],
-                      "color": "#FF6633"
+                      "color": "#339933"
                   }
 
     ];
