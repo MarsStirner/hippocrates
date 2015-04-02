@@ -395,7 +395,7 @@ def add_or_update_soc_status(client, data):
         raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Дата начала')
     end_date = safe_date(data.get('end_date'))
     doc_info = data.get('self_document')
-    doc = add_or_update_doc(client, doc_info) if doc_info else None
+    doc = add_or_update_doc(client, doc_info) if doc_info.keys() else None
 
     if soc_status_id:
         soc_status = ClientSocStatus.query.get(soc_status_id)
