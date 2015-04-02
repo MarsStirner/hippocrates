@@ -59,7 +59,7 @@ def create_new_event(event_data, local_contract_data):
         lcon = create_or_update_local_contract(event, local_contract_data)
         event.localContract = lcon
 
-    if not event.is_diagnostic:
+    if event.is_policlinic:
         visit = Visit.make_default(event)
         db.session.add(visit)
         executives = Event_Persons()
