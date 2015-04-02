@@ -59,5 +59,5 @@
 {% endblock %}
 {% block modules_js %}
     {{ super() }}
-    <script src="{{ url_for('.static', filename='js/schedule_day.js', v=version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/schedule_day.js', v=app_version) }}"></script>
 {% endblock %}
