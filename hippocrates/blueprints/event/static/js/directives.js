@@ -390,7 +390,11 @@ function ($window, $http, ActionTypeTreeModal, MessageBox, WMEventServices, WMWi
                         event_type_id: scope.event.info.event_type.id,
                         contract_id: scope.event.info.contract.id
                     },
-                    scope.update_event);
+                    function afterActionCreate() {
+                        scope.pager.current_page = 1;
+                        scope.update_event();
+                    }
+                );
             };
             scope.update_event = function () {
                 scope.event.reload().then(function () {
