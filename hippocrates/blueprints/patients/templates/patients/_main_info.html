@@ -37,7 +37,7 @@
                     <div class="form-group col-md-3"
                          ng-class="{'has-error': mainInfoForm.birthdate.$invalid && (mainInfoForm.birthdate.$dirty || editing.submit_attempt)}">
                         <label for="birthdate" class="control-label">Дата рождения <span class="text-danger">*</span></label>
-                        <wm-date id="birthdate" ng-model="client.info.birth_date" ng-required="true" max-date="currentDate">
+                        <wm-date id="birthdate" name="birthdate" ng-model="client.info.birth_date" ng-required="true" max-date="currentDate">
                         </wm-date>
                     </div>
                     <div class="form-group col-md-3"
