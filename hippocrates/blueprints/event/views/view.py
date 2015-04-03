@@ -25,7 +25,7 @@ def html_event_info():
             return abort(404)
         new_url = u'%s/appeals/%s/' % (wm10url, event_id)
         return redirect(new_url)
-    return get_event_form(event=event)
+    return get_event_form(event=event, client_id=event.client_id)
 
 
 @module.route('/event_new.html')
@@ -35,7 +35,7 @@ def new_event():
         client_id = int(request.args['client_id'])
     except (KeyError, ValueError):
         return abort(400)
-    return get_event_form(event=None)
+    return get_event_form(event=None, client_id=client_id)
 
 
 def get_event_form(**kwargs):
