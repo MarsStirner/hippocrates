@@ -35,6 +35,7 @@
 {% endblock %}
 
 {% block modules_js %}
+    {{ super() }}
     <script src="{{ url_for('.static', filename='js/action_editor.js', v=app_version) }}"></script>
     <script src="{{ url_for('static', filename='js/services/event/event-services.js', v=nemesis_version) }}"></script>
 {% endblock %}
