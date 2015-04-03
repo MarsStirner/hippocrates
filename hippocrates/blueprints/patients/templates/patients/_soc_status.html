@@ -87,6 +87,11 @@
                                 ng-if="btnAddSsDocVisible(socstat)">
                                 <span class="glyphicon glyphicon-pencil"></span>
                             </button>
+                            <button type="button" class="btn btn-sm btn-primary" title="Очистить данные документа"
+                                ng-click="clientServices.clear_soc_status_doc(socstat, ssWorkDocForm)"
+                                ng-if="btnClearSsDocVisible(socstat)">
+                                <span class="glyphicon glyphicon-erase"></span>
+                            </button>
                         </h4>
                         <div class="panel panel-default">
                         <div class="panel-body">
