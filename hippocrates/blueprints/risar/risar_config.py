@@ -22,7 +22,7 @@ common_codes = [
 mother_codes = [
     'menstruation_last_date',
     'menstruation_start_age', 'menstruation_duration', 'menstruation_period', 'menstruation_disorders',
-    'sex_life_start_age', 'contraception_type', 'fertilization_type', 'family_income'] + common_codes
+    'sex_life_start_age', 'contraception', 'fertilization_type', 'family_income'] + common_codes
 father_codes = ['name', 'phone', 'HIV', 'fluorography'] + common_codes
 
 checkup_flat_codes = ['risarFirstInspection', 'risarSecondInspection']
