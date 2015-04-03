@@ -21,8 +21,11 @@ var EpicrisisCtrl = function ($timeout, $scope, RefBookService, RisarApi) {
         RisarApi.chart.get(event_id)
         .then(function (event) {
             $scope.chart = event;
-            var first_checkup = $scope.chart.checkups[$scope.chart.checkups.length-1];
-            $scope.weight_gain = $scope.chart.checkups[0].weight - first_checkup.weight; //прибавка массы за всю беременность
+
+            if($scope.chart.checkups.length){
+                var first_checkup = $scope.chart.checkups[$scope.chart.checkups.length-1];
+                $scope.weight_gain = $scope.chart.checkups[0].weight - first_checkup.weight; //прибавка массы за всю беременность
+            }
 
             if (!$scope.chart.epicrisis) {
                 $scope.chart.epicrisis = {
@@ -85,6 +88,15 @@ var EpicrisisCtrl = function ($timeout, $scope, RefBookService, RisarApi) {
             })
         }
     };
+
+    $scope.$watch('chart.epicrisis.delivery_date', function() {
+        if($scope.chart && !$scope.chart.epicrisis.pregnancy_duration && $scope.chart.epicrisis.delivery_date &&
+            $scope.chart.card_attributes.pregnancy_start_date){
+            var delivery_date = moment($scope.chart.epicrisis.delivery_date);
+            var pregnancy_start_date = moment($scope.chart.card_attributes.pregnancy_start_date)
+            $scope.chart.epicrisis.pregnancy_duration = Math.floor(delivery_date.diff(pregnancy_start_date, 'days')/7);
+        }
+    });
 
     var init = function () {
         var hash = document.location.hash;

@@ -40,14 +40,14 @@ var CheckupFirstEditCtrl = function ($scope, $window, $document, RisarApi, Confi
         $scope.checkup.BMI = $scope.checkup.height ? ($scope.checkup.weight/Math.pow($scope.checkup.height/100,2)).toFixed(1) : NaN;
     };
     $scope.$watch('checkup.height', function() {
-        if ($scope.checkup.height && (!isNaN($scope.checkup.weight))){
+        if ($scope.checkup && $scope.checkup.height && (!isNaN($scope.checkup.weight))){
         updateHW_Ratio();
         updateBMI();
         }
 
     });
     $scope.$watch('checkup.weight', function() {
-        if (!isNaN($scope.checkup.weight)){
+        if ($scope.checkup && !isNaN($scope.checkup.weight)){
             updateHW_Ratio();
             updateBMI();
         }

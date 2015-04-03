@@ -97,17 +97,6 @@
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <th class="text-right">[[ chart.epicrisis.pregnancy_final.code =='abortom' ? 'Аборт при сроке (недель)': 'Роды при сроке (недель)']]  <span class="text-danger">*</span></th>
-                                        <td>
-                                            <div class="row" ng-class="{'has-error': firstForm.pregnancy_duration.$invalid && firstForm.submit_attempt}">
-                                            <div class="col-md-2">
-                                                <input ng-model="chart.epicrisis.pregnancy_duration" class="form-control" name="pregnancy_duration"
-                                                       ng-required="true">
-                                            </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr>
                                         <th class="text-right">[[chart.epicrisis.pregnancy_final.code =='abortom'? 'Дата аборта': 'Дата родов']]  <span class="text-danger">*</span></th>
                                         <td>
                                             <div class="row" ng-class="{'has-error': firstForm.delivery_date.$invalid && firstForm.submit_attempt}">
@@ -127,6 +116,17 @@
                                                     <div fs-time ng-model="chart.epicrisis.delivery_time"
                                                          name="delivery_time" ng-required="true"></div>
                                                 </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-right">[[ chart.epicrisis.pregnancy_final.code =='abortom' ? 'Аборт при сроке (недель)': 'Роды при сроке (недель)']]  <span class="text-danger">*</span></th>
+                                        <td>
+                                            <div class="row" ng-class="{'has-error': firstForm.pregnancy_duration.$invalid && firstForm.submit_attempt}">
+                                            <div class="col-md-2">
+                                                <input ng-model="chart.epicrisis.pregnancy_duration" class="form-control" name="pregnancy_duration"
+                                                       ng-required="true">
+                                            </div>
                                             </div>
                                         </td>
                                     </tr>
