@@ -736,7 +736,7 @@
                                                             </div>
                                                         </td>
                                                     </tr>
-                                                    <tr ng-if="!child.alive">
+                                                    <tr ng-if="child.alive==false">
                                                         <th class="text-right">Дата смерти <span class="text-danger">*</span></th>
                                                         <td>
                                                             <wm-date ng-model="child.birth_date" ng-required="true"
@@ -744,7 +744,7 @@
                                                                      style="width: 250px" name="birth_date_[[$index]]"></wm-date>
                                                         </td>
                                                     </tr>
-                                                    <tr ng-if="!child.alive">
+                                                    <tr ng-if="child.alive==false">
                                                         <th class="text-right">Время смерти <span class="text-danger">*</span></th>
                                                         <td>
                                                             <div class="row" ng-class="{'has-error': sixthForm.birth_time_[[$index]].$invalid && sixthForm.submit_attempt}">
@@ -755,7 +755,7 @@
                                                             </div>
                                                         </td>
                                                     </tr>
-                                                    <tr ng-if="!child.alive">
+                                                    <tr ng-if="child.alive==false">
                                                         <th class="text-right">Причина смерти <span class="text-danger">*</span></th>
                                                         <td>
                                                             <div class="row" ng-class="{'has-error': sixthForm.death_reason_[[$index]].$invalid && sixthForm.submit_attempt}">
