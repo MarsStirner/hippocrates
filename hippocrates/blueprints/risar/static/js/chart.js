@@ -9,10 +9,12 @@ var ChartCtrl = function ($scope, $modal, RisarApi) {
     var ticket_id = params.ticket_id;
     var event_id = params.event_id;
     $scope.has_desease = function(has_diag){
-        if (has_diag){
-            return 'Положительно'
-        } else if ($scope.chart.checkups.length){
-            return 'Отрицательно'
+        if ($scope.chart){
+            if (has_diag){
+                return 'Положительно'
+            } else if ($scope.chart.checkups.length){
+                return 'Отрицательно'
+            }
         }
         return 'Нет данных'
     }
@@ -32,10 +34,6 @@ var ChartCtrl = function ($scope, $modal, RisarApi) {
                 $scope.pregnancy_week = '40+'}
             else {
                 $scope.pregnancy_week = $scope.chart.pregnancy_week
-            }
-            var mld = safe_traverse(event, ['anamnesis','mother','menstruation_last_date']);
-            if (mld){
-                $scope.birth_date = moment(mld).add(280, 'days').format("DD.MM.YYYY");
             }
             $scope.chart.bad_habits_mother = [{value:$scope.chart.anamnesis.mother.alcohol, text: 'алкоголь'},
                 {value:$scope.chart.anamnesis.mother.smoking, text: 'курение'},

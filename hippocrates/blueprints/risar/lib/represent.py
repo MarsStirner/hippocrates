@@ -144,7 +144,8 @@ def get_pregnancy_week(event, date=None):
 def represent_card_attributes(event):
     action = get_card_attrs_action(event)
     return {
-        'pregnancy_start_date': action['pregnancy_start_date'].value
+        'pregnancy_start_date': action['pregnancy_start_date'].value,
+        'predicted_delivery_date': action['predicted_delivery_date'].value
     }
 
 

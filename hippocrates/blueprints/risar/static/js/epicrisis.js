@@ -94,7 +94,7 @@ var EpicrisisCtrl = function ($timeout, $scope, RefBookService, RisarApi) {
             $scope.chart.card_attributes.pregnancy_start_date){
             var delivery_date = moment($scope.chart.epicrisis.delivery_date);
             var pregnancy_start_date = moment($scope.chart.card_attributes.pregnancy_start_date)
-            $scope.chart.epicrisis.pregnancy_duration = Math.floor(delivery_date.diff(pregnancy_start_date, 'days')/7);
+            $scope.chart.epicrisis.pregnancy_duration = Math.floor(delivery_date.diff(pregnancy_start_date, 'days')/7) + 1;
         }
     });
 

@@ -20,7 +20,7 @@
             </div>
             <div class="col-lg-4 col-md-4 col-sm-12 achievements">
                 <span class="pull-right">
-                    <span ng-if="pregnancy_week" class="label label-default" tooltip="Срок беременности">[[ pregnancy_week ]]</span><i class="fa fa-question" ng-if="!pregnancy_week" tooltip="Срок беременности"></i>
+                    <span ng-if="pregnancy_week" class="label label-default" tooltip="Срок беременности (дата начала случая - [[chart.card_attributes.pregnancy_start_date|asDate]])">[[ pregnancy_week ]]</span><i class="fa fa-question" ng-if="!pregnancy_week" tooltip="Срок беременности"></i>
                     <i risk-rate-icon="chart.risk_rate"></i>
                     <i class="fa fa-exclamation-triangle text-danger"></i>
                     <i class="fa fa-exclamation-triangle text-success"></i>
@@ -37,7 +37,7 @@
 {#                    </svg>#}
                     <i class="fa fa-exclamation-triangle text-success"></i>
                     <span ng-if="chart.epicrisis.delivery_date" tooltip="Фактическая дата родов">[[chart.epicrisis.delivery_date | asDate]]</span>
-                    <span ng-if="!chart.epicrisis.delivery_date" tooltip="Предполагаемая дата родов">[[birth_date]]</span>
+                    <span ng-if="!chart.epicrisis.delivery_date" tooltip="Предполагаемая дата родов">[[chart.card_attributes.predicted_delivery_date | asDate]]</span>
                     <i class="fa fa-question" tooltip="Предполагаемая дата родов" ng-if="!chart.epicrisis.delivery_date && !birth_date"></i>
                 </span>
             </div>

@@ -51,8 +51,8 @@
             </thead>
             <tbody>
                 <tr>
-                    <th>Срок беременности</th>
-                    <td ng-repeat="checkup in chart.checkups">[[ checkup.pregnancy_week ]]</td>
+                    <th>Срок беременности (расчётный)</th>
+                    <td ng-repeat="checkup in chart.checkups">[[ checkup.pregnancy_week ]] ([[checkup.calculated_pregnancy_week]])</td>
                     <td></td>
                 </tr>
                 <tr>
