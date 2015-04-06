@@ -83,4 +83,4 @@ app.register_blueprint(risar_module, url_prefix='/risar')
 
 
 if __name__ == "__main__":
-    app.run()
+    app.run(port=app.config['SERVER_PORT'])
