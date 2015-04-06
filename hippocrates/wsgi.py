@@ -2,6 +2,7 @@
 import os
 from nemesis.app import app, bootstrap_app
 import config
+from version import version as app_version
 
 __author__ = 'viruzzz-kun'
 
@@ -59,6 +60,13 @@ def general_menu():
     return dict(main_menu=menu_items)
 
 
+@app.context_processor
+def app_enum():
+    return {
+        'app_version': app_version,
+    }
+
+
 from blueprints.accounting.app import module as accounting_module
 from blueprints.anareports.app import module as anareports_module
 from blueprints.event.app import module as event_module
@@ -72,6 +80,7 @@ app.register_blueprint(event_module, url_prefix='/event')
 app.register_blueprint(patients_module, url_prefix='/patients')
 app.register_blueprint(schedule_module, url_prefix='/schedule')
 app.register_blueprint(risar_module, url_prefix='/risar')
+
 
 if __name__ == "__main__":
     app.run()

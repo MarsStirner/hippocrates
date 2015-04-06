@@ -5,15 +5,17 @@ import datetime
 from flask import request, abort
 from flask.ext.login import current_user
 from sqlalchemy import desc
+from sqlalchemy.orm import joinedload
 
 from nemesis.app import app
-from nemesis.models.actions import Action
+from nemesis.models.actions import Action, ActionType
 from nemesis.models.client import Client
 from nemesis.models.enums import EventPrimary, EventOrder
 from nemesis.models.event import (Event, EventType, Diagnosis, Diagnostic, Visit)
 from nemesis.models.exists import Person, rbRequestType, rbResult
 from nemesis.systemwide import db
 from nemesis.lib.utils import (jsonify, safe_traverse, logger, safe_datetime, get_utc_datetime_with_tz)
+from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.models.schedule import ScheduleClientTicket
 from nemesis.models.exists import (Organisation, )
 from nemesis.lib.jsonify import EventVisualizer
@@ -541,3 +543,69 @@ def api_event_search():
         event = Event.query.filter(Event.id == event['id']).first()
         events.append(viz.make_search_event_info(event))
     return jsonify(events)
+
+
+@module.route('/api/event_actions/')
+@module.route('/api/event_actions/<int:event_id>/<at_group>/<int:page>/<int:per_page>/')
+@module.route('/api/event_actions/<int:event_id>/<at_group>/<int:page>/<int:per_page>/<order_field>/<order_type>/')
+@api_method
+def api_event_actions(event_id=None, at_group=None, page=None, per_page=None, order_field=None, order_type=None):
+    eviz = EventVisualizer()
+    event = Event.query.filter(Event.id == event_id, Event.deleted == 0).first()
+    if not event:
+        raise ApiException(404, u'Записи Event с id = {0} не найдено'.format(event_id))
+    at_group_class = {
+        'medical_documents': 0,
+        'diagnostics': 1,
+        'lab': 1,
+        'treatments': 2
+    }
+    at_class = at_group_class.get(at_group)
+    if at_class is None:
+        raise ApiException(404, u'Неверное значение параметра \'at_group\' - {0}. Поддерживаемые значения: \'{1}\'.'.format(
+            at_group,
+            "', '".join(at_group_class.keys())
+        ))
+    if not page:
+        raise ApiException(404, u'Не передан параметр \'page\'.')
+    if not per_page:
+        raise ApiException(404, u'Не передан параметр \'per_page\'.')
+    if not order_field:
+        order_field = 'beg_date'
+    if not order_type:
+        order_type = 'desc'
+    desc_order = order_type == 'desc'
+
+    action_query = Action.query.join(ActionType).filter(
+        Action.event_id == event_id,
+        Action.deleted == 0,
+        ActionType.class_ == at_class
+    ).options(
+        joinedload(Action.actionType, innerjoin=True)
+    )
+    if at_group == 'lab':
+        action_query = action_query.filter(ActionType.isRequiredTissue == 1)
+    elif at_group == 'diagnostics':
+        action_query = action_query.filter(ActionType.isRequiredTissue == 0)
+
+    if order_field == 'at_name':
+        action_query = action_query.order_by(ActionType.name.desc() if desc_order else ActionType.name)
+    elif order_field == 'status_code':
+        action_query = action_query.order_by(Action.status.desc() if desc_order else Action.status)
+    elif order_field == 'beg_date':
+        action_query = action_query.order_by(Action.begDate.desc() if desc_order else Action.begDate)
+    elif order_field == 'end_date':
+        action_query = action_query.order_by(Action.endDate.desc() if desc_order else Action.endDate)
+    elif order_field == 'person_name':
+        action_query = action_query.outerjoin(Action.person).order_by(
+            Person.lastName.desc() if desc_order else Person.lastName
+        )
+
+    paginate = action_query.paginate(page, per_page, False)
+    return {
+        'pages': paginate.pages,
+        'total': paginate.total,
+        'items': [
+            eviz.make_action(action) for action in paginate.items
+        ]
+    }

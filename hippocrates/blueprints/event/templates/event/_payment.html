@@ -38,7 +38,7 @@
                     <div class="form-group col-md-4"
                          ng-class="{'has-error': payerForm.birthdate.$invalid && editing.submit_attempt}">
                         <label for="birthdate" class="control-label">Дата рождения</label>
-                        <wm-date id="birthdate" ng-model="event.payment.local_contract.birth_date"
+                        <wm-date id="birthdate" name="birthdate" ng-model="event.payment.local_contract.birth_date"
                                  ng-disabled="payer_info_disabled()">
                         </wm-date>
                     </div>

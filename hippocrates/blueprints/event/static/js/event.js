@@ -9,7 +9,7 @@ var EventDiagnosesCtrl = function ($scope) {
         return $scope.event.can_edit_diagnoses;
     };
 };
-var EventMainInfoCtrl = function ($scope, RefBookService, EventType, $filter, MessageBox, CurrentUser) {
+var EventMainInfoCtrl = function ($scope, $q, RefBookService, EventType, $filter, MessageBox, CurrentUser) {
     $scope.Organisation = RefBookService.get('Organisation');
     $scope.Contract = RefBookService.get('Contract');
     $scope.rbRequestType = RefBookService.get('rbRequestType');
@@ -237,7 +237,8 @@ var EventMainInfoCtrl = function ($scope, RefBookService, EventType, $filter, Me
 
     $scope.$on('event_loaded', function() {
         $scope.event.info.set_date = new Date($scope.event.info.set_date);
-        $scope.rbEventType.initialize($scope.event.info.client)
+        var et_loading = $scope.rbEventType.initialize($scope.event.info.client);
+        $q.all([et_loading, $scope.Contract.loading, $scope.rbRequestType.loading, $scope.rbFinance.loading])
         .then(function () {
             if ($scope.create_mode) {
                 $scope.event.info.event_type = $scope.rbEventType.get_available_et($scope.event.info.event_type);
@@ -788,7 +789,7 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
 };
 
 WebMis20.controller('EventDiagnosesCtrl', ['$scope', 'RefBookService', '$http', EventDiagnosesCtrl]);
-WebMis20.controller('EventMainInfoCtrl', ['$scope', 'RefBookService', 'EventType', '$filter', 'MessageBox',
+WebMis20.controller('EventMainInfoCtrl', ['$scope', '$q', 'RefBookService', 'EventType', '$filter', 'MessageBox',
     'CurrentUser', EventMainInfoCtrl]);
 WebMis20.controller('EventStationaryInfoCtrl', ['$scope', '$filter', EventStationaryInfoCtrl]);
 WebMis20.controller('EventPaymentCtrl', ['$scope', 'RefBookService', 'Settings', '$http', '$modal', 'MessageBox',
