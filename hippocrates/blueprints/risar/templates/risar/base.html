@@ -17,5 +17,6 @@
 {% block modules_js -%}
 {{ super() }}
 <script src="{{ url_for('.config_js', v=version) }}"></script>
+<script src="{{ url_for('.current_user_js', v=version) }}"></script>
 <script src="{{ url_for('.static', filename='js/script.js') }}"></script>
 {%- endblock %}
