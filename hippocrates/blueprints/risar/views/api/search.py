@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 import datetime
+import math
 
 from flask import request
 
 from nemesis.lib.apiutils import api_method
+from nemesis.lib.utils import safe_int
 from nemesis.models.enums import PrenatalRiskRate
 from nemesis.models.exists import Organisation, Person
 from blueprints.risar.app import module
@@ -44,18 +46,27 @@ def search_events(**kwargs):
         else:
             risk = kwargs['risk']
         query = query.filter(risk__in=risk)
-    if 'bdate' in kwargs:
-        query = query.filter(bdate__eq=sphinx_days(kwargs['bdate']))
+    if 'bdate_from' in kwargs:
+        query = query.filter(bdate__gte=sphinx_days(kwargs['bdate_from']))
+    if 'bdate_to' in kwargs:
+        query = query.filter(bdate__lte=sphinx_days(kwargs['bdate_to']))
     if 'psdate' in kwargs:
         query = query.filter(psdate__eq=sphinx_days(kwargs['psdate']))
-    if 'checkup_date' in kwargs:
-        query = query.filter(checkups__eq=sphinx_days(kwargs['checkup_date']))
+    if 'checkup_date_from' in kwargs:
+        query = query.filter(checkups__gte=sphinx_days(kwargs['checkup_date_from']))
+    if 'checkup_date_to' in kwargs:
+        query = query.filter(checkups__lte=sphinx_days(kwargs['checkup_date_to']))
     if 'closed' in kwargs:
         if kwargs['closed']:
             query = query.filter(exec_date__neq=0)
         else:
             query = query.filter(exec_date__eq=0)
-    result = query.limit(0, 100).ask()
+
+    per_page = kwargs.get('per_page', 10)
+    page = kwargs.get('page', 1)
+    from_ = (page - 1) * per_page
+    to_ = page * per_page
+    result = query.limit(from_, to_).ask()
     return result
 
 
@@ -65,27 +76,36 @@ def api_0_event_search():
     data = dict(request.args)
     if request.json:
         data.update(request.json)
+    per_page = safe_int(data.get('per_page')) or 10
+    data['per_page'] = per_page
     result = search_events(**data)
+
+    total = safe_int(result['result']['meta']['total_found'])
+    pages = int(math.ceil(total / float(per_page)))
     today = datetime.date.today()
-    return [
-        {
-            'event_id': row['id'],
-            'client_id': row['client_id'],
-            'name': row['name'],
-            'set_date': datetime.date.fromtimestamp(row['set_date'] * 86400) if row['set_date'] else None,
-            'exec_date': datetime.date.fromtimestamp(row['exec_date'] * 86400) if row['exec_date'] else None,
-            'external_id': row['external_id'],
-            'exec_person_name': row['person_name'],
-            'risk': PrenatalRiskRate(row['risk']),
-            'mdate': datetime.date.fromtimestamp(row['modify_date']),
-            'pddate': datetime.date.fromtimestamp(row['bdate'] * 86400) if row['bdate'] else None,
-            'week':((
-                (min(today, datetime.date.fromtimestamp(row['bdate'] * 86400)) if row['bdate'] else today) -
-                datetime.date.fromtimestamp(row['psdate'] * 86400)
-            ).days / 7 + 1) if row['psdate'] else None
-        }
-        for row in result['result']['items']
-    ]
+    return {
+        'count': total,
+        'total_pages': pages,
+        'events': [
+            {
+                'event_id': row['id'],
+                'client_id': row['client_id'],
+                'name': row['name'],
+                'set_date': datetime.date.fromtimestamp(row['set_date'] * 86400) if row['set_date'] else None,
+                'exec_date': datetime.date.fromtimestamp(row['exec_date'] * 86400) if row['exec_date'] else None,
+                'external_id': row['external_id'],
+                'exec_person_name': row['person_name'],
+                'risk': PrenatalRiskRate(row['risk']),
+                'mdate': datetime.date.fromtimestamp(row['modify_date']),
+                'pddate': datetime.date.fromtimestamp(row['bdate'] * 86400) if row['bdate'] else None,
+                'week':((
+                    (min(today, datetime.date.fromtimestamp(row['bdate'] * 86400)) if row['bdate'] else today) -
+                    datetime.date.fromtimestamp(row['psdate'] * 86400)
+                ).days / 7 + 1) if row['psdate'] else None
+            }
+            for row in result['result']['items']
+        ]
+    }
 
 
 @module.route('/api/0/lpu_list.json', methods=['POST', 'GET'])
