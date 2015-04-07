@@ -85,6 +85,7 @@ var IndexCtrl = function ($scope, RisarApi) {
             // 0 - dead, 1 - alive
             if (result){
                 $scope.infants_death_coeff = (result['current_year'][0]/(result['current_year'][0]+ result['current_year'][1])*1000).toFixed(2);
+                $scope.maternal_death_coeff = (result['maternal_death']/result['current_year'][1]*100000).toFixed(2);
                 $scope.infants_death = [
                               {
                                   "key": "Умершие",

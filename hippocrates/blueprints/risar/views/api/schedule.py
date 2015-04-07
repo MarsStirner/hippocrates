@@ -125,4 +125,27 @@ def api_0_death_stats():
                     ActionProperty_Date
                 ))
             result1[condition][value] = db.session.execute(selectable1).rowcount
+
+    selectable = db.select(
+        (Action.id, ),
+        whereclause=db.and_(
+            ActionType.flatCode == 'epicrisis',
+            ActionPropertyType.code == 'death_date',
+            rbRequestType.code == 'pregnancy',
+            Action.event_id == Event.id,
+            ActionProperty.action_id == Action.id,
+            ActionPropertyType.id == ActionProperty.type_id,
+            ActionType.id == Action.actionType_id,
+            ActionProperty_Date.id == ActionProperty.id,
+            EventType.id == Event.eventType_id,
+            rbRequestType.id == EventType.requestType_id,
+            Event.deleted == 0,
+            Action.deleted == 0,
+            ActionProperty_Date.value.like(now.strftime('%Y')+'-%')
+        ),
+        from_obj=(
+            Event, EventType, rbRequestType, Action, ActionType, ActionProperty, ActionPropertyType,
+            ActionProperty_Date
+        ))
+    result1['maternal_death'] = db.session.execute(selectable).rowcount
     return result1
