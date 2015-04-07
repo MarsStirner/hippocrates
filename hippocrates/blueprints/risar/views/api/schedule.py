@@ -6,7 +6,8 @@ import itertools
 from flask import request
 
 from nemesis.lib.apiutils import api_method
-from nemesis.models.actions import ActionType, Action, ActionProperty, ActionPropertyType, ActionProperty_Integer, ActionProperty_Date
+from nemesis.models.actions import ActionType, Action, ActionProperty, ActionPropertyType, ActionProperty_Integer, \
+    ActionProperty_Date, ActionProperty_ExtReferenceRb
 from nemesis.models.event import Event, EventType
 from nemesis.models.exists import rbRequestType
 from nemesis.models.schedule import Schedule
@@ -149,3 +150,59 @@ def api_0_death_stats():
         ))
     result1['maternal_death'] = db.session.execute(selectable).rowcount
     return result1
+
+
+@module.route('/api/0/pregnancy_final_stats.json')
+@api_method
+def api_0_pregnancy_final_stats():
+    now = datetime.datetime.now()
+    finished_cases = []
+    result = collections.defaultdict(lambda: 0)
+    selectable = db.select(
+        (Action.id, ),
+        whereclause=db.and_(
+            ActionType.flatCode == 'epicrisis',
+            ActionPropertyType.code == 'delivery_date',
+            rbRequestType.code == 'pregnancy',
+            Action.event_id == Event.id,
+            ActionProperty.action_id == Action.id,
+            ActionPropertyType.id == ActionProperty.type_id,
+            ActionType.id == Action.actionType_id,
+            ActionProperty_Date.id == ActionProperty.id,
+            EventType.id == Event.eventType_id,
+            rbRequestType.id == EventType.requestType_id,
+            Event.deleted == 0,
+            Action.deleted == 0,
+            ActionProperty_Date.value.like(now.strftime('%Y')+'-%')
+        ),
+        from_obj=(
+            Event, EventType, rbRequestType, Action, ActionType, ActionProperty, ActionPropertyType,
+            ActionProperty_Date
+        ))
+    for (id, ) in db.session.execute(selectable):
+        finished_cases.append(id)
+
+    selectable = db.select(
+        (ActionProperty_ExtReferenceRb.value_, ),
+        whereclause=db.and_(
+            ActionType.flatCode == 'epicrisis',
+            ActionPropertyType.code == 'pregnancy_final',
+            rbRequestType.code == 'pregnancy',
+            Action.event_id == Event.id,
+            ActionProperty.action_id == Action.id,
+            ActionPropertyType.id == ActionProperty.type_id,
+            ActionType.id == Action.actionType_id,
+            ActionProperty_ExtReferenceRb.id == ActionProperty.id,
+            EventType.id == Event.eventType_id,
+            rbRequestType.id == EventType.requestType_id,
+            Event.deleted == 0,
+            Action.deleted == 0,
+            Action.id.in_(finished_cases)
+        ),
+        from_obj=(
+            Event, EventType, rbRequestType, Action, ActionType, ActionProperty, ActionPropertyType,
+            ActionProperty_ExtReferenceRb
+        ))
+    for (value, ) in db.session.execute(selectable):
+        result[value] += 1
+    return result

@@ -6,19 +6,6 @@ var IndexCtrl = function ($scope, RisarApi) {
     $scope.search_date = {date:new Date()}; // и это костыль. этот для работы wmDate
     $scope.tickets = [];
 
-    $scope.pregnancy_results = [
-                  {
-                      "key": "Количество абортов",
-                      "values": [ [ 1, 61] ],
-                      "color": "#FF6633"
-                  },
-                  {
-                      "key": "Количество родов",
-                      "values": [ [ 2, 1234] ],
-                      "color": "#339933"
-                  }
-
-    ];
     $scope.toolTipContentFunction_infants_death = function(){
         return function(key, x, y, e, graph) {
             var month = x%2 ? ' за ' + moment().add(-1, 'month').format("MMMM"): ' за ' + moment().format("MMMM");
@@ -100,6 +87,23 @@ var IndexCtrl = function ($scope, RisarApi) {
                          ];
             } else{
                 $scope.infants_death = [];
+            }
+        })
+        RisarApi.pregnancy_final_stats.get().then(function (result) {
+            $scope.pregnancy_results = [];
+            if (result['abortom']) {
+                $scope.pregnancy_results.push({
+                    "key": "Количество абортов",
+                    "values": [ [ 1, result['abortom']] ],
+                    "color": "#FF6633"
+                })
+            }
+            if (result['rodami']) {
+                $scope.pregnancy_results.push({
+                    "key": "Количество родов",
+                    "values": [ [ 2, result['rodami']] ],
+                    "color": "#339933"
+                })
             }
         })
     };
