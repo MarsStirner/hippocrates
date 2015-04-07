@@ -19,7 +19,7 @@ def html_event_info():
         event = Event.query.get(event_id)
     except (KeyError, ValueError):
         return abort(400)
-    if event.is_stationary and not UserProfileManager.has_ui_diag_doctor():
+    if event.is_stationary:
         wm10url = app.config['WEBMIS10_URL'].rstrip('/')
         if not wm10url:
             return abort(404)
