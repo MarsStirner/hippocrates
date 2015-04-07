@@ -6,7 +6,7 @@ import itertools
 from flask import request
 
 from nemesis.lib.apiutils import api_method
-from nemesis.models.actions import ActionType, Action, ActionProperty, ActionPropertyType, ActionProperty_Integer
+from nemesis.models.actions import ActionType, Action, ActionProperty, ActionPropertyType, ActionProperty_Integer, ActionProperty_Date
 from nemesis.models.event import Event, EventType
 from nemesis.models.exists import rbRequestType
 from nemesis.models.schedule import Schedule
@@ -36,6 +36,7 @@ def api_0_schedule(person_id=None):
         if all_tickets or ticket.client_ticket
     ]
 
+
 @module.route('/api/0/current_stats.json')
 @api_method
 def api_0_current_stats():
@@ -63,3 +64,65 @@ def api_0_current_stats():
     for (value, ) in db.session.execute(selectable):
         result[value] += 1
     return result
+
+
+@module.route('/api/0/death_stats.json')
+@api_method
+def api_0_death_stats():
+    # младеньческая смертность
+    result = collections.defaultdict(list)
+    result1 = collections.defaultdict(dict)
+    now = datetime.datetime.now()
+    prev = now + datetime.timedelta(days=-now.day)
+    dates_conditions = {'current_year': now.strftime('%Y')+'-%',
+                        'previous_month': prev.strftime('%Y-%m')+'-%',
+                        'current_month': now.strftime('%Y-%m')+'-%'}
+    selectable = db.select(
+        (Action.id, ActionProperty_Integer.value_),
+        whereclause=db.and_(
+            ActionType.flatCode == 'risar_newborn_inspection',
+            ActionPropertyType.code == 'alive',
+            rbRequestType.code == 'pregnancy',
+            Action.event_id == Event.id,
+            ActionProperty.action_id == Action.id,
+            ActionPropertyType.id == ActionProperty.type_id,
+            ActionType.id == Action.actionType_id,
+            ActionProperty_Integer.id == ActionProperty.id,
+            EventType.id == Event.eventType_id,
+            rbRequestType.id == EventType.requestType_id,
+            Event.deleted == 0,
+            Action.deleted == 0
+        ),
+        from_obj=(
+            Event, EventType, rbRequestType, Action, ActionType, ActionProperty, ActionPropertyType,
+            ActionProperty_Integer
+        ))
+    for (id, value) in db.session.execute(selectable):  # 0-dead, 1-alive
+        result[value].append(id)
+
+    for value in result:
+        for condition in dates_conditions:
+            selectable1 = db.select(
+                (Action.id,),
+                whereclause=db.and_(
+                    ActionType.flatCode == 'risar_newborn_inspection',
+                    ActionPropertyType.code == 'birth_date',
+                    rbRequestType.code == 'pregnancy',
+                    Action.event_id == Event.id,
+                    ActionProperty.action_id == Action.id,
+                    ActionPropertyType.id == ActionProperty.type_id,
+                    ActionType.id == Action.actionType_id,
+                    ActionProperty_Date.id == ActionProperty.id,
+                    EventType.id == Event.eventType_id,
+                    rbRequestType.id == EventType.requestType_id,
+                    Event.deleted == 0,
+                    Action.deleted == 0,
+                    ActionProperty_Date.value.like(dates_conditions[condition]),
+                    Action.id.in_(result[value])
+                ),
+                from_obj=(
+                    Event, EventType, rbRequestType, Action, ActionType, ActionProperty, ActionPropertyType,
+                    ActionProperty_Date
+                ))
+            result1[condition][value] = db.session.execute(selectable1).rowcount
+    return result1
