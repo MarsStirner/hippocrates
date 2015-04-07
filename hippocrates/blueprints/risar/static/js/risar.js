@@ -35,6 +35,11 @@ WebMis20
             return wrapper('GET', Config.url.api_current_stats);
         }
     };
+    this.death_stats = {
+        get: function () {
+            return wrapper('GET', Config.url.api_death_stats);
+        }
+    };
     this.chart = {
         get: function (event_id, ticket_id) {
             return wrapper('GET', Config.url.api_chart + ((event_id)?(event_id):''), {ticket_id: ticket_id})

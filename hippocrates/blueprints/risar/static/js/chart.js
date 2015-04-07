@@ -29,16 +29,17 @@ var ChartCtrl = function ($scope, $modal, RisarApi) {
         RisarApi.chart.get(event_id, ticket_id)
         .then(function (event) {
             $scope.chart = event;
+            var mother_anamnesis = $scope.chart.anamnesis.mother;
             $scope.first_checkup = $scope.chart.checkups[$scope.chart.checkups.length-1];
             if ($scope.chart.pregnancy_week > 40) {
                 $scope.pregnancy_week = '40+'}
             else {
                 $scope.pregnancy_week = $scope.chart.pregnancy_week
             }
-            $scope.chart.bad_habits_mother = [{value:$scope.chart.anamnesis.mother.alcohol, text: 'алкоголь'},
-                {value:$scope.chart.anamnesis.mother.smoking, text: 'курение'},
-                {value:$scope.chart.anamnesis.mother.toxic, text: 'токсические вечества'},
-                {value:$scope.chart.anamnesis.mother.drugs,text: 'наркотики'}];
+            $scope.chart.bad_habits_mother = [{value:mother_anamnesis ? mother_anamnesis.alcohol: false, text: 'алкоголь'},
+                {value:mother_anamnesis ? mother_anamnesis.smoking: false, text: 'курение'},
+                {value:mother_anamnesis ? mother_anamnesis.toxic: false, text: 'токсические вечества'},
+                {value:mother_anamnesis ? mother_anamnesis.drugs: false,text: 'наркотики'}];
 
             function get_mass_gain(prev, curr, i){
                 if (i == $scope.chart.checkups.length - 1){

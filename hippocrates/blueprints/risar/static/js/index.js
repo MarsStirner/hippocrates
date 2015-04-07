@@ -5,18 +5,6 @@ var IndexCtrl = function ($scope, RisarApi) {
     $scope.query = "";
     $scope.search_date = {date:new Date()}; // и это костыль. этот для работы wmDate
     $scope.tickets = [];
-    $scope.infants_death = [
-                  {
-                      "key": "Умершие",
-                      "values": [ [ 1, 10] , [ 2, 12] ],
-                      "color": "#FF6633"
-                  },
-                  {
-                      "key": "Живые",
-                      "values": [ [ 3, 34] , [ 4, 38]],
-                      "color": "#339933"
-                  }
-             ];
 
     $scope.pregnancy_results = [
                   {
@@ -92,7 +80,30 @@ var IndexCtrl = function ($scope, RisarApi) {
             }
         })
     };
+    $scope.refresh_gistograms = function () {
+        RisarApi.death_stats.get().then(function (result) {
+            // 0 - dead, 1 - alive
+            if (result){
+                $scope.infants_death_coeff = (result['current_year'][0]/(result['current_year'][0]+ result['current_year'][1])*1000).toFixed(2);
+                $scope.infants_death = [
+                              {
+                                  "key": "Умершие",
+                                  "values": [ [ 1, result['previous_month'][0]] , [2, result['current_month'][0]] ],
+                                  "color": "#FF6633"
+                              },
+                              {
+                                  "key": "Живые",
+                                  "values": [ [ 3, result['previous_month'][1]] , [4, result['current_month'][1]] ],
+                                  "color": "#339933"
+                              }
+                         ];
+            } else{
+                $scope.infants_death = [];
+            }
+        })
+    };
     $scope.refresh_diagram();
+    $scope.refresh_gistograms();
     $scope.declOfNum = function (number, titles){
         if (number == undefined){
             number = 0;
