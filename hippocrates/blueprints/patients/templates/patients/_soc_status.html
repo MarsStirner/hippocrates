@@ -33,15 +33,15 @@
                                 model-document="socstat.self_document"
                                 edit-mode="socstat.self_document.id ? edit.activated : true">
                             </wm-document>
-{#                            <div ng-if="socstat.self_document.file_attach">#}
-{#                                <h5 class="attach-file-copy-heading">Копия документа</h5>#}
-{#                                <wm-client-file-attach attach-type="document"#}
-{#                                    model-attach="socstat.self_document.file_attach"#}
-{#                                    model-doc="socstat.self_document"#}
-{#                                    on-add="add_new_file(documentInfo, policyInfo)"#}
-{#                                    on-open="openFile(cfa_id, idx)">#}
-{#                                </wm-client-file-attach>#}
-{#                            </div>#}
+                            <div ng-if="socstat.self_document.file_attach">
+                                <h5 class="attach-file-copy-heading">Копия документа</h5>
+                                <wm-client-file-attach attach-type="document"
+                                    model-attach="socstat.self_document.file_attach"
+                                    model-doc="socstat.self_document"
+                                    on-add="add_new_file(documentInfo, policyInfo)"
+                                    on-open="openFile(cfa_id, idx)">
+                                </wm-client-file-attach>
+                            </div>
                         </div>
                         </div>
                     </div>
@@ -102,15 +102,15 @@
                                 edit-mode="socstat.self_document.id ? edit.activated : socstat.self_document.id !== undefined">
                             </wm-document>
                             <ng-form>
-{#                            <div ng-if="socstat.self_document.file_attach">#}
-{#                                <h5 class="attach-file-copy-heading">Копия документа</h5>#}
-{#                                <wm-client-file-attach attach-type="document"#}
-{#                                    model-attach="socstat.self_document.file_attach"#}
-{#                                    model-doc="socstat.self_document"#}
-{#                                    on-add="add_new_file(documentInfo, policyInfo)"#}
-{#                                    on-open="openFile(cfa_id, idx)">#}
-{#                                </wm-client-file-attach>#}
-{#                            </div>#}
+                            <div ng-if="socstat.self_document.file_attach">
+                                <h5 class="attach-file-copy-heading">Копия документа</h5>
+                                <wm-client-file-attach attach-type="document"
+                                    model-attach="socstat.self_document.file_attach"
+                                    model-doc="socstat.self_document"
+                                    on-add="add_new_file(documentInfo, policyInfo)"
+                                    on-open="openFile(cfa_id, idx)">
+                                </wm-client-file-attach>
+                            </div>
                         </div>
                         </div>
                     </div>
