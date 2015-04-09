@@ -2,17 +2,19 @@
 import datetime
 import itertools
 
+from nemesis.systemwide import db
 from nemesis.lib.utils import safe_traverse_attrs, safe_traverse
 from nemesis.lib.jsonify import EventVisualizer
 from nemesis.models.actions import Action, ActionType
 from nemesis.models.client import BloodHistory
 from nemesis.models.enums import Gender, AllergyPower, IntoleranceType, PrenatalRiskRate
-from nemesis.models.exists import rbAttachType
+from nemesis.models.event import Diagnosis, Diagnostic
+from nemesis.models.exists import rbAttachType, MKB
 from blueprints.risar.lib.card_attrs import get_card_attrs_action, get_all_diagnoses, check_disease
 from blueprints.risar.lib.utils import get_action, action_apt_values, get_action_type_id
 from ..risar_config import pregnancy_apt_codes, risar_anamnesis_pregnancy, transfusion_apt_codes, \
     risar_anamnesis_transfusion, mother_codes, father_codes, risar_father_anamnesis, risar_mother_anamnesis, \
-    checkup_flat_codes, risar_epicrisis, risar_newborn_inspection
+    checkup_flat_codes, risar_epicrisis, risar_newborn_inspection, attach_codes
 from ..lib.utils import week_postfix
 
 
@@ -86,24 +88,16 @@ def represent_event(event):
 
 
 def represent_chart_for_routing(event):
-    mkbs = [
-        diagnose.mkb
-        for diagnose in itertools.chain.from_iterable(
-            diagnostic.diagnoses
-            for diagnostic in itertools.chain.from_iterable(
-                prop.value if isinstance(prop.value, list) else [prop.value]
-                for prop in itertools.chain.from_iterable(
-                    action.properties
-                    for action in event.actions
-                )
-                if prop.type.typeName == 'Diagnosis' and prop.value
-            )
-            if not diagnostic.endDate
-        )
-    ]
-    mkbs.sort(key=lambda x: x.DiagID)
-    plan_attach = event.client.attachments.join(rbAttachType).filter(rbAttachType.code == 10).first()
-    extra_attach = event.client.attachments.join(rbAttachType).filter(rbAttachType.code == 11).first()
+    mkbs = db.session.query(MKB).select_from(
+        Diagnostic
+    ).join(Diagnostic.diagnoses).join(Diagnosis.mkb).filter(
+        Diagnostic.event_id == event.id,
+        Diagnostic.endDate == None,
+        Diagnostic.deleted == 0
+    ).all()
+    mkbs = sorted(list(set(mkbs)), key=lambda x: x.DiagID)
+    plan_attach = event.client.attachments.join(rbAttachType).filter(rbAttachType.code == attach_codes['plan_lpu']).first()
+    extra_attach = event.client.attachments.join(rbAttachType).filter(rbAttachType.code == attach_codes['extra_lpu']).first()
     return {
         'id': event.id,
         'client_id': event.client_id,

@@ -35,21 +35,34 @@
                 </div>
             </div>
             <div class="col-md-6">
-                <div class="panel panel-default">
-                    <div class="panel-heading">ЛПУ</div>
-                    <table class="table table-condensed" ng-if="results.length > 0">
-                        <tbody>
-                        <tr ng-repeat="row in results" ng-class="{success: chart.lpu.id == row.id}">
-                            <td>[[ $index + 1 ]]</td>
-                            <td>[[ row.name ]]</td>
-                            <td><a class="btn-link" ng-click="select_lpu(row)">Выбрать</a></td>
-                        </tr>
-                        </tbody>
-                    </table>
-                    <div class="panel-body" ng-if="results.length == 0">
-                        <h3 class="text-center">Подходящие ЛПУ не найдены</h3>
+                <form name="selectLpuForm" form-safe-close="getUnsavedFormText()">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">ЛПУ
+                            <a class="pull-right" ng-href="{{ url_for('.html_routing', event_id=request.args.get('event_id'), emergency=None if request.args.get('emergency') else 1)}}"
+                                title="[[getOtherRoutingText()]]" ng-bind="getOtherRoutingText()"></a>
+                        </div>
+                        <div class="panel-body" >
+                            <div class="row">
+                            <div class="col-md-9">
+                                <div class="small-marginal" ng-class="getCurrentLpuLabelClass()">
+                                    <h3 style="margin-top: 5px">Текущее выбранное: <span style="font-weight: bold">[[ chart.lpu.short_name ]]</span></h3>
+                                </div>
+                                <div fs-radio="" items="orgs" ng-model="chart.lpu" ng-if="orgs.length > 0">
+                                    [[ item.short_name ]]
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <button type="button" class="btn btn-success pull-right" title="Сохранить" ng-click="save()">Сохранить</button>
+                            </div>
+                            </div>
+                            <div ng-if="orgs.length === 0">
+                                <h3 class="text-center">Подходящие ЛПУ не найдены.<br>
+                                    <small>Уберите часть выбранных диагнозов для вывода учреждений более широкого профиля.</small>
+                                </h3>
+                            </div>
+                        </div>
                     </div>
-                </div>
+                </form>
             </div>
         </div>
     </div>

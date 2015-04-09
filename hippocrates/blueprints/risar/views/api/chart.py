@@ -2,6 +2,7 @@
 from datetime import datetime
 
 from flask import request
+from sqlalchemy import func
 
 from nemesis.lib.data import create_action
 from nemesis.lib.utils import get_new_event_ext_id, safe_traverse, safe_datetime
@@ -9,7 +10,7 @@ from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.models.client import Client, ClientAttach
 from nemesis.models.enums import EventPrimary, EventOrder
 from nemesis.models.event import Event, EventType
-from nemesis.models.exists import Organisation, Person, rbAttachType, rbRequestType, rbFinance
+from nemesis.models.exists import Organisation, Person, rbAttachType, rbRequestType, rbFinance, MKB
 from nemesis.models.schedule import ScheduleClientTicket
 from nemesis.systemwide import db
 from blueprints.event.lib.utils import create_or_update_diagnosis
@@ -142,21 +143,25 @@ def api_0_mini_chart(event_id=None):
 @module.route('/api/0/event_routing', methods=['POST'])
 @api_method
 def api_0_event_routing():
-    from nemesis.models.exists import MKB, organisation_mkb_assoc
     diagnoses = request.get_json().get('diagnoses', None)
     query = Organisation.query.filter(Organisation.isHospital == 1)
     if diagnoses:
-        # Без этого можно обойтись, но так хоть немного меньше надо будет проверить.
-        query = query.join(organisation_mkb_assoc, MKB).filter(MKB.id.in_([d['id'] for d in diagnoses]))
-    return [
-        {
-            'id': row.id,
-            'name': row.shortName,
-            'diagnoses': row.mkbs,
-        } for row in query
-        # Страшный костыль, потому что не получается сделать нормальный запрос
-        if not diagnoses or all(d['id'] in (m.id for m in row.mkbs) for d in diagnoses)
-    ]
+        mkb_ids = [d['id'] for d in diagnoses]
+        suit_orgs_q = db.session.query(Organisation.id).join(
+            Organisation.mkbs
+        ).filter(
+            MKB.id.in_(mkb_ids)
+        ).group_by(
+            Organisation.id
+        ).having(
+            func.Count(MKB.id.distinct()) == len(mkb_ids)
+        ).subquery('suitableOrgs')
+        query = query.join(suit_orgs_q, Organisation.id == suit_orgs_q.c.id)
+    return {
+        'suitable_orgs': [
+            org for org in query
+        ]
+    }
 
 
 @module.route('/api/0/chart_close/')
