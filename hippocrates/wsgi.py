@@ -43,6 +43,14 @@ def general_menu():
         title=u'Обращения',
         visible=(UserProfileManager.has_ui_registrator() or UserProfileManager.has_ui_doctor())
     ), dict(
+        link='accounting.cashbook_html',
+        title=u'Расчет пациентов',
+        visible=UserProfileManager.has_ui_cashier()
+    ), dict(
+        link='accounting.cashbook_operations',
+        title=u'Журнал кассовых операций',
+        visible=UserProfileManager.has_ui_cashier()
+    ), dict(
         link='anareports.index_html',
         title=u'Аналитические отчёты',
         visible=True

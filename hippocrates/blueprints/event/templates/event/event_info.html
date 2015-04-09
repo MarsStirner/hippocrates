@@ -75,7 +75,7 @@
                             {% include "event/_stationary_info.html" %}
                         {% endif %}
                         {% include "event/_main_info.html" %}
-                        {% if user_profiles_mng.has_ui_doctor() %}
+                        {% if user_profiles_mng.has_ui_doctor() and user_utils.can_read_dignoses(event) %}
                             {% include "event/_diagnoses.html" %}
                         {% endif %}
                         {% if user_profiles_mng.has_ui_registrator() or user_profiles_mng.has_ui_cashier() %}
