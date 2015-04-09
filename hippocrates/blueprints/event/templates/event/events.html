@@ -1,6 +1,7 @@
 {% extends "event/base.html" %}
 {% block main %}
-    <div class="row" ng-controller="EventListCtrl">
+    <div ng-controller="EventListCtrl" class="ng-cloak">
+    <div class="row">
         <div class="col-md-3">
             <!-- Filter -->
             <div>
@@ -128,6 +129,7 @@
             </div>
         </div>
 {#    <pre>[[ flt | json ]]</pre>#}
+    </div>
     </div>
 {% endblock %}
 {% block modules_js %}
