@@ -29,7 +29,7 @@ def general_menu():
     ), dict(
         link='schedule.index',
         title=u'График работы',
-        visible=(UserProfileManager.has_ui_registrator())
+        visible=(UserProfileManager.has_ui_registrator() or UserProfileManager.has_ui_doctor())
     ), dict(
         link='schedule.doctor_schedule_day',
         title=u'Приём пациентов',
