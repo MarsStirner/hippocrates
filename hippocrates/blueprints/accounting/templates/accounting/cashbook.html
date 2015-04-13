@@ -1,9 +1,9 @@
-{% extends 'accounting/hippo_base.html' %}
+{% extends 'accounting/base.html' %}
 
 {% block title %}> Расчет пациентов{% endblock %}
 
 {% block main %}
-    <div ng-controller="CashBookCtrl">
+    <div ng-controller="CashBookCtrl" class="ng-cloak">
         <legend><h2>Расчет пациентов</h2></legend>
         <div ui-alert-list="alerts"></div>
         <wm-search-event event-id="event.id" query="query"

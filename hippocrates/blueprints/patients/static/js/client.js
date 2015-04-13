@@ -61,6 +61,12 @@ angular.module('WebMis20.controllers').
                     return el.id;
                 }).length > 1;
             };
+            $scope.btnAddSsDocVisible = function (socstat) {
+                return safe_traverse(socstat, ['self_document', 'id']) === undefined;
+            };
+            $scope.btnClearSsDocVisible = function (socstat) {
+                return safe_traverse(socstat, ['self_document', 'id']) === null;
+            };
 
             $scope.save_client = function() {
                 var form = $scope.clientForm;

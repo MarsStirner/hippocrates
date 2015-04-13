@@ -84,7 +84,7 @@
                         <label for="reg_address">Адрес</label>
                         <input type="text" class="form-control" id="reg_address" name="reg_address" autocomplete="off"
                                placeholder="Адрес регистрации" ng-model="event.payment.local_contract.reg_address"
-                               ng-disabled="payer_info_disabled()"/>
+                               ng-required="payer_person_required()" ng-disabled="payer_info_disabled()"/>
                     </div>
                 </div>
             </div>
