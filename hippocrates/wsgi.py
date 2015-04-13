@@ -30,7 +30,7 @@ def general_menu():
     ), dict(
         link='schedule.index',
         title=u'График работы',
-        visible=(UserProfileManager.has_ui_registrator())
+        visible=(UserProfileManager.has_ui_registrator() or UserProfileManager.has_ui_doctor())
     ), dict(
         link='schedule.doctor_schedule_day',
         title=u'Приём пациентов',
@@ -43,6 +43,14 @@ def general_menu():
         link='event.get_events',
         title=u'Обращения',
         visible=(UserProfileManager.has_ui_registrator() or UserProfileManager.has_ui_doctor())
+    ), dict(
+        link='accounting.cashbook_html',
+        title=u'Расчет пациентов',
+        visible=UserProfileManager.has_ui_cashier()
+    ), dict(
+        link='accounting.cashbook_operations',
+        title=u'Журнал кассовых операций',
+        visible=UserProfileManager.has_ui_cashier()
     ), dict(
         link='risar.index_html',
         title={

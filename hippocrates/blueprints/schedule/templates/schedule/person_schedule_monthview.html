@@ -2,7 +2,7 @@
 {% block title %}> {{ module_name }}{% endblock %}
 
 {% block main %}
-    <div ng-controller="ScheduleMonthCtrl">
+    <div ng-controller="ScheduleMonthCtrl" class="ng-cloak">
         <legend xmlns="http://www.w3.org/1999/html"><h2>График врача <span ng-if="person" class="bg-success">[[ person.name ]]<small>, [[ person.speciality.name ]]</small></span></h2></legend>
         <div class="row marginal">
             <div class="col-md-2">
@@ -109,7 +109,6 @@
 {% endblock %}
 {% block modules_js %}
     {{ super() }}
-
     <script type="text/ng-template" id="modal-DaysSetup.html">{% include "schedule/_daysetup.html" %}</script>
     <script type="text/ng-template" id="modal-DayFree.html">{% include "schedule/_day_free.html" %}</script>
     <script src="{{ url_for('.static', filename='js/schedule_month.js', v=app_version) }}"></script>
