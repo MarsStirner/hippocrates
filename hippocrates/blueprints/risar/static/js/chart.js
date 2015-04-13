@@ -42,14 +42,14 @@ var ChartCtrl = function ($scope, $modal, RisarApi) {
                 {value:mother_anamnesis ? mother_anamnesis.drugs: false,text: 'наркотики'}];
 
             function get_mass_gain(prev, curr, i){
-                if (i == $scope.chart.checkups.length - 1){
+                if (i === $scope.chart.checkups.length - 1) {
                     curr.weight_gain = [0, 0];
                 }
-                var num_days = moment(prev.beg_date).diff(moment(curr.beg_date), 'days')
+                var num_days = moment(prev.beg_date).diff(moment(curr.beg_date), 'days');
                 prev.weight_gain = curr.weight ? [prev.weight - curr.weight, num_days ] : [0, num_days];
                 return curr
             }
-            $scope.chart.checkups.reduce(get_mass_gain);
+            $scope.chart.checkups.reduce(get_mass_gain, [{}]);
 //            $scope.chart.bad_habits_father = [{value:$scope.chart.anamnesis.father.alcohol, text: 'алкоголь'},
 //                {value:$scope.chart.anamnesis.father.smoking, text: 'курение'},
 //                {value:$scope.chart.anamnesis.father.toxic, text: 'токсические вечества'},

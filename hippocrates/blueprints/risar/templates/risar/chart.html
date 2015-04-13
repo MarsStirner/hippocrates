@@ -38,7 +38,7 @@
                     <i class="fa fa-exclamation-triangle text-success"></i>
                     <span ng-if="chart.epicrisis.delivery_date" tooltip="Фактическая дата родов">[[chart.epicrisis.delivery_date | asDate]]</span>
                     <span ng-if="!chart.epicrisis.delivery_date" tooltip="Предполагаемая дата родов">[[chart.card_attributes.predicted_delivery_date | asDate]]</span>
-                    <i class="fa fa-question" tooltip="Предполагаемая дата родов" ng-if="!chart.epicrisis.delivery_date && !birth_date"></i>
+                    <i class="fa fa-question" tooltip="Предполагаемая дата родов" ng-if="!chart.epicrisis.delivery_date && !chart.card_attributes.predicted_delivery_date"></i>
                 </span>
             </div>
             <div class="col-md-12 col-lg-12 col-sm-12">
