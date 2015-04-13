@@ -113,6 +113,7 @@
                         <tr>
                             <th>#</th>
                             <th>Дата</th>
+                            <th>Срок</th>
                             <th>Диагноз</th>
                             <th>Врач</th>
                         </tr>
@@ -120,6 +121,7 @@
                         <tr ng-repeat="checkup in chart.checkups | orderBy:'beg_date'">
                             <td>[[ $index + 1 ]]</td>
                             <td><a ng-href="{{ url_for('.html_inspection_edit') }}?event_id=[[ chart.id ]]&checkup_id=[[ checkup.id ]]">[[ checkup.beg_date | asDate ]]</a></td>
+                            <td>[[ checkup.pregnancy_week ]] ([[checkup.calculated_pregnancy_week]])</td>
                             <td><span class="bottom_dotted" tooltip="[[ checkup.diag.diagnosis.mkb.name ]]">[[ checkup.diag.diagnosis.mkb.code ]]</span></td>
                             <td>[[ checkup.person.name ]]</td>
                         </tr>
