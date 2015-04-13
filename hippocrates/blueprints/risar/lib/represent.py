@@ -28,6 +28,22 @@ def represent_prop_value(prop):
         return prop.value
 
 
+def represent_header(event):
+    client = event.client
+    return {
+        'client': {
+            'id': client.id,
+            'full_name': client.nameText,
+        },
+        'event': {
+            'set_date': event.setDate,
+            'exec_date': event.execDate,
+            'person': event.execPerson,
+            'external_id': event.externalId,
+        }
+    }
+
+
 def represent_event(event):
     """
     :type event: application.models.event.Event

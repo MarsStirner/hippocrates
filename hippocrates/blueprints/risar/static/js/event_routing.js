@@ -10,11 +10,12 @@ var EventRoutingCtrl = function ($scope, $window, RisarApi) {
     var emergency = $scope.emergency = params.hasOwnProperty('emergency');
     var key = (emergency)?('extra_lpu'):('plan_lpu');
     var reload_chart = function () {
-        RisarApi.event_routing.get_chart(event_id)
-            .then(function (event) {
-                $scope.chart = event;
-                $scope.chart.lpu = event[key];
-                $scope.selected_diagnoses = event.diagnoses.clone()
+        return RisarApi.event_routing.get_chart(event_id)
+            .then(function (data) {
+                $scope.header = data.header;
+                $scope.chart = data.chart;
+                $scope.chart.lpu = data.chart[key];
+                $scope.selected_diagnoses = data.chart.diagnoses.clone();
             });
     };
     var reload_orgs = function () {
@@ -59,8 +60,9 @@ var EventRoutingCtrl = function ($scope, $window, RisarApi) {
     $scope.selected_diagnoses = [];
     $scope.chart = {};
     $scope.orgs = [];
-    $scope.$watchCollection('selected_diagnoses', reload_orgs);
-    reload_chart();
+    reload_chart().then(function () {
+        $scope.$watchCollection('selected_diagnoses', reload_orgs);
+    });
 };
 
 WebMis20.controller('EventRoutingCtrl', ['$scope', '$window', 'RisarApi', EventRoutingCtrl]);

@@ -23,6 +23,21 @@
 {#                <button ng-click="save()" class="btn btn-success btn-block">Сохранить</button>#}
 {#            </div>#}
 {#        </div>#}
+        <div class="row small-marginal">
+            <div class="col-lg-10 col-md-10">
+                <h2>
+                    Выбор ЛПУ для {% if 'emergency' in request.args %}экстренного{% else %}планового{% endif %} случая
+                    <a ng-href="{{ url_for('patients.patient') }}?client_id=[[ header.client.id ]]">[[ header.client.full_name ]]</a>
+                    ([[ header.event.external_id ]])
+                </h2>
+            </div>
+            <div class="col-md-12 col-lg-12">
+                <div class="alert-warning small-marginal">Случай беременности. На учёте в <b>[[ header.event.person.organisation.short_name ]]</b>
+                    у <b>[[ header.event.person.name ]]</b>
+                    с <b>[[ header.event.set_date | asDate ]]</b>
+                </div>
+            </div>
+        </div>
         <div class="row">
             <div class="col-md-6">
                 <div class="panel panel-default">

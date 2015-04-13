@@ -16,7 +16,7 @@ from nemesis.systemwide import db
 from blueprints.event.lib.utils import create_or_update_diagnosis
 from blueprints.risar.app import module
 from blueprints.risar.lib.card_attrs import default_AT_Heuristic, get_all_diagnoses
-from blueprints.risar.lib.represent import represent_event, represent_chart_for_routing
+from blueprints.risar.lib.represent import represent_event, represent_chart_for_routing, represent_header
 from blueprints.risar.risar_config import attach_codes
 
 
@@ -137,7 +137,10 @@ def api_0_mini_chart(event_id=None):
         raise ApiException(404, u'Обращение не найдено')
     if event.eventType.requestType.code != 'pregnancy':
         raise ApiException(400, u'Обращение не является случаем беременности')
-    return represent_chart_for_routing(event)
+    return {
+        'header': represent_header(event),
+        'chart': represent_chart_for_routing(event)
+    }
 
 
 @module.route('/api/0/event_routing', methods=['POST'])
