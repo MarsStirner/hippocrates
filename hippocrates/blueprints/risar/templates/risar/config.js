@@ -23,6 +23,7 @@ WebMis20
         api_epicrisis:'{{ url_for('.api_0_chart')}}{0}/epicrisis',
         api_newborn_inspection: '{{ url_for('.api_0_newborn_inspection_delete') }}{0}',
         api_event_search: '{{ url_for('.api_0_event_search') }}',
+        api_event_search_ambulance: '{{ url_for('.api_0_event_search_ambulance') }}',
         api_event_search_lpu_list: '{{ url_for('.api_0_lpu_list') }}',
         api_event_search_lpu_doctors_list: '{{ url_for('.api_0_lpu_doctors_list') }}',
         api_current_stats: '{{ url_for('.api_0_current_stats') }}',
@@ -30,7 +31,8 @@ WebMis20
         api_pregnancy_final_stats: '{{ url_for('.api_0_pregnancy_final_stats') }}',
         chart_html: '{{ url_for('.html_chart') }}',
         index_html: '{{ url_for('.index_html') }}',
-        inpection_edit_html:'{{ url_for('.html_inspection_edit') }}'
+        inpection_edit_html:'{{ url_for('.html_inspection_edit') }}',
+        ambulance_patient_info: '{{ url_for('.html_ambulance_patient_info') }}'
     }
 })
 ;

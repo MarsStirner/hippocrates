@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from flask import render_template, request
+from flask.ext.login import current_user
 from ..app import module
 from nemesis.models.actions import Action, ActionType
 
@@ -9,7 +10,10 @@ __author__ = 'mmalkov'
 @module.route('/')
 @module.route('/index.html')
 def index_html():
-    return render_template('risar/index.html')
+    if current_user.role_in('ambulance'):
+        return render_template('risar/ambulance_index.html')
+    else:
+        return render_template('risar/index.html')
 
 
 @module.route('/search.html')
@@ -81,3 +85,8 @@ def html_epicrisis_edit():
 @module.route('/event_diagnoses.html')
 def html_event_diagnoses():
     return render_template('risar/event_diagnoses.html')
+
+
+@module.route('/ambulance_patient_info.html')
+def html_ambulance_patient_info():
+    return render_template('risar/ambulance_patient_info.html')
