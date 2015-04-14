@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 from flask import request, abort
 from ..app import module
+from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.data import create_action, update_action, create_new_action, get_planned_end_datetime, int_get_atl_flat, \
     get_patient_location
 from nemesis.lib.jsonify import ActionVisualizer
 from nemesis.lib.user import UserUtils
-from nemesis.lib.utils import jsonify, safe_traverse, safe_datetime, parse_id
+from nemesis.lib.utils import safe_traverse, safe_datetime, parse_id
 from nemesis.models.actions import Action, ActionType
 from nemesis.models.event import Event
 from nemesis.models.exists import Person
@@ -22,15 +23,16 @@ prescriptionFlatCodes = (
 )
 
 @module.route('/api/actions', methods=['GET'])
+@api_method
 def api_action_get():
-    from nemesis.models.actions import Action
     action_id = int(request.args.get('action_id'))
     action = Action.query.get(action_id)
     v = ActionVisualizer()
-    return jsonify(v.make_action(action))
+    return v.make_action(action)
 
 
 @module.route('/api/actions/new.json', methods=['GET'])
+@api_method
 def api_action_new_get():
     src_action = Action.query.get(int(request.args['src_action_id'])) \
         if 'src_action_id' in request.args else None
@@ -42,10 +44,11 @@ def api_action_new_get():
     v = ActionVisualizer()
     result = v.make_action(action)
     db.session.rollback()
-    return jsonify(result)
+    return result
 
 
 @module.route('/api/actions', methods=['POST'])
+@api_method
 def api_action_post():
     action_desc = request.get_json()
     action_id = action_desc['id']
@@ -75,17 +78,17 @@ def api_action_post():
         data['properties'] = properties_desc
         action = Action.query.get(action_id)
         if not action:
-            return jsonify(None, 404, 'Action %s not found' % action_id)
+            raise ApiException(404, 'Action %s not found' % action_id)
         if not UserUtils.can_edit_action(action):
-            return jsonify(None, 403, 'User cannot edit action %s' % action_id)
+            raise ApiException(403, 'User cannot edit action %s' % action_id)
         action = update_action(action, **data)
     else:
         at_id = action_desc['action_type']['id']
         if not at_id:
-            return jsonify(None, 404, u'Невозможно создать действие без указания типа action_type.id')
+            raise ApiException(404, u'Невозможно создать действие без указания типа action_type.id')
         event_id = action_desc['event_id']
         if not UserUtils.can_create_action(event_id, at_id):
-            return jsonify(None, 403, (
+            raise ApiException(403, (
                 u'У пользовател нет прав на создание действия с ActionType id = %s '
                 u'для обращения с event id = %s') % (at_id, event_id)
             )
@@ -95,10 +98,11 @@ def api_action_post():
     db.session.commit()
 
     v = ActionVisualizer()
-    return jsonify(v.make_action(action))
+    return v.make_action(action)
 
 
 @module.route('/api/action_type/planned_end_date.json', methods=['GET'])
+@api_method
 def api_get_action_ped():
     at_id = parse_id(request.args, 'action_type_id')
     if at_id is False:
@@ -106,9 +110,9 @@ def api_get_action_ped():
     at = ActionType.query.get(at_id)
     if not at:
         return abort(404)
-    return jsonify({
+    return {
         'ped': get_planned_end_datetime(at_id)
-    })
+    }
 
 
 @cache.memoize(86400)
@@ -151,6 +155,7 @@ def int_get_atl(at_class):
 
 
 @module.route('/api/action-type-list.json')
+@api_method
 def api_atl_get():
     # not used?
     at_class = int(request.args['at_class'])
@@ -159,10 +164,11 @@ def api_atl_get():
 
     result = int_get_atl(at_class)
 
-    return jsonify(result)
+    return result
 
 
 @module.route('/api/action-type-list-flat.json')
+@api_method
 def api_atl_get_flat():
     at_class = int(request.args['at_class'])
     event_type_id = parse_id(request.args, 'event_type_id') or None
@@ -171,17 +177,18 @@ def api_atl_get_flat():
         return abort(401)
     result = int_get_atl_flat(at_class, event_type_id, contract_id)
 
-    return jsonify(result)
+    return result
 
 
 @module.route('/api/create-lab-direction.json', methods=['POST'])
+@api_method
 def api_create_lab_direction():
     ja = request.get_json()
     event_id = ja['event_id']
     event = Event.query.get(event_id)
     org_structure = get_patient_location(event)
     if not org_structure:
-        return jsonify(None, 422, u'Пациент не привязан ни к одному из отделений')
+        raise ApiException(422, u'Пациент не привязан ни к одному из отделений')
 
     for j in ja['directions']:
         action_type_id = j['type_id']
@@ -198,4 +205,3 @@ def api_create_lab_direction():
         db.session.add(action)
 
     db.session.commit()
-    return jsonify(None)
