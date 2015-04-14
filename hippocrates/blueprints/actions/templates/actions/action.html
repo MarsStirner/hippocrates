@@ -1,4 +1,4 @@
-{% extends "schedule/base.html" %}
+{% extends "actions/base.html" %}
 {% import "_macros.html" as macros %}
 {% block main %}
 <div ng-controller="ActionEditorCtrl" class="ng-cloak">
@@ -16,8 +16,8 @@
 <div>
     <div class="row">
     <div class="col-md-12">
-        {% include "schedule/_action_head_editable.html" %}
-        {% include "schedule/_action_head_viewable.html" %}
+        {% include "actions/_action_head_editable.html" %}
+        {% include "actions/_action_head_viewable.html" %}
     <hr/>
     <wm-action-layout action="action"></wm-action-layout>
     </div>
