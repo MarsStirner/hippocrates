@@ -30,6 +30,11 @@ WebMis20
             })
         }
     };
+    this.search_event_ambulance = {
+        get: function (query) {
+            return wrapper('POST', Config.url.api_event_search_ambulance, {}, query)
+        }
+    };
     this.current_stats = {
         get: function () {
             return wrapper('GET', Config.url.api_current_stats);

@@ -73,7 +73,8 @@
                     <span> {{ current_user.format_name() }}</span>
                 </span>
                 {% endif %}
-
+            </li>
+            <li>
                 <form class="navbar-form navbar-left" id="_change_role_frm" action="{{ url_for('select_role') }}" method="POST">
                     <select name="roles" onchange="$('#_change_role_frm').submit();" class="form-control">
                     {% for code, name in current_user.roles -%}

@@ -33,7 +33,7 @@ def search_events(**kwargs):
 
     query = Search(indexes=['risar_events'], config=SearchConfig)
     if 'fio' in kwargs and kwargs['fio']:
-        query = query.match(kwargs['fio'])
+        query = query.match(u'@name {0}'.format(kwargs['fio']), raw=True)
     if 'org_id' in kwargs:
         query = query.filter(org_id__eq=int(kwargs['org_id']))
     if 'doc_id' in kwargs:
@@ -62,6 +62,30 @@ def search_events(**kwargs):
         else:
             query = query.filter(exec_date__eq=0)
 
+    per_page = kwargs.get('per_page', 10)
+    page = kwargs.get('page', 1)
+    from_ = (page - 1) * per_page
+    to_ = page * per_page
+    result = query.limit(from_, to_).ask()
+    return result
+
+
+def search_events_ambulance(**kwargs):
+    from nemesis.lib.sphinx_search import Search, SearchConfig
+
+    query = Search(indexes=['risar_events'], config=SearchConfig)
+    if 'query' in kwargs and kwargs['query']:
+        query = query.match(u'@(name,document,policy) {0}'.format(kwargs['query']), raw=True)
+        query = query.options(field_weights={'lastName': 100,
+                                             'firstName': 80,
+                                             'patrName': 70,
+                                             'document': 50,
+                                             'policy': 50})
+    if 'closed' in kwargs:
+        if kwargs['closed']:
+            query = query.filter(exec_date__neq=0)
+        else:
+            query = query.filter(exec_date__eq=0)
     per_page = kwargs.get('per_page', 10)
     page = kwargs.get('page', 1)
     from_ = (page - 1) * per_page
@@ -102,6 +126,35 @@ def api_0_event_search():
                     (min(today, datetime.date.fromtimestamp(row['bdate'] * 86400)) if row['bdate'] else today) -
                     datetime.date.fromtimestamp(row['psdate'] * 86400)
                 ).days / 7 + 1) if row['psdate'] else None
+            }
+            for row in result['result']['items']
+        ]
+    }
+
+
+@module.route('/api/0/search_ambulance/', methods=['POST', 'GET'])
+@api_method
+def api_0_event_search_ambulance():
+    data = dict(request.args)
+    if request.json:
+        data.update(request.json)
+    per_page = safe_int(data.get('per_page')) or 10
+    data['per_page'] = per_page
+    result = search_events_ambulance(**data)
+
+    total = safe_int(result['result']['meta']['total_found'])
+    pages = int(math.ceil(total / float(per_page)))
+    return {
+        'count': total,
+        'total_pages': pages,
+        'events': [
+            {
+                'event_id': row['id'],
+                'client_id': row['client_id'],
+                'name': row['name'],
+                'snils': row['snils'],
+                'document': row['document'],
+                'policy': row['policy'],
             }
             for row in result['result']['items']
         ]

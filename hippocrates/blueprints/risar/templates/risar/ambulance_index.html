@@ -1,0 +1,53 @@
+{% extends 'risar/base.html' %}
+
+{% block title %}> {{ module_name }}{% endblock %}
+
+{% block main %}
+    <div ng-controller="AmbulanceIndexCtrl">
+        <form class="form-horizontal marginal" role="form">
+            <div class="input-group">
+                <input id="search" class="form-control" type="text" ng-model="query" autocomplete="off"
+                       ng-change="clear_results()"
+                       placeholder="Поиск пациента по ФИО, дате рождения, полису или документу, удостоверяющему личность">
+                <span class="input-group-btn">
+                    <button class="btn btn-success" ng-click="perform_search()"><span class="glyphicon glyphicon-search"></span> Найти</button>
+                </span>
+            </div>
+        </form>
+        <label ng-if="results.length">Найдены [[ results.length ]] пациентки:</label>
+{#        <label ng-if="results.length === 0 && query">По Вашему запросу ничего не найдено</label>#}
+        <div class="media" ng-repeat="row in results" ng-click="open_patient_info(row.event_id)" style="cursor: pointer">
+            <div class="media-left">
+              <span class="thumbnail"><span style="font-size:75px" class="fa fa-user assist-icon text-muted"></span></span>
+            </div>
+            <div class="media-body">
+                <h4 class="media-heading">[[ row.name ]]</h4>
+                <dl class="dl-horizontal">
+                    <dt>Дата рождения</dt>
+                    <dd>...</dd>
+                    <dt>Документы</dt>
+                    <dd>
+                        <div class="row">
+                            <div class="col-md-2 col-sm-2 col-xs-2">ПАСПОРТ</div>
+                            <div class="col-md-10 col-sm-10">[[ row.document ]]</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-2 col-sm-2 col-xs-2">СНИЛС</div>
+                            <div class="col-md-10 col-sm-10 col-xs-10">[[ row.snils ]]</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-2 col-sm-2 col-xs-2">ПОЛИС ОМС</div>
+                            <div class="col-md-10 col-sm-10 col-xs-10">[[ row.policy ]]</div>
+                        </div>
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block modules_js %}
+    {{ super() }}
+    <script src="{{ url_for('.static', filename='js/ambulance_index.js', v=version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/risar.js', v=version) }}"></script>
+{% endblock %}
