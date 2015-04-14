@@ -10,11 +10,11 @@
                        ng-change="clear_results()"
                        placeholder="Поиск пациента по ФИО, дате рождения, полису или документу, удостоверяющему личность">
                 <span class="input-group-btn">
-                    <button class="btn btn-success" ng-click="perform_search()"><span class="glyphicon glyphicon-search"></span> Найти</button>
+                    <button class="btn btn-success" ng-click="perform_search(false)"><span class="glyphicon glyphicon-search"></span> Найти</button>
                 </span>
             </div>
         </form>
-        <label ng-if="results.length">Найдены [[ results.length ]] пациентки:</label>
+{#        <label ng-if="results.length">Найдены [[ results.length ]] пациентки:</label>#}
 {#        <label ng-if="results.length === 0 && query">По Вашему запросу ничего не найдено</label>#}
         <div class="media" ng-repeat="row in results" ng-click="open_patient_info(row.event_id)" style="cursor: pointer">
             <div class="media-left">
@@ -42,6 +42,11 @@
                     </dd>
                 </dl>
             </div>
+        </div>
+        <div>
+            <pagination ng-model="pager.current_page" total-items="pager.pages" items-per-page="1"
+                max-size="pager.max_pages" ng-change="onPageChanged()" ng-show="pager.pages > 1" boundary-links="true">
+            </pagination>
         </div>
     </div>
 {% endblock %}

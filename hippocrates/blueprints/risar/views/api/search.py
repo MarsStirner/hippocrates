@@ -138,7 +138,7 @@ def api_0_event_search_ambulance():
     data = dict(request.args)
     if request.json:
         data.update(request.json)
-    per_page = safe_int(data.get('per_page')) or 10
+    per_page = safe_int(data.get('per_page')) or 5
     data['per_page'] = per_page
     result = search_events_ambulance(**data)
 
