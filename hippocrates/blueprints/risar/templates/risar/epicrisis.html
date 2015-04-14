@@ -11,18 +11,8 @@
             <li>Эпикриз</li>
         </ul>
         <div class="row small-marginal">
-            <div class="col-lg-10 col-md-10">
-                <h2>
-                    Эпикриз -
-                    <a ng-href="{{ url_for('patients.patient') }}?client_id=[[ chart.client.id ]]">[[ chart.client.full_name ]]</a>
-                    ([[ chart.external_id ]])
-                </h2>
-            </div>
-            <div class="col-md-12 col-lg-12">
-                <div class="alert-warning small-marginal">Случай беременности. На учёте в <b>[[ chart.person.organisation.short_name ]]</b>
-                    у <b>[[ chart.person.name ]]</b>
-                    с <b>[[ chart.set_date | asDate ]]</b>
-                </div>
+            <div class="col-md-12">
+                {{ rimacros.page_title('Эпикриз') }}
             </div>
         </div>
         <tabset>

@@ -27,7 +27,7 @@
             <div class="col-lg-10 col-md-10">
                 <h2>
                     Выбор ЛПУ для {% if 'emergency' in request.args %}экстренного{% else %}планового{% endif %} случая
-                    <a ng-href="{{ url_for('patients.patient') }}?client_id=[[ header.client.id ]]">[[ header.client.full_name ]]</a>
+                    <a ng-href="{{ url_for('patients.patient_info_full') }}?client_id=[[ header.client.id ]]">[[ header.client.full_name ]]</a>
                     ([[ header.event.external_id ]])
                 </h2>
             </div>
