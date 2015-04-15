@@ -14,30 +14,30 @@
                 </span>
             </div>
         </form>
-{#        <label ng-if="results.length">Найдены [[ results.length ]] пациентки:</label>#}
-{#        <label ng-if="results.length === 0 && query">По Вашему запросу ничего не найдено</label>#}
+        <label ng-if="pager.record_count > 0">Результаты поиска карт пациенток: <b>[[pager.record_count]]</b></label>
+        <label ng-if="pager.record_count === 0 && query">По Вашему запросу ничего не найдено</label>
         <div class="media" ng-repeat="row in results" ng-click="open_patient_info(row.event_id)" style="cursor: pointer">
             <div class="media-left">
               <span class="thumbnail"><span style="font-size:75px" class="fa fa-user assist-icon text-muted"></span></span>
             </div>
             <div class="media-body">
-                <h4 class="media-heading">[[ row.name ]]</h4>
+                <h4 class="media-heading"><a>[[ row.name ]]</a></h4>
                 <dl class="dl-horizontal">
                     <dt>Дата рождения</dt>
-                    <dd>...</dd>
+                    <dd>[[ row.birth_date ]]</dd>
                     <dt>Документы</dt>
                     <dd>
                         <div class="row">
-                            <div class="col-md-2 col-sm-2 col-xs-2">ПАСПОРТ</div>
-                            <div class="col-md-10 col-sm-10">[[ row.document ]]</div>
+                            <div class="col-md-3 col-sm-3 col-xs-3">[[ row.document_type ]]</div>
+                            <div class="col-md-9 col-sm-9 col-xs-9">[[ row.document ]]</div>
                         </div>
                         <div class="row">
-                            <div class="col-md-2 col-sm-2 col-xs-2">СНИЛС</div>
-                            <div class="col-md-10 col-sm-10 col-xs-10">[[ row.snils ]]</div>
+                            <div class="col-md-3 col-sm-3 col-xs-3">СНИЛС</div>
+                            <div class="col-md-9 col-sm-9 col-xs-9">[[ row.snils ]]</div>
                         </div>
                         <div class="row">
-                            <div class="col-md-2 col-sm-2 col-xs-2">ПОЛИС ОМС</div>
-                            <div class="col-md-10 col-sm-10 col-xs-10">[[ row.policy ]]</div>
+                            <div class="col-md-3 col-sm-3 col-xs-2">ПОЛИС</div>
+                            <div class="col-md-9 col-sm-9 col-xs-9">[[ row.policy ]]</div>
                         </div>
                     </dd>
                 </dl>
