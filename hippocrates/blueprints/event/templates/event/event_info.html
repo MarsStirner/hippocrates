@@ -29,7 +29,10 @@
                 <div class="toc-affix" bs-affix>
                     <toc-affix toc-name="tocEventForm">
                     <hr>
-                    {% if not event or (event.is_closed and user_profiles_mng.has_ui_registrator()) or (not event.is_closed and user_utils.can_edit_event(event)) %}
+                    {% if not event or (event.is_closed and user_profiles_mng.has_ui_registrator()) or (
+                        not event.is_closed and (
+                            user_utils.can_edit_event(event) or user_utils.can_edit_event_payment_info(event)
+                        )) %}
                     <div class="row">
                         <div class="col-md-6">
                             <button type="button" ng-click="save_event()" class="btn btn-block btn-success"
