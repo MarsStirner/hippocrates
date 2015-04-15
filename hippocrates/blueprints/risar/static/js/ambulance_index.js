@@ -25,7 +25,7 @@ var AmbulanceIndexCtrl = function ($scope, $window, RisarApi, Config) {
         }
     };
     $scope.open_patient_info = function (event_id) {
-        $window.open(Config.url.ambulance_patient_info + '?event_id=' + event_id);
+        $window.open(Config.url.ambulance_patient_info + '?event_id=' + event_id, '_self');
     };
 
     $scope.onPageChanged = function () {

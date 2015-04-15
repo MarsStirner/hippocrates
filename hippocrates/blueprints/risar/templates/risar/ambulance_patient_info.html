@@ -4,135 +4,103 @@
 
 {% block main %}
     <div ng-controller="AmbulancPatientInfoCtrl">
-    <nav class="navbar navbar-default" >
-      <div class="container-fluid" ng-style="{'background-color': riskColor}">
-          <div class="navbar-header">
-              <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#menu-navbar-collapse">
-                  <span class="sr-only">Toggle navigation</span>
-                  <span class="icon-bar"></span>
-                  <span class="icon-bar"></span>
-                  <span class="icon-bar"></span>
-              </button>
-              <a class="btn btn-small btn-default navbar-btn" href="{{ url_for('.index_html') }}"><span class="glyphicon glyphicon-arrow-left"></span></a>
-              <span style="color: #333; font-size: large;">[[ chart.client.full_name ]]</span>
-          </div>
-        <div class="collapse navbar-collapse" id="menu-navbar-collapse" >
-          <ul class="nav navbar-nav navbar-right" style="background-color: #e7e7e7;">
-            <li class="dropdown">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false" style="color: #333">Меню <span class="caret"></span></a>
-              <ul class="dropdown-menu" role="menu">
-                <li><a href="#">Обменная карта</a></li>
-                <li><a href="#">Лабораторные исследования</a></li>
-                <li><a href="#">Функциональные исследования</a></li>
-              </ul>
-            </li>
-          </ul>
-        </div>
+    <div class="panel panel-default">
+      <div class="panel-body"  ng-style="{'background-color': riskColor}">
+        <a class="btn btn-small btn-default navbar-btn" href="{{ url_for('.index_html') }}"><span class="glyphicon glyphicon-arrow-left"></span></a>
+        <span style="font-size: large;">[[ chart.client.full_name ]]</span>
       </div>
-    </nav>
+    </div>
     <legend>ЛПУ родоразрешения</legend>
         <div class="row">
-            <div class="col-md-6">
-                <div class="row">
-                    <div class="col-md-3 col-sm-4 col-xs-4 text-right">
-                        Экстренное
-                    </div>
-                    <div class="col-md-9 col-sm-8 col-xs-8">
-                        [[ chart.client.attach_lpu.extra_lpu.org.short_name ]]</br>
-                        [[ chart.client.attach_lpu.extra_lpu.org.address ]]
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-3 col-sm-4 col-xs-4 text-right" class="text-right">
-                        Плановое
-                    </div>
-                    <div class="col-md-9 col-sm-8 col-xs-8">
-                        [[ chart.client.attach_lpu.plan_lpu.org.short_name ]]</br>
-                        [[ chart.client.attach_lpu.plan_lpu.org.address ]]
-                    </div>
-                </div>
+            <div class="col-md-4 col-sm-4 col-xs-4 text-right">
+                Экстренное
+            </div>
+            <div class="col-md-8 col-sm-8 col-xs-8">
+                [[ chart.client.attach_lpu.extra_lpu.org.short_name ]]</br>
+                [[ chart.client.attach_lpu.extra_lpu.org.address ]][[ chart.client.attach_lpu.extra_lpu.org.phone ? ', тел:'+chart.client.attach_lpu.extra_lpu.org.phone :'']]
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 col-sm-4 col-xs-4 text-right" class="text-right">
+                Плановое
+            </div>
+            <div class="col-md-8 col-sm-8 col-xs-8">
+                [[ chart.client.attach_lpu.plan_lpu.org.short_name ]]</br>
+                [[ chart.client.attach_lpu.plan_lpu.org.address ]][[ chart.client.attach_lpu.plan_lpu.org.phone ? ', тел: '+chart.client.attach_lpu.plan_lpu.org.phone :'']]
             </div>
         </div>
     <legend>Особенности пациентки</legend>
-        <div class="row">
-            <div class="col-md-6">
-                <div class="row" style="font-size: large;">
-                    <div class="col-md-3 col-sm-4 col-xs-4 text-right">
-                        <b>Группа крови</b>
-                    </div>
-                    <div class="col-md-9 col-sm-8" ng-class="{'text-danger': chart.anamnesis.mother.blood_type.code.slice(-1) == '-'}">
-                        [[ chart.anamnesis.mother.blood_type.name ]]
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-3 col-sm-4 col-xs-4 text-right">
-                        Туберкулез
-                    </div>
-                    <div class="col-md-9 col-sm-8 col-xs-8">
-                        <span ng-class="{'text-danger': chart.has_diseases.has_tuberculosis}">[[chart.has_diseases.has_tuberculosis ? 'Да': 'Нет']]</span>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-3 col-sm-4 col-xs-4 text-right">
-                        Чесотка
-                    </div>
-                    <div class="col-md-9 col-sm-8 col-xs-8">
-                        <span ng-class="{'text-danger': chart.has_diseases.has_scabies}">[[chart.has_diseases.has_scabies ? 'Да': 'Нет']]</span>
-                    </div>
-                </div>
+        <div class="row" style="font-size: large;">
+            <div class="col-md-4 col-sm-4 col-xs-4 text-right">
+                <b>Группа крови</b>
             </div>
-            <div class="col-md-6">
-                <div class="row" style="font-size: large;">
-                    <div class="col-md-4 col-sm-4 col-xs-4 text-right">
-                        <b>Риск невынашивания</b>
-                    </div>
-                    <div class="col-md-8 col-sm-8 col-xs-8" ng-style="{'color': riskColor}">
-                        [[ chart.risk_rate.name ]]
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-4 col-sm-4 col-xs-4 text-right">
-                        Непереносимость
-                    </div>
-                    <div class="col-md-8 col-sm-8 col-xs-8">
-                        <p ng-repeat="intolerance in chart.anamnesis.intolerances">[[ intolerance.name ]]</p>
-                    </div>
-                </div>
+            <div class="col-md-8 col-sm-8" ng-class="{'text-danger': chart.anamnesis.mother.blood_type.code.slice(-1) == '-'}">
+                [[ chart.anamnesis.mother.blood_type.name ]]
+            </div>
+        </div>
+        <div class="row" style="font-size: large;">
+            <div class="col-md-4 col-sm-4 col-xs-4 text-right">
+                <b>Риск невынашивания</b>
+            </div>
+            <div class="col-md-8 col-sm-8 col-xs-8" ng-style="{'color': riskColor}">
+                [[ chart.risk_rate.name ]]
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 col-sm-4 col-xs-4 text-right">
+                Непереносимость
+            </div>
+            <div class="col-md-8 col-sm-8 col-xs-8">
+                <p ng-repeat="intolerance in chart.anamnesis.intolerances">[[ intolerance.name ]]</p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 col-sm-4 col-xs-4 text-right">
+                Туберкулез
+            </div>
+            <div class="col-md-8 col-sm-8 col-xs-8">
+                <span ng-class="{'text-danger': chart.has_diseases.has_tuberculosis}">[[chart.has_diseases.has_tuberculosis ? 'Да': 'Нет']]</span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 col-sm-4 col-xs-4 text-right">
+                Чесотка
+            </div>
+            <div class="col-md-8 col-sm-8 col-xs-8">
+                <span ng-class="{'text-danger': chart.has_diseases.has_scabies}">[[chart.has_diseases.has_scabies ? 'Да': 'Нет']]</span>
             </div>
         </div>
     <legend>Контакты врача</legend>
-        <div class="col-md-6">
-            <div class="row">
-                <div class="col-md-3 col-sm-4 col-xs-4 text-right">
-                    Врач
-                </div>
-                <div class="col-md-9 col-sm-8 col-xs-8">
-                    [[ chart.person.full_name ]]
-                </div>
+        <div class="row">
+            <div class="col-md-4 col-sm-4 col-xs-4 text-right">
+                Врач
             </div>
-            <div class="row">
-                <div class="col-md-3 col-sm-4 col-xs-4 text-right">
-                    Телефон врача
-                </div>
-                <div class="col-md-9 col-sm-8 col-xs-8">
-
-                </div>
+            <div class="col-md-8 col-sm-8 col-xs-8">
+                [[ chart.person.full_name ]]
             </div>
-            <div class="row">
-                <div class="col-md-3 col-sm-4 col-xs-4 text-right">
-                    ЛПУ наблюдения
-                </div>
-                <div class="col-md-9 col-sm-8 col-xs-8">
-                    [[ chart.person.organisation.short_name ]]
-                </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 col-sm-4 col-xs-4 text-right">
+                Телефон врача
             </div>
-            <div class="row">
-                <div class="col-md-3 col-sm-4 col-xs-4 text-right">
-                    Телефон ЛПУ
-                </div>
-                <div class="col-md-9 col-sm-8 col-xs-8">
-                    [[ chart.person.organisation.phone ]]
-                </div>
+            <div class="col-md-8 col-sm-8 col-xs-8">
+                 8(812) 845-38-49
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 col-sm-4 col-xs-4 text-right">
+                ЛПУ наблюдения
+            </div>
+            <div class="col-md-8 col-sm-8 col-xs-8">
+                [[ chart.person.organisation.short_name ]]
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 col-sm-4 col-xs-4 text-right">
+                Телефон ЛПУ
+            </div>
+            <div class="col-md-8 col-sm-8 col-xs-8">
+                [[ chart.person.organisation.phone ]]
             </div>
         </div>
     </div>

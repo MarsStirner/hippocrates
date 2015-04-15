@@ -152,8 +152,10 @@ def api_0_event_search_ambulance():
                 'event_id': row['id'],
                 'client_id': row['client_id'],
                 'name': row['name'],
+                'birth_date': row['birth_date'],
                 'snils': row['snils'],
                 'document': row['document'],
+                'document_type': row['document_type'],
                 'policy': row['policy'],
             }
             for row in result['result']['items']
