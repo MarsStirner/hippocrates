@@ -1,16 +1,24 @@
 # -*- coding: utf-8 -*-
+import datetime
+
 from flask import request, abort
+from flask.ext.login import current_user
+
 from ..app import module
+from ..lib.api import update_template_action
+from nemesis.lib.agesex import AgeSex
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.data import create_action, update_action, create_new_action, get_planned_end_datetime, int_get_atl_flat, \
     get_patient_location
 from nemesis.lib.jsonify import ActionVisualizer
 from nemesis.lib.user import UserUtils
 from nemesis.lib.utils import safe_traverse, safe_datetime, parse_id
-from nemesis.models.actions import Action, ActionType
+from nemesis.models.actions import Action, ActionType, ActionTemplate
 from nemesis.models.event import Event
 from nemesis.models.exists import Person
+from nemesis.models.utils import safe_current_user_id
 from nemesis.systemwide import db, cache
+
 
 __author__ = 'viruzzz-kun'
 
@@ -205,3 +213,92 @@ def api_create_lab_direction():
         db.session.add(action)
 
     db.session.commit()
+
+
+@module.route('/api/templates/<type_id>', methods=['GET'])
+@api_method
+def api_action_template_list(type_id):
+    user_id = safe_current_user_id()
+    speciality_id = current_user.speciality_id
+    templates = ActionTemplate.query.join(Action).filter(
+        db.and_(
+            db.or_(
+                ActionTemplate.owner_id == user_id,
+                ActionTemplate.owner_id.is_(None)),
+            db.or_(
+                ActionTemplate.speciality_id == speciality_id,
+                ActionTemplate.speciality_id.is_(None))
+            ),
+        db.or_(
+            Action.actionType_id == type_id,
+            ActionTemplate.action_id.is_(None)),
+        ActionTemplate.deleted == 0,
+    )
+    return [
+        {
+            'id': at.id,
+            'gid': at.group_id,
+            'name': at.name,
+            'aid': at.action_id,
+            'con': AgeSex(at)
+        }
+        for at in templates
+    ]
+
+
+@module.route('/api/templates/<type_id>', methods=['PUT'])
+@module.route('/api/templates/<type_id>/<id_>', methods=['POST'])
+@api_method
+def api_action_template_save(type_id, id_=None):
+    data = request.get_json()
+    now = datetime.datetime.now()
+    if id_:
+        template = ActionTemplate()
+        template.createDatetime = now
+        template.createPerson_id = safe_current_user_id()
+    else:
+        template = ActionTemplate.query.join(Action).filter(
+            ActionTemplate.deleted == 0,
+            Action.actionType_id == type_id,
+        ).first()
+    if not template:
+        raise ApiException(404, 'Template not found')
+
+    action_id = data.get('action_id')
+
+    if not template.action and action_id:
+        action = Action()
+        db.session.add(action)
+        update_template_action(action, action_id)
+        template.action = action
+
+    elif template.action and action_id:
+        update_template_action(template.action, action_id)
+
+    elif template.action and 'action' in data and data['action'] is None:
+        action = template.action
+        template.action = None
+        db.session.delete(action)
+
+    template.modifyDatetime = now
+    template.modifyPerson_id = safe_current_user_id()
+
+    if 'name' in data:
+        template.name = data['name']
+    if 'code' in data:
+        template.code = data['code']
+    if 'owner' in data:
+        if data['owner']:
+            template.owner_id = safe_current_user_id()
+        else:
+            template.owner_id = None
+    if 'speciality' in data:
+        if data['speciality']:
+            template.speciality_id = current_user.speciality_id
+        else:
+            template.speciality_id = None
+
+    db.session.add(template)
+    db.commit()
+
+
