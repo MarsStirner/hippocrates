@@ -3,7 +3,7 @@
 {% block title %}> {{ module_name }}{% endblock %}
 
 {% block main %}
-    <div ng-controller="EventRoutingCtrl">
+    <div ng-controller="EventRoutingCtrl" class="ng-cloak">
         <div alert-notify></div>
         <ul class="breadcrumb">
             <li><a href="{{ url_for('.index_html') }}">Рабочий стол</a></li>
@@ -58,22 +58,26 @@
                         </div>
                         <div class="panel-body" >
                             <div class="row">
-                            <div class="col-md-9">
-                                <div class="small-marginal" ng-class="getCurrentLpuLabelClass()">
-                                    <h3 style="margin-top: 5px">Текущее выбранное: <span style="font-weight: bold">[[ chart.lpu.short_name ]]</span></h3>
+                                <div class="col-md-9">
+                                    <div class="small-marginal">
+                                        <p style="margin-top: 5px">Выбрано: <span style="font-weight: bold">[[ chart.lpu.short_name ]]</span>
+                                            <span ng-if="!checkCurrentLpuMatchesDiagnoses()" class="text-muted"><br>
+                                                Выбранное ЛПУ не поддерживает все диагнозы пациентки
+                                            </span>
+                                        </p>
+                                    </div>
+                                    <div fs-radio="" items="orgs" ng-model="chart.lpu" ng-if="orgs.length > 0">
+                                        [[ item.short_name ]]
+                                    </div>
                                 </div>
-                                <div fs-radio="" items="orgs" ng-model="chart.lpu" ng-if="orgs.length > 0">
-                                    [[ item.short_name ]]
+                                <div class="col-md-3">
+                                    <button type="button" class="btn btn-success pull-right" title="Сохранить" ng-click="save()">Сохранить</button>
                                 </div>
-                            </div>
-                            <div class="col-md-3">
-                                <button type="button" class="btn btn-success pull-right" title="Сохранить" ng-click="save()">Сохранить</button>
-                            </div>
                             </div>
                             <div ng-if="orgs.length === 0">
-                                <h3 class="text-center">Подходящие ЛПУ не найдены.<br>
-                                    <small>Уберите часть выбранных диагнозов для вывода учреждений более широкого профиля.</small>
-                                </h3>
+                                <hr>
+                                <h3 class="text-center">Подходящие ЛПУ не найдены</h3>
+                                <span class="text-muted">Уберите часть выбранных диагнозов для вывода учреждений более широкого профиля</span>
                             </div>
                         </div>
                     </div>

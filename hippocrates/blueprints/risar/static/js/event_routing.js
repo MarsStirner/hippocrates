@@ -38,18 +38,12 @@ var EventRoutingCtrl = function ($scope, $window, RisarApi) {
             $scope.selectLpuForm.$setPristine();
         });
     };
-    $scope.getCurrentLpuLabelClass = function () {
+    $scope.checkCurrentLpuMatchesDiagnoses = function () {
         var cur_lpu_id = safe_traverse($scope.chart, ['lpu', 'id']),
             matched = $scope.orgs.some(function (org) {
-            return org.id === cur_lpu_id;
-        }),
-            cls = 'alert-danger';
-        if (matched) {
-            cls = 'alert-success';
-        } else if (cur_lpu_id) {
-            cls = 'alert-warning';
-        }
-        return cls;
+                return org.id === cur_lpu_id;
+            });
+        return matched;
     };
     $scope.getOtherRoutingText = function () {
         return emergency ? 'Плановая госпитализация' : 'Экстренная госпитализация';
