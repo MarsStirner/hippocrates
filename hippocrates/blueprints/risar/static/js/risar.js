@@ -214,16 +214,16 @@ WebMis20
 .directive('riskRateIcon', function () {
     return {
         restrict: 'A',
-        template: '<span class="fa" ng-class="icon_class(riskRateIcon.id)" tooltip="[[tooltip(riskRateIcon.id)]]"></span>',
+        template: '<span ng-class="icon_class(riskRateIcon.id)" tooltip="[[tooltip(riskRateIcon.id)]]"></span>',
         scope: {
             riskRateIcon: '='
         },
         link: function (scope) {
             scope.icon_class = function (rate) {
-                if (rate == 1) return 'fa-circle text-success';
-                if (rate == 2) return 'fa-circle text-warning';
-                if (rate == 3) return 'fa-circle text-danger';
-                return 'fa-question';
+                if (rate == 1) return 'ri-prenatal-risk text-success';
+                if (rate == 2) return 'ri-prenatal-risk text-warning';
+                if (rate == 3) return 'ri-prenatal-risk text-danger';
+                return 'ri-prenatal-risk-undefined';
             };
             scope.tooltip = function (rate) {
                 if (rate == 1) return 'У пациентки выявлен низкий риск невынашивания';
@@ -235,4 +235,29 @@ WebMis20
         }
     }
 })
+.directive('pregnancyWeekIcon', ['$filter', function ($filter) {
+    return {
+        restrict: 'A',
+        template: '<span ng-class="icon_class(pregnancyWeekIcon)"' +
+                  'tooltip="[[tooltip(pregnancyStartDate)]]"></span>',
+        scope: {
+            pregnancyWeekIcon: '=',
+            pregnancyStartDate: '='
+        },
+        link: function (scope) {
+            scope.icon_class = function (week) {
+                if (1 <= week && week <= 40) {
+                    return 'ri-pregnancy-week-' + week;
+                } else if (week > 40) {
+                    return 'ri-pregnancy-week-40h';
+                } else {
+                    return 'ri-pregnancy-week-undefined';
+                }
+            };
+            scope.tooltip = function (psdate) {
+                return 'Срок беременности (дата начала случая - {0})'.format($filter('asDate')(psdate));
+            };
+        }
+    }
+}])
 ;

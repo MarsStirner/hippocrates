@@ -28,13 +28,9 @@
     <div class="col-md-{{ w2 }} col-sm-12 achievements">
         {%- if ext_header == 'chart' %}
         <span class="pull-right">
-            <span ng-if="pregnancy_week" class="label label-default" tooltip="Срок беременности (дата начала случая - [[chart.card_attributes.pregnancy_start_date|asDate]])">[[ pregnancy_week ]]</span><i class="fa fa-question" ng-if="!pregnancy_week" tooltip="Срок беременности"></i>
+            <i pregnancy-week-icon="chart.card_attributes.pregnancy_week" pregnancy-start-date="[[chart.card_attributes.pregnancy_start_date]]"></i>
             <i risk-rate-icon="chart.risk_rate"></i>
-            <i class="fa fa-exclamation-triangle text-danger"></i>
-            <i class="fa fa-exclamation-triangle text-success"></i>
-            <i class="fa fa-exclamation-triangle text-warning"></i>
-            <i class="fa fa-exclamation-triangle"></i>
-            <span class="label label-default" tooltip="Процент заполненности карты">60</span>
+            <span class="ri-chart-fill-pct-50" tooltip="Процент заполненности карты"></span>
         </span>
         <span>
 {#            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.0" id="Layer_1" x="0px" y="0px" width="100px" height="70px" viewBox="-34.621 15 100 70" enable-background="new -34.621 15 100 70" xml:space="preserve">#}
@@ -43,7 +39,7 @@
 {#            <path fill="skyblue" d="M50.256,63.216c-8.98-0.3,0-15.627,0-15.627S59.237,63.503,50.256,63.216 M61.787,67.352  c0-12.929-11.53-21.628-11.53-21.628s-11.635,9.394-11.635,21.628c0,6.137,5.496,11.117,11.635,11.117S61.787,73.488,61.787,67.352"/>#}
 {#            <path fill="silver" stroke="gray" d="M51.446,47.218l-0.282-0.462c0,0-8.154-0.461-11.171-0.69c-1.384-0.106-2.811-0.37-3.946-0.621  c-0.703-1.283-2.248-2.179-4.053-2.179c-1.057,0-2.014,0.318-2.779,0.828c-1.973,1.055-5.692,1.052-8.338,1.062  c-3.758,0.028-7.458-0.412-10.785-0.742c-5.744-0.585-8.17-3.033-4.818-6.607c19.652-20.932-32.086-22.769-37.173-16.965  c-3.113,3.688,36.113,4.81,23.64,19.229c-4.841,0.981-9.434,2.758-11.424,4.801c-1.67-0.784-3.696-1.381-5.566-0.965  c-1.874,2.118-1.542,4.995,0,6.145c1.765,0.377,3.69-0.116,5.319-0.799c2.117,3.083,8.237,5.649,14.896,5.649  c6.447,0,10.416-2.43,13.851-4.255c3.448-1.827,16.699-3.394,19.803-1.234c0.024,0.018,0.048,0.028,0.071,0.042  c0.817,0.752,1.988,1.234,3.302,1.234c1.657,0,3.086-0.761,3.856-1.876c1.385-0.259,3.186-0.579,4.052-0.655  C41.439,48.022,51.446,47.218,51.446,47.218z"/>#}
 {#            </svg>#}
-            <i class="fa fa-exclamation-triangle text-success"></i>
+            <i class="ri-due-date"></i>
             <span ng-if="chart.epicrisis.delivery_date" tooltip="Фактическая дата родов">[[chart.epicrisis.delivery_date | asDate]]</span>
             <span ng-if="!chart.epicrisis.delivery_date" tooltip="Предполагаемая дата родов">[[chart.card_attributes.predicted_delivery_date | asDate]]</span>
             <i class="fa fa-question" tooltip="Предполагаемая дата родов" ng-if="!chart.epicrisis.delivery_date && !chart.card_attributes.predicted_delivery_date"></i>
