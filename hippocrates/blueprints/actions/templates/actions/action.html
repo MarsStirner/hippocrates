@@ -9,8 +9,8 @@
             <span class="glyphicon glyphicon-ok"></span>
         </button>
     </div>
-    <h3>[[ action.action.action_type.name ]] -
-        <a href="{{ url_for('patients.patient') }}?client_id=[[action.action.client.id]]">[[ action.action.client.full_name ]]</a>
+    <h3>[[ action.action_type.name ]] -
+        <a href="{{ url_for('patients.patient') }}?client_id=[[action.client.id]]">[[ action.client.full_name ]]</a>
     </h3>
 </legend>
 <div>
@@ -25,9 +25,14 @@
 </div>
 <div class="row">
     <div class="col-md-12">
+        <div class="pull-left">
+            <button class="btn btn-default" ng-click="template_save()">Сохранить шаблон</button>
+            <button class="btn btn-default" ng-click="template_load()" ng-if="!action.ro">Загрузить шаблон</button>
+            <button class="btn btn-default" ng-click="template_prev()" ng-if="!action.ro">Загрузить из предыдущего</button>
+        </div>
         <div class="pull-right">
             <button class="btn btn-lg btn-success" ng-click="save_action()" ng-if="!action.ro">Сохранить</button>
-            <button class="btn btn-lg btn-danger" ng-click="action.cancel()">Закрыть</button>
+            <button class="btn btn-lg btn-danger" ng-click="cancel()">Закрыть</button>
         </div>
     </div>
 </div>
@@ -37,5 +42,7 @@
 {% block modules_js %}
     {{ super() }}
     <script src="{{ url_for('.static', filename='js/action_editor.js', v=app_version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/action-layout.js', v=app_version) }}"></script>
     <script src="{{ url_for('static', filename='js/services/event/event-services.js', v=nemesis_version) }}"></script>
+    <script type="text/ng-template" id="_action_template_model.html">{% include "actions/_action_template_modal.html" %}</script>
 {% endblock %}

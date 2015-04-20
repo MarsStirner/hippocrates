@@ -1,0 +1,34 @@
+<div class="modal-header" xmlns="http://www.w3.org/1999/html">
+    <button type="button" class="close" ng-click="cancel()">&times;</button>
+    <h4 class="modal-title" id="myModalLabel">Шаблоны действий</h4>
+</div>
+<div class="modal-body">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="css-treeview well well-sm scrolled-tree" ng-mouseleave="hide_tree()" ng-class="{popup: popupable}">
+                <ul>
+                    <li ng-repeat="spec_group in tree">
+                        <input class="group" type="checkbox" id="spec-[[spec_group.speciality.id]]" checked>
+                        <label class="group" for="spec-[[spec_group.speciality.id]]" ng-bind="spec_group.speciality.name" ></label>
+                        <ul>
+                            <li ng-repeat="person in spec_group.persons">
+                                <a class="leaf" ng-bind="person.nameFull" ng-click="person_selected(person)"
+                                   ng-if="!checkboxed" ng-class="{'no-schedule': display_no_schedule(person)}"></a>
+                                <label class="leaf" for="doc-[[person.id]]" ng-if="checkboxed" ng-class="{'no-schedule': display_no_schedule(person)}">
+                                    <input type="checkbox" id="doc-[[person.id]]" class="leaf" ng-model="person.checked"
+                                           ng-disabled="person.disabled" ng-change="selection_change(person)" >
+                                    [[person.name]]
+                                </label>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-md-4"></div>
+    </div>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-primary" ng-click="accept()">Выбрать</button>
+    <button type="button" class="btn btn-default" ng-click="$dismiss()">Отмена</button>
+</div>

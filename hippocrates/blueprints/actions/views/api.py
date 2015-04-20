@@ -30,22 +30,15 @@ prescriptionFlatCodes = (
     u'chemotherapy',
 )
 
-@module.route('/api/actions', methods=['GET'])
-@api_method
-def api_action_get():
-    action_id = int(request.args.get('action_id'))
-    action = Action.query.get(action_id)
-    v = ActionVisualizer()
-    return v.make_action(action)
 
-
-@module.route('/api/actions/new.json', methods=['GET'])
+@module.route('/api/action/new/')
+@module.route('/api/action/new/<int:action_type_id>/<int:event_id>', methods=['GET'])
 @api_method
-def api_action_new_get():
-    src_action = Action.query.get(int(request.args['src_action_id'])) \
-        if 'src_action_id' in request.args else None
-    action_type_id = int(request.args['action_type_id'])
-    event_id = int(request.args['event_id'])
+def api_action_new_get(action_type_id, event_id):
+    src_action_id = request.args.get('src_action_id')
+    src_action = None
+    if src_action_id:
+        src_action = Action.query.get(src_action_id)
 
     action = create_action(action_type_id, event_id, src_action=src_action)
 
@@ -55,11 +48,36 @@ def api_action_new_get():
     return result
 
 
-@module.route('/api/actions', methods=['POST'])
+@module.route('/api/action/')
+@module.route('/api/action/<int:action_id>', methods=['GET'])
 @api_method
-def api_action_post():
+def api_action_get(action_id):
+    action = Action.query.get(action_id)
+    v = ActionVisualizer()
+    return v.make_action(action)
+
+
+@module.route('/api/action/', methods=['DELETE'])
+@module.route('/api/action/<int:action_id>', methods=['DELETE'])
+@api_method
+def api_delete_action(action_id=None):
+    if not action_id:
+        raise ApiException(404, "Argument 'action_id' cannot be found.")
+    action = Action.query.get(action_id)
+    if not action:
+        raise ApiException(404, "Действие с id=%s не найдено" % action_id)
+    if not UserUtils.can_delete_action(action):
+        raise ApiException(403, u'У пользователя нет прав на удаление действия с id = %s' % action.id)
+
+    action.delete()
+    db.session.commit()
+
+
+@module.route('/api/action/', methods=['POST'])
+@module.route('/api/action/<int:action_id>', methods=['POST'])
+@api_method
+def api_action_post(action_id=None):
     action_desc = request.get_json()
-    action_id = action_desc['id']
     set_person_id = safe_traverse(action_desc, 'set_person', 'id')
     person_id = safe_traverse(action_desc, 'person', 'id')
     data = {
