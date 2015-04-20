@@ -12,6 +12,16 @@ var CheckupCtrl = function ($scope, RisarApi, RefBookService) {
                           diag2:[],
                           diag3:[]}
     };
+    var open_tab = function (tab_name){
+        var prefix = "tab_";
+        tab_name = tab_name.replace(/\//, '');
+        $('.nav-pills a[href='+tab_name.replace(prefix,"")+']').tab('show');
+
+        // Change hash for page-reload
+        $('.nav-pills a').on('shown.bs.tab', function (e) {
+            window.location.hash = e.target.hash.replace("#", "#" + prefix);
+        })
+    };
     var reload_checkup = function () {
         RisarApi.chart.get(event_id)
         .then(function (event) {
@@ -29,7 +39,14 @@ var CheckupCtrl = function ($scope, RisarApi, RefBookService) {
         })
     };
 
-    reload_checkup();
+    var init = function () {
+        var hash = document.location.hash;
+        if (hash) {
+            open_tab(hash);
+        }
+        reload_checkup();
+    };
+    init();
 };
 
 var CheckupFirstEditCtrl = function ($scope, $window, $document, RisarApi, Config) {

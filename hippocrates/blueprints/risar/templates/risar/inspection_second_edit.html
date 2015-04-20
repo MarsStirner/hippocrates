@@ -17,450 +17,476 @@
             </div>
         </div>
         <div ng-controller="CheckupSecondEditCtrl"rc-wizard="sampleWizard" id="sampleWizard">
-            <div>
-                <nav class="navbar navbar-default" role="navigation">
-                    <div class="container-fluid">
-                        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-                        <ul class="nav navbar-nav nav-pills" style="margin: 7.5px -15px">
-                            <li class="active">
-                                <a class="active" href="#first" data-toggle="tab">
-                                    <span class="badge">1</span>
-                                    <span>Общая информация</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="#second" data-toggle="tab">
-                                    <span class="badge">2</span>
-                                    <span>Соматический статус</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="#third" data-toggle="tab">
-                                    <span class="badge">3</span>
-                                    <span>Акушерский статус</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="#fourth" data-toggle="tab">
-                                    <span class="badge">4</span>
-                                    <span>Комментарии к анализам</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="#fifth" data-toggle="tab">
-                                    <span class="badge">5</span>
-                                    <span>Заключение</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="#last" data-toggle="tab">
-                                    <span class="badge">6</span>
-                                    <span>Диагностические мероприятия</span>
-                                </a>
-                            </li>
-                        </ul>
-                        </div>
-                    </div>
-                </nav>
-                <div class="tab-content marginal">
-                    <ng-form class="tab-pane active" id="first" name="firstForm"  novalidate rc-submit rc-step>
-                        <h3>Шаг 1. Общая информация</h3>
-                        <table class="table table-condensed">
-                            <thead>
-                            <tr>
-                                <th class="col-md-2"></th>
-                                <th class="col-md-10"></th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <th class="text-right">Дата осмотра<span class="text-danger">*</span></th>
-                                    <td>
-                                        <wm-date ng-class="{'has-error': firstForm.beg_date.$invalid}" name="beg_date"
-                                                 ng-model="checkup.beg_date" style="width: 250px" ng-required="true"></wm-date>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th class="text-right">Время осмотра <span class="text-danger">*</span></th>
-                                    <td><wm-time ng-class="{'has-error': firstForm.beg_time.$invalid}" name="beg_time"
-                                                 ng-model="checkup.beg_date" style="width: 250px" ng-required="true"></wm-time>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th class="text-right">Срок беременности <span class="text-danger">*</span></th>
-                                    <td>
-                                        <div class="row"
-                                             ng-class="{'has-error': firstForm.pregnancy_week.$invalid}">
-                                            <div class="col-md-1">
-                                                <input name="pregnancy_week" ng-model="checkup.pregnancy_week"
-                                                       class="form-control" type="number" valid-number ng-required="true">
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th class="text-right">Общее состояние <span class="text-danger">*</span></th>
-                                    <td><div class="row" ng-class="{'has-error': firstForm.state.$invalid}">
-                                        <div class="col-md-3">
-                                            <rb-select name="state" ng-model="checkup.state" ref-book="rbRisarState" ng-required="true"></rb-select>
-                                        </div>
-                                    </div></td>
-                                </tr>
-                                <tr>
-                                    <th class="text-right">Масса при осмотре, кг <span class="text-danger">*</span></th>
-                                    <td><div class="row"
-                                             ng-class="{'has-error': firstForm.weight.$invalid}">
-                                        <div class="col-md-1">
-                                            <input name="weight" ng-model="checkup.weight" class="form-control" ng-required="true">
-                                        </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th class="text-right">АД правая рука<span class="text-danger">*</span></th>
-                                    <td><div class="row"
-                                             ng-class="{'has-error': firstForm.ad_right_high.$invalid && firstForm.ad_right_low.$invalid}">
-                                        <div class="col-md-2">
-                                            <input name="ad_right_high" ng-model="checkup.ad_right_high"
-                                                   maxlength="3" ng-required="true" class="form-control blood_presure">
-                                            <span>/</span>
-                                            <input name="ad_right_low" ng-model="checkup.ad_right_low"
-                                                   maxlength="3" ng-required="true" class="form-control blood_presure">
-                                        </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th class="text-right">АД левая рука <span class="text-danger">*</span></th>
-                                    <td><div class="row"
-                                             ng-class="{'has-error': firstForm.ad_left_high.$invalid && firstForm.ad_left_low.$invalid}">
-                                        <div class="col-md-2">
-                                            <input maxlength="3" name="ad_left_high" ng-model="checkup.ad_left_high"
-                                                   class="form-control blood_presure" ng-required="true">
-                                            <span>/</span>
-                                            <input maxlength="3" name="ad_left_low" ng-model="checkup.ad_left_low"
-                                                   class="form-control blood_presure" ng-required="true">
-                                        </div>
-                                    </div></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </ng-form>
-                    <ng-form class="tab-pane" id="second" name="secondForm"  novalidate rc-submit rc-step>
-                        <h3>Шаг 2. Соматический статус</h3>
-                        <table class="table table-condensed">
-                            <thead>
-                            <tr>
-                                <th class="col-md-2"></th>
-                                <th class="col-md-10"></th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <th class="text-right">Жалобы <span class="text-danger">*</span></th>
-                                    <td><div ng-class="{'has-error': secondForm.complaints.$invalid}">
-                                        <div name="complaints" refbook-checkbox ref-book="rbRisarComplaints" ng-model="checkup.complaints" ng-required="true">
-                                            [[ item.name ]]
-                                        </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th class="text-right">Молочные железы <span>&nbsp;</span></th>
-                                    <td><div>
-                                        <div name="breast" refbook-checkbox ng-model="checkup.breast" ref-book="rbRisarBreast">
-                                            [[ item.name ]]
-                                        </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th class="text-right">Состояние сосков <span>&nbsp;</span></th>
-                                    <td><div>
-                                        <div name="nipples" refbook-checkbox ng-model="checkup.nipples" ref-book="rbRisarNipples">
-                                            [[ item.name ]]
-                                        </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </ng-form>
-                    <ng-form class="tab-pane" id="third" name="thirdForm" novalidate rc-submit rc-step>
-                        <h3>Шаг 3. Акушерский статус</h3>
-                        <table class="table table-condensed">
-                            <thead>
-                            <tr>
-                                <th class="col-md-2"></th>
-                                <th class="col-md-10"></th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <th class="text-right">Наружное исследование</th>
-                                    <td>&nbsp;</td>
-                                </tr>
-                                <tr>
-                                    <th class="text-right">Окружность живота</th>
-                                    <td><div class="row"><div class="col-md-2"><input ng-model="checkup.abdominal" class="form-control"></div></div></td>
-                                </tr>
-                                <tr>
-                                    <th class="text-right">Высота стояния дна матки</th>
-                                    <td><div class="row"><div class="col-md-2"><input ng-model="checkup.fundal_height" class="form-control"></div></div></td>
-                                </tr>
-                                <tr>
-                                    <th class="text-right">Состояние матки</th>
-                                    <td><div class="row" ng-class="{'has-error': CheckupFirstEditForm.metra_state.$invalid}">
-                                        <div class="col-md-3">
-                                        <rb-select name="metra_state" ng-model="checkup.metra_state" ref-book="rbRisarMetra_State" ng-required="true"></rb-select>
-                                    </div></div></td>
-                                </tr>
-                                <tr>
-                                    <th class="text-right">Плод</th>
-                                    <td>&nbsp;</td>
-                                </tr>
-                                <tr>
-                                    <td class="text-right">Положение</td>
-                                    <td><div class="row"><div class="col-md-3">
-                                        <rb-select ng-model="checkup.fetus_position" ref-book="rbRisarFetus_Position"></rb-select></div></div></td>
-                                </tr>
-                                <tr>
-                                    <td class="text-right">Предлежание</td>
-                                    <td><div class="row"><div class="col-md-3">
-                                        <rb-select ng-model="checkup.presenting_part" ref-book="rbRisarPresenting_Part"></rb-select></div></div></td>
-                                </tr>
-                                <tr>
-                                    <td class="text-right">Сердцебиение</td>
-                                    <td><div class="row"><div class="col-md-3">
-                                        <rb-select ng-model="checkup.fetus_heartbeat" ref-book="rbRisarFetus_Heartbeat"></rb-select></div></div></td>
-                                </tr>
-                                <tr>
-                                    <td class="text-right">ЧСС, уд/мин</td>
-                                    <td><div class="row"><div class="col-md-3">
-                                        <input ng-model="checkup.fetus_heart_rate" class="form-control"></div></div></td>
-                                </tr>
-                                <tr>
-                                    <td class="text-right">Шевеление</td>
-                                    <td><div class="row"><div class="col-md-7"><wysiwyg ng-model="fetus_movement" /></div></div></td>
-                                </tr>
-                                <tr>
-                                    <th class="text-right">Внутреннее исследование</th>
-                                    <td>&nbsp;</td>
-                                </tr>
-                                <tr>
-                                    <th class="text-right">Шейка матки</th>
-                                    <td>&nbsp;</td>
-                                </tr>
-                                <tr>
-                                    <td class="text-right">Длина шейки</td>
-                                    <td><div class="row"><div class="col-md-3">
-                                        <rb-select ng-model="checkup.cervix_length" ref-book="rbRisarCervix_Length"></rb-select></div></div></td>
-                                </tr>
-                                <tr>
-                                    <td class="text-right">Позиция шейки</td>
-                                    <td><div class="row"><div class="col-md-3">
-                                        <rb-select ng-model="checkup.cervix_position" ref-book="rbRisarCervix_Position"></rb-select></div></div></td>
-                                </tr>
-                                <tr>
-                                    <td class="text-right">Зрелость шейки</td>
-                                    <td><div class="row"><div class="col-md-3">
-                                        <rb-select ng-model="checkup.cervix_maturity" ref-book="rbRisarCervix_Maturity"></rb-select></div></div></td>
-                                </tr>
-                                <tr>
-                                    <td class="text-right">Консистенция шейки</td>
-                                    <td><div class="row"><div class="col-md-3">
-                                        <rb-select ng-model="checkup.cervix_consistency" ref-book="rbRisarCervix_Consistency"></rb-select></div></div></td>
-                                </tr>
-                                <tr>
-                                    <th class="text-right">Цервикальный канал</th>
-                                    <td><div class="row"><div class="col-md-3">
-                                        <rb-select ng-model="checkup.cervical_canal" ref-book="rbRisarCervical_Canal"></rb-select></div></div></td>
-                                </tr>
-                                <tr>
-                                    <th class="text-right">Выделение</th>
-                                    <td><div class="row"><div class="col-md-3">
-                                        <rb-select ng-model="checkup.secretion" ref-book="rbRisarSecretion"></rb-select></div></div></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </ng-form>
-                    <ng-form class="tab-pane" id="fourth" name="fourthForm" novalidate rc-submit rc-step>
-                        <h3>Шаг 4. Комментарии к анализам</h3>
-                        <table class="table table-condensed">
-                            <thead>
-                            <tr>
-                                <th class="col-md-2"></th>
-                                <th class="col-md-10"></th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <th class="text-right">Мочи</th>
-                                    <td><div class="row"><div class="col-md-7"><wysiwyg ng-model="checkup.urine" /></div></div></td>
-                                </tr>
-                                <tr>
-                                    <th class="text-right">Крови</th>
-                                    <td><div class="row"><div class="col-md-7"><wysiwyg ng-model="checkup.blood" /></div></div></td>
-                                </tr>
-                                <tr>
-                                    <th class="text-right">УЗИ</th>
-                                    <td><div class="row"><div class="col-md-7"><wysiwyg ng-model="checkup.us" /></div></div></td>
-                                </tr>
-                                <tr>
-                                    <th class="text-right">Другое</th>
-                                    <td><div class="row"><div class="col-md-7"><wysiwyg ng-model="checkup.other_analysis" /></div></div></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </ng-form>
-                    <ng-form class="tab-pane" id="fifth" name="fifthForm" novalidate rc-submit rc-step>
-                        <h3>Шаг 5. Заключение</h3>
-                        <table class="table table-condensed">
-                            <thead>
-                            <tr>
-                                <th class="col-md-3"></th>
-                                <th class="col-md-9"></th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <th class="text-right">Диагнозы <span>&nbsp;</span></th>
-                                    <td>&nbsp;</td>
-                                </tr>
-                                <tr>
-                                    <td class="text-right">Основной <span class="text-danger">*</span></td>
-{#                                    ng-class="{'has-error': fifthForm.mkb.$invalid}"#}
-                                    <td>
-                                        <wm-diagnosis model="checkup.diag" list-mode="false"
-                                                      can-add-new="true" can-delete="true" can-edit="true"
-                                                      action="checkup" event="chart" risar="true"
-                                                      params="{defaults:{diagnosis_type:rbDiagnosisType.get_by_code('2')},
-                                                               disabled:{diagnosis_type:true}}"></wm-diagnosis>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="text-right">Сопутствующие <span>&nbsp;</span></td>
-                                    <td>
-                                        <wm-diagnosis model="checkup.diag2" list-mode="true"
-                                                      can-add-new="true" can-delete="true" can-edit="true"
-                                                      action="checkup" event="chart" risar="true"
-                                                      params="{defaults:{diagnosis_type:rbDiagnosisType.get_by_code('9')},
-                                                               disabled:{diagnosis_type:true}}"></wm-diagnosis>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="text-right">Осложнения <span>&nbsp;</span></td>
-                                    <td>
-                                        <wm-diagnosis model="checkup.diag3" list-mode="true"
-                                                      can-add-new="true" can-delete="true" can-edit="true"
-                                                      action="checkup" event="chart" risar="true"
-                                                      params="{defaults:{diagnosis_type:rbDiagnosisType.get_by_code('3')},
-                                                               disabled:{diagnosis_type:true}}"></wm-diagnosis>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th class="text-right">Возможность сохранения беременности <span class="text-danger">*</span></th>
-                                    <td>
-                                    <div>
-                                          <input type="radio" ng-model="checkup.pregnancy_continuation" ng-value="true" required>  Да <br/>
-                                          <input type="radio" ng-model="checkup.pregnancy_continuation" ng-value="false" required> Нет <br/>
-                                    </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th class="text-right">Витаминизация <span>&nbsp;</span></th>
-                                    <td><div class="row"><div class="col-md-7"><wysiwyg ng-model="checkup.fortification" /></div></div></td>
-                                </tr>
-                                <tr>
-                                    <th class="text-right">Коррекция питания <span>&nbsp;</span></th>
-                                    <td><div class="row"><div class="col-md-7"><wysiwyg ng-model="checkup.nutrition" /></div></div></td>
-                                </tr>
-                                <tr>
-                                    <th class="text-right">Лечение <span>&nbsp;</span></th>
-                                    <td><div class="row"><div class="col-md-7"><wysiwyg ng-model="checkup.treatment" /></div></div></td>
-                                </tr>
-                                <tr>
-                                    <th class="text-right">Плановая дата следующей явки <span class="text-danger">*</span></th>
-                                    <td><div ng-class="{'has-error': fifthForm.next_date.$invalid}">
-                                        <wm-date name="next_date" ng-model="checkup.next_date" style="width: 250px" ng-required="true"></wm-date>
-                                    </div></td>
-                                </tr>
-                                <tr>
-                                    <th class="text-right">Примечания <span>&nbsp;</span></th>
-                                    <td><div class="row"><div class="col-md-7"><wysiwyg ng-model="checkup.notes" /></div></div></td>
-                                </tr>
-                                <tr>
-                                    <th class="text-right">Рекомендации <span>&nbsp;</span></th>
-                                    <td><div class="row"><div class="col-md-7"><wysiwyg ng-model="checkup.recommendations" /></div></div></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </ng-form>
-                    <ng-form class="tab-pane" id="last" name="lastForm" novalidate rc-submit rc-step>
-                        <h2>Шаг 6. Диагностические мероприятия</h2>
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Назваие меропрития</th>
-                                    <th>Срок выполнения</th>
-                                    <th>Действия с мероприятием</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr><th colspan="3" style="text-align: center;">Лабораторные исследования</th></tr>
-                                <tr>
-                                    <td>Общий анализ крови</td>
-                                    <td>12.09.2014 - 12.10.2014</td>
-                                    <td><a class="print_link" href="#"><span class="glyphicon glyphicon-print"></span> Печать</a>
-                                        <a class="print_link" href="#"><span class="glyphicon glyphicon-pencil"></span> Изменить</a></td>
-                                </tr>
-                                <tr>
-                                    <td><span class="text-danger" tooltip="Исследование просрочено">Общий анализ мочи</span></td>
-                                    <td>12.09.2014 - 12.10.2014</td>
-                                    <td><a class="print_link" href="#"><span class="glyphicon glyphicon-print"></span> Печать</a>
-                                        <a class="print_link" href="#"><span class="glyphicon glyphicon-pencil"></span> Изменить</a></td>
-                                </tr>
-                                <tr>
-                                    <td>Определение антител M,G к гепатиту B</td>
-                                    <td>12.09.2014 - 12.11.2014</td>
-                                    <td><a class="print_link" href="#"><span class="glyphicon glyphicon-print"></span> Печать</a>
-                                        <a class="print_link" href="#"><span class="glyphicon glyphicon-pencil"></span> Изменить</a></td>
-                                </tr>
-                                <tr><th colspan="3" style="text-align: center;">Функциональные исследования</th></tr>
-                                <tr>
-                                    <td>УЗИ плода I триместр</td>
-                                    <td>12.09.2014 - 12.12.2014</td>
-                                    <td><a class="print_link" href="#"><span class="glyphicon glyphicon-print"></span> Печать</a>
-                                        <a class="print_link" href="#"><span class="glyphicon glyphicon-pencil"></span> Изменить</a></td>
-                                </tr>
-                                <tr><th colspan="3" style="text-align: center;">Консультации специалистов</th></tr>
-                                <tr>
-                                    <td>Консультация стоматолога</td>
-                                    <td>12.09.2014 - 12.02.2014</td>
-                                    <td><a class="print_link" href="#"><span class="glyphicon glyphicon-print"></span> Печать</a>
-                                        <a class="print_link" href="#"><span class="glyphicon glyphicon-pencil"></span> Изменить</a></td>
-                                </tr>
-                                <tr>
-                                    <td>Консультация офтальмолога</td>
-                                    <td>12.09.2014 - 12.02.2014</td>
-                                    <td><a class="print_link" href="#"><span class="glyphicon glyphicon-print"></span> Печать</a>
-                                        <a class="print_link" href="#"><span class="glyphicon glyphicon-pencil"></span> Изменить</a></td>
-                                </tr>
-                                <tr><th colspan="3" style="text-align: center;">Дополнительные мероприятия</th></tr>
-                                <tr>
-                                    <td><a href="#">Назначить дополнительное мероприятие</a></td>
-                                    <td></td>
-                                    <td></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <div class="text-right">
-                            <div class="btn-group">
-                                <ui-print-button ps="ps" resolve="ps_resolve()">Печать</ui-print-button>
+            <div class="row">
+                <div class="col-sm-3">
+                    <div class="sidebar-nav">
+                    <nav class="navbar navbar-default" role="navigation">
+                        <div class="container-fluid">
+                            <div class="collapse navbar-collapse">
+                            <ul class="nav navbar-nav nav-pills" style="margin: 7.5px -15px">
+                                <li class="active">
+                                    <a class="active" href="#first" data-toggle="tab">
+                                        <span class="badge">1</span>
+                                        <span>Лист динамического наблюдения</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#second" data-toggle="tab">
+                                        <span class="badge">2</span>
+                                        <span>Соматический статус</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#third" data-toggle="tab">
+                                        <span class="badge">3</span>
+                                        <span>Акушерский статус</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#fourth" data-toggle="tab">
+                                        <span class="badge">4</span>
+                                        <span>Влагалищное исследование</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#fifth" data-toggle="tab">
+                                        <span class="badge">5</span>
+                                        <span>Заключение</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#last" data-toggle="tab">
+                                        <span class="badge">6</span>
+                                        <span>Диагностические мероприятия</span>
+                                    </a>
+                                </li>
+                            </ul>
                             </div>
                         </div>
-                    </ng-form>
+                    </nav>
+                    </div>
                 </div>
+                <div class="col-sm-9">
+                    <div class="tab-content sidebar-nav marginal">
+                        <ng-form class="tab-pane active" id="first" name="firstForm"  novalidate rc-submit rc-step>
+                            <h3>Шаг 1. Лист динамического наблюдения</h3>
+                            <table class="table table-condensed">
+                                <thead>
+                                <tr>
+                                    <th class="col-md-2"></th>
+                                    <th class="col-md-10"></th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <th class="text-right">Дата осмотра <span class="text-danger">*</span></th>
+                                        <td>
+                                            <wm-date ng-class="{'has-error': firstForm.beg_date.$invalid}" name="beg_date"
+                                                     ng-model="checkup.beg_date" style="width: 250px" ng-required="true"></wm-date>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-right">Время осмотра <span class="text-danger">*</span></th>
+                                        <td><wm-time ng-class="{'has-error': firstForm.beg_time.$invalid}" name="beg_time"
+                                                     ng-model="checkup.beg_date" style="width: 250px" ng-required="true"></wm-time>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-right">Масса при осмотре, кг <span class="text-danger">*</span></th>
+                                        <td><div class="row"
+                                                 ng-class="{'has-error': firstForm.weight.$invalid}">
+                                            <div class="col-md-1">
+                                                <input name="weight" ng-model="checkup.weight" class="form-control" ng-required="true">
+                                            </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-right">АД правая рука <span class="text-danger">*</span></th>
+                                        <td><div class="row"
+                                                 ng-class="{'has-error': firstForm.ad_right_high.$invalid && firstForm.ad_right_low.$invalid}">
+                                            <div class="col-md-2">
+                                                <input name="ad_right_high" ng-model="checkup.ad_right_high"
+                                                       maxlength="3" ng-required="true" class="form-control blood_presure">
+                                                <span>/</span>
+                                                <input name="ad_right_low" ng-model="checkup.ad_right_low"
+                                                       maxlength="3" ng-required="true" class="form-control blood_presure">
+                                            </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-right">АД левая рука <span class="text-danger">*</span></th>
+                                        <td><div class="row"
+                                                 ng-class="{'has-error': firstForm.ad_left_high.$invalid && firstForm.ad_left_low.$invalid}">
+                                            <div class="col-md-2">
+                                                <input maxlength="3" name="ad_left_high" ng-model="checkup.ad_left_high"
+                                                       class="form-control blood_presure" ng-required="true">
+                                                <span>/</span>
+                                                <input maxlength="3" name="ad_left_low" ng-model="checkup.ad_left_low"
+                                                       class="form-control blood_presure" ng-required="true">
+                                            </div>
+                                        </div></td>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-right">Комментарии к анализам <span>&nbsp;</span></th>
+                                        <td>&nbsp;</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-right">Мочи <span>&nbsp;</span></td>
+                                        <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.urine" /></div></div></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-right">Крови <span>&nbsp;</span></td>
+                                        <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.blood" /></div></div></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-right">УЗИ <span>&nbsp;</span></td>
+                                        <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.us" /></div></div></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-right">Другое <span>&nbsp;</span></td>
+                                        <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.other_analysis" /></div></div></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </ng-form>
+                        <ng-form class="tab-pane" id="second" name="secondForm"  novalidate rc-submit rc-step>
+                            <h3>Шаг 2. Соматический статус</h3>
+                            <table class="table table-condensed">
+                                <thead>
+                                <tr>
+                                    <th class="col-md-2"></th>
+                                    <th class="col-md-10"></th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <th class="text-right">Общее состояние <span class="text-danger">*</span></th>
+                                        <td><div class="row" ng-class="{'has-error': firstForm.state.$invalid}">
+                                            <div class="col-md-3">
+                                                <rb-select name="state" ng-model="checkup.state" ref-book="rbRisarState" ng-required="true"></rb-select>
+                                            </div>
+                                        </div></td>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-right">Жалобы <span class="text-danger">*</span></th>
+                                        <td><div ng-class="{'has-error': secondForm.complaints.$invalid}">
+                                            <div name="complaints" refbook-checkbox ref-book="rbRisarComplaints" ng-model="checkup.complaints" ng-required="true">
+                                                [[ item.name ]]
+                                            </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-right">Отеки <span>&nbsp;</span></th>
+                                        <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.edema" /></div></div></td>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-right">Кожные покровы <span>&nbsp;</span></th>
+                                        <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.skin" /></div></div></td>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-right">Лимфоузлы <span>&nbsp;</span></th>
+                                        <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.lymph_nodes" /></div></div></td>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-right">Молочные железы <span>&nbsp;</span></th>
+                                        <td><div>
+                                            <div name="breast" refbook-checkbox ng-model="checkup.breast" ref-book="rbRisarBreast">
+                                                [[ item.name ]]
+                                            </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-right">Состояние сосков <span>&nbsp;</span></th>
+                                        <td><div>
+                                            <div name="nipples" refbook-checkbox ng-model="checkup.nipples" ref-book="rbRisarNipples">
+                                                [[ item.name ]]
+                                            </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </ng-form>
+                        <ng-form class="tab-pane" id="third" name="thirdForm" novalidate rc-submit rc-step>
+                            <h3>Шаг 3. Акушерский статус</h3>
+                            <table class="table table-condensed">
+                                <thead>
+                                <tr>
+                                    <th class="col-md-2"></th>
+                                    <th class="col-md-10"></th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <th class="text-right">Окружность живота</th>
+                                        <td><div class="row"><div class="col-md-2"><input ng-model="checkup.abdominal" class="form-control"></div></div></td>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-right">Высота стояния дна матки</th>
+                                        <td><div class="row"><div class="col-md-2"><input ng-model="checkup.fundal_height" class="form-control"></div></div></td>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-right">Состояние матки</th>
+                                        <td><div class="row" ng-class="{'has-error': CheckupFirstEditForm.metra_state.$invalid}">
+                                            <div class="col-md-3">
+                                            <rb-select name="metra_state" ng-model="checkup.metra_state" ref-book="rbRisarMetra_State" ng-required="true"></rb-select>
+                                        </div></div></td>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-right">Плод</th>
+                                        <td>&nbsp;</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-right">Положение</td>
+                                        <td><div class="row"><div class="col-md-3">
+                                            <rb-select ng-model="checkup.fetus_position" ref-book="rbRisarFetus_Position"></rb-select></div></div></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-right">Предлежание</td>
+                                        <td><div class="row"><div class="col-md-3">
+                                            <rb-select ng-model="checkup.presenting_part" ref-book="rbRisarPresenting_Part"></rb-select></div></div></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-right">Сердцебиение</td>
+                                        <td><div class="row"><div class="col-md-3">
+                                            <rb-select ng-model="checkup.fetus_heartbeat" ref-book="rbRisarFetus_Heartbeat"></rb-select></div></div></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-right">ЧСС, уд/мин</td>
+                                        <td><div class="row"><div class="col-md-3">
+                                            <input ng-model="checkup.fetus_heart_rate" class="form-control"></div></div></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-right">Шевеление</td>
+                                        <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="fetus_movement" /></div></div></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </ng-form>
+                        <ng-form class="tab-pane" id="fourth" name="fourthForm" novalidate rc-submit rc-step>
+                            <h3>Шаг 4. Влагалищное исследование</h3>
+                            <table class="table table-condensed">
+                                <thead>
+                                <tr>
+                                    <th class="col-md-2"></th>
+                                    <th class="col-md-10"></th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <th class="text-right">Наружные половые органы <span>&nbsp;</span></th>
+                                        <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.externalia" /></div></div></td>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-right">Шейка матки</th>
+                                        <td><div class="row">
+                                            <div class="col-md-4"><rb-select name="cervix" ng-model="checkup.cervix" ref-book="rbRisarCervix"></rb-select></div>
+                                        </div></td>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-right">Длина шейки матки</th>
+                                        <td><div class="row"><div class="col-md-3">
+                                            <rb-select ng-model="checkup.cervix_length" ref-book="rbRisarCervix_Length"></rb-select></div></div></td>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-right">Позиция шейки матки</th>
+                                        <td><div class="row"><div class="col-md-3">
+                                            <rb-select ng-model="checkup.cervix_position" ref-book="rbRisarCervix_Position"></rb-select></div></div></td>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-right">Зрелость шейки матки</th>
+                                        <td><div class="row"><div class="col-md-3">
+                                            <rb-select ng-model="checkup.cervix_maturity" ref-book="rbRisarCervix_Maturity"></rb-select></div></div></td>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-right">Консистенция шейки матки</th>
+                                        <td><div class="row"><div class="col-md-3">
+                                            <rb-select ng-model="checkup.cervix_consistency" ref-book="rbRisarCervix_Consistency"></rb-select></div></div></td>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-right">Цервикальный канал</th>
+                                        <td><div class="row"><div class="col-md-3">
+                                            <rb-select ng-model="checkup.cervical_canal" ref-book="rbRisarCervical_Canal"></rb-select></div></div></td>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-right">Выделения</th>
+                                        <td><div class="row"><div class="col-md-3">
+                                            <rb-select ng-model="checkup.secretion" ref-book="rbRisarSecretion"></rb-select></div></div></td>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-right">Физиологические отправления</th>
+                                        <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.bowel_and_bladder_habits" /></div></div></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </ng-form>
+                        <ng-form class="tab-pane" id="fifth" name="fifthForm" novalidate rc-submit rc-step>
+                            <h3>Шаг 5. Заключение</h3>
+                            <table class="table table-condensed">
+                                <thead>
+                                <tr>
+                                    <th class="col-md-3"></th>
+                                    <th class="col-md-9"></th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <th class="text-right">Диагнозы <span>&nbsp;</span></th>
+                                        <td>&nbsp;</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-right">Основной <span class="text-danger">*</span></td>
+    {#                                    ng-class="{'has-error': fifthForm.mkb.$invalid}"#}
+                                        <td>
+                                            <wm-diagnosis model="checkup.diag" list-mode="false"
+                                                          can-add-new="true" can-delete="true" can-edit="true"
+                                                          action="checkup" event="chart" risar="true"
+                                                          params="{defaults:{diagnosis_type:rbDiagnosisType.get_by_code('2')},
+                                                                   disabled:{diagnosis_type:true}}"></wm-diagnosis>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-right">Сопутствующие <span>&nbsp;</span></td>
+                                        <td>
+                                            <wm-diagnosis model="checkup.diag2" list-mode="true"
+                                                          can-add-new="true" can-delete="true" can-edit="true"
+                                                          action="checkup" event="chart" risar="true"
+                                                          params="{defaults:{diagnosis_type:rbDiagnosisType.get_by_code('9')},
+                                                                   disabled:{diagnosis_type:true}}"></wm-diagnosis>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-right">Осложнения <span>&nbsp;</span></td>
+                                        <td>
+                                            <wm-diagnosis model="checkup.diag3" list-mode="true"
+                                                          can-add-new="true" can-delete="true" can-edit="true"
+                                                          action="checkup" event="chart" risar="true"
+                                                          params="{defaults:{diagnosis_type:rbDiagnosisType.get_by_code('3')},
+                                                                   disabled:{diagnosis_type:true}}"></wm-diagnosis>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-right">Срок беременности <span class="text-danger">*</span></th>
+                                        <td>
+                                            <div class="row"
+                                                 ng-class="{'has-error': firstForm.pregnancy_week.$invalid}">
+                                                <div class="col-md-2">
+                                                    <input name="pregnancy_week" ng-model="checkup.pregnancy_week"
+                                                           class="form-control" type="number" valid-number ng-required="true">
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-right">Возможность сохранения беременности <span class="text-danger">*</span></th>
+                                        <td>
+                                        <div>
+                                              <input type="radio" ng-model="checkup.pregnancy_continuation" ng-value="true" required>  Да <br/>
+                                              <input type="radio" ng-model="checkup.pregnancy_continuation" ng-value="false" required> Нет <br/>
+                                        </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-right">Витаминизация <span>&nbsp;</span></th>
+                                        <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.fortification" /></div></div></td>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-right">Коррекция питания <span>&nbsp;</span></th>
+                                        <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.nutrition" /></div></div></td>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-right">Лечение <span>&nbsp;</span></th>
+                                        <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.treatment" /></div></div></td>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-right">Плановая дата следующей явки <span class="text-danger">*</span></th>
+                                        <td><div ng-class="{'has-error': fifthForm.next_date.$invalid}">
+                                            <wm-date name="next_date" ng-model="checkup.next_date" style="width: 250px" ng-required="true"></wm-date>
+                                        </div></td>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-right">Примечания <span>&nbsp;</span></th>
+                                        <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.notes" /></div></div></td>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-right">Рекомендации <span>&nbsp;</span></th>
+                                        <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.recommendations" /></div></div></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </ng-form>
+                        <ng-form class="tab-pane" id="last" name="lastForm" novalidate rc-submit rc-step>
+                            <h2>Шаг 6. Диагностические мероприятия</h2>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Назваие меропрития</th>
+                                        <th>Срок выполнения</th>
+                                        <th>Действия с мероприятием</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><th colspan="3" style="text-align: center;">Лабораторные исследования</th></tr>
+                                    <tr>
+                                        <td>Общий анализ крови</td>
+                                        <td>12.09.2014 - 12.10.2014</td>
+                                        <td><a class="print_link" href="#"><span class="glyphicon glyphicon-print"></span> Печать</a>
+                                            <a class="print_link" href="#"><span class="glyphicon glyphicon-pencil"></span> Изменить</a></td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="text-danger" tooltip="Исследование просрочено">Общий анализ мочи</span></td>
+                                        <td>12.09.2014 - 12.10.2014</td>
+                                        <td><a class="print_link" href="#"><span class="glyphicon glyphicon-print"></span> Печать</a>
+                                            <a class="print_link" href="#"><span class="glyphicon glyphicon-pencil"></span> Изменить</a></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Определение антител M,G к гепатиту B</td>
+                                        <td>12.09.2014 - 12.11.2014</td>
+                                        <td><a class="print_link" href="#"><span class="glyphicon glyphicon-print"></span> Печать</a>
+                                            <a class="print_link" href="#"><span class="glyphicon glyphicon-pencil"></span> Изменить</a></td>
+                                    </tr>
+                                    <tr><th colspan="3" style="text-align: center;">Функциональные исследования</th></tr>
+                                    <tr>
+                                        <td>УЗИ плода I триместр</td>
+                                        <td>12.09.2014 - 12.12.2014</td>
+                                        <td><a class="print_link" href="#"><span class="glyphicon glyphicon-print"></span> Печать</a>
+                                            <a class="print_link" href="#"><span class="glyphicon glyphicon-pencil"></span> Изменить</a></td>
+                                    </tr>
+                                    <tr><th colspan="3" style="text-align: center;">Консультации специалистов</th></tr>
+                                    <tr>
+                                        <td>Консультация стоматолога</td>
+                                        <td>12.09.2014 - 12.02.2014</td>
+                                        <td><a class="print_link" href="#"><span class="glyphicon glyphicon-print"></span> Печать</a>
+                                            <a class="print_link" href="#"><span class="glyphicon glyphicon-pencil"></span> Изменить</a></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Консультация офтальмолога</td>
+                                        <td>12.09.2014 - 12.02.2014</td>
+                                        <td><a class="print_link" href="#"><span class="glyphicon glyphicon-print"></span> Печать</a>
+                                            <a class="print_link" href="#"><span class="glyphicon glyphicon-pencil"></span> Изменить</a></td>
+                                    </tr>
+                                    <tr><th colspan="3" style="text-align: center;">Дополнительные мероприятия</th></tr>
+                                    <tr>
+                                        <td><a href="#">Назначить дополнительное мероприятие</a></td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <div class="text-right">
+                                <div class="btn-group">
+                                    <ui-print-button ps="ps" resolve="ps_resolve()">Печать</ui-print-button>
+                                </div>
+                            </div>
+                        </ng-form>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
                 <div class="form-group">
                     <div class="pull-right">
                         <a class="pseudo-btn" ng-href="{{ url_for('.html_inspection') }}?event_id=[[ chart.id ]]">Перейти на форму осмотров пациентки</a>
