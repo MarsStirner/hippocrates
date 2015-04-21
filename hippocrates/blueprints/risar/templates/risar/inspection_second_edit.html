@@ -73,29 +73,29 @@
                             <table class="table table-condensed">
                                 <thead>
                                 <tr>
-                                    <th class="col-md-2"></th>
-                                    <th class="col-md-10"></th>
+                                    <th class="col-md-4"></th>
+                                    <th class="col-md-8"></th>
                                 </tr>
                                 </thead>
                                 <tbody>
                                     <tr>
                                         <th class="text-right">Дата осмотра <span class="text-danger">*</span></th>
                                         <td>
-                                            <wm-date ng-class="{'has-error': firstForm.beg_date.$invalid}" name="beg_date"
+                                            <wm-date ng-class="{'has-error': firstForm.beg_date.$invalid && firstForm.submit_attempt}" name="beg_date"
                                                      ng-model="checkup.beg_date" style="width: 250px" ng-required="true"></wm-date>
                                         </td>
                                     </tr>
                                     <tr>
                                         <th class="text-right">Время осмотра <span class="text-danger">*</span></th>
-                                        <td><wm-time ng-class="{'has-error': firstForm.beg_time.$invalid}" name="beg_time"
+                                        <td><wm-time ng-class="{'has-error': firstForm.beg_time.$invalid && firstForm.submit_attempt}" name="beg_time"
                                                      ng-model="checkup.beg_date" style="width: 250px" ng-required="true"></wm-time>
                                         </td>
                                     </tr>
                                     <tr>
                                         <th class="text-right">Масса при осмотре, кг <span class="text-danger">*</span></th>
                                         <td><div class="row"
-                                                 ng-class="{'has-error': firstForm.weight.$invalid}">
-                                            <div class="col-md-1">
+                                                 ng-class="{'has-error': firstForm.weight.$invalid && firstForm.submit_attempt}">
+                                            <div class="col-md-2">
                                                 <input name="weight" ng-model="checkup.weight" class="form-control" ng-required="true">
                                             </div>
                                             </div>
@@ -104,8 +104,8 @@
                                     <tr>
                                         <th class="text-right">АД правая рука <span class="text-danger">*</span></th>
                                         <td><div class="row"
-                                                 ng-class="{'has-error': firstForm.ad_right_high.$invalid && firstForm.ad_right_low.$invalid}">
-                                            <div class="col-md-2">
+                                                 ng-class="{'has-error': (firstForm.ad_right_high.$invalid || firstForm.ad_right_low.$invalid)  && firstForm.submit_attempt}">
+                                            <div class="col-md-4">
                                                 <input name="ad_right_high" ng-model="checkup.ad_right_high"
                                                        maxlength="3" ng-required="true" class="form-control blood_presure">
                                                 <span>/</span>
@@ -118,8 +118,8 @@
                                     <tr>
                                         <th class="text-right">АД левая рука <span class="text-danger">*</span></th>
                                         <td><div class="row"
-                                                 ng-class="{'has-error': firstForm.ad_left_high.$invalid && firstForm.ad_left_low.$invalid}">
-                                            <div class="col-md-2">
+                                                 ng-class="{'has-error': (firstForm.ad_left_high.$invalid || firstForm.ad_left_low.$invalid) && firstForm.submit_attempt}">
+                                            <div class="col-md-4">
                                                 <input maxlength="3" name="ad_left_high" ng-model="checkup.ad_left_high"
                                                        class="form-control blood_presure" ng-required="true">
                                                 <span>/</span>
@@ -156,22 +156,22 @@
                             <table class="table table-condensed">
                                 <thead>
                                 <tr>
-                                    <th class="col-md-2"></th>
-                                    <th class="col-md-10"></th>
+                                    <th class="col-md-4"></th>
+                                    <th class="col-md-8"></th>
                                 </tr>
                                 </thead>
                                 <tbody>
                                     <tr>
                                         <th class="text-right">Общее состояние <span class="text-danger">*</span></th>
-                                        <td><div class="row" ng-class="{'has-error': firstForm.state.$invalid}">
-                                            <div class="col-md-3">
+                                        <td><div class="row" ng-class="{'has-error': secondForm.state.$invalid && secondForm.submit_attempt}">
+                                            <div class="col-md-4">
                                                 <rb-select name="state" ng-model="checkup.state" ref-book="rbRisarState" ng-required="true"></rb-select>
                                             </div>
                                         </div></td>
                                     </tr>
                                     <tr>
                                         <th class="text-right">Жалобы <span class="text-danger">*</span></th>
-                                        <td><div ng-class="{'has-error': secondForm.complaints.$invalid}">
+                                        <td><div ng-class="{'text-danger': secondForm.complaints.$invalid && secondForm.submit_attempt}">
                                             <div name="complaints" refbook-checkbox ref-book="rbRisarComplaints" ng-model="checkup.complaints" ng-required="true">
                                                 [[ item.name ]]
                                             </div>
@@ -216,8 +216,8 @@
                             <table class="table table-condensed">
                                 <thead>
                                 <tr>
-                                    <th class="col-md-2"></th>
-                                    <th class="col-md-10"></th>
+                                    <th class="col-md-4"></th>
+                                    <th class="col-md-8"></th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -231,8 +231,8 @@
                                     </tr>
                                     <tr>
                                         <th class="text-right">Состояние матки</th>
-                                        <td><div class="row" ng-class="{'has-error': CheckupFirstEditForm.metra_state.$invalid}">
-                                            <div class="col-md-3">
+                                        <td><div class="row" ng-class="{'has-error': thirdForm.metra_state.$invalid && thirdFormm.submit_attempt}">
+                                            <div class="col-md-4">
                                             <rb-select name="metra_state" ng-model="checkup.metra_state" ref-book="rbRisarMetra_State" ng-required="true"></rb-select>
                                         </div></div></td>
                                     </tr>
@@ -242,17 +242,17 @@
                                     </tr>
                                     <tr>
                                         <td class="text-right">Положение</td>
-                                        <td><div class="row"><div class="col-md-3">
+                                        <td><div class="row"><div class="col-md-4">
                                             <rb-select ng-model="checkup.fetus_position" ref-book="rbRisarFetus_Position"></rb-select></div></div></td>
                                     </tr>
                                     <tr>
                                         <td class="text-right">Предлежание</td>
-                                        <td><div class="row"><div class="col-md-3">
+                                        <td><div class="row"><div class="col-md-4">
                                             <rb-select ng-model="checkup.presenting_part" ref-book="rbRisarPresenting_Part"></rb-select></div></div></td>
                                     </tr>
                                     <tr>
                                         <td class="text-right">Сердцебиение</td>
-                                        <td><div class="row"><div class="col-md-3">
+                                        <td><div class="row"><div class="col-md-4">
                                             <rb-select ng-model="checkup.fetus_heartbeat" ref-book="rbRisarFetus_Heartbeat"></rb-select></div></div></td>
                                     </tr>
                                     <tr>
@@ -272,13 +272,13 @@
                             <table class="table table-condensed">
                                 <thead>
                                 <tr>
-                                    <th class="col-md-2"></th>
-                                    <th class="col-md-10"></th>
+                                    <th class="col-md-4"></th>
+                                    <th class="col-md-8"></th>
                                 </tr>
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <th class="text-right">Наружные половые органы <span>&nbsp;</span></th>
+                                        <th class="text-right">Наружные половые органы</th>
                                         <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.externalia" /></div></div></td>
                                     </tr>
                                     <tr>
@@ -289,32 +289,32 @@
                                     </tr>
                                     <tr>
                                         <th class="text-right">Длина шейки матки</th>
-                                        <td><div class="row"><div class="col-md-3">
+                                        <td><div class="row"><div class="col-md-4">
                                             <rb-select ng-model="checkup.cervix_length" ref-book="rbRisarCervix_Length"></rb-select></div></div></td>
                                     </tr>
                                     <tr>
                                         <th class="text-right">Позиция шейки матки</th>
-                                        <td><div class="row"><div class="col-md-3">
+                                        <td><div class="row"><div class="col-md-4">
                                             <rb-select ng-model="checkup.cervix_position" ref-book="rbRisarCervix_Position"></rb-select></div></div></td>
                                     </tr>
                                     <tr>
                                         <th class="text-right">Зрелость шейки матки</th>
-                                        <td><div class="row"><div class="col-md-3">
+                                        <td><div class="row"><div class="col-md-4">
                                             <rb-select ng-model="checkup.cervix_maturity" ref-book="rbRisarCervix_Maturity"></rb-select></div></div></td>
                                     </tr>
                                     <tr>
                                         <th class="text-right">Консистенция шейки матки</th>
-                                        <td><div class="row"><div class="col-md-3">
+                                        <td><div class="row"><div class="col-md-4">
                                             <rb-select ng-model="checkup.cervix_consistency" ref-book="rbRisarCervix_Consistency"></rb-select></div></div></td>
                                     </tr>
                                     <tr>
                                         <th class="text-right">Цервикальный канал</th>
-                                        <td><div class="row"><div class="col-md-3">
+                                        <td><div class="row"><div class="col-md-4">
                                             <rb-select ng-model="checkup.cervical_canal" ref-book="rbRisarCervical_Canal"></rb-select></div></div></td>
                                     </tr>
                                     <tr>
                                         <th class="text-right">Выделения</th>
-                                        <td><div class="row"><div class="col-md-3">
+                                        <td><div class="row"><div class="col-md-4">
                                             <rb-select ng-model="checkup.secretion" ref-book="rbRisarSecretion"></rb-select></div></div></td>
                                     </tr>
                                     <tr>
@@ -329,8 +329,8 @@
                             <table class="table table-condensed">
                                 <thead>
                                 <tr>
-                                    <th class="col-md-3"></th>
-                                    <th class="col-md-9"></th>
+                                    <th class="col-md-4"></th>
+                                    <th class="col-md-8"></th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -373,7 +373,7 @@
                                         <th class="text-right">Срок беременности <span class="text-danger">*</span></th>
                                         <td>
                                             <div class="row"
-                                                 ng-class="{'has-error': firstForm.pregnancy_week.$invalid}">
+                                                 ng-class="{'has-error': fifthForm.pregnancy_week.$invalid && fifthForm.submit_attempt}">
                                                 <div class="col-md-2">
                                                     <input name="pregnancy_week" ng-model="checkup.pregnancy_week"
                                                            class="form-control" type="number" valid-number ng-required="true">
@@ -491,13 +491,13 @@
                     <div class="pull-right">
                         <a class="pseudo-btn" ng-href="{{ url_for('.html_inspection') }}?event_id=[[ chart.id ]]">Перейти на форму осмотров пациентки</a>
                         <a class="btn btn-success"
-                           ng-click="save()"
-                           ng-show="rc.sampleWizard.currentIndex < rc.sampleWizard.navigationLength"
-                           ng-disabled="rc.sampleWizard.currentStep.formController.$invalid && rc.sampleWizard.currentStep.formController.$dirty">Сохранить</a>
+                           ng-click="save(rc.sampleWizard.currentStep.formController)"
+                           tooltip="[[rc.sampleWizard.currentStep.formController.$invalid && rc.sampleWizard.currentStep.formController.submit_attempt ? 'Заполните все обязательные поля': '']]"
+                           ng-show="rc.sampleWizard.currentIndex < rc.sampleWizard.navigationLength">Сохранить</a>
                         <a class="btn btn-primary"
-                           ng-click="save(); rc.sampleWizard.forward()"
-                           ng-show="rc.sampleWizard.currentIndex < rc.sampleWizard.navigationLength"
-                           ng-disabled="rc.sampleWizard.currentStep.formController.$invalid && rc.sampleWizard.currentStep.formController.$dirty">
+                           ng-click="save(rc.sampleWizard.currentStep.formController); rc.sampleWizard.forward()"
+                           tooltip="[[rc.sampleWizard.currentStep.formController.$invalid && rc.sampleWizard.currentStep.formController.submit_attempt ? 'Заполните все обязательные поля': '']]"
+                           ng-show="rc.sampleWizard.currentIndex < rc.sampleWizard.navigationLength">
                             Сохранить и продолжить
                         </a>
                     </div>
