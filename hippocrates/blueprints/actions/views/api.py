@@ -57,6 +57,24 @@ def api_action_get(action_id):
     return v.make_action(action)
 
 
+@module.route('/api/action/<int:action_id>/previous', methods=['GET'])
+@api_method
+def api_find_previous(action_id):
+    action = Action.query.get(action_id)
+    if not action:
+        raise ApiException(404, u'Действие с id="%s" не найдено' % action_id)
+    prev = Action.query.filter(
+        Action.event_id == action.event_id,
+        Action.deleted == 0,
+        Action.begDate < action.begDate,
+        Action.actionType_id == action.actionType_id,
+    ).order_by(Action.id.desc()).first()
+    if prev:
+        v = ActionVisualizer()
+        return v.make_action(prev)
+    raise ApiException(404, u'В обращении %s других действий типа "%s" не найдено' % (action.event_id, action.actionType.name))
+
+
 @module.route('/api/action/', methods=['DELETE'])
 @module.route('/api/action/<int:action_id>', methods=['DELETE'])
 @api_method

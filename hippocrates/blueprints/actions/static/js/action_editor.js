@@ -183,7 +183,13 @@ var ActionEditorCtrl = function ($scope, $window, $modal, WMAction, PrintingServ
         })
     };
     $scope.template_prev = function () {
-        // actually load
+        if ($scope.action.is_new()) {
+            $scope.action.save().then(function () {
+                WMAction.previous($scope.action);
+            })
+        } else {
+            WMAction.previous($scope.action);
+        }
     };
 };
 var ActionTemplateController = function ($scope, $modalInstance, $http, FlatTree, SelectAll, args) {
@@ -246,7 +252,7 @@ var ActionTemplateController = function ($scope, $modalInstance, $http, FlatTree
         ).then($scope.$close)
     };
     $scope.load = function () {
-        //
+
     };
     load_tree();
 };
@@ -322,6 +328,27 @@ WebMis20.factory('WMAction', ['$http', function ($http) {
         return $http.get('/actions/api/action/new/{0}/{1}'.format(action_type_id, event_id)).then(function (response) {
             return action.merge(response.data.result);
         });
+    };
+    Action.previous = function (action) {
+        var dest,
+            with_id = arguments[1];
+        if (action instanceof Action) {
+            dest = action;
+            action = action.id;
+            with_id = (with_id === undefined) ? false : !!with_id;
+        } else {
+            dest = new Action();
+            with_id = true;
+        }
+        return $http.get('/actions/api/action/{0}/previous'.format(action)).then(function (result) {
+            var previous = result.data.result;
+            merge_fields(dest, previous);
+            merge_meta(dest, previous);
+            merge_properties(dest, previous);
+            process_properties(dest, previous);
+            if (with_id) { dest.id = previous.id }
+            return dest;
+        })
     };
     Action.prototype.merge = function (src_action) {
         merge_fields(this, src_action);
