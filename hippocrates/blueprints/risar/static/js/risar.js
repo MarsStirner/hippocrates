@@ -255,7 +255,9 @@ WebMis20
                 }
             };
             scope.tooltip = function (psdate) {
-                return 'Срок беременности (дата начала случая - {0})'.format($filter('asDate')(psdate));
+                return 'Срок беременности (дата начала случая: {0})'.format(
+                    $filter('asDate')(psdate) || 'не определена'
+                );
             };
         }
     }
