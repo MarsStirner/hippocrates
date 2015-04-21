@@ -5,27 +5,31 @@
 <div class="modal-body">
     <div class="row">
         <div class="col-md-8">
-            <div class="css-treeview well well-sm scrolled-tree" ng-mouseleave="hide_tree()" ng-class="{popup: popupable}">
-                <ul>
-                    <li ng-repeat="spec_group in tree">
-                        <input class="group" type="checkbox" id="spec-[[spec_group.speciality.id]]" checked>
-                        <label class="group" for="spec-[[spec_group.speciality.id]]" ng-bind="spec_group.speciality.name" ></label>
-                        <ul>
-                            <li ng-repeat="person in spec_group.persons">
-                                <a class="leaf" ng-bind="person.nameFull" ng-click="person_selected(person)"
-                                   ng-if="!checkboxed" ng-class="{'no-schedule': display_no_schedule(person)}"></a>
-                                <label class="leaf" for="doc-[[person.id]]" ng-if="checkboxed" ng-class="{'no-schedule': display_no_schedule(person)}">
-                                    <input type="checkbox" id="doc-[[person.id]]" class="leaf" ng-model="person.checked"
-                                           ng-disabled="person.disabled" ng-change="selection_change(person)" >
-                                    [[person.name]]
-                                </label>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
+            <div class="well" style="max-height: 500px; overflow-y: auto;">
+                <div class="ui-treeview">
+                    <ul ng-repeat="root in tree.children">
+                        <li sf-treepeat="node in children of root">
+                            <div class="tree-label"
+                                 ng-class="{'collapsed': !sas.selected(node.id) && node.is_node,
+                                            'expanded': sas.selected(node.id) && node.is_node,
+                                            'leaf': !node.is_node}">&nbsp;</div>
+                            <span ng-class="{active: node.id === selected.id}">
+                                <a ng-click="select(node)" ng-if="!node.is_node" class="leaf" ng-bind="node.name"></a>
+                                <a ng-if="node.is_node" ng-click="sas.toggle(node.id)" class="node" ng-bind="node.name"></a>
+                            </span>
+                            <ul ng-if="node.is_node && sas.selected(node.id)"><li sf-treecurse></li></ul>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
-        <div class="col-md-4"></div>
+        <div class="col-md-4">
+            <div><input class="form-control" type="text" ng-model="selected.name" placeholder="Название"></div>
+            <div><input class="form-control" type="text" ng-model="selected.con.age" placeholder="код возрастных ограничений"></div>
+            <div><rb-select ref-book="Gender" ng-model="selected.con.sex" placeholder="пол"></div>
+{#            <div><input type="checkbox" ng-model="selected.own"></div>#}
+{#            <div><input type="checkbox" ng-model="selected.spec"></div>#}
+        </div>
     </div>
 </div>
 <div class="modal-footer">

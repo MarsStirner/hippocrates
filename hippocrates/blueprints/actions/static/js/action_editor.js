@@ -1,8 +1,7 @@
 /**
  * Created by mmalkov on 14.07.14.
  */
-var ActionEditorCtrl = function ($scope, $window, WMAction, PrintingService, PrintingDialog, RefBookService,
-        WMEventCache, $q, MessageBox) {
+var ActionEditorCtrl = function ($scope, $window, $modal, WMAction, PrintingService, PrintingDialog, RefBookService, WMEventCache, $q, MessageBox) {
     var params = aux.getQueryParams(location.search);
     $scope.ps = new PrintingService("action");
     $scope.ps_resolve = function () {
@@ -156,6 +155,7 @@ var ActionEditorCtrl = function ($scope, $window, WMAction, PrintingService, Pri
             $modal.open({
                 templateUrl: '_action_template_model.html',
                 controller: ActionTemplateController,
+                size: 'lg',
                 resolve: {
                     args: function () {
                         return {
@@ -171,6 +171,7 @@ var ActionEditorCtrl = function ($scope, $window, WMAction, PrintingService, Pri
         $modal.open({
             templateUrl: '_action_template_model.html',
             controller: ActionTemplateController,
+            size: 'lg',
             resolve: {
                 args: function () {
                     return {
@@ -185,7 +186,7 @@ var ActionEditorCtrl = function ($scope, $window, WMAction, PrintingService, Pri
         // actually load
     };
 };
-var ActionTemplateController = function ($scope, $modalInstance, $http, args) {
+var ActionTemplateController = function ($scope, $modalInstance, $http, FlatTree, SelectAll, args) {
     $scope.model = {
         id: null,
         gid: null,
@@ -195,12 +196,46 @@ var ActionTemplateController = function ($scope, $modalInstance, $http, args) {
         speciality: false,
         action_id: args.action_id
     };
+    $scope.flat_tree = null;
+    $scope.hier_tree = new FlatTree('gid');
+    var tree = $scope.tree = {};
     $scope.selected = {};
+    var sas = $scope.sas = new SelectAll([]);
+    function load_tree () {
+        // test 646
+        $http.get('/actions/api/templates/{0}'.format(646, args.action_type_id)).success(function (data) {
+            $scope.hier_tree.set_array(data.result).filter();
+            render_tree();
+        })
+    }
+    function render_tree () {
+        $scope.tree = $scope.hier_tree.render(make_tree_object);
+        $scope.tree.children = $scope.tree.root.children;
+        sas.setSource(tree.masterDict.keys().map(function (key) {
+            var result = parseInt(key);
+            if (isNaN(result)) { return key } else { return result }
+        }));
+        sas.selectAll();
+    }
+    function make_tree_object(item, is_node) {
+        if (item === null) {
+            var result = {};
+            result.parent_id = null;
+            result.id = 'root';
+            result.children = [];
+            result.is_node = true;
+            return result
+        }
+        return angular.extend(item, {is_node: is_node});
+    }
+    $scope.select = function (item) {
+        $scope.selected = _.clone(item);
+    };
     $scope.save_new = function () {
         $scope.model['id'] = null;
         $scope.model['gid'] = $scope.selected['id'] || null;
         $http.put(
-            '/action/api/templates/{0}'.format(args.action_type_id),
+            '/actions/api/templates/{0}'.format(args.action_type_id),
             $scope.model
         ).then($scope.$close);
     };
@@ -212,25 +247,13 @@ var ActionTemplateController = function ($scope, $modalInstance, $http, args) {
     };
     $scope.load = function () {
         //
-    }
+    };
+    load_tree();
 };
 
-WebMis20.controller('ActionEditorCtrl', ['$scope', '$window', 'WMAction', 'PrintingService', 'PrintingDialog',
-    'RefBookService', 'WMEventCache', '$q', 'MessageBox', ActionEditorCtrl]);
+WebMis20.controller('ActionEditorCtrl', ['$scope', '$window', '$modal', 'WMAction', 'PrintingService', 'PrintingDialog', 'RefBookService', 'WMEventCache', '$q', 'MessageBox', ActionEditorCtrl]);
 
-WebMis20.service('WMActionService', ['WMAction', '$http', function (WMAction, $http) {
-    this.new = function (action_type_id) {
-        var event_id = arguments[1],
-            src_action_id = arguments[2],
-            action;
-
-    }
-    this.get = function (action_id) {
-
-    }
-}]);
-
-WebMis20.factory('WMAction', ['$http', '$q', function ($http, $q) {
+WebMis20.factory('WMAction', ['$http', function ($http) {
     // FIXME: На данный момент это ломает функциональность действий, но пока пофиг.
     var fields = [
         'event_id', 'client', 'direction_date', 'beg_date', 'end_date', 'planned_end_date',
@@ -245,27 +268,23 @@ WebMis20.factory('WMAction', ['$http', '$q', function ($http, $q) {
         this.properties_by_code = {};
         this.ro = false;
     };
-    function success_wrapper(self) {
-        return function (data) {
-            var result = data.result;
-            merge_fields(self, result);
-            merge_meta(self, result);
-            merge_properties(self, result);
-            self.id = result.id;
-        }
-    }
+    /* Приватные методы */
     function merge_fields (self, source) {
+        /* Перетягивает основные атрибуты действия */
         _.extend(self, _.pick(source, fields));
     }
     function merge_meta (self, source) {
+        /* Перетягивает статические метаданные действия */
         self.action_type = source.action_type;
         self.layout = source.layout;
         self.ro = source.ro;
         self.bak_lab_info = source.bak_lab_info;
     }
     function merge_properties (self, source) {
-        self.properties = source.properties;
-
+        /* Перетягивает свойства действия */
+        self.properties = source.properties.clone();
+    }
+    function process_properties (self, source) {
         self.action_columns = {
             assignable: false,
             unit: false
@@ -284,62 +303,57 @@ WebMis20.factory('WMAction', ['$http', '$q', function ($http, $q) {
             }
         });
     }
+    /* class methods */
     Action.get = function (id) {
+        /* Получение экземпляра (в обёртке $q.defer().promise) Action по id */
         return $http.get('/actions/api/action/{0}'.format(id)).then(
             function (response) {
-                var result = response.data.result,
-                    action = new Action();
-                action.merge(result);
-                action.id = result.id;
-                return action;
+                return (new Action()).merge(response.data.result, true);
             },
             function (response) {
                 return response;
             });
     };
+    Action.get_new = function (event_id, action_type_id) {
+        /* Получение экземпляра (в обёртке $q.defer().promise) Action по Event.id и ActionType.id */
+        var action = new Action();
+        action.event_id = event_id;
+        action.action_type_id = action_type_id;
+        return $http.get('/actions/api/action/new/{0}/{1}'.format(action_type_id, event_id)).then(function (response) {
+            return action.merge(response.data.result);
+        });
+    };
     Action.prototype.merge = function (src_action) {
         merge_fields(this, src_action);
         merge_meta(this, src_action);
         merge_properties(this, src_action);
-    };
-    //Action.prototype.get = function (id) {
-    //    return $http.get('/actions/api/action/{0}'.format(id)).success(success_wrapper(this));
-    //};
-    Action.get_new = function (event_id, action_type_id) {
-        var action = new Action();
-        action.event_id = event_id;
-        action.action_type_id = action_type_id;
-        return $http.get('/actions/api/action/new/{0}/{1}'.format(action_type_id, event_id)).then(function (data) {
-            action.merge(data.data.result);
-            return action;
-        });
+        process_properties(this, src_action);
+        if (arguments[1]) this.id = src_action.id;
+        return this;
     };
     Action.prototype.is_new = function () {
         return !this.id;
     };
     Action.prototype.save = function () {
         var self = this,
-            deferred = $q.defer(),
-            data = _.pick(this, fields),
+            data = {},
             url = '/actions/api/action/{0}'.format(self.id || '');
+        merge_fields(data, this);
+        merge_properties(data, this);
         data.id = self.id;
-        data.properties = self.properties;
-        $http.post(url, data)
-            .success(function (response) {
-                success_wrapper(response);
-                deferred.resolve(response.result);
-            })
-            .error(function () {
-                deferred.reject('action save error');
+        return $http.post(url, data)
+            .then(function (response) {
+                return self.merge(response.data, true);
+            }, function (response) {
+                return response;
             })
         ;
-        return deferred.promise;
     };
     Action.prototype.reload = function () {
         var self = this;
         if (self.is_new()) {return}
         $http.get('/actions/api/action/{0}'.format(self.id)).success(function (result) {
-            self.merge(result.result)
+            return self.merge(result.result, true);
         })
     };
     Action.prototype.get_property = function (id) {
