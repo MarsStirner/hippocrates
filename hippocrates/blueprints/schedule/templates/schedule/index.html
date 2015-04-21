@@ -23,7 +23,7 @@
                 ng-click="changeReceptionType(rt.code)"><a>[[ rt.name ]]</a>
             </li>
         </ul>
-        <div class="tab-content" ng-if="person">
+        <div class="tab-content marginal" ng-if="person">
             <div class="row">
                 <div class="col-md-12">
                     <ul class="nav nav-pills">
@@ -68,6 +68,21 @@
                         </tbody>
                     </table>
                 </div>
+            </div>
+        </div>
+        <div ng-show="person">
+            <div class="btn-group dropup">
+                <ui-print-button ps="ps" resolve="get_ps_resolve()" class="btn-lg"
+                    lazy-load-context="scheduleQueue"></ui-print-button>
+                <button type="button" class="btn btn-default btn-lg dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                    <span class="caret"></span>
+                    <span class="sr-only">Toggle Dropdown</span>
+                </button>
+                <ul class="dropdown-menu" role="menu">
+                    <li><a ng-click="openPrintDialog('today')">За сегодня</a></li>
+                    <li><a ng-click="openPrintDialog('week')">За неделю</a></li>
+                    <li><a ng-click="openPrintDialog('month')">За месяц</a></li>
+                </ul>
             </div>
         </div>
     </div>

@@ -1,7 +1,8 @@
 /**
  * Created by mmalkov on 11.07.14.
  */
-var ScheduleCtrl = function ($scope, $http, RefBook, PersonTreeUpdater, WMAppointmentDialog, $window) {
+var ScheduleCtrl = function ($scope, $http, $window, RefBook, PersonTreeUpdater, WMAppointmentDialog, PrintingService,
+                             PrintingDialog) {
     $scope.aux = aux;
     var params = aux.getQueryParams(document.location.search);
     $scope.person_id = params.person_id;
@@ -11,11 +12,45 @@ var ScheduleCtrl = function ($scope, $http, RefBook, PersonTreeUpdater, WMAppoin
     var curMonth = curDate.getMonth();
     $scope.years = [curYear - 1, curYear, curYear + 1];
     $scope.year = curYear;
-
     $scope.month = curMonth;
-
     $scope.reception_types = new RefBook('rbReceptionType');
     $scope.reception_type = 'amb';
+    $scope.ps = new PrintingService('schedule');
+
+    $scope.get_ps_resolve = function () {
+        return {
+            person_id: $scope.person_id
+        }
+    };
+    $scope.openPrintDialog = function (period) {
+        var start_date = null,
+            end_date = null;
+        if (period === 'today') {
+            start_date = new Date();
+            end_date = moment().add(1, 'd').toDate();
+        } else if (period === 'week') {
+            start_date = $scope.pages[$scope.page].toDate();
+            end_date = moment($scope.pages[$scope.page]).add(7, 'd').toDate();
+        } else if (period === 'month') {
+            start_date = new Date($scope.year, $scope.month, 1);
+            end_date = moment(start_date).add(1, 'M').toDate();
+        }
+        function processPrint() {
+            PrintingDialog.open($scope.ps, $scope.get_ps_resolve(), {
+                start_date: start_date,
+                end_date: end_date
+            }, true);
+        }
+
+        if (!$scope.ps.is_loaded()) {
+            $scope.ps.set_context('scheduleQueue')
+                .then(function () {
+                    processPrint();
+                });
+        } else {
+            processPrint();
+        }
+    };
 
     $scope.reloadSchedule = function () {
         var forced = arguments[0] === true;
@@ -43,7 +78,7 @@ var ScheduleCtrl = function ($scope, $http, RefBook, PersonTreeUpdater, WMAppoin
                         page: $scope.page
                     }, null, window.location.origin + window.location.pathname + '?person_id=' + d.person.id);
                 }
-            })
+            });
         }
     };
 
@@ -144,4 +179,5 @@ var ScheduleCtrl = function ($scope, $http, RefBook, PersonTreeUpdater, WMAppoin
         $scope.$digest();
     }
 };
-WebMis20.controller('ScheduleCtrl', ['$scope', '$http', 'RefBook', 'PersonTreeUpdater', 'WMAppointmentDialog', '$window', ScheduleCtrl]);
+WebMis20.controller('ScheduleCtrl', ['$scope', '$http', '$window', 'RefBook', 'PersonTreeUpdater', 'WMAppointmentDialog',
+    'PrintingService', 'PrintingDialog', ScheduleCtrl]);
