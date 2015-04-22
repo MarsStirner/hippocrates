@@ -44,5 +44,6 @@
     <script src="{{ url_for('.static', filename='js/action_editor.js', v=app_version) }}"></script>
     <script src="{{ url_for('.static', filename='js/action-layout.js', v=app_version) }}"></script>
     <script src="{{ url_for('static', filename='js/services/event/event-services.js', v=nemesis_version) }}"></script>
-    <script type="text/ng-template" id="_action_template_model.html">{% include "actions/_action_template_modal.html" %}</script>
+    <script type="text/ng-template" id="_action_template_load_model.html">{% include "actions/_action_template_load_modal.html" %}</script>
+    <script type="text/ng-template" id="_action_template_save_model.html">{% include "actions/_action_template_save_modal.html" %}</script>
 {% endblock %}

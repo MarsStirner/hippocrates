@@ -64,17 +64,14 @@ var ActionEditorCtrl = function ($scope, $window, $modal, WMAction, PrintingServ
     };
 
     $scope.save_action = function (need_to_print) {
+        var was_new = $scope.action.is_new();
         return $scope.check_can_save_action()
         .then(function () {
-            if ($scope.action.is_new() && need_to_print) {
-                $window.sessionStorage.setItem('open_action_print_dlg', true);
-            }
-            return $scope.action.save().
-                then(function (result) {
-                    if ($scope.action.is_new()) {
-                        $window.open(url_for_schedule_html_action + '?action_id=' + result.action.id, '_self');
-                    } else {
-                        $scope.action.get(result.action.id);
+            if (was_new && need_to_print) { $window.sessionStorage.setItem('open_action_print_dlg', true) }
+            return $scope.action.save()
+                .then(function (action) {
+                    if (was_new) {
+                        $window.open(url_for_schedule_html_action + '?action_id=' + action.id, '_self');
                     }
                 });
         }, function (result) {
@@ -153,14 +150,14 @@ var ActionEditorCtrl = function ($scope, $window, $modal, WMAction, PrintingServ
     $scope.template_save = function () {
         $scope.save_action(false).then(function () {
             $modal.open({
-                templateUrl: '_action_template_model.html',
+                templateUrl: '_action_template_save_model.html',
                 controller: ActionTemplateController,
                 size: 'lg',
                 resolve: {
                     args: function () {
                         return {
                             action_id: $scope.action_id,
-                            action_type_id: $scope.action.action_type_id
+                            action_type_id: $scope.action.action_type_id || $scope.action.action_type.id
                         }
                     }
                 }
@@ -169,18 +166,22 @@ var ActionEditorCtrl = function ($scope, $window, $modal, WMAction, PrintingServ
     };
     $scope.template_load = function () {
         $modal.open({
-            templateUrl: '_action_template_model.html',
+            templateUrl: '_action_template_load_model.html',
             controller: ActionTemplateController,
             size: 'lg',
             resolve: {
                 args: function () {
                     return {
                         action_id: $scope.action_id,
-                        action_type_id: $scope.action.action_type_id
+                        action_type_id: $scope.action.action_type_id || $scope.action.action_type.id
                     }
                 }
             }
-        })
+        }).result.then(function (action_id) {
+            WMAction.get(action_id).then(function (src) {
+                $scope.action.merge(src)
+            });
+        });
     };
     $scope.template_prev = function () {
         if ($scope.action.is_new()) {
@@ -209,14 +210,14 @@ var ActionTemplateController = function ($scope, $modalInstance, $http, FlatTree
     var sas = $scope.sas = new SelectAll([]);
     function load_tree () {
         // test 646
-        $http.get('/actions/api/templates/{0}'.format(646, args.action_type_id)).success(function (data) {
+        $http.get('/actions/api/templates/{0}'.format(args.action_type_id)).success(function (data) {
             $scope.hier_tree.set_array(data.result).filter();
             render_tree();
         })
     }
     function render_tree () {
-        $scope.tree = $scope.hier_tree.render(make_tree_object);
-        $scope.tree.children = $scope.tree.root.children;
+        var tree = $scope.tree = $scope.hier_tree.render(make_tree_object);
+        tree.children = tree.root.children;
         sas.setSource(tree.masterDict.keys().map(function (key) {
             var result = parseInt(key);
             if (isNaN(result)) { return key } else { return result }
@@ -232,7 +233,7 @@ var ActionTemplateController = function ($scope, $modalInstance, $http, FlatTree
             result.is_node = true;
             return result
         }
-        return angular.extend(item, {is_node: is_node});
+        return angular.extend(item, {is_node: is_node || !item.aid});
     }
     $scope.select = function (item) {
         $scope.selected = _.clone(item);
@@ -366,11 +367,12 @@ WebMis20.factory('WMAction', ['$http', function ($http) {
             data = {},
             url = '/actions/api/action/{0}'.format(self.id || '');
         merge_fields(data, this);
+        data.action_type_id = this.action_type_id || this.action_type.id;
         merge_properties(data, this);
         data.id = self.id;
         return $http.post(url, data)
             .then(function (response) {
-                return self.merge(response.data, true);
+                return self.merge(response.data.result, true);
             }, function (response) {
                 return response;
             })

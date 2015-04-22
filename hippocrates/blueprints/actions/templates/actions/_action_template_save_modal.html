@@ -10,14 +10,13 @@
                     <ul ng-repeat="root in tree.children">
                         <li sf-treepeat="node in children of root">
                             <div class="tree-label"
-                                 ng-class="{'collapsed': !sas.selected(node.id) && node.is_node,
-                                            'expanded': sas.selected(node.id) && node.is_node,
+                                 ng-class="{'expanded': sas.selected(node.id) && node.is_node,
                                             'leaf': !node.is_node}">&nbsp;</div>
                             <span ng-class="{active: node.id === selected.id}">
                                 <a ng-click="select(node)" ng-if="!node.is_node" class="leaf" ng-bind="node.name"></a>
-                                <a ng-if="node.is_node" ng-click="sas.toggle(node.id)" class="node" ng-bind="node.name"></a>
+                                <a ng-click="select(node)" ng-if="node.is_node" class="node" ng-bind="node.name"></a>
                             </span>
-                            <ul ng-if="node.is_node && sas.selected(node.id)"><li sf-treecurse></li></ul>
+                            <ul ng-if="node.is_node"><li sf-treecurse></li></ul>
                         </li>
                     </ul>
                 </div>

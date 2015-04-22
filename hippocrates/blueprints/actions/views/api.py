@@ -127,7 +127,9 @@ def api_action_post(action_id=None):
             raise ApiException(403, 'User cannot edit action %s' % action_id)
         action = update_action(action, **data)
     else:
-        at_id = action_desc['action_type']['id']
+        import pprint
+        pprint.pprint(action_desc)
+        at_id = safe_traverse(action_desc, 'action_type', 'id', default=action_desc['action_type_id'])
         if not at_id:
             raise ApiException(404, u'Невозможно создать действие без указания типа action_type.id')
         event_id = action_desc['event_id']
