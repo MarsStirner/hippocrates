@@ -16,11 +16,6 @@ var CheckupCtrl = function ($scope, RisarApi, RefBookService) {
         var prefix = "tab_";
         tab_name = tab_name.replace(/\//, '');
         $('.nav-pills a[href='+tab_name.replace(prefix,"")+']').tab('show');
-
-        // Change hash for page-reload
-        $('.nav-pills a').on('shown.bs.tab', function (e) {
-            window.location.hash = e.target.hash.replace("#", "#" + prefix);
-        })
     };
     var reload_checkup = function () {
         RisarApi.chart.get(event_id)
@@ -94,7 +89,7 @@ var CheckupFirstEditCtrl = function ($scope, $window, $document, RisarApi, Confi
     }
 };
 
-var CheckupSecondEditCtrl = function ($scope, $window, $document, RisarApi, Config, PrintingService) {
+var CheckupSecondEditCtrl = function ($scope, $window, $location, $document, RisarApi, Config, PrintingService) {
     $scope.ps = new PrintingService("risar");
     $scope.ps.set_context("risar");
     $scope.ps_resolve = function () {
@@ -118,7 +113,27 @@ var CheckupSecondEditCtrl = function ($scope, $window, $document, RisarApi, Conf
                 } else {
                     $window.open(Config.url.inpection_edit_html + '?event_id=' + $scope.chart.id + '&checkup_id=' + data.id, '_self');
                 }
-
+            })
+        }
+    }
+    $scope.save_forward = function (form_controller) {
+        form_controller.submit_attempt = true;
+        if (form_controller.$valid){
+            if($scope.checkup){
+                $scope.checkup.flat_code = 'risarSecondInspection';
+            } else {
+                $scope.checkup = {flat_code: 'risarSecondInspection'};
+            }
+            var model = $scope.checkup;
+            RisarApi.checkup.save($scope.event_id, model)
+            .then(function (data) {
+                if($scope.checkup.id){
+                    $scope.checkup = data;
+                    $scope.rc.sampleWizard.forward();
+                    $location.url($scope.rc.sampleWizard.currentStep.attributes.id);
+                } else {
+                    $window.open(Config.url.inpection_edit_html + '?event_id=' + $scope.chart.id + '&checkup_id=' + data.id, '_self');
+                }
             })
         }
     }

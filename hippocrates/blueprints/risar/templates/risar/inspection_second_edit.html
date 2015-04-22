@@ -25,37 +25,37 @@
                             <div class="collapse navbar-collapse">
                             <ul class="nav navbar-nav nav-pills" style="margin: 7.5px -15px">
                                 <li class="active">
-                                    <a class="active" href="#first" data-toggle="tab">
+                                    <a aria-controls="first" class="active" href="#first" data-toggle="tab">
                                         <span class="badge">1</span>
                                         <span>Лист динамического наблюдения</span>
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="#second" data-toggle="tab">
+                                    <a aria-controls="second" href="#second" data-toggle="tab">
                                         <span class="badge">2</span>
                                         <span>Соматический статус</span>
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="#third" data-toggle="tab">
+                                    <a aria-controls="third" href="#third" data-toggle="tab">
                                         <span class="badge">3</span>
                                         <span>Акушерский статус</span>
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="#fourth" data-toggle="tab">
+                                    <a aria-controls="fourth" href="#fourth" data-toggle="tab">
                                         <span class="badge">4</span>
                                         <span>Влагалищное исследование</span>
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="#fifth" data-toggle="tab">
+                                    <a aria-controls="fifth" href="#fifth" data-toggle="tab">
                                         <span class="badge">5</span>
                                         <span>Заключение</span>
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="#last" data-toggle="tab">
+                                    <a aria-controls="last" href="#last" data-toggle="tab">
                                         <span class="badge">6</span>
                                         <span>Диагностические мероприятия</span>
                                     </a>
@@ -68,7 +68,7 @@
                 </div>
                 <div class="col-sm-9">
                     <div class="tab-content sidebar-nav marginal">
-                        <ng-form class="tab-pane active" id="first" name="firstForm"  novalidate rc-submit rc-step>
+                        <ng-form class="tab-pane active" id="first" name="firstForm" novalidate rc-submit rc-step>
                             <h3>Шаг 1. Лист динамического наблюдения</h3>
                             <table class="table table-condensed">
                                 <thead>
@@ -151,7 +151,7 @@
                                 </tbody>
                             </table>
                         </ng-form>
-                        <ng-form class="tab-pane" id="second" name="secondForm"  novalidate rc-submit rc-step>
+                        <ng-form class="tab-pane" id="second" name="secondForm" novalidate rc-submit rc-step>
                             <h3>Шаг 2. Соматический статус</h3>
                             <table class="table table-condensed">
                                 <thead>
@@ -211,7 +211,7 @@
                                 </tbody>
                             </table>
                         </ng-form>
-                        <ng-form class="tab-pane" id="third" name="thirdForm" novalidate rc-submit rc-step>
+                        <ng-form class="tab-pane" id="third" name="thirdForm"  novalidate rc-submit rc-step>
                             <h3>Шаг 3. Акушерский статус</h3>
                             <table class="table table-condensed">
                                 <thead>
@@ -495,7 +495,7 @@
                            tooltip="[[rc.sampleWizard.currentStep.formController.$invalid && rc.sampleWizard.currentStep.formController.submit_attempt ? 'Заполните все обязательные поля': '']]"
                            ng-show="rc.sampleWizard.currentIndex < rc.sampleWizard.navigationLength">Сохранить</a>
                         <a class="btn btn-primary"
-                           ng-click="save(rc.sampleWizard.currentStep.formController); rc.sampleWizard.forward()"
+                           ng-click="save_forward(rc.sampleWizard.currentStep.formController)"
                            tooltip="[[rc.sampleWizard.currentStep.formController.$invalid && rc.sampleWizard.currentStep.formController.submit_attempt ? 'Заполните все обязательные поля': '']]"
                            ng-show="rc.sampleWizard.currentIndex < rc.sampleWizard.navigationLength">
                             Сохранить и продолжить
