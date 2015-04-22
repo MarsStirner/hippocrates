@@ -1,10 +1,10 @@
 /**
  * Created by mmalkov on 11.07.14.
  */
-var ScheduleCtrl = function ($scope, $http, $window, RefBook, PersonTreeUpdater, WMAppointmentDialog, PrintingService,
-                             PrintingDialog) {
+var ScheduleCtrl = function ($scope, $http, $window, $location, RefBook, PersonTreeUpdater, WMAppointmentDialog,
+                             PrintingService, PrintingDialog) {
     $scope.aux = aux;
-    var params = aux.getQueryParams(document.location.search);
+    var params = aux.getQueryParams();
     $scope.person_id = params.person_id;
     $scope.person_query = '';
     var curDate = new Date();
@@ -68,15 +68,17 @@ var ScheduleCtrl = function ($scope, $http, $window, RefBook, PersonTreeUpdater,
                 $scope.person = d.person;
                 $scope.grouped = d.grouped;
                 if (forced) {
-                    history.pushState({
-                        person_id: $scope.person_id,
-                        pages: $scope.pages,
-                        person: $scope.person,
-                        grouped: $scope.grouped,
-                        year: $scope.year,
-                        month: $scope.month,
-                        page: $scope.page
-                    }, null, window.location.origin + window.location.pathname + '?person_id=' + d.person.id);
+                    var path = $location.path() + '?person_id=' + d.person.id;
+                    $location.url(path).replace();
+                    //history.pushState({
+                    //    person_id: $scope.person_id,
+                    //    pages: $scope.pages,
+                    //    person: $scope.person,
+                    //    grouped: $scope.grouped,
+                    //    year: $scope.year,
+                    //    month: $scope.month,
+                    //    page: $scope.page
+                    //}, null, window.location.origin + window.location.pathname + '?person_id=' + d.person.id);
                 }
             });
         }
@@ -156,28 +158,28 @@ var ScheduleCtrl = function ($scope, $http, $window, RefBook, PersonTreeUpdater,
         });
     };
 
-    window.onpopstate = function (event) {
-        // Это всё происходит вне контекста скоупа, и потому не запускается вотчер на person_id, иначе нам пришлось
-        // бы делать хак
-        if (event.state) {
-            $scope.person_id = event.state.person_id;
-            $scope.pages = event.state.pages;
-            $scope.person = event.state.person;
-            $scope.grouped = event.state.grouped;
-            $scope.year = event.state.year;
-            $scope.month = event.state.month;
-            $scope.page = event.state.page;
-        } else {
-            $scope.person_id = undefined;
-            $scope.pages = [];
-            $scope.person = undefined;
-            $scope.grouped = undefined;
-            $scope.year = curYear;
-            $scope.month = curDate.getMonth();
-            $scope.page = -1;
-        }
-        $scope.$digest();
-    }
+    //window.onpopstate = function (event) {
+    //    // Это всё происходит вне контекста скоупа, и потому не запускается вотчер на person_id, иначе нам пришлось
+    //    // бы делать хак
+    //    if (event.state) {
+    //        $scope.person_id = event.state.person_id;
+    //        $scope.pages = event.state.pages;
+    //        $scope.person = event.state.person;
+    //        $scope.grouped = event.state.grouped;
+    //        $scope.year = event.state.year;
+    //        $scope.month = event.state.month;
+    //        $scope.page = event.state.page;
+    //    } else {
+    //        $scope.person_id = undefined;
+    //        $scope.pages = [];
+    //        $scope.person = undefined;
+    //        $scope.grouped = undefined;
+    //        $scope.year = curYear;
+    //        $scope.month = curDate.getMonth();
+    //        $scope.page = -1;
+    //    }
+    //    $scope.$digest();
+    //}
 };
-WebMis20.controller('ScheduleCtrl', ['$scope', '$http', '$window', 'RefBook', 'PersonTreeUpdater', 'WMAppointmentDialog',
-    'PrintingService', 'PrintingDialog', ScheduleCtrl]);
+WebMis20.controller('ScheduleCtrl', ['$scope', '$http', '$window', '$location', 'RefBook', 'PersonTreeUpdater',
+    'WMAppointmentDialog', 'PrintingService', 'PrintingDialog', ScheduleCtrl]);
