@@ -5,6 +5,9 @@ var EpicrisisCtrl = function ($timeout, $scope, RefBookService, RisarApi) {
     var event_id = $scope.event_id = params.event_id;
     $scope.rbRisarPregnancy_Final = RefBookService.get('rbRisarPregnancy_Final');
     $scope.rbDiagnosisType = RefBookService.get('rbDiagnosisType');
+    $scope.is_empty = function (obj) {
+        return angular.equals({}, obj);
+    };
 
     var open_tab = function (tab_name){
         var prefix = "tab_";

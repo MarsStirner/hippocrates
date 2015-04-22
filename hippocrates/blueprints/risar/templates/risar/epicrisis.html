@@ -296,7 +296,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr ng-repeat="inspection in chart.epicrisis.newborn_inspections">
+                        <tr ng-repeat="inspection in chart.epicrisis.newborn_inspections" ng-if="!is_empty(inspection)">
                             <td>[[$index+1]]</td>
                             <td ng-if="inspection.deleted" colspan="10" class="text-center">
                                 Удалено. <a ng-click="newborn_inspection_restore(inspection)" style="cursor: pointer">Восстановить</a>?</td>
