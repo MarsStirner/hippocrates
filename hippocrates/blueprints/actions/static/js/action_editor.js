@@ -148,7 +148,8 @@ var ActionEditorCtrl = function ($scope, $window, $modal, WMAction, PrintingServ
     $scope.is_treatment = function () { return $scope.action.action_type && $scope.action.action_type.class === 2; };
 
     $scope.template_save = function () {
-        $scope.save_action(false).then(function () {
+        var action_type_id = $scope.action.action_type_id || $scope.action.action_type.id;
+        function process_modal() {
             $modal.open({
                 templateUrl: '_action_template_save_model.html',
                 controller: ActionTemplateController,
@@ -157,12 +158,18 @@ var ActionEditorCtrl = function ($scope, $window, $modal, WMAction, PrintingServ
                     args: function () {
                         return {
                             action_id: $scope.action_id,
-                            action_type_id: $scope.action.action_type_id || $scope.action.action_type.id
+                            action_type_id: action_type_id,
+                            mode: 'save'
                         }
                     }
                 }
             })
-        })
+        }
+        if ($scope.action.ro) {
+            process_modal()
+        } else {
+            $scope.save_action(false).then(process_modal);
+        }
     };
     $scope.template_load = function () {
         $modal.open({
@@ -173,23 +180,27 @@ var ActionEditorCtrl = function ($scope, $window, $modal, WMAction, PrintingServ
                 args: function () {
                     return {
                         action_id: $scope.action_id,
-                        action_type_id: $scope.action.action_type_id || $scope.action.action_type.id
+                        action_type_id: $scope.action.action_type_id || $scope.action.action_type.id,
+                        mode: 'load'
                     }
                 }
             }
         }).result.then(function (action_id) {
             WMAction.get(action_id).then(function (src) {
-                $scope.action.merge(src)
+                $scope.action.merge_template(src)
             });
         });
     };
     $scope.template_prev = function () {
-        if ($scope.action.is_new()) {
-            $scope.action.save().then(function () {
-                WMAction.previous($scope.action);
+        function process () {
+            WMAction.previous($scope.action).then(function (action) {
+                $scope.action.merge_template(action);
             })
+        }
+        if ($scope.action.is_new()) {
+            $scope.action.save().then(process)
         } else {
-            WMAction.previous($scope.action);
+            process()
         }
     };
 };
@@ -201,28 +212,38 @@ var ActionTemplateController = function ($scope, $modalInstance, $http, FlatTree
         code: '',
         owner: false,
         speciality: false,
-        action_id: args.action_id
+        action_id: args.action_id,
+        parent: null
     };
     $scope.flat_tree = null;
     $scope.hier_tree = new FlatTree('gid');
     $scope.tree = {};
-    $scope.selected = {};
+    $scope.selected = null;
     var sas = $scope.sas = new SelectAll([]);
+    var filter_mode = (args.mode === 'save') ? purge_leafs : purge_nodes;
     function load_tree () {
         // test 646
         $http.get('/actions/api/templates/{0}'.format(args.action_type_id)).success(function (data) {
-            $scope.hier_tree.set_array(data.result).filter();
+            $scope.hier_tree.set_array(data.result).filter(filter_mode);
             render_tree();
+            $scope.select($scope.tree);
         })
     }
     function render_tree () {
-        var tree = $scope.tree = $scope.hier_tree.render(make_tree_object);
+        var tree = $scope.hier_tree.render(make_tree_object);
         tree.children = tree.root.children;
         sas.setSource(tree.masterDict.keys().map(function (key) {
             var result = parseInt(key);
             if (isNaN(result)) { return key } else { return result }
         }));
         sas.selectAll();
+        $scope.tree = tree.root;
+    }
+    function purge_nodes (node, id_dict) {
+        return !!node.aid;
+    }
+    function purge_leafs (node, id_dict) {
+        return !node.aid;
     }
     function make_tree_object(item, is_node) {
         if (item === null) {
@@ -231,29 +252,25 @@ var ActionTemplateController = function ($scope, $modalInstance, $http, FlatTree
             result.id = 'root';
             result.children = [];
             result.is_node = true;
+            result.name = 'Корень';
             return result
         }
         return angular.extend(item, {is_node: is_node || !item.aid});
     }
     $scope.select = function (item) {
-        $scope.selected = _.clone(item);
+        $scope.model.parent = item;
     };
     $scope.save_new = function () {
-        $scope.model['id'] = null;
-        $scope.model['gid'] = $scope.selected['id'] || null;
+        var model = $scope.model;
+        var parent_id = (model.parent.id === 'root') ? null : model.parent.id;
         $http.put(
-            '/actions/api/templates/{0}'.format(args.action_type_id),
-            $scope.model
+            '/actions/api/templates/{0}'.format(args.action_type_id), {
+                id: null,
+                gid: parent_id,
+                name: model.name,
+                aid: parseInt(args.action_id)
+            }
         ).then($scope.$close);
-    };
-    $scope.save_replace = function () {
-        $http.post(
-            '/actions/api/templates/{0}/{1}'.format(args.action_type_id, $scope.model['id']),
-            $scope.model
-        ).then($scope.$close)
-    };
-    $scope.load = function () {
-
     };
     load_tree();
 };
@@ -262,11 +279,9 @@ WebMis20.controller('ActionEditorCtrl', ['$scope', '$window', '$modal', 'WMActio
 
 WebMis20.factory('WMAction', ['$http', function ($http) {
     // FIXME: На данный момент это ломает функциональность действий, но пока пофиг.
-    var fields = [
-        'event_id', 'client', 'direction_date', 'beg_date', 'end_date', 'planned_end_date',
-        'status', 'set_person', 'person', 'note', 'office', 'amount', 'uet', 'pay_status', 'account', 'is_urgent',
-        'coord_date'
-    ];
+    var template_fields = ['direction_date', 'beg_date', 'end_date', 'planned_end_date', 'status', 'set_person',
+        'person', 'note', 'office', 'amount', 'uet', 'pay_status', 'account', 'is_urgent', 'coord_date'];
+    var fields = ['id', 'event_id', 'client'].concat(template_fields);
     var Action = function () {
         this.action = {};
         this.layout = {};
@@ -276,6 +291,10 @@ WebMis20.factory('WMAction', ['$http', function ($http) {
         this.ro = false;
     };
     /* Приватные методы */
+    function merge_template_fields (self, source) {
+        /* Перетягивает основные атрибуты действия */
+        _.extend(self, _.pick(source, template_fields));
+    }
     function merge_fields (self, source) {
         /* Перетягивает основные атрибуты действия */
         _.extend(self, _.pick(source, fields));
@@ -331,24 +350,10 @@ WebMis20.factory('WMAction', ['$http', function ($http) {
         });
     };
     Action.previous = function (action) {
-        var dest,
-            with_id = arguments[1];
-        if (action instanceof Action) {
-            dest = action;
-            action = action.id;
-            with_id = (with_id === undefined) ? false : !!with_id;
-        } else {
-            dest = new Action();
-            with_id = true;
-        }
+        var dest = new Action();
+        if (action instanceof Action) { action = action.id }
         return $http.get('/actions/api/action/{0}/previous'.format(action)).then(function (result) {
-            var previous = result.data.result;
-            merge_fields(dest, previous);
-            merge_meta(dest, previous);
-            merge_properties(dest, previous);
-            process_properties(dest, previous);
-            if (with_id) { dest.id = previous.id }
-            return dest;
+            return dest.merge(result.data.result);
         })
     };
     Action.prototype.merge = function (src_action) {
@@ -356,7 +361,13 @@ WebMis20.factory('WMAction', ['$http', function ($http) {
         merge_meta(this, src_action);
         merge_properties(this, src_action);
         process_properties(this, src_action);
-        if (arguments[1]) this.id = src_action.id;
+        return this;
+    };
+    Action.prototype.merge_template = function (src_action) {
+        merge_template_fields(this, src_action);
+        merge_meta(this, src_action);
+        merge_properties(this, src_action);
+        process_properties(this, src_action);
         return this;
     };
     Action.prototype.is_new = function () {
@@ -372,7 +383,7 @@ WebMis20.factory('WMAction', ['$http', function ($http) {
         data.id = self.id;
         return $http.post(url, data)
             .then(function (response) {
-                return self.merge(response.data.result, true);
+                return self.merge(response.data.result);
             }, function (response) {
                 return response;
             })
@@ -382,7 +393,7 @@ WebMis20.factory('WMAction', ['$http', function ($http) {
         var self = this;
         if (self.is_new()) {return}
         $http.get('/actions/api/action/{0}'.format(self.id)).success(function (result) {
-            return self.merge(result.result, true);
+            return self.merge(result.result);
         })
     };
     Action.prototype.get_property = function (id) {
