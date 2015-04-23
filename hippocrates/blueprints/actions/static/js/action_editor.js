@@ -205,7 +205,7 @@ var ActionTemplateController = function ($scope, $modalInstance, $http, FlatTree
     };
     $scope.flat_tree = null;
     $scope.hier_tree = new FlatTree('gid');
-    var tree = $scope.tree = {};
+    $scope.tree = {};
     $scope.selected = {};
     var sas = $scope.sas = new SelectAll([]);
     function load_tree () {
