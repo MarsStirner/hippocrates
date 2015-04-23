@@ -12,7 +12,7 @@ from nemesis.models.event import Event, EventType
 from nemesis.models.exists import Organisation, Person, rbAttachType, rbRequestType, rbFinance
 from nemesis.models.schedule import ScheduleClientTicket
 from nemesis.systemwide import db
-from blueprints.event.lib.utils import create_or_update_diagnosis
+from nemesis.lib.diagnosis import create_or_update_diagnosis
 from blueprints.risar.app import module
 from blueprints.risar.lib.card_attrs import default_AT_Heuristic, get_all_diagnoses
 from blueprints.risar.lib.represent import represent_event, represent_chart_for_routing

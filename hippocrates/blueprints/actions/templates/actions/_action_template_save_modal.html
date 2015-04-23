@@ -1,0 +1,37 @@
+<div class="modal-header" xmlns="http://www.w3.org/1999/html">
+    <button type="button" class="close" ng-click="cancel()">&times;</button>
+    <h4 class="modal-title" id="myModalLabel">Шаблоны действий</h4>
+</div>
+<div class="modal-body">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="well" style="max-height: 500px; overflow-y: auto;">
+                <div class="ui-treeview">
+                    <ul ng-repeat="root in tree.children">
+                        <li sf-treepeat="node in children of root">
+                            <div class="tree-label"
+                                 ng-class="{'expanded': sas.selected(node.id) && node.is_node,
+                                            'leaf': !node.is_node}">&nbsp;</div>
+                            <span ng-class="{active: node.id === selected.id}">
+                                <a ng-click="select(node)" ng-if="!node.is_node" class="leaf" ng-bind="node.name"></a>
+                                <a ng-click="select(node)" ng-if="node.is_node" class="node" ng-bind="node.name"></a>
+                            </span>
+                            <ul ng-if="node.is_node"><li sf-treecurse></li></ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div><input class="form-control" type="text" ng-model="selected.name" placeholder="Название"></div>
+            <div><input class="form-control" type="text" ng-model="selected.con.age" placeholder="код возрастных ограничений"></div>
+            <div><rb-select ref-book="Gender" ng-model="selected.con.sex" placeholder="пол"></div>
+{#            <div><input type="checkbox" ng-model="selected.own"></div>#}
+{#            <div><input type="checkbox" ng-model="selected.spec"></div>#}
+        </div>
+    </div>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-primary" ng-click="accept()">Выбрать</button>
+    <button type="button" class="btn btn-default" ng-click="$dismiss()">Отмена</button>
+</div>

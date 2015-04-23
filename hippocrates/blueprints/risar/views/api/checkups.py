@@ -30,7 +30,7 @@ def api_0_checkup(event_id):
                 action.propsByCode[code].value = value
             elif code in ('diag', 'diag2', 'diag3') and value:
                 property = action.propsByCode[code]
-                property.value = ActionProperty_Diagnosis.format_value(property, value)
+                property.value = ActionProperty_Diagnosis.objectify(property, value)
         db.session.commit()
         reevaluate_card_attrs(event)
         db.session.commit()
