@@ -258,7 +258,7 @@ def api_create_lab_direction():
 def api_action_template_list(type_id):
     user_id = safe_current_user_id()
     speciality_id = current_user.speciality_id
-    templates = ActionTemplate.query.join(Action).filter(
+    templates = ActionTemplate.query.outerjoin(Action).filter(
         db.and_(
             db.or_(
                 ActionTemplate.owner_id == user_id,
@@ -290,53 +290,65 @@ def api_action_template_list(type_id):
 def api_action_template_save(type_id, id_=None):
     data = request.get_json()
     now = datetime.datetime.now()
-    if id_:
-        template = ActionTemplate()
-        template.createDatetime = now
-        template.createPerson_id = safe_current_user_id()
-    else:
-        template = ActionTemplate.query.join(Action).filter(
-            ActionTemplate.deleted == 0,
-            Action.actionType_id == type_id,
-        ).first()
-    if not template:
-        raise ApiException(404, 'Template not found')
 
-    action_id = data.get('action_id')
+    with db.session.no_autoflush:
+        src_action = None
+        action_id = data.get('aid')
+        if action_id:
+            src_action = Action.query.get(action_id)
 
-    if not template.action and action_id:
-        action = Action()
-        db.session.add(action)
-        update_template_action(action, action_id)
-        template.action = action
-
-    elif template.action and action_id:
-        update_template_action(template.action, action_id)
-
-    elif template.action and 'action' in data and data['action'] is None:
-        action = template.action
-        template.action = None
-        db.session.delete(action)
-
-    template.modifyDatetime = now
-    template.modifyPerson_id = safe_current_user_id()
-
-    if 'name' in data:
-        template.name = data['name']
-    if 'code' in data:
-        template.code = data['code']
-    if 'owner' in data:
-        if data['owner']:
-            template.owner_id = safe_current_user_id()
+        if id_ is None:
+            template = ActionTemplate()
+            db.session.add(template)
+            template.createDatetime = now
+            template.createPerson_id = safe_current_user_id()
+            template.deleted = 0
+            template.sex = 0
+            template.age = ''
         else:
-            template.owner_id = None
-    if 'speciality' in data:
-        if data['speciality']:
-            template.speciality_id = current_user.speciality_id
-        else:
-            template.speciality_id = None
+            template = ActionTemplate.query.join(Action).filter(
+                ActionTemplate.deleted == 0,
+                Action.actionType_id == type_id,
+            ).first()
+        if not template:
+            raise ApiException(404, 'Template not found')
 
-    db.session.add(template)
-    db.commit()
+        if not template.action and src_action:
+            action = Action()
+            template.action = action
+            update_template_action(action, src_action)
+            db.session.add(action)
+
+        elif template.action and action_id:
+            update_template_action(template.action, src_action)
+
+        elif template.action and 'aid' in data and data['aid'] is None:
+            action = template.action
+            template.action = None
+            db.session.delete(action)
+
+        template.modifyDatetime = now
+        template.modifyPerson_id = safe_current_user_id()
+
+        if 'gid' in data:
+            template.group_id = data['gid']
+        if 'name' in data:
+            template.name = data['name']
+        if 'code' in data:
+            template.code = data['code']
+        if 'owner' in data:
+            if data['owner']:
+                template.owner_id = safe_current_user_id()
+            else:
+                template.owner_id = None
+        if 'speciality' in data:
+            if data['speciality']:
+                template.speciality_id = current_user.speciality_id
+            else:
+                template.speciality_id = None
+        if template.code is None:
+            template.code = ''
+
+        db.session.commit()
 
 

@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
 from nemesis.lib.utils import transfer_fields
-from nemesis.models.actions import Action
 
 __author__ = 'viruzzz-kun'
 
 
-def update_template_action(action, action_id):
-    src_action = Action.query.get(action_id)
+def update_template_action(action, src_action):
     transfer_fields(src_action, action, [
         'begDate',
         'endDate',
@@ -22,8 +20,10 @@ def update_template_action(action, action_id):
         'uet',
         'payStatus',
         'coordDate',
-        'office'
+        'office',
+        'actionType'
     ])
+
     for k, v in src_action.propsByTypeId.iteritems():
         action.setPropValue(k, v.value)
 
