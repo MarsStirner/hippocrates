@@ -2,7 +2,7 @@
  * Created by mmalkov on 11.07.14.
  */
 var ScheduleCtrl = function ($scope, $http, $window, $location, RefBook, PersonTreeUpdater, WMAppointmentDialog,
-                             PrintingService, PrintingDialog) {
+                             PrintingService, PrintingDialog, MessageBox) {
     $scope.aux = aux;
     var params = aux.getQueryParams();
     $scope.person_id = params.person_id;
@@ -46,6 +46,11 @@ var ScheduleCtrl = function ($scope, $http, $window, $location, RefBook, PersonT
             $scope.ps.set_context('scheduleQueue')
                 .then(function () {
                     processPrint();
+                }, function () {
+                    MessageBox.error(
+                        'Печать недоступна',
+                        'Сервис печати недоступен. Свяжитесь с администратором.'
+                    );
                 });
         } else {
             processPrint();
@@ -182,4 +187,4 @@ var ScheduleCtrl = function ($scope, $http, $window, $location, RefBook, PersonT
     //}
 };
 WebMis20.controller('ScheduleCtrl', ['$scope', '$http', '$window', '$location', 'RefBook', 'PersonTreeUpdater',
-    'WMAppointmentDialog', 'PrintingService', 'PrintingDialog', ScheduleCtrl]);
+    'WMAppointmentDialog', 'PrintingService', 'PrintingDialog', 'MessageBox', ScheduleCtrl]);

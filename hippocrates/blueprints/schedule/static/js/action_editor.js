@@ -2,7 +2,7 @@
  * Created by mmalkov on 14.07.14.
  */
 var ActionEditorCtrl = function ($scope, $window, WMAction, PrintingService, PrintingDialog, RefBookService,
-        WMEventCache, $q, MessageBox) {
+        WMEventCache, $q, MessageBox, NotificationService) {
     var params = aux.getQueryParams(location.search);
     $scope.ps = new PrintingService("action");
     $scope.ps_resolve = function () {
@@ -73,8 +73,20 @@ var ActionEditorCtrl = function ($scope, $window, WMAction, PrintingService, Pri
                     if ($scope.action.is_new()) {
                         $window.open(url_for_schedule_html_action + '?action_id=' + result.action.id, '_self');
                     } else {
+                        NotificationService.notify(
+                            200,
+                            'Успешно сохранено',
+                            'success',
+                            5000
+                        );
                         $scope.action.get(result.action.id);
                     }
+                }, function (result) {
+                    NotificationService.notify(
+                        500,
+                        'Ошибка сохранения, свяжитесь с администратором',
+                        'danger'
+                    );
                 });
         }, function (result) {
             var deferred = $q.defer();
@@ -149,4 +161,4 @@ var ActionEditorCtrl = function ($scope, $window, WMAction, PrintingService, Pri
     $scope.is_treatment = function () { return $scope.action.action.action_type && $scope.action.action.action_type.class === 2; };
 };
 WebMis20.controller('ActionEditorCtrl', ['$scope', '$window', 'WMAction', 'PrintingService', 'PrintingDialog',
-    'RefBookService', 'WMEventCache', '$q', 'MessageBox', ActionEditorCtrl]);
+    'RefBookService', 'WMEventCache', '$q', 'MessageBox', 'NotificationService', ActionEditorCtrl]);
