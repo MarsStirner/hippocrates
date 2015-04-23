@@ -321,7 +321,7 @@ def api_prev_event_payment_info_get():
             event_set_date = datetime.datetime.now()
     except (KeyError, ValueError, TypeError):
         return abort(400)
-    request_type_codes = ['policlinic', '4', 'diagnosis']
+    request_type_codes = ['policlinic', '4', 'diagnosis', 'diagnostic']
 
     event_list = Event.query.join(EventType, rbRequestType).filter(
         rbRequestType.code.in_(request_type_codes),
