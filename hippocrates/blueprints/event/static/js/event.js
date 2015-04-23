@@ -66,7 +66,7 @@ var EventMainInfoCtrl = function ($scope, $q, RefBookService, EventType, $filter
 
     $scope.filter_rb_request_type = function() {
         return function(elem) {
-            return elem.relevant && (elem.code == 'policlinic' || elem.code == '4');
+            return elem.relevant && (elem.code == 'policlinic' || elem.code == '4' || elem.code == 'diagnosis');
         };
     };
     $scope.filter_results = function(event_purpose) {
