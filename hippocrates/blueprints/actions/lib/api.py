@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from nemesis.lib.agesex import AgeSex
 from nemesis.lib.utils import transfer_fields
 
 __author__ = 'viruzzz-kun'
@@ -28,3 +29,11 @@ def update_template_action(action, src_action):
         action.setPropValue(k, v.value)
 
 
+def represent_action_template(template):
+    return {
+        'id': template.id,
+        'gid': template.group_id,
+        'name': template.name,
+        'aid': template.action_id,
+        'con': AgeSex(template)
+    }

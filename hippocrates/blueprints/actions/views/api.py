@@ -5,8 +5,8 @@ from flask import request, abort
 from flask.ext.login import current_user
 
 from ..app import module
+from blueprints.actions.lib.api import represent_action_template
 from ..lib.api import update_template_action
-from nemesis.lib.agesex import AgeSex
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.data import create_action, update_action, create_new_action, get_planned_end_datetime, int_get_atl_flat, \
     get_patient_location
@@ -278,16 +278,7 @@ def api_action_template_list(type_id):
             ActionTemplate.action_id.is_(None)),
         ActionTemplate.deleted == 0,
     )
-    return [
-        {
-            'id': at.id,
-            'gid': at.group_id,
-            'name': at.name,
-            'aid': at.action_id,
-            'con': AgeSex(at)
-        }
-        for at in templates
-    ]
+    return map(represent_action_template, templates)
 
 
 @module.route('/api/templates/<type_id>', methods=['PUT'])
@@ -356,5 +347,6 @@ def api_action_template_save(type_id, id_=None):
             template.code = ''
 
         db.session.commit()
+        return represent_action_template(template)
 
 

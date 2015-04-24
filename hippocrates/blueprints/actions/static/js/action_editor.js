@@ -235,14 +235,15 @@ var ActionTemplateController = function ($scope, $modalInstance, $http, FlatTree
     var sas = $scope.sas = new SelectAll([]);
     var filter_mode = (args.mode === 'save') ? purge_leafs : purge_nodes;
     function load_tree () {
-        // test 646
-        $http.get('/actions/api/templates/{0}'.format(args.action_type_id)).success(function (data) {
-            $scope.hier_tree.set_array(data.result).filter(filter_mode);
-            render_tree();
+        return $http.get('/actions/api/templates/{0}'.format(args.action_type_id)).then(function (response) {
+            $scope.flat_tree = response.data.result;
+            rebuild_tree();
             $scope.select($scope.tree);
+            return response;
         })
     }
-    function render_tree () {
+    function rebuild_tree () {
+        $scope.hier_tree.set_array($scope.flat_tree).filter(filter_mode);
         var tree = $scope.hier_tree.render(make_tree_object);
         tree.children = tree.root.children;
         sas.setSource(tree.masterDict.keys().map(function (key) {
@@ -284,6 +285,32 @@ var ActionTemplateController = function ($scope, $modalInstance, $http, FlatTree
                 aid: parseInt(args.action_id)
             }
         ).then($scope.$close);
+    };
+    $scope.create_group = function () {
+        var model = $scope.model;
+        var parent_id = (model.parent.id === 'root') ? null : model.parent.id;
+        $http.put(
+            '/actions/api/templates/{0}'.format(args.action_type_id), {
+                id: null,
+                gid: parent_id,
+                name: model.name,
+                aid: null
+            }
+        ).then(function (response) {
+            var result = response.data.result;
+            $scope.flat_tree.push(result);
+            rebuild_tree();
+            $scope.model = {
+                id: null,
+                gid: null,
+                name: '',
+                code: '',
+                owner: false,
+                speciality: false,
+                action_id: args.action_id,
+                parent: result
+            };
+        })
     };
     load_tree();
 };
