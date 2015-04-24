@@ -1,7 +1,14 @@
 
 'use strict';
-var CheckupCtrl = function ($scope, RisarApi, RefBookService) {
+var CheckupCtrl = function ($scope, RisarApi, RefBookService, PrintingService) {
     $scope.rbDiagnosisType = RefBookService.get('rbDiagnosisType');
+    $scope.ps = new PrintingService("risar");
+    $scope.ps.set_context("risar");
+    $scope.ps_resolve = function () {
+        return {
+            event_id: $scope.chart.id
+        }
+    };
     var params = aux.getQueryParams(window.location.search);
     var checkup_id = $scope.checkup_id = params.checkup_id;
     var event_id = $scope.event_id = params.event_id;
@@ -44,7 +51,7 @@ var CheckupCtrl = function ($scope, RisarApi, RefBookService) {
     init();
 };
 
-var CheckupFirstEditCtrl = function ($scope, $window, $document, RisarApi, Config) {
+var CheckupFirstEditCtrl = function ($scope, $window, $location, $document, RisarApi, Config) {
     var updateHW_Ratio = function (){
         $scope.checkup.hw_ratio = $scope.checkup.height ? Math.round(($scope.checkup.weight/$scope.checkup.height)*100) : NaN;
     };
@@ -87,16 +94,30 @@ var CheckupFirstEditCtrl = function ($scope, $window, $document, RisarApi, Confi
 
         })
     }
+    $scope.save_forward = function (form_controller) {
+        form_controller.submit_attempt = true;
+        if (form_controller.$valid){
+            if($scope.checkup){
+                $scope.checkup.flat_code = 'risarFirstInspection';
+            } else {
+                $scope.checkup = {flat_code: 'risarFirstInspection'};
+            }
+            var model = $scope.checkup;
+            RisarApi.checkup.save($scope.event_id, model)
+            .then(function (data) {
+                if($scope.checkup.id){
+                    $scope.checkup = data;
+                    $scope.rc.sampleWizard.forward();
+                    $location.url($scope.rc.sampleWizard.currentStep.attributes.id);
+                } else {
+                    $window.open(Config.url.inpection_edit_html + '?event_id=' + $scope.chart.id + '&checkup_id=' + data.id, '_self');
+                }
+            })
+        }
+    }
 };
 
-var CheckupSecondEditCtrl = function ($scope, $window, $location, $document, RisarApi, Config, PrintingService) {
-    $scope.ps = new PrintingService("risar");
-    $scope.ps.set_context("risar");
-    $scope.ps_resolve = function () {
-        return {
-            event_id: $scope.chart.id
-        }
-    };
+var CheckupSecondEditCtrl = function ($scope, $window, $location, $document, RisarApi, Config) {
     $scope.save = function (form_controller) {
         form_controller.submit_attempt = true;
         if (form_controller.$valid){
@@ -139,5 +160,5 @@ var CheckupSecondEditCtrl = function ($scope, $window, $location, $document, Ris
     }
 };
 
-WebMis20.controller('CheckupCtrl', ['$scope', 'RisarApi', 'RefBookService', CheckupCtrl]);
-WebMis20.controller('CheckupFirstEditCtrl', ['$scope', '$window', '$document', 'RisarApi', 'Config', CheckupFirstEditCtrl]);
+WebMis20.controller('CheckupCtrl', ['$scope', 'RisarApi', 'RefBookService', 'PrintingService', CheckupCtrl]);
+//WebMis20.controller('CheckupFirstEditCtrl', ['$scope', '$window', '$document', 'RisarApi', 'Config', CheckupFirstEditCtrl]);

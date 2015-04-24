@@ -16,7 +16,7 @@
                 {{ rimacros.page_title('Ввод данных первичного осмотра') }}
             </div>
         </div>
-        <div ng-controller="CheckupFirstEditCtrl">
+        <div ng-controller="CheckupFirstEditCtrl" rc-wizard="sampleWizard" id="CheckupFirstWizard">
             <div class="row">
                 <div class="col-sm-3">
                     <div class="sidebar-nav">
@@ -128,27 +128,6 @@
                                             </div></div>
                                         </td>
                                     </tr>
-
-{#                                    <tr>#}
-{#                                        <th class="text-right">Комментарии к анализам <span>&nbsp;</span></th>#}
-{#                                        <td>&nbsp;</td>#}
-{#                                    </tr>#}
-{#                                    <tr>#}
-{#                                        <td class="text-right">Мочи <span>&nbsp;</span></td>#}
-{#                                        <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.urine" /></div></div></td>#}
-{#                                    </tr>#}
-{#                                    <tr>#}
-{#                                        <td class="text-right">Крови <span>&nbsp;</span></td>#}
-{#                                        <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.blood" /></div></div></td>#}
-{#                                    </tr>#}
-{#                                    <tr>#}
-{#                                        <td class="text-right">УЗИ <span>&nbsp;</span></td>#}
-{#                                        <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.us" /></div></div></td>#}
-{#                                    </tr>#}
-{#                                    <tr>#}
-{#                                        <td class="text-right">Другое <span>&nbsp;</span></td>#}
-{#                                        <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.other_analysis" /></div></div></td>#}
-{#                                    </tr>#}
                                 </tbody>
                             </table>
                         </ng-form>
@@ -566,6 +545,10 @@
                                         <td><input ng-model="checkup.cervical_canal_secretion" class="checkbox" type="checkbox"></td>
                                     </tr>
                                     <tr>
+                                        <td class="text-right">Отделяемое из уретры <span>&nbsp;</span></td>
+                                        <td><input ng-model="checkup.urethra_secretion" class="checkbox" type="checkbox"></td>
+                                    </tr>
+                                    <tr>
                                         <td class="text-right">Мазок на онкоцитологию <span>&nbsp;</span></td>
                                         <td><input ng-model="checkup.onco_smear" class="checkbox" type="checkbox"></td>
                                     </tr>
@@ -727,10 +710,27 @@
                     </div>
                 </div>
             </div>
-            <div class="text-right">
-                <a class="pseudo-btn" ng-href="{{ url_for('.html_inspection') }}?event_id=[[ chart.id ]]">Перейти на форму осмотров пациентки</a>
-                <button tooltip="[[CheckupFirstEditForm.$invalid ? 'Заполните все обязательные поля': '']]" class="btn btn-success" ng-click="save()">Сохранить</button>
+            <div class="row">
+                <div class="form-group col-md-12">
+                    <div class="pull-right">
+                        <a class="pseudo-btn" ng-href="{{ url_for('.html_inspection') }}?event_id=[[ chart.id ]]">Перейти на форму осмотров пациентки</a>
+                        <a class="btn btn-success"
+                           ng-click="save(rc.sampleWizard.currentStep.formController)"
+                           tooltip="[[rc.sampleWizard.currentStep.formController.$invalid && rc.sampleWizard.currentStep.formController.submit_attempt ? 'Заполните все обязательные поля': '']]"
+                           ng-show="rc.sampleWizard.currentIndex < rc.sampleWizard.navigationLength">Сохранить</a>
+                        <a class="btn btn-primary"
+                           ng-click="save_forward(rc.sampleWizard.currentStep.formController)"
+                           tooltip="[[rc.sampleWizard.currentStep.formController.$invalid && rc.sampleWizard.currentStep.formController.submit_attempt ? 'Заполните все обязательные поля': '']]"
+                           ng-show="rc.sampleWizard.currentIndex < rc.sampleWizard.navigationLength">
+                            Сохранить и продолжить
+                        </a>
+                    </div>
+                </div>
             </div>
+{#            <div class="text-right">#}
+{#                <a class="pseudo-btn" ng-href="{{ url_for('.html_inspection') }}?event_id=[[ chart.id ]]">Перейти на форму осмотров пациентки</a>#}
+{#                <button tooltip="[[CheckupFirstEditForm.$invalid ? 'Заполните все обязательные поля': '']]" class="btn btn-success" ng-click="save()">Сохранить</button>#}
+{#            </div>#}
         </div>
     </div>
 {% endblock %}
