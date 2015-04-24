@@ -1,7 +1,7 @@
 /**
  * Created by mmalkov on 14.07.14.
  */
-var ActionEditorCtrl = function ($scope, $window, $modal, WMAction, PrintingService, PrintingDialog, RefBookService, WMEventCache, $q, MessageBox) {
+var ActionEditorCtrl = function ($scope, $window, $modal, WMAction, PrintingService, PrintingDialog, RefBookService, WMEventCache, $q, MessageBox, NotificationService) {
     var params = aux.getQueryParams(location.search);
     $scope.ps = new PrintingService("action");
     $scope.ps_resolve = function () {
@@ -72,7 +72,20 @@ var ActionEditorCtrl = function ($scope, $window, $modal, WMAction, PrintingServ
                 .then(function (action) {
                     if (was_new) {
                         $window.open(url_for_schedule_html_action + '?action_id=' + action.id, '_self');
+                    } else {
+                        NotificationService.notify(
+                            200,
+                            'Успешно сохранено',
+                            'success',
+                            5000
+                        );
                     }
+                }, function (result) {
+                    NotificationService.notify(
+                        500,
+                        'Ошибка сохранения, свяжитесь с администратором',
+                        'danger'
+                    );
                 });
         }, function (result) {
             var deferred = $q.defer();
@@ -275,7 +288,7 @@ var ActionTemplateController = function ($scope, $modalInstance, $http, FlatTree
     load_tree();
 };
 
-WebMis20.controller('ActionEditorCtrl', ['$scope', '$window', '$modal', 'WMAction', 'PrintingService', 'PrintingDialog', 'RefBookService', 'WMEventCache', '$q', 'MessageBox', ActionEditorCtrl]);
+WebMis20.controller('ActionEditorCtrl', ['$scope', '$window', '$modal', 'WMAction', 'PrintingService', 'PrintingDialog', 'RefBookService', 'WMEventCache', '$q', 'MessageBox', 'NotificationService', ActionEditorCtrl]);
 
 WebMis20.factory('WMAction', ['$http', function ($http) {
     // FIXME: На данный момент это ломает функциональность действий, но пока пофиг.

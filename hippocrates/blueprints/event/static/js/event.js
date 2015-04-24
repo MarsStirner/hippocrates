@@ -66,7 +66,7 @@ var EventMainInfoCtrl = function ($scope, $q, RefBookService, EventType, $filter
 
     $scope.filter_rb_request_type = function() {
         return function(elem) {
-            return elem.relevant && (elem.code == 'policlinic' || elem.code == '4');
+            return elem.relevant && (elem.code == 'policlinic' || elem.code == '4' || elem.code == 'diagnosis' || elem.code == 'diagnostic');
         };
     };
     $scope.filter_results = function(event_purpose) {
@@ -276,6 +276,7 @@ var EventStationaryInfoCtrl = function($scope, $filter) {
 };
 var EventPaymentCtrl = function($scope, RefBookService, Settings, $http, $modal, MessageBox) {
     $scope.rbDocumentType = RefBookService.get('rbDocumentType');
+    $scope.Organisation = RefBookService.get('Organisation');
 
     function isNotEmpty(val) { return val !== undefined && val !== null; }
 

@@ -300,8 +300,8 @@ function(WMEventFormState, WMEventServices, ActionTypeTreeModal, $filter, RefBoo
 <th class="nowrap" ng-show="formstate.is_paid()">Цена (руб.)</th>\
 <th>Количество</th>\
 <th class="nowrap" ng-show="formstate.is_paid()">Сумма к оплате (руб.)</th>\
-<th ng-show="formstate.is_paid()">\
-    <div class="checkbox inline-checkbox">\
+<th class="nowrap" ng-show="formstate.is_paid()">\
+    <div class="inline-checkbox">\
         <input type="checkbox" ng-model="all_accounted" ng-change="account_all()"\
             ng-disabled="account_disabled()">Считать\
     </div>\

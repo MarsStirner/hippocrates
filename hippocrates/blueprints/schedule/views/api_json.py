@@ -11,8 +11,8 @@ from nemesis.systemwide import db, cache
 from nemesis.lib.sphinx_search import SearchPerson
 from nemesis.lib.utils import (jsonify, safe_traverse, parse_id, safe_date, safe_time_as_dt, safe_traverse_attrs, format_date, initialize_name, logger, safe_bool)
 from nemesis.lib.utils import public_endpoint
-from blueprints.schedule.app import module
-from blueprints.schedule.lib.data import delete_schedules
+from ..app import module
+from ..lib.data import delete_schedules
 from nemesis.models.exists import (rbSpeciality, rbReasonOfAbsence, Person, vrbPersonWithSpeciality)
 from nemesis.models.schedule import (Schedule, ScheduleTicket, ScheduleClientTicket, rbAppointmentType,
     rbAttendanceType, QuotingByTime)
