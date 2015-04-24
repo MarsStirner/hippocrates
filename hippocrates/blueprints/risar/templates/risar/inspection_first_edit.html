@@ -416,7 +416,7 @@
                                         <td><div class="row"><div class="col-md-2"><input ng-model="checkup.fundal_height" class="form-control"></div></div></td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Состояние матки <span>&nbsp;</span></th>
+                                        <th class="text-right">Состояние матки <span class="text-danger">*</span></th>
                                         <td><div class="row" ng-class="{'has-error': thirdForm.metra_state.$invalid && thirdForm.submit_attempt}">
                                             <div class="col-md-4">
                                             <rb-select name="metra_state" ng-model="checkup.metra_state" ref-book="rbRisarMetra_State" ng-required="true"></rb-select>

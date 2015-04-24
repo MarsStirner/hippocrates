@@ -183,12 +183,22 @@
                                         <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.edema" /></div></div></td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Кожные покровы <span>&nbsp;</span></th>
-                                        <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.skin" /></div></div></td>
+                                        <th class="text-right">Кожа</th>
+                                        <td><div>
+                                            <div name="skin" refbook-checkbox ref-book="rbRisarSkin" ng-model="checkup.skin">
+                                                [[ item.name ]]
+                                            </div>
+                                            </div>
+                                        </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Лимфоузлы <span>&nbsp;</span></th>
-                                        <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.lymph_nodes" /></div></div></td>
+                                        <th class="text-right">Лимфоузлы</th>
+                                        <td><div>
+                                            <div name="lymph" refbook-checkbox ng-model="checkup.lymph_nodes" ref-book="rbRisarLymph">
+                                                [[ item.name ]]
+                                            </div>
+                                            </div>
+                                        </td>
                                     </tr>
                                     <tr>
                                         <th class="text-right">Молочные железы <span>&nbsp;</span></th>
@@ -233,7 +243,7 @@
                                         <th class="text-right">Состояние матки</th>
                                         <td><div class="row" ng-class="{'has-error': thirdForm.metra_state.$invalid && thirdFormm.submit_attempt}">
                                             <div class="col-md-4">
-                                            <rb-select name="metra_state" ng-model="checkup.metra_state" ref-book="rbRisarMetra_State" ng-required="true"></rb-select>
+                                            <rb-select name="metra_state" ng-model="checkup.metra_state" ref-book="rbRisarMetra_State"></rb-select>
                                         </div></div></td>
                                     </tr>
                                     <tr>
