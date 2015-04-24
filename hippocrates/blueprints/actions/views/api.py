@@ -57,22 +57,28 @@ def api_action_get(action_id):
     return v.make_action(action)
 
 
-@module.route('/api/action/<int:action_id>/previous', methods=['GET'])
+@module.route('/api/action/query/previous', methods=['GET'])
 @api_method
-def api_find_previous(action_id):
-    action = Action.query.get(action_id)
-    if not action:
-        raise ApiException(404, u'Действие с id="%s" не найдено' % action_id)
+def api_find_previous():
+    event_id = request.args.get('event_id')
+    at_id = request.args.get('at_id')
+    beg_date = request.args.get('beg_date')
+
+    if not (event_id and at_id):
+        raise ApiException(400, u'Должны быть указаны и event_id и at_id')
+
     prev = Action.query.filter(
-        Action.event_id == action.event_id,
+        Action.event_id == event_id,
         Action.deleted == 0,
-        Action.begDate < action.begDate,
-        Action.actionType_id == action.actionType_id,
-    ).order_by(Action.id.desc()).first()
-    if prev:
-        v = ActionVisualizer()
-        return v.make_action(prev)
-    raise ApiException(404, u'В обращении %s других действий типа "%s" не найдено' % (action.event_id, action.actionType.name))
+        Action.actionType_id == at_id,
+    )
+    if beg_date:
+        prev = prev.filter(Action.begDate < beg_date)
+    prev = prev.order_by(Action.id.desc()).first()
+    if not prev:
+        raise ApiException(404, u'В обращении %s других действий типа "%s" не найдено' % (event_id, at_id))
+    return ActionVisualizer().make_action(prev)
+
 
 
 @module.route('/api/action/', methods=['DELETE'])

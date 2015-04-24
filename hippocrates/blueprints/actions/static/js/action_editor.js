@@ -364,8 +364,14 @@ WebMis20.factory('WMAction', ['$http', function ($http) {
     };
     Action.previous = function (action) {
         var dest = new Action();
-        if (action instanceof Action) { action = action.id }
-        return $http.get('/actions/api/action/{0}/previous'.format(action)).then(function (result) {
+        return $http.get(
+            '/actions/api/action/query/previous', {
+                params: {
+                    event_id: action.event_id || action.event.id,
+                    at_id: action.action_type_id || action.action_type.id,
+                    beg_date: action.beg_date || undefined
+                }
+            }).then(function (result) {
             return dest.merge(result.data.result);
         })
     };
