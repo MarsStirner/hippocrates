@@ -372,7 +372,7 @@ WebMis20.factory('WMAction', ['$http', function ($http) {
                     beg_date: action.beg_date || undefined
                 }
             }).then(function (result) {
-            return dest.merge(result.data.result);
+            return dest.merge_template(result.data.result);
         })
     };
     Action.prototype.merge = function (src_action) {
@@ -384,7 +384,6 @@ WebMis20.factory('WMAction', ['$http', function ($http) {
     };
     Action.prototype.merge_template = function (src_action) {
         merge_template_fields(this, src_action);
-        merge_meta(this, src_action);
         merge_properties(this, src_action);
         process_properties(this, src_action);
         return this;
