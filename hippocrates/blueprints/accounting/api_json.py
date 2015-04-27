@@ -141,11 +141,13 @@ def api_get_event_payments():
     per_page = int(flt.get('per_page', 20))
     page = int(flt.get('page', 1))
     paginate = base_query.paginate(page, per_page, False)
+    all_payment_id_list = base_query.with_entities(EventPayment.id).all()
     return jsonify({
         'pages': paginate.pages,
         'metrics': metrics,
         'items': [
             context.make_search_payments_list(event)
             for event in paginate.items
-        ]
+        ],
+        'all_payment_id_list': all_payment_id_list
     })
