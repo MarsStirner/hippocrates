@@ -494,7 +494,7 @@ def api_get_events():
     if 'org_struct_id' in flt:
         stat_loc_query = _get_stationary_location_query(Event).with_entities(
             Event.id.label('event_id'), OrgStructure.id.label('org_struct_id')
-        ).limit(1).subquery('StationaryOs')
+        ).subquery('StationaryOs')
         base_query = base_query.join(EventType).join(rbRequestType).outerjoin(
             stat_loc_query, Event.id == stat_loc_query.c.event_id
         ).filter(
