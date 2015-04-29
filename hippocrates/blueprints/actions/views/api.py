@@ -67,8 +67,10 @@ def api_find_previous():
     if not (event_id and at_id):
         raise ApiException(400, u'Должны быть указаны и event_id и at_id')
 
-    prev = Action.query.filter(
-        Action.event_id == event_id,
+    event = Event.query.get(event_id)
+
+    prev = Action.query.join(Event).filter(
+        Event.client_id == event.client_id,
         Action.deleted == 0,
         Action.actionType_id == at_id,
     )
