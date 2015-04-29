@@ -1,3 +1,4 @@
+{%- if current_user.id and current_user.current_role -%}
 <div class="navbar navbar-inverse navbar-static-top">
     <div class="container-fluid">
         {% if current_user.current_role %}
@@ -94,3 +95,4 @@
         {% endif %}
     </div>
 </div>
+{%- endif -%}
