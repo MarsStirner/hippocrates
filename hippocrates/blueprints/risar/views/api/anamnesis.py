@@ -261,8 +261,8 @@ def api_0_chart_mother(event_id):
                     n = BloodHistory(value['id'], datetime.date.today(), current_user.id, event.client)
                     db.session.add(n)
             elif (code == 'finished_diseases' or code == 'current_diseases') and value:
-                property = action.propsByCode[code]
-                property.value = ActionProperty_Diagnosis.format_value(property, value)
+                prop = action.propsByCode[code]
+                prop.value = value
         db.session.add(action)
         db.session.commit()
         reevaluate_card_attrs(event)
@@ -286,8 +286,8 @@ def api_0_chart_father(event_id):
             if code not in ('id', 'finished_diseases', 'current_diseases') and code in action.propsByCode:
                 action.propsByCode[code].value = value
             elif (code == 'finished_diseases' or code == 'current_diseases') and value:
-                property = action.propsByCode[code]
-                property.value = ActionProperty_Diagnosis.format_value(property, value)
+                prop = action.propsByCode[code]
+                prop.value = value
         db.session.commit()
         reevaluate_card_attrs(event)
         db.session.commit()

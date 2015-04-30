@@ -3,11 +3,12 @@
 from flask import render_template, abort, request
 from jinja2 import TemplateNotFound
 
-from nemesis.lib.utils import public_endpoint, roles_require
+from nemesis.lib.utils import roles_require
 from nemesis.models.client import Client
 from nemesis.lib.utils import breadcrumb
 from blueprints.schedule.app import module
 from nemesis.lib.user import UserProfileManager
+
 
 # noinspection PyUnresolvedReferences
 from . import api_html, api_json
@@ -60,9 +61,3 @@ def doctor_schedule_day():
 def html_day_free():
     return render_template('schedule/day_free.html')
 
-
-@module.route('/action.html')
-def html_action():
-    return render_template(
-        'schedule/action.html'
-    )

@@ -22,7 +22,7 @@ from nemesis.lib.jsonify import EventVisualizer
 from blueprints.event.app import module
 from blueprints.event.lib.utils import (EventSaveException, create_services, save_event, save_executives)
 from nemesis.lib.sphinx_search import SearchEventService, SearchEvent
-from nemesis.lib.data import get_planned_end_datetime, int_get_atl_dict_all, delete_action
+from nemesis.lib.data import get_planned_end_datetime, int_get_atl_dict_all
 from nemesis.lib.agesex import recordAcceptableEx
 from nemesis.lib.const import STATIONARY_EVENT_CODES
 from nemesis.lib.user import UserUtils
@@ -321,7 +321,7 @@ def api_prev_event_payment_info_get():
             event_set_date = datetime.datetime.now()
     except (KeyError, ValueError, TypeError):
         return abort(400)
-    request_type_codes = ['policlinic', '4']
+    request_type_codes = ['policlinic', '4', 'diagnosis', 'diagnostic']
 
     event_list = Event.query.join(EventType, rbRequestType).filter(
         rbRequestType.code.in_(request_type_codes),
@@ -406,20 +406,6 @@ def api_service_delete_service():
         db.session.commit()
 
     return jsonify(None)
-
-
-@module.route('api/delete_action.json', methods=['POST'])
-def api_delete_action():
-    action_id = int(request.json['action_id'])
-    if not action_id:
-        return jsonify(None, 404, "Argument 'action_id' cannot be found.")
-    action = Action.query.get(action_id)
-    ok, code, msg = delete_action(action)
-    if ok:
-        db.session.commit()
-        return jsonify(None)
-    else:
-        return jsonify(None, code, msg)
 
 
 @module.route('api/delete_event.json', methods=['POST'])

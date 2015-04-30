@@ -1,0 +1,50 @@
+{% extends "actions/base.html" %}
+{% import "_macros.html" as macros %}
+{% block main %}
+<div ng-controller="ActionEditorCtrl" class="ng-cloak">
+<div alert-notify></div>
+<legend wm-page-header>
+    <div class="pull-right text-right col-md-1">
+        <ui-print-button ps="ps" resolve="ps_resolve()" before-print="save_action(true)"></ui-print-button>
+        <button class="btn btn-success" title="Сохранить" ng-click="save_action()" ng-if="!action.ro">
+            <span class="glyphicon glyphicon-ok"></span>
+        </button>
+    </div>
+    <h3>[[ action.action_type.name ]] -
+        <a href="{{ url_for('patients.patient') }}?client_id=[[action.client.id]]">[[ action.client.full_name ]]</a>
+    </h3>
+</legend>
+<div>
+    <div class="row">
+    <div class="col-md-12">
+        {% include "actions/_action_head_editable.html" %}
+        {% include "actions/_action_head_viewable.html" %}
+    <hr/>
+    <wm-action-layout action="action"></wm-action-layout>
+    </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="pull-left">
+            <button class="btn btn-default" ng-click="template_save()">Сохранить шаблон</button>
+            <button class="btn btn-default" ng-click="template_load()" ng-if="!action.ro">Загрузить шаблон</button>
+            <button class="btn btn-default" ng-click="template_prev()" ng-if="!action.ro">Загрузить из предыдущего</button>
+        </div>
+        <div class="pull-right">
+            <button class="btn btn-lg btn-success" ng-click="save_action()" ng-if="!action.ro">Сохранить</button>
+            <button class="btn btn-lg btn-danger" ng-click="cancel()">Закрыть</button>
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}
+
+{% block modules_js %}
+    {{ super() }}
+    <script src="{{ url_for('.static', filename='js/action_editor.js', v=app_version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/action-layout.js', v=app_version) }}"></script>
+    <script src="{{ url_for('static', filename='js/services/event/event-services.js', v=nemesis_version) }}"></script>
+    <script type="text/ng-template" id="_action_template_load_model.html">{% include "actions/_action_template_load_modal.html" %}</script>
+    <script type="text/ng-template" id="_action_template_save_model.html">{% include "actions/_action_template_save_modal.html" %}</script>
+{% endblock %}

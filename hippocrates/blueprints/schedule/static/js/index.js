@@ -1,9 +1,10 @@
 /**
  * Created by mmalkov on 11.07.14.
  */
-var ScheduleCtrl = function ($scope, $http, RefBook, PersonTreeUpdater, WMAppointmentDialog, $window) {
+var ScheduleCtrl = function ($scope, $http, $window, $location, RefBook, PersonTreeUpdater, WMAppointmentDialog,
+                             PrintingService, PrintingDialog, MessageBox) {
     $scope.aux = aux;
-    var params = aux.getQueryParams(document.location.search);
+    var params = aux.getQueryParams();
     $scope.person_id = params.person_id;
     $scope.person_query = '';
     var curDate = new Date();
@@ -11,11 +12,50 @@ var ScheduleCtrl = function ($scope, $http, RefBook, PersonTreeUpdater, WMAppoin
     var curMonth = curDate.getMonth();
     $scope.years = [curYear - 1, curYear, curYear + 1];
     $scope.year = curYear;
-
     $scope.month = curMonth;
-
     $scope.reception_types = new RefBook('rbReceptionType');
     $scope.reception_type = 'amb';
+    $scope.ps = new PrintingService('schedule');
+
+    $scope.get_ps_resolve = function () {
+        return {
+            person_id: $scope.person_id
+        }
+    };
+    $scope.openPrintDialog = function (period) {
+        var start_date = null,
+            end_date = null;
+        if (period === 'today') {
+            start_date = new Date();
+            end_date = moment().add(1, 'd').toDate();
+        } else if (period === 'week') {
+            start_date = $scope.pages[$scope.page].toDate();
+            end_date = moment($scope.pages[$scope.page]).add(7, 'd').toDate();
+        } else if (period === 'month') {
+            start_date = new Date($scope.year, $scope.month, 1);
+            end_date = moment(start_date).add(1, 'M').toDate();
+        }
+        function processPrint() {
+            PrintingDialog.open($scope.ps, $scope.get_ps_resolve(), {
+                start_date: start_date,
+                end_date: end_date
+            }, true);
+        }
+
+        if (!$scope.ps.is_loaded()) {
+            $scope.ps.set_context('scheduleQueue')
+                .then(function () {
+                    processPrint();
+                }, function () {
+                    MessageBox.error(
+                        'Печать недоступна',
+                        'Сервис печати недоступен. Свяжитесь с администратором.'
+                    );
+                });
+        } else {
+            processPrint();
+        }
+    };
 
     $scope.reloadSchedule = function () {
         var forced = arguments[0] === true;
@@ -33,17 +73,19 @@ var ScheduleCtrl = function ($scope, $http, RefBook, PersonTreeUpdater, WMAppoin
                 $scope.person = d.person;
                 $scope.grouped = d.grouped;
                 if (forced) {
-                    history.pushState({
-                        person_id: $scope.person_id,
-                        pages: $scope.pages,
-                        person: $scope.person,
-                        grouped: $scope.grouped,
-                        year: $scope.year,
-                        month: $scope.month,
-                        page: $scope.page
-                    }, null, window.location.origin + window.location.pathname + '?person_id=' + d.person.id);
+                    var path = $location.path() + '?person_id=' + d.person.id;
+                    $location.url(path).replace();
+                    //history.pushState({
+                    //    person_id: $scope.person_id,
+                    //    pages: $scope.pages,
+                    //    person: $scope.person,
+                    //    grouped: $scope.grouped,
+                    //    year: $scope.year,
+                    //    month: $scope.month,
+                    //    page: $scope.page
+                    //}, null, window.location.origin + window.location.pathname + '?person_id=' + d.person.id);
                 }
-            })
+            });
         }
     };
 
@@ -121,27 +163,28 @@ var ScheduleCtrl = function ($scope, $http, RefBook, PersonTreeUpdater, WMAppoin
         });
     };
 
-    window.onpopstate = function (event) {
-        // Это всё происходит вне контекста скоупа, и потому не запускается вотчер на person_id, иначе нам пришлось
-        // бы делать хак
-        if (event.state) {
-            $scope.person_id = event.state.person_id;
-            $scope.pages = event.state.pages;
-            $scope.person = event.state.person;
-            $scope.grouped = event.state.grouped;
-            $scope.year = event.state.year;
-            $scope.month = event.state.month;
-            $scope.page = event.state.page;
-        } else {
-            $scope.person_id = undefined;
-            $scope.pages = [];
-            $scope.person = undefined;
-            $scope.grouped = undefined;
-            $scope.year = curYear;
-            $scope.month = curDate.getMonth();
-            $scope.page = -1;
-        }
-        $scope.$digest();
-    }
+    //window.onpopstate = function (event) {
+    //    // Это всё происходит вне контекста скоупа, и потому не запускается вотчер на person_id, иначе нам пришлось
+    //    // бы делать хак
+    //    if (event.state) {
+    //        $scope.person_id = event.state.person_id;
+    //        $scope.pages = event.state.pages;
+    //        $scope.person = event.state.person;
+    //        $scope.grouped = event.state.grouped;
+    //        $scope.year = event.state.year;
+    //        $scope.month = event.state.month;
+    //        $scope.page = event.state.page;
+    //    } else {
+    //        $scope.person_id = undefined;
+    //        $scope.pages = [];
+    //        $scope.person = undefined;
+    //        $scope.grouped = undefined;
+    //        $scope.year = curYear;
+    //        $scope.month = curDate.getMonth();
+    //        $scope.page = -1;
+    //    }
+    //    $scope.$digest();
+    //}
 };
-WebMis20.controller('ScheduleCtrl', ['$scope', '$http', 'RefBook', 'PersonTreeUpdater', 'WMAppointmentDialog', '$window', ScheduleCtrl]);
+WebMis20.controller('ScheduleCtrl', ['$scope', '$http', '$window', '$location', 'RefBook', 'PersonTreeUpdater',
+    'WMAppointmentDialog', 'PrintingService', 'PrintingDialog', 'MessageBox', ScheduleCtrl]);

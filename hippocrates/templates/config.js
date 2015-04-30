@@ -71,7 +71,10 @@ angular.module('hitsl.ui')
             cas_check_token: '{{ config.COLDSTAR_URL + "cas/api/check/" }}',
             cas_prolong_token: '{{ config.COLDSTAR_URL + "cas/api/prolong/" }}',
             scan_get_device_list: '{{ config.COLDSTAR_URL + "scan/list/" }}',
-            scan_process_scan: '{{ config.COLDSTAR_URL + "scan/scan" }}'
+            scan_process_scan: '{{ config.COLDSTAR_URL + "scan/scan" }}',
+            ezekiel_acquire_lock: '{{ config.COLDSTAR_URL + "ezekiel/acquire/{0}" }}',
+            ezekiel_prolong_lock: '{{ config.COLDSTAR_URL + "ezekiel/prolong/{0}" }}',
+            ezekiel_release_lock: '{{ config.COLDSTAR_URL + "ezekiel/release/{0}" }}'
         }
     },
     settings: {
