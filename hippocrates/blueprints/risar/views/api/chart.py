@@ -2,6 +2,7 @@
 from datetime import datetime
 
 from flask import request
+from nemesis.lib.vesta import Vesta
 from sqlalchemy import func
 
 from nemesis.lib.data import create_action
@@ -16,7 +17,8 @@ from nemesis.systemwide import db
 from nemesis.lib.diagnosis import create_or_update_diagnosis
 from blueprints.risar.app import module
 from blueprints.risar.lib.card_attrs import default_AT_Heuristic, get_all_diagnoses
-from blueprints.risar.lib.represent import represent_event, represent_chart_for_routing, represent_header
+from blueprints.risar.lib.represent import represent_event, represent_chart_for_routing, represent_header, \
+    represent_org_for_routing, group_orgs_for_routing
 from blueprints.risar.risar_config import attach_codes
 
 
@@ -146,7 +148,16 @@ def api_0_mini_chart(event_id=None):
 @module.route('/api/0/event_routing', methods=['POST'])
 @api_method
 def api_0_event_routing():
-    diagnoses = request.get_json().get('diagnoses', None)
+    j = request.get_json()
+    diagnoses = j.get('diagnoses', None)
+    client_id = j.get('client_id')
+    if client_id:
+        client = Client.query.get(client_id)
+        if not client:
+            raise ApiException(404, u'Не найден пациент с id = {0}'.format(client_id))
+    else:
+        client = None
+
     query = Organisation.query.filter(Organisation.isHospital == 1)
     if diagnoses:
         mkb_ids = [d['id'] for d in diagnoses]
@@ -160,11 +171,9 @@ def api_0_event_routing():
             func.Count(MKB.id.distinct()) == len(mkb_ids)
         ).subquery('suitableOrgs')
         query = query.join(suit_orgs_q, Organisation.id == suit_orgs_q.c.id)
-    return {
-        'suitable_orgs': [
-            org for org in query
-        ]
-    }
+    suitable_orgs = query.all()
+    orgs = group_orgs_for_routing(suitable_orgs, client)
+    return orgs
 
 
 @module.route('/api/0/chart_close/')

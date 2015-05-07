@@ -1,10 +1,15 @@
 # -*- coding: utf-8 -*-
+
 import datetime
 import itertools
 
+from collections import defaultdict
+
+from nemesis.app import app
 from nemesis.systemwide import db
 from nemesis.lib.utils import safe_traverse_attrs, safe_traverse
 from nemesis.lib.jsonify import EventVisualizer
+from nemesis.lib.vesta import Vesta
 from nemesis.models.actions import Action, ActionType
 from nemesis.models.client import BloodHistory
 from nemesis.models.enums import Gender, AllergyPower, IntoleranceType, PrenatalRiskRate
@@ -116,15 +121,89 @@ def represent_chart_for_routing(event):
     extra_attach = event.client.attachments.join(rbAttachType).filter(rbAttachType.code == attach_codes['extra_lpu']).first()
     return {
         'id': event.id,
-        'client_id': event.client_id,
+        'client': {
+            'id': event.client_id,
+            'live_address': event.client.loc_address
+        },
         'diagnoses': mkbs,
-        'plan_lpu': plan_attach.org if plan_attach else {},
-        'extra_lpu': extra_attach.org if extra_attach else {},
+        'plan_lpu': represent_org_for_routing(plan_attach.org) if plan_attach and plan_attach.org else {},
+        'extra_lpu': represent_org_for_routing(extra_attach.org) if extra_attach and extra_attach.org else {},
+    }
+
+
+def represent_org_for_routing(org):
+    locality = org.kladr_locality
+    if locality:
+        region = Vesta.get_kladr_locality(locality.get_region_code())
+        district = Vesta.get_kladr_locality(locality.get_district_code())
+    else:
+        region = district = None
+    return {
+        'id': org.id,
+        'full_name': org.fullName,
+        'short_name': org.shortName,
+        'title': org.title,
+        'address': org.Address,
+        'phone': org.phone,
+        'kladr_locality': locality,
+        'region': region,
+        'district': district
+    }
+
+
+def group_orgs_for_routing(orgs, client):
+    """Разбить список ЛПУ на группы 1) в районе проживания, 2) в регионе
+    проживания пациента.
+
+    Район проживания определяется I и II уровнями кода кладр (5 цифр),
+    регион - I уровнем (2 цифры). В любом случае ключевую роль играет
+    глобальная настройка регионов, которые обсуживает система РИСАР, так,
+    что если у пациента нет адреса или адрес не относится к выбранным регионам,
+    то ЛПУ будут отбираться в соответствии с регионами системы и попадать
+    во 2-ую группу.
+
+    :param orgs: [nemesis.lib.models.exists.Organisation, ]
+    :param client: nemesis.lib.models.client.Client
+    :return: dict with orgs grouped by district and region
+    """
+    risar_regions = app.config.get('RISAR_REGIONS', [])
+    district_orgs = defaultdict(dict)
+    region_orgs = defaultdict(dict)
+    if client.loc_address and client.loc_address.is_from_kladr(False):
+        client_la_kladr_code = client.loc_address.KLADRCode
+        if any(code.startswith(client_la_kladr_code[:2]) for code in risar_regions):
+            c_kladr_code = client_la_kladr_code
+        else:
+            c_kladr_code = None
+    else:
+        c_kladr_code = None
+    c_district_codes = set([c_kladr_code[:5]]) if c_kladr_code else set()
+    c_region_codes = set([code[:2] for code in risar_regions])
+    # special cases
+    # 1) Ленинградская Область 47 000 000 000 (00) и Санкт-Петербург Город 78 000 000 000 (00)
+    # 2) Московская Область 50 000 000 000 (00) и Москва Город 77 000 000 000 (00)
+    # 3) Крым Республика 91 000 000 000 (00) и Севастополь Город 92 000 000 000 (00)
+    for group in [('47', '78'), ('50', '77'), ('91', '92')]:
+        if any(code in c_region_codes for code in group):
+            c_region_codes.update(group)
+    for org in orgs:
+        if org.kladr_locality:
+            locality_code = org.kladr_locality.code
+            if any(locality_code.startswith(code) for code in c_district_codes):
+                if 'kladr_locality' not in district_orgs[locality_code]:
+                    district_orgs[locality_code]['kladr_locality'] = org.kladr_locality
+                district_orgs[locality_code].setdefault('orgs', []).append(represent_org_for_routing(org))
+            elif any(locality_code.startswith(code) for code in c_region_codes):
+                if 'kladr_locality' not in region_orgs[locality_code]:
+                    region_orgs[locality_code]['kladr_locality'] = org.kladr_locality
+                region_orgs[locality_code].setdefault('orgs', []).append(represent_org_for_routing(org))
+    return {
+        'district_orgs': district_orgs,
+        'region_orgs': region_orgs
     }
 
 
 def get_lpu_attached(attachments):
-
     return {
         'plan_lpu': attachments.join(rbAttachType).filter(rbAttachType.code == 10).first(),
         'extra_lpu': attachments.join(rbAttachType).filter(rbAttachType.code == 11).first()

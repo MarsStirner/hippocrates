@@ -95,9 +95,10 @@ WebMis20
         }
     };
     this.event_routing = {
-        get_destinations: function (diagnoses) {
+        get_destinations: function (diagnoses, client_id) {
             return wrapper('POST', Config.url.api_event_routing, {}, {
-                diagnoses: diagnoses
+                diagnoses: diagnoses,
+                client_id: client_id
             })
         },
         get_chart: function(event_id) {
