@@ -10,19 +10,6 @@
             <li><a ng-href="{{ url_for('.html_chart') }}?event_id=[[ chart.id ]]">Карта пациентки</a></li>
             <li>Выбор ЛПУ для {% if 'emergency' in request.args %}экстренного{% else %}планового{% endif %} случая</li>
         </ul>
-{#        <div class="row marginal">#}
-{#            <div class="col-md-10">#}
-{#                <ui-select ng-model="chart.lpu" theme="select2" ref-book="Organisation">#}
-{#                    <ui-select-match>[[ $select.selected.short_name ]]</ui-select-match>#}
-{#                    <ui-select-choices repeat="org in $refBook.objects | filter: {is_hospital: true, short_name: $select.search} | limitTo:50">#}
-{#                        <div ng-bind-html="org.short_name | highlight: $select.search"></div>#}
-{#                    </ui-select-choices>#}
-{#                </ui-select>#}
-{#            </div>#}
-{#            <div class="col-md-2">#}
-{#                <button ng-click="save()" class="btn btn-success btn-block">Сохранить</button>#}
-{#            </div>#}
-{#        </div>#}
         <div class="row small-marginal">
             <div class="col-lg-10 col-md-10">
                 <h2>
@@ -43,6 +30,10 @@
                 <div class="panel panel-default">
                     <div class="panel-heading">Диагнозы</div>
                     <div class="panel-body">
+                        <button type="button" class="btn btn-default" ng-if="chart.diagnoses.length"
+                            ng-click="toggleDiagnosesSelection()" title="[[getToggleDiagnosesBtnText()]]">
+                            [[getToggleDiagnosesBtnText()]]
+                        </button>
                         <div fs-checkbox items="chart.diagnoses" ng-model="selected_diagnoses">
                             <span>[[ item.code ]] - [[ item.name ]]</span>
                         </div>
@@ -52,7 +43,7 @@
             <div class="col-md-6">
                 <form name="selectLpuForm" form-safe-close="getUnsavedFormText()">
                     <div class="panel panel-default">
-                        <div class="panel-heading">ЛПУ
+                        <div class="panel-heading">ЛПУ для госпитализации
                             <a class="pull-right" ng-href="{{ url_for('.html_routing', event_id=request.args.get('event_id'), emergency=None if request.args.get('emergency') else 1)}}"
                                 title="[[getOtherRoutingText()]]" ng-bind="getOtherRoutingText()"></a>
                         </div>
@@ -61,20 +52,45 @@
                                 <div class="col-md-9">
                                     <div class="small-marginal">
                                         <p style="margin-top: 5px">Выбрано: <span style="font-weight: bold">[[ chart.lpu.short_name ]]</span>
-                                            <span ng-if="!checkCurrentLpuMatchesDiagnoses()" class="text-muted"><br>
+                                            <span ng-if="lpuSelected() && !currentLpuMatchesDiagnoses()" class="text-muted"><br>
                                                 Выбранное ЛПУ не поддерживает все диагнозы пациентки
                                             </span>
                                         </p>
                                     </div>
-                                    <div fs-radio="" items="orgs" ng-model="chart.lpu" ng-if="orgs.length > 0">
-                                        [[ item.short_name ]]
+                                    <div class="small-marginal">
+                                        <p style="margin-top: 5px">Адрес проживания пациентки:
+                                            <span style="font-weight: bold" ng-bind="getPatientLiveAddressText()"></span>
+                                        </p>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <button type="button" class="btn btn-success pull-right" title="Сохранить" ng-click="save()">Сохранить</button>
                                 </div>
                             </div>
-                            <div ng-if="orgs.length === 0">
+                            <div class="row">
+                            <div class="col-md-12">
+                                <div id="district_orgs" ng-if="districtLpuAvailable()">
+                                    <hr>
+                                    <div ng-repeat="(_, org_info) in district_orgs">
+                                        <h3>В районе проживания пациентки ([[ org_info.kladr_locality.name ]]) найдено:</h3>
+                                        <div fs-radio="" items="org_info.orgs" ng-model="chart.lpu" class="lmargin20">
+                                            [[ item.short_name ]]<br><span class="text-muted lmargin20" ng-bind="item.address"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="region_orgs" ng-if="regionLpuAvailable()">
+                                    <hr>
+                                    <h3>В обслуживаемом регионе найдено:</h3>
+                                    <div ng-repeat="(_, org_info) in region_orgs">
+                                        <h4>[[ org_info.kladr_locality.name ]]</h4>
+                                        <div fs-radio="" items="org_info.orgs" ng-model="chart.lpu" class="lmargin20">
+                                            [[ item.short_name ]]<br><span class="text-muted lmargin20" ng-bind="item.address"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            </div>
+                            <div ng-if="noLpuAvailable()">
                                 <hr>
                                 <h3 class="text-center">Подходящие ЛПУ не найдены</h3>
                                 <span class="text-muted">Уберите часть выбранных диагнозов для вывода учреждений более широкого профиля</span>
