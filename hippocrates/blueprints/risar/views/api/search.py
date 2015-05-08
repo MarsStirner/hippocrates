@@ -65,8 +65,7 @@ def search_events(**kwargs):
     per_page = kwargs.get('per_page', 10)
     page = kwargs.get('page', 1)
     from_ = (page - 1) * per_page
-    to_ = page * per_page
-    result = query.limit(from_, to_).ask()
+    result = query.limit(from_, per_page).ask()
     return result
 
 
