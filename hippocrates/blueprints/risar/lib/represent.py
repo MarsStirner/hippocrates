@@ -7,7 +7,7 @@ from collections import defaultdict
 
 from nemesis.app import app
 from nemesis.systemwide import db
-from nemesis.lib.utils import safe_traverse_attrs, safe_traverse
+from nemesis.lib.utils import safe_traverse_attrs, safe_traverse, safe_dict
 from nemesis.lib.jsonify import EventVisualizer
 from nemesis.lib.vesta import Vesta
 from nemesis.models.actions import Action, ActionType
@@ -16,7 +16,8 @@ from nemesis.models.enums import Gender, AllergyPower, IntoleranceType, Prenatal
 from nemesis.models.event import Diagnosis, Diagnostic
 from nemesis.models.exists import rbAttachType, MKB
 from blueprints.risar.lib.card_attrs import get_card_attrs_action, get_all_diagnoses, check_disease
-from blueprints.risar.lib.utils import get_action, action_apt_values, get_action_type_id
+from blueprints.risar.lib.utils import get_action, action_apt_values, get_action_type_id, risk_rates_diagID, \
+    risk_rates_blockID
 from ..risar_config import pregnancy_apt_codes, risar_anamnesis_pregnancy, transfusion_apt_codes, \
     risar_anamnesis_transfusion, mother_codes, father_codes, risar_father_anamnesis, risar_mother_anamnesis, \
     checkup_flat_codes, risar_epicrisis, risar_newborn_inspection, attach_codes
@@ -109,14 +110,6 @@ def represent_event(event):
 
 
 def represent_chart_for_routing(event):
-    mkbs = db.session.query(MKB).select_from(
-        Diagnostic
-    ).join(Diagnostic.diagnoses).join(Diagnosis.mkb).filter(
-        Diagnostic.event_id == event.id,
-        Diagnostic.endDate == None,
-        Diagnostic.deleted == 0
-    ).all()
-    mkbs = sorted(list(set(mkbs)), key=lambda x: x.DiagID)
     plan_attach = event.client.attachments.join(rbAttachType).filter(rbAttachType.code == attach_codes['plan_lpu']).first()
     extra_attach = event.client.attachments.join(rbAttachType).filter(rbAttachType.code == attach_codes['extra_lpu']).first()
     return {
@@ -125,10 +118,41 @@ def represent_chart_for_routing(event):
             'id': event.client_id,
             'live_address': event.client.loc_address
         },
-        'diagnoses': mkbs,
+        'diagnoses': represent_mkbs_for_routing(event),
         'plan_lpu': represent_org_for_routing(plan_attach.org) if plan_attach and plan_attach.org else {},
         'extra_lpu': represent_org_for_routing(extra_attach.org) if extra_attach and extra_attach.org else {},
     }
+
+
+def represent_mkbs_for_routing(event):
+    mkbs = db.session.query(MKB).select_from(
+        Diagnostic
+    ).join(Diagnostic.diagnoses).join(Diagnosis.mkb).filter(
+        Diagnostic.event_id == event.id,
+        Diagnostic.endDate == None,
+        Diagnostic.deleted == 0
+    ).all()
+    mkbs = list(set(mkbs))
+
+    def set_risk(mkb):
+        if mkb.DiagID in risk_rates_diagID['high'] or mkb.BlockID in risk_rates_blockID['high']:
+            rr = PrenatalRiskRate(PrenatalRiskRate.high[0])
+        elif mkb.DiagID in risk_rates_diagID['middle'] or mkb.BlockID in risk_rates_blockID['middle']:
+            rr = PrenatalRiskRate(PrenatalRiskRate.medium[0])
+        elif mkb.DiagID in risk_rates_diagID['low'] or mkb.BlockID in risk_rates_blockID['low']:
+            rr = PrenatalRiskRate(PrenatalRiskRate.low[0])
+        else:
+            rr = None
+        mkb.risk_rate = rr
+        return mkb
+    mkbs = map(set_risk, mkbs)
+    mkbs = sorted(mkbs, key=lambda x: x.DiagID)
+    return [{
+        'id': mkb.id,
+        'code': mkb.DiagID,
+        'name': mkb.DiagName,
+        'risk_rate': mkb.risk_rate
+    } for mkb in mkbs]
 
 
 def represent_org_for_routing(org):
