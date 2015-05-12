@@ -96,11 +96,23 @@ var EventRoutingCtrl = function ($scope, $window, RisarApi) {
             return 'Выбрать все'
         }
     };
+    $scope.getMkbItemClass = function (mkb) {
+        var css = [],
+            rr = safe_traverse(mkb, ['risk_rate', 'code']);
+        if (rr) css.push('text-bold');
+        if (rr === 'high') css.push('text-danger');
+        else if (rr === 'medium') css.push('text-warning');
+        else if (rr === 'low') css.push('text-success');
+        return css;
+    };
     $scope.selected_diagnoses = [];
     $scope.chart = {};
     $scope.district_orgs = {};
     $scope.region_orgs = {};
     $scope._all_orgs_list = [];
+    $scope.risk_rates = [
+        {id: 1}, {id: 2}, {id: 3}
+    ];
 
     reload_chart().then(function () {
         $scope.$watchCollection('selected_diagnoses', reload_orgs);

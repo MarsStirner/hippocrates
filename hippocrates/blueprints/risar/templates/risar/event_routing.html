@@ -30,12 +30,21 @@
                 <div class="panel panel-default">
                     <div class="panel-heading">Диагнозы</div>
                     <div class="panel-body">
-                        <button type="button" class="btn btn-default" ng-if="chart.diagnoses.length"
-                            ng-click="toggleDiagnosesSelection()" title="[[getToggleDiagnosesBtnText()]]">
-                            [[getToggleDiagnosesBtnText()]]
-                        </button>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <button type="button" class="btn btn-default" ng-if="chart.diagnoses.length"
+                                    ng-click="toggleDiagnosesSelection()" title="[[getToggleDiagnosesBtnText()]]">
+                                    [[getToggleDiagnosesBtnText()]]
+                                </button>
+                            </div>
+                            <div class="col-md-8">
+                                <span class="pull-right text-muted">Диагнозы выделенные <b>жирным</b> определяют перинатальный риск,<br>цвет указывает на степень риска
+                                    <span class="rmargin10" style="font-size: larger" ng-repeat="rr in risk_rates"><i risk-rate-icon="rr"></i></span>
+                                </span>
+                            </div>
+                        </div>
                         <div fs-checkbox items="chart.diagnoses" ng-model="selected_diagnoses">
-                            <span>[[ item.code ]] - [[ item.name ]]</span>
+                            <span ng-class="$parent.$parent.getMkbItemClass(item)">[[ item.code ]] - [[ item.name ]]</span>
                         </div>
                     </div>
                 </div>
