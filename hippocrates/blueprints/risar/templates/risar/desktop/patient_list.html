@@ -1,0 +1,23 @@
+<div class="panel panel-default">
+    <div class="panel-heading">Пациенток на <span style="display: inline-block; margin-bottom: -5px; margin-right:10px"><wm-date ng-model="search_date.date" style="width: 250px"></wm-date></span>: [[ tickets.length ]]</div>
+    <table class="table table-condensed table-hover">
+        <thead>
+        <tr>
+            <th>Время</th>
+            <th>Риск</th>
+            <th>ФИО</th>
+            <th>Срок беременности</th>
+            <th>Примечание</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="row in tickets | filter:query">
+            <td ng-bind="row.beg_time | asTime"></td>
+            <td><span risk-rate-icon="row.risk_rate"></span></td>
+            <td><a ng-href="{{ url_for('.html_chart') }}?ticket_id=[[ row.client_ticket_id ]]">[[ row.client.full_name ]]</a></td>
+            <td><b>[[ row.pregnancy_week ]]</b><i class="fa fa-question" ng-if="!row.pregnancy_week"></i></td>
+            <td ng-bind="(row.checkup_n)?('Повторный осмотр: ' + row.checkup_n):('Первичный осмотр')"></td>
+        </tr>
+        </tbody>
+    </table>
+</div>

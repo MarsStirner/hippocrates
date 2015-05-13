@@ -5,18 +5,19 @@ var IndexCtrl = function ($scope, RisarApi) {
     $scope.query = "";
     $scope.search_date = {date:new Date()}; // и это костыль. этот для работы wmDate
     $scope.tickets = [];
+    $scope.curYear = new Date().getFullYear();
 
     $scope.toolTipContentFunction_infants_death = function(){
         return function(key, x, y, e, graph) {
             var month = x%2 ? ' за ' + moment().add(-1, 'month').format("MMMM"): ' за ' + moment().format("MMMM");
             return  key + month + '<p>' +  y + '</p>'
         }
-    }
+    };
     $scope.toolTipContentFunction_pregnancy_results = function(){
         return function(key, x, y, e, graph) {
             return  key + '<p>' +  y + '</p>'
         }
-    }
+    };
     $scope.$watch('search_date.date', function (n, o) {
         RisarApi.schedule(n).then(function (tickets) {
             $scope.tickets = tickets;
@@ -88,7 +89,7 @@ var IndexCtrl = function ($scope, RisarApi) {
             } else{
                 $scope.infants_death = [];
             }
-        })
+        });
         RisarApi.pregnancy_final_stats.get().then(function (result) {
             $scope.pregnancy_results = [];
             if (result['abortom']) {

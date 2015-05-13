@@ -1,0 +1,20 @@
+<div class="panel panel-default">
+    <div class="panel-heading">Материнская смертность в [[ curYear ]] г.: <b>[[maternal_death_coeff]]</b></div>
+    <div class="panel-body">
+        <h5 style="line-height: 1.5;">Исходы беременностей за текущий год</h5>
+        <nvd3-multi-bar-chart
+            data="pregnancy_results"
+            id="pregnancy_results"
+            width="550"
+            height="350"
+            tooltips="true"
+            interactive="true"
+            showXAxis="false"
+            showYAxis="true"
+{#            showlegend="true"#}
+            showlabels="true"
+            tooltipcontent="toolTipContentFunction_pregnancy_results()">
+                <svg></svg>
+        </nvd3-multi-bar-chart>
+    </div>
+</div>

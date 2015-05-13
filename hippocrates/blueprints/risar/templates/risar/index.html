@@ -3,7 +3,7 @@
 {% block title %}> {{ module_name }}{% endblock %}
 
 {% block main %}
-    <div ng-controller="IndexCtrl">
+    <div ng-controller="IndexCtrl" class="ng-cloak">
         <ul class="breadcrumb">
             <li>Рабочий стол</li>
         </ul>
@@ -17,121 +17,40 @@
                 <a href="{{ url_for('.html_search') }}">Расширенный поиск</a>
             </div>
         </div>
-        <div class="row">
-            <div class="{% if current_user.role_in('overseer1', 'overseer2', 'overseer3') %}col-md-8{% else %}col-md-12{% endif %}">
-                {% if not current_user.role_in('overseer3') %}
-                    <div class="panel panel-default">
-                        <div class="panel-heading">Пациенток на <span style="display: inline-block; margin-bottom: -5px; margin-right:10px"><wm-date ng-model="search_date.date" style="width: 250px"></wm-date></span>: [[ tickets.length ]]</div>
-{#                        <legend>Пациенток на <span style="display: inline-block; margin-bottom: -5px; margin-right:10px"><wm-date ng-model="date" style="width: 250px"></wm-date></span>: [[ tickets.length ]]</legend>#}
-                        <table class="table table-condensed table-hover">
-                            <thead>
-                            <tr>
-                                <th>Время</th>
-                                <th>Риск</th>
-                                <th>ФИО</th>
-                                <th>Срок беременности</th>
-                                <th>Примечание</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr ng-repeat="row in tickets | filter:query">
-                                <td ng-bind="row.beg_time | asTime"></td>
-                                <td><span risk-rate-icon="row.risk_rate"></span></td>
-                                <td><a ng-href="{{ url_for('.html_chart') }}?ticket_id=[[ row.client_ticket_id ]]">[[ row.client.full_name ]]</a></td>
-                                <td><b>[[ row.pregnancy_week ]]</b><i class="fa fa-question" ng-if="!row.pregnancy_week"></i></td>
-                                <td ng-bind="(row.checkup_n)?('Повторный осмотр: ' + row.checkup_n):('Первичный осмотр')"></td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                {% endif %}
-                {% if current_user.role_in('overseer1', 'overseer2', 'overseer3') %}
-                    <div class="panel panel-default">
-                        <div class="panel-heading">Годовые отчёты:</div>
-                        <div class="panel-body">
-                            <ul class="list-unstyled">
-                                <li><a href="#">Форма 13</a></li>
-                                <li><a href="#">Форма 32</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                {% endif %}
+        {% if user_profiles_mng.has_ui_obstetrician() %}
+            <div class="row">
+                <div class="col-md-12">
+                    {% include "risar/desktop/patient_list.html" %}
+                </div>
             </div>
-            {%- if current_user.role_in('overseer1', 'overseer2', 'overseer3') -%}
-            <div class="col-md-4">
-                <div class="panel panel-default">
-                    <div class="panel-heading">Пациентки по степени риска</div>
-                    <nvd3-pie-chart
-                            id="noid"
-                            data="slices"
-                            width="350"
-                            height="350"
-                            x="slices_x"
-                            y="slices_y"
-                            color="slices_c"
-                            nodata="Нет данных"
-                            showlegend="true"
-                            showlabels="true"
-                            labeltype="value"
-                            donut="true"
-                            donut-ratio="0.33"
-                            ><svg></svg>
-                    </nvd3-pie-chart>
+        {% elif user_profiles_mng.has_ui_overseer_low() %}
+            <div class="row">
+                <div class="col-md-8">
+                    {% include "risar/desktop/patient_list.html" %}
+                    {% include "risar/desktop/annual_reports.html" %}
                 </div>
-            {%- if current_user.role_in('overseer3') -%}
-                <div class="panel panel-default">
-                    <div class="panel-heading">Перинатальная смертность</div>
-                    <div class="panel-body">
-                        <h5>Перинатальная смертность в текущем году: <b>[[infants_death_coeff]] &#8240;</b></h5>
-                        </br>
-                        </br>
-                        <h5 style="line-height: 1.5;">Соотношение умерших и живых детей за предыдущий и текущий месяцы</h5>
-                        <nvd3-multi-bar-chart
-                            data="infants_death"
-                            id="infants_death"
-                            width="550"
-                            height="350"
-                            tooltips="true"
-                            interactive="true"
-                            showXAxis="false"
-                            showYAxis="true"
-    {#                        showlegend="true"#}
-                            showlabels="true"
-                            tooltipcontent="toolTipContentFunction_infants_death()"
-                                >
-                                <svg></svg>
-                        </nvd3-multi-bar-chart>
-                    </div>
+                <div class="col-md-4">
+                    {% include "risar/desktop/diagram_risk_rates.html" %}
                 </div>
-                <div class="panel panel-default">
-                    <div class="panel-heading">Материнская смертность</div>
-                    <div class="panel-body">
-                        <h5>Материнская смертность в текущем году: <b>[[maternal_death_coeff]]</b></h5>
-                    </div>
-                </div>
-                <div class="panel panel-default">
-                    <div class="panel-heading">Исходы беременностей за текущий год</div>
-                    <div class="panel-body">
-                        <nvd3-multi-bar-chart
-                            data="pregnancy_results"
-                            id="pregnancy_results"
-                            width="550"
-                            height="350"
-                            tooltips="true"
-                            interactive="true"
-                            showXAxis="false"
-                            showYAxis="true"
-    {#                        showlegend="true"#}
-                            showlabels="true"
-                            tooltipcontent="toolTipContentFunction_pregnancy_results()">
-                                <svg></svg>
-                        </nvd3-multi-bar-chart>
-                    </div>
-                </div>
-            {%- endif -%}
             </div>
-            {%- endif -%}
-        </div>
+        {% elif user_profiles_mng.has_ui_overseer_high() %}
+            <div class="row">
+                <div class="col-md-4">
+                    {% include "risar/desktop/diagram_risk_rates.html" %}
+                </div>
+                <div class="col-md-4">
+                    {% include "risar/desktop/diagram_infants_death.html" %}
+                </div>
+                <div class="col-md-4">
+                    {% include "risar/desktop/diagram_maternal_death.html" %}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-8">
+                    {% include "risar/desktop/annual_reports.html" %}
+                </div>
+            </div>
+        {% endif %}
     </div>
 {% endblock %}
 
