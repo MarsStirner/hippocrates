@@ -39,7 +39,7 @@
                             </div>
                             <div class="col-md-8">
                                 <span class="pull-right text-muted">Диагнозы выделенные <b>жирным</b> определяют перинатальный риск,<br>цвет указывает на степень риска
-                                    <span class="rmargin10" style="font-size: larger" ng-repeat="rr in risk_rates"><i risk-rate-icon="rr"></i></span>
+                                    <span class="rmargin10" style="font-size: x-large" ng-repeat="rr in risk_rates"><i risk-rate-icon="rr"></i></span>
                                 </span>
                             </div>
                         </div>
@@ -80,20 +80,28 @@
                             <div class="col-md-12">
                                 <div id="district_orgs" ng-if="districtLpuAvailable()">
                                     <hr>
-                                    <div ng-repeat="(_, org_info) in district_orgs">
+                                    <div ng-repeat="(loc_code, org_info) in district_orgs">
                                         <h3>В районе проживания пациентки ([[ org_info.kladr_locality.name ]]) найдено:</h3>
-                                        <div fs-radio="" items="org_info.orgs" ng-model="chart.lpu" class="lmargin20">
-                                            [[ item.short_name ]]<br><span class="text-muted lmargin20" ng-bind="item.address"></span>
+                                        <div class="radio" ng-repeat="item in org_info.orgs">
+                                            <label class="label-no-bold lmargin20" for="org[[loc_code]]_[[$index]]">
+                                                <input type="radio" id="org[[loc_code]]_[[$index]]" ng-value="item" ng-model="chart.lpu">
+                                                [[item.short_name]]<br><span class="text-muted" ng-bind="item.address"></span>
+                                            </label>
                                         </div>
                                     </div>
                                 </div>
                                 <div id="region_orgs" ng-if="regionLpuAvailable()">
                                     <hr>
                                     <h3>В обслуживаемом регионе найдено:</h3>
-                                    <div ng-repeat="(_, org_info) in region_orgs">
-                                        <h4>[[ org_info.kladr_locality.name ]]</h4>
-                                        <div fs-radio="" items="org_info.orgs" ng-model="chart.lpu" class="lmargin20">
-                                            [[ item.short_name ]]<br><span class="text-muted lmargin20" ng-bind="item.address"></span>
+                                    <div ng-repeat="(loc_code, org_info) in region_orgs">
+                                        <div>
+                                            <h4>[[ org_info.kladr_locality.name ]]</h4>
+                                            <div class="radio" ng-repeat="item in org_info.orgs">
+                                                <label class="label-no-bold lmargin20" for="org[[loc_code]]_[[$index]]">
+                                                    <input type="radio" id="org[[loc_code]]_[[$index]]" ng-value="item" ng-model="chart.lpu">
+                                                    [[item.short_name]]<br><span class="text-muted" ng-bind="item.address"></span>
+                                                </label>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

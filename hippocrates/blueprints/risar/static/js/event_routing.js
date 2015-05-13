@@ -15,7 +15,7 @@ var EventRoutingCtrl = function ($scope, $window, RisarApi) {
                 $scope.header = data.header;
                 $scope.chart = data.chart;
                 $scope.chart.lpu = data.chart[key];
-                $scope.selected_diagnoses = data.chart.diagnoses.clone();
+                select_mkbs(true, true);
             });
     };
     var reload_orgs = function () {
@@ -46,6 +46,19 @@ var EventRoutingCtrl = function ($scope, $window, RisarApi) {
             }
         }
     };
+    var select_mkbs = function (on, only_risked) {
+        if (on) {
+            var selected = $scope.chart.diagnoses.clone();
+            if (only_risked) {
+                selected = selected.filter(function (mkb) {
+                    return mkb.risk_rate;
+                });
+            }
+            $scope.selected_diagnoses = selected;
+        } else {
+            $scope.selected_diagnoses = [];
+        }
+    };
     $scope.save = function () {
         RisarApi.event_routing.attach_client($scope.chart.client.id, {
             attach_type: key,
@@ -56,9 +69,9 @@ var EventRoutingCtrl = function ($scope, $window, RisarApi) {
     };
     $scope.toggleDiagnosesSelection = function () {
         if ($scope.selected_diagnoses.length === $scope.chart.diagnoses.length) {
-            $scope.selected_diagnoses = [];
+            select_mkbs(false);
         } else {
-            $scope.selected_diagnoses = $scope.chart.diagnoses.clone();
+            select_mkbs(true);
         }
     };
     $scope.lpuSelected = function () {
@@ -116,6 +129,13 @@ var EventRoutingCtrl = function ($scope, $window, RisarApi) {
 
     reload_chart().then(function () {
         $scope.$watchCollection('selected_diagnoses', reload_orgs);
+        $scope.$watch(function () {
+            return $scope.chart.lpu
+        }, function (n, o) {
+            if (n !== o) {
+                var a = 1;
+            }
+        });
     });
 };
 
