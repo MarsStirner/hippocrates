@@ -10,7 +10,7 @@ from nemesis.lib.utils import jsonify, logger, parse_id, public_endpoint, safe_i
 from blueprints.patients.app import module
 from nemesis.lib.sphinx_search import SearchPatient
 from nemesis.lib.jsonify import ClientVisualizer
-from nemesis.models.client import Client, ClientFileAttach, ClientDocument, ClientPolicy
+from nemesis.models.client import Client, ClientFileAttach, ClientDocument, ClientPolicy, ClientContact
 from nemesis.models.exists import FileMeta, FileGroupDocument
 from blueprints.patients.lib.utils import (set_client_main_info, ClientSaveException, add_or_update_doc,
     add_or_update_address, add_or_update_copy_address, add_or_update_policy, add_or_update_blood_type,
@@ -40,7 +40,7 @@ def api_search_clients():
     except (KeyError, ValueError):
         return abort(404)
 
-    base_query = Client.query
+    base_query = Client.query.outerjoin(ClientPolicy, ClientDocument, ClientContact)
     id_list = []
 
     if query_string:
