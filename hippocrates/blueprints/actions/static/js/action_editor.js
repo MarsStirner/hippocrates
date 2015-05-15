@@ -205,16 +205,9 @@ var ActionEditorCtrl = function ($scope, $window, $modal, WMAction, PrintingServ
         });
     };
     $scope.template_prev = function () {
-        function process () {
-            WMAction.previous($scope.action).then(function (action) {
-                $scope.action.merge_template(action);
-            })
-        }
-        if ($scope.action.is_new()) {
-            $scope.action.save().then(process)
-        } else {
-            process()
-        }
+        WMAction.previous($scope.action).then(function (action) {
+            $scope.action.merge_template(action);
+        })
     };
 };
 var ActionTemplateController = function ($scope, $modalInstance, $http, FlatTree, SelectAll, args) {
@@ -317,7 +310,7 @@ var ActionTemplateController = function ($scope, $modalInstance, $http, FlatTree
 
 WebMis20.controller('ActionEditorCtrl', ['$scope', '$window', '$modal', 'WMAction', 'PrintingService', 'PrintingDialog', 'RefBookService', 'WMEventCache', '$q', 'MessageBox', 'NotificationService', ActionEditorCtrl]);
 
-WebMis20.factory('WMAction', ['$http', function ($http) {
+WebMis20.factory('WMAction', ['ApiCalls', function (ApiCalls) {
     // FIXME: На данный момент это ломает функциональность действий, но пока пофиг.
     var template_fields = ['direction_date', 'beg_date', 'end_date', 'planned_end_date', 'status', 'set_person',
         'person', 'note', 'office', 'amount', 'uet', 'pay_status', 'account', 'is_urgent', 'coord_date'];
@@ -372,9 +365,9 @@ WebMis20.factory('WMAction', ['$http', function ($http) {
     /* class methods */
     Action.get = function (id) {
         /* Получение экземпляра (в обёртке $q.defer().promise) Action по id */
-        return $http.get('/actions/api/action/{0}'.format(id)).then(
-            function (response) {
-                return (new Action()).merge(response.data.result, true);
+        return ApiCalls.wrapper('GET', '/actions/api/action/{0}'.format(id)).then(
+            function (result) {
+                return (new Action()).merge(result, true);
             },
             function (response) {
                 return response;
@@ -385,21 +378,20 @@ WebMis20.factory('WMAction', ['$http', function ($http) {
         var action = new Action();
         action.event_id = event_id;
         action.action_type_id = action_type_id;
-        return $http.get('/actions/api/action/new/{0}/{1}'.format(action_type_id, event_id)).then(function (response) {
-            return action.merge(response.data.result);
+        return ApiCalls.wrapper('GET', '/actions/api/action/new/{0}/{1}'.format(action_type_id, event_id)).then(function (result) {
+            return action.merge(result);
         });
     };
     Action.previous = function (action) {
         var dest = new Action();
-        return $http.get(
+        return ApiCalls.wrapper(
+            'GET',
             '/actions/api/action/query/previous', {
-                params: {
-                    event_id: action.event_id || action.event.id,
-                    at_id: action.action_type_id || action.action_type.id,
-                    beg_date: action.beg_date || undefined
-                }
+                client_id: action.client.id,
+                at_id: action.action_type_id || action.action_type.id,
+                id: action.id
             }).then(function (result) {
-            return dest.merge_template(result.data.result);
+            return dest.merge_template(result);
         })
     };
     Action.prototype.merge = function (src_action) {
@@ -426,9 +418,9 @@ WebMis20.factory('WMAction', ['$http', function ($http) {
         data.action_type_id = this.action_type_id || this.action_type.id;
         merge_properties(data, this);
         data.id = self.id;
-        return $http.post(url, data)
-            .then(function (response) {
-                return self.merge(response.data.result);
+        return ApiCalls.wrapper('POST', url, undefined, data)
+            .then(function (result) {
+                return self.merge(result);
             }, function (response) {
                 return response;
             })
@@ -437,8 +429,8 @@ WebMis20.factory('WMAction', ['$http', function ($http) {
     Action.prototype.reload = function () {
         var self = this;
         if (self.is_new()) {return}
-        $http.get('/actions/api/action/{0}'.format(self.id)).success(function (result) {
-            return self.merge(result.result);
+        ApiCalls.wrapper('GET', '/actions/api/action/{0}'.format(self.id)).then(function (result) {
+            return self.merge(result);
         })
     };
     Action.prototype.get_property = function (id) {

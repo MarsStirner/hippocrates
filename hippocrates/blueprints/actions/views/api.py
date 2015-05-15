@@ -60,25 +60,28 @@ def api_action_get(action_id):
 @module.route('/api/action/query/previous', methods=['GET'])
 @api_method
 def api_find_previous():
-    event_id = request.args.get('event_id')
+    client_id = request.args.get('client_id')
     at_id = request.args.get('at_id')
-    beg_date = request.args.get('beg_date')
+    action_id = request.args.get('id')
 
-    if not (event_id and at_id):
-        raise ApiException(400, u'Должны быть указаны и event_id и at_id')
-
-    event = Event.query.get(event_id)
+    if not (client_id and at_id):
+        raise ApiException(400, u'Должны быть указаны и client_id и at_id')
 
     prev = Action.query.join(Event).filter(
-        Event.client_id == event.client_id,
+        Event.client_id == client_id,
         Action.deleted == 0,
         Action.actionType_id == at_id,
     )
-    if beg_date:
-        prev = prev.filter(Action.begDate < beg_date)
+    if action_id:
+        prev = prev.filter(Action.id < action_id)
+    else:
+        prev = prev.filter(Action.createDatetime < datetime.datetime.now())
     prev = prev.order_by(Action.id.desc()).first()
     if not prev:
-        raise ApiException(404, u'В обращении %s других действий типа "%s" не найдено' % (event_id, at_id))
+        from nemesis.models.client import Client
+        client = Client.query.get(client_id)
+        action_type = ActionType.query.get(at_id)
+        raise ApiException(404, u'У пациента "%s" других действий типа "%s" не найдено' % (client.nameText, action_type.name))
     return ActionVisualizer().make_action(prev)
 
 
