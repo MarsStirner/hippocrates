@@ -110,7 +110,9 @@ var CheckupFirstEditCtrl = function ($scope, $window, $location, $document, Risa
                     $scope.rc.sampleWizard.forward();
                     $location.url($scope.rc.sampleWizard.currentStep.attributes.id);
                 } else {
-                    $window.open(Config.url.inpection_edit_html + '?event_id=' + $scope.chart.id + '&checkup_id=' + data.id, '_self');
+                    $scope.rc.sampleWizard.forward();
+                    var tab_name = $scope.rc.sampleWizard.currentStep.attributes.id;
+                    $window.open(Config.url.inpection_edit_html + '?event_id=' + $scope.chart.id + '&checkup_id=' + data.id+'#/'+tab_name, '_self');
                 }
             })
         }
@@ -153,7 +155,9 @@ var CheckupSecondEditCtrl = function ($scope, $window, $location, $document, Ris
                     $scope.rc.sampleWizard.forward();
                     $location.url($scope.rc.sampleWizard.currentStep.attributes.id);
                 } else {
-                    $window.open(Config.url.inpection_edit_html + '?event_id=' + $scope.chart.id + '&checkup_id=' + data.id, '_self');
+                    $scope.rc.sampleWizard.forward();
+                    var tab_name = $scope.rc.sampleWizard.currentStep.attributes.id;
+                    $window.open(Config.url.inpection_edit_html + '?event_id=' + $scope.chart.id + '&checkup_id=' + data.id+'#/'+tab_name, '_self');
                 }
             })
         }
