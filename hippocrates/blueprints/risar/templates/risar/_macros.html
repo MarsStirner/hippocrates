@@ -46,7 +46,7 @@
         </span>
         {% elif ext_header == 'inspection' %}
         <div class="text-right">
-        <a class="btn" href="#"><i class="fa fa-table" style="width: 32px"></i></a>
+        <a class="btn" href="{{ url_for('.html_inspection') }}?event_id=[[ chart.id ]]"><i class="fa fa-table" tooltip="Осмотры акушером-гинекологом" style="width: 32px"></i></a>
         <a class="btn" href="{{ url_for('.html_gravidograma') }}?event_id=[[ chart.id ]]"><i class="fa fa-line-chart" tooltip="Гравидограмма" style="width: 32px"></i></a>
         <a class="btn" href="#"><i class="fa fa-info" style="width: 32px"></i></a>
         </div>
