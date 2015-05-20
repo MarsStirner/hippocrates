@@ -7,7 +7,7 @@ from nemesis.models.actions import Action, ActionType
 from nemesis.systemwide import db
 from blueprints.risar.lib.utils import get_action, get_action_list, HIV_diags, syphilis_diags, hepatitis_diags, \
     tuberculosis_diags, scabies_diags, pediculosis_diags
-from blueprints.risar.risar_config import checkup_flat_codes, risar_mother_anamnesis, risar_epicrisis
+from blueprints.risar.risar_config import checkup_flat_codes, risar_mother_anamnesis, risar_epicrisis, risar_anamnesis_pregnancy
 from .utils import risk_rates_blockID, risk_rates_diagID
 
 __author__ = 'viruzzz-kun'
@@ -90,6 +90,40 @@ def reevaluate_risk_rate(event, action=None):
     action['prenatal_risk_572'].value = max(map(diag_to_risk_rate, all_diagnoses)) if all_diagnoses else 0
 
 
+def reevaluate_preeclampsia_risk(event, action=None):
+    """
+    Пересчёт риска преэклампсии
+    :param event: обращение
+    :type event: application.models.event.Event
+    """
+    if action is None:
+        action = get_card_attrs_action(event)
+
+    delivery_years = []
+    mother_action = get_action(event, risar_mother_anamnesis)
+    first_inspection = get_action(event, 'risarFirstInspection')
+    prev_pregnancies = Action.query.join(ActionType).filter(Action.event == event, Action.deleted == 0,
+                                                            ActionType.flatCode == risar_anamnesis_pregnancy).all()
+    risk = 0 if (not mother_action and not first_inspection and not prev_pregnancies) else 2
+
+    if not prev_pregnancies or event.client.age_tuple()[-1] >= 35 or first_inspection['BMI'] >= 25 or \
+            mother_action['preeclampsia']:
+        risk = 1
+    else:
+        for pregnancy in prev_pregnancies:
+            if pregnancy['pregnancyResult'].value.code in ('normal', 'miscarriage37', 'miscarriage27', 'belated_birth'):
+                if pregnancy['preeclampsia'].value:
+                    risk = 1
+                    break
+                delivery_years.append(pregnancy['year'])
+
+        delivery_years.sort()
+        if datetime.datetime.now().year - delivery_years[-1] >= 10:
+            risk = 1
+
+    action['preeclampsia_risk'].value = risk
+
+
 def reevaluate_dates(event, action=None):
     """
     Пересчёт даты начала беременности и предполагаемой даты родов
@@ -161,6 +195,7 @@ def reevaluate_card_attrs(event, action=None):
     if action is None:
         action = get_card_attrs_action(event)
     reevaluate_risk_rate(event, action)
+    reevaluate_preeclampsia_risk(event, action)
     reevaluate_dates(event, action)
 
 

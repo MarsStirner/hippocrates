@@ -236,6 +236,28 @@ WebMis20
         }
     }
 })
+.directive('preeclampsiaRiskIcon', function () {
+    return {
+        restrict: 'A',
+        template: '<span style="font-size: 32px" ng-class="icon_class(preeclampsiaRiskIcon.id)" tooltip="[[tooltip(preeclampsiaRiskIcon.id)]]"></span>',
+        scope: {
+            preeclampsiaRiskIcon: '='
+        },
+        link: function (scope) {
+            scope.icon_class = function (rate) {
+                if (rate == 1) return 'fa fa-exclamation-circle text-danger';
+                if (rate == 2) return 'fa fa-exclamation-circle text-success';
+                return 'fa fa-question';
+            };
+            scope.tooltip = function (rate) {
+                if (rate == 1) return 'Пациентка входит в группу риска развития преэклампсии';
+                if (rate == 2) return 'Пациентка НЕ входит в группу риска развития преэклампсии';
+                return 'Риск развития преэклампсии ещё не выявлен';
+
+            }
+        }
+    }
+})
 .directive('pregnancyWeekIcon', ['$filter', function ($filter) {
     return {
         restrict: 'A',
