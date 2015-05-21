@@ -23,7 +23,7 @@ def html_event_info():
         wm10url = app.config['WEBMIS10_URL'].rstrip('/')
         if not wm10url:
             return abort(404)
-        new_url = u'%s/appeals/%s/' % (wm10url, event_id)
+        new_url = u'%s/appeals/%s/?token=%s' % (wm10url, event_id, request.cookies.get(app.config['CASTIEL_AUTH_TOKEN']))
         return redirect(new_url)
     return get_event_form(event=event, client_id=event.client_id)
 
