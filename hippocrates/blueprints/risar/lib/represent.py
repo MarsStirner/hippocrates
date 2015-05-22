@@ -56,6 +56,7 @@ def represent_event(event):
     """
     client = event.client
     all_diagnoses = list(get_all_diagnoses(event))
+    card_attrs_action = get_card_attrs_action(event, auto=True)
 
     return {
         'id': event.id,
@@ -102,8 +103,9 @@ def represent_event(event):
         'anamnesis': represent_anamnesis(event),
         'epicrisis': represent_epicrisis(event),
         'checkups': represent_checkups(event),
-        'risk_rate': PrenatalRiskRate(get_card_attrs_action(event, auto=True)['prenatal_risk_572'].value),
-        'preeclampsia_risk': PreeclampsiaRisk(get_card_attrs_action(event, auto=True)['preeclampsia_risk'].value),
+        'risk_rate': PrenatalRiskRate(card_attrs_action['prenatal_risk_572'].value),
+        'preeclampsia_risk': PreeclampsiaRisk(card_attrs_action['preeclampsia_risk'].value) if
+        card_attrs_action.propsByCode.get('preeclampsia_risk') else None,
         'pregnancy_week': get_pregnancy_week(event),
         'diagnoses': all_diagnoses,
         'has_diseases': check_disease(all_diagnoses)
