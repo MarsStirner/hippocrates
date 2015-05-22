@@ -12,7 +12,7 @@ from nemesis.models.client import ClientAllergy, ClientIntoleranceMedicament, Bl
 from nemesis.models.event import Event
 from nemesis.systemwide import db
 from ...app import module
-from blueprints.risar.lib.card_attrs import reevaluate_card_attrs
+from blueprints.risar.lib.card_attrs import reevaluate_card_attrs, reevaluate_preeclampsia_risk
 from ...lib.represent import represent_intolerance, represent_mother_action, represent_father_action
 from blueprints.risar.lib.utils import get_action, action_apt_values, get_action_type_id
 from ...risar_config import pregnancy_apt_codes, risar_anamnesis_pregnancy, transfusion_apt_codes, \
@@ -76,10 +76,13 @@ def api_0_pregnancies_post(action_id=None):
         action = Action.query.get(action_id)
         if action is None:
             raise ApiException(404, 'Action not found')
+    event = Event.query.get(action.event_id)
     json = request.get_json()
     for key in pregnancy_apt_codes:
         action.propsByCode[key].value = json.get(key)
     db.session.add(action)
+    db.session.commit()
+    reevaluate_preeclampsia_risk(event)
     db.session.commit()
     return dict(
         action_apt_values(action, pregnancy_apt_codes),
