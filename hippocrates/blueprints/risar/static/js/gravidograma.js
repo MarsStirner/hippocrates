@@ -65,7 +65,7 @@ var GravidogramaCtrl = function ($scope, RisarApi, RefBookService, PrintingServi
             $scope.chart = event;
 
             var first_checkup = $scope.chart.checkups[$scope.chart.checkups.length-1];
-            var hw_ratio = first_checkup.height ? Math.round((first_checkup.weight/first_checkup.height)*100) : NaN;
+            var hw_ratio = first_checkup && first_checkup.height ? Math.round((first_checkup.weight/first_checkup.height)*100) : NaN;
 
             // прибавка массы
             if (!hw_ratio || (hw_ratio>=35 && hw_ratio<=41)){
