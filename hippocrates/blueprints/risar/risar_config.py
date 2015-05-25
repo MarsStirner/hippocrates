@@ -20,7 +20,7 @@ common_codes = [
     'alcohol', 'smoking', 'toxic', 'drugs']
 
 mother_codes = [
-    'menstruation_last_date',
+    'menstruation_last_date', 'marital_status',
     'menstruation_start_age', 'menstruation_duration', 'menstruation_period', 'menstruation_disorders',
     'sex_life_start_age', 'contraception', 'fertilization_type', 'family_income', 'preeclampsia'] + common_codes
 father_codes = ['name', 'phone', 'HIV', 'fluorography'] + common_codes

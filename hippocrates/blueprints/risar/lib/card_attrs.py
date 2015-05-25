@@ -161,7 +161,8 @@ def reevaluate_preeclampsia_risk(event, card_attrs_action=None):
         if filter(lambda x: x in diag_id, diseases):
             risk = 1
 
-    card_attrs_action['preeclampsia_risk'].value = risk
+    if card_attrs_action.propsByCode.get('preeclampsia_risk'):
+        card_attrs_action['preeclampsia_risk'].value = risk
 
 
 def reevaluate_dates(event, action=None):

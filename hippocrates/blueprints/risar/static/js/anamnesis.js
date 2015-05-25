@@ -229,7 +229,7 @@ var IntolerancesCtrl = function ($scope, $modal, $timeout, RisarApi) {
         })
     };
 };
-var AnamnesisMotherEditCtrl = function ($scope, RisarApi) {
+var AnamnesisMotherEditCtrl = function ($scope, $document, RisarApi) {
     $scope.hooks.push(function (chart) {
         if (!chart.anamnesis.mother) {
             chart.anamnesis.mother = {finished_diseases: [],
@@ -237,6 +237,13 @@ var AnamnesisMotherEditCtrl = function ($scope, RisarApi) {
         }
     });
     $scope.save = function () {
+        $scope.submit_attempt = true;
+        var form = $scope.anamnesisMotherForm;
+        if (form.$invalid) {
+            var formelm = $('#anamnesisMotherForm').find('.ng-invalid:not(ng-form):first');
+            $document.scrollToElement(formelm, 100, 1500);
+            return false;
+        }
         var model = $scope.chart.anamnesis.mother;
         RisarApi.anamnesis.mother.save($scope.chart.id, model)
         .then(function (data) {
