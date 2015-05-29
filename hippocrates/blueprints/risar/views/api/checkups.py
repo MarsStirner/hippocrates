@@ -10,6 +10,7 @@ from ...app import module
 from blueprints.risar.lib.card_attrs import reevaluate_card_attrs
 from ...lib.represent import represent_checkup
 from blueprints.risar.lib.utils import get_action_by_id
+from blueprints.risar.lib.expert.protocols import EventMeasureManager
 
 
 @module.route('/api/0/checkup/', methods=['GET', 'POST'])
@@ -34,4 +35,15 @@ def api_0_checkup(event_id):
         db.session.commit()
         reevaluate_card_attrs(event)
         db.session.commit()
+        print '>>> Processing measures ...'
+        measure_mng = EventMeasureManager.make_default(action.id)
     return represent_checkup(action)
+
+
+@module.route('/api/0/measure/generate/', methods=['GET', 'POST'])
+@module.route('/api/0/measure/generate/<int:action_id>', methods=['GET', 'POST'])
+@api_method
+def api_0_measure_generate(action_id):
+    print '>>> Processing measures ...'
+    measure_mng = EventMeasureManager.make_default(action_id)
+    measure_mng.generate_measures()

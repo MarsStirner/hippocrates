@@ -431,73 +431,77 @@
                         </ng-form>
                         <ng-form class="tab-pane" id="last" name="lastForm" novalidate rc-submit rc-step>
                             <h2>Шаг 6. Диагностические мероприятия</h2>
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>Назваие меропрития</th>
-                                        <th>Срок выполнения</th>
-                                        <th>Действия с мероприятием</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr><th colspan="3" style="text-align: center;">Лабораторные исследования</th></tr>
-                                    <tr>
-                                        <td>Общий анализ крови</td>
-                                        <td>12.09.2014 - 12.10.2014</td>
-                                        <td><a class="print_link" href="#"><span class="glyphicon glyphicon-print"></span> Печать</a>
-                                            <a class="print_link" href="#"><span class="glyphicon glyphicon-pencil"></span> Изменить</a></td>
-                                    </tr>
-                                    <tr>
-                                        <td><span class="text-danger" tooltip="Исследование просрочено">Общий анализ мочи</span></td>
-                                        <td>12.09.2014 - 12.10.2014</td>
-                                        <td><a class="print_link" href="#"><span class="glyphicon glyphicon-print"></span> Печать</a>
-                                            <a class="print_link" href="#"><span class="glyphicon glyphicon-pencil"></span> Изменить</a></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Определение антител M,G к гепатиту B</td>
-                                        <td>12.09.2014 - 12.11.2014</td>
-                                        <td><a class="print_link" href="#"><span class="glyphicon glyphicon-print"></span> Печать</a>
-                                            <a class="print_link" href="#"><span class="glyphicon glyphicon-pencil"></span> Изменить</a></td>
-                                    </tr>
-                                    <tr><th colspan="3" style="text-align: center;">Функциональные исследования</th></tr>
-                                    <tr>
-                                        <td>УЗИ плода I триместр</td>
-                                        <td>12.09.2014 - 12.12.2014</td>
-                                        <td><a class="print_link" href="#"><span class="glyphicon glyphicon-print"></span> Печать</a>
-                                            <a class="print_link" href="#"><span class="glyphicon glyphicon-pencil"></span> Изменить</a></td>
-                                    </tr>
-                                    <tr><th colspan="3" style="text-align: center;">Консультации специалистов</th></tr>
-                                    <tr>
-                                        <td>Консультация стоматолога</td>
-                                        <td>12.09.2014 - 12.02.2014</td>
-                                        <td><a class="print_link" href="#"><span class="glyphicon glyphicon-print"></span> Печать</a>
-                                            <a class="print_link" href="#"><span class="glyphicon glyphicon-pencil"></span> Изменить</a></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Консультация офтальмолога</td>
-                                        <td>12.09.2014 - 12.02.2014</td>
-                                        <td><a class="print_link" href="#"><span class="glyphicon glyphicon-print"></span> Печать</a>
-                                            <a class="print_link" href="#"><span class="glyphicon glyphicon-pencil"></span> Изменить</a></td>
-                                    </tr>
-                                    <tr><th colspan="3" style="text-align: center;">Дополнительные мероприятия</th></tr>
-                                    <tr>
-                                        <td><a href="#">Назначить дополнительное мероприятие</a></td>
-                                        <td></td>
-                                        <td></td>
-                                    </tr>
-                                </tbody>
-                            </table>
                             <div class="text-right">
                                 <div class="btn-group">
                                     <ui-print-button ps="ps" resolve="ps_resolve()">Печать</ui-print-button>
                                 </div>
                             </div>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Название мероприятия</th>
+                                        <th>Дата начала</th>
+                                        <th>Дата окончания</th>
+                                        <th>Статус</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="measure in measures">
+                                        <td>[[]]</td>
+                                        <td>[[]]</td>
+                                        <td>[[]]</td>
+                                        <td>[[]]</td>
+                                        <td>Редактировать, Печать</td>
+                                    </tr>
+{#                                    <tr><th colspan="3" style="text-align: center;">Лабораторные исследования</th></tr>#}
+{#                                    <tr>#}
+{#                                        <td>Общий анализ крови</td>#}
+{#                                        <td>12.09.2014 - 12.10.2014</td>#}
+{#                                        <td><a class="print_link" href="#"><span class="glyphicon glyphicon-print"></span> Печать</a>#}
+{#                                            <a class="print_link" href="#"><span class="glyphicon glyphicon-pencil"></span> Изменить</a></td>#}
+{#                                    </tr>#}
+{#                                    <tr>#}
+{#                                        <td><span class="text-danger" tooltip="Исследование просрочено">Общий анализ мочи</span></td>#}
+{#                                        <td>12.09.2014 - 12.10.2014</td>#}
+{#                                        <td><a class="print_link" href="#"><span class="glyphicon glyphicon-print"></span> Печать</a>#}
+{#                                            <a class="print_link" href="#"><span class="glyphicon glyphicon-pencil"></span> Изменить</a></td>#}
+{#                                    </tr>#}
+{#                                    <tr>#}
+{#                                        <td>Определение антител M,G к гепатиту B</td>#}
+{#                                        <td>12.09.2014 - 12.11.2014</td>#}
+{#                                        <td><a class="print_link" href="#"><span class="glyphicon glyphicon-print"></span> Печать</a>#}
+{#                                            <a class="print_link" href="#"><span class="glyphicon glyphicon-pencil"></span> Изменить</a></td>#}
+{#                                    </tr>#}
+{#                                    <tr><th colspan="3" style="text-align: center;">Функциональные исследования</th></tr>#}
+{#                                    <tr>#}
+{#                                        <td>УЗИ плода I триместр</td>#}
+{#                                        <td>12.09.2014 - 12.12.2014</td>#}
+{#                                        <td><a class="print_link" href="#"><span class="glyphicon glyphicon-print"></span> Печать</a>#}
+{#                                            <a class="print_link" href="#"><span class="glyphicon glyphicon-pencil"></span> Изменить</a></td>#}
+{#                                    </tr>#}
+{#                                    <tr><th colspan="3" style="text-align: center;">Консультации специалистов</th></tr>#}
+{#                                    <tr>#}
+{#                                        <td>Консультация стоматолога</td>#}
+{#                                        <td>12.09.2014 - 12.02.2014</td>#}
+{#                                        <td><a class="print_link" href="#"><span class="glyphicon glyphicon-print"></span> Печать</a>#}
+{#                                            <a class="print_link" href="#"><span class="glyphicon glyphicon-pencil"></span> Изменить</a></td>#}
+{#                                    </tr>#}
+{#                                    <tr>#}
+{#                                        <td>Консультация офтальмолога</td>#}
+{#                                        <td>12.09.2014 - 12.02.2014</td>#}
+{#                                        <td><a class="print_link" href="#"><span class="glyphicon glyphicon-print"></span> Печать</a>#}
+{#                                            <a class="print_link" href="#"><span class="glyphicon glyphicon-pencil"></span> Изменить</a></td>#}
+{#                                    </tr>#}
+                                </tbody>
+                            </table>
                         </ng-form>
                     </div>
                 </div>
             </div>
             <div class="row">
                 <div class="form-group col-md-12">
+                    <button type="button" class="btn btn-default" ng-click="generateMeasures()">Сформировать мероприятия</button>
                     <div class="pull-right">
                         <a class="pseudo-btn" ng-href="{{ url_for('.html_inspection') }}?event_id=[[ chart.id ]]">Перейти на форму осмотров пациентки</a>
                         <a class="btn btn-success"

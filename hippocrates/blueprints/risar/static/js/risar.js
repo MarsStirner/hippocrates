@@ -203,6 +203,11 @@ WebMis20
             }
         }
     };
+    this.measure = {
+        regenerate: function(action_id) {
+            return wrapper('GET', Config.url.api_measure_generate + action_id)
+        }
+    };
 }])
 .filter('underlineNoVal', function () {
     return function(value, label) {

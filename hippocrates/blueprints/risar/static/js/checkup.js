@@ -41,6 +41,10 @@ var CheckupCtrl = function ($scope, RisarApi, RefBookService, PrintingService) {
         })
     };
 
+    $scope.generateMeasures = function () {
+        RisarApi.measure.regenerate($scope.checkup.id);
+    };
+
     var init = function () {
         var hash = document.location.hash;
         if (hash) {
