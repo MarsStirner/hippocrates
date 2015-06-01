@@ -7,6 +7,10 @@ var IndexCtrl = function ($scope, RisarApi) {
     $scope.tickets = [];
     $scope.curYear = new Date().getFullYear();
 
+    $scope.xAxisTickFormat = function(d){
+        var m = moment();
+        return m.months(d-1).format('MMM');
+    }
 //    $scope.toolTipContentFunction_infants_death = function(){
 //        return function(key, x, y, e, graph) {
 //            var month = x%2 ? ' за ' + moment().add(-1, 'month').format("MMMM"): ' за ' + moment().format("MMMM");
@@ -16,6 +20,11 @@ var IndexCtrl = function ($scope, RisarApi) {
     $scope.toolTipContentFunction_pregnancy_results = function(){
         return function(key, x, y, e, graph) {
             return  key + '<p>' +  y + '</p>'
+        }
+    };
+    $scope.toolTipContentFunction_maternal_death = function(){
+        return function(key, x, y, e, graph) {
+            return  y + ' за ' + x;
         }
     };
     $scope.$watch('search_date.date', function (n, o) {
