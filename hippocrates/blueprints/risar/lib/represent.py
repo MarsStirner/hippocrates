@@ -18,6 +18,7 @@ from nemesis.models.exists import rbAttachType, MKB
 from blueprints.risar.lib.card_attrs import get_card_attrs_action, get_all_diagnoses, check_disease
 from blueprints.risar.lib.utils import get_action, action_apt_values, get_action_type_id, risk_rates_diagID, \
     risk_rates_blockID
+from blueprints.risar.lib.expert.protocols import measure_manager_factory
 from ..risar_config import pregnancy_apt_codes, risar_anamnesis_pregnancy, transfusion_apt_codes, \
     risar_anamnesis_transfusion, mother_codes, father_codes, risar_father_anamnesis, risar_mother_anamnesis, \
     checkup_flat_codes, risar_epicrisis, risar_newborn_inspection, attach_codes
@@ -346,7 +347,7 @@ def represent_checkups(event):
     return map(represent_checkup, query)
 
 
-def represent_checkup(action):
+def represent_checkup(action, with_measures=True):
     evis = EventVisualizer()
     result = dict(
         (code, prop.value)
@@ -361,6 +362,10 @@ def represent_checkup(action):
         for code in ('diag2', 'diag3'):
             result[code] = [evis.make_diagnostic_record(diag) for diag in result[code]] if result[code] else []
     result['calculated_pregnancy_week'] = get_pregnancy_week(action.event, action.begDate)
+
+    if with_measures:
+        measure_mng = measure_manager_factory('represent', action) if action.id else None
+        result['measures'] = measure_mng.represent_measures() if measure_mng else []
     return result
 
 

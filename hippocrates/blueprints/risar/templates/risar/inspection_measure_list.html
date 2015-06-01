@@ -1,0 +1,38 @@
+<div ng-if="checkup.measures.length">
+<div class="text-right">
+    <div class="btn-group">
+        <button type="button" class="btn btn-default" ng-click="generateMeasures()">Сформировать мероприятия</button>
+        <ui-print-button ps="ps" resolve="ps_resolve()">Печать всех</ui-print-button>
+    </div>
+</div>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th width="30%">Название мероприятия</th>
+            <th>Дата начала</th>
+            <th>Дата окончания</th>
+            <th>Статус</th>
+            <th width="1%"></th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr ng-repeat="measure in checkup.measures">
+            <td>[[ measure.scheme_measure.measure.name ]]</td>
+            <td>[[ measure.beg_datetime | asDate ]]</td>
+            <td>[[ measure.end_datetime | asDate ]]</td>
+            <td>[[ measure.status.name ]]</td>
+            <td class="nowrap">
+                <button type="button" class="btn btn-default">
+                    <span class="fa fa-edit"></span> Редактировать</button>
+                <button type="button" class="btn btn-default">
+                    <span class="fa fa-print"></span> Печать</button>
+            </td>
+        </tr>
+    </tbody>
+</table>
+</div>
+<div ng-if="!checkup.measures.length">
+    <h3 class="text-center">Не хватает данных для формирования мероприятий</h3>
+    <span class="text-muted">Требуется заполнить раздел «Заключение»: Беременность (недель),
+        Плановая дата следующей явки, Основной диагноз.</span>
+</div>

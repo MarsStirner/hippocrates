@@ -1,13 +1,22 @@
 # -*- coding: utf-8 -*-
 import itertools
 
-from sqlalchemy.orm import eagerload
-
-from nemesis.lib.utils import logger
+from nemesis.lib.utils import logger, safe_date
 from nemesis.systemwide import db
 from nemesis.models.actions import Action
 from nemesis.models.expert_protocol import ExpertScheme, ExpertSchemeMKB, EventMeasure, ExpertSchemeMeasureAssoc
 from nemesis.models.exists import MKB
+from nemesis.models.enums import MeasureStatus
+
+
+def measure_manager_factory(role, action):
+    if role == 'generate':
+        start_date = safe_date(action.begDate)
+        end_date = safe_date(action.propsByCode['next_date'].value)
+        return EventMeasureManager.make_generator(action.id, start_date, end_date)
+    elif role == 'represent':
+        return EventMeasureManager.make_representer(action.id)
+
 
 
 class EventMeasureManager(object):
@@ -20,27 +29,40 @@ class EventMeasureManager(object):
     """
 
     @classmethod
-    def make_default(cls, action_id):
+    def make_generator(cls, action_id, start_date, end_date):
         action = Action.query.get(action_id)
         action_mkb_list = _get_event_mkb_list(action)
-        logger.error('Action <{0}> mkbs: {1}'.format(action_id, action_mkb_list))
-        obj = cls(action, action_mkb_list)
+        logger.debug('Action <{0}> mkbs: {1}'.format(action_id, action_mkb_list))
+        obj = cls(action, action_mkb_list, start_date, end_date)
         return obj
 
-    def __init__(self, action, action_mkb_list):
+    @classmethod
+    def make_representer(cls, action_id):
+        action = Action.query.get(action_id)
+        obj = cls(action)
+        return obj
+
+    def __init__(self, action, action_mkb_list=None, period_start_date=None, period_end_date=None):
         self.action = action
         self.action_mkb_list = action_mkb_list
-        self.period_start = None
-        self.next_stage_date = None
+        self.period_start_date = period_start_date
+        self.period_end_date = period_end_date
 
     def generate_measures(self):
-        act_scheme_measures = [ActionSchemeMeasure(act_mkb['action'], act_mkb['mkbs'])
-                           for act_mkb in self.action_mkb_list]
+        self.clear_existing_measures()
+        act_scheme_measures = [
+            ActionSchemeMeasure(act_mkb['action'], act_mkb['mkbs'])
+            for act_mkb in self.action_mkb_list
+        ]
         for act_sm in act_scheme_measures:
             for sm in act_sm.scheme_measures:
-                print sm
                 self.create_measure(sm, act_sm.action)
         db.session.commit()
+
+    def clear_existing_measures(self):
+        db.session.query(EventMeasure).filter(
+            EventMeasure.sourceAction_id == self.action.id
+        ).delete()
 
     def refresh_measures_status(self, event_id):
         pass
@@ -48,7 +70,7 @@ class EventMeasureManager(object):
     def create_measure(self, scheme_measure, source_action):
         em = EventMeasure()
         em.scheme_measure = scheme_measure.model
-        beg, end = scheme_measure.get_time_interval()
+        beg, end = scheme_measure.get_time_interval(self.period_start_date, self.period_end_date)
         em.begDateTime = beg
         em.endDateTime = end
         status = scheme_measure.get_new_status()
@@ -59,7 +81,42 @@ class EventMeasureManager(object):
         db.session.add(em)
 
     def represent_measures(self):
-        pass
+        query = EventMeasure.query.filter(EventMeasure.sourceAction_id == self.action.id)
+        return [
+            self._represent_measure(event_measure) for event_measure in query
+        ]
+
+    def _represent_measure(self, measure):
+        return {
+            'id': measure.id,
+            'event_id': measure.event_id,
+            'beg_datetime': measure.begDateTime,
+            'end_datetime': measure.endDateTime,
+            'status': MeasureStatus(measure.status),
+            'source_action_id': measure.sourceAction_id,
+            'action_id': measure.action_id,
+            'scheme_measure': self._represent_scheme_measure(measure.scheme_measure)
+        }
+
+    def _represent_scheme_measure(self, scheme_measure):
+        return {
+            'scheme': self._represent_scheme(scheme_measure.scheme),
+            'measure': self._represent_measure_rb(scheme_measure.measure)
+        }
+
+    def _represent_scheme(self, scheme):
+        return {
+            'id': scheme.id,
+            'code': scheme.code,
+            'name': scheme.name
+        }
+
+    def _represent_measure_rb(self, measure):
+        return {
+            'id': measure.id,
+            'code': measure.code,
+            'name': measure.name
+        }
 
 
 def _get_event_mkb_list(action):
@@ -103,7 +160,7 @@ class ActionSchemeMeasure(object):
             ExpertScheme, ExpertSchemeMKB, MKB
         ).filter(
             MKB.DiagID.in_(self.mkb_list)
-        )  # .options(eagerload(ExpertScheme.scheme_measures))
+        )
         self.scheme_measures = [SchemeMeasure(record) for record in query.all()]
         self._filter_by_schedules()
 
@@ -115,8 +172,27 @@ class SchemeMeasure():
     def __init__(self, model):
         self.model = model
 
-    def get_time_interval(self):
-        return [None, None]
+    def get_time_interval(self, start_date, end_date):
+        sched_type_code = self.model.schedule.schedule_type.code
+        if sched_type_code == 'after_visit':
+            start_date = start_date
+            end_date = end_date
+        elif sched_type_code == 'upon_med_indication':
+            start_date = end_date = None
+        else:
+            start_date = end_date = None
+        return [start_date, end_date]
 
     def get_new_status(self):
-        return 1
+        code = self.model.schedule.schedule_type.code
+        if code == 'after_visit':
+            status = MeasureStatus.assigned[0]
+        elif code == 'upon_med_indication':
+            status = MeasureStatus.upon_med_indications[0]
+        elif code == 'interval_single':
+            status = MeasureStatus.assigned[0]
+        elif code == 'upon_diag_set':
+            status = MeasureStatus.assigned[0]
+        else:
+            status = MeasureStatus.assigned[0]
+        return status

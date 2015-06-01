@@ -42,7 +42,10 @@ var CheckupCtrl = function ($scope, RisarApi, RefBookService, PrintingService) {
     };
 
     $scope.generateMeasures = function () {
-        RisarApi.measure.regenerate($scope.checkup.id);
+        RisarApi.measure.regenerate($scope.checkup.id).
+            then(function (measures) {
+                $scope.checkup.measures = measures;
+            });
     };
 
     var init = function () {
@@ -75,11 +78,10 @@ var CheckupFirstEditCtrl = function ($scope, $window, $location, $document, Risa
             updateBMI();
         }
     });
-    $scope.save = function () {
-        var form = $scope.CheckupFirstEditForm;
-        if (form.$invalid) {
-            var formelm = $('#CheckupFirstEditForm').find('.ng-invalid:not(ng-form):first');
-            $document.scrollToElement(formelm, 100, 1500);
+    $scope.save = function (form_controller) {
+        if (form_controller.$invalid) {
+            //var formelm = $('#CheckupFirstEditForm').find('.ng-invalid:not(ng-form):first');
+            //$document.scrollToElement(formelm, 100, 1500);
             return false;
         }
         if($scope.checkup){
@@ -97,7 +99,7 @@ var CheckupFirstEditCtrl = function ($scope, $window, $location, $document, Risa
             }
 
         })
-    }
+    };
     $scope.save_forward = function (form_controller) {
         form_controller.submit_attempt = true;
         if (form_controller.$valid){
