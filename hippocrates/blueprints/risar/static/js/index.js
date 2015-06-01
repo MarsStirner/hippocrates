@@ -7,12 +7,12 @@ var IndexCtrl = function ($scope, RisarApi) {
     $scope.tickets = [];
     $scope.curYear = new Date().getFullYear();
 
-    $scope.toolTipContentFunction_infants_death = function(){
-        return function(key, x, y, e, graph) {
-            var month = x%2 ? ' за ' + moment().add(-1, 'month').format("MMMM"): ' за ' + moment().format("MMMM");
-            return  key + month + '<p>' +  y + '</p>'
-        }
-    };
+//    $scope.toolTipContentFunction_infants_death = function(){
+//        return function(key, x, y, e, graph) {
+//            var month = x%2 ? ' за ' + moment().add(-1, 'month').format("MMMM"): ' за ' + moment().format("MMMM");
+//            return  key + month + '<p>' +  y + '</p>'
+//        }
+//    };
     $scope.toolTipContentFunction_pregnancy_results = function(){
         return function(key, x, y, e, graph) {
             return  key + '<p>' +  y + '</p>'
@@ -72,41 +72,58 @@ var IndexCtrl = function ($scope, RisarApi) {
         RisarApi.death_stats.get().then(function (result) {
             // 0 - dead, 1 - alive
             if (result){
-                $scope.infants_death_coeff = (result['current_year'][0]/(result['current_year'][0]+ result['current_year'][1])*1000).toFixed(2);
-                $scope.maternal_death_coeff = (result['maternal_death']/result['current_year'][1]*100000).toFixed(2);
+                var dead = result['0'].reduce(function(sum, current){
+                    return sum + current[1];
+                }, 0);
+                var alive = result['1'].reduce(function(sum, current){
+                    return sum + current[1];
+                }, 0);
+                var maternal_death_all = result['maternal_death'].reduce(function(sum, current){
+                    return sum + current[1];
+                }, 0);
+                $scope.infants_death_coeff = (dead/(dead + alive)*1000).toFixed(2);
+                $scope.maternal_death_coeff = (maternal_death_all/alive*100000).toFixed(2);
                 $scope.infants_death = [
                               {
-                                  "key": "Умершие",
-                                  "values": [ [ 1, result['previous_month'][0]] , [2, result['current_month'][0]] ],
+                                  "key": "Количество умерших детей",
+                                  "values": result['0'],
                                   "color": "#FF6633"
                               },
                               {
-                                  "key": "Живые",
-                                  "values": [ [ 3, result['previous_month'][1]] , [4, result['current_month'][1]] ],
+                                  "key": "Количество живых детей",
+                                  "values": result['1'],
                                   "color": "#339933"
+                              }
+                         ];
+                $scope.maternal_death = [
+                              {
+                                  "key": "Количество умерших пациенток",
+                                  "values": result['maternal_death'],
+                                  "color": "#FF6633"
                               }
                          ];
             } else{
                 $scope.infants_death = [];
+                $scope.maternal_death = [];
             }
         });
-        RisarApi.pregnancy_final_stats.get().then(function (result) {
-            $scope.pregnancy_results = [];
-            if (result['abortom']) {
-                $scope.pregnancy_results.push({
-                    "key": "Количество абортов",
-                    "values": [ [ 1, result['abortom']] ],
-                    "color": "#FF6633"
-                })
-            }
-            if (result['rodami']) {
-                $scope.pregnancy_results.push({
-                    "key": "Количество родов",
-                    "values": [ [ 2, result['rodami']] ],
-                    "color": "#339933"
-                })
-            }
-        })
+//        RisarApi.pregnancy_final_stats.get().then(function (result) {
+//            $scope.pregnancy_results = [];
+//            if (result['abortom']) {
+//                $scope.pregnancy_results.push({
+//                    "key": "Количество абортов",
+//                    "values": [ [ 1, result['abortom']] ],
+//                    "color": "#FF6633"
+//                })
+//            }
+//            if (result['rodami']) {
+//                $scope.pregnancy_results.push({
+//                    "key": "Количество родов",
+//                    "values": [ [ 2, result['rodami']] ],
+//                    "color": "#339933"
+//                })
+//            }
+//        })
     };
     $scope.refresh_diagram();
     $scope.refresh_gistograms();

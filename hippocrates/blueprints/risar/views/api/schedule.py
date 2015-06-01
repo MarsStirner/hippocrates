@@ -72,12 +72,9 @@ def api_0_current_stats():
 def api_0_death_stats():
     # младеньческая смертность
     result = collections.defaultdict(list)
-    result1 = collections.defaultdict(dict)
+    result1 = {'maternal_death': []}
     now = datetime.datetime.now()
     prev = now + datetime.timedelta(days=-now.day)
-    dates_conditions = {'current_year': now.strftime('%Y')+'-%',
-                        'previous_month': prev.strftime('%Y-%m')+'-%',
-                        'current_month': now.strftime('%Y-%m')+'-%'}
     selectable = db.select(
         (Action.id, ActionProperty_Integer.value_),
         whereclause=db.and_(
@@ -102,7 +99,8 @@ def api_0_death_stats():
         result[value].append(id)
 
     for value in result:
-        for condition in dates_conditions:
+        result1[value] = []
+        for i in range(1, 13):
             selectable1 = db.select(
                 (Action.id,),
                 whereclause=db.and_(
@@ -118,37 +116,38 @@ def api_0_death_stats():
                     rbRequestType.id == EventType.requestType_id,
                     Event.deleted == 0,
                     Action.deleted == 0,
-                    ActionProperty_Date.value.like(dates_conditions[condition]),
+                    ActionProperty_Date.value.like(now.strftime('%Y')+'-'+str(i).rjust(2, '0')+'-%'),
                     Action.id.in_(result[value])
                 ),
                 from_obj=(
                     Event, EventType, rbRequestType, Action, ActionType, ActionProperty, ActionPropertyType,
                     ActionProperty_Date
                 ))
-            result1[condition][value] = db.session.execute(selectable1).rowcount
+            result1[value].append([i, db.session.execute(selectable1).rowcount])
 
-    selectable = db.select(
-        (Action.id, ),
-        whereclause=db.and_(
-            ActionType.flatCode == 'epicrisis',
-            ActionPropertyType.code == 'death_date',
-            rbRequestType.code == 'pregnancy',
-            Action.event_id == Event.id,
-            ActionProperty.action_id == Action.id,
-            ActionPropertyType.id == ActionProperty.type_id,
-            ActionType.id == Action.actionType_id,
-            ActionProperty_Date.id == ActionProperty.id,
-            EventType.id == Event.eventType_id,
-            rbRequestType.id == EventType.requestType_id,
-            Event.deleted == 0,
-            Action.deleted == 0,
-            ActionProperty_Date.value.like(now.strftime('%Y')+'-%')
-        ),
-        from_obj=(
-            Event, EventType, rbRequestType, Action, ActionType, ActionProperty, ActionPropertyType,
-            ActionProperty_Date
-        ))
-    result1['maternal_death'] = db.session.execute(selectable).rowcount
+    for i in range(1, 13):
+        selectable = db.select(
+            (Action.id, ),
+            whereclause=db.and_(
+                ActionType.flatCode == 'epicrisis',
+                ActionPropertyType.code == 'death_date',
+                rbRequestType.code == 'pregnancy',
+                Action.event_id == Event.id,
+                ActionProperty.action_id == Action.id,
+                ActionPropertyType.id == ActionProperty.type_id,
+                ActionType.id == Action.actionType_id,
+                ActionProperty_Date.id == ActionProperty.id,
+                EventType.id == Event.eventType_id,
+                rbRequestType.id == EventType.requestType_id,
+                Event.deleted == 0,
+                Action.deleted == 0,
+                ActionProperty_Date.value.like(now.strftime('%Y')+'-'+str(i).rjust(2, '0')+'-%')
+            ),
+            from_obj=(
+                Event, EventType, rbRequestType, Action, ActionType, ActionProperty, ActionPropertyType,
+                ActionProperty_Date
+            ))
+        result1['maternal_death'].append([i, db.session.execute(selectable).rowcount])
     return result1
 
 
