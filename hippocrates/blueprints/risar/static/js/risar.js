@@ -21,8 +21,11 @@ WebMis20
         get: function (query) {
             return wrapper('POST', Config.url.api_event_search, {}, query)
         },
-        lpu_list: function () {
-            return wrapper('GET', Config.url.api_event_search_lpu_list)
+        area_list: function () {
+            return wrapper('GET', Config.url.api_event_search_area_list)
+        },
+        area_lpu_list: function (areas) {
+            return wrapper('POST', Config.url.api_event_search_area_lpu_list, {}, {areas: areas})
         },
         lpu_doctors_list: function (org_id) {
             return wrapper('GET', Config.url.api_event_search_lpu_doctors_list, {

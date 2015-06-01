@@ -3,9 +3,12 @@ import datetime
 import math
 
 from flask import request
+from flask.ext.login import current_user
 
+from nemesis.app import app
 from nemesis.lib.apiutils import api_method
 from nemesis.lib.utils import safe_int
+from nemesis.lib.vesta import Vesta
 from nemesis.models.enums import PrenatalRiskRate
 from nemesis.models.exists import Organisation, Person
 from blueprints.risar.app import module
@@ -34,6 +37,9 @@ def search_events(**kwargs):
     query = Search(indexes=['risar_events'], config=SearchConfig)
     if 'fio' in kwargs and kwargs['fio']:
         query = query.match(u'@name {0}'.format(kwargs['fio']), raw=True)
+    if 'areas' in kwargs:
+        areas = [area['code'][:5] for area in kwargs['areas']]
+        query = query.filter(area__in=areas)
     if 'org_id' in kwargs:
         query = query.filter(org_id__eq=int(kwargs['org_id']))
     if 'doc_id' in kwargs:
@@ -162,14 +168,36 @@ def api_0_event_search_ambulance():
     }
 
 
-@module.route('/api/0/lpu_list.json', methods=['POST', 'GET'])
+@module.route('/api/0/area_list.json', methods=['POST', 'GET'])
 @api_method
-def api_0_lpu_list():
+def api_0_area_list():
+    level1 = {}
+    level2 = []
+    organisation = Organisation.query.get(current_user.org_id)
+    risar_regions = [organisation.area[:2].ljust(11, '0')] if organisation else None
+    if not risar_regions:
+        risar_regions = app.config.get('RISAR_REGIONS', [])
+    for region in risar_regions:
+        l1 = Vesta.get_kladr_locality(region)
+        l2 = Vesta.get_kladr_locality_list("2", region)
+        level1[l1.code] = l1.name
+        level2.extend(l2) if l2 else level2.append(l1)
+    return level1, level2
+
+
+@module.route('/api/0/area_lpu_list.json', methods=['POST', 'GET'])
+@api_method
+def api_0_area_lpu_list():
+    j = request.get_json()
+    areas = j.get('areas')
     query = Organisation.query
     query = query.filter(
         Organisation.deleted == 0,
         Organisation.isHospital == 1,  # This is not right, however, f**k it
     )
+    if areas:
+        regex = '^' + '|^'.join([area['code'][:5] for area in areas if area['code']])
+        query = query.filter(Organisation.area.op('regexp')(regex))
     return query.all()
 
 

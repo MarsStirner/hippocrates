@@ -24,6 +24,7 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
     }];
     $scope.reset_filters = function () {
         $scope.query = {
+            areas: [],
             org: default_orgs[0],
             person: default_docs[0],
             checkup_date_from: null,
@@ -48,6 +49,7 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
         }
         var data = {
             page: $scope.pager.current_page,
+            areas: $scope.query.areas,
             org_id: $scope.query.org.id,
             doc_id: $scope.query.person.id,
             fio: $scope.query.fio || undefined,
@@ -66,10 +68,23 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
             $scope.results = result.events;
         });
     };
+    $scope.group_areas = function (item){
+        return $scope.level1[item.parent_code];
+    };
+    $scope.refresh_areas = function () {
+        return RisarApi.search_event.area_list()
+        .then(function (result) {
+            $scope.level1 = result[0];
+            $scope.areas = result[1];
+            return $scope.refresh_organisations();
+        });
+    };
     $scope.refresh_organisations = function () {
-        return RisarApi.search_event.lpu_list()
+        var areas = $scope.query.areas.length ? $scope.query.areas : $scope.areas;
+        return RisarApi.search_event.area_lpu_list(areas)
         .then(function (result) {
             $scope.organisations = default_orgs.concat(result);
+            $scope.query.org = $scope.organisations[0];
             return $scope.refresh_doctors();
         });
     };
@@ -86,7 +101,7 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
     };
     $scope.risks_rb = RefBookService.get('PrenatalRiskRate');
 
-    var org_promise = $scope.refresh_organisations();
+    var areas_promise = $scope.refresh_areas();
 
     var tc = new TimeoutCallback(perform, 600);
 
@@ -103,7 +118,7 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
     };
 
     // start
-    $q.all([org_promise]).then(function () {
+    $q.all([areas_promise]).then(function () {
         $scope.$watchCollection('query', function () {
             tc.start()
         });
