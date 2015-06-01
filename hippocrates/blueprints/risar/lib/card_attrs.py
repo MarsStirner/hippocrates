@@ -26,6 +26,7 @@ def get_card_attrs_action(event, auto=True):
     """
     action = Action.query.join(ActionType).filter(
         Action.event == event,
+        Action.deleted == 0,
         ActionType.flatCode == 'cardAttributes',
     ).first()
     if action is None and auto:
