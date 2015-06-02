@@ -148,7 +148,7 @@ var ScheduleCtrl = function ($scope, $http, $window, $location, RefBook, PersonT
     };
 
     $scope.view_patient_info = function (ticket) {
-        $window.open(url_client_html + '?client_id=' + ticket.record.client_id);
+        $window.open(url_for_patien_info_full + '?client_id=' + ticket.record.client_id);
     };
 
     $scope.appointment_toggle = function (ticket) {

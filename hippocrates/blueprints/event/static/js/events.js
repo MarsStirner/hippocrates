@@ -20,6 +20,8 @@ var EventListCtrl = function ($scope, $http, $window) {
         if ($scope.flt.speciality) model.speciality_id = $scope.flt.speciality.id;
         if ($scope.flt.exec_person) model.exec_person_id = $scope.flt.exec_person.id;
         if ($scope.flt.result) model.result_id = $scope.flt.result.id;
+        if ($scope.flt.org_struct) model.org_struct_id = $scope.flt.org_struct.id;
+        if ($scope.flt.diag_mkb) model.diag_mkb = $scope.flt.diag_mkb;
         return model;
     }
     $scope.get_data = function (page, reset_sorting) {
@@ -95,6 +97,8 @@ var EventListCtrl = function ($scope, $http, $window) {
             speciality: undefined,
             exec_person: null,
             result: undefined,
+            org_struct: null,
+            diag_mkb: null,
             unfinished: false
         };
     };
@@ -110,14 +114,14 @@ var EventListCtrl = function ($scope, $http, $window) {
     };
     $scope.reset_sorting = function () {
         $scope.current_sorting = {
-            order: 'ASC',
+            order: 'DESC',
             column_name: 'beg_date'
         };
         var i,
             columns = $scope.wmSortableHeaderCtrl.sort_cols;
         for (i = 0; i < columns.length; ++i) {
             if (columns[i].column_name === 'beg_date') {
-                columns[i].order = 'ASC';
+                columns[i].order = 'DESC';
             } else {
                 columns[i].order = undefined;
             }

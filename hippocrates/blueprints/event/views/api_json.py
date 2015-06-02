@@ -4,7 +4,7 @@ import datetime
 
 from flask import request, abort
 from flask.ext.login import current_user
-from sqlalchemy import desc
+from sqlalchemy import desc, func
 from sqlalchemy.orm import joinedload
 
 from nemesis.app import app
@@ -12,7 +12,7 @@ from nemesis.models.actions import Action, ActionType
 from nemesis.models.client import Client
 from nemesis.models.enums import EventPrimary, EventOrder
 from nemesis.models.event import (Event, EventType, Diagnosis, Diagnostic, Visit)
-from nemesis.models.exists import Person, rbRequestType, rbResult
+from nemesis.models.exists import Person, rbRequestType, rbResult, OrgStructure, MKB
 from nemesis.systemwide import db
 from nemesis.lib.utils import (jsonify, safe_traverse, logger, safe_datetime, get_utc_datetime_with_tz)
 from nemesis.lib.apiutils import api_method, ApiException
@@ -22,9 +22,9 @@ from nemesis.lib.jsonify import EventVisualizer
 from blueprints.event.app import module
 from blueprints.event.lib.utils import (EventSaveException, create_services, save_event, save_executives)
 from nemesis.lib.sphinx_search import SearchEventService, SearchEvent
-from nemesis.lib.data import get_planned_end_datetime, int_get_atl_dict_all
+from nemesis.lib.data import get_planned_end_datetime, int_get_atl_dict_all, _get_stationary_location_query
 from nemesis.lib.agesex import recordAcceptableEx
-from nemesis.lib.const import STATIONARY_EVENT_CODES
+from nemesis.lib.const import STATIONARY_EVENT_CODES, POLICLINIC_EVENT_CODES, DIAGNOSTIC_EVENT_CODES
 from nemesis.lib.user import UserUtils
 
 
@@ -476,6 +476,22 @@ def api_get_events():
         base_query = base_query.filter(Event.execPerson_id == flt['exec_person_id'])
     if 'result_id' in flt:
         base_query = base_query.filter(Event.result_id == flt['result_id'])
+    if 'org_struct_id' in flt:
+        stat_loc_query = _get_stationary_location_query(Event).with_entities(
+            Event.id.label('event_id'), OrgStructure.id.label('org_struct_id')
+        ).subquery('StationaryOs')
+        base_query = base_query.join(EventType).join(rbRequestType).outerjoin(
+            stat_loc_query, Event.id == stat_loc_query.c.event_id
+        ).filter(
+            func.IF(rbRequestType.code.in_(POLICLINIC_EVENT_CODES + DIAGNOSTIC_EVENT_CODES),
+                    Event.orgStructure_id == flt['org_struct_id'],
+                    func.IF(rbRequestType.code.in_(STATIONARY_EVENT_CODES),
+                            stat_loc_query.c.org_struct_id == flt['org_struct_id'],
+                            False)
+                    )
+        )
+    if 'diag_mkb' in flt:
+        base_query = base_query.join(Event.diagnostics, Diagnosis, Diagnosis.mkb).filter(MKB.DiagID == flt['diag_mkb']['code'])
 
     order_options = flt.get('sorting_params')
     if order_options:
@@ -504,7 +520,7 @@ def api_get_events():
         elif col_name == 'result_text':
             base_query = base_query.outerjoin(rbResult).order_by(rbResult.name.desc() if desc_order else rbResult.name)
     else:
-        base_query = base_query.order_by(Event.setDate)
+        base_query = base_query.order_by(Event.setDate.desc())
 
     per_page = int(flt.get('per_page', 20))
     page = int(flt.get('page', 1))

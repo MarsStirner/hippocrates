@@ -1,6 +1,7 @@
 {%- if current_user.id and current_user.current_role -%}
 <div class="navbar navbar-inverse navbar-static-top">
     <div class="container-fluid">
+        {% if current_user.current_role %}
         <ul class="nav navbar-nav" id="cur_modules">
             <li>
                 <div>
@@ -19,8 +20,9 @@
                 </div>
             </li>
         </ul>
+        {% endif %}
+        {% if current_user.id %}
         <ul class="nav navbar-nav pull-right">
-            {% if current_user.id %}
             <li>
                 {% if user_profiles_mng.has_ui_assistant() %}
                 <div class="navbar-text user-text-assist">
@@ -70,7 +72,7 @@
                 {% else %}
                 <span class="navbar-text{% if current_user.roles | length > 1 %} nohmargin{% endif %}">
                     <span class="glyphicon glyphicon-user"></span>
-                    <span> {{ current_user.format_name() }}</span>
+                    <span class="rmargin10"> {{ current_user.format_name() }}</span>
                 </span>
                 {% endif %}
 
@@ -89,8 +91,8 @@
                     <a id="logout" class="btn btn-small btn-default navbar-btn" href="{{ url_for('logout') }}" title="Выйти"><span class="glyphicon glyphicon-log-out"></span></a>
                 </div>
             </li>
-            {% endif %}
         </ul>
+        {% endif %}
     </div>
 </div>
 {%- endif -%}
