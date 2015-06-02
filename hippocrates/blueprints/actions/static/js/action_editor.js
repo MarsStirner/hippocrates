@@ -310,7 +310,7 @@ var ActionTemplateController = function ($scope, $modalInstance, $http, FlatTree
 
 WebMis20.controller('ActionEditorCtrl', ['$scope', '$window', '$modal', 'WMAction', 'PrintingService', 'PrintingDialog', 'RefBookService', 'WMEventCache', '$q', 'MessageBox', 'NotificationService', ActionEditorCtrl]);
 
-WebMis20.factory('WMAction', ['ApiCalls', function (ApiCalls) {
+WebMis20.factory('WMAction', ['ApiCalls', 'EzekielLock', function (ApiCalls, EzekielLock) {
     // FIXME: На данный момент это ломает функциональность действий, но пока пофиг.
     var template_fields = ['direction_date', 'beg_date', 'end_date', 'planned_end_date', 'status', 'set_person',
         'person', 'note', 'office', 'amount', 'uet', 'pay_status', 'account', 'is_urgent', 'coord_date'];
@@ -322,6 +322,8 @@ WebMis20.factory('WMAction', ['ApiCalls', function (ApiCalls) {
         this.properties_by_id = {};
         this.properties_by_code = {};
         this.ro = false;
+        this.lock = null;
+        this.editable = false;
     };
     /* Приватные методы */
     function merge_template_fields (self, source) {
@@ -367,10 +369,14 @@ WebMis20.factory('WMAction', ['ApiCalls', function (ApiCalls) {
         /* Получение экземпляра (в обёртке $q.defer().promise) Action по id */
         return ApiCalls.wrapper('GET', '/actions/api/action/{0}'.format(id)).then(
             function (result) {
-                return (new Action()).merge(result, true);
-            },
-            function (response) {
-                return response;
+                var action = (new Action()).merge(result, true);
+                if (arguments[1] && !action.ro) {
+                    var lock = action.lock = new EzekielLock('hitsl.mis.action.{0}'.format(action.id));
+                    lock.promise().then(function () { action.editable = true })
+                } else {
+                    action.lock = null;
+                }
+                return action;
             });
     };
     Action.get_new = function (event_id, action_type_id) {

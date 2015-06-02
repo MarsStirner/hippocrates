@@ -40,7 +40,7 @@ angular.module('WebMis20')
                             property_is_assignable = 'action.is_assignable(' + tag.id + ')',
                             property_unit_code = (property.type.unit)?(property.type.unit.code):('');
 
-                        if (scope.action.ro) {
+                        if (scope.action.editable) {
                             switch (property.type.type_name) {
                                 case 'Constructor':
                                 case 'Text':
@@ -177,7 +177,7 @@ angular.module('WebMis20')
                         var property_name = tag.title || property.type.name;
                         var template;
                         if (context === undefined) {
-                            if (scope.action.ro) {
+                            if (scope.action.editable) {
                                 template = '<div><label>{0}:</label> {1}</div>'.format(property_name, inner_template.format(property_code))
                             } else {
                                 template =
@@ -198,7 +198,7 @@ angular.module('WebMis20')
                                     property_name,
                                     property_code,
                                     property_is_assignable,
-                                    scope.action.ro,
+                                    scope.action.editable,
                                     inner_template.format(property_code),
                                     property_unit_code,
                                     property.type.norm ? property.type.norm : ''
