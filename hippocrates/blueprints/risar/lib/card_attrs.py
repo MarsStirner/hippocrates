@@ -154,7 +154,7 @@ def reevaluate_preeclampsia_risk(event, card_attrs_action=None):
                 delivery_years.append(pregnancy['year'].value)
 
         delivery_years.sort()
-        if datetime.datetime.now().year - delivery_years[-1] >= 10:
+        if delivery_years and datetime.datetime.now().year - delivery_years[-1] >= 10:
             risk = 1
 
     for diag in all_diagnoses:

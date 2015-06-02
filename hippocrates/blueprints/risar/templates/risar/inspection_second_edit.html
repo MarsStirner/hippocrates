@@ -45,18 +45,12 @@
                                 <li>
                                     <a aria-controls="fourth" href="#fourth" data-toggle="tab">
                                         <span class="badge">4</span>
-                                        <span>Влагалищное исследование</span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a aria-controls="fifth" href="#fifth" data-toggle="tab">
-                                        <span class="badge">5</span>
                                         <span>Заключение</span>
                                     </a>
                                 </li>
                                 <li>
                                     <a aria-controls="last" href="#last" data-toggle="tab">
-                                        <span class="badge">6</span>
+                                        <span class="badge">5</span>
                                         <span>Диагностические мероприятия</span>
                                     </a>
                                 </li>
@@ -183,7 +177,7 @@
                                         <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.edema" /></div></div></td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Кожа</th>
+                                        <th class="text-right">Кожа <span>&nbsp;</span></th>
                                         <td><div>
                                             <div name="skin" refbook-checkbox ref-book="rbRisarSkin" ng-model="checkup.skin">
                                                 [[ item.name ]]
@@ -192,7 +186,7 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right">Лимфоузлы</th>
+                                        <th class="text-right">Лимфоузлы <span>&nbsp;</span></th>
                                         <td><div>
                                             <div name="lymph" refbook-checkbox ng-model="checkup.lymph_nodes" ref-book="rbRisarLymph">
                                                 [[ item.name ]]
@@ -217,6 +211,15 @@
                                             </div>
                                             </div>
                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-right">Выделения <span>&nbsp;</span></th>
+                                        <td><div class="row"><div class="col-md-4">
+                                            <rb-select ng-model="checkup.secretion" ref-book="rbRisarSecretion"></rb-select></div></div></td>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-right">Физиологические отправления <span>&nbsp;</span></th>
+                                        <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.bowel_and_bladder_habits" /></div></div></td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -278,64 +281,7 @@
                             </table>
                         </ng-form>
                         <ng-form class="tab-pane" id="fourth" name="fourthForm" novalidate rc-submit rc-step>
-                            <h3>Шаг 4. Влагалищное исследование</h3>
-                            <table class="table table-condensed">
-                                <thead>
-                                <tr>
-                                    <th class="col-md-4"></th>
-                                    <th class="col-md-8"></th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <th class="text-right">Наружные половые органы</th>
-                                        <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.externalia" /></div></div></td>
-                                    </tr>
-                                    <tr>
-                                        <th class="text-right">Шейка матки</th>
-                                        <td><div class="row">
-                                            <div class="col-md-4"><rb-select name="cervix" ng-model="checkup.cervix" ref-book="rbRisarCervix"></rb-select></div>
-                                        </div></td>
-                                    </tr>
-                                    <tr>
-                                        <th class="text-right">Длина шейки матки</th>
-                                        <td><div class="row"><div class="col-md-4">
-                                            <rb-select ng-model="checkup.cervix_length" ref-book="rbRisarCervix_Length"></rb-select></div></div></td>
-                                    </tr>
-                                    <tr>
-                                        <th class="text-right">Позиция шейки матки</th>
-                                        <td><div class="row"><div class="col-md-4">
-                                            <rb-select ng-model="checkup.cervix_position" ref-book="rbRisarCervix_Position"></rb-select></div></div></td>
-                                    </tr>
-                                    <tr>
-                                        <th class="text-right">Зрелость шейки матки</th>
-                                        <td><div class="row"><div class="col-md-4">
-                                            <rb-select ng-model="checkup.cervix_maturity" ref-book="rbRisarCervix_Maturity"></rb-select></div></div></td>
-                                    </tr>
-                                    <tr>
-                                        <th class="text-right">Консистенция шейки матки</th>
-                                        <td><div class="row"><div class="col-md-4">
-                                            <rb-select ng-model="checkup.cervix_consistency" ref-book="rbRisarCervix_Consistency"></rb-select></div></div></td>
-                                    </tr>
-                                    <tr>
-                                        <th class="text-right">Цервикальный канал</th>
-                                        <td><div class="row"><div class="col-md-4">
-                                            <rb-select ng-model="checkup.cervical_canal" ref-book="rbRisarCervical_Canal"></rb-select></div></div></td>
-                                    </tr>
-                                    <tr>
-                                        <th class="text-right">Выделения</th>
-                                        <td><div class="row"><div class="col-md-4">
-                                            <rb-select ng-model="checkup.secretion" ref-book="rbRisarSecretion"></rb-select></div></div></td>
-                                    </tr>
-                                    <tr>
-                                        <th class="text-right">Физиологические отправления</th>
-                                        <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.bowel_and_bladder_habits" /></div></div></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </ng-form>
-                        <ng-form class="tab-pane" id="fifth" name="fifthForm" novalidate rc-submit rc-step>
-                            <h3>Шаг 5. Заключение</h3>
+                            <h3>Шаг 4. Заключение</h3>
                             <table class="table table-condensed">
                                 <thead>
                                 <tr>
@@ -430,7 +376,7 @@
                             </table>
                         </ng-form>
                         <ng-form class="tab-pane" id="last" name="lastForm" novalidate rc-submit rc-step>
-                            <h2>Шаг 6. Диагностические мероприятия</h2>
+                            <h2>Шаг 5. Диагностические мероприятия</h2>
                             {% include 'risar/inspection_measure_list.html' %}
                         </ng-form>
                     </div>
