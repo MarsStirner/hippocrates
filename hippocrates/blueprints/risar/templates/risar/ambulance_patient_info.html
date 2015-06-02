@@ -3,7 +3,7 @@
 {% block title %}> {{ module_name }}{% endblock %}
 
 {% block main %}
-    <div ng-controller="AmbulancPatientInfoCtrl">
+    <div ng-controller="AmbulancPatientInfoCtrl" ng-cloak>
     <div class="panel panel-default">
       <div class="panel-body"  ng-style="{'background-color': riskColor}">
         <a class="btn btn-small btn-default navbar-btn" href="{{ url_for('.index_html') }}"><span class="glyphicon glyphicon-arrow-left"></span></a>

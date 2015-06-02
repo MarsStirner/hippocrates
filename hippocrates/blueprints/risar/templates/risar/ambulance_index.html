@@ -3,7 +3,7 @@
 {% block title %}> {{ module_name }}{% endblock %}
 
 {% block main %}
-    <div ng-controller="AmbulanceIndexCtrl">
+    <div ng-controller="AmbulanceIndexCtrl" ng-cloak>
         <form class="form-horizontal marginal" role="form">
             <div class="input-group">
                 <input id="search" class="form-control" type="text" ng-model="query" autocomplete="off"
