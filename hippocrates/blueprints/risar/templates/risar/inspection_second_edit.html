@@ -49,8 +49,14 @@
                                     </a>
                                 </li>
                                 <li>
-                                    <a aria-controls="last" href="#last" data-toggle="tab">
+                                    <a aria-controls="fifth" href="#fifth" data-toggle="tab">
                                         <span class="badge">5</span>
+                                        <span>Талон посещения</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a aria-controls="last" href="#last" data-toggle="tab">
+                                        <span class="badge">6</span>
                                         <span>Диагностические мероприятия</span>
                                     </a>
                                 </li>
@@ -375,8 +381,109 @@
                                 </tbody>
                             </table>
                         </ng-form>
+                        <ng-form class="tab-pane" id="fifth" name="fifthForm" novalidate rc-submit rc-step>
+                            <h3>Шаг 5. Талон посещения</h3>
+                            <table class="table table-condensed">
+                                <thead>
+                                <tr>
+                                    <th class="col-md-4"></th>
+                                    <th class="col-md-8"></th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <th class="text-right">Место обслуживания <span class="text-danger">*</span></th>
+                                        <td><div class="row">
+                                            <div class="col-md-4">
+                                                <input name="place" ng-required="true" class="form-control">
+                                            </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-right">Цель посещения <span class="text-danger">*</span></th>
+                                        <td><div class="row">
+                                            <div class="col-md-4">
+                                                <input name="place" ng-required="true" class="form-control">
+                                            </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-right">Резульатат обращения <span class="text-danger">*</span></th>
+                                        <td><div class="row">
+                                            <div class="col-md-4">
+                                                <input name="place" ng-required="true" class="form-control">
+                                            </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-right">Документ временной нетрудоспособности <span>&nbsp;</span></th>
+                                        <td>&nbsp;</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-right">Статус <span>&nbsp;</span></td>
+                                        <td><div class="row">
+                                            <div class="col-md-4">
+                                                <ui-select ng-model="status" theme="select2" class="form-control">
+                                                    <ui-select-match></ui-select-match>
+                                                    <ui-select-choices repeat="item in []">
+                                                        <div></div>
+                                                    </ui-select-choices>
+                                                </ui-select>
+                                            </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-right">Причина выдачи <span>&nbsp;</span></td>
+                                        <td><div class="row">
+                                            <div class="col-md-4">
+                                                <ui-select ng-model="reason" theme="select2" class="form-control">
+                                                    <ui-select-match></ui-select-match>
+                                                    <ui-select-choices repeat="item in []">
+                                                        <div></div>
+                                                    </ui-select-choices>
+                                                </ui-select>
+                                            </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-right">Документ временной нетрудоспособности <span>&nbsp;</span></th>
+                                        <td>&nbsp;</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-right">Серия <span>&nbsp;</span></td>
+                                        <td><div class="row">
+                                            <div class="col-md-4">
+                                                <input name="serial"class="form-control">
+                                            </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-right">Номер <span>&nbsp;</span></td>
+                                        <td><div class="row">
+                                            <div class="col-md-4">
+                                                <input name="number"class="form-control">
+                                            </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-right">Дата выписки <span>&nbsp;</span></td>
+                                        <td>
+                                            <wm-date name="discharge_date"
+                                                     ng-model="discharge_date" style="width: 250px"></wm-date>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </ng-form>
                         <ng-form class="tab-pane" id="last" name="lastForm" novalidate rc-submit rc-step>
-                            <h2>Шаг 5. Диагностические мероприятия</h2>
+                            <h2>Шаг 6. Диагностические мероприятия</h2>
                             {% include 'risar/inspection_measure_list.html' %}
                         </ng-form>
                     </div>
@@ -386,6 +493,7 @@
                 <div class="form-group col-md-12">
                     <div class="pull-right">
                         <a class="pseudo-btn" ng-href="{{ url_for('.html_inspection') }}?event_id=[[ chart.id ]]">Перейти на форму осмотров пациентки</a>
+                        <ui-print-button ng-show="rc.sampleWizard.currentIndex == 4" ps="ps" resolve="ps_resolve()">Печать талона</ui-print-button>
                         <a class="btn btn-success"
                            ng-click="save(rc.sampleWizard.currentStep.formController)"
                            tooltip="[[rc.sampleWizard.currentStep.formController.$invalid && rc.sampleWizard.currentStep.formController.submit_attempt ? 'Заполните все обязательные поля': '']]"

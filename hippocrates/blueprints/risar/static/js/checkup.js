@@ -3,7 +3,7 @@
 var CheckupCtrl = function ($scope, RisarApi, RefBookService, PrintingService) {
     $scope.rbDiagnosisType = RefBookService.get('rbDiagnosisType');
     $scope.ps = new PrintingService("risar");
-    $scope.ps.set_context("risar");
+    $scope.ps.set_context("risar_talon");
     $scope.ps_resolve = function () {
         return {
             event_id: $scope.chart.id

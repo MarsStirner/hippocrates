@@ -22,6 +22,7 @@
                             <span class="caret"></span>
                           </button>
                           <ul class="dropdown-menu" role="menu">
+                            <li ng-class="{disabled: !ps.is_available()}"><a href="#" ng-click="open_print_window()" >Печать талона</a></li>
                             <li><a href="#">Копировать</a></li>
                             <li><a href="#">Удалить</a></li>
                           </ul>

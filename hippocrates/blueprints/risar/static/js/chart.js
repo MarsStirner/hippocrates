@@ -4,10 +4,17 @@
 
 'use strict';
 
-var ChartCtrl = function ($scope, $modal, RisarApi) {
+var ChartCtrl = function ($scope, $modal, RisarApi, PrintingService, PrintingDialog) {
     var params = aux.getQueryParams(window.location.search);
     var ticket_id = params.ticket_id;
     var event_id = params.event_id;
+    $scope.ps = new PrintingService("risar");
+    $scope.ps.set_context("risar_talon");
+    $scope.ps_resolve = function () {
+        return {
+            event_id: $scope.chart.id
+        }
+    };
     $scope.has_desease = function(has_diag){
         if ($scope.chart){
             if (has_diag){
@@ -55,6 +62,12 @@ var ChartCtrl = function ($scope, $modal, RisarApi) {
 //                {value:$scope.chart.anamnesis.father.toxic, text: 'токсические вечества'},
 //                {value:$scope.chart.anamnesis.father.drugs,text: 'наркотики'}];
         })
+    };
+
+    $scope.open_print_window = function () {
+        if ($scope.ps.is_available()){
+            PrintingDialog.open($scope.ps, $scope.$parent.$eval($scope.ps_resolve));
+        }
     };
     reload_chart();
 };
