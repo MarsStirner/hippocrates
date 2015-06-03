@@ -79,20 +79,21 @@ def get_diagnoses_from_action(action, open=False):
     """
     result = []
     evis = EventVisualizer()
-    for prop in action.properties:
-        if prop.type.typeName == 'Diagnosis' and prop.value:
-            if prop.type.isVector:
-                for diagnostic in prop.value:
-                    if not open or not diagnostic.endDate:
-                        diag = evis.make_diagnostic_record(diagnostic)
+    if action:
+        for prop in action.properties:
+            if prop.type.typeName == 'Diagnosis' and prop.value:
+                if prop.type.isVector:
+                    for diagnostic in prop.value:
+                        if not open or not diagnostic.endDate:
+                            diag = evis.make_diagnostic_record(diagnostic)
+                            diag['action_property_name'] = prop.type.name
+                            result.append(diag)
+                else:
+                    if not open or not prop.value.endDate:
+                        diag = evis.make_diagnostic_record(prop.value)
                         diag['action_property_name'] = prop.type.name
                         result.append(diag)
-            else:
-                if not open or not prop.value.endDate:
-                    diag = evis.make_diagnostic_record(prop.value)
-                    diag['action_property_name'] = prop.type.name
-                    result.append(diag)
-    result.sort(key=lambda x: x['set_date'])
+        result.sort(key=lambda x: x['set_date'])
     return result
 
 
