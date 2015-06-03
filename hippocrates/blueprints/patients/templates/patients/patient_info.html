@@ -12,7 +12,7 @@
                    ng-if="client_id != 'new'">
                     Записать на приём</a>
                 {% if current_user.current_role == 'admNurse' %}
-                <a href="{{ "{0}patients/{1}/appeals/new/?token={2}".format(config['WEBMIS10_URL'], request.args['client_id'], request.cookies.get(config['CASTIEL_AUTH_TOKEN'])) }}" class="btn btn-sm btn-primary" ng-if="client_id != 'new'" target="_blank">
+                <a href="{{ "{0}patients/{1}/appeals/new/?token={2}&role={3}".format(config['WEBMIS10_URL'], request.args['client_id'], request.cookies.get(config['CASTIEL_AUTH_TOKEN']), current_user.current_role) }}" class="btn btn-sm btn-primary" ng-if="client_id != 'new'" target="_blank">
                     Создать обращение</a>
                 {% else %}
                 <a class="btn btn-sm btn-primary" href="{{ url_for('event.new_event') }}?event_id=new&client_id={{ request.args['client_id'] }}"

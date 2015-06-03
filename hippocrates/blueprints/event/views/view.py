@@ -1,6 +1,7 @@
 # -*- encoding: utf-8 -*-
 
 from flask import request, render_template, abort, redirect
+from flask.ext.login import current_user
 
 from nemesis.app import app
 from ..app import module
@@ -23,7 +24,11 @@ def html_event_info():
         wm10url = app.config['WEBMIS10_URL'].rstrip('/')
         if not wm10url:
             return abort(404)
-        new_url = u'%s/appeals/%s/?token=%s' % (wm10url, event_id, request.cookies.get(app.config['CASTIEL_AUTH_TOKEN']))
+        new_url = (u'%s/appeals/%s/?token=%s&role=%s'
+                   % (wm10url,
+                      event_id,
+                      request.cookies.get(app.config['CASTIEL_AUTH_TOKEN']),
+                      current_user.current_role))
         return redirect(new_url)
     return get_event_form(event=event, client_id=event.client_id)
 
