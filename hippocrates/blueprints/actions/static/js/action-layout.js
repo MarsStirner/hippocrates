@@ -193,14 +193,12 @@ angular.module('WebMis20')
                                     <td class="text-center"><input type="checkbox" ng-model="{1}.is_assigned" ng-if="{2}" ng-disabled={3}></td>\
                                     <td>{4}</td>\
                                     <td class="text-center">{5}</td>\
-                                    <td class="text-center">{6}</td>\
                                 </tr>'.format(
                                     property_name,
                                     property_code,
                                     property_is_assignable,
                                     scope.action.ro,
                                     inner_template.format(property_code),
-                                    property_unit_code,
                                     property.type.norm ? property.type.norm : ''
                                 );
                             } else if (context.tag.tagName === 'vgroup') {
@@ -255,11 +253,10 @@ angular.module('WebMis20')
                         return '\
                             <table class="table table-hover">\
                                 <thead>\
-                                    <th width="30%"></th>\
-                                    <th width="10%" class="text-center">Назначено</th>\
+                                    <th width="35%"></th>\
+                                    <th width="15%" class="text-center">Назначено</th>\
                                     <th width="30%">Значение</th>\
-                                    <th width="15%" class="text-center">Ед. измерения</th>\
-                                    <th width="15%" class="text-center">Норма</th>\
+                                    <th width="20%" class="text-center">Норма</th>\
                                 </thead>\
                                 {0}\
                             </table>\
