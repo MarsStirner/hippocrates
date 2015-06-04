@@ -291,7 +291,7 @@ angular.module('WebMis20')
                 sas.setSource(properties.map(function (item) {return item.type.id}));
             });
 
-            scope.$watchCollection('action.layout', function (layout) {
+            function rebuild_layout (layout) {
                 v_groups_count = 0;
                 var template = build(layout);
                 sas_vgroup.setSource(aux.range(v_groups_count));
@@ -301,6 +301,14 @@ angular.module('WebMis20')
                 current_element = replace;
                 $compile(replace)(scope);
                 return layout;
+            }
+
+            scope.$watchCollection('action.layout', rebuild_layout);
+
+            scope.$watch('action.readonly', function (n, o) {
+                if (!angular.equals(n, o)) {
+                    rebuild_layout(scope.action.layout)
+                }
             })
         }
     }

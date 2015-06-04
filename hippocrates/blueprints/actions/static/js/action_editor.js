@@ -11,7 +11,7 @@ var ActionEditorCtrl = function ($scope, $window, $modal, WMAction, PrintingServ
     };
     $scope.ActionStatus = RefBookService.get('ActionStatus');
     $scope.action_id = params.action_id;
-    var action = $scope.action = new WMAction();
+    $scope.action = new WMAction();
     if (params.action_id) {
         WMAction.get(params.action_id).then(function (action) {
             $scope.action = action;
@@ -45,21 +45,21 @@ var ActionEditorCtrl = function ($scope, $window, $modal, WMAction, PrintingServ
     }
 
     $scope.on_status_changed = function () {
-        if (action.status.code === 'finished') {
-            if (!action.end_date) {
-                action.end_date = new Date();
+        if ($scope.action.status.code === 'finished') {
+            if (!$scope.action.end_date) {
+                $scope.action.end_date = new Date();
             }
         } else {
-            action.end_date = null;
+            $scope.action.end_date = null;
         }
     };
     $scope.on_enddate_changed = function () {
-        if (action.end_date) {
-            if (action.status.code !== 'finished') {
-                action.status = $scope.ActionStatus.get_by_code('finished');
+        if ($scope.action.end_date) {
+            if ($scope.action.status.code !== 'finished') {
+                $scope.action.status = $scope.ActionStatus.get_by_code('finished');
             }
         } else {
-            action.status = $scope.ActionStatus.get_by_code('started');
+            $scope.action.status = $scope.ActionStatus.get_by_code('started');
         }
     };
 
@@ -146,7 +146,7 @@ var ActionEditorCtrl = function ($scope, $window, $modal, WMAction, PrintingServ
         }
 
         var deferred = $q.defer();
-        if (action.readonly) {
+        if ($scope.action.readonly) {
             deferred.reject({
                 silent: true,
                 message: 'Действие открыто в режиме чтения'
