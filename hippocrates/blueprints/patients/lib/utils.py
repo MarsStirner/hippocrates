@@ -172,8 +172,9 @@ def add_or_update_address(client, data):
     loc_kladr = safe_traverse(data, 'address', 'locality')
     loc_kladr_code = loc_kladr.get('code') if isinstance(loc_kladr, dict) else loc_kladr
     street_kladr = safe_traverse(data, 'address', 'street')
-    street_kladr_code = street_kladr.get('code') if isinstance(street_kladr, dict) else street_kladr
-    free_input = safe_traverse(data, 'free_input')
+    street_kladr_code = safe_traverse(street_kladr, 'code', default=None)
+    street_free = safe_traverse(data, 'address', 'street_free')
+    free_input = safe_traverse(data, 'free_input', default='')
     house_number = safe_traverse(data, 'address', 'house_number', default='')
     corpus_number = safe_traverse(data, 'address', 'corpus_number', default='')
     flat_number = safe_traverse(data, 'address', 'flat_number', default='')
@@ -181,37 +182,40 @@ def add_or_update_address(client, data):
     if addr_id:
         client_addr = ClientAddress.query.get(addr_id)
 
-        #TODO: проверить еще раз условие (client_addr.address.house.KLADRCode and client_addr.address.house.KLADRStreetCode)
         if client_addr.address and client_addr.address.house:
             if free_input:
-                raise ClientSaveException(msg_err, u'попытка сохранения адреса в свободном виде для '
-                                          u'записи адреса из справочника адресов. Добавьте новую запись адреса.')
-            if not (loc_kladr_code and street_kladr_code):
-                raise ClientSaveException(msg_err, u'Отсутствуют обязательные поля: Населенный пункт и Улица.')
+                raise ClientSaveException(msg_err, u'нельзя сохранить адрес в свободном виде, '
+                    u'если до этого он был выбран из справочника Кладр. Добавьте новую запись адреса.')
+            if client_addr.address.house.KLADRStreetCode and street_free:
+                raise ClientSaveException(msg_err, u'нельзя сохранить значение для поля "Улица в свободном виде", '
+                    u'если до этого улица была выбрана из справочника Кладр. Добавьте новую запись адреса.')
+            if client_addr.address.house.streetFreeInput and street_kladr_code:
+                raise ClientSaveException(msg_err, u'нельзя сохранить значение для поля "Улица", '
+                    u'если до этого улица была заполнена в свободном виде. Добавьте новую запись адреса.')
+            if not (loc_kladr_code and (street_kladr_code or street_free)):
+                raise ClientSaveException(msg_err, u'Отсутствуют обязательные поля: Населенный пункт и Улица '
+                                                   u'(или Улица в свободном виде).')
             client_addr.address.flat = flat_number
 
             loc_kladr_code, street_kladr_code = Address.compatible_kladr(loc_kladr_code, street_kladr_code)
             client_addr.address.house.KLADRCode = loc_kladr_code
             client_addr.address.house.KLADRStreetCode = street_kladr_code
+            client_addr.address.house.streetFreeInput = street_free
             client_addr.address.house.number = house_number
             client_addr.address.house.corpus = corpus_number
-        elif client_addr.freeInput:
-            if loc_kladr_code or street_kladr_code:
-                raise ClientSaveException(msg_err, u'попытка сохранения адреса из справочника адресов '
-                                          u'для записи адреса в свободном виде. Добавьте новую запись адреса.')
+        else:
+            if loc_kladr_code:
+                raise ClientSaveException(msg_err, u'нельзя сохранить адрес, выбранный из справочника Кладр, '
+                    u'если до этого он был заполнен в свободном виде. Добавьте новую запись адреса.')
             if not free_input:
                 raise ClientSaveException(msg_err, u'Отсутствует обязательное поле Адрес в свободном виде.')
             client_addr.freeInput = free_input
-        else:
-            raise ClientSaveException(msg_err, u'неизвестная ошибка сохранения адреса из справочника адресов. '
-                                      u'Свяжитесь с администратором.')
 
         client_addr.localityType = loc_type
-        client_addr.deleted = deleted
     else:
-        if loc_kladr_code and street_kladr_code:
+        if loc_kladr_code:
             client_addr = ClientAddress.create_from_kladr(addr_type, loc_type, loc_kladr_code, street_kladr_code,
-                                                          house_number, corpus_number, flat_number, client)
+                                                          street_free, house_number, corpus_number, flat_number, client)
         elif free_input:
             client_addr = ClientAddress.create_from_free_input(addr_type, loc_type, free_input, client)
         else:
