@@ -27,10 +27,8 @@ WebMis20
         area_lpu_list: function (areas) {
             return wrapper('POST', Config.url.api_event_search_area_lpu_list, {}, {areas: areas})
         },
-        lpu_doctors_list: function (org_id) {
-            return wrapper('GET', Config.url.api_event_search_lpu_doctors_list, {
-                org_id: org_id
-            })
+        lpu_doctors_list: function (orgs) {
+            return wrapper('POST', Config.url.api_event_search_lpu_doctors_list, {}, {orgs: orgs})
         }
     };
     this.search_event_ambulance = {

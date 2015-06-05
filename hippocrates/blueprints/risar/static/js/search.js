@@ -89,14 +89,11 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
         });
     };
     $scope.refresh_doctors = function () {
-        return RisarApi.search_event.lpu_doctors_list($scope.query.org.id)
+        var org = $scope.query.org.id ? [$scope.query.org] : $scope.organisations.slice(1);
+        return RisarApi.search_event.lpu_doctors_list(org)
         .then(function (result) {
             $scope.doctors = default_docs.concat(result);
-            var doc_id = CurrentUser.get_main_user().id,
-                person_idx = _.findIndex($scope.doctors, function (doctor) {
-                    return doctor.id === doc_id;
-                });
-            $scope.query.person = $scope.doctors[person_idx !== -1 ? person_idx : 0];
+            $scope.query.person = $scope.doctors[0];
         });
     };
     $scope.risks_rb = RefBookService.get('PrenatalRiskRate');
@@ -119,6 +116,12 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
 
     // start
     $q.all([areas_promise]).then(function () {
+        var doc_id = CurrentUser.get_main_user().id,
+            person_idx = _.findIndex($scope.doctors, function (doctor) {
+                return doctor.id === doc_id;
+            });
+        $scope.query.person = $scope.doctors[person_idx !== -1 ? person_idx : 0];
+
         $scope.$watchCollection('query', function () {
             tc.start()
         });

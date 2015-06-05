@@ -204,24 +204,25 @@ def api_0_area_lpu_list():
 @module.route('/api/0/lpu_doctors_list.json', methods=['POST', 'GET'])
 @api_method
 def api_0_lpu_doctors_list():
-    query = Person.query
-    query = query.filter(
-        Person.deleted == 0
-    )
-    if 'org_id' in request.args:
+    result = []
+    j = request.get_json()
+    org_ids = [org['id'] for org in j.get('orgs')]
+    if org_ids:
+        query = Person.query
         query = query.filter(
-            Person.org_id == request.args['org_id']
+            Person.deleted == 0, Person.org_id.in_(org_ids)
         )
-    return [
-        {
-            'id': row.id,
-            'name': row.nameText,
-            'full_name': u'%s%s' % (row.nameText, u' (%s)' % row.speciality if row.speciality else ''),
-            'code': row.code,
-            'federal_code': row.federalCode,
-            'regional_code': row.regionalCode,
-            'org_name': row.organisation.shortName if row.org_id else None,
-            'org_id': row.org_id,
-        }
-        for row in query
-    ]
+        result = [
+            {
+                'id': row.id,
+                'name': row.nameText,
+                'full_name': u'%s%s' % (row.nameText, u' (%s)' % row.speciality if row.speciality else ''),
+                'code': row.code,
+                'federal_code': row.federalCode,
+                'regional_code': row.regionalCode,
+                'org_name': row.organisation.shortName if row.org_id else None,
+                'org_id': row.org_id,
+            }
+            for row in query
+        ]
+    return result
