@@ -30,7 +30,7 @@ def api_0_chart_epicrisis(event_id):
                 action.propsByCode[code].value = value
             elif code in diag_codes and value:
                 property = action.propsByCode[code]
-                property.value = ActionProperty_Diagnosis.objectify(property, value)
+                property.value = value
 
         for child_inspection in request.json['newborn_inspections']:
             if child_inspection:
