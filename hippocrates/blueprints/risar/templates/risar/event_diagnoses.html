@@ -15,10 +15,41 @@
                 {{ rimacros.page_title('Диагнозы случая') }}
             </div>
         </div>
-
-        <wm-diagnosis model="chart.diagnoses" list-mode="true"
-                      can-delete="true" can-edit="true"
-                      event="chart" risar="true"></wm-diagnosis>
+        <div class="row">
+            <div class="col-md-12">
+                <table class="table table-condensed">
+                    <thead>
+                        <tr>
+                            <th class="col-md-1">МКБ</th>
+                            <th class="col-md-1">Название</th>
+                            <th class="col-md-2">Тип</th>
+                            <th class="col-md-1">Начало</th>
+                            <th class="col-md-1">Окончание</th>
+                            <th class="col-md-3">Контекст</th>
+                            <th class="col-md-1"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="diag in chart.diagnoses">
+                            <td ng-if="diag.deleted" colspan="6" style="text-align:center;">Диагноз [[diag.diagnosis.mkb.code]] был удален. <a ng-click="delete_diagnosis(diag, 0)" style="cursor: pointer">Восстановить</a>?</td>
+                            <td ng-if="diag.deleted == 0" style="text-align:center;">[[diag.diagnosis.mkb.code]]</td>
+                            <td ng-if="diag.deleted == 0">[[diag.diagnosis.mkb.name]]</td>
+                            <td ng-if="diag.deleted == 0">[[diag.diagnosis_type.name]]</td>
+                            <td ng-if="diag.deleted == 0">[[diag.set_date | asDate]] </br> [[diag.person.name]]</td>
+                            <td ng-if="diag.deleted == 0">[[diag.end_date | asDate]] </br> [[diag.end_date ? diag.modify_person.name : ""]]</td>
+                            <td ng-if="diag.deleted == 0">[[diag.action.action_type.name]] - [[diag.action_property_name]]</td>
+                            <td ng-if="diag.deleted == 0" style="white-space:nowrap;">
+                                <button type="button" class="btn btn-sm btn-primary" title="Редактировать"
+                                        ng-click="edit_diagnosis(diag)"><span class="glyphicon glyphicon-pencil"></span>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-danger" title="Удалить"
+                                        ng-click="delete_diagnosis(diag)"><span class="glyphicon glyphicon-trash"></span>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         <div class="pull-right">
             <a class="btn btn-success"
                ng-click="save()">
