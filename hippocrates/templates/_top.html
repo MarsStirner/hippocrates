@@ -39,8 +39,10 @@
                                   </div>
                                   <div class="col-xs-8">
                                     <h4>{{ current_user.master.lastName }} {{ current_user.master.firstName|truncate(1, True, end=".") }} {{ current_user.master.patrName|truncate(1, True, end=".") }}
-                                      <small>{{ current_user.master.speciality }}</small><br>
+                                      <small>{{ current_user.master.speciality or '' }}</small><br>
                                       <small>{{ current_user.master._current_role_name }}</small>
+                                      <hr class="vmargin10">
+                                      <small>Отделение: {{ current_user.master.org_structure.name }}</small>
                                       </h4>
                                       <a href="{{ url_for('doctor_to_assist', next=request.url) }}" class="btn btn-primary btn-sm btn-block">Сменить врача</a>
                                   </div>
