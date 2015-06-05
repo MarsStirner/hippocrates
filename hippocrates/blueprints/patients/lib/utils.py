@@ -172,7 +172,7 @@ def add_or_update_address(client, data):
     loc_kladr = safe_traverse(data, 'address', 'locality')
     loc_kladr_code = loc_kladr.get('code') if isinstance(loc_kladr, dict) else loc_kladr
     street_kladr = safe_traverse(data, 'address', 'street')
-    street_kladr_code = safe_traverse(street_kladr, 'code', default=None)
+    street_kladr_code = safe_traverse(street_kladr, 'code')
     street_free = safe_traverse(data, 'address', 'street_free')
     free_input = safe_traverse(data, 'free_input', default='')
     house_number = safe_traverse(data, 'address', 'house_number', default='')
@@ -186,13 +186,13 @@ def add_or_update_address(client, data):
             if free_input:
                 raise ClientSaveException(msg_err, u'нельзя сохранить адрес в свободном виде, '
                     u'если до этого он был выбран из справочника Кладр. Добавьте новую запись адреса.')
-            if client_addr.address.house.KLADRStreetCode and street_free:
+            if client_addr.address.house.KLADRStreetCode and street_free is not None:
                 raise ClientSaveException(msg_err, u'нельзя сохранить значение для поля "Улица в свободном виде", '
                     u'если до этого улица была выбрана из справочника Кладр. Добавьте новую запись адреса.')
             if client_addr.address.house.streetFreeInput and street_kladr_code:
                 raise ClientSaveException(msg_err, u'нельзя сохранить значение для поля "Улица", '
                     u'если до этого улица была заполнена в свободном виде. Добавьте новую запись адреса.')
-            if not (loc_kladr_code and (street_kladr_code or street_free)):
+            if not (loc_kladr_code and (street_kladr_code or street_free is not None)):
                 raise ClientSaveException(msg_err, u'Отсутствуют обязательные поля: Населенный пункт и Улица '
                                                    u'(или Улица в свободном виде).')
             client_addr.address.flat = flat_number
