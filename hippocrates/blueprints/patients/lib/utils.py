@@ -8,6 +8,7 @@ import mimetypes
 from nemesis.app import app
 from nemesis.systemwide import db
 from nemesis.lib.utils import logger, safe_date, safe_traverse, get_new_uuid
+from nemesis.lib.const import SS_WORK_CODE, SS_NATIONALITY_CODE
 from nemesis.models.client import (ClientAllergy, ClientContact, ClientDocument,
    ClientIntoleranceMedicament, ClientSocStatus, ClientPolicy, BloodHistory, ClientAddress,
    ClientRelation, Address, ClientFileAttach
@@ -395,11 +396,11 @@ def add_or_update_soc_status(client, data):
     if not soc_status_type:
         raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Тип соц. статуса')
     beg_date = safe_date(data.get('beg_date'))
-    if not beg_date:
+    if not beg_date and soc_status_class_code not in (SS_WORK_CODE, SS_NATIONALITY_CODE):
         raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Дата начала')
     end_date = safe_date(data.get('end_date'))
     doc_info = data.get('self_document')
-    doc = add_or_update_doc(client, doc_info) if doc_info.keys() else None
+    doc = add_or_update_doc(client, doc_info) if doc_info and doc_info.keys() else None
 
     if soc_status_id:
         soc_status = ClientSocStatus.query.get(soc_status_id)
