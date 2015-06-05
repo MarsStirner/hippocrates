@@ -16,7 +16,7 @@ var CashBookCtrl = function ($scope, CashPaymentModal) {
     $scope.open_event = function (event) {
         CashPaymentModal.open(event).then(function (data) {
             $scope.alerts.push({
-                text: 'Оплата успешно проведена: {0} руб.'.format(data.payment_sum),
+                text: 'Платеж успешно проведен: {0} руб.'.format(data.payment_sum),
                 code: '',
                 data: null,
                 type: 'success'
@@ -92,7 +92,6 @@ var CashPaymentModal = function ($modal, RefBookService) {
         <button type="button" class="btn btn-danger" ng-click="$dismiss()">Отменить</button>\
     </div>',
                 controller: function ($scope, $http) {
-                    $scope.rbCashOperation = new RefBookService.get('rbCashOperation');
                     $scope.rbPaymentType = new RefBookService.get('PaymentType');
                     $scope.model = {
                         current_act: event.contract.coord_text,
@@ -117,8 +116,11 @@ var CashPaymentModal = function ($modal, RefBookService) {
                                 new_act: $scope.model.new_act
                             }
                         ).success(function () {
+                            var s = safe_traverse($scope.model, ['cash_operation', 'code']) === 'refund' ?
+                                -$scope.model.payment_sum :
+                                $scope.model.payment_sum;
                             $scope.$close({
-                                payment_sum: $scope.model.payment_sum
+                                payment_sum: s
                             });
                         }).error(function (data, status) {
                             $scope.alerts[0] = {

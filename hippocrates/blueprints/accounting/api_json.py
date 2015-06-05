@@ -22,11 +22,15 @@ def api_event_make_payment():
     payment_date = safe_date(pay_data.get('payment_date'))
     if not payment_date:
         return jsonify(u'Отсутствует дата платежа payment_date', 422, 'ERROR')
-    cash_operation = safe_traverse(pay_data.get('cash_operation'), 'id')
+    cash_operation_id = safe_traverse(pay_data.get('cash_operation'), 'id')
+    cash_op = rbCashOperation.query.get(cash_operation_id) if cash_operation_id else None
     payment_type = safe_traverse(pay_data.get('payment_type'), 'id', default=PaymentType.cash[0])
     payment_sum = pay_data.get('payment_sum')
     if not payment_sum:
         return jsonify(u'Отсутствует сумма платежа payment_sum', 422, 'ERROR')
+    if cash_op and cash_op.code == 'refund':
+        payment_sum = -payment_sum
+
     new_act = pay_data.get('new_act')
 
     event = Event.query.get(event_id)
@@ -34,7 +38,7 @@ def api_event_make_payment():
     payment = EventPayment()
     payment.master_id = event_id
     payment.date = payment_date
-    payment.cashOperation_id = cash_operation
+    payment.cashOperation_id = cash_operation_id
     payment.sum = payment_sum
     payment.typePayment = payment_type
     payment.cashBox = ''
@@ -137,11 +141,13 @@ def api_get_event_payments():
     per_page = int(flt.get('per_page', 20))
     page = int(flt.get('page', 1))
     paginate = base_query.paginate(page, per_page, False)
+    all_payment_id_list = base_query.with_entities(EventPayment.id).all()
     return jsonify({
         'pages': paginate.pages,
         'metrics': metrics,
         'items': [
             context.make_search_payments_list(event)
             for event in paginate.items
-        ]
+        ],
+        'all_payment_id_list': all_payment_id_list
     })

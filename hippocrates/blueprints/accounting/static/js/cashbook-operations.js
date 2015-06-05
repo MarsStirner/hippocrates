@@ -25,7 +25,7 @@ var CashBookOperationsCtrl = function ($scope, $http, $window, RefBookService, P
     $scope.ps.set_context('cashOperations');
     $scope.cash_op_resolve = function () {
         return {
-            'payments_id_list': $scope.results.map(function (payment) { return payment.id; })
+            'payments_id_list': $scope.all_payment_id_list
         }
     };
 
@@ -43,6 +43,7 @@ var CashBookOperationsCtrl = function ($scope, $http, $window, RefBookService, P
             $scope.pages = data.result.pages;
             $scope.results = data.result.items;
             $scope.metrics = data.result.metrics;
+            $scope.all_payment_id_list = data.result.all_payment_id_list;
             $scope.prints = {};
             angular.forEach($scope.results, function (payment) {
                 $scope.prints[payment.id] = new PrintingService('event');

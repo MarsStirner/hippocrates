@@ -54,7 +54,7 @@
         url_api_search_persons = '{{ url_for('schedule.api_search_persons') }}',
         url_api_procedure_offices_get = '{{ url_for('schedule.api_procedure_offices_get') }}',
         url_schedule_index = '{{ url_for('schedule.index') }}',
-        url_wm10_create_event = '{{ "{0}patients/{{0}}/appeals/new/".format(config['WEBMIS10_URL']) }}',
+        url_wm10_create_event = '{{ "{0}patients/{{0}}/appeals/new/?token={1}&role={2}".format(config['WEBMIS10_URL'], request.cookies.get(config['CASTIEL_AUTH_TOKEN']), current_user.current_role) | safe}}',
         url_api_event_make_payment = '{{ url_for('accounting.api_event_make_payment') }}',
         url_api_get_event_payments = '{{ url_for('accounting.api_get_event_payments') }}';
     </script>

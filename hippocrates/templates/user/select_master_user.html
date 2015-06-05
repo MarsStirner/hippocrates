@@ -16,14 +16,15 @@
         <div class="row">
         <form class="form-sel-doctor" method="POST">
             <h2 class="vmargin10 marginal">Выберите врача для ассистирования</h2>
-            <input type="text" class="form-control marginal" placeholder="ФИО, профиль, специальность..."
+            <input type="text" class="form-control marginal" placeholder="ФИО, профиль, специальность, отделение..."
                 ng-model="search.$">
             <div class="scrollable row">
                 <div class="col-md-6" ng-repeat="user in users | filter:search">
                     <button type="button" class="btn btn-lg btn-default btn-block marginal text-left"
-                            ng-click="select_user_and_go(user)">
+                            ng-click="select_user_and_go(user)" title="[[user.full_name]]">
                         <span ng-bind="user.full_name"></span><br>
-                        <span class="text-muted" ng-bind="user.profile.name"></span>
+                        <span style="font-size: smaller" class="text-muted" ng-bind="user.profile.name || '&nbsp;'"></span><br>
+                        <span style="font-size: smaller" class="text-muted" ng-bind="user.org_structure.name || '&nbsp;'"></span>
                     </button>
                 </div>
             </div>
