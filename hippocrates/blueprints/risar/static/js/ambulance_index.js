@@ -1,5 +1,4 @@
 var AmbulanceIndexCtrl = function ($scope, $window, RisarApi, Config) {
-    $scope.query = "";
     $scope.results = [];
     $scope.pager = {
         current_page: 1,
@@ -24,7 +23,18 @@ var AmbulanceIndexCtrl = function ($scope, $window, RisarApi, Config) {
             });
         }
     };
+
+    try {
+        $scope.query = JSON.parse($window.sessionStorage.getItem('query'));
+        $window.sessionStorage.removeItem('query');
+        if ($scope.query){$scope.perform_search(false)}
+    }
+    catch(e){
+        $scope.query = '';
+    }
+
     $scope.open_patient_info = function (event_id) {
+        $window.sessionStorage.setItem('query', JSON.stringify($scope.query));
         $window.open(Config.url.ambulance_patient_info + '?event_id=' + event_id, '_self');
     };
 
