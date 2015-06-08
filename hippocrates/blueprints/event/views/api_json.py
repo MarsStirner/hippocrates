@@ -60,7 +60,7 @@ def api_event_new_get():
     if ticket_id:
         ticket = ScheduleClientTicket.query.get(int(ticket_id))
         client_id = ticket.client_id
-        setDate = ticket.ticket.begDateTime
+        setDate = ticket.get_date_for_new_event()
         note = ticket.note
         exec_person_id = ticket.ticket.schedule.person_id
     else:
