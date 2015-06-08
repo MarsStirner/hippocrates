@@ -182,7 +182,7 @@ def api_0_area_list():
         l2 = Vesta.get_kladr_locality_list("2", region)
         level1[l1.code] = l1.name
         level2.extend(l2) if l2 else level2.append(l1)
-    return level1, level2
+    return level1, sorted(level2, key=lambda x: x.name)
 
 
 @module.route('/api/0/area_lpu_list.json', methods=['POST', 'GET'])
