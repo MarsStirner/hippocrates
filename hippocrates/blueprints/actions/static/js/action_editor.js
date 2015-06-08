@@ -11,7 +11,7 @@ var ActionEditorCtrl = function ($scope, $window, $modal, WMAction, PrintingServ
     };
     $scope.ActionStatus = RefBookService.get('ActionStatus');
     $scope.action_id = params.action_id;
-    var action = $scope.action = new WMAction();
+    $scope.action = new WMAction();
     if (params.action_id) {
         WMAction.get(params.action_id).then(function (action) {
             $scope.action = action;
@@ -45,21 +45,21 @@ var ActionEditorCtrl = function ($scope, $window, $modal, WMAction, PrintingServ
     }
 
     $scope.on_status_changed = function () {
-        if (action.status.code === 'finished') {
-            if (!action.end_date) {
-                action.end_date = new Date();
+        if ($scope.action.status.code === 'finished') {
+            if (!$scope.action.end_date) {
+                $scope.action.end_date = new Date();
             }
         } else {
-            action.end_date = null;
+            $scope.action.end_date = null;
         }
     };
     $scope.on_enddate_changed = function () {
-        if (action.end_date) {
-            if (action.status.code !== 'finished') {
-                action.status = $scope.ActionStatus.get_by_code('finished');
+        if ($scope.action.end_date) {
+            if ($scope.action.status.code !== 'finished') {
+                $scope.action.status = $scope.ActionStatus.get_by_code('finished');
             }
         } else {
-            action.status = $scope.ActionStatus.get_by_code('started');
+            $scope.action.status = $scope.ActionStatus.get_by_code('started');
         }
     };
 
@@ -146,7 +146,7 @@ var ActionEditorCtrl = function ($scope, $window, $modal, WMAction, PrintingServ
         }
 
         var deferred = $q.defer();
-        if (action.ro) {
+        if ($scope.action.readonly) {
             deferred.reject({
                 silent: true,
                 message: 'Действие открыто в режиме чтения'
@@ -178,7 +178,7 @@ var ActionEditorCtrl = function ($scope, $window, $modal, WMAction, PrintingServ
                 }
             })
         }
-        if ($scope.action.ro) {
+        if ($scope.action.readonly) {
             process_modal()
         } else {
             $scope.save_action(false).then(process_modal);
@@ -310,7 +310,7 @@ var ActionTemplateController = function ($scope, $modalInstance, $http, FlatTree
 
 WebMis20.controller('ActionEditorCtrl', ['$scope', '$window', '$modal', 'WMAction', 'PrintingService', 'PrintingDialog', 'RefBookService', 'WMEventCache', '$q', 'MessageBox', 'NotificationService', ActionEditorCtrl]);
 
-WebMis20.factory('WMAction', ['ApiCalls', function (ApiCalls) {
+WebMis20.factory('WMAction', ['ApiCalls', 'EzekielLock', function (ApiCalls, EzekielLock) {
     // FIXME: На данный момент это ломает функциональность действий, но пока пофиг.
     var template_fields = ['direction_date', 'beg_date', 'end_date', 'planned_end_date', 'status', 'set_person',
         'person', 'note', 'office', 'amount', 'uet', 'pay_status', 'account', 'is_urgent', 'coord_date'];
@@ -321,7 +321,9 @@ WebMis20.factory('WMAction', ['ApiCalls', function (ApiCalls) {
         this.action_columns = {};
         this.properties_by_id = {};
         this.properties_by_code = {};
-        this.ro = false;
+        this.ro = true;
+        this.lock = null;
+        this.readonly = true;
     };
     /* Приватные методы */
     function merge_template_fields (self, source) {
@@ -336,6 +338,8 @@ WebMis20.factory('WMAction', ['ApiCalls', function (ApiCalls) {
         /* Перетягивает статические метаданные действия */
         self.action_type = source.action_type;
         self.layout = source.layout;
+        // ro - атрибут нашего представления действия, обозначающий, разрешено ли нам вообще это действие редактировать
+        // в дальнейшем атрибут readonly определяет разрешения на редактирование с учётом блокировки.
         self.ro = source.ro;
         self.bak_lab_info = source.bak_lab_info;
     }
@@ -367,10 +371,18 @@ WebMis20.factory('WMAction', ['ApiCalls', function (ApiCalls) {
         /* Получение экземпляра (в обёртке $q.defer().promise) Action по id */
         return ApiCalls.wrapper('GET', '/actions/api/action/{0}'.format(id)).then(
             function (result) {
-                return (new Action()).merge(result, true);
-            },
-            function (response) {
-                return response;
+                console.log('aaaaaaaaaa');
+                var action = (new Action()).merge(result, true);
+                if (!arguments[1] && !action.ro) {
+                    var lock = action.lock = new EzekielLock('hitsl.mis.action.{0}'.format(action.id));
+                    lock.promise().then(function () {
+                        action.readonly = false
+                    })
+                } else {
+                    action.lock = null;
+                    action.readonly = action.ro;
+                }
+                return action;
             });
     };
     Action.get_new = function (event_id, action_type_id) {
