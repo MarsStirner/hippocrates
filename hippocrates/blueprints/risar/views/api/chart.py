@@ -92,10 +92,9 @@ def api_0_chart(event_id=None):
                 event.isPrimaryCode = EventPrimary.primary[0]
                 event.order = EventOrder.planned[0]
 
-                setDate = ticket.ticket.begDateTime
                 note = ticket.note
                 event.client = Client.query.get(client_id)
-                event.setDate = setDate
+                event.setDate = datetime.now()
                 event.note = note
                 event.externalId = get_new_event_ext_id(event.eventType.id, ticket.client_id)
                 event.payStatus = 0
