@@ -227,9 +227,9 @@ WebMis20
         },
         link: function (scope) {
             scope.icon_class = function (rate) {
-                if (rate == 1) return 'ri-prenatal-risk text-success';
-                if (rate == 2) return 'ri-prenatal-risk text-warning';
-                if (rate == 3) return 'ri-prenatal-risk text-danger';
+                if (rate == 1) return 'ri-prenatal-risk text-success-risar';
+                if (rate == 2) return 'ri-prenatal-risk text-warning-risar';
+                if (rate == 3) return 'ri-prenatal-risk text-danger-risar';
                 return 'ri-prenatal-risk-undefined';
             };
             scope.tooltip = function (rate) {
@@ -251,8 +251,8 @@ WebMis20
         },
         link: function (scope) {
             scope.icon_class = function (rate) {
-                if (rate == 1) return 'fa fa-exclamation-circle text-danger';
-                if (rate == 2) return 'fa fa-exclamation-circle text-success';
+                if (rate == 1) return 'fa fa-exclamation-circle text-danger-risar';
+                if (rate == 2) return 'fa fa-exclamation-circle text-success-risar';
                 return 'fa fa-question';
             };
             scope.tooltip = function (rate) {

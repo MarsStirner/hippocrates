@@ -113,9 +113,9 @@ var EventRoutingCtrl = function ($scope, $window, RisarApi) {
         var css = [],
             rr = safe_traverse(mkb, ['risk_rate', 'code']);
         if (rr) css.push('text-bold');
-        if (rr === 'high') css.push('text-danger');
-        else if (rr === 'medium') css.push('text-warning');
-        else if (rr === 'low') css.push('text-success');
+        if (rr === 'high') css.push('text-danger-risar');
+        else if (rr === 'medium') css.push('text-warning-risar');
+        else if (rr === 'low') css.push('text-success-risar');
         return css;
     };
     $scope.selected_diagnoses = [];
