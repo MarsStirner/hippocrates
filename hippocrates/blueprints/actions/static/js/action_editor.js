@@ -371,13 +371,13 @@ WebMis20.factory('WMAction', ['ApiCalls', 'EzekielLock', function (ApiCalls, Eze
         /* Получение экземпляра (в обёртке $q.defer().promise) Action по id */
         return ApiCalls.wrapper('GET', '/actions/api/action/{0}'.format(id)).then(
             function (result) {
-                console.log('aaaaaaaaaa');
                 var action = (new Action()).merge(result, true);
                 if (!arguments[1] && !action.ro) {
-                    var lock = action.lock = new EzekielLock('hitsl.mis.action.{0}'.format(action.id));
-                    lock.promise().then(function () {
-                        action.readonly = false
-                    })
+                    var lock = action.lock = new EzekielLock('hitsl.mis.action.{0}'.format(action.id)),
+                        event_source = lock.eventSource;
+                    event_source.subscribe('acquired', function () {action.readonly = false});
+                    event_source.subscribe('lost', function () {action.readonly = true});
+                    event_source.subscribe('released', function () {action.readonly = true});
                 } else {
                     action.lock = null;
                     action.readonly = action.ro;
