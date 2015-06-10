@@ -159,6 +159,7 @@ var ScheduleDayCtrl = function ($scope, $http, $filter, $interval, $location, $a
             interval = $interval(function () {
                 if ($scope.child_window.closed) {
                     $scope.client.reload('for_servicing');
+                    $scope.loadData();
                     $scope.clearInterval();
                     $scope.child_window = {};
                 }
