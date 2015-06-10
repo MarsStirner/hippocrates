@@ -346,7 +346,7 @@ def represent_checkups(event):
         Action.event == event,
         Action.deleted == 0,
         ActionType.flatCode.in_(checkup_flat_codes)
-    ).order_by(Action.begDate.desc())
+    ).order_by(Action.begDate)
     return map(represent_checkup, query)
 
 

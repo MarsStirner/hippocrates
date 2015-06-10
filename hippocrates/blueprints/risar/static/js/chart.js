@@ -37,7 +37,7 @@ var ChartCtrl = function ($scope, $modal, RisarApi, PrintingService, PrintingDia
         .then(function (event) {
             $scope.chart = event;
             var mother_anamnesis = $scope.chart.anamnesis.mother;
-            $scope.first_checkup = $scope.chart.checkups[$scope.chart.checkups.length-1];
+            $scope.first_checkup = $scope.chart.checkups.length ? $scope.chart.checkups[0] : null;
             if ($scope.chart.pregnancy_week > 40) {
                 $scope.pregnancy_week = '40+'}
             else {
@@ -49,11 +49,11 @@ var ChartCtrl = function ($scope, $modal, RisarApi, PrintingService, PrintingDia
                 {value:mother_anamnesis ? mother_anamnesis.drugs: false,text: 'наркотики'}];
 
             function get_mass_gain(prev, curr, i){
-                if (i === $scope.chart.checkups.length - 1) {
+                if (i === 0) {
                     curr.weight_gain = [0, 0];
                 }
-                var num_days = moment(prev.beg_date).diff(moment(curr.beg_date), 'days');
-                prev.weight_gain = curr.weight ? [prev.weight - curr.weight, num_days ] : [0, num_days];
+                var num_days = moment(curr.beg_date).diff(moment(prev.beg_date), 'days');
+                curr.weight_gain = prev.weight ? [curr.weight - prev.weight, num_days ] : [0, num_days];
                 return curr
             }
             $scope.chart.checkups.reduce(get_mass_gain, [{}]);

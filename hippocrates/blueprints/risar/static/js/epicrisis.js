@@ -26,8 +26,8 @@ var EpicrisisCtrl = function ($timeout, $scope, RefBookService, RisarApi) {
             $scope.chart = event;
 
             if($scope.chart.checkups.length){
-                var first_checkup = $scope.chart.checkups[$scope.chart.checkups.length-1];
-                $scope.weight_gain = $scope.chart.checkups[0].weight - first_checkup.weight; //прибавка массы за всю беременность
+                var first_checkup = $scope.chart.checkups[0];
+                $scope.weight_gain = $scope.chart.checkups[$scope.chart.checkups.length-1].weight - first_checkup.weight; //прибавка массы за всю беременность
             }
 
             if (!$scope.chart.epicrisis) {
