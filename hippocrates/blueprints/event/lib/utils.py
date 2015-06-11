@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import datetime
+import logging
 
 from flask.ext.login import current_user
 from sqlalchemy import func
@@ -10,11 +11,13 @@ from nemesis.lib.user import UserUtils
 from nemesis.models.actions import Action, ActionType
 from nemesis.models.client import Client
 from nemesis.models.event import EventLocalContract, Event, EventType, Visit, Event_Persons
-from nemesis.lib.utils import safe_date, safe_traverse, safe_datetime, logger, get_new_event_ext_id, get_new_uuid
+from nemesis.lib.utils import safe_date, safe_traverse, safe_datetime, get_new_event_ext_id, get_new_uuid
 from nemesis.models.exists import rbDocumentType, Person
 from nemesis.lib.settings import Settings
 from nemesis.models.schedule import ScheduleClientTicket
 from nemesis.systemwide import db
+
+logger = logging.getLogger('simple')
 
 
 class EventSaveException(Exception):

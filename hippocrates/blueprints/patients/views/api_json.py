@@ -1,16 +1,17 @@
 # -*- coding: utf-8 -*-
 
 import datetime
+import logging
 
 from flask import abort, request
 
 from nemesis.systemwide import db
 from nemesis.lib.apiutils import api_method, ApiException
-from nemesis.lib.utils import jsonify, logger, parse_id, public_endpoint, safe_int, safe_traverse, safe_traverse_attrs
+from nemesis.lib.utils import jsonify, parse_id, public_endpoint, safe_int, safe_traverse, safe_traverse_attrs
 from blueprints.patients.app import module
 from nemesis.lib.sphinx_search import SearchPatient
 from nemesis.lib.jsonify import ClientVisualizer
-from nemesis.models.client import Client, ClientFileAttach, ClientDocument, ClientPolicy
+from nemesis.models.client import Client, ClientFileAttach, ClientDocument, ClientPolicy, ClientContact
 from nemesis.models.exists import FileMeta, FileGroupDocument
 from blueprints.patients.lib.utils import (set_client_main_info, ClientSaveException, add_or_update_doc,
     add_or_update_address, add_or_update_copy_address, add_or_update_policy, add_or_update_blood_type,
@@ -20,6 +21,8 @@ from blueprints.patients.lib.utils import (set_client_main_info, ClientSaveExcep
 
 
 __author__ = 'mmalkov'
+
+logger = logging.getLogger('simple')
 
 
 @module.errorhandler(ClientSaveException)
@@ -40,7 +43,7 @@ def api_search_clients():
     except (KeyError, ValueError):
         return abort(404)
 
-    base_query = Client.query
+    base_query = Client.query.outerjoin(ClientPolicy, ClientDocument, ClientContact)
     id_list = []
 
     if query_string:

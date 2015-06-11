@@ -35,7 +35,7 @@ BABEL_DEFAULT_LOCALE = 'ru_RU'
 BEAKER_SESSION = {'session.type': 'file',
                   'session.data_dir': '/tmp/session/data',
                   'session.lock_dir': '/tmp/session/lock',
-                  'session.key': '{0}.beaker.session.id'.format(os.path.basename(os.path.abspath('..')))}
+                  'session.key': '{0}.session.id'.format(os.path.basename(os.path.dirname(__file__)))}
 
 TIME_ZONE = 'Europe/Moscow'
 

@@ -1,4 +1,4 @@
-<div class="form-horizontal" ng-if="!action.ro">
+<div class="form-horizontal" ng-if="!action.readonly">
     <div class="row" ng-if="!is_med_doc()">
         <div class="col-md-9">
             <div class="form-group">
@@ -24,7 +24,8 @@
             <div class="form-group">
                 <label for="set_person" class="col-md-2 control-label">Назначил</label>
                 <div class="col-md-10">
-                    <wm-person-select ng-model="action.set_person"></wm-person-select>
+                    <wm-person-select id="set_person" name="set_person" ng-model="action.set_person" theme="bootstrap"
+                        placeholder="Введите ФИО врача или специальность"></wm-person-select>
                 </div>
             </div>
         </div>
@@ -68,7 +69,8 @@
             <div class="form-group">
                 <label for="person" class="col-md-2 control-label">Исполнитель</label>
                 <div class="col-md-6">
-                    <wm-person-select id="person" name="person" ng-model="action.person" theme="bootstrap" placeholder="Введите ФИО врача или специальность"></wm-person-select>
+                    <wm-person-select id="person" name="person" ng-model="action.person" theme="bootstrap"
+                        placeholder="Введите ФИО врача или специальность"></wm-person-select>
                 </div>
                 <div ng-if="!is_med_doc()">
                     <label for="office" class="col-md-1 control-label">Кабинет</label>

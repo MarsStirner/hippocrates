@@ -66,6 +66,14 @@
                         <label for="filter-result">Результат</label>
                         <rb-select id="filter-result" ng-model="flt.result" placeholder="Результат" ref-book="rbResult"
                             custom-name="rbResultFormatter" order-by="rbResultFormatter"></rb-select>
+
+                        <label for="filter-org-struct">Подразделение</label>
+                        <wm-custom-dropdown id="filter-org-struct" ng-model="flt.org_struct">
+                            <wm-org-structure-tree nodes-selectable="true"></wm-org-structure-tree>
+                        </wm-custom-dropdown>
+
+                        <label for="filter-diag-mkb">МКБ диагноза</label>
+                        <ui-mkb id="filter-diag-mkb" ng-model="flt.diag_mkb"></ui-mkb>
                     </div>
                     <div class="panel-footer panel-default">
                         <div class="btn-group">

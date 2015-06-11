@@ -11,7 +11,7 @@ var ActionEditorCtrl = function ($scope, $window, $modal, WMAction, PrintingServ
     };
     $scope.ActionStatus = RefBookService.get('ActionStatus');
     $scope.action_id = params.action_id;
-    var action = $scope.action = new WMAction();
+    $scope.action = new WMAction();
     if (params.action_id) {
         WMAction.get(params.action_id).then(function (action) {
             $scope.action = action;
@@ -45,21 +45,21 @@ var ActionEditorCtrl = function ($scope, $window, $modal, WMAction, PrintingServ
     }
 
     $scope.on_status_changed = function () {
-        if (action.status.code === 'finished') {
-            if (!action.end_date) {
-                action.end_date = new Date();
+        if ($scope.action.status.code === 'finished') {
+            if (!$scope.action.end_date) {
+                $scope.action.end_date = new Date();
             }
         } else {
-            action.end_date = null;
+            $scope.action.end_date = null;
         }
     };
     $scope.on_enddate_changed = function () {
-        if (action.end_date) {
-            if (action.status.code !== 'finished') {
-                action.status = $scope.ActionStatus.get_by_code('finished');
+        if ($scope.action.end_date) {
+            if ($scope.action.status.code !== 'finished') {
+                $scope.action.status = $scope.ActionStatus.get_by_code('finished');
             }
         } else {
-            action.status = $scope.ActionStatus.get_by_code('started');
+            $scope.action.status = $scope.ActionStatus.get_by_code('started');
         }
     };
 
@@ -146,7 +146,7 @@ var ActionEditorCtrl = function ($scope, $window, $modal, WMAction, PrintingServ
         }
 
         var deferred = $q.defer();
-        if (action.ro) {
+        if ($scope.action.readonly) {
             deferred.reject({
                 silent: true,
                 message: 'Действие открыто в режиме чтения'
@@ -178,7 +178,7 @@ var ActionEditorCtrl = function ($scope, $window, $modal, WMAction, PrintingServ
                 }
             })
         }
-        if ($scope.action.ro) {
+        if ($scope.action.readonly) {
             process_modal()
         } else {
             $scope.save_action(false).then(process_modal);
@@ -205,16 +205,9 @@ var ActionEditorCtrl = function ($scope, $window, $modal, WMAction, PrintingServ
         });
     };
     $scope.template_prev = function () {
-        function process () {
-            WMAction.previous($scope.action).then(function (action) {
-                $scope.action.merge_template(action);
-            })
-        }
-        if ($scope.action.is_new()) {
-            $scope.action.save().then(process)
-        } else {
-            process()
-        }
+        WMAction.previous($scope.action).then(function (action) {
+            $scope.action.merge_template(action);
+        })
     };
 };
 var ActionTemplateController = function ($scope, $modalInstance, $http, FlatTree, SelectAll, args) {
@@ -317,7 +310,7 @@ var ActionTemplateController = function ($scope, $modalInstance, $http, FlatTree
 
 WebMis20.controller('ActionEditorCtrl', ['$scope', '$window', '$modal', 'WMAction', 'PrintingService', 'PrintingDialog', 'RefBookService', 'WMEventCache', '$q', 'MessageBox', 'NotificationService', ActionEditorCtrl]);
 
-WebMis20.factory('WMAction', ['$http', function ($http) {
+WebMis20.factory('WMAction', ['ApiCalls', 'EzekielLock', function (ApiCalls, EzekielLock) {
     // FIXME: На данный момент это ломает функциональность действий, но пока пофиг.
     var template_fields = ['direction_date', 'beg_date', 'end_date', 'planned_end_date', 'status', 'set_person',
         'person', 'note', 'office', 'amount', 'uet', 'pay_status', 'account', 'is_urgent', 'coord_date'];
@@ -328,7 +321,9 @@ WebMis20.factory('WMAction', ['$http', function ($http) {
         this.action_columns = {};
         this.properties_by_id = {};
         this.properties_by_code = {};
-        this.ro = false;
+        this.ro = true;
+        this.lock = null;
+        this.readonly = true;
     };
     /* Приватные методы */
     function merge_template_fields (self, source) {
@@ -343,6 +338,8 @@ WebMis20.factory('WMAction', ['$http', function ($http) {
         /* Перетягивает статические метаданные действия */
         self.action_type = source.action_type;
         self.layout = source.layout;
+        // ro - атрибут нашего представления действия, обозначающий, разрешено ли нам вообще это действие редактировать
+        // в дальнейшем атрибут readonly определяет разрешения на редактирование с учётом блокировки.
         self.ro = source.ro;
         self.bak_lab_info = source.bak_lab_info;
     }
@@ -372,12 +369,20 @@ WebMis20.factory('WMAction', ['$http', function ($http) {
     /* class methods */
     Action.get = function (id) {
         /* Получение экземпляра (в обёртке $q.defer().promise) Action по id */
-        return $http.get('/actions/api/action/{0}'.format(id)).then(
-            function (response) {
-                return (new Action()).merge(response.data.result, true);
-            },
-            function (response) {
-                return response;
+        return ApiCalls.wrapper('GET', '/actions/api/action/{0}'.format(id)).then(
+            function (result) {
+                var action = (new Action()).merge(result, true);
+                if (!arguments[1] && !action.ro) {
+                    var lock = action.lock = new EzekielLock('hitsl.mis.action.{0}'.format(action.id)),
+                        event_source = lock.eventSource;
+                    event_source.subscribe('acquired', function () {action.readonly = false});
+                    event_source.subscribe('lost', function () {action.readonly = true});
+                    event_source.subscribe('released', function () {action.readonly = true});
+                } else {
+                    action.lock = null;
+                    action.readonly = action.ro;
+                }
+                return action;
             });
     };
     Action.get_new = function (event_id, action_type_id) {
@@ -385,21 +390,20 @@ WebMis20.factory('WMAction', ['$http', function ($http) {
         var action = new Action();
         action.event_id = event_id;
         action.action_type_id = action_type_id;
-        return $http.get('/actions/api/action/new/{0}/{1}'.format(action_type_id, event_id)).then(function (response) {
-            return action.merge(response.data.result);
+        return ApiCalls.wrapper('GET', '/actions/api/action/new/{0}/{1}'.format(action_type_id, event_id)).then(function (result) {
+            return action.merge(result);
         });
     };
     Action.previous = function (action) {
         var dest = new Action();
-        return $http.get(
+        return ApiCalls.wrapper(
+            'GET',
             '/actions/api/action/query/previous', {
-                params: {
-                    event_id: action.event_id || action.event.id,
-                    at_id: action.action_type_id || action.action_type.id,
-                    beg_date: action.beg_date || undefined
-                }
+                client_id: action.client.id,
+                at_id: action.action_type_id || action.action_type.id,
+                id: action.id
             }).then(function (result) {
-            return dest.merge_template(result.data.result);
+            return dest.merge_template(result);
         })
     };
     Action.prototype.merge = function (src_action) {
@@ -426,9 +430,9 @@ WebMis20.factory('WMAction', ['$http', function ($http) {
         data.action_type_id = this.action_type_id || this.action_type.id;
         merge_properties(data, this);
         data.id = self.id;
-        return $http.post(url, data)
-            .then(function (response) {
-                return self.merge(response.data.result);
+        return ApiCalls.wrapper('POST', url, undefined, data)
+            .then(function (result) {
+                return self.merge(result);
             }, function (response) {
                 return response;
             })
@@ -437,8 +441,8 @@ WebMis20.factory('WMAction', ['$http', function ($http) {
     Action.prototype.reload = function () {
         var self = this;
         if (self.is_new()) {return}
-        $http.get('/actions/api/action/{0}'.format(self.id)).success(function (result) {
-            return self.merge(result.result);
+        ApiCalls.wrapper('GET', '/actions/api/action/{0}'.format(self.id)).then(function (result) {
+            return self.merge(result);
         })
     };
     Action.prototype.get_property = function (id) {

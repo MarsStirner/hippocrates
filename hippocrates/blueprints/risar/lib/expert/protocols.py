@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import itertools
 
-from nemesis.lib.utils import logger, safe_date
+from nemesis.lib.utils import safe_date
 from nemesis.systemwide import db
 from nemesis.models.actions import Action
 from nemesis.models.expert_protocol import ExpertScheme, ExpertSchemeMKB, EventMeasure, ExpertSchemeMeasureAssoc
@@ -32,7 +32,7 @@ class EventMeasureManager(object):
     def make_generator(cls, action_id, start_date, end_date):
         action = Action.query.get(action_id)
         action_mkb_list = _get_event_mkb_list(action)
-        logger.debug('Action <{0}> mkbs: {1}'.format(action_id, action_mkb_list))
+        # logger.debug('Action <{0}> mkbs: {1}'.format(action_id, action_mkb_list))
         obj = cls(action, action_mkb_list, start_date, end_date)
         return obj
 

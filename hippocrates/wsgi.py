@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 import os
+from flask import url_for
 from nemesis.app import app, bootstrap_app
 import config
+from nemesis.lib.frontend import frontend_config
 from version import version as app_version
 
 __author__ = 'viruzzz-kun'
@@ -91,6 +93,22 @@ app.register_blueprint(schedule_module, url_prefix='/schedule')
 app.register_blueprint(actions_module, url_prefix='/actions')
 app.register_blueprint(risar_module, url_prefix='/risar')
 
+
+@frontend_config
+def fc_urls():
+    """
+    Специфическая конфигурация фронтенда Hippocrates
+    :return: configuration dict
+    """
+    return {
+        'url': {
+            'doctor_to_assist': url_for("doctor_to_assist"),
+            'api_patient_file_attach': url_for("patients.api_patient_file_attach"),
+            'api_patient_file_attach_save': url_for("patients.api_patient_file_attach_save"),
+            'api_patient_file_attach_delete': url_for("patients.api_patient_file_attach_delete"),
+            'api_event_actions': url_for("event.api_event_actions"),
+        }
+    }
 
 if __name__ == "__main__":
     app.run(port=app.config['SERVER_PORT'])

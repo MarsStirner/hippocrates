@@ -40,7 +40,7 @@ angular.module('WebMis20')
                             property_is_assignable = 'action.is_assignable(' + tag.id + ')',
                             property_unit_code = (property.type.unit)?(property.type.unit.code):('');
 
-                        if (scope.action.ro) {
+                        if (scope.action.readonly) {
                             switch (property.type.type_name) {
                                 case 'Constructor':
                                 case 'Text':
@@ -177,7 +177,7 @@ angular.module('WebMis20')
                         var property_name = tag.title || property.type.name;
                         var template;
                         if (context === undefined) {
-                            if (scope.action.ro) {
+                            if (scope.action.readonly) {
                                 template = '<div><label>{0}:</label> {1}</div>'.format(property_name, inner_template.format(property_code))
                             } else {
                                 template =
@@ -193,14 +193,12 @@ angular.module('WebMis20')
                                     <td class="text-center"><input type="checkbox" ng-model="{1}.is_assigned" ng-if="{2}" ng-disabled={3}></td>\
                                     <td>{4}</td>\
                                     <td class="text-center">{5}</td>\
-                                    <td class="text-center">{6}</td>\
                                 </tr>'.format(
                                     property_name,
                                     property_code,
                                     property_is_assignable,
-                                    scope.action.ro,
+                                    scope.action.readonly,
                                     inner_template.format(property_code),
-                                    property_unit_code,
                                     property.type.norm ? property.type.norm : ''
                                 );
                             } else if (context.tag.tagName === 'vgroup') {
@@ -255,11 +253,10 @@ angular.module('WebMis20')
                         return '\
                             <table class="table table-hover">\
                                 <thead>\
-                                    <th width="30%"></th>\
-                                    <th width="10%" class="text-center">Назначено</th>\
+                                    <th width="35%"></th>\
+                                    <th width="15%" class="text-center">Назначено</th>\
                                     <th width="30%">Значение</th>\
-                                    <th width="15%" class="text-center">Ед. измерения</th>\
-                                    <th width="15%" class="text-center">Норма</th>\
+                                    <th width="20%" class="text-center">Норма</th>\
                                 </thead>\
                                 {0}\
                             </table>\
@@ -291,7 +288,7 @@ angular.module('WebMis20')
                 sas.setSource(properties.map(function (item) {return item.type.id}));
             });
 
-            scope.$watchCollection('action.layout', function (layout) {
+            function rebuild_layout (layout) {
                 v_groups_count = 0;
                 var template = build(layout);
                 sas_vgroup.setSource(aux.range(v_groups_count));
@@ -301,6 +298,14 @@ angular.module('WebMis20')
                 current_element = replace;
                 $compile(replace)(scope);
                 return layout;
+            }
+
+            scope.$watchCollection('action.layout', rebuild_layout);
+
+            scope.$watch('action.readonly', function (n, o) {
+                if (!angular.equals(n, o)) {
+                    rebuild_layout(scope.action.layout)
+                }
             })
         }
     }

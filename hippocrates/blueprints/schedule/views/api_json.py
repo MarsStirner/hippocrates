@@ -3,13 +3,14 @@
 import calendar
 import datetime
 from collections import defaultdict
+import logging
 
 from flask import abort, request
 from flask.ext.login import current_user
 
 from nemesis.systemwide import db, cache
 from nemesis.lib.sphinx_search import SearchPerson
-from nemesis.lib.utils import (jsonify, safe_traverse, parse_id, safe_date, safe_time_as_dt, safe_traverse_attrs, format_date, initialize_name, logger, safe_bool)
+from nemesis.lib.utils import (jsonify, safe_traverse, parse_id, safe_date, safe_time_as_dt, safe_traverse_attrs, format_date, initialize_name, safe_bool)
 from nemesis.lib.utils import public_endpoint
 from ..app import module
 from ..lib.data import delete_schedules
@@ -20,6 +21,8 @@ from nemesis.lib.jsonify import ScheduleVisualizer
 
 
 __author__ = 'mmalkov'
+
+logger = logging.getLogger('simple')
 
 
 @module.route('/api/schedule.json')
