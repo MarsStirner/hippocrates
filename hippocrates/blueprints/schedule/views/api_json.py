@@ -3,6 +3,7 @@
 import calendar
 import datetime
 from collections import defaultdict
+import logging
 
 from flask import abort, request
 from flask.ext.login import current_user
@@ -20,6 +21,8 @@ from nemesis.lib.jsonify import ScheduleVisualizer
 
 
 __author__ = 'mmalkov'
+
+logger = logging.getLogger('simple')
 
 
 @module.route('/api/schedule.json')
@@ -293,10 +296,6 @@ def api_persons_tree_schedule_info():
 
 @module.route('/api/search_persons.json')
 def api_search_persons():
-    import logging
-    from nemesis.app import app
-    logger = logging.getLogger(app.config['PROJECT_NAME'])
-
     try:
         query_string = request.args['q']
         only_doctors = safe_bool(request.args.get('only_doctors', True))

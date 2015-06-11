@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import datetime
+import logging
 
 from flask import request, abort
 from flask.ext.login import current_user
@@ -26,6 +27,8 @@ from nemesis.lib.data import get_planned_end_datetime, int_get_atl_dict_all, _ge
 from nemesis.lib.agesex import recordAcceptableEx
 from nemesis.lib.const import STATIONARY_EVENT_CODES, POLICLINIC_EVENT_CODES, DIAGNOSTIC_EVENT_CODES
 from nemesis.lib.user import UserUtils
+
+logger = logging.getLogger('simple')
 
 
 @module.errorhandler(EventSaveException)
@@ -93,10 +96,6 @@ def api_event_stationary_open_get():
 
 @module.route('api/event_save.json', methods=['POST'])
 def api_event_save():
-    import logging
-    from nemesis.app import app
-    logger = logging.getLogger(app.config['PROJECT_NAME'])
-
     all_data = request.json
     event_data = all_data.get('event')
     event_id = event_data.get('id')
@@ -114,10 +113,6 @@ def api_event_save():
 
 @module.route('api/event_close.json', methods=['POST'])
 def api_event_close():
-    import logging
-    from nemesis.app import app
-    logger = logging.getLogger(app.config['PROJECT_NAME'])
-
     all_data = request.json
     event_data = all_data['event']
     event_id = event_data['id']

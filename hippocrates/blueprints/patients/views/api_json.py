@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import datetime
+import logging
 
 from flask import abort, request
 
@@ -20,6 +21,8 @@ from blueprints.patients.lib.utils import (set_client_main_info, ClientSaveExcep
 
 
 __author__ = 'mmalkov'
+
+logger = logging.getLogger('simple')
 
 
 @module.errorhandler(ClientSaveException)
@@ -102,10 +105,6 @@ def api_patient_appointments():
 
 @module.route('/api/save_patient_info.json', methods=['POST'])
 def api_patient_save():
-    import logging
-    from nemesis.app import app
-    logger = logging.getLogger(app.config['PROJECT_NAME'])
-
     client_data = request.json
     client_id = parse_id(client_data, 'client_id', True)
     if client_id is False:

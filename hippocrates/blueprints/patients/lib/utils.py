@@ -2,6 +2,7 @@
 
 import base64
 import datetime
+import logging
 import os
 import mimetypes
 
@@ -16,6 +17,7 @@ from nemesis.models.client import (ClientAllergy, ClientContact, ClientDocument,
 from nemesis.models.enums import AddressType
 from nemesis.models.exists import rbSocStatusClass, FileMeta, FileGroupDocument
 
+logger = logging.getLogger('simple')
 
 
 # def format_snils(snils):
@@ -541,10 +543,6 @@ def generate_filename(name, mime, descname=None, idx=None, date=None, relation_t
 
 
 def store_file_locally(filepath, file_data):
-    import logging
-    from nemesis.app import app
-    logger = logging.getLogger(app.config['PROJECT_NAME'])
-
     uri_string = file_data
     data_string = uri_string.split(',')[1]  # seems legit
     data_string = base64.b64decode(data_string)

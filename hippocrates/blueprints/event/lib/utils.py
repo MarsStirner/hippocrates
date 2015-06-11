@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import datetime
+import logging
 
 from flask.ext.login import current_user
 from sqlalchemy import func
@@ -15,6 +16,8 @@ from nemesis.models.exists import rbDocumentType, Person
 from nemesis.lib.settings import Settings
 from nemesis.models.schedule import ScheduleClientTicket
 from nemesis.systemwide import db
+
+logger = logging.getLogger('simple')
 
 
 class EventSaveException(Exception):
@@ -93,10 +96,6 @@ def update_event(event_id, event_data, local_contract_data):
 
 
 def save_event(event_id, data):
-    import logging
-    from nemesis.app import app
-    logger = logging.getLogger(app.config['PROJECT_NAME'])
-
     event_data = data.get('event')
     if not event_data:
         raise EventSaveException(data={
@@ -312,10 +311,6 @@ def create_services(event_id, service_groups, contract_id):
     """
     Создание или обновление услуг (действий) и последующее сохранение в бд.
     """
-    import logging
-    from nemesis.app import app
-    logger = logging.getLogger(app.config['PROJECT_NAME'])
-
     actions = []
     errors = []
     for sg in service_groups:
