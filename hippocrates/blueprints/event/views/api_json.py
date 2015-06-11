@@ -14,7 +14,7 @@ from nemesis.models.enums import EventPrimary, EventOrder
 from nemesis.models.event import (Event, EventType, Diagnosis, Diagnostic, Visit)
 from nemesis.models.exists import Person, rbRequestType, rbResult, OrgStructure, MKB
 from nemesis.systemwide import db
-from nemesis.lib.utils import (jsonify, safe_traverse, logger, safe_datetime, get_utc_datetime_with_tz)
+from nemesis.lib.utils import (jsonify, safe_traverse, safe_datetime, get_utc_datetime_with_tz)
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.models.schedule import ScheduleClientTicket
 from nemesis.models.exists import (Organisation, )
@@ -93,6 +93,10 @@ def api_event_stationary_open_get():
 
 @module.route('api/event_save.json', methods=['POST'])
 def api_event_save():
+    import logging
+    from nemesis.app import app
+    logger = logging.getLogger(app.config['PROJECT_NAME'])
+
     all_data = request.json
     event_data = all_data.get('event')
     event_id = event_data.get('id')
@@ -110,6 +114,10 @@ def api_event_save():
 
 @module.route('api/event_close.json', methods=['POST'])
 def api_event_close():
+    import logging
+    from nemesis.app import app
+    logger = logging.getLogger(app.config['PROJECT_NAME'])
+
     all_data = request.json
     event_data = all_data['event']
     event_id = event_data['id']

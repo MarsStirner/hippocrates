@@ -6,7 +6,7 @@ from flask import abort, request
 
 from nemesis.systemwide import db
 from nemesis.lib.apiutils import api_method, ApiException
-from nemesis.lib.utils import jsonify, logger, parse_id, public_endpoint, safe_int, safe_traverse, safe_traverse_attrs
+from nemesis.lib.utils import jsonify, parse_id, public_endpoint, safe_int, safe_traverse, safe_traverse_attrs
 from blueprints.patients.app import module
 from nemesis.lib.sphinx_search import SearchPatient
 from nemesis.lib.jsonify import ClientVisualizer
@@ -102,6 +102,10 @@ def api_patient_appointments():
 
 @module.route('/api/save_patient_info.json', methods=['POST'])
 def api_patient_save():
+    import logging
+    from nemesis.app import app
+    logger = logging.getLogger(app.config['PROJECT_NAME'])
+
     client_data = request.json
     client_id = parse_id(client_data, 'client_id', True)
     if client_id is False:

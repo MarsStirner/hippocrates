@@ -7,7 +7,7 @@ import mimetypes
 
 from nemesis.app import app
 from nemesis.systemwide import db
-from nemesis.lib.utils import logger, safe_date, safe_traverse, get_new_uuid
+from nemesis.lib.utils import safe_date, safe_traverse, get_new_uuid
 from nemesis.lib.const import SS_WORK_CODE, SS_NATIONALITY_CODE
 from nemesis.models.client import (ClientAllergy, ClientContact, ClientDocument,
    ClientIntoleranceMedicament, ClientSocStatus, ClientPolicy, BloodHistory, ClientAddress,
@@ -541,6 +541,10 @@ def generate_filename(name, mime, descname=None, idx=None, date=None, relation_t
 
 
 def store_file_locally(filepath, file_data):
+    import logging
+    from nemesis.app import app
+    logger = logging.getLogger(app.config['PROJECT_NAME'])
+
     uri_string = file_data
     data_string = uri_string.split(',')[1]  # seems legit
     data_string = base64.b64decode(data_string)

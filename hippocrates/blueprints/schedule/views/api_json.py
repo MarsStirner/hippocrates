@@ -9,7 +9,7 @@ from flask.ext.login import current_user
 
 from nemesis.systemwide import db, cache
 from nemesis.lib.sphinx_search import SearchPerson
-from nemesis.lib.utils import (jsonify, safe_traverse, parse_id, safe_date, safe_time_as_dt, safe_traverse_attrs, format_date, initialize_name, logger, safe_bool)
+from nemesis.lib.utils import (jsonify, safe_traverse, parse_id, safe_date, safe_time_as_dt, safe_traverse_attrs, format_date, initialize_name, safe_bool)
 from nemesis.lib.utils import public_endpoint
 from ..app import module
 from ..lib.data import delete_schedules
@@ -293,6 +293,10 @@ def api_persons_tree_schedule_info():
 
 @module.route('/api/search_persons.json')
 def api_search_persons():
+    import logging
+    from nemesis.app import app
+    logger = logging.getLogger(app.config['PROJECT_NAME'])
+
     try:
         query_string = request.args['q']
         only_doctors = safe_bool(request.args.get('only_doctors', True))

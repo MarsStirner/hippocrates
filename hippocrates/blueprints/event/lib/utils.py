@@ -10,7 +10,7 @@ from nemesis.lib.user import UserUtils
 from nemesis.models.actions import Action, ActionType
 from nemesis.models.client import Client
 from nemesis.models.event import EventLocalContract, Event, EventType, Visit, Event_Persons
-from nemesis.lib.utils import safe_date, safe_traverse, safe_datetime, logger, get_new_event_ext_id, get_new_uuid
+from nemesis.lib.utils import safe_date, safe_traverse, safe_datetime, get_new_event_ext_id, get_new_uuid
 from nemesis.models.exists import rbDocumentType, Person
 from nemesis.lib.settings import Settings
 from nemesis.models.schedule import ScheduleClientTicket
@@ -93,6 +93,10 @@ def update_event(event_id, event_data, local_contract_data):
 
 
 def save_event(event_id, data):
+    import logging
+    from nemesis.app import app
+    logger = logging.getLogger(app.config['PROJECT_NAME'])
+
     event_data = data.get('event')
     if not event_data:
         raise EventSaveException(data={
@@ -308,6 +312,10 @@ def create_services(event_id, service_groups, contract_id):
     """
     Создание или обновление услуг (действий) и последующее сохранение в бд.
     """
+    import logging
+    from nemesis.app import app
+    logger = logging.getLogger(app.config['PROJECT_NAME'])
+
     actions = []
     errors = []
     for sg in service_groups:
