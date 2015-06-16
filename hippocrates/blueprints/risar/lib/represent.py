@@ -266,15 +266,24 @@ def represent_card_attributes(event):
     }
 
 
+def represent_pregnancies(event):
+    prev_pregnancies = [represent_pregnancy(action) for action in event.actions
+                        if action.actionType_id == get_action_type_id(risar_anamnesis_pregnancy)]
+    return prev_pregnancies
+
+
+def represent_pregnancy(action):
+    pregnancy = dict(action_apt_values(action, pregnancy_apt_codes), id=action.id)
+    pregnancy['newborn_inspections'] = represent_newborn_inspections(pregnancy['newborn_inspections']) if \
+        pregnancy.get('newborn_inspections') else []
+    return pregnancy
+
+
 def represent_anamnesis(event):
     return {
         'mother': represent_mother_action(event),
         'father': represent_father_action(event),
-        'pregnancies': [
-            dict(action_apt_values(action, pregnancy_apt_codes), id=action.id)
-            for action in event.actions
-            if action.actionType_id == get_action_type_id(risar_anamnesis_pregnancy)
-        ],
+        'pregnancies': represent_pregnancies(event),
         'transfusions': [
             dict(action_apt_values(action, transfusion_apt_codes), id=action.id)
             for action in event.actions
@@ -478,7 +487,8 @@ def represent_epicrisis(event, action=None):
     )
     finish_date = epicrisis['delivery_date']
     epicrisis['registration_pregnancy_week'] = get_pregnancy_week(event, event.setDate.date()) if finish_date else None
-    epicrisis['newborn_inspections'] = represent_newborn_inspections(event)
+    epicrisis['newborn_inspections'] = represent_newborn_inspections(epicrisis['newborn_inspections']) if \
+        epicrisis.get('newborn_inspections') else []
     epicrisis['info'] = make_epicrisis_info(epicrisis)
     if epicrisis:
         evis = EventVisualizer()
@@ -489,12 +499,10 @@ def represent_epicrisis(event, action=None):
     return epicrisis
 
 
-def represent_newborn_inspections(event):
+def represent_newborn_inspections(children_info):
     newborn_inspections = []
-    actions = Action.query.join(ActionType).filter(Action.event == event, Action.deleted == 0,
-                                                   ActionType.flatCode == risar_newborn_inspection).all()
 
-    for action in actions:
+    for action in children_info:
         inspection = dict((code, prop.value) for (code, prop) in action.propsByCode.iteritems())
         inspection['id'] = action.id
         inspection['sex'] = Gender(inspection['sex']) if inspection['sex'] is not None else None

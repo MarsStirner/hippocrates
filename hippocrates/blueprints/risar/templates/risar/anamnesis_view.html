@@ -161,7 +161,7 @@
                 <table class="table">
                     <thead>
                     <tr>
-                        <th>№</th>
+                        <th>Год</th>
                         <th>Исход беременности</th>
                         <th>Сведения о детях</th>
                         <th>Особенности</th>
@@ -171,10 +171,11 @@
                     <tbody>
                     <tr ng-repeat="p in chart.anamnesis.pregnancies">
                         <td ng-if="p.deleted" colspan="5" class="text-center">Удалено. <a ng-click="restore(p)" style="cursor: pointer">Восстановить</a>?</td>
-                        <td ng-if="!p.deleted" ng-bind="p.number"></td>
+                        <td ng-if="!p.deleted" ng-bind="p.year"></td>
                         <td ng-if="!p.deleted" ng-bind="p.pregnancyResult.name"></td>
-                        <td ng-if="!p.deleted">[[ (p.alive)?('живой'):('мёртвый') ]]; [[ (p.alive)?(p.weight):(p.cause_of_death) ]]</td>
-                        <td ng-if="!p.deleted" ng-bind="p.note"></td>
+                        <td ng-if="!p.deleted">Дети ([[p.newborn_inspections.length]]):<div ng-repeat="child_info in p.newborn_inspections"><b>ребенок [[$index+1]]</b>: [[ (child_info.alive)?('живой'):('мёртвый') ]], масса: [[child_info.weight]]г
+                            [[ (!child_info.alive && child_info.death_reason) ? ', причина смерти: '+child_info.death_reason: '']]</div></td>
+                        <td ng-if="!p.deleted">[[p.note]]<br>[[p.preeclampsia ? 'Была преэклампсия во время беременности': '']]</td>
                         <td ng-if="!p.deleted" class="col-md-1 nowrap">
                             <button class="btn btn-default" ng-click="edit(p)">Изменить</button>
                             <button class="btn btn-danger" ng-click="remove(p)">Удалить</button>

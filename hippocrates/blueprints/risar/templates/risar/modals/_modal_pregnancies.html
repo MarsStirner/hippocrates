@@ -12,15 +12,7 @@
             </thead>
             <tbody>
                 <tr>
-                    <th class="text-right">Номер беременности по порядку</th>
-                    <td>
-                        <div class="col-md-2">
-                        <input class="form-control validatable" type="text" ng-model="model.number" valid-number max-val="100"/>
-                        </div>
-                    </td>
-                </tr>
-                <tr>
-                    <th class="text-right">Год рождения ребенка</th>
+                    <th class="text-right">Год беременности</th>
                     <td>
                         <div class="col-md-2">
                         <input class="form-control validatable" type="text" ng-model="model.year" ui-mask="9999" validator-regexp="'^[12]\\d{3}$'">
@@ -31,26 +23,8 @@
                     <th class="text-right">Исход беременности</th>
                     <td>
                         <div class="col-md-8">
-                        <rb-select ref-book="rbRisarPregnancyResult" ng-model="model.pregnancyResult" />
+                        <rb-select ref-book="rbRisarPregnancyResult" ng-model="model.pregnancyResult" ng-change="result_change(model)"/>
                         </div>
-                    </td>
-                </tr>
-                <tr>
-                    <th class="text-right">Ребёнок живой</th>
-                    <td>
-                    <div class="col-md-8"><input type="checkbox" class="checkbox" ng-model="model.alive"></div>
-                    </td>
-                </tr>
-                <tr>
-                    <th class="text-right">Масса при рождении</th>
-                    <td>
-                    <div class="col-md-2"><input ng-disabled="!model.alive" class="form-control validatable" type="number" ng-model="model.weight" valid-number/></div>
-                    </td>
-                </tr>
-                <tr>
-                    <th class="text-right">Причина смерти</th>
-                    <td>
-                    <div class="col-md-8"><input ng-disabled="model.alive" class="form-control" type="text" ng-model="model.cause_of_death" /></div>
                     </td>
                 </tr>
                 <tr>
@@ -60,13 +34,86 @@
                     </td>
                 </tr>
                 <tr>
-                    <th class="text-right">Особенности родов</th>
+                    <th class="text-right">Особенности</th>
                     <td>
-                    <div class="col-md-8"><input class="form-control" type="text" ng-model="model.note" /></div>
+                    <div class="col-md-10">
+                        <wysiwyg ng-model="model.note"/>
+                    </div>
                     </td>
                 </tr>
             </tbody>
         </table>
+        <div ng-if="['normal', 'miscarriage37', 'miscarriage27', 'belated_birth'].indexOf(model.pregnancyResult.code) != -1">
+            <h4>Информация о детях</h4>
+            <div class="row">
+                <div class="col-md-3">
+                    <button type="button" class="btn btn-primary text-left marginal" ng-click="add_child(model)"><span class="glyphicon glyphicon-plus"></span> Добавить</button>
+                    <ul class="nav nav-pills nav-stacked  marginal" id="childrenTabs">
+                        <li ng-class="{'active': $index==0}" ng-repeat="child in model.newborn_inspections"><a href="#child[[$index+1]]" data-toggle="pill"> Ребенок [[$index+1]]</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-9">
+                    <div class="tab-content">
+                        <div ng-class="{'active': $index==0}" class="tab-pane" id="child[[$index+1]]"
+                             ng-repeat="child in model.newborn_inspections">
+                            <table class="table">
+                                <thead>
+                                <tr>
+                                    <th class="col-md-4"></th>
+                                    <th class="col-md-8"></th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <th class="text-right">Живой</th>
+                                        <td>
+                                            <div>
+                                                <div class="radio-inline">
+                                                    <label>
+                                                        <input type="radio" name="optionsAlive_[[$index]]"
+                                                               ng-model="child.alive" data-ng-value="true" ng-click="child.death_reason=''">
+                                                        Да
+                                                    </label>
+                                                </div>
+                                                <div class="radio-inline">
+                                                    <label>
+                                                        <input type="radio" name="optionsAlive_[[$index]]"
+                                                               ng-model="child.alive" data-ng-value="false">
+                                                        Нет
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-right">Масса при рождении, г</th>
+                                        <td>
+                                            <div class="row">
+                                            <div class="col-md-4 col-lg-3">
+                                                <input type="number" ng-model="child.weight"
+                                                       class="form-control" name="weight_[[$index]]">
+                                            </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr ng-if="child.alive==false">
+                                        <th class="text-right">Причина смерти</th>
+                                        <td>
+                                            <div class="row">
+                                            <div class="col-md-4">
+                                                <input ng-model="child.death_reason" class="form-control"
+                                                       name="death_reason_[[$index]]">
+                                            </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 <div class="modal-footer">

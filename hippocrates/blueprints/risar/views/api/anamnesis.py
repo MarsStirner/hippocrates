@@ -13,10 +13,11 @@ from nemesis.models.event import Event
 from nemesis.systemwide import db
 from ...app import module
 from blueprints.risar.lib.card_attrs import reevaluate_card_attrs, reevaluate_preeclampsia_risk
-from ...lib.represent import represent_intolerance, represent_mother_action, represent_father_action
-from blueprints.risar.lib.utils import get_action, action_apt_values, get_action_type_id
+from ...lib.represent import represent_intolerance, represent_mother_action, represent_father_action, \
+    represent_pregnancy
+from blueprints.risar.lib.utils import get_action, action_apt_values, get_action_type_id, get_action_by_id
 from ...risar_config import pregnancy_apt_codes, risar_anamnesis_pregnancy, transfusion_apt_codes, \
-    risar_anamnesis_transfusion, risar_father_anamnesis, risar_mother_anamnesis
+    risar_anamnesis_transfusion, risar_father_anamnesis, risar_mother_anamnesis, risar_newborn_inspection
 
 
 __author__ = 'mmalkov'
@@ -78,16 +79,30 @@ def api_0_pregnancies_post(action_id=None):
             raise ApiException(404, 'Action not found')
     event = Event.query.get(action.event_id)
     json = request.get_json()
-    for key in pregnancy_apt_codes:
-        action.propsByCode[key].value = json.get(key)
+    for code, value in json.iteritems():
+        if code not in ('newborn_inspections',) and code in pregnancy_apt_codes:
+            action.propsByCode[code].value = value
+
+    child_inspection_actions = []
+    for child_inspection in json.get('newborn_inspections'):
+        if child_inspection:
+            child_action = get_action_by_id(child_inspection.get('id'), event,  risar_newborn_inspection, True)
+            for code, value in child_inspection.iteritems():
+                if code not in ('id',) and code in child_action.propsByCode:
+                    child_action.propsByCode[code].value = value
+            child_action.deleted = child_inspection.get('deleted', 0)
+            db.session.add(child_action)
+            db.session.commit()
+            if not child_action.deleted:
+                child_inspection_actions.append({'id': child_action.id})
+
+    action.propsByCode['newborn_inspections'].value = child_inspection_actions
+
     db.session.add(action)
     db.session.commit()
     reevaluate_preeclampsia_risk(event)
     db.session.commit()
-    return dict(
-        action_apt_values(action, pregnancy_apt_codes),
-        id=action.id
-    )
+    return represent_pregnancy(action)
 
 
 # Переливания
