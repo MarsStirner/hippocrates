@@ -47,7 +47,7 @@ var MotherFatherCtrl = function ($scope) {
 var PregnanciesCtrl = function ($scope, $modal, $timeout, RisarApi) {
     $scope.add = function () {
         var model = {
-            alive: true
+            newborn_inspections: []
         };
         open_edit(model).result.then(function (rslt) {
             var result = rslt[0],
@@ -73,6 +73,24 @@ var PregnanciesCtrl = function ($scope, $modal, $timeout, RisarApi) {
             }
         });
     };
+
+    $scope.add_child = function (pregnancy){
+        pregnancy.newborn_inspections.push({});
+        $timeout(function(){
+            $('#childrenTabs a:last').tab('show');
+        }, 0);
+
+    };
+
+    $scope.result_change = function (pregnancy){
+        if (['med_abortion12', 'med_abortion', 'misbirth11', 'misbirth21', 'misbirth'].indexOf(pregnancy.pregnancyResult.code) > -1){
+            pregnancy.newborn_inspections = pregnancy.newborn_inspections.filter(function(inspection){
+                inspection.deleted = 1;
+                return inspection.id
+            })
+        }
+    };
+
     $scope.remove = function (p) {
         if (p.id) {
             RisarApi.anamnesis.pregnancies.delete(p.id).then(function () {
@@ -103,6 +121,7 @@ var PregnanciesCtrl = function ($scope, $modal, $timeout, RisarApi) {
             size: 'lg'
         })
     };
+
 };
 var TransfusionsCtrl = function ($scope, $modal, $timeout, RisarApi) {
     $scope.add = function () {
