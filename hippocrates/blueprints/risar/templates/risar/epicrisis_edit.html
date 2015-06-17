@@ -598,6 +598,27 @@
                                                     </thead>
                                                     <tbody>
                                                         <tr>
+                                                            <th class="text-right">Живой <span class="text-danger">*</span></th>
+                                                            <td>
+                                                                <div ng-class="{'has-error': sixthForm.optionsAlive_[[$index]].$invalid && sixthForm.submit_attempt}">
+                                                                    <div class="radio-inline">
+                                                                        <label>
+                                                                            <input type="radio" name="optionsAlive_[[$index]]"
+                                                                                   ng-model="child.alive" data-ng-value="true" ng-change="alive_changed(child)" required>
+                                                                            Да
+                                                                        </label>
+                                                                    </div>
+                                                                    <div class="radio-inline">
+                                                                        <label>
+                                                                            <input type="radio" name="optionsAlive_[[$index]]"
+                                                                                   ng-model="child.alive" data-ng-value="false" ng-change="alive_changed(child)" required>
+                                                                            Нет
+                                                                        </label>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
                                                             <th class="text-right">Пол <span class="text-danger">*</span></th>
                                                             <td>
                                                                 <div ng-class="{'has-error': sixthForm.optionsSex_[[$index]].$invalid && sixthForm.submit_attempt}">
@@ -641,41 +662,20 @@
                                                             </td>
                                                         </tr>
                                                         <tr>
-                                                            <th class="text-right">Живой <span class="text-danger">*</span></th>
+                                                            <th class="text-right">[[child.alive == false ? 'Дата смерти' : 'Дата рождения']] <span class="text-danger">*</span></th>
                                                             <td>
-                                                                <div ng-class="{'has-error': sixthForm.optionsAlive_[[$index]].$invalid && sixthForm.submit_attempt}">
-                                                                    <div class="radio-inline">
-                                                                        <label>
-                                                                            <input type="radio" name="optionsAlive_[[$index]]"
-                                                                                   ng-model="child.alive" data-ng-value="true" required>
-                                                                            Да
-                                                                        </label>
-                                                                    </div>
-                                                                    <div class="radio-inline">
-                                                                        <label>
-                                                                            <input type="radio" name="optionsAlive_[[$index]]"
-                                                                                   ng-model="child.alive" data-ng-value="false" required>
-                                                                            Нет
-                                                                        </label>
-                                                                    </div>
-                                                                </div>
+                                                                <wm-date ng-model="child.date" ng-required="true"
+                                                                         ng-class="{'has-error': sixthForm.date_[[$index]].$invalid && sixthForm.submit_attempt}"
+                                                                         style="width: 250px" name="date_[[$index]]"></wm-date>
                                                             </td>
                                                         </tr>
-                                                        <tr ng-if="child.alive">
-                                                            <th class="text-right">Дата рождения <span class="text-danger">*</span></th>
+                                                        <tr>
+                                                            <th class="text-right">[[child.alive == false ? 'Время смерти' : 'Время рождения']] <span class="text-danger">*</span></th>
                                                             <td>
-                                                                <wm-date ng-model="child.birth_date" ng-required="true"
-                                                                         ng-class="{'has-error': sixthForm.birth_date_[[$index]].$invalid && sixthForm.submit_attempt}"
-                                                                         style="width: 250px" name="birth_date_[[$index]]"></wm-date>
-                                                            </td>
-                                                        </tr>
-                                                        <tr ng-if="child.alive">
-                                                            <th class="text-right">Время рождения <span class="text-danger">*</span></th>
-                                                            <td>
-                                                                <div class="row" ng-class="{'has-error': sixthForm.birth_time_[[$index]].$invalid && sixthForm.submit_attempt}">
+                                                                <div class="row" ng-class="{'has-error': sixthForm.time_[[$index]].$invalid && sixthForm.submit_attempt}">
                                                                     <div class="col-md-3">
                                                                         <div fs-time ng-required="true"
-                                                                             ng-model="child.birth_time" name="birth_time_[[$index]]"></div>
+                                                                             ng-model="child.time" name="time_[[$index]]"></div>
                                                                     </div>
                                                                 </div>
                                                             </td>
@@ -732,29 +732,10 @@
                                                             </td>
                                                         </tr>
                                                         <tr ng-if="child.alive==false">
-                                                            <th class="text-right">Дата смерти <span class="text-danger">*</span></th>
-                                                            <td>
-                                                                <wm-date ng-model="child.birth_date" ng-required="true"
-                                                                         ng-class="{'has-error': sixthForm.birth_date_[[$index]].$invalid && sixthForm.submit_attempt}"
-                                                                         style="width: 250px" name="birth_date_[[$index]]"></wm-date>
-                                                            </td>
-                                                        </tr>
-                                                        <tr ng-if="child.alive==false">
-                                                            <th class="text-right">Время смерти <span class="text-danger">*</span></th>
-                                                            <td>
-                                                                <div class="row" ng-class="{'has-error': sixthForm.birth_time_[[$index]].$invalid && sixthForm.submit_attempt}">
-                                                                    <div class="col-md-2">
-                                                                        <div fs-time ng-required="true"
-                                                                             ng-model="child.birth_time" name="birth_time_[[$index]]"></div>
-                                                                    </div>
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                        <tr ng-if="child.alive==false">
                                                             <th class="text-right">Причина смерти <span class="text-danger">*</span></th>
                                                             <td>
                                                                 <div class="row" ng-class="{'has-error': sixthForm.death_reason_[[$index]].$invalid && sixthForm.submit_attempt}">
-                                                                <div class="col-md-2">
+                                                                <div class="col-md-3">
                                                                     <input ng-model="child.death_reason" ng-required="true" class="form-control" name="death_reason_[[$index]]">
                                                                 </div>
                                                                 </div>

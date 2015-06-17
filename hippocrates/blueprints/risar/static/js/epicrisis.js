@@ -92,6 +92,21 @@ var EpicrisisCtrl = function ($timeout, $scope, RefBookService, RisarApi) {
         }
     };
 
+    $scope.alive_changed = function(child_info){
+        if (child_info.alive){
+            child_info.date = null;
+            child_info.time = null;
+            child_info.death_reason = null;
+        } else {
+            child_info.date = null;
+            child_info.time = null;
+            child_info.maturity_rate = null;
+            child_info.apgar_score_1 = null;
+            child_info.apgar_score_5 = null;
+            child_info.apgar_score_10 = null;
+        }
+    }
+
     $scope.$watch('chart.epicrisis.delivery_date', function() {
         if($scope.chart && !$scope.chart.epicrisis.pregnancy_duration && $scope.chart.epicrisis.delivery_date &&
             $scope.chart.card_attributes.pregnancy_start_date){
