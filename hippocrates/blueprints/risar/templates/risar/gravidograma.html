@@ -124,7 +124,8 @@
                 <tr>
                     <td>Предлежание плода</td>
                     <td ng-repeat="n in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]">
-                        <span tooltip="[[ presenting_part[n][1] ]]">[[ presenting_part[n][0] ]]
+                        <span ng-repeat="item in presenting_part[n]">
+                            <span tooltip="[[ item[1] ]]">[[ item[0] ]]</span>[[$last ? '' : ', ']]
                         </span>
                     </td>
                 </tr>

@@ -89,8 +89,16 @@ var GravidogramaCtrl = function ($scope, RisarApi, RefBookService, PrintingServi
                 var day_num = (checkups_beg_date.diff(pregnancy_start_date, 'days')) - 28; // интересует начиная с 5ой недели
                 var index = Math.floor(day_num/14);
 
-                $scope.abdominal[index] = checkup.abdominal;
-                $scope.fetus_heart_rate[index] = checkup.fetus_heart_rate;
+                if(checkup.abdominal){
+                    $scope.abdominal[index] = $scope.abdominal[index] ?
+                        $scope.abdominal[index] + ', ' + checkup.abdominal : checkup.abdominal;
+                }
+
+                if(checkup.fetus_heart_rate){
+                    $scope.fetus_heart_rate[index] = $scope.fetus_heart_rate[index] ?
+                        $scope.fetus_heart_rate[index] + ', ' + checkup.fetus_heart_rate : checkup.fetus_heart_rate
+                }
+                ;
 
                 // предлежание плода
                 if (checkup.presenting_part){
@@ -98,13 +106,18 @@ var GravidogramaCtrl = function ($scope, RisarApi, RefBookService, PrintingServi
                         var str = prev + curr[0].toUpperCase();
                         return str
                     }, "");
-                    $scope.presenting_part[index] = [short_name, checkup.presenting_part.name];
+                    if($scope.presenting_part[index]){
+                        $scope.presenting_part[index].push([short_name, checkup.presenting_part.name]);
+                    } else{
+                        $scope.presenting_part[index] = [[short_name, checkup.presenting_part.name]];
+                    }
                 }
 
                 // проверяем были жалобы на отеки
                 if(checkup.complaints){
                     var edema = $scope.rbRisarComplaints.get_by_code("oteki");
-                    $scope.edema[index] = indexOf(checkup.complaints, edema)>0 ? '+' : '-';
+                    var if_edema = indexOf(checkup.complaints, edema)>0 ? '+' : '-'
+                    $scope.edema[index] = $scope.edema[index] ? $scope.edema[index] + ', '+ if_edema : if_edema;
                 }
 
                 // высота стояния дна матки
@@ -121,7 +134,7 @@ var GravidogramaCtrl = function ($scope, RisarApi, RefBookService, PrintingServi
                 //прибавка массы
                 if(checkup.weight && first_checkup.weight && day_num>=0){
                     $scope.weight_gain.push([day_num, checkup.weight-first_checkup.weight]);
-                    $scope.weight[index] = checkup.weight;
+                    $scope.weight[index] = $scope.weight[index] ? $scope.weight[index] + ', ' + checkup.weight : checkup.weight;
                 };
             }
             $scope.refreshCharts();
