@@ -205,6 +205,12 @@ WebMis20
         }
     };
     this.measure = {
+        get_chart: function(event_id) {
+            return wrapper('GET', Config.url.api_chart_measure_list + event_id)
+        },
+        get_by_event: function (event_id, query) {
+            return wrapper('POST', Config.url.api_measure_list + event_id, undefined, query)
+        },
         regenerate: function(action_id) {
             return wrapper('GET', Config.url.api_measure_generate + action_id)
         }
@@ -291,4 +297,21 @@ WebMis20
         }
     }
 }])
+.directive('measureTypeIcon', function () {
+    return {
+        restrict: 'A',
+        template: '<span ng-class="icon_class(measureTypeIcon.code)" tooltip="[[measureTypeIcon.name]]"></span>',
+        scope: {
+            measureTypeIcon: '='
+        },
+        link: function (scope) {
+            scope.icon_class = function (code) {
+                if (code === 'lab_test') return 'ri-mt-lab-test';
+                if (code === 'func_test') return 'ri-mt-func-test';
+                if (code === 'checkup') return 'ri-mt-checkup';
+                return 'ri-mt-func-other';
+            };
+        }
+    }
+})
 ;

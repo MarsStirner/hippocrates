@@ -30,6 +30,7 @@ def html_routing():
 def html_chart():
     return render_template('risar/chart.html')
 
+
 @module.route('/anamnesis.html')
 def html_anamnesis():
     return render_template('risar/anamnesis_view.html')
@@ -90,3 +91,8 @@ def html_event_diagnoses():
 @module.route('/ambulance_patient_info.html')
 def html_ambulance_patient_info():
     return render_template('risar/ambulance_patient_info.html')
+
+
+@module.route('/measure_list.html')
+def html_event_measure():
+    return render_template('risar/event_measure_list.html')

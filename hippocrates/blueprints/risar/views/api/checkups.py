@@ -2,15 +2,14 @@
 from flask import request
 
 from nemesis.lib.apiutils import api_method, ApiException
-from nemesis.lib.utils import safe_datetime, safe_date
+from nemesis.lib.utils import safe_datetime
 from nemesis.models.event import Event
-from nemesis.models.actions import Action
 from nemesis.systemwide import db
-from ...app import module
+from blueprints.risar.app import module
 from blueprints.risar.lib.card_attrs import reevaluate_card_attrs
-from ...lib.represent import represent_checkup
+from blueprints.risar.lib.represent import represent_checkup
 from blueprints.risar.lib.utils import get_action_by_id
-from blueprints.risar.lib.expert.protocols import measure_manager_factory
+from blueprints.risar.lib.expert.protocols import EventMeasureGenerator
 
 
 @module.route('/api/0/checkup/', methods=['GET', 'POST'])
@@ -36,16 +35,6 @@ def api_0_checkup(event_id):
         reevaluate_card_attrs(event)
         db.session.commit()
 
-        measure_mng = measure_manager_factory('generate', action)
+        measure_mng = EventMeasureGenerator.create_for_risar(action.id)
         measure_mng.generate_measures()
     return represent_checkup(action, True)
-
-
-@module.route('/api/0/measure/generate/', methods=['GET', 'POST'])
-@module.route('/api/0/measure/generate/<int:action_id>', methods=['GET', 'POST'])
-@api_method
-def api_0_measure_generate(action_id):
-    action = Action.query.get_or_404(action_id)
-    measure_mng = measure_manager_factory('generate', action)
-    measure_mng.generate_measures()
-    return measure_mng.represent_measures()
