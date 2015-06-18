@@ -1,45 +1,35 @@
 # -*- coding: utf-8 -*-
 import itertools
 
-from nemesis.lib.utils import safe_date
+from sqlalchemy.orm import aliased
+
+from nemesis.lib.utils import safe_date, safe_int, safe_datetime
 from nemesis.systemwide import db
 from nemesis.models.actions import Action
-from nemesis.models.expert_protocol import ExpertScheme, ExpertSchemeMKB, EventMeasure, ExpertSchemeMeasureAssoc
+from nemesis.models.expert_protocol import (ExpertScheme, ExpertSchemeMKB, EventMeasure, ExpertSchemeMeasureAssoc,
+    rbMeasureType, Measure)
 from nemesis.models.exists import MKB
 from nemesis.models.enums import MeasureStatus
 
 
-def measure_manager_factory(role, action):
-    if role == 'generate':
-        start_date = safe_date(action.begDate)
-        end_date = safe_date(action.propsByCode['next_date'].value)
-        return EventMeasureManager.make_generator(action.id, start_date, end_date)
-    elif role == 'represent':
-        return EventMeasureManager.make_representer(action.id)
-
-
-
-class EventMeasureManager(object):
-    """Процесс создания мероприятий на основе диагнозов, указанных в осмотрах
+class EventMeasureGenerator(object):
+    """Класс, отвечающий за процесс создания мероприятий на основе диагнозов,
+    указанных в осмотрах.
 
     TODO:
-      - Подумать как можно проверить, что после сохранения осмотра список мкб не был
-    изменен, чтобы избежать перестройки мероприятий
+      - Подумать как можно проверить, что после сохранения осмотра список мкб
+    не был изменен, чтобы избежать перестройки мероприятий
       - Добавить проверки по протоколам
     """
 
     @classmethod
-    def make_generator(cls, action_id, start_date, end_date):
+    def create_for_risar(cls, action_id):
         action = Action.query.get(action_id)
+        start_date = safe_date(action.begDate)
+        end_date = safe_date(action.propsByCode['next_date'].value)
         action_mkb_list = _get_event_mkb_list(action)
         # logger.debug('Action <{0}> mkbs: {1}'.format(action_id, action_mkb_list))
         obj = cls(action, action_mkb_list, start_date, end_date)
-        return obj
-
-    @classmethod
-    def make_representer(cls, action_id):
-        action = Action.query.get(action_id)
-        obj = cls(action)
         return obj
 
     def __init__(self, action, action_mkb_list=None, period_start_date=None, period_end_date=None):
@@ -49,7 +39,7 @@ class EventMeasureManager(object):
         self.period_end_date = period_end_date
 
     def generate_measures(self):
-        self.clear_existing_measures()
+        # self.clear_existing_measures()
         act_scheme_measures = [
             ActionSchemeMeasure(act_mkb['action'], act_mkb['mkbs'])
             for act_mkb in self.action_mkb_list
@@ -80,42 +70,128 @@ class EventMeasureManager(object):
 
         db.session.add(em)
 
-    def represent_measures(self):
-        query = EventMeasure.query.filter(EventMeasure.sourceAction_id == self.action.id)
+
+class EventMeasureSelecter(object):
+
+    def __init__(self, event, action=None):
+        self.event = event
+        self.query = EventMeasure.query.filter(EventMeasure.event_id == self.event.id)
+
+    def apply_filter(self, action_id=None, **flt):
+        if 'id' in flt:
+            self.query = self.query.filter(EventMeasure.id == flt['id'])
+            return self
+        if action_id:
+            self.query = self.query.filter(EventMeasure.sourceAction_id == action_id)
+        if 'measure_type_id_list' in flt:
+            if len(flt['measure_type_id_list']):
+                self.query = self.query.join(
+                    ExpertSchemeMeasureAssoc, Measure, rbMeasureType
+                ).filter(rbMeasureType.id.in_(flt['measure_type_id_list']))
+            else:
+                self.query = self.query.filter(1 == 0)
+        if 'beg_date_from' in flt:
+            self.query = self.query.filter(EventMeasure.begDateTime >= safe_datetime(flt['beg_date_from']))
+        if 'beg_date_to' in flt:
+            self.query = self.query.filter(EventMeasure.begDateTime <= safe_datetime(flt['beg_date_to']))
+        if 'end_date_from' in flt:
+            self.query = self.query.filter(EventMeasure.endDateTime >= safe_datetime(flt['end_date_from']))
+        if 'end_date_to' in flt:
+            self.query = self.query.filter(EventMeasure.endDateTime <= safe_datetime(flt['end_date_to']))
+        if 'measure_status_id_list' in flt:
+            if len(flt['measure_status_id_list']):
+                self.query = self.query.filter(EventMeasure.status.in_(flt['measure_status_id_list']))
+            else:
+                self.query = self.query.filter(1 == 0)
+        return self
+
+    def apply_sort_order(self, **order_options):
+        desc_order = order_options.get('order', 'ASC') == 'DESC'
+        if order_options:
+            pass
+        else:
+            source_action = aliased(Action, name='SourceAction')
+            self.query = self.query.join(
+                source_action, EventMeasure.sourceAction_id == source_action.id
+            ).order_by(
+                source_action.begDate.desc(),
+                EventMeasure.begDateTime.desc(),
+                EventMeasure.id.desc()
+            )
+        return self
+
+    def get_all(self):
+        return self.query.all()
+
+    def paginate(self, per_page=20, page=1):
+        return self.query.paginate(page, per_page, False)
+
+
+class EventMeasureRepr(object):
+
+    def represent_by_action(self, action):
+        if not action.id:
+            return []
+        em_selecter = EventMeasureSelecter(action.event, action)
+        em_selecter.apply_filter(action_id=action.id)
+        em_data = em_selecter.get_all()
         return [
-            self._represent_measure(event_measure) for event_measure in query
+            self.represent_measure(event_measure) for event_measure in em_data
         ]
 
-    def _represent_measure(self, measure):
+    def represent_by_event(self, event, query_filter=None):
+        per_page = safe_int(query_filter.get('per_page')) or 20 if query_filter is not None else 20
+        page = safe_int(query_filter.get('page')) or 1 if query_filter is not None else 1
+        em_selecter = EventMeasureSelecter(event)
+        if query_filter:
+            em_selecter.apply_filter(**query_filter)
+        em_selecter.apply_sort_order()
+        em_data = em_selecter.paginate(per_page, page)
+        return {
+            'count': em_data.total,
+            'total_pages': em_data.pages,
+            'measures': [
+                self.represent_measure(event_measure) for event_measure in em_data.items
+            ]
+        }
+
+    def represent_measure(self, measure):
         return {
             'id': measure.id,
             'event_id': measure.event_id,
             'beg_datetime': measure.begDateTime,
             'end_datetime': measure.endDateTime,
             'status': MeasureStatus(measure.status),
-            'source_action_id': measure.sourceAction_id,
+            'source_action': self.represent_source_action(measure.source_action),
             'action_id': measure.action_id,
-            'scheme_measure': self._represent_scheme_measure(measure.scheme_measure)
+            'scheme_measure': self.represent_scheme_measure(measure.scheme_measure)
         }
 
-    def _represent_scheme_measure(self, scheme_measure):
+    def represent_scheme_measure(self, scheme_measure):
         return {
-            'scheme': self._represent_scheme(scheme_measure.scheme),
-            'measure': self._represent_measure_rb(scheme_measure.measure)
+            'scheme': self.represent_scheme(scheme_measure.scheme),
+            'measure': self.represent_measure_rb(scheme_measure.measure)
         }
 
-    def _represent_scheme(self, scheme):
+    def represent_scheme(self, scheme):
         return {
             'id': scheme.id,
             'code': scheme.code,
             'name': scheme.name
         }
 
-    def _represent_measure_rb(self, measure):
+    def represent_measure_rb(self, measure):
         return {
             'id': measure.id,
             'code': measure.code,
-            'name': measure.name
+            'name': measure.name,
+            'measure_type': measure.measure_type
+        }
+
+    def represent_source_action(self, action):
+        return {
+            'id': action.id,
+            'beg_date': action.begDate
         }
 
 

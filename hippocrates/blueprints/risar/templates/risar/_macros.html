@@ -11,6 +11,19 @@
 {% endmacro %}
 
 
+{% macro page_title_n(title) %}
+<h2>
+    {{ title }}
+    <a ng-href="{{ url_for('patients.patient_info_full') }}?client_id=[[ header.client.id ]]">[[ header.client.full_name ]]</a>
+    ([[ header.event.external_id ]])
+</h2>
+<div class="alert-warning small-marginal">Случай беременности. На учёте в <b>[[ header.event.person.organisation.short_name ]]</b>
+    у <b>[[ header.event.person.name ]]</b>
+    с <b>[[ header.event.set_date | asDate ]]</b>
+</div>
+{% endmacro %}
+
+
 {% macro page_title_ext(title, ext_header=None) %}
 {%- if ext_header == 'chart' %}
     {% set w1 = 8 %} {% set w2 = 4 %}
