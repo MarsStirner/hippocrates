@@ -9,7 +9,7 @@ var CreateEventModalCtrl = function ($scope, $modalInstance) {
         $modalInstance.close(true);
     };
 };
-var ClientModalCtrl = function ($scope, $modalInstance, client, PrintingService, $modal, WMWindowSync, CurrentUser) {
+var ClientModalCtrl = function ($scope, $modalInstance, $filter, $modal, PrintingService, WMWindowSync, client) {
     $scope.client = client;
     $scope.client_id = client.client_id;
     $scope.alerts = [];
@@ -41,6 +41,16 @@ var ClientModalCtrl = function ($scope, $modalInstance, client, PrintingService,
         $modalInstance.dismiss('cancel');
     };
 
+    $scope.formatAppointmentDate = function (appointment) {
+        return '{0}{ (|1|)}'.formatNonEmpty(
+            appointment.attendance_type.code === 'planned' ?
+                $filter('asDateTime')(appointment.begDateTime) :
+                $filter('asDate')(appointment.begDateTime),
+            appointment.attendance_type.code !== 'planned' ?
+                appointment.attendance_type.name :
+                null
+        );
+    };
     $scope.new_event = function(client_id, ticket_id) {
         var query = '?client_id=' + client_id;
         if (ticket_id) {
@@ -133,4 +143,6 @@ var ClientSearch = function ($scope, WMClient, $modal, CurrentUser) {
     };
 };
 WebMis20.controller('ClientSearch', ['$scope', 'WMClient', '$modal', 'CurrentUser', ClientSearch]);
+WebMis20.controller('ClientModalCtrl', ['$scope', '$modalInstance', '$filter', '$modal', 'PrintingService',
+    'WMWindowSync', 'client', ClientModalCtrl]);
 
