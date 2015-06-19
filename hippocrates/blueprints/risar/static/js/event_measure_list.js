@@ -47,12 +47,12 @@ var EventMeasureListCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefB
         }
         var query = {
             page: $scope.pager.current_page,
-            measure_type_id_list: _.pluck($scope.query.measure_type, 'id'),
+            measure_type_id_list: $scope.query.measure_type.length ? _.pluck($scope.query.measure_type, 'id') : undefined,
             beg_date_from: $scope.query.beg_date_from ? moment($scope.query.beg_date_from).startOf('day').toDate() : undefined,
             beg_date_to: $scope.query.beg_date_to ? moment($scope.query.beg_date_to).endOf('day').toDate() : undefined,
             end_date_from: $scope.query.end_date_from ? moment($scope.query.end_date_from).startOf('day').toDate() : undefined,
             end_date_to: $scope.query.end_date_to ? moment($scope.query.end_date_to).endOf('day').toDate() : undefined,
-            measure_status_id_list: _.pluck($scope.query.status, 'id')
+            measure_status_id_list: $scope.query.status.length ? _.pluck($scope.query.status, 'id') : undefined
         };
         RisarApi.measure.get_by_event(event_id, query).then(setMeasureData);
     };

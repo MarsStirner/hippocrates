@@ -1,5 +1,5 @@
-var ScheduleDayCtrl = function ($scope, $http, WMClient, PrintingService, $interval, WMAppointmentDialog, $location,
-        $anchorScroll, WMProcedureOffices, CurrentUser) {
+var ScheduleDayCtrl = function ($scope, $http, $filter, $interval, $location, $anchorScroll, WMClient,
+        PrintingService, WMAppointmentDialog, WMProcedureOffices, CurrentUser) {
     $scope.client_id = null;
     $scope.client = null;
     $scope.person = {};
@@ -67,7 +67,16 @@ var ScheduleDayCtrl = function ($scope, $http, WMClient, PrintingService, $inter
     $scope.show_time = function (date_time) {
         return moment(date_time).isAfter(moment().subtract(1, 'hours'));
     };
-
+    $scope.formatAppointmentDate = function (appointment) {
+        return '{0}{ (|1|)}'.formatNonEmpty(
+            appointment.attendance_type.code === 'planned' ?
+                $filter('asDateTime')(appointment.begDateTime) :
+                $filter('asDate')(appointment.begDateTime),
+            appointment.attendance_type.code !== 'planned' ?
+                appointment.attendance_type.name :
+                null
+        );
+    };
     $scope.ticket_choose = function (ticket) {
         if (ticket.record && ticket.record.client_id) {
             $scope.ticket = ticket;
@@ -150,6 +159,7 @@ var ScheduleDayCtrl = function ($scope, $http, WMClient, PrintingService, $inter
             interval = $interval(function () {
                 if ($scope.child_window.closed) {
                     $scope.client.reload('for_servicing');
+                    $scope.loadData();
                     $scope.clearInterval();
                     $scope.child_window = {};
                 }
@@ -157,5 +167,5 @@ var ScheduleDayCtrl = function ($scope, $http, WMClient, PrintingService, $inter
         }
     });
 };
-WebMis20.controller('ScheduleDayCtrl', ['$scope', '$http', 'WMClient', 'PrintingService', '$interval',
-    'WMAppointmentDialog', '$location', '$anchorScroll', 'WMProcedureOffices', 'CurrentUser', ScheduleDayCtrl]);
+WebMis20.controller('ScheduleDayCtrl', ['$scope', '$http', '$filter', '$interval', '$location', '$anchorScroll',
+    'WMClient', 'PrintingService', 'WMAppointmentDialog', 'WMProcedureOffices', 'CurrentUser', ScheduleDayCtrl]);

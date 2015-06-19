@@ -13,7 +13,7 @@
     <tbody>
     <tr ng-repeat="record in client.appointments">
         <td>[[ record.mark ]]</td>
-        <td>[[ record.begDateTime | asDateTime ]]</td>
+        <td>[[ formatAppointmentDate(record) ]]</td>
         <td>[[ record.office.code ]]</td>
         <td>[[ record.person ]] <span class="text-muted" ng-if="record.person_speciality">([[ record.person_speciality ]])</span></td>
         <td>[[ record.createPerson.name ]]</td>
