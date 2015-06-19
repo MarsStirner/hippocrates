@@ -84,12 +84,9 @@ class EventMeasureSelecter(object):
         if action_id:
             self.query = self.query.filter(EventMeasure.sourceAction_id == action_id)
         if 'measure_type_id_list' in flt:
-            if len(flt['measure_type_id_list']):
-                self.query = self.query.join(
-                    ExpertSchemeMeasureAssoc, Measure, rbMeasureType
-                ).filter(rbMeasureType.id.in_(flt['measure_type_id_list']))
-            else:
-                self.query = self.query.filter(1 == 0)
+            self.query = self.query.join(
+                ExpertSchemeMeasureAssoc, Measure, rbMeasureType
+            ).filter(rbMeasureType.id.in_(flt['measure_type_id_list']))
         if 'beg_date_from' in flt:
             self.query = self.query.filter(EventMeasure.begDateTime >= safe_datetime(flt['beg_date_from']))
         if 'beg_date_to' in flt:
@@ -99,10 +96,7 @@ class EventMeasureSelecter(object):
         if 'end_date_to' in flt:
             self.query = self.query.filter(EventMeasure.endDateTime <= safe_datetime(flt['end_date_to']))
         if 'measure_status_id_list' in flt:
-            if len(flt['measure_status_id_list']):
-                self.query = self.query.filter(EventMeasure.status.in_(flt['measure_status_id_list']))
-            else:
-                self.query = self.query.filter(1 == 0)
+            self.query = self.query.filter(EventMeasure.status.in_(flt['measure_status_id_list']))
         return self
 
     def apply_sort_order(self, **order_options):
