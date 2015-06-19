@@ -105,7 +105,7 @@ def api_0_death_stats():
                 (Action.id,),
                 whereclause=db.and_(
                     ActionType.flatCode == 'risar_newborn_inspection',
-                    ActionPropertyType.code == 'birth_date',
+                    ActionPropertyType.code == 'date',
                     rbRequestType.code == 'pregnancy',
                     Action.event_id == Event.id,
                     ActionProperty.action_id == Action.id,
