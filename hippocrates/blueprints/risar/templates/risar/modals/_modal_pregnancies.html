@@ -22,8 +22,16 @@
                 <tr>
                     <th class="text-right">Исход беременности</th>
                     <td>
-                        <div class="col-md-8">
+                        <div class="col-md-7">
                         <rb-select ref-book="rbRisarPregnancyResult" ng-model="model.pregnancyResult" ng-change="result_change(model)"/>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="text-right">Срок беременности</th>
+                    <td>
+                        <div class="col-md-2">
+                            <input class="form-control" type="number" ng-model="model.pregnancy_week">
                         </div>
                     </td>
                 </tr>

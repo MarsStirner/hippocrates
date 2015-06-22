@@ -251,7 +251,7 @@ WebMis20
 .directive('preeclampsiaRiskIcon', function () {
     return {
         restrict: 'A',
-        template: '<span style="font-size: 32px" ng-class="icon_class(preeclampsiaRiskIcon.id)" tooltip="[[tooltip(preeclampsiaRiskIcon.id)]]"></span>',
+        template: '<span style="font-size: 120%" ng-class="icon_class(preeclampsiaRiskIcon.id)" tooltip="[[tooltip(preeclampsiaRiskIcon.id)]]"></span>',
         scope: {
             preeclampsiaRiskIcon: '='
         },
