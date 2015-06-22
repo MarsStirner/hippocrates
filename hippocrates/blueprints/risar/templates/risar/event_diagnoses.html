@@ -37,7 +37,7 @@
                             <td ng-if="diag.deleted == 0">[[diag.diagnosis_type.name]]</td>
                             <td ng-if="diag.deleted == 0">[[diag.set_date | asDate]] </br> [[diag.person.name]]</td>
                             <td ng-if="diag.deleted == 0">[[diag.end_date | asDate]] </br> [[diag.end_date ? diag.modify_person.name : ""]]</td>
-                            <td ng-if="diag.deleted == 0">[[diag.action.action_type.name]] - [[diag.action_property_name]]</td>
+                            <td ng-if="diag.deleted == 0">[[diag.action.action_type.name]] - [[diag.action_property.name]]</td>
                             <td ng-if="diag.deleted == 0" style="white-space:nowrap;">
                                 <button type="button" class="btn btn-sm btn-primary" title="Редактировать"
                                         ng-click="edit_diagnosis(diag)"><span class="glyphicon glyphicon-pencil"></span>

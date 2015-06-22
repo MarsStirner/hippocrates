@@ -11,12 +11,14 @@ from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.models.client import Client, ClientAttach
 from nemesis.models.enums import EventPrimary, EventOrder
 from nemesis.models.event import Event, EventType
+from nemesis.models.actions import Action
 from nemesis.models.exists import Organisation, Person, rbAttachType, rbRequestType, rbFinance, MKB
 from nemesis.models.schedule import ScheduleClientTicket
 from nemesis.systemwide import db
 from nemesis.lib.diagnosis import create_or_update_diagnosis
 from blueprints.risar.app import module
-from blueprints.risar.lib.card_attrs import default_AT_Heuristic, get_all_diagnoses
+from blueprints.risar.lib.card_attrs import default_AT_Heuristic, get_all_diagnoses, reevaluate_risk_rate, \
+    reevaluate_preeclampsia_risk
 from blueprints.risar.lib.represent import represent_event, represent_chart_for_routing, represent_header, \
     represent_org_for_routing, group_orgs_for_routing
 from blueprints.risar.risar_config import attach_codes
@@ -130,7 +132,14 @@ def api_0_save_diagnoses(event_id=None):
         raise ApiException(404, u'Обращение не найдено')
     for diagnosis in diagnoses:
         diag = create_or_update_diagnosis(event, diagnosis)
+        if diagnosis['deleted']:
+            action = Action.query.get(diagnosis['action_id'])
+            property_code = diagnosis['action_property']['code']
+            action[property_code].value = [diag for diag in action[property_code].value if diag.id != diagnosis['id']]
         db.session.add(diag)
+    db.session.commit()
+    reevaluate_risk_rate(event)
+    reevaluate_preeclampsia_risk(event)
     db.session.commit()
     return list(get_all_diagnoses(event))
 

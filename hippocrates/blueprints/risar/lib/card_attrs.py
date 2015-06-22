@@ -60,11 +60,13 @@ def get_all_diagnoses(event):
                 if prop.type.isVector:
                     for diagnostic in prop.value:
                         diag = evis.make_diagnostic_record(diagnostic)
-                        diag['action_property_name'] = prop.type.name
+                        diag['action_property'] = {'name': prop.type.name,
+                                                   'code': prop.type.code}
                         result.append(diag)
                 else:
                     diag = evis.make_diagnostic_record(prop.value)
-                    diag['action_property_name'] = prop.type.name
+                    diag['action_property'] = {'name': prop.type.name,
+                                               'code': prop.type.code}
                     result.append(diag)
     result.sort(key=lambda x: x['set_date'])
     return result
