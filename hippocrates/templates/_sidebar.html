@@ -27,12 +27,8 @@
             <li>
                 <a class="{% if request.endpoint == item.link %}active{% endif %}"
                    href="{{ url_for(item.link) }}" title="{{ item.title }}">
-                    {% if item.homepage %}
-                    <span class="glyphicon glyphicon-home"></span>
-                    {% else %}
-                    <i class="fa fa-dashboard"></i>
-                    {{ item.title }}
-                    {% endif %}
+                    <i class="{{ item.icon }}"></i>
+                    <span>{{ item.title }}</span>
                 </a>
             </li>
             {% endif %}
