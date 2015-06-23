@@ -214,12 +214,18 @@
                                 </thead>
                                 <tbody>
                                     <tr>
+                                        <td class="text-right">Смерть матери <span>&nbsp;</span></td>
+                                        <td>
+                                            <input type="checkbox" ng-model="mother_death" ng-change="clear_death_info">
+                                        </td>
+                                    </tr>
+                                    <tr>
                                         <td class="text-right">Причина смерти матери <span class="text-danger">*</span></td>
                                         <td><div class="row"
                                                  ng-class="{'has-error': secondForm.reason_of_death.$invalid && secondForm.submit_attempt}">
                                             <div class="col-md-3">
-                                            <input ng-model="chart.epicrisis.reason_of_death" class="form-control"
-                                                   ng-required="true" name="reason_of_death">
+                                            <input ng-model="chart.epicrisis.reason_of_death" class = "form-control"
+                                                   ng-required="true" name="reason_of_death" ng-disabled="!mother_death">
                                             </div></div>
                                         </td>
 
@@ -227,7 +233,7 @@
                                     <tr>
                                         <td class="text-right">Дата смерти матери <span class="text-danger">*</span></td>
                                         <td>
-                                            <wm-date name="death_date"
+                                            <wm-date name="death_date" ng-disabled="!mother_death"
                                                      ng-class="{'has-error': secondForm.death_date.$invalid && secondForm.submit_attempt}"
                                                      ng-required="true" ng-model="chart.epicrisis.death_date" style="width: 250px"></wm-date>
                                         </td>
@@ -237,8 +243,9 @@
                                         <td>
                                             <div class="row">
                                             <div class="col-md-4">
-                                            <div fs-time ng-model="chart.epicrisis.death_time" ng-required="true" name="death_time"
-                                                  ng-class="{'has-error': secondForm.death_time.$invalid && secondForm.submit_attempt}"></div>
+                                            <div fs-time ng-model="chart.epicrisis.death_time" ng-required="true"
+                                                 name="death_time" ng-disabled="!mother_death"
+                                                 ng-class="{'has-error': secondForm.death_time.$invalid && secondForm.submit_attempt}"></div>
                                             </div>
                                             </div>
                                         </td>
@@ -251,6 +258,7 @@
                                                 <wm-diagnosis model="chart.epicrisis.pat_diagnosis" list-mode="false"
                                                               can-add-new="true" can-delete="true" can-edit="true"
                                                               action="chart.epicrisis" event="chart" risar="true"
+                                                              disabled="!mother_death"
                                                               params="{defaults:{diagnosis_type:rbDiagnosisType.get_by_code('2')},
                                                                        required:{end_date:true}}"></wm-diagnosis>
                                             </div>
@@ -260,7 +268,7 @@
                                         <td class="text-right"><span tooltip="Заключение лечебно-контрольной комиссии">Заключение ЛКК <span>&nbsp;</span></span></td>
                                         <td>
                                             <div class="row"><div class="col-md-12">
-                                                <wysiwyg ng-model="chart.epicrisis.control_expert_conclusion" />
+                                                <wysiwyg ng-model="chart.epicrisis.control_expert_conclusion" contenteditable="mother_death"/>
                                             </div></div>
                                     </tr>
                                 </tbody>
@@ -778,10 +786,12 @@
                     <div class="pull-right">
                         <a class="pseudo-btn" ng-href="{{ url_for('.html_epicrisis') }}?event_id=[[ chart.id ]]">Перейти на форму эпикриза пациентки</a>
                         <a class="btn btn-success"
+                           ng-disabled="is_save_disabled(rc.sampleWizard)"
                            tooltip="[[rc.sampleWizard.currentStep.formController.$invalid && rc.sampleWizard.currentStep.formController.submit_attempt ? 'Заполните все обязательные поля': '']]"
                            ng-click="rc.sampleWizard.currentIndex == rc.sampleWizard.navigationLength ? close_event() : save(rc.sampleWizard.currentStep.formController)">
                             Сохранить</a>
                         <a class="btn btn-primary"
+                           ng-disabled="is_save_disabled(rc.sampleWizard)"
                            ng-click="save(rc.sampleWizard.currentStep.formController); rc.sampleWizard.forward()"
                            tooltip="[[rc.sampleWizard.currentStep.formController.$invalid && rc.sampleWizard.currentStep.formController.submit_attempt ? 'Заполните все обязательные поля': '']]"
                            ng-show="rc.sampleWizard.currentIndex < rc.sampleWizard.navigationLength">

@@ -29,7 +29,7 @@ var EpicrisisCtrl = function ($timeout, $scope, RefBookService, RisarApi) {
                 var first_checkup = $scope.chart.checkups[0];
                 $scope.weight_gain = $scope.chart.checkups[$scope.chart.checkups.length-1].weight - first_checkup.weight; //прибавка массы за всю беременность
             }
-
+            $scope.mother_death = Boolean($scope.chart.epicrisis.death_date);
             if (!$scope.chart.epicrisis) {
                 $scope.chart.epicrisis = {
                     pregnancy_final: $scope.rbRisarPregnancy_Final.get_by_code('rodami'),
@@ -58,6 +58,12 @@ var EpicrisisCtrl = function ($timeout, $scope, RefBookService, RisarApi) {
         }
 
     };
+    $scope.is_save_disabled = function (wizard){
+        if(wizard.currentIndex == 1 && $scope.mother_death && wizard.currentStep.formController.$invalid){
+            return true
+        }
+        return false
+    }
 
     $scope.close_event = function () {
         RisarApi.chart.close_event($scope.chart.id, $scope.chart)
@@ -115,6 +121,16 @@ var EpicrisisCtrl = function ($timeout, $scope, RefBookService, RisarApi) {
             $scope.chart.epicrisis.pregnancy_duration = Math.floor(delivery_date.diff(pregnancy_start_date, 'days')/7) + 1;
         }
     });
+
+    $scope.$watch('mother_death', function(n){
+        if(!n){
+            $scope.chart.epicrisis.reason_of_death = null;
+            $scope.chart.epicrisis.death_date = null;
+            $scope.chart.epicrisis.death_time = null;
+            $scope.chart.epicrisis.pat_diagnosis = null;
+            $scope.chart.epicrisis.control_expert_conclusion = '';
+        }
+    })
 
     var init = function () {
         var hash = document.location.hash;
