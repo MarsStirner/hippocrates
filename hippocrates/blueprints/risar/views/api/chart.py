@@ -20,7 +20,6 @@ from blueprints.risar.lib.card_attrs import default_AT_Heuristic, get_all_diagno
 from blueprints.risar.lib.represent import represent_event, represent_chart_for_routing, represent_header, \
     represent_org_for_routing, group_orgs_for_routing
 from blueprints.risar.risar_config import attach_codes
-from blueprints.risar.lib.expert.protocols import EventMeasureRepr
 
 
 __author__ = 'mmalkov'
@@ -161,7 +160,6 @@ def api_0_chart_measure_list(event_id=None):
         raise ApiException(400, u'Обращение не является случаем беременности')
     return {
         'header': represent_header(event),
-        'measures': EventMeasureRepr().represent_by_event(event)
     }
 
 
