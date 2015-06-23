@@ -3,7 +3,7 @@
 var EventMeasureListCtrl = function ($scope, $q, RisarApi, RefBookService) {
     var params = aux.getQueryParams(window.location.search);
     var event_id = $scope.event_id = params.event_id;
-    var viewMode = undefined;
+    var viewMode;
     $scope.setViewMode = function (mode) {
         viewMode = mode;
         $scope.$broadcast('viewModeChanged', {
@@ -57,8 +57,6 @@ var EventMeasureListCtrl = function ($scope, $q, RisarApi, RefBookService) {
         var chart_loading = reloadChart($scope.event_id);
         $q.all([chart_loading, $scope.rbMeasureType.loading, $scope.rbMeasureStatus.loading]).
             then(function () {
-                selectMeasureTypes(true);
-                selectMeasureStatuses(true);
                 $scope.setViewMode('table');
             });
     };
@@ -137,8 +135,15 @@ var EventMeasureCalendarViewCtrl = function ($scope, $timeout, RisarApi, Timeout
                 return data.measures.map(makeTask);
             });
     };
-    var reloadCalendar = function (event_type) {
-        if (!event_type) event_type = 'render';
+    var firstRender = false;
+    var reloadCalendar = function () {
+        var event_type;
+        if (!firstRender) {
+            event_type = 'render';
+            firstRender = true;
+        } else {
+            event_type = 'refetchEvents';
+        }
         $timeout(function () {
             uiCalendarConfig.calendars.measureList.fullCalendar(event_type);
         });
@@ -165,7 +170,7 @@ var EventMeasureCalendarViewCtrl = function ($scope, $timeout, RisarApi, Timeout
         }
     };
     var tc = new TimeoutCallback(function () {
-        reloadCalendar('refetchEvents');
+        reloadCalendar();
     }, 600);
 
     var registered_watchers = [];
@@ -184,12 +189,11 @@ var EventMeasureCalendarViewCtrl = function ($scope, $timeout, RisarApi, Timeout
             registered_watchers.push(w_q);
             registered_watchers.push(w_qmt);
             registered_watchers.push(w_qs);
+            reloadCalendar();
         } else {
             registered_watchers.forEach(function (unwatch) { unwatch(); });
             registered_watchers = [];
         }
-
-        reloadCalendar('render');
     });
 };
 
