@@ -137,8 +137,15 @@ var EventMeasureCalendarViewCtrl = function ($scope, $timeout, RisarApi, Timeout
                 return data.measures.map(makeTask);
             });
     };
-    var reloadCalendar = function (event_type) {
-        if (!event_type) event_type = 'render';
+    var firstRender = false;
+    var reloadCalendar = function () {
+        var event_type;
+        if (!firstRender) {
+            event_type = 'render';
+            firstRender = true;
+        } else {
+            event_type = 'refetchEvents';
+        }
         $timeout(function () {
             uiCalendarConfig.calendars.measureList.fullCalendar(event_type);
         });
@@ -165,7 +172,7 @@ var EventMeasureCalendarViewCtrl = function ($scope, $timeout, RisarApi, Timeout
         }
     };
     var tc = new TimeoutCallback(function () {
-        reloadCalendar('refetchEvents');
+        reloadCalendar();
     }, 600);
 
     var registered_watchers = [];
@@ -184,12 +191,11 @@ var EventMeasureCalendarViewCtrl = function ($scope, $timeout, RisarApi, Timeout
             registered_watchers.push(w_q);
             registered_watchers.push(w_qmt);
             registered_watchers.push(w_qs);
+            reloadCalendar();
         } else {
             registered_watchers.forEach(function (unwatch) { unwatch(); });
             registered_watchers = [];
         }
-
-        reloadCalendar('render');
     });
 };
 
