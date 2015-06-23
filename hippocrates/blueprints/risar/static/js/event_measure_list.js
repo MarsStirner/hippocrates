@@ -3,7 +3,7 @@
 var EventMeasureListCtrl = function ($scope, $q, RisarApi, RefBookService) {
     var params = aux.getQueryParams(window.location.search);
     var event_id = $scope.event_id = params.event_id;
-    var viewMode = undefined;
+    var viewMode;
     $scope.setViewMode = function (mode) {
         viewMode = mode;
         $scope.$broadcast('viewModeChanged', {
@@ -57,8 +57,6 @@ var EventMeasureListCtrl = function ($scope, $q, RisarApi, RefBookService) {
         var chart_loading = reloadChart($scope.event_id);
         $q.all([chart_loading, $scope.rbMeasureType.loading, $scope.rbMeasureStatus.loading]).
             then(function () {
-                selectMeasureTypes(true);
-                selectMeasureStatuses(true);
                 $scope.setViewMode('table');
             });
     };
