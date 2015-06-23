@@ -1,159 +1,131 @@
-<div class="marginal">
 <ng-form name="_socStatuses" toc-element="Соц. статус">
-    <legend>Социальные статусы</legend>
+    <h4>Социальные статусы</h4>
     <ng-form name="_invalidity" toc-element="Инвалидность">
-        <h4>Инвалидность</h4>
         <div ng-repeat="socstat in client.invalidities | flt_not_deleted">
             <ng-form name="socStatInvalidityForm">
-                <div class="row">
-                    <div class="col-md-11">
+                <div class="box box-info">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Инвалидность</h3>
+                        <div class="box-tools pull-right">
+                            <button ng-show="socstat.id" type="button" class="btn btn-box-tool" title="Редактировать"
+                                    ng-click="edit.activated=true"><span class="glyphicon glyphicon-pencil text-primary"></span></button>
+                            <button type="button" class="btn btn-box-tool" title="Удалить"
+                                    ng-click="clientServices.delete_invalidity(client, socstat)"><span class="glyphicon glyphicon-trash text-danger"></span></button>
+                        </div>
+                    </div>
+                    <div class="box-body">
                         <wm-soc-status ss-class="2" id-postfix="i[[$index]]"
                             model-soc-status="socstat"
                             edit-mode="socstat.id ? edit.activated : true">
                         </wm-soc-status>
-                    </div>
-                    <div class="col-md-1">
-                        <div class="row" ng-show="socstat.id">
-                            <button type="button" class="btn btn-primary marginal" title="Редактировать"
-                                    ng-click="edit.activated=true"><span class="glyphicon glyphicon-pencil"></span></button>
-                        </div>
-                        <div class="row">
-                            <button type="button" class="btn btn-danger marginal" title="Удалить"
-                                    ng-click="clientServices.delete_invalidity(client, socstat)"><span class="glyphicon glyphicon-trash"></span></button>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-11">
-                        <h4 class="text-muted">Документ</h4>
-                        <div class="panel panel-default">
-                        <div class="panel-body">
-                            <wm-document id-postfix="c[[$index]]"
-                                group-code="7"
-                                model-document="socstat.self_document"
-                                edit-mode="socstat.self_document.id ? edit.activated : true">
-                            </wm-document>
-                            <div ng-if="socstat.self_document.file_attach">
-                                <h5 class="attach-file-copy-heading">Копия документа</h5>
-                                <wm-client-file-attach attach-type="document"
-                                    model-attach="socstat.self_document.file_attach"
-                                    model-doc="socstat.self_document"
-                                    on-add="add_new_file(documentInfo, policyInfo)"
-                                    on-open="openFile(cfa_id, idx)">
-                                </wm-client-file-attach>
-                            </div>
-                        </div>
+                        <h5>Документ</h5>
+                        <wm-document id-postfix="c[[$index]]"
+                            group-code="7"
+                            model-document="socstat.self_document"
+                            edit-mode="socstat.self_document.id ? edit.activated : true">
+                        </wm-document>
+                        <div ng-if="socstat.self_document.file_attach">
+                            <h5>Копия документа</h5>
+                            <wm-client-file-attach attach-type="document"
+                                model-attach="socstat.self_document.file_attach"
+                                model-doc="socstat.self_document"
+                                on-add="add_new_file(documentInfo, policyInfo)"
+                                on-open="openFile(cfa_id, idx)">
+                            </wm-client-file-attach>
                         </div>
                     </div>
                 </div>
             </ng-form>
-            <hr class="no-top-margin">
         </div>
-        <div>
-            <button type="button" class="btn btn-primary"
-                    ng-click="clientServices.add_new_invalidity(client)">Добавить инвалидность</button>
+        <div class="box-footer marginal">
+            <button type="button" class="btn btn-primary" ng-click="clientServices.add_new_invalidity(client)">Добавить инвалидность</button>
         </div>
     </ng-form>
 
-    <hr>
-
     <ng-form name="_works" toc-element="Занятость">
-        <h4>Занятость</h4>
         <div ng-repeat="socstat in client.works | flt_not_deleted">
             <ng-form name="socStatWorkForm">
-                <div class="row">
-                    <div class="col-md-11">
+                <div class="box box-info">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Занятость</h3>
+                        <div class="box-tools pull-right">
+                            <button ng-show="socstat.id" type="button" class="btn btn-box-tool" title="Редактировать"
+                                    ng-click="edit.activated=true"><span class="glyphicon glyphicon-pencil text-primary"></span></button>
+                            <button type="button" class="btn btn-box-tool" title="Удалить"
+                                    ng-click="clientServices.delete_work(client, socstat)"><span class="glyphicon glyphicon-trash text-danger"></span></button>
+                        </div>
+                    </div>
+                    <div class="box-body">
                         <wm-soc-status ss-class="3" id-postfix="w[[$index]]"
                             model-soc-status="socstat"
                             edit-mode="socstat.id ? edit.activated : true">
                         </wm-soc-status>
-                    </div>
-                    <div class="col-md-1">
-                        <div class="row" ng-show="socstat.id">
-                            <button type="button" class="btn btn-primary marginal" title="Редактировать"
-                                    ng-click="edit.activated=true"><span class="glyphicon glyphicon-pencil"></span></button>
-                        </div>
-                        <div class="row">
-                            <button type="button" class="btn btn-danger marginal" title="Удалить"
-                                    ng-click="clientServices.delete_work(client, socstat)"><span class="glyphicon glyphicon-trash"></span></button>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-11">
-                        <h4 class="text-muted">Документ
-                            <button type="button" class="btn btn-sm btn-primary" title="Заполнить документ"
-                                ng-click="clientServices.add_soc_status_doc(socstat)"
-                                ng-if="btnAddSsDocVisible(socstat)">
-                                <span class="glyphicon glyphicon-pencil"></span>
-                            </button>
-                            <button type="button" class="btn btn-sm btn-primary" title="Очистить данные документа"
-                                ng-click="clientServices.clear_soc_status_doc(socstat, ssWorkDocForm)"
-                                ng-if="btnClearSsDocVisible(socstat)">
-                                <span class="glyphicon glyphicon-erase"></span>
-                            </button>
+                        <h4>Документ
+                            <small>
+                                <button type="button" class="btn btn-link" title="Заполнить документ"
+                                    ng-click="clientServices.add_soc_status_doc(socstat)"
+                                    ng-if="btnAddSsDocVisible(socstat)">
+                                    <span class="glyphicon glyphicon-pencil"></span> заполнить документ
+                                </button>
+                                <button type="button" class="btn btn-link text-danger" title="Очистить данные документа"
+                                    ng-click="clientServices.clear_soc_status_doc(socstat, ssWorkDocForm)"
+                                    ng-if="btnClearSsDocVisible(socstat)">
+                                    <span class="glyphicon glyphicon-eraser"></span> очистить данные документа
+                                </button>
+                            </small>
                         </h4>
-                        <div class="panel panel-default">
-                        <div class="panel-body">
-                            <ng-form name="ssWorkDocForm">
-                            <wm-document id-postfix="c[[$index]]"
-                                group-code="4"
-                                model-document="socstat.self_document"
-                                edit-mode="socstat.self_document.id ? edit.activated : socstat.self_document.id !== undefined">
-                            </wm-document>
-                            <ng-form>
-                            <div ng-if="socstat.self_document.file_attach">
-                                <h5 class="attach-file-copy-heading">Копия документа</h5>
-                                <wm-client-file-attach attach-type="document"
-                                    model-attach="socstat.self_document.file_attach"
-                                    model-doc="socstat.self_document"
-                                    on-add="add_new_file(documentInfo, policyInfo)"
-                                    on-open="openFile(cfa_id, idx)">
-                                </wm-client-file-attach>
-                            </div>
-                        </div>
+                        <ng-form name="ssWorkDocForm">
+                        <wm-document id-postfix="c[[$index]]"
+                            group-code="4"
+                            model-document="socstat.self_document"
+                            edit-mode="socstat.self_document.id ? edit.activated : socstat.self_document.id !== undefined">
+                        </wm-document>
+                        <ng-form>
+                        <div ng-if="socstat.self_document.file_attach">
+                            <h5 class="attach-file-copy-heading">Копия документа</h5>
+                            <wm-client-file-attach attach-type="document"
+                                model-attach="socstat.self_document.file_attach"
+                                model-doc="socstat.self_document"
+                                on-add="add_new_file(documentInfo, policyInfo)"
+                                on-open="openFile(cfa_id, idx)">
+                            </wm-client-file-attach>
                         </div>
                     </div>
                 </div>
             </ng-form>
-            <hr class="no-top-margin">
         </div>
-        <div>
+        <div class="box-footer marginal">
             <button type="button" class="btn btn-primary"
                     ng-click="clientServices.add_new_work(client)">Добавить занятость</button>
         </div>
     </ng-form>
 
-    <hr>
-
     <ng-form name="_nationalities" toc-element="Гражданство">
         <h4>Гражданство</h4>
         <div ng-repeat="socstat in client.nationalities | flt_not_deleted">
             <ng-form name="socStatNationalityForm">
-                <div class="row">
-                    <div class="col-md-11">
+                <div class="box box-info">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Занятость</h3>
+                        <div class="box-tools pull-right">
+                            <button ng-show="socstat.id" type="button" class="btn btn-box-tool" title="Редактировать"
+                                    ng-click="edit.activated=true"><span class="glyphicon glyphicon-pencil text-primary"></span></button>
+                            <button type="button" class="btn btn-box-tool" title="Удалить"
+                                    ng-click="clientServices.delete_nationality(client, socstat)"><span class="glyphicon glyphicon-trash text-danger"></span></button>
+                        </div>
+                    </div>
+                    <div class="box-body">
                         <wm-soc-status ss-class="4" id-postfix="n[[$index]]"
                             model-soc-status="socstat"
                             edit-mode="socstat.id ? edit.activated : true">
                         </wm-soc-status>
                     </div>
-                    <div class="col-md-1">
-                        <div class="row" ng-show="socstat.id">
-                            <button type="button" class="btn btn-primary marginal" title="Редактировать"
-                                    ng-click="edit.activated=true"><span class="glyphicon glyphicon-pencil"></span></button>
-                        </div>
-                        <div class="row">
-                            <button type="button" class="btn btn-danger marginal" title="Удалить"
-                                    ng-click="clientServices.delete_nationality(client, socstat)"><span class="glyphicon glyphicon-trash"></span></button>
-                        </div>
-                    </div>
                 </div>
             </ng-form>
         </div>
-        <div>
+        <div class="box-footer marginal">
             <button type="button" class="btn btn-primary"
                     ng-click="clientServices.add_new_nationality(client)">Добавить гражданство</button>
         </div>
     </ng-form>
 </ng-form>
-</div>

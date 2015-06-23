@@ -24,9 +24,8 @@
             <li class="header">НАВИГАЦИЯ</li>
             {%- for item in main_menu -%}
             {% if item.visible %}
-            <li>
-                <a class="{% if request.endpoint == item.link %}active{% endif %}"
-                   href="{{ url_for(item.link) }}" title="{{ item.title }}">
+            <li class="{% if request.endpoint == item.link %}active{% endif %}">
+                <a href="{{ url_for(item.link) }}" title="{{ item.title }}">
                     <i class="{{ item.icon }}"></i>
                     <span>{{ item.title }}</span>
                 </a>
