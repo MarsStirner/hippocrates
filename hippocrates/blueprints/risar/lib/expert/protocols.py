@@ -3,7 +3,7 @@ import itertools
 
 from sqlalchemy.orm import aliased
 
-from nemesis.lib.utils import safe_date, safe_int, safe_datetime
+from nemesis.lib.utils import safe_date, safe_int, safe_datetime, safe_bool
 from nemesis.systemwide import db
 from nemesis.models.actions import Action
 from nemesis.models.expert_protocol import (ExpertScheme, ExpertSchemeMKB, EventMeasure, ExpertSchemeMeasureAssoc,
@@ -39,7 +39,7 @@ class EventMeasureGenerator(object):
         self.period_end_date = period_end_date
 
     def generate_measures(self):
-        # self.clear_existing_measures()
+        self.clear_existing_measures()
         act_scheme_measures = [
             ActionSchemeMeasure(act_mkb['action'], act_mkb['mkbs'])
             for act_mkb in self.action_mkb_list
@@ -134,18 +134,38 @@ class EventMeasureRepr(object):
         ]
 
     def represent_by_event(self, event, query_filter=None):
-        per_page = safe_int(query_filter.get('per_page')) or 20 if query_filter is not None else 20
-        page = safe_int(query_filter.get('page')) or 1 if query_filter is not None else 1
         em_selecter = EventMeasureSelecter(event)
-        if query_filter:
+        if query_filter is not None:
+            paginate = safe_bool(query_filter.get('paginate', True))
+            per_page = safe_int(query_filter.get('per_page')) or 20
+            page = safe_int(query_filter.get('page')) or 1
             em_selecter.apply_filter(**query_filter)
+        else:
+            paginate = True
+            per_page = 20
+            page = 1
         em_selecter.apply_sort_order()
-        em_data = em_selecter.paginate(per_page, page)
+
+        if paginate:
+            return self._paginate_data(em_selecter, per_page, page)
+        else:
+            return self._list_data(em_selecter)
+
+    def _paginate_data(self, selecter, per_page, page):
+        em_data = selecter.paginate(per_page, page)
         return {
             'count': em_data.total,
             'total_pages': em_data.pages,
             'measures': [
                 self.represent_measure(event_measure) for event_measure in em_data.items
+            ]
+        }
+
+    def _list_data(self, selecter):
+        em_data = selecter.get_all()
+        return {
+            'measures': [
+                self.represent_measure(event_measure) for event_measure in em_data
             ]
         }
 

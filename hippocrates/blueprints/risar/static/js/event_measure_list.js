@@ -1,20 +1,23 @@
-/**
- * Created by mmalkov on 24.09.14.
- */
-
 'use strict';
 
-var EventMeasureListCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookService) {
+var EventMeasureListCtrl = function ($scope, $q, RisarApi, RefBookService) {
     var params = aux.getQueryParams(window.location.search);
     var event_id = $scope.event_id = params.event_id;
+    var viewMode = undefined;
+    $scope.setViewMode = function (mode) {
+        viewMode = mode;
+        $scope.$broadcast('viewModeChanged', {
+            mode: mode
+        });
+    };
+    $scope.isTableMode = function () {
+        return viewMode === 'table';
+    };
+    $scope.isCalendarMode = function () {
+        return viewMode === 'calendar';
+    };
 
     $scope.query = {};
-    $scope.measure_list = [];
-    $scope.pager = {
-        current_page: 1,
-        max_pages: 10,
-        pages: 1
-    };
 
     var selectMeasureTypes = function (on) {
         if (on) {
@@ -30,16 +33,50 @@ var EventMeasureListCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefB
             $scope.query.status = [];
         }
     };
+    var reloadChart = function () {
+         return RisarApi.measure.get_chart($scope.event_id).then(function (data) {
+             $scope.header = data.header;
+        });
+    };
+
+    $scope.resetFilters = function () {
+        $scope.query = {
+            measure_type: [],
+            beg_date_from: null,
+            beg_date_to: null,
+            end_date_from: null,
+            end_date_to: null,
+            status: []
+        };
+    };
+
+    $scope.init = function () {
+        $scope.resetFilters();
+        $scope.rbMeasureType = RefBookService.get('rbMeasureType');
+        $scope.rbMeasureStatus = RefBookService.get('MeasureStatus');
+        var chart_loading = reloadChart($scope.event_id);
+        $q.all([chart_loading, $scope.rbMeasureType.loading, $scope.rbMeasureStatus.loading]).
+            then(function () {
+                selectMeasureTypes(true);
+                selectMeasureStatuses(true);
+                $scope.setViewMode('table');
+            });
+    };
+    $scope.init();
+};
+
+var EventMeasureTableViewCtrl = function ($scope, RisarApi, TimeoutCallback) {
+    $scope.measure_list = [];
+    $scope.pager = {
+        current_page: 1,
+        max_pages: 10,
+        pages: 1
+    };
+
     var setMeasureData = function (data) {
         $scope.measure_list = data.measures;
         $scope.pager.pages = data.total_pages;
         $scope.pager.record_count = data.count;
-    };
-    var reloadChart = function () {
-         return RisarApi.measure.get_chart(event_id).then(function (data) {
-             $scope.header = data.header;
-             setMeasureData(data.measures);
-        });
     };
     var refreshMeasureList = function (set_page) {
         if (!set_page) {
@@ -54,45 +91,111 @@ var EventMeasureListCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefB
             end_date_to: $scope.query.end_date_to ? moment($scope.query.end_date_to).endOf('day').toDate() : undefined,
             measure_status_id_list: $scope.query.status.length ? _.pluck($scope.query.status, 'id') : undefined
         };
-        RisarApi.measure.get_by_event(event_id, query).then(setMeasureData);
+        RisarApi.measure.get_by_event($scope.event_id, query).then(setMeasureData);
     };
     var tc = new TimeoutCallback(refreshMeasureList, 600);
 
-    $scope.resetFilters = function () {
-        $scope.query = {
-            measure_type: [],
-            beg_date_from: null,
-            beg_date_to: null,
-            end_date_from: null,
-            end_date_to: null,
-            status: []
-        };
-    };
     $scope.onPageChanged = function () {
         refreshMeasureList(true);
     };
-    $scope.init = function () {
-        $scope.resetFilters();
-        $scope.rbMeasureType = RefBookService.get('rbMeasureType');
-        $scope.rbMeasureStatus = RefBookService.get('MeasureStatus');
-        var chart_loading = reloadChart(event_id);
-        $q.all([chart_loading, $scope.rbMeasureType.loading, $scope.rbMeasureStatus.loading]).
-            then(function () {
-                selectMeasureTypes(true);
-                selectMeasureStatuses(true);
-                $scope.$watchCollection('query', function (n, o) {
-                    if (n !== o) tc.start();
-                });
-                $scope.$watchCollection('query.measure_type', function (n, o) {
-                    if (n !== o) tc.start();
-                });
-                $scope.$watchCollection('query.status', function (n, o) {
-                    if (n !== o) tc.start();
-                });
-            });
-    };
-    $scope.init();
+
+    var registered_watchers = [];
+    $scope.$on('viewModeChanged', function (event, data) {
+        var w_q, w_qmt, w_qs;
+        if (data.mode === 'table') {
+            w_q = $scope.$watchCollection('query', function () { tc.start(); });
+            w_qmt = $scope.$watchCollection('query.measure_type', function () { tc.start(); });
+            w_qs = $scope.$watchCollection('query.status', function () { tc.start(); });
+            registered_watchers.push(w_q);
+            registered_watchers.push(w_qmt);
+            registered_watchers.push(w_qs);
+        } else {
+            registered_watchers.forEach(function (unwatch) { unwatch(); });
+            registered_watchers = [];
+        }
+    });
 };
 
-WebMis20.controller('EventMeasureListCtrl', ['$scope', '$q', 'RisarApi', 'TimeoutCallback', 'RefBookService',
+var EventMeasureCalendarViewCtrl = function ($scope, $timeout, RisarApi, TimeoutCallback, uiCalendarConfig) {
+    function makeTask(data) {
+        return {
+            title: data.scheme_measure.measure.name,
+            start: data.beg_datetime,
+            end: data.end_datetime
+        }
+    }
+    var refreshMeasureCalendar = function (start, end) {
+        var query = {
+            paginate: false,
+            beg_date_from: start.local().startOf('day').toDate(),
+            end_date_to: end.local().endOf('day').toDate(),
+            measure_type_id_list: $scope.query.measure_type.length ? _.pluck($scope.query.measure_type, 'id') : undefined,
+            measure_status_id_list: $scope.query.status.length ? _.pluck($scope.query.status, 'id') : undefined
+        };
+        return RisarApi.measure.get_by_event($scope.event_id, query).
+            then(function (data) {
+                return data.measures.map(makeTask);
+            });
+    };
+    var reloadCalendar = function (event_type) {
+        if (!event_type) event_type = 'render';
+        $timeout(function () {
+            uiCalendarConfig.calendars.measureList.fullCalendar(event_type);
+        });
+    };
+    $scope.measureLoader = function (start, end, timezone, callback) {
+        refreshMeasureCalendar(start, end).then(function (tasks) {
+            callback(tasks);
+        });
+    };
+    $scope.eventSources = [
+        $scope.measureLoader
+    ];
+    $scope.uiConfig = {
+        calendar: {
+            header: {
+                left: 'month basicWeek basicDay',
+                center: 'title',
+                right: 'today prev,next'
+            },
+            lang: 'ru',
+            timezone: 'local',
+            height: 'auto',
+            eventLimit: true
+        }
+    };
+    var tc = new TimeoutCallback(function () {
+        reloadCalendar('refetchEvents');
+    }, 600);
+
+    var registered_watchers = [];
+    $scope.$on('viewModeChanged', function (event, data) {
+        var w_q, w_qmt, w_qs;
+        if (data.mode === 'calendar') {
+            w_q = $scope.$watchCollection('query', function (n, o) {
+                if (n !== o) tc.start();
+            });
+            w_qmt = $scope.$watchCollection('query.measure_type', function (n, o) {
+                if (n !== o) tc.start();
+            });
+            w_qs = $scope.$watchCollection('query.status', function (n, o) {
+                if (n !== o) tc.start();
+            });
+            registered_watchers.push(w_q);
+            registered_watchers.push(w_qmt);
+            registered_watchers.push(w_qs);
+        } else {
+            registered_watchers.forEach(function (unwatch) { unwatch(); });
+            registered_watchers = [];
+        }
+
+        reloadCalendar('render');
+    });
+};
+
+WebMis20.controller('EventMeasureListCtrl', ['$scope', '$q', 'RisarApi', 'RefBookService',
     EventMeasureListCtrl]);
+WebMis20.controller('EventMeasureTableViewCtrl', ['$scope', 'RisarApi', 'TimeoutCallback',
+    EventMeasureTableViewCtrl]);
+WebMis20.controller('EventMeasureCalendarViewCtrl', ['$scope', '$timeout', 'RisarApi', 'TimeoutCallback',
+    'uiCalendarConfig', EventMeasureCalendarViewCtrl]);
