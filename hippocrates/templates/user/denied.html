@@ -3,7 +3,10 @@
 {% block title %} > Доступ запрещён{% endblock %}
 
 {% block content %}
-<legend>Доступ запрещён</legend>
+<section class="content-header">
+    <h1>Доступ запрещён</h1>
+</section>
+<section class="content">
 {%- with messages = get_flashed_messages() -%}
   {%- if messages -%}
     <div class="alert alert-danger">
@@ -14,3 +17,4 @@
   {%- endif -%}
 {%- endwith -%}
 {% endblock %}
+</section>
