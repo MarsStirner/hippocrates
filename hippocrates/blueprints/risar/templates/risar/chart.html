@@ -10,7 +10,7 @@
             <li><a href="{{ url_for('.index_html') }}">Рабочий стол</a></li>
             <li>Карта пациентки</li>
         </ul>
-        {{ rimacros.page_title_ext('Карта пациентки', 'chart') }}
+        {{ rimacros.page_title_ext_n('Карта пациентки', 'chart') }}
         <div class="row">
             <div class="col-lg-8 col-md-8">
                 <div class="panel panel-default">
@@ -85,7 +85,7 @@
                             <td>[[ $index + 1 ]]</td>
                             <td><a ng-href="{{ url_for('.html_inspection_edit') }}?event_id=[[ chart.id ]]&checkup_id=[[ checkup.id ]]">[[ checkup.beg_date | asDate ]]</a></td>
                             <td>[[ checkup.pregnancy_week ]] ([[checkup.calculated_pregnancy_week]])</td>
-                            <td><span class="bottom_dotted" tooltip="[[ checkup.diag.diagnosis.mkb.name ]]">[[ checkup.diag.diagnosis.mkb.code ]]</span></td>
+                            <td><span class="bottom_dotted" tooltip="[[ checkup.diag.mkb.name ]]">[[ checkup.diag.mkb.code ]]</span></td>
                             <td>[[ checkup.person.name ]]</td>
                         </tr>
                     </table>

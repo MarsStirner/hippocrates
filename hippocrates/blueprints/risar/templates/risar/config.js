@@ -13,7 +13,6 @@ WebMis20
         api_chart_close: '{{ url_for('.api_0_chart_close') }}{0}',
         api_attach_lpu: '{{ url_for('.api_0_attach_lpu') }}',
         api_attach_lpu_mini: '/risar/api/0/client/{0}/attach_lpu',
-        api_checkup_save: '{{ url_for('.api_0_checkup') }}{0}',
         api_diagnoses_save: '{{ url_for('.api_0_save_diagnoses') }}{0}',
         api_anamnesis_mother: '{{ url_for('.api_0_chart') }}{0}/mother',
         api_anamnesis_father: '{{ url_for('.api_0_chart') }}{0}/father',
@@ -36,7 +35,12 @@ WebMis20
         inpection_edit_html:'{{ url_for('.html_inspection_edit') }}',
         ambulance_patient_info: '{{ url_for('.html_ambulance_patient_info') }}',
         api_chart_measure_list: '{{ url_for('.api_0_chart_measure_list') }}',
-        api_measure_list: '{{ url_for('.api_0_measure_list') }}'
+        api_measure_list: '{{ url_for('.api_0_measure_list') }}',
+        api_chart_header: '{{ url_for('.api_0_chart_header') }}',
+        api_checkup_list: '{{ url_for('.api_0_checkup_list') }}',
+        api_checkup_get: '{{ url_for('.api_0_checkup_get') }}{0}',
+        api_checkup_new: '{{ url_for('.api_0_checkup_new') }}{0}',
+        api_checkup_save: '{{ url_for('.api_0_checkup') }}{0}'
     }
 })
 ;

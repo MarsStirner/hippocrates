@@ -4,19 +4,19 @@
 {% block title %}> {{ module_name }}{% endblock %}
 
 {% block main %}
-    <div ng-controller="CheckupCtrl" ng-cloak>
+    <div ng-controller="CheckupSecondEditCtrl" ng-cloak>
         <ul class="breadcrumb">
             <li><a href="{{ url_for('.index_html') }}">Рабочий стол</a></li>
-            <li><a ng-href="{{ url_for('.html_chart') }}?event_id=[[ chart.id ]]">Карта пациентки</a></li>
-            <li><a ng-href="{{ url_for('.html_inspection') }}?event_id=[[ chart.id ]]">Осмотры акушера-гинеколога беременной</a></li>
+            <li><a ng-href="{{ url_for('.html_chart') }}?event_id=[[ header.event.id ]]">Карта пациентки</a></li>
+            <li><a ng-href="{{ url_for('.html_inspection') }}?event_id=[[ header.event.id ]]">Осмотры акушера-гинеколога беременной</a></li>
             <li>Ввод данных повторного осмотра</li>
         </ul>
         <div class="row small-marginal">
             <div class="col-md-12">
-                {{ rimacros.page_title('Ввод данных повторного осмотра') }}
+                {{ rimacros.page_title_n('Ввод данных повторного осмотра') }}
             </div>
         </div>
-        <div ng-controller="CheckupSecondEditCtrl"rc-wizard="sampleWizard" id="sampleWizard">
+        <div rc-wizard="sampleWizard" id="sampleWizard">
             <div class="row">
                 <div class="col-sm-3">
                     <div class="sidebar-nav">
@@ -306,7 +306,7 @@
                                         <td>
                                             <wm-diagnosis model="checkup.diag" list-mode="false"
                                                           can-add-new="true" can-delete="true" can-edit="true"
-                                                          action="checkup" event="chart" risar="true"
+                                                          action="checkup" risar="true"
                                                           params="{defaults:{diagnosis_type:rbDiagnosisType.get_by_code('2')},
                                                                    disabled:{diagnosis_type:true}}"></wm-diagnosis>
                                         </td>
@@ -316,7 +316,7 @@
                                         <td>
                                             <wm-diagnosis model="checkup.diag2" list-mode="true"
                                                           can-add-new="true" can-delete="true" can-edit="true"
-                                                          action="checkup" event="chart" risar="true"
+                                                          action="checkup" risar="true"
                                                           params="{defaults:{diagnosis_type:rbDiagnosisType.get_by_code('9')},
                                                                    disabled:{diagnosis_type:true}}"></wm-diagnosis>
                                         </td>
@@ -326,7 +326,7 @@
                                         <td>
                                             <wm-diagnosis model="checkup.diag3" list-mode="true"
                                                           can-add-new="true" can-delete="true" can-edit="true"
-                                                          action="checkup" event="chart" risar="true"
+                                                          action="checkup" risar="true"
                                                           params="{defaults:{diagnosis_type:rbDiagnosisType.get_by_code('3')},
                                                                    disabled:{diagnosis_type:true}}"></wm-diagnosis>
                                         </td>
@@ -492,7 +492,7 @@
             <div class="row">
                 <div class="form-group col-md-12">
                     <div class="pull-right">
-                        <a class="pseudo-btn" ng-href="{{ url_for('.html_inspection') }}?event_id=[[ chart.id ]]">Перейти на форму осмотров пациентки</a>
+                        <a class="pseudo-btn" ng-href="{{ url_for('.html_inspection') }}?event_id=[[ header.event.id ]]">Перейти на форму осмотров пациентки</a>
                         <ui-print-button ng-show="rc.sampleWizard.currentIndex == 4" ps="ps" resolve="ps_resolve()">Печать талона</ui-print-button>
                         <a class="btn btn-success"
                            ng-click="save(rc.sampleWizard.currentStep.formController)"
