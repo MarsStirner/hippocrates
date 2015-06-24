@@ -3,12 +3,16 @@
 {% block title %}> Расчет пациентов{% endblock %}
 
 {% block main %}
+<section class="content-header">
+    <h1>Расчет пациентов</h1>
+</section>
+<section class="content">
     <div ng-controller="CashBookCtrl" class="ng-cloak">
-        <legend><h2>Расчет пациентов</h2></legend>
         <div ui-alert-list="alerts"></div>
         <wm-search-event event-id="event.id" query="query"
              on-select="set_event(selected_event)"></wm-search-event>
     </div>
+</section>
 {% endblock %}
 {% block modules_js %}
     {{ super() }}
