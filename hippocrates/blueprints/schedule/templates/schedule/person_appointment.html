@@ -2,9 +2,12 @@
 {% block title %}> {{ module_name }}{% endblock %}
 
 {% block main %}
-    {% include "_breadcrumbs.html" %}
+<section class="content-header">
+{#    {% include "_breadcrumbs.html" %}#}
+    <h1 wm-page-header>Запись пациента на прием - <a href="{{ url_for('patients.patient', client_id=client.id) }}">{{ client.nameText }}</a></h1>
+</section>
+<section class="content">
     <div ng-controller="PersonAppointmentCtrl" class="ng-cloak">
-        <legend xmlns="http://www.w3.org/1999/html" wm-page-header><h2>Запись пациента на прием - <a href="{{ url_for('patients.patient', client_id=client.id) }}">{{ client.nameText }}</a></h2></legend>
         <div class="row">
             <div class="col-md-9">
                 <div class="row marginal">
@@ -27,47 +30,45 @@
                         </ul>
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col-md-12">
-                        <ul class="nav nav-tabs nav-justified" ng-model="reception_type">
-                            <li ng-class="{active: (rt.code == reception_type)}" ng-repeat="rt in reception_types.objects"
-                                ng-click="changeReceptionType(rt.code)"><a href="#">[[ rt.name ]]</a>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="tab-content">
-                    <div class="row" ng-repeat="person_schedule in total_schedules">
-                        <div class="col-md-12">
-                            <table class="table table-condensed person-schedule">
-                                <caption>
-                                    <a class="btn btn-default glyphicon glyphicon-chevron-up" ng-click="person_fold(person_schedule.person.id)"
-                                       ng-if="!is_folded(person_schedule.person.id)"></a>
-                                    <a class="btn btn-default glyphicon glyphicon-chevron-down" ng-click="person_unfold(person_schedule.person.id)"
-                                       ng-if="is_folded(person_schedule.person.id)"></a>
-                                    [[ person_schedule.person.name ]]<small>, [[ person_schedule.person.speciality.name ]]</small>
-                                    <span ng-if="schedule_is_empty(person_schedule) && !is_folded(person_schedule.person.id)"
-                                          class="no-schedule-label bg-danger">Нет расписания</span>
-                                    <span ng-if="!schedule_is_empty(person_schedule) && !schedule_has_free_tickets(person_schedule) && !is_folded(person_schedule.person.id)"
-                                          class="no-schedule-label bg-danger">Нет свободных номерков</span>
-                                </caption>
-                                <thead ng-if="schedule_has_free_tickets(person_schedule)">
-                                <tr>
-                                    <th ng-repeat="day in person_schedule.grouped[reception_type].schedule"
-                                        ng-bind="day.date | asMomentFormat:'DD.MM.YYYY, dd'">
-                                    </th>
-                                </tr>
-                                </thead>
-                                <tbody ng-if="schedule_has_free_tickets(person_schedule)">
-                                <tr ng-repeat="row in aux.range(person_schedule.grouped[reception_type].max_tickets)">
-                                    <td ng-repeat="day in person_schedule.grouped[reception_type].schedule">
-                                        <button ui-schedule-ticket="day.tickets[row]" day="day" show-name="false"
-                                                ng-click="appointment_toggle(day.tickets[row], person_schedule.person)">
-                                        </button>
-                                    </td>
-                                </tr>
-                                </tbody>
-                            </table>
+                <div class="nav-tabs-custom">
+                    <ul class="nav nav-tabs nav-justified" ng-model="reception_type">
+                        <li ng-class="{active: (rt.code == reception_type)}" ng-repeat="rt in reception_types.objects"
+                            ng-click="changeReceptionType(rt.code)"><a href="#">[[ rt.name ]]</a>
+                        </li>
+                    </ul>
+                    <div class="tab-content">
+                        <div class="row" ng-repeat="person_schedule in total_schedules">
+                            <div class="col-md-12">
+                                <table class="table table-condensed person-schedule">
+                                    <caption>
+                                        <a class="btn btn-default glyphicon glyphicon-chevron-up" ng-click="person_fold(person_schedule.person.id)"
+                                           ng-if="!is_folded(person_schedule.person.id)"></a>
+                                        <a class="btn btn-default glyphicon glyphicon-chevron-down" ng-click="person_unfold(person_schedule.person.id)"
+                                           ng-if="is_folded(person_schedule.person.id)"></a>
+                                        [[ person_schedule.person.name ]]<small>, [[ person_schedule.person.speciality.name ]]</small>
+                                        <span ng-if="schedule_is_empty(person_schedule) && !is_folded(person_schedule.person.id)"
+                                              class="no-schedule-label bg-danger">Нет расписания</span>
+                                        <span ng-if="!schedule_is_empty(person_schedule) && !schedule_has_free_tickets(person_schedule) && !is_folded(person_schedule.person.id)"
+                                              class="no-schedule-label bg-danger">Нет свободных номерков</span>
+                                    </caption>
+                                    <thead ng-if="schedule_has_free_tickets(person_schedule)">
+                                    <tr>
+                                        <th ng-repeat="day in person_schedule.grouped[reception_type].schedule"
+                                            ng-bind="day.date | asMomentFormat:'DD.MM.YYYY, dd'">
+                                        </th>
+                                    </tr>
+                                    </thead>
+                                    <tbody ng-if="schedule_has_free_tickets(person_schedule)">
+                                    <tr ng-repeat="row in aux.range(person_schedule.grouped[reception_type].max_tickets)">
+                                        <td ng-repeat="day in person_schedule.grouped[reception_type].schedule">
+                                            <button ui-schedule-ticket="day.tickets[row]" day="day" show-name="false"
+                                                    ng-click="appointment_toggle(day.tickets[row], person_schedule.person)">
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -79,6 +80,7 @@
         </div>
 {#        <pre>[[schedule|json]]</pre>#}
     </div>
+</section>
 {% endblock %}
 {% block modules_js %}
     {{ super() }}

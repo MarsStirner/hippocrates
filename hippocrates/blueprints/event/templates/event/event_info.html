@@ -33,7 +33,11 @@
                 <div class="marginal">
                     <ng-form name="eventForm" id="eventForm" role="form" novalidate
                              toc-element toc-name="tocEventForm" form-safe-close>
-                        <wm-client-info client="event.info.client"></wm-client-info>
+                        <div class="box box-info">
+                            <div class="box-body">
+                                <wm-client-info client="event.info.client"></wm-client-info>
+                            </div>
+                        </div>
                         {% if event and event.is_stationary %}
                             {% include "event/_stationary_info.html" %}
                         {% endif %}
