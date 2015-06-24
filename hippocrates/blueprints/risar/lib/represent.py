@@ -22,7 +22,7 @@ from blueprints.risar.lib.expert.protocols import EventMeasureRepr
 from ..risar_config import pregnancy_apt_codes, risar_anamnesis_pregnancy, transfusion_apt_codes, \
     risar_anamnesis_transfusion, mother_codes, father_codes, risar_father_anamnesis, risar_mother_anamnesis, \
     checkup_flat_codes, risar_epicrisis, risar_newborn_inspection, attach_codes
-from ..lib.utils import week_postfix
+from ..lib.utils import week_postfix, get_action_property_value
 
 
 __author__ = 'mmalkov'
@@ -43,6 +43,7 @@ def represent_header(event):
             'full_name': client.nameText,
         },
         'event': {
+            'id': event.id,
             'set_date': event.setDate,
             'exec_date': event.execDate,
             'person': event.execPerson,
@@ -103,10 +104,10 @@ def represent_event(event):
         'card_attributes': represent_card_attributes(event),
         'anamnesis': represent_anamnesis(event),
         'epicrisis': represent_epicrisis(event),
-        'checkups': represent_checkups(event),
+        'checkups': represent_checkups_shortly(event),
         'risk_rate': PrenatalRiskRate(card_attrs_action['prenatal_risk_572'].value),
         'preeclampsia_risk': PreeclampsiaRisk(card_attrs_action['preeclampsia_risk'].value) if
-        card_attrs_action.propsByCode.get('preeclampsia_risk') else None,
+            card_attrs_action.propsByCode.get('preeclampsia_risk') else None,
         'pregnancy_week': get_pregnancy_week(event),
         'diagnoses': all_diagnoses,
         'has_diseases': check_disease(all_diagnoses)
@@ -367,7 +368,7 @@ def represent_checkup(action, with_measures=True):
     )
     result['beg_date'] = action.begDate
     result['person'] = action.person
-    result['flatCode'] = action.actionType.flatCode
+    result['flat_code'] = action.actionType.flatCode
     result['id'] = action.id
     if result:
         result['diag'] = evis.make_diagnostic_record(result['diag'])
@@ -378,6 +379,36 @@ def represent_checkup(action, with_measures=True):
     if with_measures:
         result['measures'] = EventMeasureRepr().represent_by_action(action)
     return result
+
+
+def represent_checkups_shortly(event):
+    query = Action.query.join(ActionType).filter(
+        Action.event == event,
+        Action.deleted == 0,
+        ActionType.flatCode.in_(checkup_flat_codes)
+    ).order_by(Action.begDate)
+    return map(represent_checkup_shortly, query)
+
+
+def represent_checkup_shortly(action):
+    pregnancy_week = get_action_property_value(action.id, 'pregnancy_week')
+    diag = get_action_property_value(action.id, 'diag')
+    result = {
+        'id': action.id,
+        'beg_date': action.begDate,
+        'person': action.person,
+        'pregnancy_week': pregnancy_week.value if pregnancy_week else None,
+        'calculated_pregnancy_week': get_pregnancy_week(action.event, action.begDate),
+        'diag': represent_diag_shortly(diag.value) if diag and diag.value else None
+    }
+    return result
+
+
+def represent_diag_shortly(diagnostic):
+    return {
+        'id': diagnostic.id,
+        'mkb': diagnostic.diagnosis.mkb
+    }
 
 
 def represent_ticket(ticket):

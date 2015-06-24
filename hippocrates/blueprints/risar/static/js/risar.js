@@ -52,6 +52,9 @@ WebMis20
         }
     };
     this.chart = {
+        get_header: function (event_id) {
+            return wrapper('GET', Config.url.api_chart_header + event_id);
+        },
         get: function (event_id, ticket_id) {
             return wrapper('GET', Config.url.api_chart + ((event_id)?(event_id):''), {ticket_id: ticket_id})
                 .then(function (event_info) {
@@ -82,7 +85,7 @@ WebMis20
                             'success'
                         );
                     }
-                    return event_info.event;
+                    return chart;
                 });
         },
         delete: function (ticket_id) {
@@ -113,7 +116,6 @@ WebMis20
                     } else {
                         NotificationService.notify(200, 'ЛПУ направления оставлено без изменений', 'info')
                     }
-
                 })
         }
     };
@@ -124,9 +126,20 @@ WebMis20
         }
     };
     this.checkup = {
-            save: function (event_id, data) {
-                return wrapper('POST', Config.url.api_checkup_save.format(event_id), {}, data);
-            }
+        get_list: function (event_id) {
+            return wrapper('GET', Config.url.api_checkup_list + event_id);
+        },
+        get: function (checkup_id) {
+            return wrapper('GET', Config.url.api_checkup_get.format(checkup_id));
+        },
+        create: function (event_id, flat_code) {
+            return wrapper('POST', Config.url.api_checkup_new.format(event_id), undefined, {
+                flat_code: flat_code
+            });
+        },
+        save: function (event_id, data) {
+            return wrapper('POST', Config.url.api_checkup_save.format(event_id), {}, data);
+        }
     };
     this.anamnesis = {
         get: function (event_id) {

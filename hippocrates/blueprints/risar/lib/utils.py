@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
+from sqlalchemy.orm import lazyload
+
 from nemesis.lib.data import create_action
 from nemesis.lib.utils import safe_traverse_attrs
-from nemesis.models.actions import Action, ActionType
+from nemesis.models.actions import Action, ActionType, ActionProperty, ActionPropertyType
 from nemesis.systemwide import cache, db
 
 risk_rates_diagID = {
@@ -120,13 +122,13 @@ def get_action_list(event, flat_code, all=False):
     return query
 
 
-def get_action_by_id(action_id, event, flat_code, create=False):
+def get_action_by_id(action_id, event=None, flat_code=None, create=False):
     """
     :param action_id: id действия
     :param event: обращение, в котором действие может быть создано
     :param flat_code: flat code, с которым действие может быть создано
     :param create: создавать ли действие, если оно не найдено?
-    :type action_id: int
+    :type action_id: int | None
     :type event: application.models.event.Event
     :type flat_code: str
     :type create: bool
@@ -168,3 +170,23 @@ def get_action_type_id(flat_code):
     if not row:
         return None
     return row[0]
+
+
+def get_action_property_value(action_id, prop_type_code):
+    """
+    Получение ActionProperty по ActionPropertyType.code
+    :param action_id: Action.id
+    :type action_id: int
+    :param prop_type_code: ActionPropertyType.code
+    :type prop_type_code: str
+    :rtype: ActionProperty | None
+    :return: ActionProperty или None
+    """
+    query = ActionProperty.query.join(ActionPropertyType).filter(
+        ActionProperty.action_id == action_id,
+        ActionProperty.deleted == 0,
+        ActionPropertyType.code == prop_type_code
+    ).options(
+        lazyload('*')
+    )
+    return query.first()
