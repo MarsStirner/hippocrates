@@ -4,20 +4,20 @@
 {% block title %}> {{ module_name }}{% endblock %}
 
 {% block main %}
-    <div ng-controller="AnamnesisCtrl" ng-cloak>
-        <ul class="breadcrumb">
-            <li><a href="{{ url_for('.index_html') }}">Рабочий стол</a></li>
-            <li><a ng-href="{{ url_for('.html_chart') }}?event_id=[[ chart.id ]]">Карта пациентки</a></li>
-            <li><a ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ chart.id ]]">Анамнез пациентки</a></li>
-            <li>Ввод данных о матери</li>
-        </ul>
-        <div class="row small-marginal">
-            <div class="col-md-12">
-                {{ rimacros.page_title('Ввод данных о матери') }}
-            </div>
-        </div>
-        <div ng-controller="AnamnesisMotherEditCtrl">
+<div ng-controller="AnamnesisCtrl" ng-cloak>
+    <section class="content-header">
+        {{ rimacros.page_title('Ввод данных о матери') }}
+{#        <ul class="breadcrumb">#}
+{#            <li><a href="{{ url_for('.index_html') }}">Рабочий стол</a></li>#}
+{#            <li><a ng-href="{{ url_for('.html_chart') }}?event_id=[[ chart.id ]]">Карта пациентки</a></li>#}
+{#            <li><a ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ chart.id ]]">Анамнез пациентки</a></li>#}
+{#            <li>Ввод данных о матери</li>#}
+{#        </ul>#}
+    </section>
+    <section class="content">
+        <div ng-controller="AnamnesisMotherEditCtrl" class="box box-primary">
             <ng-form name="anamnesisMotherForm" id="anamnesisMotherForm" role="form" novalidate>
+            <div class="box-body">
             <table class="table table-condensed title-right">
                 <thead>
                 <tr>
@@ -162,15 +162,17 @@
                 </tr>
                 </tbody>
             </table>
+            </div>
             </ng-form>
-            <div class="text-right">
+            <div class="box-footer text-right">
                 <a class="pseudo-btn" ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ chart.id ]]">Перейти на форму анамнеза пациентки</a>
                 <button class="btn btn-success"
                         tooltip="[[anamnesisMotherForm.$invalid && submit_attempt ? 'Заполните все обязательные поля': '']]"
                         ng-click="save()">Сохранить</button>
             </div>
         </div>
-    </div>
+    </section>
+</div>
 {% endblock %}
 
 {% block modules_js %}

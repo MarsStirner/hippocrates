@@ -1,10 +1,10 @@
 {% macro page_title(title) %}
-<h2>
+<h1>
     {{ title }}
     <a ng-href="{{ url_for('patients.patient_info_full') }}?client_id=[[ chart.client.id ]]">[[ chart.client.full_name ]]</a>
     ([[ chart.external_id ]])
-</h2>
-<div class="alert-warning small-marginal">Случай беременности. На учёте в <b>[[ chart.person.organisation.short_name ]]</b>
+</h1>
+<div class="alert-warning tmargin10">Случай беременности. На учёте в <b>[[ chart.person.organisation.short_name ]]</b>
     у <b>[[ chart.person.name ]]</b>
     с <b>[[ chart.set_date | asDate ]]</b>
 </div>
@@ -86,7 +86,7 @@
     <a ng-href="{{ url_for('patients.patient_info_full') }}?client_id=[[ header.client.id ]]">[[ header.client.full_name ]]</a>
     ([[ header.event.external_id ]])
 </h1>
-<div class="breadcrumb">
+<div class="breadcrumb novpadding">
 {#    <div class="col-md-{{ w2 }} col-sm-12 achievements">#}
     <div class="achievements">
         {%- if ext_header == 'chart' %}

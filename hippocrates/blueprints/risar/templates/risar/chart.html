@@ -5,8 +5,8 @@
 
 {% block main %}
 <div ng-controller="ChartCtrl" ng-cloak>
-    <div alert-notify></div>
     <section class="content-header">
+        <div alert-notify></div>
         {{ rimacros.page_title_ext_n('Карта пациентки', 'chart') }}
         <div class="panel novmargin">
             <a ng-href="{{ url_for('patients.patient_info_full') }}?client_id=[[ header.client.id ]]" class="btn btn-link">Сводная карта</a>

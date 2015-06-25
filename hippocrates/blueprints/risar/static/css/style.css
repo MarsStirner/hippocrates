@@ -291,7 +291,3 @@ nvd3-line-chart svg {
 .text-success-risar {
     color: #30D040;
 }
-.content-header > .breadcrumb{
-    padding-top: 0;
-    padding-bottom: 0;
-}
