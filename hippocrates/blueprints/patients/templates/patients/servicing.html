@@ -3,11 +3,18 @@
 {% block title %}> {{ module_name }}{% endblock %}
 
 {% block main %}
-    <div ng-controller="ClientSearch" class="ng-cloak">
-        <legend xmlns="http://www.w3.org/1999/html"><h2>Обслуживание пациентов</h2></legend>
-        <wm-search-client client-id="client.client_id" query="query" allow-register
-            on-select="set_patient_id(selected_client)"></wm-search-client>
-    </div>
+    <section class="content-header">
+        <h1>Обслуживание пациентов</h1>
+    </section>
+    <section class="content">
+        <div ng-controller="ClientSearch" class="ng-cloak box box-success">
+            <div class="box-header"></div>
+            <div class="box-body">
+                <wm-search-client client-id="client.client_id" query="query" allow-register
+                    on-select="set_patient_id(selected_client)"></wm-search-client>
+            </div>
+        </div>
+    </section>
 
 {% endblock %}
 

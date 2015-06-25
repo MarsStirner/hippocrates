@@ -3,7 +3,10 @@
 {% block title %}> {{ module_name }}{% endblock %}
 
 {% block main %}
-    <legend xmlns="http://www.w3.org/1999/html"><h2>График работы</h2></legend>
+<section class="content-header">
+    <h1>График работы</h1>
+</section>
+<section class="content">
     <div ng-controller="ScheduleCtrl" class="ng-cloak">
         <div class="row marginal">
             <div class="col-md-2">
@@ -18,59 +21,61 @@
                 <person-tree popupable="true" person-id="person_id"></person-tree>
             </div>
         </div>
-        <ul class="nav nav-tabs nav-justified" ng-model="reception_type" ng-if="person">
-            <li ng-class="{active: (rt.code == reception_type)}" ng-repeat="rt in reception_types.objects"
-                ng-click="changeReceptionType(rt.code)"><a>[[ rt.name ]]</a>
-            </li>
-        </ul>
-        <div class="tab-content marginal" ng-if="person">
-            <div class="row">
-                <div class="col-md-12">
-                    <ul class="nav nav-pills">
-                        <li ng-class="{active: ($index == page)}" ng-repeat="p in pages">
-                            <a ng-click="setDatePage($index)">
-                                [[ p | asShortDate ]] - [[ aux.moment(p).add(6, 'd') | asShortDate ]]
-                            </a>
-                        </li>
-                    </ul>
+        <div class="nav-tabs-custom">
+            <ul class="nav nav-tabs nav-justified" ng-model="reception_type" ng-if="person">
+                <li ng-class="{active: (rt.code == reception_type)}" ng-repeat="rt in reception_types.objects"
+                    ng-click="changeReceptionType(rt.code)"><a>[[ rt.name ]]</a>
+                </li>
+            </ul>
+            <div class="tab-content marginal" ng-if="person">
+                <div class="row">
+                    <div class="col-md-12">
+                        <ul class="nav nav-pills">
+                            <li ng-class="{active: ($index == page)}" ng-repeat="p in pages">
+                                <a ng-click="setDatePage($index)">
+                                    [[ p | asShortDate ]] - [[ aux.moment(p).add(6, 'd') | asShortDate ]]
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
-            </div>
-            <div class="row">
-                <div class="col-md-12">
-                    <table class="table table-condensed person-schedule">
-                        <caption><span ng-if="grouped[reception_type].max_tickets == 0" class="no-schedule-label">Нет расписания</span>
+                <div class="row">
+                    <div class="col-md-12">
+                        <h4><span ng-if="grouped[reception_type].max_tickets == 0" class="no-schedule-label">Нет расписания</span>
                             [[ person.name ]]
                             <small>, [[ person.speciality.name ]]</small>
-                        </caption>
-                        <thead ng-if="grouped[reception_type].max_tickets > 0">
-                        <tr>
-                            <th ng-repeat="day in grouped[reception_type].schedule"
-                                ng-bind="day.date | asMomentFormat:'DD.MM.YYYY, dd'"></th>
-                        </tr>
-                        </thead>
-                        <tbody ng-if="grouped[reception_type].max_tickets > 0">
-                        <tr ng-repeat="row in aux.range(grouped[reception_type].max_tickets)">
-                            <td ng-repeat="day in grouped[reception_type].schedule">
-                                <div class="btn-group btn-group-justified">
-                                    <div class="btn-group">
-                                        <button ui-schedule-ticket="day.tickets[row]" day="day" show-name="true"
-                                                ng-click="appointment_toggle(day.tickets[row])"></button>
+                        </h4>
+                        <table class="table table-condensed person-schedule">
+                            <thead ng-if="grouped[reception_type].max_tickets > 0">
+                            <tr>
+                                <th ng-repeat="day in grouped[reception_type].schedule"
+                                    ng-bind="day.date | asMomentFormat:'DD.MM.YYYY, dd'"></th>
+                            </tr>
+                            </thead>
+                            <tbody ng-if="grouped[reception_type].max_tickets > 0">
+                            <tr ng-repeat="row in aux.range(grouped[reception_type].max_tickets)">
+                                <td ng-repeat="day in grouped[reception_type].schedule">
+                                    <div class="btn-group btn-group-justified">
+                                        <div class="btn-group">
+                                            <button ui-schedule-ticket="day.tickets[row]" day="day" show-name="true"
+                                                    ng-click="appointment_toggle(day.tickets[row])"></button>
+                                        </div>
+                                        <div class="btn-group" ng-if="ticket_user_info_available(day.tickets[row])">
+                                            <button type="button" class="btn btn-primary" title="Посмотреть информацию о пациенте"
+                                                    ng-click="view_patient_info(day.tickets[row])">
+                                                <span class="glyphicon glyphicon-user"></span>
+                                            </button>
+                                        </div>
                                     </div>
-                                    <div class="btn-group" ng-if="ticket_user_info_available(day.tickets[row])">
-                                        <button type="button" class="btn btn-primary" title="Посмотреть информацию о пациенте"
-                                                ng-click="view_patient_info(day.tickets[row])">
-                                            <span class="glyphicon glyphicon-user"></span>
-                                        </button>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
-        <div ng-show="person">
+        <div ng-show="person" class="panel">
             <div class="btn-group dropup">
                 <ui-print-button ps="ps" resolve="get_ps_resolve()" class="btn-lg"
                     lazy-load-context="scheduleQueue"></ui-print-button>
@@ -86,6 +91,7 @@
             </div>
         </div>
     </div>
+</section>
 {% endblock %}
 {% block modules_js %}
     {{ super() }}

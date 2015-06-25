@@ -1,7 +1,11 @@
 <div ng-controller="EventPaymentCtrl" ng-show="formstate.is_paid() || formstate.is_dms() || formstate.is_oms()">
 <ng-form name="payerForm" toc-element="Плательщик">
-<legend xmlns="http://www.w3.org/1999/html">Плательщик</legend>
-<tabset justified="false" class="marginal">
+    <div class="box box-info">
+        <div class="box-header with-border">
+            <h3 class="box-title">Плательщик</h3>
+        </div>
+        <div class="box-body">
+            <tabset justified="false" class="marginal">
     <tab id="tab_payer_person" disabled="payer_tabs.person.disabled"
          active="payer_tabs.person.active" deselect="switch_tab(0)">
         <tab-heading>Физ. лицо
@@ -141,12 +145,15 @@
         </div>
     </tab>
 </tabset>
-
-<legend xmlns="http://www.w3.org/1999/html">Договор между пациентом и ЛПУ
-    <span class="text-warning" ng-if="integration1CODVD_enabled()"> (Заключается при оплате в кассе)</span>
-</legend>
-<div class="panel panel-default">
-    <div class="panel-body">
+</div>
+</div>
+<div class="box box-info">
+    <div class="box-header with-border">
+        <h3 class="box-title">Договор между пациентом и ЛПУ
+            <span class="text-warning" ng-if="integration1CODVD_enabled()"> (Заключается при оплате в кассе)</span>
+        </h3>
+    </div>
+    <div class="box-body">
         <div class="row form-group">
             <div class="col-md-2"
                 ng-class="{'has-error': payerForm.date_contract.$invalid && editing.submit_attempt}">

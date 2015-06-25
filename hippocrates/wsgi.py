@@ -20,39 +20,48 @@ def general_menu():
         link='index',
         title=u'Главная страница',
         homepage=True,
-        visible=(UserProfileManager.has_ui_doctor() or UserProfileManager.has_ui_registrator())
+        visible=(UserProfileManager.has_ui_doctor() or UserProfileManager.has_ui_registrator()),
+        icon='glyphicon glyphicon-home'
     ), dict(
         link='patients.index',
         title=u'Обслуживание пациентов',
-        visible=(UserProfileManager.has_ui_registrator() or UserProfileManager.has_ui_registrator_cut())
+        visible=(UserProfileManager.has_ui_registrator() or UserProfileManager.has_ui_registrator_cut()),
+        icon='fa fa-users'
     ), dict(
         link='schedule.person_schedule_monthview',
-        title=u'Формирование графика врача',
-        visible=(UserProfileManager.has_ui_registrator())
+        title=u'Формирование графика',
+        visible=(UserProfileManager.has_ui_registrator()),
+        icon='fa fa-user-md'
     ), dict(
         link='schedule.index',
         title=u'График работы',
-        visible=(UserProfileManager.has_ui_registrator() or UserProfileManager.has_ui_doctor())
+        visible=(UserProfileManager.has_ui_registrator() or UserProfileManager.has_ui_doctor()),
+        icon='fa fa-calendar'
     ), dict(
         link='schedule.doctor_schedule_day',
         title=u'Приём пациентов',
-        visible=(UserProfileManager.has_ui_doctor())
+        visible=(UserProfileManager.has_ui_doctor()),
+        icon='fa fa-stethoscope'
     ), dict(
         link='patients.search',
         title=u'Поиск пациентов',
-        visible=(UserProfileManager.has_ui_doctor())
+        visible=(UserProfileManager.has_ui_doctor()),
+        icon='fa fa-search'
     ), dict(
         link='event.get_events',
         title=u'Обращения',
-        visible=(UserProfileManager.has_ui_registrator() or UserProfileManager.has_ui_doctor())
+        visible=(UserProfileManager.has_ui_registrator() or UserProfileManager.has_ui_doctor()),
+        icon='fa fa-medkit'
     ), dict(
         link='accounting.cashbook_html',
         title=u'Расчет пациентов',
-        visible=UserProfileManager.has_ui_cashier()
+        visible=UserProfileManager.has_ui_cashier(),
+        icon='fa fa-calculator'
     ), dict(
         link='accounting.cashbook_operations',
         title=u'Журнал кассовых операций',
-        visible=UserProfileManager.has_ui_cashier()
+        visible=UserProfileManager.has_ui_cashier(),
+        icon='fa fa-book'
     ), dict(
         link='risar.index_html',
         title={
@@ -65,7 +74,8 @@ def general_menu():
     ), dict(
         link='anareports.index_html',
         title=u'Аналитические отчёты',
-        visible=True
+        visible=True,
+        icon='fa fa-bar-chart'
     )]
     return dict(main_menu=menu_items)
 

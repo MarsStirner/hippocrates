@@ -1,63 +1,61 @@
 <ng-form name="mainInfoForm" toc-element="Основная информация">
-    <legend>Основная информация</legend>
-    <div class="row">
-    <div class="col-md-11">
-        <div class="panel panel-default">
-            <div class="panel-body">
-                <div class="row">
-                    <div class="form-group col-md-3"
-                         ng-class="{'has-error': mainInfoForm.lastname.$invalid && (mainInfoForm.lastname.$dirty || editing.submit_attempt)}">
-                        <label for="lastname" class="control-label">Фамилия <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" autocomplete="off" placeholder="Фамилия"
-                               id="lastname" name="lastname" ng-model="client.info.last_name" ng-required="true"/>
-                    </div>
-                    <div class="form-group col-md-3"
-                         ng-class="{'has-error': mainInfoForm.firstname.$invalid && (mainInfoForm.firstname.$dirty || editing.submit_attempt)}">
-                        <label for="lastname" class="control-label">Имя <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" autocomplete="off" placeholder="Имя"
-                                id="firstname" name="firstname" ng-model="client.info.first_name" ng-required="true"/>
-                    </div>
-                    <div class="form-group col-md-3">
-                        <label for="patronymic">Отчество</label>
-                        <input type="text" class="form-control" autocomplete="off" placeholder="Отчество"
-                               id="patronymic" name="patronymic" ng-model="client.info.patr_name"/>
-                    </div>
-                    <div class="form-group col-md-offset-1 col-md-2"
-                         ng-class="{'has-error': mainInfoForm.gender.$invalid && (mainInfoForm.gender.$dirty || editing.submit_attempt)}">
-                        <label for="gender" class="control-label">Пол <span class="text-danger">*</span></label>
-                        <select class="form-control" id="gender" name="gender"
-                                ng-model="client.info.sex"
-                                ng-options="item as item.name for item in rbGender.objects track by item.id"
-                                ng-required="true">
-                            <option value="">Не выбрано</option>
-                        </select>
-                    </div>
+    <div class="box box-info">
+        <div class="box-header with-border">
+            <h3 class="box-title">Основная информация</h3>
+        </div>
+        <div class="box-body">
+            <div class="row">
+                <div class="form-group col-md-3"
+                     ng-class="{'has-error': mainInfoForm.lastname.$invalid && (mainInfoForm.lastname.$dirty || editing.submit_attempt)}">
+                    <label for="lastname" class="control-label">Фамилия <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" autocomplete="off" placeholder="Фамилия"
+                           id="lastname" name="lastname" ng-model="client.info.last_name" ng-required="true"/>
                 </div>
-                <div class="row">
-                    <div class="form-group col-md-3"
-                         ng-class="{'has-error': mainInfoForm.birthdate.$invalid && (mainInfoForm.birthdate.$dirty || editing.submit_attempt)}">
-                        <label for="birthdate" class="control-label">Дата рождения <span class="text-danger">*</span></label>
-                        <wm-date id="birthdate" name="birthdate" ng-model="client.info.birth_date" ng-required="true" max-date="currentDate">
-                        </wm-date>
-                    </div>
-                    <div class="form-group col-md-3"
-                         ng-class="{'has-error': mainInfoForm.snils.$invalid && mainInfoForm.snils.$dirty}">
-                        <label for="snils" class="control-label">СНИЛС</label>
-                        <input type="text" class="form-control" id="snils" name="snils" ui-mask="999-999-999 99"
-                               ng-model="client.info.snils" placeholder="___-___-___ __"
-                               ng-pattern="/\d{3}-\d{3}-\d{3} \d\d/" snils-validator
-                               popover="Введён невалидный СНИЛС" popover-placement="right" popover-trigger="show_popover" />
-                    </div>
+                <div class="form-group col-md-3"
+                     ng-class="{'has-error': mainInfoForm.firstname.$invalid && (mainInfoForm.firstname.$dirty || editing.submit_attempt)}">
+                    <label for="lastname" class="control-label">Имя <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" autocomplete="off" placeholder="Имя"
+                            id="firstname" name="firstname" ng-model="client.info.first_name" ng-required="true"/>
                 </div>
-                <div class="row">
-                    <div class="form-group col-md-12">
-                        <label for="notes">Примечания</label>
-                        <textarea class="form-control" id="notes" name="notes" rows="2" autocomplete="off"
-                            ng-model="client.info.notes"></textarea>
-                    </div>
+                <div class="form-group col-md-3">
+                    <label for="patronymic">Отчество</label>
+                    <input type="text" class="form-control" autocomplete="off" placeholder="Отчество"
+                           id="patronymic" name="patronymic" ng-model="client.info.patr_name"/>
+                </div>
+                <div class="form-group col-md-offset-1 col-md-2"
+                     ng-class="{'has-error': mainInfoForm.gender.$invalid && (mainInfoForm.gender.$dirty || editing.submit_attempt)}">
+                    <label for="gender" class="control-label">Пол <span class="text-danger">*</span></label>
+                    <select class="form-control" id="gender" name="gender"
+                            ng-model="client.info.sex"
+                            ng-options="item as item.name for item in rbGender.objects track by item.id"
+                            ng-required="true">
+                        <option value="">Не выбрано</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group col-md-3"
+                     ng-class="{'has-error': mainInfoForm.birthdate.$invalid && (mainInfoForm.birthdate.$dirty || editing.submit_attempt)}">
+                    <label for="birthdate" class="control-label">Дата рождения <span class="text-danger">*</span></label>
+                    <wm-date id="birthdate" name="birthdate" ng-model="client.info.birth_date" ng-required="true" max-date="currentDate">
+                    </wm-date>
+                </div>
+                <div class="form-group col-md-3"
+                     ng-class="{'has-error': mainInfoForm.snils.$invalid && mainInfoForm.snils.$dirty}">
+                    <label for="snils" class="control-label">СНИЛС</label>
+                    <input type="text" class="form-control" id="snils" name="snils" ui-mask="999-999-999 99"
+                           ng-model="client.info.snils" placeholder="___-___-___ __"
+                           ng-pattern="/\d{3}-\d{3}-\d{3} \d\d/" snils-validator
+                           popover="Введён невалидный СНИЛС" popover-placement="right" popover-trigger="show_popover" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group col-md-12">
+                    <label for="notes">Примечания</label>
+                    <textarea class="form-control" id="notes" name="notes" rows="2" autocomplete="off"
+                        ng-model="client.info.notes"></textarea>
                 </div>
             </div>
         </div>
-    </div>
     </div>
 </ng-form>

@@ -2,7 +2,8 @@
 {% block title %}> {{ module_name }}{% endblock %}
 
 {% block main %}
-    <div ng-controller="ScheduleDayCtrl" class="ng-cloak">
+<section class="content">
+    <div ng-controller="ScheduleDayCtrl" class="ng-cloak row">
         <div class="col-lg-3 col-md-3">
             <div ng-if="mode === 'proc_office'">
             <ui-select id="proc_office" name="proc_office" theme="select2" ng-model="proc_office.selected"
@@ -14,48 +15,58 @@
             </ui-select>
             <hr>
             </div>
-            <div class="well">
-                <datepicker class="vbmargin10" style="width: 100%" ng-model="date" show-weeks="false" ng-change="dateChanged();"></datepicker>
-                <button ng-click="today()" class="btn btn-sm btn-block btn-info ng-binding" type="button">Сегодня</button>
+            <div class="panel">
+                <div class="panel-body">
+                    <datepicker class="vbmargin10" style="width: 100%" ng-model="date" show-weeks="false" ng-change="dateChanged();"></datepicker>
+                    <button ng-click="today()" class="btn btn-sm btn-block btn-info ng-binding" type="button">Сегодня</button>
+                </div>
             </div>
-            <div class="well-sm alert alert-info" ng-if="schedules[0].scheds.length">
+            <div class="panel alert" ng-if="schedules[0].scheds.length">
                 <a ng-href="[[get_full_schedule_url()]]" target="_blank" class="pull-right" title="Посмотреть полный график"><h4 class="glyphicon glyphicon-calendar novmargin"></h4></a>
                 <ul class="list-unstyled novmargin">
                     <li ng-repeat="schedule in schedules[0].scheds" title="[[schedule.reception_type.name]]"><small class="glyphicon" ng-class="{'glyphicon-plus': (schedule.reception_type.code == 'amb'), 'glyphicon-home': (schedule.reception_type.code == 'home')}"></small> [[ (schedules[0].date + ' ' + schedule.begTime|asTime) | asTime ]] - [[ (schedules[0].date + ' ' + schedule.endTime) | asTime ]] <small class="text-danger" ng-if="schedule.office">каб. [[schedule.office.code]]</small></li>
                 </ul>
             </div>
-            <div class="well-sm alert alert-danger" ng-if="schedules && !schedules[0].scheds.length">
+            <div class="panel alert alert-danger" ng-if="schedules && !schedules[0].scheds.length">
                 <strong ng-if="!schedules[0].roa">Нет расписания на [[ date | asMomentFormat : 'DD.MM.YYYY' ]]</strong>
                 <span ng-if="schedules[0].roa">Причина отсутсвия: <strong>[[ schedules[0].roa.name ]]</strong></span>
             </div>
-            <p ng-repeat="schedule in schedules[0].scheds">
-                <legend><a href="javascript:;" title="Показать/скрыть прошедшие записи" class="pull-right btn btn-xs btn-default" ng-click="show_past_tickets=!show_past_tickets"><span class="glyphicon" ng-class="{'glyphicon-chevron-down': !show_past_tickets, 'glyphicon-chevron-up': show_past_tickets}"></span></a><small>[[schedule.reception_type.name]]: [[ (schedules[0].date + ' ' + schedule.begTime|asTime) | asTime ]] - [[ (schedules[0].date + ' ' + schedule.endTime) | asTime ]]</small></legend>
-                <button ng-repeat="ticket in schedule.tickets" ui-schedule-ticket="ticket" day="schedules[0].date" show-name="true" ng-click="ticket_choose(ticket);" ng-show="show_past_tickets || ticket.attendance_type.code == 'CITO' || ticket.attendance_type.code == 'extra' || show_time(ticket.begDateTime)" ng-class="{'disabled': !client || ticket.disabled}"></button>
-            </p>
+            <div class="box box-primary" ng-repeat="schedule in schedules[0].scheds">
+                <div class="box-header">
+                    <h3 class="box-title">[[schedule.reception_type.name]]: [[ (schedules[0].date + ' ' + schedule.begTime|asTime) | asTime ]] - [[ (schedules[0].date + ' ' + schedule.endTime) | asTime ]]</h3>
+                    <div class="box-tools pull-right"><button title="Показать/скрыть прошедшие записи" class="btn btn-box-tool" ng-click="show_past_tickets=!show_past_tickets"><i class="glyphicon" ng-class="{'glyphicon-chevron-down': !show_past_tickets, 'glyphicon-chevron-up': show_past_tickets}"></i></button></div>
+                </div>
+                <div class="box-body">
+                    <button ng-repeat="ticket in schedule.tickets" ui-schedule-ticket="ticket" day="schedules[0].date" show-name="true" ng-click="ticket_choose(ticket);" ng-show="show_past_tickets || ticket.attendance_type.code == 'CITO' || ticket.attendance_type.code == 'extra' || show_time(ticket.begDateTime)" ng-class="{'disabled': !client || ticket.disabled}"></button>
+                </div>
+            </div>
         </div>
         <div class="col-lg-9 col-md-9" id="client_top">
-        {% include "_breadcrumbs.html" %}
-            <div ng-if="client">
-                <legend class="vbmargin10">
-                    <h2>[[ client.info.full_name ]] <small ng-if="client.info.full_name">(запись на [[ticket.begDateTime|asTime]])</small></h2>
-                </legend>
-                <div ng-if="client.info.full_name" class="vbmargin10">
-                    <button class="btn btn-lg btn-success" ng-if="!ticket.record.event_id" ng-click="new_event(client.info.id, ticket.record.id)" title="Создать обращение">Создать обращение</button>
-                    <button class="btn btn-lg btn-success" ng-if="ticket.record.event_id" ng-click="open_event(ticket.record.event_id)" title="Открыть обращение [[ticket.record.event_external_id]]">Открыть обращение [[ticket.record.event_external_id]]</button>
-                    <button class="btn btn-lg btn-primary" ng-click="new_appointment(ticket.record.client_id)" title="Записать на приём к другому специалисту">Записать на приём</button>
-                    <ui-print-button class="btn-lg" ps="ps_home" class="btn-sm" resolve="ps_home_resolve(ticket.record.id)" ng-if="ticket.record.appointment_type.code == 'home'"></ui-print-button>
-                    <ui-print-button class="btn-lg" ps="ps_amb" class="btn-sm" resolve="ps_amb_resolve(ticket.record.id)" ng-if="ticket.record.appointment_type.code == 'amb'"></ui-print-button>
+{#        {% include "_breadcrumbs.html" %}#}
+            <div ng-if="client" class="box box-info">
+                <div class="box-header with-border">
+                    <h3 class="box-title">[[ client.info.full_name ]] <small ng-if="client.info.full_name">(запись на [[ticket.begDateTime|asTime]])</small></h3>
                 </div>
-
-                <wm-client-info client="client"></wm-client-info>
-
-                <tabset>
-                    <tab heading="Предварительные записи">{% include "patients/_appointments.html" %}</tab>
-                    <tab heading="Обращения">{% include "patients/_event_list.html" %}</tab>
-                </tabset>
+                <div class="box-body">
+                    <div ng-if="client.info.full_name" class="vbmargin10">
+                        <button class="btn btn-lg btn-success" ng-if="!ticket.record.event_id" ng-click="new_event(client.info.id, ticket.record.id)" title="Создать обращение">Создать обращение</button>
+                        <button class="btn btn-lg btn-success" ng-if="ticket.record.event_id" ng-click="open_event(ticket.record.event_id)" title="Открыть обращение [[ticket.record.event_external_id]]">Открыть обращение [[ticket.record.event_external_id]]</button>
+                        <button class="btn btn-lg btn-primary" ng-click="new_appointment(ticket.record.client_id)" title="Записать на приём к другому специалисту">Записать на приём</button>
+                        <ui-print-button class="btn-lg" ps="ps_home" class="btn-sm" resolve="ps_home_resolve(ticket.record.id)" ng-if="ticket.record.appointment_type.code == 'home'"></ui-print-button>
+                        <ui-print-button class="btn-lg" ps="ps_amb" class="btn-sm" resolve="ps_amb_resolve(ticket.record.id)" ng-if="ticket.record.appointment_type.code == 'amb'"></ui-print-button>
+                    </div>
+                    <div class="marginal">
+                        <wm-client-info client="client"></wm-client-info>
+                    </div>
+                    <tabset>
+                        <tab heading="Предварительные записи">{% include "patients/_appointments.html" %}</tab>
+                        <tab heading="Обращения">{% include "patients/_event_list.html" %}</tab>
+                    </tabset>
+                </div>
             </div>
         </div>
     </div>
+</section>
 {% endblock %}
 {% block modules_js %}
     {{ super() }}
