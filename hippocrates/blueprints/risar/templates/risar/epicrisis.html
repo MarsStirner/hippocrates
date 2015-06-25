@@ -4,35 +4,33 @@
 {% block title %}> {{ module_name }}{% endblock %}
 
 {% block main %}
-    <div ng-controller="EpicrisisCtrl" ng-cloak>
+<div ng-controller="EpicrisisCtrl" ng-cloak>
+    <section class="content-header">
+        {{ rimacros.page_title('Эпикриз') }}
         <ul class="breadcrumb">
             <li><a href="{{ url_for('.index_html') }}">Рабочий стол</a></li>
             <li><a ng-href="{{ url_for('.html_chart') }}?event_id=[[ chart.id ]]">Карта пациентки</a></li>
             <li>Эпикриз</li>
         </ul>
-        <div class="row small-marginal">
-            <div class="col-md-12">
-                {{ rimacros.page_title('Эпикриз') }}
-            </div>
-        </div>
+    </section>
+    <section class="content">
         <tabset>
             <tab heading="Информация о родоразрешении">
-                <div class="panel panel-default" style="border-color: #ffffff;">
+                <div class="panel panel-default" style="border-top: none; border-radius: 0">
                     <div class="panel-body">
-                        <span ng-if="chart.epicrisis" ng-bind-html="chart.epicrisis.info">
-                        </span>
-                        <div class="text-right"><a class="print_link" href="{{ url_for('.html_epicrisis_edit') }}?event_id=[[ chart.id ]]"><span class="glyphicon glyphicon-pencil"></span> Изменить</a> </div>
+                        <div class="pull-right"><a class="print_link" href="{{ url_for('.html_epicrisis_edit') }}?event_id=[[ chart.id ]]"><span class="glyphicon glyphicon-pencil"></span> Изменить</a> </div>
+                        <span ng-if="chart.epicrisis" ng-bind-html="chart.epicrisis.info"></span>
                     </div>
-
                 </div>
                 <div class="row">
                     <div class="col-md-6">
-                        <div class="panel panel-default">
-                            <div class="panel-heading"> Диагнозы
+                        <div class="box box-primary">
+                            <div class="box-header with-border">
+                                <h3 class="box-title">Диагнозы</h3>
                                 <a class="print_link pull-right"
                                    href="{{ url_for('.html_epicrisis_edit') }}?event_id=[[ chart.id ]]#tab_first"><span class="glyphicon glyphicon-pencil"></span> Изменить</a>
                             </div>
-                            <div class="panel-body">
+                            <div class="box-body">
                                 <div class="row">
                                     <div class="col-sm-5 col-md-5  text-right">Основной диагноз:</div>
                                     <div class="col-sm-7 col-md-7">[[chart.epicrisis.main_diagnosis.diagnosis.mkb.code]] - [[chart.epicrisis.main_diagnosis.diagnosis.mkb.name]]</div>
@@ -53,12 +51,13 @@
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <div class="panel panel-default">
-                            <div class="panel-heading"> Данные случая
+                        <div class="box box-primary">
+                            <div class="box-header with-border">
+                                <h3 class="box-title">Данные случая</h3>
                                 <a class="print_link pull-right"
                                    href="{{ url_for('.html_epicrisis_edit') }}?event_id=[[ chart.id ]]#tab_first"><span class="glyphicon glyphicon-pencil"></span> Изменить</a>
                             </div>
-                            <div class="panel-body">
+                            <div class="box-body">
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6  text-right">Дата постановки на учёт:</div>
                                     <div class="col-sm-6 col-md-6">[[chart.set_date|asDate]]</div>
@@ -84,12 +83,13 @@
                         </div>
                     </div>
                     <div class="col-md-6" ng-if="chart.epicrisis.death_date || chart.epicrisis.reason_of_death">
-                        <div class="panel panel-default">
-                            <div class="panel-heading"> Смерть матери
+                        <div class="box box-primary">
+                            <div class="box-header with-border">
+                                <h3 class="box-title">Смерть матери</h3>
                                 <a class="print_link pull-right"
                                    href="{{ url_for('.html_epicrisis_edit') }}?event_id=[[ chart.id ]]#tab_second"><span class="glyphicon glyphicon-pencil"></span> Изменить</a>
                             </div>
-                            <div class="panel-body">
+                            <div class="box-body">
                                 <div class="row">
                                     <div class="col-sm-5 col-md-5 text-right">Дата смерти:</div>
                                     <div class="col-sm-7 col-md-7">[[chart.epicrisis.death_date|asDate]]</div>
@@ -129,12 +129,13 @@
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <div class="panel panel-default">
-                            <div class="panel-heading"> Осложнения при родах
+                        <div class="box box-primary">
+                            <div class="box-header with-border">
+                                <h3 class="box-title">Осложнения при родах</h3>
                                 <a class="print_link pull-right"
                                    href="{{ url_for('.html_epicrisis_edit') }}?event_id=[[ chart.id ]]#tab_third"><span class="glyphicon glyphicon-pencil"></span> Изменить</a>
                             </div>
-                            <div class="panel-body">
+                            <div class="box-body">
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">Излитие околоплодных вод:</div>
                                     <div class="col-sm-6 col-md-6">[[chart.epicrisis.delivery_waters.name]]</div>
@@ -179,12 +180,13 @@
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <div class="panel panel-default">
-                            <div class="panel-heading"> Пособия и манипуляции при родах
+                        <div class="box box-primary">
+                            <div class="box-header with-border">
+                                <h3 class="box-title">Пособия и манипуляции при родах</h3>
                                 <a class="print_link pull-right"
                                    href="{{ url_for('.html_epicrisis_edit') }}?event_id=[[ chart.id ]]#tab_fourth"><span class="glyphicon glyphicon-pencil"></span> Изменить</a>
                             </div>
-                            <div class="panel-body">
+                            <div class="box-body">
                                 <div class="row">
                                     <div class="col-sm-5 col-md-5 text-right">Вскрытие околоплодного пузыря:</div>
                                     <div class="col-sm-7 col-md-7">[[chart.epicrisis.caul  ? 'да': 'нет']]</div>
@@ -217,19 +219,17 @@
                                 <div class="row">
                                     <div class="col-md-12">&nbsp;</div>
                                 </div>
-                                <div class="row">
-                                    <div class="col-md-12">&nbsp;</div>
-                                </div>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <div class="panel panel-default">
-                            <div class="panel-heading"> Операции при родах
+                        <div class="box box-primary">
+                            <div class="box-header with-border">
+                                <h3 class="box-title">Операции при родах</h3>
                                 <a class="print_link pull-right"
                                    href="{{ url_for('.html_epicrisis_edit') }}?event_id=[[ chart.id ]]#tab_fifth"><span class="glyphicon glyphicon-pencil"></span> Изменить</a>
                             </div>
-                            <div class="panel-body">
+                            <div class="box-body">
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6  text-right">Кесарево сечение:</div>
                                     <div class="col-sm-6 col-md-6">[[chart.epicrisis.caesarean_section.name]]</div>
@@ -267,65 +267,67 @@
                                     <div class="col-sm-6 col-md-6  text-right">Плодоразрушающие операции:</div>
                                     <div class="col-sm-6 col-md-6">[[chart.epicrisis.embryotomy  ? 'да': 'нет']]</div>
                                 </div>
-                                <div class="row">
-                                    <div class="col-md-12">&nbsp;</div>
-                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </tab>
             <tab heading="Информация о детях">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th rowspan="2">№</th>
-                            <th rowspan="2">Живой</th>
-                            <th rowspan="2">Дата и время рождения</th>
-                            <th rowspan="2">Пол</th>
-                            <th rowspan="2">Масса, г</th>
-                            <th rowspan="2">Длина, см</th>
-                            <th rowspan="2">Степень доношенности</th>
-                            <th colspan="3">Оценка по Апгар на минуту жизни</th>
-                            <th rowspan="2"></th>
-                        </tr>
-                        <tr>
-                            <th>1</th>
-                            <th>5</th>
-                            <th>10</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr ng-repeat="inspection in chart.epicrisis.newborn_inspections" ng-if="!is_empty(inspection)">
-                            <td>[[$index+1]]</td>
-                            <td ng-if="inspection.deleted" colspan="10" class="text-center">
-                                Удалено. <a ng-click="newborn_inspection_restore(inspection)" style="cursor: pointer">Восстановить</a>?</td>
-                            <td ng-if="!inspection.deleted">[[inspection.alive ? 'да': 'нет']]</td>
-                            <td ng-if="!inspection.deleted">[[inspection.birth_date |asDate ]] [[inspection.birth_time]]</td>
-                            <td ng-if="!inspection.deleted">[[inspection.sex.code == 'male' ? 'Мужской': 'Женский']]</td>
-                            <td ng-if="!inspection.deleted">[[inspection.weight]]</td>
-                            <td ng-if="!inspection.deleted">[[inspection.length]]</td>
-                            <td ng-if="!inspection.deleted">[[inspection.maturity_rate.name]]</td>
-                            <td ng-if="!inspection.deleted">[[inspection.apgar_score_1]]</td>
-                            <td ng-if="!inspection.deleted">[[inspection.apgar_score_5]]</td>
-                            <td ng-if="!inspection.deleted">[[inspection.apgar_score_10]]</td>
-                            <td ng-if="!inspection.deleted" class="col-md-1 nowrap">
-                                <a class="btn btn-primary" href="{{ url_for('.html_epicrisis_edit') }}?event_id=[[ chart.id ]]#tab_child[[$index+1]]"><span class="glyphicon glyphicon-pencil"></span> Изменить</a>
-                                <a class="btn btn-danger" ng-click="newborn_inspection_delete(inspection)"><span class="glyphicon glyphicon-trash"></span> Удалить</a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td colspan="10">&nbsp;</td>
-                            <td>
-                                <a class="btn btn-success"
-                                   href="{{ url_for('.html_epicrisis_edit') }}?event_id=[[ chart.id ]]#tab_sixth"><span class="glyphicon glyphicon-plus"></span> Добавить</a>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="panel panel-default" style="border-top: none; border-radius: 0">
+                    <div class="panel-body">
+                    <table class="table novmargin">
+                        <thead>
+                            <tr>
+                                <th rowspan="2">№</th>
+                                <th rowspan="2">Живой</th>
+                                <th rowspan="2">Дата и время рождения</th>
+                                <th rowspan="2">Пол</th>
+                                <th rowspan="2">Масса, г</th>
+                                <th rowspan="2">Длина, см</th>
+                                <th rowspan="2">Степень доношенности</th>
+                                <th colspan="3">Оценка по Апгар на минуту жизни</th>
+                                <th rowspan="2"></th>
+                            </tr>
+                            <tr>
+                                <th>1</th>
+                                <th>5</th>
+                                <th>10</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="inspection in chart.epicrisis.newborn_inspections" ng-if="!is_empty(inspection)">
+                                <td>[[$index+1]]</td>
+                                <td ng-if="inspection.deleted" colspan="10" class="text-center">
+                                    Удалено. <a ng-click="newborn_inspection_restore(inspection)" style="cursor: pointer">Восстановить</a>?</td>
+                                <td ng-if="!inspection.deleted">[[inspection.alive ? 'да': 'нет']]</td>
+                                <td ng-if="!inspection.deleted">[[inspection.birth_date |asDate ]] [[inspection.birth_time]]</td>
+                                <td ng-if="!inspection.deleted">[[inspection.sex.code == 'male' ? 'Мужской': 'Женский']]</td>
+                                <td ng-if="!inspection.deleted">[[inspection.weight]]</td>
+                                <td ng-if="!inspection.deleted">[[inspection.length]]</td>
+                                <td ng-if="!inspection.deleted">[[inspection.maturity_rate.name]]</td>
+                                <td ng-if="!inspection.deleted">[[inspection.apgar_score_1]]</td>
+                                <td ng-if="!inspection.deleted">[[inspection.apgar_score_5]]</td>
+                                <td ng-if="!inspection.deleted">[[inspection.apgar_score_10]]</td>
+                                <td ng-if="!inspection.deleted" class="col-md-1 nowrap">
+                                    <a class="btn btn-primary" href="{{ url_for('.html_epicrisis_edit') }}?event_id=[[ chart.id ]]#tab_child[[$index+1]]"><span class="glyphicon glyphicon-pencil"></span> Изменить</a>
+                                    <a class="btn btn-danger" ng-click="newborn_inspection_delete(inspection)"><span class="glyphicon glyphicon-trash"></span> Удалить</a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="10">&nbsp;</td>
+                                <td>
+                                    <a class="btn btn-success"
+                                       href="{{ url_for('.html_epicrisis_edit') }}?event_id=[[ chart.id ]]#tab_sixth"><span class="glyphicon glyphicon-plus"></span> Добавить</a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    </div>
+                </div>
             </tab>
         </tabset>
-    </div>
+    </section>
+</div>
 {% endblock %}
 
 {% block modules_js %}
