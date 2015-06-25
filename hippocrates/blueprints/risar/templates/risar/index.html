@@ -3,10 +3,11 @@
 {% block title %}> {{ module_name }}{% endblock %}
 
 {% block main %}
+<section class="content-header">
+    <h1>Рабочий стол</h1>
+</section>
+<section class="content">
     <div ng-controller="IndexCtrl" class="ng-cloak">
-        <ul class="breadcrumb">
-            <li>Рабочий стол</li>
-        </ul>
         <div class="row">
             <div class="col-md-12">
                 <input class="form-control" ng-model="query" placeholder="Быстрый поиск">
@@ -52,6 +53,7 @@
             </div>
         {% endif %}
     </div>
+</section>
 {% endblock %}
 
 {% block modules_js %}

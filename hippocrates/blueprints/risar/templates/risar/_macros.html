@@ -32,11 +32,11 @@
 {% endif -%}
 <div class="row small-marginal">
     <div class="col-md-{{ w1 }} col-sm-12">
-        <h2>
+        <h1>
             {{ title }}
             <a ng-href="{{ url_for('patients.patient_info_full') }}?client_id=[[ chart.client.id ]]">[[ chart.client.full_name ]]</a>
             ([[ chart.external_id ]])
-        </h2>
+        </h1>
     </div>
     <div class="col-md-{{ w2 }} col-sm-12 achievements">
         {%- if ext_header == 'chart' %}
@@ -81,15 +81,14 @@
 {%  elif ext_header == 'inspection' %}
     {% set w1 = 10 %} {% set w2 = 2 %}
 {% endif -%}
-<div class="row small-marginal">
-    <div class="col-md-{{ w1 }} col-sm-12">
-        <h2>
-            {{ title }}
-            <a ng-href="{{ url_for('patients.patient_info_full') }}?client_id=[[ header.client.id ]]">[[ header.client.full_name ]]</a>
-            ([[ header.event.external_id ]])
-        </h2>
-    </div>
-    <div class="col-md-{{ w2 }} col-sm-12 achievements">
+<h1>
+    {{ title }}
+    <a ng-href="{{ url_for('patients.patient_info_full') }}?client_id=[[ header.client.id ]]">[[ header.client.full_name ]]</a>
+    ([[ header.event.external_id ]])
+</h1>
+<div class="breadcrumb">
+{#    <div class="col-md-{{ w2 }} col-sm-12 achievements">#}
+    <div class="achievements">
         {%- if ext_header == 'chart' %}
         <span class="pull-right">
             <i pregnancy-week-icon="chart.pregnancy_week" pregnancy-start-date="chart.card_attributes.pregnancy_start_date"></i>
@@ -117,8 +116,10 @@
         </div>
         {% endif -%}
     </div>
+</div>
+<div class="row vmargin10">
     <div class="col-md-12 col-lg-12 col-sm-12">
-        <div class="alert-warning small-marginal">Случай беременности. На учёте в <b>[[ header.person.organisation.short_name ]]</b>
+        <div class="alert-warning">Случай беременности. На учёте в <b>[[ header.person.organisation.short_name ]]</b>
             у <b>[[ header.person.name ]]</b>
             с <b>[[ header.event.set_date | asDate ]]</b>
         </div>

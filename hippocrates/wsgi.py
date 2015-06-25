@@ -70,7 +70,8 @@ def general_menu():
             'overseer2': u'АРМ Куратора 2 уровня',
             'overseer3': u'АРМ Куратора 3 уровня',
             }.get(getattr(current_user, 'current_role', None), u'АРМ Администратора РИСАР'),
-        visible=UserProfileManager.has_ui_risar()
+        visible=UserProfileManager.has_ui_risar(),
+        icon='glyphicon glyphicon-th-large'
     ), dict(
         link='anareports.index_html',
         title=u'Аналитические отчёты',
