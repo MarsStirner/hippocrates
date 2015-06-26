@@ -4,20 +4,19 @@
 
 {% block main %}
     <div ng-controller="EventRoutingCtrl" class="ng-cloak">
+    <section class="content-header">
         <div alert-notify></div>
+        <h1>
+            Выбор ЛПУ для {% if 'emergency' in request.args %}экстренного{% else %}планового{% endif %} случая
+            <a ng-href="{{ url_for('patients.patient_info_full') }}?client_id=[[ header.client.id ]]">[[ header.client.full_name ]]</a>
+            ([[ header.event.external_id ]])
+        </h1>
         <ul class="breadcrumb">
             <li><a href="{{ url_for('.index_html') }}">Рабочий стол</a></li>
             <li><a ng-href="{{ url_for('.html_chart') }}?event_id=[[ chart.id ]]">Карта пациентки</a></li>
             <li>Выбор ЛПУ для {% if 'emergency' in request.args %}экстренного{% else %}планового{% endif %} случая</li>
         </ul>
-        <div class="row small-marginal">
-            <div class="col-lg-10 col-md-10">
-                <h2>
-                    Выбор ЛПУ для {% if 'emergency' in request.args %}экстренного{% else %}планового{% endif %} случая
-                    <a ng-href="{{ url_for('patients.patient_info_full') }}?client_id=[[ header.client.id ]]">[[ header.client.full_name ]]</a>
-                    ([[ header.event.external_id ]])
-                </h2>
-            </div>
+        <div class="row tmargin10">
             <div class="col-md-12 col-lg-12">
                 <div class="alert-warning small-marginal">Случай беременности. На учёте в <b>[[ header.event.person.organisation.short_name ]]</b>
                     у <b>[[ header.event.person.name ]]</b>
@@ -25,11 +24,15 @@
                 </div>
             </div>
         </div>
+    </section>
+    <section class="content">
         <div class="row">
             <div class="col-md-6">
-                <div class="panel panel-default">
-                    <div class="panel-heading">Диагнозы</div>
-                    <div class="panel-body">
+                <div class="box box-primary">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Диагнозы</h3>
+                    </div>
+                    <div class="box-body">
                         <div class="row">
                             <div class="col-md-4">
                                 <button type="button" class="btn btn-default" ng-if="chart.diagnoses.length"
@@ -53,12 +56,14 @@
             </div>
             <div class="col-md-6">
                 <form name="selectLpuForm" form-safe-close="getUnsavedFormText()">
-                    <div class="panel panel-default">
-                        <div class="panel-heading">ЛПУ для госпитализации
-                            <a class="pull-right" ng-href="{{ url_for('.html_routing', event_id=request.args.get('event_id'), emergency=None if request.args.get('emergency') else 1)}}"
+                    <div class="box box-primary">
+                        <div class="box-header with-border">
+                            <h3 class="box-title">ЛПУ для госпитализации</h3>
+                            <div class="box-tools"><a ng-href="{{ url_for('.html_routing', event_id=request.args.get('event_id'), emergency=None if request.args.get('emergency') else 1)}}"
                                 title="[[getOtherRoutingText()]]" ng-bind="getOtherRoutingText()"></a>
+                            </div>
                         </div>
-                        <div class="panel-body" >
+                        <div class="box-body" >
                             <div class="row">
                                 <div class="col-md-9">
                                     <div class="small-marginal">
@@ -119,6 +124,7 @@
                 </form>
             </div>
         </div>
+    </section>
     </div>
 {% endblock %}
 
