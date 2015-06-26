@@ -3,11 +3,15 @@
 {% block title %}> {{ module_name }}{% endblock %}
 
 {% block main %}
-    <div ng-controller="EventSearchCtrl" ng-cloak>
+<div ng-controller="EventSearchCtrl" ng-cloak>
+    <section class="content-header">
+        <h1>Расширенный поиск карты пациента</h1>
         <ul class="breadcrumb">
             <li><a href="{{ url_for('.index_html') }}">Рабочий стол</a></li>
             <li>Поиск карты пациентки</li>
         </ul>
+    </section>
+    <section class="content">
         <div class="row">
             <form class="col-md-4">
 {#                <div class="form-group">#}
@@ -22,11 +26,11 @@
 {#                    <label>Район</label>#}
 {#                    <div class="form-control-static">-</div>#}
 {#                </div>#}
-            <div class="panel panel-default">
-            <div class="panel-heading">
-                Фильтры
+            <div class="box box-primary">
+            <div class="box-header">
+                <h3 class="box-title">Фильтры</h3>
             </div>
-            <div class="panel-body">
+            <div class="box-body">
                 <div class="form-group">
                     <label>Территория</label>
                     <ui-select multiple ng-model="query.areas" theme="select2" ng-change="refresh_organisations()" class="form-control">
@@ -99,43 +103,44 @@
             </div>
             </form>
             <div class="col-md-8">
-            <div class="panel panel-default">
-            <div class="panel-heading">
-                Результаты поиска карт пациенток: <b>[[pager.record_count]]</b>
-            </div>
-            <div class="panel-body">
-                <table class="table table-condensed">
-                    <thead>
-                    <tr>
-                        <th>Риск</th>
-                        <th>№ карты</th>
-                        <th>ФИО</th>
-                        <th>Врач</th>
-                        <th>Срок</th>
-                        <th>Последнее<br>изменение</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr ng-repeat="row in results">
-                        <td risk-rate-icon="row.risk"></td>
-                        <td>[[ row.external_id ]]</td>
-                        <td><a ng-href="{{ url_for('.html_chart') }}?event_id=[[ row.event_id ]]">[[ row.name ]]</a></td>
-                        <td>[[ row.exec_person_name ]]</td>
-                        <td>[[ row.week ]]</td>
-                        <td>[[ row.mdate | asDate ]]</td>
-                    </tr>
-                    </tbody>
-                </table>
-                <div>
-                    <pagination ng-model="pager.current_page" total-items="pager.pages" items-per-page="1"
-                        max-size="pager.max_pages" ng-change="onPageChanged()" ng-show="pager.pages > 1" boundary-links="true">
-                    </pagination>
+                <div class="box box-primary">
+                    <div class="box-header">
+                        <h3 class="box-title">Результаты поиска карт пациенток: <b>[[pager.record_count]]</b></h3>
+                    </div>
+                    <div class="box-body">
+                        <table class="table table-condensed">
+                            <thead>
+                            <tr>
+                                <th>Риск</th>
+                                <th>№ карты</th>
+                                <th>ФИО</th>
+                                <th>Врач</th>
+                                <th>Срок</th>
+                                <th>Последнее<br>изменение</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr ng-repeat="row in results">
+                                <td risk-rate-icon="row.risk"></td>
+                                <td>[[ row.external_id ]]</td>
+                                <td><a ng-href="{{ url_for('.html_chart') }}?event_id=[[ row.event_id ]]">[[ row.name ]]</a></td>
+                                <td>[[ row.exec_person_name ]]</td>
+                                <td>[[ row.week ]]</td>
+                                <td>[[ row.mdate | asDate ]]</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="box-footer">
+                        <pagination ng-model="pager.current_page" total-items="pager.pages" items-per-page="1"
+                            max-size="pager.max_pages" ng-change="onPageChanged()" ng-show="pager.pages > 1" boundary-links="true">
+                        </pagination>
+                    </div>
                 </div>
             </div>
-            </div>
-            </div>
         </div>
-    </div>
+    </section>
+</div>
 {% endblock %}
 
 {% block modules_js %}
