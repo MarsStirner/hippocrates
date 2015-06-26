@@ -8,7 +8,7 @@ import mimetypes
 
 from nemesis.app import app
 from nemesis.systemwide import db
-from nemesis.lib.utils import safe_date, safe_traverse, get_new_uuid
+from nemesis.lib.utils import safe_date, safe_traverse, get_new_uuid, encode_file_name
 from nemesis.lib.const import SS_WORK_CODE, SS_NATIONALITY_CODE
 from nemesis.models.client import (ClientAllergy, ClientContact, ClientDocument,
    ClientIntoleranceMedicament, ClientSocStatus, ClientPolicy, BloodHistory, ClientAddress,
@@ -550,7 +550,7 @@ def store_file_locally(filepath, file_data):
     try:
         if not os.path.exists(dirname):
             os.makedirs(dirname)
-        with open(filepath, 'wb') as f:
+        with open(encode_file_name(filepath), 'wb') as f:
             f.write(data_string)
     except IOError, e:
         logger.error(u'Ошибка сохранения файла средствами МИС: %s' % e, exc_info=True)
