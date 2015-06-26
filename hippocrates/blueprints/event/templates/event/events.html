@@ -1,15 +1,16 @@
 {% extends "event/base.html" %}
 {% block main %}
+<section class="content">
     <div ng-controller="EventListCtrl" class="ng-cloak">
     <div class="row">
         <div class="col-md-3">
             <!-- Filter -->
             <div>
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        Фильтр
+                <div class="box box-primary">
+                    <div class="box-header">
+                        <h3 class="box-title">Фильтр</h3>
                     </div>
-                    <div class="panel-body">
+                    <div class="box-body">
                         <label for="filter-id">Идентификатор обращения</label>
                         <input class="form-control" id="filter-id" type="text" ng-model="flt.external_id" placeholder="Идентификатор">
 
@@ -22,10 +23,11 @@
                                 <wm-date id="filter-beg-date-to" ng-model="flt.beg_date_to"></wm-date>
                             </div>
                         </div>
-
-                        <label class="checkbox">
-                            <input type="checkbox" ng-model="flt.unfinished" ng-change="on_unfinished_changed()">Только незавершённые
-                        </label>
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" ng-model="flt.unfinished" ng-change="on_unfinished_changed()">Только незавершённые
+                            </label>
+                        </div>
 
                         <label for="filter-end-date">Завершено</label>
                         <div class="row">
@@ -75,7 +77,7 @@
                         <label for="filter-diag-mkb">МКБ диагноза</label>
                         <ui-mkb id="filter-diag-mkb" ng-model="flt.diag_mkb"></ui-mkb>
                     </div>
-                    <div class="panel-footer panel-default">
+                    <div class="box-footer">
                         <div class="btn-group">
                             <button class="btn btn-default" ng-click="get_data(1, true)">Получить данные</button>
                             <button class="btn btn-default dropdown-toggle" data-toggle="dropdown">
@@ -102,6 +104,7 @@
             </div>
         </div>
         <div class="col-md-9">
+            <div class="box box-primary">
             <!-- Main -->
             <table class="table table-condensed table-hover table-clickable">
                 <thead wm-sortable-header>
@@ -132,13 +135,15 @@
                     </tr>
                 </tbody>
             </table>
-            <div class="center-block">
+            <div class="box-footer center-block">
                 <pagination page="page" ng-model="page" total-items="pages" items-per-page="1" max-size="max_size" ng-change="get_data(page)" ng-show="pages > 1" boundary-links="true"></pagination>
+            </div>
             </div>
         </div>
 {#    <pre>[[ flt | json ]]</pre>#}
     </div>
     </div>
+</section>
 {% endblock %}
 {% block modules_js %}
     {{ super() }}

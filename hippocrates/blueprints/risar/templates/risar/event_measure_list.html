@@ -4,20 +4,23 @@
 {% block title %}> {{ module_name }}{% endblock %}
 
 {% block main %}
-    <div ng-controller="EventMeasureListCtrl" ng-cloak>
+<div ng-controller="EventMeasureListCtrl" ng-cloak>
+    <section class="content-header">
         <ul class="breadcrumb">
             <li><a href="{{ url_for('.index_html') }}">Рабочий стол</a></li>
             <li><a ng-href="{{ url_for('.html_chart') }}?event_id=[[ event_id ]]">Карта пациентки</a></li>
             <li>Мероприятия случая</li>
         </ul>
         {{ rimacros.page_title_n('Мероприятия случая') }}
+    </section>
+    <section class="content">
         <div class="row">
             <form class="col-md-3">
-            <div class="panel panel-default">
-            <div class="panel-heading">
-                Фильтры
+            <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title">Фильтры</h3>
             </div>
-            <div class="panel-body">
+            <div class="box-body">
                 <div class="form-group">
                     <label>Тип мероприятия</label>
                     <div fs-checkbox="" items="rbMeasureType.objects" ng-model="query.measure_type" class="nopadding">
@@ -63,13 +66,15 @@
             </div>
             </form>
             <div class="col-md-9">
-                <div class="panel panel-default" ng-controller="EventMeasureTableViewCtrl" ng-show="isTableMode()">
-                    <div class="panel-heading">
-                        Мероприятия: <b>[[pager.record_count]]</b>
-                        <a href="javascript:void(0);" class="fa fa-calendar-o pull-right" style="font-size: x-large"
+                <div class="box box-primary" ng-controller="EventMeasureTableViewCtrl" ng-show="isTableMode()">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Мероприятия: <b>[[pager.record_count]]</b></h3>
+                        <div class="box-tools">
+                        <a href="javascript:void(0);" class="fa fa-calendar-o btn-box-tool" style="font-size: x-large"
                             title="Переключить отображение в виде календаря" ng-click="setViewMode('calendar')"></a>
+                        </div>
                     </div>
-                    <div class="panel-body">
+                    <div class="box-body">
                         <table class="table table-condensed">
                             <thead>
                             <tr>
@@ -98,7 +103,7 @@
                             </tr>
                             </tbody>
                         </table>
-                        <div>
+                        <div class="box-footer">
                             <pagination ng-model="pager.current_page" total-items="pager.pages" items-per-page="1"
                                 max-size="pager.max_pages" ng-change="onPageChanged()" ng-show="pager.pages > 1" boundary-links="true">
                             </pagination>
@@ -106,19 +111,22 @@
                     </div>
                 </div>
 
-                <div class="panel panel-default" ng-controller="EventMeasureCalendarViewCtrl" ng-show="isCalendarMode()">
-                    <div class="panel-heading">
-                        Календарь мероприятий
-                        <a href="javascript:void(0);" class="fa fa-table pull-right" style="font-size: x-large"
-                            title="Переключить отображение в виде таблицы" ng-click="setViewMode('table')"></a>
+                <div class="box box-primary" ng-controller="EventMeasureCalendarViewCtrl" ng-show="isCalendarMode()">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Календарь мероприятий</h3>
+                        <div class="box-tools">
+                            <a href="javascript:void(0);" class="fa fa-table btn-box-tool" style="font-size: x-large"
+                                title="Переключить отображение в виде таблицы" ng-click="setViewMode('table')"></a>
+                        </div>
                     </div>
-                    <div class="panel-body">
+                    <div class="box-body">
                         <div ui-calendar="uiConfig.calendar" ng-model="eventSources" calendar="measureList"></div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    </section>
+</div>
 {% endblock %}
 
 {% block modules_js %}

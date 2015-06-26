@@ -4,78 +4,78 @@
 {% block title %}> {{ module_name }}{% endblock %}
 
 {% block main %}
-    <div ng-controller="EpicrisisCtrl" ng-cloak>
+<div ng-controller="EpicrisisCtrl" ng-cloak>
+    <section class="content-header">
+        {{ rimacros.page_title('Ввод данных по эпикризу родоразрешения') }}
         <ul class="breadcrumb">
             <li><a href="{{ url_for('.index_html') }}">Рабочий стол</a></li>
             <li><a ng-href="{{ url_for('.html_chart') }}?event_id=[[ chart.id ]]">Карта пациентки</a></li>
             <li><a ng-href="{{ url_for('.html_epicrisis') }}?event_id=[[ chart.id ]]">Эпикриз</a></li>
             <li>Ввод данных по эпикризу родоразрешения</li>
         </ul>
-        <div class="row small-marginal">
-            <div class="col-md-12">
-                {{ rimacros.page_title('Ввод данных по эпикризу родоразрешения') }}
-            </div>
-        </div>
+    </section>
+    <section class="content">
         <div rc-wizard="sampleWizard" id="sampleWizard">
             <div class="row">
                 <div class="col-sm-3">
-                    <div class="sidebar-nav">
-                        <nav class="navbar navbar-default" role="navigation">
-                            <div class="container-fluid">
-                                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-                                <ul class="nav navbar-nav nav-pills" style="margin: 7.5px -15px"  id="EpicrisisTabs">
-                                    <li class="active">
-                                        <a class="active" href="#first" data-toggle="tab">
-                                            <span class="badge">1</span>
-                                            <span>Общая информация</span>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="#second" data-toggle="tab">
-                                            <span class="badge">2</span>
-                                            <span>Информация о смерти матери</span>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="#third" data-toggle="tab">
-                                            <span class="badge">3</span>
-                                            <span>Осложнения при родах</span>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="#fourth" data-toggle="tab">
-                                            <span class="badge">4</span>
-                                            <span>Пособия и манипуляции при родах</span>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="#fifth" data-toggle="tab">
-                                            <span class="badge">5</span>
-                                            <span>Операции при родах</span>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="#sixth" data-toggle="tab">
-                                            <span class="badge">6</span>
-                                            <span>Сведения о родившихся детях</span>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="#last" data-toggle="tab">
-                                            <span class="badge">7</span>
-                                            <span>Закрытие случая</span>
-                                        </a>
-                                    </li>
-                                </ul>
-                                </div>
-                            </div>
-                        </nav>
+                    <div class="box box-solid">
+                        <div class="box-header with-border">
+                            <h3 class="box-title">Шаги</h3>
+                        </div>
+                        <div class="box-body no-padding" id="bs-example-navbar-collapse-1">
+                            <ul class="nav nav-pills nav-stacked"  id="EpicrisisTabs">
+                                <li class="active">
+                                    <a class="active" href="#first" data-toggle="tab">
+                                        <span class="badge">1</span>
+                                        <span>Общая информация</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#second" data-toggle="tab">
+                                        <span class="badge">2</span>
+                                        <span>Информация о смерти матери</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#third" data-toggle="tab">
+                                        <span class="badge">3</span>
+                                        <span>Осложнения при родах</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#fourth" data-toggle="tab">
+                                        <span class="badge">4</span>
+                                        <span>Пособия и манипуляции при родах</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#fifth" data-toggle="tab">
+                                        <span class="badge">5</span>
+                                        <span>Операции при родах</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#sixth" data-toggle="tab">
+                                        <span class="badge">6</span>
+                                        <span>Сведения о родившихся детях</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#last" data-toggle="tab">
+                                        <span class="badge">7</span>
+                                        <span>Закрытие случая</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
                 <div class="col-sm-9">
-                    <div class="sidebar-nav tab-content marginal">
+                    <div class="tab-content marginal">
                         <ng-form class="tab-pane active" id="first" name="firstForm"  novalidate rc-submit rc-step>
-                            <h3>Шаг 1. Общая информация</h3>
+                            <div class="box box-primary">
+                            <div class="box-header">
+                                <h3 class="box-title">Шаг 1. Общая информация</h3>
                                 <div class="row" ng-class="{'has-error': firstForm.pregnancy_final.$invalid}" >
                                     <div class="col-md-3" for="pregnancy_final" class="control-label text-right">Беременность закончилась</div>
                                     <div class="col-md-9" name="pregnancy_final" ng-model="chart.epicrisis.pregnancy_final"
@@ -83,17 +83,13 @@
                                       [[ item.name ]]
                                     </div>
                                 </div>
+                            </div>
+                            <div class="box-body">
                                 <table class="table table-condensed" ng-if="chart.epicrisis.pregnancy_final.code">
-                                    <thead>
-                                    <tr>
-                                        <th class="col-md-4"></th>
-                                        <th class="col-md-8"></th>
-                                    </tr>
-                                    </thead>
                                     <tbody>
                                         <tr>
-                                            <th class="text-right">[[chart.epicrisis.pregnancy_final.code =='abortom'? 'Дата аборта': 'Дата родов']]  <span class="text-danger">*</span></th>
-                                            <td>
+                                            <th class="text-right col-md-4">[[chart.epicrisis.pregnancy_final.code =='abortom'? 'Дата аборта': 'Дата родов']]  <span class="text-danger">*</span></th>
+                                            <td class="col-md-8">
                                                 <div class="row" ng-class="{'has-error': firstForm.delivery_date.$invalid && firstForm.submit_attempt}">
                                                 <div class="col-md-2">
                                                 <wm-date ng-model="chart.epicrisis.delivery_date"
@@ -202,20 +198,20 @@
                                         </tr>
                                     </tbody>
                                 </table>
+                            </div>
+                            </div>
                         </ng-form>
                         <ng-form class="tab-pane" id="second" name="secondForm"  novalidate rc-submit rc-step>
-                            <h3>Шаг 2. Информация о смерти матери</h3>
+                            <div class="box box-primary">
+                            <div class="box-header">
+                                <h3 class="box-title">Шаг 2. Информация о смерти матери</h3>
+                            </div>
+                            <div class="box-body">
                             <table class="table table-condensed">
-                                <thead>
-                                <tr>
-                                    <th class="col-md-4"></th>
-                                    <th class="col-md-8"></th>
-                                </tr>
-                                </thead>
                                 <tbody>
                                     <tr>
-                                        <td class="text-right">Смерть матери <span>&nbsp;</span></td>
-                                        <td>
+                                        <td class="text-right col-md-4">Смерть матери <span>&nbsp;</span></td>
+                                        <td class="col-md-8">
                                             <input type="checkbox" ng-model="mother_death" ng-change="clear_death_info">
                                         </td>
                                     </tr>
@@ -273,20 +269,20 @@
                                     </tr>
                                 </tbody>
                             </table>
+                            </div>
+                            </div>
                         </ng-form>
                         <ng-form class="tab-pane" id="third" name="thirdForm" novalidate rc-submit rc-step>
-                            <h3>Шаг 3. Осложнения при родах</h3>
+                            <div class="box box-primary">
+                            <div class="box-header">
+                                <h3 class="box-title">Шаг 3. Осложнения при родах</h3>
+                            </div>
+                            <div class="box-body">
                             <table class="table table-condensed">
-                                <thead>
-                                <tr>
-                                    <th class="col-md-4"></th>
-                                    <th class="col-md-8"></th>
-                                </tr>
-                                </thead>
                                 <tbody>
                                     <tr>
-                                        <th class="text-right">Излитие околоплодных вод</th>
-                                        <td>
+                                        <th class="text-right col-md-4">Излитие околоплодных вод</th>
+                                        <td class="col-md-8">
                                             <div class="row">
                                                 <div class="col-md-4">
                                                     <rb-select name="state" ng-model="chart.epicrisis.delivery_waters" ref-book="rbRisarDelivery_Waters"></rb-select>
@@ -384,20 +380,20 @@
                                     </tr>
                                 </tbody>
                             </table>
+                            </div>
+                            </div>
                         </ng-form>
                         <ng-form class="tab-pane" id="fourth" name="fourthForm" novalidate rc-submit rc-step>
-                            <h3>Шаг 4. Пособия и манипуляции при родах</h3>
+                            <div class="box box-primary">
+                            <div class="box-header">
+                                <h3 class="box-title">Шаг 4. Пособия и манипуляции при родах</h3>
+                            </div>
+                            <div class="box-body">
                             <table class="table table-condensed">
-                                <thead>
-                                <tr>
-                                    <th class="col-md-4"></th>
-                                    <th class="col-md-8"></th>
-                                </tr>
-                                </thead>
                                 <tbody>
                                     <tr>
-                                        <th class="text-right">Вскрытие околоплодного пузыря</th>
-                                        <td><div>
+                                        <th class="text-right col-md-4">Вскрытие околоплодного пузыря</th>
+                                        <td class="col-md-8"><div>
                                         <div class="radio-inline">
                                             <label>
                                                 <input type="radio" ng-click="chart.epicrisis.caul = true" ng-checked="chart.epicrisis.caul">
@@ -466,20 +462,20 @@
                                     </tr>
                                 </tbody>
                             </table>
+                            </div>
+                            </div>
                         </ng-form>
                         <ng-form class="tab-pane" id="fifth" name="fifthForm" novalidate rc-submit rc-step>
-                            <h3>Шаг 5. Операции при родах</h3>
+                            <div class="box box-primary">
+                            <div class="box-header">
+                                <h3 class="box-title">Шаг 5. Операции при родах</h3>
+                            </div>
+                            <div class="box-body">
                             <table class="table table-condensed">
-                                <thead>
-                                <tr>
-                                    <th class="col-md-4"></th>
-                                    <th class="col-md-8"></th>
-                                </tr>
-                                </thead>
                                 <tbody>
                                     <tr>
-                                        <th class="text-right">Кесарево сечение</th>
-                                        <td>
+                                        <th class="text-right col-md-4">Кесарево сечение</th>
+                                        <td class="col-md-8">
                                             <div class="row">
                                                 <div class="col-md-4">
                                                     <rb-select name="state" ng-model="chart.epicrisis.caesarean_section" ref-book="rbRisarCaesarean_Section"></rb-select>
@@ -584,9 +580,15 @@
                                     </tr>
                                 </tbody>
                             </table>
+                            </div>
+                            </div>
                         </ng-form>
                         <ng-form class="tab-pane" id="sixth" name="sixthForm" novalidate rc-submit rc-step>
-                            <h2>Шаг 6. Сведения о родившихся детях</h2>
+                            <div class="box box-primary">
+                            <div class="box-header">
+                                <h3 class="box-title">Шаг 6. Сведения о родившихся детях</h3>
+                            </div>
+                            <div class="box-body">
                                 <div class="row">
                                     <div class="col-md-2">
                                         <button type="button" class="btn btn-primary text-left marginal" ng-click="add_child()"><span class="glyphicon glyphicon-plus"></span> Добавить</button>
@@ -598,16 +600,10 @@
                                         <div class="tab-content">
                                             <div ng-class="{'active': $index==0}" class="tab-pane" id="child[[$index+1]]" ng-repeat="child in chart.epicrisis.newborn_inspections">
                                                 <table class="table">
-                                                    <thead>
-                                                    <tr>
-                                                        <th class="col-md-4"></th>
-                                                        <th class="col-md-8"></th>
-                                                    </tr>
-                                                    </thead>
                                                     <tbody>
                                                         <tr>
-                                                            <th class="text-right">Живой <span class="text-danger">*</span></th>
-                                                            <td>
+                                                            <th class="text-right col-md-4">Живой <span class="text-danger">*</span></th>
+                                                            <td class="col-md-8">
                                                                 <div ng-class="{'has-error': sixthForm.optionsAlive_[[$index]].$invalid && sixthForm.submit_attempt}">
                                                                     <div class="radio-inline">
                                                                         <label>
@@ -755,9 +751,15 @@
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+                            </div>
                         </ng-form>
                         <ng-form class="tab-pane" id="last" name="lastForm" novalidate rc-submit rc-step>
-                            <h2>Шаг 7. Закрытие случая</h2>
+                            <div class="box box-primary">
+                            <div class="box-header">
+                                <h3 class="box-title">Шаг 7. Закрытие случая</h3>
+                                </div>
+                            <div class="box-body">
                             <div class="row">
                                 <div class="col-md-4 text-right">
                                     Дата закрытия случая
@@ -776,14 +778,16 @@
                                              ng-model="chart.exec_date" style="width: 250px" ng-required="true"></wm-time>
                                 </div>
                             </div>
-
+                            </div>
+                            </div>
                         </ng-form>
                     </div>
                 </div>
             </div>
             <div class="row">
-                <div class="form-group col-md-12">
-                    <div class="pull-right">
+                <div class="col-md-offset-3 col-md-9 col-sm-offset-3 col-sm-9">
+                    <div class="box-footer">
+                        <div class="pull-right">
                         <a class="pseudo-btn" ng-href="{{ url_for('.html_epicrisis') }}?event_id=[[ chart.id ]]">Перейти на форму эпикриза пациентки</a>
                         <a class="btn btn-success"
                            ng-disabled="is_save_disabled(rc.sampleWizard)"
@@ -802,6 +806,8 @@
             </div>
         </div>
     </div>
+    </section>
+</div>
 {% endblock %}
 
 {% block modules_js %}

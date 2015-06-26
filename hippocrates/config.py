@@ -57,7 +57,7 @@ CASTIEL_AUTH_TOKEN = 'CastielAuthToken'
 
 TITLE = u'WebMIS 2.0'
 COPYRIGHT_COMPANY = u'КОРУС Консалтинг ИТ'
-LPU_STYLE = 'FNKC'
+LPU_STYLE = ''  #'FNKC'
 
 INDEX_HTML = 'hippo_index.html'
 SCANSERVER_URL = ''

@@ -1,0 +1,40 @@
+<aside class="main-sidebar">
+    <section class="sidebar">
+        <div class="user-panel">
+            <div class="pull-left image">
+              <h1 class="glyphicon glyphicon-user text-white novmargin"></h1>
+            </div>
+            <div class="pull-left info">
+              <p>{{ current_user.format_name() }}</p>
+              <a href="#"><i class="fa fa-circle text-success"></i> Online</a>
+            </div>
+        </div>
+        {%- if current_user.id and current_user.current_role -%}
+        <form class="sidebar-form" method="get" action="#">
+            <div class="input-group">
+              <input type="text" placeholder="Искать..." class="form-control" name="q">
+              <span class="input-group-btn">
+                <button class="btn btn-flat" id="search-btn" name="search" type="submit" title="Искать"><i class="fa fa-search"></i></button>
+              </span>
+            </div>
+          </form>
+        {%- endif -%}
+        {% if current_user.current_role %}
+        <ul class="sidebar-menu" id="cur_modules">
+            <li class="header">НАВИГАЦИЯ</li>
+            {%- for item in main_menu -%}
+            {% if item.visible %}
+            <li class="{% if request.endpoint == item.link %}active{% endif %}">
+                <a href="{{ url_for(item.link) }}" title="{{ item.title }}">
+                    <i class="{{ item.icon }}"></i>
+                    <span>{{ item.title }}</span>
+                </a>
+            </li>
+            {% endif %}
+            {%- endfor -%}
+        </ul>
+        {% endif %}
+        {% if current_user.id %}
+        {% endif %}
+    </section>
+</aside>

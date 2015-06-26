@@ -449,7 +449,7 @@ function ($window, $http, ActionTypeTreeModal, MessageBox, WMEventServices, WMWi
     <tfoot>\
     <tr>\
         <td colspan="6">\
-            <button type="button" class="btn btn-primary btn-lg pull-right tmargin20" ng-click="open_action_tree(actionTypeGroup)"\
+            <button type="button" class="btn btn-primary pull-right tmargin20" ng-click="open_action_tree(actionTypeGroup)"\
                     ng-if="can_create_action()">Создать</button>\
             <pagination ng-model="pager.current_page" total-items="pager.pages" items-per-page="1"\
                 max-size="pager.max_size" ng-change="reload()" ng-show="pager.pages > 1" boundary-links="true"></pagination>\

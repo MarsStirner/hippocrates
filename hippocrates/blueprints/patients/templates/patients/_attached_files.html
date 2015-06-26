@@ -1,26 +1,24 @@
 <ng-form name="fileAttachForm" toc-element="Копии документов">
-    <legend>Копии документов</legend>
-    <div class="row">
-    <div class="col-md-11">
-        <div class="panel panel-default">
-            <div class="panel-body">
-                <button type="button" class="btn btn-primary" ng-click="add_new_file()">Прикрепить файл</button>
-                <hr>
-                <div class="row">
-                    <ul>
-                        <li ng-repeat="fa in client.file_attaches">
-                            <wm-client-file-attach-item model-attach="fa"
-                                on-open="openFile(fa_id, page_idx)">
-                            </wm-client-file-attach-item>
-                            <button type="button" class="btn btn-default btn-sm" ng-click="printFileAttach(fa)"
-                                title="Печать всех страниц документа">
-                                <span class="glyphicon glyphicon-print"></span>
-                            </button>
-                        </li>
-                    </ul>
-                </div>
+    <div class="box box-info">
+        <div class="box-header with-border">
+            <h3 class="box-title">Копии документов</h3>
+        </div>
+        <div class="box-body">
+            <button type="button" class="btn btn-primary" ng-click="add_new_file()">Прикрепить файл</button>
+            <hr>
+            <div class="row">
+                <ul>
+                    <li ng-repeat="fa in client.file_attaches">
+                        <wm-client-file-attach-item model-attach="fa"
+                            on-open="openFile(fa_id, page_idx)">
+                        </wm-client-file-attach-item>
+                        <button type="button" class="btn btn-default btn-sm" ng-click="printFileAttach(fa)"
+                            title="Печать всех страниц документа">
+                            <span class="glyphicon glyphicon-print"></span>
+                        </button>
+                    </li>
+                </ul>
             </div>
         </div>
-    </div>
     </div>
 </ng-form>
