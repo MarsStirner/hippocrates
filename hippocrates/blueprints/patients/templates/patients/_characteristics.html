@@ -25,8 +25,8 @@
                     </div>
                 </div>
                 <div class="box-footer" ng-if="!client.blood_types.length || bt_history_visible()">
-                    <button type="button" class="btn btn-primary" ng-if="!client.blood_types.length"
-                            ng-click="clientServices.add_new_blood_type(client)">Добавить новую группу крови</button>
+                    <button type="button" class="btn btn-lg btn-link btn-block" ng-if="!client.blood_types.length"
+                            ng-click="clientServices.add_new_blood_type(client)"><i class="ion ion-plus-round fa-fw"></i>Добавить новую группу крови</button>
                     <div ng-if="bt_history_visible()">
                         <table class="table table-condensed">
                             <caption><h4>История изменений группы крови</h4></caption>
@@ -78,8 +78,8 @@
                 </div>
             </div>
         </div>
-        <div class="box-footer marginal">
-            <button type="button" class="btn btn-primary" ng-click="clientServices.add_allergy(client)">Добавить аллергию</button>
+        <div class="panel marginal">
+            <button type="button" class="btn btn-link btn-lg btn-block" ng-click="clientServices.add_allergy(client)"><i class="ion ion-plus-round fa-fw"></i>Добавить аллергию</button>
         </div>
     </ng-form>
     <ng-form name="_intolerances" toc-element="Непереносимость">
@@ -109,9 +109,9 @@
                 </div>
             </div>
         </div>
-        <div class="box-footer">
-            <button type="button" class="btn btn-primary"
-                    ng-click="clientServices.add_med_intolerance(client)">Добавить медикаментозную непереносимость</button>
+        <div class="panel">
+            <button type="button" class="btn btn-link btn-lg btn-block"
+                    ng-click="clientServices.add_med_intolerance(client)"><i class="ion ion-plus-round fa-fw"></i>Добавить медикаментозную непереносимость</button>
         </div>
     </ng-form>
 </ng-form>
