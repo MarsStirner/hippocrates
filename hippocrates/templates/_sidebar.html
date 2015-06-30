@@ -10,16 +10,14 @@
             </div>
         </div>
         {%- if current_user.id and current_user.current_role -%}
-        <form class="sidebar-form" method="get" action="#">
-            <div class="input-group">
-              <input type="text" placeholder="Искать..." class="form-control" name="q">
-              <span class="input-group-btn">
-                <button class="btn btn-flat" id="search-btn" name="search" type="submit" title="Искать"><i class="fa fa-search"></i></button>
-              </span>
-            </div>
-          </form>
-        {%- endif -%}
-        {% if current_user.current_role %}
+{#        <form class="sidebar-form" method="get" action="#">#}
+{#            <div class="input-group">#}
+{#              <input type="text" placeholder="Искать..." class="form-control" name="q">#}
+{#              <span class="input-group-btn">#}
+{#                <button class="btn btn-flat" id="search-btn" name="search" type="submit" title="Искать"><i class="fa fa-search"></i></button>#}
+{#              </span>#}
+{#            </div>#}
+{#          </form>#}
         <ul class="sidebar-menu" id="cur_modules">
             <li class="header">НАВИГАЦИЯ</li>
             {%- for item in main_menu -%}
