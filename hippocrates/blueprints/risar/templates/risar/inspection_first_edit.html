@@ -766,7 +766,9 @@
                     <div class="box-footer">
                         <div class="pull-right">
                             <a class="pseudo-btn" ng-href="{{ url_for('.html_inspection') }}?event_id=[[ header.event.id ]]">Перейти на форму осмотров пациентки</a>
-                            <ui-print-button ng-show="rc.sampleWizard.currentIndex == 5" ps="ps" resolve="ps_resolve()">Печать талона</ui-print-button>
+                            <ui-print-button ng-show="rc.sampleWizard.currentIndex == 5" ps="ps_talon" resolve="ps_resolve_talon()">Печать талона</ui-print-button>
+                            <ui-print-button ng-show="rc.sampleWizard.currentIndex == 4" ps="ps_fi"
+                                             resolve="ps_resolve()" before-print="save(rc.sampleWizard.currentStep.formController)">Печать</ui-print-button>
                             <a class="btn btn-success"
                                ng-click="save(rc.sampleWizard.currentStep.formController)"
                                tooltip="[[rc.sampleWizard.currentStep.formController.$invalid && rc.sampleWizard.currentStep.formController.submit_attempt ? 'Заполните все обязательные поля': '']]"

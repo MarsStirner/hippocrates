@@ -3,11 +3,22 @@
 
 var CheckupCtrl = function ($scope, RisarApi, RefBookService, PrintingService) {
     $scope.rbDiagnosisType = RefBookService.get('rbDiagnosisType');
-    $scope.ps = new PrintingService("risar");
-    $scope.ps.set_context("risar_talon");
-    $scope.ps_resolve = function () {
+    $scope.ps_talon = new PrintingService("risar");
+    $scope.ps_talon.set_context("risar_talon");
+    $scope.ps_resolve_talon = function () {
         return {
             event_id: $scope.header.event.id
+        }
+    };
+
+    $scope.ps_fi = new PrintingService("risar_inspection");
+    $scope.ps_fi.set_context("risar_first_inspection");
+    $scope.ps_si = new PrintingService("risar_inspection");
+    $scope.ps_si.set_context("risar_second_inspection");
+    $scope.ps_resolve = function () {
+        return {
+            event_id: $scope.header.event.id,
+            action_id: $scope.checkup_id
         }
     };
     var params = aux.getQueryParams(window.location.search);
@@ -83,7 +94,7 @@ var CheckupFirstEditCtrl = function ($scope, $controller, $window, $location, $d
             //$document.scrollToElement(formelm, 100, 1500);
             return false;
         }
-        RisarApi.checkup.save($scope.event_id, $scope.checkup)
+        return RisarApi.checkup.save($scope.event_id, $scope.checkup)
             .then(function (data) {
                 if($scope.checkup.id){
                     $scope.checkup = data;
@@ -122,7 +133,7 @@ var CheckupSecondEditCtrl = function ($scope, $controller, $window, $location, $
     $scope.save = function (form_controller) {
         form_controller.submit_attempt = true;
         if (form_controller.$valid){
-            RisarApi.checkup.save($scope.event_id, $scope.checkup)
+            return RisarApi.checkup.save($scope.event_id, $scope.checkup)
                 .then(function (data) {
                     if ($scope.checkup.id){
                         $scope.checkup = data;
