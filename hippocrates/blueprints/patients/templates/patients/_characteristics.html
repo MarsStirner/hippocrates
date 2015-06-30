@@ -1,119 +1,117 @@
-<div class="marginal">
 <ng-form name="_characteristics" toc-element="Особенности пациента">
-    <legend>Особенности пациента</legend>
+    <h4>Особенности пациента</h4>
     <ng-form name="_bloodtype" toc-element="Группа крови">
-        <h4>Группа крови и резус фактор</h4>
         <div ng-repeat="bt in client.blood_types.slice(0, 1) | flt_not_deleted">
-            <div class="row">
-                <div class="col-md-11">
-                    <ng-form name="cbtForm">
-                        <wm-client-blood-type id-postfix="$index"
-                            model-blood-type="bt"
-                            edit-mode="bt.id ? false : true">
-                        </wm-client-blood-type>
-                    </ng-form>
-                </div>
-                <div class="col-md-1">
-                    <div class="row">
-                        <button type="button" class="btn btn-danger marginal" title="Удалить"
+            <div class="box box-info">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Группа крови и резус фактор</h3>
+                    <div class="box-tools pull-right">
+                        <button type="button" class="btn btn-box-tool" title="Удалить"
                                 ng-click="clientServices.delete_blood_type(client, bt)" ng-if="!bt.id">
-                            <span class="glyphicon glyphicon-trash"></span>
+                            <span class="glyphicon glyphicon-trash text-danger"></span>
                         </button>
                     </div>
                 </div>
+                <div class="box-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <ng-form name="cbtForm">
+                                <wm-client-blood-type id-postfix="$index"
+                                    model-blood-type="bt"
+                                    edit-mode="bt.id ? false : true">
+                                </wm-client-blood-type>
+                            </ng-form>
+                        </div>
+                    </div>
+                </div>
+                <div class="box-footer" ng-if="!client.blood_types.length || bt_history_visible()">
+                    <button type="button" class="btn btn-lg btn-link btn-block" ng-if="!client.blood_types.length"
+                            ng-click="clientServices.add_new_blood_type(client)"><i class="ion ion-plus-round fa-fw"></i>Добавить новую группу крови</button>
+                    <div ng-if="bt_history_visible()">
+                        <table class="table table-condensed">
+                            <caption><h4>История изменений группы крови</h4></caption>
+                            <thead>
+                                <tr>
+                                    <th>Дата установления</th>
+                                    <th>Группа крови</th>
+                                    <th>Установивший</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="bt in client.blood_types">
+                                    <td>[[bt.date]]</td>
+                                    <td>[[bt.blood_type.name]]</td>
+                                    <td>[[bt.person.name]]</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
-        <div>
-            <button type="button" class="btn btn-primary" ng-if="!client.blood_types.length"
-                    ng-click="clientServices.add_new_blood_type(client)">Добавить новую</button>
-        </div>
-
-        <div ng-if="bt_history_visible()">
-            <table class="table table-condensed">
-                <caption><h4>История изменений группы крови</h4></caption>
-                <thead>
-                    <tr>
-                        <th>Дата установления</th>
-                        <th>Группа крови</th>
-                        <th>Установивший</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr ng-repeat="bt in client.blood_types">
-                        <td>[[bt.date]]</td>
-                        <td>[[bt.blood_type.name]]</td>
-                        <td>[[bt.person.name]]</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
     </ng-form>
-
-    <hr>
-
     <ng-form name="_allergies" toc-element="Аллергия">
-        <h4>Аллергия</h4>
         <div ng-repeat="alg in client.allergies | flt_not_deleted">
-            <div class="row">
-                <div class="col-md-11">
-                    <ng-form name="allergyForm">
-                        <wm-client-allergy id-postfix="[[$index]]"
-                            type="allergy"
-                            model-allergy="alg"
-                            edit-mode="alg.id ? edit.activated : true">
-                        </wm-client-allergy>
-                    </ng-form>
-                </div>
-                <div class="col-md-1">
-                    <div class="row" ng-show="alg.id">
-                        <button type="button" class="btn btn-primary marginal" title="Редактировать"
-                                ng-click="edit.activated=true"><span class="glyphicon glyphicon-pencil"></span></button>
+            <div class="box box-info">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Аллергия</h3>
+                    <div class="box-tools pull-right">
+                        <button ng-show="alg.id" type="button" class="btn btn-box-tool" title="Редактировать"
+                                ng-click="edit.activated=true"><span class="glyphicon glyphicon-pencil text-primary"></span></button>
+                        <button type="button" class="btn btn-box-tool" title="Удалить"
+                                ng-click="clientServices.delete_allergy(client, alg)"><span class="glyphicon glyphicon-trash text-danger"></span></button>
+
                     </div>
+                </div>
+                <div class="box-body">
                     <div class="row">
-                        <button type="button" class="btn btn-danger marginal" title="Удалить"
-                                ng-click="clientServices.delete_allergy(client, alg)"><span class="glyphicon glyphicon-trash"></span></button>
+                        <div class="col-md-12">
+                            <ng-form name="allergyForm">
+                                <wm-client-allergy id-postfix="[[$index]]"
+                                    type="allergy"
+                                    model-allergy="alg"
+                                    edit-mode="alg.id ? edit.activated : true">
+                                </wm-client-allergy>
+                            </ng-form>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div>
-            <button type="button" class="btn btn-primary"
-                    ng-click="clientServices.add_allergy(client)">Добавить новую</button>
+        <div class="panel marginal">
+            <button type="button" class="btn btn-link btn-lg btn-block" ng-click="clientServices.add_allergy(client)"><i class="ion ion-plus-round fa-fw"></i>Добавить аллергию</button>
         </div>
     </ng-form>
-
-    <hr>
-
     <ng-form name="_intolerances" toc-element="Непереносимость">
-        <h4>Медикаментозная непереносимость</h4>
         <div ng-repeat="intlr in client.intolerances | flt_not_deleted">
-            <div class="row">
-                <div class="col-md-11">
-                    <ng-form name="intoleranceForm">
-                        <wm-client-allergy id-postfix="[[$index]]"
-                            type="intolerance"
-                            model-allergy="intlr"
-                            edit-mode="intlr.id ? edit.activated : true">
-                        </wm-client-allergy>
-                    </ng-form>
-                </div>
-                <div class="col-md-1">
-                    <div class="row" ng-show="intlr.id">
-                        <button type="button" class="btn btn-primary marginal" title="Редактировать"
-                                ng-click="edit.activated=true"><span class="glyphicon glyphicon-pencil"></span></button>
+            <div class="box box-info">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Медикаментозная непереносимость</h3>
+                    <div class="box-tools pull-right">
+                        <button ng-show="intlr.id" type="button" class="btn btn-box-tool" title="Редактировать"
+                                ng-click="edit.activated=true"><span class="glyphicon glyphicon-pencil text-primary"></span></button>
+                        <button type="button" class="btn btn-box-tool" title="Удалить"
+                                ng-click="clientServices.delete_med_intolerance(client, intlr)"><span class="glyphicon glyphicon-trash text-danger"></span></button>
                     </div>
+                </div>
+                <div class="box-body">
                     <div class="row">
-                        <button type="button" class="btn btn-danger marginal" title="Удалить"
-                                ng-click="clientServices.delete_med_intolerance(client, intlr)"><span class="glyphicon glyphicon-trash"></span></button>
+                        <div class="col-md-12">
+                            <ng-form name="intoleranceForm">
+                                <wm-client-allergy id-postfix="[[$index]]"
+                                    type="intolerance"
+                                    model-allergy="intlr"
+                                    edit-mode="intlr.id ? edit.activated : true">
+                                </wm-client-allergy>
+                            </ng-form>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div>
-            <button type="button" class="btn btn-primary"
-                    ng-click="clientServices.add_med_intolerance(client)">Добавить новую</button>
+        <div class="panel">
+            <button type="button" class="btn btn-link btn-lg btn-block"
+                    ng-click="clientServices.add_med_intolerance(client)"><i class="ion ion-plus-round fa-fw"></i>Добавить медикаментозную непереносимость</button>
         </div>
     </ng-form>
-
 </ng-form>
-</div>

@@ -1,7 +1,20 @@
 <div ng-controller="EventPaymentCtrl" ng-show="formstate.is_paid() || formstate.is_dms() || formstate.is_oms()">
 <ng-form name="payerForm" toc-element="Плательщик">
-<legend xmlns="http://www.w3.org/1999/html">Плательщик</legend>
-<tabset justified="false" class="marginal">
+    <div class="box box-info">
+        <div class="box-header with-border">
+            <h3 class="box-title">Плательщик</h3>
+            <div class="box-tools">
+                <button ng-if="payer_tabs.person.active" type="button" class="btn btn-box-tool" title="Удалить"
+                        ng-click="clear_payer_lc()" ng-disabled="btn_delete_lc_disabled()">
+                    <span class="glyphicon glyphicon-trash text-danger"></span>
+                </button>
+                <button ng-if="payer_tabs.org.active" type="button" class="btn btn-box-tool" title="Удалить"
+                        ng-click="clear_payer_lc()">
+                    <span class="glyphicon glyphicon-trash text-danger"></span>
+                </button>
+            </div>
+        </div>
+            <tabset justified="false" class="marginal nav-tabs-custom">
     <tab id="tab_payer_person" disabled="payer_tabs.person.disabled"
          active="payer_tabs.person.active" deselect="switch_tab(0)">
         <tab-heading>Физ. лицо
@@ -9,7 +22,7 @@
                   ng-show="payer_tabs.person.active && contract_is_shared()"
                   tooltip="[[get_shared_contract_warning()]]"></span>
         </tab-heading>
-        <div class="row">
+        <div class="row tab-content">
             <div class="col-md-10">
                 <div class="row">
                     <div class="form-group col-md-4"
@@ -92,19 +105,12 @@
             <div class="col-md-2">
                 <div class="marginal">
                     <label>Заполнить из:</label>
-                    <button type="button" class="btn btn-info btn-block" ng-disabled="import_payer_btn_disabled()"
+                    <button type="button" class="btn btn-primary btn-block" ng-disabled="import_payer_btn_disabled()"
                             ng-click="import_payer_info('self')">карты пациента</button>
-                    <button type="button" class="btn btn-info btn-block" ng-disabled="import_payer_btn_disabled()"
+                    <button type="button" class="btn btn-primary btn-block" ng-disabled="import_payer_btn_disabled()"
                             ng-click="import_payer_info('parent')">карты родственника</button>
-                    <button type="button" class="btn btn-info btn-block" ng-disabled="import_payer_btn_disabled()"
+                    <button type="button" class="btn btn-primary btn-block" ng-disabled="import_payer_btn_disabled()"
                             ng-click="import_payer_info('prev')">предыдущего</button>
-                </div>
-                <div>
-                    <label>&nbsp;</label><br>
-                    <button type="button" class="btn btn-danger pull-right" title="Удалить"
-                            ng-click="clear_payer_lc()" ng-disabled="btn_delete_lc_disabled()">
-                        <span class="glyphicon glyphicon-trash"></span>
-                    </button>
                 </div>
             </div>
         </div>
@@ -131,22 +137,22 @@
                     </ui-select-choices>
                 </ui-select>
             </div>
-            <div class="col-md-offset-4 col-md-2">
-                <label>&nbsp;</label><br>
-                <button type="button" class="btn btn-danger pull-right" title="Удалить"
-                        ng-click="clear_payer_lc()">
-                    <span class="glyphicon glyphicon-trash"></span>
-                </button>
-            </div>
         </div>
     </tab>
 </tabset>
-
-<legend xmlns="http://www.w3.org/1999/html">Договор между пациентом и ЛПУ
-    <span class="text-warning" ng-if="integration1CODVD_enabled()"> (Заключается при оплате в кассе)</span>
-</legend>
-<div class="panel panel-default">
-    <div class="panel-body">
+</div>
+<div class="box box-info">
+    <div class="box-header with-border">
+        <h3 class="box-title">Договор между пациентом и ЛПУ
+            <span class="text-warning" ng-if="integration1CODVD_enabled()"> (Заключается при оплате в кассе)</span>
+        </h3>
+        <div class="box-tools">
+            <button type="button" class="btn btn-box-tool" ng-show="btn_edit_contract_info_visible()"
+                    ng-click="editing.contract_edited = true" title="Редактировать"><span class="glyphicon glyphicon-pencil text-primary"></span>
+            </button>
+        </div>
+    </div>
+    <div class="box-body">
         <div class="row form-group">
             <div class="col-md-2"
                 ng-class="{'has-error': payerForm.date_contract.$invalid && editing.submit_attempt}">
@@ -160,12 +166,6 @@
                 <label for="number_contract">Номер договора</label>
                 <input type="text" class="form-control" id="number_contract" name="number_contract" autocomplete="off"
                        ng-disabled="contract_info_disabled()" ng-model="event.payment.local_contract.number_contract"/>
-            </div>
-            <div class="col-md-6">
-                <label>&nbsp;</label><br>
-                <button type="button" class="btn btn-default pull-right" ng-show="btn_edit_contract_info_visible()"
-                        ng-click="editing.contract_edited = true"><span class="glyphicon glyphicon-pencil"></span>
-                </button>
             </div>
         </div>
         <div class="row form-group">

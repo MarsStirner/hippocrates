@@ -1,8 +1,10 @@
 <div ng-controller="EventServicesCtrl">
 <ng-form name="eventServicesForm" role="form"toc-element="Услуги" toc-name="tocEventForm">
-    <legend id="services">Услуги</legend>
-    <div class="panel panel-default">
-    <div class="panel-body">
+    <div class="box box-info">
+        <div class="box-header with-border">
+            <h3 class="box-title">Услуги</h3>
+        </div>
+        <div class="box-body">
         <ng-form name="sr_services">
             <div class="form-group">
                 <div class="input-group">
@@ -22,8 +24,8 @@
             <div ng-show="query && search_processed && !found_services.length" class="alert alert-danger">
                 Нет услуг, удовлетворяющих запросу <strong>"[[query]]"</strong>
             </div>
-            <div ng-show="found_services" class="panel panel-default">
-                <table class="table table-condensed table-striped table-hover table-clickable table-bordered">
+            <div ng-show="found_services">
+                <table class="table table-condensed table-striped table-hover table-clickable">
                     <thead>
                         <tr>
                             <th>Код</th>
@@ -45,9 +47,9 @@
         </ng-form>
 
         <div id="selected_services" ng-show="event.services.length">
-            <div class="panel panel-default">
-                <div class="panel-heading"><strong>Выбранные услуги</strong></div>
-                <table class="table table-condensed table-bordered">
+            <h4>Выбранные услуги</h4>
+            <div style="overflow-x: auto">
+                <table class="table table-condensed">
                     <thead>
                         <tr wm-event-service-list-header></tr>
                     </thead>
@@ -63,18 +65,15 @@
                 </table>
             </div>
         </div>
-
+    </div>
+    <div class="box-footer">
         <blockquote class="novmargin blockquote-reverse" ng-show="formstate.is_paid() && event.services.length">
-            <div class="row">
-            <div class="col-md-12">
-                <span class="text-muted">Итого к оплате: </span>
-                <span class="text-primary" ng-bind="event.payment.payments.total_out"></span><span class="text-primary"> руб.</span>
-                <span class="text-muted"> Оплачено: </span>
-                <span class="text-success" ng-bind="event.payment.payments.total_in"></span><span class="text-success"> руб.</span>
-                <span class="text-muted"> Долг: </span>
-                <span class="text-danger" ng-bind="event.payment.payments.diff"></span><span class="text-danger"> руб.</span>
-            </div>
-            </div>
+            <span class="text-muted">Итого к оплате: </span>
+            <span class="text-primary" ng-bind="event.payment.payments.total_out"></span><span class="text-primary"> руб.</span>
+            <span class="text-muted"> Оплачено: </span>
+            <span class="text-success" ng-bind="event.payment.payments.total_in"></span><span class="text-success"> руб.</span>
+            <span class="text-muted"> Долг: </span>
+            <span class="text-danger" ng-bind="event.payment.payments.diff"></span><span class="text-danger"> руб.</span>
         </blockquote>
     </div>
     </div>

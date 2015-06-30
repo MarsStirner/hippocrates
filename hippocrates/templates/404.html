@@ -3,7 +3,10 @@
 {% block title %} > Страница не найдена{% endblock %}
 
 {% block content %}
-<legend>Страница не найдена</legend>
+<section class="content-header">
+    <h1>Страница не найдена</h1>
+</section>
+<section class="content">
 {%- with messages = get_flashed_messages() -%}
   {%- if messages -%}
     <div class="alert alert-danger">
@@ -14,3 +17,4 @@
   {%- endif -%}
 {%- endwith -%}
 {% endblock %}
+</section>

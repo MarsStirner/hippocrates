@@ -1,11 +1,19 @@
-<div class="marginal">
 <ng-form name="addressForm" toc-element="Адреса">
-    <legend>Адрес регистрации и проживания</legend>
+    <h4>Адрес регистрации и проживания</h4>
     <ng-form name="_regaddress" toc-element="Регистрации">
-        <h4>Адрес регистрации</h4>
         <div ng-repeat="reg_addr in client.reg_addresses | flt_not_deleted">
-            <div class="row">
-                <div class="col-md-11">
+            <div class="box box-info">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Адрес регистрации</h3>
+                    <div class="box-tools pull-right">
+                        <button type="button" ng-show="reg_addr.id" class="btn btn-box-tool" title="Редактировать"
+                                ng-click="edit.activated=true"><span class="glyphicon glyphicon-pencil text-primary"></span></button>
+                        <button type="button" class="btn btn-box-tool" title="Удалить"
+                                ng-click="clientServices.delete_address(client, 0, reg_addr)">
+                            <span class="glyphicon glyphicon-trash text-danger"></span></button>
+                    </div>
+                </div>
+                <div class="box-body">
                     <ng-form name="regAddressForm">
                         <wm-kladr-address prefix='reg'
                             address-model="reg_addr"
@@ -13,33 +21,28 @@
                         </wm-kladr-address>
                     </ng-form>
                 </div>
-                <div class="col-md-1">
-                    <div class="row" ng-show="reg_addr.id">
-                        <button type="button" class="btn btn-primary marginal" title="Редактировать"
-                                ng-click="edit.activated=true"><span class="glyphicon glyphicon-pencil"></span></button>
-                    </div>
-                    <div class="row">
-                        <button type="button" class="btn btn-danger marginal" title="Удалить"
-                                ng-click="clientServices.delete_address(client, 0, reg_addr)">
-                            <span class="glyphicon glyphicon-trash"></span></button>
-                    </div>
+                <div class="box-footer">
+                    <button type="button" class="btn btn-lg btn-link btn-block"
+                            ng-click="clientServices.add_new_address(client, 0)"><i class="ion ion-plus-round fa-fw"></i>Добавить адрес регистрации</button>
                 </div>
             </div>
 {#            <div>[[reg_addr | json]]</div>#}
         </div>
-        <div>
-            <button type="button" class="btn btn-primary"
-                    ng-click="clientServices.add_new_address(client, 0)">Добавить новый</button>
-        </div>
     </ng-form>
-
-    <hr>
-
     <ng-form name="_liveaddress" toc-element="Проживания">
-        <h4>Адрес проживания</h4>
         <div ng-repeat="live_addr in client.live_addresses | flt_not_deleted">
-            <div class="row">
-                <div class="col-md-11">
+            <div class="box box-info">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Адрес проживания</h3>
+                    <div class="box-tools pull-right">
+                        <button ng-show="live_addr.id" type="button" class="btn btn-box-tool" title="Редактировать"
+                                ng-click="edit.activated=true"><span class="glyphicon glyphicon-pencil text-primary"></span></button>
+                        <button type="button" class="btn btn-box-tool" title="Удалить"
+                                ng-click="clientServices.delete_address(client, 1, live_addr)">
+                            <span class="glyphicon glyphicon-trash text-danger"></span></button>
+                    </div>
+                </div>
+                <div class="box-body">
                     <ng-form name="locAddressForm">
                         <wm-kladr-address prefix='loc'
                             address-model="live_addr"
@@ -56,24 +59,12 @@
                         </wm-kladr-address>
                     </ng-form>
                 </div>
-                <div class="col-md-1">
-                    <div class="row" ng-show="live_addr.id">
-                        <button type="button" class="btn btn-primary marginal" title="Редактировать"
-                                ng-click="edit.activated=true"><span class="glyphicon glyphicon-pencil"></span></button>
-                    </div>
-                    <div class="row">
-                        <button type="button" class="btn btn-danger marginal" title="Удалить"
-                                ng-click="clientServices.delete_address(client, 1, live_addr)">
-                            <span class="glyphicon glyphicon-trash"></span></button>
-                    </div>
+                <div class="box-footer">
+                    <button type="button" class="btn btn-lg btn-link btn-block"
+                        ng-click="clientServices.add_new_address(client, 1)"><i class="ion ion-plus-round fa-fw"></i>Добавить адрес проживания</button>
                 </div>
             </div>
 {#            <div>[[live_addr | json]]</div>#}
         </div>
-        <div>
-            <button type="button" class="btn btn-primary"
-                    ng-click="clientServices.add_new_address(client, 1)">Добавить новый</button>
-        </div>
     </ng-form>
 </ng-form>
-</div>

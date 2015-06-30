@@ -4,9 +4,7 @@
 
 {% block main %}
     <div ng-controller="ClientCtrl" class="ng-cloak">
-        {% include "_breadcrumbs.html" %}
-
-        <legend xmlns="http://www.w3.org/1999/html">
+        <section class="content-header">
             <div class="pull-right">
                 <a class="btn btn-sm btn-primary" href="{{ url_for('schedule.appointment') }}?client_id={{ request.args['client_id'] }}"
                    ng-if="client_id != 'new'">
@@ -21,40 +19,45 @@
                 {% endif %}
                 <ui-print-button ps="ps" class="btn-sm" resolve="print_context_resolve()" ng-if="!client.is_new()"></ui-print-button>
             </div>
-        <h2>Пациент: [[ client.info.full_name ]]</h2>
-        </legend>
-        <div class="row">
-            <div class="col-md-2 affix-holder">
-                <div class="toc-affix" bs-affix>
-                    <toc-affix toc-name="tocClientForm">
-                    <hr>
-                        <button ng-click="save_client()" class="btn btn-success"
-                                tooltip="[[clientForm.$invalid ? 'Заполните все обязательные поля': '']]">Сохранить</button>
-                        <button ng-click="cancel_editing()" class="btn btn-default">Отмена</button>
-                    </toc-affix>
-                </div>
-            </div>
-            <div class="col-md-10">
-                <div ui-alert-list="alerts"></div>
-                <div class="marginal">
-                    <ng-form name="clientForm" id="clientForm" role="form" novalidate toc-element toc-name="tocClientForm" form-safe-close>
-                        {% include "patients/_main_info.html" %}
-                        {% include "patients/_id_doc.html" %}
-                        {% include "patients/_address.html" %}
-                        {% include "patients/_policy.html" %}
-                        {% include "patients/_characteristics.html" %}
-                        {% include "patients/_soc_status.html" %}
-                        {% include "patients/_contacts.html" %}
-                        {% include "patients/_attached_files.html" %}
-                        {% include "patients/_doc_history.html" %}
+            <h1>Пациент: [[ client.info.full_name ]]</h1>
+        </section>
 
-    {#                    {% include "patients/identifiers.html" %}#}
-    {#                    <legend>Debug</legend>#}
-    {#                    <pre>[[client | json]]</pre>#}
-                    </ng-form>
+        <section class="content">
+            <div class="row">
+                <div class="col-md-9">
+                    <div ui-alert-list="alerts"></div>
+                    <div class="marginal">
+                        <ng-form name="clientForm" id="clientForm" role="form" novalidate toc-element toc-name="tocClientForm" form-safe-close>
+                            {% include "patients/_main_info.html" %}
+                            {% include "patients/_id_doc.html" %}
+                            {% include "patients/_address.html" %}
+                            {% include "patients/_policy.html" %}
+                            {% include "patients/_characteristics.html" %}
+                            {% include "patients/_soc_status.html" %}
+                            {% include "patients/_contacts.html" %}
+                            {% include "patients/_attached_files.html" %}
+                            {% include "patients/_doc_history.html" %}
+
+        {#                    {% include "patients/identifiers.html" %}#}
+        {#                    <legend>Debug</legend>#}
+        {#                    <pre>[[client | json]]</pre>#}
+                        </ng-form>
+                    </div>
+                </div>
+                <div class="col-md-3 affix-holder">
+                    <div class="toc-affix box" ng-class="{'box-danger': clientForm.$invalid, 'box-success': !clientForm.$invalid}" bs-affix>
+                        <div class="box-body">
+                            <toc-affix toc-name="tocClientForm">
+                            <hr>
+                                <button ng-click="save_client()" class="btn btn-lg btn-success"
+                                        tooltip="[[clientForm.$invalid ? 'Заполните все обязательные поля': '']]">Сохранить</button>
+                                <button ng-click="cancel_editing()" class="btn btn-lg btn-default">Отмена</button>
+                            </toc-affix>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
+        </section>
     </div>
 {% endblock %}
 
@@ -65,6 +68,4 @@
     <script src="{{ url_for('static', filename='js/directives/kladr-directives.js', v=nemesis_version) }}"></script>
     <script src="{{ url_for('static', filename='js/services/client/client-services.js', v=nemesis_version) }}"></script>
     <script src="{{ url_for('static', filename='js/services/file-editor.js', v=nemesis_version) }}"></script>
-
-
 {% endblock %}

@@ -2,8 +2,11 @@
 {% block title %}> {{ module_name }}{% endblock %}
 
 {% block main %}
-    <div ng-controller="ScheduleMonthCtrl" class="ng-cloak">
-        <legend xmlns="http://www.w3.org/1999/html"><h2>График врача <span ng-if="person" class="bg-success">[[ person.name ]]<small>, [[ person.speciality.name ]]</small></span></h2></legend>
+<div ng-controller="ScheduleMonthCtrl" class="ng-cloak">
+    <section class="content-header">
+        <h1>График врача <span ng-if="person">[[ person.name ]]<small>, [[ person.speciality.name ]]</small></span></h1>
+    </section>
+    <section class="content">
         <div class="row marginal">
             <div class="col-md-2">
                 <select class="form-control" name="year" ng-model="year" ng-disabled="editing"
@@ -18,38 +21,41 @@
             </div>
         </div>
         <div ng-show="person">
-            <div class="well well-sm">
-                <div class="btn-group">
-                    <button class="btn btn-primary" ng-click="start_editing()" ng-if="!editing">Редактировать</button>
-                    <button class="btn btn-success" ng-click="finish_editing()" ng-if="editing">Сохранить</button>
-                    <button class="btn btn-danger" ng-click="cancel_editing()" ng-if="editing">Отменить</button>
-                </div>
-                <button class="btn btn-warning" ng-click="fill_selection()" ng-if="editing" ng-disabled="selected_days.length == 0">Заполнить</button>
-                <div ng-if="editing" class="btn-group">
-                    <button class="btn btn-primary disabled"><span class="glyphicon glyphicon-ok"></span></button>
-                    <button class="btn btn-primary" ng-click="select.odd()">Нечет дни</button>
-                    <button class="btn btn-primary" ng-click="select.invert()">Инверсия</button>
-                    <button class="btn btn-primary" ng-click="select.all()">Все</button>
-                    <button class="btn btn-primary" ng-click="select.none()">Снять</button>
-                </div>
-                <label ng-show="editing" for="weekendCheckBox"><input type="checkbox" id="weekendCheckBox" ng-model="weekends_selectable"> Выбирать выходные</label>
 
-                <div class="btn-group pull-right" dropdown ng-if="editing">
-                    <button type="button" class="btn btn-info" ng-click="copy_schedule_from_previous_month()">Копировать из предыдущего</button>
-                    <button type="button" class="btn btn-info dropdown-toggle">
-                        <span class="caret"></span><span class="sr-only">Выбрать месяц</span>
-                    </button>
-                    <ul class="dropdown-menu" role="menu">
-                        <li ng-repeat="m in prevMonthsInfo">
-                            <a href="javascript:;" ng-bind="m.name" ng-click="copy_schedule_from_previous_month(m.date)"></a>
-                        </li>
-                    </ul>
+            <div class="box box-info">
+                <div class="box-header with-border">
+                    <h3 class="box-title">[[ person.name ]]<small>, [[ person.speciality.name ]]</small></h3>
                 </div>
-            </div>
-            <div class="row">
-                <div class="col-md-12">
+                <div class="box-body">
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn btn-primary" ng-click="start_editing()" ng-if="!editing">Редактировать</button>
+                        <button class="btn btn-success" ng-click="finish_editing()" ng-if="editing">Сохранить</button>
+                        <button class="btn btn-danger" ng-click="cancel_editing()" ng-if="editing">Отменить</button>
+                    </div>
+                    <button class="btn btn-sm btn-warning" ng-click="fill_selection()" ng-if="editing" ng-disabled="selected_days.length == 0">Заполнить</button>
+                    <div ng-if="editing" class="btn-group btn-group-sm">
+                        <button class="btn btn-primary disabled"><span class="glyphicon glyphicon-ok"></span></button>
+                        <button class="btn btn-primary" ng-click="select.odd()">Нечет дни</button>
+                        <button class="btn btn-primary" ng-click="select.invert()">Инверсия</button>
+                        <button class="btn btn-primary" ng-click="select.all()">Все</button>
+                        <button class="btn btn-primary" ng-click="select.none()">Снять</button>
+                    </div>
+                    <label ng-show="editing" for="weekendCheckBox"><input type="checkbox" id="weekendCheckBox" ng-model="weekends_selectable"> Выбирать выходные</label>
+
+                    <div class="btn-group btn-group-sm pull-right" dropdown ng-if="editing">
+                        <button type="button" class="btn btn-primary" ng-click="copy_schedule_from_previous_month()">Копировать из предыдущего</button>
+                        <button type="button" class="btn btn-primary dropdown-toggle">
+                            <span class="caret"></span><span class="sr-only">Выбрать месяц</span>
+                        </button>
+                        <ul class="dropdown-menu" role="menu">
+                            <li ng-repeat="m in prevMonthsInfo">
+                                <a href="javascript:;" ng-bind="m.name" ng-click="copy_schedule_from_previous_month(m.date)"></a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="box-footer">
                     <table class="table table-condensed person-schedule">
-                        <caption>[[ person.name ]]<small>, [[ person.speciality.name ]]</small></caption>
                         <thead>
                         <tr>
                             <th class="text-center" ng-if="editing">&raquo;</th>
@@ -105,7 +111,8 @@
             </div>
         </div>
 {#    <pre>Schedules: [[schedules | json]]</pre>#}
-    </div>
+    </section>
+</div>
 {% endblock %}
 {% block modules_js %}
     {{ super() }}

@@ -5,15 +5,17 @@
     {%- include '_header.html' -%}
     {%- block modules_css %}{% endblock -%}
 </head>
-<body ng-class="{loading: pendingRequests}">
-<div id="wrap">
-    {% include '_top.html' %}
+<body ng-class="{loading: pendingRequests}" class="skin-blue sidebar-mini sidebar-collapse" id="top">
+<div class="wrapper">
+    {%- include '_top.html' -%}
+    {%- include '_sidebar.html' -%}
+    <div class="content-wrapper" style="min-height: 855px">{# FIXME: убрать явное указание min-height #}
     {%- block container %}
     {% endblock -%}
-    <div id="push"></div>
+    </div>
+    {%- include '_bottom.html' -%}
+    {%- include '_footer.html' with context -%}
 </div><!-- /#wrap -->
-{% include '_bottom.html' -%}
-{% include '_footer.html' with context -%}
 {%- block modules_js %}{% endblock -%}
 </body>
 </html>

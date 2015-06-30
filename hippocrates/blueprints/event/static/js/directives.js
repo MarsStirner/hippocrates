@@ -421,7 +421,7 @@ function ($window, $http, ActionTypeTreeModal, MessageBox, WMEventServices, WMWi
             scope.reload();
         },
         template:
-'<table class="table table-condensed table-hover table-clickable">\
+'<table class="table table-condensed table-hover table-clickable novmargin">\
     <thead wm-sortable-header>\
     <tr>\
         <th width="45%" wm-sortable-column="at_name" on-change-order="sort_by_column(params)">Тип действия</th>\
@@ -449,8 +449,9 @@ function ($window, $http, ActionTypeTreeModal, MessageBox, WMEventServices, WMWi
     <tfoot>\
     <tr>\
         <td colspan="6">\
-            <button type="button" class="btn btn-primary btn-lg pull-right tmargin20" ng-click="open_action_tree(actionTypeGroup)"\
-                    ng-if="can_create_action()">Создать</button>\
+            <hr class="novmargin">\
+            <button type="button" class="btn btn-link btn-lg pull-right" ng-click="open_action_tree(actionTypeGroup)"\
+                    ng-if="can_create_action()"><i class="ion ion-plus-round fa-fw"></i>Добавить</button>\
             <pagination ng-model="pager.current_page" total-items="pager.pages" items-per-page="1"\
                 max-size="pager.max_size" ng-change="reload()" ng-show="pager.pages > 1" boundary-links="true"></pagination>\
         </td>\

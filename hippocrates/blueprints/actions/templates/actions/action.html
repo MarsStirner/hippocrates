@@ -3,40 +3,47 @@
 {% block main %}
 <div ng-controller="ActionEditorCtrl" class="ng-cloak">
 <div alert-notify></div>
-<legend wm-page-header>
+<section class="content-header" wm-page-header>
     <div class="pull-right text-right col-md-1">
         <ui-print-button ps="ps" resolve="ps_resolve()" before-print="save_action(true)"></ui-print-button>
         <button class="btn btn-success" title="Сохранить" ng-click="save_action()" ng-if="!action.readonly">
             <span class="glyphicon glyphicon-ok"></span>
         </button>
     </div>
-    <h3>[[ action.action_type.name ]] -
+    <h1>[[ action.action_type.name ]] -
         <a href="{{ url_for('patients.patient') }}?client_id=[[action.client.id]]">[[ action.client.full_name ]]</a>
-    </h3>
-</legend>
+    </h1>
+</section>
+<section class="content">
 <div>
     <div class="row">
     <div class="col-md-12">
+        <div class="box box-solid">
         {% include "actions/_action_head_editable.html" %}
+        </div>
+        <div class="box box-solid">
         {% include "actions/_action_head_viewable.html" %}
-    <hr/>
+        </div>
+    <div class="box box-solid">
+    <div class="box-body">
     <wm-action-layout action="action"></wm-action-layout>
     </div>
     </div>
+    </div>
+    </div>
 </div>
-<div class="row">
-    <div class="col-md-12">
+<div class="box-footer">
         <div class="pull-left">
-            <button class="btn btn-default" ng-click="template_save()">Сохранить шаблон</button>
-            <button class="btn btn-default" ng-click="template_load()" ng-if="!action.readonly">Загрузить шаблон</button>
-            <button class="btn btn-default" ng-click="template_prev()" ng-if="!action.readonly">Загрузить из предыдущего</button>
+            <button class="btn btn-lg btn-default" ng-click="template_save()">Сохранить шаблон</button>
+            <button class="btn btn-lg btn-default" ng-click="template_load()" ng-if="!action.readonly">Загрузить шаблон</button>
+            <button class="btn btn-lg btn-default" ng-click="template_prev()" ng-if="!action.readonly">Загрузить из предыдущего</button>
         </div>
         <div class="pull-right">
             <button class="btn btn-lg btn-success" ng-click="save_action()" ng-if="!action.readonly">Сохранить</button>
             <button class="btn btn-lg btn-danger" ng-click="cancel()">Закрыть</button>
         </div>
-    </div>
 </div>
+</section>
 </div>
 {% endblock %}
 

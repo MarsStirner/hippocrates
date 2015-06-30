@@ -3,13 +3,17 @@
 {% block title %}> {{ module_name }}{% endblock %}
 
 {% block main %}
+<section class="content-header">
+    <h1>Аналитические отчёты</h1>
+</section>
+<section class="content">
     <div ng-controller="IndexCtrl" class="ng-cloak">
-    <legend xmlns="http://www.w3.org/1999/html"><h2>Аналитические отчёты</h2></legend>
-    <div class="container">
-    <div class="input-group">
+    <div class="input-group marginal">
         <span class="input-group-addon"><i class="fa fa-search"></i></span>
         <input type="text" class="form-control" placeholder="Поиск" ng-model="query">
     </div>
+    <div class="box box-info">
+    <div class="box-body">
     <table class="table table-condensed">
         <thead>
         <tr>
@@ -28,6 +32,8 @@
     </table>
     </div>
     </div>
+    </div>
+</section>
     {#- Шаблон для модального окна -#}
     <script type="text/ng-template" id="modal-print.html">
         <div class="modal-header" xmlns="http://www.w3.org/1999/html">

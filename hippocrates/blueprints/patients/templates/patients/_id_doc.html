@@ -1,41 +1,33 @@
 <ng-form name="_idDocForm" toc-element="Документы">
-<div class="marginal">
-    <legend>Документ удостоверяющий личность</legend>
     <div ng-repeat="doc in client.id_docs | flt_not_deleted">
         <ng-form name="idDocForm">
-            <div class="row">
-                <div class="col-md-11">
-                    <div class="panel panel-default">
-                    <div class="panel-body">
-                        <wm-document id-postfix="c[[$index]]"
-                            group-code="1"
-                            model-document="doc"
-                            edit-mode="doc.id ? edit.activated : true">
-                        </wm-document>
-                        <div ng-if="doc.file_attach">
-                            <h5 class="attach-file-copy-heading">Копия документа</h5>
-                            <wm-client-file-attach attach-type="document"
-                                model-attach="doc.file_attach"
-                                model-doc="doc"
-                                on-add="add_new_file(documentInfo, policyInfo)"
-                                on-open="openFile(cfa_id, idx)">
-                            </wm-client-file-attach>
-                        </div>
-                    </div>
+            <div class="box box-info">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Документ удостоверяющий личность</h3>
+                    <div class="box-tools pull-right">
+                        <button type="button" class="btn btn-box-tool" title="Редактировать"
+                            ng-click="edit.activated=true" ng-show="doc.id"><span class="glyphicon glyphicon-pencil text-primary"></span></button>
+                        <button type="button" class="btn btn-box-tool" title="Удалить"
+                            ng-click="clientServices.delete_document(client, doc)"><span class="text-danger glyphicon glyphicon-trash"></span></button>
                     </div>
                 </div>
-                <div class="col-md-1">
-                    <div class="row" ng-show="doc.id">
-                        <button type="button" class="btn btn-primary marginal" title="Редактировать"
-                                ng-click="edit.activated=true"><span class="glyphicon glyphicon-pencil"></span></button>
-                    </div>
-                    <div class="row">
-                        <button type="button" class="btn btn-danger marginal" title="Удалить"
-                                ng-click="clientServices.delete_document(client, doc)"><span class="glyphicon glyphicon-trash"></span></button>
+                <div class="box-body">
+                    <wm-document id-postfix="c[[$index]]"
+                        group-code="1"
+                        model-document="doc"
+                        edit-mode="doc.id ? edit.activated : true">
+                    </wm-document>
+                    <div ng-if="doc.file_attach">
+                        <h5>Копия документа</h5>
+                        <wm-client-file-attach attach-type="document"
+                            model-attach="doc.file_attach"
+                            model-doc="doc"
+                            on-add="add_new_file(documentInfo, policyInfo)"
+                            on-open="openFile(cfa_id, idx)">
+                        </wm-client-file-attach>
                     </div>
                 </div>
             </div>
         </ng-form>
     </div>
-</div>
 </ng-form>
