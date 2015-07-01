@@ -1,10 +1,17 @@
 
 'use strict';
-var EpicrisisCtrl = function ($timeout, $scope, RefBookService, RisarApi) {
+var EpicrisisCtrl = function ($timeout, $scope, RefBookService, RisarApi, PrintingService) {
     var params = aux.getQueryParams(window.location.search);
     var event_id = $scope.event_id = params.event_id;
     $scope.rbRisarPregnancy_Final = RefBookService.get('rbRisarPregnancy_Final');
     $scope.rbDiagnosisType = RefBookService.get('rbDiagnosisType');
+    $scope.ps_epicrisis = new PrintingService("risar");
+    $scope.ps_epicrisis.set_context("risar_epicrisis");
+    $scope.ps_resolve = function () {
+        return {
+            event_id: $scope.chart.id
+        }
+    };
     $scope.is_empty = function (obj) {
         return angular.equals({}, obj);
     };
@@ -51,7 +58,7 @@ var EpicrisisCtrl = function ($timeout, $scope, RefBookService, RisarApi) {
         form_controller.submit_attempt = true;
         if (form_controller.$valid){
             var model = $scope.chart.epicrisis;
-            RisarApi.epicrisis.save($scope.chart.id, model)
+            return RisarApi.epicrisis.save($scope.chart.id, model)
             .then(function (data) {
                 $scope.chart.epicrisis = data;
             })

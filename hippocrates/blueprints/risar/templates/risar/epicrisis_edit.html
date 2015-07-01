@@ -789,6 +789,8 @@
                     <div class="box-footer">
                         <div class="pull-right">
                         <a class="pseudo-btn" ng-href="{{ url_for('.html_epicrisis') }}?event_id=[[ chart.id ]]">Перейти на форму эпикриза пациентки</a>
+                        <ui-print-button ng-show="rc.sampleWizard.currentIndex == 5" ps="ps_epicrisis"
+                                         resolve="ps_resolve()" before-print="save(rc.sampleWizard.currentStep.formController)">Печать</ui-print-button>
                         <a class="btn btn-success"
                            ng-disabled="is_save_disabled(rc.sampleWizard)"
                            tooltip="[[rc.sampleWizard.currentStep.formController.$invalid && rc.sampleWizard.currentStep.formController.submit_attempt ? 'Заполните все обязательные поля': '']]"
