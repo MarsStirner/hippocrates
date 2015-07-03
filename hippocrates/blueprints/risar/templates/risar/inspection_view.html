@@ -18,14 +18,16 @@
                     <th width="10%" nowrap ng-repeat="checkup in checkups">
                         <a ng-href="{{ url_for('.html_inspection_edit') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]">[[ checkup.beg_date | asDate ]]</a>
                         <div class="btn-group">
-                          <button type="button" class="btn btn-xs btn-default dropdown-toggle" data-toggle="dropdown">
-                            <span class="caret"></span>
-                          </button>
-                          <ul class="dropdown-menu" role="menu">
-                            <li ng-class="{disabled: !ps_talon.is_available()}"><a href="#" ng-click="open_print_window()" >Печать талона</a></li>
-                            <li><a href="#">Копировать</a></li>
-                            <li><a href="#">Удалить</a></li>
-                          </ul>
+                            <button type="button" class="btn btn-xs btn-default dropdown-toggle" data-toggle="dropdown">
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu" role="menu">
+                                <li ng-class="{disabled: !ps_talon.is_available()}"><a href="#" ng-click="open_print_window(ps_talon)" >Печать талона</a></li>
+                                <li ng-if="checkup.flat_code == 'risarFirstInspection'" ng-class="{disabled: !ps_fi.is_available()}"><a href="#" ng-click="open_print_window(ps_fi)" >Печать осмотра</a></li>
+                                <li ng-if="checkup.flat_code == 'risarSecondInspection'" ng-class="{disabled: !ps_si.is_available()}"><a href="#" ng-click="open_print_window(ps_si)" >Печать осмотра</a></li>
+                                <li><a href="#">Копировать</a></li>
+                                <li><a href="#">Удалить</a></li>
+                            </ul>
                         </div>
                     </th>
                     <th></th>

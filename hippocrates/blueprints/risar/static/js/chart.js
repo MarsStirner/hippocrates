@@ -68,13 +68,20 @@ var ChartCtrl = function ($scope, $modal, RisarApi, PrintingService, PrintingDia
 var InspectionViewCtrl = function ($scope, $modal, RisarApi, PrintingService, PrintingDialog) {
     var params = aux.getQueryParams(window.location.search);
     var event_id = params.event_id;
-    $scope.ps = new PrintingService("risar");
-    $scope.ps.set_context("risar_talon");
+    $scope.ps_talon = new PrintingService("risar");
+    $scope.ps_talon.set_context("risar_talon");
+
+    $scope.ps_fi = new PrintingService("risar_inspection");
+    $scope.ps_fi.set_context("risar_first_inspection");
+    $scope.ps_si = new PrintingService("risar_inspection");
+    $scope.ps_si.set_context("risar_second_inspection");
     $scope.ps_resolve = function () {
         return {
-            event_id: $scope.chart.id
+            event_id: $scope.header.event.id,
+            action_id: $scope.checkup_id
         }
     };
+
     $scope.declOfNum = function (number, titles) {
         var cases = [2, 0, 1, 1, 1, 2];
         return titles[ (number%100>4 && number%100<20)? 2 : cases[(number%10<5)?number%10:5] ];
@@ -103,9 +110,9 @@ var InspectionViewCtrl = function ($scope, $modal, RisarApi, PrintingService, Pr
             });
     };
 
-    $scope.open_print_window = function () {
-        if ($scope.ps_talon.is_available()){
-            PrintingDialog.open($scope.ps_talon, $scope.$parent.$eval($scope.ps_resolve));
+    $scope.open_print_window = function (ps) {
+        if (ps.is_available()){
+            PrintingDialog.open(ps, $scope.$parent.$eval($scope.ps_resolve));
         }
     };
     reload();
