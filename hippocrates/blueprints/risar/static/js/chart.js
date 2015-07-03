@@ -75,10 +75,10 @@ var InspectionViewCtrl = function ($scope, $modal, RisarApi, PrintingService, Pr
     $scope.ps_fi.set_context("risar_first_inspection");
     $scope.ps_si = new PrintingService("risar_inspection");
     $scope.ps_si.set_context("risar_second_inspection");
-    $scope.ps_resolve = function () {
+    $scope.ps_resolve = function (checkup_id) {
         return {
             event_id: $scope.header.event.id,
-            action_id: $scope.checkup_id
+            action_id: checkup_id
         }
     };
 
@@ -110,9 +110,9 @@ var InspectionViewCtrl = function ($scope, $modal, RisarApi, PrintingService, Pr
             });
     };
 
-    $scope.open_print_window = function (ps) {
+    $scope.open_print_window = function (ps, checkup_id) {
         if (ps.is_available()){
-            PrintingDialog.open(ps, $scope.$parent.$eval($scope.ps_resolve));
+            PrintingDialog.open(ps, $scope.ps_resolve(checkup_id));
         }
     };
     reload();
