@@ -125,29 +125,33 @@ def api_0_death_stats():
                 ))
             result1[value].append([i, db.session.execute(selectable1).rowcount])
 
+    #материнская смертность
+    def check_pat_diagnosis(action):
+        pat_diagnosis = action.propsByCode['pat_diagnosis'].value
+        for diag_code in ('V', 'W', 'X', 'Y'):
+            if pat_diagnosis.diagnosis.mkb.DiagID.startswith(diag_code):
+                return False
+        return True
+
     for i in range(1, 13):
-        selectable = db.select(
-            (Action.id, ),
-            whereclause=db.and_(
-                ActionType.flatCode == 'epicrisis',
-                ActionPropertyType.code == 'death_date',
-                rbRequestType.code == 'pregnancy',
-                Action.event_id == Event.id,
-                ActionProperty.action_id == Action.id,
-                ActionPropertyType.id == ActionProperty.type_id,
-                ActionType.id == Action.actionType_id,
-                ActionProperty_Date.id == ActionProperty.id,
-                EventType.id == Event.eventType_id,
-                rbRequestType.id == EventType.requestType_id,
-                Event.deleted == 0,
-                Action.deleted == 0,
-                ActionProperty_Date.value.like(now.strftime('%Y')+'-'+str(i).rjust(2, '0')+'-%')
-            ),
-            from_obj=(
-                Event, EventType, rbRequestType, Action, ActionType, ActionProperty, ActionPropertyType,
-                ActionProperty_Date
-            ))
-        result1['maternal_death'].append([i, db.session.execute(selectable).rowcount])
+        actions = Action.query.join(Event, EventType, rbRequestType, Action, ActionType, ActionProperty,
+                                   ActionPropertyType, ActionProperty_Date)\
+            .filter(ActionType.flatCode == 'epicrisis',
+                    ActionPropertyType.code == 'death_date',
+                    rbRequestType.code == 'pregnancy',
+                    Action.event_id == Event.id,
+                    ActionProperty.action_id == Action.id,
+                    ActionPropertyType.id == ActionProperty.type_id,
+                    ActionType.id == Action.actionType_id,
+                    ActionProperty_Date.id == ActionProperty.id,
+                    EventType.id == Event.eventType_id,
+                    rbRequestType.id == EventType.requestType_id,
+                    Event.deleted == 0,
+                    Action.deleted == 0,
+                    ActionProperty_Date.value.like(now.strftime('%Y')+'-'+str(i).rjust(2, '0')+'-%')
+                    ).all()
+        actions = filter(check_pat_diagnosis, actions)
+        result1['maternal_death'].append([i, len(actions)])
     return result1
 
 
