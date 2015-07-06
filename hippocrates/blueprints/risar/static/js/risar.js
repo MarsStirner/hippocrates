@@ -141,6 +141,11 @@ WebMis20
             return wrapper('POST', Config.url.api_checkup_save.format(event_id), {}, data);
         }
     };
+    this.gravidograma = {
+        get: function (event_id){
+            return wrapper('GET', Config.url.api_gravidograma + event_id);
+        }
+    }
     this.anamnesis = {
         get: function (event_id) {
             var url = Config.url.api_anamnesis + event_id;

@@ -45,7 +45,7 @@ var GravidogramaCtrl = function ($scope, RisarApi, RefBookService, PrintingServi
         $scope.xml_weight_gain_data = d3.select('#weight_gain_data svg').node().parentNode.innerHTML;
 
         return {
-            event_id: $scope.chart.id,
+            event_id: $scope.event_id,
             blood_pressure_right: $scope.xml_blood_pressure_right,
             blood_pressure_left: $scope.xml_blood_pressure_left,
             gravidograma: $scope.xml_gravidograma,
@@ -60,11 +60,16 @@ var GravidogramaCtrl = function ($scope, RisarApi, RefBookService, PrintingServi
     };
 
     var reload_checkup = function () {
-        RisarApi.chart.get(event_id)
-        .then(function (event) {
-            $scope.chart = event;
+        RisarApi.chart.get_header(event_id).
+            then(function (data) {
+                $scope.header = data.header;
+            });
+        RisarApi.gravidograma.get(event_id)
+        .then(function (result) {
+            $scope.checkups = result.checkups;
+            $scope.card_attributes = result.card_attributes;
 
-            var first_checkup = $scope.chart.checkups.length ? $scope.chart.checkups[0] : null;
+            var first_checkup = $scope.checkups.length ? $scope.checkups[0] : null;
             var hw_ratio = first_checkup && first_checkup.height ? Math.round((first_checkup.weight/first_checkup.height)*100) : NaN;
 
             // прибавка массы
@@ -82,9 +87,9 @@ var GravidogramaCtrl = function ($scope, RisarApi, RefBookService, PrintingServi
                 $scope.weight_gain_title = 'с дефицитом массы теля (M +/- 16; 12,07 +/- 2,8)';
             }
             $scope.refreshCharts();
-            var pregnancy_start_date =  moment($scope.chart.card_attributes.pregnancy_start_date);
-            for (var i in event.checkups) {
-                var checkup = event.checkups[i];
+            var pregnancy_start_date =  moment($scope.card_attributes.pregnancy_start_date);
+            for (var i in $scope.checkups) {
+                var checkup = $scope.checkups[i];
                 var checkups_beg_date = moment(checkup.beg_date);
                 var day_num = (checkups_beg_date.diff(pregnancy_start_date, 'days')) - 28; // интересует начиная с 5ой недели
                 var index = Math.floor(day_num/14);

@@ -20,7 +20,7 @@ from blueprints.risar.app import module
 from blueprints.risar.lib.card_attrs import default_AT_Heuristic, get_all_diagnoses, reevaluate_risk_rate, \
     reevaluate_preeclampsia_risk
 from blueprints.risar.lib.represent import represent_event, represent_chart_for_routing, represent_header, \
-    represent_org_for_routing, group_orgs_for_routing
+    represent_org_for_routing, group_orgs_for_routing, represent_checkups, represent_card_attributes
 from blueprints.risar.risar_config import attach_codes
 
 
@@ -332,3 +332,14 @@ def api_0_mini_attach_lpu(client_id):
     else:
         db.session.rollback()
         return False
+
+
+@module.route('/api/0/gravidograma/')
+@module.route('/api/0/gravidograma/<int:event_id>')
+@api_method
+def api_0_gravidograma(event_id):
+    event = Event.query.get(event_id)
+    return {
+        'checkups': represent_checkups(event),
+        'card_attributes': represent_card_attributes(event)
+    }
