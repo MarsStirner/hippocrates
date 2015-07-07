@@ -221,7 +221,7 @@
                                                  ng-class="{'has-error': secondForm.reason_of_death.$invalid && secondForm.submit_attempt}">
                                             <div class="col-md-3">
                                             <input ng-model="epicrisis.reason_of_death" class = "form-control"
-                                                   ng-required="true" name="reason_of_death" ng-disabled="!mother_death">
+                                                   ng-required="mother_death" name="reason_of_death" ng-disabled="!mother_death">
                                             </div></div>
                                         </td>
 
@@ -231,17 +231,16 @@
                                         <td>
                                             <wm-date name="death_date" ng-disabled="!mother_death"
                                                      ng-class="{'has-error': secondForm.death_date.$invalid && secondForm.submit_attempt}"
-                                                     ng-required="true" ng-model="epicrisis.death_date" style="width: 250px"></wm-date>
+                                                     ng-required="mother_death" ng-model="epicrisis.death_date" style="width: 250px"></wm-date>
                                         </td>
                                     </tr>
                                     <tr>
                                         <td class="text-right">Время смерти матери <span class="text-danger">*</span></td>
                                         <td>
                                             <div class="row">
-                                            <div class="col-md-4">
-                                            <div fs-time ng-model="epicrisis.death_time" ng-required="true"
-                                                 name="death_time" ng-disabled="!mother_death"
-                                                 ng-class="{'has-error': secondForm.death_time.$invalid && secondForm.submit_attempt}"></div>
+                                            <div class="col-md-4" ng-class="{'has-error': secondForm.death_time.$invalid}">
+                                            <div fs-time ng-model="epicrisis.death_time" ng-required="mother_death"
+                                                 name="death_time" ng-disabled="!mother_death"></div>
                                             </div>
                                             </div>
                                         </td>
