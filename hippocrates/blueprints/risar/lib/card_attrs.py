@@ -145,12 +145,12 @@ def reevaluate_preeclampsia_risk(event, card_attrs_action=None):
                                                             ActionType.flatCode == risar_anamnesis_pregnancy).all()
     risk = 0 if (not mother_action and not first_inspection and not prev_pregnancies) else 2
 
-    if not prev_pregnancies or event.client.age_tuple()[-1] >= 35 or first_inspection['BMI'].value >= 25 or \
-            mother_action['preeclampsia'].value:
+    if not prev_pregnancies or event.client.age_tuple()[-1] >= 35 or (first_inspection and first_inspection['BMI'].value >= 25) or \
+            (mother_action and mother_action['preeclampsia'].value):
         risk = 1
     else:
         for pregnancy in prev_pregnancies:
-            if pregnancy['pregnancyResult'].value['code'] in ('normal', 'miscarriage37', 'miscarriage27', 'belated_birth'):
+            if pregnancy['pregnancyResult'].value and pregnancy['pregnancyResult'].value['code'] in ('normal', 'miscarriage37', 'miscarriage27', 'belated_birth'):
                 if pregnancy['preeclampsia'].value:
                     risk = 1
                     break
