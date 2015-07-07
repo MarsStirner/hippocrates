@@ -1,0 +1,51 @@
+table.person-schedule caption span.no-schedule-label {
+    color: red;
+}
+
+div.person-schedule-day ul li p,
+div.person-schedule-day .panel-body {
+    margin: 0;
+    padding: 0;
+}
+
+div.person-schedule-day {
+    margin-bottom: 0;
+}
+
+div.person-schedule-day ul.list-group li.list-group-item {
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+div.person-schedule-day ul.list-group li.list-group-item p.interval-title {
+    font-weight: 800;
+}
+
+div.person-schedule-day div.panel-heading {
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+.day-selectable {
+    cursor: pointer;
+}
+
+.tub_content{
+    padding-top: 20px;
+}
+
+#general_action_info td{
+    border: 0px;
+    vertical-align: middle;
+}
+
+blockquote {
+    border-color: mediumturquoise;
+}
+
+.error-border {
+    border: solid;
+    border-width: 1px;
+    border-color: #a94442;
+    border-radius: 3px;
+}

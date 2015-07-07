@@ -174,9 +174,9 @@
                   </li>
                   <!-- Menu Footer-->
                   <li class="user-footer">
-{#                    <div class="pull-left">#}
-{#                      <a href="#" class="btn btn-default btn-flat">Личный кабинет</a>#}
-{#                    </div>#}
+                    <div class="pull-left">
+                      <a href="{{ url_for('useraccount.index_html') }}" class="btn btn-default btn-flat">Личный кабинет</a>
+                    </div>
                     <div class="pull-right">
                       <a id="logout" href="{{ url_for('logout') }}" title="Выйти" class="btn btn-default btn-flat">Выход</a>
                     </div>
