@@ -20,7 +20,8 @@ from blueprints.risar.app import module
 from blueprints.risar.lib.card_attrs import default_AT_Heuristic, get_all_diagnoses, reevaluate_risk_rate, \
     reevaluate_preeclampsia_risk
 from blueprints.risar.lib.represent import represent_event, represent_chart_for_routing, represent_header, \
-    represent_org_for_routing, group_orgs_for_routing, represent_checkups, represent_card_attributes
+    represent_org_for_routing, group_orgs_for_routing, represent_checkups, represent_card_attributes, \
+    represent_chart_for_epicrisis
 from blueprints.risar.risar_config import attach_codes
 
 
@@ -228,7 +229,7 @@ def api_0_chart_close(event_id=None):
         event = Event.query.get(event_id)
         event.execDate = safe_datetime(data['exec_date'])
         db.session.commit()
-    return represent_event(event)
+    return represent_chart_for_epicrisis(event)
 
 
 @module.route('/api/0/chart/attach_lpu/', methods=['POST'])

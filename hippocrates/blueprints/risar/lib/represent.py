@@ -17,7 +17,7 @@ from nemesis.models.event import Diagnosis, Diagnostic
 from nemesis.models.exists import rbAttachType, MKB
 from blueprints.risar.lib.card_attrs import get_card_attrs_action, get_all_diagnoses, check_disease
 from blueprints.risar.lib.utils import get_action, action_apt_values, get_action_type_id, risk_rates_diagID, \
-    risk_rates_blockID
+    risk_rates_blockID, get_action_list
 from blueprints.risar.lib.expert.protocols import EventMeasureRepr
 from ..risar_config import pregnancy_apt_codes, risar_anamnesis_pregnancy, transfusion_apt_codes, \
     risar_anamnesis_transfusion, mother_codes, father_codes, risar_father_anamnesis, risar_mother_anamnesis, \
@@ -126,6 +126,18 @@ def represent_chart_for_routing(event):
         'diagnoses': represent_mkbs_for_routing(event),
         'plan_lpu': represent_org_for_routing(plan_attach.org) if plan_attach and plan_attach.org else {},
         'extra_lpu': represent_org_for_routing(extra_attach.org) if extra_attach and extra_attach.org else {},
+    }
+
+
+def represent_chart_for_epicrisis(event):
+    card_attrs_action = get_card_attrs_action(event)
+    second_inspections = get_action_list(event, 'risarSecondInspection', all=True)
+    return {
+        'id': event.id,
+        'set_date': event.setDate,
+        'exec_date': event.execDate,
+        'pregnancy_start_date': card_attrs_action['pregnancy_start_date'].value,
+        'num_of_inspections': len(second_inspections) + 1
     }
 
 
@@ -515,6 +527,13 @@ def represent_epicrisis(event, action=None):
         (code, prop.value)
         for (code, prop) in action.propsByCode.iteritems()
     )
+    #прибавка массы за всю беременность
+    first_inspection = get_action(event, 'risarFirstInspection')
+    second_inspection = Action.query.join(ActionType).filter(Action.event == event, Action.deleted == 0).\
+        filter(ActionType.flatCode == 'risarSecondInspection').order_by(Action.begDate.desc()).first()
+    if first_inspection and second_inspection:
+        epicrisis['weight_gain'] = second_inspection.propsByCode['weight'].value - first_inspection.propsByCode['weight'].value
+
     finish_date = epicrisis['delivery_date']
     epicrisis['registration_pregnancy_week'] = get_pregnancy_week(event, event.setDate.date()) if finish_date else None
     epicrisis['newborn_inspections'] = represent_newborn_inspections(epicrisis['newborn_inspections']) if \

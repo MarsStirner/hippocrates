@@ -9,7 +9,7 @@ var EpicrisisCtrl = function ($timeout, $scope, RefBookService, RisarApi, Printi
     $scope.ps_epicrisis.set_context("risar_epicrisis");
     $scope.ps_resolve = function () {
         return {
-            event_id: $scope.chart.id
+            event_id: $scope.event_id
         }
     };
     $scope.is_empty = function (obj) {
@@ -28,17 +28,17 @@ var EpicrisisCtrl = function ($timeout, $scope, RefBookService, RisarApi, Printi
     };
 
     var reload_epicrisis = function () {
-        RisarApi.chart.get(event_id)
-        .then(function (event) {
-            $scope.chart = event;
-
-            if($scope.chart.checkups.length){
-                var first_checkup = $scope.chart.checkups[0];
-                $scope.weight_gain = $scope.chart.checkups[$scope.chart.checkups.length-1].weight - first_checkup.weight; //прибавка массы за всю беременность
-            }
-            $scope.mother_death = Boolean($scope.chart.epicrisis.death_date);
-            if (!$scope.chart.epicrisis) {
-                $scope.chart.epicrisis = {
+        RisarApi.chart.get_header(event_id).
+            then(function (data) {
+                $scope.header = data.header;
+            });
+        RisarApi.epicrisis.get(event_id)
+        .then(function (result) {
+            $scope.epicrisis = result.epicrisis;
+            $scope.chart = result.chart;
+            $scope.mother_death = $scope.epicrisis ? Boolean($scope.epicrisis.death_date) : false;
+            if (!$scope.epicrisis) {
+                $scope.epicrisis = {
                     pregnancy_final: $scope.rbRisarPregnancy_Final.get_by_code('rodami'),
                     newborn_inspections : [{}],
                     attend_diagnosis: [],
@@ -57,10 +57,11 @@ var EpicrisisCtrl = function ($timeout, $scope, RefBookService, RisarApi, Printi
     $scope.save = function (form_controller) {
         form_controller.submit_attempt = true;
         if (form_controller.$valid){
-            var model = $scope.chart.epicrisis;
-            return RisarApi.epicrisis.save($scope.chart.id, model)
+            var model = $scope.epicrisis;
+            return RisarApi.epicrisis.save($scope.event_id, model)
             .then(function (data) {
-                $scope.chart.epicrisis = data;
+                $scope.epicrisis = data.epicrisis;
+                $scope.chart = data.chart;
             })
         }
 
@@ -80,7 +81,7 @@ var EpicrisisCtrl = function ($timeout, $scope, RefBookService, RisarApi, Printi
     };
 
     $scope.add_child = function (){
-        $scope.chart.epicrisis.newborn_inspections.push({});
+        $scope.epicrisis.newborn_inspections.push({});
         $timeout(function(){
             $('#childrenTabs a:last').tab('show');
         }, 0);
@@ -121,21 +122,21 @@ var EpicrisisCtrl = function ($timeout, $scope, RefBookService, RisarApi, Printi
     }
 
     $scope.$watch('chart.epicrisis.delivery_date', function() {
-        if($scope.chart && !$scope.chart.epicrisis.pregnancy_duration && $scope.chart.epicrisis.delivery_date &&
-            $scope.chart.card_attributes.pregnancy_start_date){
-            var delivery_date = moment($scope.chart.epicrisis.delivery_date);
-            var pregnancy_start_date = moment($scope.chart.card_attributes.pregnancy_start_date)
-            $scope.chart.epicrisis.pregnancy_duration = Math.floor(delivery_date.diff(pregnancy_start_date, 'days')/7) + 1;
+        if($scope.chart && !$scope.epicrisis.pregnancy_duration && $scope.epicrisis.delivery_date &&
+            $scope.chart.pregnancy_start_date){
+            var delivery_date = moment($scope.epicrisis.delivery_date);
+            var pregnancy_start_date = moment($scope.chart.pregnancy_start_date)
+            $scope.epicrisis.pregnancy_duration = Math.floor(delivery_date.diff(pregnancy_start_date, 'days')/7) + 1;
         }
     });
 
     $scope.$watch('mother_death', function(n){
-        if(!n){
-            $scope.chart.epicrisis.reason_of_death = null;
-            $scope.chart.epicrisis.death_date = null;
-            $scope.chart.epicrisis.death_time = null;
-            $scope.chart.epicrisis.pat_diagnosis = null;
-            $scope.chart.epicrisis.control_expert_conclusion = '';
+        if($scope.epicrisis && !n){
+            $scope.epicrisis.reason_of_death = null;
+            $scope.epicrisis.death_date = null;
+            $scope.epicrisis.death_time = null;
+            $scope.epicrisis.pat_diagnosis = null;
+            $scope.epicrisis.control_expert_conclusion = '';
         }
     })
 

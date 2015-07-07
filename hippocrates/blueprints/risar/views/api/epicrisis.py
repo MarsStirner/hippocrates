@@ -6,7 +6,7 @@ from nemesis.models.event import Event
 from nemesis.models.actions import Action, ActionProperty_Diagnosis
 from nemesis.systemwide import db
 from blueprints.risar.lib.card_attrs import reevaluate_card_attrs
-from ...lib.represent import represent_epicrisis, risar_newborn_inspection
+from ...lib.represent import represent_epicrisis, risar_newborn_inspection, represent_chart_for_epicrisis
 from blueprints.risar.lib.utils import get_action, get_action_by_id
 from ...risar_config import risar_epicrisis
 
@@ -44,7 +44,10 @@ def api_0_chart_epicrisis(event_id):
         db.session.commit()
         reevaluate_card_attrs(event)
         db.session.commit()
-    return represent_epicrisis(event, action)
+    return {
+        'chart': represent_chart_for_epicrisis(event),
+        'epicrisis': represent_epicrisis(event, action)
+    }
 
 
 @module.route('/api/0/epicrisis/newborn_inspection/')

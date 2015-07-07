@@ -209,6 +209,9 @@ WebMis20
         }
     };
     this.epicrisis = {
+        get: function (event_id) {
+            return wrapper('GET', Config.url.api_epicrisis.format(event_id));
+        },
         save: function (event_id, data) {
             return wrapper('POST', Config.url.api_epicrisis.format(event_id), {}, data);
         },

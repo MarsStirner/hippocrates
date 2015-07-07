@@ -6,7 +6,7 @@
 {% block main %}
 <div ng-controller="EpicrisisCtrl" ng-cloak>
     <section class="content-header">
-        {{ rimacros.page_title('Эпикриз') }}
+        {{ rimacros.page_title_n('Эпикриз') }}
         <ul class="breadcrumb">
             <li><a href="{{ url_for('.index_html') }}">Рабочий стол</a></li>
             <li><a ng-href="{{ url_for('.html_chart') }}?event_id=[[ chart.id ]]">Карта пациентки</a></li>
@@ -20,7 +20,7 @@
                 <div class="panel panel-default" style="border-top: none; border-radius: 0">
                     <div class="panel-body">
                         <div class="pull-right"><a class="print_link" href="{{ url_for('.html_epicrisis_edit') }}?event_id=[[ chart.id ]]"><span class="glyphicon glyphicon-pencil"></span> Изменить</a> </div>
-                        <span ng-if="chart.epicrisis" ng-bind-html="chart.epicrisis.info"></span>
+                        <span ng-if="epicrisis" ng-bind-html="epicrisis.info"></span>
                     </div>
                 </div>
                 <div class="row">
@@ -34,18 +34,18 @@
                             <div class="box-body">
                                 <div class="row">
                                     <div class="col-sm-5 col-md-5  text-right">Основной диагноз:</div>
-                                    <div class="col-sm-7 col-md-7">[[chart.epicrisis.main_diagnosis.diagnosis.mkb.code]] - [[chart.epicrisis.main_diagnosis.diagnosis.mkb.name]]</div>
+                                    <div class="col-sm-7 col-md-7">[[epicrisis.main_diagnosis.diagnosis.mkb.code]] - [[epicrisis.main_diagnosis.diagnosis.mkb.name]]</div>
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-5 col-md-5  text-right">Сопутствующий диагноз:</div>
-                                    <div class="col-sm-7 col-md-7"><span ng-repeat="diag in chart.epicrisis.attend_diagnosis" >[[diag.diagnosis.mkb.code]] - [[diag.diagnosis.mkb.name]]
-                                    <span ng-if="chart.epicrisis.attend_diagnosis.length>1"><br></span></span>
+                                    <div class="col-sm-7 col-md-7"><span ng-repeat="diag in epicrisis.attend_diagnosis" >[[diag.diagnosis.mkb.code]] - [[diag.diagnosis.mkb.name]]
+                                    <span ng-if="epicrisis.attend_diagnosis.length>1"><br></span></span>
                                     </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-5 col-md-5  text-right">Диагноз осложнения:</div>
-                                    <div class="col-sm-7 col-md-7"><span ng-repeat="diag in chart.epicrisis.complicating_diagnosis">[[diag.diagnosis.mkb.code]] - [[diag.diagnosis.mkb.name]]
-                                    <span ng-if="chart.epicrisis.complicating_diagnosis.length>1"><br></span></span>
+                                    <div class="col-sm-7 col-md-7"><span ng-repeat="diag in epicrisis.complicating_diagnosis">[[diag.diagnosis.mkb.code]] - [[diag.diagnosis.mkb.name]]
+                                    <span ng-if="epicrisis.complicating_diagnosis.length>1"><br></span></span>
                                     </div>
                                 </div>
                             </div>
@@ -66,24 +66,24 @@
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6  text-right">Срок беременности при постановке на учёт:</div>
                                     <div class="col-sm-6 col-md-6">
-                                        <span tooltip="Рассчитывается исходя из текущего срока беременности, даты родоразрешения и даты постановки на учёт">[[chart.epicrisis.registration_pregnancy_week]]</span></div>
+                                        <span tooltip="Рассчитывается исходя из текущего срока беременности, даты родоразрешения и даты постановки на учёт">[[epicrisis.registration_pregnancy_week]]</span></div>
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6  text-right">Число посещений акушера-гинеколога:</div>
-                                    <div class="col-sm-6 col-md-6">[[chart.checkups.length]]</div>
+                                    <div class="col-sm-6 col-md-6">[[chart.num_of_inspections]]</div>
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6  text-right">Прибавка массы, кг:</div>
-                                    <div class="col-sm-6 col-md-6">[[weight_gain]]</div>
+                                    <div class="col-sm-6 col-md-6">[[epicrisis.weight_gain]]</div>
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6  text-right">Особенности течения беременности:</div>
-                                    <div class="col-sm-6 col-md-6">[[chart.epicrisis.pregnancy_speciality]]</div>
+                                    <div class="col-sm-6 col-md-6">[[epicrisis.pregnancy_speciality]]</div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-6" ng-if="chart.epicrisis.death_date || chart.epicrisis.reason_of_death">
+                    <div class="col-md-6" ng-if="epicrisis.death_date || epicrisis.reason_of_death">
                         <div class="box box-primary">
                             <div class="box-header with-border">
                                 <h3 class="box-title">Смерть матери</h3>
@@ -93,23 +93,23 @@
                             <div class="box-body">
                                 <div class="row">
                                     <div class="col-sm-5 col-md-5 text-right">Дата смерти:</div>
-                                    <div class="col-sm-7 col-md-7">[[chart.epicrisis.death_date|asDate]]</div>
+                                    <div class="col-sm-7 col-md-7">[[epicrisis.death_date|asDate]]</div>
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-5 col-md-5 text-right">Время смерти:</div>
-                                    <div class="col-sm-7 col-md-7">[[chart.epicrisis.death_time|asTime]]</div>
+                                    <div class="col-sm-7 col-md-7">[[epicrisis.death_time|asTime]]</div>
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-5 col-md-5 text-right">Причина смерти:</div>
-                                    <div class="col-sm-7 col-md-7">[[chart.epicrisis.reason_of_death]]</div>
+                                    <div class="col-sm-7 col-md-7">[[epicrisis.reason_of_death]]</div>
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-5 col-md-5 text-right">Патологоанатомический диагноз:</div>
-                                    <div class="col-sm-7 col-md-7"><span tooltip="[[ chart.epicrisis.pat_diagnosis.diagnosis.mkb.name ]]">[[chart.epicrisis.pat_diagnosis.diagnosis.mkb.code]]</span></div>
+                                    <div class="col-sm-7 col-md-7"><span tooltip="[[ epicrisis.pat_diagnosis.diagnosis.mkb.name ]]">[[epicrisis.pat_diagnosis.diagnosis.mkb.code]]</span></div>
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-5 col-md-5 text-right">Заключение ЛКК:</div>
-                                    <div class="col-sm-7 col-md-7">[[chart.epicrisis.control_expert_conclusion]]</div>
+                                    <div class="col-sm-7 col-md-7">[[epicrisis.control_expert_conclusion]]</div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-12">&nbsp;</div>
@@ -139,43 +139,43 @@
                             <div class="box-body">
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">Излитие околоплодных вод:</div>
-                                    <div class="col-sm-6 col-md-6">[[chart.epicrisis.delivery_waters.name]]</div>
+                                    <div class="col-sm-6 col-md-6">[[epicrisis.delivery_waters.name]]</div>
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">Слабость родовых сил:</div>
-                                    <div class="col-sm-6 col-md-6">[[chart.epicrisis.weakness.name]]</div>
+                                    <div class="col-sm-6 col-md-6">[[epicrisis.weakness.name]]</div>
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">Разрыв промежностей (степень):</div>
-                                    <div class="col-sm-6 col-md-6">[[chart.epicrisis.perineal_tear]]</div>
+                                    <div class="col-sm-6 col-md-6">[[epicrisis.perineal_tear]]</div>
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">Анемия после родов (Hb<110 г/л):</div>
-                                    <div class="col-sm-6 col-md-6">[[chart.epicrisis.poor_blood]]</div>
+                                    <div class="col-sm-6 col-md-6">[[epicrisis.poor_blood]]</div>
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">Нефропатия/эклампсия в родах:</div>
-                                    <div class="col-sm-6 col-md-6">[[chart.epicrisis.eclampsia.name]]</div>
+                                    <div class="col-sm-6 col-md-6">[[epicrisis.eclampsia.name]]</div>
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">Патология пуповины:</div>
-                                    <div class="col-sm-6 col-md-6">[[chart.epicrisis.funiculus.name]]</div>
+                                    <div class="col-sm-6 col-md-6">[[epicrisis.funiculus.name]]</div>
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">Патология плаценты:</div>
-                                    <div class="col-sm-6 col-md-6">[[chart.epicrisis.afterbirth.name]]</div>
+                                    <div class="col-sm-6 col-md-6">[[epicrisis.afterbirth.name]]</div>
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">Инфекции в родах:</div>
-                                    <div class="col-sm-6 col-md-6">[[chart.epicrisis.infections_during_birth]]</div>
+                                    <div class="col-sm-6 col-md-6">[[epicrisis.infections_during_birth]]</div>
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">Инфекции после родов:</div>
-                                    <div class="col-sm-6 col-md-6">[[chart.epicrisis.infections_after_birth]]</div>
+                                    <div class="col-sm-6 col-md-6">[[epicrisis.infections_after_birth]]</div>
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">Другие осложнения при родах:</div>
-                                    <div class="col-sm-6 col-md-6">[[chart.epicrisis.other_complications]]</div>
+                                    <div class="col-sm-6 col-md-6">[[epicrisis.other_complications]]</div>
                                 </div>
                             </div>
                         </div>
@@ -190,23 +190,23 @@
                             <div class="box-body">
                                 <div class="row">
                                     <div class="col-sm-5 col-md-5 text-right">Вскрытие околоплодного пузыря:</div>
-                                    <div class="col-sm-7 col-md-7">[[chart.epicrisis.caul  ? 'да': 'нет']]</div>
+                                    <div class="col-sm-7 col-md-7">[[epicrisis.caul  ? 'да': 'нет']]</div>
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-5 col-md-5 text-right">Ручное обследование матки:</div>
-                                    <div class="col-sm-7 col-md-7">[[chart.epicrisis.calfbed  ? 'да': 'нет']]</div>
+                                    <div class="col-sm-7 col-md-7">[[epicrisis.calfbed  ? 'да': 'нет']]</div>
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-5 col-md-5 text-right">Эпизио/перинеотомия:</div>
-                                    <div class="col-sm-7 col-md-7">[[chart.epicrisis.perineotomy]]</div>
+                                    <div class="col-sm-7 col-md-7">[[epicrisis.perineotomy]]</div>
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-5 col-md-5 text-right">Ручное выделение последа:</div>
-                                    <div class="col-sm-7 col-md-7">[[chart.epicrisis.secundines ? 'да': 'нет']]</div>
+                                    <div class="col-sm-7 col-md-7">[[epicrisis.secundines ? 'да': 'нет']]</div>
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-5 col-md-5 text-right">Другие пособия и манипуляции:</div>
-                                    <div class="col-sm-7 col-md-7">[[chart.epicrisis.other_manipulations]]</div>
+                                    <div class="col-sm-7 col-md-7">[[epicrisis.other_manipulations]]</div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-12">&nbsp;</div>
@@ -233,40 +233,40 @@
                             <div class="box-body">
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6  text-right">Кесарево сечение:</div>
-                                    <div class="col-sm-6 col-md-6">[[chart.epicrisis.caesarean_section.name]]</div>
+                                    <div class="col-sm-6 col-md-6">[[epicrisis.caesarean_section.name]]</div>
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6  text-right">Акушерские щипцы:</div>
-                                    <div class="col-sm-6 col-md-6">[[chart.epicrisis.obstetrical_forceps.name]]</div>
+                                    <div class="col-sm-6 col-md-6">[[epicrisis.obstetrical_forceps.name]]</div>
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6  text-right">Вакуум-экстракция:</div>
-                                    <div class="col-sm-6 col-md-6">[[chart.epicrisis.vacuum_extraction ? 'да': 'нет']]</div>
+                                    <div class="col-sm-6 col-md-6">[[epicrisis.vacuum_extraction ? 'да': 'нет']]</div>
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6  text-right">Показания к операции:</div>
-                                    <div class="col-sm-6 col-md-6">[[chart.epicrisis.indication.name]]</div>
+                                    <div class="col-sm-6 col-md-6">[[epicrisis.indication.name]]</div>
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6  text-right">Особенности операции:</div>
-                                    <div class="col-sm-6 col-md-6">[[chart.epicrisis.specialities.name]]</div>
+                                    <div class="col-sm-6 col-md-6">[[epicrisis.specialities.name]]</div>
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6  text-right">Обезболивание:</div>
-                                    <div class="col-sm-6 col-md-6">[[chart.epicrisis.anesthetization.name]]</div>
+                                    <div class="col-sm-6 col-md-6">[[epicrisis.anesthetization.name]]</div>
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6  text-right">Гистерэктомия:</div>
-                                    <div class="col-md-6">[[chart.epicrisis.hysterectomy.name]]</div>
+                                    <div class="col-md-6">[[epicrisis.hysterectomy.name]]</div>
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6  text-right">Осложнения:</div>
-                                    <div class="col-sm-6 col-md-6"><span ng-repeat="diag in chart.epicrisis.operation_complication" tooltip="[[diag.diagnosis.mkb.name]]">[[diag.diagnosis.mkb.code]]
-                                    <span ng-if="chart.epicrisis.operation_complication.length>1"><br></span></span></div>
+                                    <div class="col-sm-6 col-md-6"><span ng-repeat="diag in epicrisis.operation_complication" tooltip="[[diag.diagnosis.mkb.name]]">[[diag.diagnosis.mkb.code]]
+                                    <span ng-if="epicrisis.operation_complication.length>1"><br></span></span></div>
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6  text-right">Плодоразрушающие операции:</div>
-                                    <div class="col-sm-6 col-md-6">[[chart.epicrisis.embryotomy  ? 'да': 'нет']]</div>
+                                    <div class="col-sm-6 col-md-6">[[epicrisis.embryotomy  ? 'да': 'нет']]</div>
                                 </div>
                             </div>
                         </div>
@@ -296,12 +296,12 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr ng-repeat="inspection in chart.epicrisis.newborn_inspections" ng-if="!is_empty(inspection)">
+                            <tr ng-repeat="inspection in epicrisis.newborn_inspections" ng-if="!is_empty(inspection)">
                                 <td>[[$index+1]]</td>
                                 <td ng-if="inspection.deleted" colspan="10" class="text-center">
                                     Удалено. <a ng-click="newborn_inspection_restore(inspection)" style="cursor: pointer">Восстановить</a>?</td>
                                 <td ng-if="!inspection.deleted">[[inspection.alive ? 'да': 'нет']]</td>
-                                <td ng-if="!inspection.deleted">[[inspection.birth_date |asDate ]] [[inspection.birth_time]]</td>
+                                <td ng-if="!inspection.deleted">[[inspection.date |asDate ]] [[inspection.birth_time]]</td>
                                 <td ng-if="!inspection.deleted">[[inspection.sex.code == 'male' ? 'Мужской': 'Женский']]</td>
                                 <td ng-if="!inspection.deleted">[[inspection.weight]]</td>
                                 <td ng-if="!inspection.deleted">[[inspection.length]]</td>
