@@ -16,6 +16,11 @@ def index_html():
         return render_template('risar/index.html')
 
 
+@module.route('/orgbirthcare/')
+def html_org_birth_care():
+    return render_template('risar/curation/org_birth_care.html')
+
+
 @module.route('/search.html')
 def html_search():
     return render_template('risar/search.html')

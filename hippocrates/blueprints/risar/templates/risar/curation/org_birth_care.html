@@ -1,0 +1,65 @@
+{% extends 'risar/base.html' %}
+
+{% block title %}> {{ module_name }}{% endblock %}
+
+{% block main %}
+<section class="content-header">
+    <h1>Распределение медицинских учреждений по уровням оказания медицинской помощи</h1>
+</section>
+<section class="content">
+    <div ng-controller="OrgBirthCareCtrl" class="ng-cloak">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="box box-default">
+                <div class="box-body no-padding">
+                    <ul class="products-list product-list-in-box nav nav-pills nav-stacked">
+                        <li ng-repeat="obcl in obcl_items" class="item" ng-class="{'product-list-item-active': isLevelSelected(obcl.id)}">
+                            <a href="javascript:void(0);" ng-click="selectOBCL(obcl)"
+                                style="margin-top: -10px; margin-bottom: -10px;">
+                            <div class="product-img" style="width: 50px; height: 50px; background: lightgreen;">
+
+                            </div>
+                            <div class="product-info">
+                                <span class="product-title">[[ obcl.name ]] <span class="label label-primary pull-right">[[ obcl.org_count ]]</span></span>
+                                <span class="product-description">Степень перинатального риска [[ obcl.perinatal_risk_rate.name ]]</span>
+                                <span class="product-description">[[ obcl.description ]]</span>
+                            </div>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="box box-solid" ng-repeat="org in org_items">
+                <div class="box-header with-border">
+                    <h3 class="box-title">[[ org.short_name ]]</h3>
+                </div>
+                <div class="box-body">
+                    <p>[[ org.address ]]</p>
+                    <p>Уровни оказания помощи</p>
+                    <ul>
+                        <li ng-repeat="obcl in org.obcls">
+                            [[ obcl.name ]]
+                        </li>
+                    </ul>
+                    <p>Количество пациентов по степеням перинатального риска</p>
+                    <ul>
+                        <li>Высокий [[org.patient_by_risk_count.high]]</li>
+                        <li>Средний [[org.patient_by_risk_count.medium]]</li>
+                        <li>Низкий [[org.patient_by_risk_count.low]]</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block modules_js %}
+    {{ super() }}
+    <script src="{{ url_for('.static', filename='js/org_birth_care.js', v=version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/risar.js', v=version) }}"></script>
+{% endblock %}

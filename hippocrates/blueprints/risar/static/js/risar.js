@@ -228,6 +228,16 @@ WebMis20
             return wrapper('GET', Config.url.api_measure_generate + action_id)
         }
     };
+    this.desktop = {
+        get_info: function () {
+            return wrapper('GET', Config.url.api_obcl_org_count_get);
+        }
+    };
+    this.curation = {
+        get_org_patient_count: function (org_birth_care_id) {
+            return wrapper('GET', Config.url.api_obcl_org_patient_count_get + org_birth_care_id);
+        }
+    }
 }])
 .filter('underlineNoVal', function () {
     return function(value, label) {
