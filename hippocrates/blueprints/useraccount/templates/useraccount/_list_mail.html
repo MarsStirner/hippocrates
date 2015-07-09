@@ -12,39 +12,24 @@
     </div>
     <!-- /.box-header -->
     <div class="box-body no-padding">
-        <div class="mailbox-controls">
-            <!-- Check all button -->
-            <button class="btn btn-default btn-sm checkbox-toggle"><i class="fa fa-square-o"></i>
-            </button>
-            <div class="btn-group">
-                <button class="btn btn-default btn-sm"><i class="fa fa-trash-o"></i></button>
-                <button class="btn btn-default btn-sm"><i class="fa fa-reply"></i></button>
-                <button class="btn btn-default btn-sm"><i class="fa fa-share"></i></button>
-            </div>
-            <!-- /.btn-group -->
-            <button class="btn btn-default btn-sm"><i class="fa fa-refresh"></i></button>
-            <div class="pull-right">
-                1-50/200
-                <div class="btn-group">
-                    <button class="btn btn-default btn-sm"><i class="fa fa-chevron-left"></i></button>
-                    <button class="btn btn-default btn-sm"><i class="fa fa-chevron-right"></i></button>
-                </div>
-                <!-- /.btn-group -->
-            </div>
-            <!-- /.pull-right -->
-        </div>
+        {% include 'useraccount/_list_mail_mailbox_controls.html' %}
         <div class="table-responsive mailbox-messages">
             <table class="table table-hover table-striped">
                 <tbody>
                 <tr ng-repeat="message in messages">
-                    <td width="1%"><input type="checkbox"/></td>
-                    <td width="1%" class="mailbox-star">
-                        <a href="#"><i class="fa fa-star text-yellow" ng-class="{'fa-star-o': message.read}"></i></a>
+                    <td width="1%"><input type="checkbox" ng-click="select_all.toggle(message.id)" ng-checked="select_all.selected(message.id)"/></td>
+                    <td width="1%" class="mailbox-star" ng-click="mark_star(message)">
+                        <a href="#"><i class="fa fa-star text-yellow" ng-class="{'fa-star-o': !message.mark}"></i></a>
                     </td>
-                    <td width="1%" class="mailbox-name text-nowrap"><a href="#" ng-click="view_mail(message)">[[ message.sender.name ]]</a></td>
-                    <td class="mailbox-subject"><b ng-click="view_mail(message)">[[ message.subject ]]</b></td>
+                    <td width="1%" class="mailbox-name text-nowrap" ng-if="current_folder != 'sent'">[[ message.sender.name ]]</td>
+                    <td width="1%" class="mailbox-name text-nowrap" ng-if="current_folder == 'sent'">[[ message.recipient.name ]]</td>
+                    <td class="mailbox-subject" ng-class="{'text-bold': !message.read }">
+                        <a href="#" ng-click="view_mail(message)">
+                            [[ message.subject || 'Без темы' ]]
+                        </a>
+                    </td>
                     <td width="1%" class="mailbox-attachment"><i class="fa fa-paperclip hidden"></i></td>
-                    <td width="1%" class="mailbox-date text-nowrap">5 mins ago</td>
+                    <td width="1%" class="mailbox-date text-nowrap">[[ message.datetime | asDateTime ]]</td>
                 </tr>
                 </tbody>
             </table>
@@ -53,28 +38,6 @@
         <!-- /.mail-box-messages -->
     </div>
     <!-- /.box-body -->
-    <div class="box-footer no-padding">
-        <div class="mailbox-controls">
-            <!-- Check all button -->
-            <button class="btn btn-default btn-sm checkbox-toggle"><i class="fa fa-square-o"></i>
-            </button>
-            <div class="btn-group">
-                <button class="btn btn-default btn-sm"><i class="fa fa-trash-o"></i></button>
-                <button class="btn btn-default btn-sm"><i class="fa fa-reply"></i></button>
-                <button class="btn btn-default btn-sm"><i class="fa fa-share"></i></button>
-            </div>
-            <!-- /.btn-group -->
-            <button class="btn btn-default btn-sm"><i class="fa fa-refresh"></i></button>
-            <div class="pull-right">
-                1-50/200
-                <div class="btn-group">
-                    <button class="btn btn-default btn-sm"><i class="fa fa-chevron-left"></i></button>
-                    <button class="btn btn-default btn-sm"><i class="fa fa-chevron-right"></i></button>
-                </div>
-                <!-- /.btn-group -->
-            </div>
-            <!-- /.pull-right -->
-        </div>
-    </div>
+    {% include 'useraccount/_list_mail_mailbox_controls.html' %}
 </div>
 <!-- /. box -->

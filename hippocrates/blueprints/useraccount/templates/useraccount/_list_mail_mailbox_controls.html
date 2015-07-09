@@ -1,0 +1,23 @@
+<div class="box-footer no-padding">
+    <div class="mailbox-controls">
+        <!-- Check all button -->
+        <button class="btn btn-default btn-sm checkbox-toggle" ng-click="select_all.toggle_all()">
+            <i class="fa"
+               ng-class="{'fa-square-o': !select_all.all(), 'fa-check-square-o': select_all.all()}"></i>
+        </button>
+        <div class="btn-group">
+            <button class="btn btn-default btn-sm" ng-click="delete_selected()"><i class="fa fa-trash-o"></i> Удалить</button>
+        </div>
+        <!-- /.btn-group -->
+        <button class="btn btn-default btn-sm" ng-click="reload_messages()"><i class="fa fa-refresh"></i></button>
+        <div class="pull-right">
+            [[ skip+1 ]]-[[ _.min([skip+limit+1, messages_count]) ]]/[[ messages_count ]]
+            <div class="btn-group">
+                <button class="btn btn-default btn-sm" ng-click="change_skip(-limit)"><i class="fa fa-chevron-left"></i></button>
+                <button class="btn btn-default btn-sm" ng-click="change_skip(limit)"><i class="fa fa-chevron-right"></i></button>
+            </div>
+            <!-- /.btn-group -->
+        </div>
+        <!-- /.pull-right -->
+    </div>
+</div>

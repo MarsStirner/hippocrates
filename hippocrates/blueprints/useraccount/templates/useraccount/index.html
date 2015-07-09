@@ -3,16 +3,16 @@
 {% block title %}> {{ module_name }}{% endblock %}
 
 {% block main %}
-    <div ng-controller="IndexCtrl">
+    <div ng-controller="IndexCtrl" ng-cloak>
         <!-- Content Header (Page header) -->
         <section class="content-header">
             <h1>
-                Mailbox
-                <small>13 new messages</small>
+                Почтовый ящик
+                <small>Непрочитанных сообщений: [[ messages_unread ]] из [[ messages_inbox_count ]]</small>
             </h1>
             <ol class="breadcrumb">
-                <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
-                <li class="active">Mailbox</li>
+                <li><a href="/"><i class="fa fa-dashboard"></i> Главная</a></li>
+                <li class="active">Почтовый ящик</li>
             </ol>
         </section>
 
@@ -20,7 +20,12 @@
         <section class="content">
             <div class="row">
                 <div class="col-md-3">
-                    <a href="compose.html" class="btn btn-primary btn-block margin-bottom">Compose</a>
+                    <a href="#" ng-click="compose_mail()" ng-if="mode != 2" class="btn btn-primary btn-block margin-bottom">Написать</a>
+                    <a href="#" ng-click="send_mail(message)" ng-if="mode == 2"
+                       class="btn btn-success btn-block margin-bottom"
+                       ng-disabled="! (message.to && message.subject && message.text)">
+                        Отправить
+                    </a>
 
                     <div class="box box-solid">
                         <div class="box-header with-border">
@@ -32,45 +37,51 @@
                         </div>
                         <div class="box-body no-padding">
                             <ul class="nav nav-pills nav-stacked">
-                                <li class="active">
-                                    <a href="#">
+                                <li ng-class="{active: current_folder == 'inbox'}">
+                                    <a href="#" ng-click="change_folder('inbox')">
                                         <i class="fa fa-inbox"></i>
-                                        Inbox
-                                        <span class="label label-primary pull-right" ng-if="messages.length" ng-bind="messages.length"></span>
+                                        Входящие
+                                        <span class="label label-primary pull-right" ng-if="messages_unread" ng-bind="messages_unread"></span>
                                     </a>
                                 </li>
-                                <li><a href="#"><i class="fa fa-envelope-o"></i> Sent</a></li>
-                                <li><a href="#"><i class="fa fa-file-text-o"></i> Drafts</a></li>
-                                <li><a href="#"><i class="fa fa-filter"></i> Junk <span class="label label-warning pull-right">65</span></a></li>
-                                <li><a href="#"><i class="fa fa-trash-o"></i> Trash</a></li>
+                                <li ng-class="{active: current_folder == 'star'}">
+                                    <a href="#" ng-click="change_folder('star')"><i class="fa fa-star text-yellow"></i> Помеченные</a>
+                                </li>
+                                <li ng-class="{active: current_folder == 'sent'}">
+                                    <a href="#" ng-click="change_folder('sent')"><i class="fa fa-envelope-o"></i> Отправленные</a>
+                                </li>
+                                <li ng-class="{active: current_folder == 'trash'}">
+                                    <a href="#" ng-click="change_folder('trash')"><i class="fa fa-trash-o"></i> Корзина</a>
+                                </li>
                             </ul>
                         </div>
                         <!-- /.box-body -->
                     </div>
                     <!-- /. box -->
-                    <div class="box box-solid">
-                        <div class="box-header with-border">
-                            <h3 class="box-title">Labels</h3>
-
-                            <div class="box-tools">
-                                <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
-                            </div>
-                        </div>
-                        <div class="box-body no-padding">
-                            <ul class="nav nav-pills nav-stacked">
-                                <li><a href="#"><i class="fa fa-circle-o text-red"></i> Important</a></li>
-                                <li><a href="#"><i class="fa fa-circle-o text-yellow"></i> Promotions</a></li>
-                                <li><a href="#"><i class="fa fa-circle-o text-light-blue"></i> Social</a></li>
-                            </ul>
-                        </div>
-                        <!-- /.box-body -->
-                    </div>
-                    <!-- /.box -->
+{#                    <div class="box box-solid">#}
+{#                        <div class="box-header with-border">#}
+{#                            <h3 class="box-title">Метки</h3>#}
+{##}
+{#                            <div class="box-tools">#}
+{#                                <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                        <div class="box-body no-padding">#}
+{#                            <ul class="nav nav-pills nav-stacked">#}
+{#                                <li><a href="#"><i class="fa fa-circle-o text-red"></i> Важные</a></li>#}
+{#                                <li><a href="#"><i class="fa fa-circle-o text-yellow"></i> Promotions</a></li>#}
+{#                                <li><a href="#"><i class="fa fa-circle-o text-light-blue"></i> Social</a></li>#}
+{#                            </ul>#}
+{#                        </div>#}
+{#                        <!-- /.box-body -->#}
+{#                    </div>#}
+{#                    <!-- /.box -->#}
                 </div>
                 <!-- /.col -->
                 <div class="col-md-9">
                     {% include 'useraccount/_list_mail.html' %}
                     {% include 'useraccount/_view_mail.html' %}
+                    {% include 'useraccount/_compose_mail.html' %}
                 </div>
                 <!-- /.col -->
             </div>

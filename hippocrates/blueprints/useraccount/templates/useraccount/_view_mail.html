@@ -1,7 +1,8 @@
 <div class="box box-success" ng-if="mode == 1">
     <div class="box-header with-border">
-        <button class="btn btn-default btn-sm" ng-click="view_list()"><i class="fa fa-backward"></i></button>
-        <h3 class="box-title">[[ message.subject ]]</h3><br/>
+        <button class="btn btn-default btn-sm" ng-click="list_mail()"><i class="fa fa-backward"></i> Назад</button>
+        <button class="btn btn-default btn-sm" ng-click="compose_mail(message)"><i class="fa fa-mail-reply"></i> Ответить</button>
+        <br/><h3 class="box-title">[[ message.subject ]]</h3><br/>
         От: [[ message.sender.name ]]
 
         <div class="box-tools pull-right">
@@ -15,28 +16,5 @@
     <!-- /.box-header -->
     <div class="box-body" ng-bind-html="message.text"></div>
     <!-- /.box-body -->
-    <div class="box-footer no-padding">
-        <div class="mailbox-controls">
-            <!-- Check all button -->
-            <button class="btn btn-default btn-sm checkbox-toggle"><i class="fa fa-square-o"></i>
-            </button>
-            <div class="btn-group">
-                <button class="btn btn-default btn-sm"><i class="fa fa-trash-o"></i></button>
-                <button class="btn btn-default btn-sm"><i class="fa fa-reply"></i></button>
-                <button class="btn btn-default btn-sm"><i class="fa fa-share"></i></button>
-            </div>
-            <!-- /.btn-group -->
-            <button class="btn btn-default btn-sm"><i class="fa fa-refresh"></i></button>
-            <div class="pull-right">
-                1-50/200
-                <div class="btn-group">
-                    <button class="btn btn-default btn-sm"><i class="fa fa-chevron-left"></i></button>
-                    <button class="btn btn-default btn-sm"><i class="fa fa-chevron-right"></i></button>
-                </div>
-                <!-- /.btn-group -->
-            </div>
-            <!-- /.pull-right -->
-        </div>
-    </div>
 </div>
 <!-- /. box -->
