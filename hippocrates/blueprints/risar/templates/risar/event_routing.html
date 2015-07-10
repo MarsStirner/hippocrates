@@ -8,8 +8,8 @@
         <div alert-notify></div>
         <h1>
             Выбор ЛПУ для {% if 'emergency' in request.args %}экстренной{% else %}плановой{% endif %} госпитализации
-            <a ng-href="{{ url_for('patients.patient_info_full') }}?client_id=[[ header.client.id ]]">[[ header.client.full_name ]]</a>
             ([[ header.event.external_id ]])
+            <a ng-href="{{ url_for('patients.patient_info_full') }}?client_id=[[ header.client.id ]]">[[ header.client.full_name ]]</a>
         </h1>
         <div class="row tmargin10">
             <div class="col-md-12 col-lg-12">
