@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from . import anamnesis, chart, checkups, schedule, epicrisis, search, measure
+from . import anamnesis, chart, checkups, schedule, epicrisis, search, measure, curation
 
 __author__ = 'mmalkov'
 
-__all__ = ['anamnesis', 'chart', 'checkups', 'schedule', 'epicrisis', 'search', 'measure']
+__all__ = ['anamnesis', 'chart', 'checkups', 'schedule', 'epicrisis', 'search', 'measure', 'curation']
