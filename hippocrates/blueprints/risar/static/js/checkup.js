@@ -1,11 +1,13 @@
 
 'use strict';
 
-var CheckupCtrl = function ($scope, RisarApi, RefBookService, PrintingService) {
+var CheckupCtrl = function ($scope, RisarApi, RefBookService, PrintingService, PrintingDialog) {
     $scope.rbDiagnosisType = RefBookService.get('rbDiagnosisType');
+    $scope.ps = new PrintingService("risar");
+    $scope.ps.set_context("risar");
     $scope.ps_talon = new PrintingService("risar");
     $scope.ps_talon.set_context("risar_talon");
-    $scope.ps_resolve_talon = function () {
+    $scope.ps_resolve = function () {
         return {
             event_id: $scope.header.event.id
         }
@@ -15,7 +17,7 @@ var CheckupCtrl = function ($scope, RisarApi, RefBookService, PrintingService) {
     $scope.ps_fi.set_context("risar_first_inspection");
     $scope.ps_si = new PrintingService("risar_inspection");
     $scope.ps_si.set_context("risar_second_inspection");
-    $scope.ps_resolve = function () {
+    $scope.ps_resolve_inspection = function () {
         return {
             event_id: $scope.header.event.id,
             action_id: $scope.checkup_id
@@ -61,6 +63,12 @@ var CheckupCtrl = function ($scope, RisarApi, RefBookService, PrintingService) {
             open_tab(hash);
         }
         reload_checkup();
+    };
+
+    $scope.open_print_window = function () {
+        if ($scope.ps.is_available()) {
+            PrintingDialog.open($scope.ps, $scope.$parent.$eval($scope.ps_resolve));
+        }
     };
 };
 
@@ -164,7 +172,7 @@ var CheckupSecondEditCtrl = function ($scope, $controller, $window, $location, $
     $scope.init();
 };
 
-WebMis20.controller('CheckupCtrl', ['$scope', 'RisarApi', 'RefBookService', 'PrintingService', CheckupCtrl]);
+WebMis20.controller('CheckupCtrl', ['$scope', 'RisarApi', 'RefBookService', 'PrintingService', 'PrintingDialog', CheckupCtrl]);
 WebMis20.controller('CheckupFirstEditCtrl', ['$scope', '$controller', '$window', '$location', '$document', 'RisarApi',
     'Config', CheckupFirstEditCtrl]);
 WebMis20.controller('CheckupSecondEditCtrl', ['$scope', '$controller', '$window', '$location', '$document', 'RisarApi',

@@ -4,11 +4,24 @@
 
 'use strict';
 
-var EventRoutingCtrl = function ($scope, $window, RisarApi) {
+var EventRoutingCtrl = function ($scope, $window, RisarApi, PrintingService, PrintingDialog) {
     var params = aux.getQueryParams($window.location.search);
     var event_id = params.event_id;
     var emergency = $scope.emergency = params.hasOwnProperty('emergency');
     var key = (emergency)?('extra_lpu'):('plan_lpu');
+    $scope.ps = new PrintingService("risar");
+    $scope.ps.set_context("risar");
+    $scope.ps_resolve = function () {
+        return {
+            event_id: event_id
+        }
+    };
+    $scope.open_print_window = function () {
+        if ($scope.ps.is_available()){
+            PrintingDialog.open($scope.ps, $scope.ps_resolve());
+        }
+    };
+
     var reload_chart = function () {
         return RisarApi.event_routing.get_chart(event_id)
             .then(function (data) {
@@ -139,4 +152,4 @@ var EventRoutingCtrl = function ($scope, $window, RisarApi) {
     });
 };
 
-WebMis20.controller('EventRoutingCtrl', ['$scope', '$window', 'RisarApi', EventRoutingCtrl]);
+WebMis20.controller('EventRoutingCtrl', ['$scope', '$window', 'RisarApi', 'PrintingService', 'PrintingDialog', EventRoutingCtrl]);

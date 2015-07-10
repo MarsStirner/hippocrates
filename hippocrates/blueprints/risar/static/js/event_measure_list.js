@@ -1,9 +1,16 @@
 'use strict';
 
-var EventMeasureListCtrl = function ($scope, $q, RisarApi, RefBookService) {
+var EventMeasureListCtrl = function ($scope, $q, RisarApi, RefBookService, PrintingService, PrintingDialog) {
     var params = aux.getQueryParams(window.location.search);
     var event_id = $scope.event_id = params.event_id;
     var viewMode;
+    $scope.ps = new PrintingService("risar");
+    $scope.ps.set_context("risar");
+    $scope.ps_resolve = function () {
+        return {
+            event_id: $scope.event_id
+        }
+    };
     $scope.setViewMode = function (mode) {
         viewMode = mode;
         $scope.$broadcast('viewModeChanged', {
@@ -60,6 +67,13 @@ var EventMeasureListCtrl = function ($scope, $q, RisarApi, RefBookService) {
                 $scope.setViewMode('table');
             });
     };
+
+    $scope.open_print_window = function () {
+        if ($scope.ps.is_available()){
+            PrintingDialog.open($scope.ps, $scope.ps_resolve());
+        }
+    };
+
     $scope.init();
 };
 
@@ -197,7 +211,7 @@ var EventMeasureCalendarViewCtrl = function ($scope, $timeout, RisarApi, Timeout
     });
 };
 
-WebMis20.controller('EventMeasureListCtrl', ['$scope', '$q', 'RisarApi', 'RefBookService',
+WebMis20.controller('EventMeasureListCtrl', ['$scope', '$q', 'RisarApi', 'RefBookService', 'PrintingService', 'PrintingDialog',
     EventMeasureListCtrl]);
 WebMis20.controller('EventMeasureTableViewCtrl', ['$scope', 'RisarApi', 'TimeoutCallback',
     EventMeasureTableViewCtrl]);

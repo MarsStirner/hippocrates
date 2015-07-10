@@ -7,6 +7,21 @@
 <div ng-controller="InspectionViewCtrl" ng-cloak>
     <section class="content-header">
         {{ rimacros.page_title_ext_n('Осмотры акушером-гинекологом беременной', 'inspection') }}
+        <div class="btn-group">
+            <a ng-href="{{ url_for('.html_chart') }}?event_id=[[ chart.id ]]" class="btn btn-default">Карта пациентки</a>
+            <a ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ header.event.id ]]" class="btn btn-default">Анамнез</a>
+            <a ng-href="{{ url_for('.html_inspection') }}?event_id=[[ header.event.id ]]" class="btn btn-primary">Осмотры</a>
+            <a ng-href="{{ url_for('.html_routing') }}?event_id=[[ header.event.id ]]&emergency=1" class="btn btn-default">Маршрутизация</a>
+            <a ng-href="{{ url_for('.html_epicrisis') }}?event_id=[[ header.event.id ]]" class="btn btn-default">Эпикриз</a>
+            <a ng-class="{disabled: !ps.is_available()}" ng-click="open_print_window(ps)" class="btn btn-default">Печать</a>
+            <div class="btn-group">
+                <button class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Дополнительно <span class="fa fa-caret-down"></span></button>
+                <ul role="menu" class="dropdown-menu">
+                    <li><a ng-href="{{ url_for('.html_event_diagnoses') }}?event_id=[[ header.event.id ]]">Диагнозы случая</a></li>
+                    <li><a href="#">Мероприятия случая</a></li>
+                </ul>
+            </div>
+        </div>
     </section>
     <section class="content">
         <div class="box box-primary">

@@ -9,17 +9,20 @@
         <div alert-notify></div>
         {{ rimacros.page_title_ext_n('Карта пациентки', 'chart') }}
         <div class="panel novmargin">
-            <a ng-href="{{ url_for('patients.patient_info_full') }}?client_id=[[ header.client.id ]]" class="btn btn-link">Сводная карта</a>
-            <a ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ chart.id ]]" class="btn btn-link">Анамнез</a>
-            <a ng-href="{{ url_for('.html_inspection') }}?event_id=[[ chart.id ]]" class="btn btn-link">Осмотры</a>
-            <a ng-href="{{ url_for('.html_routing') }}?event_id=[[ chart.id ]]&emergency=1" class="btn btn-link">Маршрутизация</a>
-            <a ng-href="{{ url_for('.html_epicrisis') }}?event_id=[[ chart.id ]]" class="btn btn-link">Эпикриз</a>
             <div class="btn-group">
-                <button class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Дополнительно <span class="fa fa-caret-down"></span></button>
-                <ul role="menu" class="dropdown-menu">
-                    <li><a ng-href="{{ url_for('.html_event_diagnoses') }}?event_id=[[ chart.id ]]">Диагнозы случая</a></li>
-                    <li><a href="#">Мероприятия случая</a></li>
-                </ul>
+                <a ng-href="{{ url_for('.html_chart') }}?event_id=[[ chart.id ]]" class="btn btn-primary">Карта пациентки</a>
+                <a ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ chart.id ]]" class="btn btn-default">Анамнез</a>
+                <a ng-href="{{ url_for('.html_inspection') }}?event_id=[[ chart.id ]]" class="btn btn-default">Осмотры</a>
+                <a ng-href="{{ url_for('.html_routing') }}?event_id=[[ chart.id ]]&emergency=1" class="btn btn-default">Маршрутизация</a>
+                <a ng-href="{{ url_for('.html_epicrisis') }}?event_id=[[ chart.id ]]" class="btn btn-default">Эпикриз</a>
+                <a ng-class="{disabled: !ps.is_available()}" ng-click="open_print_window()" class="btn btn-default">Печать</a>
+                <div class="btn-group">
+                    <button class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Дополнительно <span class="fa fa-caret-down"></span></button>
+                    <ul role="menu" class="dropdown-menu">
+                        <li><a ng-href="{{ url_for('.html_event_diagnoses') }}?event_id=[[ chart.id ]]">Диагнозы случая</a></li>
+                        <li><a href="#">Мероприятия случая</a></li>
+                    </ul>
+                </div>
             </div>
         </div>
     </section>
@@ -29,9 +32,6 @@
                 <div class="box box-primary">
                     <div class="box-header">
                         <h3 class="box-title">Личные данные</h3>
-                        <div class="box-tools">
-                            <ui-print-button class="btn-box-tool" ps="ps" resolve="ps_resolve()">Печать</ui-print-button>
-                        </div>
                     </div>
                     <table class="table table-condensed table-personal-data">
                         <tbody>
@@ -242,16 +242,6 @@
                                     [[ chart.progress.checkups.complete ]]/[[ chart.progress.checkups.total ]]
                                 </progressbar>
                             </td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="box box-primary">
-                    <div class="box-header"><h3 class="box-title">Дополнительно</h3></div>
-                    <table class="table table-condensed">
-                        <tbody>
-                        <tr>
-                            <td class="col-md-12"><a class="btn-link" ng-href="{{ url_for('.html_event_diagnoses') }}?event_id=[[ chart.id ]]">Диагнозы случая</a></td>
                         </tr>
                         </tbody>
                     </table>

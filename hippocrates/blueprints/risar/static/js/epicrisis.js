@@ -1,10 +1,12 @@
 
 'use strict';
-var EpicrisisCtrl = function ($timeout, $scope, RefBookService, RisarApi, PrintingService) {
+var EpicrisisCtrl = function ($timeout, $scope, RefBookService, RisarApi, PrintingService, PrintingDialog) {
     var params = aux.getQueryParams(window.location.search);
     var event_id = $scope.event_id = params.event_id;
     $scope.rbRisarPregnancy_Final = RefBookService.get('rbRisarPregnancy_Final');
     $scope.rbDiagnosisType = RefBookService.get('rbDiagnosisType');
+    $scope.ps = new PrintingService("risar");
+    $scope.ps.set_context("risar");
     $scope.ps_epicrisis = new PrintingService("risar");
     $scope.ps_epicrisis.set_context("risar_epicrisis");
     $scope.ps_resolve = function () {
@@ -146,6 +148,12 @@ var EpicrisisCtrl = function ($timeout, $scope, RefBookService, RisarApi, Printi
             hash.match('child') ? open_tab('#sixth') : open_tab(hash);
         }
         reload_epicrisis();
+    };
+
+    $scope.open_print_window = function () {
+        if ($scope.ps.is_available()) {
+            PrintingDialog.open($scope.ps, $scope.$parent.$eval($scope.ps_resolve));
+        }
     };
     init();
 

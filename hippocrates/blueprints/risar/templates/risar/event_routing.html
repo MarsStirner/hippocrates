@@ -7,20 +7,32 @@
     <section class="content-header">
         <div alert-notify></div>
         <h1>
-            Выбор ЛПУ для {% if 'emergency' in request.args %}экстренного{% else %}планового{% endif %} случая
+            Выбор ЛПУ для {% if 'emergency' in request.args %}экстренной{% else %}плановой{% endif %} госпитализации
             <a ng-href="{{ url_for('patients.patient_info_full') }}?client_id=[[ header.client.id ]]">[[ header.client.full_name ]]</a>
             ([[ header.event.external_id ]])
         </h1>
-        <ul class="breadcrumb">
-            <li><a href="{{ url_for('.index_html') }}">Рабочий стол</a></li>
-            <li><a ng-href="{{ url_for('.html_chart') }}?event_id=[[ chart.id ]]">Карта пациентки</a></li>
-            <li>Выбор ЛПУ для {% if 'emergency' in request.args %}экстренного{% else %}планового{% endif %} случая</li>
-        </ul>
         <div class="row tmargin10">
             <div class="col-md-12 col-lg-12">
                 <div class="alert-warning small-marginal">Случай беременности. На учёте в <b>[[ header.event.person.organisation.short_name ]]</b>
                     у <b>[[ header.event.person.name ]]</b>
                     с <b>[[ header.event.set_date | asDate ]]</b>
+                </div>
+            </div>
+        </div>
+        <div class="panel novmargin">
+            <div class="btn-group">
+                <a ng-href="{{ url_for('.html_chart') }}?event_id=[[ chart.id ]]" class="btn btn-default">Карта пациентки</a>
+                <a ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ chart.id ]]" class="btn btn-default">Анамнез</a>
+                <a ng-href="{{ url_for('.html_inspection') }}?event_id=[[ chart.id ]]" class="btn btn-default">Осмотры</a>
+                <a ng-href="{{ url_for('.html_routing') }}?event_id=[[ chart.id ]]&emergency=1" class="btn btn-primary">Маршрутизация</a>
+                <a ng-href="{{ url_for('.html_epicrisis') }}?event_id=[[ chart.id ]]" class="btn btn-default">Эпикриз</a>
+                <a ng-class="{disabled: !ps.is_available()}" ng-click="open_print_window()" class="btn btn-default">Печать</a>
+                <div class="btn-group">
+                    <button class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Дополнительно <span class="fa fa-caret-down"></span></button>
+                    <ul role="menu" class="dropdown-menu">
+                        <li><a ng-href="{{ url_for('.html_event_diagnoses') }}?event_id=[[ chart.id ]]">Диагнозы случая</a></li>
+                        <li><a href="#">Мероприятия случая</a></li>
+                    </ul>
                 </div>
             </div>
         </div>

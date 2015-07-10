@@ -4,7 +4,7 @@
 
 'use strict';
 
-var ChartCtrl = function ($scope, $modal, RisarApi, PrintingService, PrintingDialog) {
+var ChartCtrl = function ($scope, $modal, RisarApi, PrintingService, PrintingDialog, NotificationService) {
     var params = aux.getQueryParams(window.location.search);
     var ticket_id = params.ticket_id;
     var event_id = params.event_id;
@@ -57,6 +57,15 @@ var ChartCtrl = function ($scope, $modal, RisarApi, PrintingService, PrintingDia
             });
     };
 
+    $scope.$on('printing_error', function (event, error) {
+        NotificationService.notify(
+                        error.code,
+                        error.text,
+                        'error',
+                        5000
+                    );
+    });
+
     $scope.open_print_window = function () {
         if ($scope.ps.is_available()) {
             PrintingDialog.open($scope.ps, $scope.$parent.$eval($scope.ps_resolve));
@@ -68,6 +77,8 @@ var ChartCtrl = function ($scope, $modal, RisarApi, PrintingService, PrintingDia
 var InspectionViewCtrl = function ($scope, $modal, RisarApi, PrintingService, PrintingDialog) {
     var params = aux.getQueryParams(window.location.search);
     var event_id = params.event_id;
+    $scope.ps = new PrintingService("risar");
+    $scope.ps.set_context("risar");
     $scope.ps_talon = new PrintingService("risar");
     $scope.ps_talon.set_context("risar_talon");
 
@@ -118,7 +129,7 @@ var InspectionViewCtrl = function ($scope, $modal, RisarApi, PrintingService, Pr
     reload();
 };
 
-WebMis20.controller('ChartCtrl', ['$scope', '$modal', 'RisarApi', 'PrintingService', 'PrintingDialog',
+WebMis20.controller('ChartCtrl', ['$scope', '$modal', 'RisarApi', 'PrintingService', 'PrintingDialog', 'NotificationService',
     ChartCtrl]);
 WebMis20.controller('InspectionViewCtrl', ['$scope', '$modal', 'RisarApi', 'PrintingService', 'PrintingDialog',
     InspectionViewCtrl]);

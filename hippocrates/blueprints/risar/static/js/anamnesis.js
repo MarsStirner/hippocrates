@@ -4,9 +4,16 @@
 
 'use strict';
 
-var AnamnesisCtrl = function ($scope, RisarApi, RefBookService) {
+var AnamnesisCtrl = function ($scope, RisarApi, RefBookService, PrintingService, PrintingDialog) {
     $scope.hooks = [];
     $scope.rbDiagnosisType = RefBookService.get('rbDiagnosisType');
+    $scope.ps = new PrintingService("risar");
+    $scope.ps.set_context("risar");
+    $scope.ps_resolve = function () {
+        return {
+            event_id: $scope.chart.id
+        }
+    };
     $scope.menstruation_max_date= new Date();
     $scope.menstruation_max_date.setDate($scope.menstruation_max_date.getDate() - 1);
     var tabs = $scope.tabs = {
@@ -32,6 +39,11 @@ var AnamnesisCtrl = function ($scope, RisarApi, RefBookService) {
             $scope.client_id = event.client.id;
             $scope.hooks.forEach(function (hook) {hook(event)});
         })
+    };
+    $scope.open_print_window = function () {
+        if ($scope.ps.is_available()) {
+            PrintingDialog.open($scope.ps, $scope.$parent.$eval($scope.ps_resolve));
+        }
     };
     reload_anamnesis();
 };
