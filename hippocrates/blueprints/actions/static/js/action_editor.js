@@ -391,7 +391,9 @@ WebMis20.factory('WMAction', ['ApiCalls', 'EzekielLock', function (ApiCalls, Eze
         action.event_id = event_id;
         action.action_type_id = action_type_id;
         return ApiCalls.wrapper('GET', '/actions/api/action/new/{0}/{1}'.format(action_type_id, event_id)).then(function (result) {
-            return action.merge(result);
+            var retval = action.merge(result);
+            retval.readonly = result.ro;
+            return retval;
         });
     };
     Action.previous = function (action) {
