@@ -21,8 +21,6 @@ def api_0_chart_epicrisis(event_id):
         raise ApiException(404, 'Event not found')
     if request.method == 'GET':
         action = get_action(event, risar_epicrisis)
-        if not action:
-            raise ApiException(404, 'Action not found')
     else:
         action = get_action(event, risar_epicrisis, True)
         for code, value in request.get_json().iteritems():
