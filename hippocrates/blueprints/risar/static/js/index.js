@@ -144,3 +144,15 @@ var IndexCtrl = function ($scope, RisarApi) {
         return titles[ (number%100>4 && number%100<20)? 2 : cases[(number%10<5)?number%10:5] ];
     }
 };
+
+var OrgBirthCareViewCtrl = function ($scope, RisarApi) {
+    RisarApi.desktop.get_info().
+        then(function (data) {
+            $scope.obcl_items = data.obcl_items;
+        });
+};
+
+WebMis20.controller('IndexCtrl', ['$scope', 'RisarApi',
+    IndexCtrl]);
+WebMis20.controller('OrgBirthCareViewCtrl', ['$scope', 'RisarApi',
+    OrgBirthCareViewCtrl]);
