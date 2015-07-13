@@ -1,7 +1,7 @@
 /**
  * Created by mmalkov on 11.07.14.
  */
-var IndexCtrl = function ($scope, $timeout, ApiCalls, WMConfig, Simargl, CurrentUser, NotificationService, SelectAll) {
+var IndexCtrl = function ($scope, $timeout, UserMail, SelectAll, CurrentUser) {
     $scope._ = _;
     $scope.mode = 0;
     $scope.messages = [];
@@ -12,34 +12,34 @@ var IndexCtrl = function ($scope, $timeout, ApiCalls, WMConfig, Simargl, Current
     $scope.limit = 10;
     $scope.current_folder = 'inbox';
     $scope.select_all = new SelectAll([]);
-    var get_mail = _.partial(ApiCalls.wrapper, 'GET', WMConfig.url.api_user_mail),
-        mark_read = _.partial(ApiCalls.wrapper, 'POST', WMConfig.url.api_user_mail_read),
-        mark_star = _.partial(ApiCalls.wrapper, 'POST', WMConfig.url.api_user_mail_mark),
-        move_mail = _.partial(ApiCalls.wrapper, 'POST', WMConfig.url.api_user_mail_move);
-    Simargl.subscribe('mail', reload_messages);
-    function set_summary (result) {
-        $scope.messages_count = result.count;
+    UserMail.subscribe('unread', set_common_summary);
+    UserMail.subscribe('ready', reload_messages);
+
+    function set_common_summary (result) {
         $scope.messages_inbox_count = result.inbox_count || $scope.messages_inbox_count;
         $scope.messages_unread = result.unread;
         return result
     }
+    function set_summary (result) {
+        $scope.messages_count = result.count;
+        return result
+    }
+    function reset_messages (result) {
+        if (result.messages) {
+            $scope.select_all.setSource(_.pluck(result.messages, 'id'));
+            $scope.select_all.selectNone();
+            $scope.messages = result.messages;
+        }
+    }
     function reload_messages () {
-        get_mail({
-            skip: $scope.skip || undefined,
-            folder: $scope.current_folder
-        }).then(set_summary).then(function (result) {
-            if (result.messages) {
-                $scope.select_all.setSource(_.pluck(result.messages, 'id'));
-                $scope.select_all.selectNone();
-                $scope.messages = result.messages;
-            }
-        });
+        UserMail.get_mail($scope.current_folder, $scope.skip || undefined, $scope.limit || undefined)
+            .then(set_summary)
+            .then(reset_messages);
     }
     $scope.reload_messages = reload_messages;
-    Simargl.when_ready(reload_messages);
     $scope.view_mail = function (message) {
         if (message.recipient.id == CurrentUser.id && !message.read) {
-            mark_read({ids: message.id}).then(set_summary).then(function () {
+            UserMail.set_mark('read', message.id, true).then(function () {
                 message.read = 1;
                 $scope.message = message;
                 $scope.mode = 1;
@@ -51,6 +51,7 @@ var IndexCtrl = function ($scope, $timeout, ApiCalls, WMConfig, Simargl, Current
     };
     $scope.list_mail = function () {
         $scope.mode = 0;
+        reload_messages();
     };
     $scope.compose_mail = function (message) {
         $scope.mode = 2;
@@ -64,22 +65,7 @@ var IndexCtrl = function ($scope, $timeout, ApiCalls, WMConfig, Simargl, Current
         }
     };
     $scope.send_mail = function (message) {
-        ApiCalls.coldstar('POST', WMConfig.url.simargl.simargl_rpc, undefined, {
-            topic: 'mail:new',
-            recipient: message.to.id,
-            sender: CurrentUser.id,
-            data: {
-                subject: message.subject,
-                text: message.text,
-                parent_id: message.parent_id
-            },
-            ctrl: true
-        }, {allowCredentials: true}).then(function () {
-            NotificationService.notify(undefined, 'Письмо успешно отправлено', 'success', 5000);
-            $scope.mode = 0;
-        }, function () {
-            NotificationService.notify(undefined, 'Не удалось отправить письмо', 'danger', 5000);
-        })
+        UserMail.send_mail(message.to.id, message.subject, message.text, message.parent_id);
     };
     $scope.change_skip = function (amount) {
         var prev = $scope.skip,
@@ -95,24 +81,11 @@ var IndexCtrl = function ($scope, $timeout, ApiCalls, WMConfig, Simargl, Current
         $scope.mode = 0;
         reload_messages();
     };
-    var format_ids = function (idlist) {
-        if (idlist instanceof Array) {
-            return idlist.join(':')
-        } else {
-            return idlist
-        }
-    };
     $scope.mark_star = function (selected) {
-        mark_star({
-            ids: selected.id,
-            mark: (selected.mark)?(0):(1)
-        }).then(reload_messages)
+        UserMail.set_mark('mark', selected.id, (!selected.mark)?(true):(false)).then(reload_messages)
     };
     $scope.delete_selected = function () {
-        move_mail({
-            ids: format_ids($scope.select_all.selected()),
-            folder: 'trash'
-        }).then(reload_messages)
+        UserMail.mail_move('trash', $scope.select_all.selected()).then(reload_messages);
     };
 };
 angular.module('WebMis20')
