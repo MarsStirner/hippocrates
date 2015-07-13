@@ -4,7 +4,7 @@
     ([[ chart.external_id ]])
     <a ng-href="{{ url_for('patients.patient_info_full') }}?client_id=[[ chart.client.id ]]">[[ chart.client.full_name ]]</a>
 </h1>
-<div class="alert-warning tmargin10">Случай беременности. На учёте в <b>[[ chart.person.organisation.short_name ]]</b>
+<div class="alert-warning vmargin10">Случай беременности. На учёте в <b>[[ chart.person.organisation.short_name ]]</b>
     у <b>[[ chart.person.name ]]</b>
     с <b>[[ chart.set_date | asDate ]]</b>
 </div>
@@ -17,9 +17,13 @@
     ([[ header.event.external_id ]])
     <a ng-href="{{ url_for('patients.patient_info_full') }}?client_id=[[ header.client.id ]]">[[ header.client.full_name ]]</a>
 </h1>
-<div class="alert-warning tmargin10">Случай беременности. На учёте в <b>[[ header.event.person.organisation.short_name ]]</b>
-    у <b>[[ header.event.person.name ]]</b>
-    с <b>[[ header.event.set_date | asDate ]]</b>
+<div class="row vmargin10">
+    <div class="col-md-12 col-lg-12 col-sm-12">
+        <div class="alert-warning">Случай беременности. На учёте в <b>[[ header.event.person.organisation.short_name ]]</b>
+            у <b>[[ header.event.person.name ]]</b>
+            с <b>[[ header.event.set_date | asDate ]]</b>
+        </div>
+    </div>
 </div>
 {% endmacro %}
 
