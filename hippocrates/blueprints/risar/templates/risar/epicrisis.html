@@ -7,7 +7,7 @@
 <div ng-controller="EpicrisisCtrl" ng-cloak>
     <section class="content-header">
         {{ rimacros.page_title_n('Эпикриз') }}
-        <div class="panel novmargin">
+        <div class="novmargin">
             <div class="btn-group">
                 <a ng-href="{{ url_for('.html_chart') }}?event_id=[[ chart.id ]]" class="btn btn-default">Карта пациентки</a>
                 <a ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ chart.id ]]" class="btn btn-default">Анамнез</a>
@@ -90,7 +90,7 @@
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6  text-right">Особенности течения беременности:</div>
-                                    <div class="col-sm-6 col-md-6">[[epicrisis.pregnancy_speciality]]</div>
+                                    <div class="col-sm-6 col-md-6 long-words" ng-bind-html="epicrisis.pregnancy_speciality"></div>
                                 </div>
                             </div>
                         </div>
@@ -121,7 +121,7 @@
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-5 col-md-5 text-right">Заключение ЛКК:</div>
-                                    <div class="col-sm-7 col-md-7">[[epicrisis.control_expert_conclusion]]</div>
+                                    <div class="col-sm-7 col-md-7 long-words" ng-bind-html="epicrisis.control_expert_conclusion"></div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-12">&nbsp;</div>
@@ -187,7 +187,7 @@
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6 text-right">Другие осложнения при родах:</div>
-                                    <div class="col-sm-6 col-md-6">[[epicrisis.other_complications]]</div>
+                                    <div class="col-sm-6 col-md-6 long-words" ng-bind-html="epicrisis.other_complications"></div>
                                 </div>
                             </div>
                         </div>
@@ -218,7 +218,7 @@
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-5 col-md-5 text-right">Другие пособия и манипуляции:</div>
-                                    <div class="col-sm-7 col-md-7">[[epicrisis.other_manipulations]]</div>
+                                    <div class="col-sm-7 col-md-7 long-words" ng-bind-html="epicrisis.other_manipulations"></div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-12">&nbsp;</div>

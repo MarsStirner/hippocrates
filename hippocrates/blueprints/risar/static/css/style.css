@@ -36,7 +36,7 @@ div.das-form > .row {
 }
 
 .achievements {
-    font-size: 230%;
+    font-size: 200%;
     line-height: 30px;
 }
 
@@ -290,4 +290,26 @@ nvd3-line-chart svg {
 
 .text-success-risar {
     color: #30D040;
+}
+.wizard-container-6 .box {
+    margin-bottom: 0px;
+    min-height: 286px;
+}
+.wizard-container-7 .box {
+    margin-bottom: 0px;
+    min-height: 327px;
+}
+.long-words{
+    word-wrap: break-word;
+}
+
+.content-header h1 {
+  margin: 0;
+  font-size: 24px;
+}
+.content-header h1 > small {
+  font-size: 15px;
+  display: inline-block;
+  padding-left: 4px;
+  font-weight: 300;
 }

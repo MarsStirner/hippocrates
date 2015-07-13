@@ -7,6 +7,7 @@
 <div ng-controller="InspectionViewCtrl" ng-cloak>
     <section class="content-header">
         {{ rimacros.page_title_ext_n('Осмотры акушером-гинекологом беременной', 'inspection') }}
+        <div class="novmargin">
         <div class="btn-group">
             <a ng-href="{{ url_for('.html_chart') }}?event_id=[[ chart.id ]]" class="btn btn-default">Карта пациентки</a>
             <a ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ header.event.id ]]" class="btn btn-default">Анамнез</a>
@@ -21,6 +22,7 @@
                     <li><a href="#">Мероприятия случая</a></li>
                 </ul>
             </div>
+        </div>
         </div>
     </section>
     <section class="content">

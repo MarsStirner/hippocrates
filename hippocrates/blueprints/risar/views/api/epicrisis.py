@@ -46,7 +46,7 @@ def api_0_chart_epicrisis(event_id):
         db.session.commit()
     return {
         'chart': represent_chart_for_epicrisis(event),
-        'epicrisis': represent_epicrisis(event, action)
+        'epicrisis': represent_epicrisis(event, action) if action else None
     }
 
 

@@ -7,7 +7,7 @@
 <div ng-controller="CheckupFirstEditCtrl" ng-cloak>
     <section class="content-header">
         {{ rimacros.page_title_n('Ввод данных первичного осмотра') }}
-        <div class="panel novmargin">
+        <div class="novmargin">
             <div class="btn-group">
                 <a ng-href="{{ url_for('.html_chart') }}?event_id=[[ chart.id ]]" class="btn btn-default">Карта пациентки</a>
                 <a ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ chart.id ]]" class="btn btn-default">Анамнез</a>
@@ -26,7 +26,7 @@
         </div>
     </section>
     <section class="content">
-        <div rc-wizard="sampleWizard" id="CheckupFirstWizard">
+        <div rc-wizard="sampleWizard" id="CheckupFirstWizard" class="wizard-container-7">
             <div class="row">
                 <div class="col-sm-3">
                     <div class="box box-solid">
@@ -82,9 +82,9 @@
                     </div>
                 </div>
                 <div class="col-sm-9">
-                    <div class="tab-content marginal">
+                    <div class="tab-content">
                         <ng-form class="tab-pane active" id="first" name="firstForm" novalidate rc-submit rc-step>
-                            <div class="box box-primary">
+                            <div class="box box-primary box-wizard">
                             <div class="box-header">
                                 <h3 class="box-title">Шаг 1. Общая информация</h3>
                             </div>
@@ -147,7 +147,7 @@
                         </div>
                         </ng-form>
                         <ng-form class="tab-pane" id="second" name="secondForm" novalidate rc-submit rc-step>
-                            <div class="box box-primary">
+                            <div class="box box-primary box-wizard">
                             <div class="box-header">
                                 <h3 class="box-title">Шаг 2. Соматический статус</h3>
                             </div>
@@ -340,8 +340,8 @@
                             </div>
                             </div>
                         </ng-form>
-                        <ng-form class="tab-pane" id="third" name="thirdForm"  novalidate rc-submit rc-step>
-                            <div class="box box-primary">
+                        <ng-form class="tab-pane" id="third" name="thirdForm"  novalidate rc-submit rc-step box-wizard>
+                            <div class="box box-primary box-wizard">
                             <div class="box-header">
                                 <h3 class="box-title">Шаг 3. Акушерский статус</h3>
                             </div>
@@ -476,7 +476,7 @@
                             </div>
                         </ng-form>
                         <ng-form class="tab-pane" id="fourth" name="fourthForm" novalidate rc-submit rc-step>
-                            <div class="box box-primary">
+                            <div class="box box-primary box-wizard">
                             <div class="box-header">
                                 <h3 class="box-title">Шаг 4. Влагалищное исследование</h3>
                             </div>
@@ -571,7 +571,7 @@
                             </div>
                         </ng-form>
                         <ng-form class="tab-pane" id="fifth" name="fifthForm" novalidate rc-submit rc-step>
-                            <div class="box box-primary">
+                            <div class="box box-primary box-wizard">
                             <div class="box-header">
                                 <h3 class="box-title">Шаг 5. Заключение</h3>
                             </div>
@@ -659,7 +659,7 @@
                             </div>
                         </ng-form>
                         <ng-form class="tab-pane" id="sixth" name="sixthForm" novalidate rc-submit rc-step>
-                            <div class="box box-primary">
+                            <div class="box box-primary box-wizard">
                             <div class="box-header">
                                 <h3 class="box-title">Шаг 6. Талон посещения</h3>
                             </div>
@@ -760,7 +760,7 @@
                             </div>
                         </ng-form>
                         <ng-form class="tab-pane" id="last" name="lastForm" novalidate rc-submit rc-step>
-                            <div class="box box-primary">
+                            <div class="box box-primary box-wizard">
                             <div class="box-header">
                                 <h3 class="box-title">Шаг 7. Диагностические мероприятия</h3>
                             </div>
