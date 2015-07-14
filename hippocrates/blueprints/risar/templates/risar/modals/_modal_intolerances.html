@@ -13,13 +13,18 @@
             <tbody>
                 <tr>
                     <th class="text-right">Тип</th>
-                    <td ng-if="!model.id"><div class="col-md-4" ><rb-select ref-book="IntoleranceType" ng-model="model.type" /></div></td>
+                    <td ng-if="!model.id"><div class="col-md-4" ><rb-select ref-book="IntoleranceType"
+                                                                            ng-model="model.type" autofocus="autofocus"/></div></td>
                     <td ng-if="model.id"><div class="col-md-12" ng-bind="model.type.name"></div></td>
                 </tr>
                 <tr>
                     <th class="text-right">Дата установления</th>
                     <td>
-                        <div class="col-md-4"><div fs-date ng-model="model.date"></div></div>
+                        <div class="col-md-4">
+                            <wm-date ng-if="!model.id" name="date" ng-model="model.date" style="width: 250px"></wm-date>
+                            <wm-date ng-if="model.id" name="date" ng-model="model.date" style="width: 250px"
+                                     autofocus="autofocus"></wm-date>
+                        </div>
                     </td>
                 </tr>
                 <tr>

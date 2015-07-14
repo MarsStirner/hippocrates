@@ -29,7 +29,8 @@
             <div class="box-body">
                 <div class="form-group">
                     <label>Территория</label>
-                    <ui-select multiple ng-model="query.areas" theme="select2" ng-change="refresh_organisations()" class="form-control">
+                    <ui-select multiple ng-model="query.areas" theme="select2" ng-change="refresh_organisations()"
+                               class="form-control" autofocus>
                         <ui-select-match placeholder="Выберите территорию">[[ $item.name ]]</ui-select-match>
                         <ui-select-choices group-by="group_areas" repeat="area in areas | filter: {name: $select.search} | limitTo:50">
                             <div ng-bind-html="area.name | highlight: $select.search"></div>

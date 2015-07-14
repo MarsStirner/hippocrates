@@ -8,7 +8,8 @@
             <div class="input-group">
                 <input id="search" class="form-control" type="text" ng-model="query" autocomplete="off"
                        ng-change="clear_results()"
-                       placeholder="Поиск пациента по ФИО, дате рождения, полису или документу, удостоверяющему личность">
+                       placeholder="Поиск пациента по ФИО, дате рождения, полису или документу, удостоверяющему личность"
+                       autofocus>
                 <span class="input-group-btn">
                     <button class="btn btn-success" ng-click="perform_search(false)"><span class="glyphicon glyphicon-search"></span> Найти</button>
                 </span>
