@@ -17,6 +17,11 @@ WebMis20
             all: all
         });
     };
+    this.need_hospitalization = {
+        get: function(){
+            return wrapper('GET', Config.url.api_need_hospitalization)
+        }
+    }
     this.search_event = {
         get: function (query) {
             return wrapper('POST', Config.url.api_event_search, {}, query)

@@ -19,43 +19,7 @@
             </div>
         </div>
         {% if user_profiles_mng.has_ui_obstetrician() %}
-            <div class="row">
-                <div class="col-md-9">
-                    {% include "risar/desktop/patient_list.html" %}
-                </div>
-                <div class="col-md-3">
-                    <div class="box box-warning">
-                        <div class="box-header with-border">
-                            <h3 class="box-title">Статистика по пациенткам:</h3>
-                            <div class="box-tools pull-right">
-                              <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
-                            </div>
-                        </div>
-                        <div class="box-body">
-                            <p>Всего</p>
-                            <p>Не закрыты карты пациенток (срок более 45 недель)</p>
-                            <p>Пропущено плановое посещение (2 месяца)</p>
-                        </div>
-                    </div>
-                    <div class="box box-warning">
-                        <div class="box-header with-border">
-                            <h3 class="box-title">Ведение карт</h3>
-                            <div class="box-tools pull-right">
-                              <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
-                            </div>
-                        </div>
-                        <div class="box-body">
-                            <p>Заполненные карты</p>
-                            <p>Незаполненные разделы</p>
-                            <p>Анамнез</p>
-                            <p>Плановый осмотр</p>
-                            <p>ЛПУ для родоразрешения</p>
-                            <p>Результаты мероприятий</p>
-                            <p>Эпикриз</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            {% include "risar/desktop/index_obstetrician.html" %}
         {% elif user_profiles_mng.has_ui_overseer_low() %}
             <div class="row">
                 <div class="col-md-8">

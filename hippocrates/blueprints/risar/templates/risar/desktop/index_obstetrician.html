@@ -1,0 +1,76 @@
+<div class="row">
+    <div class="col-md-9">
+        {% include "risar/desktop/patient_list.html" %}
+        <div class="box box-info">
+            <div class="box-header">
+                <h3 class="box-title">Срочная госпитализация</h3>
+                <div class="box-tools pull-right">
+                    <span class="badge label-danger">[[ need_hospitalization.length ]]</span>
+        {#            <ul class="pagination pagination-sm no-margin" style="vertical-align: middle;">#}
+        {#                <li><a href="#">«</a></li>#}
+        {#                <li><a href="#">1</a></li>#}
+        {#                <li><a href="#">2</a></li>#}
+        {#                <li><a href="#">3</a></li>#}
+        {#                <li><a href="#">»</a></li>#}
+        {#            </ul>#}
+                    <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                </div>
+            </div>
+            <div class="box-body no-padding">
+                <table class="table">
+                    <tbody>
+                    <tr>
+                        <th></th>
+                        <th>Риск</th>
+                        <th>ФИО</th>
+                        <th>Срок беременности</th>
+                    </tr>
+                    <tr ng-repeat="row in need_hospitalization | filter:query">
+                        <td></td>
+                        <td><span class="label"
+                                  ng-class="{'label-default': row.risk_rate.id == 0,
+                                             'label-success': row.risk_rate.id == 1,
+                                             'label-warning': row.risk_rate.id == 2,
+                                             'label-danger': row.risk_rate.id == 3}">[[ row.risk_rate.name ]]</span></td>
+                        <td><a ng-href="{{ url_for('.html_chart') }}?event_id=[[ row.id ]]">[[
+                            row.client.full_name ]]</a></td>
+                        <td>[[ row.pregnancy_week ]]<i class="fa fa-question" ng-if="!row.pregnancy_week"></i></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="box box-warning">
+            <div class="box-header with-border">
+                <h3 class="box-title">Статистика по пациенткам:</h3>
+                <div class="box-tools pull-right">
+                  <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                </div>
+            </div>
+            <div class="box-body">
+                <p>Всего <span class="badge label-info">23</span></p>
+                <p>Не закрыты карты пациенток (срок более 45 недель) <span class="badge label-danger">7</span></p>
+                <p>Пропущено плановое посещение (2 месяца) <span class="badge label-danger">3</span></p>
+            </div>
+        </div>
+        <div class="box box-warning">
+            <div class="box-header with-border">
+                <h3 class="box-title">Ведение карт</h3>
+                <div class="box-tools pull-right">
+                  <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                </div>
+            </div>
+            <div class="box-body">
+                <p>Заполненные карты <span class="badge label-danger">12</span></p>
+                <p>Незаполненные разделы <span class="badge label-danger">6</span></p>
+                <p>Анамнез <span class="badge label-danger">0</span></p>
+                <p>Плановый осмотр <span class="badge label-danger">2</span></p>
+                <p>ЛПУ для родоразрешения <span class="badge label-danger">1</span></p>
+                <p>Результаты мероприятий <span class="badge label-danger">1</span></p>
+                <p>Эпикриз <span class="badge label-danger">2</span></p>
+            </div>
+        </div>
+    </div>
+</div>

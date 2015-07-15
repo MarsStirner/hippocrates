@@ -114,6 +114,15 @@ def represent_event(event):
     }
 
 
+def represent_chart_short(event):
+    return {
+        'id': event.id,
+        'client': event.client,
+        'risk_rate': PrenatalRiskRate(get_card_attrs_action(event)['prenatal_risk_572'].value) if event else None,
+        'pregnancy_week': get_pregnancy_week(event) if event else None,
+    }
+
+
 def represent_chart_for_routing(event):
     plan_attach = event.client.attachments.join(rbAttachType).filter(rbAttachType.code == attach_codes['plan_lpu']).first()
     extra_attach = event.client.attachments.join(rbAttachType).filter(rbAttachType.code == attach_codes['extra_lpu']).first()

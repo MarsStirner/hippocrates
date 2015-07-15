@@ -14,7 +14,7 @@ from nemesis.models.schedule import Schedule
 from nemesis.models.utils import safe_current_user_id
 from nemesis.systemwide import db
 from blueprints.risar.app import module
-from blueprints.risar.lib.represent import represent_ticket
+from blueprints.risar.lib.represent import represent_ticket, represent_chart_short, get_pregnancy_week
 
 
 __author__ = 'mmalkov'
@@ -36,6 +36,24 @@ def api_0_schedule(person_id=None):
         for ticket in itertools.chain(*(schedule.tickets for schedule in schedule_list))
         if all_tickets or ticket.client_ticket
     ]
+
+
+@module.route('/api/0/need_hospitalization/')
+@module.route('/api/0/need_hospitalization/<int:person_id>')
+@api_method
+def api_0_need_hospitalization(person_id=None):
+    # получение списка пациенток врача, которые нуждаются в госпитализации в стационар 2/3 уровня
+
+    if not person_id:
+        person_id = safe_current_user_id()
+
+    patient_list = Event.query.join(EventType, rbRequestType, Action, ActionType, ActionProperty,
+                                    ActionPropertyType, ActionProperty_Integer)\
+        .filter(rbRequestType.code == 'pregnancy', Event.execDate.is_(None), Event.execPerson_id == person_id,
+                ActionType.flatCode == 'cardAttributes', ActionPropertyType.code == "prenatal_risk_572",
+                ActionProperty_Integer.value_.in_([2, 3]))\
+        .all()
+    return [represent_chart_short(event) for event in patient_list if get_pregnancy_week(event) >= 38]
 
 
 @module.route('/api/0/current_stats.json')

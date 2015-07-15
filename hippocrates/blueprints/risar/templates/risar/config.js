@@ -6,6 +6,7 @@ WebMis20
 .constant('Config', {
     url: {
         api_schedule: '{{ url_for('.api_0_schedule') }}',
+        api_need_hospitalization: '{{ url_for('.api_0_need_hospitalization') }}',
         api_chart: '{{ url_for('.api_0_chart') }}',
         api_mini_chart: '{{ url_for('.api_0_mini_chart') }}',
         api_event_routing: '{{ url_for('.api_0_event_routing') }}',

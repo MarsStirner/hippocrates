@@ -116,6 +116,11 @@ var IndexCtrl = function ($scope, RisarApi) {
                 $scope.maternal_death = [];
             }
         });
+    $scope.load_need_hospitalization = function(){
+        RisarApi.need_hospitalization.get().then(function (result) {
+            $scope.need_hospitalization = result;
+        });
+    }
 //        RisarApi.pregnancy_final_stats.get().then(function (result) {
 //            $scope.pregnancy_results = [];
 //            if (result['abortom']) {
@@ -136,6 +141,7 @@ var IndexCtrl = function ($scope, RisarApi) {
     };
     $scope.refresh_diagram();
     $scope.refresh_gistograms();
+    $scope.load_need_hospitalization();
     $scope.declOfNum = function (number, titles){
         if (number == undefined){
             number = 0;
