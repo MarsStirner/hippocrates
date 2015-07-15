@@ -14,26 +14,23 @@ var IndexCtrl = function ($scope, $timeout, UserMail, SelectAll, CurrentUser) {
     $scope.select_all = new SelectAll([]);
     UserMail.subscribe('unread', set_common_summary);
     UserMail.subscribe('ready', reload_messages);
+    UserMail.subscribe('new:id', reload_messages);
 
     function set_common_summary (result) {
-        $scope.messages_inbox_count = result.inbox_count || $scope.messages_inbox_count;
+        $scope.messages_inbox_count = result.count || $scope.messages_inbox_count;
         $scope.messages_unread = result.unread;
-        return result
-    }
-    function set_summary (result) {
-        $scope.messages_count = result.count;
         return result
     }
     function reset_messages (result) {
         if (result.messages) {
             $scope.select_all.setSource(_.pluck(result.messages, 'id'));
             $scope.select_all.selectNone();
+            $scope.messages_count = result.count;
             $scope.messages = result.messages;
         }
     }
     function reload_messages () {
         UserMail.get_mail($scope.current_folder, $scope.skip || undefined, $scope.limit || undefined)
-            .then(set_summary)
             .then(reset_messages);
     }
     $scope.reload_messages = reload_messages;
@@ -65,7 +62,9 @@ var IndexCtrl = function ($scope, $timeout, UserMail, SelectAll, CurrentUser) {
         }
     };
     $scope.send_mail = function (message) {
-        UserMail.send_mail(message.to.id, message.subject, message.text, message.parent_id);
+        UserMail.send_mail(message.to.id, message.subject, message.text, message.parent_id).then(function () {
+            $scope.change_folder('index');
+        });
     };
     $scope.change_skip = function (amount) {
         var prev = $scope.skip,

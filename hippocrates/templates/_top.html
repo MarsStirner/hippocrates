@@ -20,11 +20,11 @@
                   <span class="label label-success" ng-if="unread > 0">[[ unread ]]</span>
                 </a>
                 <ul class="dropdown-menu">
-                  <li class="header">You have [[ unread ]] messages</li>
+                  <li class="header">Непрочитанных сообщений: [[ unread ]]</li>
                   <li>
                     <!-- inner menu: contains the messages -->
                     <ul class="menu">
-                      <li><!-- start message -->
+                      <li ng-repeat="msg in messages"><!-- start message -->
                         <a href="#">
                           <div class="pull-left">
                             <!-- User Image -->
@@ -32,14 +32,14 @@
                           </div>
                           <!-- Message title and timestamp -->
                           <h4>
-                            Support Team
-                            <small><i class="fa fa-clock-o"></i> 5 mins</small>
+                            [[ msg.sender.name ]]
+                            <small><i class="fa fa-clock-o"></i> [[ msg.datetime | asDateTime ]]</small>
                           </h4>
                         </a>
                       </li><!-- end message -->
                     </ul><!-- /.menu -->
                   </li>
-                  <li class="footer"><a href="#">See All Messages</a></li>
+                  <li class="footer"><a href="{{ url_for('useraccount.index_html') }}">Все сообщения</a></li>
                 </ul>
               </li><!-- /.messages-menu -->
 
@@ -202,8 +202,10 @@
 <script language="JavaScript">
     WebMisHeader = function ($scope, UserMail) {
         $scope.unread = 0;
+        $scope.messages = [];
         UserMail.subscribe('unread', function (result) {
             $scope.unread = result.unread;
+            $scope.messages = result.messages;
         });
     }
 </script>

@@ -8,7 +8,7 @@
         <section class="content-header">
             <h1>
                 Почтовый ящик
-                <small>Непрочитанных сообщений: [[ messages_unread ]] из [[ messages_inbox_count ]]</small>
+                <small ng-if="messages_unread > 0">Непрочитанных сообщений: [[ messages_unread ]] из [[ messages_inbox_count ]]</small>
             </h1>
             <ol class="breadcrumb">
                 <li><a href="/"><i class="fa fa-dashboard"></i> Главная</a></li>

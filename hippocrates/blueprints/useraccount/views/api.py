@@ -12,81 +12,68 @@ from nemesis.systemwide import db
 __author__ = 'viruzzz-kun'
 
 
-def int_mail_summary():
+@module.route('/api/mail/summary/')
+@api_method
+def api_mail_summary():
+    query = UserMail.query.filter(
+        UserMail.recipient_id == safe_current_user_id(),
+        UserMail.folder == 'inbox'
+    )
+    count = query.count()
+    query = query.filter(UserMail.read == 0)
+    unread = query.count()
+    query = query.limit(10)
+    messages = query.all()
     return {
-        'inbox_count': UserMail.query.filter(
-            UserMail.recipient_id == safe_current_user_id(),
-            UserMail.folder == 'inbox'
-        ).count(),
-        'unread': UserMail.query.filter(
-            UserMail.recipient_id == safe_current_user_id(),
-            UserMail.read == 0,
-            UserMail.folder == 'inbox'
-        ).count(),
+        'count': count,
+        'unread': unread,
+        'messages': messages,
     }
 
 
-@module.route('/api/mail', methods=["GET"])
+@module.route('/api/mail/', methods=["GET"])
+@module.route('/api/mail/<folder>', methods=["GET"])
 @api_method
-def api_mail_get():
-    summary = 'summary' in request.args
-    folder = request.args.get('folder', 'inbox')
+def api_mail_get(folder='inbox'):
+    unread = int(request.args.get('unread', '0'))
     skip = int(request.args.get('skip', 0))
     limit = int(request.args.get('limit', 10))
     ids = map(int, filter(None, request.args.get('ids', '').split(':')))
 
-    result = int_mail_summary()
+    result = {}
 
-    if not summary:
-        query = UserMail.query
-        if folder == 'sent':
-            query = query.filter(UserMail.sender_id == safe_current_user_id())
-            result['count'] = UserMail.query.filter(
-                UserMail.sender_id == safe_current_user_id()
-            ).count()
-        elif folder == 'star':
-            folder = 'inbox'
-            result['count'] = UserMail.query.filter(
-                UserMail.recipient_id == safe_current_user_id(),
-                UserMail.folder == folder,
-                UserMail.mark == 1,
-            ).count()
-            query = query.filter(
-                UserMail.recipient_id == safe_current_user_id(),
-                UserMail.folder == folder,
-                UserMail.mark == 1
-            )
-        else:
-            result['count'] = UserMail.query.filter(
-                UserMail.recipient_id == safe_current_user_id(),
-                UserMail.folder == folder,
-            ).count()
-            query = query.filter(
-                UserMail.recipient_id == safe_current_user_id(),
-                UserMail.folder == folder
-            )
-
-        query = query \
-            .order_by(UserMail.id.desc()) \
-            .options(
-                joinedload(UserMail.sender),
-                joinedload(UserMail.recipient),
-            )
-        if ids:
-            query = query.filter(UserMail.id.in_(ids)).all()
-        else:
-            if skip:
-                query = query.offset(skip)
-            if limit:
-                query = query.limit(limit)
-        result['messages'] = query.all()
+    query = UserMail.query
+    if unread:
+        query = query.filter(UserMail.read == 0)
+    if folder == 'star':
+        query = query.filter(UserMail.mark == 1)
+        folder = 'inbox'
+    if folder == 'sent':
+        query = query.filter(UserMail.sender_id == safe_current_user_id())
+    else:
+        query = query.filter(UserMail.recipient_id == safe_current_user_id())
+    query = query.filter(UserMail.folder == folder)
+    result['count'] = query.count()
+    query = query \
+        .order_by(UserMail.id.desc()) \
+        .options(
+            joinedload(UserMail.sender),
+            joinedload(UserMail.recipient),
+        )
+    if ids:
+        query = query.filter(UserMail.id.in_(ids)).all()
+    else:
+        if skip:
+            query = query.offset(skip)
+        if limit:
+            query = query.limit(limit)
+    result['messages'] = query.all()
     return result
 
 
 def mail_update(ids, field, value):
     UserMail.query.filter(
         UserMail.id.in_(ids),
-        UserMail.recipient_id == safe_current_user_id(),
     ).update({field: value}, synchronize_session=False)
     db.session.commit()
 
@@ -102,7 +89,6 @@ def api_mail_mark(uid, mode):
     if not ids:
         raise Exception('ids must me set')
     mail_update(ids, mode, value)
-    return int_mail_summary()
 
 
 @module.route('/api/mail/', methods=["MOVE"])
@@ -113,4 +99,3 @@ def api_mail_move(uid, folder):
     if not ids:
         raise Exception('ids must me set')
     mail_update(ids, 'folder', folder)
-    return int_mail_summary()

@@ -107,7 +107,8 @@ def fc_urls():
             'api_patient_file_attach_save': url_for("patients.api_patient_file_attach_save"),
             'api_patient_file_attach_delete': url_for("patients.api_patient_file_attach_delete"),
             'api_event_actions': url_for("event.api_event_actions"),
-            'api_user_mail': url_for("useraccount.api_mail_get"),
+            'api_user_mail_summary': url_for("useraccount.api_mail_summary"),
+            'api_user_mail': url_for("useraccount.api_mail_get") + '{0}',
             'api_user_mail_mark': url_for("useraccount.api_mail_mark", _method="PUT") + '{0}/{1}',
             'api_user_mail_move': url_for("useraccount.api_mail_move", _method="MOVE") + '{0}/{1}',
         }
