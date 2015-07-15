@@ -6,8 +6,8 @@
                 <div class="box box-info">
                     <div class="box-header">
                         <h3 class="box-title">Срочная госпитализация</h3>
+                        <span class="badge label-danger">[[ need_hospitalization.length ]]</span>
                         <div class="box-tools pull-right">
-                            <span class="badge label-danger">[[ need_hospitalization.length ]]</span>
                 {#            <ul class="pagination pagination-sm no-margin" style="vertical-align: middle;">#}
                 {#                <li><a href="#">«</a></li>#}
                 {#                <li><a href="#">1</a></li>#}
@@ -47,8 +47,8 @@
                 <div class="box box-info">
                     <div class="box-header">
                         <h3 class="box-title">Поручения</h3>
+                        <span class="badge label-danger">5</span>
                         <div class="box-tools pull-right">
-                            <span class="badge label-danger">9</span>
                 {#            <ul class="pagination pagination-sm no-margin" style="vertical-align: middle;">#}
                 {#                <li><a href="#">«</a></li>#}
                 {#                <li><a href="#">1</a></li>#}
@@ -75,18 +75,6 @@
                                 <td><span class="label label-warning">Ожидает выполнения</span></td>
                             </tr>
                             <tr>
-                                <td>2/2015</td>
-                                <td><span class="label label-danger">высокий</span></td>
-                                <td>Лыкова Татьяна Владимировна</td>
-                                <td><span class="label label-warning">Ожидает выполнения</span></td>
-                            </tr>
-                            <tr>
-                                <td>32/2015</td>
-                                <td><span class="label label-danger">высокий</span></td>
-                                <td>Калинина Елена Андреевна</td>
-                                <td><span class="label label-danger">Просрочено</span></td>
-                            </tr>
-                            <tr>
                                 <td>56/2015</td>
                                 <td><span class="label label-danger">высокий</span></td>
                                 <td>Ксантос Альбина Сергеевна</td>
@@ -105,22 +93,10 @@
                                 <td><span class="label label-danger">Просрочено</span></td>
                             </tr>
                             <tr>
-                                <td>4/2015</td>
-                                <td><span class="label label-warning">средний</span></td>
-                                <td>Царкцан Елизавета Владимирович</td>
-                                <td><span class="label label-warning">Ожидает выполнения</span></td>
-                            </tr>
-                            <tr>
                                 <td>56/2015</td>
                                 <td><span class="label label-warning">средний</span></td>
                                 <td>Полякова Наталья Сергеевна</td>
                                 <td><span class="label label-danger">Просрочено</span></td>
-                            </tr>
-                            <tr>
-                                <td>34/2015</td>
-                                <td><span class="label label-warning">средний</span></td>
-                                <td>Лобанова Людмила Вячеславовна</td>
-                                <td><span class="label label-warning">Ожидает выполнения</span></td>
                             </tr>
                             </tbody>
                         </table>
@@ -138,9 +114,20 @@
                 </div>
             </div>
             <div class="box-body">
-                <p>Всего <span class="badge label-info">23</span></p>
-                <p>Не закрыты карты пациенток (срок более 45 недель) <span class="badge label-danger">7</span></p>
-                <p>Пропущено плановое посещение (2 месяца) <span class="badge label-danger">3</span></p>
+                <table>
+                    <tr>
+                        <td>Всего</td>
+                        <td><span class="badge label-info pull-right">23</span></td>
+                    </tr>
+                    <tr>
+                        <td>Не закрыты карты пациенток (срок более 45 недель)</td>
+                        <td><span class="badge label-danger pull-right">7</span></td>
+                    </tr>
+                    <tr>
+                        <td>Пропущено плановое посещение (2 месяца)</td>
+                        <td><span class="badge label-danger pull-right">3</span></td>
+                    </tr>
+                </table>
             </div>
         </div>
         <div class="box box-warning">
@@ -151,13 +138,48 @@
                 </div>
             </div>
             <div class="box-body">
-                <p>Заполненные карты <span class="badge label-danger">12</span></p>
-                <p>Незаполненные разделы <span class="badge label-danger">6</span></p>
-                <p>Анамнез <span class="badge label-danger">0</span></p>
-                <p>Плановый осмотр <span class="badge label-danger">2</span></p>
-                <p>ЛПУ для родоразрешения <span class="badge label-danger">1</span></p>
-                <p>Результаты мероприятий <span class="badge label-danger">1</span></p>
-                <p>Эпикриз <span class="badge label-danger">2</span></p>
+                <p>Заполненные карты <span class="badge label-danger pull-right">12</span></p>
+                <p>Незаполненные разделы <span class="badge label-danger pull-right">6</span></p>
+                <p>Анамнез <span class="badge label-danger pull-right">0</span></p>
+                <p>Плановый осмотр <span class="badge label-danger pull-right">2</span></p>
+                <p>ЛПУ для родоразрешения <span class="badge label-danger pull-right">1</span></p>
+                <p>Результаты мероприятий <span class="badge label-danger pull-right">1</span></p>
+                <p>Эпикриз <span class="badge label-danger pull-right">2</span></p>
+            </div>
+        </div>
+
+        <div class="box box-danger">
+            <div class="box-header with-border">
+                <h3 class="box-title">График по степеням риска</h3>
+                <div class="box-tools pull-right">
+                    <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                </div>
+            </div>
+            <div class="box-body">
+                <nvd3-pie-chart
+                    id="noid"
+                    data="slices"
+                    width="360"
+                    height="370"
+                    margin="{left:0,top:0,bottom:0,right:40}"
+                    x="slices_x"
+                    y="slices_y"
+                    color="slices_c"
+                    nodata="Нет данных"
+                    showlegend="true"
+                    showlabels="true"
+                    labeltype="value"
+                    donut="true"
+                    donut-ratio="0.33"
+                    ><svg></svg>
+                </nvd3-pie-chart>
+            </div>
+            <div class="box-footer no-padding">
+                  <ul class="nav nav-pills nav-stacked">
+                    <li><a href="#">Cоматическая <span class="pull-right text-red"> 12%</span></a></li>
+                    <li><a href="#">Акушерско-гинекологическая <span class="pull-right text-green"> 48%</span></a></li>
+                    <li><a href="#">Сочетанная <span class="pull-right text-yellow"> 40%</span></a></li>
+                  </ul>
             </div>
         </div>
     </div>

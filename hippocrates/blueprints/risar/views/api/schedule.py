@@ -4,6 +4,7 @@ import datetime
 import itertools
 
 from flask import request
+from flask.ext.login import current_user
 
 from nemesis.lib.apiutils import api_method
 from nemesis.models.actions import ActionType, Action, ActionProperty, ActionPropertyType, ActionProperty_Integer, \
@@ -59,24 +60,30 @@ def api_0_need_hospitalization(person_id=None):
 @module.route('/api/0/current_stats.json')
 @api_method
 def api_0_current_stats():
+    person_id = None
     result = collections.defaultdict(lambda: 0)
+    if current_user.current_role in ('admin', 'obstetrician'):
+        person_id = safe_current_user_id()
+
+    where = [ActionType.flatCode == 'cardAttributes',
+             ActionPropertyType.code == 'prenatal_risk_572',
+             rbRequestType.code == 'pregnancy',
+             Action.event_id == Event.id,
+             ActionProperty.action_id == Action.id,
+             ActionPropertyType.id == ActionProperty.type_id,
+             ActionType.id == Action.actionType_id,
+             ActionProperty_Integer.id == ActionProperty.id,
+             Event.execDate.is_(None),
+             EventType.id == Event.eventType_id,
+             rbRequestType.id == EventType.requestType_id,
+             Event.deleted == 0,
+             Action.deleted == 0]
+    if person_id:
+        where.append(Event.execPerson_id == person_id)
+
     selectable = db.select(
         (ActionProperty_Integer.value_,),
-        whereclause=db.and_(
-            ActionType.flatCode == 'cardAttributes',
-            ActionPropertyType.code == 'prenatal_risk_572',
-            rbRequestType.code == 'pregnancy',
-            Action.event_id == Event.id,
-            ActionProperty.action_id == Action.id,
-            ActionPropertyType.id == ActionProperty.type_id,
-            ActionType.id == Action.actionType_id,
-            ActionProperty_Integer.id == ActionProperty.id,
-            Event.execDate.is_(None),
-            EventType.id == Event.eventType_id,
-            rbRequestType.id == EventType.requestType_id,
-            Event.deleted == 0,
-            Action.deleted == 0,
-        ),
+        whereclause=db.and_(*where),
         from_obj=(
             Event, EventType, rbRequestType, Action, ActionType, ActionProperty, ActionPropertyType, ActionProperty_Integer
         ))
