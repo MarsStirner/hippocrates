@@ -11,11 +11,13 @@ from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.data import create_action, update_action, create_new_action, get_planned_end_datetime, int_get_atl_flat, \
     get_patient_location
 from nemesis.lib.jsonify import ActionVisualizer
+from nemesis.lib.subscriptions import notify_user
 from nemesis.lib.user import UserUtils
 from nemesis.lib.utils import safe_traverse, safe_datetime, parse_id
 from nemesis.models.actions import Action, ActionType, ActionTemplate
 from nemesis.models.event import Event
 from nemesis.models.exists import Person
+from nemesis.models.useraccount import UserSubscriptions
 from nemesis.models.utils import safe_current_user_id
 from nemesis.systemwide import db, cache
 
@@ -136,6 +138,11 @@ def api_action_post(action_id=None):
             raise ApiException(404, 'Action %s not found' % action_id)
         if not UserUtils.can_edit_action(action):
             raise ApiException(403, 'User cannot edit action %s' % action_id)
+        if person_id != action.person_id:
+            s = UserSubscriptions()
+            s.person_id = person_id
+            s.object_id = 'hitsl.action.%s' % action.id
+            db.session.add(s)
         action = update_action(action, **data)
     else:
         import pprint
@@ -153,6 +160,22 @@ def api_action_post(action_id=None):
 
     db.session.add(action)
     db.session.commit()
+
+    object_id = 'hitsl.action.%s' % action.id
+    if not action_id:
+        action.person.subscribe(object_id)
+        action.setPerson.subscribe(object_id)
+    db.session.commit()
+    for notify_person_id in UserSubscriptions.list_subscribers(object_id):
+        notify_user(
+            notify_person_id,
+            u'Изменение в действии {0} пациента {1}'.format(
+                action.actionType.name,
+                action.event.client.nameText),
+            u'Вы подписаны на изменения в "{0}" у пациента {1}, поэтому получаете это письмо.'.format(
+                action.actionType.name,
+                action.event.client.nameText)
+        )
 
     v = ActionVisualizer()
     return v.make_action(action)

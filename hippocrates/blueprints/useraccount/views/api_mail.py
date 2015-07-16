@@ -3,9 +3,8 @@ from flask import request
 from sqlalchemy.orm import joinedload
 
 from ..app import module
-from blueprints.useraccount.models import UserMail
+from nemesis.models.useraccount import UserMail
 from nemesis.lib.apiutils import api_method
-from nemesis.models.exists import Person
 from nemesis.models.utils import safe_current_user_id
 from nemesis.systemwide import db
 
@@ -78,24 +77,17 @@ def mail_update(ids, field, value):
     db.session.commit()
 
 
-@module.route('/api/mail/', methods=["PUT", "DELETE"])
-@module.route('/api/mail/<uid>/<mode>', methods=["PUT", "DELETE"])
+@module.route('/api/mail/', methods=["PUT", "DELETE", "MOVE"])
+@module.route('/api/mail/<uid>/<action>', methods=["PUT", "DELETE", "MOVE"])
 @api_method
-def api_mail_mark(uid, mode):
-    if mode not in ('read', 'mark'):
-        raise
-    value = request.method == 'PUT' and 1 or 0
+def api_mail_mark(uid, action):
     ids = map(int, filter(None, uid.split(':')))
     if not ids:
         raise Exception('ids must me set')
-    mail_update(ids, mode, value)
+    if request.method == "MOVE":
+        mail_update(ids, 'folder', action)
+    elif request.method == "PUT":
+        mail_update(ids, action, 1)
+    elif request.method == "DELETE":
+        mail_update(ids, action, 0)
 
-
-@module.route('/api/mail/', methods=["MOVE"])
-@module.route('/api/mail/<uid>/<folder>', methods=["MOVE"])
-@api_method
-def api_mail_move(uid, folder):
-    ids = map(int, filter(None, uid.split(':')))
-    if not ids:
-        raise Exception('ids must me set')
-    mail_update(ids, 'folder', folder)

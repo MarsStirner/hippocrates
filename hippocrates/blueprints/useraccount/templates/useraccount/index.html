@@ -50,6 +50,9 @@
                                 <li ng-class="{active: current_folder == 'sent'}">
                                     <a href="#" ng-click="change_folder('sent')"><i class="fa fa-envelope-o"></i> Отправленные</a>
                                 </li>
+                                <li ng-class="{active: current_folder == 'system'}">
+                                    <a href="#" ng-click="change_folder('system')"><i class="fa fa-gear"></i> Системные</a>
+                                </li>
                                 <li ng-class="{active: current_folder == 'trash'}">
                                     <a href="#" ng-click="change_folder('trash')"><i class="fa fa-trash-o"></i> Корзина</a>
                                 </li>
