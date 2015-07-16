@@ -1,0 +1,20 @@
+<div class="box box-success" ng-if="mode == 1">
+    <div class="box-header with-border">
+        <button class="btn btn-default btn-sm" ng-click="list_mail()"><i class="fa fa-backward"></i> Назад</button>
+        <button class="btn btn-default btn-sm" ng-click="compose_mail(message)"><i class="fa fa-mail-reply"></i> Ответить</button>
+        <br/><h3 class="box-title">[[ message.subject ]]</h3><br/>
+        От: [[ message.sender.name ]]
+
+        <div class="box-tools pull-right">
+            <div class="has-feedback">
+                <input type="text" class="form-control input-sm" placeholder="Search Mail"/>
+                <span class="glyphicon glyphicon-search form-control-feedback"></span>
+            </div>
+        </div>
+        <!-- /.box-tools -->
+    </div>
+    <!-- /.box-header -->
+    <div class="box-body" ng-bind-html="message.text"></div>
+    <!-- /.box-body -->
+</div>
+<!-- /. box -->

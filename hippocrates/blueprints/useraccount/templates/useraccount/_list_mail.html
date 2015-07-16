@@ -1,0 +1,43 @@
+<div class="box box-primary" ng-if="mode == 0">
+    <div class="box-header with-border">
+        <h3 class="box-title">Inbox</h3>
+
+        <div class="box-tools pull-right">
+            <div class="has-feedback">
+                <input type="text" class="form-control input-sm" placeholder="Search Mail"/>
+                <span class="glyphicon glyphicon-search form-control-feedback"></span>
+            </div>
+        </div>
+        <!-- /.box-tools -->
+    </div>
+    <!-- /.box-header -->
+    <div class="box-body no-padding">
+        {% include 'useraccount/_list_mail_mailbox_controls.html' %}
+        <div class="table-responsive mailbox-messages">
+            <table class="table table-hover table-striped">
+                <tbody>
+                <tr ng-repeat="message in messages">
+                    <td width="1%"><input type="checkbox" ng-click="select_all.toggle(message.id)" ng-checked="select_all.selected(message.id)"/></td>
+                    <td width="1%" class="mailbox-star" ng-click="mark_star(message)" ng-if="current_folder != 'sent'">
+                        <a href="#"><i class="fa fa-star text-yellow" ng-class="{'fa-star-o': !message.mark}"></i></a>
+                    </td>
+                    <td width="1%" class="mailbox-name text-nowrap" ng-if="current_folder != 'sent'">[[ message.sender.name ]]</td>
+                    <td width="1%" class="mailbox-name text-nowrap" ng-if="current_folder == 'sent'">[[ message.recipient.name ]]</td>
+                    <td class="mailbox-subject" ng-class="{'text-bold': !message.read }">
+                        <a href="#" ng-click="view_mail(message)">
+                            [[ message.subject || 'Без темы' ]]
+                        </a>
+                    </td>
+                    <td width="1%" class="mailbox-attachment"><i class="fa fa-paperclip hidden"></i></td>
+                    <td width="1%" class="mailbox-date text-nowrap">[[ message.datetime | asDateTime ]]</td>
+                </tr>
+                </tbody>
+            </table>
+            <!-- /.table -->
+        </div>
+        <!-- /.mail-box-messages -->
+    </div>
+    <!-- /.box-body -->
+    {% include 'useraccount/_list_mail_mailbox_controls.html' %}
+</div>
+<!-- /. box -->

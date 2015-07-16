@@ -373,11 +373,10 @@ WebMis20.factory('WMAction', ['ApiCalls', 'EzekielLock', function (ApiCalls, Eze
             function (result) {
                 var action = (new Action()).merge(result, true);
                 if (!arguments[1] && !action.ro) {
-                    var lock = action.lock = new EzekielLock('hitsl.mis.action.{0}'.format(action.id)),
-                        event_source = lock.eventSource;
-                    event_source.subscribe('acquired', function () {action.readonly = false});
-                    event_source.subscribe('lost', function () {action.readonly = true});
-                    event_source.subscribe('released', function () {action.readonly = true});
+                    var lock = action.lock = new EzekielLock('hitsl.mis.action.{0}'.format(action.id));
+                    lock.subscribe('acquired', function () {action.readonly = false});
+                    lock.subscribe('lost', function () {action.readonly = true});
+                    lock.subscribe('released', function () {action.readonly = true});
                 } else {
                     action.lock = null;
                     action.readonly = action.ro;
