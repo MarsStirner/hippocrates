@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import collections
 import datetime
 
 from flask import request, abort
@@ -11,13 +12,12 @@ from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.data import create_action, update_action, create_new_action, get_planned_end_datetime, int_get_atl_flat, \
     get_patient_location
 from nemesis.lib.jsonify import ActionVisualizer
-from nemesis.lib.subscriptions import notify_user
+from nemesis.lib.subscriptions import notify_object, subscribe_user
 from nemesis.lib.user import UserUtils
 from nemesis.lib.utils import safe_traverse, safe_datetime, parse_id
 from nemesis.models.actions import Action, ActionType, ActionTemplate
 from nemesis.models.event import Event
 from nemesis.models.exists import Person
-from nemesis.models.useraccount import UserSubscriptions
 from nemesis.models.utils import safe_current_user_id
 from nemesis.systemwide import db, cache
 
@@ -108,6 +108,8 @@ def api_delete_action(action_id=None):
 @module.route('/api/action/<int:action_id>', methods=['POST'])
 @api_method
 def api_action_post(action_id=None):
+    notifications = []
+    subscriptions = []
     action_desc = request.get_json()
     set_person_id = safe_traverse(action_desc, 'set_person', 'id')
     person_id = safe_traverse(action_desc, 'person', 'id')
@@ -139,10 +141,19 @@ def api_action_post(action_id=None):
         if not UserUtils.can_edit_action(action):
             raise ApiException(403, 'User cannot edit action %s' % action_id)
         if person_id != action.person_id:
-            s = UserSubscriptions()
-            s.person_id = person_id
-            s.object_id = 'hitsl.action.%s' % action.id
-            db.session.add(s)
+            if person_id:
+                notifications.append({
+                    'person_id': person_id,
+                    'reason': 'exec_assigned',
+                })
+                subscriptions.append(person_id)
+            if action.person_id:
+                notifications.append({
+                    'person_id': action.person_id,
+                    'reason': 'exec_unassigned',
+                })
+        if set_person_id != action.setPerson_id:
+            subscriptions.append(set_person_id)
         action = update_action(action, **data)
     else:
         import pprint
@@ -156,26 +167,35 @@ def api_action_post(action_id=None):
                 u'У пользовател нет прав на создание действия с ActionType id = %s '
                 u'для обращения с event id = %s') % (at_id, event_id)
             )
+        if set_person_id:
+            subscriptions.append(set_person_id)
+        if person_id:
+            subscriptions.append(person_id)
+            notifications.append({
+                'person_id': person_id,
+                'reason': 'exec_assigned',
+            })
         action = create_new_action(at_id, event_id, properties=properties_desc, data=data)
 
     db.session.add(action)
     db.session.commit()
 
     object_id = 'hitsl.action.%s' % action.id
-    if not action_id:
-        action.person.subscribe(object_id)
-        action.setPerson.subscribe(object_id)
-    db.session.commit()
-    for notify_person_id in UserSubscriptions.list_subscribers(object_id):
-        notify_user(
-            notify_person_id,
-            u'Изменение в действии {0} пациента {1}'.format(
-                action.actionType.name,
-                action.event.client.nameText),
-            u'Вы подписаны на изменения в "{0}" у пациента {1}, поэтому получаете это письмо.'.format(
-                action.actionType.name,
-                action.event.client.nameText)
-        )
+
+    data = {
+        'action_name': action.actionType.name,
+        'client_name': action.event.client.nameText,
+    }
+
+    for pid in subscriptions:
+        subscribe_user(pid, object_id)
+
+    reasons_dict = collections.defaultdict(list)
+
+    for d in notifications:
+        reasons_dict[d['person_id']].append(d['reason'])
+
+    notify_object(object_id, reasons_dict, data, 'altered')
 
     v = ActionVisualizer()
     return v.make_action(action)
