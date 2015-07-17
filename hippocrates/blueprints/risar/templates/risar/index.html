@@ -4,7 +4,7 @@
 
 {% block main %}
 <section class="content-header">
-    <h1>Рабочий стол</h1>
+    <h1>Рабочий стол {% if user_profiles_mng.has_ui_obstetrician() %}акушера-гинеколога{% endif %}</h1>
 </section>
 <section class="content">
     <div ng-controller="IndexCtrl" class="ng-cloak">

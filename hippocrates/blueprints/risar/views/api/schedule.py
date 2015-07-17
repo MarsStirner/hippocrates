@@ -15,6 +15,7 @@ from nemesis.models.schedule import Schedule
 from nemesis.models.utils import safe_current_user_id
 from nemesis.systemwide import db
 from blueprints.risar.app import module
+from blueprints.risar.lib.card_attrs import get_card_attrs_action
 from blueprints.risar.lib.represent import represent_ticket, represent_chart_short, get_pregnancy_week
 
 
@@ -45,6 +46,10 @@ def api_0_schedule(person_id=None):
 def api_0_need_hospitalization(person_id=None):
     # получение списка пациенток врача, которые нуждаются в госпитализации в стационар 2/3 уровня
 
+    def get_delivery_date(event):
+        action = get_card_attrs_action(event)
+        return action['predicted_delivery_date'].value
+
     if not person_id:
         person_id = safe_current_user_id()
 
@@ -54,7 +59,9 @@ def api_0_need_hospitalization(person_id=None):
                 ActionType.flatCode == 'cardAttributes', ActionPropertyType.code == "prenatal_risk_572",
                 ActionProperty_Integer.value_.in_([2, 3]))\
         .all()
-    return [represent_chart_short(event) for event in patient_list if get_pregnancy_week(event) >= 38]
+    patient_list = filter(lambda x: get_pregnancy_week(x) >= 38, patient_list)
+    patient_list.sort(key=get_delivery_date)
+    return [represent_chart_short(event) for event in patient_list]
 
 
 @module.route('/api/0/current_stats.json')

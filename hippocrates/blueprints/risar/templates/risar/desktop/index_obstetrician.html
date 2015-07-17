@@ -22,13 +22,11 @@
                         <table class="table">
                             <tbody>
                             <tr>
-                                <th></th>
                                 <th>Риск</th>
                                 <th>ФИО</th>
-                                <th>Срок беременности</th>
+                                <th>Срок</th>
                             </tr>
                             <tr ng-repeat="row in need_hospitalization | filter:query">
-                                <td></td>
                                 <td><span class="label"
                                           ng-class="{'label-default': row.risk_rate.id == 0,
                                                      'label-success': row.risk_rate.id == 1,
@@ -66,7 +64,7 @@
                                 <th>Номер</th>
                                 <th>Риск</th>
                                 <th>ФИО</th>
-                                <th>Срок беременности</th>
+                                <th>Статус выполнения</th>
                             </tr>
                             <tr>
                                 <td>12/2015</td>
@@ -114,7 +112,7 @@
                 </div>
             </div>
             <div class="box-body">
-                <table>
+                <table class="table table-condensed">
                     <tr>
                         <td>Всего</td>
                         <td><span class="badge label-info pull-right">23</span></td>
@@ -138,19 +136,43 @@
                 </div>
             </div>
             <div class="box-body">
-                <p>Заполненные карты <span class="badge label-danger pull-right">12</span></p>
-                <p>Незаполненные разделы <span class="badge label-danger pull-right">6</span></p>
-                <p>Анамнез <span class="badge label-danger pull-right">0</span></p>
-                <p>Плановый осмотр <span class="badge label-danger pull-right">2</span></p>
-                <p>ЛПУ для родоразрешения <span class="badge label-danger pull-right">1</span></p>
-                <p>Результаты мероприятий <span class="badge label-danger pull-right">1</span></p>
-                <p>Эпикриз <span class="badge label-danger pull-right">2</span></p>
+                <table class="table table-condensed">
+                    <tr>
+                        <td>Заполненные карты</td>
+                        <td><span class="badge label-danger pull-right">12</span></td>
+                    </tr>
+                    <tr>
+                        <td>Незаполненные разделы</td>
+                        <td><span class="badge label-danger pull-right">6</span></td>
+                    </tr>
+                    <tr>
+                        <td>Анамнез</td>
+                        <td><span class="badge label-danger pull-right">0</span></td>
+                    </tr>
+                    <tr>
+                        <td>Плановый осмотр</td>
+                        <td><span class="badge label-danger pull-right">2</span></td>
+                    </tr>
+                    <tr>
+                        <td>ЛПУ для родоразрешения</td>
+                        <td><span class="badge label-danger pull-right">1</span></td>
+                    </tr>
+                    <tr>
+                        <td>Результаты мероприятий</td>
+                        <td><span class="badge label-danger pull-right">1</span></td>
+                    </tr>
+                </table>
+                    <tr>
+                        <td>Эпикриз</td>
+                        <td><span class="badge label-danger pull-right">2</span></td>
+                    </tr>
+                </table>
             </div>
         </div>
 
         <div class="box box-danger">
             <div class="box-header with-border">
-                <h3 class="box-title">График по степеням риска</h3>
+                <h3 class="box-title">Пациентки по степени риска</h3>
                 <div class="box-tools pull-right">
                     <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
                 </div>
@@ -159,9 +181,9 @@
                 <nvd3-pie-chart
                     id="noid"
                     data="slices"
-                    width="360"
+                    width="350"
                     height="370"
-                    margin="{left:0,top:0,bottom:0,right:40}"
+                    margin="{left:0,top:0,bottom:0,right:10}"
                     x="slices_x"
                     y="slices_y"
                     color="slices_c"
@@ -174,12 +196,13 @@
                     ><svg></svg>
                 </nvd3-pie-chart>
             </div>
-            <div class="box-footer no-padding">
-                  <ul class="nav nav-pills nav-stacked">
+            <div class="box-footer">
+                <h4>По патологиям</h4>
+                <ul class="nav nav-pills nav-stacked">
                     <li><a href="#">Cоматическая <span class="pull-right text-red"> 12%</span></a></li>
                     <li><a href="#">Акушерско-гинекологическая <span class="pull-right text-green"> 48%</span></a></li>
                     <li><a href="#">Сочетанная <span class="pull-right text-yellow"> 40%</span></a></li>
-                  </ul>
+                </ul>
             </div>
         </div>
     </div>
