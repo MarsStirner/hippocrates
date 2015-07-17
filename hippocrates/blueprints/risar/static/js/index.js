@@ -65,14 +65,14 @@ var IndexCtrl = function ($scope, RisarApi) {
                 $scope.slices.push({
                     key: 'Средняя',
                     value: result['2'],
-                    color: '#E0C030'
+                    color: '#f39c12'
                 })
             }
             if (result['3']) {
                 $scope.slices.push({
                     key: 'Высокая',
                     value: result['3'],
-                    color: '#E05030'
+                    color: '#dd4b39'
                 })
             }
         })
