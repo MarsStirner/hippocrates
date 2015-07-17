@@ -18,19 +18,19 @@
 <section class="content">
 <div>
     <div class="row">
-    <div class="col-md-12">
-        <div class="box box-solid">
-        {% include "actions/_action_head_editable.html" %}
+        <div class="col-md-12">
+            <div class="box box-info">
+                <div class="box-body">
+                    {% include "actions/_action_head_editable.html" %}
+                    {% include "actions/_action_head_viewable.html" %}
+                </div>
+            </div>
+            <div class="box box-info">
+                <div class="box-body">
+                    <wm-action-layout action="action"></wm-action-layout>
+                </div>
+            </div>
         </div>
-        <div class="box box-solid">
-        {% include "actions/_action_head_viewable.html" %}
-        </div>
-    <div class="box box-solid">
-    <div class="box-body">
-    <wm-action-layout action="action"></wm-action-layout>
-    </div>
-    </div>
-    </div>
     </div>
 </div>
 <div class="box-footer">
