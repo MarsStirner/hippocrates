@@ -1,4 +1,4 @@
 # -*- coding: utf-8 -*-
-import html, api_mail
+from . import html, api_mail, api_subscriptions
 
 __author__ = 'viruzzz-kun'

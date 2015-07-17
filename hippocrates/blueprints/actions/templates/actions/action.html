@@ -3,8 +3,9 @@
 {% block main %}
 <div ng-controller="ActionEditorCtrl" class="ng-cloak">
 <div alert-notify></div>
-<section class="content-header" wm-page-header>
-    <div class="pull-right text-right col-md-1">
+<section class="content-header">
+    <div class="wm-page-header-button-box">
+        <wm-subscription-btn oid="hitsl.action.[[ action.id ]]"></wm-subscription-btn>
         <ui-print-button ps="ps" resolve="ps_resolve()" before-print="save_action(true)"></ui-print-button>
         <button class="btn btn-success" title="Сохранить" ng-click="save_action()" ng-if="!action.readonly">
             <span class="glyphicon glyphicon-ok"></span>

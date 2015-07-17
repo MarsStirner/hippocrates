@@ -110,6 +110,7 @@ def fc_urls():
             'api_user_mail_summary': url_for("useraccount.api_mail_summary"),
             'api_user_mail': url_for("useraccount.api_mail_get") + '{0}',
             'api_user_mail_alter': url_for("useraccount.api_mail_mark") + '{0}/{1}',
+            'api_subscription': url_for("useraccount.api_subscription") + '{0}'
         }
     }
 
