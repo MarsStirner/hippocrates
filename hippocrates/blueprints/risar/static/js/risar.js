@@ -22,6 +22,11 @@ WebMis20
             return wrapper('GET', Config.url.api_need_hospitalization)
         }
     }
+    this.pregnancy_week_diagram  = {
+        get: function(){
+            return wrapper('GET', Config.url.api_pregnancy_week_diagram)
+        }
+    }
     this.search_event = {
         get: function (query) {
             return wrapper('POST', Config.url.api_event_search, {}, query)

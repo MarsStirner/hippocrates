@@ -64,6 +64,29 @@ def api_0_need_hospitalization(person_id=None):
     return [represent_chart_short(event) for event in patient_list]
 
 
+@module.route('/api/0/pregnancy_week_diagram/')
+@module.route('/api/0/pregnancy_week_diagram/<int:person_id>')
+@api_method
+def api_0_pregnancy_week_diagram(person_id=None):
+    """
+    распределение пациенток на учете у врача по сроку беременности
+    """
+    result = [[i, 0] for i in xrange(1, 41)]
+    if not person_id:
+        person_id = safe_current_user_id()
+
+    event_list = Event.query.join(EventType, rbRequestType, Action, ActionType, ActionProperty,
+                                    ActionPropertyType, ActionProperty_Integer)\
+        .filter(rbRequestType.code == 'pregnancy', Event.execDate.is_(None), Event.execPerson_id == person_id)\
+        .all()
+
+    for event in event_list:
+        pregnancy_week = get_pregnancy_week(event)
+        if pregnancy_week and pregnancy_week <= 40:
+            result[pregnancy_week-1][1] += 1
+    return result
+
+
 @module.route('/api/0/current_stats.json')
 @api_method
 def api_0_current_stats():

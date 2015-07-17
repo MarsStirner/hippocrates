@@ -18,9 +18,7 @@
                 <a href="{{ url_for('.html_search') }}">Расширенный поиск</a>
             </div>
         </div>
-        {% if user_profiles_mng.has_ui_obstetrician() %}
-            {% include "risar/desktop/index_obstetrician.html" %}
-        {% elif user_profiles_mng.has_ui_overseer_low() %}
+        {% if user_profiles_mng.has_ui_overseer_low() %}
             <div class="row">
                 <div class="col-md-8">
                     {% include "risar/desktop/patient_list.html" %}

@@ -12,6 +12,8 @@ __author__ = 'mmalkov'
 def index_html():
     if current_user.role_in('ambulance'):
         return render_template('risar/ambulance_index.html')
+    elif current_user.role_in('admin', 'obstetrician'):
+        return render_template('risar/index_obstetrician.html')
     else:
         return render_template('risar/index.html')
 

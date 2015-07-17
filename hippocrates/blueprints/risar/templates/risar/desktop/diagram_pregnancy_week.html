@@ -1,0 +1,25 @@
+<div class="box box-info">
+    <div class="box-header with-border">
+        <h3 class="box-title">Пациентки по сроку беременности, по группам риска</h3>
+        <div class="box-tools pull-right">
+            <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+        </div>
+    </div>
+    <div class="box-body">
+        <nvd3-discrete-bar-chart
+                data="pregnancy_week"
+                id="pregnancy_week"
+                width="900"
+                height="400"
+                showXAxis="true"
+                showYAxis="true"
+                tooltips="true"
+                interactive="true"
+{#                margin="{left:30,top:20,bottom:20,right:20}"#}
+                tooltipcontent="toolTipContent_pregnancy_week()"
+                color="colorFunction()"
+                showLegend="true"
+                ><svg></svg>
+        </nvd3-discrete-bar-chart>
+    </div>
+</div>

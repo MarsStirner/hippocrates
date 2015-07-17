@@ -7,6 +7,7 @@ WebMis20
     url: {
         api_schedule: '{{ url_for('.api_0_schedule') }}',
         api_need_hospitalization: '{{ url_for('.api_0_need_hospitalization') }}',
+        api_pregnancy_week_diagram: '{{ url_for('.api_0_pregnancy_week_diagram') }}',
         api_chart: '{{ url_for('.api_0_chart') }}',
         api_mini_chart: '{{ url_for('.api_0_mini_chart') }}',
         api_event_routing: '{{ url_for('.api_0_event_routing') }}',
