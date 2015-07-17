@@ -2,7 +2,8 @@
 import collections
 import datetime
 
-from flask import request, abort
+from flask import request, abort, url_for
+
 from flask.ext.login import current_user
 
 from ..app import module
@@ -185,6 +186,8 @@ def api_action_post(action_id=None):
     data = {
         'action_name': action.actionType.name,
         'client_name': action.event.client.nameText,
+        'action_url': url_for('actions.html_action', action_id=action.id),
+        'client_url': url_for('patients.patient_info_full', client_id=action.event.client_id),
     }
 
     for pid in subscriptions:
