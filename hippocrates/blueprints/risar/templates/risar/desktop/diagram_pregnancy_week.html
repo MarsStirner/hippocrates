@@ -8,15 +8,15 @@
     <div class="box-body">
         <div class="row">
 
-            <div class="col-md-8">
+            <div class="col-md-12">
                 <p class="text-center">
                     <strong>По сроку беременности</strong>
                 </p>
                 <nvd3-discrete-bar-chart
                         data="pregnancy_week"
                         id="pregnancy_week"
-                        width="820"
-                        height="400"
+                        width="1500"
+                        height="500"
                         showXAxis="true"
                         showYAxis="true"
                         yAxisTickFormat="yAxisTickFormat"
@@ -29,10 +29,12 @@
                         ><svg></svg>
                 </nvd3-discrete-bar-chart>
             </div>
+        </div>
+        <div class="row risk_groups">
+            <p class="text-center">
+                <strong>По группам риска</strong>
+            </p>
             <div class="col-md-4">
-                <p class="text-center">
-                    <strong>По группам риска</strong>
-                </p>
                 <div class="progress-group">
                     <span class="progress-text">Невынашивание беременности</span>
                     <span class="progress-number"><b>2</b>/[[pregnancy_week_all]]</span>
@@ -68,6 +70,8 @@
                       <div class="progress-bar progress-bar-primary" style="width: 0%"></div>
                     </div>
                 </div><!-- /.progress-group -->
+            </div>
+            <div class="col-md-4">
                 <div class="progress-group">
                     <span class="progress-text">Развитие резус-конфликта</span>
                     <span class="progress-number"><b>3</b>/[[pregnancy_week_all]]</span>
@@ -110,6 +114,8 @@
                       <div class="progress-bar progress-bar-primary" style="width: 0%"></div>
                     </div>
                 </div><!-- /.progress-group -->
+            </div>
+            <div class="col-md-4">
                 <div class="progress-group">
                     <span class="progress-text">Обострение хр.астматических заболеваний</span>
                     <span class="progress-number"><b>0</b>/[[pregnancy_week_all]]</span>

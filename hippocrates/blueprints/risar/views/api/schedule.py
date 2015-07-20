@@ -61,7 +61,7 @@ def api_0_current_stats(person_id=None):
 
     event_list = Event.query.join(EventType, rbRequestType, Action, ActionType, ActionProperty,
                                     ActionPropertyType, ActionProperty_Integer)\
-        .filter(rbRequestType.code == 'pregnancy', Event.execDate.is_(None), Event.execPerson_id == person_id).all()
+        .filter(rbRequestType.code == 'pregnancy', Event.deleted == 0, Event.execDate.is_(None), Event.execPerson_id == person_id).all()
     events_all = len(event_list)
     events_45 = len(filter(lambda x: get_pregnancy_week(x) >= 45, event_list))
     events_2_months = len(filter(lambda x: two_months(x), event_list))
@@ -87,7 +87,7 @@ def api_0_need_hospitalization(person_id=None):
 
     patient_list = Event.query.join(EventType, rbRequestType, Action, ActionType, ActionProperty,
                                     ActionPropertyType, ActionProperty_Integer)\
-        .filter(rbRequestType.code == 'pregnancy', Event.execDate.is_(None), Event.execPerson_id == person_id,
+        .filter(rbRequestType.code == 'pregnancy', Event.deleted == 0, Event.execDate.is_(None), Event.execPerson_id == person_id,
                 ActionType.flatCode == 'cardAttributes', ActionPropertyType.code == "prenatal_risk_572",
                 ActionProperty_Integer.value_.in_([2, 3]))\
         .all()
@@ -104,6 +104,7 @@ def api_0_pregnancy_week_diagram(person_id=None):
     распределение пациенток на учете у врача по сроку беременности
     """
     result = [[i, 0] for i in xrange(1, 41)]
+    result.append(['40+', 0])
     if not person_id:
         person_id = safe_current_user_id()
 
@@ -116,6 +117,8 @@ def api_0_pregnancy_week_diagram(person_id=None):
         pregnancy_week = get_pregnancy_week(event)
         if pregnancy_week and pregnancy_week <= 40:
             result[pregnancy_week-1][1] += 1
+        elif pregnancy_week and pregnancy_week > 40:
+            result[40][1] += 1
     return result
 
 
