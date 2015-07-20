@@ -320,3 +320,7 @@ ul.product-list, li.product-list-item-active {
     border-right-color: orangered;
 
 }
+
+.risk_groups .progress-group{
+    margin-bottom: 5px;
+}
