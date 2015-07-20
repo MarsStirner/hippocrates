@@ -35,8 +35,13 @@ var IndexObstetricianCtrl = function ($scope, RisarApi) {
         // А это, ребятки, костыль, потому что где-то в d3 или nv - багулечка
         return d.data.color;
     };
-    $scope.refresh_diagram = function () {
+    $scope.current_stats = function(){
         RisarApi.current_stats.get().then(function (result) {
+            $scope.current_stats = result;
+        })
+    };
+    $scope.refresh_diagram = function () {
+        RisarApi.prenatal_risk_stats.get().then(function (result) {
             $scope.slices = [];
             if (result['0']) {
                 $scope.slices.push({
@@ -85,6 +90,7 @@ var IndexObstetricianCtrl = function ($scope, RisarApi) {
         });
     }
 
+    $scope.current_stats();
     $scope.refresh_diagram();
     $scope.refresh_pregnancy_week_diagram();
     $scope.load_need_hospitalization();

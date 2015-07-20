@@ -65,7 +65,7 @@
                         <div class="box box-info">
                             <div class="box-header">
                                 <h3 class="box-title">Поручения</h3>
-                                <span class="badge label-danger">5</span>
+                                <span class="badge label-info">5</span>
                                 <div class="box-tools pull-right">
                         {#            <ul class="pagination pagination-sm no-margin" style="vertical-align: middle;">#}
                         {#                <li><a href="#">«</a></li>#}
@@ -116,6 +116,9 @@
                                         <td>Полякова Наталья Сергеевна</td>
                                         <td><span class="label label-danger">Просрочено</span></td>
                                     </tr>
+                                    <tr class="text-center">
+                                        <td colspan="4"><a href="#">Все поручения</a></td>
+                                    </tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -136,15 +139,15 @@
                         <table class="table table-condensed">
                             <tr>
                                 <td>Всего</td>
-                                <td><span class="badge label-info pull-right">23</span></td>
+                                <td><span class="badge label-info pull-right">[[current_stats.events_all]]</span></td>
                             </tr>
                             <tr>
                                 <td>Не закрыты карты пациенток (срок более 45 недель)</td>
-                                <td><span class="badge label-danger pull-right">7</span></td>
+                                <td><span class="badge label-danger pull-right">[[current_stats.events_45]]</span></td>
                             </tr>
                             <tr>
                                 <td>Пропущено плановое посещение (2 месяца)</td>
-                                <td><span class="badge label-danger pull-right">3</span></td>
+                                <td><span class="badge label-danger pull-right">[[current_stats.events_2_months]]</span></td>
                             </tr>
                         </table>
                     </div>

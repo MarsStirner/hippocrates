@@ -45,7 +45,7 @@ var IndexCtrl = function ($scope, RisarApi) {
         return d.data.color;
     };
     $scope.refresh_diagram = function () {
-        RisarApi.current_stats.get().then(function (result) {
+        RisarApi.prenatal_risk_stats.get().then(function (result) {
             $scope.slices = [];
             if (result['0']) {
                 $scope.slices.push({

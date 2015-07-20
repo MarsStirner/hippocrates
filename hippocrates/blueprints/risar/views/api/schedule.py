@@ -17,6 +17,7 @@ from nemesis.systemwide import db
 from blueprints.risar.app import module
 from blueprints.risar.lib.card_attrs import get_card_attrs_action
 from blueprints.risar.lib.represent import represent_ticket, represent_chart_short, get_pregnancy_week
+from blueprints.risar.risar_config import checkup_flat_codes
 
 
 __author__ = 'mmalkov'
@@ -38,6 +39,37 @@ def api_0_schedule(person_id=None):
         for ticket in itertools.chain(*(schedule.tickets for schedule in schedule_list))
         if all_tickets or ticket.client_ticket
     ]
+
+
+@module.route('/api/0/current_stats.json')
+@api_method
+def api_0_current_stats(person_id=None):
+    def two_months(event):
+        now = datetime.datetime.now()
+        checkups = Action.query.join(ActionType).filter(
+            Action.event == event,
+            Action.deleted == 0,
+            ActionType.flatCode.in_(checkup_flat_codes)
+        ).order_by(Action.begDate).all()
+        if checkups:
+            return True if (now - checkups[-1].begDate).days/60. > 2 else False
+        else:
+            return True if (now - event.setDate).days/60. > 2 else False
+
+    if not person_id:
+        person_id = safe_current_user_id()
+
+    event_list = Event.query.join(EventType, rbRequestType, Action, ActionType, ActionProperty,
+                                    ActionPropertyType, ActionProperty_Integer)\
+        .filter(rbRequestType.code == 'pregnancy', Event.execDate.is_(None), Event.execPerson_id == person_id).all()
+    events_all = len(event_list)
+    events_45 = len(filter(lambda x: get_pregnancy_week(x) >= 45, event_list))
+    events_2_months = len(filter(lambda x: two_months(x), event_list))
+    return {
+        'events_all': events_all,
+        'events_45': events_45,
+        'events_2_months': events_2_months
+    }
 
 
 @module.route('/api/0/need_hospitalization/')
@@ -87,9 +119,9 @@ def api_0_pregnancy_week_diagram(person_id=None):
     return result
 
 
-@module.route('/api/0/current_stats.json')
+@module.route('/api/0/prenatal_risk_stats.json')
 @api_method
-def api_0_current_stats():
+def api_0_prenatal_risk_stats():
     person_id = None
     result = collections.defaultdict(lambda: 0)
     if current_user.current_role in ('admin', 'obstetrician'):

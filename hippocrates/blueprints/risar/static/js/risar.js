@@ -51,6 +51,11 @@ WebMis20
             return wrapper('GET', Config.url.api_current_stats);
         }
     };
+    this.prenatal_risk_stats = {
+        get: function () {
+            return wrapper('GET', Config.url.api_prenatal_risk_stats);
+        }
+    }
     this.death_stats = {
         get: function () {
             return wrapper('GET', Config.url.api_death_stats);
