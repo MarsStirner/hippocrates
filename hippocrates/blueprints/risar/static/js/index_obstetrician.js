@@ -15,6 +15,9 @@ var IndexObstetricianCtrl = function ($scope, RisarApi) {
             return '#3c8dbc';
         };
     }
+    $scope.yAxisTickFormat = function(d){
+        return d;
+    }
     $scope.$watch('search_date.date', function (n, o) {
         RisarApi.schedule(n).then(function (tickets) {
             $scope.tickets = tickets;
@@ -71,6 +74,9 @@ var IndexObstetricianCtrl = function ($scope, RisarApi) {
                 "key": "Пациентки по сроку беременности",
                 "values": result
             }]
+            $scope.pregnancy_week_all = result.reduce(function(prev, curr){
+                        return prev + curr[1]
+                    }, 0);
         })
     }
     $scope.load_need_hospitalization = function(){
