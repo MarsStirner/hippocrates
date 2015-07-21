@@ -1,24 +1,39 @@
 <ng-form name="fileAttachForm" toc-element="Копии документов">
-    <div class="box box-info">
+    <div class="box box-primary">
         <div class="box-header with-border">
             <h3 class="box-title">Копии документов</h3>
+            <div class="box-tools pull-right">
+                <button type="button" class="btn btn-box-tool" ng-click="add_new_file()"><span class="text-primary"><i class="ion ion-plus-round fa-fw"></i> Прикрепить файл</span></button>
+            </div>
         </div>
         <div class="box-body">
-            <button type="button" class="btn btn-primary" ng-click="add_new_file()">Прикрепить файл</button>
-            <hr>
-            <div class="row">
-                <ul>
-                    <li ng-repeat="fa in client.file_attaches">
+            <ul class="list-unstyled">
+                <li ng-if="client.file_attaches.length">
+                    <div class="checkbox">
+                        <label>
+                        <input type="checkbox" ng-checked="client.file_attaches.length==selected_files.length" ng-click="select_all_files()">
+                        <b>Выбрать все документы</b>
+                        </label>
+                    </div>
+                </li>
+                <li ng-repeat="fa in client.file_attaches">
+                    <div class="checkbox">
+                        <label>
+                        <input type="checkbox" ng-click="toggle_select_file(fa)" ng-checked="selected_files.has(fa)">
                         <wm-client-file-attach-item model-attach="fa"
                             on-open="openFile(fa_id, page_idx)">
                         </wm-client-file-attach-item>
-                        <button type="button" class="btn btn-default btn-sm" ng-click="printFileAttach(fa)"
-                            title="Печать всех страниц документа">
-                            <span class="glyphicon glyphicon-print"></span>
-                        </button>
-                    </li>
-                </ul>
-            </div>
+                        </label>
+                    </div>
+                </li>
+            </ul>
         </div>
+        <div class="box-footer">
+            <button type="button" class="btn btn-lg btn-default" ng-click="printFilesAttach(selected_files)"
+                title="Печать всех страниц документа">
+                <span class="glyphicon glyphicon-print"></span> Печать выбранных документов
+            </button>
+        </div>
+
     </div>
 </ng-form>

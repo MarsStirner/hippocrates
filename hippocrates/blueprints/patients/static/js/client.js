@@ -13,6 +13,7 @@ angular.module('WebMis20.controllers').
             $scope.alerts = [];
             $scope.clientServices = WMClientServices;
             $scope.currentDate = new Date();
+            $scope.selected_files = [];
 
             $scope.client_id = $scope.params.client_id;
             var client = $scope.client = new WMClient($scope.client_id);
@@ -147,8 +148,25 @@ angular.module('WebMis20.controllers').
                     $scope.reloadClient();
                 });
             };
-            $scope.printFileAttach = function (fa) {
-                function makeDocument(fa) {
+
+            $scope.toggle_select_file = function (fa) {
+                if($scope.selected_files.has(fa)) {
+                    $scope.selected_files.remove(fa);
+                } else {
+                    $scope.selected_files.push(fa);
+                }
+            };
+
+            $scope.select_all_files = function () {
+                if ($scope.selected_files.length == client.file_attaches.length) {
+                    $scope.selected_files = [];
+                } else {
+                    $scope.selected_files = client.file_attaches;
+                }
+            };
+
+            $scope.printFilesAttach = function (fa_list) {
+                function make_documents(fa_list) {
                     var deferred = $q.defer();
                     var html = '<html><style>{0}</style><body>{1}</body></html>'.format(
                         '@media print {\
@@ -160,21 +178,24 @@ angular.module('WebMis20.controllers').
                     );
                     var pages = [],
                         promises = [];
-                    angular.forEach(fa.file_document.files, function (fileMeta) {
-                        var idx = fileMeta.idx,
-                            promise;
-                        pages[idx] = new Image();
-                        promise = $http.get(WMConfig.url.api_patient_file_attach, {
-                            params: {
-                                file_meta_id: fileMeta.id
-                            }
-                        }).success(function (data) {
-                            pages[idx].src = "data:{0};base64,".format(data.result.mime) + data.result.data;
-                        }).error(function () {
-                            pages[idx] = document.createElement('p');
-                            pages[idx].innerHTML = 'Ошибка загрузки {0} страницы документа'.format(idx);
+                    angular.forEach(fa_list, function (fa) {
+                        var promises = [];
+                        angular.forEach(fa.file_document.files, function (fileMeta) {
+                            var idx = fileMeta.idx,
+                                promise;
+                            pages[idx] = new Image();
+                            promise = $http.get(WMConfig.url.api_patient_file_attach, {
+                                params: {
+                                    file_meta_id: fileMeta.id
+                                }
+                            }).success(function (data) {
+                                pages[idx].src = "data:{0};base64,".format(data.result.mime) + data.result.data;
+                            }).error(function () {
+                                pages[idx] = document.createElement('p');
+                                pages[idx].innerHTML = 'Ошибка загрузки {0} страницы документа'.format(idx);
+                            });
+                            promises.push(promise);
                         });
-                        promises.push(promise);
                     });
 
                     $q.all(promises).then(function composeDocument() {
@@ -185,7 +206,7 @@ angular.module('WebMis20.controllers').
                         html = html.format(html_pages);
                         deferred.resolve(html);
                     }, function () {
-                        deferred.reject('Ошбика формирования документа на печать');
+                        deferred.reject('Ошибка формирования документа на печать');
                     });
                     return deferred.promise;
                 }
@@ -193,7 +214,7 @@ angular.module('WebMis20.controllers').
                 // i.e. user click event and corresponding callback function.
                 // Using promises results in calling new functions, that are not directly fired by user.
                 var w = $window.open();
-                makeDocument(fa).then(function openPrintWindow(html) {
+                make_documents(fa_list).then(function openPrintWindow(html) {
                     w.document.open();
                     w.document.write(html);
                     w.document.close();
