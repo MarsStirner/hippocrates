@@ -12,7 +12,15 @@ var IndexObstetricianCtrl = function ($scope, RisarApi) {
     };
     $scope.colorFunction = function() {
         return function(d, i) {
-            return '#3c8dbc';
+            if (d[0]<=14){
+                return '#E567B1'
+            } else if (14 < d[0] && d[0]<= 26){
+                return '#E5399E'
+            } else if (27 < d[0] && d[0]<= 40){
+                return '#CB0077'
+            } else {
+                return '#84004D';
+            }
         };
     }
     $scope.yAxisTickFormat = function(d){

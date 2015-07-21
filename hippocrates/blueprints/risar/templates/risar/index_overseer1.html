@@ -1,0 +1,51 @@
+{% extends 'risar/base.html' %}
+
+{% block title %}> {{ module_name }}{% endblock %}
+
+{% block main %}
+<section class="content-header">
+    <h1>Рабочий стол куратора первого уровня</h1>
+</section>
+<section class="content">
+    <div ng-controller="IndexCtrl" class="ng-cloak">
+        <div class="row">
+            <div class="col-md-12">
+                <input class="form-control" ng-model="query" placeholder="Быстрый поиск" autofocus>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 text-right">
+                <a href="{{ url_for('.html_search') }}">Расширенный поиск</a>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-9">
+                {% include "risar/desktop/patient_list.html" %}
+                <div class ="row">
+                    <div class="col-md-6">
+
+                    </div>
+                    <div class="col-md-6">
+                    </div>
+                </div>
+                <div class ="row">
+                    <div class="col-md-6">
+                        {% include "risar/desktop/annual_reports.html" %}
+                    </div>
+                    <div class="col-md-6">
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                {% include "risar/desktop/diagram_risk_rates.html" %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block modules_js %}
+    {{ super() }}
+    <script src="{{ url_for('.static', filename='js/index.js', v=version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/risar.js', v=version) }}"></script>
+{% endblock %}
