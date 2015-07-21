@@ -1,6 +1,6 @@
 <ng-form name="_policies" toc-element="Полисы">
 <h4>Медицинские полисы</h4>
-<div class="box box-info">
+<div class="box box-primary">
     <div ng-repeat="cpol in client.compulsory_policies | flt_not_deleted">
         <ng-form name="cpolForm" toc-element toc-dynamic="cpol.insurer.short_name">
             <div class="box-header with-border">
