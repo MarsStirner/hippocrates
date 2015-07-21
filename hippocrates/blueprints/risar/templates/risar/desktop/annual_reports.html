@@ -1,9 +1,18 @@
 <div class="box box-success">
-    <div class="box-header with-border"><h3 class="box-title">Годовые отчёты:</h3></div>
+    <div class="box-header with-border">
+        <h3 class="box-title">Годовые отчёты:</h3>
+        <div class="box-tools pull-right">
+            <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+        </div>
+    </div>
     <div class="box-body">
         <ul class="list-unstyled">
-            <li><a href="#">Форма 13</a></li>
-            <li><a href="#">Форма 32</a></li>
+            {% if user_profiles_mng.has_ui_overseer_low() %}
+                <li><a href="#">Основные показатели по учреждению</a></li>
+            {% elif user_profiles_mng.has_ui_overseer_high() %}
+                <li><a href="#">Форма 13</a></li>
+                <li><a href="#">Форма 32</a></li>
+            {% endif %}
         </ul>
     </div>
 </div>
