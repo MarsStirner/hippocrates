@@ -8,6 +8,27 @@ var IndexOverseer1Ctrl = function ($scope, RisarApi) {
         "values": [['Трунова Н.С.', 25], ['Папуша Л.А.', 18], ['Мамзерова П.Р.', 15], ['Семенова В.Ф.', 11], ['Горячева Л.Л.', 7]]
     }]
 
+    $scope.toolTipContent_pregnancy_week = function(){
+        return function(key, x, y, e, graph) {
+            return  '<h4>'+ x  + ' неделя'+ '</h4>'+ '<p>' +  y + '</p>'
+        }
+    };
+    $scope.colorFunction = function() {
+        return function(d, i) {
+            if (d[0]<=14){
+                return '#E567B1'
+            } else if (14 < d[0] && d[0]<= 26){
+                return '#E5399E'
+            } else if (27 < d[0] && d[0]<= 40){
+                return '#CB0077'
+            } else {
+                return '#84004D';
+            }
+        };
+    }
+    $scope.yAxisTickFormat = function(d){
+        return d;
+    }
     $scope.xAxisTickFormat = function(d){
         var m = moment();
         return m.months(d-1).format('MMM');
@@ -30,7 +51,7 @@ var IndexOverseer1Ctrl = function ($scope, RisarApi) {
         return d.data.color;
     };
     $scope.refresh_diagram = function () {
-        RisarApi.prenatal_risk_stats.get().then(function (result) {
+        RisarApi.prenatal_risk_stats.get(1).then(function (result) {
             $scope.slices = [];
             if (result['0']) {
                 $scope.slices.push({
@@ -62,7 +83,18 @@ var IndexOverseer1Ctrl = function ($scope, RisarApi) {
             }
         })
     };
-
+    $scope.refresh_pregnancy_week_diagram = function (){
+        RisarApi.pregnancy_week_diagram.get(1).then(function (result) {
+            $scope.pregnancy_week = [{
+                "key": "Пациентки по сроку беременности",
+                "values": result
+            }]
+            $scope.pregnancy_week_all = result.reduce(function(prev, curr){
+                        return prev + curr[1]
+                    }, 0);
+        })
+    }
+    $scope.refresh_pregnancy_week_diagram();
     $scope.refresh_diagram();
 };
 

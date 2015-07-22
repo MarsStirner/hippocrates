@@ -23,8 +23,10 @@ WebMis20
         }
     }
     this.pregnancy_week_diagram  = {
-        get: function(){
-            return wrapper('GET', Config.url.api_pregnancy_week_diagram)
+        get: function(curation_level){
+            return wrapper('GET', Config.url.api_pregnancy_week_diagram, {
+                curation_level: curation_level
+            });
         }
     }
     this.search_event = {
@@ -52,8 +54,10 @@ WebMis20
         }
     };
     this.prenatal_risk_stats = {
-        get: function () {
-            return wrapper('GET', Config.url.api_prenatal_risk_stats);
+        get: function (curation_level) {
+            return wrapper('GET', Config.url.api_prenatal_risk_stats, {
+                curation_level: curation_level
+            });
         }
     }
     this.death_stats = {

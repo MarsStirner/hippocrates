@@ -12,6 +12,8 @@ from nemesis.models.actions import ActionType, Action, ActionProperty, ActionPro
 from nemesis.models.event import Event, EventType
 from nemesis.models.exists import rbRequestType
 from nemesis.models.schedule import Schedule
+from nemesis.models.organisation import Organisation, OrganisationCurationAssoc
+from nemesis.models.person import PersonCurationAssoc, rbOrgCurationLevel
 from nemesis.models.utils import safe_current_user_id
 from nemesis.systemwide import db
 from blueprints.risar.app import module
@@ -103,15 +105,26 @@ def api_0_pregnancy_week_diagram(person_id=None):
     """
     распределение пациенток на учете у врача по сроку беременности
     """
+    person_id = safe_current_user_id()
+    curation_level = request.args.get('curation_level')
     result = [[i, 0] for i in xrange(1, 41)]
     result.append(['40+', 0])
-    if not person_id:
-        person_id = safe_current_user_id()
 
-    event_list = Event.query.join(EventType, rbRequestType, Action, ActionType, ActionProperty,
+    query = Event.query.join(EventType, rbRequestType, Action, ActionType, ActionProperty,
                                     ActionPropertyType, ActionProperty_Integer)\
-        .filter(rbRequestType.code == 'pregnancy', Event.execDate.is_(None), Event.execPerson_id == person_id)\
-        .all()
+        .filter(rbRequestType.code == 'pregnancy', Event.execDate.is_(None))
+
+    if curation_level:
+        query = query.join(Organisation, OrganisationCurationAssoc, PersonCurationAssoc, rbOrgCurationLevel)
+        query = query.filter(Event.org_id == Organisation.id, OrganisationCurationAssoc.org_id == Organisation.id,
+                             OrganisationCurationAssoc.personCuration_id == PersonCurationAssoc.id,
+                             PersonCurationAssoc.person_id == person_id,
+                             PersonCurationAssoc.orgCurationLevel_id == rbOrgCurationLevel.id,
+                             rbOrgCurationLevel.code == curation_level)
+    elif person_id:
+        query = query.filter(Event.execPerson_id == person_id)
+
+    event_list = query.all()
 
     for event in event_list:
         pregnancy_week = get_pregnancy_week(event)
@@ -125,10 +138,9 @@ def api_0_pregnancy_week_diagram(person_id=None):
 @module.route('/api/0/prenatal_risk_stats.json')
 @api_method
 def api_0_prenatal_risk_stats():
-    person_id = None
+    person_id = safe_current_user_id()
+    curation_level = request.args.get('curation_level')
     result = collections.defaultdict(lambda: 0)
-    if current_user.current_role in ('admin', 'obstetrician'):
-        person_id = safe_current_user_id()
 
     where = [ActionType.flatCode == 'cardAttributes',
              ActionPropertyType.code == 'prenatal_risk_572',
@@ -143,15 +155,23 @@ def api_0_prenatal_risk_stats():
              rbRequestType.id == EventType.requestType_id,
              Event.deleted == 0,
              Action.deleted == 0]
-    if person_id:
+    from_obj = [
+        Event, EventType, rbRequestType, Action, ActionType, ActionProperty, ActionPropertyType, ActionProperty_Integer
+    ]
+
+    if curation_level:
+        from_obj.extend([Organisation, OrganisationCurationAssoc, PersonCurationAssoc, rbOrgCurationLevel])
+        where.extend([Event.org_id == Organisation.id, OrganisationCurationAssoc.org_id == Organisation.id,
+                      OrganisationCurationAssoc.personCuration_id == PersonCurationAssoc.id,
+                      PersonCurationAssoc.person_id == person_id,
+                      PersonCurationAssoc.orgCurationLevel_id == rbOrgCurationLevel.id, rbOrgCurationLevel.code == curation_level])
+    elif person_id:
         where.append(Event.execPerson_id == person_id)
 
     selectable = db.select(
         (ActionProperty_Integer.value_,),
         whereclause=db.and_(*where),
-        from_obj=(
-            Event, EventType, rbRequestType, Action, ActionType, ActionProperty, ActionPropertyType, ActionProperty_Integer
-        ))
+        from_obj=from_obj)
     for (value, ) in db.session.execute(selectable):
         result[value] += 1
     return result
