@@ -58,12 +58,25 @@ def api_0_current_stats(person_id=None):
         else:
             return True if (now - event.setDate).days/60. > 2 else False
 
-    if not person_id:
-        person_id = safe_current_user_id()
+    person_id = safe_current_user_id()
+    curation_level = request.args.get('curation_level')
 
-    event_list = Event.query.join(EventType, rbRequestType, Action, ActionType, ActionProperty,
+    query = Event.query.join(EventType, rbRequestType, Action, ActionType, ActionProperty,
                                     ActionPropertyType, ActionProperty_Integer)\
-        .filter(rbRequestType.code == 'pregnancy', Event.deleted == 0, Event.execDate.is_(None), Event.execPerson_id == person_id).all()
+        .filter(rbRequestType.code == 'pregnancy', Event.deleted == 0, Event.execDate.is_(None))
+
+    if curation_level:
+        query = query.join(Organisation, OrganisationCurationAssoc, PersonCurationAssoc, rbOrgCurationLevel)
+        query = query.filter(Event.org_id == Organisation.id, OrganisationCurationAssoc.org_id == Organisation.id,
+                             OrganisationCurationAssoc.personCuration_id == PersonCurationAssoc.id,
+                             PersonCurationAssoc.person_id == person_id,
+                             PersonCurationAssoc.orgCurationLevel_id == rbOrgCurationLevel.id,
+                             rbOrgCurationLevel.code == curation_level)
+    elif person_id:
+        query = query.filter(Event.execPerson_id == person_id)
+
+    event_list = query.all()
+
     events_all = len(event_list)
     events_45 = len(filter(lambda x: get_pregnancy_week(x) >= 45, event_list))
     events_2_months = len(filter(lambda x: two_months(x), event_list))
@@ -112,7 +125,7 @@ def api_0_pregnancy_week_diagram(person_id=None):
 
     query = Event.query.join(EventType, rbRequestType, Action, ActionType, ActionProperty,
                                     ActionPropertyType, ActionProperty_Integer)\
-        .filter(rbRequestType.code == 'pregnancy', Event.execDate.is_(None))
+        .filter(rbRequestType.code == 'pregnancy', Event.deleted == 0, Event.execDate.is_(None))
 
     if curation_level:
         query = query.join(Organisation, OrganisationCurationAssoc, PersonCurationAssoc, rbOrgCurationLevel)

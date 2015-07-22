@@ -50,6 +50,11 @@ var IndexOverseer1Ctrl = function ($scope, RisarApi) {
         // А это, ребятки, костыль, потому что где-то в d3 или nv - багулечка
         return d.data.color;
     };
+    $scope.current_stats = function(){
+        RisarApi.current_stats.get(1).then(function (result) {
+            $scope.current_stats = result;
+        })
+    };
     $scope.refresh_diagram = function () {
         RisarApi.prenatal_risk_stats.get(1).then(function (result) {
             $scope.slices = [];
@@ -94,8 +99,9 @@ var IndexOverseer1Ctrl = function ($scope, RisarApi) {
                     }, 0);
         })
     }
-    $scope.refresh_pregnancy_week_diagram();
+    $scope.current_stats();
     $scope.refresh_diagram();
+    $scope.refresh_pregnancy_week_diagram();
 };
 
 WebMis20.controller('IndexOverseer1Ctrl', ['$scope', 'RisarApi',

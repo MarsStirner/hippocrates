@@ -61,31 +61,31 @@
                                         <td>12/2015</td>
                                         <td><span class="label label-danger">высокий</span></td>
                                         <td>Подшивалова Баира Петровна</td>
-                                        <td><span class="label label-warning">Ожидает выполнения</span></td>
+                                        <td><span class="label label-warning">ожидает выполнения</span></td>
                                     </tr>
                                     <tr>
                                         <td>56/2015</td>
                                         <td><span class="label label-danger">высокий</span></td>
                                         <td>Ксантос Альбина Сергеевна</td>
-                                        <td><span class="label label-danger">Просрочено</span></td>
+                                        <td><span class="label label-danger">просрочено</span></td>
                                     </tr>
                                     <tr>
                                         <td>33/2015</td>
                                         <td><span class="label label-danger">высокий</span></td>
                                         <td>Полякова Наталья Сергеевна</td>
-                                        <td><span class="label label-warning">Ожидает выполнения</span></td>
+                                        <td><span class="label label-warning">ожидает выполнения</span></td>
                                     </tr>
                                     <tr>
                                         <td>78/2015</td>
                                         <td><span class="label label-warning">средний</span></td>
                                         <td>Неверова Анна Эдуардовна</td>
-                                        <td><span class="label label-danger">Просрочено</span></td>
+                                        <td><span class="label label-danger">просрочено</span></td>
                                     </tr>
                                     <tr>
                                         <td>56/2015</td>
                                         <td><span class="label label-warning">средний</span></td>
                                         <td>Полякова Наталья Сергеевна</td>
-                                        <td><span class="label label-danger">Просрочено</span></td>
+                                        <td><span class="label label-danger">просрочено</span></td>
                                     </tr>
                                     <tr class="text-center">
                                         <td colspan="4"><a href="#">Все поручения</a></td>
@@ -114,6 +114,7 @@
                 </div>
                 <div class="box box-info">
                     <div class="box-header">
+                        <h3 class="box-title">Оценка ведения карт учреждения</h3>
                         <div class="box-tools pull-right">
                             <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
                         </div>
@@ -134,6 +135,7 @@
                         </nvd3-multi-bar-horizontal-chart>
                     </div>
                 </div>
+                {% include "risar/desktop/patients_stats.html" %}
                 {% include "risar/desktop/diagram_risk_rates.html" %}
             </div>
         </div>
