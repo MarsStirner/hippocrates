@@ -21,12 +21,11 @@
                         </wm-kladr-address>
                     </ng-form>
                 </div>
-                <div class="box-footer">
-                    <button type="button" class="btn btn-lg btn-link btn-block"
-                            ng-click="clientServices.add_new_address(client, 0)"><i class="ion ion-plus-round fa-fw"></i>Добавить адрес регистрации</button>
-                </div>
             </div>
-{#            <div>[[reg_addr | json]]</div>#}
+        </div>
+        <div class="panel">
+            <button type="button" class="btn btn-lg btn-link btn-block"
+                    ng-click="clientServices.add_new_address(client, 0)"><i class="ion ion-plus-round fa-fw"></i>Добавить адрес регистрации</button>
         </div>
     </ng-form>
     <ng-form name="_liveaddress" toc-element="Проживания">
@@ -59,12 +58,11 @@
                         </wm-kladr-address>
                     </ng-form>
                 </div>
-                <div class="box-footer">
-                    <button type="button" class="btn btn-lg btn-link btn-block"
-                        ng-click="clientServices.add_new_address(client, 1)"><i class="ion ion-plus-round fa-fw"></i>Добавить адрес проживания</button>
-                </div>
             </div>
-{#            <div>[[live_addr | json]]</div>#}
+            <div class="panel">
+                <button type="button" class="btn btn-lg btn-link btn-block"
+                    ng-click="clientServices.add_new_address(client, 1)"><i class="ion ion-plus-round fa-fw"></i>Добавить адрес проживания</button>
+            </div>
         </div>
     </ng-form>
 </ng-form>
