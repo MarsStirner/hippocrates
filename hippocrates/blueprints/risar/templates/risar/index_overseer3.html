@@ -1,0 +1,96 @@
+{% extends 'risar/base.html' %}
+
+{% block title %}> {{ module_name }}{% endblock %}
+
+{% block main %}
+<section class="content-header">
+    <h1>Рабочий стол куратора третьего уровня</h1>
+</section>
+<section class="content">
+    <div ng-controller="IndexOverseer3Ctrl" class="ng-cloak">
+        <div class="row">
+            <div class="col-md-9">
+                {% include "risar/desktop/diagram_maternal_death.html" %}
+                {% include "risar/desktop/diagram_infants_death.html" %}
+                <div class ="row">
+                    <div class="col-md-6">
+                        {% include "risar/desktop/annual_reports.html" %}
+                    </div>
+                    <div class="col-md-6">
+                        <div class="box box-default" ng-controller="OrgBirthCareViewCtrl">
+                            <div class="box-header with-border">
+                                <h3 class="box-title">Распределение медицинских учреждений по уровням оказания медицинской помощи</h3>
+                                <div class="box-tools">
+                                    <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                                </div>
+                            </div>
+                            <div class="box-body">
+                                <ul class="products-list product-list-in-box">
+                                    <li ng-repeat="obcl in obcl_items" class="item">
+                                        <div class="product-img" style="width: 50px; height: 50px; background: lightgreen;">
+
+                                        </div>
+                                        <div class="product-info">
+                                            <span class="product-title">[[ obcl.name ]] <span class="label label-primary pull-right">[[ obcl.org_count ]]</span></span>
+                                            <span class="product-description">Степень перинатального риска [[ obcl.perinatal_risk_rate.name ]]</span>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="box-footer text-center">
+                                <a href="{{ url_for('.html_org_birth_care') }}" class="uppercase">Подробнее</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% include "risar/desktop/diagram_pregnancy_week.html" %}
+            </div>
+            <div class="col-md-3">
+                <div class="info-box bg-green">
+                    <span class="info-box-icon"><i class="fa fa-trophy"></i></span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">Совокупная оценка</span>
+                        <span class="info-box-number">90%</span>
+                        <div class="progress">
+                            <div class="progress-bar" style="width: 20%"></div>
+                        </div>
+                        <span class="progress-description">
+                        20% рост за последние 30 дней
+                      </span>
+                    </div>
+                </div>
+                <div class="box box-info">
+                    <div class="box-header">
+                        <h3 class="box-title">Оценка ведения карт учреждения</h3>
+                        <div class="box-tools pull-right">
+                            <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                        </div>
+                    </div>
+                    <div class="box-body">
+                        <nvd3-multi-bar-horizontal-chart
+                            id="chart_fill_assessment"
+                            data="chart_fill_assessment"
+                            width="400"
+                            height="200"
+                            nodata="Нет данных"
+                            showXAxis="true"
+                            margin="{left:100,top:0,bottom:0,right:0}"
+                            showlabels="true"
+                            labeltype="value"
+                            showValues="true"
+                            ><svg></svg>
+                        </nvd3-multi-bar-horizontal-chart>
+                    </div>
+                </div>
+                {% include "risar/desktop/diagram_risk_rates.html" %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block modules_js %}
+    {{ super() }}
+    <script src="{{ url_for('.static', filename='js/index_overseer3.js', v=version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/risar.js', v=version) }}"></script>
+{% endblock %}

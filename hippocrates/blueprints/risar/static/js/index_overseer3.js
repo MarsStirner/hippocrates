@@ -1,15 +1,8 @@
-var IndexOverseer2Ctrl = function ($scope, RisarApi) {
+var IndexOverseer3Ctrl = function ($scope, RisarApi) {
     $scope.query = "";
     $scope.search_date = {date:new Date()}; // и это костыль. этот для работы wmDate
     $scope.tickets = [];
     $scope.curYear = new Date().getFullYear();
-    $scope.itemsPerPage = 5;
-    $scope.pager = {
-        current_page: 1,
-        max_pages: 10,
-        pages: 1,
-        record_count: 0
-    };
     $scope.chart_fill_assessment = [{
         "key": "Series 1",
         "values": [['Трунова Н.С.', 25], ['Папуша Л.А.', 18], ['Мамзерова П.Р.', 15], ['Семенова В.Ф.', 11], ['Горячева Л.Л.', 7]]
@@ -57,14 +50,9 @@ var IndexOverseer2Ctrl = function ($scope, RisarApi) {
         // А это, ребятки, костыль, потому что где-то в d3 или nv - багулечка
         return d.data.color;
     };
-    $scope.current_stats = function(){
-        RisarApi.current_stats.get(2).then(function (result) {
-            $scope.current_stats = result;
-        })
-    };
 
     $scope.refresh_diagram = function () {
-        RisarApi.prenatal_risk_stats.get(2).then(function (result) {
+        RisarApi.prenatal_risk_stats.get(3).then(function (result) {
             $scope.slices = [];
             if (result['0']) {
                 $scope.slices.push({
@@ -96,8 +84,48 @@ var IndexOverseer2Ctrl = function ($scope, RisarApi) {
             }
         })
     };
+    $scope.refresh_gistograms = function () {
+        RisarApi.death_stats.get().then(function (result) {
+            // 0 - dead, 1 - alive
+            if (result){
+                var dead = result['0'].reduce(function(sum, current){
+                    return sum + current[1];
+                }, 0);
+                var alive = result['1'].reduce(function(sum, current){
+                    return sum + current[1];
+                }, 0);
+                var maternal_death_all = result['maternal_death'].reduce(function(sum, current){
+                    return sum + current[1];
+                }, 0);
+                $scope.infants_death_coeff = (dead/(dead + alive)*1000).toFixed(2);
+                $scope.maternal_death_coeff = (maternal_death_all/alive*100000).toFixed(2);
+                $scope.infants_death = [
+                              {
+                                  "key": "Количество умерших детей",
+                                  "values": result['0'],
+                                  "color": "#FF6633"
+                              },
+                              {
+                                  "key": "Количество живых детей",
+                                  "values": result['1'],
+                                  "color": "#339933"
+                              }
+                         ];
+                $scope.maternal_death = [
+                              {
+                                  "key": "Количество умерших пациенток",
+                                  "values": result['maternal_death'],
+                                  "color": "#FF6633"
+                              }
+                         ];
+            } else{
+                $scope.infants_death = [];
+                $scope.maternal_death = [];
+            }
+        });
+    };
     $scope.refresh_pregnancy_week_diagram = function (){
-        RisarApi.pregnancy_week_diagram.get(2).then(function (result) {
+        RisarApi.pregnancy_week_diagram.get(3).then(function (result) {
             $scope.pregnancy_week = [{
                 "key": "Пациентки по сроку беременности",
                 "values": result
@@ -107,10 +135,17 @@ var IndexOverseer2Ctrl = function ($scope, RisarApi) {
                     }, 0);
         })
     }
-    $scope.current_stats();
     $scope.refresh_diagram();
+    $scope.refresh_gistograms();
     $scope.refresh_pregnancy_week_diagram();
 };
-
-WebMis20.controller('IndexOverseer2Ctrl', ['$scope', 'RisarApi',
-    IndexOverseer2Ctrl]);
+var OrgBirthCareViewCtrl = function ($scope, RisarApi) {
+    RisarApi.desktop.get_info().
+        then(function (data) {
+            $scope.obcl_items = data.obcl_items;
+        });
+};
+WebMis20.controller('IndexOverseer3Ctrl', ['$scope', 'RisarApi',
+    IndexOverseer3Ctrl]);
+WebMis20.controller('OrgBirthCareViewCtrl', ['$scope', 'RisarApi',
+    OrgBirthCareViewCtrl]);
