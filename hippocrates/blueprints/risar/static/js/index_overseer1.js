@@ -3,6 +3,12 @@ var IndexOverseer1Ctrl = function ($scope, RisarApi) {
     $scope.search_date = {date:new Date()}; // и это костыль. этот для работы wmDate
     $scope.tickets = [];
     $scope.curYear = new Date().getFullYear();
+    $scope.itemsPerPage = 5;
+    $scope.pager = {
+        current_page: 1,
+        max_pages: 10,
+        pages: 1
+    };
     $scope.chart_fill_assessment = [{
         "key": "Series 1",
         "values": [['Трунова Н.С.', 25], ['Папуша Л.А.', 18], ['Мамзерова П.Р.', 15], ['Семенова В.Ф.', 11], ['Горячева Л.Л.', 7]]
@@ -16,13 +22,13 @@ var IndexOverseer1Ctrl = function ($scope, RisarApi) {
     $scope.colorFunction = function() {
         return function(d, i) {
             if (d[0]<=14){
-                return '#E567B1'
+                return '#F493F2'
             } else if (14 < d[0] && d[0]<= 26){
-                return '#E5399E'
+                return '#E400E0'
             } else if (27 < d[0] && d[0]<= 40){
-                return '#CB0077'
+                return '#9600CD'
             } else {
-                return '#84004D';
+                return '#5416B4';
             }
         };
     }
@@ -54,6 +60,22 @@ var IndexOverseer1Ctrl = function ($scope, RisarApi) {
         RisarApi.current_stats.get(1).then(function (result) {
             $scope.current_stats = result;
         })
+    };
+
+    var week_old_charts = function() {
+        var data = {
+            per_page: $scope.itemsPerPage,
+            page: $scope.pager.current_page,
+            curation_level: 1
+        }
+        RisarApi.week_old_charts.get(data).then(function (result) {
+            $scope.pager.pages = result.total_pages;
+            $scope.pager.record_count = result.count;
+            $scope.week_old_charts = result.events;
+        })
+    };
+    $scope.onPageChanged = function () {
+        week_old_charts();
     };
     $scope.refresh_diagram = function () {
         RisarApi.prenatal_risk_stats.get(1).then(function (result) {
@@ -100,6 +122,7 @@ var IndexOverseer1Ctrl = function ($scope, RisarApi) {
         })
     }
     $scope.current_stats();
+    week_old_charts();
     $scope.refresh_diagram();
     $scope.refresh_pregnancy_week_diagram();
 };

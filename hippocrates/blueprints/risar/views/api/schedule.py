@@ -7,6 +7,7 @@ from flask import request
 from flask.ext.login import current_user
 
 from nemesis.lib.apiutils import api_method
+from nemesis.lib.utils import safe_int
 from nemesis.models.actions import ActionType, Action, ActionProperty, ActionPropertyType, ActionProperty_Integer, \
     ActionProperty_Date, ActionProperty_ExtReferenceRb
 from nemesis.models.event import Event, EventType
@@ -85,6 +86,33 @@ def api_0_current_stats(person_id=None):
         'events_45': events_45,
         'events_2_months': events_2_months
     }
+
+
+@module.route('/api/0/week_old_charts.json')
+@api_method
+def api_0_week_old_charts():
+    person_id = safe_current_user_id()
+    boundary_date = datetime.datetime.now() - datetime.timedelta(days=7)
+    curation_level = request.args.get('curation_level')
+
+    query = Event.query.join(EventType, rbRequestType)\
+        .filter(rbRequestType.code == 'pregnancy', Event.deleted == 0, Event.execDate.is_(None),
+                Event.setDate <= boundary_date)
+
+    if curation_level:
+        query = query.join(Organisation, OrganisationCurationAssoc, PersonCurationAssoc, rbOrgCurationLevel)
+        query = query.filter(PersonCurationAssoc.person_id == person_id,
+                             rbOrgCurationLevel.code == curation_level)
+    elif person_id:
+        query = query.filter(Event.execPerson_id == person_id)
+
+    per_page = safe_int(request.args.get('per_page', 5))
+    page = safe_int(request.args.get('page', 1))
+    pagination = query.order_by(Event.setDate.desc()).paginate(page, per_page)
+    return {
+        'count': pagination.total,
+        'total_pages': pagination.pages,
+        'events': [represent_chart_short(event) for event in pagination.items]}
 
 
 @module.route('/api/0/need_hospitalization/')

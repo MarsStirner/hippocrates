@@ -1,0 +1,37 @@
+<div class="box box-info">
+    <div class="box-header">
+        <h3 class="box-title">Поставленные на учёт</h3>
+        <span class="badge label-info" style="margin-right: 5px;">[[ week_old_charts.length ]]</span>
+        <div class="box-tools pull-right">
+            <pagination class="pagination pagination-sm no-margin" ng-model="pager.current_page" total-items="pager.record_count"
+                        items-per-page="itemsPerPage" direction-links="False" style="vertical-align: middle;"
+                        boundary-links="False" max-size="pager.max_pages" ng-change="onPageChanged()">
+            </pagination>
+            <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+        </div>
+    </div>
+
+    <div class="box-body no-padding">
+        <table class="table">
+            <tbody>
+            <tr>
+                <th>ФИО</th>
+                <th>Риск</th>
+                <th>Срок</th>
+                <th>Дата учёта</th>
+            </tr>
+            <tr ng-repeat="row in week_old_charts">
+                <td><a ng-href="{{ url_for('.html_chart') }}?event_id=[[ row.id ]]">[[
+                    row.client.full_name ]]</a></td>
+                <td><span class="label"
+                          ng-class="{'label-default': row.risk_rate.id == 0,
+                                     'label-success': row.risk_rate.id == 1,
+                                     'label-warning': row.risk_rate.id == 2,
+                                     'label-danger': row.risk_rate.id == 3}">[[ row.risk_rate.name ]]</span></td>
+                <td>[[ row.pregnancy_week ]]<i class="fa fa-question" ng-if="!row.pregnancy_week"></i></td>
+                <td ng-bind="row.set_date | asDate"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

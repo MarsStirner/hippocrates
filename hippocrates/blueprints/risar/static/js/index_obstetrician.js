@@ -13,13 +13,13 @@ var IndexObstetricianCtrl = function ($scope, RisarApi) {
     $scope.colorFunction = function() {
         return function(d, i) {
             if (d[0]<=14){
-                return '#E567B1'
+                return '#F493F2'
             } else if (14 < d[0] && d[0]<= 26){
-                return '#E5399E'
+                return '#E400E0'
             } else if (27 < d[0] && d[0]<= 40){
-                return '#CB0077'
+                return '#9600CD'
             } else {
-                return '#84004D';
+                return '#5416B4';
             }
         };
     }
