@@ -16,6 +16,8 @@ def index_html():
         return render_template('risar/index_obstetrician.html')
     elif current_user.role_in('overseer1'):
         return render_template('risar/index_overseer1.html')
+    elif current_user.role_in('overseer2'):
+        return render_template('risar/index_overseer2.html')
     else:
         return render_template('risar/index.html')
 
