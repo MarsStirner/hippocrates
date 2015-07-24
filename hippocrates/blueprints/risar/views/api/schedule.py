@@ -151,16 +151,12 @@ def api_0_pregnancy_week_diagram(person_id=None):
     result = [[i, 0] for i in xrange(1, 41)]
     result.append(['40+', 0])
 
-    query = Event.query.join(EventType, rbRequestType, Action, ActionType, ActionProperty,
-                                    ActionPropertyType, ActionProperty_Integer)\
+    query = Event.query.join(EventType, rbRequestType)\
         .filter(rbRequestType.code == 'pregnancy', Event.deleted == 0, Event.execDate.is_(None))
 
     if curation_level:
         query = query.join(Organisation, OrganisationCurationAssoc, PersonCurationAssoc, rbOrgCurationLevel)
-        query = query.filter(Event.org_id == Organisation.id, OrganisationCurationAssoc.org_id == Organisation.id,
-                             OrganisationCurationAssoc.personCuration_id == PersonCurationAssoc.id,
-                             PersonCurationAssoc.person_id == person_id,
-                             PersonCurationAssoc.orgCurationLevel_id == rbOrgCurationLevel.id,
+        query = query.filter(PersonCurationAssoc.person_id == person_id,
                              rbOrgCurationLevel.code == curation_level)
     elif person_id:
         query = query.filter(Event.execPerson_id == person_id)
