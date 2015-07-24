@@ -55,9 +55,9 @@ WebMis20
             });
         }
     };
-    this.week_old_charts = {
+    this.recent_charts = {
         get: function (data) {
-            return wrapper('GET', Config.url.api_week_old_charts, data);
+            return wrapper('GET', Config.url.api_recent_charts, data);
         }
     };
     this.prenatal_risk_stats = {

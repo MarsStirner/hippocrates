@@ -63,20 +63,20 @@ var IndexOverseer1Ctrl = function ($scope, RisarApi) {
         })
     };
 
-    var week_old_charts = function() {
+    var recent_charts = function() {
         var data = {
             per_page: $scope.itemsPerPage,
             page: $scope.pager.current_page,
             curation_level: 1
         }
-        RisarApi.week_old_charts.get(data).then(function (result) {
+        RisarApi.recent_charts.get(data).then(function (result) {
             $scope.pager.pages = result.total_pages;
             $scope.pager.record_count = result.count;
-            $scope.week_old_charts = result.events;
+            $scope.recent_charts = result.events;
         })
     };
     $scope.onPageChanged = function () {
-        week_old_charts();
+        recent_charts();
     };
     $scope.refresh_diagram = function () {
         RisarApi.prenatal_risk_stats.get(1).then(function (result) {
@@ -123,7 +123,7 @@ var IndexOverseer1Ctrl = function ($scope, RisarApi) {
         })
     }
     $scope.current_stats();
-    week_old_charts();
+    recent_charts();
     $scope.refresh_diagram();
     $scope.refresh_pregnancy_week_diagram();
 };

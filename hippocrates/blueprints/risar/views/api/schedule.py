@@ -88,16 +88,16 @@ def api_0_current_stats(person_id=None):
     }
 
 
-@module.route('/api/0/week_old_charts.json')
+@module.route('/api/0/recent_charts.json')
 @api_method
-def api_0_week_old_charts():
+def api_0_recent_charts():
     person_id = safe_current_user_id()
     boundary_date = datetime.datetime.now() - datetime.timedelta(days=7)
     curation_level = request.args.get('curation_level')
 
     query = Event.query.join(EventType, rbRequestType)\
         .filter(rbRequestType.code == 'pregnancy', Event.deleted == 0, Event.execDate.is_(None),
-                Event.setDate <= boundary_date)
+                Event.setDate >= boundary_date)
 
     if curation_level:
         query = query.join(Organisation, OrganisationCurationAssoc, PersonCurationAssoc, rbOrgCurationLevel)

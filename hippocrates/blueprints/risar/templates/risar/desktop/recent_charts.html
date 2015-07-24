@@ -4,7 +4,7 @@
         <span class="badge label-info" style="margin-right: 5px;">[[ pager.record_count ]]</span>
         <div class="box-tools pull-right">
             <pagination class="pagination pagination-sm no-margin" ng-model="pager.current_page" total-items="pager.record_count"
-                        items-per-page="itemsPerPage" style="vertical-align: middle;"
+                        items-per-page="itemsPerPage" style="vertical-align: middle;" ng-show="pager.pages > 1"
                         previous-text="&lsaquo;" next-text="&rsaquo;"
                         max-size="pager.max_pages" ng-change="onPageChanged()">
             </pagination>
@@ -19,9 +19,9 @@
                 <th>ФИО</th>
                 <th>Риск</th>
                 <th>Срок</th>
-                <th>Дата учёта</th>
+                <th>Учёт с</th>
             </tr>
-            <tr ng-repeat="row in week_old_charts">
+            <tr ng-repeat="row in recent_charts">
                 <td><a ng-href="{{ url_for('.html_chart') }}?event_id=[[ row.id ]]">[[
                     row.client.full_name ]]</a></td>
                 <td><span class="label"
