@@ -1,11 +1,12 @@
 <div class="box box-info">
     <div class="box-header">
         <h3 class="box-title">Поставленные на учёт</h3>
-        <span class="badge label-info" style="margin-right: 5px;">[[ week_old_charts.length ]]</span>
+        <span class="badge label-info" style="margin-right: 5px;">[[ pager.record_count ]]</span>
         <div class="box-tools pull-right">
             <pagination class="pagination pagination-sm no-margin" ng-model="pager.current_page" total-items="pager.record_count"
-                        items-per-page="itemsPerPage" direction-links="False" style="vertical-align: middle;"
-                        boundary-links="False" max-size="pager.max_pages" ng-change="onPageChanged()">
+                        items-per-page="itemsPerPage" style="vertical-align: middle;"
+                        previous-text="&lsaquo;" next-text="&rsaquo;"
+                        max-size="pager.max_pages" ng-change="onPageChanged()">
             </pagination>
             <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
         </div>

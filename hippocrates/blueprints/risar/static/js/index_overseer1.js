@@ -7,7 +7,8 @@ var IndexOverseer1Ctrl = function ($scope, RisarApi) {
     $scope.pager = {
         current_page: 1,
         max_pages: 10,
-        pages: 1
+        pages: 1,
+        record_count: 0
     };
     $scope.chart_fill_assessment = [{
         "key": "Series 1",
