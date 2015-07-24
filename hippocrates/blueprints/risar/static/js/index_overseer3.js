@@ -5,7 +5,8 @@ var IndexOverseer3Ctrl = function ($scope, RisarApi) {
     $scope.curYear = new Date().getFullYear();
     $scope.chart_fill_assessment = [{
         "key": "Series 1",
-        "values": [['Трунова Н.С.', 25], ['Папуша Л.А.', 18], ['Мамзерова П.Р.', 15], ['Семенова В.Ф.', 11], ['Горячева Л.Л.', 7]]
+        "values": [['Трунова Н.С.', 25], ['Папуша Л.А.', 18], ['Мамзерова П.Р.', 15], ['Семенова В.Ф.', 11], ['Горячева Л.Л.', 7]],
+        "color": '#dd4b39'
     }]
 
     $scope.toolTipContent_pregnancy_week = function(){

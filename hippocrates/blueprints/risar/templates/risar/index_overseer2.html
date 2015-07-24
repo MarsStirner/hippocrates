@@ -44,29 +44,7 @@
                       </span>
                     </div>
                 </div>
-                <div class="box box-info">
-                    <div class="box-header">
-                        <h3 class="box-title">Оценка ведения карт учреждения</h3>
-                        <div class="box-tools pull-right">
-                            <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
-                        </div>
-                    </div>
-                    <div class="box-body">
-                        <nvd3-multi-bar-horizontal-chart
-                            id="chart_fill_assessment"
-                            data="chart_fill_assessment"
-                            width="400"
-                            height="200"
-                            nodata="Нет данных"
-                            showXAxis="true"
-                            margin="{left:100,top:0,bottom:0,right:0}"
-                            showlabels="true"
-                            labeltype="value"
-                            showValues="true"
-                            ><svg></svg>
-                        </nvd3-multi-bar-horizontal-chart>
-                    </div>
-                </div>
+                {% include "risar/desktop/chart_fill_assessment.html" %}
                 {% include "risar/desktop/patients_stats.html" %}
                 {% include "risar/desktop/diagram_risk_rates.html" %}
             </div>
