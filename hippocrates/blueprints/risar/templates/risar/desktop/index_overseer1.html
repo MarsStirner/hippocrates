@@ -20,17 +20,17 @@
         </div>
         <div class="row">
             <div class="col-md-9">
-                {% include "risar/desktop/patient_list.html" %}
+                {% include "risar/stats/patient_list.html" %}
                 <div class ="row">
                     <div class="col-md-6">
-                        {% include "risar/desktop/recent_charts.html" %}
+                        {% include "risar/stats/recent_charts.html" %}
                     </div>
                     <div class="col-md-6">
                     </div>
                 </div>
                 <div class ="row">
                     <div class="col-md-6">
-                        {% include "risar/desktop/annual_reports.html" %}
+                        {% include "risar/stats/annual_reports.html" %}
                     </div>
                     <div class="col-md-6">
                         <div class="box box-info">
@@ -96,7 +96,7 @@
                         </div>
                     </div>
                 </div>
-                {% include "risar/desktop/diagram_pregnancy_week.html" %}
+                {% include "risar/stats/diagram_pregnancy_week.html" %}
             </div>
             <div class="col-md-3">
                 <div class="info-box bg-green">
@@ -112,9 +112,9 @@
                       </span>
                     </div>
                 </div>
-                {% include "risar/desktop/chart_fill_assessment.html" %}
-                {% include "risar/desktop/patients_stats.html" %}
-                {% include "risar/desktop/diagram_risk_rates.html" %}
+                {% include "risar/stats/chart_fill_assessment.html" %}
+                {% include "risar/stats/patients_stats.html" %}
+                {% include "risar/stats/diagram_risk_rates.html" %}
             </div>
         </div>
     </div>
@@ -123,6 +123,6 @@
 
 {% block modules_js %}
     {{ super() }}
-    <script src="{{ url_for('.static', filename='js/curation/index_overseer1.js', v=version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/desktop/index_overseer1.js', v=version) }}"></script>
     <script src="{{ url_for('.static', filename='js/risar.js', v=version) }}"></script>
 {% endblock %}

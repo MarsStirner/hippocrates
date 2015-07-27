@@ -20,7 +20,7 @@
         </div>
         <div class="row">
             <div class="col-md-9">
-                {% include "risar/desktop/patient_list.html" %}
+                {% include "risar/stats/patient_list.html" %}
                 <div class ="row">
                     <div class="col-md-6">
                         <div class="box box-info">
@@ -125,10 +125,10 @@
                         </div>
                     </div>
                 </div>
-                {% include "risar/desktop/diagram_pregnancy_week.html" %}
+                {% include "risar/stats/diagram_pregnancy_week.html" %}
             </div>
             <div class="col-md-3">
-                {% include "risar/desktop/patients_stats.html" %}
+                {% include "risar/stats/patients_stats.html" %}
                 <div class="box box-warning">
                     <div class="box-header with-border">
                         <h3 class="box-title">Ведение карт</h3>
@@ -173,7 +173,7 @@
                         </table>
                     </div>
                 </div>
-                {% include "risar/desktop/diagram_risk_rates.html" %}
+                {% include "risar/stats/diagram_risk_rates.html" %}
             </div>
         </div>
     </div>
@@ -182,7 +182,7 @@
 
 {% block modules_js %}
     {{ super() }}
-    <script src="{{ url_for('.static', filename='js/index_obstetrician.js', v=version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/desktop/index_obstetrician.js', v=version) }}"></script>
     <script src="{{ url_for('.static', filename='js/risar.js', v=version) }}"></script>
 {% endblock %}
 
