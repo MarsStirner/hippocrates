@@ -177,11 +177,12 @@ angular.module('WebMis20.controllers').
                         '{0}'
                     );
                     var pages = [],
-                        promises = [];
+                        promises = [],
+                        fidx=0;
                     angular.forEach(fa_list, function (fa) {
                         var promises = [];
                         angular.forEach(fa.file_document.files, function (fileMeta) {
-                            var idx = fileMeta.idx,
+                            var idx = fileMeta.idx + fidx,
                                 promise;
                             pages[idx] = new Image();
                             promise = $http.get(WMConfig.url.api_patient_file_attach, {
@@ -196,6 +197,7 @@ angular.module('WebMis20.controllers').
                             });
                             promises.push(promise);
                         });
+                        ++fidx;
                     });
 
                     $q.all(promises).then(function composeDocument() {
