@@ -47,7 +47,7 @@ WebMis20
         api_checkup_save: '{{ url_for('.api_0_checkup') }}{0}',
         api_gravidograma: '{{ url_for('.api_0_gravidograma') }}',
         api_obcl_org_count_get: '{{ url_for('.api_0_obcl_org_count_get') }}',
-        api_obcl_org_patient_count_get: '{{ url_for('.api_0_obcl_org_patient_count_get') }}'
+        api_obcl_org_patient_count_get: '{{ url_for('.api_0_obcl_org_patient_count_get') }}{0}'
     }
 })
 ;

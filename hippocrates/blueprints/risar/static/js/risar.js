@@ -269,7 +269,7 @@ WebMis20
     };
     this.curation = {
         get_org_patient_count: function (org_birth_care_id) {
-            return wrapper('GET', Config.url.api_obcl_org_patient_count_get + org_birth_care_id);
+            return wrapper('GET', Config.url.api_obcl_org_patient_count_get.formatNonEmpty(org_birth_care_id));
         }
     }
 }])
@@ -290,9 +290,9 @@ WebMis20
         },
         link: function (scope) {
             scope.icon_class = function (rate) {
-                if (rate == 1) return 'ri-prenatal-risk text-success-risar';
-                if (rate == 2) return 'ri-prenatal-risk text-warning-risar';
-                if (rate == 3) return 'ri-prenatal-risk text-danger-risar';
+                if (rate == 1) return 'ri-prenatal-risk text-green';
+                if (rate == 2) return 'ri-prenatal-risk text-yellow';
+                if (rate == 3) return 'ri-prenatal-risk text-red';
                 return 'ri-prenatal-risk-undefined';
             };
             scope.tooltip = function (rate) {
@@ -314,8 +314,8 @@ WebMis20
         },
         link: function (scope) {
             scope.icon_class = function (rate) {
-                if (rate == 1) return 'fa fa-exclamation-circle text-danger-risar';
-                if (rate == 2) return 'fa fa-exclamation-circle text-success-risar';
+                if (rate == 1) return 'fa fa-exclamation-circle text-red';
+                if (rate == 2) return 'fa fa-exclamation-circle text-green';
                 return 'fa fa-question';
             };
             scope.tooltip = function (rate) {

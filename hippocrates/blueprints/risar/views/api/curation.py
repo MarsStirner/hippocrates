@@ -16,6 +16,4 @@ def api_0_obcl_org_count_get():
 @module.route('/api/0/org_birth_care_level/orgs_info/<int:obcl_id>')
 @api_method
 def api_0_obcl_org_patient_count_get(obcl_id=None):
-    if not obcl_id:
-        raise ApiException(400, '`obcl_id` required')
     return OrgBirthCareLevelRepr().represent_level_orgs(obcl_id)
