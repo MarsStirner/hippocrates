@@ -18,7 +18,7 @@ from nemesis.systemwide import db
 from nemesis.lib.diagnosis import create_or_update_diagnosis
 from blueprints.risar.app import module
 from blueprints.risar.lib.card_attrs import default_AT_Heuristic, get_all_diagnoses, reevaluate_risk_rate, \
-    reevaluate_preeclampsia_risk
+    reevaluate_preeclampsia_risk, reevaluate_card_attrs, get_card_attrs_action
 from blueprints.risar.lib.represent import represent_event, represent_chart_for_routing, represent_header, \
     represent_org_for_routing, group_orgs_for_routing, represent_checkups, represent_card_attributes, \
     represent_chart_for_epicrisis
@@ -138,8 +138,7 @@ def api_0_save_diagnoses(event_id=None):
             action[property_code].value = [diag for diag in action[property_code].value if diag.id != diagnosis['id']]
         db.session.add(diag)
     db.session.commit()
-    reevaluate_risk_rate(event)
-    reevaluate_preeclampsia_risk(event)
+    reevaluate_card_attrs(event)
     db.session.commit()
     return list(get_all_diagnoses(event))
 

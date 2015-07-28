@@ -4,7 +4,13 @@ var IndexOverseer1Ctrl = function ($scope, RisarApi) {
     $scope.tickets = [];
     $scope.curYear = new Date().getFullYear();
     $scope.itemsPerPage = 5;
-    $scope.pager = {
+    $scope.pager_recent_charts = {
+        current_page: 1,
+        max_pages: 10,
+        pages: 1,
+        record_count: 0
+    };
+    $scope.pager_recently_modified_charts = {
         current_page: 1,
         max_pages: 10,
         pages: 1,
@@ -67,17 +73,33 @@ var IndexOverseer1Ctrl = function ($scope, RisarApi) {
     var recent_charts = function() {
         var data = {
             per_page: $scope.itemsPerPage,
-            page: $scope.pager.current_page,
+            page: $scope.pager_recent_charts.current_page,
             curation_level: 1
         }
         RisarApi.recent_charts.get(data).then(function (result) {
-            $scope.pager.pages = result.total_pages;
-            $scope.pager.record_count = result.count;
+            $scope.pager_recent_charts.pages = result.total_pages;
+            $scope.pager_recent_charts.record_count = result.count;
             $scope.recent_charts = result.events;
         })
     };
-    $scope.onPageChanged = function () {
+    var recently_modified_charts = function() {
+        var data = {
+            per_page: $scope.itemsPerPage,
+            page: $scope.pager_recently_modified_charts.current_page,
+            curation_level: 1,
+            risk_rate: [2, 3]
+        }
+        RisarApi.recently_modified_charts.get(data).then(function (result) {
+            $scope.pager_recently_modified_charts.pages = result.total_pages;
+            $scope.pager_recently_modified_charts.record_count = result.count;
+            $scope.recently_modified_charts = result.events;
+        })
+    };
+    $scope.onRecentChartsPageChanged = function () {
         recent_charts();
+    };
+    $scope.onRecentlyModifiedPageChanged = function () {
+        recently_modified_charts();
     };
     $scope.refresh_diagram = function () {
         RisarApi.prenatal_risk_stats.get(1).then(function (result) {
@@ -125,6 +147,7 @@ var IndexOverseer1Ctrl = function ($scope, RisarApi) {
     }
     $scope.current_stats();
     recent_charts();
+    recently_modified_charts();
     $scope.refresh_diagram();
     $scope.refresh_pregnancy_week_diagram();
 };

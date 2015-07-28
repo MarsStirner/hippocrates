@@ -171,7 +171,7 @@ def reevaluate_preeclampsia_risk(event, card_attrs_action=None):
 
 def reevaluate_dates(event, action=None):
     """
-    Пересчёт даты начала беременности и предполагаемой даты родов
+    Пересчёт даты начала беременности, предполагаемой даты родов, и даты редактирования карты пациентки
     :param event: обращение
     :param action: атрибуты карточки пациентки
     :type event: application.models.event.Event
@@ -229,6 +229,10 @@ def reevaluate_dates(event, action=None):
         # Не надо трогать дату родоразрешения, если она не слишком отличается от предыдущей вычисленной при отсутствии
         # эпикриза
         action['predicted_delivery_date'].value = delivery_date
+
+    now = datetime.datetime.now()
+    action['chart_modify_date'].value = now
+    action['chart_modify_time'].value = now
 
 
 def reevaluate_card_attrs(event, action=None):

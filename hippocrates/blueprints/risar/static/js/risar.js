@@ -60,6 +60,11 @@ WebMis20
             return wrapper('GET', Config.url.api_recent_charts, data);
         }
     };
+    this.recently_modified_charts = {
+        get: function (data) {
+            return wrapper('POST', Config.url.api_recently_modified_charts, {}, data);
+        }
+    };
     this.prenatal_risk_stats = {
         get: function (curation_level) {
             return wrapper('GET', Config.url.api_prenatal_risk_stats, {

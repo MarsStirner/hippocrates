@@ -10,6 +10,12 @@ var IndexOverseer2Ctrl = function ($scope, RisarApi) {
         pages: 1,
         record_count: 0
     };
+    $scope.pager_recently_modified_charts = {
+        current_page: 1,
+        max_pages: 10,
+        pages: 1,
+        record_count: 0
+    };
     $scope.chart_fill_assessment = [{
         "key": "Series 1",
         "values": [['Трунова Н.С.', 25], ['Папуша Л.А.', 18], ['Мамзерова П.Р.', 15], ['Семенова В.Ф.', 11], ['Горячева Л.Л.', 7]],
@@ -108,7 +114,24 @@ var IndexOverseer2Ctrl = function ($scope, RisarApi) {
                     }, 0);
         })
     }
+    var recently_modified_charts = function() {
+        var data = {
+            per_page: $scope.itemsPerPage,
+            page: $scope.pager_recently_modified_charts.current_page,
+            curation_level: 1,
+            risk_rate:[3]
+        }
+        RisarApi.recently_modified_charts.get(data).then(function (result) {
+            $scope.pager_recently_modified_charts.pages = result.total_pages;
+            $scope.pager_recently_modified_charts.record_count = result.count;
+            $scope.recently_modified_charts = result.events;
+        })
+    };
+    $scope.onRecentlyModifiedPageChanged = function () {
+        recently_modified_charts();
+    };
     $scope.current_stats();
+    recently_modified_charts();
     $scope.refresh_diagram();
     $scope.refresh_pregnancy_week_diagram();
 };

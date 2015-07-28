@@ -93,6 +93,41 @@ def api_0_recent_charts():
         'events': [represent_chart_short(event) for event in pagination.items]}
 
 
+@module.route('/api/0/recently_modified_charts.json', methods=['POST'])
+@api_method
+def api_0_recently_modified_charts():
+    """
+    карты пациенток со степенью риска выше низкой, отсортированные по дате последнего изменения
+    """
+    j = request.get_json()
+    person_id = safe_current_user_id()
+    curation_level = j.get('curation_level')
+    risk_rate = j.get('risk_rate')
+
+    query = Event.query.join(EventType, rbRequestType, Action, ActionType, ActionProperty, ActionPropertyType,
+                             ActionProperty_Integer)\
+        .filter(rbRequestType.code == 'pregnancy', Event.deleted == 0, Event.execDate.is_(None),
+                ActionType.flatCode == 'cardAttributes', ActionPropertyType.code == "prenatal_risk_572",
+                ActionProperty_Integer.value_.in_(risk_rate))
+
+    if curation_level:
+        query = query.join(Organisation, OrganisationCurationAssoc, PersonCurationAssoc, rbOrgCurationLevel)
+        query = query.filter(PersonCurationAssoc.person_id == person_id,
+                             rbOrgCurationLevel.code == curation_level)
+    elif person_id:
+        query = query.filter(Event.execPerson_id == person_id)
+
+    per_page = safe_int(request.args.get('per_page', 5))
+    page = safe_int(request.args.get('page', 1))
+    pagination = query.order_by(Event.setDate.desc()).paginate(page, per_page)
+    events = [represent_chart_short(event) for event in pagination.items]
+    events.sort(key=lambda x: x['modify_date'], reverse=True)
+    return {
+        'count': pagination.total,
+        'total_pages': pagination.pages,
+        'events': events}
+
+
 @module.route('/api/0/need_hospitalization/')
 @module.route('/api/0/need_hospitalization/<int:person_id>')
 @api_method

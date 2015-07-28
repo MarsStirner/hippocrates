@@ -115,11 +115,14 @@ def represent_event(event):
 
 
 def represent_chart_short(event):
+    card_attrs_action = get_card_attrs_action(event)
     return {
         'id': event.id,
         'set_date': event.setDate,
+        'modify_date': datetime.datetime.combine(card_attrs_action['chart_modify_date'].value,
+                                                 card_attrs_action['chart_modify_time'].value),
         'client': event.client,
-        'risk_rate': PrenatalRiskRate(get_card_attrs_action(event)['prenatal_risk_572'].value) if event else None,
+        'risk_rate': PrenatalRiskRate(card_attrs_action['prenatal_risk_572'].value) if event else None,
         'pregnancy_week': get_pregnancy_week(event) if event else None,
     }
 

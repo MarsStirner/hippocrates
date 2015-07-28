@@ -30,6 +30,7 @@ WebMis20
         api_event_search_lpu_doctors_list: '{{ url_for('.api_0_lpu_doctors_list') }}',
         api_current_stats: '{{ url_for('.api_0_current_stats') }}',
         api_recent_charts: '{{ url_for('.api_0_recent_charts') }}',
+        api_recently_modified_charts: '{{ url_for('.api_0_recently_modified_charts') }}',
         api_prenatal_risk_stats: '{{ url_for('.api_0_prenatal_risk_stats') }}',
         api_death_stats: '{{ url_for('.api_0_death_stats') }}',
         api_pregnancy_final_stats: '{{ url_for('.api_0_pregnancy_final_stats') }}',
