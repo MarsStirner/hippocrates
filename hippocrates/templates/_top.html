@@ -118,6 +118,22 @@
                         {% if user_profiles_mng.has_ui_assistant() %}
                         <small>ассистирую:</small>
                         {% if current_user.master %}
+                            <a class="show_assist" href="javascript:void(0);">
+                            <span class="fa fa-user-md assist-icon"></span> {{ current_user.master.format_name(is_master=True) }}
+                            </a>
+                            <script type="application/javascript">
+                                $(function () {
+                                    $(".show_assist").popover({
+                                        html : true,
+                                        placement : 'bottom',
+                                        title : '',
+                                        trigger : 'focus',
+                                        content: function() {
+                                          return $('#assist').html();
+                                        }
+                                    });
+                                });
+                            </script>
                             <div id="assist" class="hidden">
                                 <div class="row">
                                   <div class="col-xs-4">
@@ -134,26 +150,8 @@
                                   </div>
                                 </div>
                             </div>
-                            <a class="show_assist" href="javascript:void(0);"><span class="fa fa-user-md assist-icon"></span></a>
-                            <a class="show_assist" href="javascript:void(0);">
-                            {{ current_user.master.format_name(is_master=True) }}</a>
-
-                            <script type="application/javascript">
-                                $(function () {
-                                    $(".show_assist").popover({
-                                        html : true,
-                                        placement : 'bottom',
-                                        title : '',
-                                        trigger : 'focus',
-                                        content: function() {
-                                          return $('#assist').html();
-                                        }
-                                    });
-                                });
-                            </script>
                             {% else %}
-                                <a href="{{ url_for('doctor_to_assist', next=request.url) }}" title="Выбрать врача"><span class="fa fa-user-md assist-icon"></span></a>
-                                <a href="{{ url_for('doctor_to_assist', next=request.url) }}" title="Выбрать врача">не выбрано</a>
+                                <a class="show_assist" href="{{ url_for('doctor_to_assist', next=request.url) }}" title="Выбрать врача"><span class="fa fa-user-md assist-icon"></span> не выбрано</a>
                             {% endif %}
                         {% endif %}
                     </p>
