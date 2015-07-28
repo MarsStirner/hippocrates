@@ -180,7 +180,6 @@ angular.module('WebMis20.controllers').
                         promises = [],
                         fidx=0;
                     angular.forEach(fa_list, function (fa) {
-                        var promises = [];
                         angular.forEach(fa.file_document.files, function (fileMeta) {
                             var idx = fileMeta.idx + fidx,
                                 promise;
