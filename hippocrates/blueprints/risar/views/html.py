@@ -11,17 +11,17 @@ __author__ = 'mmalkov'
 @module.route('/index.html')
 def index_html():
     if current_user.role_in('ambulance'):
-        return render_template('risar/ambulance_index.html')
+        return render_template('risar/desktop/index_ambulance.html')
     elif current_user.role_in('admin', 'obstetrician'):
-        return render_template('risar/index_obstetrician.html')
+        return render_template('risar/desktop/index_obstetrician.html')
     elif current_user.role_in('overseer1'):
-        return render_template('risar/index_overseer1.html')
+        return render_template('risar/desktop/index_overseer1.html')
     elif current_user.role_in('overseer2'):
-        return render_template('risar/index_overseer2.html')
+        return render_template('risar/desktop/index_overseer2.html')
     elif current_user.role_in('overseer3'):
-        return render_template('risar/index_overseer3.html')
+        return render_template('risar/desktop/index_overseer3.html')
     else:
-        return render_template('risar/index.html')
+        return render_template('risar/desktop/index.html')
 
 
 @module.route('/orgbirthcare/')

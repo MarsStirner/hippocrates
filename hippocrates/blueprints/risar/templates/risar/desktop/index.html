@@ -21,28 +21,28 @@
         {% if user_profiles_mng.has_ui_overseer_low() %}
             <div class="row">
                 <div class="col-md-8">
-                    {% include "risar/desktop/patient_list.html" %}
-                    {% include "risar/desktop/annual_reports.html" %}
+                    {% include "risar/stats/patient_list.html" %}
+                    {% include "risar/stats/annual_reports.html" %}
                 </div>
                 <div class="col-md-4">
-                    {% include "risar/desktop/diagram_risk_rates.html" %}
+                    {% include "risar/stats/diagram_risk_rates.html" %}
                 </div>
             </div>
         {% elif user_profiles_mng.has_ui_overseer_high() %}
             <div class="row">
                 <div class="col-md-4">
-                    {% include "risar/desktop/diagram_risk_rates.html" %}
+                    {% include "risar/stats/diagram_risk_rates.html" %}
                 </div>
                 <div class="col-md-4">
-                    {% include "risar/desktop/diagram_infants_death.html" %}
+                    {% include "risar/stats/diagram_infants_death.html" %}
                 </div>
                 <div class="col-md-4">
-                    {% include "risar/desktop/diagram_maternal_death.html" %}
+                    {% include "risar/stats/diagram_maternal_death.html" %}
                 </div>
             </div>
             <div class="row">
                 <div class="col-md-8">
-                    {% include "risar/desktop/annual_reports.html" %}
+                    {% include "risar/stats/annual_reports.html" %}
                 </div>
                 <div class="col-md-4">
                     <div class="box box-default" ng-controller="OrgBirthCareViewCtrl">
@@ -78,6 +78,6 @@
 
 {% block modules_js %}
     {{ super() }}
-    <script src="{{ url_for('.static', filename='js/index.js', v=version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/desktop/index.js', v=version) }}"></script>
     <script src="{{ url_for('.static', filename='js/risar.js', v=version) }}"></script>
 {% endblock %}

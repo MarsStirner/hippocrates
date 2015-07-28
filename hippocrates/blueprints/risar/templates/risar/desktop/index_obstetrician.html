@@ -20,7 +20,7 @@
         </div>
         <div class="row">
             <div class="col-md-9">
-                {% include "risar/desktop/patient_list.html" %}
+                {% include "risar/stats/patient_list.html" %}
                 <div class ="row">
                     <div class="col-md-6">
                         <div class="box box-info">
@@ -125,10 +125,10 @@
                         </div>
                     </div>
                 </div>
-                {% include "risar/desktop/diagram_pregnancy_week.html" %}
+                {% include "risar/stats/diagram_pregnancy_week.html" %}
             </div>
             <div class="col-md-3">
-                {% include "risar/desktop/patients_stats.html" %}
+                {% include "risar/stats/patients_stats.html" %}
                 <div class="box box-warning">
                     <div class="box-header with-border">
                         <h3 class="box-title">Ведение карт</h3>
@@ -143,33 +143,37 @@
                                 <td><span class="badge label-info pull-right">12</span></td>
                             </tr>
                             <tr>
-                                <td>Незаполненные разделы</td>
+                                <td>Незаполненные карты</td>
                                 <td><span class="badge label-danger pull-right">6</span></td>
                             </tr>
                             <tr>
-                                <td>Анамнез</td>
-                                <td><span class="badge label-danger pull-right">0</span></td>
+                                <td>Из них с разделами:</td>
+                                <td></td>
                             </tr>
                             <tr>
-                                <td>Плановый осмотр</td>
+                                <td><span class="small-left-margin">Анамнез</span></td>
+                                <td><span class="badge label-info pull-right">0</span></td>
+                            </tr>
+                            <tr>
+                                <td><span class="small-left-margin">Плановый осмотр</span></td>
                                 <td><span class="badge label-danger pull-right">2</span></td>
                             </tr>
                             <tr>
-                                <td>ЛПУ для родоразрешения</td>
+                                <td><span class="small-left-margin">ЛПУ для родоразрешения</span></td>
                                 <td><span class="badge label-danger pull-right">1</span></td>
                             </tr>
                             <tr>
-                                <td>Результаты мероприятий</td>
+                                <td><span class="small-left-margin">Результаты мероприятий</span></td>
                                 <td><span class="badge label-danger pull-right">1</span></td>
                             </tr>
                             <tr>
-                                <td>Эпикриз</td>
+                                <td><span class="small-left-margin">Эпикриз</span></td>
                                 <td><span class="badge label-danger pull-right">2</span></td>
                             </tr>
                         </table>
                     </div>
                 </div>
-                {% include "risar/desktop/diagram_risk_rates.html" %}
+                {% include "risar/stats/diagram_risk_rates.html" %}
             </div>
         </div>
     </div>
@@ -178,7 +182,7 @@
 
 {% block modules_js %}
     {{ super() }}
-    <script src="{{ url_for('.static', filename='js/index_obstetrician.js', v=version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/desktop/index_obstetrician.js', v=version) }}"></script>
     <script src="{{ url_for('.static', filename='js/risar.js', v=version) }}"></script>
 {% endblock %}
 
