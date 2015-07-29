@@ -26,7 +26,7 @@ def index_html():
 
 @module.route('/orgbirthcare/')
 def html_org_birth_care():
-    return render_template('risar/curation/org_birth_care.html')
+    return render_template('risar/stats/obcl_orgs.html')
 
 
 @module.route('/search.html')

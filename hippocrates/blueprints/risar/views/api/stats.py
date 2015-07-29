@@ -18,6 +18,7 @@ from blueprints.risar.app import module
 from blueprints.risar.lib.card_attrs import get_card_attrs_action
 from blueprints.risar.lib.represent import represent_ticket, represent_chart_short, get_pregnancy_week
 from blueprints.risar.risar_config import checkup_flat_codes
+from blueprints.risar.lib.org_bcl import OrgBirthCareLevelRepr
 
 
 @module.route('/api/0/current_stats.json')
@@ -334,3 +335,16 @@ def api_0_pregnancy_final_stats():
     for (value, ) in db.session.execute(selectable):
         result[value] += 1
     return result
+
+
+@module.route('/api/0/stats/org_birth_care_level/org_count/')
+@api_method
+def api_0_stats_obcl_get():
+    return OrgBirthCareLevelRepr().represent_levels()
+
+
+@module.route('/api/0/stats/org_birth_care_level/orgs_info/')
+@module.route('/api/0/stats/org_birth_care_level/orgs_info/<int:obcl_id>')
+@api_method
+def api_0_stats_obcl_orgs_get(obcl_id=None):
+    return OrgBirthCareLevelRepr().represent_level_orgs(obcl_id)

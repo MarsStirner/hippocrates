@@ -17,30 +17,7 @@
                         {% include "risar/stats/annual_reports.html" %}
                     </div>
                     <div class="col-md-6">
-                        <div class="box box-default" ng-controller="OrgBirthCareViewCtrl">
-                            <div class="box-header with-border">
-                                <h3 class="box-title">Распределение медицинских учреждений по уровням оказания медицинской помощи</h3>
-                                <div class="box-tools">
-                                    <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
-                                </div>
-                            </div>
-                            <div class="box-body">
-                                <ul class="products-list product-list-in-box">
-                                    <li ng-repeat="obcl in obcl_items" class="item">
-                                        <div class="product-img" style="width: 50px; height: 50px; background: lightgreen;">
-
-                                        </div>
-                                        <div class="product-info">
-                                            <span class="product-title">[[ obcl.name ]] <span class="label label-primary pull-right">[[ obcl.org_count ]]</span></span>
-                                            <span class="product-description">Степень перинатального риска [[ obcl.perinatal_risk_rate.name ]]</span>
-                                        </div>
-                                    </li>
-                                </ul>
-                            </div>
-                            <div class="box-footer text-center">
-                                <a href="{{ url_for('.html_org_birth_care') }}" class="uppercase">Подробнее</a>
-                            </div>
-                        </div>
+                        {% include "risar/stats/obcl_summary.html" %}
                     </div>
                 </div>
                 {% include "risar/stats/diagram_pregnancy_week.html" %}

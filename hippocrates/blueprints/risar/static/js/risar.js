@@ -264,12 +264,12 @@ WebMis20
     };
     this.desktop = {
         get_info: function () {
-            return wrapper('GET', Config.url.api_obcl_org_count_get);
+            return wrapper('GET', Config.url.api_stats_obcl_gett);
         }
     };
     this.curation = {
         get_org_patient_count: function (org_birth_care_id) {
-            return wrapper('GET', Config.url.api_obcl_org_patient_count_get.formatNonEmpty(org_birth_care_id));
+            return wrapper('GET', Config.url.api_stats_obcl_orgs_get.formatNonEmpty(org_birth_care_id));
         }
     }
 }])
