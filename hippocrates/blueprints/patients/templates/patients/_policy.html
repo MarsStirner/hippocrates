@@ -26,6 +26,9 @@
                         on-add="add_new_file(documentInfo, policyInfo)"
                         on-open="openFile(cfa_id, idx)">
                     </wm-client-file-attach>
+                    <button type="button" class="btn-link" ng-click="printFilesAttach([cpol.file_attach])" title="Печать копии">
+                        <span class="glyphicon glyphicon-print"></span>
+                    </button>
                 </div>
             </div>
         </ng-form>
@@ -55,13 +58,16 @@
                     edit-mode="vpol.id ? edit.activated : true">
                 </wm-policy>
                 <div ng-if="vpol.file_attach">
-                    <h5 class="attach-file-copy-heading">Копия документа</h5>
+                    <h5>Копия документа</h5>
                     <wm-client-file-attach attach-type="policy"
                         model-attach="vpol.file_attach"
                         model-doc="vpol"
                         on-add="add_new_file(documentInfo, policyInfo)"
                         on-open="openFile(cfa_id, idx)">
                     </wm-client-file-attach>
+                    <button type="button" class="btn-link" ng-click="printFilesAttach([vpol.file_attach])" title="Печать копии">
+                        <span class="glyphicon glyphicon-print"></span>
+                    </button>
                 </div>
             </div>
         </div>

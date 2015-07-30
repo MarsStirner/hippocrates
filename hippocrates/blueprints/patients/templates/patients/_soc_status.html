@@ -32,6 +32,9 @@
                                 on-add="add_new_file(documentInfo, policyInfo)"
                                 on-open="openFile(cfa_id, idx)">
                             </wm-client-file-attach>
+                            <button type="button" class="btn-link" ng-click="printFilesAttach([socstat.self_document.file_attach])" title="Печать копии">
+                                <span class="glyphicon glyphicon-print"></span>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -89,6 +92,9 @@
                                 on-add="add_new_file(documentInfo, policyInfo)"
                                 on-open="openFile(cfa_id, idx)">
                             </wm-client-file-attach>
+                            <button type="button" class="btn-link" ng-click="printFilesAttach([socstat.self_document.file_attach])" title="Печать копии">
+                                <span class="glyphicon glyphicon-print"></span>
+                            </button>
                         </div>
                     </div>
                 </div>
