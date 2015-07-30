@@ -177,12 +177,12 @@ angular.module('WebMis20.controllers').
                         '{0}'
                     );
                     var pages = [],
-                        promises = [],
-                        idx=0;
+                        promises = [];
                     angular.forEach(fa_list, function (fa) {
                         angular.forEach(fa.file_document.files, function (fileMeta) {
                             var promise;
-                            pages[idx] = new Image();
+                            pages.push(new Image());
+                            var idx = pages.length - 1;
                             promise = $http.get(WMConfig.url.api_patient_file_attach, {
                                 params: {
                                     file_meta_id: fileMeta.id
@@ -194,7 +194,6 @@ angular.module('WebMis20.controllers').
                                 pages[idx].innerHTML = 'Ошибка загрузки {0} страницы документа'.format(idx);
                             });
                             promises.push(promise);
-                            ++idx;
                         });
                     });
 
