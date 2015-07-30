@@ -105,7 +105,8 @@ class OrganisationFetcher(BaseFetcher):
             Organisation_OrganisationBCLAssoc,
             OrganisationBirthCareLevel
         ).filter(
-            OrganisationBirthCareLevel.id == None
+            OrganisationBirthCareLevel.id == None,
+            Organisation.isStationary == 1
         ).with_entities(
             func.count(Organisation.id.distinct())
         )
@@ -267,7 +268,8 @@ class OrganisationRepr():
             'title': org.title,
             'infis': org.infisCode,
             'is_insurer': bool(org.isInsurer),
-            'is_hospital': bool(org.isHospital),
+            'is_lpu': bool(org.isLPU),
+            'is_stationary': bool(org.isStationary),
             'address': org.Address,
             'phone': org.phone,
             'deleted': org.deleted
