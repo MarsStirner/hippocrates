@@ -1,0 +1,94 @@
+{% extends 'risar/base.html' %}
+
+{% block title %}> {{ module_name }}{% endblock %}
+
+{% block main %}
+<section class="content-header">
+    <h1>Распределение медицинских учреждений по уровням оказания перинатальной помощи</h1>
+</section>
+<section class="content">
+    <div ng-controller="OrgBirthCareCtrl" class="ng-cloak">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="box box-default">
+                <div class="box-body no-padding">
+                    <ul class="products-list product-list-in-box nav nav-pills nav-stacked">
+                        <li class="item" ng-class="{'product-list-item-active': isLevelSelected()}">
+                            <a href="javascript:void(0);" ng-click="selectEmptyOBCL()"
+                                style="margin-top: -10px; margin-bottom: -10px;">
+                            <div class="product-img" ng-style="{width: 50, height: 50}">
+                            </div>
+                            <div class="product-info">
+                                <span class="product-title">Без уровня <span class="label label-primary pull-right">[[ empty_obcl.org_count ]]</span></span>
+                                <span class="product-description normalwrap">Медицинские учреждения, обладающие стационарным отделением и не связанные с уровнем оказания помощи.</span>
+                            </div>
+                            </a>
+                        </li>
+                        <li ng-repeat="obcl in obcl_items" class="item" ng-class="{'product-list-item-active': isLevelSelected(obcl.id)}">
+                            <a href="javascript:void(0);" ng-click="selectOBCL(obcl)"
+                                style="margin-top: -10px; margin-bottom: -10px;">
+                            <div class="product-img" ng-style="{width: 50, height: 50, background: obcl.color}">
+                            </div>
+                            <div class="product-info">
+                                <span class="product-title">[[ obcl.name ]] <span class="label label-primary pull-right">[[ obcl.org_count ]]</span></span>
+                                <span class="product-description">Степень перинатального риска [[ obcl.perinatal_risk_rate.name ]]</span>
+                                <span class="product-description">[[ obcl.description ]]</span>
+                                <p class="product-description normalwrap">Количество пациенток по степеням перинатального риска, запланированных на родоразрешение:</p>
+                                <div class="product-description">
+                                    Всего: <span class="rmargin10 text-black" style="font-size: larger; font-weight: bold;">
+                                        [[obcl.patient_by_risk_count.all]]</span>
+                                    Высокая: <span class="text-danger rmargin10" style="font-size: larger; font-weight: bold">
+                                        [[obcl.patient_by_risk_count.high]]</span>
+                                    Средняя: <span class="text-warning rmargin10" style="font-size: larger; font-weight: bold">
+                                        [[obcl.patient_by_risk_count.medium]]</span>
+                                    Низкая: <span class="text-success rmargin10" style="font-size: larger; font-weight: bold">
+                                        [[obcl.patient_by_risk_count.low]]</span>
+                                    Неопределенная: <span class="rmargin10 text-black" style="font-size: larger; font-weight: bold">
+                                        [[obcl.patient_by_risk_count.undefined]]</span>
+                                </div>
+                            </div>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="box box-solid" ng-repeat="org in org_items">
+                <div class="box-header with-border">
+                    <h3 class="box-title">[[ org.short_name ]]</h3>
+                    <div class="pull-right">
+                        <span ng-repeat="obcl in org.obcls" class="rmargin10 label"
+                            title="Уровень [[obcl.name]], [[obcl.description]]" ng-style="{background: obcl.color}">
+                            [[ obcl.name ]]
+                        </span>
+                    </div>
+                </div>
+                <div class="box-body">
+                    <p>Количество пациенток по степеням перинатального риска, запланированных на родоразрешение:</p>
+                    <div>
+                        Всего: <span class="rmargin10" style="font-size: larger; font-weight: bold" title="Количество пациенток высокой степени риска, запланированных на родоразрешение">
+                            [[org.patient_by_risk_count.all]]</span>
+                        Высокая: <span class="text-danger rmargin10" style="font-size: larger; font-weight: bold">
+                            [[org.patient_by_risk_count.high]]</span>
+                        Средняя: <span class="text-warning rmargin10" style="font-size: larger; font-weight: bold">
+                            [[org.patient_by_risk_count.medium]]</span>
+                        Низкая: <span class="text-success rmargin10" style="font-size: larger; font-weight: bold">
+                            [[org.patient_by_risk_count.low]]</span>
+                        Неопределенная: <span class="rmargin10" style="font-size: larger; font-weight: bold">
+                            [[org.patient_by_risk_count.undefined]]</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block modules_js %}
+    {{ super() }}
+    <script src="{{ url_for('.static', filename='js/org_birth_care.js', v=version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/risar.js', v=version) }}"></script>
+{% endblock %}

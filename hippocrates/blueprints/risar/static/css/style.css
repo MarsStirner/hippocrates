@@ -280,18 +280,6 @@ nvd3-line-chart svg {
   }
 }
 
-.text-danger-risar {
-    color: #E05030;
-}
-
-.text-warning-risar {
-    color: #E0C030;
-}
-
-.text-success-risar {
-    color: #30D040;
-}
-
 .wizard-container-6 .box {
     margin-bottom: 0px;
     min-height: 286px;
@@ -318,7 +306,6 @@ nvd3-line-chart svg {
 ul.product-list, li.product-list-item-active {
     border-right-style: solid;
     border-right-color: orangered;
-
 }
 
 .risk_groups .progress-group{

@@ -1,0 +1,36 @@
+<div class="box box-default" ng-controller="OrgBirthCareViewCtrl">
+    <div class="box-header with-border">
+        <h3 class="box-title">Уровни оказания перинатальной помощи</h3>
+        <div class="box-tools">
+            <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+        </div>
+    </div>
+    <div class="box-body">
+        <ul class="products-list product-list-in-box">
+            <li ng-repeat="obcl in obcl_items" class="item">
+                <div class="product-img" ng-style="{width: 50, height: 50, background: obcl.color}">
+                </div>
+                <div class="product-info">
+                    <span class="product-title">[[ obcl.name ]] <span class="label label-primary pull-right">[[ obcl.org_count ]]</span></span>
+                    <span class="product-description">Степень перинатального риска [[ obcl.perinatal_risk_rate.name ]]</span>
+                    <p class="product-description normalwrap">Количество пациенток по степеням перинатального риска, запланированных на родоразрешение:</p>
+                    <div class="product-description">
+                        Всего: <span class="rmargin10 text-black" style="font-size: larger; font-weight: bold;">
+                            [[obcl.patient_by_risk_count.all]]</span>
+                        Высокая: <span class="text-danger rmargin10" style="font-size: larger; font-weight: bold">
+                            [[obcl.patient_by_risk_count.high]]</span>
+                        Средняя: <span class="text-warning rmargin10" style="font-size: larger; font-weight: bold">
+                            [[obcl.patient_by_risk_count.medium]]</span>
+                        Низкая: <span class="text-success rmargin10" style="font-size: larger; font-weight: bold">
+                            [[obcl.patient_by_risk_count.low]]</span>
+                        Неопределенная: <span class="rmargin10 text-black" style="font-size: larger; font-weight: bold">
+                            [[obcl.patient_by_risk_count.undefined]]</span>
+                    </div>
+                </div>
+            </li>
+        </ul>
+    </div>
+    <div class="box-footer text-center">
+        <a href="{{ url_for('.html_org_birth_care') }}" class="uppercase">Подробнее</a>
+    </div>
+</div>

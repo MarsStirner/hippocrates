@@ -53,6 +53,7 @@ VESTA_URL = ''
 TRFU_URL = ''
 WEBMIS10_URL = ''
 COLDSTAR_URL = ''
+SIMARGL_URL = ''
 CASTIEL_AUTH_TOKEN = 'CastielAuthToken'
 
 TITLE = u'WebMIS 2.0'

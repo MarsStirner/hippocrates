@@ -199,7 +199,7 @@ def api_0_event_routing():
     else:
         client = None
 
-    query = Organisation.query.filter(Organisation.isHospital == 1)
+    query = Organisation.query.filter(Organisation.isLPU == 1)
     if diagnoses:
         mkb_ids = [d['id'] for d in diagnoses]
         suit_orgs_q = db.session.query(Organisation.id).join(

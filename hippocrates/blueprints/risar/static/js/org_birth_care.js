@@ -11,6 +11,7 @@ var OrgBirthCareCtrl = function ($scope, RisarApi) {
         RisarApi.desktop.get_info().
             then(function (data) {
                 $scope.obcl_items = data.obcl_items;
+                $scope.empty_obcl = data.empty_obcl;
                 if ($scope.obcl_items.length) {
                     $scope.selectOBCL($scope.obcl_items[0]);
                 }
@@ -22,6 +23,11 @@ var OrgBirthCareCtrl = function ($scope, RisarApi) {
             then(function (data) {
                 $scope.org_items = data.org_items;
             });
+    };
+    $scope.selectEmptyOBCL = function () {
+        $scope.selectOBCL({
+            id: undefined
+        });
     };
 
     $scope.init();
