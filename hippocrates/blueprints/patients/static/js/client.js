@@ -200,7 +200,7 @@ angular.module('WebMis20.controllers').
                     $q.all(promises).then(function composeDocument() {
                         var html_pages = '';
                         angular.forEach(pages, function (elem) {
-                            html_pages += '<div style="page-break-after: always">{0}</div>'.format(elem.outerHTML)
+                            html_pages += '<div style="page-break-after: auto">{0}</div>'.format(elem.outerHTML)
                         });
                         html = html.format(html_pages);
                         deferred.resolve(html);
