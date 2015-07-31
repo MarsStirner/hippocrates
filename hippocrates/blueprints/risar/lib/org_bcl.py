@@ -1,16 +1,18 @@
 # -*- coding: utf-8 -*-
+from collections import defaultdict
 
 from sqlalchemy import func, and_, or_
 from sqlalchemy.orm import immediateload
 
 from nemesis.systemwide import db
-from nemesis.models.organisation import OrganisationBirthCareLevel, Organisation, Organisation_OrganisationBCLAssoc
+from nemesis.models.organisation import (OrganisationBirthCareLevel, Organisation, Organisation_OrganisationBCLAssoc,
+    OrganisationCurationAssoc)
 from nemesis.models.enums import PerinatalRiskRate, PrenatalRiskRate
 from nemesis.models.exists import Person, rbAttachType
 from nemesis.models.event import Event
 from nemesis.models.client import Client, ClientAttach
 from nemesis.models.actions import Action, ActionType, ActionProperty, ActionPropertyType, ActionProperty_Integer
-from nemesis.lib.utils import format_hex_color
+from nemesis.lib.utils import format_hex_color, safe_dict
 from blueprints.risar.risar_config import attach_codes
 
 
@@ -49,7 +51,8 @@ class OrganisationFetcher(BaseFetcher):
                 Organisation.org_obcls,
                 OrganisationBirthCareLevel
             ).filter(OrganisationBirthCareLevel.id == flt['obcl_id'])
-            return self
+        if 'is_stationary' in flt:
+            self.query = self.query.filter(Organisation.isStationary == flt['is_stationary'])
         return self
 
     def apply_with_patients_by_risk(self):
@@ -109,6 +112,14 @@ class OrganisationFetcher(BaseFetcher):
             Organisation.isStationary == 1
         ).with_entities(
             func.count(Organisation.id.distinct())
+        )
+
+    def apply_with_person_curation(self):
+        self.query = self.query.outerjoin(
+            Organisation.org_curators,
+            Person
+        ).filter(
+            Organisation.isStationary == 1
         )
 
 
@@ -202,7 +213,10 @@ class OrgBirthCareLevelRepr(object):
 
     def represent_level_orgs(self, obcl_id):
         org_fetcher = OrganisationFetcher()
-        org_fetcher.apply_filter(obcl_id=obcl_id)
+        if obcl_id:
+            org_fetcher.apply_filter(obcl_id=obcl_id)
+        else:
+            org_fetcher.apply_filter(is_stationary=1)
         org_fetcher.apply_with_patients_by_risk()
         org_fetcher.apply_with_obcl()
         org_data = org_fetcher.get_all()
@@ -251,13 +265,34 @@ class OrgBirthCareLevelRepr(object):
         )
 
 
-class OrganisationRepr():
+class OrganisationRepr(object):
+
+    def represent_curations(self):
+        fetcher = OrganisationFetcher()
+        fetcher.apply_with_person_curation()
+        org_data = fetcher.get_all()
+        return {
+            'orgs': [
+                self.represent_org_curations(org, org.org_curators) for org in org_data
+            ]
+        }
 
     def represent_org_bcl(self, org, obcl_list):
         obcl_repr = OrgBirthCareLevelRepr()
         return dict(
             self.represent_org(org),
             obcls=map(obcl_repr.represent_obcl, obcl_list)
+        )
+
+    def represent_org_curations(self, org, curation_list):
+        p_pepr = PersonRepr()
+        curations = defaultdict(list)
+        for p_curation in curation_list:
+            k = p_curation.orgCurationLevel_id
+            curations[k].append(p_pepr.represent_person(p_curation.person))
+        return dict(
+            self.represent_org(org),
+            curations=curations
         )
 
     def represent_org(self, org):
@@ -273,4 +308,13 @@ class OrganisationRepr():
             'address': org.Address,
             'phone': org.phone,
             'deleted': org.deleted
+        }
+
+
+class PersonRepr(object):
+
+    def represent_person(self, person):
+        return {
+            'id': person.id,
+            'short_name': person.shortNameText
         }
