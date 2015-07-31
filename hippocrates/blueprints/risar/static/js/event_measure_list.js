@@ -41,9 +41,13 @@ var EventMeasureListCtrl = function ($scope, $q, RisarApi, RefBookService, Print
         }
     };
     var reloadChart = function () {
-         return RisarApi.measure.get_chart($scope.event_id).then(function (data) {
-             $scope.header = data.header;
+        var header = RisarApi.chart.get_header($scope.event_id).then(function (data) {
+            $scope.header = data.header;
         });
+        var chart = RisarApi.measure.get_chart($scope.event_id).then(function (data) {
+             $scope.chart = data;
+        });
+        return $q.all(header, chart);
     };
 
     $scope.resetFilters = function () {
@@ -203,6 +207,9 @@ var EventMeasureCalendarViewCtrl = function ($scope, $timeout, RisarApi, Timeout
             registered_watchers.push(w_q);
             registered_watchers.push(w_qmt);
             registered_watchers.push(w_qs);
+            if ($scope.chart.last_inspection_date) {
+                uiCalendarConfig.calendars.measureList.fullCalendar('gotoDate', $scope.chart.last_inspection_date);
+            }
             reloadCalendar();
         } else {
             registered_watchers.forEach(function (unwatch) { unwatch(); });

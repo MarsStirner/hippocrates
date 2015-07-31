@@ -22,6 +22,7 @@ from blueprints.risar.lib.card_attrs import default_AT_Heuristic, get_all_diagno
 from blueprints.risar.lib.represent import represent_event, represent_chart_for_routing, represent_header, \
     represent_org_for_routing, group_orgs_for_routing, represent_checkups, represent_card_attributes, \
     represent_chart_for_epicrisis
+from blueprints.risar.lib.utils import get_last_checkup_date
 from blueprints.risar.risar_config import attach_codes
 
 
@@ -168,7 +169,7 @@ def api_0_chart_measure_list(event_id=None):
     if event.eventType.requestType.code != 'pregnancy':
         raise ApiException(400, u'Обращение не является случаем беременности')
     return {
-        'header': represent_header(event),
+        'last_inspection_date': get_last_checkup_date(event_id)
     }
 
 
