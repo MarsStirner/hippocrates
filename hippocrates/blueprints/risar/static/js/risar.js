@@ -267,16 +267,17 @@ WebMis20
             return wrapper('GET', Config.url.api_measure_generate + action_id)
         }
     };
-    this.desktop = {
-        get_info: function () {
+    this.stats = {
+        get_obcl_info: function () {
             return wrapper('GET', Config.url.api_stats_obcl_gett);
+        },
+        get_obcl_org_info: function (org_birth_care_id) {
+            return wrapper('GET', Config.url.api_stats_obcl_orgs_get.formatNonEmpty(org_birth_care_id));
+        },
+        get_org_curation_info: function () {
+            return wrapper('GET', Config.url.api_stats_org_curation_get);
         }
     };
-    this.curation = {
-        get_org_patient_count: function (org_birth_care_id) {
-            return wrapper('GET', Config.url.api_stats_obcl_orgs_get.formatNonEmpty(org_birth_care_id));
-        }
-    }
 }])
 .filter('underlineNoVal', function () {
     return function(value, label) {

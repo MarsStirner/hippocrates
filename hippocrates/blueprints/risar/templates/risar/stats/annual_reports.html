@@ -10,7 +10,7 @@
             {% if user_profiles_mng.has_ui_overseer_low() %}
                 <li><a href="#">Основные показатели по учреждению</a></li>
             {% elif user_profiles_mng.has_ui_overseer_high() %}
-                <li><a href="#">Распределение учреждений по уровням курации</a></li>
+                <li><a href="{{ url_for('.html_stats_org_curation') }}">Распределение учреждений по уровням курации</a></li>
                 <li><a href="#">Форма 13</a></li>
                 <li><a href="#">Форма 32</a></li>
             {% endif %}
