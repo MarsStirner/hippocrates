@@ -8,7 +8,7 @@ var OrgBirthCareCtrl = function ($scope, RisarApi) {
         return $scope.selected.obcl_id === obcl_id;
     };
     $scope.init = function () {
-        RisarApi.desktop.get_info().
+        RisarApi.stats.get_obcl_info().
             then(function (data) {
                 $scope.obcl_items = data.obcl_items;
                 $scope.empty_obcl = data.empty_obcl;
@@ -19,7 +19,7 @@ var OrgBirthCareCtrl = function ($scope, RisarApi) {
     };
     $scope.selectOBCL = function (obcl) {
         $scope.selected.obcl_id = obcl.id;
-        RisarApi.curation.get_org_patient_count(obcl.id).
+        RisarApi.stats.get_obcl_org_info(obcl.id).
             then(function (data) {
                 $scope.org_items = data.org_items;
             });
@@ -32,6 +32,15 @@ var OrgBirthCareCtrl = function ($scope, RisarApi) {
 
     $scope.init();
 };
+var OrgBirthCareViewCtrl = function ($scope, RisarApi) {
+    RisarApi.stats.get_obcl_info().
+        then(function (data) {
+            $scope.obcl_items = data.obcl_items;
+        });
+};
+
 
 WebMis20.controller('OrgBirthCareCtrl', ['$scope', 'RisarApi',
     OrgBirthCareCtrl]);
+WebMis20.controller('OrgBirthCareViewCtrl', ['$scope', 'RisarApi',
+    OrgBirthCareViewCtrl]);
