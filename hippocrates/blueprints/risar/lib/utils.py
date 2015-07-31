@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
+
 from sqlalchemy.orm import lazyload
 
 from nemesis.lib.data import create_action
 from nemesis.lib.utils import safe_traverse_attrs
 from nemesis.models.actions import Action, ActionType, ActionProperty, ActionPropertyType
 from nemesis.systemwide import cache, db
+from blueprints.risar.risar_config import checkup_flat_codes
+
 
 risk_rates_diagID = {
     'low': ['Z34.0', 'Z34.8', 'Z34.9'],
@@ -190,3 +193,12 @@ def get_action_property_value(action_id, prop_type_code):
         lazyload('*')
     )
     return query.first()
+
+
+def get_last_checkup_date(event_id):
+    query = db.session.query(Action.begDate).join(ActionType).filter(
+        Action.event_id == event_id,
+        Action.deleted == 0,
+        ActionType.flatCode.in_(checkup_flat_codes)
+    ).order_by(Action.begDate.desc()).first()
+    return query[0] if query else None
