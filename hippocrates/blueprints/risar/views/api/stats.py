@@ -4,6 +4,7 @@ import datetime
 
 from flask import request
 
+from nemesis.app import app
 from nemesis.lib.apiutils import api_method
 from nemesis.lib.utils import safe_int
 from nemesis.models.actions import ActionType, Action, ActionProperty, ActionPropertyType, ActionProperty_Integer, \
@@ -13,6 +14,7 @@ from nemesis.models.exists import rbRequestType
 from nemesis.models.organisation import Organisation, OrganisationCurationAssoc
 from nemesis.models.person import PersonCurationAssoc, rbOrgCurationLevel
 from nemesis.models.utils import safe_current_user_id
+from nemesis.models.risar import TerritorialRate, rbRateType
 from nemesis.systemwide import db
 from blueprints.risar.app import module
 from blueprints.risar.lib.card_attrs import get_card_attrs_action
@@ -230,6 +232,10 @@ def api_0_prenatal_risk_stats():
 @module.route('/api/0/death_stats.json')
 @api_method
 def api_0_death_stats():
+    #перинатальная смертности и материнская смертность
+    regions = ['00000000000']
+    regions.extend(app.config.get('RISAR_REGIONS', []))
+
     # младеньческая смертность
     result = collections.defaultdict(list)
     result1 = {'maternal_death': []}
@@ -285,6 +291,22 @@ def api_0_death_stats():
                 ))
             result1[value].append([i, db.session.execute(selectable1).rowcount])
 
+    perinatal_death_rate = {}
+    for region in regions:
+        perinatal_death_rate[region] = []
+        selectable = db.select(
+            (TerritorialRate.year, TerritorialRate.value),
+            whereclause=db.and_(
+                TerritorialRate.kladr_code == region,
+                rbRateType.code == "perinatal_death",
+                rbRequestType.code == 'pregnancy'
+            ),
+            from_obj=(
+                TerritorialRate, rbRateType
+            ))
+        for (year, value) in db.session.execute(selectable):  #
+            perinatal_death_rate[region].append([year, value])
+
     #материнская смертность
     def check_pat_diagnosis(action):
         pat_diagnosis = action.propsByCode['pat_diagnosis'].value
@@ -312,7 +334,7 @@ def api_0_death_stats():
                     ).all()
         actions = filter(check_pat_diagnosis, actions)
         result1['maternal_death'].append([i, len(actions)])
-    return result1
+    return result1, perinatal_death_rate
 
 
 @module.route('/api/0/pregnancy_final_stats.json')

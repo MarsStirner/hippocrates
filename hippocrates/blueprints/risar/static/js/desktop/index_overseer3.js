@@ -84,13 +84,16 @@ var IndexOverseer3Ctrl = function ($scope, RisarApi) {
         RisarApi.death_stats.get().then(function (result) {
             // 0 - dead, 1 - alive
             if (result){
-                var dead = result['0'].reduce(function(sum, current){
+                var result_current_year = result[0];
+                var result_prev_years = result[1];
+
+                var dead = result_current_year['0'].reduce(function(sum, current){
                     return sum + current[1];
                 }, 0);
-                var alive = result['1'].reduce(function(sum, current){
+                var alive = result_current_year['1'].reduce(function(sum, current){
                     return sum + current[1];
                 }, 0);
-                var maternal_death_all = result['maternal_death'].reduce(function(sum, current){
+                var maternal_death_all = result_current_year['maternal_death'].reduce(function(sum, current){
                     return sum + current[1];
                 }, 0);
                 $scope.infants_death_coeff = (dead/(dead + alive)*1000).toFixed(2);
@@ -98,22 +101,32 @@ var IndexOverseer3Ctrl = function ($scope, RisarApi) {
                 $scope.infants_death = [
                               {
                                   "key": "Количество умерших детей",
-                                  "values": result['0'],
+                                  "values": result_current_year['0'],
                                   "color": "#FF6633"
                               },
                               {
                                   "key": "Количество живых детей",
-                                  "values": result['1'],
+                                  "values": result_current_year['1'],
                                   "color": "#339933"
                               }
                          ];
                 $scope.maternal_death = [
                               {
                                   "key": "Количество умерших пациенток",
-                                  "values": result['maternal_death'],
+                                  "values": result_current_year['maternal_death'],
                                   "color": "#FF6633"
                               }
                          ];
+                $scope.infants_death_prev_years = [];
+                for (var key in result_prev_years){
+                    if (result_prev_years[key].length){
+                        $scope.infants_death_prev_years.push({
+                            "key": key,
+                            "values": result_prev_years[key]
+                            })
+                    }
+
+                }
             } else{
                 $scope.infants_death = [];
                 $scope.maternal_death = [];
