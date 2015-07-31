@@ -77,44 +77,44 @@
                 </tr>
                 <tr>
                     <th>Масса тела</th>
-                    <td ng-repeat="checkup in checkups"><i class="glyphicon glyphicon-arrow-up text-success"></i> [[ checkup.weight ]]</td>
+                    <td ng-repeat="checkup in checkups"> [[ checkup.weight ]]</td>
                     <td></td>
                 </tr>
                 <tr>
                     <th>Прибавка в массе</th>
-                    <td ng-repeat="checkup in checkups"><i class="glyphicon glyphicon-arrow-up text-success"></i>
+                    <td ng-repeat="checkup in checkups">
                         <span tooltip="Прибавка в массе на расчётный срок [[ checkup.pregnancy_week ]] [[declOfNum(checkup.pregnancy_week, ['неделя', 'недели', 'недель'])]]">
                             [[checkup.weight-first_checkup.weight]]</span>/<span tooltip="Прибавка в массе за [[ checkup.weight_gain[1] ]] [[declOfNum(checkup.weight_gain[1], ['день', 'дня', 'дней'])]]">[[ checkup.weight_gain[0] ]]</span></td>
                     <td></td>
                 </tr>
                 <tr>
                     <th>Молочные железы</th>
-                    <td ng-repeat="checkup in checkups"><i class="glyphicon glyphicon-arrow-up text-success"></i><p ng-repeat="item in checkup.breast">[[ item | format:'{name}' ]]</p></td>
+                    <td ng-repeat="checkup in checkups"><p ng-repeat="item in checkup.breast">[[ item | format:'{name}' ]]</p></td>
                     <td></td>
                 </tr>
                 <tr>
                     <th>Соски</th>
-                    <td ng-repeat="checkup in checkups"><i class="glyphicon glyphicon-arrow-up text-success"></i><p ng-repeat="item in checkup.nipples">[[ item | format:'{name}' ]]</p></td>
+                    <td ng-repeat="checkup in checkups"><p ng-repeat="item in checkup.nipples">[[ item | format:'{name}' ]]</p></td>
                     <td></td>
                 </tr>
                 <tr>
                     <th>Отёки</th>
-                    <td ng-repeat="checkup in checkups"><i class="glyphicon glyphicon-arrow-up text-success"></i> [[ checkup.edema ]]</td>
+                    <td ng-repeat="checkup in checkups"> [[ checkup.edema ]]</td>
                     <td></td>
                 </tr>
                 <tr>
                     <th>АД левая рука</th>
-                    <td ng-repeat="checkup in checkups"><i class="glyphicon glyphicon-arrow-up text-success"></i> [[ checkup.ad_left_high ]]/[[ checkup.ad_left_low ]]</td>
+                    <td ng-repeat="checkup in checkups"> [[ checkup.ad_left_high ]]/[[ checkup.ad_left_low ]]</td>
                     <td></td>
                 </tr>
                 <tr>
                     <th>АД правая рука</th>
-                    <td ng-repeat="checkup in checkups"><i class="glyphicon glyphicon-arrow-up text-success"></i> [[ checkup.ad_right_high ]]/[[ checkup.ad_right_low ]]</td>
+                    <td ng-repeat="checkup in checkups"> [[ checkup.ad_right_high ]]/[[ checkup.ad_right_low ]]</td>
                     <td></td>
                 </tr>
                 <tr>
                     <th>Окружность живота</th>
-                    <td ng-repeat="checkup in checkups"><i class="glyphicon glyphicon-arrow-up text-success"></i> [[ checkup.abdominal ]]</td>
+                    <td ng-repeat="checkup in checkups"> [[ checkup.abdominal ]]</td>
                     <td></td>
                 </tr>
                 <tr>
@@ -123,12 +123,12 @@
                 </tr>
                 <tr>
                     <td>Высота дна</td>
-                    <td ng-repeat="checkup in checkups"><i class="glyphicon glyphicon-arrow-up text-success"></i> [[ checkup.fundal_height ]]</td>
+                    <td ng-repeat="checkup in checkups"> [[ checkup.fundal_height ]]</td>
                     <td></td>
                 </tr>
                 <tr>
                     <td>Состояние</td>
-                    <td ng-repeat="checkup in checkups"><i class="glyphicon glyphicon-arrow-up text-success"></i> [[ checkup.metra_state.name ]]</td>
+                    <td ng-repeat="checkup in checkups"> [[ checkup.metra_state.name ]]</td>
                     <td></td>
                 </tr>
                 <tr>
@@ -137,22 +137,22 @@
                 </tr>
                 <tr>
                     <td>Положение</td>
-                    <td ng-repeat="checkup in checkups"><i class="glyphicon glyphicon-arrow-up text-success"></i> [[ checkup.fetus_position.name ]]</td>
+                    <td ng-repeat="checkup in checkups"> [[ checkup.fetus_position.name ]]</td>
                     <td></td>
                 </tr>
                 <tr>
                     <td>Предлежание</td>
-                    <td ng-repeat="checkup in checkups"><i class="glyphicon glyphicon-arrow-up text-success"></i> [[ checkup.presenting_part.name ]]</td>
+                    <td ng-repeat="checkup in checkups"> [[ checkup.presenting_part.name ]]</td>
                     <td></td>
                 </tr>
                 <tr>
                     <td>Характер СС</td>
-                    <td ng-repeat="checkup in checkups"><i class="glyphicon glyphicon-arrow-up text-success"></i> [[ checkup.fetus_heartbeat.name ]]</td>
+                    <td ng-repeat="checkup in checkups"> [[ checkup.fetus_heartbeat.name ]]</td>
                     <td></td>
                 </tr>
                 <tr>
                     <td>Частота СС</td>
-                    <td ng-repeat="checkup in checkups"><i class="glyphicon glyphicon-arrow-up text-success"></i> [[ checkup.fetus_heart_rate ]]</td>
+                    <td ng-repeat="checkup in checkups"> [[ checkup.fetus_heart_rate ]]</td>
                     <td></td>
                 </tr>
             </tbody>
