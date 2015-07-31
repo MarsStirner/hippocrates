@@ -114,6 +114,12 @@ var EventMeasureTableViewCtrl = function ($scope, RisarApi, TimeoutCallback) {
     $scope.onPageChanged = function () {
         refreshMeasureList(true);
     };
+    $scope.getStatusColorStyle = function (status) {
+        var style = {};
+        if (status.code === 'assigned') style['background-color'] = '#3C8DBC';
+        else if (status.code  === 'upon_med_indications') style['background-color'] = '#9600CD';
+        return style;
+    };
 
     var registered_watchers = [];
     $scope.$on('viewModeChanged', function (event, data) {
