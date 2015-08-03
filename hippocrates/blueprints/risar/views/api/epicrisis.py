@@ -30,6 +30,7 @@ def api_0_chart_epicrisis(event_id):
                 property = action.propsByCode[code]
                 property.value = value
 
+        child_inspection_actions = []
         for child_inspection in request.json['newborn_inspections']:
             if child_inspection:
                 child_action = get_action_by_id(child_inspection.get('id'), event,  risar_newborn_inspection, True)
@@ -39,6 +40,11 @@ def api_0_chart_epicrisis(event_id):
                     elif code == 'sex' and value:
                         child_action.propsByCode['sex'].value = 1 if value['code'] == 'male' else 2
                 db.session.add(child_action)
+                db.session.commit()
+                if not child_action.deleted:
+                    child_inspection_actions.append({'id': child_action.id})
+
+        action.propsByCode['newborn_inspections'].value = child_inspection_actions
         db.session.commit()
         reevaluate_card_attrs(event)
         db.session.commit()

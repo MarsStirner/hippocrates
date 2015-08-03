@@ -165,13 +165,6 @@ var IndexOverseer3Ctrl = function ($scope, RisarApi) {
     $scope.refresh_gistograms();
     $scope.refresh_pregnancy_week_diagram();
 };
-var OrgBirthCareViewCtrl = function ($scope, RisarApi) {
-    RisarApi.desktop.get_info().
-        then(function (data) {
-            $scope.obcl_items = data.obcl_items;
-        });
-};
+
 WebMis20.controller('IndexOverseer3Ctrl', ['$scope', 'RisarApi',
     IndexOverseer3Ctrl]);
-WebMis20.controller('OrgBirthCareViewCtrl', ['$scope', 'RisarApi',
-    OrgBirthCareViewCtrl]);

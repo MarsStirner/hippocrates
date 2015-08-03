@@ -41,9 +41,13 @@ var EventMeasureListCtrl = function ($scope, $q, RisarApi, RefBookService, Print
         }
     };
     var reloadChart = function () {
-         return RisarApi.measure.get_chart($scope.event_id).then(function (data) {
-             $scope.header = data.header;
+        var header = RisarApi.chart.get_header($scope.event_id).then(function (data) {
+            $scope.header = data.header;
         });
+        var chart = RisarApi.measure.get_chart($scope.event_id).then(function (data) {
+             $scope.chart = data;
+        });
+        return $q.all(header, chart);
     };
 
     $scope.resetFilters = function () {
@@ -109,6 +113,12 @@ var EventMeasureTableViewCtrl = function ($scope, RisarApi, TimeoutCallback) {
 
     $scope.onPageChanged = function () {
         refreshMeasureList(true);
+    };
+    $scope.getStatusColorStyle = function (status) {
+        var style = {};
+        if (status.code === 'assigned') style['background-color'] = '#3C8DBC';
+        else if (status.code  === 'upon_med_indications') style['background-color'] = '#9600CD';
+        return style;
     };
 
     var registered_watchers = [];
@@ -203,6 +213,9 @@ var EventMeasureCalendarViewCtrl = function ($scope, $timeout, RisarApi, Timeout
             registered_watchers.push(w_q);
             registered_watchers.push(w_qmt);
             registered_watchers.push(w_qs);
+            if ($scope.chart.last_inspection_date) {
+                uiCalendarConfig.calendars.measureList.fullCalendar('gotoDate', $scope.chart.last_inspection_date);
+            }
             reloadCalendar();
         } else {
             registered_watchers.forEach(function (unwatch) { unwatch(); });

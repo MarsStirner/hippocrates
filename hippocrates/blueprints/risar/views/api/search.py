@@ -193,7 +193,7 @@ def api_0_area_lpu_list():
     query = Organisation.query
     query = query.filter(
         Organisation.deleted == 0,
-        Organisation.isHospital == 1,  # This is not right, however, f**k it
+        Organisation.isLPU == 1,
     )
     if areas:
         regex = '^' + '|^'.join([area['code'][:5] for area in areas if area['code']])

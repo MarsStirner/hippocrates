@@ -22,6 +22,7 @@ from blueprints.risar.lib.card_attrs import default_AT_Heuristic, get_all_diagno
 from blueprints.risar.lib.represent import represent_event, represent_chart_for_routing, represent_header, \
     represent_org_for_routing, group_orgs_for_routing, represent_checkups, represent_card_attributes, \
     represent_chart_for_epicrisis
+from blueprints.risar.lib.utils import get_last_checkup_date
 from blueprints.risar.risar_config import attach_codes
 
 
@@ -69,11 +70,11 @@ def api_0_chart(event_id=None):
         ticket = ScheduleClientTicket.query.get(ticket_id)
         if not ticket:
             raise ApiException(404, u'Талончик на приём не найден')
-        event = ticket.event
+        event = ticket.event if not ticket.event.deleted else None
         if not event:
             # проверка наличия у пациентки открытого обращения
             client_id = ticket.client_id
-            event = Event.query.join(EventType, rbRequestType).filter(Event.client_id == client_id,
+            event = Event.query.join(EventType, rbRequestType).filter(Event.client_id == client_id, Event.deleted == 0,
                                                                       rbRequestType.code == 'pregnancy',
                                                                       Event.execDate.is_(None)).order_by(Event.setDate.desc()).first()
             if not event:
@@ -168,7 +169,7 @@ def api_0_chart_measure_list(event_id=None):
     if event.eventType.requestType.code != 'pregnancy':
         raise ApiException(400, u'Обращение не является случаем беременности')
     return {
-        'header': represent_header(event),
+        'last_inspection_date': get_last_checkup_date(event_id)
     }
 
 
@@ -199,7 +200,7 @@ def api_0_event_routing():
     else:
         client = None
 
-    query = Organisation.query.filter(Organisation.isHospital == 1)
+    query = Organisation.query.filter(Organisation.isLPU == 1)
     if diagnoses:
         mkb_ids = [d['id'] for d in diagnoses]
         suit_orgs_q = db.session.query(Organisation.id).join(

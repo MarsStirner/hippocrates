@@ -24,11 +24,6 @@ def index_html():
         return render_template('risar/desktop/index.html')
 
 
-@module.route('/orgbirthcare/')
-def html_org_birth_care():
-    return render_template('risar/curation/org_birth_care.html')
-
-
 @module.route('/search.html')
 def html_search():
     return render_template('risar/search.html')
@@ -109,3 +104,13 @@ def html_ambulance_patient_info():
 @module.route('/measure_list.html')
 def html_event_measure():
     return render_template('risar/event_measure_list.html')
+
+
+@module.route('/stats/org-birth-care/')
+def html_stats_org_birth_care():
+    return render_template('risar/stats/obcl_orgs.html')
+
+
+@module.route('/stats/org-curation/')
+def html_stats_org_curation():
+    return render_template('risar/stats/org_curation.html')

@@ -267,16 +267,17 @@ WebMis20
             return wrapper('GET', Config.url.api_measure_generate + action_id)
         }
     };
-    this.desktop = {
-        get_info: function () {
-            return wrapper('GET', Config.url.api_obcl_org_count_get);
+    this.stats = {
+        get_obcl_info: function () {
+            return wrapper('GET', Config.url.api_stats_obcl_gett);
+        },
+        get_obcl_org_info: function (org_birth_care_id) {
+            return wrapper('GET', Config.url.api_stats_obcl_orgs_get.formatNonEmpty(org_birth_care_id));
+        },
+        get_org_curation_info: function () {
+            return wrapper('GET', Config.url.api_stats_org_curation_get);
         }
     };
-    this.curation = {
-        get_org_patient_count: function (org_birth_care_id) {
-            return wrapper('GET', Config.url.api_obcl_org_patient_count_get + org_birth_care_id);
-        }
-    }
 }])
 .filter('underlineNoVal', function () {
     return function(value, label) {
@@ -295,9 +296,9 @@ WebMis20
         },
         link: function (scope) {
             scope.icon_class = function (rate) {
-                if (rate == 1) return 'ri-prenatal-risk text-success-risar';
-                if (rate == 2) return 'ri-prenatal-risk text-warning-risar';
-                if (rate == 3) return 'ri-prenatal-risk text-danger-risar';
+                if (rate == 1) return 'ri-prenatal-risk text-green';
+                if (rate == 2) return 'ri-prenatal-risk text-yellow';
+                if (rate == 3) return 'ri-prenatal-risk text-red';
                 return 'ri-prenatal-risk-undefined';
             };
             scope.tooltip = function (rate) {
@@ -319,8 +320,8 @@ WebMis20
         },
         link: function (scope) {
             scope.icon_class = function (rate) {
-                if (rate == 1) return 'fa fa-exclamation-circle text-danger-risar';
-                if (rate == 2) return 'fa fa-exclamation-circle text-success-risar';
+                if (rate == 1) return 'fa fa-exclamation-circle text-red';
+                if (rate == 2) return 'fa fa-exclamation-circle text-green';
                 return 'fa fa-question';
             };
             scope.tooltip = function (rate) {
