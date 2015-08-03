@@ -7,6 +7,7 @@ from flask import request
 from nemesis.app import app
 from nemesis.lib.apiutils import api_method
 from nemesis.lib.utils import safe_int
+from nemesis.lib.vesta import Vesta
 from nemesis.models.actions import ActionType, Action, ActionProperty, ActionPropertyType, ActionProperty_Integer, \
     ActionProperty_Date, ActionProperty_ExtReferenceRb
 from nemesis.models.event import Event, EventType
@@ -20,6 +21,31 @@ from blueprints.risar.app import module
 from blueprints.risar.lib.card_attrs import get_card_attrs_action
 from blueprints.risar.lib.represent import represent_ticket, represent_chart_short, get_pregnancy_week
 from blueprints.risar.risar_config import checkup_flat_codes
+
+
+def get_rate_for_regions(regions, rate_code):
+    rate = {}
+    for region in regions:
+        result = []
+        selectable = db.select(
+            (TerritorialRate.year, TerritorialRate.value),
+            whereclause=db.and_(
+                TerritorialRate.kladr_code == region,
+                rbRateType.id == TerritorialRate.rate_type_id,
+                rbRateType.code == rate_code
+            ),
+            from_obj=(
+                TerritorialRate, rbRateType
+            ))
+        for (year, value) in db.session.execute(selectable):
+            result.append([year, value])
+        if result:
+            if region == '00000000000':
+                rate[u'РФ'] = result
+            else:
+                region_info = Vesta.search_kladr_locality(region, 1)[0]
+                rate[region_info.fullname] = result
+    return rate
 
 
 @module.route('/api/0/current_stats.json')
@@ -108,10 +134,10 @@ def api_0_recently_modified_charts():
 
     query = Event.query.join(EventType, rbRequestType, Action, ActionType, ActionProperty, ActionPropertyType,
                              ActionProperty_Integer)\
-        .filter(rbRequestType.code == 'pregnancy', Event.deleted == 0, Event.execDate.is_(None),
+        .filter(rbRequestType.code == 'pregnancy', Event.deleted == 0, Event.execDate.is_(None), Action.deleted == 0,
                 ActionType.flatCode == 'cardAttributes', ActionPropertyType.code == "prenatal_risk_572",
+                ActionProperty.deleted == 0,
                 ActionProperty_Integer.value_.in_(risk_rate))
-
     if curation_level:
         query = query.join(Organisation, OrganisationCurationAssoc, PersonCurationAssoc, rbOrgCurationLevel)
         query = query.filter(PersonCurationAssoc.person_id == person_id,
@@ -146,7 +172,8 @@ def api_0_need_hospitalization(person_id=None):
     patient_list = Event.query.join(EventType, rbRequestType, Action, ActionType, ActionProperty,
                                     ActionPropertyType, ActionProperty_Integer)\
         .filter(rbRequestType.code == 'pregnancy', Event.deleted == 0, Event.execDate.is_(None), Event.execPerson_id == person_id,
-                ActionType.flatCode == 'cardAttributes', ActionPropertyType.code == "prenatal_risk_572",
+                ActionType.flatCode == 'cardAttributes', Action.deleted == 0,
+                ActionPropertyType.code == "prenatal_risk_572", ActionProperty.deleted == 0,
                 ActionProperty_Integer.value_.in_([2, 3]))\
         .all()
     patient_list = filter(lambda x: get_pregnancy_week(x) >= 38, patient_list)
@@ -291,21 +318,8 @@ def api_0_death_stats():
                 ))
             result1[value].append([i, db.session.execute(selectable1).rowcount])
 
-    perinatal_death_rate = {}
-    for region in regions:
-        perinatal_death_rate[region] = []
-        selectable = db.select(
-            (TerritorialRate.year, TerritorialRate.value),
-            whereclause=db.and_(
-                TerritorialRate.kladr_code == region,
-                rbRateType.code == "perinatal_death",
-                rbRequestType.code == 'pregnancy'
-            ),
-            from_obj=(
-                TerritorialRate, rbRateType
-            ))
-        for (year, value) in db.session.execute(selectable):  #
-            perinatal_death_rate[region].append([year, value])
+    perinatal_death_rate = get_rate_for_regions(regions, "perinatal_death")
+    birth_rate = get_rate_for_regions(regions, "birth")
 
     #материнская смертность
     def check_pat_diagnosis(action):
@@ -334,7 +348,7 @@ def api_0_death_stats():
                     ).all()
         actions = filter(check_pat_diagnosis, actions)
         result1['maternal_death'].append([i, len(actions)])
-    return result1, perinatal_death_rate
+    return result1, perinatal_death_rate, birth_rate
 
 
 @module.route('/api/0/pregnancy_final_stats.json')

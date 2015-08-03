@@ -29,6 +29,11 @@ var IndexOverseer3Ctrl = function ($scope, RisarApi) {
         var m = moment();
         return m.months(d-1).format('MMM');
     }
+    $scope.xAxisTickFormatYears = function(d){
+        if (d%1 ===0){
+            return d;
+        }
+    }
     $scope.$watch('search_date.date', function (n, o) {
         RisarApi.schedule(n).then(function (tickets) {
             $scope.tickets = tickets;
@@ -83,9 +88,11 @@ var IndexOverseer3Ctrl = function ($scope, RisarApi) {
     $scope.refresh_gistograms = function () {
         RisarApi.death_stats.get().then(function (result) {
             // 0 - dead, 1 - alive
+            $scope.infants_prev_years = [];
             if (result){
                 var result_current_year = result[0];
-                var result_prev_years = result[1];
+                var prev_years_perinatal_death = result[1];
+                var prev_years_birth = result[2];
 
                 var dead = result_current_year['0'].reduce(function(sum, current){
                     return sum + current[1];
@@ -117,12 +124,22 @@ var IndexOverseer3Ctrl = function ($scope, RisarApi) {
                                   "color": "#FF6633"
                               }
                          ];
-                $scope.infants_death_prev_years = [];
-                for (var key in result_prev_years){
-                    if (result_prev_years[key].length){
-                        $scope.infants_death_prev_years.push({
-                            "key": key,
-                            "values": result_prev_years[key]
+                for (var key in prev_years_perinatal_death){
+                    if (prev_years_perinatal_death[key].length){
+                        $scope.infants_prev_years.push({
+                            "key": key+', смертность',
+                            "values": prev_years_perinatal_death[key],
+                            "color": "#FF6633"
+                            })
+                    }
+
+                }
+                for (var key in prev_years_birth){
+                    if (prev_years_birth[key].length){
+                        $scope.infants_prev_years.push({
+                            "key": key+', рождаемость',
+                            "values": prev_years_birth[key],
+                            "color": "#339933"
                             })
                     }
 
