@@ -216,7 +216,7 @@ class OrgBirthCareLevelRepr(object):
         if obcl_id:
             org_fetcher.apply_filter(obcl_id=obcl_id)
         else:
-            org_fetcher.apply_filter(is_stationary=1)
+            org_fetcher.apply_filter(obcl_id=None, is_stationary=1)
         org_fetcher.apply_with_patients_by_risk()
         org_fetcher.apply_with_obcl()
         org_data = org_fetcher.get_all()
