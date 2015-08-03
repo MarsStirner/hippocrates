@@ -70,11 +70,11 @@ def api_0_chart(event_id=None):
         ticket = ScheduleClientTicket.query.get(ticket_id)
         if not ticket:
             raise ApiException(404, u'Талончик на приём не найден')
-        event = ticket.event
+        event = ticket.event if not ticket.event.deleted else None
         if not event:
             # проверка наличия у пациентки открытого обращения
             client_id = ticket.client_id
-            event = Event.query.join(EventType, rbRequestType).filter(Event.client_id == client_id,
+            event = Event.query.join(EventType, rbRequestType).filter(Event.client_id == client_id, Event.deleted == 0,
                                                                       rbRequestType.code == 'pregnancy',
                                                                       Event.execDate.is_(None)).order_by(Event.setDate.desc()).first()
             if not event:
