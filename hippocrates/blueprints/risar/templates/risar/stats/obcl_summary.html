@@ -11,20 +11,19 @@
                 <div class="product-img" ng-style="{width: 50, height: 50, background: obcl.color}">
                 </div>
                 <div class="product-info">
-                    <span class="product-title">[[ obcl.name ]] <span class="label label-primary pull-right">[[ obcl.org_count ]]</span></span>
-                    <span class="product-description">Степень перинатального риска [[ obcl.perinatal_risk_rate.name ]]</span>
-                    <p class="product-description normalwrap">Количество пациенток по степеням перинатального риска, запланированных на родоразрешение:</p>
-                    <div class="product-description">
-                        Всего: <span class="rmargin10 text-black" style="font-size: larger; font-weight: bold;">
-                            [[obcl.patient_by_risk_count.all]]</span>
-                        Высокая: <span class="text-danger rmargin10" style="font-size: larger; font-weight: bold">
-                            [[obcl.patient_by_risk_count.high]]</span>
-                        Средняя: <span class="text-warning rmargin10" style="font-size: larger; font-weight: bold">
-                            [[obcl.patient_by_risk_count.medium]]</span>
-                        Низкая: <span class="text-success rmargin10" style="font-size: larger; font-weight: bold">
-                            [[obcl.patient_by_risk_count.low]]</span>
-                        Неопределенная: <span class="rmargin10 text-black" style="font-size: larger; font-weight: bold">
-                            [[obcl.patient_by_risk_count.undefined]]</span>
+                    <span class="product-title">[[ obcl.name ]] уровень <span class="label label-primary pull-right">[[ obcl.org_count ]]</span></span>
+                    <span class="product-description normalwrap">[[ obcl.description ]]</span>
+                    <div class="product-description normalwrap">
+                        <span class="nowrap">Всего: <span class="rmargin10 text-black" style="font-size: larger; font-weight: bold;" title="Всего пациенток, планово установленных на родоразрешение">
+                            [[obcl.patient_by_risk_count.all]]</span></span>
+                        <span class="nowrap">Высокая: <span class="text-danger rmargin10" style="font-size: larger; font-weight: bold" title="[[getRRToolTipText(obcl.perinatal_risk_rate)]]">
+                            [[obcl.patient_by_risk_count.high]]</span></span>
+                        <span class="nowrap">Средняя: <span class="text-warning rmargin10" style="font-size: larger; font-weight: bold" title="[[getRRToolTipText(obcl.perinatal_risk_rate)]]">
+                            [[obcl.patient_by_risk_count.medium]]</span></span>
+                        <span class="nowrap">Низкая: <span class="text-success rmargin10" style="font-size: larger; font-weight: bold" title="[[getRRToolTipText(obcl.perinatal_risk_rate)]]">
+                            [[obcl.patient_by_risk_count.low]]</span></span>
+                        <span class="nowrap">Неопределенная: <span class="rmargin10 text-black" style="font-size: larger; font-weight: bold" title="[[getRRToolTipText(obcl.perinatal_risk_rate)]]">
+                            [[obcl.patient_by_risk_count.undefined]]</span></span>
                     </div>
                 </div>
             </li>
