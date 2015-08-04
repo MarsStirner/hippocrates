@@ -22,6 +22,7 @@ from blueprints.risar.lib.card_attrs import get_card_attrs_action
 from blueprints.risar.lib.represent import represent_ticket, represent_chart_short, get_pregnancy_week
 from blueprints.risar.risar_config import checkup_flat_codes
 from blueprints.risar.lib.org_bcl import OrgBirthCareLevelRepr, OrganisationRepr
+from sqlalchemy import func
 
 
 def get_rate_for_regions(regions, rate_code):
@@ -310,7 +311,8 @@ def api_0_death_stats():
                     rbRequestType.id == EventType.requestType_id,
                     Event.deleted == 0,
                     Action.deleted == 0,
-                    ActionProperty_Date.value.like(now.strftime('%Y')+'-'+str(i).rjust(2, '0')+'-%'),
+                    func.year(ActionProperty_Date.value) == now.strftime('%Y'),
+                    func.month(ActionProperty_Date.value) == str(i).rjust(2, '0'),
                     Action.id.in_(result[value])
                 ),
                 from_obj=(
@@ -345,7 +347,8 @@ def api_0_death_stats():
                     rbRequestType.id == EventType.requestType_id,
                     Event.deleted == 0,
                     Action.deleted == 0,
-                    ActionProperty_Date.value.like(now.strftime('%Y')+'-'+str(i).rjust(2, '0')+'-%')
+                    func.year(ActionProperty_Date.value) == now.strftime('%Y'),
+                    func.month(ActionProperty_Date.value) == str(i).rjust(2, '0')
                     ).all()
         actions = filter(check_pat_diagnosis, actions)
         result1['maternal_death'].append([i, len(actions)])
@@ -373,7 +376,7 @@ def api_0_pregnancy_final_stats():
             rbRequestType.id == EventType.requestType_id,
             Event.deleted == 0,
             Action.deleted == 0,
-            ActionProperty_Date.value.like(now.strftime('%Y')+'-%')
+            func.year(ActionProperty_Date.value) == now.strftime('%Y')
         ),
         from_obj=(
             Event, EventType, rbRequestType, Action, ActionType, ActionProperty, ActionPropertyType,
