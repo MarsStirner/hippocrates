@@ -352,7 +352,9 @@ def api_0_death_stats():
                     ).all()
         actions = filter(check_pat_diagnosis, actions)
         result1['maternal_death'].append([i, len(actions)])
-    return result1, perinatal_death_rate, birth_rate
+
+    maternal_death_rate = get_rate_for_regions(regions, "maternal_death")
+    return result1, perinatal_death_rate, birth_rate, maternal_death_rate
 
 
 @module.route('/api/0/pregnancy_final_stats.json')

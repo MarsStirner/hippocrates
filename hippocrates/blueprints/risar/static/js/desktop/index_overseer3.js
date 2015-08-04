@@ -93,6 +93,7 @@ var IndexOverseer3Ctrl = function ($scope, RisarApi) {
                 var result_current_year = result[0];
                 var prev_years_perinatal_death = result[1];
                 var prev_years_birth = result[2];
+                var prev_years_maternal_death = result[3];
 
                 var dead = result_current_year['0'].reduce(function(sum, current){
                     return sum + current[1];
@@ -126,20 +127,34 @@ var IndexOverseer3Ctrl = function ($scope, RisarApi) {
                          ];
                 for (var key in prev_years_perinatal_death){
                     if (prev_years_perinatal_death[key].length){
+                        var color = key == 'РФ' ? "#FF9728": "#FF6633";
                         $scope.infants_prev_years.push({
                             "key": key+', смертность',
                             "values": prev_years_perinatal_death[key],
-                            "color": "#FF6633"
+                            "color": color
                             })
                     }
 
                 }
                 for (var key in prev_years_birth){
                     if (prev_years_birth[key].length){
+                        var color = key == 'РФ' ? "#3c8dbc": "#339933";
                         $scope.infants_prev_years.push({
                             "key": key+', рождаемость',
                             "values": prev_years_birth[key],
-                            "color": "#339933"
+                            "color": color
+                            })
+                    }
+
+                }
+                $scope.prev_years_maternal_death = [];
+                for (var key in prev_years_maternal_death){
+                    if (prev_years_maternal_death[key].length){
+                        var color = key == 'РФ' ? "#FF9728": "#FF6633";
+                        $scope.prev_years_maternal_death.push({
+                            "key": key,
+                            "values": prev_years_maternal_death[key],
+                            "color": color
                             })
                     }
 
