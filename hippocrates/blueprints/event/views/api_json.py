@@ -224,7 +224,6 @@ def api_search_services():
                                        eventType_id=event_type_id,
                                        contract_id=contract_id,
                                        speciality_id=speciality_id)
-    # result = find_services_direct(query, event_type_id, contract_id, speciality_id)
 
     ats_apts = int_get_atl_dict_all()
     client = Client.query.get(client_id)
@@ -269,49 +268,6 @@ def api_search_services():
             matched.append(s)
 
     return jsonify(matched)
-
-
-def find_services_direct(query, event_type_id, contract_id, speciality_id):
-    # for tests
-    sql = u'''
-SELECT  at.id as action_type_id, ct.code, ct.name as service, at.name, at.service_id,
-	GROUP_CONCAT(DISTINCT e.eventType_id SEPARATOR ',') as eventType_id,
-	IF(e.speciality_id, GROUP_CONCAT(DISTINCT e.speciality_id SEPARATOR ','), 0) as speciality_id,
-	GROUP_CONCAT(DISTINCT ct.master_id SEPARATOR ',') as contract_id,
-	ct.price
-FROM ActionType at
-INNER JOIN EventType_Action e ON e.actionType_id=at.id
-INNER JOIN Contract_Tariff ct ON ct.service_id=at.service_id AND ct.eventType_id=e.eventType_id
-INNER JOIN rbService s ON s.id=at.service_id
-WHERE at.deleted=0 AND ct.deleted=0 AND (CURDATE() BETWEEN ct.begDate AND ct.endDate)
-AND e.eventType_id {0} AND ct.master_id {1} AND speciality_id {2} AND at.code like '%{3}%'
-GROUP BY at.id, ct.code
-'''
-    result = {
-        'result': {
-            'items': []
-        }
-    }
-    sr = db.session.execute(
-        db.text(
-            sql.format(
-                '= %s' % event_type_id if event_type_id else '!= -1',
-                '= %s' % contract_id if contract_id else '!= -1',
-                '!= %s' % speciality_id if speciality_id else '!= -1',
-                '%s' % query
-                )
-        )
-    )
-    for r in sr:
-        r = list(r)
-        item = {}
-        item['action_type_id'] = r[0]
-        item['code'] = r[1]
-        item['service'] = r[2]
-        item['name'] = r[3]
-        item['price'] = r[8]
-        result['result']['items'].append(item)
-    return result
 
 
 @module.route('/api/event_payment/previous_local_contracts.json', methods=['GET'])

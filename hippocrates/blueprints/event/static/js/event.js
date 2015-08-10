@@ -274,7 +274,7 @@ var EventStationaryInfoCtrl = function($scope, $filter) {
         return doctor ? (doctor.full_name) : '&nbsp;';
     };
 };
-var EventPaymentCtrl = function($scope, RefBookService, Settings, $http, $modal, MessageBox) {
+var EventPaymentCtrl = function($scope, RefBookService, $http, $modal, MessageBox) {
     $scope.rbDocumentType = RefBookService.get('rbDocumentType');
     $scope.Organisation = RefBookService.get('Organisation');
 
@@ -291,12 +291,9 @@ var EventPaymentCtrl = function($scope, RefBookService, Settings, $http, $modal,
         var lc = $scope.event.payment && $scope.event.payment.local_contract || null;
         return lc !== null && lc.payer_org;
     };
-    $scope.integration1CODVD_enabled = function() {
-        return $scope.Settings.get_string('Event.Payment.1CODVD') == '1';
-    };
     $scope.contract_info_required = function () {
         return ($scope.formstate.is_paid() || $scope.formstate.is_oms() || $scope.formstate.is_dms()) &&
-            !$scope.integration1CODVD_enabled();
+            !$scope.eventServices.integration1codvdEnabled();
     };
     $scope.payer_person_required = function () {
         return ($scope.payer_tabs.person.active && $scope.formstate.is_paid() && $scope.event.info.client.info.age_tuple[3] < 18);
@@ -310,7 +307,7 @@ var EventPaymentCtrl = function($scope, RefBookService, Settings, $http, $modal,
     $scope.contract_info_disabled = function () {
         return !(
             $scope.event.has_access_to_payment_info && (
-                !$scope.integration1CODVD_enabled() &&
+                !$scope.eventServices.integration1codvdEnabled() &&
                 ($scope.create_mode || $scope.editing.contract_edited)
             )
         );
@@ -318,7 +315,7 @@ var EventPaymentCtrl = function($scope, RefBookService, Settings, $http, $modal,
     $scope.btn_edit_contract_info_visible = function () {
         var lc = $scope.event.payment && $scope.event.payment.local_contract || null;
         return ($scope.event.has_access_to_payment_info &&
-            !$scope.integration1CODVD_enabled() && (
+            !$scope.eventServices.integration1codvdEnabled() && (
                 !lc || !lc.date_contract || !lc.number_contract || !lc.coord_text
             )
         );
@@ -582,6 +579,7 @@ var SwitchPayerModalCtrl = function ($scope, $modalInstance, from_tab) {
         $modalInstance.dismiss('cancel');
     };
 };
+
 var EventServicesCtrl = function($scope, $http) {
     $scope.query = "";
     $scope.found_services = null;
@@ -625,6 +623,15 @@ var EventServicesCtrl = function($scope, $http) {
         }
         return result;
     };
+    $scope.getPaymentsInTooltipText = function () {
+        if ($scope.eventServices.integration1codvdEnabled()) {
+            return 'Поступило платежей всего, в том числе на выбранные услуги: {0} руб.'.format(
+                safe_traverse($scope.event, ['payment', 'payments', 'total_in_for_charges'])
+            );
+        } else {
+            return 'Поступило платежей всего';
+        }
+    };
 
     $scope.$on('event_loaded', function() {
         $scope.query_clear();
@@ -638,10 +645,9 @@ var EventServicesCtrl = function($scope, $http) {
     };
 };
 
-var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $document, PrintingService, Settings,
+var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $document, PrintingService,
         $filter, $modal, WMEventServices, WMEventFormState, MessageBox) {
     $scope.aux = aux;
-    $scope.Settings = new Settings();
     $scope.alerts = [];
     $scope.eventServices = WMEventServices;
     $scope.formstate = WMEventFormState;
@@ -793,8 +799,8 @@ WebMis20.controller('EventDiagnosesCtrl', ['$scope', 'RefBookService', '$http', 
 WebMis20.controller('EventMainInfoCtrl', ['$scope', '$q', 'RefBookService', 'EventType', '$filter', 'MessageBox',
     'CurrentUser', EventMainInfoCtrl]);
 WebMis20.controller('EventStationaryInfoCtrl', ['$scope', '$filter', EventStationaryInfoCtrl]);
-WebMis20.controller('EventPaymentCtrl', ['$scope', 'RefBookService', 'Settings', '$http', '$modal', 'MessageBox',
+WebMis20.controller('EventPaymentCtrl', ['$scope', 'RefBookService', '$http', '$modal', 'MessageBox',
     EventPaymentCtrl]);
 WebMis20.controller('EventServicesCtrl', ['$scope', '$http', EventServicesCtrl]);
 WebMis20.controller('EventInfoCtrl', ['$scope', 'WMEvent', '$http', 'RefBookService', '$window', '$document',
-    'PrintingService', 'Settings', '$filter', '$modal', 'WMEventServices', 'WMEventFormState', 'MessageBox', EventInfoCtrl]);
+    'PrintingService', '$filter', '$modal', 'WMEventServices', 'WMEventFormState', 'MessageBox', EventInfoCtrl]);
