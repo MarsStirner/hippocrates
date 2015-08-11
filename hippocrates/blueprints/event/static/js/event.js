@@ -625,8 +625,9 @@ var EventServicesCtrl = function($scope, $http) {
     };
     $scope.getPaymentsInTooltipText = function () {
         if ($scope.eventServices.integration1codvdEnabled()) {
-            return 'Поступило платежей всего, в том числе на выбранные услуги: {0} руб.'.format(
-                safe_traverse($scope.event, ['payment', 'payments', 'total_in_for_charges'])
+            return 'Поступило платежей всего на сумму {0} руб., с учетом скидок {1} руб.'.format(
+                safe_traverse($scope.event, ['payment', 'payments', 'total_in']),
+                safe_traverse($scope.event, ['payment', 'payments', 'total_discount'])
             );
         } else {
             return 'Поступило платежей всего';
