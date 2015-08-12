@@ -1,6 +1,12 @@
 <div class="box box-primary" ng-if="mode == 0">
     <div class="box-header with-border">
-        <h3 class="box-title">Inbox</h3>
+        <h3 class="box-title" ng-switch="current_folder">
+            <span ng-switch-when="inbox">Входящие</span>
+            <span ng-switch-when="star">Помеченные</span>
+            <span ng-switch-when="sent">Отправленные</span>
+            <span ng-switch-when="system">Системные</span>
+            <span ng-switch-when="trash">Корзина</span>
+        </h3>
 
         <div class="box-tools pull-right">
             <div class="has-feedback">
