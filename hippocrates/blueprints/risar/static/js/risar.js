@@ -279,6 +279,56 @@ WebMis20
         }
     };
 }])
+.service('UserErrand', function (Simargl, ApiCalls, Config, OneWayEvent, CurrentUser, NotificationService) {
+    var event_source = new OneWayEvent(),
+        get_errands_url = Config.url.api_errands;
+    if (!get_errands_url) {
+        throw 'ВСЁ ПРОПАЛО!'
+    }
+    function get_errands_summary (pass) {
+        ApiCalls.wrapper('GET', Config.url.api_errands_summary).then(_.partial(event_source.send, 'unread'));
+        return pass;
+    }
+    Simargl.when_ready(function () {
+        get_errands_summary();
+        event_source.send('ready');
+    });
+    Simargl.subscribe('errand', function (msg) {
+        get_errands_summary();
+        event_source.send('new:id', msg.data.id);
+    });
+    this.subscribe = event_source.eventSource.subscribe;
+//    this.set_mark = function (mark_type, ids, value) {
+//        var method = "PUT";
+//        if (! (ids instanceof Array)) ids = [ids];
+//        if (!value) {method = "DELETE"}
+//        return ApiCalls.wrapper(method, WMConfig.url.api_user_mail_alter.format(ids.join(':'), mark_type)).then(get_mail_summary);
+//    };
+//    this.mail_move = function (folder, ids) {
+//        if (! (ids instanceof Array)) ids = [ids];
+//        return ApiCalls.wrapper('MOVE', WMConfig.url.api_user_mail_alter.format(ids.join(':'), folder)).then(get_mail_summary);
+//    };
+    this.get_errands = function (limit) {
+        return ApiCalls.wrapper('GET', get_errands_url, {
+            limit: limit
+        }).then(get_errands_summary)
+    };
+    this.create_errand = function (recipient, subject, text, event_id) {
+        Simargl.send_msg({
+            topic: 'errand:new',
+            recipient: recipient,
+            sender: CurrentUser.id,
+            data: { subject: subject, text: text, event_id: event_id },
+            ctrl: true
+        }).then(function (result) {
+            NotificationService.notify(undefined, 'Письмо успешно отправлено', 'success', 5000);
+            return result;
+        }, function (result) {
+            NotificationService.notify(undefined, 'Не удалось отправить письмо', 'danger', 5000);
+            return result;
+        })
+    };
+})
 .filter('underlineNoVal', function () {
     return function(value, label) {
         if (value !== 0 && !value) {

@@ -1,4 +1,4 @@
-<header class="main-header">
+<header class="main-header" ng-controller="WebMisHeader">
     <a class="logo" href="{{ url_for('index') }}">
       <!-- mini logo for sidebar mini 50x50 pixels -->
       <span class="logo-mini"><b>MIS</b></span>
@@ -67,38 +67,27 @@
               </li>
               <!-- Tasks Menu -->
               <li class="dropdown tasks-menu">
-                <!-- Menu Toggle Button -->
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                  <i class="fa fa-flag-o"></i>
-                  <span class="label label-danger">9</span>
-                </a>
-                <ul class="dropdown-menu">
-                  <li class="header">You have 9 tasks</li>
-                  <li>
-                    <!-- Inner menu: contains the tasks -->
-                    <ul class="menu">
-                      <li><!-- Task item -->
-                        <a href="#">
-                          <!-- Task title and progress text -->
-                          <h3>
-                            Design some buttons
-                            <small class="pull-right">20%</small>
-                          </h3>
-                          <!-- The progress bar -->
-                          <div class="progress xs">
-                            <!-- Change the css width attribute to simulate progress -->
-                            <div class="progress-bar progress-bar-aqua" style="width: 20%" role="progressbar" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100">
-                              <span class="sr-only">20% Complete</span>
-                            </div>
-                          </div>
-                        </a>
-                      </li><!-- end task item -->
-                    </ul>
-                  </li>
-                  <li class="footer">
-                    <a href="#">View all tasks</a>
-                  </li>
-                </ul>
+                  <!-- Menu Toggle Button -->
+                  <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                      <i class="fa fa-flag-o"></i>
+                      <span class="label label-danger">[[unread]]</span>
+                  </a>
+                  <ul class="dropdown-menu">
+                      <li class="header">У Вас [[unread]] поручений</li>
+                      <li>
+                          <!-- Inner menu: contains the tasks -->
+                          <ul class="menu">
+                              <li ng-repeat="errand in errands"><!-- Task item -->
+                                  <a href="#">
+                                      Поручение по карте [[ errand.event_id ]]
+                                  </a>
+                              </li><!-- end task item -->
+                          </ul>
+                      </li>
+                      <li class="footer">
+                          <li class="footer"><a href="{{ url_for('risar.html_errands_list') }}">Все сообщения</a>
+                      </li>
+                  </ul>
               </li>
               <!-- User Account Menu -->
               <li class="dropdown user user-menu">
@@ -202,3 +191,13 @@
         </script>
     {%- endif -%}
 </header>
+<script language="JavaScript">
+    WebMisHeader = function ($scope, UserErrand) {
+        $scope.unread = 0;
+        $scope.errands = [];
+        UserErrand.subscribe('unread', function (result) {
+            $scope.unread = result.unread;
+            $scope.errands = result.errands;
+        });
+    }
+</script>
