@@ -50,8 +50,8 @@ def api_mail_get(folder='inbox'):
     if folder == 'sent':
         query = query.filter(UserMail.sender_id == safe_current_user_id())
     else:
-        query = query.filter(UserMail.recipient_id == safe_current_user_id())
-    query = query.filter(UserMail.folder == folder)
+        query = query.filter(UserMail.recipient_id == safe_current_user_id(), UserMail.folder == folder)
+    query = query.filter()
     result['count'] = query.count()
     query = query \
         .order_by(UserMail.id.desc()) \
