@@ -63,7 +63,7 @@ var IndexCtrl = function ($scope, $timeout, UserMail, SelectAll, CurrentUser) {
     };
     $scope.send_mail = function (message) {
         UserMail.send_mail(message.to.id, message.subject, message.text, message.parent_id).then(function () {
-            $scope.change_folder('index');
+            $scope.change_folder('inbox');
         });
     };
     $scope.change_skip = function (amount) {
