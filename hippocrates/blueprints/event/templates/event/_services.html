@@ -71,7 +71,9 @@
             <span class="text-muted">Итого к оплате: </span>
             <span class="text-primary" ng-bind="event.payment.payments.total_out"></span><span class="text-primary"> руб.</span>
             <span class="text-muted"> Оплачено: </span>
-            <span class="text-success" ng-bind="event.payment.payments.total_in"></span><span class="text-success"> руб.</span>
+            <span title="[[getPaymentsInTooltipText()]]">
+                <span class="text-success" ng-bind="event.payment.payments.total_in"></span><span class="text-success"> руб.</span>
+            </span>
             <span class="text-muted"> Долг: </span>
             <span class="text-danger" ng-bind="event.payment.payments.diff"></span><span class="text-danger"> руб.</span>
         </blockquote>

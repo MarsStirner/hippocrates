@@ -187,13 +187,17 @@ def save_executives(event_id):
         raise EventSaveException(u'Ошибка закрытия обращения')
 
 
+def integration_1codvd_enabled():
+    return Settings.getBool('Event.Payment.1CODVD')
+
+
 def create_new_local_contract(lc_info):
     err_msg = u'Ошибка сохранения обращения'
     lcon = EventLocalContract()
 
     date = lc_info.get('date_contract')
     number = lc_info.get('number_contract')
-    if Settings.getBool('Event.Payment.1CODVD'):
+    if integration_1codvd_enabled():
         lcon.dateContract = datetime.date.today()
         lcon.numberContract = ''
     else:
