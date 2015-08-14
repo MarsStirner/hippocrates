@@ -74,7 +74,6 @@
 
 {% block modules_js %}
     {{ super() }}
-    <script src="{{ url_for('.static', filename='js/risar.js', v=version) }}"></script>
-    <script src="{{ url_for('.static', filename='js/event_diagnoses.js', v=version) }}"></script>
-    <script src="{{ url_for('static', filename='js/services/event/event-services.js', v=version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/event_diagnoses.js', v=app_version) }}"></script>
+    <script src="{{ url_for('static', filename='js/services/event/event-services.js', v=app_version) }}"></script>
 {% endblock %}

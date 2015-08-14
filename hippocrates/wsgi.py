@@ -5,6 +5,7 @@ from nemesis.app import app, bootstrap_app
 import config
 from nemesis.lib.frontend import frontend_config
 from version import version as app_version
+from blueprints.risar.risar_version import version as risar_version
 
 __author__ = 'viruzzz-kun'
 
@@ -42,7 +43,7 @@ def general_menu():
 @app.context_processor
 def app_enum():
     return {
-        'app_version': app_version,
+        'app_version': risar_version,
     }
 
 
