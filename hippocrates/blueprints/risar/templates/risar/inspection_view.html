@@ -1,7 +1,7 @@
-{% extends 'risar/base.html' %}
+{% extends 'risar/base/base.html' %}
 {% import 'risar/_macros.html' as rimacros %}
 
-{% block title %}> {{ module_name }}{% endblock %}
+{% block title %}> Осмотры акушером-гинекологом беременной{% endblock %}
 
 {% block main %}
 <div ng-controller="InspectionViewCtrl" ng-cloak>
@@ -165,6 +165,5 @@
 
 {% block modules_js %}
     {{ super() }}
-    <script src="{{ url_for('.static', filename='js/chart.js', v=version) }}"></script>
-    <script src="{{ url_for('.static', filename='js/risar.js', v=version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/chart.js', v=app_version) }}"></script>
 {% endblock %}

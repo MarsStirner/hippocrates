@@ -1,6 +1,6 @@
-{% extends 'risar/base.html' %}
+{% extends 'risar/base/base.html' %}
 
-{% block title %}> {{ module_name }}{% endblock %}
+{% block title %}> Рабочий стол{% endblock %}
 
 {% block main %}
     <div ng-controller="AmbulanceIndexCtrl" ng-cloak>
@@ -54,6 +54,5 @@
 
 {% block modules_js %}
     {{ super() }}
-    <script src="{{ url_for('.static', filename='js/desktop/index_ambulance.js', v=version) }}"></script>
-    <script src="{{ url_for('.static', filename='js/risar.js', v=version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/desktop/index_ambulance.js', v=app_version) }}"></script>
 {% endblock %}

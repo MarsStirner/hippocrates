@@ -1,7 +1,7 @@
-{% extends 'risar/base.html' %}
+{% extends 'risar/base/base.html' %}
 {% import 'risar/_macros.html' as rimacros %}
 
-{% block title %}> {{ module_name }}{% endblock %}
+{% block title %}> Эпикриз{% endblock %}
 
 {% block main %}
 <div ng-controller="EpicrisisCtrl" ng-cloak>
@@ -344,6 +344,5 @@
 
 {% block modules_js %}
     {{ super() }}
-    <script src="{{ url_for('.static', filename='js/risar.js', v=version) }}"></script>
-    <script src="{{ url_for('.static', filename='js/epicrisis.js', v=version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/epicrisis.js', v=app_version) }}"></script>
 {% endblock %}

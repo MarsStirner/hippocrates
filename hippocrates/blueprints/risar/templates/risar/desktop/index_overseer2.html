@@ -1,6 +1,6 @@
-{% extends 'risar/base.html' %}
+{% extends 'risar/base/base.html' %}
 
-{% block title %}> {{ module_name }}{% endblock %}
+{% block title %}> Рабочий стол{% endblock %}
 
 {% block main %}
 <section class="content-header">
@@ -56,6 +56,5 @@
 
 {% block modules_js %}
     {{ super() }}
-    <script src="{{ url_for('.static', filename='js/desktop/index_overseer2.js', v=version) }}"></script>
-    <script src="{{ url_for('.static', filename='js/risar.js', v=version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/desktop/index_overseer2.js', v=app_version) }}"></script>
 {% endblock %}

@@ -1,7 +1,9 @@
-{% extends 'base.html' %}
+{% extends 'risar/base/_base.html' %}
 
-{% block content %}
-    {% block main -%}{%- endblock %}
+{% block container %}
+    <div id="container">
+        {% block main -%}{%- endblock %}
+    </div>
 {% endblock %}
 
 {% block modules_css -%}
@@ -13,7 +15,7 @@
 
 {% block modules_js -%}
 {{ super() }}
-<script src="{{ url_for('.config_js', v=version) }}"></script>
-<script src="{{ url_for('.current_user_js', v=version) }}"></script>
-<script src="{{ url_for('.static', filename='js/script.js') }}"></script>
+<script src="{{ url_for('.config_js', v=app_version) }}"></script>
+<script src="{{ url_for('.current_user_js', v=app_version) }}"></script>
+<script src="{{ url_for('.static', filename='js/risar.js', v=app_version) }}"></script>
 {%- endblock %}
