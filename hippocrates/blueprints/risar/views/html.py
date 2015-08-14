@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
-from flask import render_template, request
+from flask import render_template, request, redirect, url_for
 from flask.ext.login import current_user
 from ..app import module
+from nemesis.app import app
 from nemesis.models.actions import Action, ActionType
 
 __author__ = 'mmalkov'
@@ -22,6 +23,11 @@ def index_html():
         return render_template('risar/desktop/index_overseer3.html')
     else:
         return render_template('risar/desktop/index.html')
+
+
+@module.route('/mis')
+def html_mis():
+    return render_template(app.config['INDEX_HTML'])
 
 
 @module.route('/search.html')

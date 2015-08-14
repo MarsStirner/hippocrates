@@ -1,7 +1,9 @@
-{% extends 'base.html' %}
+{% extends 'risar/base/_base.html' %}
 
-{% block content %}
-    {% block main -%}{%- endblock %}
+{% block container %}
+    <div id="container">
+        {% block main -%}{%- endblock %}
+    </div>
 {% endblock %}
 
 {% block modules_css -%}

@@ -14,69 +14,27 @@ bootstrap_app(os.path.join(os.path.dirname(__file__), 'templates'))
 
 @app.context_processor
 def general_menu():
-    from flask.ext.login import current_user
     from nemesis.lib.user import UserProfileManager
     menu_items = [dict(
-        link='index',
-        title=u'Главная страница',
-        homepage=True,
-        visible=(UserProfileManager.has_ui_doctor() or UserProfileManager.has_ui_registrator()),
-        icon='glyphicon glyphicon-home'
+        link='risar.index_html',
+        title=u'Рабочий стол',
+        visible=True,
+        icon='fa fa-home'
     ), dict(
-        link='patients.index',
-        title=u'Обслуживание пациентов',
-        visible=(UserProfileManager.has_ui_registrator() or UserProfileManager.has_ui_registrator_cut()),
-        icon='fa fa-users'
-    ), dict(
-        link='schedule.person_schedule_monthview',
-        title=u'Формирование графика',
-        visible=(UserProfileManager.has_ui_registrator()),
-        icon='fa fa-user-md'
-    ), dict(
-        link='schedule.index',
-        title=u'График работы',
-        visible=(UserProfileManager.has_ui_registrator() or UserProfileManager.has_ui_doctor()),
-        icon='fa fa-calendar'
-    ), dict(
-        link='schedule.doctor_schedule_day',
-        title=u'Приём пациентов',
-        visible=(UserProfileManager.has_ui_doctor()),
-        icon='fa fa-stethoscope'
-    ), dict(
-        link='patients.search',
-        title=u'Поиск пациентов',
-        visible=(UserProfileManager.has_ui_doctor()),
+        link='risar.html_search',
+        title=u'Расширенный поиск',
+        visible=True,
         icon='fa fa-search'
     ), dict(
-        link='event.get_events',
-        title=u'Обращения',
-        visible=(UserProfileManager.has_ui_registrator() or UserProfileManager.has_ui_doctor()),
-        icon='fa fa-medkit'
+        external_link=app.config['CAESAR_URL'],
+        title=u'Администрирование системы',
+        visible=UserProfileManager.has_ui_admin(),
+        icon='fa fa-cog'
     ), dict(
-        link='accounting.cashbook_html',
-        title=u'Расчет пациентов',
-        visible=UserProfileManager.has_ui_cashier(),
-        icon='fa fa-calculator'
-    ), dict(
-        link='accounting.cashbook_operations',
-        title=u'Журнал кассовых операций',
-        visible=UserProfileManager.has_ui_cashier(),
-        icon='fa fa-book'
-    ), dict(
-        link='risar.index_html',
-        title={
-            'obstetrician': u'АРМ Акушера-гинеколога',
-            'overseer1': u'АРМ Куратора 1 уровня',
-            'overseer2': u'АРМ Куратора 2 уровня',
-            'overseer3': u'АРМ Куратора 3 уровня',
-            }.get(getattr(current_user, 'current_role', None), u'АРМ Администратора РИСАР'),
-        visible=UserProfileManager.has_ui_risar(),
-        icon='glyphicon glyphicon-th-large'
-    ), dict(
-        link='anareports.index_html',
-        title=u'Аналитические отчёты',
+        link='risar.html_mis',
+        title=u'МИС',
         visible=True,
-        icon='fa fa-bar-chart'
+        icon='fa fa-medkit'
     )]
     return dict(main_menu=menu_items)
 
