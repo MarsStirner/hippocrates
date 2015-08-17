@@ -1,0 +1,76 @@
+<!-- Le javascript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script src="{{ url_for('static', filename='js/underscore.js') }}"></script>
+<script src="{{ url_for('static', filename='js/moment.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/moment.ru.js') }}"></script>
+<script src="{{ url_for('static', filename='js/hitsl/hitsl.power.js', v=nemesis_version) }}"></script>
+<script src="{{ url_for('static', filename='js/hitsl/hitsl.core.js', v=nemesis_version) }}"></script>
+<script src="{{ url_for('static', filename='js/hitsl/hitsl.config.js') }}"></script>
+<script src="{{ url_for('static', filename='js/hitsl/hitsl.apis.js', v=nemesis_version) }}"></script>
+<script src="{{ url_for('static', filename='js/hitsl/hitsl.ui.js', v=nemesis_version) }}"></script>
+
+<script src="{{ url_for('static', filename='angular.js/angular-sanitize.min.js') }}"></script>
+<script src="{{ url_for('static', filename='angular.js/angular-locale_ru-ru.js') }}"></script>
+
+<script src="{{ url_for('static', filename='bootstrap/js/bootstrap.min.js') }}"></script>
+<script src="{{ url_for('static', filename='theme/js/app.min.js', v=nemesis_version) }}"></script>
+<script src="{{ url_for('static', filename='angular.js/ui-bootstrap-tpls.js') }}"></script>
+
+<script src="{{ url_for('static', filename='angular-formstamp/formstamp.js') }}"></script>
+<script src="{{ url_for('static', filename='angular-ui-select/select.js') }}"></script>
+<script src="{{ url_for('static', filename='angular.js/angular-tree-repeat.js') }}"></script>
+<script src="{{ url_for('static', filename='angular-ui-utils/mask_edited.js') }}"></script>
+<script src="{{ url_for('static', filename='js/angular-strap.js') }}"></script>
+<script src="{{ url_for('static', filename='js/angular-strap.tpl.js') }}"></script>
+<script src="{{ url_for('static', filename='angular-scroll/angular-scroll.js') }}"></script>
+
+<script src="{{ url_for('static', filename='rc-wizard/rcWizard.js') }}"></script>
+<script src="{{ url_for('static', filename='twitter-bootstrap-wizard/jquery.bootstrap.wizard.js') }}"></script>
+<script src="{{ url_for('static', filename='js/d3.js') }}"></script>
+<script src="{{ url_for('static', filename='nvd3/nv.d3.js') }}"></script>
+<script src="{{ url_for('static', filename='angular.js/angularjs-nvd3-directives.js') }}"></script>
+<script src="{{ url_for('static', filename='jcrop/jquery.Jcrop.min.js') }}"></script>
+<script src="{{ url_for('static', filename='angular-ui-calendar/calendar.min.js') }}"></script>
+<script src="{{ url_for('static', filename='fullcalendar/fullcalendar.min.js') }}"></script>
+<script src="{{ url_for('static', filename='fullcalendar/lang/ru.js') }}"></script>
+
+<script src="{{ url_for('static', filename='js/webmis20.js', v=nemesis_version) }}"></script>
+<script src="{{ url_for('static', filename='js/hitsl/hitsl.widgets.js', v=nemesis_version) }}"></script>
+
+<script src="{{ url_for('static', filename='js/services.js', v=nemesis_version) }}"></script>
+<script src="{{ url_for('static', filename='js/services/client/client-models.js', v=nemesis_version) }}"></script>
+<script src="{{ url_for('static', filename='js/services/event/event-models.js', v=nemesis_version) }}"></script>
+<script src="{{ url_for('static', filename='js/services/schedule-models.js', v=nemesis_version) }}"></script>
+<script src="{{ url_for('static', filename='js/services/appointment_dialog.js', v=nemesis_version) }}"></script>
+
+<script src="{{ url_for('static', filename='js/controllers.js', v=nemesis_version) }}"></script>
+
+<script src="{{ url_for('static', filename='js/directives.js', v=nemesis_version) }}"></script>
+<script src="{{ url_for('static', filename='js/directives/goodies.js', v=nemesis_version) }}"></script>
+<script src="{{ url_for('static', filename='js/directives/person_tree.js', v=nemesis_version) }}"></script>
+<script src="{{ url_for('static', filename='js/directives/action-type-tree.js', v=nemesis_version) }}"></script>
+<script src="{{ url_for('static', filename='js/directives/bootstrap-wysiwyg.js', v=nemesis_version) }}"></script>
+<script src="{{ url_for('static', filename='js/directives/client-search.js', v=nemesis_version) }}"></script>
+<script src="{{ url_for('static', filename='js/directives/event-search.js', v=nemesis_version) }}"></script>
+<script src="{{ url_for('static', filename='js/directives/client-info.js', v=nemesis_version) }}"></script>
+<script src="{{ url_for('static', filename='js/services.js', v=nemesis_version) }}"></script>
+<script src="{{ url_for('static', filename='js/services/appointment_dialog.js', v=nemesis_version) }}"></script>
+<script src="{{ url_for('static', filename='js/controllers.js', v=nemesis_version) }}"></script>
+<script src="{{ url_for('config_js', v=app_version) }}"></script>
+<script src="{{ url_for('current_user_js', v=app_version) }}"></script>
+
+<script>
+    'use strict';
+    var
+        rb_root = '{{ url_for('api_refbook') }}',
+        rbThesaurus_root = '{{ url_for('api_thesaurus') }}',
+        url_print_templates = '{{ print_subsystem_templates }}',
+        url_print_subsystem = '{{ print_subsystem_url }}',
+        url_print_template = '{{ print_subsystem_print_template }}',
+        search_kladr_city = '{{ url_for('kladr_search_city') }}',
+        search_kladr_street = '{{ url_for('kladr_search_street') }}',
+        url_roles_api = '{{ url_for('api_roles') }}',
+        url_api_doctors_to_assist = '{{ url_for('api_doctors_to_assist') }}';
+
+</script>

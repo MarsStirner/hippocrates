@@ -1,6 +1,6 @@
-{% extends 'risar/base.html' %}
+{% extends 'risar/base/base.html' %}
 
-{% block title %}> {{ module_name }}{% endblock %}
+{% block title %}> Выбор ЛПУ для {% if 'emergency' in request.args %}экстренной{% else %}плановой{% endif %} госпитализации{% endblock %}
 
 {% block main %}
     <div ng-controller="EventRoutingCtrl" class="ng-cloak">
@@ -142,6 +142,5 @@
 
 {% block modules_js %}
     {{ super() }}
-    <script src="{{ url_for('.static', filename='js/event_routing.js', v=version) }}"></script>
-    <script src="{{ url_for('.static', filename='js/risar.js', v=version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/event_routing.js', v=app_version) }}"></script>
 {% endblock %}

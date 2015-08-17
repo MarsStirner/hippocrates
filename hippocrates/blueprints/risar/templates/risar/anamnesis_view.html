@@ -1,4 +1,4 @@
-{% extends 'risar/base.html' %}
+{% extends 'risar/base/base.html' %}
 {% import 'risar/_macros.html' as rimacros %}
 
 {% block title %}> {{ module_name }}{% endblock %}
@@ -188,7 +188,7 @@
                         <td ng-if="!p.deleted" ng-bind="p.pregnancy_week"></td>
                         <td ng-if="!p.deleted">Дети ([[p.newborn_inspections.length]]):<div ng-repeat="child_info in p.newborn_inspections"><b>ребенок [[$index+1]]</b>: [[ (child_info.alive)?('живой'):('мёртвый') ]], масса: [[child_info.weight]]г
                             [[ (!child_info.alive && child_info.death_reason) ? ', причина смерти: '+child_info.death_reason: '']]</div></td>
-                        <td ng-if="!p.deleted">[[p.note]]<br>[[p.preeclampsia ? 'Была преэклампсия во время беременности': '']]</td>
+                        <td ng-if="!p.deleted"><span ng-bind-html="p.note | trustHtml"></span><br>[[p.preeclampsia ? 'Была преэклампсия во время беременности': '']]</td>
                         <td ng-if="!p.deleted" class="col-md-1 nowrap">
                             <button class="btn btn-default" ng-click="edit(p)">Изменить</button>
                             <button class="btn btn-danger" ng-click="remove(p)">Удалить</button>
@@ -276,8 +276,7 @@
 
 {% block modules_js %}
     {{ super() }}
-    <script src="{{ url_for('.static', filename='js/anamnesis.js', v=version) }}"></script>
-    <script src="{{ url_for('.static', filename='js/risar.js', v=version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/anamnesis.js', v=app_version) }}"></script>
     <script type="text/ng-template" id="/WebMis20/RISAR/modal/pregnancies.html">{% include 'risar/modals/_modal_pregnancies.html' %}</script>
     <script type="text/ng-template" id="/WebMis20/RISAR/modal/transfusions.html">{% include 'risar/modals/_modal_transfusions.html' %}</script>
     <script type="text/ng-template" id="/WebMis20/RISAR/modal/intolerances.html">{% include 'risar/modals/_modal_intolerances.html' %}</script>
