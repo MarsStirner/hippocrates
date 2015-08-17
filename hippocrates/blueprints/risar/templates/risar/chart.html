@@ -24,6 +24,10 @@
                     </ul>
                 </div>
             </div>
+            <div class="btn-group pull-right">
+                <a href="{{ url_for('risar.html_errands_list') }}" class="btn btn-default">Поручения</a>
+                <a href="#" class="btn btn-default" ng-click="create_errand()"><i class="fa fa-plus"></i></a>
+            </div>
         </div>
     </section>
     <section class="content">
@@ -257,4 +261,5 @@
     {{ super() }}
     <script src="{{ url_for('.static', filename='js/chart.js', v=version) }}"></script>
     <script src="{{ url_for('.static', filename='js/risar.js', v=version) }}"></script>
+    <script type="text/ng-template" id="/WebMis20/RISAR/modal/create_errand.html">{% include 'risar/errands/_modal_create_errand.html' %}</script>
 {% endblock %}

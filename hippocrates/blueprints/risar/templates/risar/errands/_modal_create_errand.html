@@ -1,0 +1,88 @@
+<div class="modal-header">
+    <h3 class="modal-title">Поручение по карте [[model.external_id]]</h3>
+</div>
+<div class="modal-body">
+    <div class="das-form">
+        <table class="table table-condensed">
+            <thead>
+                <tr>
+                    <th class="col-md-3"></th>
+                    <th class="col-md-9"></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th class="text-right">Описание</th>
+                    <td>
+                        <div class="col-md-12"><wysiwyg ng-disabled="!model.is_author" ng-model="model.text"  /></div>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="text-right">Выполнить до</th>
+                    <td>
+                        <div class="col-md-4">
+                            <wm-date name="date" ng-disabled="!model.is_author" ng-model="model.planned_exec_date"
+                                     style="width: 250px"></wm-date>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="text-right">Автор</th>
+                    <td>
+                        <div class="col-md-5">
+                            <ui-select ng-model="model.set_person" theme="select2" class="form-control" ref-book="Person"
+                                       ng-disabled="!model.is_author">
+                                <ui-select-match>[[ $select.selected.name ]]</ui-select-match>
+                                <ui-select-choices repeat="item in $refBook.objects | filter: $select.search | limitTo: 50">
+                                    <span ng-bind-html="item.name | highlight: $select.search"></span>
+                                </ui-select-choices>
+                            </ui-select>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="text-right">Исполнитель</th>
+                    <td>
+                        <div class="col-md-5">
+                            <ui-select ng-model="model.exec_person" theme="select2" class="form-control" ref-book="Person"
+                                       ng-disabled="!model.is_author">
+                                <ui-select-match>[[ $select.selected.name ]]</ui-select-match>
+                                <ui-select-choices repeat="item in $refBook.objects | filter: $select.search | limitTo: 50">
+                                    <span ng-bind-html="item.name | highlight: $select.search"></span>
+                                </ui-select-choices>
+                            </ui-select>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <table class="table table-condensed" ng-disabled="is_author">
+            <thead>
+                <tr>
+                    <th class="col-md-3"></th>
+                    <th class="col-md-9"></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th class="text-right">Описание выполненных исполнителем действий </th>
+                    <td>
+                        <div class="col-md-12"><wysiwyg ng-model="model.result" ng-disabled="model.is_author" /></div>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="text-right">Дата выполнения</th>
+                    <td>
+                        <div class="col-md-4">
+                            <wm-date ng-disabled="model.is_author" name="date" ng-model="model.exec_date" style="width: 250px"></wm-date>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-success" ng-click="$close([model, restart])">Сохранить</button>
+    <button class="btn btn-default" ng-click="$dismiss()">Отменить</button>
+</div>

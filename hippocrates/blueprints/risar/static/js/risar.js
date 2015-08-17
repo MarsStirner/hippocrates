@@ -313,18 +313,18 @@ WebMis20
             limit: limit
         }).then(get_errands_summary)
     };
-    this.create_errand = function (recipient, subject, text, event_id) {
+    this.create_errand = function (recipient, text, event_id) {
         Simargl.send_msg({
             topic: 'errand:new',
-            recipient: recipient,
+            recipient: recipient.id,
             sender: CurrentUser.id,
-            data: { subject: subject, text: text, event_id: event_id },
+            data: { text: text, event_id: event_id },
             ctrl: true
         }).then(function (result) {
-            NotificationService.notify(undefined, 'Письмо успешно отправлено', 'success', 5000);
+            NotificationService.notify(undefined, 'Поручение успешно создано', 'success', 5000);
             return result;
         }, function (result) {
-            NotificationService.notify(undefined, 'Не удалось отправить письмо', 'danger', 5000);
+            NotificationService.notify(undefined, 'Не удалось создать поручение', 'danger', 5000);
             return result;
         })
     };
