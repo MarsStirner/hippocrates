@@ -75,7 +75,7 @@ var ChartCtrl = function ($scope, $modal, RisarApi, PrintingService, PrintingDia
         var model = {
             set_person: CurrentUser.info,
             is_author: true,
-            external_id: $scope.chart.external_id
+            event: {external_id: $scope.chart.external_id}
         };
         open_edit_errand(model).result.then(function (rslt) {
             var result = rslt[0],

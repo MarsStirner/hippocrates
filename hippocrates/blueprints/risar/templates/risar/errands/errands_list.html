@@ -1,4 +1,4 @@
-{% extends 'risar/base.html' %}
+{% extends 'risar/base/base.html' %}
 {% import 'risar/_macros.html' as rimacros %}
 
 {% block title %}> {{ module_name }}{% endblock %}
@@ -16,6 +16,68 @@
                             <h3 class="box-title">Фильтры</h3>
                         </div>
                     <div class="box-body">
+                        <div class="form-group">
+                            <label>Номер поручения</label>
+                            <input class="form-control" ng-model="query.number">
+                        </div>
+                        <div class="form-group">
+                            <label>Статус</label>
+                        </div>
+                        <div class="form-group">
+                            <label>Дата создания</label>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <wm-date ng-model="query.create_date_from"></wm-date>
+                                </div>
+                                <div class="col-md-6">
+                                    <wm-date ng-model="query.create_date_to"></wm-date>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Требуемая дата выполнения</label>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <wm-date ng-model="query.planned_edate_from"></wm-date>
+                                </div>
+                                <div class="col-md-6">
+                                    <wm-date ng-model="query.planned_edate_to"></wm-date>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Фактическая дата выполнения</label>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <wm-date ng-model="query.edate_from"></wm-date>
+                                </div>
+                                <div class="col-md-6">
+                                    <wm-date ng-model="query.edate_to"></wm-date>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Автор</label>
+                            <ui-select ng-model="query.set_person" theme="select2" class="form-control" ref-book="Person">
+                                <ui-select-match>[[ $select.selected.name ]]</ui-select-match>
+                                <ui-select-choices repeat="item in $refBook.objects | filter: $select.search | limitTo: 50">
+                                    <span ng-bind-html="item.name | highlight: $select.search"></span>
+                                </ui-select-choices>
+                            </ui-select>
+                        </div>
+                        <div class="form-group">
+                            <label>Исполнитель</label>
+                            <ui-select ng-model="query.exec_person" theme="select2" class="form-control" ref-book="Person">
+                                <ui-select-match>[[ $select.selected.name ]]</ui-select-match>
+                                <ui-select-choices repeat="item in $refBook.objects | filter: $select.search | limitTo: 50">
+                                    <span ng-bind-html="item.name | highlight: $select.search"></span>
+                                </ui-select-choices>
+                            </ui-select>
+                        </div>
+                        <div class="form-group">
+                            <label for="show_deleted"> Показать удаленные </label>
+                            <input type="checkbox" ng-model="query.show_deleted" id="show_deleted">
+                        </div>
                     </div>
                     </div>
                 </form>
@@ -30,22 +92,31 @@
                                     <tr>
                                         <th>Номер поручения</th>
                                         <th>Статус</th>
-                                        <th>Дата создания</th>
-                                        <th>Требуемая дата выполнения</th>
-                                        <th>Фактическая дата выполнения</th>
-                                        <th>Автор</th>
+                                        <th>Номер карты</th>
                                         <th>Исполнитель</th>
+                                        <th>Прогресс</th>
+                                        <th>Дата выполнения</th>
+                                        <th></th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                 <tr ng-repeat="errand in errands">
-                                    <td>[[errand.number]]</td>
+                                    <td ng-class="{'bold':!errand.reading_date}"><a ng-href="#" ng-click="edit_errand(errand, current_user.id == errand.set_person.id)">[[errand.number]]</a></td>
+                                    <td ng-class="{'bold':!errand.reading_date}">[[errand.status.name]]</td>
+                                    <td ng-class="{'bold':!errand.reading_date}"><a ng-href="{{ url_for('.html_chart') }}?event_id=[[ errand.event.id ]]">[[errand.event.external_id]]</a></td>
+                                    <td ng-class="{'bold':!errand.reading_date}">[[errand.exec_person.name]]</td>
                                     <td></td>
-                                    <td>[[errand.create_datetime | asDate]]</td>
-                                    <td>[[errand.planned_exec_date | asDate]]</td>
-                                    <td>[[errand.exec_date | asDate]]</td>
-                                    <td>[[errand.set_person.name]]</td>
-                                    <td>[[errand.exec_person.name]]</td>
+                                    <td ng-class="{'bold':!errand.reading_date}">[[errand.planned_exec_date | asDate]]</td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <button class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><span class="fa fa-caret-down"></span></button>
+                                            <ul role="menu" class="dropdown-menu dropdown-menu-right">
+                                                <li ng-if="current_user.id == errand.set_person.id"><a ng-href="#" ng-click="delete_errand(errand)">Удалить</a></li>
+                                                <li ng-if="current_user.id == errand.set_person.id"><a ng-href="#" ng-click="edit_errand(errand, true)">Редактировать</a></li>
+                                                <li ng-if="current_user.id == errand.exec_person.id"><a ng-href="#" ng-click="edit_errand(errand, false)">Написать о выполнении</a></li>
+                                            </ul>
+                                        </div>
+                                    </td>
                                 </tr>
                                 </tbody>
                             </table>
@@ -63,4 +134,5 @@
     {{ super() }}
     <script src="{{ url_for('.static', filename='js/risar.js', v=version) }}"></script>
     <script src="{{ url_for('.static', filename='js/errands/errands_list.js', v=version) }}"></script>
+    <script type="text/ng-template" id="/WebMis20/RISAR/modal/create_errand.html">{% include 'risar/errands/_modal_create_errand.html' %}</script>
 {% endblock %}

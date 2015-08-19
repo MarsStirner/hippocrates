@@ -27,6 +27,11 @@ def general_menu():
         visible=True,
         icon='fa fa-search'
     ), dict(
+        link='risar.html_errands_list',
+        title=u'Поручения',
+        visible=True,
+        icon='fa fa-flag-o'
+    ), dict(
         external_link=app.config['CAESAR_URL'],
         title=u'Администрирование системы',
         visible=UserProfileManager.has_ui_admin(),

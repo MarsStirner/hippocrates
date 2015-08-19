@@ -298,20 +298,29 @@ WebMis20
         event_source.send('new:id', msg.data.id);
     });
     this.subscribe = event_source.eventSource.subscribe;
-//    this.set_mark = function (mark_type, ids, value) {
-//        var method = "PUT";
-//        if (! (ids instanceof Array)) ids = [ids];
-//        if (!value) {method = "DELETE"}
-//        return ApiCalls.wrapper(method, WMConfig.url.api_user_mail_alter.format(ids.join(':'), mark_type)).then(get_mail_summary);
-//    };
-//    this.mail_move = function (folder, ids) {
-//        if (! (ids instanceof Array)) ids = [ids];
-//        return ApiCalls.wrapper('MOVE', WMConfig.url.api_user_mail_alter.format(ids.join(':'), folder)).then(get_mail_summary);
-//    };
-    this.get_errands = function (limit) {
-        return ApiCalls.wrapper('GET', get_errands_url, {
+
+    this.edit_errand = function (errand) {
+        var current_date = new Date();
+        if (errand.is_author){
+            errand.reading_date = null;
+        } else if (!errand.reading_date){
+            errand.reading_date =  current_date;
+        }
+        return ApiCalls.wrapper('POST', Config.url.api_errand_edit.format(errand.id), {}, errand).then(get_errands_summary);
+    };
+    this.mark_as_read = function (errand){
+        var current_date = new Date();
+        errand.reading_date =  current_date;
+        return ApiCalls.wrapper('POST', Config.url.api_errand_mark_as_read.format(errand.id), {}, errand).then(get_errands_summary);
+    }
+    this.delete_errand = function (errand) {
+        errand.deleted = 1;
+        return ApiCalls.wrapper('POST', Config.url.api_errand_edit.format(errand.id), {}, errand).then(get_errands_summary);
+    };
+    this.get_errands = function (limit, filters) {
+        return ApiCalls.wrapper('POST', get_errands_url, {
             limit: limit
-        }).then(get_errands_summary)
+        }, filters)
     };
     this.create_errand = function (recipient, text, event_id) {
         Simargl.send_msg({

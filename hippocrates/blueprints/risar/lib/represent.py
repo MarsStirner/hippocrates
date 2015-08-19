@@ -12,7 +12,7 @@ from nemesis.lib.jsonify import EventVisualizer
 from nemesis.lib.vesta import Vesta
 from nemesis.models.actions import Action, ActionType
 from nemesis.models.client import BloodHistory
-from nemesis.models.enums import Gender, AllergyPower, IntoleranceType, PrenatalRiskRate, PreeclampsiaRisk
+from nemesis.models.enums import Gender, AllergyPower, IntoleranceType, PrenatalRiskRate, PreeclampsiaRisk, ErrandStatus
 from nemesis.models.event import Diagnosis, Diagnostic
 from nemesis.models.exists import rbAttachType, MKB
 from blueprints.risar.lib.card_attrs import get_card_attrs_action, get_all_diagnoses, check_disease
@@ -571,3 +571,22 @@ def represent_newborn_inspections(children_info):
         inspection['sex'] = Gender(inspection['sex']) if inspection['sex'] is not None else None
         newborn_inspections.append(inspection)
     return newborn_inspections
+
+
+def represent_errand(errand_info):
+    #todo: progress
+    return {
+        'id': errand_info.id,
+        'create_datetime':errand_info.createDatetime,
+        'number': errand_info.number,
+        'set_person': errand_info.setPerson,
+        'exec_person': errand_info.execPerson,
+        'text': errand_info.text,
+        'planned_exec_date': errand_info.plannedExecDate,
+        'exec_date': errand_info.execDate,
+        'event': {'id': errand_info.event.id,
+                  'external_id':  errand_info.event.externalId},
+        'result': errand_info.result,
+        'reading_date': errand_info.readingDate,
+        'status': ErrandStatus(errand_info.status)
+    }

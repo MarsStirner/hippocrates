@@ -17,16 +17,16 @@
                 <a ng-href="{{ url_for('.html_epicrisis') }}?event_id=[[ chart.id ]]" class="btn btn-default">Эпикриз</a>
                 <a ng-class="{disabled: !ps.is_available()}" ng-click="open_print_window()" class="btn btn-default">Печать</a>
                 <div class="btn-group">
+                    <a href="{{ url_for('risar.html_errands_list') }}" class="btn btn-default">Поручения</a>
+                    <a href="#" class="btn btn-default" ng-click="create_errand()"><i class="fa fa-plus"></i></a>
+                </div>
+                <div class="btn-group">
                     <button class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Дополнительно <span class="fa fa-caret-down"></span></button>
                     <ul role="menu" class="dropdown-menu">
                         <li><a ng-href="{{ url_for('.html_event_diagnoses') }}?event_id=[[ chart.id ]]">Диагнозы случая</a></li>
                         <li><a ng-href="{{ url_for('.html_event_measure') }}?event_id=[[ chart.id ]]">Мероприятия случая</a></li>
                     </ul>
                 </div>
-            </div>
-            <div class="btn-group pull-right">
-                <a href="{{ url_for('risar.html_errands_list') }}" class="btn btn-default">Поручения</a>
-                <a href="#" class="btn btn-default" ng-click="create_errand()"><i class="fa fa-plus"></i></a>
             </div>
         </div>
     </section>
