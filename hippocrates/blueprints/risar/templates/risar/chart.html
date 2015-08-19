@@ -187,6 +187,14 @@
                                     </div>
                                 </td>
                             </tr>
+                            <tr>
+                                <td class="col-md-5 text-right">Патологии:</td>
+                                <td class="col-md-7">
+                                    <div ng-repeat="pathg in chart.pregnancy_pathologies">
+                                        <span ng-bind="pathg.name"></span>
+                                    </div>
+                                </td>
+                            </tr>
 
                         </tbody>
                     </table>

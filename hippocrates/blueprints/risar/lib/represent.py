@@ -12,7 +12,8 @@ from nemesis.lib.jsonify import EventVisualizer
 from nemesis.lib.vesta import Vesta
 from nemesis.models.actions import Action, ActionType
 from nemesis.models.client import BloodHistory
-from nemesis.models.enums import Gender, AllergyPower, IntoleranceType, PrenatalRiskRate, PreeclampsiaRisk
+from nemesis.models.enums import (Gender, AllergyPower, IntoleranceType, PrenatalRiskRate, PreeclampsiaRisk,
+    PregnancyPathology)
 from nemesis.models.event import Diagnosis, Diagnostic
 from nemesis.models.exists import rbAttachType, MKB
 from blueprints.risar.lib.card_attrs import get_card_attrs_action, get_all_diagnoses, check_disease
@@ -108,6 +109,10 @@ def represent_event(event):
         'risk_rate': PrenatalRiskRate(card_attrs_action['prenatal_risk_572'].value),
         'preeclampsia_risk': PreeclampsiaRisk(card_attrs_action['preeclampsia_risk'].value) if
             card_attrs_action.propsByCode.get('preeclampsia_risk') else None,
+        'pregnancy_pathologies': [
+            PregnancyPathology(pathg)
+            for pathg in card_attrs_action['pregnancy_pathology_list'].value
+        ],
         'pregnancy_week': get_pregnancy_week(event),
         'diagnoses': all_diagnoses,
         'has_diseases': check_disease(all_diagnoses)
