@@ -86,38 +86,40 @@ WebMis20
         get_header: function (event_id) {
             return wrapper('GET', Config.url.api_chart_header + event_id);
         },
-        get: function (event_id, ticket_id) {
-            return wrapper('GET', Config.url.api_chart + ((event_id)?(event_id):''), {ticket_id: ticket_id})
-                .then(function (event_info) {
-                    var chart = event_info.event,
-                        automagic = event_info.automagic;
-                    if (automagic) {
-                        NotificationService.notify(
-                            200,
-                            [
-                                'Пациентка поставлена на учёт: ',
-                                {
-                                    bold: true,
-                                    text: chart.person.name
-                                }, '. ',
-                                {
-                                    link: '#',
-                                    text: 'Изменить'
-                                }, ' ',
-                                {
-                                    click: function () {
-                                        self.chart.delete(ticket_id).then(function success() {
-                                            $window.location.replace(Config.url.index_html);
-                                        })
-                                    },
-                                    text: 'Отменить'
-                                }
-                            ],
-                            'success'
-                        );
-                    }
-                    return chart;
-                });
+        get: function (event_id, ticket_id, client_id) {
+            return wrapper('GET', Config.url.api_chart + ((event_id)?(event_id):''), {
+                ticket_id: ticket_id,
+                client_id: client_id
+            }).then(function (event_info) {
+                var chart = event_info.event,
+                    automagic = event_info.automagic;
+                if (automagic) {
+                    NotificationService.notify(
+                        200,
+                        [
+                            'Пациентка поставлена на учёт: ',
+                            {
+                                bold: true,
+                                text: chart.person.name
+                            }, '. ',
+                            {
+                                link: '#',
+                                text: 'Изменить'
+                            }, ' ',
+                            {
+                                click: function () {
+                                    self.chart.delete(ticket_id).then(function success() {
+                                        $window.location.replace(Config.url.index_html);
+                                    })
+                                },
+                                text: 'Отменить'
+                            }
+                        ],
+                        'success'
+                    );
+                }
+                return chart;
+            });
         },
         delete: function (ticket_id) {
             return wrapper('DELETE', Config.url.api_chart_delete + ticket_id);

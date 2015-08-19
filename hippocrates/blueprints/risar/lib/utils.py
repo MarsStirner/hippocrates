@@ -3,8 +3,11 @@
 from sqlalchemy.orm import lazyload
 
 from nemesis.lib.data import create_action
-from nemesis.lib.utils import safe_traverse_attrs
+from nemesis.lib.utils import safe_traverse_attrs, safe_dict
 from nemesis.models.actions import Action, ActionType, ActionProperty, ActionPropertyType
+from nemesis.models.event import Event, Diagnostic, Diagnosis
+from nemesis.models.risar import rbPregnancyPathology
+from nemesis.models.exists import MKB
 from nemesis.systemwide import cache, db
 from blueprints.risar.risar_config import checkup_flat_codes
 
@@ -202,3 +205,32 @@ def get_last_checkup_date(event_id):
         ActionType.flatCode.in_(checkup_flat_codes)
     ).order_by(Action.begDate.desc()).first()
     return query[0] if query else None
+
+
+def get_event_diag_mkbs(event, at_flatcodes=None):
+    query = db.session.query(Event).join(
+        Diagnostic, Diagnosis
+    ).join(
+        MKB, Diagnosis.MKB == MKB.DiagID
+    ).filter(
+        Event.id == event.id,
+        Diagnostic.deleted == 0,
+        Diagnosis.deleted == 0
+    )
+    if isinstance(at_flatcodes, (list, tuple)):
+        query = query.join(
+            (Action, Diagnostic.action_id == Action.id),
+            ActionType
+        ).filter(
+            ActionType.flatCode.in_(at_flatcodes),
+            Action.deleted == 0
+        )
+    query = query.with_entities(MKB)
+    return query.all()
+
+
+@cache.memoize()
+def pregnancy_pathologies():
+    query = db.session.query(rbPregnancyPathology).outerjoin(rbPregnancyPathology.pp_mkbs)
+    result = dict((rb_pp.code, [safe_dict(mkb) for mkb in rb_pp.mkbs]) for rb_pp in query)
+    return result
