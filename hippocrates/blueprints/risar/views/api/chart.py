@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime
 
-from flask import request
-from nemesis.lib.vesta import Vesta
 from sqlalchemy import func
+from flask import request
+from flask.ext.login import current_user
 
 from nemesis.lib.data import create_action
 from nemesis.lib.utils import get_new_event_ext_id, safe_traverse, safe_datetime
@@ -64,55 +64,68 @@ def default_ET_Heuristic():
 def api_0_chart(event_id=None):
     automagic = False
     ticket_id = request.args.get('ticket_id')
-    if not event_id and not ticket_id:
-        raise ApiException(400, u'Должен быть указан параметр event_id или ticket_id')
-    if ticket_id:
-        ticket = ScheduleClientTicket.query.get(ticket_id)
-        if not ticket:
-            raise ApiException(404, u'Талончик на приём не найден')
-        event = ticket.event
-        if not event or not event.deleted:
-            # проверка наличия у пациентки открытого обращения
-            client_id = ticket.client_id
-            event = Event.query.join(EventType, rbRequestType).filter(Event.client_id == client_id, Event.deleted == 0,
-                                                                      rbRequestType.code == 'pregnancy',
-                                                                      Event.execDate.is_(None)).order_by(Event.setDate.desc()).first()
-            if not event:
-                event = Event()
-                at = default_AT_Heuristic()
-                if not at:
-                    raise ApiException(500, u'Нет типа действия с flatCode = cardAttributes')
-                ET = default_ET_Heuristic()
-                if ET is None:
-                    raise ApiException(500, u'Не настроен тип события - Случай беременности ОМС')
-                event.eventType = ET
+    client_id = request.args.get('client_id')
+    if not event_id and not (ticket_id or client_id):
+        raise ApiException(400, u'Должен быть указан параметр event_id или (ticket_id или client_id)')
 
-                exec_person_id = ticket.ticket.schedule.person_id
-                exec_person = Person.query.get(exec_person_id)
-                event.execPerson = exec_person
-                event.orgStructure = exec_person.org_structure
-                event.organisation = exec_person.organisation
-
-                event.isPrimaryCode = EventPrimary.primary[0]
-                event.order = EventOrder.planned[0]
-
-                note = ticket.note
-                event.client = Client.query.get(client_id)
-                event.setDate = datetime.now()
-                event.note = note
-                event.externalId = get_new_event_ext_id(event.eventType.id, ticket.client_id)
-                event.payStatus = 0
-                db.session.add(event)
-                ext = create_action(at.id, event)
-                db.session.add(ext)
-                automagic = True
-            ticket.event = event
-            db.session.add(ticket)
-            db.session.commit()
-    else:
-        event = Event.query.get(event_id)
+    if event_id:
+        event = Event.query.filter(Event.id == event_id, Event.deleted == 0).first()
         if not event:
             raise ApiException(404, u'Обращение не найдено')
+    else:
+        if ticket_id:
+            ticket = ScheduleClientTicket.query.get(ticket_id)
+            if not ticket:
+                raise ApiException(404, u'Талончик на приём не найден')
+            event = ticket.event
+            client_id = ticket.client_id
+            if not event or event.deleted:
+                # проверка наличия у пациентки открытого обращения, созданного по одному из прошлых записей на приём
+                event = Event.query.join(EventType, rbRequestType).filter(
+                    Event.client_id == client_id,
+                    Event.deleted == 0,
+                    rbRequestType.code == 'pregnancy',
+                    Event.execDate.is_(None)
+                ).order_by(Event.setDate.desc()).first()
+        else:  # client_id is not None
+            event = None
+            ticket = None
+        if not event:
+            event = Event()
+            at = default_AT_Heuristic()
+            if not at:
+                raise ApiException(500, u'Нет типа действия с flatCode = cardAttributes')
+            ET = default_ET_Heuristic()
+            if ET is None:
+                raise ApiException(500, u'Не настроен тип события - Случай беременности ОМС')
+            event.eventType = ET
+
+            exec_person_id = ticket.ticket.schedule.person_id if ticket else current_user.get_main_user().id
+            exec_person = Person.query.get(exec_person_id)
+            event.execPerson = exec_person
+            event.orgStructure = exec_person.org_structure
+            event.organisation = exec_person.organisation
+
+            event.isPrimaryCode = EventPrimary.primary[0]
+            event.order = EventOrder.planned[0]
+
+            note = ticket.note if ticket else ''
+            event.client = Client.query.get(client_id)
+            event.setDate = datetime.now()
+            event.note = note
+            event.externalId = get_new_event_ext_id(event.eventType.id, client_id)
+            event.payStatus = 0
+            db.session.add(event)
+            ext = create_action(at.id, event)
+            db.session.add(ext)
+            automagic = True
+        if ticket:
+            ticket.event = event
+            db.session.add(ticket)
+        db.session.commit()
+        reevaluate_card_attrs(event, ext)
+        db.session.commit()
+
     if event.eventType.requestType.code != 'pregnancy':
         raise ApiException(400, u'Обращение не является случаем беременности')
     return {

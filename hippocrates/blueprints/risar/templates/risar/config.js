@@ -31,7 +31,6 @@ WebMis20
         api_current_stats: '{{ url_for('.api_0_current_stats') }}',
         api_recent_charts: '{{ url_for('.api_0_recent_charts') }}',
         api_recently_modified_charts: '{{ url_for('.api_0_recently_modified_charts') }}',
-        api_prenatal_risk_stats: '{{ url_for('.api_0_prenatal_risk_stats') }}',
         api_death_stats: '{{ url_for('.api_0_death_stats') }}',
         api_pregnancy_final_stats: '{{ url_for('.api_0_pregnancy_final_stats') }}',
         api_measure_generate: '{{ url_for('.api_0_measure_generate') }}',
@@ -47,13 +46,15 @@ WebMis20
         api_checkup_new: '{{ url_for('.api_0_checkup_new') }}{0}',
         api_checkup_save: '{{ url_for('.api_0_checkup') }}{0}',
         api_gravidograma: '{{ url_for('.api_0_gravidograma') }}',
-        api_stats_obcl_gett: '{{ url_for('.api_0_stats_obcl_get') }}',
+        api_stats_perinatal_risk_rate: '{{ url_for('.api_0_stats_perinatal_risk_rate') }}',
+        api_stats_obcl_get: '{{ url_for('.api_0_stats_obcl_get') }}',
         api_stats_obcl_orgs_get: '{{ url_for('.api_0_stats_obcl_orgs_get') }}{0}',
         api_stats_org_curation_get: '{{ url_for('.api_0_stats_org_curation_get') }}',
         api_errands: '{{ url_for('.api_errands_get') }}',
         api_errands_summary: '{{ url_for('.api_errands_summary') }}',
         api_errand_edit: '{{ url_for('.api_errand_edit') }}{0}',
-        api_errand_mark_as_read: '{{ url_for('.api_errand_mark_as_read') }}{0}'
+        api_errand_mark_as_read: '{{ url_for('.api_errand_mark_as_read') }}{0}',
+        api_stats_pregnancy_pathology: '{{ url_for('.api_0_stats_pregnancy_pathology') }}'
     }
 })
 ;

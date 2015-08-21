@@ -7,6 +7,7 @@
 var ChartCtrl = function ($scope, $modal, RisarApi, PrintingService, PrintingDialog, NotificationService, CurrentUser, UserErrand) {
     var params = aux.getQueryParams(window.location.search);
     var ticket_id = params.ticket_id;
+    var client_id = params.client_id;
     var event_id = params.event_id;
     $scope.ps_talon = new PrintingService("risar");
     $scope.ps_talon.set_context("risar_talon");
@@ -29,13 +30,13 @@ var ChartCtrl = function ($scope, $modal, RisarApi, PrintingService, PrintingDia
     };
 
     var reload_chart = function () {
-        if (!ticket_id) {
+        if (event_id) {
             RisarApi.chart.get_header(event_id).
                 then(function (data) {
                     $scope.header = data.header;
                 });
         }
-        RisarApi.chart.get(event_id, ticket_id)
+        RisarApi.chart.get(event_id, ticket_id, client_id)
             .then(function (event) {
                 $scope.chart = event;
                 var mother_anamnesis = $scope.chart.anamnesis.mother;
@@ -48,7 +49,7 @@ var ChartCtrl = function ($scope, $modal, RisarApi, PrintingService, PrintingDia
                 //    {value:$scope.chart.anamnesis.father.toxic, text: 'токсические вечества'},
                 //    {value:$scope.chart.anamnesis.father.drugs,text: 'наркотики'}];
 
-                if (ticket_id) {
+                if (ticket_id || client_id) {
                     RisarApi.chart.get_header($scope.chart.id).
                         then(function (data) {
                             $scope.header = data.header;
@@ -153,8 +154,7 @@ var InspectionViewCtrl = function ($scope, $modal, RisarApi, PrintingService, Pr
     reload();
 };
 
-WebMis20.controller('ChartCtrl', ['$scope', '$modal', 'RisarApi', 'PrintingService', 'PrintingDialog', 'NotificationService',
-    'CurrentUser', 'UserErrand',
-    ChartCtrl]);
+WebMis20.controller('ChartCtrl', ['$scope', '$modal', 'RisarApi', 'PrintingService', 'PrintingDialog',
+    'NotificationService', 'CurrentUser', 'UserErrand', ChartCtrl]);
 WebMis20.controller('InspectionViewCtrl', ['$scope', '$modal', 'RisarApi', 'PrintingService', 'PrintingDialog',
     InspectionViewCtrl]);

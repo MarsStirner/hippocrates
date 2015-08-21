@@ -7,11 +7,12 @@ from sqlalchemy.orm import immediateload
 from nemesis.systemwide import db
 from nemesis.models.organisation import (OrganisationBirthCareLevel, Organisation, Organisation_OrganisationBCLAssoc,
     OrganisationCurationAssoc)
-from nemesis.models.enums import PerinatalRiskRate, PrenatalRiskRate
+from nemesis.models.enums import PerinatalRiskRate, PrenatalRiskRate, PregnancyPathology
 from nemesis.models.exists import Person, rbAttachType
 from nemesis.models.event import Event
 from nemesis.models.client import Client, ClientAttach
 from nemesis.models.actions import Action, ActionType, ActionProperty, ActionPropertyType, ActionProperty_Integer
+from nemesis.models.person import PersonCurationAssoc, rbOrgCurationLevel
 from nemesis.lib.utils import format_hex_color, safe_dict
 from blueprints.risar.risar_config import attach_codes
 
@@ -317,4 +318,89 @@ class PersonRepr(object):
         return {
             'id': person.id,
             'short_name': person.shortNameText
+        }
+
+
+# Event
+class EventFetcher(BaseFetcher):
+
+    def set_base_query(self):
+        self.query = Event.query.filter(
+            Event.deleted == 0
+        ).order_by(Event.id)
+
+    def apply_with_pregnancy_pathology_percent(self, person_id=None, curation_level_code=None):
+        self.query = self.query.join(
+            Event.execPerson,
+            (Action, Action.event_id == Event.id),
+            (ActionType, and_(Action.actionType_id == ActionType.id, ActionType.flatCode == 'cardAttributes')),
+            ActionProperty,
+            (
+                ActionPropertyType, and_(
+                    ActionProperty.type_id == ActionPropertyType.id,
+                    ActionPropertyType.code == 'pregnancy_pathology_list'
+                )
+            ),
+            ActionProperty_Integer
+        ).filter(
+            Action.deleted == 0,
+            ActionProperty.deleted == 0,
+            Event.execDate.is_(None)
+        )
+        if curation_level_code:
+            self.query = self.query.join(
+                (OrganisationCurationAssoc, OrganisationCurationAssoc.org_id == Event.org_id),
+                PersonCurationAssoc,
+                rbOrgCurationLevel
+            ).filter(
+                PersonCurationAssoc.person_id == person_id,
+                rbOrgCurationLevel.code == curation_level_code
+            )
+        elif person_id:
+            self.query = self.query.filter(Event.execPerson_id == person_id)
+
+        self.query = self.query.with_entities(
+            func.sum(func.IF(ActionProperty_Integer.value_ == PregnancyPathology.extragenital[0], 1, 0)).label('count_extragenital'),
+            func.sum(func.IF(ActionProperty_Integer.value_ == PregnancyPathology.obstetric[0], 1, 0)).label('count_obstetric'),
+            func.sum(func.IF(ActionProperty_Integer.value_ == PregnancyPathology.infectious[0], 1, 0)).label('count_infectious'),
+            func.sum(func.IF(ActionProperty_Integer.value_ == PregnancyPathology.combined[0], 1, 0)).label('count_combined'),
+            func.count(Event.id.distinct()).label('count_all')
+        )
+
+
+class EventRepr(object):
+
+    def represent_by_pregnancy_pathology(self, person_id=None, curation_level_code=None):
+        fetcher = EventFetcher()
+        fetcher.apply_with_pregnancy_pathology_percent(person_id, curation_level_code)
+        event_data = fetcher.get_all()
+        return {
+            'preg_pathg_stats': self.represent_pregnancy_pathology_stats(*d) for d in event_data
+        }
+
+    def represent_pregnancy_pathology_stats(self, count_extragenital, count_obstetric, count_infectious,
+                                            count_combined, count_all):
+        def calc_pact(item):
+            if not (count_all or item):
+                return 0
+            return round(float(item) / count_all * 100, 2)
+
+        return {
+            'all': count_all or 0,
+            'extragenital': {
+                'count': count_extragenital or 0,
+                'pct': calc_pact(count_extragenital)
+            },
+            'obstetric': {
+                'count': count_obstetric or 0,
+                'pct': calc_pact(count_obstetric)
+            },
+            'infectious': {
+                'count': count_infectious or 0,
+                'pct': calc_pact(count_infectious)
+            },
+            'combined': {
+                'count': count_combined or 0,
+                'pct': calc_pact(count_combined)
+            }
         }

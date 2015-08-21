@@ -1,15 +1,17 @@
 # -*- coding: utf-8 -*-
 import itertools
 import datetime
+
 from nemesis.lib.data import create_action
 from nemesis.lib.jsonify import EventVisualizer
-from nemesis.models.actions import Action, ActionType
+from nemesis.models.actions import Action, ActionType, ActionPropertyType, ActionProperty
+from nemesis.models.enums import PregnancyPathology, PreeclampsiaRisk
 from nemesis.systemwide import db
 from blueprints.risar.lib.utils import get_action, get_action_list, HIV_diags, syphilis_diags, hepatitis_diags, \
     tuberculosis_diags, scabies_diags, pediculosis_diags, multiple_birth, hypertensia, kidney_diseases, collagenoses, \
-    vascular_diseases, diabetes, antiphospholipid_syndrome
+    vascular_diseases, diabetes, antiphospholipid_syndrome, get_event_diag_mkbs, risk_rates_blockID, risk_rates_diagID, \
+    pregnancy_pathologies
 from blueprints.risar.risar_config import checkup_flat_codes, risar_mother_anamnesis, risar_epicrisis, risar_anamnesis_pregnancy
-from .utils import risk_rates_blockID, risk_rates_diagID
 
 __author__ = 'viruzzz-kun'
 
@@ -19,7 +21,7 @@ def get_card_attrs_action(event, auto=True):
     Получение Action, соответствующего атрибутам карточки
     :param event: карточка беременной, обращение
     :param auto: создавать ли действие автоматически
-    :type event: application.models.event.Event
+    :type event: nemesis.models.event.Event
     :type auto: bool
     :return: действие с атрибутами
     :rtype: Action|NoneType
@@ -37,6 +39,35 @@ def get_card_attrs_action(event, auto=True):
     return action
 
 
+def check_card_attrs_action_integrity(action):
+    """
+    Проверка, что в action, соответствующего атрибутам карточки, существуют
+    все необходимые свойства.
+    :param action: действие с атрибутами
+    :type action: nemesis.models.actions.Action
+    :return: None
+    """
+    property_type_codes = ['pregnancy_pathology_list',]
+    for apt_code in property_type_codes:
+        if apt_code not in action.propsByCode:
+            create_property(action, apt_code)
+
+
+def create_property(action, apt_code):
+    prop_type = action.actionType.property_types.filter(
+        ActionPropertyType.deleted == 0, ActionPropertyType.code == apt_code
+    ).first()
+    prop = ActionProperty()
+    prop.type = prop_type
+    prop.action = action
+    prop.isAssigned = False
+    if prop.type.defaultValue:
+        prop.set_value(prop.type.defaultValue, True)
+    else:
+        prop.value = None
+    action.properties.append(prop)
+
+
 def default_AT_Heuristic():
     """
     Получение ActionType, соответствующего атрибутам карточки
@@ -49,7 +80,7 @@ def get_all_diagnoses(event):
     """
     Получание всех диагнозов по событию
     :param event: Событие
-    :type event: application.models.event.Event
+    :type event: nemesis.models.event.Event
     :return: list of DiagIDs
     """
     result = []
@@ -76,7 +107,7 @@ def get_diagnoses_from_action(action, open=False):
     """
     Получание всех диагнозов по событию
     :param action: Действие
-    :type action: Action
+    :type action: nemesis.model.action.Action
     :return: list of
     """
     result = []
@@ -103,7 +134,7 @@ def reevaluate_risk_rate(event, action=None):
     """
     Пересчёт риска невынашивания
     :param event: обращение
-    :type event: application.models.event.Event
+    :type event: nemesis.models.event.Event
     """
     if action is None:
         action = get_card_attrs_action(event)
@@ -125,7 +156,7 @@ def reevaluate_preeclampsia_risk(event, card_attrs_action=None):
     """
     Пересчёт риска преэклампсии
     :param event: обращение
-    :type event: application.models.event.Event
+    :type event: nemesis.models.event.Event
     """
     if card_attrs_action is None:
         card_attrs_action = get_card_attrs_action(event)
@@ -143,27 +174,27 @@ def reevaluate_preeclampsia_risk(event, card_attrs_action=None):
 
     prev_pregnancies = Action.query.join(ActionType).filter(Action.event == event, Action.deleted == 0,
                                                             ActionType.flatCode == risar_anamnesis_pregnancy).all()
-    risk = 0 if (not mother_action and not first_inspection and not prev_pregnancies) else 2
+    risk = PreeclampsiaRisk.undefined[0] if (not mother_action and not first_inspection and not prev_pregnancies) else PreeclampsiaRisk.no_risk[0]
 
     if not prev_pregnancies or event.client.age_tuple()[-1] >= 35 or (first_inspection and first_inspection['BMI'].value >= 25) or \
             (mother_action and mother_action['preeclampsia'].value):
-        risk = 1
+        risk = PreeclampsiaRisk.has_risk[0]
     else:
         for pregnancy in prev_pregnancies:
             if pregnancy['pregnancyResult'].value and pregnancy['pregnancyResult'].value['code'] in ('normal', 'miscarriage37', 'miscarriage27', 'belated_birth'):
                 if pregnancy['preeclampsia'].value:
-                    risk = 1
+                    risk = PreeclampsiaRisk.has_risk[0]
                     break
                 delivery_years.append(pregnancy['year'].value)
 
         delivery_years.sort()
         if delivery_years and datetime.datetime.now().year - delivery_years[-1] >= 10:
-            risk = 1
+            risk = PreeclampsiaRisk.has_risk[0]
 
     for diag in all_diagnoses:
         diag_id = diag['diagnosis']['mkb'].DiagID
         if filter(lambda x: x in diag_id, diseases):
-            risk = 1
+            risk = PreeclampsiaRisk.has_risk[0]
 
     if card_attrs_action.propsByCode.get('preeclampsia_risk'):
         card_attrs_action['preeclampsia_risk'].value = risk
@@ -174,11 +205,14 @@ def reevaluate_dates(event, action=None):
     Пересчёт даты начала беременности, предполагаемой даты родов, и даты редактирования карты пациентки
     :param event: обращение
     :param action: атрибуты карточки пациентки
-    :type event: application.models.event.Event
+    :type event: nemesis.models.event.Event
     :type action: Action
     :rtype: datetime.date
     :return:
     """
+    now = datetime.datetime.now()
+    action['chart_modify_date'].value = now
+    action['chart_modify_time'].value = now
 
     if action is None:
         action = get_card_attrs_action(event)
@@ -230,9 +264,32 @@ def reevaluate_dates(event, action=None):
         # эпикриза
         action['predicted_delivery_date'].value = delivery_date
 
-    now = datetime.datetime.now()
-    action['chart_modify_date'].value = now
-    action['chart_modify_time'].value = now
+
+def reevaluate_pregnacy_pathology(event, action=None):
+    """
+    Пересчёт групп патологий беременности
+    :param event: обращение
+    :type event: nemesis.models.event.Event
+    """
+    if action is None:
+        action = get_card_attrs_action(event)
+
+    event_mkb_codes = set()
+    for mkb in get_event_diag_mkbs(event, checkup_flat_codes):
+        event_mkb_codes.add(mkb.DiagID)
+
+    event_pathologies = set()
+    pathologies = pregnancy_pathologies()
+    for pathg_code, mkb_list in pathologies.iteritems():
+        for mkb in mkb_list:
+            if mkb['code'] in event_mkb_codes:
+                event_pathologies.add(PregnancyPathology.getId(pathg_code))
+    if len(event_pathologies) > 1:
+        event_pathologies.add(PregnancyPathology.getId('combined'))
+    elif len(event_pathologies) == 0:
+        event_pathologies.add(PregnancyPathology.getId('undefined'))
+
+    action['pregnancy_pathology_list'].value = list(event_pathologies)
 
 
 def reevaluate_card_attrs(event, action=None):
@@ -243,8 +300,10 @@ def reevaluate_card_attrs(event, action=None):
     """
     if action is None:
         action = get_card_attrs_action(event)
+    check_card_attrs_action_integrity(action)
     reevaluate_risk_rate(event, action)
     reevaluate_preeclampsia_risk(event, action)
+    reevaluate_pregnacy_pathology(event, action)
     reevaluate_dates(event, action)
 
 
