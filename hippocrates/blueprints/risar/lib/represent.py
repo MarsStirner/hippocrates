@@ -112,7 +112,7 @@ def represent_event(event):
         'pregnancy_pathologies': [
             PregnancyPathology(pathg)
             for pathg in card_attrs_action['pregnancy_pathology_list'].value
-        ],
+        ] if card_attrs_action['pregnancy_pathology_list'].value else [],
         'pregnancy_week': get_pregnancy_week(event),
         'diagnoses': all_diagnoses,
         'has_diseases': check_disease(all_diagnoses)
