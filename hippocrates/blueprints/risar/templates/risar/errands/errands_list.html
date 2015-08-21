@@ -102,7 +102,14 @@
                                 <tbody>
                                 <tr ng-repeat="errand in errands">
                                     <td ng-class="{'bold':!errand.reading_date}"><a ng-href="#" ng-click="edit_errand(errand, current_user.id == errand.set_person.id)">[[errand.number]]</a></td>
-                                    <td ng-class="{'bold':!errand.reading_date}">[[errand.status.name]]</td>
+                                    <td ng-class="{'bold':!errand.reading_date}">
+                                        <span ng-class="{'label-info': errand.status.code == 'waiting',
+                                                         'label-success': errand.status.code == 'executed',
+                                                         'label-danger': errand.status.code == 'expired',
+                                                         'label-warning': errand.status.code == 'late_execution'}" class="label">
+                                            [[errand.status.name]]
+                                        </span>
+                                    </td>
                                     <td ng-class="{'bold':!errand.reading_date}"><a ng-href="{{ url_for('.html_chart') }}?event_id=[[ errand.event.id ]]">[[errand.event.external_id]]</a></td>
                                     <td ng-class="{'bold':!errand.reading_date}">[[errand.exec_person.name]]</td>
                                     <td></td>
@@ -120,6 +127,7 @@
                                 </tr>
                                 </tbody>
                             </table>
+
                         </div>
                         <div class="box-footer">
                         </div>

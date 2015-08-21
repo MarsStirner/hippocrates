@@ -588,5 +588,5 @@ def represent_errand(errand_info):
                   'external_id':  errand_info.event.externalId},
         'result': errand_info.result,
         'reading_date': errand_info.readingDate,
-        'status': ErrandStatus(errand_info.status)
+        'status': ErrandStatus(errand_info.status_id)
     }
