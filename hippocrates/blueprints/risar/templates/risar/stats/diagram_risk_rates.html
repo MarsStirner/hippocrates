@@ -1,4 +1,4 @@
-<div class="box box-danger">
+<div class="box box-danger" ng-controller="PerinatalRiskRateViewCtrl">
     <div class="box-header with-border">
         <h3 class="box-title">Пациентки по степени риска</h3>
         <div class="box-tools pull-right">
@@ -27,9 +27,9 @@
     <div class="box-footer">
         <h4>По патологиям</h4>
         <ul class="nav nav-pills nav-stacked">
-            <li><a href="#">Cоматическая <span class="pull-right text-red"> 12%</span></a></li>
-            <li><a href="#">Акушерско-гинекологическая <span class="pull-right text-green"> 48%</span></a></li>
-            <li><a href="#">Сочетанная <span class="pull-right text-yellow"> 40%</span></a></li>
+            <li ng-repeat="pp in PregnancyPathology.objects | filter:flt_pp">
+                <a href="javascript:void(0);">[[ pp.name ]] <span class="pull-right text-bold" ng-bind="getPregPathgPct(pp.code)"></span></a>
+            </li>
         </ul>
     </div>
 </div>

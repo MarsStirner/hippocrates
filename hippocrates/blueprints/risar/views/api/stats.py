@@ -21,7 +21,7 @@ from blueprints.risar.app import module
 from blueprints.risar.lib.card_attrs import get_card_attrs_action
 from blueprints.risar.lib.represent import represent_ticket, represent_chart_short, get_pregnancy_week
 from blueprints.risar.risar_config import checkup_flat_codes
-from blueprints.risar.lib.org_bcl import OrgBirthCareLevelRepr, OrganisationRepr
+from blueprints.risar.lib.org_bcl import OrgBirthCareLevelRepr, OrganisationRepr, EventRepr
 from sqlalchemy import func
 
 
@@ -216,9 +216,9 @@ def api_0_pregnancy_week_diagram(person_id=None):
     return result
 
 
-@module.route('/api/0/prenatal_risk_stats.json')
+@module.route('/api/0/stats/perinatal_risk_rate.json')
 @api_method
-def api_0_prenatal_risk_stats():
+def api_0_stats_perinatal_risk_rate():
     person_id = safe_current_user_id()
     curation_level = request.args.get('curation_level')
     result = collections.defaultdict(lambda: 0)
@@ -237,15 +237,19 @@ def api_0_prenatal_risk_stats():
              Event.deleted == 0,
              Action.deleted == 0]
     from_obj = [
-        Event, EventType, rbRequestType, Action, ActionType, ActionProperty, ActionPropertyType, ActionProperty_Integer
+        Event, EventType, rbRequestType, Action, ActionType, ActionProperty, ActionPropertyType,
+        ActionProperty_Integer
     ]
 
     if curation_level:
         from_obj.extend([Organisation, OrganisationCurationAssoc, PersonCurationAssoc, rbOrgCurationLevel])
-        where.extend([Event.org_id == Organisation.id, OrganisationCurationAssoc.org_id == Organisation.id,
-                      OrganisationCurationAssoc.personCuration_id == PersonCurationAssoc.id,
-                      PersonCurationAssoc.person_id == person_id,
-                      PersonCurationAssoc.orgCurationLevel_id == rbOrgCurationLevel.id, rbOrgCurationLevel.code == curation_level])
+        where.extend([
+            Event.org_id == Organisation.id, OrganisationCurationAssoc.org_id == Organisation.id,
+            OrganisationCurationAssoc.personCuration_id == PersonCurationAssoc.id,
+            PersonCurationAssoc.person_id == person_id,
+            PersonCurationAssoc.orgCurationLevel_id == rbOrgCurationLevel.id,
+            rbOrgCurationLevel.code == curation_level
+        ])
     elif person_id:
         where.append(Event.execPerson_id == person_id)
 
@@ -430,3 +434,11 @@ def api_0_stats_obcl_orgs_get(obcl_id=None):
 @api_method
 def api_0_stats_org_curation_get():
     return OrganisationRepr().represent_curations()
+
+
+@module.route('/api/0/stats/pregnancy_pathology/')
+@api_method
+def api_0_stats_pregnancy_pathology():
+    person_id = safe_current_user_id()
+    curation_level_code = request.args.get('curation_level_code')
+    return EventRepr().represent_by_pregnancy_pathology(person_id, curation_level_code)
