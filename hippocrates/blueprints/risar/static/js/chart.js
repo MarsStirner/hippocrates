@@ -4,7 +4,7 @@
 
 'use strict';
 
-var ChartCtrl = function ($scope, $modal, $location, RisarApi, PrintingService, PrintingDialog, NotificationService) {
+var ChartCtrl = function ($scope, $modal, RisarApi, PrintingService, PrintingDialog, NotificationService) {
     var params = aux.getQueryParams(window.location.search);
     var ticket_id = params.ticket_id;
     var client_id = params.client_id;
@@ -54,7 +54,6 @@ var ChartCtrl = function ($scope, $modal, $location, RisarApi, PrintingService, 
                         then(function (data) {
                             $scope.header = data.header;
                         });
-                    $location.search('event_id', event.id).replace();
                 }
             });
     };
@@ -131,7 +130,7 @@ var InspectionViewCtrl = function ($scope, $modal, RisarApi, PrintingService, Pr
     reload();
 };
 
-WebMis20.controller('ChartCtrl', ['$scope', '$modal', '$location', 'RisarApi', 'PrintingService', 'PrintingDialog',
+WebMis20.controller('ChartCtrl', ['$scope', '$modal', 'RisarApi', 'PrintingService', 'PrintingDialog',
     'NotificationService', ChartCtrl]);
 WebMis20.controller('InspectionViewCtrl', ['$scope', '$modal', 'RisarApi', 'PrintingService', 'PrintingDialog',
     InspectionViewCtrl]);

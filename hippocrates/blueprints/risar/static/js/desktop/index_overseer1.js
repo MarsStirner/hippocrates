@@ -1,4 +1,7 @@
 var IndexOverseer1Ctrl = function ($scope, RisarApi) {
+    $scope.curation_level = {
+        code: '1'
+    };
     $scope.query = "";
     $scope.search_date = {date:new Date()}; // и это костыль. этот для работы wmDate
     $scope.tickets = [];
@@ -52,18 +55,6 @@ var IndexOverseer1Ctrl = function ($scope, RisarApi) {
             $scope.tickets = tickets;
         })
     });
-    // Подгрузки данных пока нет
-    $scope.slices = [];
-    $scope.slices_x = function (d) {
-        return d.key;
-    };
-    $scope.slices_y = function (d) {
-        return d.value;
-    };
-    $scope.slices_c = function (d, i) {
-        // А это, ребятки, костыль, потому что где-то в d3 или nv - багулечка
-        return d.data.color;
-    };
     $scope.current_stats = function(){
         RisarApi.current_stats.get(1).then(function (result) {
             $scope.current_stats = result;
@@ -101,39 +92,6 @@ var IndexOverseer1Ctrl = function ($scope, RisarApi) {
     $scope.onRecentlyModifiedPageChanged = function () {
         recently_modified_charts();
     };
-    $scope.refresh_diagram = function () {
-        RisarApi.prenatal_risk_stats.get(1).then(function (result) {
-            $scope.slices = [];
-            if (result['0']) {
-                $scope.slices.push({
-                    key: 'Не определена',
-                    value: result['0'],
-                    color: '#707070'
-                })
-            }
-            if (result['1']) {
-                $scope.slices.push({
-                    key: 'Низкая',
-                    value: result['1'],
-                    color: '#30D040'
-                })
-            }
-            if (result['2']) {
-                $scope.slices.push({
-                    key: 'Средняя',
-                    value: result['2'],
-                    color: '#f39c12'
-                })
-            }
-            if (result['3']) {
-                $scope.slices.push({
-                    key: 'Высокая',
-                    value: result['3'],
-                    color: '#dd4b39'
-                })
-            }
-        })
-    };
     $scope.refresh_pregnancy_week_diagram = function (){
         RisarApi.pregnancy_week_diagram.get(1).then(function (result) {
             $scope.pregnancy_week = [{
@@ -148,7 +106,6 @@ var IndexOverseer1Ctrl = function ($scope, RisarApi) {
     $scope.current_stats();
     recent_charts();
     recently_modified_charts();
-    $scope.refresh_diagram();
     $scope.refresh_pregnancy_week_diagram();
 };
 

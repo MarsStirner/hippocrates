@@ -65,13 +65,6 @@ WebMis20
             return wrapper('POST', Config.url.api_recently_modified_charts, {}, data);
         }
     };
-    this.prenatal_risk_stats = {
-        get: function (curation_level) {
-            return wrapper('GET', Config.url.api_prenatal_risk_stats, {
-                curation_level: curation_level
-            });
-        }
-    }
     this.death_stats = {
         get: function () {
             return wrapper('GET', Config.url.api_death_stats);
@@ -93,6 +86,10 @@ WebMis20
             }).then(function (event_info) {
                 var chart = event_info.event,
                     automagic = event_info.automagic;
+                if (client_id) {
+                    $window.location.replace(Config.url.chart_html + '?event_id=' + chart.id);
+                    return chart;
+                }
                 if (automagic) {
                     NotificationService.notify(
                         200,
@@ -178,7 +175,7 @@ WebMis20
         get: function (event_id){
             return wrapper('GET', Config.url.api_gravidograma + event_id);
         }
-    }
+    };
     this.anamnesis = {
         get: function (event_id) {
             var url = Config.url.api_anamnesis + event_id;
@@ -271,13 +268,23 @@ WebMis20
     };
     this.stats = {
         get_obcl_info: function () {
-            return wrapper('GET', Config.url.api_stats_obcl_gett);
+            return wrapper('GET', Config.url.api_stats_obcl_get);
         },
         get_obcl_org_info: function (org_birth_care_id) {
             return wrapper('GET', Config.url.api_stats_obcl_orgs_get.formatNonEmpty(org_birth_care_id));
         },
         get_org_curation_info: function () {
             return wrapper('GET', Config.url.api_stats_org_curation_get);
+        },
+        get_perinatal_risk_info: function (curation_level) {
+            return wrapper('GET', Config.url.api_stats_perinatal_risk_rate, {
+                curation_level: curation_level
+            });
+        },
+        get_pregnancy_pathology_info: function (curation_level_code) {
+            return wrapper('GET', Config.url.api_stats_pregnancy_pathology, {
+                curation_level_code: curation_level_code
+            });
         }
     };
 }])
