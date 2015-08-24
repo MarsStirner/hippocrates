@@ -63,7 +63,7 @@ var PerinatalRiskRateViewCtrl = function ($scope, RisarApi, RefBookService) {
         return pp.code !== 'undefined';
     };
     $scope.getPregPathgPct = function (pp_code) {
-        return _.isEmpty($scope.preg_pathg_stats) ? null : $scope.preg_pathg_stats[pp_code].pct;
+        return _.isEmpty($scope.preg_pathg_stats) ? null : '{0} %'.format($scope.preg_pathg_stats[pp_code].pct);
     };
 
     $scope.init();
