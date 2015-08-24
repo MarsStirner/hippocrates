@@ -25,29 +25,31 @@
                     </div>
                 </div>
                 <div class="box-footer" ng-if="!client.blood_types.length || bt_history_visible()">
-                    <button type="button" class="btn btn-lg btn-link btn-block" ng-if="!client.blood_types.length"
-                            ng-click="clientServices.add_new_blood_type(client)"><i class="ion ion-plus-round fa-fw"></i>Добавить новую группу крови</button>
-                    <div ng-if="bt_history_visible()">
-                        <table class="table table-condensed">
-                            <caption><h4>История изменений группы крови</h4></caption>
-                            <thead>
-                                <tr>
-                                    <th>Дата установления</th>
-                                    <th>Группа крови</th>
-                                    <th>Установивший</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr ng-repeat="bt in client.blood_types">
-                                    <td>[[bt.date]]</td>
-                                    <td>[[bt.blood_type.name]]</td>
-                                    <td>[[bt.person.name]]</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                    <table class="table table-condensed">
+                        <caption><h4>История изменений группы крови</h4></caption>
+                        <thead>
+                            <tr>
+                                <th>Дата установления</th>
+                                <th>Группа крови</th>
+                                <th>Установивший</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="bt in client.blood_types">
+                                <td>[[bt.date]]</td>
+                                <td>[[bt.blood_type.name]]</td>
+                                <td>[[bt.person.name]]</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
+        </div>
+        <div class="panel marginal">
+            <button type="button" class="btn btn-lg btn-link btn-block"
+                    ng-click="clientServices.add_new_blood_type(client)">
+                <i class="ion ion-plus-round fa-fw"></i>Добавить новую группу крови
+            </button>
         </div>
     </ng-form>
     <ng-form name="_allergies" toc-element="Аллергия">
