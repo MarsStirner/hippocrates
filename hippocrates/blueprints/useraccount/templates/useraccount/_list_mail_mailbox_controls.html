@@ -6,7 +6,10 @@
                ng-class="{'fa-square-o': !select_all.all(), 'fa-check-square-o': select_all.all()}"></i>
         </button>
         <div class="btn-group">
-            <button class="btn btn-default btn-sm" ng-click="delete_selected()"><i class="fa fa-trash-o"></i> Удалить</button>
+            <button class="btn btn-default btn-sm" ng-click="delete_selected()"
+                    ng-if="['inbox', 'star', 'system'].has(current_folder)">
+                <i class="fa fa-trash-o"></i> Удалить
+            </button>
         </div>
         <!-- /.btn-group -->
         <button class="btn btn-default btn-sm" ng-click="reload_messages()"><i class="fa fa-refresh"></i></button>

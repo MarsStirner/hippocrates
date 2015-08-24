@@ -13,34 +13,12 @@
         <div class="navbar-custom-menu">
         <ul class="nav navbar-nav">
               <!-- Messages: style can be found in dropdown.less-->
-              <li class="dropdown messages-menu">
+              <li class="messages-menu">
                 <!-- Menu toggle button -->
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                <a href="{{ url_for('useraccount.index_html') }}">
                   <i class="fa fa-envelope-o"></i>
-                  <span class="label label-success" ng-if="unread > 0">[[ unread ]]</span>
+                  <span class="label label-success" ng-if="unread > 0" ng-bind="unread"></span>
                 </a>
-                <ul class="dropdown-menu">
-                  <li class="header">Непрочитанных сообщений: [[ unread ]]</li>
-                  <li>
-                    <!-- inner menu: contains the messages -->
-                    <ul class="menu">
-                      <li ng-repeat="msg in messages"><!-- start message -->
-                        <a href="#">
-                          <div class="pull-left">
-                            <!-- User Image -->
-                            <span class="img-circle glyphicon glyphicon-user"></span>
-                          </div>
-                          <!-- Message title and timestamp -->
-                          <h4>
-                            [[ msg.sender.name ]]
-                            <small><i class="fa fa-clock-o"></i> [[ msg.datetime | asDateTime ]]</small>
-                          </h4>
-                        </a>
-                      </li><!-- end message -->
-                    </ul><!-- /.menu -->
-                  </li>
-                  <li class="footer"><a href="{{ url_for('useraccount.index_html') }}">Все сообщения</a></li>
-                </ul>
               </li><!-- /.messages-menu -->
 
               <!-- Notifications Menu -->
