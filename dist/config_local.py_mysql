@@ -30,5 +30,7 @@ COLDSTAR_URL = 'http://127.0.0.1:5202/'
 SCANSERVER_URL = 'http://127.0.0.1:5202/'
 WEBMIS10_URL = 'http://127.0.0.1/'
 
+CASTIEL_AUTH_TOKEN = 'authToken'
+
 
 COPYRIGHT_COMPANY = u'КОРУС Консалтинг ИТ'
