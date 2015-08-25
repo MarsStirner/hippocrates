@@ -293,7 +293,7 @@ var EventPaymentCtrl = function($scope, RefBookService, $http, $modal, MessageBo
     };
     $scope.contract_info_required = function () {
         return ($scope.formstate.is_paid() || $scope.formstate.is_oms() || $scope.formstate.is_dms()) &&
-            !$scope.eventServices.integration1codvdEnabled();
+            !$scope.eventServices.isPaymentPerService($scope.event);
     };
     $scope.payer_person_required = function () {
         return ($scope.payer_tabs.person.active && $scope.formstate.is_paid() && $scope.event.info.client.info.age_tuple[3] < 18);
@@ -307,7 +307,7 @@ var EventPaymentCtrl = function($scope, RefBookService, $http, $modal, MessageBo
     $scope.contract_info_disabled = function () {
         return !(
             $scope.event.has_access_to_payment_info && (
-                !$scope.eventServices.integration1codvdEnabled() &&
+                !$scope.eventServices.isPaymentPerService($scope.event) &&
                 ($scope.create_mode || $scope.editing.contract_edited)
             )
         );
@@ -315,7 +315,7 @@ var EventPaymentCtrl = function($scope, RefBookService, $http, $modal, MessageBo
     $scope.btn_edit_contract_info_visible = function () {
         var lc = $scope.event.payment && $scope.event.payment.local_contract || null;
         return ($scope.event.has_access_to_payment_info &&
-            !$scope.eventServices.integration1codvdEnabled() && (
+            !$scope.eventServices.isPaymentPerService($scope.event) && (
                 !lc || !lc.date_contract || !lc.number_contract || !lc.coord_text
             )
         );
@@ -624,7 +624,7 @@ var EventServicesCtrl = function($scope, $http) {
         return result;
     };
     $scope.getPaymentsInTooltipText = function () {
-        if ($scope.eventServices.integration1codvdEnabled()) {
+        if ($scope.eventServices.isPaymentPerService($scope.event)) {
             return 'Поступило платежей всего на сумму {0} руб., с учетом скидок {1} руб.'.format(
                 safe_traverse($scope.event, ['payment', 'payments', 'total_in']),
                 safe_traverse($scope.event, ['payment', 'payments', 'total_discount'])

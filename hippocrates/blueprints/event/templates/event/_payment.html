@@ -144,7 +144,7 @@
 <div class="box box-info">
     <div class="box-header with-border">
         <h3 class="box-title">Договор между пациентом и ЛПУ
-            <span class="text-warning" ng-if="eventServices.integration1codvdEnabled()"> (Заключается при оплате в кассе)</span>
+            <span class="text-warning" ng-if="eventServices.isPaymentPerService(event)"> (Заключается при оплате в кассе)</span>
         </h3>
         <div class="box-tools">
             <button type="button" class="btn btn-box-tool" ng-show="btn_edit_contract_info_visible()"
