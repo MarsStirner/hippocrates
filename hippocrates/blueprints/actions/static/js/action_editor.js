@@ -314,7 +314,7 @@ WebMis20.factory('WMAction', ['ApiCalls', 'EzekielLock', function (ApiCalls, Eze
     // FIXME: На данный момент это ломает функциональность действий, но пока пофиг.
     var template_fields = ['direction_date', 'beg_date', 'end_date', 'planned_end_date', 'status', 'set_person',
         'person', 'note', 'office', 'amount', 'uet', 'pay_status', 'account', 'is_urgent', 'coord_date'];
-    var fields = ['id', 'event_id', 'client'].concat(template_fields);
+    var fields = ['id', 'event_id', 'client', 'prescriptions'].concat(template_fields);
     var Action = function () {
         this.action = {};
         this.layout = {};

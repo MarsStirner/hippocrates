@@ -131,7 +131,8 @@ def api_action_post(action_id=None):
         'uet': action_desc['uet'],
         'payStatus': action_desc['pay_status'] or 0,
         'coordDate': safe_datetime(action_desc['coord_date']),
-        'office': action_desc['office']
+        'office': action_desc['office'],
+        'prescriptions': action_desc.get('prescriptions'),
     }
     properties_desc = action_desc['properties']
     if action_id:
