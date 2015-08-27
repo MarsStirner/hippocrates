@@ -4,7 +4,7 @@ from flask import request
 from sqlalchemy.orm import joinedload
 
 from ...app import module
-from nemesis.models.risar import Errand
+from nemesis.models.risar import Errand, rbErrandStatus
 from nemesis.lib.apiutils import api_method
 from nemesis.models.utils import safe_current_user_id
 from nemesis.systemwide import db
@@ -85,6 +85,7 @@ def api_errand_edit(errand_id):
         errand.deleted = data.get('deleted', 0)
         if data['result']:
             errand.result = data['result']
+            errand.status = rbErrandStatus.query.filter(rbErrandStatus.code == 'executed').first()
             errand.execDate = data['exec_date'] if data['exec_date'] else now
         db.session.add(errand)
         db.session.commit()

@@ -331,12 +331,12 @@ WebMis20
             limit: limit
         }, filters)
     };
-    this.create_errand = function (recipient, text, event_id) {
+    this.create_errand = function (recipient, text, event_id, status) {
         Simargl.send_msg({
             topic: 'errand:new',
             recipient: recipient.id,
             sender: CurrentUser.id,
-            data: { text: text, event_id: event_id },
+            data: { text: text, event_id: event_id, status: status},
             ctrl: true
         }).then(function (result) {
             NotificationService.notify(undefined, 'Поручение успешно создано', 'success', 5000);

@@ -4,11 +4,14 @@
 
 'use strict';
 
-var ChartCtrl = function ($scope, $modal, RisarApi, PrintingService, PrintingDialog, NotificationService, CurrentUser, UserErrand) {
+var ChartCtrl = function ($scope, $modal, RisarApi, PrintingService, PrintingDialog, NotificationService, CurrentUser,
+                          UserErrand, RefBookService) {
     var params = aux.getQueryParams(window.location.search);
     var ticket_id = params.ticket_id;
     var client_id = params.client_id;
     var event_id = params.event_id;
+
+    $scope.rbErrandStatus = RefBookService.get('ErrandStatus');
     $scope.ps_talon = new PrintingService("risar");
     $scope.ps_talon.set_context("risar_talon");
     $scope.ps_resolve = function () {
@@ -76,12 +79,13 @@ var ChartCtrl = function ($scope, $modal, RisarApi, PrintingService, PrintingDia
         var model = {
             set_person: CurrentUser.info,
             is_author: true,
-            event: {external_id: $scope.chart.external_id}
+            event: {external_id: $scope.chart.external_id},
+            status: $scope.rbErrandStatus.get_by_code('waiting')
         };
         open_edit_errand(model).result.then(function (rslt) {
             var result = rslt[0],
                 restart = rslt[1];
-            UserErrand.create_errand(result.exec_person, result.text, event_id);
+            UserErrand.create_errand(result.exec_person, result.text, event_id, result.status);
         })
     };
     var open_edit_errand = function(e){
@@ -155,6 +159,6 @@ var InspectionViewCtrl = function ($scope, $modal, RisarApi, PrintingService, Pr
 };
 
 WebMis20.controller('ChartCtrl', ['$scope', '$modal', 'RisarApi', 'PrintingService', 'PrintingDialog',
-    'NotificationService', 'CurrentUser', 'UserErrand', ChartCtrl]);
+    'NotificationService', 'CurrentUser', 'UserErrand', 'RefBookService', ChartCtrl]);
 WebMis20.controller('InspectionViewCtrl', ['$scope', '$modal', 'RisarApi', 'PrintingService', 'PrintingDialog',
     InspectionViewCtrl]);

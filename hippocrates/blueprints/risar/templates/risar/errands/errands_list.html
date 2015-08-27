@@ -118,9 +118,9 @@
                                         <div class="btn-group">
                                             <button class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><span class="fa fa-caret-down"></span></button>
                                             <ul role="menu" class="dropdown-menu dropdown-menu-right">
-                                                <li ng-if="current_user.id == errand.set_person.id"><a ng-href="#" ng-click="delete_errand(errand)">Удалить</a></li>
-                                                <li ng-if="current_user.id == errand.set_person.id"><a ng-href="#" ng-click="edit_errand(errand, true)">Редактировать</a></li>
                                                 <li ng-if="current_user.id == errand.exec_person.id"><a ng-href="#" ng-click="edit_errand(errand, false)">Написать о выполнении</a></li>
+                                                <li ng-if="current_user.id == errand.set_person.id"><a ng-href="#" ng-click="edit_errand(errand, true)">Редактировать</a></li>
+                                                <li ng-if="current_user.id == errand.set_person.id"><a ng-href="#" ng-click="delete_errand(errand)">Удалить</a></li>
                                             </ul>
                                         </div>
                                     </td>
