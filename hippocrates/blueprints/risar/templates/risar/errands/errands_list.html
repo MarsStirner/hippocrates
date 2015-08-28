@@ -58,21 +58,13 @@
                         </div>
                         <div class="form-group">
                             <label>Автор</label>
-                            <ui-select ng-model="query.set_person" theme="select2" class="form-control" ref-book="Person">
-                                <ui-select-match>[[ $select.selected.name ]]</ui-select-match>
-                                <ui-select-choices repeat="item in $refBook.objects | filter: $select.search | limitTo: 50">
-                                    <span ng-bind-html="item.name | highlight: $select.search"></span>
-                                </ui-select-choices>
-                            </ui-select>
+                            <rb-select id="set_person" ng-model="query.set_person" placeholder="Автор"
+                                       ref-book="Person" allow-clear="true"></rb-select>
                         </div>
                         <div class="form-group">
                             <label>Исполнитель</label>
-                            <ui-select ng-model="query.exec_person" theme="select2" class="form-control" ref-book="Person">
-                                <ui-select-match>[[ $select.selected.name ]]</ui-select-match>
-                                <ui-select-choices repeat="item in $refBook.objects | filter: $select.search | limitTo: 50">
-                                    <span ng-bind-html="item.name | highlight: $select.search"></span>
-                                </ui-select-choices>
-                            </ui-select>
+                            <rb-select id="exec_person" ng-model="query.exec_person" placeholder="Исполнитель"
+                                       ref-book="Person" allow-clear="true"></rb-select>
                         </div>
                         <div class="form-group">
                             <label for="show_deleted"> Показать удаленные </label>

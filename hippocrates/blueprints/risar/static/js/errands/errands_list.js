@@ -1,7 +1,8 @@
 
 'use strict';
 
-var ErrandsListCtrl = function ($scope, $modal, UserErrand, CurrentUser) {
+var ErrandsListCtrl = function ($scope, $window, $modal, UserErrand, CurrentUser) {
+    var params = aux.getQueryParams($window.location.search);
     $scope.unread = 0;
     $scope.errands = [];
     $scope.current_user = CurrentUser.info;
@@ -10,10 +11,15 @@ var ErrandsListCtrl = function ($scope, $modal, UserErrand, CurrentUser) {
     UserErrand.subscribe('new:id', reload_errands);
 
     $scope.reset_filters = function () {
-        $scope.query = {
-            exec_person: CurrentUser.info,
-            show_deleted: false
-        };
+        if (Object.keys(params).length){
+            $scope.query = params;
+        } else {
+            $scope.query = {
+                exec_person: CurrentUser.info,
+                show_deleted: false
+            }
+        }
+;
     };
     function reset_errands (result) {
         if (result) {
@@ -29,8 +35,8 @@ var ErrandsListCtrl = function ($scope, $modal, UserErrand, CurrentUser) {
         open_edit_errand(errand).result.then(
             function (rslt) {
             var result = rslt[0],
-                restart = rslt[1];
-            UserErrand.edit_errand(result).then(reload_errands);
+                exec = rslt[1];
+            UserErrand.edit_errand(result, exec).then(reload_errands);
         },
             function(){
             if (!is_author && !errand.reading_date){
@@ -57,4 +63,7 @@ var ErrandsListCtrl = function ($scope, $modal, UserErrand, CurrentUser) {
     }
     $scope.reset_filters();
     $scope.reload_errands = reload_errands;
+    $scope.$watchCollection('query', function () {
+        reload_errands();
+    });
 }

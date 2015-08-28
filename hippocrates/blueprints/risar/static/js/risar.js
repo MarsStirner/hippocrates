@@ -308,8 +308,9 @@ WebMis20
     });
     this.subscribe = event_source.eventSource.subscribe;
 
-    this.edit_errand = function (errand) {
+    this.edit_errand = function (errand, exec) {
         var current_date = new Date();
+        errand.exec = exec;
         if (errand.is_author){
             errand.reading_date = null;
         } else if (!errand.reading_date){

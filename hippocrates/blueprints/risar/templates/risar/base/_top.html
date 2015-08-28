@@ -73,14 +73,14 @@
                       <i class="fa fa-flag-o"></i>
                       <span class="label label-danger">[[unread]]</span>
                   </a>
-                  <ul class="dropdown-menu">
+                  <ul class="dropdown-menu" style="width: 350px;">
                       <li class="header">У Вас [[unread]] поручений</li>
                       <li>
                           <!-- Inner menu: contains the tasks -->
                           <ul class="menu">
                               <li ng-repeat="errand in errands"><!-- Task item -->
-                                  <a href="#">
-                                      Поручение по карте [[ errand.event_id ]]
+                                  <a href="{{ url_for('risar.html_errands_list') }}?number=[[ errand.number ]]">
+                                      Поручение по карте [[ errand.event.external_id ]] ([[ errand.event.client ]])
                                   </a>
                               </li><!-- end task item -->
                           </ul>

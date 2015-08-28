@@ -582,7 +582,7 @@ def represent_errand(errand_info):
     #todo: progress
     return {
         'id': errand_info.id,
-        'create_datetime':errand_info.createDatetime,
+        'create_datetime': errand_info.createDatetime,
         'number': errand_info.number,
         'set_person': errand_info.setPerson,
         'exec_person': errand_info.execPerson,
@@ -590,7 +590,9 @@ def represent_errand(errand_info):
         'planned_exec_date': errand_info.plannedExecDate,
         'exec_date': errand_info.execDate,
         'event': {'id': errand_info.event.id,
-                  'external_id':  errand_info.event.externalId},
+                  'external_id':  errand_info.event.externalId,
+                  'client': errand_info.event.client.shortNameText
+                  },
         'result': errand_info.result,
         'reading_date': errand_info.readingDate,
         'status': ErrandStatus(errand_info.status_id)

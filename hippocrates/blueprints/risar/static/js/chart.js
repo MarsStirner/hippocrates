@@ -78,6 +78,7 @@ var ChartCtrl = function ($scope, $modal, RisarApi, PrintingService, PrintingDia
     $scope.create_errand = function () {
         var model = {
             set_person: CurrentUser.info,
+            exec_person: $scope.chart.person,
             is_author: true,
             event: {external_id: $scope.chart.external_id},
             status: $scope.rbErrandStatus.get_by_code('waiting')
