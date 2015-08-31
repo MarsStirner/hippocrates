@@ -383,7 +383,7 @@ class EventRepr(object):
         def calc_pact(item):
             if not (count_all or item):
                 return 0
-            return round(float(item) / count_all * 100, 2)
+            return round(item / count_all * 100)
 
         return {
             'all': count_all or 0,
