@@ -8,6 +8,7 @@ from nemesis.models.risar import Errand, rbErrandStatus
 from nemesis.lib.apiutils import api_method
 from nemesis.models.utils import safe_current_user_id
 from nemesis.systemwide import db
+from nemesis.lib.utils import safe_int
 from blueprints.risar.lib.represent import represent_errand
 from sqlalchemy import func
 
@@ -35,7 +36,8 @@ def api_errands_summary():
 @module.route('/api/errands/', methods=["POST"])
 @api_method
 def api_errands_get():
-    limit = int(request.args.get('limit', 10))
+    per_page = safe_int(request.args.get('per_page', 5))
+    page = safe_int(request.args.get('page', 1))
     filters = request.get_json() or {}
 
     unread = int(filters.get('unread', '0'))
@@ -86,11 +88,11 @@ def api_errands_get():
             joinedload(Errand.setPerson),
             joinedload(Errand.execPerson),
         )
-    if limit:
-        query = query.limit(limit)
-    result['errands'] = [represent_errand(errand) for errand in query.all()]
-    return result
 
+    pagination = query.paginate(page, per_page)
+    result['total_pages'] = pagination.pages
+    result['errands'] = [represent_errand(errand) for errand in pagination.items]
+    return result
 
 @module.route('/api/errands/edit/', methods=["POST"])
 @module.route('/api/errands/edit/<int:errand_id>', methods=["POST"])
@@ -106,7 +108,7 @@ def api_errand_edit(errand_id):
         errand.plannedExecDate = data['planned_exec_date']
         errand.deleted = data.get('deleted', 0)
         errand.result = data['result']
-        if data['exec']:
+        if data.get('exec', 0):
             errand.status = rbErrandStatus.query.filter(rbErrandStatus.code == 'executed').first()
             errand.execDate = data['exec_date'] if data['exec_date'] else now
         db.session.add(errand)

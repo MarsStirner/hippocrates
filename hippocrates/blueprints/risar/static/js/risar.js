@@ -327,9 +327,10 @@ WebMis20
         errand.deleted = 1;
         return ApiCalls.wrapper('POST', Config.url.api_errand_edit.format(errand.id), {}, errand).then(get_errands_summary);
     };
-    this.get_errands = function (limit, filters) {
+    this.get_errands = function (per_page, page, filters) {
         return ApiCalls.wrapper('POST', get_errands_url, {
-            limit: limit
+            per_page: per_page,
+            page: page
         }, filters)
     };
     this.create_errand = function (recipient, text, event_id, status) {

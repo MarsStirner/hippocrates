@@ -6,7 +6,13 @@ var ErrandsListCtrl = function ($scope, $window, $modal, UserErrand, CurrentUser
     $scope.unread = 0;
     $scope.errands = [];
     $scope.current_user = CurrentUser.info;
-    UserErrand.subscribe('unread', reset_errands)
+    $scope.pager = {
+        current_page: 1,
+        max_pages: 10,
+        pages: 1,
+        record_count: 0
+    };
+    UserErrand.subscribe('unread', reset_errands);
     UserErrand.subscribe('ready', reload_errands);
     UserErrand.subscribe('new:id', reload_errands);
 
@@ -19,16 +25,21 @@ var ErrandsListCtrl = function ($scope, $window, $modal, UserErrand, CurrentUser
                 show_deleted: false
             }
         }
-;
     };
     function reset_errands (result) {
         if (result) {
             $scope.errands = result.errands;
+            $scope.pager.pages = result.total_pages;
+            $scope.pager.record_count = result.count;
         }
     }
-    function reload_errands () {
-        UserErrand.get_errands(10, $scope.query).then(reset_errands);
+    function reload_errands (page) {
+        page = page ? page : 1;
+        UserErrand.get_errands(10, page, $scope.query).then(reset_errands);
     }
+    $scope.onPageChanged = function () {
+        reload_errands($scope.pager.current_page);
+    };
 
     $scope.edit_errand = function (errand, is_author) {
         errand.is_author = is_author;

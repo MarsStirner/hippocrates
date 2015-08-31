@@ -77,6 +77,13 @@
                     <div class="box box-primary">
                         <div class="box-header">
                             <h3 class="box-title">Поручения: <b>[[errands.length]]</b></h3>
+                            <div class="box-tools pull-right">
+                                <pagination class="pagination pagination-sm no-margin" ng-model="pager.current_page" total-items="pager.record_count"
+                                            items-per-page="10" style="vertical-align: middle;" ng-show="pager.pages > 1"
+                                            previous-text="&lsaquo;" next-text="&rsaquo;"
+                                            max-size="pager.max_pages" ng-change="onPageChanged()">
+                                </pagination>
+                            </div>
                         </div>
                         <div class="box-body">
                             <table class="table table-condensed">
