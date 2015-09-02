@@ -333,12 +333,12 @@ WebMis20
             page: page
         }, filters)
     };
-    this.create_errand = function (recipient, text, event_id, status) {
+    this.create_errand = function (recipient, text, event_id, status, planned_exec_date) {
         Simargl.send_msg({
             topic: 'errand:new',
             recipient: recipient.id,
             sender: CurrentUser.id,
-            data: { text: text, event_id: event_id, status: status},
+            data: { text: text, event_id: event_id, status: status, planned_exec_date:planned_exec_date},
             ctrl: true
         }).then(function (result) {
             NotificationService.notify(undefined, 'Поручение успешно создано', 'success', 5000);

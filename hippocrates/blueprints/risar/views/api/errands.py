@@ -8,7 +8,7 @@ from nemesis.models.risar import Errand, rbErrandStatus
 from nemesis.lib.apiutils import api_method
 from nemesis.models.utils import safe_current_user_id
 from nemesis.systemwide import db
-from nemesis.lib.utils import safe_int
+from nemesis.lib.utils import safe_int, string_to_datetime
 from blueprints.risar.lib.represent import represent_errand
 from sqlalchemy import func
 
@@ -105,11 +105,14 @@ def api_errand_edit(errand_id):
         errand.execPerson_id = data['exec_person']['id']
         errand.readingDate = data['reading_date']
         errand.text = data['text']
-        errand.plannedExecDate = data['planned_exec_date']
+        errand.plannedExecDate = string_to_datetime(data['planned_exec_date'])
         errand.deleted = data.get('deleted', 0)
         errand.result = data['result']
         if data.get('exec', 0):
-            errand.status = rbErrandStatus.query.filter(rbErrandStatus.code == 'executed').first()
+            if errand.plannedExecDate.date() >= now.date():
+                errand.status = rbErrandStatus.query.filter(rbErrandStatus.code == 'executed').first()
+            else:
+                errand.status = rbErrandStatus.query.filter(rbErrandStatus.code == 'late_execution').first()
             errand.execDate = data['exec_date'] if data['exec_date'] else now
         db.session.add(errand)
         db.session.commit()
