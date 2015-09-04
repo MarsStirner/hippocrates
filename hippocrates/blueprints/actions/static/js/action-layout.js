@@ -268,6 +268,10 @@ angular.module('WebMis20')
                     case 'bak_lab_view':
                         return '<bak-lab-view model="action.get_baklab_info()"></bak-lab-view>';
 
+                    case 'prescriptions':
+                        return '<legend class="vmargin10">Назначения медицинских препаратов</legend>\
+                                <medication-prescriptions model="action.prescriptions" action="action"/>';
+
                     case 'root':
                         inner_template = tag.children.map(function (child) {
                             return '<div class="row"><div class="col-md-12">{0}</div></div>'.format(build(child))
