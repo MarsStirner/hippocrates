@@ -5,7 +5,7 @@
 {% block main %}
     <div ng-controller="ClientCtrl" class="ng-cloak">
         <section class="content-header">
-            <div class="pull-right">
+            <div class="wm-page-header-button-box">
                 <a class="btn btn-sm btn-primary" href="{{ url_for('schedule.appointment') }}?client_id={{ request.args['client_id'] }}"
                    ng-if="client_id != 'new'">
                     Записать на приём</a>
@@ -49,9 +49,9 @@
                         <div class="box-body">
                             <toc-affix toc-name="tocClientForm">
                             <hr>
-                                <button ng-click="save_client()" class="btn btn-success"
+                                <button ng-click="save_client()" class="btn btn-lg btn-success"
                                         tooltip="[[clientForm.$invalid ? 'Заполните все обязательные поля': '']]">Сохранить</button>
-                                <button ng-click="cancel_editing()" class="btn btn-default">Отмена</button>
+                                <button ng-click="cancel_editing()" class="btn btn-lg btn-default">Отмена</button>
                             </toc-affix>
                         </div>
                     </div>

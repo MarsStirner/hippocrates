@@ -3,8 +3,8 @@
 
 {% block main %}
 <section class="content-header">
-{#    {% include "_breadcrumbs.html" %}#}
-    <h1 wm-page-header>Запись пациента на прием - <a href="{{ url_for('patients.patient', client_id=client.id) }}">{{ client.nameText }}</a></h1>
+    <h1>Запись пациента на прием - <a href="{{ url_for('patients.patient', client_id=client.id) }}">{{ client.nameText }}</a></h1>
+    <div class="wm-page-header-button-box"></div>
 </section>
 <section class="content">
     <div ng-controller="PersonAppointmentCtrl" class="ng-cloak">

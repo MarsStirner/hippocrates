@@ -3,7 +3,7 @@
     <ng-form name="_invalidity" toc-element="Инвалидность">
         <div ng-repeat="socstat in client.invalidities | flt_not_deleted">
             <ng-form name="socStatInvalidityForm">
-                <div class="box box-info">
+                <div class="box box-primary">
                     <div class="box-header with-border">
                         <h3 class="box-title">Инвалидность</h3>
                         <div class="box-tools pull-right">
@@ -32,13 +32,16 @@
                                 on-add="add_new_file(documentInfo, policyInfo)"
                                 on-open="openFile(cfa_id, idx)">
                             </wm-client-file-attach>
+                            <button type="button" class="btn-link" ng-click="printFilesAttach([socstat.self_document.file_attach])" title="Печать копии">
+                                <span class="glyphicon glyphicon-print"></span>
+                            </button>
                         </div>
                     </div>
                 </div>
             </ng-form>
         </div>
-        <div class="box-footer marginal">
-            <button type="button" class="btn btn-primary" ng-click="clientServices.add_new_invalidity(client)">Добавить инвалидность</button>
+        <div class="panel marginal">
+            <button type="button" class="btn btn-link btn-lg btn-block" ng-click="clientServices.add_new_invalidity(client)"><i class="ion ion-plus-round fa-fw"></i>Добавить инвалидность</button>
         </div>
     </ng-form>
 
@@ -89,14 +92,17 @@
                                 on-add="add_new_file(documentInfo, policyInfo)"
                                 on-open="openFile(cfa_id, idx)">
                             </wm-client-file-attach>
+                            <button type="button" class="btn-link" ng-click="printFilesAttach([socstat.self_document.file_attach])" title="Печать копии">
+                                <span class="glyphicon glyphicon-print"></span>
+                            </button>
                         </div>
                     </div>
                 </div>
             </ng-form>
         </div>
-        <div class="box-footer marginal">
-            <button type="button" class="btn btn-primary"
-                    ng-click="clientServices.add_new_work(client)">Добавить занятость</button>
+        <div class="panel marginal">
+            <button type="button" class="btn btn-lg btn-link btn-block"
+                    ng-click="clientServices.add_new_work(client)"><i class="ion ion-plus-round fa-fw"></i>Добавить занятость</button>
         </div>
     </ng-form>
 
@@ -123,9 +129,9 @@
                 </div>
             </ng-form>
         </div>
-        <div class="box-footer marginal">
-            <button type="button" class="btn btn-primary"
-                    ng-click="clientServices.add_new_nationality(client)">Добавить гражданство</button>
+        <div class="panel marginal">
+            <button type="button" class="btn btn-link btn-lg btn-block"
+                    ng-click="clientServices.add_new_nationality(client)"><i class="ion ion-plus-round fa-fw"></i>Добавить гражданство</button>
         </div>
     </ng-form>
 </ng-form>

@@ -1,0 +1,22 @@
+<div class="box box-success" ng-if="mode == 2">
+    <div class="box-header with-border">
+        <button class="btn btn-default btn-sm" ng-click="list_mail()"><i class="fa fa-backward"></i></button>
+        <h3 class="box-title">Новое письмо</h3><br/>
+
+        <!-- /.box-tools -->
+    </div>
+    <!-- /.box-header -->
+    <div class="box-body">
+        Кому: <wm-person-select ng-model="message.to"></wm-person-select>
+        Тема: <input class="form-control" ng-model="message.subject">
+        <wysiwyg ng-model="message.text"></wysiwyg>
+    </div>
+    <!-- /.box-body -->
+    <div class="box-footer">
+        <button class="btn btn-success pull-right" ng-click="send_mail(message)"
+                ng-disabled="! (message.to && message.subject && message.text)">
+            Отправить
+        </button>
+    </div>
+</div>
+<!-- /. box -->

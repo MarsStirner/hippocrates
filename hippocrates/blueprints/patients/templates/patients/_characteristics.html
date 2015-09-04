@@ -2,7 +2,7 @@
     <h4>Особенности пациента</h4>
     <ng-form name="_bloodtype" toc-element="Группа крови">
         <div ng-repeat="bt in client.blood_types.slice(0, 1) | flt_not_deleted">
-            <div class="box box-info">
+            <div class="box box-primary">
                 <div class="box-header with-border">
                     <h3 class="box-title">Группа крови и резус фактор</h3>
                     <div class="box-tools pull-right">
@@ -25,29 +25,31 @@
                     </div>
                 </div>
                 <div class="box-footer" ng-if="!client.blood_types.length || bt_history_visible()">
-                    <button type="button" class="btn btn-primary" ng-if="!client.blood_types.length"
-                            ng-click="clientServices.add_new_blood_type(client)">Добавить новую группу крови</button>
-                    <div ng-if="bt_history_visible()">
-                        <table class="table table-condensed">
-                            <caption><h4>История изменений группы крови</h4></caption>
-                            <thead>
-                                <tr>
-                                    <th>Дата установления</th>
-                                    <th>Группа крови</th>
-                                    <th>Установивший</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr ng-repeat="bt in client.blood_types">
-                                    <td>[[bt.date]]</td>
-                                    <td>[[bt.blood_type.name]]</td>
-                                    <td>[[bt.person.name]]</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                    <table class="table table-condensed">
+                        <caption><h4>История изменений группы крови</h4></caption>
+                        <thead>
+                            <tr>
+                                <th>Дата установления</th>
+                                <th>Группа крови</th>
+                                <th>Установивший</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="bt in client.blood_types">
+                                <td>[[bt.date]]</td>
+                                <td>[[bt.blood_type.name]]</td>
+                                <td>[[bt.person.name]]</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
+        </div>
+        <div class="panel marginal">
+            <button type="button" class="btn btn-lg btn-link btn-block"
+                    ng-click="clientServices.add_new_blood_type(client)">
+                <i class="ion ion-plus-round fa-fw"></i>Добавить новую группу крови
+            </button>
         </div>
     </ng-form>
     <ng-form name="_allergies" toc-element="Аллергия">
@@ -78,8 +80,8 @@
                 </div>
             </div>
         </div>
-        <div class="box-footer marginal">
-            <button type="button" class="btn btn-primary" ng-click="clientServices.add_allergy(client)">Добавить аллергию</button>
+        <div class="panel marginal">
+            <button type="button" class="btn btn-link btn-lg btn-block" ng-click="clientServices.add_allergy(client)"><i class="ion ion-plus-round fa-fw"></i>Добавить аллергию</button>
         </div>
     </ng-form>
     <ng-form name="_intolerances" toc-element="Непереносимость">
@@ -109,9 +111,9 @@
                 </div>
             </div>
         </div>
-        <div class="box-footer">
-            <button type="button" class="btn btn-primary"
-                    ng-click="clientServices.add_med_intolerance(client)">Добавить медикаментозную непереносимость</button>
+        <div class="panel">
+            <button type="button" class="btn btn-link btn-lg btn-block"
+                    ng-click="clientServices.add_med_intolerance(client)"><i class="ion ion-plus-round fa-fw"></i>Добавить медикаментозную непереносимость</button>
         </div>
     </ng-form>
 </ng-form>

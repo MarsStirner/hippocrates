@@ -1,6 +1,6 @@
 <ng-form name="_policies" toc-element="Полисы">
 <h4>Медицинские полисы</h4>
-<div class="box box-info">
+<div class="box box-primary">
     <div ng-repeat="cpol in client.compulsory_policies | flt_not_deleted">
         <ng-form name="cpolForm" toc-element toc-dynamic="cpol.insurer.short_name">
             <div class="box-header with-border">
@@ -26,13 +26,16 @@
                         on-add="add_new_file(documentInfo, policyInfo)"
                         on-open="openFile(cfa_id, idx)">
                     </wm-client-file-attach>
+                    <button type="button" class="btn-link" ng-click="printFilesAttach([cpol.file_attach])" title="Печать копии">
+                        <span class="glyphicon glyphicon-print"></span>
+                    </button>
                 </div>
             </div>
         </ng-form>
     </div>
     <div class="box-footer">
-        <button type="button" class="btn btn-primary"
-            ng-click="clientServices.add_new_cpolicy(client)">Добавить новый ОМС</button>
+        <button type="button" class="btn btn-lg btn-link btn-block"
+            ng-click="clientServices.add_new_cpolicy(client)"><i class="ion ion-plus-round fa-fw"></i>Добавить новый ОМС</button>
     </div>
 </div>
 <h4>Полисы ДМС</h4>
@@ -55,21 +58,24 @@
                     edit-mode="vpol.id ? edit.activated : true">
                 </wm-policy>
                 <div ng-if="vpol.file_attach">
-                    <h5 class="attach-file-copy-heading">Копия документа</h5>
+                    <h5>Копия документа</h5>
                     <wm-client-file-attach attach-type="policy"
                         model-attach="vpol.file_attach"
                         model-doc="vpol"
                         on-add="add_new_file(documentInfo, policyInfo)"
                         on-open="openFile(cfa_id, idx)">
                     </wm-client-file-attach>
+                    <button type="button" class="btn-link" ng-click="printFilesAttach([vpol.file_attach])" title="Печать копии">
+                        <span class="glyphicon glyphicon-print"></span>
+                    </button>
                 </div>
             </div>
         </div>
     </ng-form>
 </div>
-<div class="box-footer">
-    <button type="button" class="btn btn-primary"
-        ng-click="clientServices.add_new_vpolicy(client)">Добавить новый ДМС</button>
+<div class="panel">
+    <button type="button" class="btn btn-lg btn-link btn-block"
+        ng-click="clientServices.add_new_vpolicy(client)"><i class="ion ion-plus-round fa-fw"></i>Добавить новый ДМС</button>
 </div>
 </ng-form>
 

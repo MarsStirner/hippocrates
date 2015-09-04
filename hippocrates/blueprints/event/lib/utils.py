@@ -187,13 +187,33 @@ def save_executives(event_id):
         raise EventSaveException(u'Ошибка закрытия обращения')
 
 
+def integration_1codvd_enabled():
+    return Settings.getBool('Event.Payment.1CODVD')
+
+
+class PaymentKind:
+    per_event = 0
+    per_service = 1
+
+
+def get_event_payment_kind(event):
+    if event:
+        is_per_event = lambda payment: not payment.is_per_service()
+        is_per_service = lambda payment: payment.is_per_service()
+        if any(map(is_per_event, event.payments)):
+            return PaymentKind.per_event
+        if any(map(is_per_service, event.payments)):
+            return PaymentKind.per_service
+    return PaymentKind.per_service if integration_1codvd_enabled() else PaymentKind.per_event
+
+
 def create_new_local_contract(lc_info):
     err_msg = u'Ошибка сохранения обращения'
     lcon = EventLocalContract()
 
     date = lc_info.get('date_contract')
     number = lc_info.get('number_contract')
-    if Settings.getBool('Event.Payment.1CODVD'):
+    if integration_1codvd_enabled():
         lcon.dateContract = datetime.date.today()
         lcon.numberContract = ''
     else:

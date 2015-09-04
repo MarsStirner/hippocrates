@@ -3,7 +3,7 @@
 import sys
 import os
 sys.path.append(os.path.join(os.getcwd(), '..'))
-from config import DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME
+from config_local import DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME
 
 params = {
     '%DB_HOST%': DB_HOST,

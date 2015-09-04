@@ -2,7 +2,7 @@
     <h4>Адрес регистрации и проживания</h4>
     <ng-form name="_regaddress" toc-element="Регистрации">
         <div ng-repeat="reg_addr in client.reg_addresses | flt_not_deleted">
-            <div class="box box-info">
+            <div class="box box-primary">
                 <div class="box-header with-border">
                     <h3 class="box-title">Адрес регистрации</h3>
                     <div class="box-tools pull-right">
@@ -21,12 +21,11 @@
                         </wm-kladr-address>
                     </ng-form>
                 </div>
-                <div class="box-footer">
-                    <button type="button" class="btn btn-primary"
-                            ng-click="clientServices.add_new_address(client, 0)">Добавить новый</button>
-                </div>
             </div>
-{#            <div>[[reg_addr | json]]</div>#}
+        </div>
+        <div class="panel">
+            <button type="button" class="btn btn-lg btn-link btn-block"
+                    ng-click="clientServices.add_new_address(client, 0)"><i class="ion ion-plus-round fa-fw"></i>Добавить адрес регистрации</button>
         </div>
     </ng-form>
     <ng-form name="_liveaddress" toc-element="Проживания">
@@ -37,7 +36,7 @@
                     <div class="box-tools pull-right">
                         <button ng-show="live_addr.id" type="button" class="btn btn-box-tool" title="Редактировать"
                                 ng-click="edit.activated=true"><span class="glyphicon glyphicon-pencil text-primary"></span></button>
-                        <button type="button" class="btn btn-box-tool" title="Удалить"
+                        <button type="button" class="btn btn-box-tool" title="Очистить"
                                 ng-click="clientServices.delete_address(client, 1, live_addr)">
                             <span class="glyphicon glyphicon-trash text-danger"></span></button>
                     </div>
@@ -59,12 +58,11 @@
                         </wm-kladr-address>
                     </ng-form>
                 </div>
-                <div class="box-footer">
-                    <button type="button" class="btn btn-primary"
-                        ng-click="clientServices.add_new_address(client, 1)">Добавить новый</button>
-                </div>
             </div>
-{#            <div>[[live_addr | json]]</div>#}
+        </div>
+        <div class="panel">
+            <button type="button" class="btn btn-lg btn-link btn-block"
+                ng-click="clientServices.add_new_address(client, 1)"><i class="ion ion-plus-round fa-fw"></i>Добавить адрес проживания</button>
         </div>
     </ng-form>
 </ng-form>

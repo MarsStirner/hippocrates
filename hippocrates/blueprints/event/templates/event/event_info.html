@@ -3,27 +3,25 @@
 {% block main %}
 <div ng-controller="EventInfoCtrl" class="ng-cloak">
     <section class="content-header">
-{#        {% include "_breadcrumbs.html" %}#}
+        <div class="wm-page-header-button-box">
+            <wm-subscription-btn oid="hitsl.event.[[ event.event_id ]]" ng-if="!event.is_new()"></wm-subscription-btn>
+            <ui-print-button ps="ps" resolve="ps_resolve()" ng-if="!event.is_new()"></ui-print-button>
+        </div>
         <h1>
-            <div class="pull-right text-right col-md-1">
-                <ui-print-button ps="ps" resolve="ps_resolve()" ng-if="!event.is_new()"></ui-print-button>
-            </div>
-            <h1>
-                {% if event and event.is_stationary %}История болезни №
-                {% elif event and not event.is_stationary %}Обращение №
-                {% elif not event and event.is_stationary %}Создание госпитализации
-                {% elif not event and not event.is_stationary %}Создание обращения
-                {% endif %}{{ event.externalId }}, пациент
-                {% if user_profiles_mng.has_ui_registrator() %}
-                <a href="{{ url_for('patients.patient', client_id=client_id) }}" tooltip="Редактирование регистрационной карты">
-                    [[ event.info.client.info.full_name ]]
-                </a>
-                {% elif user_profiles_mng.has_ui_doctor() %}
-                <a href="{{ url_for('patients.patient_info_full', client_id=client_id) }}" tooltip="Просмотр регистрационной карты">
-                    [[ event.info.client.info.full_name ]]
-                </a>
-                {% else %}[[ event.info.client.info.full_name ]]{% endif %}
-            </h1>
+            {% if event and event.is_stationary %}История болезни №
+            {% elif event and not event.is_stationary %}Обращение №
+            {% elif not event and event.is_stationary %}Создание госпитализации
+            {% elif not event and not event.is_stationary %}Создание обращения
+            {% endif %}{{ event.externalId }}, пациент
+            {% if user_profiles_mng.has_ui_registrator() %}
+            <a href="{{ url_for('patients.patient', client_id=client_id) }}" tooltip="Редактирование регистрационной карты">
+                [[ event.info.client.info.full_name ]]
+            </a>
+            {% elif user_profiles_mng.has_ui_doctor() %}
+            <a href="{{ url_for('patients.patient_info_full', client_id=client_id) }}" tooltip="Просмотр регистрационной карты">
+                [[ event.info.client.info.full_name ]]
+            </a>
+            {% else %}[[ event.info.client.info.full_name ]]{% endif %}
         </h1>
         </section>
         <section class="content">
@@ -111,9 +109,9 @@
                         )) %}
                     <div class="row">
                         <div class="col-md-12">
-                            <button type="button" ng-click="save_event()" class="btn btn-success"
+                            <button type="button" ng-click="save_event()" class="btn btn-lg btn-success"
                             ng-bind="event.is_new() ? 'Создать' : 'Сохранить'">Создать</button>
-                            <button type="button" ng-click="cancel_editing()" class="btn btn-default">Отмена</button>
+                            <button type="button" ng-click="cancel_editing()" class="btn btn-lg btn-default">Отмена</button>
                         </div>
                     </div>
                     {%- endif %}
@@ -134,7 +132,7 @@
                     {% if user_utils.can_delete_event(event) %}
                     <div class="row vmargin10">
                         <div class="col-md-12">
-                            <button type="button" ng-click="delete_event()" class="btn btn-block btn-danger"
+                            <button type="button" ng-click="delete_event()" class="btn btn-lg btn-danger"
                                     ng-if="btn_delete_event_visible()">Удалить обращение</button>
                         </div>
                     </div>
