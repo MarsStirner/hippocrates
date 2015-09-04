@@ -96,16 +96,17 @@
                         {% if user_profiles_mng.has_ui_assistant() %}
                         <small>ассистирую:</small>
                         {% if current_user.master %}
-                            <a class="show_assist" href="javascript:void(0);">
+                            <a class="show_assist" id="current_assist" href="javascript:void(0);">
                             <span class="fa fa-user-md assist-icon"></span> {{ current_user.master.format_name(is_master=True) }}
                             </a>
                             <script type="application/javascript">
                                 $(function () {
                                     $(".show_assist").popover({
                                         html : true,
-                                        placement : 'bottom',
+                                        placement : 'left',
                                         title : '',
                                         trigger : 'focus',
+                                        container: 'body',
                                         content: function() {
                                           return $('#assist').html();
                                         }
@@ -115,16 +116,20 @@
                             <div id="assist" class="hidden">
                                 <div class="row">
                                   <div class="col-xs-4">
-                                    <span class="thumbnail"><span style="font-size:75px" class="fa fa-user-md assist-icon text-muted"></span></span>
+                                    <span class="thumbnail novmargin"><span style="font-size:66px" class="fa fa-user-md assist-icon text-muted"></span></span>
                                   </div>
                                   <div class="col-xs-8">
                                     <h4>{{ current_user.master.lastName }} {{ current_user.master.firstName|truncate(1, True, end=".") }} {{ current_user.master.patrName|truncate(1, True, end=".") }}
                                       <small>{{ current_user.master.speciality or '' }}</small><br>
                                       <small>{{ current_user.master._current_role_name }}</small>
-                                      <hr class="vmargin10">
-                                      <small>Отделение: {{ current_user.master.org_structure.name }}</small>
+                                    </h4>
+                                  </div>
+                                  <div class="col-xs-12">
+                                      <h4 class="vmargin10">
+{#                                      <hr class="vmargin10">#}
+                                      <small>{{ current_user.master.org_structure.name }}</small>
                                       </h4>
-                                      <a href="{{ url_for('doctor_to_assist', next=request.url) }}" class="btn btn-primary btn-sm btn-block">Сменить врача</a>
+                                      <button id="change_assist"  onclick="location.href='{{ url_for('doctor_to_assist', next=request.url) }}'" class="btn btn-primary btn-sm btn-block">Сменить врача</button>
                                   </div>
                                 </div>
                             </div>
@@ -168,7 +173,7 @@
     </nav>
         <script>
         $(function(){
-            $('.dropdown-menu input, .dropdown-menu select').click(function(e) {
+            $('.dropdown-menu input, .dropdown-menu select, a#current_assist').click(function(e) {
                 e.stopPropagation();
             });
         });
