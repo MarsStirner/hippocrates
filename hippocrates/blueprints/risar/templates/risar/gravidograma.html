@@ -6,7 +6,7 @@
 {% block main %}
 <div ng-controller="GravidogramaCtrl" ng-cloak>
     <section class="content-header">
-        {{ rimacros.page_title_ext('Гравидограмма', 'inspection') }}
+        {{ rimacros.page_title_ext_n('Гравидограмма', 'inspection') }}
         <div class="novmargin">
             <div class="btn-group">
                 <a ng-href="{{ url_for('.html_chart') }}?event_id=[[ event_id ]]" class="btn btn-default">Карта пациентки</a>
