@@ -16,10 +16,7 @@
                 <a ng-href="{{ url_for('.html_routing') }}?event_id=[[ chart.id ]]&emergency=1" class="btn btn-default">Маршрутизация</a>
                 <a ng-href="{{ url_for('.html_epicrisis') }}?event_id=[[ chart.id ]]" class="btn btn-default">Эпикриз</a>
                 <a ng-class="{disabled: !ps.is_available()}" ng-click="open_print_window()" class="btn btn-default">Печать</a>
-                <div class="btn-group">
-                    <a href="{{ url_for('risar.html_errands_list') }}" class="btn btn-default">Поручения</a>
-                    <a href="#" class="btn btn-default" ng-click="create_errand()"><i class="fa fa-plus"></i></a>
-                </div>
+                <a href="#" class="btn btn-default" ng-click="create_errand()">Создать поручение <i class="fa fa-plus"></i></a>
                 <div class="btn-group">
                     <button class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Дополнительно <span class="fa fa-caret-down"></span></button>
                     <ul role="menu" class="dropdown-menu">

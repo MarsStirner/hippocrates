@@ -308,8 +308,9 @@ WebMis20
     });
     this.subscribe = event_source.eventSource.subscribe;
 
-    this.edit_errand = function (errand) {
+    this.edit_errand = function (errand, exec) {
         var current_date = new Date();
+        errand.exec = exec;
         if (errand.is_author){
             errand.reading_date = null;
         } else if (!errand.reading_date){
@@ -326,17 +327,18 @@ WebMis20
         errand.deleted = 1;
         return ApiCalls.wrapper('POST', Config.url.api_errand_edit.format(errand.id), {}, errand).then(get_errands_summary);
     };
-    this.get_errands = function (limit, filters) {
+    this.get_errands = function (per_page, page, filters) {
         return ApiCalls.wrapper('POST', get_errands_url, {
-            limit: limit
+            per_page: per_page,
+            page: page
         }, filters)
     };
-    this.create_errand = function (recipient, text, event_id) {
+    this.create_errand = function (recipient, text, event_id, status, planned_exec_date) {
         Simargl.send_msg({
             topic: 'errand:new',
             recipient: recipient.id,
             sender: CurrentUser.id,
-            data: { text: text, event_id: event_id },
+            data: { text: text, event_id: event_id, status: status, planned_exec_date:planned_exec_date},
             ctrl: true
         }).then(function (result) {
             NotificationService.notify(undefined, 'Поручение успешно создано', 'success', 5000);

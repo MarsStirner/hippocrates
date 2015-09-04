@@ -1,4 +1,4 @@
-<header class="main-header"  ng-controller="WebMisHeader">
+<header class="main-header"  ng-controller="WebMisHeader" ng-cloak>
     <a class="logo" href="{{ url_for('.index_html') }}">
       <!-- mini logo for sidebar mini 50x50 pixels -->
       <span class="logo-lg"></span>
@@ -13,59 +13,59 @@
         <a class="logo" href="{{ url_for('.index_html') }}" style="width: auto"><b>РИСАР: Родовспоможение</b></a>
         <div class="navbar-custom-menu">
         <ul class="nav navbar-nav">
-              <!-- Messages: style can be found in dropdown.less-->
-              <li class="dropdown messages-menu">
-                <!-- Menu toggle button -->
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                  <i class="fa fa-envelope-o"></i>
-                  <span class="label label-success">4</span>
-                </a>
-                <ul class="dropdown-menu">
-                  <li class="header">You have 4 messages</li>
-                  <li>
-                    <!-- inner menu: contains the messages -->
-                    <ul class="menu">
-                      <li><!-- start message -->
-                        <a href="#">
-                          <div class="pull-left">
-                            <!-- User Image -->
-                            <span class="img-circle glyphicon glyphicon-user"></span>
-                          </div>
-                          <!-- Message title and timestamp -->
-                          <h4>
-                            Support Team
-                            <small><i class="fa fa-clock-o"></i> 5 mins</small>
-                          </h4>
-                        </a>
-                      </li><!-- end message -->
-                    </ul><!-- /.menu -->
-                  </li>
-                  <li class="footer"><a href="#">See All Messages</a></li>
-                </ul>
-              </li><!-- /.messages-menu -->
+{#              <!-- Messages: style can be found in dropdown.less-->#}
+{#              <li class="dropdown messages-menu">#}
+{#                <!-- Menu toggle button -->#}
+{#                <a href="#" class="dropdown-toggle" data-toggle="dropdown">#}
+{#                  <i class="fa fa-envelope-o"></i>#}
+{#                  <span class="label label-success">4</span>#}
+{#                </a>#}
+{#                <ul class="dropdown-menu">#}
+{#                  <li class="header">You have 4 messages</li>#}
+{#                  <li>#}
+{#                    <!-- inner menu: contains the messages -->#}
+{#                    <ul class="menu">#}
+{#                      <li><!-- start message -->#}
+{#                        <a href="#">#}
+{#                          <div class="pull-left">#}
+{#                            <!-- User Image -->#}
+{#                            <span class="img-circle glyphicon glyphicon-user"></span>#}
+{#                          </div>#}
+{#                          <!-- Message title and timestamp -->#}
+{#                          <h4>#}
+{#                            Support Team#}
+{#                            <small><i class="fa fa-clock-o"></i> 5 mins</small>#}
+{#                          </h4>#}
+{#                        </a>#}
+{#                      </li><!-- end message -->#}
+{#                    </ul><!-- /.menu -->#}
+{#                  </li>#}
+{#                  <li class="footer"><a href="#">See All Messages</a></li>#}
+{#                </ul>#}
+{#              </li><!-- /.messages-menu -->#}
 
-              <!-- Notifications Menu -->
-              <li class="dropdown notifications-menu">
-                <!-- Menu toggle button -->
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                  <i class="fa fa-bell-o"></i>
-                  <span class="label label-warning">10</span>
-                </a>
-                <ul class="dropdown-menu">
-                  <li class="header">You have 10 notifications</li>
-                  <li>
-                    <!-- Inner Menu: contains the notifications -->
-                    <ul class="menu">
-                      <li><!-- start notification -->
-                        <a href="#">
-                          <i class="fa fa-users text-aqua"></i> 5 new members joined today
-                        </a>
-                      </li><!-- end notification -->
-                    </ul>
-                  </li>
-                  <li class="footer"><a href="#">View all</a></li>
-                </ul>
-              </li>
+{#              <!-- Notifications Menu -->#}
+{#              <li class="dropdown notifications-menu">#}
+{#                <!-- Menu toggle button -->#}
+{#                <a href="#" class="dropdown-toggle" data-toggle="dropdown">#}
+{#                  <i class="fa fa-bell-o"></i>#}
+{#                  <span class="label label-warning">10</span>#}
+{#                </a>#}
+{#                <ul class="dropdown-menu">#}
+{#                  <li class="header">You have 10 notifications</li>#}
+{#                  <li>#}
+{#                    <!-- Inner Menu: contains the notifications -->#}
+{#                    <ul class="menu">#}
+{#                      <li><!-- start notification -->#}
+{#                        <a href="#">#}
+{#                          <i class="fa fa-users text-aqua"></i> 5 new members joined today#}
+{#                        </a>#}
+{#                      </li><!-- end notification -->#}
+{#                    </ul>#}
+{#                  </li>#}
+{#                  <li class="footer"><a href="#">View all</a></li>#}
+{#                </ul>#}
+{#              </li>#}
               <!-- Tasks Menu -->
               <li class="dropdown tasks-menu">
                   <!-- Menu Toggle Button -->
@@ -73,20 +73,20 @@
                       <i class="fa fa-flag-o"></i>
                       <span class="label label-danger">[[unread]]</span>
                   </a>
-                  <ul class="dropdown-menu">
+                  <ul class="dropdown-menu" style="width: 350px;">
                       <li class="header">У Вас [[unread]] поручений</li>
                       <li>
                           <!-- Inner menu: contains the tasks -->
                           <ul class="menu">
                               <li ng-repeat="errand in errands"><!-- Task item -->
-                                  <a href="#">
-                                      Поручение по карте [[ errand.event_id ]]
+                                  <a href="{{ url_for('risar.html_errands_list') }}?number=[[ errand.number ]]">
+                                      Поручение по карте [[ errand.event.external_id ]] ([[ errand.event.client ]])
                                   </a>
                               </li><!-- end task item -->
                           </ul>
                       </li>
                       <li class="footer">
-                          <li class="footer"><a href="{{ url_for('risar.html_errands_list') }}">Все сообщения</a>
+                          <li class="footer"><a href="{{ url_for('risar.html_errands_list') }}">Все поручения</a>
                       </li>
                   </ul>
               </li>
