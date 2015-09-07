@@ -288,9 +288,6 @@ nvd3-line-chart svg {
     margin-bottom: 0px;
     min-height: 327px;
 }
-.long-words{
-    word-wrap: break-word;
-}
 
 .content-header h1 {
   margin: 0;

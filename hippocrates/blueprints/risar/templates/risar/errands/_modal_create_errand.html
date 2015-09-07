@@ -28,7 +28,7 @@
                 <tr>
                     <th class="text-right">Описание <span class="text-danger">*</span></th>
                     <td>
-                        <div class="col-md-12"><wysiwyg ng-disabled="!model.is_author"
+                        <div class="col-md-12"><wysiwyg ng-disabled="!model.is_author" contenteditable="model.is_author"
                                                         ng-model="model.text" ng-required="true" /></div>
                     </td>
                 </tr>
@@ -53,7 +53,7 @@
                     <th class="text-right">Исполнитель <span class="text-danger">*</span></th>
                     <td>
                         <div class="col-md-5">
-                            <ui-select ng-model="model.exec_person" theme="select2" class="form-control" ref-book="Person"
+                            <ui-select ng-model="model.exec_person" theme="select2" class="form-control" ref-book="vrbPersonWithSpeciality"
                                        ng-disabled="!model.is_author" ng-required="true">
                                 <ui-select-match>[[ $select.selected.name ]]</ui-select-match>
                                 <ui-select-choices repeat="item in $refBook.objects | filter: $select.search | limitTo: 50">
