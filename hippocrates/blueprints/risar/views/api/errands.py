@@ -51,6 +51,7 @@ def api_errands_get():
     edate_from = filters.get('edate_from')
     edate_to = filters.get('edate_to')
     number = filters.get('number')
+    status = filters.get('status')
 
     result = {}
 
@@ -77,6 +78,8 @@ def api_errands_get():
         query = query.filter(func.DATE(Errand.execDate) <= edate_to)
     if number:
         query = query.filter(Errand.number == number)
+    if status:
+        query = query.filter(Errand.status_id == status.get('id'))
 
     query = query.filter(db.or_(Errand.execPerson_id == safe_current_user_id(),
                                 Errand.setPerson_id == safe_current_user_id()))
