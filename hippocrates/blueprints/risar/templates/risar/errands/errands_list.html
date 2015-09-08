@@ -115,7 +115,9 @@
                                     </td>
                                     <td ng-class="{'bold':!errand.reading_date}"><a ng-href="{{ url_for('.html_chart') }}?event_id=[[ errand.event.id ]]">[[errand.event.external_id]]</a></td>
                                     <td ng-class="{'bold':!errand.reading_date}">[[errand.exec_person.name]]</td>
-                                    <td></td>
+                                    <td style="text-align: center;">
+                                        <span class="progress" id="[[errand.id]]">Loading..</span>
+                                    </td>
                                     <td ng-class="{'bold':!errand.reading_date}">[[errand.planned_exec_date | asDate]]</td>
                                     <td>
                                         <div class="btn-group">

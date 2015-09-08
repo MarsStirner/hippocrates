@@ -579,7 +579,13 @@ def represent_newborn_inspections(children_info):
 
 
 def represent_errand(errand_info):
-    #todo: progress
+    today = datetime.date.today()
+    planned = errand_info.plannedExecDate.date()
+    create_date = errand_info.createDatetime.date()
+
+    days_to_complete = (planned-create_date).days
+    progress = (today - create_date).days*100/days_to_complete if (today < planned and days_to_complete) else 100
+
     return {
         'id': errand_info.id,
         'create_datetime': errand_info.createDatetime,
@@ -595,5 +601,6 @@ def represent_errand(errand_info):
                   },
         'result': errand_info.result,
         'reading_date': errand_info.readingDate,
-        'status': ErrandStatus(errand_info.status_id)
+        'status': ErrandStatus(errand_info.status_id),
+        'progress': progress
     }
