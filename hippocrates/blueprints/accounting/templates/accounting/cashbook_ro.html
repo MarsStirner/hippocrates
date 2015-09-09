@@ -1,0 +1,19 @@
+{% extends 'accounting/base.html' %}
+
+{% block title %}> Просмотр обращений{% endblock %}
+
+{% block main %}
+<section class="content-header">
+    <h1>Просмотр обращений</h1>
+</section>
+<section class="content">
+    <div ng-controller="CashBookCtrl" class="ng-cloak">
+        <div ui-alert-list="alerts"></div>
+        <wm-search-event event-id="event.id" query="query"></wm-search-event>
+    </div>
+</section>
+{% endblock %}
+{% block modules_js %}
+    {{ super() }}
+    <script src="{{ url_for('.static', filename='js/cashbook.js', v=app_version) }}"></script>
+{% endblock %}
