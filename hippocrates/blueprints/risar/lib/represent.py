@@ -550,8 +550,11 @@ def represent_epicrisis(event, action=None):
     first_inspection = get_action(event, 'risarFirstInspection')
     second_inspection = Action.query.join(ActionType).filter(Action.event == event, Action.deleted == 0).\
         filter(ActionType.flatCode == 'risarSecondInspection').order_by(Action.begDate.desc()).first()
-    if first_inspection and second_inspection:
-        epicrisis['weight_gain'] = second_inspection.propsByCode['weight'].value - first_inspection.propsByCode['weight'].value
+
+    first_weight = first_inspection.propsByCode['weight'].value
+    second_weight = second_inspection.propsByCode['weight'].value
+    if first_inspection and second_inspection and first_weight and second_weight:
+        epicrisis['weight_gain'] = second_weight - first_inspection
 
     finish_date = epicrisis['delivery_date']
     epicrisis['registration_pregnancy_week'] = get_pregnancy_week(event, event.setDate.date()) if finish_date else None
