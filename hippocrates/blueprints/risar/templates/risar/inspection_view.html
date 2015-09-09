@@ -39,9 +39,8 @@
                                 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu" role="menu">
-                                <li ng-class="{disabled: !ps_talon.is_available()}"><a href="#" ng-click="open_print_window(ps_talon)" >Печать талона</a></li>
-                                <li ng-if="checkup.flat_code == 'risarFirstInspection'" ng-class="{disabled: !ps_fi.is_available()}"><a href="#" ng-click="open_print_window(ps_fi, checkup.id)" >Печать осмотра</a></li>
-                                <li ng-if="checkup.flat_code == 'risarSecondInspection'" ng-class="{disabled: !ps_si.is_available()}"><a href="#" ng-click="open_print_window(ps_si, checkup.id)" >Печать осмотра</a></li>
+                                <li ng-if="checkup.flat_code == 'risarFirstInspection'" ng-class="{disabled: !ps_fi.is_available()}"><a href="#" ng-click="open_print_window(ps_fi, checkup.id)" >Печать</a></li>
+                                <li ng-if="checkup.flat_code == 'risarSecondInspection'" ng-class="{disabled: !ps_si.is_available()}"><a href="#" ng-click="open_print_window(ps_si, checkup.id)" >Печать</a></li>
                                 <li><a href="#">Копировать</a></li>
                                 <li><a href="#">Удалить</a></li>
                             </ul>

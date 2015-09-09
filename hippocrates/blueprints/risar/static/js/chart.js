@@ -109,13 +109,11 @@ var InspectionViewCtrl = function ($scope, $modal, RisarApi, PrintingService, Pr
     var event_id = params.event_id;
     $scope.ps = new PrintingService("risar");
     $scope.ps.set_context("risar");
-    $scope.ps_talon = new PrintingService("risar");
-    $scope.ps_talon.set_context("risar_talon");
 
     $scope.ps_fi = new PrintingService("risar_inspection");
-    $scope.ps_fi.set_context("risar_first_inspection");
+    $scope.ps_fi.set_context("risar_osm1_talon");
     $scope.ps_si = new PrintingService("risar_inspection");
-    $scope.ps_si.set_context("risar_second_inspection");
+    $scope.ps_si.set_context("risar_osm2_talon");
     $scope.ps_resolve = function (checkup_id) {
         return {
             event_id: $scope.header.event.id,
