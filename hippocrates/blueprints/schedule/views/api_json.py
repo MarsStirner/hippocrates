@@ -213,6 +213,7 @@ def api_schedule_description_post():
                 new_sched.endTimeAsDt = safe_time_as_dt(sub_sched['endTime'])
                 new_sched.endTime = new_sched.endTimeAsDt.time()
                 new_sched.receptionType_id = safe_traverse(sub_sched, 'reception_type', 'id')
+                new_sched.finance_id = safe_traverse(sub_sched, 'finance', 'id')
                 office_id = safe_traverse(sub_sched, 'office', 'id')
                 if not office_id and safe_traverse(sub_sched, 'reception_type', 'code') == 'amb':
                     return jsonify({}, 422, u'На %s не указан кабинет' % format_date(date))
