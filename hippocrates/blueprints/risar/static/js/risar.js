@@ -384,7 +384,7 @@ WebMis20
 .directive('preeclampsiaRiskIcon', function () {
     return {
         restrict: 'A',
-        template: '<span style="font-size: 120%" ng-class="icon_class(preeclampsiaRiskIcon.id)" tooltip="[[tooltip(preeclampsiaRiskIcon.id)]]"></span>',
+        template: '<span style="font-size: 110%" ng-class="icon_class(preeclampsiaRiskIcon.id)" tooltip="[[tooltip(preeclampsiaRiskIcon.id)]]"></span>',
         scope: {
             preeclampsiaRiskIcon: '='
         },
@@ -398,6 +398,51 @@ WebMis20
                 if (rate == 1) return 'Пациентка входит в группу риска развития преэклампсии';
                 if (rate == 2) return 'Пациентка НЕ входит в группу риска развития преэклампсии';
                 return 'Риск развития преэклампсии ещё не выявлен';
+
+            }
+        }
+    }
+})
+.directive('preeclampsiaSuspIcon', function () {
+    return {
+        restrict: 'A',
+        template: '<span style="font-size: 110%" ng-class="icon_class(preeclampsiaSuspIcon.code)" tooltip="[[tooltip(preeclampsiaSuspIcon.code)]]"></span>',
+        scope: {
+            preeclampsiaSuspIcon: '='
+        },
+        link: function (scope) {
+            scope.icon_class = function (rate) {
+                if (rate == 'mild') return 'fa fa-exclamation-triangle text-yellow';
+                if (rate == 'heavy') return 'fa fa-exclamation-triangle text-red';
+                if (rate == 'ChAH') return 'fa fa-exclamation-triangle text-orange';
+                return 'fa fa-exclamation-triangle';
+            };
+            scope.tooltip = function (rate) {
+                if (rate == 'mild') return 'Внимание! Симптомы пациентки указывают на преэклампсию умеренную';
+                if (rate == 'heavy') return 'Внимание! Симптомы пациентки указывают на преэклампсию тяжелую';
+                if (rate == 'ChAH') return 'Внимание! Симптомы пациентки указывают на преэклампсию на фоне ХАГ';
+                return 'Симптомы преэклампсии не обнаружены';
+
+            }
+        }
+    }
+})
+.directive('preeclampsiaConfirmedIcon', function () {
+    return {
+        restrict: 'A',
+        template: '<span style="font-size: 120%" ng-class="icon_class(preeclampsiaConfirmedIcon.code)" tooltip="[[tooltip(preeclampsiaConfirmedIcon)]]"></span>',
+        scope: {
+            preeclampsiaConfirmedIcon: '='
+        },
+        link: function (scope) {
+            scope.icon_class = function (rate) {
+                if (rate == 'mild') return 'fa fa-exclamation-triangle text-yellow';
+                if (rate == 'heavy') return 'fa fa-exclamation-triangle text-red';
+                if (rate == 'ChAH') return 'fa fa-exclamation-triangle text-orange';
+                return 'fa fa-exclamation-triangle';
+            };
+            scope.tooltip = function (rate) {
+                return 'Внимание! Пациентке врачом установлена преэклампсия '+rate.name;
 
             }
         }

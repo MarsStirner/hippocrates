@@ -99,6 +99,9 @@
             <i pregnancy-week-icon="chart.pregnancy_week" pregnancy-start-date="chart.card_attributes.pregnancy_start_date"></i>
             <i risk-rate-icon="chart.risk_rate"></i>
             <i preeclampsia-risk-icon="chart.preeclampsia_risk"></i>
+            <i preeclampsia-susp-icon="chart.preeclampsia_susp_rate"></i>
+            <i preeclampsia-confirmed-icon="chart.preeclampsia_confirmed_rate"
+               ng-if="chart.preeclampsia_confirmed_rate && chart.preeclampsia_confirmed_rate.code != 'unknown'"></i>
             <span class="ri-chart-fill-pct-50" tooltip="Процент заполненности карты"></span>
         </span>
         <span>

@@ -6,6 +6,7 @@ from nemesis.lib.data import create_action
 from nemesis.lib.jsonify import EventVisualizer
 from nemesis.models.actions import Action, ActionType, ActionPropertyType, ActionProperty
 from nemesis.models.enums import PregnancyPathology, PreeclampsiaRisk
+from nemesis.models.risar import rbPreEclampsiaRate
 from nemesis.systemwide import db
 from blueprints.risar.lib.utils import get_action, get_action_list, HIV_diags, syphilis_diags, hepatitis_diags, \
     tuberculosis_diags, scabies_diags, pediculosis_diags, multiple_birth, hypertensia, kidney_diseases, collagenoses, \
@@ -37,6 +38,27 @@ def get_card_attrs_action(event, auto=True):
         db.session.add(action)
         db.session.commit()
     return action
+
+
+def get_pregnancy_week(event, action, date=None):
+    """
+    :type event: application.models.event.Event
+    :type date: datetime.date | None
+    :param event: Карточка пациентки
+    :param date: Интересующая дата или None (тогда - дата окончания беременности)
+    :return: число недель от начала беременности на дату
+    """
+    if action is None:
+        action = get_card_attrs_action(event)
+    start_date = action['pregnancy_start_date'].value
+    if date is None:
+        date = action['predicted_delivery_date'].value
+    if start_date:  # assume that date is not None
+        if isinstance(date, datetime.datetime):
+            date = date.date()
+        if isinstance(start_date, datetime.datetime):
+            start_date = start_date.date()
+        return (min(date, datetime.date.today()) - start_date).days / 7 + 1
 
 
 def check_card_attrs_action_integrity(action):
@@ -292,6 +314,77 @@ def reevaluate_pregnacy_pathology(event, action=None):
     action['pregnancy_pathology_list'].value = list(event_pathologies)
 
 
+def reevaluate_preeclampsia_rate(event, action=None):
+    """
+    Расчет степени преэклампсии у пациентки
+    """
+
+    def preec_diag(diag):
+        DiagID = diag['diagnosis']['mkb'].DiagID
+        if 'O11' in DiagID:
+            return 3
+        if 'O14.0' in DiagID:
+            return 2
+        if 'O14.1' in DiagID:
+            return 1
+        return 0
+
+    res = 'unknown'
+    has_CAH = False
+    heavy_diags = False
+    if action is None:
+        action = get_card_attrs_action(event)
+    preg_week = get_pregnancy_week(event, action)
+
+    last_inspection = get_action_list(event, checkup_flat_codes).all()[-1] # todo
+    if preg_week > 20:
+        mother_anamnesis = get_action(event, risar_mother_anamnesis)
+
+        anamnesis_diags = get_diagnoses_from_action(mother_anamnesis, open=False)
+        all_diags = get_all_diagnoses(event)
+        urinary_protein_24 = get_action(event, '24urinary')['24protein'].value if get_action(event, '24urinary') else None
+        urinary_protein = get_action(event, 'urinaryProtein')['protein'].value if get_action(event, 'urinaryProtein') else None
+        biochemical_analysis = get_action(event, 'biochemical_analysis')
+        ALaT = biochemical_analysis['ALaT'].value if biochemical_analysis else None
+        ASaT = biochemical_analysis['ASaT'].value if biochemical_analysis else None
+        thrombocytes = get_action(event, 'clinical_blood_analysis')['thrombocytes'] if get_action(event, 'clinical_blood_analysis') else None
+
+        for diag in anamnesis_diags:
+            if 'O10' in diag['diagnosis']['mkb'].DiagID:
+                has_CAH = True
+                break
+        for diag in all_diags:
+            DiagID = diag['diagnosis']['mkb'].DiagID
+            if ('R34' in DiagID) or ('J81' in DiagID) or ('R23.0' in DiagID) or ('O36.5' in DiagID):
+                heavy_diags = True
+                break
+
+        if has_CAH:  # хроническая артериальная гипертензия
+            if urinary_protein_24 >= 0.3 or urinary_protein >= 0.3 or ALaT > 31 or ASaT > 31 or thrombocytes < 100:
+                res = 'ChAH'  # преэклампсия на фоне ХАГ
+        else:
+            all_complaints = last_inspection['complaints'].value
+            complaints = filter(lambda x: x['code'] in ('epigastrii', 'zrenie', 'golovnaabol_'), all_complaints) if all_complaints else None
+            ad_left_high = last_inspection['ad_left_high'].value
+            ad_left_low = last_inspection['ad_left_low'].value
+            ad_right_high = last_inspection['ad_right_high'].value
+            ad_right_low = last_inspection['ad_right_low'].value
+            hight_blood_pressure = (ad_left_high >= 140 or ad_left_low >= 90) or (ad_right_high >= 140 or ad_right_low >= 90)
+            very_hight_blood_pressure = (ad_left_high >= 160 or ad_left_low >= 110) or (ad_right_high >= 160 or ad_right_low >= 110)
+
+            if hight_blood_pressure and urinary_protein_24 >= 0.3:
+                res = 'mild'
+                urinary24 = urinary_protein_24['24urinary'].value  # < 500 Олигурия
+                if very_hight_blood_pressure or urinary_protein_24 >= 5 or urinary24 < 500 or ALaT > 31 or \
+                   ASaT > 31 or thrombocytes < 100 or heavy_diags or complaints:
+                    res = 'heavy'
+
+    last_inspection_diags = get_diagnoses_from_action(last_inspection, open=False)
+
+    action['preeclampsia_susp'].value = rbPreEclampsiaRate.query.filter(rbPreEclampsiaRate.code == res).first().__json__()
+    action['preeclampsia_comfirmed'].value = rbPreEclampsiaRate.query.get(max(map(preec_diag, last_inspection_diags))).__json__()
+
+
 def reevaluate_card_attrs(event, action=None):
     """
     Пересчёт атрибутов карточки беременной
@@ -305,6 +398,7 @@ def reevaluate_card_attrs(event, action=None):
     reevaluate_preeclampsia_risk(event, action)
     reevaluate_pregnacy_pathology(event, action)
     reevaluate_dates(event, action)
+    reevaluate_preeclampsia_rate(event, action)
 
 
 def check_disease(diagnoses):

@@ -109,6 +109,10 @@ def represent_event(event):
         'risk_rate': PrenatalRiskRate(card_attrs_action['prenatal_risk_572'].value),
         'preeclampsia_risk': PreeclampsiaRisk(card_attrs_action['preeclampsia_risk'].value) if
             card_attrs_action.propsByCode.get('preeclampsia_risk') else None,
+        'preeclampsia_susp_rate': card_attrs_action['preeclampsia_susp'].value if
+            card_attrs_action.propsByCode.get('preeclampsia_susp') else None,
+        'preeclampsia_confirmed_rate': card_attrs_action['preeclampsia_comfirmed'].value if
+            card_attrs_action.propsByCode.get('preeclampsia_comfirmed') else None,
         'pregnancy_pathologies': [
             PregnancyPathology(pathg)
             for pathg in card_attrs_action['pregnancy_pathology_list'].value
@@ -551,10 +555,10 @@ def represent_epicrisis(event, action=None):
     second_inspection = Action.query.join(ActionType).filter(Action.event == event, Action.deleted == 0).\
         filter(ActionType.flatCode == 'risarSecondInspection').order_by(Action.begDate.desc()).first()
 
-    first_weight = first_inspection.propsByCode['weight'].value
-    second_weight = second_inspection.propsByCode['weight'].value
-    if first_inspection and second_inspection and first_weight and second_weight:
-        epicrisis['weight_gain'] = second_weight - first_inspection
+    first_weight = first_inspection.propsByCode['weight'].value if first_inspection else None
+    second_weight = second_inspection.propsByCode['weight'].value if second_inspection else None
+    if first_weight and second_weight:
+        epicrisis['weight_gain'] = second_weight - first_weight
 
     finish_date = epicrisis['delivery_date']
     epicrisis['registration_pregnancy_week'] = get_pregnancy_week(event, event.setDate.date()) if finish_date else None
