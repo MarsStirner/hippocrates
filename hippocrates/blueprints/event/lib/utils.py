@@ -212,21 +212,20 @@ def create_new_local_contract(lc_info):
     lcon = EventLocalContract()
 
     date = lc_info.get('date_contract')
-    number = lc_info.get('number_contract')
     if integration_1codvd_enabled():
-        lcon.dateContract = datetime.date.today()
-        lcon.numberContract = ''
+        number = lc_info.get('number_contract') or ''
     else:
-        if not date:
-            raise EventSaveException(data={
-                'ext_msg': u'Не указана дата заключения договора'
-            })
-        lcon.dateContract = date
-        if number is None:
-            raise EventSaveException(data={
-                'ext_msg': u'Не указана дата заключения договора'
-            })
-        lcon.numberContract = number
+        number = lc_info.get('number_contract')
+    if not date:
+        raise EventSaveException(data={
+            'ext_msg': u'Не указана дата заключения договора'
+        })
+    lcon.dateContract = date
+    if number is None:
+        raise EventSaveException(data={
+            'ext_msg': u'Не указан номер договора'
+        })
+    lcon.numberContract = number
 
     lcon.coordAgent = lc_info.get('coord_agent', '')
     lcon.coordInspector = lc_info.get('coord_inspector', '')
