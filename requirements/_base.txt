@@ -7,7 +7,7 @@ Flask-Babel
 Flask-Admin
 pytz
 Flask-BabelEx
-Flask-Login
+Flask-Login==0.2.11
 Flask-Principal
 blinker
 selenium
