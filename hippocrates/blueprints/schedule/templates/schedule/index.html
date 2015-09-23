@@ -60,12 +60,12 @@
                                         <div class="btn-group">[[day.tickets[row].finance.code]]
                                             <button ui-schedule-ticket="day.tickets[row]" day="day" show-name="true"
                                                     ng-click="appointment_toggle(day.tickets[row])"
-                                                    {% if config['ORGANISATION_INFIS_CODE'] == 500 %}ng-class="{'bg-gray': (day.tickets[row].finance == '2' && !ticket_user_info_available(day.tickets[row])), 'bg-purple': (day.tickets[row].finance == '4' && !ticket_user_info_available(day.tickets[row])), 'bg-teal': (day.tickets[row].finance == '6' && !ticket_user_info_available(day.tickets[row]))}"{% endif %}></button>
+                                                    {% if config['ORGANISATION_INFIS_CODE'] == 500 %}ng-class="{'bg-gray': (day.tickets[row].finance == '2' && !ticket_user_info_available(day.tickets[row])), 'bg-purple': (day.tickets[row].finance == '4' && !ticket_user_info_available(day.tickets[row])), 'bg-teal': (day.tickets[row].finance == '6' && !ticket_user_info_available(day.tickets[row]))}" style="border:none"{% endif %}></button>
                                         </div>
                                         <div class="btn-group" ng-if="ticket_user_info_available(day.tickets[row])">
                                             <button type="button" class="btn btn-primary" title="Посмотреть информацию о пациенте"
                                                     ng-click="view_patient_info(day.tickets[row])"
-                                                    {% if config['ORGANISATION_INFIS_CODE'] == 500 %}ng-class="{'bg-gray': (day.tickets[row].finance == '2'), 'bg-purple': (day.tickets[row].finance == '4'), 'bg-teal': (day.tickets[row].finance == '6')}"{% endif %}>
+                                                    {% if config['ORGANISATION_INFIS_CODE'] == 500 %}ng-class="{'bg-gray': (day.tickets[row].finance == '2'), 'bg-purple': (day.tickets[row].finance == '4'), 'bg-teal': (day.tickets[row].finance == '6')}" style="border:none"{% endif %}>
                                                 <span class="glyphicon glyphicon-user"></span>
                                             </button>
                                         </div>
