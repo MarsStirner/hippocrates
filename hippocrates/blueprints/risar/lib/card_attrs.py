@@ -317,6 +317,7 @@ def reevaluate_pregnacy_pathology(event, action=None):
 def reevaluate_preeclampsia_rate(event, action=None):
     """
     Расчет степени преэклампсии у пациентки
+    и отображение преэклампсии установленной врачом
     """
 
     def preec_diag(diag):
@@ -336,7 +337,8 @@ def reevaluate_preeclampsia_rate(event, action=None):
         action = get_card_attrs_action(event)
     preg_week = get_pregnancy_week(event, action)
 
-    last_inspection = get_action_list(event, checkup_flat_codes).all()[-1] # todo
+    inspections = get_action_list(event, checkup_flat_codes).all()
+    last_inspection = inspections[-1] if inspections else None
     if preg_week > 20:
         mother_anamnesis = get_action(event, risar_mother_anamnesis)
 
@@ -347,6 +349,8 @@ def reevaluate_preeclampsia_rate(event, action=None):
         biochemical_analysis = get_action(event, 'biochemical_analysis')
         ALaT = biochemical_analysis['ALaT'].value if biochemical_analysis else None
         ASaT = biochemical_analysis['ASaT'].value if biochemical_analysis else None
+        albumin_creatinine = get_action(event, 'albuminCreatinineRelation')['albuminCreatinineRelation'].value if \
+            get_action(event, 'albuminCreatinineRelation') else None
         thrombocytes = get_action(event, 'clinical_blood_analysis')['thrombocytes'] if get_action(event, 'clinical_blood_analysis') else None
 
         for diag in anamnesis_diags:
@@ -360,9 +364,9 @@ def reevaluate_preeclampsia_rate(event, action=None):
                 break
 
         if has_CAH:  # хроническая артериальная гипертензия
-            if urinary_protein_24 >= 0.3 or urinary_protein >= 0.3 or ALaT > 31 or ASaT > 31 or thrombocytes < 100:
+            if urinary_protein_24 >= 0.3 or urinary_protein >= 0.3 or albumin_creatinine >= 0.15 or ALaT > 31 or ASaT > 31 or thrombocytes < 100:
                 res = 'ChAH'  # преэклампсия на фоне ХАГ
-        else:
+        elif last_inspection:
             all_complaints = last_inspection['complaints'].value
             complaints = filter(lambda x: x['code'] in ('epigastrii', 'zrenie', 'golovnaabol_'), all_complaints) if all_complaints else None
             ad_left_high = last_inspection['ad_left_high'].value
@@ -372,7 +376,7 @@ def reevaluate_preeclampsia_rate(event, action=None):
             hight_blood_pressure = (ad_left_high >= 140 or ad_left_low >= 90) or (ad_right_high >= 140 or ad_right_low >= 90)
             very_hight_blood_pressure = (ad_left_high >= 160 or ad_left_low >= 110) or (ad_right_high >= 160 or ad_right_low >= 110)
 
-            if hight_blood_pressure and urinary_protein_24 >= 0.3:
+            if hight_blood_pressure and (urinary_protein_24 >= 0.3 or albumin_creatinine >= 0.15):
                 res = 'mild'
                 urinary24 = urinary_protein_24['24urinary'].value  # < 500 Олигурия
                 if very_hight_blood_pressure or urinary_protein_24 >= 5 or urinary24 < 500 or ALaT > 31 or \

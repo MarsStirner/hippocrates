@@ -312,3 +312,7 @@ ul.product-list, li.product-list-item-active {
 .bold {
     font-weight: bold;
 }
+
+.text-darkgray {
+  color: #888 !important;
+}

@@ -384,7 +384,7 @@ WebMis20
 .directive('preeclampsiaRiskIcon', function () {
     return {
         restrict: 'A',
-        template: '<span style="font-size: 110%" ng-class="icon_class(preeclampsiaRiskIcon.id)" tooltip="[[tooltip(preeclampsiaRiskIcon.id)]]"></span>',
+        template: '<span style="font-size: 120%" ng-class="icon_class(preeclampsiaRiskIcon.id)" tooltip="[[tooltip(preeclampsiaRiskIcon.id)]]"></span>',
         scope: {
             preeclampsiaRiskIcon: '='
         },
@@ -414,8 +414,8 @@ WebMis20
             scope.icon_class = function (rate) {
                 if (rate == 'mild') return 'fa fa-exclamation-triangle text-yellow';
                 if (rate == 'heavy') return 'fa fa-exclamation-triangle text-red';
-                if (rate == 'ChAH') return 'fa fa-exclamation-triangle text-orange';
-                return 'fa fa-exclamation-triangle';
+                if (rate == 'ChAH') return 'fa fa-exclamation-triangle';
+                return 'fa fa-exclamation-triangle text-darkgray';
             };
             scope.tooltip = function (rate) {
                 if (rate == 'mild') return 'Внимание! Симптомы пациентки указывают на преэклампсию умеренную';
@@ -438,8 +438,8 @@ WebMis20
             scope.icon_class = function (rate) {
                 if (rate == 'mild') return 'fa fa-exclamation-triangle text-yellow';
                 if (rate == 'heavy') return 'fa fa-exclamation-triangle text-red';
-                if (rate == 'ChAH') return 'fa fa-exclamation-triangle text-orange';
-                return 'fa fa-exclamation-triangle';
+                if (rate == 'ChAH') return 'fa fa-exclamation-triangle';
+                return 'fa fa-exclamation-triangle text-darkgray';
             };
             scope.tooltip = function (rate) {
                 return 'Внимание! Пациентке врачом установлена преэклампсия '+rate.name;
