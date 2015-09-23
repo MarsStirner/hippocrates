@@ -69,7 +69,7 @@ def check_card_attrs_action_integrity(action):
     :type action: nemesis.models.actions.Action
     :return: None
     """
-    property_type_codes = ['pregnancy_pathology_list',]
+    property_type_codes = ['pregnancy_pathology_list', 'preeclampsia_susp', 'preeclampsia_comfirmed']
     for apt_code in property_type_codes:
         if apt_code not in action.propsByCode:
             create_property(action, apt_code)
@@ -323,12 +323,12 @@ def reevaluate_preeclampsia_rate(event, action=None):
     def preec_diag(diag):
         DiagID = diag['diagnosis']['mkb'].DiagID
         if 'O11' in DiagID:
-            return 3
-        if 'O14.0' in DiagID:
-            return 2
+            return 4, 'ChAH'
         if 'O14.1' in DiagID:
-            return 1
-        return 0
+            return 3, 'heavy'
+        if 'O14.0' in DiagID:
+            return 2, 'mild'
+        return 1, 'unknown'
 
     res = 'unknown'
     has_CAH = False
@@ -386,7 +386,8 @@ def reevaluate_preeclampsia_rate(event, action=None):
     last_inspection_diags = get_diagnoses_from_action(last_inspection, open=False)
 
     action['preeclampsia_susp'].value = rbPreEclampsiaRate.query.filter(rbPreEclampsiaRate.code == res).first().__json__()
-    action['preeclampsia_comfirmed'].value = rbPreEclampsiaRate.query.get(max(map(preec_diag, last_inspection_diags))).__json__()
+    confirmed_rate = max(map(preec_diag, last_inspection_diags), key=lambda x: x[0]) if last_inspection_diags else (1, 'unknown')
+    action['preeclampsia_comfirmed'].value = rbPreEclampsiaRate.query.filter(rbPreEclampsiaRate.code == confirmed_rate[1]).first().__json__()
 
 
 def reevaluate_card_attrs(event, action=None):

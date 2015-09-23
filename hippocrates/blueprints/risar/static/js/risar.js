@@ -430,7 +430,7 @@ WebMis20
 .directive('preeclampsiaConfirmedIcon', function () {
     return {
         restrict: 'A',
-        template: '<span style="font-size: 120%" ng-class="icon_class(preeclampsiaConfirmedIcon.code)" tooltip="[[tooltip(preeclampsiaConfirmedIcon)]]"></span>',
+        template: '<span style="font-size: 110%" ng-class="icon_class(preeclampsiaConfirmedIcon.code)" tooltip="[[tooltip(preeclampsiaConfirmedIcon)]]"></span>',
         scope: {
             preeclampsiaConfirmedIcon: '='
         },
