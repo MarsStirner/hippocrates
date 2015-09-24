@@ -369,7 +369,7 @@ WebMis20
                 if (rate == 1) return 'ri-prenatal-risk text-green';
                 if (rate == 2) return 'ri-prenatal-risk text-yellow';
                 if (rate == 3) return 'ri-prenatal-risk text-red';
-                return 'ri-prenatal-risk-undefined';
+                return 'ri-prenatal-risk-undefined text-darkgray';
             };
             scope.tooltip = function (rate) {
                 if (rate == 1) return 'У пациентки выявлен низкий риск невынашивания';
@@ -392,7 +392,7 @@ WebMis20
             scope.icon_class = function (rate) {
                 if (rate == 1) return 'fa fa-exclamation-circle text-red';
                 if (rate == 2) return 'fa fa-exclamation-circle text-green';
-                return 'fa fa-question';
+                return 'fa fa-question text-darkgray';
             };
             scope.tooltip = function (rate) {
                 if (rate == 1) return 'Пациентка входит в группу риска развития преэклампсии';
@@ -464,7 +464,7 @@ WebMis20
                 } else if (week > 40) {
                     return 'ri-pregnancy-week-40h';
                 } else {
-                    return 'ri-pregnancy-week-undefined';
+                    return 'ri-pregnancy-week-undefined text-darkgray';
                 }
             };
             scope.tooltip = function (psdate) {
