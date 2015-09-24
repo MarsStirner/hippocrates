@@ -230,19 +230,16 @@ def api_0_stats_perinatal_risk_rate():
              ActionProperty.action_id == Action.id,
              ActionPropertyType.id == ActionProperty.type_id,
              ActionType.id == Action.actionType_id,
-             ActionProperty_Integer.id == ActionProperty.id,
              Event.execDate.is_(None),
              EventType.id == Event.eventType_id,
              rbRequestType.id == EventType.requestType_id,
              Event.deleted == 0,
              Action.deleted == 0]
-    from_obj = [
-        Event, EventType, rbRequestType, Action, ActionType, ActionProperty, ActionPropertyType,
-        ActionProperty_Integer
-    ]
+    from_obj = Event.__table__.join(EventType).join(rbRequestType).join(Action).join(ActionType)\
+        .join(ActionProperty).join(ActionPropertyType).outerjoin(ActionProperty_Integer)
 
     if curation_level:
-        from_obj.extend([Organisation, OrganisationCurationAssoc, PersonCurationAssoc, rbOrgCurationLevel])
+        from_obj.join(Organisation).join(OrganisationCurationAssoc).join(PersonCurationAssoc).join(rbOrgCurationLevel)
         where.extend([
             Event.org_id == Organisation.id, OrganisationCurationAssoc.org_id == Organisation.id,
             OrganisationCurationAssoc.personCuration_id == PersonCurationAssoc.id,
@@ -258,7 +255,10 @@ def api_0_stats_perinatal_risk_rate():
         whereclause=db.and_(*where),
         from_obj=from_obj)
     for (value, ) in db.session.execute(selectable):
-        result[value] += 1
+        if value:
+            result[value] += 1
+        else:
+            result[0] += 1
     return result
 
 
