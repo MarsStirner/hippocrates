@@ -120,16 +120,16 @@ def api_0_event_search():
                 'event_id': row['id'],
                 'client_id': row['client_id'],
                 'name': row['name'],
-                'set_date': datetime.date.fromtimestamp(row['set_date'] * 86400) if row['set_date'] else None,
-                'exec_date': datetime.date.fromtimestamp(row['exec_date'] * 86400) if row['exec_date'] else None,
+                'set_date': datetime.date.fromtimestamp(row['set_date']) if row['set_date'] else None,
+                'exec_date': datetime.date.fromtimestamp(row['exec_date']) if row['exec_date'] else None,
                 'external_id': row['external_id'],
                 'exec_person_name': row['person_name'],
                 'risk': PrenatalRiskRate(row['risk']),
-                'mdate': datetime.date.fromtimestamp(row['modify_date']),
-                'pddate': datetime.date.fromtimestamp(row['bdate'] * 86400) if row['bdate'] else None,
+                'mdate': datetime.date.fromtimestamp(row['card_modify_date']) if row['card_modify_date'] else None,
+                'pddate': datetime.date.fromtimestamp(row['bdate']) if row['bdate'] else None,
                 'week':((
-                    (min(today, datetime.date.fromtimestamp(row['bdate'] * 86400)) if row['bdate'] else today) -
-                    datetime.date.fromtimestamp(row['psdate'] * 86400)
+                    (min(today, datetime.date.fromtimestamp(row['bdate'])) if row['bdate'] else today) -
+                    datetime.date.fromtimestamp(row['psdate'])
                 ).days / 7 + 1) if row['psdate'] else None
             }
             for row in result['result']['items']
