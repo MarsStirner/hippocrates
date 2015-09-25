@@ -207,7 +207,7 @@ def get_last_checkup_date(event_id):
     return query[0] if query else None
 
 
-def get_event_diag_mkbs(event, at_flatcodes=None):
+def get_event_diag_mkbs(event, **kwargs):
     query = db.session.query(Event).join(
         Diagnostic, Diagnosis
     ).join(
@@ -217,14 +217,22 @@ def get_event_diag_mkbs(event, at_flatcodes=None):
         Diagnostic.deleted == 0,
         Diagnosis.deleted == 0
     )
-    if isinstance(at_flatcodes, (list, tuple)):
-        query = query.join(
-            (Action, Diagnostic.action_id == Action.id),
-            ActionType
-        ).filter(
-            ActionType.flatCode.in_(at_flatcodes),
-            Action.deleted == 0
-        )
+    if 'at_flatcodes' in kwargs:
+        at_flatcodes = kwargs['at_flatcodes']
+        if isinstance(at_flatcodes, (list, tuple)):
+            query = query.join(
+                (Action, Diagnostic.action_id == Action.id),
+                ActionType
+            ).filter(
+                ActionType.flatCode.in_(at_flatcodes),
+                Action.deleted == 0
+            )
+    if 'action_id' in kwargs:
+        action_id = kwargs['action_id']
+        query = query.filter(Diagnostic.action_id == action_id)
+    if 'without_action_id' in kwargs:
+        action_id = kwargs['without_action_id']
+        query = query.filter(Diagnostic.action_id != action_id)
     query = query.with_entities(MKB)
     return query.all()
 

@@ -1,15 +1,21 @@
 # -*- coding: utf-8 -*-
-import itertools
 
+import datetime
+
+from collections import defaultdict
 from sqlalchemy.orm import aliased
 
 from nemesis.lib.utils import safe_date, safe_int, safe_datetime, safe_bool
 from nemesis.systemwide import db
 from nemesis.models.actions import Action
-from nemesis.models.expert_protocol import (ExpertScheme, ExpertSchemeMKB, EventMeasure, ExpertSchemeMeasureAssoc,
-    rbMeasureType, Measure)
+from nemesis.models.expert_protocol import (ExpertScheme, ExpertSchemeMKBAssoc, EventMeasure, ExpertProtocol,
+    ExpertSchemeMeasureAssoc, rbMeasureType, Measure)
 from nemesis.models.exists import MKB
-from nemesis.models.enums import MeasureStatus
+from nemesis.models.enums import MeasureStatus, MeasureScheduleType
+from blueprints.risar.lib.utils import get_event_diag_mkbs
+from blueprints.risar.risar_config import first_inspection_code
+from blueprints.risar.lib.time_converter import DateTimeUtil
+from blueprints.risar.lib.datetime_interval import DateTimeInterval, get_intersection_type, IntersectionType
 
 
 class EventMeasureGenerator(object):
@@ -27,48 +33,328 @@ class EventMeasureGenerator(object):
         action = Action.query.get(action_id)
         start_date = safe_date(action.begDate)
         end_date = safe_date(action.propsByCode['next_date'].value)
-        action_mkb_list = _get_event_mkb_list(action)
+        actual_mkbs = get_actual_mkbs(action)
         # logger.debug('Action <{0}> mkbs: {1}'.format(action_id, action_mkb_list))
-        obj = cls(action, action_mkb_list, start_date, end_date)
+        obj = cls(action, actual_mkbs['action'], actual_mkbs['event'], start_date, end_date)
         return obj
 
-    def __init__(self, action, action_mkb_list=None, period_start_date=None, period_end_date=None):
-        self.action = action
+    def __init__(self, action, action_mkb_list=None, event_mkb_list=None, period_start_date=None, period_end_date=None):
+        self.source_action = action
         self.action_mkb_list = action_mkb_list
-        self.period_start_date = period_start_date
-        self.period_end_date = period_end_date
+        self.event_mkb_list = event_mkb_list
+        self.existing_measures = None
+        # self.period_start_date = period_start_date
+        # self.period_end_date = period_end_date
+        self.context = None
 
     def generate_measures(self):
-        self.clear_existing_measures()
-        act_scheme_measures = [
-            ActionSchemeMeasure(act_mkb['action'], act_mkb['mkbs'])
-            for act_mkb in self.action_mkb_list
-        ]
-        for act_sm in act_scheme_measures:
-            for sm in act_sm.scheme_measures:
-                self.create_measure(sm, act_sm.action)
+        # basic plan:
+        # 0) delete existing (temporary step)
+        # 1) select scheme measures that fit source action mkbs
+        # 2) filter scheme measures by theirs schedules (is SM acceptable for now)
+        # 3) create event measures from schemes
+        #   - EMs that fit time interval from current action to next action should be presented in single instance
+        #   - EMs that lie in time interval, relative to reference date, should contain only subset of EM group, where
+        #     each element falls into time interval from current action to next action
+        # 4) resolve conflicts between old and new event measures
+        #   4.1) filter duplicates by SchemeMeasure among created and existing actual EMs
+        #   - based on event_measure.scheme_measure.apply_type:
+        #
+        #     [EMs that reside on time interval from current action to next action]
+        #   - check for existing event measures from current action that have same SchemeMeasure.id
+        #     - if not present: create new
+        #     - else: pass or perform more sophisticated checks (date, status, ...)
+        #
+        #     [EMs, forming a group, that reside on time interval, relative to reference date.
+        #      This interval can contain EMs from different actions]
+        #   - or check for existing event measures from all actions (previous and current)
+        #     - if not present: create new
+        #     - else:
+        #       - check whether EM from previous actions fits current EM group
+        #         (and what if EM from previous actions now becomes invalid on dates because of significant change of
+        #          current action pregnancy week?)
+        #         - if fits: ignore it
+        #         - else: ignore it? [overall it can be more EM in a group, than defined in schedule???]
+        #       - somehow, based on data from previous EMs in group, create missing EMs
+        #   4.2) filter duplicates by Measure among created and existing actual EMs
+        #     - do not remove Em that have same Measure but different SchemeMeasure
+        # 5) handle create-alert flag
+        #   - just return number of newly created EMs
+        # 6) update expired status on existing EMs, that should have ended before current action
+        # 7) save new and update old event measures
+
+        # TODO: ~_~
+        # self._clear_existing_measures()
+        # return
+
+        # prepare
+        self.context = MeasureGeneratorRisarContext(self.source_action, self.action_mkb_list, self.event_mkb_list)
+        self._load_existing_measures()
+
+        # go
+        spawner_list = self._select_scheme_measures()
+        sm_to_exist_list = self._filter_scheme_measures(spawner_list)
+        em_list = self._create_event_measures(sm_to_exist_list)
+        em_list = self._filter_em_duplicates_by_sm(em_list)
+        em_list = self._filter_em_duplicates_by_measure(em_list)
+        expired_em_list = self._update_expired_event_measures()
+        self.save_event_measures(*(em_list+expired_em_list))
+        return len(em_list)
+
+    def _load_existing_measures(self):
+        self.existing_measures = defaultdict(list)
+        self.existing_action_measures = defaultdict(list)
+        query = db.session.query(EventMeasure).filter(
+            EventMeasure.event_id == self.source_action.event_id,
+            EventMeasure.deleted == 0
+        )
+        for em in query:
+            self.existing_measures[em.schemeMeasure_id].append(em)
+            if em.sourceAction_id == self.source_action.id:
+                self.existing_action_measures[em.schemeMeasure_id].append(em)
+
+    def _clear_existing_measures(self):
+        db.session.query(EventMeasure).filter(
+            EventMeasure.sourceAction_id == self.source_action.id
+        ).delete()
         db.session.commit()
 
-    def clear_existing_measures(self):
-        db.session.query(EventMeasure).filter(
-            EventMeasure.sourceAction_id == self.action.id
-        ).delete()
+    def _update_expired_event_measures(self):
+        cur_dt = datetime.datetime.now()
+        em_list = []
+        for sm_id, em_list in self.existing_measures.iteritems():
+            for em in em_list:
+                if em.endDateTime < cur_dt and em.status != MeasureStatus.cancelled[0]:
+                    em.status = MeasureStatus.cancelled[0]
+                    em_list.append(em)
+        return em_list
 
-    def refresh_measures_status(self, event_id):
-        pass
+    def _select_scheme_measures(self):
+        return [
+            ActionMkbSpawner(self.source_action, mkb)
+            for mkb in self.action_mkb_list
+        ]
 
-    def create_measure(self, scheme_measure, source_action):
+    def _filter_scheme_measures(self, spawner_list):
+        """Return _unique_ scheme_measures, that form event_measures, that
+         should exist in event according to current action state.
+
+        :param spawner_list:
+        :return:
+        """
+        unique_sm_id_list = set()
+        unique_sm_list = []
+        for mkb_spawner in spawner_list:
+            for sm in mkb_spawner.scheme_measures:
+                if sm not in unique_sm_id_list and self.context.is_scheme_measure_acceptable(sm, mkb_spawner.mkb_code):
+                    unique_sm_id_list.add(sm.id)
+                    unique_sm_list.append(sm)
+        return unique_sm_list
+
+    def _group_by_measure(self, scheme_measures):
+        result = defaultdict(list)
+        for sm in scheme_measures:
+            result[sm.measure_id].append(sm)
+        return result
+
+    def _group_by_sm(self, em_list):
+        grouped_em = defaultdict(list)
+        for em in em_list:
+            grouped_em[em.scheme_measure.id].append(em)
+        return grouped_em
+
+    def _create_event_measures(self, sm_list):
+        # grouping does not make sense in current algorithm implementation
+        grouped_sm = self._group_by_measure(sm_list)
+        new_em_list = []
+
+        for m_id, sm_list in grouped_sm.iteritems():
+            for sm in sm_list:
+                if is_multi_scheme_measure(sm):
+                    for beg, end in self.context.get_sm_time_interval_list(sm):
+                        status = self.context.get_new_status(sm)
+                        em = self.create_measure(sm, beg, end, status)
+                        new_em_list.append(em)
+                else:
+                    beg, end = self.context.get_new_sm_time_interval(sm)
+                    status = self.context.get_new_status(sm)
+                    em = self.create_measure(sm, beg, end, status)
+                    new_em_list.append(em)
+        return new_em_list
+
+    def _filter_em_duplicates_by_sm(self, em_list):
+        # 4.1) filter duplicates by SchemeMeasure among created and existing actual EMs
+        #   - based on event_measure.scheme_measure.apply_type:
+        #
+        #     [EMs that reside on time interval from current action to next action]
+        #   - check for existing event measures from current action that have same SchemeMeasure.id
+        #     - if not present: create new
+        #     - else: pass or perform more sophisticated checks (date, status, ...)
+        #
+        #     [EMs, forming a group, that reside on time interval, relative to reference date.
+        #      This interval can contain EMs from different actions]
+        #   - or check for existing event measures from all actions (previous and current)
+        #     - if not present: create new
+        #     - else:
+        #       - check whether EM from previous actions fits current EM group
+        #         (and what if EM from previous actions now becomes invalid on dates because of significant change of
+        #          current action pregnancy week?)
+        #         - if fits: ignore it
+        #         - else: ignore it? [overall it can be more EM in a group, than defined in schedule???]
+        #       - somehow, based on data from previous EMs in group, create missing EMs
+
+        grouped_em = self._group_by_sm(em_list)
+        result = []
+        for sm_id, em_list in grouped_em.iteritems():
+            scheme_measure = em_list[0].scheme_measure
+            apply_type_code = scheme_measure.schedule.apply_type.code
+            if apply_type_code == 'before_next_visit':
+                filtered_em = self._filter_single_em_sm_producer(scheme_measure, em_list)
+                if filtered_em:
+                    result.append(filtered_em)
+            elif apply_type_code == 'range_up_to':
+                filtered_em = self._filter_single_em_sm_producer(scheme_measure, em_list)
+                if filtered_em:
+                    result.append(filtered_em)
+            elif apply_type_code == 'bounds':
+                filtered_em_list = self._filter_multiple_em_sm_producer(scheme_measure, em_list)
+                result.extend(filtered_em_list)
+        return result
+
+    def _filter_single_em_sm_producer(self, sm, em_list):
+        sm_id = sm.id
+        assert len(em_list) == 1, u'More than 1 EM, created from SM.id = {0}'.format(sm_id)
+        if sm_id in self.existing_action_measures:
+            pass
+            # or perform more sophisticated checks (date, status, ...)
+        else:
+            return em_list[0]
+
+    def _filter_multiple_em_sm_producer(self, sm, em_list):
+        # TODO:
+        return em_list
+
+    def _filter_em_duplicates_by_measure(self, em_list):
+        # assuming there are not duplicates by scheme_measures
+        # but still can be event measure duplicates by measure from different schemes
+        # ignoring for now
+        return em_list
+
+    def create_measure(self, scheme_measure, beg_dt, end_dt, status):
         em = EventMeasure()
-        em.scheme_measure = scheme_measure.model
-        beg, end = scheme_measure.get_time_interval(self.period_start_date, self.period_end_date)
-        em.begDateTime = beg
-        em.endDateTime = end
-        status = scheme_measure.get_new_status()
+        em.scheme_measure = scheme_measure
+        em.begDateTime = beg_dt
+        em.endDateTime = end_dt
         em.status = status
-        em.source_action = source_action
-        em.event = source_action.event
+        em.source_action = self.source_action
+        em.event = self.source_action.event
+        return em
 
-        db.session.add(em)
+    def save_event_measures(self, *event_measures):
+        db.session.add_all(event_measures)
+        db.session.commit()
+
+
+class MeasureGeneratorRisarContext(object):
+
+    def __init__(self, action, action_mkb_list, event_mkb_list):
+        self.inspection_date = None
+        self.next_inspection_date = None
+        self.is_first_inspection = None
+        self.pregnancy_week = None
+        self.existing_diagnoses = None
+        self.actual_diagnoses = None
+        self.source_action = action
+        self.action_mkb_list = action_mkb_list
+        self.event_mkb_list = event_mkb_list
+        self.load()
+
+    def load(self):
+        self.inspection_date = safe_date(self.source_action.begDate)
+        self.next_inspection_date = safe_date(self.source_action.propsByCode['next_date'].value)
+        self.is_first_inspection = self.source_action.actionType.flatCode == first_inspection_code
+        self.pregnancy_week = safe_int(self.source_action.propsByCode['pregnancy_week'].value)
+        self.existing_diagnoses = self.event_mkb_list + self.action_mkb_list
+        self.actual_diagnoses = self.action_mkb_list
+
+    def is_scheme_measure_acceptable(self, sm, mkb_code):
+        return all(self.st_handlers[sched_type.id](self, sm, mkb_code) for sched_type in sm.schedule.schedule_types)
+
+    def _check_st_afv(self, sm, mkb_code):
+        return self.is_first_inspection
+
+    def _check_st_wpr(self, sm, mkb_code):
+        # assuming units in weeks, TODO: check units and add conversions
+        return sm.schedule.boundsLowEventRange <= self.pregnancy_week <= sm.schedule.boundsHighEventRange
+
+    def _check_st_uds(self, sm, mkb_code):
+        return mkb_code not in self.existing_diagnoses
+
+    def _check_st_ipd(self, sm, mkb_code):
+        return any(mkb.DiagID in self.existing_diagnoses for mkb in sm.schedule.additional_mkbs)
+
+    st_handlers = {
+        MeasureScheduleType.getId('after_visit'): lambda *args: True,
+        MeasureScheduleType.getId('after_first_visit'): _check_st_afv,
+        MeasureScheduleType.getId('within_pregnancy_range'): _check_st_wpr,
+        MeasureScheduleType.getId('upon_med_indication'): lambda *args: True,
+        MeasureScheduleType.getId('upon_diag_set'): _check_st_uds,
+        MeasureScheduleType.getId('in_presence_diag'): _check_st_ipd,
+    }
+
+    def get_new_sm_time_interval(self, scheme_measure):
+        apply_type_code = scheme_measure.schedule.apply_type.code
+        if apply_type_code == 'before_next_visit':
+            start_date = self.inspection_date
+            end_date = self.next_inspection_date
+        elif apply_type_code == 'range_up_to':
+            start_date = self.inspection_date
+            add_val = scheme_measure.schedule.boundsHighApplyRange
+            add_unit_code = scheme_measure.schedule.bounds_high_apply_range_unit.code
+            range_end = DateTimeUtil.add_to_date(self.inspection_date, add_val, add_unit_code)
+            end_date = range_end if range_end <= self.next_inspection_date else self.next_inspection_date
+        else:
+            start_date = end_date = None
+        return [start_date, end_date]
+
+    def get_sm_time_interval_list(self, scheme_measure):
+        apply_type_code = scheme_measure.schedule.apply_type.code
+        interval_list = []
+        if apply_type_code == 'bounds':
+            return self._calc_bounds_sm_dates(scheme_measure)
+        return interval_list
+
+    def _calc_bounds_sm_dates(self, scheme_measure):
+        cur_w = self.pregnancy_week
+        next_w = cur_w + (self.next_inspection_date - self.inspection_date).days / 7
+        range_w_start = scheme_measure.schedule.boundsLowApplyRange  # assume in weeks TODO: check units and add conversions
+        range_w_end = scheme_measure.schedule.boundsHighApplyRange  # assume in weeks TODO: check units and add conversions
+        range_count = scheme_measure.schedule.count or 1
+        range_period = scheme_measure.schedule.apply_period  # assume in days TODO: check units and add conversions
+
+        date_list = []
+        if get_intersection_type(
+            DateTimeInterval(cur_w, next_w),
+            DateTimeInterval(range_w_start, range_w_end)
+        ) != IntersectionType.none:
+            # TODO: fix this
+            start_date = DateTimeUtil.add_to_date(self.inspection_date, range_w_start - cur_w, DateTimeUtil.week)  # can result be before event date?
+            end_date = DateTimeUtil.add_to_date(self.inspection_date, range_w_end - cur_w, DateTimeUtil.week)
+            step = (end_date - start_date).days / range_period
+            while start_date < end_date:
+                date_list.append(
+                    (start_date + datetime.timedelta(days=0), start_date + datetime.timedelta(days=step))
+                )
+                start_date = start_date + datetime.timedelta(days=step)
+        return date_list
+
+    def get_new_status(self, scheme_measure):
+        st_list = scheme_measure.schedule.schedule_types
+        if len(st_list) == 1 and st_list[0].code == 'upon_med_indication':
+            status = MeasureStatus.upon_med_indications[0]
+        else:
+            status = MeasureStatus.assigned[0]
+        return status
 
 
 class EventMeasureSelecter(object):
@@ -209,80 +495,35 @@ class EventMeasureRepr(object):
         }
 
 
-def _get_event_mkb_list(action):
-    # TODO: add mkb from rest of event actions
-    mkb_list = []
-    source_action_mkb = _get_action_mkbs(action)
-    if source_action_mkb:
-        mkb_list.append({
-            'action': action,
-            'mkbs': source_action_mkb
-        })
-    return mkb_list
+class ActionMkbSpawner(object):
 
-
-def _get_action_mkbs(action):
-    """mkb from action diagnoses"""
-    prop_codes = ['diag', 'diag2', 'diag3']
-
-    def get_mkb_list(prop_value):
-        if not isinstance(prop_value, list):
-            prop_value = [prop_value] if prop_value is not None else []
-        return (diagnostic.mkb for diagnostic in prop_value)
-
-    return list(itertools.chain.from_iterable(
-        get_mkb_list(prop.value)
-        for p_code, prop in action.propsByCode.iteritems()
-        if p_code in prop_codes
-    ))
-
-
-class ActionSchemeMeasure(object):
-
-    def __init__(self, action, mkb_list):
+    def __init__(self, action, mkb):
         self.action = action
-        self.mkb_list = mkb_list
+        self.mkb_code = mkb
         self.scheme_measures = []
-        self.init_schemes()
+        self.load_schemes()
 
-    def init_schemes(self):
+    def load_schemes(self):
         query = ExpertSchemeMeasureAssoc.query.join(
-            ExpertScheme, ExpertSchemeMKB, MKB
+            ExpertScheme, ExpertSchemeMKBAssoc, ExpertProtocol, MKB
         ).filter(
-            MKB.DiagID.in_(self.mkb_list)
+            ExpertProtocol.deleted == 0,
+            ExpertScheme.deleted == 0,
+            ExpertSchemeMeasureAssoc.deleted == 0,
+            MKB.DiagID == self.mkb_code
         )
-        self.scheme_measures = [SchemeMeasure(record) for record in query.all()]
-        self._filter_by_schedules()
-
-    def _filter_by_schedules(self):
-        pass
+        self.scheme_measures = [sm for sm in query.all()]
 
 
-class SchemeMeasure():
-    def __init__(self, model):
-        self.model = model
+def get_actual_mkbs(action):
+    action_mkb_codes = [mkb.DiagID for mkb in get_event_diag_mkbs(action.event, action_id=action.id)]
+    event_mkb_codes = [mkb.DiagID for mkb in get_event_diag_mkbs(action.event, without_action_id=action.id)]
+    result = {
+        'action': action_mkb_codes,
+        'event': event_mkb_codes
+    }
+    return result
 
-    def get_time_interval(self, start_date, end_date):
-        sched_type_code = self.model.schedule.schedule_type.code
-        if sched_type_code == 'after_visit':
-            start_date = start_date
-            end_date = end_date
-        elif sched_type_code == 'upon_med_indication':
-            start_date = end_date = None
-        else:
-            start_date = end_date = None
-        return [start_date, end_date]
 
-    def get_new_status(self):
-        code = self.model.schedule.schedule_type.code
-        if code == 'after_visit':
-            status = MeasureStatus.assigned[0]
-        elif code == 'upon_med_indication':
-            status = MeasureStatus.upon_med_indications[0]
-        elif code == 'interval_single':
-            status = MeasureStatus.assigned[0]
-        elif code == 'upon_diag_set':
-            status = MeasureStatus.assigned[0]
-        else:
-            status = MeasureStatus.assigned[0]
-        return status
+def is_multi_scheme_measure(scheme_measure):
+    return scheme_measure.schedule.apply_type.code == 'bounds'

@@ -275,7 +275,7 @@ def reevaluate_pregnacy_pathology(event, action=None):
         action = get_card_attrs_action(event)
 
     event_mkb_codes = set()
-    for mkb in get_event_diag_mkbs(event, checkup_flat_codes):
+    for mkb in get_event_diag_mkbs(event, at_flatcodes=checkup_flat_codes):
         event_mkb_codes.add(mkb.DiagID)
 
     event_pathologies = set()

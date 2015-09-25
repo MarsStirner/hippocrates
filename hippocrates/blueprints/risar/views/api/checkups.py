@@ -38,8 +38,8 @@ def api_0_checkup(event_id):
         reevaluate_card_attrs(event)
         db.session.commit()
 
-        measure_mng = EventMeasureGenerator.create_for_risar(action.id)
-        measure_mng.generate_measures()
+        # measure_mng = EventMeasureGenerator.create_for_risar(action.id)
+        # measure_mng.generate_measures()
     return represent_checkup(action)
 
 
