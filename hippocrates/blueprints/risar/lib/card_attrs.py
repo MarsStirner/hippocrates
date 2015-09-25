@@ -186,7 +186,7 @@ def reevaluate_preeclampsia_risk(event, card_attrs_action=None):
     delivery_years = []
     all_diagnoses = []
     diseases = multiple_birth + hypertensia + kidney_diseases + collagenoses + vascular_diseases + diabetes + \
-               antiphospholipid_syndrome
+        antiphospholipid_syndrome
     mother_action = get_action(event, risar_mother_anamnesis)
     first_inspection = get_action(event, 'risarFirstInspection')
     second_inspections = get_action_list(event, 'risarSecondInspection', all=True)
@@ -196,27 +196,30 @@ def reevaluate_preeclampsia_risk(event, card_attrs_action=None):
 
     prev_pregnancies = Action.query.join(ActionType).filter(Action.event == event, Action.deleted == 0,
                                                             ActionType.flatCode == risar_anamnesis_pregnancy).all()
-    risk = PreeclampsiaRisk.undefined[0] if (not mother_action and not first_inspection and not prev_pregnancies) else PreeclampsiaRisk.no_risk[0]
-
-    if not prev_pregnancies or event.client.age_tuple()[-1] >= 35 or (first_inspection and first_inspection['BMI'].value >= 25) or \
-            (mother_action and mother_action['preeclampsia'].value):
-        risk = PreeclampsiaRisk.has_risk[0]
+    if not mother_action and not first_inspection and not prev_pregnancies:
+        risk = PreeclampsiaRisk.undefined[0]
     else:
-        for pregnancy in prev_pregnancies:
-            if pregnancy['pregnancyResult'].value and pregnancy['pregnancyResult'].value['code'] in ('normal', 'miscarriage37', 'miscarriage27', 'belated_birth'):
-                if pregnancy['preeclampsia'].value:
-                    risk = PreeclampsiaRisk.has_risk[0]
-                    break
-                delivery_years.append(pregnancy['year'].value)
+        risk = PreeclampsiaRisk.no_risk[0]
 
-        delivery_years.sort()
-        if delivery_years and datetime.datetime.now().year - delivery_years[-1] >= 10:
+        if not prev_pregnancies or event.client.age_tuple()[-1] >= 35 or (first_inspection and first_inspection['BMI'].value >= 25) or \
+                (mother_action and mother_action['preeclampsia'].value):
             risk = PreeclampsiaRisk.has_risk[0]
+        else:
+            for pregnancy in prev_pregnancies:
+                if pregnancy['pregnancyResult'].value and pregnancy['pregnancyResult'].value['code'] in ('normal', 'miscarriage37', 'miscarriage27', 'belated_birth'):
+                    if pregnancy['preeclampsia'].value:
+                        risk = PreeclampsiaRisk.has_risk[0]
+                        break
+                    delivery_years.append(pregnancy['year'].value)
 
-    for diag in all_diagnoses:
-        diag_id = diag['diagnosis']['mkb'].DiagID
-        if filter(lambda x: x in diag_id, diseases):
-            risk = PreeclampsiaRisk.has_risk[0]
+            delivery_years.sort()
+            if delivery_years and datetime.datetime.now().year - delivery_years[-1] >= 10:
+                risk = PreeclampsiaRisk.has_risk[0]
+
+        for diag in all_diagnoses:
+            diag_id = diag['diagnosis']['mkb'].DiagID
+            if filter(lambda x: x in diag_id, diseases):
+                risk = PreeclampsiaRisk.has_risk[0]
 
     if card_attrs_action.propsByCode.get('preeclampsia_risk'):
         card_attrs_action['preeclampsia_risk'].value = risk
