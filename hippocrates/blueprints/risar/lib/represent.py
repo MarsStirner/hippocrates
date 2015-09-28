@@ -106,7 +106,7 @@ def represent_event(event):
         'anamnesis': represent_anamnesis(event),
         'epicrisis': represent_epicrisis(event),
         'checkups': represent_checkups_shortly(event),
-        'risk_rate': PrenatalRiskRate(card_attrs_action['prenatal_risk_572'].value),
+        'risk_rate': card_attrs_action['prenatal_risk_572'].value,
         'preeclampsia_risk': PreeclampsiaRisk(card_attrs_action['preeclampsia_risk'].value) if
             card_attrs_action.propsByCode.get('preeclampsia_risk') else None,
         'preeclampsia_susp_rate': card_attrs_action['preeclampsia_susp'].value if
@@ -132,7 +132,7 @@ def represent_chart_short(event):
                                                  card_attrs_action['chart_modify_time'].value) if
         card_attrs_action['chart_modify_date'].value and card_attrs_action['chart_modify_time'].value else None,
         'client': event.client,
-        'risk_rate': PrenatalRiskRate(card_attrs_action['prenatal_risk_572'].value) if event else None,
+        'risk_rate': card_attrs_action['prenatal_risk_572'].value if event else None,
         'pregnancy_week': get_pregnancy_week(event) if event else None,
     }
 
@@ -469,7 +469,7 @@ def represent_ticket(ticket):
         'event_id': ticket.client_ticket.event_id if ticket.client_ticket else None,
         'note': ticket.client_ticket.note if ticket.client else None,
         'checkup_n': checkup_n,
-        'risk_rate': PrenatalRiskRate(get_card_attrs_action(event)['prenatal_risk_572'].value) if event else None,
+        'risk_rate': get_card_attrs_action(event)['prenatal_risk_572'].value if event else None,
         'pregnancy_week': get_pregnancy_week(event) if event else None,
     }
 

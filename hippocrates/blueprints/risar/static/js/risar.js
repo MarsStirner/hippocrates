@@ -366,16 +366,16 @@ WebMis20
         },
         link: function (scope) {
             scope.icon_class = function (rate) {
-                if (rate == 1) return 'ri-prenatal-risk text-green';
-                if (rate == 2) return 'ri-prenatal-risk text-yellow';
-                if (rate == 3) return 'ri-prenatal-risk text-red';
-                return 'ri-prenatal-risk-undefined text-darkgray';
+                if (rate == 2) return 'ri-prenatal-risk text-green';
+                if (rate == 3) return 'ri-prenatal-risk text-yellow';
+                if (rate == 4) return 'ri-prenatal-risk text-red';
+                if (rate == 1) return 'ri-prenatal-risk-undefined text-darkgray';
             };
             scope.tooltip = function (rate) {
-                if (rate == 1) return 'У пациентки выявлен низкий риск невынашивания';
-                if (rate == 2) return 'У пациентки выявлен средний риск невынашивания';
-                if (rate == 3) return 'Внимание! У пациентки выявлен высокий риск невынашивания';
-                return 'У пациентки риск невынашивания не выявлен';
+                if (rate == 2) return 'У пациентки выявлен низкий риск невынашивания';
+                if (rate == 3) return 'У пациентки выявлен средний риск невынашивания';
+                if (rate == 4) return 'Внимание! У пациентки выявлен высокий риск невынашивания';
+                if (rate == 1) return 'У пациентки риск невынашивания не выявлен';
 
             }
         }

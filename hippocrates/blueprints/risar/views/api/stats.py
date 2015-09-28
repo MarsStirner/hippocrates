@@ -87,7 +87,7 @@ def api_0_current_stats():
     events_all = len(event_list)
     events_45 = len(filter(lambda x: get_pregnancy_week(x) >= 45, event_list))
     events_2_months = len(filter(lambda x: two_months(x), event_list))
-    events_undefined_risk = len(filter(lambda x: get_card_attrs_action(x)['prenatal_risk_572'].value == 0, event_list))
+    events_undefined_risk = len(filter(lambda x: get_card_attrs_action(x)['prenatal_risk_572'].value.code == 'undefined', event_list))
     return {
         'events_all': events_all,
         'events_45': events_45,

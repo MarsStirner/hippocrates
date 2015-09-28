@@ -21,31 +21,31 @@ var PerinatalRiskRateViewCtrl = function ($scope, RisarApi, RefBookService) {
         RisarApi.stats.get_perinatal_risk_info($scope.curation_level_code)
             .then(function (result) {
                 $scope.slices = [];
-                if (result['0']) {
-                    $scope.slices.push({
-                        key: 'Не определена',
-                        value: result['0'],
-                        color: '#707070'
-                    })
-                }
                 if (result['1']) {
                     $scope.slices.push({
-                        key: 'Низкая',
+                        key: 'Не определена',
                         value: result['1'],
-                        color: '#30D040'
+                        color: '#707070'
                     })
                 }
                 if (result['2']) {
                     $scope.slices.push({
-                        key: 'Средняя',
+                        key: 'Низкая',
                         value: result['2'],
-                        color: '#f39c12'
+                        color: '#30D040'
                     })
                 }
                 if (result['3']) {
                     $scope.slices.push({
-                        key: 'Высокая',
+                        key: 'Средняя',
                         value: result['3'],
+                        color: '#f39c12'
+                    })
+                }
+                if (result['4']) {
+                    $scope.slices.push({
+                        key: 'Высокая',
+                        value: result['4'],
                         color: '#dd4b39'
                     })
                 }
