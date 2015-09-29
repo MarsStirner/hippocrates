@@ -4,14 +4,15 @@ import datetime
 
 from nemesis.lib.data import create_action
 from nemesis.lib.jsonify import EventVisualizer
+from nemesis.lib.utils import safe_dict
 from nemesis.models.actions import Action, ActionType, ActionPropertyType, ActionProperty
-from nemesis.models.enums import PregnancyPathology, PreeclampsiaRisk
+from nemesis.models.enums import PregnancyPathology, PreeclampsiaRisk, PerinatalRiskRate
 from nemesis.models.risar import rbPreEclampsiaRate, rbPerinatalRiskRate
 from nemesis.systemwide import db
 from blueprints.risar.lib.utils import get_action, get_action_list, HIV_diags, syphilis_diags, hepatitis_diags, \
     tuberculosis_diags, scabies_diags, pediculosis_diags, multiple_birth, hypertensia, kidney_diseases, collagenoses, \
     vascular_diseases, diabetes, antiphospholipid_syndrome, get_event_diag_mkbs, risk_rates_blockID, risk_rates_diagID, \
-    pregnancy_pathologies
+    pregnancy_pathologies, risk_mkbs
 from blueprints.risar.risar_config import checkup_flat_codes, risar_mother_anamnesis, risar_epicrisis, risar_anamnesis_pregnancy
 
 __author__ = 'viruzzz-kun'
@@ -161,21 +162,20 @@ def reevaluate_risk_rate(event, action=None):
     if action is None:
         action = get_card_attrs_action(event)
 
-    risk_rates = {record.code: record for record in rbPerinatalRiskRate.query.all()}
-    risk_rate_diagIDs = {risk_code: [diag.mkb.DiagID for diag in risk_rates[risk_code].prr_mkbs] for risk_code in risk_rates}
+    risk_rate_mkbs = risk_mkbs()
 
     def diag_to_risk_rate(diag):
-        if diag['diagnosis']['mkb'].DiagID in risk_rate_diagIDs['high']:
-            return risk_rates['high']
-        elif diag['diagnosis']['mkb'].DiagID in risk_rate_diagIDs['medium']:
-            return risk_rates['medium']
-        elif diag['diagnosis']['mkb'].DiagID in risk_rate_diagIDs['low']:
-            return risk_rates['low']
-        return risk_rates['undefined']
+        if diag['diagnosis']['mkb'].DiagID in [mkb['code'] for mkb in risk_rate_mkbs['high']]:
+            return 4
+        elif diag['diagnosis']['mkb'].DiagID in [mkb['code'] for mkb in risk_rate_mkbs['medium']]:
+            return 3
+        elif diag['diagnosis']['mkb'].DiagID in [mkb['code'] for mkb in risk_rate_mkbs['low']]:
+            return 2
+        return 1
 
     all_diagnoses = list(get_all_diagnoses(event))
-    action['prenatal_risk_572'].value = max(map(diag_to_risk_rate, all_diagnoses), key=lambda x: x.id).__json__() if \
-        all_diagnoses else risk_rates['undefined'].__json__()
+    action['prenatal_risk_572'].value = safe_dict(PerinatalRiskRate(max(map(diag_to_risk_rate, all_diagnoses)))) if \
+        all_diagnoses else safe_dict(PerinatalRiskRate(1))
 
 
 def reevaluate_preeclampsia_risk(event, card_attrs_action=None):
