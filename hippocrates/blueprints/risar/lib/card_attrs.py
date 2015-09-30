@@ -166,16 +166,16 @@ def reevaluate_risk_rate(event, action=None):
 
     def diag_to_risk_rate(diag):
         if diag['diagnosis']['mkb'].DiagID in [mkb['code'] for mkb in risk_rate_mkbs['high']]:
-            return 4
+            return PerinatalRiskRate.high[0]
         elif diag['diagnosis']['mkb'].DiagID in [mkb['code'] for mkb in risk_rate_mkbs['medium']]:
-            return 3
+            return PerinatalRiskRate.medium[0]
         elif diag['diagnosis']['mkb'].DiagID in [mkb['code'] for mkb in risk_rate_mkbs['low']]:
-            return 2
-        return 1
+            return PerinatalRiskRate.low[0]
+        return PerinatalRiskRate.undefined[0]
 
     all_diagnoses = list(get_all_diagnoses(event))
     action['prenatal_risk_572'].value = safe_dict(PerinatalRiskRate(max(map(diag_to_risk_rate, all_diagnoses)))) if \
-        all_diagnoses else safe_dict(PerinatalRiskRate(1))
+        all_diagnoses else safe_dict(PerinatalRiskRate(PerinatalRiskRate.undefined[0]))
 
 
 def reevaluate_preeclampsia_risk(event, card_attrs_action=None):
