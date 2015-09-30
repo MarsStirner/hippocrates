@@ -36,6 +36,7 @@ WebMis20
         api_measure_generate: '{{ url_for('.api_0_measure_generate') }}',
         chart_html: '{{ url_for('.html_chart') }}',
         index_html: '{{ url_for('.index_html') }}',
+        inpection_read_html:'{{ url_for('.html_inspection_read') }}',
         inpection_edit_html:'{{ url_for('.html_inspection_edit') }}',
         ambulance_patient_info: '{{ url_for('.html_ambulance_patient_info') }}',
         api_chart_measure_list: '{{ url_for('.api_0_chart_measure_list') }}',
