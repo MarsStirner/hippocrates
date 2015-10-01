@@ -1,3 +1,4 @@
+# -*- encoding: utf-8 -*-
 from flask import request
 
 from ...app import module
@@ -7,7 +8,7 @@ from nemesis.models.actions import Action, ActionProperty_Diagnosis
 from nemesis.systemwide import db
 from blueprints.risar.lib.card_attrs import reevaluate_card_attrs
 from ...lib.represent import represent_epicrisis, risar_newborn_inspection, represent_chart_for_epicrisis
-from blueprints.risar.lib.utils import get_action, get_action_by_id
+from blueprints.risar.lib.utils import get_action, get_action_by_id, close_open_checkups
 from ...risar_config import risar_epicrisis
 
 
@@ -23,6 +24,8 @@ def api_0_chart_epicrisis(event_id):
         action = get_action(event, risar_epicrisis)
     else:
         action = get_action(event, risar_epicrisis, True)
+        if not action.id:
+            close_open_checkups(event_id)  # закрыть все незакрытые осмотры
         for code, value in request.get_json().iteritems():
             if code not in ('id', 'newborn_inspections', ) + diag_codes and code in action.propsByCode:
                 action.propsByCode[code].value = value

@@ -176,7 +176,7 @@ def api_0_need_hospitalization(person_id=None):
         .filter(rbRequestType.code == 'pregnancy', Event.deleted == 0, Event.execDate.is_(None), Event.execPerson_id == person_id,
                 ActionType.flatCode == 'cardAttributes', Action.deleted == 0,
                 ActionPropertyType.code == "prenatal_risk_572", ActionProperty.deleted == 0,
-                ActionProperty_Integer.value_.in_([2, 3]))\
+                ActionProperty_Integer.value_.in_([3, 4]))\
         .all()
     patient_list = filter(lambda x: get_pregnancy_week(x) >= 38, patient_list)
     patient_list.sort(key=get_delivery_date)

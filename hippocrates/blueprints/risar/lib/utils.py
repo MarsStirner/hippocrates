@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import datetime
 from sqlalchemy.orm import lazyload
 
 from nemesis.lib.data import create_action
@@ -7,6 +8,7 @@ from nemesis.lib.utils import safe_traverse_attrs, safe_dict
 from nemesis.models.actions import Action, ActionType, ActionProperty, ActionPropertyType
 from nemesis.models.event import Event, Diagnostic, Diagnosis
 from nemesis.models.risar import rbPregnancyPathology, rbPerinatalRiskRate
+from nemesis.models.enums import ActionStatus
 from nemesis.models.exists import MKB
 from nemesis.systemwide import cache, db
 from blueprints.risar.risar_config import checkup_flat_codes
@@ -227,6 +229,21 @@ def get_event_diag_mkbs(event, at_flatcodes=None):
         )
     query = query.with_entities(MKB)
     return query.all()
+
+
+def close_open_checkups(event_id):
+    open_checkups = db.session.query(Action).join(ActionType).filter(
+        Action.event_id == event_id,
+        Action.endDate.is_(None),
+        Action.deleted == 0,
+        ActionType.flatCode.in_(checkup_flat_codes)
+    ).all()
+    for action in open_checkups:
+        action.endDate = datetime.datetime.now()
+        action.status = ActionStatus.finished[0]
+        db.session.add(action)
+    if open_checkups:
+        db.session.commit()
 
 
 @cache.memoize()

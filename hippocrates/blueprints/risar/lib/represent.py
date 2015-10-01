@@ -402,6 +402,7 @@ def represent_checkup(action, with_measures=True):
         for (code, prop) in action.propsByCode.iteritems()
     )
     result['beg_date'] = action.begDate
+    result['end_date'] = action.endDate
     result['person'] = action.person
     result['flat_code'] = action.actionType.flatCode
     result['id'] = action.id
@@ -431,6 +432,7 @@ def represent_checkup_shortly(action):
     result = {
         'id': action.id,
         'beg_date': action.begDate,
+        'end_date': action.endDate,
         'person': action.person,
         'pregnancy_week': pregnancy_week.value if pregnancy_week else None,
         'calculated_pregnancy_week': get_pregnancy_week(action.event, action.begDate),

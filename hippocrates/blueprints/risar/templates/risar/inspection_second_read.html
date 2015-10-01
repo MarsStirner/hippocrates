@@ -31,8 +31,9 @@
                 <div class="box box-primary">
                     <div class="box-header with-border">
                         <h3 class="box-title">Лист динамического наблюдения</h3>
-                        <a class="print_link pull-right"
-                           href="{{ url_for('.html_inspection_edit') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]#tab_first"><span class="glyphicon glyphicon-pencil"></span> Изменить</a>
+                        <a class="print_link pull-right" ng-if="!checkup.end_date"
+                           href="{{ url_for('.html_inspection_edit') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]#tab_first">
+                            <span class="glyphicon glyphicon-pencil"></span> Изменить</a>
                     </div>
                     <div class="box-body">
                         <div class="row">
@@ -78,8 +79,9 @@
                 <div class="box box-primary">
                     <div class="box-header with-border">
                         <h3 class="box-title">Соматический статус</h3>
-                        <a class="print_link pull-right"
-                           href="{{ url_for('.html_inspection_edit') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]#tab_second"><span class="glyphicon glyphicon-pencil"></span> Изменить</a>
+                        <a class="print_link pull-right" ng-if="!checkup.end_date"
+                           href="{{ url_for('.html_inspection_edit') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]#tab_second">
+                            <span class="glyphicon glyphicon-pencil"></span> Изменить</a>
                     </div>
                     <div class="box-body">
                         <div class="row">
@@ -125,8 +127,9 @@
                 <div class="box box-primary">
                     <div class="box-header with-border">
                         <h3 class="box-title">Акушерский статус</h3>
-                        <a class="print_link pull-right"
-                           href="{{ url_for('.html_inspection_edit') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]#tab_third"><span class="glyphicon glyphicon-pencil"></span> Изменить</a>
+                        <a class="print_link pull-right" ng-if="!checkup.end_date"
+                           href="{{ url_for('.html_inspection_edit') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]#tab_third">
+                            <span class="glyphicon glyphicon-pencil"></span> Изменить</a>
                     </div>
                     <div class="box-body">
                         <div class="row">
@@ -172,8 +175,9 @@
                 <div class="box box-primary">
                     <div class="box-header with-border">
                         <h3 class="box-title">Заключение</h3>
-                        <a class="print_link pull-right"
-                           href="{{ url_for('.html_inspection_edit') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]#tab_fifth"><span class="glyphicon glyphicon-pencil"></span> Изменить</a>
+                        <a class="print_link pull-right" ng-if="!checkup.end_date"
+                           href="{{ url_for('.html_inspection_edit') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]#tab_fifth">
+                            <span class="glyphicon glyphicon-pencil"></span> Изменить</a>
                     </div>
                     <div class="box-body">
                         <div class="row">
@@ -231,8 +235,9 @@
                 <div class="box box-primary">
                     <div class="box-header with-border">
                         <h3 class="box-title">Мероприятия</h3>
-                        <a class="print_link pull-right"
-                           href="{{ url_for('.html_inspection_edit') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]#tab_last"><span class="glyphicon glyphicon-pencil"></span> Изменить</a>
+                        <a class="print_link pull-right" ng-if="!checkup.end_date"
+                           href="{{ url_for('.html_inspection_edit') }}?event_id=[[ header.event.id ]]&checkup_id=[[ checkup.id ]]#tab_last">
+                            <span class="glyphicon glyphicon-pencil"></span> Изменить</a>
                     </div>
                     <div class="box-body">
                         <table class="table table-striped">
