@@ -1,19 +1,28 @@
 # -*- coding: utf-8 -*-
 
 
-class IntersectionType:
-    none = 0  # () [___] или [___] () Интервалы не пересекаются
-    left = 1  # ( [_)_] интервал попадает на левую границу
-    over = 2  # ( [___] ) интервал перекрывает интервал
-    inner = 3  # [_(___)_] интервал целиком входит в интервал
-    right = 4  # [_(_]_) интервал попадает на правую границу
-    point = 5  # [_._] не интервал, но точка попадает в интервал. Аналогично inner
+class IntersectionType(object):
+    none_left = 0  # () [___] Интервалы не пересекаются: 1-ый лежит левее
+    none_right = 1  # [___] () Интервалы не пересекаются: 1-ый лежит правее
+    left = 2  # ( [_)_] интервал попадает на левую границу
+    over = 3  # ( [___] ) интервал перекрывает интервал
+    inner = 4  # [_(___)_] интервал целиком входит в интервал
+    right = 5  # [_(_]_) интервал попадает на правую границу
+    point = 6  # [_._] не интервал, но точка попадает в интервал. Аналогично inner
+
+    @classmethod
+    def is_no_intersection(cls, it):
+        return it == cls.none_left or it == cls.none_right
+
+    @classmethod
+    def is_intersection(cls, it):
+        return not cls.is_no_intersection(it)
 
 
 class DateTimeInterval(object):
-    def __init__(self, beg_datetime, end_datetime):
-        self.beg_datetime = beg_datetime
-        self.end_datetime = end_datetime
+    def __init__(self, beg, end):
+        self.beg = beg
+        self.end = end
 
 
 def get_intersection_type(interval, other_interval):
@@ -29,22 +38,25 @@ def get_intersection_type(interval, other_interval):
         4 - пересекает справа
         5 - входное значение не интервал, но попадает во временной интервал
     """
-    if not other_interval.end_datetime:
-        other_interval = DateTimeInterval(other_interval.beg_datetime, other_interval.beg_datetime)
-    if not interval.end_datetime:
-        if other_interval.beg_datetime <= interval.beg_datetime < other_interval.end_datetime:
+    if not other_interval.end:
+        other_interval = DateTimeInterval(other_interval.beg, other_interval.beg)
+    if not interval.end:
+        if other_interval.beg <= interval.beg < other_interval.end:
             return IntersectionType.point
-    elif interval.beg_datetime < other_interval.beg_datetime:
-        if interval.end_datetime > other_interval.end_datetime:
+    elif interval.beg < other_interval.beg:
+        if interval.end > other_interval.end:
             return IntersectionType.over
-        elif other_interval.beg_datetime < interval.end_datetime <= other_interval.end_datetime:
+        elif other_interval.beg < interval.end <= other_interval.end:
             return IntersectionType.left
-    elif interval.beg_datetime < other_interval.end_datetime:
-        if interval.end_datetime > other_interval.end_datetime:
+    elif interval.beg < other_interval.end:
+        if interval.end > other_interval.end:
             return IntersectionType.right
         else:
             return IntersectionType.inner
-    elif (interval.beg_datetime == other_interval.beg_datetime and
-          interval.end_datetime == other_interval.end_datetime):
+    elif (interval.beg == other_interval.beg and
+          interval.end == other_interval.end):
         return IntersectionType.over
-    return IntersectionType.none
+    if interval.beg < other_interval.beg:
+        return IntersectionType.none_left
+    else:
+        return IntersectionType.none_right

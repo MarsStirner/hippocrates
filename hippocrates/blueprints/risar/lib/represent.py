@@ -20,11 +20,11 @@ from blueprints.risar.lib.card_attrs import get_card_attrs_action, get_all_diagn
 from blueprints.risar.lib.utils import get_action, action_apt_values, get_action_type_id, risk_rates_diagID, \
     risk_rates_blockID, get_action_list
 from blueprints.risar.lib.expert.protocols import EventMeasureRepr
-from ..risar_config import pregnancy_apt_codes, risar_anamnesis_pregnancy, transfusion_apt_codes, \
+from blueprints.risar.risar_config import pregnancy_apt_codes, risar_anamnesis_pregnancy, transfusion_apt_codes, \
     risar_anamnesis_transfusion, mother_codes, father_codes, risar_father_anamnesis, risar_mother_anamnesis, \
     checkup_flat_codes, risar_epicrisis, risar_newborn_inspection, attach_codes
-from ..lib.utils import week_postfix, get_action_property_value
-
+from blueprints.risar.lib.utils import week_postfix, get_action_property_value
+from blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
 
 __author__ = 'mmalkov'
 
@@ -268,26 +268,6 @@ def get_lpu_attached(attachments):
         'plan_lpu': attachments.join(rbAttachType).filter(rbAttachType.code == 10).first(),
         'extra_lpu': attachments.join(rbAttachType).filter(rbAttachType.code == 11).first()
     }
-
-
-def get_pregnancy_week(event, date=None):
-    """
-    :type event: application.models.event.Event
-    :type date: datetime.date | None
-    :param event: Карточка пациентки
-    :param date: Интересующая дата или None (тогда - дата окончания беременности)
-    :return: число недель от начала беременности на дату
-    """
-    action = get_card_attrs_action(event)
-    start_date = action['pregnancy_start_date'].value
-    if date is None:
-        date = action['predicted_delivery_date'].value
-    if start_date:  # assume that date is not None
-        if isinstance(date, datetime.datetime):
-            date = date.date()
-        if isinstance(start_date, datetime.datetime):
-            start_date = start_date.date()
-        return (min(date, datetime.date.today()) - start_date).days / 7 + 1
 
 
 def represent_card_attributes(event):

@@ -233,6 +233,11 @@ def get_event_diag_mkbs(event, **kwargs):
     if 'without_action_id' in kwargs:
         action_id = kwargs['without_action_id']
         query = query.filter(Diagnostic.action_id != action_id)
+    if 'opened' in kwargs:
+        if kwargs['opened']:
+            query = query.filter(Diagnostic.endDate.is_(None))
+        else:
+            query = query.filter(Diagnostic.endDate.isnot(None))
     query = query.with_entities(MKB)
     return query.all()
 

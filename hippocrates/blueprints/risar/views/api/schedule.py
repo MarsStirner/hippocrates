@@ -8,9 +8,7 @@ from nemesis.lib.apiutils import api_method
 from nemesis.models.schedule import Schedule
 from nemesis.models.utils import safe_current_user_id
 from blueprints.risar.app import module
-from blueprints.risar.lib.card_attrs import get_card_attrs_action
-from blueprints.risar.lib.represent import represent_ticket, represent_chart_short, get_pregnancy_week
-from blueprints.risar.risar_config import checkup_flat_codes
+from blueprints.risar.lib.represent import represent_ticket
 
 
 __author__ = 'mmalkov'

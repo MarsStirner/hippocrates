@@ -1,6 +1,7 @@
 <div ng-if="checkup.measures.length || true">
 <div class="text-right">
     <div class="btn-group">
+        <button type="button" class="btn btn-danger" ng-click="removeMeasures()">Удалить мероприятия</button>
         <button type="button" class="btn btn-default" ng-click="generateMeasures()">Сформировать мероприятия</button>
         <button type="button" class="btn btn-default"><span class="fa fa-print"></span>Печать всех</button>
     </div>
@@ -8,6 +9,7 @@
 <table class="table table-striped">
     <thead>
         <tr>
+            <th>#</th>
             <th width="30%">Название мероприятия</th>
             <th>Дата начала</th>
             <th>Дата окончания</th>
@@ -17,6 +19,7 @@
     </thead>
     <tbody>
         <tr ng-repeat="measure in checkup.measures">
+            <td>[[ $index + 1 ]]</td>
             <td>[[ measure.scheme_measure.measure.name ]]</td>
             <td>[[ measure.beg_datetime | asDate ]]</td>
             <td>[[ measure.end_datetime | asDate ]]</td>

@@ -19,7 +19,8 @@ from nemesis.models.risar import TerritorialRate, rbRateType
 from nemesis.systemwide import db
 from blueprints.risar.app import module
 from blueprints.risar.lib.card_attrs import get_card_attrs_action
-from blueprints.risar.lib.represent import represent_ticket, represent_chart_short, get_pregnancy_week
+from blueprints.risar.lib.represent import represent_chart_short
+from blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
 from blueprints.risar.risar_config import checkup_flat_codes
 from blueprints.risar.lib.org_bcl import OrgBirthCareLevelRepr, OrganisationRepr, EventRepr
 from sqlalchemy import func

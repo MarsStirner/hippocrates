@@ -8,14 +8,24 @@ from blueprints.risar.app import module
 from blueprints.risar.lib.expert.protocols import EventMeasureGenerator, EventMeasureRepr
 
 
-@module.route('/api/0/measure/generate/')
-@module.route('/api/0/measure/generate/<int:action_id>')
+@module.route('/api/0/event_measure/generate/')
+@module.route('/api/0/event_measure/generate/<int:action_id>')
 @api_method
-def api_0_measure_generate(action_id):
+def api_0_event_measure_generate(action_id):
     action = Action.query.get_or_404(action_id)
-    measure_gen = EventMeasureGenerator.create_for_risar(action.id)
+    measure_gen = EventMeasureGenerator(action)
     measure_gen.generate_measures()
     return EventMeasureRepr().represent_by_action(action)
+
+
+@module.route('/api/0/event_measure/remove/', methods=['POST'])
+@module.route('/api/0/event_measure/remove/<int:action_id>', methods=['POST'])
+@api_method
+def api_0_event_measure_remove(action_id):
+    action = Action.query.get_or_404(action_id)
+    measure_gen = EventMeasureGenerator(action)
+    measure_gen.clear_existing_measures()
+    return []
 
 
 @module.route('/api/0/measure/list/<int:event_id>', methods=['GET', 'POST'])

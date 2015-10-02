@@ -263,7 +263,10 @@ WebMis20
             return wrapper('POST', Config.url.api_measure_list + event_id, undefined, query)
         },
         regenerate: function(action_id) {
-            return wrapper('GET', Config.url.api_measure_generate + action_id)
+            return wrapper('GET', Config.url.api_event_measure_generate + action_id)
+        },
+        remove: function(action_id) {
+            return wrapper('POST', Config.url.api_event_measure_remove + action_id)
         }
     };
     this.stats = {

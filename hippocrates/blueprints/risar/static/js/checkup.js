@@ -56,6 +56,12 @@ var CheckupCtrl = function ($scope, RisarApi, RefBookService, PrintingService, P
                 $scope.checkup.measures = measures;
             });
     };
+    $scope.removeMeasures = function () {
+        RisarApi.measure.remove($scope.checkup.id).
+            then(function (measures) {
+                $scope.checkup.measures = measures;
+            });
+    };
 
     $scope.init = function () {
         var hash = document.location.hash;
