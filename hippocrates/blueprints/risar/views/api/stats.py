@@ -88,7 +88,7 @@ def api_0_current_stats():
     events_all = len(event_list)
     events_45 = len(filter(lambda x: get_pregnancy_week(x) >= 45, event_list))
     events_2_months = len(filter(lambda x: two_months(x), event_list))
-    events_undefined_risk = len(filter(lambda x: get_card_attrs_action(x)['prenatal_risk_572'].value == 0, event_list))
+    events_undefined_risk = len(filter(lambda x: get_card_attrs_action(x)['prenatal_risk_572'].value.code == 'undefined', event_list))
     return {
         'events_all': events_all,
         'events_45': events_45,
@@ -177,7 +177,7 @@ def api_0_need_hospitalization(person_id=None):
         .filter(rbRequestType.code == 'pregnancy', Event.deleted == 0, Event.execDate.is_(None), Event.execPerson_id == person_id,
                 ActionType.flatCode == 'cardAttributes', Action.deleted == 0,
                 ActionPropertyType.code == "prenatal_risk_572", ActionProperty.deleted == 0,
-                ActionProperty_Integer.value_.in_([2, 3]))\
+                ActionProperty_Integer.value_.in_([3, 4]))\
         .all()
     patient_list = filter(lambda x: get_pregnancy_week(x) >= 38, patient_list)
     patient_list.sort(key=get_delivery_date)
@@ -231,19 +231,16 @@ def api_0_stats_perinatal_risk_rate():
              ActionProperty.action_id == Action.id,
              ActionPropertyType.id == ActionProperty.type_id,
              ActionType.id == Action.actionType_id,
-             ActionProperty_Integer.id == ActionProperty.id,
              Event.execDate.is_(None),
              EventType.id == Event.eventType_id,
              rbRequestType.id == EventType.requestType_id,
              Event.deleted == 0,
              Action.deleted == 0]
-    from_obj = [
-        Event, EventType, rbRequestType, Action, ActionType, ActionProperty, ActionPropertyType,
-        ActionProperty_Integer
-    ]
+    from_obj = Event.__table__.join(EventType).join(rbRequestType).join(Action).join(ActionType)\
+        .join(ActionProperty).join(ActionPropertyType).outerjoin(ActionProperty_Integer)
 
     if curation_level:
-        from_obj.extend([Organisation, OrganisationCurationAssoc, PersonCurationAssoc, rbOrgCurationLevel])
+        from_obj.join(Organisation).join(OrganisationCurationAssoc).join(PersonCurationAssoc).join(rbOrgCurationLevel)
         where.extend([
             Event.org_id == Organisation.id, OrganisationCurationAssoc.org_id == Organisation.id,
             OrganisationCurationAssoc.personCuration_id == PersonCurationAssoc.id,
@@ -259,7 +256,10 @@ def api_0_stats_perinatal_risk_rate():
         whereclause=db.and_(*where),
         from_obj=from_obj)
     for (value, ) in db.session.execute(selectable):
-        result[value] += 1
+        if value:
+            result[value] += 1
+        else:
+            result[0] += 1
     return result
 
 

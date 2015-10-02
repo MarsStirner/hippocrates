@@ -70,6 +70,19 @@ def html_gravidograma():
     return render_template('risar/gravidograma.html')
 
 
+@module.route('/inspection_read.html')
+def html_inspection_read():
+    flat_code = None
+    checkup_id = request.args.get('checkup_id')
+    if checkup_id:
+        checkup = Action.query.get(checkup_id)
+        flat_code = checkup.actionType.flatCode
+    if flat_code == 'risarFirstInspection':
+        return render_template('risar/inspection_first_read.html')
+    elif flat_code == 'risarSecondInspection':
+        return render_template('risar/inspection_second_read.html')
+
+
 @module.route('/inspection_edit.html')
 def html_inspection_edit():
     event_id = request.args['event_id']
@@ -77,6 +90,8 @@ def html_inspection_edit():
     if checkup_id:
         checkup = Action.query.get(checkup_id)
         flat_code = checkup.actionType.flatCode
+        if checkup.endDate:
+            return redirect(url_for('.html_inspection_read', event_id=event_id, checkup_id=checkup_id))
     else:
         first_inspection = Action.query.join(ActionType).filter(Action.event_id == event_id, Action.deleted == 0,
                                                                ActionType.flatCode == 'risarFirstInspection').first()

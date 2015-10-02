@@ -106,9 +106,13 @@ def represent_event(event):
         'anamnesis': represent_anamnesis(event),
         'epicrisis': represent_epicrisis(event),
         'checkups': represent_checkups_shortly(event),
-        'risk_rate': PrenatalRiskRate(card_attrs_action['prenatal_risk_572'].value),
+        'risk_rate': card_attrs_action['prenatal_risk_572'].value,
         'preeclampsia_risk': PreeclampsiaRisk(card_attrs_action['preeclampsia_risk'].value) if
             card_attrs_action.propsByCode.get('preeclampsia_risk') else None,
+        'preeclampsia_susp_rate': card_attrs_action['preeclampsia_susp'].value if
+            card_attrs_action.propsByCode.get('preeclampsia_susp') else None,
+        'preeclampsia_confirmed_rate': card_attrs_action['preeclampsia_comfirmed'].value if
+            card_attrs_action.propsByCode.get('preeclampsia_comfirmed') else None,
         'pregnancy_pathologies': [
             PregnancyPathology(pathg)
             for pathg in card_attrs_action['pregnancy_pathology_list'].value
@@ -128,7 +132,7 @@ def represent_chart_short(event):
                                                  card_attrs_action['chart_modify_time'].value) if
         card_attrs_action['chart_modify_date'].value and card_attrs_action['chart_modify_time'].value else None,
         'client': event.client,
-        'risk_rate': PrenatalRiskRate(card_attrs_action['prenatal_risk_572'].value) if event else None,
+        'risk_rate': card_attrs_action['prenatal_risk_572'].value if event else None,
         'pregnancy_week': get_pregnancy_week(event) if event else None,
     }
 
@@ -378,6 +382,7 @@ def represent_checkup(action, with_measures=True):
         for (code, prop) in action.propsByCode.iteritems()
     )
     result['beg_date'] = action.begDate
+    result['end_date'] = action.endDate
     result['person'] = action.person
     result['flat_code'] = action.actionType.flatCode
     result['id'] = action.id
@@ -407,6 +412,7 @@ def represent_checkup_shortly(action):
     result = {
         'id': action.id,
         'beg_date': action.begDate,
+        'end_date': action.endDate,
         'person': action.person,
         'pregnancy_week': pregnancy_week.value if pregnancy_week else None,
         'calculated_pregnancy_week': get_pregnancy_week(action.event, action.begDate),
@@ -445,7 +451,7 @@ def represent_ticket(ticket):
         'event_id': ticket.client_ticket.event_id if ticket.client_ticket else None,
         'note': ticket.client_ticket.note if ticket.client else None,
         'checkup_n': checkup_n,
-        'risk_rate': PrenatalRiskRate(get_card_attrs_action(event)['prenatal_risk_572'].value) if event else None,
+        'risk_rate': get_card_attrs_action(event)['prenatal_risk_572'].value if event else None,
         'pregnancy_week': get_pregnancy_week(event) if event else None,
     }
 
@@ -530,8 +536,11 @@ def represent_epicrisis(event, action=None):
     first_inspection = get_action(event, 'risarFirstInspection')
     second_inspection = Action.query.join(ActionType).filter(Action.event == event, Action.deleted == 0).\
         filter(ActionType.flatCode == 'risarSecondInspection').order_by(Action.begDate.desc()).first()
-    if first_inspection and second_inspection:
-        epicrisis['weight_gain'] = second_inspection.propsByCode['weight'].value - first_inspection.propsByCode['weight'].value
+
+    first_weight = first_inspection.propsByCode['weight'].value if first_inspection else None
+    second_weight = second_inspection.propsByCode['weight'].value if second_inspection else None
+    if first_weight and second_weight:
+        epicrisis['weight_gain'] = second_weight - first_weight
 
     finish_date = epicrisis['delivery_date']
     epicrisis['registration_pregnancy_week'] = get_pregnancy_week(event, event.setDate.date()) if finish_date else None
@@ -559,7 +568,13 @@ def represent_newborn_inspections(children_info):
 
 
 def represent_errand(errand_info):
-    #todo: progress
+    today = datetime.date.today()
+    planned = errand_info.plannedExecDate.date()
+    create_date = errand_info.createDatetime.date()
+
+    days_to_complete = (planned-create_date).days
+    progress = (today - create_date).days*100/days_to_complete if (today < planned and days_to_complete) else 100
+
     return {
         'id': errand_info.id,
         'create_datetime': errand_info.createDatetime,
@@ -575,5 +590,6 @@ def represent_errand(errand_info):
                   },
         'result': errand_info.result,
         'reading_date': errand_info.readingDate,
-        'status': ErrandStatus(errand_info.status_id)
+        'status': ErrandStatus(errand_info.status_id),
+        'progress': progress
     }

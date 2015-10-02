@@ -369,16 +369,16 @@ WebMis20
         },
         link: function (scope) {
             scope.icon_class = function (rate) {
-                if (rate == 1) return 'ri-prenatal-risk text-green';
-                if (rate == 2) return 'ri-prenatal-risk text-yellow';
-                if (rate == 3) return 'ri-prenatal-risk text-red';
-                return 'ri-prenatal-risk-undefined';
+                if (rate == 2) return 'ri-prenatal-risk text-green';
+                if (rate == 3) return 'ri-prenatal-risk text-yellow';
+                if (rate == 4) return 'ri-prenatal-risk text-red';
+                if (rate == 1) return 'ri-prenatal-risk-undefined text-darkgray';
             };
             scope.tooltip = function (rate) {
-                if (rate == 1) return 'У пациентки выявлен низкий риск невынашивания';
-                if (rate == 2) return 'У пациентки выявлен средний риск невынашивания';
-                if (rate == 3) return 'Внимание! У пациентки выявлен высокий риск невынашивания';
-                return 'У пациентки риск невынашивания не выявлен';
+                if (rate == 2) return 'У пациентки выявлен низкий риск невынашивания';
+                if (rate == 3) return 'У пациентки выявлен средний риск невынашивания';
+                if (rate == 4) return 'Внимание! У пациентки выявлен высокий риск невынашивания';
+                if (rate == 1) return 'У пациентки риск невынашивания не выявлен';
 
             }
         }
@@ -395,12 +395,57 @@ WebMis20
             scope.icon_class = function (rate) {
                 if (rate == 1) return 'fa fa-exclamation-circle text-red';
                 if (rate == 2) return 'fa fa-exclamation-circle text-green';
-                return 'fa fa-question';
+                return 'fa fa-question text-darkgray';
             };
             scope.tooltip = function (rate) {
                 if (rate == 1) return 'Пациентка входит в группу риска развития преэклампсии';
                 if (rate == 2) return 'Пациентка НЕ входит в группу риска развития преэклампсии';
                 return 'Риск развития преэклампсии ещё не выявлен';
+
+            }
+        }
+    }
+})
+.directive('preeclampsiaSuspIcon', function () {
+    return {
+        restrict: 'A',
+        template: '<span style="font-size: 110%" ng-class="icon_class(preeclampsiaSuspIcon.code)" tooltip="[[tooltip(preeclampsiaSuspIcon.code)]]"></span>',
+        scope: {
+            preeclampsiaSuspIcon: '='
+        },
+        link: function (scope) {
+            scope.icon_class = function (rate) {
+                if (rate == 'mild') return 'fa fa-exclamation-triangle text-yellow';
+                if (rate == 'heavy') return 'fa fa-exclamation-triangle text-red';
+                if (rate == 'ChAH') return 'fa fa-exclamation-triangle';
+                return 'fa fa-exclamation-triangle text-darkgray';
+            };
+            scope.tooltip = function (rate) {
+                if (rate == 'mild') return 'Внимание! Симптомы пациентки указывают на преэклампсию умеренную';
+                if (rate == 'heavy') return 'Внимание! Симптомы пациентки указывают на преэклампсию тяжелую';
+                if (rate == 'ChAH') return 'Внимание! Симптомы пациентки указывают на преэклампсию на фоне ХАГ';
+                return 'Симптомы преэклампсии не обнаружены';
+
+            }
+        }
+    }
+})
+.directive('preeclampsiaConfirmedIcon', function () {
+    return {
+        restrict: 'A',
+        template: '<span style="font-size: 110%" ng-class="icon_class(preeclampsiaConfirmedIcon.code)" tooltip="[[tooltip(preeclampsiaConfirmedIcon)]]"></span>',
+        scope: {
+            preeclampsiaConfirmedIcon: '='
+        },
+        link: function (scope) {
+            scope.icon_class = function (rate) {
+                if (rate == 'mild') return 'fa fa-exclamation-triangle text-yellow';
+                if (rate == 'heavy') return 'fa fa-exclamation-triangle text-red';
+                if (rate == 'ChAH') return 'fa fa-exclamation-triangle';
+                return 'fa fa-exclamation-triangle text-darkgray';
+            };
+            scope.tooltip = function (rate) {
+                return 'Внимание! Пациентке врачом установлена преэклампсия '+rate.name;
 
             }
         }
@@ -422,7 +467,7 @@ WebMis20
                 } else if (week > 40) {
                     return 'ri-pregnancy-week-40h';
                 } else {
-                    return 'ri-pregnancy-week-undefined';
+                    return 'ri-pregnancy-week-undefined text-darkgray';
                 }
             };
             scope.tooltip = function (psdate) {

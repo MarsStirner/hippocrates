@@ -78,7 +78,7 @@ var IndexOverseer1Ctrl = function ($scope, RisarApi) {
             per_page: $scope.itemsPerPage,
             page: $scope.pager_recently_modified_charts.current_page,
             curation_level: 1,
-            risk_rate: [2, 3]
+            risk_rate: [3, 4] // middle, high
         }
         RisarApi.recently_modified_charts.get(data).then(function (result) {
             $scope.pager_recently_modified_charts.pages = result.total_pages;

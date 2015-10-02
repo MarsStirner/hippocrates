@@ -1,7 +1,7 @@
 
 'use strict';
 
-var ErrandsListCtrl = function ($scope, $window, $modal, UserErrand, CurrentUser) {
+var ErrandsListCtrl = function ($scope, $window, $modal, $timeout, UserErrand, CurrentUser) {
     var params = aux.getQueryParams($window.location.search);
     $scope.unread = 0;
     $scope.errands = [];
@@ -32,6 +32,13 @@ var ErrandsListCtrl = function ($scope, $window, $modal, UserErrand, CurrentUser
             $scope.pager.pages = result.total_pages;
             $scope.pager.record_count = result.count;
         }
+        $timeout(function(){
+            $scope.errands.forEach(function(errand){
+                var slices = [errand.progress, 100-errand.progress];
+                $('.progress#'+errand.id).sparkline(slices, {type: 'pie', sliceColors: ['green', 'red']} );
+            })
+
+        }, 0);
     }
     function reload_errands (page) {
         page = page ? page : 1;

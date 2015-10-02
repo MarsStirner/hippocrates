@@ -48,10 +48,10 @@
                                     </tr>
                                     <tr ng-repeat="row in need_hospitalization | filter:query">
                                         <td><span class="label"
-                                                  ng-class="{'label-default': row.risk_rate.id == 0,
-                                                             'label-success': row.risk_rate.id == 1,
-                                                             'label-warning': row.risk_rate.id == 2,
-                                                             'label-danger': row.risk_rate.id == 3}">[[ row.risk_rate.name ]]</span></td>
+                                                  ng-class="{'label-default': row.risk_rate.code == 'undefined',
+                                                             'label-success': row.risk_rate.code == 'low',
+                                                             'label-warning': row.risk_rate.code == 'medium',
+                                                             'label-danger': row.risk_rate.code == 'high'}">[[ row.risk_rate.name ]]</span></td>
                                         <td><a ng-href="{{ url_for('.html_chart') }}?event_id=[[ row.id ]]">[[
                                             row.client.full_name ]]</a></td>
                                         <td>[[ row.pregnancy_week ]]<i class="fa fa-question" ng-if="!row.pregnancy_week"></i></td>

@@ -8,7 +8,7 @@ from nemesis.systemwide import db
 from blueprints.risar.app import module
 from blueprints.risar.lib.card_attrs import reevaluate_card_attrs
 from blueprints.risar.lib.represent import represent_checkup, represent_checkups
-from blueprints.risar.lib.utils import get_action_by_id
+from blueprints.risar.lib.utils import get_action_by_id, close_open_checkups
 from blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
 from blueprints.risar.lib.expert.protocols import EventMeasureGenerator
 
@@ -28,6 +28,8 @@ def api_0_checkup(event_id):
         if not action:
             raise ApiException(404, 'Action not found')
     else:
+        if not checkup_id:
+            close_open_checkups(event_id)
         action.begDate = safe_datetime(data['beg_date'])
         for code, value in data.iteritems():
             if code not in ('id', 'flat_code', 'person', 'beg_date', 'diag', 'diag2', 'diag3') and code in action.propsByCode:
