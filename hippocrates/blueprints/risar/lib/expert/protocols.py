@@ -277,7 +277,7 @@ class EventMeasureGenerator(object):
             if is_multi_scheme_measure(sm):
                 for beg, end in self.context.get_sm_time_interval_list(sm, act):
                     status = self.context.get_new_status(sm)
-                    em = self.create_measure(sm, beg, end, status)
+                    em = self.create_measure(sm, beg, end, status, act)
                     new_em_list.append(em)
             # else: pass
             # normally there should not be such case
@@ -360,14 +360,15 @@ class EventMeasureGenerator(object):
         # ignoring for now
         return em_list
 
-    def create_measure(self, scheme_measure, beg_dt, end_dt, status):
+    def create_measure(self, scheme_measure, beg_dt, end_dt, status, action=None):
         em = EventMeasure()
         em.scheme_measure = scheme_measure
         em.begDateTime = beg_dt
         em.endDateTime = end_dt
         em.status = status
-        em.source_action = self.source_action
-        em.event = self.source_action.event
+        source_action = action if action is not None else self.source_action
+        em.source_action = source_action
+        em.event = source_action.event
         return em
 
     def save_event_measures(self, *event_measures):

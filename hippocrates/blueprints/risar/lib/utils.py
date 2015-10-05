@@ -261,7 +261,7 @@ def close_open_checkups(event_id):
 
 @cache.memoize()
 def pregnancy_pathologies():
-    query = db.session.query(rbPregnancyPathology).outerjoin(rbPregnancyPathology.pp_mkbs)
+    query = db.session.query(rbPregnancyPathology)
     result = dict((rb_pp.code, [safe_dict(mkb) for mkb in rb_pp.mkbs]) for rb_pp in query)
     return result
 
@@ -269,5 +269,5 @@ def pregnancy_pathologies():
 @cache.memoize()
 def risk_mkbs():
     query = db.session.query(rbPerinatalRiskRate)
-    result = dict((rb_prr.code, [safe_dict(prr_mkb.mkb) for prr_mkb in rb_prr.prr_mkbs]) for rb_prr in query)
+    result = dict((rb_prr.code, [safe_dict(mkb) for mkb in rb_prr.mkbs]) for rb_prr in query)
     return result
