@@ -147,8 +147,8 @@ def api_0_recently_modified_charts():
     elif person_id:
         query = query.filter(Event.execPerson_id == person_id)
 
-    per_page = safe_int(request.args.get('per_page', 5))
-    page = safe_int(request.args.get('page', 1))
+    per_page = safe_int(j.get('per_page', 5))
+    page = safe_int(j.get('page', 1))
     pagination = query.order_by(Event.setDate.desc()).paginate(page, per_page)
     events = [represent_chart_short(event) for event in pagination.items]
     events.sort(key=lambda x: x['modify_date'], reverse=True)
