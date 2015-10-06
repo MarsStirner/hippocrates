@@ -47,7 +47,7 @@ var GravidogramaCtrl = function ($scope, RisarApi, RefBookService, PrintingServi
     }
     $scope.ps_resolve = function () {
         $scope.xml_blood_pressure_right = d3.select('#blood_pressure_right svg').node().parentNode.innerHTML;
-        $scope.xml_blood_pressure_left = d3.select('#blood_pressure_right svg').node().parentNode.innerHTML;
+        $scope.xml_blood_pressure_left = d3.select('#blood_pressure_left svg').node().parentNode.innerHTML;
         $scope.xml_gravidograma = d3.select('#gravidograma svg').node().parentNode.innerHTML;
         $scope.xml_weight_gain_data = d3.select('#weight_gain_data svg').node().parentNode.innerHTML;
 
@@ -97,7 +97,7 @@ var GravidogramaCtrl = function ($scope, RisarApi, RefBookService, PrintingServi
             } else {
                 $scope.weight_gain_upper.push.apply($scope.weight_gain_upper, weight_gain_upper_3);
                 $scope.weight_gain_lower.push.apply($scope.weight_gain_lower, weight_gain_lower_3);
-                $scope.weight_gain_title = 'с дефицитом массы теля (M +/- 16; 12,07 +/- 2,8)';
+                $scope.weight_gain_title = 'с дефицитом массы тела (M +/- 16; 12,07 +/- 2,8)';
             }
             $scope.refreshCharts();
             var pregnancy_start_date =  moment($scope.card_attributes.pregnancy_start_date);
@@ -127,7 +127,7 @@ var GravidogramaCtrl = function ($scope, RisarApi, RefBookService, PrintingServi
                     if($scope.presenting_part[index]){
                         $scope.presenting_part[index].push([short_name, checkup.presenting_part.name]);
                     } else{
-                        $scope.presenting_part[index] = [[short_name, checkup.presenting_part.name]];
+                        $scope.presenting_part[index] = [short_name, checkup.presenting_part.name];
                     }
                 }
 
