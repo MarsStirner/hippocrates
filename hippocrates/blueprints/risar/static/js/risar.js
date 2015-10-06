@@ -178,15 +178,21 @@ WebMis20
     };
     this.anamnesis = {
         get: function (event_id) {
-            var url = Config.url.api_anamnesis + event_id;
+            var url = Config.url.api_anamnesis.format(event_id);
             return wrapper('GET', url);
         },
         mother: {
+            get: function (event_id) {
+                return wrapper('GET', Config.url.api_anamnesis_mother.format(event_id));
+            },
             save: function (event_id, data) {
                 return wrapper('POST', Config.url.api_anamnesis_mother.format(event_id), {}, data);
             }
         },
         father: {
+            get: function (event_id) {
+                return wrapper('GET', Config.url.api_anamnesis_father.format(event_id));
+            },
             save: function (event_id, data) {
                 return wrapper('POST', Config.url.api_anamnesis_father.format(event_id), {}, data);
             }

@@ -14,7 +14,7 @@ from nemesis.systemwide import db
 from ...app import module
 from blueprints.risar.lib.card_attrs import reevaluate_card_attrs, reevaluate_preeclampsia_risk
 from ...lib.represent import represent_intolerance, represent_mother_action, represent_father_action, \
-    represent_pregnancy
+    represent_pregnancy, represent_anamnesis
 from blueprints.risar.lib.utils import get_action, action_apt_values, get_action_type_id, get_action_by_id
 from ...risar_config import pregnancy_apt_codes, risar_anamnesis_pregnancy, transfusion_apt_codes, \
     risar_anamnesis_transfusion, risar_father_anamnesis, risar_mother_anamnesis, risar_newborn_inspection
@@ -255,6 +255,16 @@ def api_0_intolerances_post(i_type, object_id=None):
     return represent_intolerance(obj)
 
 
+@module.route('/api/0/chart/<int:event_id>/anamnesis', methods=['GET'])
+@api_method
+def api_0_chart_anamnesis(event_id):
+    event = Event.query.get(event_id)
+    return {
+        'client_id': event.client.id,
+        'anamnesis': represent_anamnesis(event),
+    }
+
+
 @module.route('/api/0/chart/<int:event_id>/mother', methods=['GET', 'POST'])
 @api_method
 def api_0_chart_mother(event_id):
@@ -263,8 +273,6 @@ def api_0_chart_mother(event_id):
         raise ApiException(404, 'Event not found')
     if request.method == 'GET':
         action = get_action(event, risar_mother_anamnesis)
-        if not action:
-            raise ApiException(404, 'Action not found')
     else:
         action = get_action(event, risar_mother_anamnesis, True)
         for code, value in request.get_json().iteritems():
@@ -296,8 +304,6 @@ def api_0_chart_father(event_id):
         raise ApiException(404, 'Event not found')
     if request.method == 'GET':
         action = get_action(event, risar_father_anamnesis)
-        if not action:
-            raise ApiException(404, 'Action not found')
     else:
         action = get_action(event, risar_father_anamnesis, True)
         for code, value in request.get_json().iteritems():

@@ -16,6 +16,7 @@ WebMis20
         api_attach_lpu: '{{ url_for('.api_0_attach_lpu') }}',
         api_attach_lpu_mini: '/risar/api/0/client/{0}/attach_lpu',
         api_diagnoses_save: '{{ url_for('.api_0_save_diagnoses') }}{0}',
+        api_anamnesis: '{{ url_for('.api_0_chart') }}{0}/anamnesis',
         api_anamnesis_mother: '{{ url_for('.api_0_chart') }}{0}/mother',
         api_anamnesis_father: '{{ url_for('.api_0_chart') }}{0}/father',
         api_anamnesis_pregnancies: '{{ url_for('.api_0_pregnancies_get') }}',
