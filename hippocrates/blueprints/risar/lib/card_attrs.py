@@ -205,7 +205,7 @@ def reevaluate_preeclampsia_risk(event, card_attrs_action=None):
     else:
         risk = PreeclampsiaRisk.no_risk[0]
 
-        if not prev_pregnancies or event.client.age_tuple()[-1] >= 35 or (first_inspection and first_inspection['BMI'].value >= 25) or \
+        if not prev_pregnancies or event.client.age_tuple()[-1] > 35 or (first_inspection and first_inspection['BMI'].value >= 25) or \
                 (mother_action and mother_action['preeclampsia'].value):
             risk = PreeclampsiaRisk.has_risk[0]
         else:

@@ -1,16 +1,16 @@
 <header class="main-header"  ng-controller="WebMisHeader" ng-cloak>
-    <a class="logo" href="{{ url_for('.index_html') }}">
+    <a class="logo" href="{{ url_for('.index_html') }}" style="padding: 0 12px;">
       <!-- mini logo for sidebar mini 50x50 pixels -->
-      <span class="logo-lg"></span>
+      <span class="logo-mini"><span class="rlogo">1</span></span>
       <!-- logo for regular state and mobile devices -->
-      <span class="logo-lg"></span>
+
+      <span class="logo-lg"><span class="rlogo">1</span> <b>РИСАР</b></span>
     </a>
     {%- if current_user.id and current_user.current_role -%}
     <nav class="navbar navbar-static-top" role="navigation">
         <a role="button" data-toggle="offcanvas" class="sidebar-toggle" href="#">
             <span class="sr-only">Toggle navigation</span>
         </a>
-        <a class="logo" href="{{ url_for('.index_html') }}" style="width: auto"><b>РИСАР: Родовспоможение</b></a>
         <div class="navbar-custom-menu">
         <ul class="nav navbar-nav">
 {#              <!-- Messages: style can be found in dropdown.less-->#}
