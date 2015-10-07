@@ -436,7 +436,7 @@ WebMis20
 .directive('preeclampsiaConfirmedIcon', function () {
     return {
         restrict: 'A',
-        template: '<span style="font-size: 110%" ng-class="icon_class(preeclampsiaConfirmedIcon.code)" tooltip="[[tooltip(preeclampsiaConfirmedIcon)]]"></span>',
+        template: '<span style="font-size: 110%" ng-class="icon_class(preeclampsiaConfirmedIcon.code)" tooltip="[[tooltip(preeclampsiaConfirmedIcon.code)]]"></span>',
         scope: {
             preeclampsiaConfirmedIcon: '='
         },
@@ -448,6 +448,7 @@ WebMis20
                 return 'fa fa-exclamation-triangle text-darkgray';
             };
             scope.tooltip = function (rate) {
+                if (rate == 'unknown') return 'Диагноз преэклампсии врачом не установлен';
                 return 'Внимание! Пациентке врачом установлена преэклампсия '+rate.name;
 
             }
