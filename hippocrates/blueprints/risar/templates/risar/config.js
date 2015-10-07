@@ -35,6 +35,7 @@ WebMis20
         api_pregnancy_final_stats: '{{ url_for('.api_0_pregnancy_final_stats') }}',
         api_event_measure_generate: '{{ url_for('.api_0_event_measure_generate') }}',
         api_event_measure_remove: '{{ url_for('.api_0_event_measure_remove') }}',
+        api_event_measure_cancel: '{{ url_for('.api_0_event_measure_cancel') }}',
         chart_html: '{{ url_for('.html_chart') }}',
         index_html: '{{ url_for('.index_html') }}',
         inpection_read_html:'{{ url_for('.html_inspection_read') }}',

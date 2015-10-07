@@ -4,8 +4,10 @@ from flask import request
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.models.actions import Action
 from nemesis.models.event import Event
+from nemesis.models.expert_protocol import EventMeasure
 from blueprints.risar.app import module
 from blueprints.risar.lib.expert.protocols import EventMeasureGenerator, EventMeasureRepr
+from blueprints.risar.lib.expert.event_measure import EventMeasureController
 
 
 @module.route('/api/0/event_measure/generate/')
@@ -26,6 +28,17 @@ def api_0_event_measure_remove(action_id):
     measure_gen = EventMeasureGenerator(action)
     measure_gen.clear_existing_measures()
     return []
+
+
+@module.route('/api/0/event_measure/cancel/', methods=['POST'])
+@module.route('/api/0/event_measure/cancel/<int:event_measure_id>', methods=['POST'])
+@api_method
+def api_0_event_measure_cancel(event_measure_id):
+    em = EventMeasure.query.get_or_404(event_measure_id)
+    em_ctrl = EventMeasureController()
+    em_ctrl.cancel(em)
+    em_ctrl.store(em)
+    return EventMeasureRepr().represent_measure(em)
 
 
 @module.route('/api/0/measure/list/<int:event_id>', methods=['GET', 'POST'])

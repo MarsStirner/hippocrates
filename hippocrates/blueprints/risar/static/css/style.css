@@ -316,3 +316,22 @@ ul.product-list, li.product-list-item-active {
 .text-darkgray {
   color: #AAA !important;
 }
+
+.measure-status-assigned {
+    background-color: #3C8DBC !important;
+}
+.measure-status-waiting {
+    background-color: #65deb9 !important;
+}
+.measure-status-upon_med_indications {
+    background-color: #9600CD !important;
+}
+.measure-status-cancelled {
+    background-color: #b1b5b5 !important;
+}
+.measure-status-overdue {
+    background-color: #e43c43 !important;
+}
+.measure-status-performed {
+    background-color: #1fc63a !important;
+}

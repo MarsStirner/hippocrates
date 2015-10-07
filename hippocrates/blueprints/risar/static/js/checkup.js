@@ -1,7 +1,8 @@
 
 'use strict';
 
-var CheckupCtrl = function ($scope, RisarApi, RefBookService, PrintingService, PrintingDialog) {
+var CheckupCtrl = function ($scope, RisarApi, RefBookService, PrintingService, PrintingDialog, EMModalService,
+                            EventMeasureService) {
     $scope.rbDiagnosisType = RefBookService.get('rbDiagnosisType');
     $scope.ps = new PrintingService("risar");
     $scope.ps.set_context("risar");
@@ -60,6 +61,17 @@ var CheckupCtrl = function ($scope, RisarApi, RefBookService, PrintingService, P
         RisarApi.measure.remove($scope.checkup.id).
             then(function (measures) {
                 $scope.checkup.measures = measures;
+            });
+    };
+    $scope.viewEventMeasure = function (idx) {
+        var em = $scope.checkup.measures[idx];
+        EMModalService.openView(em);
+    };
+    $scope.cancelEm = function (idx) {
+        var em = $scope.checkup.measures[idx];
+        EventMeasureService.cancel(em)
+            .then(function (upd_em) {
+                $scope.checkup.measures.splice(idx, 1, upd_em);
             });
     };
 
@@ -178,7 +190,8 @@ var CheckupSecondEditCtrl = function ($scope, $controller, $window, $location, $
     $scope.init();
 };
 
-WebMis20.controller('CheckupCtrl', ['$scope', 'RisarApi', 'RefBookService', 'PrintingService', 'PrintingDialog', CheckupCtrl]);
+WebMis20.controller('CheckupCtrl', ['$scope', 'RisarApi', 'RefBookService', 'PrintingService', 'PrintingDialog',
+    'EMModalService', 'EventMeasureService', CheckupCtrl]);
 WebMis20.controller('CheckupFirstEditCtrl', ['$scope', '$controller', '$window', '$location', '$document', 'RisarApi',
     'Config', CheckupFirstEditCtrl]);
 WebMis20.controller('CheckupSecondEditCtrl', ['$scope', '$controller', '$window', '$location', '$document', 'RisarApi',

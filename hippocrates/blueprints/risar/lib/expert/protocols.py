@@ -635,15 +635,21 @@ class EventMeasureRepr(object):
         }
 
     def represent_measure(self, measure):
+        import random
         return {
             'id': measure.id,
             'event_id': measure.event_id,
             'beg_datetime': measure.begDateTime,
             'end_datetime': measure.endDateTime,
+            # 'status': MeasureStatus(random.randint(1, 6)),
             'status': MeasureStatus(measure.status),
             'source_action': self.represent_source_action(measure.source_action),
             'action_id': measure.action_id,
-            'scheme_measure': self.represent_scheme_measure(measure.scheme_measure)
+            'scheme_measure': self.represent_scheme_measure(measure.scheme_measure),
+            'create_datetime': measure.createDatetime,
+            'modify_datetime': measure.modifyDatetime,
+            'create_person': measure.create_person,
+            'modify_person': measure.modify_person
         }
 
     def represent_scheme_measure(self, scheme_measure):

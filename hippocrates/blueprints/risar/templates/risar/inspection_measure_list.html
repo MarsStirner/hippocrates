@@ -23,8 +23,22 @@
             <td>[[ measure.scheme_measure.measure.name ]]</td>
             <td>[[ measure.beg_datetime | asDate ]]</td>
             <td>[[ measure.end_datetime | asDate ]]</td>
-            <td>[[ measure.status.name ]]</td>
+            <td><event-measure-status status="measure.status"></event-measure-status></td>
             <td class="nowrap">
+                <div class="btn-group">
+                    <button type="button" class="btn btn-primary" ng-click="viewEventMeasure($index)">
+                        Просмотр
+                    </button>
+                    <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" role="menu">
+                        <li role="menuitem"><a href="javascript:void(0);">Редактировать направление</a></li>
+                        <li role="menuitem"><a href="javascript:void(0);">Редактировать результаты</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li role="menuitem"><a href="javascript:void(0);" ng-click="cancelEm($index)">Отменить</a></li>
+                    </ul>
+                </div>
                 <button type="button" class="btn btn-default">
                     <span class="fa fa-edit"></span> Редактировать</button>
                 <button type="button" class="btn btn-default">

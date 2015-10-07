@@ -256,17 +256,20 @@ WebMis20
         }
     };
     this.measure = {
-        get_chart: function(event_id) {
+        get_chart: function (event_id) {
             return wrapper('GET', Config.url.api_chart_measure_list + event_id)
         },
         get_by_event: function (event_id, query) {
             return wrapper('POST', Config.url.api_measure_list + event_id, undefined, query)
         },
-        regenerate: function(action_id) {
+        regenerate: function (action_id) {
             return wrapper('GET', Config.url.api_event_measure_generate + action_id)
         },
-        remove: function(action_id) {
+        remove: function (action_id) {
             return wrapper('POST', Config.url.api_event_measure_remove + action_id)
+        },
+        cancel: function (event_measure_id) {
+            return wrapper('POST', Config.url.api_event_measure_cancel + event_measure_id);
         }
     };
     this.stats = {
