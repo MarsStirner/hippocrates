@@ -55,10 +55,15 @@ var IndexObstetricianCtrl = function ($scope, RisarApi) {
             $scope.need_hospitalization = result;
         });
     }
-
+    $scope.load_urgent_errands = function(){
+        RisarApi.urgent_errands.get().then(function (result) {
+            $scope.urgent_errands = result;
+        });
+    }
     $scope.current_stats();
     $scope.refresh_pregnancy_week_diagram();
     $scope.load_need_hospitalization();
+    $scope.load_urgent_errands();
 
 };
 WebMis20.controller('IndexObstetricianCtrl', ['$scope', 'RisarApi',

@@ -15,11 +15,11 @@ from nemesis.models.exists import rbRequestType
 from nemesis.models.organisation import Organisation, OrganisationCurationAssoc
 from nemesis.models.person import PersonCurationAssoc, rbOrgCurationLevel
 from nemesis.models.utils import safe_current_user_id
-from nemesis.models.risar import TerritorialRate, rbRateType
+from nemesis.models.risar import TerritorialRate, rbRateType, Errand, rbErrandStatus
 from nemesis.systemwide import db
 from blueprints.risar.app import module
 from blueprints.risar.lib.card_attrs import get_card_attrs_action
-from blueprints.risar.lib.represent import represent_ticket, represent_chart_short, get_pregnancy_week
+from blueprints.risar.lib.represent import represent_ticket, represent_chart_short, get_pregnancy_week, represent_errand
 from blueprints.risar.risar_config import checkup_flat_codes
 from blueprints.risar.lib.org_bcl import OrgBirthCareLevelRepr, OrganisationRepr, EventRepr
 from sqlalchemy import func
@@ -442,3 +442,15 @@ def api_0_stats_pregnancy_pathology():
     person_id = safe_current_user_id()
     curation_level_code = request.args.get('curation_level_code')
     return EventRepr().represent_by_pregnancy_pathology(person_id, curation_level_code)
+
+
+@module.route('/api/0/stats/urgent_errands/')
+@api_method
+def api_0_stats_urgent_errands():
+    person_id = safe_current_user_id()
+    errands = Errand.query.join(rbErrandStatus, Event, Action, ActionType, ActionProperty, ActionPropertyType, ActionProperty_Integer)\
+        .filter(Errand.execPerson_id == person_id, rbErrandStatus.code.in_(['waiting', 'expired']),
+                ActionType.flatCode == 'cardAttributes',
+                ActionPropertyType.code == "prenatal_risk_572", ActionProperty.deleted == 0,)\
+        .order_by(func.date(Errand.plannedExecDate)).order_by(ActionProperty_Integer.value_.desc()).limit(10).all()
+    return [represent_errand(errand) for errand in errands]

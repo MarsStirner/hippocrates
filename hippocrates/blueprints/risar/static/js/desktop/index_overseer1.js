@@ -103,10 +103,16 @@ var IndexOverseer1Ctrl = function ($scope, RisarApi) {
                     }, 0);
         })
     }
+    $scope.load_urgent_errands = function(){
+        RisarApi.urgent_errands.get().then(function (result) {
+            $scope.urgent_errands = result;
+        });
+    }
     $scope.current_stats();
     recent_charts();
     recently_modified_charts();
     $scope.refresh_pregnancy_week_diagram();
+    $scope.load_urgent_errands();
 };
 
 WebMis20.controller('IndexOverseer1Ctrl', ['$scope', 'RisarApi',

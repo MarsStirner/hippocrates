@@ -55,6 +55,11 @@ WebMis20
             });
         }
     };
+    this.urgent_errands = {
+        get: function(){
+            return wrapper('GET', Config.url.api_stats_urgent_errands)
+        }
+    }
     this.recent_charts = {
         get: function (data) {
             return wrapper('GET', Config.url.api_recent_charts, data);

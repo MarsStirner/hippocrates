@@ -594,7 +594,7 @@ def represent_errand(errand_info):
 
     days_to_complete = (planned-create_date).days
     progress = (today - create_date).days*100/days_to_complete if (today < planned and days_to_complete) else 100
-
+    card_attrs_action = get_card_attrs_action(errand_info.event)
     return {
         'id': errand_info.id,
         'create_datetime': errand_info.createDatetime,
@@ -606,7 +606,8 @@ def represent_errand(errand_info):
         'exec_date': errand_info.execDate,
         'event': {'id': errand_info.event.id,
                   'external_id':  errand_info.event.externalId,
-                  'client': errand_info.event.client.shortNameText
+                  'client': errand_info.event.client.shortNameText,
+                  'risk_rate': card_attrs_action['prenatal_risk_572'].value
                   },
         'result': errand_info.result,
         'reading_date': errand_info.readingDate,

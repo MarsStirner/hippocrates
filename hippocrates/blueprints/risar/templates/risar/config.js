@@ -52,6 +52,7 @@ WebMis20
         api_stats_obcl_get: '{{ url_for('.api_0_stats_obcl_get') }}',
         api_stats_obcl_orgs_get: '{{ url_for('.api_0_stats_obcl_orgs_get') }}{0}',
         api_stats_org_curation_get: '{{ url_for('.api_0_stats_org_curation_get') }}',
+        api_stats_urgent_errands: '{{ url_for('.api_0_stats_urgent_errands') }}',
         api_errands: '{{ url_for('.api_errands_get') }}',
         api_errands_summary: '{{ url_for('.api_errands_summary') }}',
         api_errand_edit: '{{ url_for('.api_errand_edit') }}{0}',
