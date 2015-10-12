@@ -1,16 +1,30 @@
 <div class="form-horizontal" ng-if="!action.readonly">
     <div class="row" ng-if="!is_med_doc()">
-        <div class="col-md-9">
+        <div class="col-md-12">
             <div class="form-group">
-                <label for="direction_date" class="col-md-2 control-label">Назначено</label>
-                <div class="col-md-3">
-                    <wm-date id="direction_date" name="direction_date" ng-model="action.direction_date"></wm-date>
+                <label for="direction_date" class="col-md-1 control-label">Назначено</label>
+                <div class="col-md-4">
+                    <div class="row">
+                    <div class="col-md-7">
+                        <wm-date id="direction_date" name="direction_date" ng-model="action.direction_date"></wm-date>
+                    </div>
+                    <div class="col-md-5">
+                        <wm-time id="direction_date" name="direction_date" ng-model="action.direction_date"></wm-time>
+                    </div>
+                    </div>
                 </div>
                 <label for="planned_end_date" class="col-md-1 control-label">План</label>
-                <div class="col-md-3">
-                    <wm-date id="planned_end_date" name="planned_end_date" ng-model="action.planned_end_date"></wm-date>
+                <div class="col-md-4">
+                    <div class="row">
+                    <div class="col-md-7">
+                        <wm-date id="planned_end_date" name="planned_end_date" ng-model="action.planned_end_date"></wm-date>
+                    </div>
+                    <div class="col-md-5">
+                        <wm-time id="planned_end_date" name="planned_end_date" ng-model="action.planned_end_date"></wm-time>
+                    </div>
+                    </div>
                 </div>
-                <div class="col-md-2">
+                <div class="col-md-1">
                     <div class="checkbox">
                         <label><input type="checkbox" ng-model="action.is_urgent"></label>Срочно
                     </div>
@@ -20,10 +34,10 @@
     </div>
 
     <div class="row" ng-if="!is_med_doc()">
-        <div class="col-md-9">
+        <div class="col-md-12">
             <div class="form-group">
-                <label for="set_person" class="col-md-2 control-label">Назначил</label>
-                <div class="col-md-10">
+                <label for="set_person" class="col-md-1 control-label">Назначил</label>
+                <div class="col-md-6">
                     <wm-person-select id="set_person" name="set_person" ng-model="action.set_person" theme="bootstrap"
                         placeholder="Введите ФИО врача или специальность"></wm-person-select>
                 </div>
@@ -32,49 +46,70 @@
     </div>
 
     <div class="row" ng-if="is_med_doc() && action.coord_date">
-        <div class="col-md-9">
+        <div class="col-md-12">
             <div class="form-group">
-                <label for="direction_date" class="col-md-2 control-label">Согласовано</label>
-                <div class="col-md-3">
-                    <wm-date id="coord_date" name="coord_date" ng-model="action.coord_date"></wm-date>
+                <label for="direction_date" class="col-md-1 control-label">Согласовано</label>
+                <div class="col-md-4">
+                    <div class="row">
+                    <div class="col-md-7">
+                        <wm-date id="coord_date" name="coord_date" ng-model="action.coord_date"></wm-date>
+                    </div>
+                    <div class="col-md-5">
+                        <wm-time id="coord_date" name="coord_date" ng-model="action.coord_date"></wm-time>
+                    </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="row">
-        <div class="col-md-9">
+        <div class="col-md-12">
             <div class="form-group">
-                <label for="status" class="col-md-2 control-label">Состояние</label>
-                <div class="col-md-2">
+                <label for="status" class="col-md-1 control-label">Состояние</label>
+                <div class="col-md-1">
                     <select class="form-control" id="status" name="status"
                             ng-model="action.status" ng-change="on_status_changed()"
                             ng-options="status as status.name for status in ActionStatus.objects track by status.id">
                     </select>
                 </div>
                 <label for="beg_date" class="col-md-1 control-label">Начато</label>
-                <div class="col-md-3">
-                    <wm-date id="beg_date" name="beg_date" ng-model="action.beg_date"></wm-date>
+                <div class="col-md-4">
+                    <div class="row">
+                    <div class="col-md-7">
+                        <wm-date id="beg_date" name="beg_date" ng-model="action.beg_date"></wm-date>
+                    </div>
+                    <div class="col-md-5">
+                        <wm-time id="beg_date" name="beg_date" ng-model="action.beg_date"></wm-time>
+                    </div>
+                    </div>
                 </div>
                 <label for="end_date" class="col-md-1 control-label">Выполнено</label>
-                <div class="col-md-3">
-                    <wm-date id="end_date" name="end_date" ng-model="action.end_date" ng-change="on_enddate_changed()"></wm-date>
+                <div class="col-md-4">
+                    <div class="row">
+                    <div class="col-md-7">
+                        <wm-date id="end_date" name="end_date" ng-model="action.end_date" ng-change="on_enddate_changed()"></wm-date>
+                    </div>
+                    <div class="col-md-5">
+                        <wm-time id="end_date" name="end_date" ng-model="action.end_date" ng-change="on_enddate_changed()"></wm-time>
+                    </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="row">
-        <div class="col-md-9">
+        <div class="col-md-12">
             <div class="form-group">
-                <label for="person" class="col-md-2 control-label">Исполнитель</label>
+                <label for="person" class="col-md-1 control-label">Исполнитель</label>
                 <div class="col-md-6">
                     <wm-person-select id="person" name="person" ng-model="action.person" theme="bootstrap"
                         placeholder="Введите ФИО врача или специальность"></wm-person-select>
                 </div>
                 <div ng-if="!is_med_doc()">
                     <label for="office" class="col-md-1 control-label">Кабинет</label>
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <input type="text" id="office" name="office" class="form-control" ng-model="action.office">
                     </div>
                 </div>
@@ -83,9 +118,9 @@
     </div>
 
     <div class="row">
-        <div class="col-md-9">
+        <div class="col-md-12">
             <div class="form-group">
-                <label for="amount" class="col-md-2 control-label">Количество</label>
+                <label for="amount" class="col-md-1 control-label">Количество</label>
                 <div class="col-md-2">
                     <input type="number" id="amount" name="amount" class="form-control" ng-model="action.amount">
                 </div>
@@ -98,10 +133,10 @@
     </div>
 
     <div class="row">
-        <div class="col-md-9">
+        <div class="col-md-12">
             <div class="form-group">
-                <label for="note" class="col-md-2 control-label">Примечания</label>
-                <div class="col-md-10">
+                <label for="note" class="col-md-1 control-label">Примечания</label>
+                <div class="col-md-6">
                     <input type="text" id="note" name="note" class="form-control" ng-model="action.note">
                 </div>
             </div>

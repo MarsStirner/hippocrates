@@ -1,62 +1,62 @@
 <div class="form-horizontal" ng-if="action.readonly">
     <div class="row" ng-if="!is_med_doc()">
-        <div class="col-md-9">
+        <div class="col-md-10">
             <div class="form-group">
                 <label class="col-md-2 control-label">Назначено</label>
-                <div class="col-md-3 form-control-static" ng-bind="action.direction_date | asDate"></div>
+                <div class="col-md-2 form-control-static" ng-bind="action.direction_date | asDateTime"></div>
                 <label class="col-md-1 control-label">План</label>
-                <div class="col-md-3 form-control-static" ng-bind="action.planned_end_date | asDate"></div>
+                <div class="col-md-2 form-control-static" ng-bind="action.planned_end_date | asDateTime"></div>
                 <div class="col-md-2 form-control-static"><label ng-if="action.is_urgent">Срочно</label></div>
             </div>
         </div>
     </div>
 
     <div class="row" ng-if="!is_med_doc()">
-        <div class="col-md-9">
+        <div class="col-md-10">
             <div class="form-group">
                 <label class="col-md-2 control-label">Назначил</label>
-                <div class="col-md-10 form-control-static" ng-bind="action.set_person.name"></div>
+                <div class="col-md-6 form-control-static" ng-bind="action.set_person.name"></div>
             </div>
         </div>
     </div>
 
     <div class="row" ng-if="is_med_doc() && action.coord_date">
-        <div class="col-md-9">
+        <div class="col-md-10">
             <div class="form-group">
                 <label class="col-md-2 control-label">Согласовано</label>
-                <div class="col-md-3 form-control-static" ng-bind="action.coord_date | asDate"></div>
+                <div class="col-md-2 form-control-static" ng-bind="action.coord_date | asDateTime"></div>
             </div>
         </div>
     </div>
 
     <div class="row">
-        <div class="col-md-9">
+        <div class="col-md-10">
             <div class="form-group">
                 <label class="col-md-2 control-label">Состояние</label>
                 <div class="col-md-2 form-control-static" ng-bind="action.status.name"></div>
                 <label class="col-md-1 control-label">Начато</label>
-                <div class="col-md-3 form-control-static" ng-bind="action.beg_date | asDate"></div>
+                <div class="col-md-2 form-control-static" ng-bind="action.beg_date | asDateTime"></div>
                 <label class="col-md-1 control-label">Выполнено</label>
-                <div class="col-md-3 form-control-static" ng-bind="action.end_date | asDate"></div>
+                <div class="col-md-2 form-control-static" ng-bind="action.end_date | asDateTime"></div>
             </div>
         </div>
     </div>
 
     <div class="row">
-        <div class="col-md-9">
+        <div class="col-md-10">
             <div class="form-group">
                 <label class="col-md-2 control-label">Исполнитель</label>
-                <div class="col-md-6 form-control-static" ng-bind="action.person.name"></div>
+                <div class="col-md-5 form-control-static" ng-bind="action.person.name"></div>
                 <div ng-if="!is_med_doc()">
                     <label class="col-md-1 control-label">Кабинет</label>
-                    <div class="col-md-3 form-control-static" ng-bind="action.office"></div>
+                    <div class="col-md-2 form-control-static" ng-bind="action.office"></div>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="row">
-        <div class="col-md-9">
+        <div class="col-md-10">
             <div class="form-group">
                 <label class="col-md-2 control-label">Количество</label>
                 <div class="col-md-2 form-control-static" ng-bind="action.amount"></div>
@@ -67,10 +67,10 @@
     </div>
 
     <div class="row">
-        <div class="col-md-9">
+        <div class="col-md-10">
             <div class="form-group">
                 <label class="col-md-2 control-label">Примечания</label>
-                <div class="col-md-10 form-control-static" ng-bind="action.note"></div>
+                <div class="col-md-6 form-control-static" ng-bind="action.note"></div>
             </div>
         </div>
     </div>
