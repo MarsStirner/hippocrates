@@ -53,15 +53,15 @@ var ActionEditorCtrl = function ($scope, $window, $modal, WMAction, PrintingServ
             $scope.action.end_date = null;
         }
     };
-    $scope.on_enddate_changed = function () {
-        if ($scope.action.end_date) {
+    $scope.$watch('action.end_date', function (newVal, oldVal) {
+        if (newVal) {
             if ($scope.action.status.code !== 'finished') {
                 $scope.action.status = $scope.ActionStatus.get_by_code('finished');
             }
         } else {
             $scope.action.status = $scope.ActionStatus.get_by_code('started');
         }
-    };
+    });
 
     $scope.save_action = function (need_to_print) {
         var was_new = $scope.action.is_new();
