@@ -240,12 +240,12 @@ def reevaluate_dates(event, action=None):
     :return:
     """
     now = datetime.datetime.now()
-    action['chart_modify_date'].value = now
-    action['chart_modify_time'].value = now
 
     if action is None:
         action = get_card_attrs_action(event)
 
+    action['chart_modify_date'].value = now
+    action['chart_modify_time'].value = now
     prev_start_date, prev_delivery_date = action['pregnancy_start_date'].value, action['predicted_delivery_date'].value
     start_date, delivery_date, p_week = None, None, None
     epicrisis = get_action(event, risar_epicrisis)
