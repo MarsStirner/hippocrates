@@ -275,7 +275,6 @@ def api_0_attach_lpu():
             db.session.add(obj)
             result[attach_type] = obj
     db.session.commit()
-    #
     return result
 
 
