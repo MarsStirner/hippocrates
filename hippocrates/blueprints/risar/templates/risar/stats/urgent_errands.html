@@ -1,4 +1,4 @@
-<div class="box box-info">
+<div class="box box-info" ng-controller="UrgentErrandsCtrl">
     <div class="box-header">
         <h3 class="box-title">Срочные поручения</h3>
         <span class="badge label-info">[[urgent_errands.length]]</span>
@@ -16,7 +16,9 @@
                 <th>Статус</th>
             </tr>
             <tr ng-repeat="errand in urgent_errands">
-                <td>[[errand.number]]</td>
+                <td>
+                    <a ng-href="#" ng-click="edit_errand(errand, false)">[[errand.number]]</a>
+                </td>
                 <td>
                     <span class="label"
                           ng-class="{'label-default': errand.event.risk_rate.code == 'undefined',
