@@ -165,6 +165,15 @@
                                         </div></td>
                                     </tr>
                                     <tr>
+                                        <th class="text-right">Жалобы <span class="text-danger">*</span></th>
+                                        <td><div ng-class="{'text-danger': secondForm.complaints.$invalid && secondForm.submit_attempt}">
+                                            <div name="complaints" refbook-checkbox ref-book="rbRisarComplaints" ng-model="checkup.complaints" ng-required="true">
+                                                [[ item.name ]]
+                                            </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
                                         <th class="text-right">Язык <span class="text-danger">*</span></th>
                                         <td><div class="row" ng-class="{'has-error': secondForm.tongue.$invalid && secondForm.submit_attempt}">
                                             <div class="col-md-4">
@@ -236,15 +245,6 @@
                                         <th class="text-right">Пульс <span class="text-danger">*</span></th>
                                         <td><div ng-class="{'text-danger': secondForm.pulse.$invalid}">
                                             <div name="pulse" refbook-checkbox ng-model="checkup.pulse" ref-book="rbRisarPulse" ng-required="true">
-                                                [[ item.name ]]
-                                            </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th class="text-right">Жалобы <span class="text-danger">*</span></th>
-                                        <td><div ng-class="{'text-danger': secondForm.complaints.$invalid && secondForm.submit_attempt}">
-                                            <div name="complaints" refbook-checkbox ref-book="rbRisarComplaints" ng-model="checkup.complaints" ng-required="true">
                                                 [[ item.name ]]
                                             </div>
                                             </div>
