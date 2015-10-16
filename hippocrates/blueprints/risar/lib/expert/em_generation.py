@@ -4,13 +4,12 @@ import datetime
 import logging
 
 from collections import defaultdict
-from sqlalchemy.orm import aliased
 
-from nemesis.lib.utils import safe_date, safe_int, safe_datetime, safe_bool
+from nemesis.lib.utils import safe_date, safe_int, safe_datetime
 from nemesis.systemwide import db
 from nemesis.models.actions import Action
 from nemesis.models.expert_protocol import (ExpertScheme, ExpertSchemeMKBAssoc, EventMeasure, ExpertProtocol,
-    ExpertSchemeMeasureAssoc, rbMeasureType, Measure, MeasureSchedule, rbMeasureScheduleApplyType)
+    ExpertSchemeMeasureAssoc, MeasureSchedule, rbMeasureScheduleApplyType)
 from nemesis.models.exists import MKB
 from nemesis.models.enums import MeasureStatus, MeasureScheduleTypeKind
 from blueprints.risar.lib.utils import get_event_diag_mkbs
@@ -34,8 +33,83 @@ class EventMeasureGenerator(object):
         self.aux_changed_em_list = []
 
     def generate_measures(self):
+        # Базовый алгоритм:
+        # 1) Выбрать все необходимые данные:
+        #   - Выбрать текущие действующие* мероприятия случая (EM) (-> EM_list_exist) и их схемы (-> SM_list_exist)
+        #   - Выбрать все МКБ из диагнозов обращения
+        #   - Выбрать все актуальные МКБ из диагнозов обращения
+        #   - Выбрать все актуальные МКБ из текущего осмотра
+        #   - Инициализировать различные вспомогательные атрибуты
+        # 2) Выбрать набор расписаний схем (SM) (-> SM_list), соответствующих МКБ текущего осмотра
+        # 3) Отфильтровать SM_list в зависимости от условий применения:
+        #   a) верхнего уровня (можно их назвать событиями применения)
+        #     - Note: в данный момент используется только одно событие применения (Каждое посещение), которое
+        #       определяет работу алгоритма. В будущем могут появиться новые события применения,
+        #       которые будут дополнять работу алгоритма.
+        #   b) нижнего уровня:
+        #     - провести проверку удовлетворяют ли схемы, порожденные текущим осмотром, условиям применения (Первое
+        #       посещение, Поздняя явка, При первичной постановке диагноза, При наличии дополнительных диагнозов)
+        # 4) Обработать SM_list_exist:
+        #   - если МКБ схемы отсутствует в списке актуальных МКБ обращения, то отменить интервалы, которые еще не
+        #     наступили (Может быть можно решить это через удаление оставшихся необработанных схем в конце генерации?)
+        #     Также можно использовать проверку на наличие такой схемы в SM_list и если нет, то отменять?
+        #     В итоге максимум на что может повлиять этот шаг - это отменить созданные ранее, которые перестали быть
+        #     актуальными.
+        # 5) Обработать SM_list:
+        #   [В зависимости от типа применения и списка уже существующих EM и использующихся SM]
+        #   [Фиксированное количество применений от осмотра]
+        #   - подготовить новый набор EM для создания (с датой начала равной дате осмотра)
+        #     [? подумать, может ли изменение параметров осмотра вызвать коллизии между ранее созданными EM и заново
+        #      создаваемыми - может, например, дата осмотра]
+        #   - если SM по данному экшену(!) уже есть в списке созданных
+        #     - проверить, что существующие интервалы совпадают с создаваемыми (см. ниже) и если нет, то
+        #       - отменить все EM по этой схеме и осмотру, которые можно отменить**
+        #
+        #   [Фиксированные границы применения]
+        #   - подготовить новый набор EM для создания (с датой начала равной опорной дате)
+        #   - сравнить список созданных с новым списком:
+        #     - проходя по списку созданных, сравнивать каждое EM с новосозданным и если появилось различие, то
+        #       - оставшиеся элементы, включая текущий, в списке созданных отменить*** в случае, если это возможно**
+        #       - оставшиеся элементы в списке новых поместить в список на создание
+        #       - сопоставление ранее созданных с пересоздаваемыми EM не проводить. Могут появиться дубли EM в рамках
+        #         одной группы, но у них будут различные статусы
+        #     Здесь также обработается случай, когда текущий осмотр никак не связан с этими интервалами, но на осмотре
+        #     уточняется неделя беременности и из-за этого меняется опорная дата, от которой рассчитываются интервалы.
+        #
+        #   [Фиксированные границы начала применения]
+        #   - подготовить новый набор EM для создания (дата начала будет равна опорной дате или в случае, когда дата
+        #     начала окажется в прошлом *и* в SM_list_exist нет текущей схемы, то в качестве даты начала использовать
+        #     дату осмотра, но только если она попадает в диапазон начала применения; иначе - игнорировать текущую SM)
+        #   - сравнить список созданных с новым списком:
+        #     - проходя по списку созданных, сравнивать каждое EM с новосозданным и если появилось различие, то
+        #       - оставшиеся элементы, включая текущий, в списке созданных отменить*** в случае, если это возможно**
+        #       - оставшиеся элементы в списке новых поместить в список на создание
+        #       - сопоставление ранее созданных с пересоздаваемыми EM не проводить. Могут появиться дубли EM в рамках
+        #         одной группы, но у них будут различные статусы
+        #     Здесь также обработается случай, когда текущий осмотр никак не связан с этими интервалами, но на осмотре
+        #     уточняется неделя беременности и из-за этого меняется опорная дата, от которой рассчитываются интервалы.
+        #
+        #   [Продолжительное безграничное применение]
+        #   - если данная SM отсутствует в списке существующих, то
+        #     - подготовить одиночное EM для создания (с датой начала равной дате осмотра)
+        #
+        # В результате будут сформирвоаны 2 списка EM - которые нужно создать и которые нужно обновить
+        # 6) Проверить на дубликаты EM, имеющих одинаковые Measure (среди существующих и создаваемых)
+        #   - оставлять только одно EM с более коротким(быстрым) сроком, оставшиеся помечать статусом Отмены с дублем
+        # 5) Обработать отметку об изменении набора мероприятий
+        #   - просто вернуть флаг, отражающий есть ли изменения или нет
+        # 6) обновить статус на Просрочено у существующих EM, которые должны быть закончены до текущего осмотра
+        # 7) создать новые и обновить старые EM из двух сформированных списков на сохранение
+        # ---
+        # Сноски:
+        # * - действующие определяются датами и статусами
+        # ** - можно отменять те EM, у которых нет направления и результата и установлен подходящий статус
+        # *** - под отменой подразумевается перевод в статус Отменено для EM, с которыми не было взаимодействия
+        # пользователя и в статус "Отменено, но с мероприятием работали" в случае, если для мероприятия было создано
+        # направление или результат. Также стоит учитывать текущие статусы EM.
+        # ---
+        #
         # basic plan:
-        # 0) delete existing (temporary step)
         # 1) select scheme measures that fit source action mkbs
         #   - also include SM from previous actions, if they are still actual (schedule apply type kind is repetitive)
         # 2) filter scheme measures by theirs schedules (is SM acceptable for now)
@@ -534,150 +608,6 @@ class MeasureGeneratorRisarContext(object):
 
     def get_actual_event_diagnoses(self):
         return self.actual_existing_mkb
-
-
-class EventMeasureSelecter(object):
-
-    def __init__(self, event, action=None):
-        self.event = event
-        self.query = EventMeasure.query.filter(EventMeasure.event_id == self.event.id)
-
-    def apply_filter(self, action_id=None, **flt):
-        if 'id' in flt:
-            self.query = self.query.filter(EventMeasure.id == flt['id'])
-            return self
-        if action_id:
-            self.query = self.query.filter(EventMeasure.sourceAction_id == action_id)
-        if 'measure_type_id_list' in flt:
-            self.query = self.query.join(
-                ExpertSchemeMeasureAssoc, Measure, rbMeasureType
-            ).filter(rbMeasureType.id.in_(flt['measure_type_id_list']))
-        if 'beg_date_from' in flt:
-            self.query = self.query.filter(EventMeasure.begDateTime >= safe_datetime(flt['beg_date_from']))
-        if 'beg_date_to' in flt:
-            self.query = self.query.filter(EventMeasure.begDateTime <= safe_datetime(flt['beg_date_to']))
-        if 'end_date_from' in flt:
-            self.query = self.query.filter(EventMeasure.endDateTime >= safe_datetime(flt['end_date_from']))
-        if 'end_date_to' in flt:
-            self.query = self.query.filter(EventMeasure.endDateTime <= safe_datetime(flt['end_date_to']))
-        if 'measure_status_id_list' in flt:
-            self.query = self.query.filter(EventMeasure.status.in_(flt['measure_status_id_list']))
-        return self
-
-    def apply_sort_order(self, **order_options):
-        desc_order = order_options.get('order', 'ASC') == 'DESC'
-        if order_options:
-            pass
-        else:
-            source_action = aliased(Action, name='SourceAction')
-            self.query = self.query.join(
-                source_action, EventMeasure.sourceAction_id == source_action.id
-            ).order_by(
-                source_action.begDate.desc(),
-                EventMeasure.begDateTime.desc(),
-                EventMeasure.id.desc()
-            )
-        return self
-
-    def get_all(self):
-        return self.query.all()
-
-    def paginate(self, per_page=20, page=1):
-        return self.query.paginate(page, per_page, False)
-
-
-class EventMeasureRepr(object):
-
-    def represent_by_action(self, action):
-        if not action.id:
-            return []
-        em_selecter = EventMeasureSelecter(action.event, action)
-        em_selecter.apply_filter(action_id=action.id)
-        em_data = em_selecter.get_all()
-        return [
-            self.represent_measure(event_measure) for event_measure in em_data
-        ]
-
-    def represent_by_event(self, event, query_filter=None):
-        em_selecter = EventMeasureSelecter(event)
-        if query_filter is not None:
-            paginate = safe_bool(query_filter.get('paginate', True))
-            per_page = safe_int(query_filter.get('per_page')) or 20
-            page = safe_int(query_filter.get('page')) or 1
-            em_selecter.apply_filter(**query_filter)
-        else:
-            paginate = True
-            per_page = 20
-            page = 1
-        em_selecter.apply_sort_order()
-
-        if paginate:
-            return self._paginate_data(em_selecter, per_page, page)
-        else:
-            return self._list_data(em_selecter)
-
-    def _paginate_data(self, selecter, per_page, page):
-        em_data = selecter.paginate(per_page, page)
-        return {
-            'count': em_data.total,
-            'total_pages': em_data.pages,
-            'measures': [
-                self.represent_measure(event_measure) for event_measure in em_data.items
-            ]
-        }
-
-    def _list_data(self, selecter):
-        em_data = selecter.get_all()
-        return {
-            'measures': [
-                self.represent_measure(event_measure) for event_measure in em_data
-            ]
-        }
-
-    def represent_measure(self, measure):
-        import random
-        return {
-            'id': measure.id,
-            'event_id': measure.event_id,
-            'beg_datetime': measure.begDateTime,
-            'end_datetime': measure.endDateTime,
-            # 'status': MeasureStatus(random.randint(1, 6)),
-            'status': MeasureStatus(measure.status),
-            'source_action': self.represent_source_action(measure.source_action),
-            'action_id': measure.action_id,
-            'scheme_measure': self.represent_scheme_measure(measure.scheme_measure),
-            'create_datetime': measure.createDatetime,
-            'modify_datetime': measure.modifyDatetime,
-            'create_person': measure.create_person,
-            'modify_person': measure.modify_person
-        }
-
-    def represent_scheme_measure(self, scheme_measure):
-        return {
-            'scheme': self.represent_scheme(scheme_measure.scheme),
-            'measure': self.represent_measure_rb(scheme_measure.measure)
-        }
-
-    def represent_scheme(self, scheme):
-        return {
-            'id': scheme.id,
-            'code': scheme.code,
-            'name': scheme.name
-        }
-
-    def represent_measure_rb(self, measure):
-        return {
-            'id': measure.id,
-            'code': measure.code,
-            'name': measure.name,
-            'measure_type': measure.measure_type
-        }
-
-    def represent_source_action(self, action):
-        return {
-            'id': action.id,
-            'beg_date': action.begDate
-        }
 
 
 class ActionMkbSpawner(object):

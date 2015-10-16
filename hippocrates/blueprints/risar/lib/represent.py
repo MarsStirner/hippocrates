@@ -19,7 +19,7 @@ from nemesis.models.exists import rbAttachType, MKB
 from blueprints.risar.lib.card_attrs import get_card_attrs_action, get_all_diagnoses, check_disease
 from blueprints.risar.lib.utils import get_action, action_apt_values, get_action_type_id, risk_rates_diagID, \
     risk_rates_blockID, get_action_list
-from blueprints.risar.lib.expert.protocols import EventMeasureRepr
+from blueprints.risar.lib.expert.em_representation import EventMeasureRepr
 from blueprints.risar.risar_config import pregnancy_apt_codes, risar_anamnesis_pregnancy, transfusion_apt_codes, \
     risar_anamnesis_transfusion, mother_codes, father_codes, risar_father_anamnesis, risar_mother_anamnesis, \
     checkup_flat_codes, risar_epicrisis, risar_newborn_inspection, attach_codes

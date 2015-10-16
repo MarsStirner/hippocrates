@@ -6,8 +6,9 @@ from nemesis.models.actions import Action
 from nemesis.models.event import Event
 from nemesis.models.expert_protocol import EventMeasure
 from blueprints.risar.app import module
-from blueprints.risar.lib.expert.protocols import EventMeasureGenerator, EventMeasureRepr
-from blueprints.risar.lib.expert.event_measure import EventMeasureController
+from blueprints.risar.lib.expert.em_generation import EventMeasureGenerator
+from blueprints.risar.lib.expert.em_representation import EventMeasureRepr
+from blueprints.risar.lib.expert.em_manipulation import EventMeasureController
 
 
 @module.route('/api/0/event_measure/generate/')
