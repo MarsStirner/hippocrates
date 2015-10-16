@@ -151,7 +151,7 @@ var InspectionViewCtrl = function ($scope, $modal, RisarApi, PrintingService, Pr
                 // проверяем были жалобы на отеки
                 var edema = $scope.rbRisarComplaints.get_by_code("oteki");
                 $scope.checkups.map(function(checkup){
-                    checkup.if_edema = (checkup.complaints && indexOf(checkup.complaints, edema)>0) ? 'Да' : 'Нет'
+                    checkup.if_edema = (checkup.complaints && indexOf(checkup.complaints, edema)>=0) ? 'Да' : 'Нет'
                 })
             });
     };
