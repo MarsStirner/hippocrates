@@ -12,8 +12,10 @@
                         ng-click="clear_payer_lc()">
                     <span class="glyphicon glyphicon-trash text-danger"></span>
                 </button>
+                <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
             </div>
         </div>
+        <div class="box-body">
             <tabset justified="false" class="marginal nav-tabs-custom">
     <tab id="tab_payer_person" disabled="payer_tabs.person.disabled"
          active="payer_tabs.person.active" deselect="switch_tab(0)">
@@ -139,7 +141,8 @@
             </div>
         </div>
     </tab>
-</tabset>
+            </tabset>
+        </div>
 </div>
 <div class="box box-info">
     <div class="box-header with-border">
@@ -150,6 +153,7 @@
             <button type="button" class="btn btn-box-tool" ng-show="btn_edit_contract_info_visible()"
                     ng-click="editing.contract_edited = true" title="Редактировать"><span class="glyphicon glyphicon-pencil text-primary"></span>
             </button>
+            <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
         </div>
     </div>
     <div class="box-body">
