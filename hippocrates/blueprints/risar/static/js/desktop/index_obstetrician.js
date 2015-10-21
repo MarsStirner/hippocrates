@@ -19,7 +19,7 @@ var IndexObstetricianCtrl = function ($scope, RisarApi) {
                 return '#F493F2'
             } else if (14 < d[0] && d[0]<= 26){
                 return '#E400E0'
-            } else if (27 < d[0] && d[0]<= 40){
+            } else if (27 <= d[0] && d[0]<= 40){
                 return '#9600CD'
             } else {
                 return '#5416B4';
@@ -55,7 +55,6 @@ var IndexObstetricianCtrl = function ($scope, RisarApi) {
             $scope.need_hospitalization = result;
         });
     }
-
     $scope.current_stats();
     $scope.refresh_pregnancy_week_diagram();
     $scope.load_need_hospitalization();

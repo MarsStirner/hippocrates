@@ -104,9 +104,10 @@ var ChartCtrl = function ($scope, $modal, RisarApi, PrintingService, PrintingDia
     reload_chart();
 };
 
-var InspectionViewCtrl = function ($scope, $modal, RisarApi, PrintingService, PrintingDialog) {
+var InspectionViewCtrl = function ($scope, $modal, RisarApi, PrintingService, PrintingDialog, RefBookService) {
     var params = aux.getQueryParams(window.location.search);
     var event_id = params.event_id;
+    $scope.rbRisarComplaints = RefBookService.get('rbRisarComplaints');
     $scope.ps = new PrintingService("risar");
     $scope.ps.set_context("risar");
 
@@ -146,6 +147,12 @@ var InspectionViewCtrl = function ($scope, $modal, RisarApi, PrintingService, Pr
                     return curr
                 }
                 $scope.checkups.reduce(get_mass_gain, [{}]);
+
+                // проверяем были жалобы на отеки
+                var edema = $scope.rbRisarComplaints.get_by_code("oteki");
+                $scope.checkups.map(function(checkup){
+                    checkup.if_edema = (checkup.complaints && indexOf(checkup.complaints, edema)>=0) ? 'Да' : 'Нет'
+                })
             });
     };
 
@@ -160,4 +167,4 @@ var InspectionViewCtrl = function ($scope, $modal, RisarApi, PrintingService, Pr
 WebMis20.controller('ChartCtrl', ['$scope', '$modal', 'RisarApi', 'PrintingService', 'PrintingDialog',
     'NotificationService', 'CurrentUser', 'UserErrand', 'RefBookService', ChartCtrl]);
 WebMis20.controller('InspectionViewCtrl', ['$scope', '$modal', 'RisarApi', 'PrintingService', 'PrintingDialog',
-    InspectionViewCtrl]);
+    'RefBookService', InspectionViewCtrl]);

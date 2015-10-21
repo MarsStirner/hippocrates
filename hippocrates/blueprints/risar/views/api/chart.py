@@ -18,7 +18,8 @@ from nemesis.systemwide import db
 from nemesis.lib.diagnosis import create_or_update_diagnosis
 from blueprints.risar.app import module
 from blueprints.risar.lib.card_attrs import default_AT_Heuristic, get_all_diagnoses, reevaluate_risk_rate, \
-    reevaluate_preeclampsia_risk, reevaluate_card_attrs, get_card_attrs_action, check_card_attrs_action_integrity
+    reevaluate_preeclampsia_risk, reevaluate_card_attrs, get_card_attrs_action, check_card_attrs_action_integrity, \
+    reevaluate_dates
 from blueprints.risar.lib.represent import represent_event, represent_chart_for_routing, represent_header, \
     represent_org_for_routing, group_orgs_for_routing, represent_checkups, represent_card_attributes, \
     represent_chart_for_epicrisis
@@ -327,6 +328,7 @@ def api_1_attach_lpu():
 @api_method
 def api_0_mini_attach_lpu(client_id):
     data = request.get_json()
+    event = Event.query.get(data['event_id'])
     now = datetime.now()
     attach_type = data['attach_type']
     attach_type_code = attach_codes.get(attach_type, str(attach_type))
@@ -344,6 +346,8 @@ def api_0_mini_attach_lpu(client_id):
         db.session.add(attach)
     if attach.LPU_id != org_id:
         attach.LPU_id = org_id
+        db.session.commit()
+        reevaluate_dates(event)
         db.session.commit()
         return True
     else:

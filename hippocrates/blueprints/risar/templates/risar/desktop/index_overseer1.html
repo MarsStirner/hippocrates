@@ -34,67 +34,7 @@
                         {% include "risar/stats/annual_reports.html" %}
                     </div>
                     <div class="col-md-6">
-                        <div class="box box-info">
-                            <div class="box-header">
-                                <h3 class="box-title">Срочные поручения</h3>
-                                <span class="badge label-info">5</span>
-                                <div class="box-tools pull-right">
-                        {#            <ul class="pagination pagination-sm no-margin" style="vertical-align: middle;">#}
-                        {#                <li><a href="#">«</a></li>#}
-                        {#                <li><a href="#">1</a></li>#}
-                        {#                <li><a href="#">2</a></li>#}
-                        {#                <li><a href="#">3</a></li>#}
-                        {#                <li><a href="#">»</a></li>#}
-                        {#            </ul>#}
-                                    <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
-                                </div>
-                            </div>
-                            <div class="box-body no-padding">
-                                <table class="table">
-                                    <tbody>
-                                    <tr>
-                                        <th>Номер</th>
-                                        <th>Риск</th>
-                                        <th>ФИО</th>
-                                        <th>Статус</th>
-                                    </tr>
-                                    <tr>
-                                        <td>12/2015</td>
-                                        <td><span class="label label-danger">высокий</span></td>
-                                        <td>Подшивалова Баира Петровна</td>
-                                        <td><span class="label label-warning">ожидает выполнения</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>56/2015</td>
-                                        <td><span class="label label-danger">высокий</span></td>
-                                        <td>Ксантос Альбина Сергеевна</td>
-                                        <td><span class="label label-danger">просрочено</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>33/2015</td>
-                                        <td><span class="label label-danger">высокий</span></td>
-                                        <td>Полякова Наталья Сергеевна</td>
-                                        <td><span class="label label-warning">ожидает выполнения</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>78/2015</td>
-                                        <td><span class="label label-warning">средний</span></td>
-                                        <td>Неверова Анна Эдуардовна</td>
-                                        <td><span class="label label-danger">просрочено</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>56/2015</td>
-                                        <td><span class="label label-warning">средний</span></td>
-                                        <td>Полякова Наталья Сергеевна</td>
-                                        <td><span class="label label-danger">просрочено</span></td>
-                                    </tr>
-                                    <tr class="text-center">
-                                        <td colspan="4"><a href="#">Все поручения</a></td>
-                                    </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+                        {% include "risar/stats/urgent_errands.html" %}
                     </div>
                 </div>
                 {% include "risar/stats/diagram_pregnancy_week.html" %}
@@ -126,4 +66,6 @@
     {{ super() }}
     <script src="{{ url_for('.static', filename='js/desktop/index_overseer1.js', v=app_version) }}"></script>
     <script src="{{ url_for('.static', filename='js/stats/perinatal_risk_rate.js', v=app_version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/stats/urgent_errands.js', v=app_version) }}"></script>
+    <script type="text/ng-template" id="/WebMis20/RISAR/modal/create_errand.html">{% include 'risar/errands/_modal_create_errand.html' %}</script>
 {% endblock %}

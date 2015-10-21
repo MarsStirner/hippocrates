@@ -2,7 +2,7 @@
 
 from sqlalchemy.orm import aliased
 
-from nemesis.lib.utils import , safe_int, safe_datetime, safe_bool
+from nemesis.lib.utils import safe_int, safe_datetime, safe_bool
 from nemesis.models.actions import Action
 from nemesis.models.expert_protocol import (EventMeasure, ExpertSchemeMeasureAssoc, rbMeasureType, Measure)
 from nemesis.models.enums import MeasureStatus

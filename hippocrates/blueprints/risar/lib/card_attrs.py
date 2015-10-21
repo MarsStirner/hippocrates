@@ -205,7 +205,7 @@ def reevaluate_preeclampsia_risk(event, card_attrs_action=None):
     else:
         risk = PreeclampsiaRisk.no_risk[0]
 
-        if not prev_pregnancies or event.client.age_tuple()[-1] >= 35 or (first_inspection and first_inspection['BMI'].value >= 25) or \
+        if not prev_pregnancies or event.client.age_tuple()[-1] > 35 or (first_inspection and first_inspection['BMI'].value >= 25) or \
                 (mother_action and mother_action['preeclampsia'].value):
             risk = PreeclampsiaRisk.has_risk[0]
         else:
@@ -240,12 +240,12 @@ def reevaluate_dates(event, action=None):
     :return:
     """
     now = datetime.datetime.now()
-    action['chart_modify_date'].value = now
-    action['chart_modify_time'].value = now
 
     if action is None:
         action = get_card_attrs_action(event)
 
+    action['chart_modify_date'].value = now
+    action['chart_modify_time'].value = now
     prev_start_date, prev_delivery_date = action['pregnancy_start_date'].value, action['predicted_delivery_date'].value
     start_date, delivery_date, p_week = None, None, None
     epicrisis = get_action(event, risar_epicrisis)
@@ -265,7 +265,9 @@ def reevaluate_dates(event, action=None):
                 # Установленная неделя беременности. Может быть как меньше, так и больше 40
                 p_week = int(inspection['pregnancy_week'].value)
                 # вычисленная дата начала беременности
-                start_date = (inspection.begDate.date() + datetime.timedelta(weeks=-p_week, days=1))
+                new_start_date = (inspection.begDate.date() + datetime.timedelta(weeks=-p_week, days=1))
+                # Не надо трогать дату начала беременности, если она не слишком отличается от предыдущей вычисленной
+                start_date = new_start_date if abs((new_start_date - prev_start_date).days) > 3 else prev_start_date
                 break
 
     if not start_date:
@@ -285,8 +287,7 @@ def reevaluate_dates(event, action=None):
         weeks = 40 if p_week is None else max(p_week, 40)
         delivery_date = start_date + datetime.timedelta(weeks=weeks)
 
-    if not prev_start_date or abs((start_date - prev_start_date).days) > 3:
-        # Не надо трогать дату начала беременности, если она не слишком отличается от предыдущей вычисленной
+    if not prev_start_date or start_date != prev_start_date:
         action['pregnancy_start_date'].value = start_date
     if not prev_delivery_date or epicrisis or abs((delivery_date - prev_delivery_date).days) > 3:
         # Не надо трогать дату родоразрешения, если она не слишком отличается от предыдущей вычисленной при отсутствии

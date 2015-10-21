@@ -55,6 +55,11 @@ WebMis20
             });
         }
     };
+    this.urgent_errands = {
+        get: function(){
+            return wrapper('GET', Config.url.api_stats_urgent_errands)
+        }
+    }
     this.recent_charts = {
         get: function (data) {
             return wrapper('GET', Config.url.api_recent_charts, data);
@@ -178,15 +183,21 @@ WebMis20
     };
     this.anamnesis = {
         get: function (event_id) {
-            var url = Config.url.api_anamnesis + event_id;
+            var url = Config.url.api_anamnesis.format(event_id);
             return wrapper('GET', url);
         },
         mother: {
+            get: function (event_id) {
+                return wrapper('GET', Config.url.api_anamnesis_mother.format(event_id));
+            },
             save: function (event_id, data) {
                 return wrapper('POST', Config.url.api_anamnesis_mother.format(event_id), {}, data);
             }
         },
         father: {
+            get: function (event_id) {
+                return wrapper('GET', Config.url.api_anamnesis_father.format(event_id));
+            },
             save: function (event_id, data) {
                 return wrapper('POST', Config.url.api_anamnesis_father.format(event_id), {}, data);
             }
@@ -378,10 +389,10 @@ WebMis20
                 if (rate == 1) return 'ri-prenatal-risk-undefined text-darkgray';
             };
             scope.tooltip = function (rate) {
-                if (rate == 2) return 'У пациентки выявлен низкий риск невынашивания';
-                if (rate == 3) return 'У пациентки выявлен средний риск невынашивания';
-                if (rate == 4) return 'Внимание! У пациентки выявлен высокий риск невынашивания';
-                if (rate == 1) return 'У пациентки риск невынашивания не выявлен';
+                if (rate == 2) return 'У пациентки выявлена низкая степень риска';
+                if (rate == 3) return 'У пациентки выявлена средняя степень риска';
+                if (rate == 4) return 'У пациентки выявлена высокая степень риска';
+                if (rate == 1) return 'У пациентки не выявлена степень риска';
 
             }
         }
@@ -448,7 +459,8 @@ WebMis20
                 return 'fa fa-exclamation-triangle text-darkgray';
             };
             scope.tooltip = function (rate) {
-                return 'Внимание! Пациентке врачом установлена преэклампсия '+rate.name;
+                if (rate.code == 'unknown') return 'Диагноз преэклампсии не подтверждён';
+                return 'Внимание! Установлен диагноз: преэклампсия '+rate.name;
 
             }
         }

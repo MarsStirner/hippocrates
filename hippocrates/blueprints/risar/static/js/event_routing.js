@@ -75,7 +75,8 @@ var EventRoutingCtrl = function ($scope, $window, RisarApi, PrintingService, Pri
     $scope.save = function () {
         RisarApi.event_routing.attach_client($scope.chart.client.id, {
             attach_type: key,
-            org_id: $scope.chart.lpu.id
+            org_id: $scope.chart.lpu.id,
+            event_id: $scope.chart.id
         }).then(function () {
             $scope.selectLpuForm.$setPristine();
         });

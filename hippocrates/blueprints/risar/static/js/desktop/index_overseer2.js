@@ -36,7 +36,7 @@ var IndexOverseer2Ctrl = function ($scope, RisarApi) {
                 return '#F493F2'
             } else if (14 < d[0] && d[0]<= 26){
                 return '#E400E0'
-            } else if (27 < d[0] && d[0]<= 40){
+            } else if (27 <= d[0] && d[0]<= 40){
                 return '#9600CD'
             } else {
                 return '#5416B4';

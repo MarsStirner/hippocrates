@@ -4,29 +4,28 @@
 {% block title %}> {{ module_name }}{% endblock %}
 
 {% block main %}
-<div ng-controller="AnamnesisCtrl" ng-cloak>
+<div ng-controller="AnamnesisMotherEditCtrl" ng-cloak>
     <section class="content-header">
-        {{ rimacros.page_title('Ввод данных о матери') }}
+        {{ rimacros.page_title_n('Ввод данных о матери') }}
         <div class="novmargin">
             <div class="btn-group">
-                <a ng-href="{{ url_for('.html_chart') }}?event_id=[[ chart.id ]]" class="btn btn-default">Карта пациентки</a>
-                <a ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ chart.id ]]" class="btn btn-default">Анамнез</a>
-                <a ng-href="{{ url_for('.html_inspection') }}?event_id=[[ chart.id ]]" class="btn btn-default">Осмотры</a>
-                <a ng-href="{{ url_for('.html_routing') }}?event_id=[[ chart.id ]]&emergency=1" class="btn btn-default">Маршрутизация</a>
-                <a ng-href="{{ url_for('.html_epicrisis') }}?event_id=[[ chart.id ]]" class="btn btn-default">Эпикриз</a>
+                <a ng-href="{{ url_for('.html_chart') }}?event_id=[[ event_id ]]" class="btn btn-default">Карта пациентки</a>
+                <a ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ event_id ]]" class="btn btn-default">Анамнез</a>
+                <a ng-href="{{ url_for('.html_inspection') }}?event_id=[[ event_id ]]" class="btn btn-default">Осмотры</a>
+                <a ng-href="{{ url_for('.html_routing') }}?event_id=[[ event_id ]]&emergency=1" class="btn btn-default">Маршрутизация</a>
+                <a ng-href="{{ url_for('.html_epicrisis') }}?event_id=[[ event_id ]]" class="btn btn-default">Эпикриз</a>
                 <a ng-class="{disabled: !ps.is_available()}" ng-click="open_print_window()" class="btn btn-default">Печать</a>
                 <div class="btn-group">
                     <button class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Дополнительно <span class="fa fa-caret-down"></span></button>
                     <ul role="menu" class="dropdown-menu">
-                        <li><a ng-href="{{ url_for('.html_event_diagnoses') }}?event_id=[[ chart.id ]]">Диагнозы случая</a></li>
-                        <li><a ng-href="{{ url_for('.html_event_measure') }}?event_id=[[ chart.id ]]">Мероприятия случая</a></li>
+                        <li><a ng-href="{{ url_for('.html_event_diagnoses') }}?event_id=[[ event_id ]]">Диагнозы случая</a></li>
+                        <li><a ng-href="{{ url_for('.html_event_measure') }}?event_id=[[ event_id ]]">Мероприятия случая</a></li>
                     </ul>
                 </div>
             </div>
         </div>
     </section>
     <section class="content">
-        <div ng-controller="AnamnesisMotherEditCtrl" class="box box-primary">
             <ng-form name="anamnesisMotherForm" id="anamnesisMotherForm" role="form" novalidate>
             <div class="box-body">
             <table class="table table-condensed title-right">
@@ -39,32 +38,32 @@
                 <tbody>
                 <tr>
                     <th class="text-right">Образование <span>&nbsp;</span></th>
-                    <td><rb-select ng-model="chart.anamnesis.mother.education" ref-book="rbRisarEducation" autofocus="autofocus"></rb-select></td>
+                    <td><rb-select ng-model="anamnesis_mother.education" ref-book="rbRisarEducation" autofocus="autofocus"></rb-select></td>
                 </tr>
                 <tr>
                     <th class="text-right">Общественно-профессиональная группа <span>&nbsp;</span></th>
-                    <td><rb-select ng-model="chart.anamnesis.mother.work_group" ref-book="rbRisarWork_Group"></rb-select></td>
+                    <td><rb-select ng-model="anamnesis_mother.work_group" ref-book="rbRisarWork_Group"></rb-select></td>
                 </tr>
                 <tr>
                     <th class="text-right">Профессиональные вредности <span>&nbsp;</span></th>
-                    <td><rb-select ng-model="chart.anamnesis.mother.professional_properties" ref-book="rbRisarProfessional_Properties"></rb-select></td>
+                    <td><rb-select ng-model="anamnesis_mother.professional_properties" ref-book="rbRisarProfessional_Properties"></rb-select></td>
                 </tr>
                 <tr>
                     <th class="text-right">Семейное положение <span class="text-danger">*</span></th>
-                    <td><rb-select ng-model="chart.anamnesis.mother.marital_status" ref-book="rbRisarMarital_Status"
+                    <td><rb-select ng-model="anamnesis_mother.marital_status" ref-book="rbRisarMarital_Status"
                                    ng-required="true"></rb-select></td>
                 </tr>
                 <tr>
                     <th class="text-right">Доход семьи <span>&nbsp;</span></th>
-                    <td><input ng-model="chart.anamnesis.mother.family_income" class="form-control"></td>
+                    <td><input ng-model="anamnesis_mother.family_income" class="form-control"></td>
                 </tr>
                 <tr>
                     <th class="text-right">Группа крови и резус-фактор <span>&nbsp;</span></th>
-                    <td><div class="row"><div class="col-md-4"><rb-select ng-model="chart.anamnesis.mother.blood_type" ref-book="rbBloodType"></rb-select></div></div></td>
+                    <td><div class="row"><div class="col-md-4"><rb-select ng-model="anamnesis_mother.blood_type" ref-book="rbBloodType"></rb-select></div></div></td>
                 </tr>
                 <tr>
                     <th class="text-right">Дата последней менструации <span>&nbsp;</span></th>
-                    <td><wm-date ng-model="chart.anamnesis.mother.menstruation_last_date" max-date="menstruation_max_date" style="width: 250px"></wm-date></td>
+                    <td><wm-date ng-model="anamnesis_mother.menstruation_last_date" max-date="menstruation_max_date" style="width: 250px"></wm-date></td>
                 </tr>
                 <tr>
                     <th class="text-right">Менструации <span>&nbsp;</span></th>
@@ -72,83 +71,83 @@
                 </tr>
                 <tr>
                     <td class="text-right">С возраста <span>&nbsp;</span></td>
-                    <td><div class="row"><div class="col-md-4"><input ng-model="chart.anamnesis.mother.menstruation_start_age" class="form-control"></div></div></td>
+                    <td><div class="row"><div class="col-md-4"><input ng-model="anamnesis_mother.menstruation_start_age" class="form-control"></div></div></td>
                 </tr>
                 <tr>
                     <td class="text-right">Длительность <span>&nbsp;</span></td>
-                    <td><div class="row"><div class="col-md-4"><input ng-model="chart.anamnesis.mother.menstruation_duration" class="form-control"></div></div></td>
+                    <td><div class="row"><div class="col-md-4"><input ng-model="anamnesis_mother.menstruation_duration" class="form-control"></div></div></td>
                 </tr>
                 <tr>
                     <td class="text-right">Продолжительность цикла <span>&nbsp;</span></td>
-                    <td><div class="row"><div class="col-md-4"><input ng-model="chart.anamnesis.mother.menstruation_period" class="form-control"></div></div></td>
+                    <td><div class="row"><div class="col-md-4"><input ng-model="anamnesis_mother.menstruation_period" class="form-control"></div></div></td>
                 </tr>
                 <tr>
                     <td class="text-right">Нарушения <span>&nbsp;</span></td>
-                    <td><input ng-model="chart.anamnesis.mother.menstruation_disorders" class="checkbox" type="checkbox"></td>
+                    <td><input ng-model="anamnesis_mother.menstruation_disorders" class="checkbox" type="checkbox"></td>
                 </tr>
                 <tr>
                     <th class="text-right">Половая жизнь с <span>&nbsp;</span></th>
-                    <td><div class="row"><div class="col-md-4"><input ng-model="chart.anamnesis.mother.sex_life_start_age" class="form-control" type="number" valid-number></div></div></td>
+                    <td><div class="row"><div class="col-md-4"><input ng-model="anamnesis_mother.sex_life_start_age" class="form-control" type="number" valid-number></div></div></td>
                 </tr>
                 <tr>
                     <th class="text-right">Сведения по контрацепции <span>&nbsp;</span></th>
-                    <td><input ng-model="chart.anamnesis.mother.contraception" class="form-control"></td>
+                    <td><input ng-model="anamnesis_mother.contraception" class="form-control"></td>
                 </tr>
                 <tr>
                     <th class="text-right">Способ оплодотворения <span>&nbsp;</span></th>
-                    <td><rb-select ref-book="rbRisarFertilizationMethod" ng-model="chart.anamnesis.mother.fertilization_type" class="form-control"></rb-select></td>
+                    <td><rb-select ref-book="rbRisarFertilizationMethod" ng-model="anamnesis_mother.fertilization_type" class="form-control"></rb-select></td>
                 </tr>
                 <tr>
                     <th class="text-right">Предыдущие многоплодные беременности <span>&nbsp;</span></th>
-                    <td><input ng-model="chart.anamnesis.mother.multifetation" class="checkbox" type="checkbox"></td>
+                    <td><input ng-model="anamnesis_mother.multifetation" class="checkbox" type="checkbox"></td>
                 </tr>
                 <tr>
                     <th class="text-right">Бесплодие <span>&nbsp;</span></th>
-                    <td><input ng-model="chart.anamnesis.mother.infertility" class="checkbox" type="checkbox"></td>
+                    <td><input ng-model="anamnesis_mother.infertility" class="checkbox" type="checkbox"></td>
                 </tr>
                 <tr>
                     <td class="text-right">Вид <span>&nbsp;</span></td>
-                    <td><input ng-model="chart.anamnesis.mother.infertility_type" class="form-control" ng-disabled="!chart.anamnesis.mother.infertility"></td>
+                    <td><input ng-model="anamnesis_mother.infertility_type" class="form-control" ng-disabled="!anamnesis_mother.infertility"></td>
                 </tr>
                 <tr>
                     <td class="text-right">Длительность, мес <span>&nbsp;</span></td>
-                    <td><input ng-model="chart.anamnesis.mother.infertility_period" class="form-control" type="number" valid-number ng-disabled="!chart.anamnesis.mother.infertility"></td>
+                    <td><input ng-model="anamnesis_mother.infertility_period" class="form-control" type="number" valid-number ng-disabled="!anamnesis_mother.infertility"></td>
                 </tr>
                 <tr>
                     <td class="text-right">Лечение <span>&nbsp;</span></td>
-                    <td><input ng-model="chart.anamnesis.mother.infertility_treatment" class="form-control" ng-disabled="!chart.anamnesis.mother.infertility"></td>
+                    <td><input ng-model="anamnesis_mother.infertility_treatment" class="form-control" ng-disabled="!anamnesis_mother.infertility"></td>
                 </tr>
                 <tr>
                     <td class="text-right">Причина <span>&nbsp;</span></td>
-                    <td><input ng-model="chart.anamnesis.mother.infertility_cause" class="form-control" ng-disabled="!chart.anamnesis.mother.infertility"></td>
+                    <td><input ng-model="anamnesis_mother.infertility_cause" class="form-control" ng-disabled="!anamnesis_mother.infertility"></td>
                 </tr>
                 <tr>
                     <th class="text-right">Перенесенные заболевания <span>&nbsp;</span></th>
                     <td>
-                        <wm-diagnosis model="chart.anamnesis.mother.finished_diseases" list-mode="true"
+                        <wm-diagnosis model="anamnesis_mother.finished_diseases" list-mode="true"
                                       can-add-new="true" can-delete="true" can-edit="true"
-                                      action="chart.anamnesis.mother" event="chart"
+                                      action="anamnesis_mother" event="chart"
                                       params="{defaults:{diagnosis_type:rbDiagnosisType.get_by_code('2')},
                                                required:{end_date:true}}" risar="true"></wm-diagnosis>
                     </td>
                 </tr>
                 <tr>
                     <th class="text-right">Наследственность <span>&nbsp;</span></th>
-                    <td><input ng-model="chart.anamnesis.mother.hereditary" class="form-control"></td>
+                    <td><input ng-model="anamnesis_mother.hereditary" class="form-control"></td>
                 </tr>
                 <tr>
                     <th class="text-right">Текущие заболевания <span>&nbsp;</span></th>
                     <td>
-                        <wm-diagnosis model="chart.anamnesis.mother.current_diseases" list-mode="true"
+                        <wm-diagnosis model="anamnesis_mother.current_diseases" list-mode="true"
                                       can-add-new="true" can-delete="true" can-edit="true"
-                                      action="chart.anamnesis.mother" event="chart"
+                                      action="anamnesis_mother" event="chart"
                                       params="{defaults:{diagnosis_type:rbDiagnosisType.get_by_code('2')}}" risar="true"></wm-diagnosis>
                     </td>
                 </tr>
                 <tr>
                     <th class="text-right">Преэклампсия была у матери или сестры <span>&nbsp;</span></th>
                     <td>
-                        <input ng-model="chart.anamnesis.mother.preeclampsia" class="checkbox" type="checkbox">
+                        <input ng-model="anamnesis_mother.preeclampsia" class="checkbox" type="checkbox">
                     </td>
                 </tr>
                 <tr>
@@ -157,31 +156,30 @@
                 </tr>
                 <tr>
                     <td class="text-right">Алкоголь <span>&nbsp;</span></td>
-                    <td><input ng-model="chart.anamnesis.mother.alcohol" class="checkbox" type="checkbox"></td>
+                    <td><input ng-model="anamnesis_mother.alcohol" class="checkbox" type="checkbox"></td>
                 </tr>
                 <tr>
                     <td class="text-right">Курение <span>&nbsp;</span></td>
-                    <td><input ng-model="chart.anamnesis.mother.smoking" class="checkbox" type="checkbox"></td>
+                    <td><input ng-model="anamnesis_mother.smoking" class="checkbox" type="checkbox"></td>
                 </tr>
                 <tr>
                     <td class="text-right">Токсические вещества <span>&nbsp;</span></td>
-                    <td><input ng-model="chart.anamnesis.mother.toxic" class="checkbox" type="checkbox"></td>
+                    <td><input ng-model="anamnesis_mother.toxic" class="checkbox" type="checkbox"></td>
                 </tr>
                 <tr>
                     <td class="text-right">Наркотики <span>&nbsp;</span></td>
-                    <td><input ng-model="chart.anamnesis.mother.drugs" class="checkbox" type="checkbox"></td>
+                    <td><input ng-model="anamnesis_mother.drugs" class="checkbox" type="checkbox"></td>
                 </tr>
                 </tbody>
             </table>
             </div>
             </ng-form>
             <div class="box-footer text-right">
-                <a class="pseudo-btn" ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ chart.id ]]">Перейти на форму анамнеза пациентки</a>
+                <a class="pseudo-btn" ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ event_id ]]">Перейти на форму анамнеза пациентки</a>
                 <button class="btn btn-success"
                         tooltip="[[anamnesisMotherForm.$invalid && submit_attempt ? 'Заполните все обязательные поля': '']]"
                         ng-click="save()">Сохранить</button>
             </div>
-        </div>
     </section>
 </div>
 {% endblock %}

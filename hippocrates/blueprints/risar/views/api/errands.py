@@ -106,7 +106,7 @@ def api_errand_edit(errand_id):
     errand = Errand.query.get(errand_id)
     if data:
         errand.execPerson_id = data['exec_person']['id']
-        errand.readingDate = data['reading_date']
+        errand.readingDate = string_to_datetime(data['reading_date'])
         errand.text = data['text']
         errand.plannedExecDate = string_to_datetime(data['planned_exec_date'])
         errand.deleted = data.get('deleted', 0)
@@ -126,9 +126,9 @@ def api_errand_edit(errand_id):
 @api_method
 def api_errand_mark_as_read(errand_id):
     data = request.get_json()
-    reading_date = data.get('reading_date', datetime.datetime.now())
+    reading_date = data.get('reading_date', '')
     errand = Errand.query.get(errand_id)
-    errand.readingDate = reading_date
+    errand.readingDate = string_to_datetime(reading_date) if reading_date else datetime.datetime.now()
     db.session.add(errand)
     db.session.commit()
 
