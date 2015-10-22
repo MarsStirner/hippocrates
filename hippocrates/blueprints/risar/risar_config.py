@@ -29,4 +29,7 @@ first_inspection_code = 'risarFirstInspection'
 second_inspection_code = 'risarSecondInspection'
 checkup_flat_codes = [first_inspection_code, second_inspection_code]
 
+# inspection properties
+inspection_preg_week_code = 'pregnancy_week'
+
 attach_codes = {'plan_lpu': '10', 'extra_lpu': '11'}

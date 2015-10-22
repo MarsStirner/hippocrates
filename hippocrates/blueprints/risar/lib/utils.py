@@ -11,7 +11,7 @@ from nemesis.models.risar import rbPregnancyPathology, rbPerinatalRiskRate
 from nemesis.models.enums import ActionStatus
 from nemesis.models.exists import MKB
 from nemesis.systemwide import cache, db
-from blueprints.risar.risar_config import checkup_flat_codes
+from blueprints.risar.risar_config import checkup_flat_codes, first_inspection_code, inspection_preg_week_code
 
 
 risk_rates_diagID = {
@@ -270,4 +270,14 @@ def pregnancy_pathologies():
 def risk_mkbs():
     query = db.session.query(rbPerinatalRiskRate)
     result = dict((rb_prr.code, [safe_dict(mkb) for mkb in rb_prr.mkbs]) for rb_prr in query)
+    return result
+
+
+def is_event_late_first_visit(event):
+    result = False
+    fi = get_action(event, first_inspection_code)
+    if fi:
+        preg_week = fi[inspection_preg_week_code]
+        if preg_week is not None:
+            result = preg_week >= 10
     return result

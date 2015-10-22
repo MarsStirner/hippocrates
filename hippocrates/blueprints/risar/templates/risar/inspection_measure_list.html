@@ -21,8 +21,8 @@
         <tr ng-repeat="measure in checkup.measures">
             <td>[[ $index + 1 ]]</td>
             <td>[[ measure.scheme_measure.measure.name ]]</td>
-            <td>[[ measure.beg_datetime | asDate ]]</td>
-            <td>[[ measure.end_datetime | asDate ]]</td>
+            <td>[[ measure.beg_datetime | asDateTime ]]</td>
+            <td>[[ measure.end_datetime | asDateTime ]]</td>
             <td><event-measure-status status="measure.status"></event-measure-status></td>
             <td class="nowrap">
                 <div class="btn-group">

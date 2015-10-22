@@ -125,7 +125,7 @@ def api_0_event_search():
                 'external_id': row['external_id'],
                 'exec_person_name': row['person_name'],
                 'risk': PrenatalRiskRate(row['risk']),
-                'mdate': datetime.date.fromtimestamp(row['card_modify_date']) if row['card_modify_date'] else None,
+                'mdate': datetime.date.fromtimestamp(row['card_modify_date']) if 'card_modify_date' in row else None,
                 'pddate': datetime.date.fromtimestamp(row['bdate']) if row['bdate'] else None,
                 'week':((
                     (min(today, datetime.date.fromtimestamp(row['bdate'])) if row['bdate'] else today) -
