@@ -42,6 +42,16 @@ def api_0_event_measure_cancel(event_measure_id):
     return EventMeasureRepr().represent_measure(em)
 
 
+@module.route('/api/0/event_measure/<int:event_measure_id>/direction/', methods=['POST'])
+@api_method
+def api_0_event_measure_make_direction(event_measure_id):
+    em = EventMeasure.query.get_or_404(event_measure_id)
+    em_ctrl = EventMeasureController()
+    em_ctrl.make_direction(em)
+    em_ctrl.store(em)
+    return EventMeasureRepr().represent_measure(em)
+
+
 @module.route('/api/0/measure/list/<int:event_id>', methods=['GET', 'POST'])
 @module.route('/api/0/measure/list/')
 @api_method

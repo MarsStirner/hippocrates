@@ -37,6 +37,7 @@ WebMis20
         api_event_measure_generate: '{{ url_for('.api_0_event_measure_generate') }}',
         api_event_measure_remove: '{{ url_for('.api_0_event_measure_remove') }}',
         api_event_measure_cancel: '{{ url_for('.api_0_event_measure_cancel') }}',
+        api_event_measure_make_direction: '{{ url_for('.api_0_event_measure_make_direction', event_measure_id=-90) | replace("-90", "{0}") }}',
         chart_html: '{{ url_for('.html_chart') }}',
         index_html: '{{ url_for('.index_html') }}',
         inpection_read_html:'{{ url_for('.html_inspection_read') }}',

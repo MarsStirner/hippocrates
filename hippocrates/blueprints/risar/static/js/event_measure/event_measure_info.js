@@ -25,7 +25,10 @@ WebMis20.service('EMModalService', ['$modal', function ($modal) {
 WebMis20.service('EventMeasureService', ['RisarApi', function (RisarApi) {
     this.cancel = function (em) {
         return RisarApi.measure.cancel(em.id);
-    }
+    };
+    this.make_direction = function (em) {
+        return RisarApi.measure.make_direction(em.id);
+    };
 }]);
 
 WebMis20.run(['$templateCache', function ($templateCache) {
@@ -72,7 +75,7 @@ WebMis20.run(['$templateCache', function ($templateCache) {
         <div class="form-group">\
             <label for="measure_dates" class="col-sm-3 control-label">Документы</label>\
             <div class="col-sm-9 form-control-static">\
-                Направление: -\
+                Направление: [[ getDirectionInfo() ]]\
             </div>\
             <div class="col-sm-offset-3 col-sm-9 form-control-static">\
                 Результат: -\
@@ -126,6 +129,11 @@ var EventMeasureModalCtrl = function ($scope, $filter, RisarApi, RefBookService,
         return '{0}, {1}'.format(
             $filter('asDateTime')(event_measure.modify_datetime),
             safe_traverse(event_measure, ['modify_person', 'short_name'])
+        );
+    };
+    $scope.getDirectionInfo = function () {
+        return '{0}'.format(
+            event_measure.action_id || ' - '
         );
     };
     $scope.init = function () {

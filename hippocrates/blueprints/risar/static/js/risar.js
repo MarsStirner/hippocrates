@@ -281,6 +281,9 @@ WebMis20
         },
         cancel: function (event_measure_id) {
             return wrapper('POST', Config.url.api_event_measure_cancel + event_measure_id);
+        },
+        make_direction: function (event_measure_id) {
+            return wrapper('POST', Config.url.api_event_measure_make_direction.format(event_measure_id));
         }
     };
     this.stats = {

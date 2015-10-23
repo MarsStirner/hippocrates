@@ -64,7 +64,7 @@ class EventMeasureRepr(object):
         if not action.id:
             return []
         em_selecter = EventMeasureSelecter(action.event, action)
-        em_selecter.apply_filter(action_id=action.id)
+        # em_selecter.apply_filter(action_id=action.id)
         em_data = em_selecter.get_all()
         return [
             self.represent_measure(event_measure) for event_measure in em_data

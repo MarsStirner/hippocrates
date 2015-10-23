@@ -8,9 +8,10 @@ from collections import defaultdict
 from nemesis.lib.utils import safe_date, safe_int, safe_datetime
 from nemesis.systemwide import db
 from nemesis.models.expert_protocol import (ExpertScheme, ExpertSchemeMKBAssoc, EventMeasure, ExpertProtocol,
-    ExpertSchemeMeasureAssoc,)
+    ExpertSchemeMeasureAssoc)
 from nemesis.models.exists import MKB
 from nemesis.models.enums import MeasureStatus
+from blueprints.risar.lib.expert.utils import em_final_status_list
 from blueprints.risar.lib.utils import get_event_diag_mkbs, is_event_late_first_visit
 from blueprints.risar.lib.pregnancy_dates import get_pregnancy_start_date
 from blueprints.risar.risar_config import first_inspection_code
@@ -106,10 +107,10 @@ class EventMeasureGenerator(object):
         # В результате будут сформированы 2 списка EM - которые нужно создать и которые нужно обновить
         # 6) Проверить на дубликаты EM, имеющих одинаковые Measure (среди существующих и создаваемых)
         #   - оставлять только одно EM с более коротким(быстрым) сроком, оставшиеся помечать статусом Отмены с дублем
-        # 5) Обработать отметку об изменении набора мероприятий
+        # 7) Обработать отметку об изменении набора мероприятий
         #   - просто вернуть флаг, отражающий есть ли изменения или нет
-        # 6) обновить статус на Просрочено у существующих EM, которые должны быть закончены до текущего осмотра
-        # 7) создать новые и обновить старые EM из двух сформированных списков на сохранение
+        # 8) обновить статус на Просрочено у существующих EM, которые должны быть закончены до текущего осмотра
+        # 9) создать новые и обновить старые EM из двух сформированных списков на сохранение
         # ---
         # Сноски:
         # * - действующие определяются датами и статусами
@@ -130,14 +131,14 @@ class EventMeasureGenerator(object):
         )
         logger.debug(msg)
 
-        current_action_sm_list = self._select_scheme_measures_from_current_action()
+        current_action_sm_list = self._select_scheme_measures_from_current_state()
         msg = u'> EM generation [Get new SMs]: got SM list from current action id = {0}. Count = {1}'.format(
             self.source_action.id,
             reduce(lambda cur, c: cur + len(c.scheme_measures), current_action_sm_list, 0)
         )
         logger.debug(msg)
 
-        sm_to_exist_list = self._filter_sm_from_current_action(current_action_sm_list)
+        sm_to_exist_list = self._filter_sm_from_current_state(current_action_sm_list)
         msg = (u'> EM generation [Filter new SMs]: SM list from current action id = {0}, which EM should exist. '
                u'Count = {1} (filtered)').format(
             self.source_action.id,
@@ -173,10 +174,11 @@ class EventMeasureGenerator(object):
         new_em_list = self._filter_em_duplicates_by_measure(new_em_list)
         logger.debug(u'> EM generation: EM list filtered by Measure')
 
-        # TODO: impement this step
-        # expired_em_list = self._update_expired_event_measures()
-        # logger.debug('> EM generation: expired EM list processed')
-        expired_em_list = []
+        expired_em_list = self._update_expired_event_measures(new_em_list)
+        msg = u'> EM generation: Process expired EMs]: total number of EMs, set to overdue - {0}'.format(
+            len(expired_em_list)
+        )
+        logger.debug(msg)
 
         edited_items = (new_em_list + expired_em_list + self.aux_changed_em_list)
         self.save_event_measures(*edited_items)
@@ -218,16 +220,18 @@ class EventMeasureGenerator(object):
         :return:
         """
         min_beg_range = sm.schedule.applyBoundRangeLow
+        min_beg_range_unit_code = sm.schedule.apply_bound_range_low_unit.code
         max_beg_range = sm.schedule.applyBoundRangeLowMax
+        max_beg_range_unit_code = sm.schedule.apply_bound_range_low_max_unit.code
         ref_date = self.context.get_reference_dt()
         inspection_dt = self.context.inspection_datetime
         # TODO: think about endOfDay etc in datetimes
-        pos_start_dt_min = DateTimeUtil.add_to_date(ref_date, min_beg_range, DateTimeUtil.week)  # TODO: unit
+        pos_start_dt_min = DateTimeUtil.add_to_date(ref_date, min_beg_range, min_beg_range_unit_code)
         start_dt = None
         if (pos_start_dt_min < inspection_dt and
                 # TODO: подумать про разные случаи, которые могут повлиять на корректность проверки
                 sm.id not in self.existing_em_list.keys()):
-            pos_start_dt_max = DateTimeUtil.add_to_date(ref_date, max_beg_range, DateTimeUtil.week)  # TODO: unit
+            pos_start_dt_max = DateTimeUtil.add_to_date(ref_date, max_beg_range, max_beg_range_unit_code)
             if inspection_dt <= pos_start_dt_max:
                 start_dt = inspection_dt
         else:
@@ -253,13 +257,14 @@ class EventMeasureGenerator(object):
             if em.sourceAction_id == self.source_action.id:
                 self.existing_action_em_list[em.schemeMeasure_id].append(em)
 
-    def _select_scheme_measures_from_current_action(self):
+    def _select_scheme_measures_from_current_state(self):
+        mkb_list = self.context.actual_existing_mkb.union(self.context.actual_action_mkb)
         return [
             ActionMkbSpawner(self.source_action, mkb)
-            for mkb in self.context.actual_action_mkb
+            for mkb in mkb_list
         ]
 
-    def _filter_sm_from_current_action(self, spawner_list):
+    def _filter_sm_from_current_state(self, spawner_list):
         unique_sm_id_list = set()
         unique_sm_list = []
         for mkb_spawner in spawner_list:
@@ -304,9 +309,6 @@ class EventMeasureGenerator(object):
                         if intersect == IntersectionType.none_left:
                             upd_em = self.cancel_event_measure(em)
                             result.append(upd_em)
-                    # TODO: check
-                    # TODO: это повлечет за собой невозможность отметки просроченных мероприятий в конце алгоритма
-                    # del self.existing_em_list[sm_id]
         return result
 
     def _create_event_measures(self, sm_list):
@@ -363,7 +365,6 @@ class EventMeasureGenerator(object):
             if apply_code == 'rel_obj_date_count':
                 em_to_create = self._filter_renewed_em_in_action(em_list, scheme_measure)
             elif apply_code == 'rel_ref_date_bound_range':
-                # TODO: установка статуса просроченных для создаваемых мероприятий в прошлое-в пост обновлении статусов
                 em_to_create = self._filter_renewed_em_in_range(em_list, scheme_measure)
             elif apply_code == 'rel_conditional_count':
                 em_to_create = self._filter_renewed_em_in_range(em_list, scheme_measure)
@@ -423,14 +424,29 @@ class EventMeasureGenerator(object):
         # ignoring for now
         return em_list
 
-    def _update_expired_event_measures(self):
-        cur_dt = datetime.datetime.now()
-        result = []
-        for sm_id, em_list in self.existing_measures.iteritems():
-            for em in em_list:
-                if em.endDateTime < cur_dt and em.status != MeasureStatus.cancelled[0]:
-                    em.status = MeasureStatus.overdue[0]
+    def _update_expired_event_measures(self, new_em_list):
+        """Перевести просроченные мероприятия в соответствующий статус.
+        Проверяются существующий список мероприятий и новый (пере)создаваемый.
+
+        :param new_em_list:
+        :return:
+        """
+        def process_expired(em):
+            if em.endDateTime and em.endDateTime < exp_dt:
+                em = self.set_event_measure_overdue(em)
+                if em is not None:
                     result.append(em)
+
+        # TODO: check
+        exp_dt = max(datetime.datetime.now(), self.context.inspection_datetime)
+        result = []
+        for sm_id, em_list in self.existing_em_list.iteritems():
+            for em in em_list:
+                process_expired(em)
+
+        for em in new_em_list:
+            process_expired(em)
+
         return result
 
     def create_measure(self, scheme_measure, beg_dt, end_dt, status, action=None):
@@ -449,6 +465,12 @@ class EventMeasureGenerator(object):
         # TODO: implement
         em.status = MeasureStatus.cancelled[0]
         return em
+
+    def set_event_measure_overdue(self, em):
+        if em.status not in em_final_status_list:
+            em.status = MeasureStatus.overdue[0]
+            return em
+        return None
 
     def save_event_measures(self, *event_measures):
         db.session.add_all(event_measures)
@@ -584,7 +606,7 @@ class MeasureGeneratorRisarContext(object):
         if any(1 for st in st_list if st.code == 'upon_med_indication'):
             status = MeasureStatus.upon_med_indications[0]
         else:
-            status = MeasureStatus.assigned[0]
+            status = MeasureStatus.created[0]
         return status
 
     def get_reference_dt(self):

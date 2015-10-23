@@ -74,6 +74,13 @@ var CheckupCtrl = function ($scope, RisarApi, RefBookService, PrintingService, P
                 $scope.checkup.measures.splice(idx, 1, upd_em);
             });
     };
+    $scope.makeEmDirection = function (idx) {
+        var em = $scope.checkup.measures[idx];
+        EventMeasureService.make_direction(em)
+            .then(function (upd_em) {
+                $scope.checkup.measures.splice(idx, 1, upd_em);
+            });
+    };
 
     $scope.init = function () {
         var hash = document.location.hash;

@@ -317,6 +317,9 @@ ul.product-list, li.product-list-item-active {
   color: #AAA !important;
 }
 
+.measure-status-created {
+    background-color: #FFB02E !important;
+}
 .measure-status-assigned {
     background-color: #3C8DBC !important;
 }
@@ -326,12 +329,21 @@ ul.product-list, li.product-list-item-active {
 .measure-status-upon_med_indications {
     background-color: #9600CD !important;
 }
-.measure-status-cancelled {
-    background-color: #b1b5b5 !important;
-}
 .measure-status-overdue {
     background-color: #e43c43 !important;
 }
 .measure-status-performed {
     background-color: #1fc63a !important;
+}
+.measure-status-cancelled {
+    background-color: #b1b5b5 !important;
+}
+.measure-status-cancelled_dupl {
+    background-color: #b1b5b5 !important;
+}
+.measure-status-cancelled_changed_data {
+    background-color: #b1b5b5 !important;
+}
+.measure-status-assigned_not_actual {
+    background-color: #b1b5b5 !important;
 }

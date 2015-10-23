@@ -28,6 +28,12 @@ class EventMeasureController(object):
     def cancel(self, em):
         em.status = MeasureStatus.cancelled[0]
 
+    def make_direction(self, em):
+        # temp
+        em.action_id = em.sourceAction_id
+        em.status = MeasureStatus.assigned[0]
+        return em
+
     def store(self, *em_list):
         db.session.add_all(em_list)
         db.session.commit()
