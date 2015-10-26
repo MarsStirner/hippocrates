@@ -19,7 +19,7 @@
                                    ng-model="request_type.selected" ng-change="on_request_type_changed()"
                                    ng-disabled="widget_disabled('request_type') || services_added()">
                             <ui-select-match placeholder="Тип обращения">[[$select.selected.name]]</ui-select-match>
-                            <ui-select-choices repeat="rt in rbRequestType.objects | filter: filter_rb_request_type() | filter: $select.search">
+                            <ui-select-choices repeat="rt in rbRequestType.objects | filter: filter_rb_request_type(request_type_kind) | filter: $select.search">
                                 <div ng-bind-html="rt.name | highlight: $select.search"></div>
                             </ui-select-choices>
                         </ui-select>

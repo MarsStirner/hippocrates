@@ -88,6 +88,44 @@ def api_event_new_get():
     return jsonify(v.make_new_event(event))
 
 
+@module.route('/api/event_stationary_new.json', methods=['GET'])
+def api_event_stationary_new_get():
+    event = Event()
+    event.eventType = EventType.query.filter_by(code='03').first()
+    event.organisation = Organisation.query.filter_by(infisCode=str(app.config['ORGANISATION_INFIS_CODE'])).first()
+    event.isPrimaryCode = EventPrimary.primary[0]
+    event.order = EventOrder.planned[0]
+
+    ticket_id = request.args.get('ticket_id')
+    if ticket_id:
+        ticket = ScheduleClientTicket.query.get(int(ticket_id))
+        client_id = ticket.client_id
+        setDate = ticket.get_date_for_new_event()
+        note = ticket.note
+        exec_person_id = ticket.ticket.schedule.person_id
+        if ticket.ticket.schedule.finance_id:
+            request_type = rbRequestType.query.filter_by(code='policlinic').first()
+            event_type_by_ticket = EventType.query.filter_by(finance_id=ticket.ticket.schedule.finance_id,
+                                                             requestType_id=request_type.id).first()
+            if event_type_by_ticket:
+                event.eventType = event_type_by_ticket
+
+    else:
+        client_id = int(request.args['client_id'])
+        setDate = datetime.datetime.now()
+        note = ''
+        exec_person_id = current_user.get_main_user().id
+    if not event.is_diagnostic:
+        event.execPerson_id = exec_person_id
+        event.execPerson = Person.query.get(exec_person_id)
+        event.orgStructure = event.execPerson.org_structure
+    event.client = Client.query.get(client_id)
+    event.setDate = setDate
+    event.note = note
+    v = EventVisualizer()
+    return jsonify(v.make_new_event(event))
+
+
 @module.route('/api/event_stationary_opened.json', methods=['GET'])
 def api_event_stationary_open_get():
     client_id = int(request.args['client_id'])
