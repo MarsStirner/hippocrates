@@ -86,7 +86,7 @@ var ChartCtrl = function ($scope, $modal, RisarApi, PrintingService, PrintingDia
         open_edit_errand(model).result.then(function (rslt) {
             var result = rslt[0],
                 restart = rslt[1];
-            UserErrand.create_errand(result.exec_person, result.text, event_id, result.status, result.planned_exec_date);
+            UserErrand.create_errand(result.exec_person, result.text, $scope.chart.id, result.status, result.planned_exec_date);
         })
     };
     var open_edit_errand = function(e){
