@@ -58,7 +58,7 @@ def api_action_get(action_id):
     action = Action.query.get(action_id)
     v = ActionVisualizer()
     if is_template_action(action):
-        return v.make_action_wo_diagnosis_props(action)
+        return v.make_action_wo_sensitive_props(action)
     return v.make_action(action)
 
 
@@ -87,7 +87,7 @@ def api_find_previous():
         client = Client.query.get(client_id)
         action_type = ActionType.query.get(at_id)
         raise ApiException(404, u'У пациента "%s" других действий типа "%s" не найдено' % (client.nameText, action_type.name))
-    return ActionVisualizer().make_action_wo_diagnosis_props(prev)
+    return ActionVisualizer().make_action_wo_sensitive_props(prev)
 
 
 

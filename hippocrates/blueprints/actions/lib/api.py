@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from nemesis.lib.agesex import AgeSex
 from nemesis.lib.utils import transfer_fields
+from nemesis.lib.const import NOT_COPYABLE_VALUE_TYPES
 
 __author__ = 'viruzzz-kun'
 
@@ -26,7 +27,7 @@ def update_template_action(action, src_action):
     ])
 
     for k, v in src_action.propsByTypeId.iteritems():
-        if v.type.typeName != 'Diagnosis':
+        if v.type.typeName not in NOT_COPYABLE_VALUE_TYPES:
             action.setPropValue(k, v.value)
 
 
