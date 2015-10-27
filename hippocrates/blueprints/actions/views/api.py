@@ -8,7 +8,7 @@ from flask.ext.login import current_user
 
 from ..app import module
 from blueprints.actions.lib.api import represent_action_template
-from ..lib.api import update_template_action
+from ..lib.api import update_template_action, is_template_action
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.data import create_action, update_action, create_new_action, get_planned_end_datetime, int_get_atl_flat, \
     get_patient_location
@@ -57,6 +57,8 @@ def api_action_new_get(action_type_id, event_id):
 def api_action_get(action_id):
     action = Action.query.get(action_id)
     v = ActionVisualizer()
+    if is_template_action(action):
+        return v.make_action_wo_diagnosis_props(action)
     return v.make_action(action)
 
 
@@ -85,7 +87,7 @@ def api_find_previous():
         client = Client.query.get(client_id)
         action_type = ActionType.query.get(at_id)
         raise ApiException(404, u'У пациента "%s" других действий типа "%s" не найдено' % (client.nameText, action_type.name))
-    return ActionVisualizer().make_action(prev)
+    return ActionVisualizer().make_action_wo_diagnosis_props(prev)
 
 
 
@@ -399,5 +401,3 @@ def api_action_template_save(type_id, id_=None):
 
         db.session.commit()
         return represent_action_template(template)
-
-

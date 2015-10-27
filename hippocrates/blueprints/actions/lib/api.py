@@ -26,7 +26,8 @@ def update_template_action(action, src_action):
     ])
 
     for k, v in src_action.propsByTypeId.iteritems():
-        action.setPropValue(k, v.value)
+        if v.type.typeName != 'Diagnosis':
+            action.setPropValue(k, v.value)
 
 
 def represent_action_template(template):
@@ -37,3 +38,7 @@ def represent_action_template(template):
         'aid': template.action_id,
         'con': AgeSex(template)
     }
+
+
+def is_template_action(action):
+    return action.id and not action.event_id
