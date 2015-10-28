@@ -21,6 +21,7 @@ from nemesis.models.event import Event
 from nemesis.models.exists import Person
 from nemesis.models.utils import safe_current_user_id
 from nemesis.systemwide import db, cache
+from nemesis.lib.utils import crossdomain
 
 
 __author__ = 'viruzzz-kun'
@@ -313,10 +314,13 @@ def api_create_lab_direction():
 
 
 @module.route('/api/templates/<type_id>', methods=['GET'])
+@crossdomain('*', methods=['POST', 'OPTIONS'], headers='Content-Type')
 @api_method
 def api_action_template_list(type_id):
-    user_id = safe_current_user_id()
-    speciality_id = current_user.speciality_id
+    user_id = request.args.get('user_id') or safe_current_user_id()
+    speciality_id = request.args.get('speciality_id') or (
+        current_user.speciality_id if current_user is not None else None
+    )
     templates = ActionTemplate.query.outerjoin(Action).filter(
         db.and_(
             db.or_(
@@ -336,10 +340,15 @@ def api_action_template_list(type_id):
 
 @module.route('/api/templates/<type_id>', methods=['PUT'])
 @module.route('/api/templates/<type_id>/<id_>', methods=['POST'])
+@crossdomain('*', methods=['POST', 'OPTIONS'], headers='Content-Type')
 @api_method
 def api_action_template_save(type_id, id_=None):
     data = request.get_json()
     now = datetime.datetime.now()
+    user_id = data.get('user_id') or safe_current_user_id()
+    speciality_id = data.get('speciality_id') or (
+        current_user.speciality_id if current_user is not None else None
+    )
 
     with db.session.no_autoflush:
         src_action = None
@@ -351,7 +360,7 @@ def api_action_template_save(type_id, id_=None):
             template = ActionTemplate()
             db.session.add(template)
             template.createDatetime = now
-            template.createPerson_id = safe_current_user_id()
+            template.createPerson_id = user_id
             template.deleted = 0
             template.sex = 0
             template.age = ''
@@ -378,7 +387,7 @@ def api_action_template_save(type_id, id_=None):
             db.session.delete(action)
 
         template.modifyDatetime = now
-        template.modifyPerson_id = safe_current_user_id()
+        template.modifyPerson_id = user_id
 
         if 'gid' in data:
             template.group_id = data['gid']
@@ -388,12 +397,12 @@ def api_action_template_save(type_id, id_=None):
             template.code = data['code']
         if 'owner' in data:
             if data['owner']:
-                template.owner_id = safe_current_user_id()
+                template.owner_id = user_id
             else:
                 template.owner_id = None
         if 'speciality' in data:
             if data['speciality']:
-                template.speciality_id = current_user.speciality_id
+                template.speciality_id = speciality_id
             else:
                 template.speciality_id = None
         if template.code is None:
