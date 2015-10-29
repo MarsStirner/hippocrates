@@ -21,7 +21,7 @@ from nemesis.models.event import Event
 from nemesis.models.exists import Person
 from nemesis.models.utils import safe_current_user_id
 from nemesis.systemwide import db, cache
-from nemesis.lib.utils import crossdomain
+from nemesis.lib.utils import public_api
 
 
 __author__ = 'viruzzz-kun'
@@ -314,7 +314,7 @@ def api_create_lab_direction():
 
 
 @module.route('/api/templates/<type_id>', methods=['GET'])
-@crossdomain('*', methods=['POST', 'OPTIONS'], headers='Content-Type')
+@public_api
 @api_method
 def api_action_template_list(type_id):
     user_id = request.args.get('user_id') or safe_current_user_id()
@@ -340,7 +340,7 @@ def api_action_template_list(type_id):
 
 @module.route('/api/templates/<type_id>', methods=['PUT'])
 @module.route('/api/templates/<type_id>/<id_>', methods=['POST'])
-@crossdomain('*', methods=['POST', 'OPTIONS'], headers='Content-Type')
+@public_api
 @api_method
 def api_action_template_save(type_id, id_=None):
     data = request.get_json()
