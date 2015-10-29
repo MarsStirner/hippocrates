@@ -20,10 +20,16 @@
     <tbody>
         <tr ng-repeat="measure in checkup.measures">
             <td>[[ $index + 1 ]]</td>
-            <td>[[ measure.scheme_measure.measure.name ]]</td>
+            <td>
+                <span ng-bind="measure.scheme_measure.measure.name"></span><br>
+                <span class="text-muted" bind-html-compile="measure.additional_info"></span>
+            </td>
             <td>[[ measure.beg_datetime | asDateTime ]]</td>
             <td>[[ measure.end_datetime | asDateTime ]]</td>
-            <td><event-measure-status status="measure.status"></event-measure-status></td>
+            <td>
+                <event-measure-status status="measure.status"></event-measure-status>
+                <span ng-if="emIsNotActual(measure)">(Неактуально)</span>
+            </td>
             <td class="nowrap">
                 <div class="btn-group">
                     <button type="button" class="btn btn-primary" ng-click="viewEventMeasure($index)">

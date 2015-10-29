@@ -5,7 +5,7 @@ from sqlalchemy.orm import aliased
 from nemesis.lib.utils import safe_int, safe_datetime, safe_bool
 from nemesis.models.actions import Action
 from nemesis.models.expert_protocol import (EventMeasure, ExpertSchemeMeasureAssoc, rbMeasureType, Measure)
-from nemesis.models.enums import MeasureStatus
+from nemesis.models.enums import MeasureStatus, EventMeasureActuality
 
 
 class EventMeasureSelecter(object):
@@ -107,22 +107,43 @@ class EventMeasureRepr(object):
         }
 
     def represent_measure(self, measure):
-        import random
         return {
             'id': measure.id,
             'event_id': measure.event_id,
             'beg_datetime': measure.begDateTime,
             'end_datetime': measure.endDateTime,
-            # 'status': MeasureStatus(random.randint(1, 6)),
             'status': MeasureStatus(measure.status),
             'source_action': self.represent_source_action(measure.source_action),
             'action_id': measure.action_id,
+            'is_actual': EventMeasureActuality(measure.is_actual),
             'scheme_measure': self.represent_scheme_measure(measure.scheme_measure),
             'create_datetime': measure.createDatetime,
             'modify_datetime': measure.modifyDatetime,
             'create_person': measure.create_person,
-            'modify_person': measure.modify_person
+            'modify_person': measure.modify_person,
+            'additional_info': self._make_em_addtional_info(measure)
         }
+
+    def _make_em_addtional_info(self, em):
+        sm = em.scheme_measure
+        parts = []
+
+        additional_text = sm.schedule.additionalText
+        if additional_text:
+            parts.append(additional_text)
+
+        additional_mkbs = sm.schedule.additional_mkbs
+        if additional_mkbs:
+            text = u'Дополнительные диагнозы: {0}'.format(
+                u', '.join([
+                    u'<span tooltip="{0}"><span class="bottom_dotted">{1}</span></span>'.format(
+                        mkb.DiagName, mkb.DiagID
+                    )
+                    for mkb in additional_mkbs
+                ])
+            )
+            parts.append(text)
+        return u'<br>'.join(parts)
 
     def represent_scheme_measure(self, scheme_measure):
         return {
@@ -134,7 +155,8 @@ class EventMeasureRepr(object):
         return {
             'id': scheme.id,
             'code': scheme.code,
-            'name': scheme.name
+            'name': scheme.name,
+            'number': scheme.number
         }
 
     def represent_measure_rb(self, measure):

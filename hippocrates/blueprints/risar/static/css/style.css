@@ -171,13 +171,7 @@ span.empty-value {
 .navbar-inverse .navbar-link:hover {
     color: #fff;
 }
-.abs-alert{
-    position: absolute;
-    left: 30%;
-    right: 30%;
-    top: -15px;
-    z-index: 1100;
-}
+
 .inline-datepicker{
     display: inherit;
     width: 100%;

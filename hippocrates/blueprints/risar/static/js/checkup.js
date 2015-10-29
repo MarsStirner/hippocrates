@@ -81,6 +81,9 @@ var CheckupCtrl = function ($scope, RisarApi, RefBookService, PrintingService, P
                 $scope.checkup.measures.splice(idx, 1, upd_em);
             });
     };
+    $scope.emIsNotActual = function (em) {
+        return em.is_actual.id === 0;
+    };
 
     $scope.init = function () {
         var hash = document.location.hash;

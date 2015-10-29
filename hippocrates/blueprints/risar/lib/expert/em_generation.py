@@ -10,8 +10,9 @@ from nemesis.systemwide import db
 from nemesis.models.expert_protocol import (ExpertScheme, ExpertSchemeMKBAssoc, EventMeasure, ExpertProtocol,
     ExpertSchemeMeasureAssoc)
 from nemesis.models.exists import MKB
-from nemesis.models.enums import MeasureStatus
-from blueprints.risar.lib.expert.utils import em_final_status_list
+from nemesis.models.enums import MeasureStatus, EventMeasureActuality
+from blueprints.risar.lib.expert.utils import (em_final_status_list, em_garbage_status_list,
+    is_em_cancellable, is_em_touched, is_em_in_final_status)
 from blueprints.risar.lib.utils import get_event_diag_mkbs, is_event_late_first_visit
 from blueprints.risar.lib.pregnancy_dates import get_pregnancy_start_date
 from blueprints.risar.risar_config import first_inspection_code
@@ -205,7 +206,10 @@ class EventMeasureGenerator(object):
         return grouped_em
 
     def _filter_actual_existing_ems(self, em_list):
-        return [em for em in em_list if em.status != MeasureStatus.cancelled[0]]
+        """Оставить среди существующих EM только такие, которые влияют на проверки при
+        сравнении с заново сформированным списком тех EM, которые должны существовать
+        по текущим параметрам."""
+        return [em for em in em_list if em.is_actual == EventMeasureActuality.actual[0]]
 
     def _get_cond_start_dt(self, sm):
         """Получение даты начала для вычисления интервалов EM для способа применения
@@ -216,8 +220,6 @@ class EventMeasureGenerator(object):
         датой начала будет дата осмотра, но только в том случае, если она не выходит за рассчитанную дату
         по максимальной границе начала относительно опорной даты, в случае чего интервал не будет
         создаваться вообще.
-        :param sm:
-        :return:
         """
         min_beg_range = sm.schedule.applyBoundRangeLow
         min_beg_range_unit_code = sm.schedule.apply_bound_range_low_unit.code
@@ -225,18 +227,17 @@ class EventMeasureGenerator(object):
         max_beg_range_unit_code = sm.schedule.apply_bound_range_low_max_unit.code
         ref_date = self.context.get_reference_dt()
         inspection_dt = self.context.inspection_datetime
-        # TODO: think about endOfDay etc in datetimes
         pos_start_dt_min = DateTimeUtil.add_to_date(ref_date, min_beg_range, min_beg_range_unit_code)
-        start_dt = None
-        if (pos_start_dt_min < inspection_dt and
-                # TODO: подумать про разные случаи, которые могут повлиять на корректность проверки
-                sm.id not in self.existing_em_list.keys()):
-            pos_start_dt_max = DateTimeUtil.add_to_date(ref_date, max_beg_range, max_beg_range_unit_code)
-            if inspection_dt <= pos_start_dt_max:
-                start_dt = inspection_dt
+        # TODO: исправить проблему для ситуации, когда были созданы EM по одной схеме,
+        # после чего параметры расписания схемы существенно поменялись.
+        # В этом случае существующие EM являются неактуальными и должны быть отмечены этим признаком,
+        # и EM должны быть пересозданы по новым данным схемы.
+        if sm.id in self.existing_em_list.keys():
+            start_dt = self.existing_em_list[sm.id][0].begDateTime
         else:
-            if sm.id in self.existing_em_list.keys():
-                start_dt = self.existing_em_list[sm.id][0].begDateTime
+            pos_start_dt_max = DateTimeUtil.add_to_date(ref_date, max_beg_range, max_beg_range_unit_code)
+            if pos_start_dt_min < inspection_dt <= pos_start_dt_max:
+                start_dt = inspection_dt
             else:
                 start_dt = pos_start_dt_min
         return start_dt
@@ -247,7 +248,8 @@ class EventMeasureGenerator(object):
         query = db.session.query(EventMeasure).filter(
             EventMeasure.event_id == self.source_action.event_id,
             EventMeasure.deleted == 0,
-            EventMeasure.status.notin_([MeasureStatus.cancelled[0]])
+            EventMeasure.status.notin_(em_garbage_status_list),
+            EventMeasure.is_actual == EventMeasureActuality.actual[0]
         ).order_by(
             EventMeasure.begDateTime,
             EventMeasure.id
@@ -269,7 +271,7 @@ class EventMeasureGenerator(object):
         unique_sm_list = []
         for mkb_spawner in spawner_list:
             for sm in mkb_spawner.scheme_measures:
-                if (sm not in unique_sm_id_list and
+                if (sm.id not in unique_sm_id_list and
                         self.context.is_sm_apply_event_after_each_visit(sm) and
                         self.context.is_scheme_measure_acceptable(sm, mkb_spawner.mkb_code)):
                     unique_sm_id_list.add(sm.id)
@@ -281,6 +283,7 @@ class EventMeasureGenerator(object):
         что МКБ таких схем перестал быть актуальным.
         # TODO: доработать описание
         """
+        # TODO: check and think
         current_dt_point = DateTimeInterval(self.context.inspection_datetime, None)
         renew_sm_id_list = set([sm.id for sm in sm_to_exist_list])
         result = []
@@ -297,8 +300,9 @@ class EventMeasureGenerator(object):
                                 DateTimeInterval(em.begDateTime, em.endDateTime)
                             )
                             if intersect == IntersectionType.none_left:
-                                upd_em = self.cancel_event_measure(em)
-                                result.append(upd_em)
+                                upd_em = self.cancel_or_deactualize_em(em, MeasureStatus.cancelled_changed_data[0])
+                                if upd_em is not None:
+                                    result.append(upd_em)
             else:
                 if sm_id not in renew_sm_id_list:
                     for em in em_list:
@@ -307,8 +311,9 @@ class EventMeasureGenerator(object):
                             DateTimeInterval(em.begDateTime, em.endDateTime)
                         )
                         if intersect == IntersectionType.none_left:
-                            upd_em = self.cancel_event_measure(em)
-                            result.append(upd_em)
+                            upd_em = self.cancel_or_deactualize_em(em, MeasureStatus.cancelled_changed_data[0])
+                            if upd_em is not None:
+                                result.append(upd_em)
         return result
 
     def _create_event_measures(self, sm_list):
@@ -404,8 +409,9 @@ class EventMeasureGenerator(object):
                 break
             idx += 1
         for em in existing_em_list[idx:]:
-            em = self.cancel_event_measure(em)
-            self.aux_changed_em_list.append(em)
+            em = self.cancel_or_deactualize_em(em, MeasureStatus.cancelled_changed_data[0])
+            if em is not None:
+                self.aux_changed_em_list.append(em)
         em_to_create = []
         for em in em_list[idx:]:
             em_to_create.append(em)
@@ -427,9 +433,6 @@ class EventMeasureGenerator(object):
     def _update_expired_event_measures(self, new_em_list):
         """Перевести просроченные мероприятия в соответствующий статус.
         Проверяются существующий список мероприятий и новый (пере)создаваемый.
-
-        :param new_em_list:
-        :return:
         """
         def process_expired(em):
             if em.endDateTime and em.endDateTime < exp_dt:
@@ -437,7 +440,6 @@ class EventMeasureGenerator(object):
                 if em is not None:
                     result.append(em)
 
-        # TODO: check
         exp_dt = max(datetime.datetime.now(), self.context.inspection_datetime)
         result = []
         for sm_id, em_list in self.existing_em_list.iteritems():
@@ -461,10 +463,26 @@ class EventMeasureGenerator(object):
         em.event_id = source_action.event.id
         return em
 
-    def cancel_event_measure(self, em):
-        # TODO: implement
-        em.status = MeasureStatus.cancelled[0]
-        return em
+    def cancel_or_deactualize_em(self, em, status):
+        """Отменить EM, если это возможно, в частности с ним не работал пользователь;
+        иначе - отметить его как неактуальное.
+        """
+        if is_em_touched(em) or is_em_in_final_status(em):
+            return self.set_event_measure_actuality(em, EventMeasureActuality.not_actual[0])
+        else:
+            return self.cancel_event_measure(em, status)
+
+    def cancel_event_measure(self, em, status=MeasureStatus.cancelled[0]):
+        if is_em_cancellable(em):
+            em.status = status
+            return em
+        return None
+
+    def set_event_measure_actuality(self, em, actuality):
+        if em.is_actual != actuality:
+            em.is_actual = actuality
+            return em
+        return None
 
     def set_event_measure_overdue(self, em):
         if em.status not in em_final_status_list:
@@ -540,7 +558,7 @@ class MeasureGeneratorRisarContext(object):
 
     def _check_st_ipd(self, sm, mkb_code):
         diag_list = self.actual_existing_mkb.union(self.actual_action_mkb)
-        return any(mkb.DiagID in diag_list for mkb in sm.schedule.additional_mkbs)
+        return all(mkb.DiagID in diag_list for mkb in sm.schedule.additional_mkbs)
 
     st_handlers = {
         'after_each_visit': lambda *args: True,

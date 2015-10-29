@@ -111,7 +111,7 @@ var EventMeasureModalCtrl = function ($scope, $filter, RisarApi, RefBookService,
     $scope.event_measure = event_measure;
 
     $scope.getSchemeInfo = function () {
-        return '{0}. {1}'.format(event_measure.scheme_measure.scheme.code, event_measure.scheme_measure.scheme.name);
+        return '{0}. {1}'.format(event_measure.scheme_measure.scheme.number, event_measure.scheme_measure.scheme.name);
     };
     $scope.getMeasureDateRange = function () {
         return '{0} - {1}'.format(
