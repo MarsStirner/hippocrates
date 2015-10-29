@@ -319,7 +319,7 @@ def api_create_lab_direction():
 def api_action_template_list(type_id):
     user_id = request.args.get('user_id') or safe_current_user_id()
     speciality_id = request.args.get('speciality_id') or (
-        current_user.speciality_id if current_user is not None else None
+        getattr(current_user, 'speciality_id') if current_user is not None else None
     )
     templates = ActionTemplate.query.outerjoin(Action).filter(
         db.and_(
@@ -347,7 +347,7 @@ def api_action_template_save(type_id, id_=None):
     now = datetime.datetime.now()
     user_id = data.get('user_id') or safe_current_user_id()
     speciality_id = data.get('speciality_id') or (
-        current_user.speciality_id if current_user is not None else None
+        getattr(current_user, 'speciality_id') if current_user is not None else None
     )
 
     with db.session.no_autoflush:
