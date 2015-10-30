@@ -307,15 +307,13 @@ var EventPaymentCtrl = function($scope, RefBookService, $http, $modal, MessageBo
     $scope.contract_info_disabled = function () {
         return !(
             $scope.event.has_access_to_payment_info && (
-                !$scope.eventServices.isPaymentPerService($scope.event) &&
                 ($scope.create_mode || $scope.editing.contract_edited)
             )
         );
     };
     $scope.btn_edit_contract_info_visible = function () {
         var lc = $scope.event.payment && $scope.event.payment.local_contract || null;
-        return ($scope.event.has_access_to_payment_info &&
-            !$scope.eventServices.isPaymentPerService($scope.event) && (
+        return ($scope.event.has_access_to_payment_info && (
                 !lc || !lc.date_contract || !lc.number_contract || !lc.coord_text
             )
         );

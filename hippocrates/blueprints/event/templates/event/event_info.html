@@ -95,6 +95,16 @@
                                 </ng-form>
                             </div>
                         {% endif %}
+                        <div class="box box-info">
+                            <ng-form name="eventPrescriptions" toc-element="Назначения">
+                                <div class="box-header with-border">
+                                    <h3 class="box-title">Назначения</h3>
+                                </div>
+                                <div class="box-body">
+                                    <medication-prescriptions model="event.info.prescriptions">
+                                </div>
+                            </ng-form>
+                        </div>
                     </ng-form>
                 </div>
             </div>

@@ -65,6 +65,13 @@ def api_event_new_get():
         setDate = ticket.get_date_for_new_event()
         note = ticket.note
         exec_person_id = ticket.ticket.schedule.person_id
+        if ticket.ticket.schedule.finance_id:
+            request_type = rbRequestType.query.filter_by(code='policlinic').first()
+            event_type_by_ticket = EventType.query.filter_by(finance_id=ticket.ticket.schedule.finance_id,
+                                                             requestType_id=request_type.id).first()
+            if event_type_by_ticket:
+                event.eventType = event_type_by_ticket
+
     else:
         client_id = int(request.args['client_id'])
         setDate = datetime.datetime.now()

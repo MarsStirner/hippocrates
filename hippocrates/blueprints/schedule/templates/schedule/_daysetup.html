@@ -68,7 +68,14 @@
                                                             </ui-select-choices>
                                                         </ui-select>
                                                     </div>
-
+                                                    <div>
+                                                        <label for="finance[[$index]]" class="text-nowrap">Источник финансирования</label>
+                                                        <select class="form-control" id="finance[[$index]]" name="finance" theme="select2"
+                                                                   ng-model="interval.finance"
+                                                                   ng-options="fin as fin.name for fin in finance | filter: filter_finance() | orderBy: 'name' track by fin.id">
+                                                            <option value="">Не выбран</option>
+                                                        </select>
+                                                    </div>
                                                 </div>
                                                 <div class="form-group col-md-2 text-center">
                                                     <label for="beg_time[[$index]]">Начало приёма</label>
