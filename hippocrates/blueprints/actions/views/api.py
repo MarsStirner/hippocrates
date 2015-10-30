@@ -8,7 +8,7 @@ from flask.ext.login import current_user
 
 from ..app import module
 from blueprints.actions.lib.api import represent_action_template
-from ..lib.api import update_template_action
+from ..lib.api import update_template_action, is_template_action
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.data import create_action, update_action, create_new_action, get_planned_end_datetime, int_get_atl_flat, \
     get_patient_location
@@ -21,6 +21,7 @@ from nemesis.models.event import Event
 from nemesis.models.exists import Person
 from nemesis.models.utils import safe_current_user_id
 from nemesis.systemwide import db, cache
+from nemesis.lib.utils import public_api
 
 
 __author__ = 'viruzzz-kun'
@@ -57,6 +58,8 @@ def api_action_new_get(action_type_id, event_id):
 def api_action_get(action_id):
     action = Action.query.get(action_id)
     v = ActionVisualizer()
+    if is_template_action(action):
+        return v.make_action_wo_sensitive_props(action)
     return v.make_action(action)
 
 
@@ -85,7 +88,7 @@ def api_find_previous():
         client = Client.query.get(client_id)
         action_type = ActionType.query.get(at_id)
         raise ApiException(404, u'У пациента "%s" других действий типа "%s" не найдено' % (client.nameText, action_type.name))
-    return ActionVisualizer().make_action(prev)
+    return ActionVisualizer().make_action_wo_sensitive_props(prev)
 
 
 
@@ -131,7 +134,8 @@ def api_action_post(action_id=None):
         'uet': action_desc['uet'],
         'payStatus': action_desc['pay_status'] or 0,
         'coordDate': safe_datetime(action_desc['coord_date']),
-        'office': action_desc['office']
+        'office': action_desc['office'],
+        'prescriptions': action_desc.get('prescriptions'),
     }
     properties_desc = action_desc['properties']
     if action_id:
@@ -157,8 +161,6 @@ def api_action_post(action_id=None):
             subscriptions.append(set_person_id)
         action = update_action(action, **data)
     else:
-        import pprint
-        pprint.pprint(action_desc)
         at_id = safe_traverse(action_desc, 'action_type', 'id', default=action_desc['action_type_id'])
         if not at_id:
             raise ApiException(404, u'Невозможно создать действие без указания типа action_type.id')
@@ -311,10 +313,13 @@ def api_create_lab_direction():
 
 
 @module.route('/api/templates/<type_id>', methods=['GET'])
+@public_api
 @api_method
 def api_action_template_list(type_id):
-    user_id = safe_current_user_id()
-    speciality_id = current_user.speciality_id
+    user_id = request.args.get('user_id') or safe_current_user_id()
+    speciality_id = request.args.get('speciality_id') or (
+        getattr(current_user, 'speciality_id', None) if current_user is not None else None
+    )
     templates = ActionTemplate.query.outerjoin(Action).filter(
         db.and_(
             db.or_(
@@ -334,10 +339,15 @@ def api_action_template_list(type_id):
 
 @module.route('/api/templates/<type_id>', methods=['PUT'])
 @module.route('/api/templates/<type_id>/<id_>', methods=['POST'])
+@public_api
 @api_method
 def api_action_template_save(type_id, id_=None):
     data = request.get_json()
     now = datetime.datetime.now()
+    user_id = data.get('user_id') or safe_current_user_id()
+    speciality_id = data.get('speciality_id') or (
+        getattr(current_user, 'speciality_id', None) if current_user is not None else None
+    )
 
     with db.session.no_autoflush:
         src_action = None
@@ -349,7 +359,7 @@ def api_action_template_save(type_id, id_=None):
             template = ActionTemplate()
             db.session.add(template)
             template.createDatetime = now
-            template.createPerson_id = safe_current_user_id()
+            template.createPerson_id = user_id
             template.deleted = 0
             template.sex = 0
             template.age = ''
@@ -376,7 +386,7 @@ def api_action_template_save(type_id, id_=None):
             db.session.delete(action)
 
         template.modifyDatetime = now
-        template.modifyPerson_id = safe_current_user_id()
+        template.modifyPerson_id = user_id
 
         if 'gid' in data:
             template.group_id = data['gid']
@@ -386,12 +396,12 @@ def api_action_template_save(type_id, id_=None):
             template.code = data['code']
         if 'owner' in data:
             if data['owner']:
-                template.owner_id = safe_current_user_id()
+                template.owner_id = user_id
             else:
                 template.owner_id = None
         if 'speciality' in data:
             if data['speciality']:
-                template.speciality_id = current_user.speciality_id
+                template.speciality_id = speciality_id
             else:
                 template.speciality_id = None
         if template.code is None:
@@ -399,5 +409,3 @@ def api_action_template_save(type_id, id_=None):
 
         db.session.commit()
         return represent_action_template(template)
-
-

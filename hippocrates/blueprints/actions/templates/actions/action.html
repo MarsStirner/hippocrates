@@ -2,6 +2,9 @@
 {% import "_macros.html" as macros %}
 {% block main %}
 <div ng-controller="ActionEditorCtrl" class="ng-cloak">
+<div class="alert alert-warning text-center" style="font-size: larger" ng-if="isActionLockedByOtherPerson()">
+    Данные заблокированы пользователем <b>[[ locker_person.description ]]</b>
+</div>
 <div alert-notify></div>
 <section class="content-header">
     <div class="wm-page-header-button-box">

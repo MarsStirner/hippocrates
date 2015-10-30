@@ -12,12 +12,13 @@ from nemesis.systemwide import db, cache
 from nemesis.lib.sphinx_search import SearchPerson
 from nemesis.lib.utils import (jsonify, safe_traverse, parse_id, safe_date, safe_time_as_dt, safe_traverse_attrs, format_date, initialize_name, safe_bool)
 from nemesis.lib.utils import public_endpoint
+from nemesis.lib.apiutils import api_method
 from ..app import module
 from ..lib.data import delete_schedules
 from nemesis.models.exists import (rbSpeciality, rbReasonOfAbsence, Person, vrbPersonWithSpeciality)
 from nemesis.models.schedule import (Schedule, ScheduleTicket, ScheduleClientTicket, rbAppointmentType,
     rbAttendanceType, QuotingByTime)
-from nemesis.lib.jsonify import ScheduleVisualizer
+from nemesis.lib.jsonify import ScheduleVisualizer, PersonTreeVisualizer
 
 
 __author__ = 'mmalkov'
@@ -213,6 +214,7 @@ def api_schedule_description_post():
                 new_sched.endTimeAsDt = safe_time_as_dt(sub_sched['endTime'])
                 new_sched.endTime = new_sched.endTimeAsDt.time()
                 new_sched.receptionType_id = safe_traverse(sub_sched, 'reception_type', 'id')
+                new_sched.finance_id = safe_traverse(sub_sched, 'finance', 'id')
                 office_id = safe_traverse(sub_sched, 'office', 'id')
                 if not office_id and safe_traverse(sub_sched, 'reception_type', 'code') == 'amb':
                     return jsonify({}, 422, u'На %s не указан кабинет' % format_date(date))
@@ -347,9 +349,15 @@ def api_search_persons():
     return jsonify(data)
 
 
-    # Следующие 2 функции следует привести к приличному виду - записывать id создавших, проверки, ответы
+@module.route('/api/person/')
+@module.route('/api/person/<int:person_id>')
+@api_method
+def api_person_get(person_id=None):
+    person = Person.query.get_or_404(person_id)
+    return PersonTreeVisualizer().make_full_person(person)
 
 
+# Следующие 2 функции следует привести к приличному виду - записывать id создавших, проверки, ответы
 @module.route('/api/appointment.json', methods=['POST'])
 @public_endpoint
 def api_appointment():

@@ -1,7 +1,8 @@
 /**
  * Created by mmalkov on 14.07.14.
  */
-var ActionEditorCtrl = function ($scope, $window, $modal, WMAction, PrintingService, PrintingDialog, RefBookService, WMEventCache, $q, MessageBox, NotificationService) {
+var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, WMAction, PrintingService, PrintingDialog,
+        RefBookService, WMEventCache, MessageBox, NotificationService, WMConfig) {
     var params = aux.getQueryParams(location.search);
     $scope.ps = new PrintingService("action");
     $scope.ps_resolve = function () {
@@ -12,6 +13,7 @@ var ActionEditorCtrl = function ($scope, $window, $modal, WMAction, PrintingServ
     $scope.ActionStatus = RefBookService.get('ActionStatus');
     $scope.action_id = params.action_id;
     $scope.action = new WMAction();
+    $scope.locker_person = null;
     if (params.action_id) {
         WMAction.get(params.action_id).then(function (action) {
             $scope.action = action;
@@ -19,6 +21,18 @@ var ActionEditorCtrl = function ($scope, $window, $modal, WMAction, PrintingServ
             process_printing();
             WMEventCache.get($scope.action.event_id).then(function (event) {
                 $scope.event = event;
+            });
+            return action;
+        }).then(function (action) {
+            console.log(action.lock);
+            $scope.$watch('action.lock.locker', function (newVal, oldVal) {
+                if (!$scope.action.lock.success && newVal) {
+                    var locker_id = $scope.action.lock.locker;
+                    $http.get(WMConfig.url.api_person_get + locker_id)
+                        .success(function (data) {
+                            $scope.locker_person = data.result;
+                        })
+                }
             });
         });
     } else if (params.event_id && params.action_type_id) {
@@ -44,6 +58,9 @@ var ActionEditorCtrl = function ($scope, $window, $modal, WMAction, PrintingServ
         }
     }
 
+    $scope.isActionLockedByOtherPerson = function () {
+        return Boolean($scope.locker_person);
+    };
     $scope.on_status_changed = function () {
         if ($scope.action.status.code === 'finished') {
             if (!$scope.action.end_date) {
@@ -53,15 +70,15 @@ var ActionEditorCtrl = function ($scope, $window, $modal, WMAction, PrintingServ
             $scope.action.end_date = null;
         }
     };
-    $scope.on_enddate_changed = function () {
-        if ($scope.action.end_date) {
+    $scope.$watch('action.end_date', function (newVal, oldVal) {
+        if (newVal) {
             if ($scope.action.status.code !== 'finished') {
                 $scope.action.status = $scope.ActionStatus.get_by_code('finished');
             }
         } else {
             $scope.action.status = $scope.ActionStatus.get_by_code('started');
         }
-    };
+    });
 
     $scope.save_action = function (need_to_print) {
         var was_new = $scope.action.is_new();
@@ -308,13 +325,15 @@ var ActionTemplateController = function ($scope, $modalInstance, $http, FlatTree
     load_tree();
 };
 
-WebMis20.controller('ActionEditorCtrl', ['$scope', '$window', '$modal', 'WMAction', 'PrintingService', 'PrintingDialog', 'RefBookService', 'WMEventCache', '$q', 'MessageBox', 'NotificationService', ActionEditorCtrl]);
+WebMis20.controller('ActionEditorCtrl', ['$scope', '$window', '$modal', '$q', '$http', 'WMAction', 'PrintingService',
+    'PrintingDialog', 'RefBookService', 'WMEventCache', 'MessageBox', 'NotificationService',
+    'WMConfig', ActionEditorCtrl]);
 
 WebMis20.factory('WMAction', ['ApiCalls', 'EzekielLock', function (ApiCalls, EzekielLock) {
     // FIXME: На данный момент это ломает функциональность действий, но пока пофиг.
     var template_fields = ['direction_date', 'beg_date', 'end_date', 'planned_end_date', 'status', 'set_person',
         'person', 'note', 'office', 'amount', 'uet', 'pay_status', 'account', 'is_urgent', 'coord_date'];
-    var fields = ['id', 'event_id', 'client'].concat(template_fields);
+    var fields = ['id', 'event_id', 'client', 'prescriptions'].concat(template_fields);
     var Action = function () {
         this.action = {};
         this.layout = {};
@@ -374,9 +393,19 @@ WebMis20.factory('WMAction', ['ApiCalls', 'EzekielLock', function (ApiCalls, Eze
                 var action = (new Action()).merge(result, true);
                 if (!arguments[1] && !action.ro) {
                     var lock = action.lock = new EzekielLock('hitsl.mis.action.{0}'.format(action.id));
-                    lock.subscribe('acquired', function () {action.readonly = false});
-                    lock.subscribe('lost', function () {action.readonly = true});
-                    lock.subscribe('released', function () {action.readonly = true});
+                    lock.subscribe('acquired', function () {
+                        action.readonly = false
+                    });
+                    lock.subscribe('lost', function () {
+                        action.readonly = true
+                    });
+                    lock.subscribe('released', function () {
+                        action.readonly = true
+                    });
+                    lock.subscribe('rejected', function () {
+                        action.readonly = true;
+                        lock.close();
+                    });
                 } else {
                     action.lock = null;
                     action.readonly = action.ro;

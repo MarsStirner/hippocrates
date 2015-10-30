@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from nemesis.lib.agesex import AgeSex
 from nemesis.lib.utils import transfer_fields
+from nemesis.lib.const import NOT_COPYABLE_VALUE_TYPES
 
 __author__ = 'viruzzz-kun'
 
@@ -26,7 +27,8 @@ def update_template_action(action, src_action):
     ])
 
     for k, v in src_action.propsByTypeId.iteritems():
-        action.setPropValue(k, v.value)
+        if v.type.typeName not in NOT_COPYABLE_VALUE_TYPES:
+            action.setPropValue(k, v.value)
 
 
 def represent_action_template(template):
@@ -37,3 +39,7 @@ def represent_action_template(template):
         'aid': template.action_id,
         'con': AgeSex(template)
     }
+
+
+def is_template_action(action):
+    return action.id and not action.event_id
