@@ -1,23 +1,10 @@
 # -*- coding: utf-8 -*-
 
-import datetime
-import logging
+from blueprints.risar.lib.utils import fill_action
 
-from collections import defaultdict
-from sqlalchemy.orm import aliased
-
-from nemesis.lib.utils import safe_date, safe_int, safe_datetime, safe_bool
 from nemesis.systemwide import db
-from nemesis.models.actions import Action
-from nemesis.models.expert_protocol import (ExpertScheme, ExpertSchemeMKBAssoc, EventMeasure, ExpertProtocol,
-    ExpertSchemeMeasureAssoc, rbMeasureType, Measure, MeasureSchedule, rbMeasureScheduleApplyType)
-from nemesis.models.exists import MKB
-from nemesis.models.enums import MeasureStatus, MeasureScheduleTypeKind
-from blueprints.risar.lib.utils import get_event_diag_mkbs
-from blueprints.risar.lib.pregnancy_dates import get_pregnancy_start_date
-from blueprints.risar.risar_config import first_inspection_code
-from blueprints.risar.lib.time_converter import DateTimeUtil
-from blueprints.risar.lib.datetime_interval import DateTimeInterval, get_intersection_type, IntersectionType
+from nemesis.models.enums import MeasureStatus
+from nemesis.lib.data import create_action
 
 
 class EventMeasureController(object):
@@ -27,13 +14,31 @@ class EventMeasureController(object):
 
     def cancel(self, em):
         em.status = MeasureStatus.cancelled[0]
-
-    def make_direction(self, em):
-        # temp
-        em.action_id = em.sourceAction_id
-        em.status = MeasureStatus.assigned[0]
         return em
 
-    def store(self, *em_list):
-        db.session.add_all(em_list)
+    def make_assigned(self, em):
+        if em.status == MeasureStatus.created[0]:
+            em.status = MeasureStatus.assigned[0]
+        return em
+
+    def get_new_appointment(self, em):
+        event_id = em.event_id
+        action_type_id = em.scheme_measure.measure.appointmentAt_id
+        appointment = create_action(action_type_id, event_id)
+        return appointment
+
+    def create_appointment(self, em, json_data):
+        appointment = self.get_new_appointment(em)
+        appointment = fill_action(appointment, json_data)
+        em.appointment_action = appointment
+        self.make_assigned(em)
+        return appointment
+
+    def update_appointment(self, em, appointment, json_data):
+        appointment = fill_action(appointment, json_data)
+        em.appointment_action = appointment
+        return appointment
+
+    def store(self, *entity_list):
+        db.session.add_all(entity_list)
         db.session.commit()

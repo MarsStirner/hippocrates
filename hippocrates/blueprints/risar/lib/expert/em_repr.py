@@ -6,6 +6,7 @@ from nemesis.lib.utils import safe_int, safe_datetime, safe_bool
 from nemesis.models.actions import Action
 from nemesis.models.expert_protocol import (EventMeasure, ExpertSchemeMeasureAssoc, rbMeasureType, Measure)
 from nemesis.models.enums import MeasureStatus, EventMeasureActuality
+from blueprints.risar.lib.expert.utils import can_edit_em_appointment, can_edit_em_result
 
 
 class EventMeasureSelecter(object):
@@ -67,7 +68,7 @@ class EventMeasureRepr(object):
         # em_selecter.apply_filter(action_id=action.id)
         em_data = em_selecter.get_all()
         return [
-            self.represent_measure(event_measure) for event_measure in em_data
+            self.represent_em_full(event_measure) for event_measure in em_data
         ]
 
     def represent_by_event(self, event, query_filter=None):
@@ -94,7 +95,7 @@ class EventMeasureRepr(object):
             'count': em_data.total,
             'total_pages': em_data.pages,
             'measures': [
-                self.represent_measure(event_measure) for event_measure in em_data.items
+                self.represent_event_measure(event_measure) for event_measure in em_data.items
             ]
         }
 
@@ -102,11 +103,23 @@ class EventMeasureRepr(object):
         em_data = selecter.get_all()
         return {
             'measures': [
-                self.represent_measure(event_measure) for event_measure in em_data
+                self.represent_event_measure(event_measure) for event_measure in em_data
             ]
         }
 
-    def represent_measure(self, measure):
+    def represent_em_full(self, em):
+        em_data = self.represent_event_measure(em)
+        return {
+            'data': em_data,
+            'access': {
+                'can_edit_appointment': can_edit_em_appointment(em),
+                'can_edit_result': can_edit_em_result(em),
+                'can_cancel': False
+            },
+            'additional_info': self._make_em_addtional_info(em)
+        }
+
+    def represent_event_measure(self, measure):
         return {
             'id': measure.id,
             'event_id': measure.event_id,
@@ -114,14 +127,14 @@ class EventMeasureRepr(object):
             'end_datetime': measure.endDateTime,
             'status': MeasureStatus(measure.status),
             'source_action': self.represent_source_action(measure.source_action),
-            'action_id': measure.action_id,
+            'appointment_action_id': measure.appointmentAction_id,
+            'result_action_id': measure.resultAction_id,
             'is_actual': EventMeasureActuality(measure.is_actual),
             'scheme_measure': self.represent_scheme_measure(measure.scheme_measure),
             'create_datetime': measure.createDatetime,
             'modify_datetime': measure.modifyDatetime,
             'create_person': measure.create_person,
-            'modify_person': measure.modify_person,
-            'additional_info': self._make_em_addtional_info(measure)
+            'modify_person': measure.modify_person
         }
 
     def _make_em_addtional_info(self, em):

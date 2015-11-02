@@ -37,3 +37,17 @@ def is_em_cancellable(em):
 
 def is_em_in_final_status(em):
     return em.status in em_final_status_list
+
+
+def can_edit_em_appointment(em):
+    return (
+        em.appointmentAction_id is not None or
+        em.scheme_measure.measure.appointmentAt_id is not None
+    )
+
+
+def can_edit_em_result(em):
+    return (
+        em.resultAction_id is not None or
+        em.scheme_measure.measure.resultAt_id is not None
+    )

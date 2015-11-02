@@ -1,3 +1,4 @@
+<div ng-controller="EventMeasureActionViewCtrl">
 <div ng-if="checkup.measures.length || true">
 <div class="text-right">
     <div class="btn-group">
@@ -18,37 +19,38 @@
         </tr>
     </thead>
     <tbody>
-        <tr ng-repeat="measure in checkup.measures">
+        <tr ng-repeat="em in checkup.measures track by em.data.id">
             <td>[[ $index + 1 ]]</td>
             <td>
-                <span ng-bind="measure.scheme_measure.measure.name"></span><br>
-                <span class="text-muted" bind-html-compile="measure.additional_info"></span>
+                <span ng-bind="em.data.scheme_measure.measure.name"></span>
+                <span ng-if="emHasAppointment(em)" class="small-left-margin fa fa-file-text" title="Имеется направление"></span>
+                <br><span class="text-muted" bind-html-compile="em.additional_info"></span>
             </td>
-            <td>[[ measure.beg_datetime | asDateTime ]]</td>
-            <td>[[ measure.end_datetime | asDateTime ]]</td>
+            <td>[[ em.data.beg_datetime | asDateTime ]]</td>
+            <td>[[ em.data.end_datetime | asDateTime ]]</td>
             <td>
-                <event-measure-status status="measure.status"></event-measure-status>
-                <span ng-if="emIsNotActual(measure)">(Неактуально)</span>
+                <event-measure-status status="em.data.status"></event-measure-status>
+                <span ng-if="emIsNotActual(em)">(Неактуально)</span>
             </td>
             <td class="nowrap">
-                <div class="btn-group">
+                <div class="btn-group" style="min-width: 125px">
                     <button type="button" class="btn btn-primary" ng-click="viewEventMeasure($index)">
                         Просмотр
                     </button>
                     <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         <span class="caret"></span>
                     </button>
-                    <ul class="dropdown-menu" role="menu">
-                        <li role="menuitem"><a href="javascript:void(0);" ng-click="makeEmDirection($index)">Редактировать направление</a></li>
-                        <li role="menuitem"><a href="javascript:void(0);">Редактировать результаты</a></li>
+                    <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                        <li role="menuitem" ng-class="{'disabled': !canEditEmAppointment(em)}">
+                            <a href="javascript:void(0);" ng-click="openEmAppointment($index)">Редактировать направление</a>
+                        </li>
+                        <li role="menuitem" ng-class="{'disabled': !canEditEmResult(em)}">
+                            <a href="javascript:void(0);">Редактировать результаты</a>
+                        </li>
                         <li role="separator" class="divider"></li>
                         <li role="menuitem"><a href="javascript:void(0);" ng-click="cancelEm($index)">Отменить</a></li>
                     </ul>
                 </div>
-                <button type="button" class="btn btn-default">
-                    <span class="fa fa-edit"></span> Редактировать</button>
-                <button type="button" class="btn btn-default">
-                    <span class="fa fa-print"></span> Печать</button>
             </td>
         </tr>
     </tbody>
@@ -58,4 +60,5 @@
     <h3 class="text-center">Не хватает данных для формирования мероприятий</h3>
     <span class="text-muted">Требуется заполнить раздел «Заключение»: Беременность (недель),
         Плановая дата следующей явки, Основной диагноз.</span>
+</div>
 </div>

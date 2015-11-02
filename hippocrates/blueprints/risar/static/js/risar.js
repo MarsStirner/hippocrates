@@ -276,14 +276,50 @@ WebMis20
         regenerate: function (action_id) {
             return wrapper('GET', Config.url.api_event_measure_generate + action_id)
         },
+        get: function (event_measure_id) {
+            return wrapper('GET', Config.url.api_event_measure_get + event_measure_id);
+        },
         remove: function (action_id) {
             return wrapper('POST', Config.url.api_event_measure_remove + action_id)
         },
         cancel: function (event_measure_id) {
             return wrapper('POST', Config.url.api_event_measure_cancel + event_measure_id);
         },
-        make_direction: function (event_measure_id) {
-            return wrapper('POST', Config.url.api_event_measure_make_direction.format(event_measure_id));
+        get_appointment: function (event_measure_id, appointment_id) {
+            var url = Config.url.api_event_measure_appointment_get.format(event_measure_id);
+            if (appointment_id) {
+                url += appointment_id;
+            } else {
+                url += '?new=true';
+            }
+            return wrapper('GET', url);
+        },
+        save_appointment: function (event_measure_id, appointment_id, data) {
+            var url = Config.url.api_event_measure_appointment_save.format(event_measure_id),
+                method;
+            if (appointment_id) {
+                url += appointment_id;
+                method = 'POST';
+            } else {
+                method = 'PUT';
+            }
+            return wrapper(method, url, {}, data)
+                .then(function (action) {
+                    NotificationService.notify(
+                        200,
+                        'Успешно сохранено',
+                        'success',
+                        5000
+                    );
+                    return action;
+                }, function (result) {
+                    NotificationService.notify(
+                        500,
+                        'Ошибка сохранения, свяжитесь с администратором',
+                        'danger'
+                    );
+                    return result;
+                });
         }
     };
     this.stats = {

@@ -3,13 +3,14 @@
 import datetime
 from sqlalchemy.orm import lazyload
 
-from nemesis.lib.data import create_action
-from nemesis.lib.utils import safe_traverse_attrs, safe_dict
+from nemesis.lib.data import create_action, update_action
+from nemesis.lib.utils import safe_traverse_attrs, safe_dict, safe_traverse, safe_datetime
 from nemesis.models.actions import Action, ActionType, ActionProperty, ActionPropertyType
 from nemesis.models.event import Event, Diagnostic, Diagnosis
 from nemesis.models.risar import rbPregnancyPathology, rbPerinatalRiskRate
 from nemesis.models.enums import ActionStatus
 from nemesis.models.exists import MKB
+from nemesis.models.person import Person
 from nemesis.systemwide import cache, db
 from blueprints.risar.risar_config import checkup_flat_codes, first_inspection_code, inspection_preg_week_code
 
@@ -281,3 +282,30 @@ def is_event_late_first_visit(event):
         if preg_week is not None:
             result = preg_week >= 10
     return result
+
+
+def fill_action(action, json_data):
+    set_person_id = safe_traverse(json_data, 'set_person', 'id')
+    person_id = safe_traverse(json_data, 'person', 'id')
+    data = {
+        'begDate': safe_datetime(json_data['beg_date']),
+        'endDate': safe_datetime(json_data['end_date']),
+        'plannedEndDate': safe_datetime(json_data['planned_end_date']),
+        'directionDate': safe_datetime(json_data['direction_date']),
+        'isUrgent': json_data['is_urgent'],
+        'status': json_data['status']['id'],
+        'setPerson_id': set_person_id,
+        'person_id':  person_id,
+        'setPerson': Person.query.get(set_person_id) if set_person_id else None,
+        'person':  Person.query.get(person_id) if person_id else None,
+        'note': json_data['note'],
+        'amount': json_data['amount'],
+        'account': json_data['account'] or 0,
+        'uet': json_data['uet'],
+        'payStatus': json_data['pay_status'] or 0,
+        'coordDate': safe_datetime(json_data['coord_date']),
+        'office': json_data['office'],
+        'properties': json_data['properties']
+    }
+    action = update_action(action, **data)
+    return action
