@@ -7,7 +7,7 @@ from sqlalchemy.orm import immediateload
 from nemesis.systemwide import db
 from nemesis.models.organisation import (OrganisationBirthCareLevel, Organisation, Organisation_OrganisationBCLAssoc,
     OrganisationCurationAssoc)
-from nemesis.models.enums import PerinatalRiskRate, PrenatalRiskRate, PregnancyPathology
+from nemesis.models.enums import PerinatalRiskRate, PregnancyPathology
 from nemesis.models.exists import Person, rbAttachType
 from nemesis.models.event import Event
 from nemesis.models.client import Client, ClientAttach
@@ -82,11 +82,11 @@ class OrganisationFetcher(BaseFetcher):
         ).with_entities(
             ClientAttach.LPU_id
         ).add_columns(
-            func.sum(func.IF(ActionProperty_Integer.value_ == PrenatalRiskRate.low[0], 1, 0)).label('count_low'),
-            func.sum(func.IF(ActionProperty_Integer.value_ == PrenatalRiskRate.medium[0], 1, 0)).label('count_medium'),
-            func.sum(func.IF(ActionProperty_Integer.value_ == PrenatalRiskRate.high[0], 1, 0)).label('count_high'),
+            func.sum(func.IF(ActionProperty_Integer.value_ == PerinatalRiskRate.low[0], 1, 0)).label('count_low'),
+            func.sum(func.IF(ActionProperty_Integer.value_ == PerinatalRiskRate.medium[0], 1, 0)).label('count_medium'),
+            func.sum(func.IF(ActionProperty_Integer.value_ == PerinatalRiskRate.high[0], 1, 0)).label('count_high'),
             func.sum(func.IF(or_(
-                ActionProperty_Integer.value_ == PrenatalRiskRate.undefined[0],
+                ActionProperty_Integer.value_ == PerinatalRiskRate.undefined[0],
                 Action.id == None
             ), 1, 0)).label('count_undefined'),
             func.count(Event.id.distinct()).label('count_all')
@@ -139,8 +139,7 @@ class OrgBirthCareLevelFetcher(BaseFetcher):
 
     def apply_with_org_count(self):
         self.query = self.query.outerjoin(
-            OrganisationBirthCareLevel.org_obcls,
-            Organisation
+            OrganisationBirthCareLevel.orgs,
         ).group_by(
             OrganisationBirthCareLevel.id
         ).add_columns(func.count(Organisation.id.distinct()))
@@ -175,11 +174,11 @@ class OrgBirthCareLevelFetcher(BaseFetcher):
         ).with_entities(
             OrganisationBirthCareLevel.id
         ).add_columns(
-            func.sum(func.IF(ActionProperty_Integer.value_ == PrenatalRiskRate.low[0], 1, 0)).label('count_low'),
-            func.sum(func.IF(ActionProperty_Integer.value_ == PrenatalRiskRate.medium[0], 1, 0)).label('count_medium'),
-            func.sum(func.IF(ActionProperty_Integer.value_ == PrenatalRiskRate.high[0], 1, 0)).label('count_high'),
+            func.sum(func.IF(ActionProperty_Integer.value_ == PerinatalRiskRate.low[0], 1, 0)).label('count_low'),
+            func.sum(func.IF(ActionProperty_Integer.value_ == PerinatalRiskRate.medium[0], 1, 0)).label('count_medium'),
+            func.sum(func.IF(ActionProperty_Integer.value_ == PerinatalRiskRate.high[0], 1, 0)).label('count_high'),
             func.sum(func.IF(or_(
-                ActionProperty_Integer.value_ == PrenatalRiskRate.undefined[0],
+                ActionProperty_Integer.value_ == PerinatalRiskRate.undefined[0],
                 Action.id == None
             ), 1, 0)).label('count_undefined'),
             func.count(Event.id.distinct()).label('count_all')

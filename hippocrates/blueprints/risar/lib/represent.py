@@ -12,7 +12,7 @@ from nemesis.lib.jsonify import EventVisualizer
 from nemesis.lib.vesta import Vesta
 from nemesis.models.actions import Action, ActionType
 from nemesis.models.client import BloodHistory
-from nemesis.models.enums import (Gender, AllergyPower, IntoleranceType, PrenatalRiskRate, PreeclampsiaRisk,
+from nemesis.models.enums import (Gender, AllergyPower, IntoleranceType, PerinatalRiskRate, PreeclampsiaRisk,
     PregnancyPathology, ErrandStatus)
 from nemesis.models.event import Diagnosis, Diagnostic
 from nemesis.models.exists import rbAttachType, MKB
@@ -176,11 +176,11 @@ def represent_mkbs_for_routing(event):
 
     def set_risk(mkb):
         if mkb.DiagID in risk_rates_diagID['high'] or mkb.BlockID in risk_rates_blockID['high']:
-            rr = PrenatalRiskRate(PrenatalRiskRate.high[0])
+            rr = PerinatalRiskRate(PerinatalRiskRate.high[0])
         elif mkb.DiagID in risk_rates_diagID['middle'] or mkb.BlockID in risk_rates_blockID['middle']:
-            rr = PrenatalRiskRate(PrenatalRiskRate.medium[0])
+            rr = PerinatalRiskRate(PerinatalRiskRate.medium[0])
         elif mkb.DiagID in risk_rates_diagID['low'] or mkb.BlockID in risk_rates_blockID['low']:
-            rr = PrenatalRiskRate(PrenatalRiskRate.low[0])
+            rr = PerinatalRiskRate(PerinatalRiskRate.low[0])
         else:
             rr = None
         mkb.risk_rate = rr
