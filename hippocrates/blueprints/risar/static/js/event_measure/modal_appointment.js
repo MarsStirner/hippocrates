@@ -106,7 +106,8 @@ WebMis20.run(['$templateCache', function ($templateCache) {
 </section>\
 </div>\
 <div class="modal-footer">\
-    <ui-print-button ps="ps" resolve="ps_resolve()" before-print="save_appointment(true)" class="text-left"></ui-print-button>\
+    <ui-print-button ps="ps" resolve="ps_resolve()" before-print="save_appointment(true)" fast-print="true"\
+        class="pull-left"></ui-print-button>\
     <button type="button" class="btn btn-default" ng-click="$dismiss(\'cancel\')">Отменить</button>\
     <button type="button" class="btn btn-primary" ng-click="saveAndClose()">Сохранить</button>\
 </div>');
