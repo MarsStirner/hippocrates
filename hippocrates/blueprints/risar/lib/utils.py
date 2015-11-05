@@ -284,7 +284,7 @@ def is_event_late_first_visit(event):
     return result
 
 
-def fill_action(action, json_data):
+def format_action_data(json_data):
     set_person_id = safe_traverse(json_data, 'set_person', 'id')
     person_id = safe_traverse(json_data, 'person', 'id')
     data = {
@@ -307,5 +307,4 @@ def fill_action(action, json_data):
         'office': json_data['office'],
         'properties': json_data['properties']
     }
-    action = update_action(action, **data)
-    return action
+    return data

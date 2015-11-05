@@ -44,4 +44,5 @@ class EmAppointmentRepr(object):
             'code': action_type.code,
             'flat_code': action_type.flatCode,
             'class': action_type.class_,
+            'context_name': action_type.context
         }

@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from blueprints.risar.lib.utils import fill_action
+from blueprints.risar.lib.utils import format_action_data
 
 from nemesis.systemwide import db
 from nemesis.models.enums import MeasureStatus
-from nemesis.lib.data import create_action
+from nemesis.lib.data import create_action, update_action
 
 
 class EventMeasureController(object):
@@ -21,21 +21,26 @@ class EventMeasureController(object):
             em.status = MeasureStatus.assigned[0]
         return em
 
-    def get_new_appointment(self, em):
+    def get_new_appointment(self, em, action_data=None, action_props=None):
         event_id = em.event_id
         action_type_id = em.scheme_measure.measure.appointmentAt_id
-        appointment = create_action(action_type_id, event_id)
+        appointment = create_action(action_type_id, event_id, properties=action_props, data=action_data)
         return appointment
 
     def create_appointment(self, em, json_data):
-        appointment = self.get_new_appointment(em)
-        appointment = fill_action(appointment, json_data)
+        json_data = format_action_data(json_data)
+        if 'properties' in json_data:
+            props = json_data.pop('properties')
+        else:
+            props = []
+        appointment = self.get_new_appointment(em, json_data, props)
         em.appointment_action = appointment
         self.make_assigned(em)
         return appointment
 
     def update_appointment(self, em, appointment, json_data):
-        appointment = fill_action(appointment, json_data)
+        json_data = format_action_data(json_data)
+        appointment = update_action(appointment, **json_data)
         em.appointment_action = appointment
         return appointment
 

@@ -106,30 +106,31 @@ WebMis20.run(['$templateCache', function ($templateCache) {
 </section>\
 </div>\
 <div class="modal-footer">\
+    <ui-print-button ps="ps" resolve="ps_resolve()" before-print="save_appointment(true)" class="text-left"></ui-print-button>\
     <button type="button" class="btn btn-default" ng-click="$dismiss(\'cancel\')">Отменить</button>\
     <button type="button" class="btn btn-primary" ng-click="saveAndClose()">Сохранить</button>\
 </div>');
 }]);
 
 
-var EMAppointmentModalCtrl = function ($scope, $window, $q, RisarApi, RefBookService, WMAction, MessageBox,
-                                       event_measure, appointment) {
-    //$scope.ps = new PrintingService("action");
-    //$scope.ps_resolve = function () {
-    //    return {
-    //        action_id: $scope.action.id
-    //    }
-    //};
-    //
-    //function update_print_templates (context_name) {
-    //    $scope.ps.set_context(context_name);
-    //}
-    //function process_printing() {
-    //    if ($window.sessionStorage.getItem('open_action_print_dlg')) {
-    //        $window.sessionStorage.removeItem('open_action_print_dlg');
-    //        PrintingDialog.open($scope.ps, $scope.ps_resolve());
-    //    }
-    //}
+var EMAppointmentModalCtrl = function ($scope, $window, $q, RisarApi, RefBookService, WMAction,
+                                       PrintingService, PrintingDialog, MessageBox, event_measure, appointment) {
+    $scope.ps = new PrintingService("event_measure");
+    $scope.ps_resolve = function () {
+        return {
+            event_measure_id: event_measure.data.id
+        }
+    };
+
+    function update_print_templates (context_name) {
+        $scope.ps.set_context(context_name);
+    }
+    function process_printing() {
+        if ($window.sessionStorage.getItem('open_action_print_dlg')) {
+            $window.sessionStorage.removeItem('open_action_print_dlg');
+            PrintingDialog.open($scope.ps, $scope.ps_resolve(), undefined, true);
+        }
+    }
 
     $scope.on_status_changed = function () {
         if ($scope.action.status.code === 'finished') {
@@ -207,8 +208,8 @@ var EMAppointmentModalCtrl = function ($scope, $window, $q, RisarApi, RefBookSer
         $scope.ActionStatus.loading.then(function () {
             $scope.action = $scope.action.merge(appointment);
             $scope.action.readonly = false;
-            //update_print_templates(action.action_type.context_name);
-            //process_printing();
+            update_print_templates(appointment.action_type.context_name);
+            process_printing();
         });
     };
 
@@ -217,4 +218,4 @@ var EMAppointmentModalCtrl = function ($scope, $window, $q, RisarApi, RefBookSer
 
 
 WebMis20.controller('EMAppointmentModalCtrl', ['$scope', '$window', '$q', 'RisarApi', 'RefBookService', 'WMAction',
-    'MessageBox', EMAppointmentModalCtrl]);
+    'PrintingService', 'PrintingDialog', 'MessageBox', EMAppointmentModalCtrl]);
