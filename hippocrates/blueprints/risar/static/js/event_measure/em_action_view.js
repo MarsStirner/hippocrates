@@ -32,7 +32,21 @@ var EventMeasureActionViewCtrl = function ($scope, RisarApi, EMModalService, Eve
                     return EMModalService.openAppointmentEdit(em, appointment);
                 })
                 .then(function (result) {
-                    console.log(result);
+                    return EventMeasureService.get(em.data.id)
+                        .then(function (upd_em) {
+                            $scope.checkup.measures.splice(idx, 1, upd_em);
+                        });
+                });
+        }
+    };
+    $scope.openEmResult = function (idx) {
+        var em = $scope.checkup.measures[idx];
+        if ($scope.canEditEmResult(em)) {
+            EventMeasureService.get_em_result(em)
+                .then(function (em_result) {
+                    return EMModalService.openEmResultEdit(em, em_result);
+                })
+                .then(function (result) {
                     return EventMeasureService.get(em.data.id)
                         .then(function (upd_em) {
                             $scope.checkup.measures.splice(idx, 1, upd_em);
@@ -51,7 +65,10 @@ var EventMeasureActionViewCtrl = function ($scope, RisarApi, EMModalService, Eve
     };
     $scope.emHasAppointment = function (em) {
         return Boolean(em.data.appointment_action_id);
-    }
+    };
+    $scope.emHasResult = function (em) {
+        return Boolean(em.data.result_action_id);
+    };
 };
 
 

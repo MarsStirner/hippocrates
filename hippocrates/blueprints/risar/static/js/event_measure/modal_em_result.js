@@ -2,11 +2,11 @@
 
 WebMis20.run(['$templateCache', function ($templateCache) {
     $templateCache.put(
-        '/WebMis20/RISAR/modal/em_appointment_edit.html',
+        '/WebMis20/RISAR/modal/em_result_edit.html',
         '\
 <div class="modal-header" xmlns="http://www.w3.org/1999/html">\
     <button type="button" class="close" ng-click="$dismiss(\'cancel\')">&times;</button>\
-    <h4 class="modal-title">Направление по мероприятию</h4>\
+    <h4 class="modal-title">Результат по мероприятию</h4>\
 </div>\
 <div class="modal-body">\
 <section class="content">\
@@ -106,7 +106,7 @@ WebMis20.run(['$templateCache', function ($templateCache) {
 </section>\
 </div>\
 <div class="modal-footer">\
-    <ui-print-button ps="ps" resolve="ps_resolve()" before-print="save_appointment(true)" fast-print="true"\
+    <ui-print-button ps="ps" resolve="ps_resolve()" before-print="save_em_result(true)" fast-print="true"\
         class="pull-left"></ui-print-button>\
     <button type="button" class="btn btn-default" ng-click="$dismiss(\'cancel\')">Отменить</button>\
     <button type="button" class="btn btn-primary" ng-click="saveAndClose()">Сохранить</button>\
@@ -114,8 +114,8 @@ WebMis20.run(['$templateCache', function ($templateCache) {
 }]);
 
 
-var EMAppointmentModalCtrl = function ($scope, $window, $q, RisarApi, RefBookService, WMAction,
-                                       PrintingService, PrintingDialog, MessageBox, event_measure, appointment) {
+var EMResultModalCtrl = function ($scope, $window, $q, RisarApi, RefBookService, WMAction,
+                                  PrintingService, PrintingDialog, MessageBox, event_measure, em_result) {
     $scope.ps = new PrintingService("event_measure");
     $scope.ps_resolve = function () {
         return {
@@ -153,21 +153,21 @@ var EMAppointmentModalCtrl = function ($scope, $window, $q, RisarApi, RefBookSer
     });
 
     $scope.saveAndClose = function () {
-        $scope.save_appointment().then(function () {
+        $scope.save_em_result().then(function () {
             $scope.$close();
         });
     };
-    $scope.save_appointment = function (need_to_print) {
+    $scope.save_em_result = function (need_to_print) {
         var was_new = $scope.action.is_new(),
             data = $scope.action.get_data(),
             event_measure_id = event_measure.data.id,
-            appointment_id = appointment.id;
+            em_result_id = em_result.id;
         return $scope.check_can_save_action()
             .then(function () {
                 if (was_new && need_to_print) { $window.sessionStorage.setItem('open_action_print_dlg', true) }
-                return RisarApi.measure.save_appointment(
+                return RisarApi.measure.save_em_result(
                     event_measure_id,
-                    appointment_id,
+                    em_result_id,
                     data
                 ).
                     then(function (action) {
@@ -207,9 +207,9 @@ var EMAppointmentModalCtrl = function ($scope, $window, $q, RisarApi, RefBookSer
         $scope.action = new WMAction();
         $scope.ActionStatus = RefBookService.get('ActionStatus');
         $scope.ActionStatus.loading.then(function () {
-            $scope.action = $scope.action.merge(appointment);
+            $scope.action = $scope.action.merge(em_result);
             $scope.action.readonly = false;
-            update_print_templates(appointment.action_type.context_name);
+            update_print_templates(em_result.action_type.context_name);
             process_printing();
         });
     };
@@ -218,5 +218,5 @@ var EMAppointmentModalCtrl = function ($scope, $window, $q, RisarApi, RefBookSer
 };
 
 
-WebMis20.controller('EMAppointmentModalCtrl', ['$scope', '$window', '$q', 'RisarApi', 'RefBookService', 'WMAction',
-    'PrintingService', 'PrintingDialog', 'MessageBox', EMAppointmentModalCtrl]);
+WebMis20.controller('EMResultModalCtrl', ['$scope', '$window', '$q', 'RisarApi', 'RefBookService', 'WMAction',
+    'PrintingService', 'PrintingDialog', 'MessageBox', EMResultModalCtrl]);

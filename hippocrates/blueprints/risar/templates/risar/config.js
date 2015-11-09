@@ -40,6 +40,8 @@ WebMis20
         api_event_measure_cancel: '{{ url_for('.api_0_event_measure_cancel') }}',
         api_event_measure_appointment_get: '{{ url_for('.api_0_event_measure_appointment_get', event_measure_id=-90) | replace("-90", "{0}") }}',
         api_event_measure_appointment_save: '{{ url_for('.api_0_event_measure_appointment_save', event_measure_id=-90) | replace("-90", "{0}") }}',
+        api_event_measure_result_get: '{{ url_for('.api_0_event_measure_result_get', event_measure_id=-90) | replace("-90", "{0}") }}',
+        api_event_measure_result_save: '{{ url_for('.api_0_event_measure_result_save', event_measure_id=-90) | replace("-90", "{0}") }}',
         chart_html: '{{ url_for('.html_chart') }}',
         index_html: '{{ url_for('.index_html') }}',
         inpection_read_html:'{{ url_for('.html_inspection_read') }}',

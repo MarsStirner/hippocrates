@@ -320,6 +320,42 @@ WebMis20
                     );
                     return result;
                 });
+        },
+        get_em_result: function (event_measure_id, em_result_id) {
+            var url = Config.url.api_event_measure_result_get.format(event_measure_id);
+            if (em_result_id) {
+                url += em_result_id;
+            } else {
+                url += '?new=true';
+            }
+            return wrapper('GET', url);
+        },
+        save_em_result: function (event_measure_id, em_result_id, data) {
+            var url = Config.url.api_event_measure_result_save.format(event_measure_id),
+                method;
+            if (em_result_id) {
+                url += em_result_id;
+                method = 'POST';
+            } else {
+                method = 'PUT';
+            }
+            return wrapper(method, url, {}, data)
+                .then(function (action) {
+                    NotificationService.notify(
+                        200,
+                        'Успешно сохранено',
+                        'success',
+                        5000
+                    );
+                    return action;
+                }, function (result) {
+                    NotificationService.notify(
+                        500,
+                        'Ошибка сохранения, свяжитесь с администратором',
+                        'danger'
+                    );
+                    return result;
+                });
         }
     };
     this.stats = {

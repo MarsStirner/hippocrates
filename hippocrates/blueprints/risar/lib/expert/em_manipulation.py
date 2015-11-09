@@ -44,6 +44,29 @@ class EventMeasureController(object):
         em.appointment_action = appointment
         return appointment
 
+    def get_new_em_result(self, em, action_data=None, action_props=None):
+        event_id = em.event_id
+        action_type_id = em.scheme_measure.measure.resultAt_id
+        em_result = create_action(action_type_id, event_id, properties=action_props, data=action_data)
+        return em_result
+
+    def create_em_result(self, em, json_data):
+        json_data = format_action_data(json_data)
+        if 'properties' in json_data:
+            props = json_data.pop('properties')
+        else:
+            props = []
+        em_result = self.get_new_em_result(em, json_data, props)
+        em.result_action = em_result
+        self.make_assigned(em)
+        return em_result
+
+    def update_em_result(self, em, em_result, json_data):
+        json_data = format_action_data(json_data)
+        em_result = update_action(em_result, **json_data)
+        em.result_action = em_result
+        return em_result
+
     def store(self, *entity_list):
         db.session.add_all(entity_list)
         db.session.commit()
