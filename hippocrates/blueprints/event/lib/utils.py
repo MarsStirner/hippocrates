@@ -6,9 +6,9 @@ import logging
 from flask.ext.login import current_user
 from sqlalchemy import func
 
-from nemesis.lib.data import create_new_action, update_action, ActionException
+from nemesis.lib.data import create_new_action, update_action, ActionException, create_action
 from nemesis.lib.user import UserUtils
-from nemesis.models.actions import Action, ActionType
+from nemesis.models.actions import Action, ActionType, ActionProperty_Diagnosis
 from nemesis.models.client import Client
 from nemesis.models.event import EventLocalContract, Event, EventType, Visit, Event_Persons
 from nemesis.lib.utils import safe_date, safe_traverse, safe_datetime, get_new_event_ext_id, get_new_uuid
@@ -24,6 +24,79 @@ class EventSaveException(Exception):
     def __init__(self, message=u'', data=None):
         super(EventSaveException, self).__init__(message)
         self.data = data
+
+
+class EventSaveController():
+    def __init__(self):
+        pass
+
+    def create_base_info(self, event, all_data):
+        # для всех request type
+        event_data = all_data['event']
+        local_contract_data = safe_traverse(all_data, 'payment', 'local_contract')
+        event.setPerson_id = current_user.get_main_user().id
+        event.client_id = event_data['client_id']
+        event.client = Client.query.get(event_data['client_id'])
+        event.org_id = event_data['organisation']['id']
+        event.payStatus = 0
+        event = self.update_base_info(event, event_data, local_contract_data)
+        event.externalId = get_new_event_ext_id(event.eventType.id, event.client_id)
+        event.uuid = get_new_uuid()
+        return event
+
+    def update_base_info(self, event, event_data, local_contract_data):
+        event.eventType = EventType.query.get(event_data['event_type']['id'])
+        exec_person_id = safe_traverse(event_data, 'exec_person', 'id')
+        event.setDate = safe_datetime(event_data['set_date'])
+        if exec_person_id and not event.is_diagnostic:
+            event.execPerson = Person.query.get(exec_person_id)
+        if event.is_stationary:
+            event.isPrimaryCode = event_data['is_primary']['id']
+            event.order = event_data['order']['id']
+        event.contract_id = event_data['contract']['id']
+        event.note = event_data['note']
+        event.orgStructure_id = event_data['org_structure']['id']
+        if local_contract_data:
+            lcon = create_or_update_local_contract(event, local_contract_data)
+            event.localContract = lcon
+        return event
+
+    def store(self, *entity_list):
+        db.session.add_all(entity_list)
+        db.session.commit()
+
+
+class ReceivedController():
+    def __init__(self):
+        pass
+
+    def update_data(self, received, received_info):
+        diag_codes = ('diag_received', 'diag_received1', 'diag_received2')
+        received.begDate = safe_datetime(received_info['beg_date'])
+        for code, value in received_info.iteritems():
+            if code not in ('id', 'beg_data', 'person', 'flatCode', 'event_id') + diag_codes and code in received.propsByCode:
+                received.propsByCode[code].value = value
+            elif code in diag_codes and value:
+                property = received.propsByCode[code]
+                property.value = ActionProperty_Diagnosis.objectify(property, value)
+        db.session.add(received)
+        db.session.commit()
+        return received
+
+    def create_received(self, event_id, received_info):
+
+        event = Event.query.get(event_id)
+        action_type = ActionType.query.filter(ActionType.flatCode == 'received').first()
+
+        received = create_action(action_type.id, event)
+        received = self.update_data(received, received_info)
+        return received
+
+    def update_received(self, received_info):
+        received_id = received_info['id']
+        received = Action.query.get(received_id)
+        received = self.update_data(received, received_info)
+        return received
 
 
 def create_new_event(event_data, local_contract_data):
@@ -163,6 +236,17 @@ def save_event(event_id, data):
                     })
 
     return result
+
+
+def received_save(event_id, received_data):
+    received_ctrl = ReceivedController()
+    received_id = received_data['id']
+    if received_id:
+        received = received_ctrl.update_received(received_data)
+    else:
+        received = received_ctrl.create_received(event_id, received_data)
+    db.session.add(received)
+    db.session.commit()
 
 
 def save_executives(event_id):

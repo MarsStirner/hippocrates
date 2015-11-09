@@ -491,6 +491,12 @@ var EventPaymentCtrl = function($scope, RefBookService, $http, $modal, MessageBo
     };
 };
 
+var EventReceivedCtrl = function($scope, RefBookService) {
+    $scope.OrgStructure = RefBookService.get('OrgStructure');
+    $scope.rbHospitalisationGoal = RefBookService.get('rbHospitalisationGoal');
+    $scope.rbHospitalisationOrder = RefBookService.get('rbHospitalisationOrder');
+};
+
 var PrevEventContractModalCtrl = function ($scope, $modalInstance, model, $filter) {
     $scope.model = model;
     $scope.selected = {
@@ -821,6 +827,7 @@ WebMis20.controller('EventMainInfoCtrl', ['$scope', '$q', 'RefBookService', 'Eve
 WebMis20.controller('EventStationaryInfoCtrl', ['$scope', '$filter', EventStationaryInfoCtrl]);
 WebMis20.controller('EventPaymentCtrl', ['$scope', 'RefBookService', '$http', '$modal', 'MessageBox',
     EventPaymentCtrl]);
+WebMis20.controller('EventReceivedCtrl', ['$scope', 'RefBookService', EventReceivedCtrl]);
 WebMis20.controller('EventServicesCtrl', ['$scope', '$http', EventServicesCtrl]);
 WebMis20.controller('EventInfoCtrl', ['$scope', 'WMEvent', '$http', 'RefBookService', '$window', '$document',
     'PrintingService', '$filter', '$modal', 'WMEventServices', 'WMEventFormState', 'MessageBox', EventInfoCtrl]);

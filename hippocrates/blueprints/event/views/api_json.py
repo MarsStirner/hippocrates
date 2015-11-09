@@ -12,16 +12,18 @@ from nemesis.app import app
 from nemesis.models.actions import Action, ActionType
 from nemesis.models.client import Client
 from nemesis.models.enums import EventPrimary, EventOrder
-from nemesis.models.event import (Event, EventType, Diagnosis, Diagnostic, Visit)
+from nemesis.models.event import (Event, EventType, Diagnosis, Diagnostic, Visit, Event_Persons)
 from nemesis.models.exists import Person, rbRequestType, rbResult, OrgStructure, MKB
 from nemesis.systemwide import db
-from nemesis.lib.utils import (jsonify, safe_traverse, safe_datetime, get_utc_datetime_with_tz)
+from nemesis.lib.utils import (jsonify, safe_traverse, safe_datetime, get_utc_datetime_with_tz, safe_int)
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.models.schedule import ScheduleClientTicket
 from nemesis.models.exists import (Organisation, )
 from nemesis.lib.jsonify import EventVisualizer
+from nemesis.lib.event.event_builder import PoliclinicEventBuilder, StationaryEventBuilder, EventConstructionDirector
 from blueprints.event.app import module
-from blueprints.event.lib.utils import (EventSaveException, create_services, save_event, save_executives)
+from blueprints.event.lib.utils import (EventSaveException, create_services, save_event, received_save,
+                                        save_executives, EventSaveController, ReceivedController)
 from nemesis.lib.sphinx_search import SearchEventService, SearchEvent
 from nemesis.lib.data import get_planned_end_datetime, int_get_atl_dict_all, _get_stationary_location_query
 from nemesis.lib.agesex import recordAcceptableEx
@@ -43,87 +45,29 @@ def handle_event_error(err):
 
 
 @module.route('/api/event_info.json')
+@api_method
 def api_event_info():
     event_id = int(request.args['event_id'])
     event = Event.query.get(event_id)
     vis = EventVisualizer()
-    return jsonify(vis.make_event_info_for_current_role(event))
+    return vis.make_event_info_for_current_role(event)
 
 
 @module.route('/api/event_new.json', methods=['GET'])
+@api_method
 def api_event_new_get():
-    event = Event()
-    event.eventType = EventType.get_default_et()
-    event.organisation = Organisation.query.filter_by(infisCode=str(app.config['ORGANISATION_INFIS_CODE'])).first()
-    event.isPrimaryCode = EventPrimary.primary[0]
-    event.order = EventOrder.planned[0]
-
-    ticket_id = request.args.get('ticket_id')
-    if ticket_id:
-        ticket = ScheduleClientTicket.query.get(int(ticket_id))
-        client_id = ticket.client_id
-        setDate = ticket.get_date_for_new_event()
-        note = ticket.note
-        exec_person_id = ticket.ticket.schedule.person_id
-        if ticket.ticket.schedule.finance_id:
-            request_type = rbRequestType.query.filter_by(code='policlinic').first()
-            event_type_by_ticket = EventType.query.filter_by(finance_id=ticket.ticket.schedule.finance_id,
-                                                             requestType_id=request_type.id).first()
-            if event_type_by_ticket:
-                event.eventType = event_type_by_ticket
-
-    else:
-        client_id = int(request.args['client_id'])
-        setDate = datetime.datetime.now()
-        note = ''
-        exec_person_id = current_user.get_main_user().id
-    if not event.is_diagnostic:
-        event.execPerson_id = exec_person_id
-        event.execPerson = Person.query.get(exec_person_id)
-        event.orgStructure = event.execPerson.org_structure
-    event.client = Client.query.get(client_id)
-    event.setDate = setDate
-    event.note = note
+    ticket_id = safe_int(request.args.get('ticket_id'))
+    client_id = safe_int(request.args['client_id'])
+    request_type_kind = request.args['request_type_kind']
+    if request_type_kind == 'policlinic':
+        event_builder = PoliclinicEventBuilder(client_id, ticket_id)
+    elif request_type_kind == 'stationary':
+        event_builder = StationaryEventBuilder(client_id, ticket_id)
+    event_construction_director = EventConstructionDirector()
+    event_construction_director.set_builder(event_builder)
+    event = event_construction_director.construct()
     v = EventVisualizer()
-    return jsonify(v.make_new_event(event))
-
-
-@module.route('/api/event_stationary_new.json', methods=['GET'])
-def api_event_stationary_new_get():
-    event = Event()
-    event.eventType = EventType.query.filter_by(code='03').first()
-    event.organisation = Organisation.query.filter_by(infisCode=str(app.config['ORGANISATION_INFIS_CODE'])).first()
-    event.isPrimaryCode = EventPrimary.primary[0]
-    event.order = EventOrder.planned[0]
-
-    ticket_id = request.args.get('ticket_id')
-    if ticket_id:
-        ticket = ScheduleClientTicket.query.get(int(ticket_id))
-        client_id = ticket.client_id
-        setDate = ticket.get_date_for_new_event()
-        note = ticket.note
-        exec_person_id = ticket.ticket.schedule.person_id
-        if ticket.ticket.schedule.finance_id:
-            request_type = rbRequestType.query.filter_by(code='policlinic').first()
-            event_type_by_ticket = EventType.query.filter_by(finance_id=ticket.ticket.schedule.finance_id,
-                                                             requestType_id=request_type.id).first()
-            if event_type_by_ticket:
-                event.eventType = event_type_by_ticket
-
-    else:
-        client_id = int(request.args['client_id'])
-        setDate = datetime.datetime.now()
-        note = ''
-        exec_person_id = current_user.get_main_user().id
-    if not event.is_diagnostic:
-        event.execPerson_id = exec_person_id
-        event.execPerson = Person.query.get(exec_person_id)
-        event.orgStructure = event.execPerson.org_structure
-    event.client = Client.query.get(client_id)
-    event.setDate = setDate
-    event.note = note
-    v = EventVisualizer()
-    return jsonify(v.make_new_event(event))
+    return v.make_new_event(event)
 
 
 @module.route('/api/event_stationary_opened.json', methods=['GET'])
@@ -140,20 +84,69 @@ def api_event_stationary_open_get():
 
 
 @module.route('api/event_save.json', methods=['POST'])
+@api_method
 def api_event_save():
+    result = {}
     all_data = request.json
+    request_type_kind = all_data.get('request_type_kind')
     event_data = all_data.get('event')
     event_id = event_data.get('id')
+    contract_id = event_data['contract']['id']
+    services_data = all_data.get('services', [])
 
+    event_ctrl = EventSaveController()
     try:
-        result = save_event(event_id, all_data)
+        if event_id:
+            event = Event.query.get(event_id)
+            event_data = all_data['event']
+            local_contract_data = safe_traverse(all_data, 'payment', 'local_contract')
+            event = event_ctrl.update_base_info(event, event_data, local_contract_data)
+            event_ctrl.store(event)
+        else:
+            event = Event()
+            event = event_ctrl.create_base_info(event, all_data)
+            event_ctrl.store(event)
+            event_id = int(event)
+        result['id'] = int(event)
+
+        services_save(event_id, services_data, contract_id)
+        if request_type_kind == 'policlinic':
+            visit = Visit.make_default(event)
+            db.session.add(visit)
+            executives = Event_Persons()
+            executives.person = event.execPerson
+            executives.event = event
+            executives.begDate = event.setDate
+            db.session.add(executives)
+            db.session.commit()
+        elif request_type_kind == 'stationary':
+            received_data = all_data['received']
+            received_save(event_id, received_data)
     except EventSaveException:
         raise
     except Exception, e:
         logger.error(e, exc_info=True)
         raise EventSaveException()
+    return result
 
-    return jsonify(result)
+
+def services_save(event_id, services_data, contract_id):
+    try:
+        actions, errors = create_services(event_id, services_data, contract_id)
+    except Exception, e:
+        db.session.rollback()
+        logger.error(u'Ошибка сохранения услуг для обращения %s: %s' % (event_id, e), exc_info=True)
+        raise EventSaveException(u'Ошибка сохранения услуг', {
+            'ext_msg': u'Свяжитесь с администратором.'
+        })
+    else:
+        if errors:
+            err_msg = u'<br><br> - %s<br>Свяжитесь с администратором.' % (
+                u'<br> - '.join(errors)
+            )
+            raise EventSaveException(u'Произошла ошибка при сохранении следующих услуг', {
+                'ext_msg': err_msg
+            })
 
 
 @module.route('api/event_close.json', methods=['POST'])
