@@ -28,8 +28,8 @@ def api_0_checkup(event_id):
         if not action:
             raise ApiException(404, 'Action not found')
     else:
-        # if not checkup_id:
-        #     close_open_checkups(event_id)
+        if not checkup_id:
+            close_open_checkups(event_id)
         action.begDate = safe_datetime(data['beg_date'])
         for code, value in data.iteritems():
             if code not in ('id', 'flat_code', 'person', 'beg_date', 'diag', 'diag2', 'diag3') and code in action.propsByCode:

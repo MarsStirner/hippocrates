@@ -338,6 +338,6 @@ ul.product-list, li.product-list-item-active {
 .measure-status-cancelled_changed_data {
     background-color: #b1b5b5 !important;
 }
-.measure-status-assigned_not_actual {
+.measure-status-cancelled_invalid {
     background-color: #b1b5b5 !important;
 }

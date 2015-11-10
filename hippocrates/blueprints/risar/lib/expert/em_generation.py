@@ -379,6 +379,7 @@ class EventMeasureGenerator(object):
                 em_to_create = self._filter_renewed_em_in_range(em_list, scheme_measure)
             elif apply_code == 'rel_obj_date_no_end':
                 em_to_create = self._filter_renewed_em_no_end(em_list, scheme_measure)
+            em_to_create = self._process_past_new_em_list(em_to_create)
             result.extend(em_to_create)
         return result
 
@@ -426,6 +427,19 @@ class EventMeasureGenerator(object):
         em_to_create = []
         if not existing_em_list:
             em_to_create.extend(em_list)
+        return em_to_create
+
+    def _process_past_new_em_list(self, em_to_create):
+        """Пометить EM в списке создаваемых, которые заканчиваются ранее даты текущего
+        осмотра, как недействительные."""
+        current_dt_point = DateTimeInterval(self.context.inspection_datetime, None)
+        for em in em_to_create:
+            intersect = get_intersection_type(
+                DateTimeInterval(em.begDateTime, em.endDateTime),
+                current_dt_point
+            )
+            if intersect == IntersectionType.none_left:
+                em.status = MeasureStatus.cancelled_invalid[0]
         return em_to_create
 
     def _filter_em_duplicates_by_measure(self, em_list):
