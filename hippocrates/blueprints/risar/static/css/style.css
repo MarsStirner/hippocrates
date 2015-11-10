@@ -313,31 +313,41 @@ ul.product-list, li.product-list-item-active {
 
 .measure-status-created {
     background-color: #FFB02E !important;
+    border-color: #FFB02E !important;
 }
 .measure-status-assigned {
     background-color: #3C8DBC !important;
+    border-color: #3C8DBC !important;
 }
 .measure-status-waiting {
     background-color: #65deb9 !important;
+    border-color: #65deb9 !important;
 }
 .measure-status-upon_med_indications {
     background-color: #9600CD !important;
+    border-color: #9600CD !important;
 }
 .measure-status-overdue {
     background-color: #e43c43 !important;
+    border-color: #e43c43 !important;
 }
 .measure-status-performed {
     background-color: #1fc63a !important;
+    border-color: #1fc63a !important;
 }
 .measure-status-cancelled {
     background-color: #b1b5b5 !important;
+    border-color: #b1b5b5 !important;
 }
 .measure-status-cancelled_dupl {
     background-color: #b1b5b5 !important;
+    border-color: #b1b5b5 !important;
 }
 .measure-status-cancelled_changed_data {
     background-color: #b1b5b5 !important;
+    border-color: #b1b5b5 !important;
 }
 .measure-status-cancelled_invalid {
     background-color: #b1b5b5 !important;
+    border-color: #b1b5b5 !important;
 }
