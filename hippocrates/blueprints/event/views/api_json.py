@@ -110,14 +110,10 @@ def api_event_save():
         result['id'] = int(event)
 
         services_save(event_id, services_data, contract_id)
+        update_executives(event)
         if request_type_kind == 'policlinic':
             visit = Visit.make_default(event)
             db.session.add(visit)
-            executives = Event_Persons()
-            executives.person = event.execPerson
-            executives.event = event
-            executives.begDate = event.setDate
-            db.session.add(executives)
             db.session.commit()
         elif request_type_kind == 'stationary':
             received_data = all_data['received']
@@ -147,6 +143,20 @@ def services_save(event_id, services_data, contract_id):
             raise EventSaveException(u'Произошла ошибка при сохранении следующих услуг', {
                 'ext_msg': err_msg
             })
+
+
+def update_executives(event):
+    last_executive = Event_Persons.query.filter(Event_Persons.event_id == event.id).order_by(desc(Event_Persons.begDate)).first()
+    if not last_executive or last_executive.id != event.execPerson_id:
+        executives = Event_Persons()
+        executives.person = event.execPerson
+        executives.event = event
+        executives.begDate = event.setDate
+        db.session.add(executives)
+        if last_executive:
+            last_executive.endDate = event.setDate
+            db.session.add(last_executive)
+        db.session.commit()
 
 
 @module.route('api/event_close.json', methods=['POST'])

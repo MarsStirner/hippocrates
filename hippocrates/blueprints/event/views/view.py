@@ -18,6 +18,7 @@ def html_event_info():
     try:
         event_id = int(request.args['event_id'])
         event = Event.query.get(event_id)
+        requestType_kind = 'stationary' if event.is_stationary else 'policlinic'
     except (KeyError, ValueError):
         return abort(400)
     # if event.is_stationary:
@@ -30,7 +31,7 @@ def html_event_info():
     #                   request.cookies.get(app.config['CASTIEL_AUTH_TOKEN']),
     #                   current_user.current_role))
     #     return redirect(new_url)
-    return get_event_form(event=event, client_id=event.client_id)
+    return get_event_form(event=event, requestType_kind=requestType_kind, client_id=event.client_id)
 
 
 @module.route('/event_new.html')
