@@ -4,6 +4,7 @@ from flask.ext.login import current_user
 from ..app import module
 from nemesis.app import app
 from nemesis.models.actions import Action, ActionType
+from blueprints.risar.lib.debug import get_debug_data
 
 __author__ = 'mmalkov'
 
@@ -42,7 +43,8 @@ def html_routing():
 
 @module.route('/chart.html')
 def html_chart():
-    return render_template('risar/chart.html')
+    debug_data = get_debug_data(request.args)
+    return render_template('risar/chart.html', debug_data=debug_data)
 
 
 @module.route('/anamnesis.html')
@@ -85,6 +87,7 @@ def html_inspection_read():
 
 @module.route('/inspection_edit.html')
 def html_inspection_edit():
+    debug_data = get_debug_data(request.args)
     event_id = request.args['event_id']
     checkup_id = request.args.get('checkup_id')
     if checkup_id:
@@ -97,9 +100,9 @@ def html_inspection_edit():
                                                                ActionType.flatCode == 'risarFirstInspection').first()
         flat_code = 'risarSecondInspection' if first_inspection else 'risarFirstInspection'
     if flat_code == 'risarFirstInspection':
-        return render_template('risar/inspection_first_edit.html')
+        return render_template('risar/inspection_first_edit.html', debug_data=debug_data)
     elif flat_code == 'risarSecondInspection':
-        return render_template('risar/inspection_second_edit.html')
+        return render_template('risar/inspection_second_edit.html', debug_data=debug_data)
 
 
 @module.route('/epicrisis.html')

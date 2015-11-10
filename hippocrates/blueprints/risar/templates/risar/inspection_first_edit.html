@@ -6,6 +6,7 @@
 {% block main %}
 <div ng-controller="CheckupFirstEditCtrl" ng-cloak>
     <section class="content-header">
+        {% if debug_data %}<pre>{{ debug_data.ca }}</pre>{% endif %}
         {{ rimacros.page_title_n('Ввод данных первичного осмотра') }}
         <div class="novmargin">
             <div class="btn-group">

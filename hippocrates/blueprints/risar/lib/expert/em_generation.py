@@ -171,12 +171,12 @@ class EventMeasureGenerator(object):
         )
         logger.debug(msg)
 
-        # TODO: impement this step
+        # TODO: implement this step
         new_em_list = self._filter_em_duplicates_by_measure(new_em_list)
-        logger.debug(u'> EM generation: EM list filtered by Measure')
+        logger.debug(u'> EM generation [filter all by Measure]')
 
         expired_em_list = self._update_expired_event_measures(new_em_list)
-        msg = u'> EM generation: Process expired EMs]: total number of EMs, set to overdue - {0}'.format(
+        msg = u'> EM generation [Process expired EMs]: total number of EMs, set to overdue - {0}'.format(
             len(expired_em_list)
         )
         logger.debug(msg)
@@ -273,7 +273,11 @@ class EventMeasureGenerator(object):
             for sm in mkb_spawner.scheme_measures:
                 if (sm.id not in unique_sm_id_list and
                         self.context.is_sm_apply_event_after_each_visit(sm) and
-                        self.context.is_scheme_measure_acceptable(sm, mkb_spawner.mkb_code)):
+                        self.context.is_scheme_measure_acceptable(
+                            sm,
+                            mkb_spawner.mkb_code,
+                            self.existing_em_list.get(sm.id)
+                        )):
                     unique_sm_id_list.add(sm.id)
                     unique_sm_list.append(sm)
         return unique_sm_list
@@ -544,8 +548,31 @@ class MeasureGeneratorRisarContext(object):
     def is_sm_apply_event_after_each_visit(self, sm):
         return any(sched_type.code == 'after_each_visit' for sched_type in sm.schedule.schedule_types)
 
-    def is_scheme_measure_acceptable(self, sm, mkb_code):
-        return all(self.st_handlers[sched_type.code](self, sm, mkb_code) for sched_type in sm.schedule.schedule_types)
+    def is_scheme_measure_acceptable(self, sm, mkb_code, existing_em_by_sm):
+        apply_code = sm.schedule.apply_type.code
+        created_earlier = bool(existing_em_by_sm)
+        depends_on_created_earlier = apply_code in ('rel_ref_date_bound_range', 'rel_ref_date_bound_range',
+                                                    'rel_obj_date_no_end')
+        acceptable = True
+        for sched_type in sm.schedule.schedule_types:
+            st_code = sched_type.code
+            if st_code == 'after_first_visit':
+                acceptable = self._check_st_afv(sm, mkb_code) or (
+                    created_earlier if depends_on_created_earlier else False
+                )
+            elif st_code == 'upon_diag_set':
+                acceptable = self._check_st_uds(sm, mkb_code) or (
+                    created_earlier if depends_on_created_earlier else False
+                )
+            elif st_code == 'late_first_visit':
+                acceptable = self._check_st_lfv(sm, mkb_code)
+            elif st_code == 'in_presence_diag':
+                acceptable = self._check_st_ipd(sm, mkb_code)
+            elif st_code in ('in_presence_diag', 'text', 'recommended'):
+                acceptable = True
+            if not acceptable:
+                return False
+        return acceptable
 
     def _check_st_afv(self, sm, mkb_code):
         return self.is_first_inspection
@@ -559,17 +586,6 @@ class MeasureGeneratorRisarContext(object):
     def _check_st_ipd(self, sm, mkb_code):
         diag_list = self.actual_existing_mkb.union(self.actual_action_mkb)
         return all(mkb.DiagID in diag_list for mkb in sm.schedule.additional_mkbs)
-
-    st_handlers = {
-        'after_each_visit': lambda *args: True,
-        'after_first_visit': _check_st_afv,
-        'upon_med_indication': lambda *args: True,
-        'text': lambda *args: True,
-        'recommended': lambda *args: True,
-        'late_first_visit': _check_st_lfv,
-        'upon_diag_set': _check_st_uds,
-        'in_presence_diag': _check_st_ipd,
-    }
 
     def _make_intervals_in_range(self, start, end, frequency):
         result = []
