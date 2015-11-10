@@ -13,90 +13,6 @@ WebMis20.run(['$templateCache', function ($templateCache) {
     <div class="row">\
     <div class="col-md-12">\
         <div class="box box-info">\
-        <div class="box-body">\
-            <div class="form-horizontal">\
-            <div class="row">\
-                <div class="col-md-12">\
-                    <div class="form-group">\
-                        <label for="direction_date" class="col-md-1 control-label">Назначено</label>\
-                        <div class="col-md-4">\
-                            <div class="row">\
-                            <div class="col-md-7">\
-                                <wm-date id="direction_date" name="direction_date" ng-model="action.direction_date"></wm-date>\
-                            </div>\
-                            <div class="col-md-5">\
-                                <wm-time id="direction_date" name="direction_date" ng-model="action.direction_date"></wm-time>\
-                            </div>\
-                            </div>\
-                        </div>\
-                        <div class="col-md-1">\
-                            <div class="checkbox">\
-                                <label><input type="checkbox" ng-model="action.is_urgent"></label>Срочно\
-                            </div>\
-                        </div>\
-                    </div>\
-                </div>\
-            </div>\
-            <div class="row" ng-if="!is_med_doc()">\
-                <div class="col-md-12">\
-                    <div class="form-group">\
-                        <label for="set_person" class="col-md-1 control-label">Назначил</label>\
-                        <div class="col-md-6">\
-                            <wm-person-select id="set_person" name="set_person" ng-model="action.set_person" theme="bootstrap"\
-                                placeholder="Введите ФИО врача или специальность"></wm-person-select>\
-                        </div>\
-                    </div>\
-                </div>\
-            </div>\
-            <div class="row">\
-                <div class="col-md-12">\
-                    <div class="form-group">\
-                        <label for="status" class="col-md-1 control-label">Состояние</label>\
-                        <div class="col-md-1">\
-                            <select class="form-control" id="status" name="status"\
-                                    ng-model="action.status" ng-change="on_status_changed()"\
-                                    ng-options="status as status.name for status in ActionStatus.objects track by status.id">\
-                            </select>\
-                        </div>\
-                        <label for="beg_date" class="col-md-1 control-label">Начато</label>\
-                        <div class="col-md-4">\
-                            <div class="row">\
-                            <div class="col-md-7">\
-                                <wm-date id="beg_date" name="beg_date" ng-model="action.beg_date"></wm-date>\
-                            </div>\
-                            <div class="col-md-5">\
-                                <wm-time id="beg_date" name="beg_date" ng-model="action.beg_date"></wm-time>\
-                            </div>\
-                            </div>\
-                        </div>\
-                        <label for="end_date" class="col-md-1 control-label">Выполнено</label>\
-                        <div class="col-md-4">\
-                            <div class="row">\
-                            <div class="col-md-7">\
-                                <wm-date id="end_date" name="end_date" ng-model="action.end_date"></wm-date>\
-                            </div>\
-                            <div class="col-md-5">\
-                                <wm-time id="end_date" name="end_date" ng-model="action.end_date"></wm-time>\
-                            </div>\
-                            </div>\
-                        </div>\
-                    </div>\
-                </div>\
-            </div>\
-            <div class="row">\
-                <div class="col-md-12">\
-                    <div class="form-group">\
-                        <label for="note" class="col-md-1 control-label">Примечания</label>\
-                        <div class="col-md-6">\
-                            <input type="text" id="note" name="note" class="form-control" ng-model="action.note">\
-                        </div>\
-                    </div>\
-                </div>\
-            </div>\
-            </div>\
-        </div>\
-        </div>\
-        <div class="box box-info">\
             <div class="box-body">\
                 <wm-action-layout action="action"></wm-action-layout>\
             </div>\
@@ -132,25 +48,6 @@ var EMResultModalCtrl = function ($scope, $window, $q, RisarApi, RefBookService,
             PrintingDialog.open($scope.ps, $scope.ps_resolve(), undefined, true);
         }
     }
-
-    $scope.on_status_changed = function () {
-        if ($scope.action.status.code === 'finished') {
-            if (!$scope.action.end_date) {
-                $scope.action.end_date = new Date();
-            }
-        } else {
-            $scope.action.end_date = null;
-        }
-    };
-    $scope.$watch('action.end_date', function (newVal, oldVal) {
-        if (newVal) {
-            if ($scope.action.status.code !== 'finished') {
-                $scope.action.status = $scope.ActionStatus.get_by_code('finished');
-            }
-        } else {
-            $scope.action.status = $scope.ActionStatus.get_by_code('started');
-        }
-    });
 
     $scope.saveAndClose = function () {
         $scope.save_em_result().then(function () {
