@@ -147,7 +147,7 @@ def services_save(event_id, services_data, contract_id):
 
 def update_executives(event):
     last_executive = Event_Persons.query.filter(Event_Persons.event_id == event.id).order_by(desc(Event_Persons.begDate)).first()
-    if not last_executive or last_executive.id != event.execPerson_id:
+    if not last_executive or last_executive.person_id != event.execPerson_id:
         executives = Event_Persons()
         executives.person = event.execPerson
         executives.event = event

@@ -73,12 +73,12 @@ class ReceivedController():
     def update_data(self, received, received_info):
         diag_codes = ('diag_received', 'diag_received1', 'diag_received2')
         received.begDate = safe_datetime(received_info['beg_date'])
-        for code, value in received_info.iteritems():
+        for code, prop in received_info.iteritems():
             if code not in ('id', 'beg_data', 'person', 'flatCode', 'event_id') + diag_codes and code in received.propsByCode:
-                received.propsByCode[code].value = value
-            elif code in diag_codes and value:
+                received.propsByCode[code].value = prop['value']
+            elif code in diag_codes and prop['value']:
                 property = received.propsByCode[code]
-                property.value = ActionProperty_Diagnosis.objectify(property, value)
+                property.value = ActionProperty_Diagnosis.objectify(property, prop['value'])
         db.session.add(received)
         db.session.commit()
         return received

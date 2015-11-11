@@ -4,10 +4,74 @@
         <div class="box-header with-border">
             <h3 class="box-title">Поступление</h3>
             <div class="box-tools pull-right">
+                <button type="button" class="btn btn-box-tool" ng-click="received_edit()" title="Редактировать">
+                    <span class="glyphicon glyphicon-pencil text-primary"></span>
+                </button>
                 <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
             </div>
         </div>
         <div class="box-body">
+            <div ng-if="!event.is_new()">
+                <table class="table table-condensed">
+                    <thead>
+                        <tr>
+                            <th class="col-md-4"></th>
+                            <th class="col-md-8"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th class="text-right">Кем направлен</th>
+                            <td>[[ event.stationary_info.received.appointed_by.value ]]</td>
+                        </tr>
+                        <tr>
+                            <th class="text-right">Направивший врач</th>
+                            <td>[[ event.stationary_info.received.appointment_doctor.value ]]</td>
+                        </tr>
+                        <tr>
+                            <th class="text-right">Дата направления</th>
+                            <td>[[ event.stationary_info.received.appointment_date.value ]]</td>
+                        </tr>
+                        <tr>
+                            <th class="text-right">№ направления</th>
+                            <td>[[ event.stationary_info.received.appointment_number.value ]]</td>
+                        </tr>
+                        <tr>
+                            <th class="text-right">Кем доставлен</th>
+                            <td>[[ event.stationary_info.received.delivered_by.value ]]</td>
+                        </tr>
+                        <tr>
+                            <th class="text-right">№ наряда СП</th>
+                            <td>[[ event.stationary_info.received.ambulance_number.value ]]</td>
+                        </tr>
+                        <tr>
+                            <th class="text-right">Вид транспортировки</th>
+                            <td>[[ event.stationary_info.received.transp_type.value ]]</td>
+                        </tr>
+                        <tr>
+                            <th class="text-right">Диагноз направившего учреждения</th>
+                            <td>[[ event.stationary_info.received.diag_received.value.diagnosis.mkb.code ]] -
+                                [[ event.stationary_info.received.diag_received.value.diagnosis.mkb.name ]]
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="text-right">В состоянии опьянения</th>
+                            <td>[[ event.stationary_info.received.intoxication.value ]]</td>
+                        </tr>
+                        <tr>
+                            <th class="text-right">Травма</th>
+                            <td>[[ event.stationary_info.received.trauma.value.name ]]</td>
+                        </tr>
+                        <tr>
+                            <th class="text-right">Доставлен от начала заболевания\травмы через</th>
+                            <td>[[ event.stationary_info.received.delivered_after.value ]]</td>
+                        </tr>
+                        <tr>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div ng-if="event.is_new()">
             <div class="panel panel-default">
                 <div class="panel-body">
                     <div class="row">
@@ -57,7 +121,7 @@
                         <div class="form-group col-md-3">
                             <label for="delivered_by">Кем доставлен</label>
                             <select id="delivered_by" name="delivered_by" class="form-control"
-                                    ng-model="event.stationary_info.received.appointed_by.value"
+                                    ng-model="event.stationary_info.received.delivered_by.value"
                                     ng-options="val for val in event.stationary_info.received.delivered_by.type.values"></select>
                         </div>
                         <div class="form-group col-md-3">
@@ -96,21 +160,21 @@
                 <div class="panel-body">
                     <div class="row marginal">
                         <div class="col-md-12">
-                            <label for="diag_received" class="control-label">Диагноза направившего учереждения</label>
+                            <label for="diag_received" class="control-label">Диагноз направившего учереждения</label>
                             <wm-diagnosis model="event.stationary_info.received.diag_received.value" action="event.stationary_info.received" can-add-new="true"
                                           can-delete="true" can-edit="true"></wm-diagnosis>
                         </div>
                     </div>
                     <div class="row marginal">
                         <div class="col-md-12">
-                            <label for="diag_received1" class="control-label">Диагноза направившего учереждения (сопутствующий)</label>
+                            <label for="diag_received1" class="control-label">Диагноз направившего учереждения (сопутствующий)</label>
                             <wm-diagnosis model="event.stationary_info.received.diag_received1.value" action="event.stationary_info.received" can-add-new="true"
                                           can-delete="true" can-edit="true" list-mode="true"></wm-diagnosis>
                         </div>
                     </div>
                     <div class="row marginal">
                         <div class="col-md-12">
-                            <label for="diag_received2" class="control-label">Диагноза направившего учереждения (осложнения)</label>
+                            <label for="diag_received2" class="control-label">Диагноз направившего учереждения (осложнения)</label>
                             <wm-diagnosis model="event.stationary_info.received.diag_received2.value" action="event.stationary_info.received" can-add-new="true"
                                           can-delete="true" can-edit="true" list-mode="true"></wm-diagnosis>
                         </div>
@@ -177,6 +241,7 @@
                         </div>
                     </div>
                 </div>
+            </div>
             </div>
         </div>
     </div>
