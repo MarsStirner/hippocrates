@@ -23,7 +23,8 @@ from nemesis.lib.jsonify import EventVisualizer
 from blueprints.event.app import module
 from blueprints.event.lib.utils import (EventSaveException, create_services, save_event, save_executives)
 from nemesis.lib.sphinx_search import SearchEventService, SearchEvent
-from nemesis.lib.data import get_planned_end_datetime, int_get_atl_dict_all, _get_stationary_location_query
+from nemesis.lib.data import (get_planned_end_datetime, int_get_atl_dict_all, _get_stationary_location_query,
+    _get_moving_query)
 from nemesis.lib.agesex import recordAcceptableEx
 from nemesis.lib.const import STATIONARY_EVENT_CODES, POLICLINIC_EVENT_CODES, DIAGNOSTIC_EVENT_CODES
 from nemesis.lib.user import UserUtils
@@ -443,7 +444,10 @@ def api_get_events():
     if 'result_id' in flt:
         base_query = base_query.filter(Event.result_id == flt['result_id'])
     if 'org_struct_id' in flt:
-        stat_loc_query = _get_stationary_location_query(Event).with_entities(
+        moving_query = _get_moving_query(Event)
+        stat_loc_query = _get_stationary_location_query(
+            Event, moving_query=moving_query
+        ).with_entities(
             Event.id.label('event_id'), OrgStructure.id.label('org_struct_id')
         ).subquery('StationaryOs')
         base_query = base_query.join(EventType).join(rbRequestType).outerjoin(
