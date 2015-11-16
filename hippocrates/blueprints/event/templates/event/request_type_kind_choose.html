@@ -1,18 +1,78 @@
 {% extends "event/base.html" %}
 
 {% block main %}
-<div>
-    <div class="row vmargin10">
-        <div class="col-md-12" style="text-align:center">
-        <a type="button" href="{{ url_for('event.new_event', requestType_kind="policlinic", client_id=client_id) }}"
-           class="btn btn-lg btn-default">Поликлиника</a>
-        <a type="button" href="{{ url_for('event.new_event', requestType_kind="stationary", client_id=client_id) }}"
-           class="btn btn-lg btn-default">Стационар</a>
-        <a type="button" href="#" class="btn btn-lg btn-default">Диагностика</a>
-        <a type="button" href="#" class="btn btn-lg btn-default">Диcпансерное наблюдение</a>
+    <section class="content">
+        <div class="row">
+            <div class="col-lg-3 col-md-2 col-xs-1">
+            </div>
+            <div class="col-lg-3 col-md-4 col-xs-5">
+                <a href="{{ url_for('event.new_event', requestType_kind="policlinic", client_id=client_id) }}"
+                   title="Поликлиника" class="small-box bg-gray">
+                    <div class="inner">
+                        <h4>Поликлиника</h4>
+                        <br>
+                        <br>
+                        <br>
+                    </div>
+                    <div class="icon">
+                        <i class="fa fa-medkit"></i>
+                    </div>
+                    <span class="small-box-footer">Создать обращение <i class="fa fa-arrow-circle-right"></i></span>
+                </a>
+            </div>
+            <div class="col-lg-3 col-md-4 col-xs-5">
+                <a href="{{ url_for('event.new_event', requestType_kind="stationary", client_id=client_id) }}"
+                   title="Стационар" class="small-box bg-gray">
+                    <div class="inner">
+                        <h4>Стационар</h4>
+                        <br>
+                        <br>
+                        <br>
+                    </div>
+                    <div class="icon">
+                        <i class="fa fa-hospital-o"></i>
+                    </div>
+                    <span class="small-box-footer">Создать обращение <i class="fa fa-arrow-circle-right"></i></span>
+                </a>
+            </div>
+            <div class="col-lg-3 col-md-2 col-xs-1">
+            </div>
         </div>
-    </div>
-</div>
+        <div class="row">
+            <div class="col-lg-3 col-md-2 col-xs-1">
+            </div>
+            <div class="col-lg-3 col-md-4 col-xs-5">
+                <a href="#" title="Диагностика" class="small-box bg-gray">
+                    <div class="inner">
+                        <h4>Диагностика</h4>
+                        <br>
+                        <br>
+                        <br>
+                    </div>
+                    <div class="icon">
+                        <i class="ion ion-ios-search"></i>
+                    </div>
+                    <span class="small-box-footer">Создать обращение <i class="fa fa-arrow-circle-right"></i></span>
+                </a>
+            </div>
+            <div class="col-lg-3 col-md-4 col-xs-5">
+                <a href="#" title="Диcпансерное наблюдение" class="small-box bg-gray">
+                    <div class="inner">
+                        <h4>Диcпансерное наблюдение</h4>
+                        <br>
+                        <br>
+                        <br>
+                    </div>
+                    <div class="icon">
+                        <i class="fa fa-stethoscope"></i>
+                    </div>
+                    <span class="small-box-footer">Создать обращение <i class="fa fa-arrow-circle-right"></i></span>
+                </a>
+            </div>
+            <div class="col-lg-3 col-md-2 col-xs-1">
+            </div>
+        </div>
+    </section>
 {% endblock %}
 
 {% block modules_js %}

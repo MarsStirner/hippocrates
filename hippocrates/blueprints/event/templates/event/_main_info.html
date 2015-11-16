@@ -91,7 +91,7 @@
                     <div class="col-md-4">
                         <label for="org_structure" class="control-label">Отделение поступления</label>
                         <ui-select id="org_structure" name="org_structure" theme="select2"
-                                   ng-model="event.stationary_info.received.orgStructStay.value" ng-required="true">
+                                   ng-model="event.received.orgStructStay.value" ng-required="true">
                             <ui-select-match placeholder="Подразделение">[[$select.selected.name]]</ui-select-match>
                             <ui-select-choices repeat="os in OrgStructure.objects | filter: $select.search">
                                 <div ng-bind-html="os.name | highlight: $select.search"></div>

@@ -9,7 +9,7 @@ from sqlalchemy import desc, func
 from sqlalchemy.orm import joinedload
 
 from nemesis.app import app
-from nemesis.models.actions import Action, ActionType
+from nemesis.models.actions import Action, ActionType, ActionProperty, ActionPropertyType, OrgStructure_HospitalBed, ActionProperty_HospitalBed
 from nemesis.models.client import Client
 from nemesis.models.enums import EventPrimary, EventOrder
 from nemesis.models.event import (Event, EventType, Diagnosis, Diagnostic, Visit, Event_Persons)
@@ -19,11 +19,11 @@ from nemesis.lib.utils import (jsonify, safe_traverse, safe_datetime, get_utc_da
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.models.schedule import ScheduleClientTicket
 from nemesis.models.exists import (Organisation, )
-from nemesis.lib.jsonify import EventVisualizer
+from nemesis.lib.jsonify import EventVisualizer, StationaryEventVisualizer
 from nemesis.lib.event.event_builder import PoliclinicEventBuilder, StationaryEventBuilder, EventConstructionDirector
 from blueprints.event.app import module
 from blueprints.event.lib.utils import (EventSaveException, create_services, save_event, received_save,
-                                        save_executives, EventSaveController, ReceivedController)
+                                        save_executives, EventSaveController, ReceivedController, MovingController)
 from nemesis.lib.sphinx_search import SearchEventService, SearchEvent
 from nemesis.lib.data import get_planned_end_datetime, int_get_atl_dict_all, _get_stationary_location_query
 from nemesis.lib.agesex import recordAcceptableEx
@@ -49,7 +49,10 @@ def handle_event_error(err):
 def api_event_info():
     event_id = int(request.args['event_id'])
     event = Event.query.get(event_id)
-    vis = EventVisualizer()
+    if event.is_stationary:
+        vis = StationaryEventVisualizer()
+    else:
+        vis = EventVisualizer()
     return vis.make_event_info_for_current_role(event)
 
 
@@ -59,14 +62,15 @@ def api_event_new_get():
     ticket_id = safe_int(request.args.get('ticket_id'))
     client_id = safe_int(request.args['client_id'])
     request_type_kind = request.args['request_type_kind']
+    v = EventVisualizer()
     if request_type_kind == 'policlinic':
         event_builder = PoliclinicEventBuilder(client_id, ticket_id)
     elif request_type_kind == 'stationary':
         event_builder = StationaryEventBuilder(client_id, ticket_id)
+        v = StationaryEventVisualizer()
     event_construction_director = EventConstructionDirector()
     event_construction_director.set_builder(event_builder)
     event = event_construction_director.construct()
-    v = EventVisualizer()
     return v.make_new_event(event)
 
 
@@ -124,6 +128,40 @@ def api_event_save():
         logger.error(e, exc_info=True)
         raise EventSaveException()
     return result
+
+
+@module.route('api/event_moving_save.json', methods=['POST'])
+@api_method
+def api_moving_save():
+    vis = StationaryEventVisualizer()
+    data = request.json
+    event_id = data.get('event_id')
+    mov_ctrl = MovingController()
+    if data.get('id'):
+        moving = mov_ctrl.update_moving(data)
+    else:
+        moving = mov_ctrl.create_moving(event_id, data)
+    result = vis.make_action_info(moving)
+    return result
+
+
+@module.route('api/event_hosp_beds_get.json', methods=['GET'])
+@api_method
+def api_hosp_beds_get():
+    vis = StationaryEventVisualizer()
+    org_str_id = request.args.get('org_str_id')
+    hb_id = request.args.get('hb_id')
+    ap_hosp_beds = ActionProperty.query.join(ActionPropertyType, Action, ActionType, Event,
+                                             ActionProperty_HospitalBed, OrgStructure_HospitalBed)\
+        .filter(ActionProperty.deleted == 0, ActionPropertyType.code == 'hospitalBed', Action.deleted == 0,
+                Event.deleted == 0, ActionType.flatCode == 'moving',
+                Action.endDate.is_(None), OrgStructure_HospitalBed.master_id == org_str_id).all()
+    occupied_hb = [ap.value for ap in ap_hosp_beds]
+    all_hb = OrgStructure_HospitalBed.query.filter(OrgStructure_HospitalBed.master_id == org_str_id).all()
+    for hb in all_hb:
+        hb.occupied = True if hb in occupied_hb else False
+        hb.chosen = True if (hb_id and hb.id == hb_id) else False
+    return map(vis.make_hosp_bed, all_hb)
 
 
 def services_save(event_id, services_data, contract_id):

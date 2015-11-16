@@ -10,8 +10,8 @@
                     <table class="table table-condensed">
                         <thead>
                         <tr>
-                            <th class="col-md-3"></th>
-                            <th class="col-md-8"></th>
+                            <th class="col-md-4"></th>
+                            <th class="col-md-7"></th>
                             <th class="col-md-1"></th>
                         </tr>
                         </thead>
@@ -50,14 +50,14 @@
                             <tr>
                                 <th>Рост</th>
                                 <td>
-
+                                    [[event.received.height.value]]
                                 </td>
                                 <td></td>
                             </tr>
                             <tr>
                                 <th>Вес</th>
                                 <td>
-
+                                    [[event.received.weight.value]]
                                 </td>
                                 <td></td>
                             </tr>
@@ -75,33 +75,33 @@
                     <table class="table table-condensed">
                         <thead>
                         <tr>
-                            <th class="col-md-3"></th>
-                            <th class="col-md-8"></th>
+                            <th class="col-md-4"></th>
+                            <th class="col-md-7"></th>
                             <th class="col-md-1"></th>
                         </tr>
                         </thead>
                         <tbody>
                             <tr>
                                 <th>Дата поступления</th>
-                                <td ng-bind-html="format_admission_date(event.stationary_info.admission_date)"></td>
+                                <td ng-bind-html="format_admission_date(event.admission_date)"></td>
                             </tr>
                             <tr>
                                 <th>Дата выписки и/или продолжительность лечения (дней)</th>
                                 <td>
-                                    [[format_discharge_date(event.stationary_info.discharge_date)]], [[format_hosp_length(event.stationary_info.hosp_length)]]
+                                    [[format_discharge_date(event.discharge_date)]], [[format_hosp_length(event.hosp_length)]]
                                 </td>
                             </tr>
                             <tr>
                                 <th>Отделение</th>
-                                <td ng-bind-html="format_os(event.stationary_info.patient_current_os)"></td>
+                                <td ng-bind-html="format_os(event.patient_current_os)"></td>
                             </tr>
                             <tr>
                                 <th>Койка</th>
-                                <td ng-bind-html="format_hosp_bed(event.stationary_info.hospital_bed)"></td>
+                                <td ng-bind-html="format_hosp_bed(event.hospital_bed)"></td>
                             </tr>
 {#                            <tr>#}
 {#                                <th>Лечащий врач</th>#}
-{#                                <td ng-bind-html="format_doctor(event.stationary_info.attending_doctor)"></td>#}
+{#                                <td ng-bind-html="format_doctor(event.attending_doctor)"></td>#}
 {#                                <td>#}
 {#                                    <button type="button" class="btn btn-sm btn-default" title="Удалить"#}
 {#                                            ng-click="" disabled><span class="glyphicon glyphicon-pencil"></span>#}

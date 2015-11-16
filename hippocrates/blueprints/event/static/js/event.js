@@ -498,7 +498,7 @@ var EventReceivedCtrl = function($scope, $modal, RefBookService) {
 
     $scope.received_edit = function(){
         var scope = $scope.$new();
-        scope.model = angular.copy($scope.event.stationary_info.received)
+        scope.model = angular.copy($scope.event.received)
         $modal.open({
             templateUrl: 'modal-received.html',
             windowClass: 'modal-scrollable',
@@ -506,14 +506,71 @@ var EventReceivedCtrl = function($scope, $modal, RefBookService) {
             scope: scope,
             resolve: {
                 model: function () {
-                    return $scope.event.stationary_info.received;
+                    return $scope.event.received;
                 }
             }
         }).result.then(function (rslt) {
-            $scope.event.stationary_info.received = rslt;
+            $scope.event.received = rslt;
         });
     }
 
+};
+
+var EventMovingsCtrl = function($scope, $modal, RefBookService, ApiCalls) {
+    $scope.OrgStructure = RefBookService.get('OrgStructure');
+    $scope.rbHospitalBedProfile = RefBookService.get('rbHospitalBedProfile');
+
+    $scope.moving_save = function (moving){
+        return ApiCalls.wrapper('POST', url_moving_save, {}, moving)
+    }
+    $scope.create_moving = function(){
+        var scope = $scope.$new();
+        scope.model = {
+            event_id: $scope.event.event_id,
+            beg_date: Date()
+        };
+        $modal.open({
+            templateUrl: 'modal-create-moving.html',
+            size: 'lg',
+            scope: scope
+        }).result.then(function (result) {
+            $scope.moving_save(result).then(function (result) {
+                $scope.event.movings.push(result);
+            });
+        });
+    }
+    $scope.create_hospitalBed = function(moving){
+        var scope = $scope.$new();
+        scope.model = angular.copy(moving);
+        $scope.org_struct_changed(scope.model).then(function(){
+            $modal.open({
+                templateUrl: 'modal-create-hospBed.html',
+                size: 'lg',
+                scope: scope
+            }).result.then(function (result) {
+                $scope.moving_save(result).then(function (result) {
+                angular.extend(moving, result);
+                });
+            });
+        })
+    }
+
+    $scope.org_struct_changed = function(model){
+        var hb_id = model.HospitalBed ? model.HospitalBed.id : null;
+        return ApiCalls.wrapper('GET', url_hosp_beds_get, {org_str_id : model.orgStructStay.value.id,
+                                                           hb_id: hb_id})
+            .then(function (result) {
+                model.hosp_beds = result;
+            })
+    }
+
+    $scope.choose_hb = function(moving, hb){
+        moving.hosp_beds.map(function(hbed){
+            hbed.chosen = false;
+        })
+        moving.hospitalBed.value = hb;
+        hb.chosen = true;
+    }
 };
 
 var PrevEventContractModalCtrl = function ($scope, $modalInstance, model, $filter) {
@@ -847,6 +904,7 @@ WebMis20.controller('EventStationaryInfoCtrl', ['$scope', '$filter', EventStatio
 WebMis20.controller('EventPaymentCtrl', ['$scope', 'RefBookService', '$http', '$modal', 'MessageBox',
     EventPaymentCtrl]);
 WebMis20.controller('EventReceivedCtrl', ['$scope', '$modal', 'RefBookService', EventReceivedCtrl]);
+WebMis20.controller('EventMovingsCtrl', ['$scope', '$modal', 'RefBookService', 'ApiCalls', EventMovingsCtrl]);
 WebMis20.controller('EventServicesCtrl', ['$scope', '$http', EventServicesCtrl]);
 WebMis20.controller('EventInfoCtrl', ['$scope', 'WMEvent', '$http', 'RefBookService', '$window', '$document',
     'PrintingService', '$filter', '$modal', 'WMEventServices', 'WMEventFormState', 'MessageBox', EventInfoCtrl]);

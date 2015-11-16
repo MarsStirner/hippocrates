@@ -12,7 +12,7 @@ from nemesis.models.actions import Action, ActionType, ActionProperty_Diagnosis
 from nemesis.models.client import Client
 from nemesis.models.event import EventLocalContract, Event, EventType, Visit, Event_Persons
 from nemesis.lib.utils import safe_date, safe_traverse, safe_datetime, get_new_event_ext_id, get_new_uuid
-from nemesis.models.exists import rbDocumentType, Person
+from nemesis.models.exists import rbDocumentType, Person, OrgStructure
 from nemesis.lib.settings import Settings
 from nemesis.models.schedule import ScheduleClientTicket
 from nemesis.systemwide import db
@@ -97,6 +97,50 @@ class ReceivedController():
         received = Action.query.get(received_id)
         received = self.update_data(received, received_info)
         return received
+
+
+class MovingController():
+    def __init__(self):
+        pass
+
+    def get_from_orgstr(self, event_id):
+        movings = db.session.query(Action).join(ActionType).filter(Action.event_id == event_id,
+                                                                   Action.deleted == 0,
+                                                                   ActionType.flatCode == 'moving').order_by(Action.begDate).all()
+        if movings:
+            from_org_str = movings[-1]['orgStructStay'].value
+        else:
+            received = db.session.query(Action).join(ActionType).filter(Action.event_id == event_id,
+                                                                        Action.deleted == 0,
+                                                                        ActionType.flatCode == 'received'
+                                                                        ).first()
+            from_org_str = received['orgStructStay'].value
+        return from_org_str
+
+    def update_data(self, moving, moving_info):
+        moving.begDate = safe_datetime(moving_info['beg_date'])
+        moving.propsByCode['orgStructStay'].value = moving_info['orgStructStay']['value']
+        moving.propsByCode['hospitalBed'].value = moving_info['hospitalBed']['value'] if moving_info['hospitalBed'] else None
+        moving.propsByCode['hospitalBedProfile'].value = moving_info['hospitalBedProfile']['value'] if \
+            moving_info['hospitalBedProfile'] else None
+        db.session.add(moving)
+        db.session.commit()
+        return moving
+
+    def create_moving(self, event_id, moving_info):
+        event = Event.query.get(event_id)
+        action_type = ActionType.query.filter(ActionType.flatCode == 'moving').first()
+
+        moving = create_action(action_type.id, event)
+        moving.propsByCode['orgStructReceived'].value = self.get_from_orgstr(moving_info.get('event_id'))
+        moving = self.update_data(moving, moving_info)
+        return moving
+
+    def update_moving(self, moving_info):
+        moving_id = moving_info['id']
+        moving = Action.query.get(moving_id)
+        moving = self.update_data(moving, moving_info)
+        return moving
 
 
 def create_new_event(event_data, local_contract_data):
