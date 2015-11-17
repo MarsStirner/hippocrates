@@ -4,8 +4,8 @@
 </div>
 <div class="modal-body">
     <div class="row marginal">
-        <div class="col-md-6">
-            <label for="" class="control-label">Поступил в отделение</label>
+        <div class="col-md-5">
+            <label for="orgStructStay" class="control-label">Поступил в отделение</label>
             <ui-select id="orgStructStay" name="orgStructStay" theme="select2"
                        ng-change="org_struct_changed(model)"
                        ng-model="model.orgStructStay.value" ng-required="true">
@@ -15,15 +15,34 @@
                 </ui-select-choices>
             </ui-select>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2">
             <label for="arrival_date" class="control-label">Дата поступления</label>
             <wm-date id="arrival_date" name="arrival_date" ng-model="model.beg_date" ng-required="true">
             </wm-date>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2">
             <label for="arrival_time" class="control-label">Время поступления</label>
             <wm-time id="arrival_time" name="arrival_time" ng-model="model.beg_date" ng-required="true">
             </wm-time>
+        </div>
+        <div class="col-md-3">
+            <label for="patronage" class="control-label">Патронаж</label>
+            <div name="patronage">
+                <div class="radio-inline">
+                    <label>
+                        <input type="radio" name="patronage_[[$index]]"
+                               ng-model="model.patronage.value" data-ng-value="true" required>
+                        Да
+                    </label>
+                </div>
+                <div class="radio-inline">
+                    <label>
+                        <input type="radio" name="patronage_[[$index]]"
+                               ng-model="model.patronage.value" data-ng-value="false" required>
+                        Нет
+                    </label>
+                </div>
+            </div>
         </div>
     </div>
     <div class="row">
@@ -35,7 +54,7 @@
     <div class="row">
         <div class="col-md-5">
             <label for="hospitalBedProfile" class="control-label">Профиль койки</label>
-            <rb-select ng-model="model.hospitalBedProfile.value" ref-book="rbHospitalBedProfile"></rb-select>
+            <rb-select ng-model="model.hospitalBedProfile.value" ref-book="rbHospitalBedProfile" required></rb-select>
         </div>
     </div>
 </div>

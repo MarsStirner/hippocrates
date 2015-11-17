@@ -562,6 +562,7 @@ var EventMovingsCtrl = function($scope, $modal, RefBookService, ApiCalls) {
                                                            hb_id: hb_id})
             .then(function (result) {
                 model.hosp_beds = result;
+                model.hospitalBedProfile.value = null;
             })
     }
 
@@ -570,6 +571,7 @@ var EventMovingsCtrl = function($scope, $modal, RefBookService, ApiCalls) {
             hbed.chosen = false;
         })
         moving.hospitalBed.value = hb;
+        moving.hospitalBedProfile.value = hb.profile;
         hb.chosen = true;
     }
 };

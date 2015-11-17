@@ -125,6 +125,7 @@ class MovingController():
         moving.propsByCode['hospitalBed'].value = moving_info['hospitalBed']['value'] if moving_info.get('hospitalBed') else None
         moving.propsByCode['hospitalBedProfile'].value = moving_info['hospitalBedProfile']['value'] if \
             moving_info.get('hospitalBedProfile') else None
+        moving.propsByCode['patronage'].value = moving_info['patronage']['value'] if moving_info.get('patronage') else None
         db.session.add(moving)
         db.session.commit()
         return moving
