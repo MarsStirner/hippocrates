@@ -139,9 +139,10 @@ def api_moving_save():
     mov_ctrl = MovingController()
     if data.get('id'):
         moving = mov_ctrl.update_moving(data)
+        result = vis.make_action_info(moving)
     else:
-        moving = mov_ctrl.create_moving(event_id, data)
-    result = vis.make_action_info(moving)
+        result = mov_ctrl.create_moving(event_id, data)
+        result = map(vis.make_action_info, result)
     return result
 
 

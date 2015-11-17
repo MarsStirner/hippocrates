@@ -527,7 +527,7 @@ var EventMovingsCtrl = function($scope, $modal, RefBookService, ApiCalls) {
         var scope = $scope.$new();
         scope.model = {
             event_id: $scope.event.event_id,
-            beg_date: Date()
+            beg_date: new Date()
         };
         $modal.open({
             templateUrl: 'modal-create-moving.html',
@@ -535,7 +535,8 @@ var EventMovingsCtrl = function($scope, $modal, RefBookService, ApiCalls) {
             scope: scope
         }).result.then(function (result) {
             $scope.moving_save(result).then(function (result) {
-                $scope.event.movings.push(result);
+                $scope.event.movings[$scope.event.movings.length - 1] = result[0];
+                $scope.event.movings.push(result[1]);
             });
         });
     }

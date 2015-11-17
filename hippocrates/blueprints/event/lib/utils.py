@@ -103,26 +103,28 @@ class MovingController():
     def __init__(self):
         pass
 
-    def get_from_orgstr(self, event_id):
+    def get_prev_action(self, event_id):
+        """
+        получить предыдущее движение или послупление
+        """
         movings = db.session.query(Action).join(ActionType).filter(Action.event_id == event_id,
                                                                    Action.deleted == 0,
                                                                    ActionType.flatCode == 'moving').order_by(Action.begDate).all()
         if movings:
-            from_org_str = movings[-1]['orgStructStay'].value
+            action = movings[-1]
         else:
-            received = db.session.query(Action).join(ActionType).filter(Action.event_id == event_id,
-                                                                        Action.deleted == 0,
-                                                                        ActionType.flatCode == 'received'
-                                                                        ).first()
-            from_org_str = received['orgStructStay'].value
-        return from_org_str
+            action = db.session.query(Action).join(ActionType).filter(Action.event_id == event_id,
+                                                                      Action.deleted == 0,
+                                                                      ActionType.flatCode == 'received'
+                                                                      ).first()
+        return action
 
     def update_data(self, moving, moving_info):
         moving.begDate = safe_datetime(moving_info['beg_date'])
         moving.propsByCode['orgStructStay'].value = moving_info['orgStructStay']['value']
-        moving.propsByCode['hospitalBed'].value = moving_info['hospitalBed']['value'] if moving_info['hospitalBed'] else None
+        moving.propsByCode['hospitalBed'].value = moving_info['hospitalBed']['value'] if moving_info.get('hospitalBed') else None
         moving.propsByCode['hospitalBedProfile'].value = moving_info['hospitalBedProfile']['value'] if \
-            moving_info['hospitalBedProfile'] else None
+            moving_info.get('hospitalBedProfile') else None
         db.session.add(moving)
         db.session.commit()
         return moving
@@ -132,9 +134,15 @@ class MovingController():
         action_type = ActionType.query.filter(ActionType.flatCode == 'moving').first()
 
         moving = create_action(action_type.id, event)
-        moving.propsByCode['orgStructReceived'].value = self.get_from_orgstr(moving_info.get('event_id'))
+        prev_action = self.get_prev_action(moving_info.get('event_id'))
+        moving.propsByCode['orgStructReceived'].value = prev_action['orgStructStay'].value
         moving = self.update_data(moving, moving_info)
-        return moving
+
+        prev_action.endDate = moving.begDate
+        prev_action.propsByCode['orgStructDirection'].value = moving.propsByCode['orgStructStay'].value
+        db.session.add(prev_action)
+        db.session.commit()
+        return prev_action, moving
 
     def update_moving(self, moving_info):
         moving_id = moving_info['id']
