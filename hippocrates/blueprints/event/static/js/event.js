@@ -540,6 +540,14 @@ var EventMovingsCtrl = function($scope, $modal, RefBookService, ApiCalls) {
             });
         });
     }
+
+    $scope.close_last_moving = function(){
+        var moving = $scope.event.movings[$scope.event.movings.length - 1]
+        ApiCalls.wrapper('POST', url_moving_close, {}, moving).then(function(result){
+            $scope.event.movings[$scope.event.movings.length - 1] = result;
+        })
+    }
+
     $scope.create_hospitalBed = function(moving){
         var scope = $scope.$new();
         scope.model = angular.copy(moving);

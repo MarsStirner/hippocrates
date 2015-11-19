@@ -1,5 +1,5 @@
 <div ng-controller="EventReceivedCtrl">
-<ng-form name="eventReceivedForm" role="form" toc-element="Поступление" toc-name="tocEventForm">
+<ng-form name="event_received_form" role="form" toc-element="Поступление" toc-name="tocEventForm">
     <div class="box box-info">
         <div class="box-header with-border">
             <h3 class="box-title">Поступление</h3>
@@ -108,9 +108,11 @@
                                 </ui-select-choices>
                             </ui-select>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-4"
+                             ng-class="{'has-error': event_received_form.hosp_order.$invalid && editing.submit_attempt}">
                             <label for="hosp_order" class="control-label">Порядок госпитализации</label>
-                            <rb-select ng-model="event.received.hosp_order.value" ref-book="rbHospitalisationOrder"></rb-select>
+                            <rb-select id="hosp_order" name="hosp_order" ng-model="event.received.hosp_order.value"
+                                       ref-book="rbHospitalisationOrder" ng-required="true"></rb-select>
                         </div>
                         <div class="col-md-4">
                             <label for="hosp_goal" class="control-label">Цель госпитализации</label>
@@ -141,11 +143,13 @@
                                     ng-model="event.received.delivered_after.value"
                                     ng-options="val for val in event.received.delivered_after.type.values"></select>
                         </div>
-                        <div class="form-group col-md-3">
+                        <div class="form-group col-md-3"
+                             ng-class="{'has-error': event_received_form.transp_type.$invalid && editing.submit_attempt}">
                             <label for="transp_type">Вид транспортировки</label>
-                            <select id="transp_type" name="delivered_by" class="form-control"
+                            <select id="transp_type" name="transp_type" class="form-control"
                                     ng-model="event.received.transp_type.value"
-                                    ng-options="val for val in event.received.transp_type.type.values"></select>
+                                    ng-options="val for val in event.received.transp_type.type.values"
+                                    ng-required="true"></select>
                         </div>
                         <div class="form-group col-md-4">
                             <label for="intoxication">Доставлен в состоянии опьянения</label>

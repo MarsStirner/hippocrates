@@ -139,7 +139,8 @@ class MovingController():
         moving.propsByCode['orgStructReceived'].value = prev_action['orgStructStay'].value
         moving = self.update_data(moving, moving_info)
 
-        prev_action.endDate = moving.begDate
+        if not prev_action.endDate:
+            prev_action.endDate = moving.begDate
         prev_action.propsByCode['orgStructDirection'].value = moving.propsByCode['orgStructStay'].value
         db.session.add(prev_action)
         db.session.commit()
@@ -149,6 +150,14 @@ class MovingController():
         moving_id = moving_info['id']
         moving = Action.query.get(moving_id)
         moving = self.update_data(moving, moving_info)
+        return moving
+
+    def close_moving(self, moving_info):
+        moving_id = moving_info['id']
+        moving = Action.query.get(moving_id)
+        moving.endDate = datetime.datetime.now()
+        db.session.add(moving)
+        db.session.commit()
         return moving
 
 

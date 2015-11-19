@@ -9,14 +9,14 @@
                 <a class="btn btn-sm btn-primary" href="{{ url_for('schedule.appointment') }}?client_id={{ request.args['client_id'] }}"
                    ng-if="client_id != 'new'">
                     Записать на приём</a>
-                {% if current_user.current_role == 'admNurse' %}
-                <a href="{{ "{0}patients/{1}/appeals/new/?token={2}&role={3}".format(config['WEBMIS10_URL'], request.args['client_id'], request.cookies.get(config['CASTIEL_AUTH_TOKEN']), current_user.current_role) }}" class="btn btn-sm btn-primary" ng-if="client_id != 'new'" target="_blank">
-                    Создать обращение</a>
-                {% else %}
-                <a class="btn btn-sm btn-primary" href="{{ url_for('event.new_event') }}?event_id=new&client_id={{ request.args['client_id'] }}"
+{#                {% if current_user.current_role == 'admNurse' %}#}
+{#                <a href="{{ "{0}patients/{1}/appeals/new/?token={2}&role={3}".format(config['WEBMIS10_URL'], request.args['client_id'], request.cookies.get(config['CASTIEL_AUTH_TOKEN']), current_user.current_role) }}" class="btn btn-sm btn-primary" ng-if="client_id != 'new'" target="_blank">#}
+{#                    Создать обращение</a>#}
+{#                {% else %}#}
+{#                {% endif %}    #}
+                <a class="btn btn-sm btn-primary" href="{{ url_for('event.request_type_kind_choose') }}?event_id=new&client_id={{ request.args['client_id'] }}"
                    ng-if="client_id != 'new'">
                     Создать обращение</a>
-                {% endif %}
                 <ui-print-button ps="ps" class="btn-sm" resolve="print_context_resolve()" ng-if="!client.is_new()"></ui-print-button>
             </div>
             <h1>Пациент: [[ client.info.full_name ]]</h1>

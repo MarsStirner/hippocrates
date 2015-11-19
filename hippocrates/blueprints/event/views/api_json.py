@@ -139,11 +139,21 @@ def api_moving_save():
     mov_ctrl = MovingController()
     if data.get('id'):
         moving = mov_ctrl.update_moving(data)
-        result = vis.make_action_info(moving)
+        result = vis.make_moving_info(moving)
     else:
         result = mov_ctrl.create_moving(event_id, data)
-        result = map(vis.make_action_info, result)
+        result = map(vis.make_moving_info, result)
     return result
+
+
+@module.route('api/event_moving_close.json', methods=['POST'])
+@api_method
+def api_moving_close():
+    vis = StationaryEventVisualizer()
+    data = request.json
+    mov_ctrl = MovingController()
+    moving = mov_ctrl.close_moving(data)
+    return vis.make_moving_info(moving)
 
 
 @module.route('api/event_hosp_beds_get.json', methods=['GET'])
@@ -156,7 +166,7 @@ def api_hosp_beds_get():
                                              ActionProperty_HospitalBed, OrgStructure_HospitalBed)\
         .filter(ActionProperty.deleted == 0, ActionPropertyType.code == 'hospitalBed', Action.deleted == 0,
                 Event.deleted == 0, ActionType.flatCode == 'moving',
-                Action.endDate.is_(None), OrgStructure_HospitalBed.master_id == org_str_id).all()
+                db.or_(Action.endDate.is_(None), Action.endDate >= datetime.datetime.now()), OrgStructure_HospitalBed.master_id == org_str_id).all()
     occupied_hb = [ap.value for ap in ap_hosp_beds]
     all_hb = OrgStructure_HospitalBed.query.filter(OrgStructure_HospitalBed.master_id == org_str_id).all()
     for hb in all_hb:
