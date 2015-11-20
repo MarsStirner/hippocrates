@@ -181,6 +181,7 @@ var EventMainInfoCtrl = function ($scope, $q, RefBookService, EventType, $filter
     }
     function get_available_contracts() {
         return $filter('contract_filter')($scope.Contract.objects, $scope.event.info);
+        return $scope.Contract.objects
     }
     function get_available_contract(contract) {
         return get_available_contracts().some(function (contr) {
@@ -542,7 +543,7 @@ var EventMovingsCtrl = function($scope, $modal, RefBookService, ApiCalls) {
     }
 
     $scope.close_last_moving = function(){
-        var moving = $scope.event.movings[$scope.event.movings.length - 1]
+        var moving = $scope.event.movings.length ? $scope.event.movings[$scope.event.movings.length - 1] : null
         ApiCalls.wrapper('POST', url_moving_close, {}, moving).then(function(result){
             $scope.event.movings[$scope.event.movings.length - 1] = result;
         })

@@ -102,6 +102,8 @@ def api_event_save():
     try:
         if event_id:
             event = Event.query.get(event_id)
+            if not event:
+                raise ApiException(404, u'Не найдено обращение с id = {}'.format(event_id))
             event_data = all_data['event']
             local_contract_data = safe_traverse(all_data, 'payment', 'local_contract')
             event = event_ctrl.update_base_info(event, event_data, local_contract_data)
@@ -134,11 +136,15 @@ def api_event_save():
 @api_method
 def api_moving_save():
     vis = StationaryEventVisualizer()
+    mov_ctrl = MovingController()
     data = request.json
     event_id = data.get('event_id')
-    mov_ctrl = MovingController()
-    if data.get('id'):
-        moving = mov_ctrl.update_moving(data)
+    moving_id = data.get('id')
+    if moving_id:
+        moving = Action.query.get(moving_id)
+        if not moving:
+            raise ApiException(404, u'Не найдено движение с id = {}'.format(moving_id))
+        moving = mov_ctrl.update_moving_data(moving, data)
         result = vis.make_moving_info(moving)
     else:
         result = mov_ctrl.create_moving(event_id, data)
@@ -148,11 +154,17 @@ def api_moving_save():
 
 @module.route('api/event_moving_close.json', methods=['POST'])
 @api_method
-def api_moving_close():
+def api_event_moving_close():
     vis = StationaryEventVisualizer()
-    data = request.json
     mov_ctrl = MovingController()
-    moving = mov_ctrl.close_moving(data)
+    moving_info = request.json
+    moving_id = moving_info['id']
+    if not moving_id:
+        raise ApiException(404, u'Не передан параметр moving_id')
+    moving = Action.query.get(moving_id)
+    if not moving:
+        raise ApiException(404, u'Не найдено движение с id = {}'.format(moving_id))
+    moving = mov_ctrl.close_moving(moving)
     return vis.make_moving_info(moving)
 
 
