@@ -356,7 +356,8 @@ def reevaluate_preeclampsia_rate(event, action=None):
 
         anamnesis_diags = get_diagnoses_from_action(mother_anamnesis, open=False)
         all_diags = get_all_diagnoses(event)
-        urinary_protein_24 = get_action(event, '24urinary')['24protein'].value if get_action(event, '24urinary') else None
+        urinary_24 = get_action(event, '24urinary')
+        urinary_protein_24 = urinary_24['24protein'].value if urinary_24 else None
         urinary_protein = get_action(event, 'urinaryProtein')['protein'].value if get_action(event, 'urinaryProtein') else None
         biochemical_analysis = get_action(event, 'biochemical_analysis')
         ALaT = biochemical_analysis['ALaT'].value if biochemical_analysis else None
@@ -390,7 +391,7 @@ def reevaluate_preeclampsia_rate(event, action=None):
 
             if hight_blood_pressure and (urinary_protein_24 >= 0.3 or albumin_creatinine >= 0.15):
                 res = 'mild'
-                urinary24 = urinary_protein_24['24urinary'].value  # < 500 Олигурия
+                urinary24 = urinary_24['24urinary'].value if urinary_24 else None  # < 500 Олигурия
                 if very_hight_blood_pressure or urinary_protein_24 >= 5 or urinary24 < 500 or ALaT > 31 or \
                    ASaT > 31 or thrombocytes < 100 or heavy_diags or complaints:
                     res = 'heavy'
