@@ -16,3 +16,8 @@ def cashbook_operations():
     if integration_1codvd_enabled():
         return render_template('accounting/no_cashier_ui.html')
     return render_template('accounting/cashbook_operations.html')
+
+
+@module.route('/contract-list')
+def html_contract_list():
+    return render_template('accounting/contract_list.html')

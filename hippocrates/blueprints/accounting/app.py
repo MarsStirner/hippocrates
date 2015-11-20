@@ -11,7 +11,7 @@ def module_name():
         module_name=RUS_NAME,
     )
 
-# noinspection PyUnresolvedReferences
-from .views import *
-# noinspection PyUnresolvedReferences
-from .api_json import *
+
+from html_views import *
+from api import *
+from api_json import *

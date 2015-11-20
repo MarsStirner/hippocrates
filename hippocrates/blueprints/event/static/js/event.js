@@ -246,14 +246,14 @@ var EventMainInfoCtrl = function ($scope, $q, RefBookService, EventType, $filter
         $scope.event.info.set_date = new Date($scope.event.info.set_date);
         var et_loading = $scope.rbEventType.initialize($scope.event.info.client);
         $q.all([et_loading, $scope.Contract.loading, $scope.rbRequestType.loading, $scope.rbFinance.loading])
-        .then(function () {
-            if ($scope.create_mode) {
-                $scope.event.info.event_type = $scope.rbEventType.get_available_et($scope.event.info.event_type);
-            }
-            set_rt_finance_choices();
-            $scope.on_event_type_changed();
-            $scope.event.info.contract = get_available_contract($scope.event.info.contract);
-        });
+            .then(function () {
+                if ($scope.create_mode) {
+                    $scope.event.info.event_type = $scope.rbEventType.get_available_et($scope.event.info.event_type);
+                }
+                set_rt_finance_choices();
+                $scope.on_event_type_changed();
+                $scope.event.info.contract = get_available_contract($scope.event.info.contract);
+            });
         $scope.userHasResponsibilityByAction = $scope.event.info.actions ?
             $scope.event.info.actions.some(function (action) {
                 return [action.person_id, action.create_person_id, action.set_person_id].has(main_user.id);

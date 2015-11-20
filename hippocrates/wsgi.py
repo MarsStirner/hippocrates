@@ -110,7 +110,13 @@ def fc_urls():
             'api_user_mail_summary': url_for("useraccount.api_mail_summary"),
             'api_user_mail': url_for("useraccount.api_mail_get") + '{0}',
             'api_user_mail_alter': url_for("useraccount.api_mail_mark") + '{0}/{1}',
-            'api_subscription': url_for("useraccount.api_subscription") + '{0}'
+            'api_subscription': url_for("useraccount.api_subscription") + '{0}',
+            # accounting
+            'html_contract_list': url_for('accounting.html_contract_list'),
+            'api_contract_get': url_for('accounting.api_0_contract_get'),
+            'api_contract_list': url_for('accounting.api_0_contract_list'),
+            'api_contract_save': url_for('accounting.api_0_contract_save'),
+            'api_contragent_list': url_for('accounting.api_0_contragent_list')
         }
     }
 

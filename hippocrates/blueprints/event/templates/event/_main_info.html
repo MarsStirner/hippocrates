@@ -1,5 +1,4 @@
 <div ng-controller="EventMainInfoCtrl">
-{#    <h4>[[ event.info.organisation.short_name ]]</h4>#}
     <ng-form name="event_maininfo_form" toc-element="Информация об обращении">
         <div class="box box-info">
             <div class="box-header with-border">
@@ -38,21 +37,6 @@
                         </ui-select>
                     </div>
                     <div class="col-md-4"
-                         ng-class="{'has-error': event_maininfo_form.contract.$invalid && editing.submit_attempt}">
-                        <label for="contract">Договор</label>
-                        <ui-select id="contract" name="contract" theme="select2"
-                                   ng-model="event.info.contract" ng-required="true" ng-change="on_contract_changed()"
-                                   ng-disabled="widget_disabled('contract') || services_added()">
-                            <ui-select-match placeholder="Договор">[[$select.selected.number]] [[$select.selected.date]]
-                                                         [[$select.selected.resolution]]</ui-select-match>
-                            <ui-select-choices repeat="c in Contract.objects | contract_filter:event.info | filter: $select.search">
-                                <div ng-bind-html="(c.number+' '+c.date+' '+c.resolution) | highlight: $select.search"></div>
-                            </ui-select-choices>
-                        </ui-select>
-                    </div>
-                </div>
-                <div class="row marginal">
-                    <div class="col-md-4"
                          ng-class="{'has-error': event_maininfo_form.event_type.$invalid && editing.submit_attempt}">
                         <label for="event_type">Тип события</label>
                         <ui-select id="event_type" name="event_type" theme="select2"
@@ -66,7 +50,9 @@
                             </ui-select-choices>
                         </ui-select>
                     </div>
-                    <div class="col-md-4" ng-show="formstate.is_dms()"
+                </div>
+                <div class="row marginal" ng-show="formstate.is_dms()">
+                    <div class="col-md-4"
                          ng-class="{'has-error': event_maininfo_form.dms.$invalid && editing.submit_attempt}">
                         <label for="dms">Полис ДМС</label>
                         <ui-select id="dms" name="dms" theme="select2"
@@ -77,6 +63,39 @@
                                 <div ng-bind-html="policy.policy_text | highlight: $select.search"></div>
                             </ui-select-choices>
                         </ui-select>
+                    </div>
+                </div>
+                <div class="row marginal">
+                    <div class="col-md-9"
+                         ng-class="{'has-error': event_maininfo_form.contract.$invalid && editing.submit_attempt}">
+                        <label for="contract">Договор</label>
+                        <div class="row">
+                        <div class="col-md-10">
+                            <ui-select id="contract" name="contract" theme="select2"
+                                       ng-model="event.info.contract" ng-required="true" ng-change="on_contract_changed()"
+                                       ng-disabled="widget_disabled('contract') || services_added()">
+                                <ui-select-match placeholder="Договор">[[$select.selected.number]] [[$select.selected.date]]
+                                                             [[$select.selected.resolution]]</ui-select-match>
+                                <ui-select-choices repeat="c in Contract.objects | contract_filter:event.info | filter: $select.search">
+                                    <div ng-bind-html="(c.number+' '+c.date+' '+c.resolution) | highlight: $select.search"></div>
+                                </ui-select-choices>
+                            </ui-select>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"
+                                    aria-haspopup="true" aria-expanded="false">
+                                    <span class="fa fa-reorder"></span> <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a href="#">Редактировать</a></li>
+                                    <li><a href="#">Создать новый договор</a></li>
+                                    <li role="separator" class="divider"></li>
+                                    <li><a href="#">Перейти к списку договоров</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        </div>
                     </div>
                 </div>
                 <div class="row marginal">
