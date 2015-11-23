@@ -364,17 +364,14 @@ def reevaluate_preeclampsia_rate(event, action=None):
         ASaT = biochemical_analysis['ASaT'].value if biochemical_analysis else None
         albumin_creatinine = get_action(event, 'albuminCreatinineRelation')['albuminCreatinineRelation'].value if \
             get_action(event, 'albuminCreatinineRelation') else None
-        thrombocytes = get_action(event, 'clinical_blood_analysis')['thrombocytes'] if get_action(event, 'clinical_blood_analysis') else None
+        thrombocytes = get_action(event, 'clinical_blood_analysis')['thrombocytes'].value if get_action(event, 'clinical_blood_analysis') else None
 
-        for diag in anamnesis_diags:
-            if 'O10' in diag['diagnosis']['mkb'].DiagID:
-                has_CAH = True
-                break
         for diag in all_diags:
             DiagID = diag['diagnosis']['mkb'].DiagID
+            if 'O10' in diag['diagnosis']['mkb'].DiagID:
+                has_CAH = True
             if ('R34' in DiagID) or ('J81' in DiagID) or ('R23.0' in DiagID) or ('O36.5' in DiagID):
                 heavy_diags = True
-                break
 
         if has_CAH:  # хроническая артериальная гипертензия
             if urinary_protein_24 >= 0.3 or urinary_protein >= 0.3 or albumin_creatinine >= 0.15 or ALaT > 31 or ASaT > 31 or thrombocytes < 100:
@@ -392,8 +389,8 @@ def reevaluate_preeclampsia_rate(event, action=None):
             if hight_blood_pressure and (urinary_protein_24 >= 0.3 or albumin_creatinine >= 0.15):
                 res = 'mild'
                 urinary24 = urinary_24['24urinary'].value if urinary_24 else None  # < 500 Олигурия
-                if very_hight_blood_pressure or urinary_protein_24 >= 5 or urinary24 < 500 or ALaT > 31 or \
-                   ASaT > 31 or thrombocytes < 100 or heavy_diags or complaints:
+                if very_hight_blood_pressure or urinary_protein_24 >= 5 or (urinary24 and urinary24 < 500) or ALaT > 31 or \
+                   ASaT > 31 or (thrombocytes and thrombocytes < 100) or heavy_diags or complaints:
                     res = 'heavy'
 
     last_inspection_diags = get_diagnoses_from_action(last_inspection, open=False)
