@@ -180,7 +180,7 @@ var EventMainInfoCtrl = function ($scope, $q, RefBookService, EventType, $filter
         $scope.finance.selected = et ? angular.extend({}, et.finance) : undefined;
     }
     function get_available_contracts() {
-        return $filter('contract_filter')($scope.Contract.objects, $scope.event.info);
+//        return $filter('contract_filter')($scope.Contract.objects, $scope.event.info);
         return $scope.Contract.objects
     }
     function get_available_contract(contract) {
