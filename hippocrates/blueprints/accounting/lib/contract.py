@@ -5,7 +5,7 @@ import datetime
 from sqlalchemy import or_
 
 from nemesis.systemwide import db
-from nemesis.models.accounting import Contract, rbContractType, Contract_Contragent, ContractContingent
+from nemesis.models.accounting import Contract, rbContractType, Contract_Contragent, Contract_Contingent
 from nemesis.models.refbooks import rbFinance
 from nemesis.models.client import Client
 from nemesis.models.organisation import Organisation
@@ -79,10 +79,11 @@ class ContractController(BaseModelController):
                 setattr(contract, attr, json_data.get(attr))
         self.update_contract_ca_payer(contract, json_data['payer'])
         self.update_contract_ca_recipient(contract, json_data['recipient'])
+        self.update_contract_contingent(contract, json_data['contingent_list'])
         return contract
 
     def update_contract_ca_payer(self, contract, ca_data):
-        contragent_id = safe_traverse(ca_data, 'id')
+        contragent_id = safe_int(ca_data.get('id'))
         if contragent_id:
             ca_payer = self.contragent_ctrl.get_contragent(contragent_id)
         else:
@@ -91,13 +92,25 @@ class ContractController(BaseModelController):
         return ca_payer
 
     def update_contract_ca_recipient(self, contract, ca_data):
-        contragent_id = safe_traverse(ca_data, 'id')
+        contragent_id = safe_int(ca_data.get('id'))
         if contragent_id:
             ca_recipient = self.contragent_ctrl.get_contragent(contragent_id)
         else:
             ca_recipient = self.contragent_ctrl.update_contragent(contract.recipient, ca_data)
         contract.recipient = ca_recipient
         return ca_recipient
+
+    def update_contract_contingent(self, contract, cont_data):
+        contingent_list = []
+        for cont_d in cont_data:
+            contingent_id = safe_int(cont_d.get('id'))
+            if contingent_id:
+                contingent = self.contingent_ctrl.get_contingent(contingent_id)
+            else:
+                contingent = self.contingent_ctrl.get_new_contingent()
+            contingent = self.contingent_ctrl.update_contingent(contingent, cont_d, contract)
+            contingent_list.append(contingent)
+        contract.contingent_list = contingent_list
 
     def _format_contract_data(self, data):
         finance_id = safe_traverse(data, 'finance', 'id')
@@ -137,10 +150,8 @@ class ContragentController(BaseModelController):
     def _format_contragent_data(self, data):
         client_id = safe_traverse(data, 'client', 'id')
         org_id = safe_traverse(data, 'org', 'id')
-        data = {
-            'client': self.session.query(Client).filter(Client.id == client_id).first() if client_id else None,
-            'org': self.session.query(Organisation).filter(Organisation.id == org_id).first() if org_id else None
-        }
+        data['client'] = self.session.query(Client).filter(Client.id == client_id).first() if client_id else None
+        data['org'] = self.session.query(Organisation).filter(Organisation.id == org_id).first() if org_id else None
         return data
 
 
@@ -149,28 +160,29 @@ class ContingentController(BaseModelController):
     def get_new_contingent(self, params=None):
         if params is None:
             params = {}
-        cont = ContractContingent()
+        contract_id = safe_int(params.get('contract_id'))
+        cont = Contract_Contingent()
+        if contract_id:
+            cont.contract_id = contract_id
         cont.deleted = 0
         return cont
 
-    # def get_contragent(self, ca_id):
-    #     ca = self.session.query(Contract_Contragent).get(ca_id)
-    #     return ca
-    #
-    # def update_contragent(self, contragent, json_data):
-    #     json_data = self._format_contragent_data(json_data)
-    #     contragent.client = json_data['client']
-    #     contragent.org = json_data['org']
-    #     return contragent
-    #
-    # def _format_contragent_data(self, data):
-    #     client_id = safe_traverse(data, 'client', 'id')
-    #     org_id = safe_traverse(data, 'org', 'id')
-    #     data = {
-    #         'client': self.session.query(Client).filter(Client.id == client_id).first() if client_id else None,
-    #         'org': self.session.query(Organisation).filter(Organisation.id == org_id).first() if org_id else None
-    #     }
-    #     return data
+    def get_contingent(self, cont_id):
+        cont = self.session.query(Contract_Contingent).get(cont_id)
+        return cont
+
+    def update_contingent(self, contingent, json_data, contract):
+        json_data = self._format_contingent_data(json_data)
+        contingent.contract = contract
+        contingent.client = json_data['client']
+        # TODO: in separate method
+        contingent.deleted = json_data['deleted']
+        return contingent
+
+    def _format_contingent_data(self, data):
+        client_id = safe_traverse(data, 'client', 'id')
+        data['client'] = self.session.query(Client).filter(Client.id == client_id).first() if client_id else None
+        return data
 
 
 from flask import abort

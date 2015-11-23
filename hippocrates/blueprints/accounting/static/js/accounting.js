@@ -36,5 +36,8 @@ WebMis20.service('AccountingService', ['WebMisApi', function (WebMisApi) {
             query: query,
             ca_type_code: ca_type_code
         });
-    }
+    };
+    this.get_new_contingent = function (args) {
+        return WebMisApi.contingent.get(undefined, args);
+    };
 }]);

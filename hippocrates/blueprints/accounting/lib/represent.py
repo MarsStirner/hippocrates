@@ -16,9 +16,9 @@ class ContractRepr(object):
         data.update({
             'recipient': self.ca_repr.represent_contragent(contract.recipient),
             'payer': self.ca_repr.represent_contragent(contract.payer),
-            'contingent': [
+            'contingent_list': [
                 self.contingent_repr.represent_contingent(cont)
-                for cont in contract.contingent
+                for cont in contract.contingent_list if cont.deleted == 0  # TODO: think about selection
             ],
             'pricelist_list': []
         })
@@ -118,10 +118,13 @@ class ContingentRepr(object):
         return {
             'id': contingent.id,
             'contract_id': contingent.contract_id,
-            'client': self.represent_client(contingent.client)
+            'client': self.represent_client(contingent.client),
+            'deleted': contingent.deleted
         }
 
     def represent_client(self, client):
+        if not client:
+            return None
         return {
             'id': client.id,
             'birth_date': client.birthDate,

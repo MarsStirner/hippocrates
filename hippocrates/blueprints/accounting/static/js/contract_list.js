@@ -43,7 +43,7 @@ var ContractListCtrl = function ($scope, AccountingService, ContractModalService
             });
     };
     $scope.editContract = function (idx) {
-        var contract = $scope.contract_list[idx];
+        var contract = _.deepCopy($scope.contract_list[idx]);
         ContractModalService.openEdit(contract)
             .then(function (result) {
                 var upd_contract = result.contract;

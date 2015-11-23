@@ -2,3 +2,4 @@
 
 from contract import *
 from contragent import *
+from contingent import *

@@ -142,7 +142,28 @@ WebMis20.run(['$templateCache', function ($templateCache) {
                 <h3 class="box-title">Потребители услуг (Контингент)</h3>\
             </div>\
             <div class="box-body">\
-                \
+                <ul class="list-group">\
+                    <li ng-repeat="cont in contract.contingent_list | flt_not_deleted" class="list-group-item">\
+                        <span><a ng-href="[[getClientInfoUrl(cont.client.id)]]" target="_blank">[[ cont.client.full_name ]], [[ cont.client.birth_date | asDate ]]</a></span>\
+                        <span class="fa fa-remove text-danger cursor-pointer pull-right"\
+                            ng-click="removeContingent($index)" title="Удалить"></span>\
+                    </li>\
+                </ul>\
+            </div>\
+            <div class="box-footer">\
+                <div class="row">\
+                <div class="col-md-9">\
+                    <ui-select ng-model="new_contingent.client" ext-select-client-search theme="bootstrap"\
+                        placeholder="Выберите пациента">\
+                    </ui-select>\
+                </div>\
+                <div class="col-md-3">\
+                    <button type="button" class="btn btn-sm btn-primary pull-right" ng-click="addNewContingent()"\
+                        ng-disabled="btnAddContingentDisabled()">\
+                        <span class="fa fa-plus"> Добавить пациента</span>\
+                    </button>\
+                </div>\
+                </div>\
             </div>\
         </div>\
     </div>\
@@ -163,6 +184,9 @@ var ContractModalCtrl = function ($scope, AccountingService, contract) {
         payer_create_mode: false,
         recipient_create_mode: false
     };
+    $scope.new_contingent = {
+        client: null
+    };
 
     $scope.saveAndClose = function () {
         $scope.save_contract().then(function (upd_contract) {
@@ -180,6 +204,8 @@ var ContractModalCtrl = function ($scope, AccountingService, contract) {
     $scope.is_new_contract = function () {
         return !$scope.contract.id;
     };
+
+    // contragents
     function clearLegalPayer () {
         $scope.contract.payer.org = null;
         $scope.contract.payer.short_descr = $scope.contract.payer.full_descr = null;
@@ -244,6 +270,32 @@ var ContractModalCtrl = function ($scope, AccountingService, contract) {
             else if (newVal === 'legal') clearIndividualRecipient();
         }
     });
+
+    // contingent
+    $scope.addNewContingent = function () {
+        AccountingService.get_new_contingent({
+            contract_id: $scope.contract.id
+        })
+            .then(function (new_cont) {
+                new_cont.client = $scope.new_contingent.client;
+                $scope.contract.contingent_list.push(new_cont);
+                $scope.new_contingent.client = null;
+            });
+    };
+    $scope.removeContingent = function (idx) {
+        var cont = $scope.contract.contingent_list[idx];
+        if (cont.id) {
+            cont.deleted = 1;
+        } else {
+            $scope.contract.contingent_list.splice(idx, 1);
+        }
+    };
+    $scope.btnAddContingentDisabled = function () {
+        return !safe_traverse($scope.new_contingent, ['client', 'id']);
+    };
+    $scope.getClientInfoUrl = function (client_id) {
+        return url_for_patien_info_full + '?client_id=' + client_id;
+    };
 
     $scope.init = function () { };
 
