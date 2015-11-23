@@ -54,12 +54,12 @@ class EventSaveController():
         if event.is_stationary:
             event.isPrimaryCode = event_data['is_primary']['id']
             event.order = event_data['order']['id']
-        event.contract_id = event_data['contract']['id']
+        # event.contract_id = event_data['contract']['id']
         event.note = event_data['note']
         event.orgStructure_id = event_data['org_structure']['id'] if event_data['org_structure'] else None
-        if local_contract_data:
-            lcon = create_or_update_local_contract(event, local_contract_data)
-            event.localContract = lcon
+        # if local_contract_data:
+        #     lcon = create_or_update_local_contract(event, local_contract_data)
+        #     event.localContract = lcon
         return event
 
     def store(self, *entity_list):
@@ -160,7 +160,7 @@ def create_new_event(event_data, local_contract_data):
         event.execPerson = Person.query.get(exec_person_id)
     event.setDate = safe_datetime(event_data['set_date'])
     event.externalId = get_new_event_ext_id(event.eventType.id, event.client_id)
-    event.contract_id = event_data['contract']['id']
+    # event.contract_id = event_data['contract']['id']
     event.isPrimaryCode = event_data['is_primary']['id']
     event.order = event_data['order']['id']
     event.org_id = event_data['organisation']['id']
@@ -175,14 +175,14 @@ def create_new_event(event_data, local_contract_data):
             'code': 403
         })
 
-    if event.payer_required:
-        if not local_contract_data:
-            raise EventSaveException(base_msg % error_msg['message'], {
-                'code': 422,
-                'ext_msg': u'Не заполнена информация о плательщике.'
-            })
-        lcon = create_or_update_local_contract(event, local_contract_data)
-        event.localContract = lcon
+    # if event.payer_required:
+    #     if not local_contract_data:
+    #         raise EventSaveException(base_msg % error_msg['message'], {
+    #             'code': 422,
+    #             'ext_msg': u'Не заполнена информация о плательщике.'
+    #         })
+    #     lcon = create_or_update_local_contract(event, local_contract_data)
+    #     event.localContract = lcon
 
     if event.is_policlinic:
         visit = Visit.make_default(event)
@@ -211,10 +211,10 @@ def update_event(event_id, event_data, local_contract_data):
     event.rbAcheResult_id = safe_traverse(event_data, 'ache_result', 'id')
     event.note = event_data['note']
 
-    if local_contract_data:
-        lcon = create_or_update_local_contract(event, local_contract_data)
-        event.localContract = lcon
-    return event
+    # if local_contract_data:
+    #     lcon = create_or_update_local_contract(event, local_contract_data)
+    #     event.localContract = lcon
+    # return event
 
 
 def save_event(event_id, data):

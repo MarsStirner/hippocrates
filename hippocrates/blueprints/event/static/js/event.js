@@ -101,10 +101,10 @@ var EventMainInfoCtrl = function ($scope, $q, RefBookService, EventType, $filter
         $scope.on_event_type_changed();
     };
     $scope.on_event_type_changed = function () {
-        set_contract();
+//        set_contract();
         $scope.update_form_state();
         $scope.update_policies();
-        $scope.on_contract_changed();
+//        $scope.on_contract_changed();
     };
     $scope.on_contract_changed = function () {
         if ($scope.formstate.is_dms()) {

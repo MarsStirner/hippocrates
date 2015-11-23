@@ -95,7 +95,7 @@ def api_event_save():
     request_type_kind = all_data.get('request_type_kind')
     event_data = all_data.get('event')
     event_id = event_data.get('id')
-    contract_id = event_data['contract']['id']
+    # contract_id = event_data['contract']['id']
     services_data = all_data.get('services', [])
 
     event_ctrl = EventSaveController()
@@ -115,7 +115,7 @@ def api_event_save():
             event_id = int(event)
         result['id'] = int(event)
 
-        services_save(event_id, services_data, contract_id)
+        # services_save(event_id, services_data, contract_id)
         update_executives(event)
         if request_type_kind == 'policlinic':
             visit = Visit.make_default(event)

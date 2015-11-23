@@ -37,19 +37,19 @@
                             </ui-select-choices>
                         </ui-select>
                     </div>
-                    <div class="col-md-4"
-                         ng-class="{'has-error': event_maininfo_form.contract.$invalid && editing.submit_attempt}">
-                        <label for="contract">Договор</label>
-                        <ui-select id="contract" name="contract" theme="select2"
-                                   ng-model="event.info.contract" ng-required="true" ng-change="on_contract_changed()"
-                                   ng-disabled="widget_disabled('contract') || services_added()">
-                            <ui-select-match placeholder="Договор">[[$select.selected.number]] [[$select.selected.date]]
-                                                         [[$select.selected.resolution]]</ui-select-match>
-                            <ui-select-choices repeat="c in Contract.objects | contract_filter:event.info | filter: $select.search">
-                                <div ng-bind-html="(c.number+' '+c.date+' '+c.resolution) | highlight: $select.search"></div>
-                            </ui-select-choices>
-                        </ui-select>
-                    </div>
+{#                    <div class="col-md-4"#}
+{#                         ng-class="{'has-error': event_maininfo_form.contract.$invalid && editing.submit_attempt}">#}
+{#                        <label for="contract">Договор</label>#}
+{#                        <ui-select id="contract" name="contract" theme="select2"#}
+{#                                   ng-model="event.info.contract" ng-required="true" ng-change="on_contract_changed()"#}
+{#                                   ng-disabled="widget_disabled('contract') || services_added()">#}
+{#                            <ui-select-match placeholder="Договор">[[$select.selected.number]] [[$select.selected.date]]#}
+{#                                                         [[$select.selected.resolution]]</ui-select-match>#}
+{#                            <ui-select-choices repeat="c in Contract.objects | contract_filter:event.info | filter: $select.search">#}
+{#                                <div ng-bind-html="(c.number+' '+c.date+' '+c.resolution) | highlight: $select.search"></div>#}
+{#                            </ui-select-choices>#}
+{#                        </ui-select>#}
+{#                    </div>#}
                 </div>
                 <div class="row marginal">
                     <div class="col-md-4"
