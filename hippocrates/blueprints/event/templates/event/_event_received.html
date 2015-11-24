@@ -1,0 +1,255 @@
+<div ng-controller="EventReceivedCtrl">
+<ng-form name="event_received_form" role="form" toc-element="Поступление" toc-name="tocEventForm">
+    <div class="box box-info">
+        <div class="box-header with-border">
+            <h3 class="box-title">Поступление</h3>
+            <div class="box-tools pull-right">
+                <button type="button" class="btn btn-box-tool" ng-click="received_edit()" title="Редактировать">
+                    <span class="glyphicon glyphicon-pencil text-primary"></span>
+                </button>
+                <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+            </div>
+        </div>
+        <div class="box-body">
+            <div ng-if="!event.is_new()">
+                <table class="table table-condensed">
+                    <thead>
+                        <tr>
+                            <th class="col-md-4"></th>
+                            <th class="col-md-8"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th class="text-right">Кем направлен</th>
+                            <td>[[ event.received.appointed_by.value ]]</td>
+                        </tr>
+                        <tr>
+                            <th class="text-right">Направивший врач</th>
+                            <td>[[ event.received.appointment_doctor.value ]]</td>
+                        </tr>
+                        <tr>
+                            <th class="text-right">Дата направления</th>
+                            <td>[[ event.received.appointment_date.value ]]</td>
+                        </tr>
+                        <tr>
+                            <th class="text-right">№ направления</th>
+                            <td>[[ event.received.appointment_number.value ]]</td>
+                        </tr>
+                        <tr>
+                            <th class="text-right">Кем доставлен</th>
+                            <td>[[ event.received.delivered_by.value ]]</td>
+                        </tr>
+                        <tr>
+                            <th class="text-right">№ наряда СП</th>
+                            <td>[[ event.received.ambulance_number.value ]]</td>
+                        </tr>
+                        <tr>
+                            <th class="text-right">Вид транспортировки</th>
+                            <td>[[ event.received.transp_type.value ]]</td>
+                        </tr>
+                        <tr>
+                            <th class="text-right">Диагноз направившего учреждения</th>
+                            <td>[[ event.received.diag_received.value.diagnosis.mkb.code ]] -
+                                [[ event.received.diag_received.value.diagnosis.mkb.name ]]
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="text-right">В состоянии опьянения</th>
+                            <td>[[ event.received.intoxication.value ]]</td>
+                        </tr>
+                        <tr>
+                            <th class="text-right">Травма</th>
+                            <td>[[ event.received.trauma.value.name ]]</td>
+                        </tr>
+                        <tr>
+                            <th class="text-right">Доставлен от начала заболевания\травмы через</th>
+                            <td>[[ event.received.delivered_after.value ]]</td>
+                        </tr>
+                        <tr>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div ng-if="event.is_new()">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="form-group col-md-3">
+                            <label for="appointed_by">Кем направлен</label>
+                            <select id="appointed_by" name="appointed_by" class="form-control"
+                                    ng-model="event.received.appointed_by.value"
+                                    ng-options="val for val in event.received.appointed_by.type.values"></select>
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label for="appointment_doctor">Направивший врач</label>
+                            <input type="text" class="form-control" autocomplete="off"
+                                   id="appointment_doctor" name="appointment_doctor" ng-model="event.received.appointment_doctor.value"/>
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label for="appointment_number">№ направления</label>
+                            <input type="text" class="form-control" autocomplete="off"
+                                   id="appointment_number" name="appointment_number" ng-model="event.received.appointment_number.value"/>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="appointment_date" class="control-label">Дата направления</label>
+                            <wm-date id="appointment_date" name="appointment_date" ng-model="event.received.appointment_date.value">
+                            </wm-date>
+                        </div>
+                    </div>
+                    <div class="row marginal">
+                        <div class="col-md-4">
+                            <label for="orgStructDirectedFrom" class="control-label">Направлен из</label>
+                            <ui-select id="orgStructDirectedFrom" name="orgStructDirectedFrom" theme="select2"
+                                       ng-model="event.received.orgStructDirectedFrom.value">
+                                <ui-select-match placeholder="Подразделение">[[$select.selected.name]]</ui-select-match>
+                                <ui-select-choices repeat="os in OrgStructure.objects | filter: $select.search">
+                                    <div ng-bind-html="os.name | highlight: $select.search"></div>
+                                </ui-select-choices>
+                            </ui-select>
+                        </div>
+                        <div class="col-md-4"
+                             ng-class="{'has-error': event_received_form.hosp_order.$invalid && editing.submit_attempt}">
+                            <label for="hosp_order" class="control-label">Порядок госпитализации</label>
+                            <rb-select id="hosp_order" name="hosp_order" ng-model="event.received.hosp_order.value"
+                                       ref-book="rbHospitalisationOrder" ng-required="true"></rb-select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="hosp_goal" class="control-label">Цель госпитализации</label>
+                            <rb-select ng-model="event.received.hosp_goal.value" ref-book="rbHospitalisationGoal"></rb-select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-md-3">
+                            <label for="delivered_by">Кем доставлен</label>
+                            <select id="delivered_by" name="delivered_by" class="form-control"
+                                    ng-model="event.received.delivered_by.value"
+                                    ng-options="val for val in event.received.delivered_by.type.values"></select>
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label for="ambulance_number">№ наряда СП</label>
+                            <input type="text" class="form-control" autocomplete="off"
+                                   id="ambulance_number" name="ambulance_number" ng-model="event.received.ambulance_number.value"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="form-group col-md-5">
+                            <label for="delivered_after">Доставлен от начала заболевания\травмы через</label>
+                            <select id="delivered_after" name="delivered_by" class="form-control"
+                                    ng-model="event.received.delivered_after.value"
+                                    ng-options="val for val in event.received.delivered_after.type.values"></select>
+                        </div>
+                        <div class="form-group col-md-3"
+                             ng-class="{'has-error': event_received_form.transp_type.$invalid && editing.submit_attempt}">
+                            <label for="transp_type">Вид транспортировки</label>
+                            <select id="transp_type" name="transp_type" class="form-control"
+                                    ng-model="event.received.transp_type.value"
+                                    ng-options="val for val in event.received.transp_type.type.values"
+                                    ng-required="true"></select>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="intoxication">Доставлен в состоянии опьянения</label>
+                            <select id="intoxication" name="delivered_by" class="form-control"
+                                    ng-model="event.received.intoxication.value"
+                                    ng-options="val for val in event.received.intoxication.type.values"></select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="row marginal">
+                        <div class="col-md-12">
+                            <label for="diag_received" class="control-label">Диагноз направившего учереждения</label>
+                            <wm-diagnosis model="event.received.diag_received.value" action="event.received" can-add-new="true"
+                                          can-delete="true" can-edit="true"></wm-diagnosis>
+                        </div>
+                    </div>
+                    <div class="row marginal">
+                        <div class="col-md-12">
+                            <label for="diag_received1" class="control-label">Диагноз направившего учереждения (сопутствующий)</label>
+                            <wm-diagnosis model="event.received.diag_received1.value" action="event.received" can-add-new="true"
+                                          can-delete="true" can-edit="true" list-mode="true"></wm-diagnosis>
+                        </div>
+                    </div>
+                    <div class="row marginal">
+                        <div class="col-md-12">
+                            <label for="diag_received2" class="control-label">Диагноз направившего учереждения (осложнения)</label>
+                            <wm-diagnosis model="event.received.diag_received2.value" action="event.received" can-add-new="true"
+                                          can-delete="true" can-edit="true" list-mode="true"></wm-diagnosis>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label for="hosp_order" class="control-label">Травма</label>
+                            <rb-select ng-model="event.received.trauma.value" ref-book="rbTraumaType"></rb-select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="form-group col-md-6">
+                            <label>Артериальное давление. Левая рука</label>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label>Артериальное давление. Правая рука</label>
+                        </div>
+                    </div>
+                    <div class="row marginal">
+                        <div class="form-group col-md-3">
+                            <input type="text" class="form-control" autocomplete="off"
+                                   id="directed_by" name="appointed_by" ng-model="event.received.lh_systolic.value"/>
+                            <span>Сист., мм.рт.ст.</span>
+                        </div>
+                        <div class="form-group col-md-3">
+                            <input type="text" class="form-control" autocomplete="off"
+                                   id="direction_number" name="appointment_doctor" ng-model="event.received.lh_diastolic.value"/>
+                            <span>Диаст., мм.рт.ст.</span>
+                        </div>
+                        <div class="form-group col-md-3">
+                            <input type="text" class="form-control" autocomplete="off"
+                                   id="directed_by" name="appointed_by" ng-model="event.received.rh_systolic.value"/>
+                            <span>Сист., мм.рт.ст.</span>
+                        </div>
+                        <div class="form-group col-md-3">
+                            <input type="text" class="form-control" autocomplete="off"
+                                   id="direction_number" name="appointment_doctor" ng-model="event.received.rh_diastolic.value"/>
+                            <span>Диаст., мм.рт.ст.</span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-md-3">
+                            <label for="directed_by">Температура</label>
+                            <input type="text" class="form-control" autocomplete="off"
+                                   id="directed_by" name="appointed_by" ng-model="event.received.temperature.value"/>
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label for="direction_number">Вес при поступлении (кг)</label>
+                            <input type="text" class="form-control" autocomplete="off"
+                                   id="direction_number" name="appointment_doctor" ng-model="event.received.weight.value"/>
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label for="directed_by">Рост (см)</label>
+                            <input type="text" class="form-control" autocomplete="off"
+                                   id="directed_by" name="appointed_by" ng-model="event.received.height.value"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+</ng-form>
+<div>
+</div>
+</div>

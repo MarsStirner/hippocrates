@@ -64,9 +64,16 @@ var EventMainInfoCtrl = function ($scope, $q, RefBookService, EventType, $filter
         return !$scope.create_mode && !$scope.formstate.is_diagnostic();
     };
 
-    $scope.filter_rb_request_type = function() {
+    $scope.filter_rb_request_type = function(request_type_kind) {
         return function(elem) {
-            return elem.relevant && (elem.code == 'policlinic' || elem.code == '4' || elem.code == 'diagnosis' || elem.code == 'diagnostic');
+            if (request_type_kind == 'policlinic'){
+                return elem.relevant && (elem.code == 'policlinic' || elem.code == '4' || elem.code == 'diagnosis' || elem.code == 'diagnostic');
+            } else if (request_type_kind == 'stationary'){
+                return elem.relevant && (['clinic', 'hospital', 'stationary'].indexOf(elem.code)>=0);
+            } else {
+                return elem.relevant
+            }
+
         };
     };
     $scope.filter_results = function(event_purpose) {
@@ -94,10 +101,10 @@ var EventMainInfoCtrl = function ($scope, $q, RefBookService, EventType, $filter
         $scope.on_event_type_changed();
     };
     $scope.on_event_type_changed = function () {
-        set_contract();
+//        set_contract();
         $scope.update_form_state();
         $scope.update_policies();
-        $scope.on_contract_changed();
+//        $scope.on_contract_changed();
     };
     $scope.on_contract_changed = function () {
         if ($scope.formstate.is_dms()) {
@@ -173,7 +180,8 @@ var EventMainInfoCtrl = function ($scope, $q, RefBookService, EventType, $filter
         $scope.finance.selected = et ? angular.extend({}, et.finance) : undefined;
     }
     function get_available_contracts() {
-        return $filter('contract_filter')($scope.Contract.objects, $scope.event.info);
+//        return $filter('contract_filter')($scope.Contract.objects, $scope.event.info);
+        return $scope.Contract.objects
     }
     function get_available_contract(contract) {
         return get_available_contracts().some(function (contr) {
@@ -484,6 +492,99 @@ var EventPaymentCtrl = function($scope, RefBookService, $http, $modal, MessageBo
     };
 };
 
+var EventReceivedCtrl = function($scope, $modal, RefBookService) {
+    $scope.OrgStructure = RefBookService.get('OrgStructure');
+    $scope.rbHospitalisationGoal = RefBookService.get('rbHospitalisationGoal');
+    $scope.rbHospitalisationOrder = RefBookService.get('rbHospitalisationOrder');
+
+    $scope.received_edit = function(){
+        var scope = $scope.$new();
+        scope.model = angular.copy($scope.event.received)
+        $modal.open({
+            templateUrl: 'modal-received.html',
+            windowClass: 'modal-scrollable',
+            size: 'lg',
+            scope: scope,
+            resolve: {
+                model: function () {
+                    return $scope.event.received;
+                }
+            }
+        }).result.then(function (rslt) {
+            $scope.event.received = rslt;
+        });
+    }
+
+};
+
+var EventMovingsCtrl = function($scope, $modal, RefBookService, ApiCalls) {
+    $scope.OrgStructure = RefBookService.get('OrgStructure');
+    $scope.rbHospitalBedProfile = RefBookService.get('rbHospitalBedProfile');
+
+    $scope.moving_save = function (moving){
+        return ApiCalls.wrapper('POST', url_moving_save, {}, moving)
+    }
+    $scope.create_moving = function(){
+        var scope = $scope.$new();
+        scope.model = {
+            event_id: $scope.event.event_id,
+            beg_date: new Date()
+        };
+        $modal.open({
+            templateUrl: 'modal-create-moving.html',
+            size: 'lg',
+            scope: scope
+        }).result.then(function (result) {
+            $scope.moving_save(result).then(function (result) {
+                $scope.event.movings[$scope.event.movings.length - 1] = result[0];
+                $scope.event.movings.push(result[1]);
+            });
+        });
+    }
+
+    $scope.close_last_moving = function(){
+        var moving = $scope.event.movings.length ? $scope.event.movings[$scope.event.movings.length - 1] : null
+        ApiCalls.wrapper('POST', url_moving_close, {}, moving).then(function(result){
+            $scope.event.movings[$scope.event.movings.length - 1] = result;
+        })
+    }
+
+    $scope.create_hospitalBed = function(moving){
+        var scope = $scope.$new();
+        scope.model = angular.copy(moving);
+        $scope.org_struct_changed(scope.model).then(function(){
+            $modal.open({
+                templateUrl: 'modal-create-hospBed.html',
+                size: 'lg',
+                scope: scope
+            }).result.then(function (result) {
+                $scope.moving_save(result).then(function (result) {
+                angular.extend(moving, result);
+                });
+            });
+        })
+    }
+
+    $scope.org_struct_changed = function(model){
+        var hb_id = model.HospitalBed ? model.HospitalBed.id : null;
+        return ApiCalls.wrapper('GET', url_hosp_beds_get, {org_str_id : model.orgStructStay.value.id,
+                                                           hb_id: hb_id})
+            .then(function (result) {
+                model.hosp_beds = result;
+                model.hospitalBedProfile.value = null;
+            })
+    }
+
+    $scope.choose_hb = function(moving, hb){
+        moving.hosp_beds.map(function(hbed){
+            hbed.chosen = false;
+        })
+        moving.hospitalBed.value = hb;
+        moving.hospitalBedProfile.value = hb.profile;
+        hb.chosen = true;
+    }
+};
+
 var PrevEventContractModalCtrl = function ($scope, $modalInstance, model, $filter) {
     $scope.model = model;
     $scope.selected = {
@@ -655,8 +756,9 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
     $scope.event_id = params.event_id;
     $scope.client_id = params.client_id;
     $scope.ticket_id = params.ticket_id;
-    var event = $scope.event = new WMEvent($scope.event_id, $scope.client_id, $scope.ticket_id);
-    $scope.create_mode = $scope.event.is_new();
+    $scope.request_type_kind = params.requestType_kind;
+//    var event = $scope.event = new WMEvent($scope.event_id, $scope.client_id, $scope.ticket_id);
+//    $scope.create_mode = $scope.event.is_new();
     $scope.editing = {
         submit_attempt: false,
         contract_edited: false
@@ -666,19 +768,19 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
         $scope.event.reload().
             then(function() {
                 $scope.$broadcast('event_loaded');
-                $scope.formstate.set_state(event.info.event_type.request_type, event.info.event_type.finance, event.is_new());
+                $scope.formstate.set_state($scope.event.info.event_type.request_type, $scope.event.info.event_type.finance, $scope.event.is_new());
                 if (!$scope.event.is_new()) {
                     $scope.ps.set_context($scope.event.info.event_type.print_context);
                 }
 
                 $scope.$watch(function () {
-                    return [safe_traverse(event, ['info', 'event_type', 'request_type']),
-                        safe_traverse(event, ['info', 'event_type', 'finance'])];
+                    return [safe_traverse($scope.event, ['info', 'event_type', 'request_type']),
+                        safe_traverse($scope.event, ['info', 'event_type', 'finance'])];
                 }, function (n, o) {
                     if (n !== o) {
                         var rt = n[0],
                             fin = n[1];
-                        $scope.formstate.set_state(rt, fin, event.is_new());
+                        $scope.formstate.set_state(rt, fin, $scope.event.is_new());
                         $scope.$broadcast('eventFormStateChanged', {
                             request_type: rt,
                             finance: fin
@@ -791,8 +893,21 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
         $scope.alerts.push(error);
     });
 
-    $scope.initialize();
+
 };
+var StationaryEventInfoCtrl = function ($scope, $controller, WMStationaryEvent) {
+    $controller('EventInfoCtrl', {$scope: $scope});
+    var event = $scope.event = new WMStationaryEvent($scope.event_id, $scope.client_id, $scope.ticket_id);
+    $scope.create_mode = $scope.event.is_new();
+    $scope.initialize();
+}
+var PoliclinicEventInfoCtrl = function ($scope, $controller, WMPoliclinicEvent) {
+    $controller('EventInfoCtrl', {$scope: $scope});
+    var event = $scope.event = new WMPoliclinicEvent($scope.event_id, $scope.client_id, $scope.ticket_id);
+    $scope.create_mode = $scope.event.is_new();
+    $scope.initialize();
+
+}
 
 WebMis20.controller('EventDiagnosesCtrl', ['$scope', 'RefBookService', '$http', EventDiagnosesCtrl]);
 WebMis20.controller('EventMainInfoCtrl', ['$scope', '$q', 'RefBookService', 'EventType', '$filter', 'MessageBox',
@@ -800,6 +915,10 @@ WebMis20.controller('EventMainInfoCtrl', ['$scope', '$q', 'RefBookService', 'Eve
 WebMis20.controller('EventStationaryInfoCtrl', ['$scope', '$filter', EventStationaryInfoCtrl]);
 WebMis20.controller('EventPaymentCtrl', ['$scope', 'RefBookService', '$http', '$modal', 'MessageBox',
     EventPaymentCtrl]);
+WebMis20.controller('EventReceivedCtrl', ['$scope', '$modal', 'RefBookService', EventReceivedCtrl]);
+WebMis20.controller('EventMovingsCtrl', ['$scope', '$modal', 'RefBookService', 'ApiCalls', EventMovingsCtrl]);
 WebMis20.controller('EventServicesCtrl', ['$scope', '$http', EventServicesCtrl]);
 WebMis20.controller('EventInfoCtrl', ['$scope', 'WMEvent', '$http', 'RefBookService', '$window', '$document',
     'PrintingService', '$filter', '$modal', 'WMEventServices', 'WMEventFormState', 'MessageBox', EventInfoCtrl]);
+WebMis20.controller('StationaryEventInfoCtrl', ['$scope', '$controller', 'WMStationaryEvent', StationaryEventInfoCtrl]);
+WebMis20.controller('PoliclinicEventInfoCtrl', ['$scope', '$controller', 'WMPoliclinicEvent', PoliclinicEventInfoCtrl]);

@@ -56,7 +56,7 @@ var ClientModalCtrl = function ($scope, $modalInstance, $filter, $modal, Printin
         if (ticket_id) {
             query += '&ticket_id=' + ticket_id;
         }
-        var url = url_event_new_event_html + query;
+        var url = url_request_type_kind_html + query;
         WMWindowSync.openTab(url, $scope.reload_client);
     };
 

@@ -6,13 +6,14 @@ import logging
 from flask.ext.login import current_user
 from sqlalchemy import func
 
-from nemesis.lib.data import create_new_action, update_action, ActionException
+from nemesis.lib.data import create_new_action, update_action, ActionException, create_action
 from nemesis.lib.user import UserUtils
-from nemesis.models.actions import Action, ActionType
+from nemesis.models.actions import Action, ActionType, ActionProperty_Diagnosis
 from nemesis.models.client import Client
+from nemesis.lib.apiutils import ApiException
 from nemesis.models.event import EventLocalContract, Event, EventType, Visit, Event_Persons
 from nemesis.lib.utils import safe_date, safe_traverse, safe_datetime, get_new_event_ext_id, get_new_uuid
-from nemesis.models.exists import rbDocumentType, Person
+from nemesis.models.exists import rbDocumentType, Person, OrgStructure
 from nemesis.lib.settings import Settings
 from nemesis.models.schedule import ScheduleClientTicket
 from nemesis.systemwide import db
@@ -24,6 +25,127 @@ class EventSaveException(Exception):
     def __init__(self, message=u'', data=None):
         super(EventSaveException, self).__init__(message)
         self.data = data
+
+
+class EventSaveController():
+    def __init__(self):
+        pass
+
+    def create_base_info(self, event, all_data):
+        # для всех request type
+        event_data = all_data['event']
+        local_contract_data = safe_traverse(all_data, 'payment', 'local_contract')
+        event.setPerson_id = current_user.get_main_user().id
+        event.client_id = event_data['client_id']
+        event.client = Client.query.get(event_data['client_id'])
+        event.org_id = event_data['organisation']['id']
+        event.payStatus = 0
+        event = self.update_base_info(event, event_data, local_contract_data)
+        event.externalId = get_new_event_ext_id(event.eventType.id, event.client_id)
+        event.uuid = get_new_uuid()
+        return event
+
+    def update_base_info(self, event, event_data, local_contract_data):
+        event.eventType = EventType.query.get(event_data['event_type']['id'])
+        exec_person_id = safe_traverse(event_data, 'exec_person', 'id')
+        event.setDate = safe_datetime(event_data['set_date'])
+        if exec_person_id and not event.is_diagnostic:
+            event.execPerson = Person.query.get(exec_person_id)
+        if event.is_stationary:
+            event.isPrimaryCode = event_data['is_primary']['id']
+            event.order = event_data['order']['id']
+        # event.contract_id = event_data['contract']['id']
+        event.note = event_data['note']
+        event.orgStructure_id = event_data['org_structure']['id'] if event_data['org_structure'] else None
+        # if local_contract_data:
+        #     lcon = create_or_update_local_contract(event, local_contract_data)
+        #     event.localContract = lcon
+        return event
+
+    def store(self, *entity_list):
+        db.session.add_all(entity_list)
+        db.session.commit()
+
+
+class ReceivedController():
+    def __init__(self):
+        pass
+
+    def update_received_data(self, received, received_info):
+        diag_codes = ('diag_received', 'diag_received1', 'diag_received2')
+        received.begDate = safe_datetime(received_info['beg_date'])
+        for code, prop in received_info.iteritems():
+            if code not in ('id', 'beg_data', 'person', 'flatCode', 'event_id') + diag_codes and code in received.propsByCode:
+                received.propsByCode[code].value = prop['value']
+            elif code in diag_codes and prop['value']:
+                property = received.propsByCode[code]
+                property.value = ActionProperty_Diagnosis.objectify(property, prop['value'])
+        db.session.add(received)
+        db.session.commit()
+        return received
+
+    def create_received(self, event_id, received_info):
+
+        event = Event.query.get(event_id)
+        action_type = ActionType.query.filter(ActionType.flatCode == 'received').first()
+
+        received = create_action(action_type.id, event)
+        received = self.update_received_data(received, received_info)
+        return received
+
+
+class MovingController():
+    def __init__(self):
+        pass
+
+    def get_prev_action(self, event_id):
+        """
+        получить предыдущее движение или послупление
+        """
+        movings = db.session.query(Action).join(ActionType).filter(Action.event_id == event_id,
+                                                                   Action.deleted == 0,
+                                                                   ActionType.flatCode == 'moving').order_by(Action.begDate).all()
+        if movings:
+            action = movings[-1]
+        else:
+            action = db.session.query(Action).join(ActionType).filter(Action.event_id == event_id,
+                                                                      Action.deleted == 0,
+                                                                      ActionType.flatCode == 'received'
+                                                                      ).first()
+        return action
+
+    def update_moving_data(self, moving, moving_info):
+        moving.begDate = safe_datetime(moving_info['beg_date'])
+        moving.propsByCode['orgStructStay'].value = moving_info['orgStructStay']['value']
+        moving.propsByCode['hospitalBed'].value = moving_info['hospitalBed']['value'] if moving_info.get('hospitalBed') else None
+        moving.propsByCode['hospitalBedProfile'].value = moving_info['hospitalBedProfile']['value'] if \
+            moving_info.get('hospitalBedProfile') else None
+        moving.propsByCode['patronage'].value = moving_info['patronage']['value'] if moving_info.get('patronage') else None
+        db.session.add(moving)
+        db.session.commit()
+        return moving
+
+    def create_moving(self, event_id, moving_info):
+        event = Event.query.get(event_id)
+        action_type = ActionType.query.filter(ActionType.flatCode == 'moving').first()
+
+        moving = create_action(action_type.id, event)
+        prev_action = self.get_prev_action(moving_info.get('event_id'))
+        moving.propsByCode['orgStructReceived'].value = prev_action['orgStructStay'].value
+        moving = self.update_moving_data(moving, moving_info)
+
+        if not prev_action.endDate:
+            prev_action.endDate = moving.begDate
+        prev_action.propsByCode['orgStructDirection'].value = moving.propsByCode['orgStructStay'].value
+        db.session.add(prev_action)
+        db.session.commit()
+        return prev_action, moving
+
+    def close_moving(self, moving):
+        moving.endDate = datetime.datetime.now()
+        db.session.add(moving)
+        db.session.commit()
+        return moving
 
 
 def create_new_event(event_data, local_contract_data):
@@ -38,7 +160,7 @@ def create_new_event(event_data, local_contract_data):
         event.execPerson = Person.query.get(exec_person_id)
     event.setDate = safe_datetime(event_data['set_date'])
     event.externalId = get_new_event_ext_id(event.eventType.id, event.client_id)
-    event.contract_id = event_data['contract']['id']
+    # event.contract_id = event_data['contract']['id']
     event.isPrimaryCode = event_data['is_primary']['id']
     event.order = event_data['order']['id']
     event.org_id = event_data['organisation']['id']
@@ -53,14 +175,14 @@ def create_new_event(event_data, local_contract_data):
             'code': 403
         })
 
-    if event.payer_required:
-        if not local_contract_data:
-            raise EventSaveException(base_msg % error_msg['message'], {
-                'code': 422,
-                'ext_msg': u'Не заполнена информация о плательщике.'
-            })
-        lcon = create_or_update_local_contract(event, local_contract_data)
-        event.localContract = lcon
+    # if event.payer_required:
+    #     if not local_contract_data:
+    #         raise EventSaveException(base_msg % error_msg['message'], {
+    #             'code': 422,
+    #             'ext_msg': u'Не заполнена информация о плательщике.'
+    #         })
+    #     lcon = create_or_update_local_contract(event, local_contract_data)
+    #     event.localContract = lcon
 
     if event.is_policlinic:
         visit = Visit.make_default(event)
@@ -89,10 +211,10 @@ def update_event(event_id, event_data, local_contract_data):
     event.rbAcheResult_id = safe_traverse(event_data, 'ache_result', 'id')
     event.note = event_data['note']
 
-    if local_contract_data:
-        lcon = create_or_update_local_contract(event, local_contract_data)
-        event.localContract = lcon
-    return event
+    # if local_contract_data:
+    #     lcon = create_or_update_local_contract(event, local_contract_data)
+    #     event.localContract = lcon
+    # return event
 
 
 def save_event(event_id, data):
@@ -163,6 +285,20 @@ def save_event(event_id, data):
                     })
 
     return result
+
+
+def received_save(event_id, received_data):
+    received_ctrl = ReceivedController()
+    received_id = received_data['id']
+    if received_id:
+        received = Action.query.get(received_id)
+        if not received:
+            raise ApiException(404, u'Не найдено поступление с id = {}'.format(received_id))
+        received = received_ctrl.update_received_data(received, received_data)
+    else:
+        received = received_ctrl.create_received(event_id, received_data)
+    db.session.add(received)
+    db.session.commit()
 
 
 def save_executives(event_id):
