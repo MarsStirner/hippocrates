@@ -1,7 +1,7 @@
 {% extends "event/base.html" %}
 
 {% block main %}
-<div ng-controller="EventInfoCtrl" class="ng-cloak">
+<div ng-controller="StationaryEventInfoCtrl" class="ng-cloak">
     <section class="content-header">
         <div class="wm-page-header-button-box">
             <wm-subscription-btn oid="hitsl.event.[[ event.event_id ]]" ng-if="!event.is_new()"></wm-subscription-btn>
@@ -44,9 +44,14 @@
                             {% include "event/_diagnoses.html" %}
                         {% endif %}
 {#                        {% if user_profiles_mng.has_ui_registrator() or user_profiles_mng.has_ui_cashier() %}#}
-{#                            {% include "event/_services.html" %}#}
 {#                            {% include "event/_payment.html" %}#}
 {#                        {% endif %}#}
+                        {% if user_profiles_mng.has_ui_registrator() or user_profiles_mng.has_ui_cashier() %}
+                            {% include "event/_event_received.html" %}
+                        {% endif %}
+                        {% if event %}
+                            {% include "event/_movings.html" %}
+                        {% endif %}
                         {% if user_utils.can_read_actions_meddoc(event) %}
                             <ng-form name="eventMedDocActionsForm" toc-element="Медицинские документы">
                                 <div class="box box-info">
@@ -107,19 +112,19 @@
                                 </div>
                             </ng-form>
                         {% endif %}
-                        <ng-form name="eventPrescriptions" toc-element="Назначения">
-                            <div class="box box-info">
-                                <div class="box-header with-border">
-                                    <h3 class="box-title">Назначения</h3>
-                                    <div class="box-tools pull-right">
-                                        <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
-                                    </div>
-                                </div>
-                                <div class="box-body">
-                                    <medication-prescriptions model="event.info.prescriptions"/>
-                                </div>
-                            </div>
-                        </ng-form>
+{#                        <ng-form name="eventPrescriptions" toc-element="Назначения">#}
+{#                            <div class="box box-info">#}
+{#                                <div class="box-header with-border">#}
+{#                                    <h3 class="box-title">Назначения</h3>#}
+{#                                    <div class="box-tools pull-right">#}
+{#                                        <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>#}
+{#                                    </div>#}
+{#                                </div>#}
+{#                                <div class="box-body">#}
+{#                                    <medication-prescriptions model="event.info.prescriptions"/>#}
+{#                                </div>#}
+{#                            </div>#}
+{#                        </ng-form>#}
                     </ng-form>
                 </div>
             </div>
@@ -179,4 +184,7 @@
     <script type="text/ng-template" id="modal-prev-event-contract.html">{% include "event/_modal_prev_event_contracts.html" %}</script>
     <script type="text/ng-template" id="modal-relatives.html">{% include "event/_modal_relatives.html" %}</script>
     <script type="text/ng-template" id="modal-switch-payer.html">{% include "event/_modal_switch_payer_tab.html" %}</script>
+    <script type="text/ng-template" id="modal-received.html">{% include 'event/_modal_received.html' %}</script>
+    <script type="text/ng-template" id="modal-create-moving.html">{% include 'event/_modal_create_moving.html' %}</script>
+    <script type="text/ng-template" id="modal-create-hospBed.html">{% include 'event/_modal_create_hospBed.html' %}</script>
 {% endblock %}

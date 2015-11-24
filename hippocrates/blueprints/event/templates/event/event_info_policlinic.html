@@ -1,7 +1,7 @@
 {% extends "event/base.html" %}
 
 {% block main %}
-<div ng-controller="EventInfoCtrl" class="ng-cloak">
+<div ng-controller="PoliclinicEventInfoCtrl" class="ng-cloak">
     <section class="content-header">
         <div class="wm-page-header-button-box">
             <wm-subscription-btn oid="hitsl.event.[[ event.event_id ]]" ng-if="!event.is_new()"></wm-subscription-btn>
