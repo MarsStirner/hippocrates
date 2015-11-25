@@ -16,7 +16,8 @@ from nemesis.models.exists import FileMeta, FileGroupDocument
 from blueprints.patients.lib.utils import (set_client_main_info, ClientSaveException, add_or_update_doc,
     add_or_update_address, add_or_update_copy_address, add_or_update_policy, add_or_update_blood_type,
     add_or_update_allergy, add_or_update_intolerance, add_or_update_soc_status, add_or_update_relation,
-    add_or_update_contact, generate_filename, save_new_file, delete_client_file_attach_and_relations
+    add_or_update_contact, generate_filename, save_new_file, delete_client_file_attach_and_relations,
+    add_or_update_work_soc_status
 )
 
 
@@ -174,7 +175,19 @@ def api_patient_save():
                     intlr = add_or_update_intolerance(client, intolerance)
                     db.session.add(intlr)
 
-            ss_info = client_data.get('soc_statuses')
+            works_info = client_data.get('works')
+            if works_info:
+                for w in works_info:
+                    work = add_or_update_work_soc_status(client, w)
+                    db.session.add(work)
+
+            ss_info = client_data.get('invalidities')
+            if ss_info:
+                for ss in ss_info:
+                    sstat = add_or_update_soc_status(client, ss)
+                    db.session.add(sstat)
+
+            ss_info = client_data.get('nationalities')
             if ss_info:
                 for ss in ss_info:
                     sstat = add_or_update_soc_status(client, ss)

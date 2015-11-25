@@ -67,17 +67,20 @@
                             <div class=" col-md-4">
                                 <label for="company" class="control-label">[[ socstat.ss_type.code == '004'? 'Организация' : 'Школа']]</label>
                                 <input type="text" class="form-control" autocomplete="off" placeholder="Место работы"
-                                        id="company" name="company" ng-model="socstat.work.organisation"/>
+                                       ng-disabled="socstat.id ? !edit.activated : false"
+                                       id="company" name="company" ng-model="socstat.work.organisation"/>
                             </div>
                             <div class=" col-md-3">
                                 <label for="post" class="control-label">[[ socstat.ss_type.code == '004'? 'Должность' : 'Класс']]</label>
                                 <input type="text" class="form-control" autocomplete="off" placeholder="Должность"
-                                        id="post" name="post" ng-model="socstat.work.post"/>
+                                       ng-disabled="socstat.id ? !edit.activated : false"
+                                       id="post" name="post" ng-model="socstat.work.post"/>
                             </div>
                             <div class=" col-md-4">
                                 <label for="note" class="control-label">Примечание</label>
                                 <input type="text" class="form-control" autocomplete="off" placeholder="Примечание"
-                                        id="note" name="note" ng-model="socstat.note"/>
+                                       ng-disabled="socstat.id ? !edit.activated : false"
+                                       id="note" name="note" ng-model="socstat.note"/>
                             </div>
                         </div>
                         <h4>Документ
