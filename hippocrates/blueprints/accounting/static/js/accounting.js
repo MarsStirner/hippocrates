@@ -31,6 +31,17 @@ WebMis20.service('AccountingService', ['WebMisApi', function (WebMisApi) {
         var contract_id = contract.id;
         return WebMisApi.contract.save(contract_id, contract);
     };
+    this.delete_contract = function (contract) {
+        var contract_id = contract.id;
+        return WebMisApi.contract.del(contract_id);
+    };
+    this.get_available_contracts = function (client_id, finance_id, event_set_date) {
+        return WebMisApi.contract.get_available({
+            client_id: client_id,
+            finance_id: finance_id,
+            event_set_date: event_set_date
+        });
+    };
     this.search_contragent = function (query, ca_type_code) {
         return WebMisApi.contragent.get_list({
             query: query,

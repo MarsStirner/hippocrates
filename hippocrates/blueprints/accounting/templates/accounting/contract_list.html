@@ -27,8 +27,9 @@
                     <th>Дата заключения</th>
                     <th>Дата начала</th>
                     <th>Дата окончания</th>
-                    <th>Заказчик (Плательщик)</th>
-                    <th>Исполнитель (Получатель)</th>
+                    <th width="25%">Заказчик (Плательщик)</th>
+                    <th width="25%">Исполнитель (Получатель)</th>
+                    <th>Контингент<br>(Кол-во)</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -41,14 +42,12 @@
                         <td>[[ contract.end_date | asDate ]]</td>
                         <td>[[ contract.payer.full_descr ]]</td>
                         <td>[[ contract.recipient.full_descr ]]</td>
+                        <td>[[ contract.contingent_list.length ]]</td>
                         <td class="nowrap" width="1%">
                             <i class="fa fa-edit text-primary cursor-pointer" title="Редактировать"
                                 ng-if="canEdit(item)" ng-click="editContract($index)"></i>
-                            <i class="fa fa-trash-o text-danger cursor-pointer lmargin20"></i>
-    {#                        <button type="button" class="btn btn-danger" ng-if="canDelete(item)" ng-click="remove($index)" title="Удалить">#}
-    {#                            <i class="fa fa-trash"></i></button>#}
-    {#                        <button type="button" class="btn btn-info" ng-if="canUndelete(item)" ng-click="restore($index)" title="Восстановить">#}
-    {#                            <i class="fa fa-undo"></i></button>#}
+                            <i class="fa fa-trash-o text-danger cursor-pointer lmargin20"
+                                ng-if="canDelete(item)" ng-click="deleteContract($index)"></i>
                         </td>
                     </tr>
                 </tbody>

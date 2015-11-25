@@ -12,6 +12,8 @@ class ContractRepr(object):
         self.contingent_repr = ContingentRepr()
 
     def represent_contract_full(self, contract):
+        if not contract:
+            return None
         data = self.represent_contract(contract)
         data.update({
             'recipient': self.ca_repr.represent_contragent(contract.recipient),
@@ -20,7 +22,11 @@ class ContractRepr(object):
                 self.contingent_repr.represent_contingent(cont)
                 for cont in contract.contingent_list if cont.deleted == 0  # TODO: think about selection
             ],
-            'pricelist_list': []
+            'pricelist_list': [],
+            'description': {
+                'full': self.make_full_description(contract),
+                'short': self.make_short_description(contract),
+            }
         })
         return data
 
@@ -37,6 +43,15 @@ class ContractRepr(object):
             'deleted': contract.deleted,
             'draft': contract.draft,
         }
+
+    def make_full_description(self, contract):
+        return u'''\
+№{0} от {1}. {2}. с {3} по {4}</span>
+'''.format(contract.number, format_date(contract.date), contract.resolution or '', format_date(contract.begDate),
+           format_date(contract.endDate))
+
+    def make_short_description(self, contract):
+        return u'№{0} от {1}. {2}'.format(contract.number, format_date(contract.date), contract.resolution or '')
 
     def represent_paginated_contracts(self, paginated_data):
         return {

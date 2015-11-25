@@ -227,6 +227,7 @@ var ContractModalCtrl = function ($scope, AccountingService, contract) {
         $scope.ca_params.payer_create_mode = !$scope.ca_params.payer_create_mode;
         clearLegalPayer();
         clearIndividualPayer();
+        $scope.contract.payer.id = null;
     };
     $scope.$watch('contract.payer.ca_type_code', function (newVal, oldVal) {
         if (newVal === oldVal) return;
@@ -259,6 +260,7 @@ var ContractModalCtrl = function ($scope, AccountingService, contract) {
         $scope.ca_params.recipient_create_mode = !$scope.ca_params.recipient_create_mode;
         clearLegalRecipient();
         clearIndividualRecipient();
+        $scope.contract.recipient.id = null;
     };
     $scope.$watch('contract.recipient.ca_type_code', function (newVal, oldVal) {
         if (newVal === oldVal) return;

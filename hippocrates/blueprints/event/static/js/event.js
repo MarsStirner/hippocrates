@@ -9,25 +9,25 @@ var EventDiagnosesCtrl = function ($scope) {
         return $scope.event.can_edit_diagnoses;
     };
 };
-var EventMainInfoCtrl = function ($scope, $q, RefBookService, EventType, $filter, MessageBox, CurrentUser) {
-    $scope.Organisation = RefBookService.get('Organisation');
-    $scope.Contract = RefBookService.get('Contract');
+var EventMainInfoCtrl = function ($scope, $q, RefBookService, EventType, $filter, CurrentUser,
+                                  AccountingService, ContractModalService, WMConfig, WMWindowSync) {
     $scope.rbRequestType = RefBookService.get('rbRequestType');
     $scope.rbFinance = RefBookService.get('rbFinance');
     $scope.rbEventType = new EventType();
     $scope.OrgStructure = RefBookService.get('OrgStructure');
     $scope.rbResult = RefBookService.get('rbResult');
     $scope.rbAcheResult = RefBookService.get('rbAcheResult');
-    $scope.dms_policies = [];
 
     $scope.request_type = {};
     $scope.finance = {};
-    $scope.dms = {};
-
+    $scope.available_contracts = {
+        list: []
+    };
     var event_created = !$scope.event.is_new(),
         main_user = CurrentUser.get_main_user();
+
     $scope.widget_disabled = function (widget_name) {
-        if (['request_type', 'finance', 'contract', 'event_type', 'dms',
+        if (['request_type', 'finance', 'contract', 'event_type',
              'exec_person', 'org_structure', 'set_date'
         ].has(widget_name)) {
             return event_created || $scope.event.ro;
@@ -55,6 +55,7 @@ var EventMainInfoCtrl = function ($scope, $q, RefBookService, EventType, $filter
         }
     };
     $scope.services_added = function () {
+        // TODO:
         return $scope.event.is_new() && $scope.event.services.length;
     };
     $scope.cmb_result_available = function () {
@@ -63,8 +64,44 @@ var EventMainInfoCtrl = function ($scope, $q, RefBookService, EventType, $filter
     $scope.cmb_ache_result_available = function () {
         return !$scope.create_mode && !$scope.formstate.is_diagnostic();
     };
+    $scope.isContractListEmpty = function () {
+        return $scope.available_contracts.list.length === 0;
+    };
+    $scope.isContractListEmptyLabelVisible = function () {
+        return $scope.create_mode && $scope.isContractListEmpty();
+    };
+
+    $scope.createContract = function () {
+        AccountingService.get_contract()
+            .then(function (contract) {
+                return ContractModalService.openEdit(contract);
+            })
+            .then(function (result) {
+                var contract = result.contract;
+                refreshAvailableContracts()
+                    .then(function () {
+                        set_contract(contract.id)
+                    });
+            });
+    };
+    $scope.editContract = function (idx) {
+        if (!$scope.event.info.contract) return;
+        var contract = _.deepCopy($scope.event.info.contract);
+        ContractModalService.openEdit(contract)
+            .then(function (result) {
+                var upd_contract = result.contract;
+                refreshAvailableContracts()
+                    .then(function () {
+                        set_contract(upd_contract.id)
+                    });
+            });
+    };
+    $scope.openContractListUi = function () {
+        WMWindowSync.openTab(WMConfig.url.html_contract_list, refreshAvailableContracts);
+    };
 
     $scope.filter_rb_request_type = function(request_type_kind) {
+        // TODO:
         return function(elem) {
             if (request_type_kind == 'policlinic'){
                 return elem.relevant && (elem.code == 'policlinic' || elem.code == '4' || elem.code == 'diagnosis' || elem.code == 'diagnostic');
@@ -101,44 +138,10 @@ var EventMainInfoCtrl = function ($scope, $q, RefBookService, EventType, $filter
         $scope.on_event_type_changed();
     };
     $scope.on_event_type_changed = function () {
-        set_contract();
+        clearErrors();
         $scope.update_form_state();
         $scope.update_policies();
-        $scope.on_contract_changed();
-    };
-    $scope.on_contract_changed = function () {
-        if ($scope.formstate.is_dms()) {
-            var contract = $scope.event.info.contract,
-                matched_policies = $scope.dms_policies.filter(function (policy) {
-                    return policy.insurer.id === contract.payer.id;
-                });
-            if (!matched_policies.length) {
-                if ($scope.create_mode) {
-                    MessageBox.error('Ошибка полиса ДМС', 'У пациента нет полиса ДМС, связанного с выбранным договором')
-                    .then(angular.noop, function () {
-                        $scope.dms.selected = undefined;
-                    });
-                } else {
-                    $scope.dms.selected = undefined;
-                }
-            } else {
-                set_dms_policy(matched_policies[0]);
-            }
-        }
-    };
-    $scope.on_dms_changed = function () {
-        var selected_dms = $scope.dms.selected,
-            matched_contracts = get_available_contracts().filter(function (contract) {
-                return selected_dms.insurer.id === contract.payer.id;
-            });
-        if (!matched_contracts.length) {
-            MessageBox.error('Ошибка полиса ДМС', 'Не заведено договора, соответствующего выбранному полису ДМС')
-            .then(angular.noop, function () {
-                $scope.event.info.contract = undefined;
-            });
-        } else {
-            $scope.event.info.contract = matched_contracts[0];
-        }
+        $scope.update_contract();
     };
     $scope.on_set_date_changed = function () {
         $scope.on_event_type_changed();
@@ -153,25 +156,30 @@ var EventMainInfoCtrl = function ($scope, $q, RefBookService, EventType, $filter
     };
     $scope.update_policies = function () {
         if ($scope.formstate.is_oms() && $scope.create_mode) {
-            var errors = {},
-                policy = get_available_oms_policy($scope.event.info.client, errors);
-            if (errors.err) {
-                MessageBox.error('Ошибка полиса ОМС', errors.err).
-                then(angular.noop, function () {
-                    set_finance('4');
-                });
-            }
+            refreshAvailableOmsPolicy();
         } else if ($scope.formstate.is_dms()) {
-            var errors = {},
-                policies = get_available_dms_policies($scope.event.info.client, errors);
-            if ($scope.create_mode && errors.err) {
-                MessageBox.error('Ошибка полиса ДМС', errors.err);
-            }
-            $scope.dms_policies = policies;
-            set_dms_policy(policies[0]);
+            refreshAvailableDmsPolicy();
+        }
+    };
+    $scope.update_contract = function () {
+        if ($scope.create_mode) {
+            refreshAvailableContracts()
+                .then(function () {
+                    set_contract();
+                });
         }
     };
 
+    function clearErrors() {
+        for (var key in $scope.formErrors){
+            if ($scope.formErrors.hasOwnProperty(key)){
+                delete $scope.formErrors[key];
+            }
+        }
+    }
+    function setError(field, message) {
+        $scope.formErrors[field] = message;
+    }
     function set_rt_finance_choices() {
         var et = safe_traverse($scope.event, ['info', 'event_type']);
         $scope.request_type.selected = et ?
@@ -179,80 +187,72 @@ var EventMainInfoCtrl = function ($scope, $q, RefBookService, EventType, $filter
             $scope.rbRequestType.get_by_code('policlinic');
         $scope.finance.selected = et ? angular.extend({}, et.finance) : undefined;
     }
-    function get_available_contracts() {
-        return $filter('contract_filter')($scope.Contract.objects, $scope.event.info);
+    function refreshAvailableContracts() {
+        var client_id = $scope.event.info.client_id,
+            finance_id = safe_traverse($scope.event, ['info', 'event_type', 'finance', 'id']),
+            set_date = aux.format_date($scope.event.info.set_date);
+        return AccountingService.get_available_contracts(client_id, finance_id, set_date)
+            .then(function (contract_list) {
+                $scope.available_contracts.list = contract_list;
+            });
     }
-    function get_available_contract(contract) {
-        return get_available_contracts().some(function (contr) {
-            return angular.equals(contr, contract);
-        }) ? contract : undefined;
-    }
-    function get_available_oms_policy(client, errors) {
-        var policy = client.compulsory_policy;
+    function refreshAvailableOmsPolicy() {
+        var policy = $scope.event.info.client.compulsory_policy;
         if (!policy) {
-            errors['err'] = 'У пациента не указан полис ОМС';
-            return null;
+            setError('policy_oms', 'У пациента не указан полис ОМС');
+            return;
         } else {
             if (!policy.beg_date || moment(policy.beg_date).startOf('d').isAfter($scope.event.info.set_date)) {
-                errors['err'] = 'Дата начала действия полиса не установлена или превышает дату создания обращения';
-                return null;
+                setError('policy_oms', 'Дата начала действия полиса ОМС не установлена или превышает дату создания обращения');
+                return;
             }
             if (moment($scope.event.info.set_date).isAfter(moment(policy.end_date).endOf('d'))) {
-                errors['err'] = 'Дата создания обращения превышает дату окончания действия полиса';
-                return null;
+                setError('policy_oms', 'Дата создания обращения превышает дату окончания действия полиса ОМС');
+                return;
             }
         }
         return policy;
     }
-    function get_available_dms_policies(client, errors) {
-        var policies = client.voluntary_policies;
+    function refreshAvailableDmsPolicy() {
+        var policies = $scope.event.info.client.voluntary_policies;
         if (!policies.length) {
-            errors['err'] = 'У пациента не указан действующий полис ДМС';
-            return [];
+            setError('policy_dms', 'У пациента не указан действующий полис ДМС');
+            return;
         } else {
             policies = policies.filter(function (policy) {
                 return !(!policy.beg_date || moment(policy.beg_date).startOf('d').isAfter($scope.event.info.set_date)) &&
                     !(!policy.end_date || moment($scope.event.info.set_date).isAfter(moment(policy.end_date).endOf('d')));
             });
             if (!policies.length) {
-                errors['err'] = 'У пациента нет ни одного валидного полиса ДМС';
-                return [];
+                setError('policy_dms', 'У пациента нет ни одного валидного полиса ДМС');
+                return;
             }
         }
         return policies;
     }
-    function set_finance(code) {
-        $scope.finance.selected = $scope.rbFinance.get_by_code(code);
-        $scope.on_finance_changed();
-    }
-    function set_contract() {
-        var cur_contract = $scope.event.info.contract,
-            available_contracts = get_available_contracts();
-        if (available_contracts.every(function (avail_contract) {
-            return !angular.equals(cur_contract, avail_contract);
-        })) {
-            $scope.event.info.contract = available_contracts[0];
-        }
-    }
-    function set_dms_policy(policy) {
-        if ($scope.dms_policies.every(function (avail_policy) {
-            return !angular.equals($scope.dms.selected, avail_policy);
-        })) {
-            $scope.dms.selected = policy;
+    function set_contract(contract_id) {
+        if (!contract_id) {
+            $scope.event.info.contract = !$scope.isContractListEmpty() ?
+                $scope.available_contracts.list[0] :
+                null;
+        } else {
+            var idx = _.findIndex($scope.available_contracts.list, function (con) {
+                return con.id === contract_id;
+            });
+            $scope.event.info.contract = $scope.available_contracts.list[idx];
         }
     }
 
     $scope.$on('event_loaded', function() {
         $scope.event.info.set_date = new Date($scope.event.info.set_date);
         var et_loading = $scope.rbEventType.initialize($scope.event.info.client);
-        $q.all([et_loading, $scope.Contract.loading, $scope.rbRequestType.loading, $scope.rbFinance.loading])
+        $q.all([et_loading, $scope.rbRequestType.loading, $scope.rbFinance.loading])
             .then(function () {
                 if ($scope.create_mode) {
                     $scope.event.info.event_type = $scope.rbEventType.get_available_et($scope.event.info.event_type);
                 }
                 set_rt_finance_choices();
                 $scope.on_event_type_changed();
-                $scope.event.info.contract = get_available_contract($scope.event.info.contract);
             });
         $scope.userHasResponsibilityByAction = $scope.event.info.actions ?
             $scope.event.info.actions.some(function (action) {
@@ -283,7 +283,6 @@ var EventStationaryInfoCtrl = function($scope, $filter) {
 };
 var EventPaymentCtrl = function($scope, RefBookService, $http, $modal, MessageBox) {
     $scope.rbDocumentType = RefBookService.get('rbDocumentType');
-    $scope.Organisation = RefBookService.get('Organisation');
 
     function isNotEmpty(val) { return val !== undefined && val !== null; }
 
@@ -750,6 +749,7 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
     $scope.request_type_kind = params.requestType_kind;
 //    var event = $scope.event = new WMEvent($scope.event_id, $scope.client_id, $scope.ticket_id);
 //    $scope.create_mode = $scope.event.is_new();
+    $scope.formErrors = {};
     $scope.editing = {
         submit_attempt: false,
         contract_edited: false
@@ -783,7 +783,10 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
 
     $scope.save_event = function () {
         $scope.editing.submit_attempt = true;
-        if ($scope.eventForm.$valid) {
+        if (!_.isEmpty($scope.formErrors)) {
+            var elm = $('#mainInfoErrorBlock');
+            $document.scrollToElement(elm, 100, 1500);
+        } else if ($scope.eventForm.$valid) {
             $scope.event.save()
             .then(function (result) {
                 $scope.eventForm.$setPristine();
@@ -901,8 +904,8 @@ var PoliclinicEventInfoCtrl = function ($scope, $controller, WMPoliclinicEvent) 
 }
 
 WebMis20.controller('EventDiagnosesCtrl', ['$scope', 'RefBookService', '$http', EventDiagnosesCtrl]);
-WebMis20.controller('EventMainInfoCtrl', ['$scope', '$q', 'RefBookService', 'EventType', '$filter', 'MessageBox',
-    'CurrentUser', EventMainInfoCtrl]);
+WebMis20.controller('EventMainInfoCtrl', ['$scope', '$q', 'RefBookService', 'EventType', '$filter',
+    'CurrentUser', 'AccountingService', 'ContractModalService', 'WMConfig', 'WMWindowSync', EventMainInfoCtrl]);
 WebMis20.controller('EventStationaryInfoCtrl', ['$scope', '$filter', EventStationaryInfoCtrl]);
 WebMis20.controller('EventPaymentCtrl', ['$scope', 'RefBookService', '$http', '$modal', 'MessageBox',
     EventPaymentCtrl]);

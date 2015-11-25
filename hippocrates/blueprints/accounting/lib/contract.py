@@ -2,27 +2,33 @@
 
 import datetime
 
-from sqlalchemy import or_
+from sqlalchemy import or_, and_
+from sqlalchemy.sql.expression import between, union, func
 
 from nemesis.systemwide import db
 from nemesis.models.accounting import Contract, rbContractType, Contract_Contragent, Contract_Contingent
 from nemesis.models.refbooks import rbFinance
-from nemesis.models.client import Client
+from nemesis.models.client import Client, ClientPolicy
+from nemesis.models.exists import rbPolicyType
 from nemesis.models.organisation import Organisation
-from nemesis.models.enums import ContragentType
+from nemesis.models.enums import ContragentType, ContractTypeInsurance
 from nemesis.lib.utils import safe_int, safe_date, safe_unicode, safe_traverse
+from nemesis.lib.const import COMP_POLICY_CODES, VOL_POLICY_CODES, OMS_EVENT_CODE, DMS_EVENT_CODE
+from nemesis.lib.apiutils import ApiException
 
 
 class BaseModelController(object):
 
-    def __init__(self):
-        self.session = db.session
+    session = db.session
 
-    def get_selecter(self, args):
+    def __init__(self):
+        pass
+
+    def get_selecter(self):
         raise NotImplementedError()
 
     def get_listed_data(self, args):
-        selecter = self.get_selecter(args)
+        selecter = self.get_selecter()
         selecter.apply_filter(**args)
         selecter.apply_sort_order(**args)
         listed_data = selecter.get_all()
@@ -31,7 +37,9 @@ class BaseModelController(object):
     def get_paginated_data(self, args):
         per_page = safe_int(args.get('per_page')) or 20
         page = safe_int(args.get('page')) or 1
-        selecter = self.get_selecter(args)
+        selecter = self.get_selecter()
+        selecter.apply_filter(**args)
+        selecter.apply_sort_order(**args)
         paginated_data = selecter.paginate(page, per_page)
         return paginated_data
 
@@ -47,7 +55,7 @@ class ContractController(BaseModelController):
         self.contragent_ctrl = ContragentController()
         self.contingent_ctrl = ContingentController()
 
-    def get_selecter(self, args):
+    def get_selecter(self):
         return ContractSelecter()
 
     def get_new_contract(self, params=None):
@@ -82,14 +90,20 @@ class ContractController(BaseModelController):
         self.update_contract_contingent(contract, json_data['contingent_list'])
         return contract
 
+    def delete_contract(self, contract):
+        contract.deleted = 1
+        return contract
+
     def update_contract_ca_payer(self, contract, ca_data):
         contragent_id = safe_int(ca_data.get('id'))
         if contragent_id:
-            ca_payer = self.contragent_ctrl.get_contragent(contragent_id)
+            contragent = self.contragent_ctrl.get_contragent(contragent_id)
         else:
-            ca_payer = self.contragent_ctrl.update_contragent(contract.payer, ca_data)
-        contract.payer = ca_payer
-        return ca_payer
+            contragent = self.contragent_ctrl.get_new_contragent()
+            contragent = self.contragent_ctrl.update_contragent(contragent, ca_data)
+
+        contract.payer = contragent
+        return contragent
 
     def update_contract_ca_recipient(self, contract, ca_data):
         contragent_id = safe_int(ca_data.get('id'))
@@ -124,10 +138,16 @@ class ContractController(BaseModelController):
         data['resolution'] = safe_unicode(data['resolution'])
         return data
 
+    def get_avalable_contracts(self, client_id, finance_id, set_date):
+        selecter = self.get_selecter()
+        selecter.set_available_contracts(client_id, finance_id, set_date)
+        available_contracts = selecter.get_all()
+        return available_contracts
+
 
 class ContragentController(BaseModelController):
 
-    def get_selecter(self, args):
+    def get_selecter(self):
         return ContragentSelecter()
 
     def get_new_contragent(self, params=None):
@@ -150,6 +170,11 @@ class ContragentController(BaseModelController):
     def _format_contragent_data(self, data):
         client_id = safe_traverse(data, 'client', 'id')
         org_id = safe_traverse(data, 'org', 'id')
+        if not client_id and not org_id:
+            raise ApiException(
+                422,
+                u'Контрагент договора должен быть физическим или юридическим лицом и не может быть пустым.'
+            )
         data['client'] = self.session.query(Client).filter(Client.id == client_id).first() if client_id else None
         data['org'] = self.session.query(Organisation).filter(Organisation.id == org_id).first() if org_id else None
         return data
@@ -232,6 +257,75 @@ class ContractSelecter(BaseSelecter):
     def __init__(self):
         query = self.session.query(Contract)
         super(ContractSelecter, self).__init__(query)
+
+    def set_available_contracts(self, client_id, finance_id, set_date):
+        finance = self.session.query(rbFinance).filter(rbFinance.id == finance_id).first()
+        finance_code = finance.code
+        policy_codes = (
+            COMP_POLICY_CODES
+            if finance_code == OMS_EVENT_CODE
+            else (
+                VOL_POLICY_CODES
+                if finance_code == DMS_EVENT_CODE
+                else None
+            )
+        )
+
+        contingent_query = self.session.query(Contract).join(
+            rbContractType
+        ).join(
+            Contract_Contingent
+        ).filter(
+            Contract.finance_id == finance_id,
+            between(
+                set_date,
+                Contract.begDate,
+                func.coalesce(Contract.endDate, func.curdate())
+            ),
+            Contract.deleted == 0, Contract.draft == 0,
+            Contract_Contingent.client_id == client_id,
+            Contract_Contingent.deleted == 0
+        )
+
+        if policy_codes is not None:
+            contingent_query = contingent_query.with_entities(Contract)
+            through_policy_query = self.session.query(Contract).join(
+                rbContractType, and_(Contract.contractType_id == rbContractType.id,
+                                     rbContractType.usingInsurancePolicy == ContractTypeInsurance.with_policy[0])
+            ).join(
+                Contract_Contragent, and_(Contract.payer_id == Contract_Contragent.id,
+                                          Contract_Contragent.deleted == 0)
+            ).join(
+                Organisation, (Contract_Contragent.organisation_id == Organisation.id)
+            ).join(
+                ClientPolicy, and_(ClientPolicy.insurer_id == Organisation.id,
+                                   ClientPolicy.deleted == 0)
+            ).join(
+                rbPolicyType, and_(ClientPolicy.policyType_id == rbPolicyType.id,
+                                   rbPolicyType.code.in_(policy_codes))
+            ).join(
+                Client, (ClientPolicy.clientId == Client.id)
+            ).filter(
+                Contract.finance_id == finance_id,
+                between(
+                    set_date,
+                    Contract.begDate,
+                    func.coalesce(Contract.endDate, func.curdate())
+                ),
+                Contract.deleted == 0, Contract.draft == 0,
+                between(
+                    set_date,
+                    ClientPolicy.begDate,
+                    func.coalesce(ClientPolicy.endDate, func.curdate())
+                )
+            )
+            contingent_query = contingent_query
+            through_policy_query = through_policy_query
+            self.query = self.session.query(Contract).select_entity_from(
+                union(contingent_query, through_policy_query)
+            ).order_by(Contract.date)
+        else:
+            self.query = contingent_query.order_by(Contract.id)
 
 
 class ContragentSelecter(BaseSelecter):

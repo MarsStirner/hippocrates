@@ -1,6 +1,6 @@
 'use strict';
 
-var ContractListCtrl = function ($scope, AccountingService, ContractModalService) {
+var ContractListCtrl = function ($scope, AccountingService, ContractModalService, MessageBox) {
     $scope.contract_list = [];
     $scope.pager = {
         current_page: 1,
@@ -50,10 +50,25 @@ var ContractListCtrl = function ($scope, AccountingService, ContractModalService
                 $scope.contract_list.splice(idx, 1, upd_contract);
             });
     };
+    $scope.deleteContract = function (idx) {
+        var contract = $scope.contract_list[idx];
+        MessageBox.question(
+            'Удаление договора',
+            'Вы уверены, что хотите удалить выбранный договор?'
+        ).then(function () {
+            AccountingService.delete_contract(contract)
+                .then(function () {
+                    $scope.contract_list.splice(idx, 1);
+                });
+        });
+    };
     $scope.onPageChanged = function () {
         refreshContractList(true);
     };
     $scope.canEdit = function () {
+        return true;
+    };
+    $scope.canDelete = function () {
         return true;
     };
     $scope.init = function () {
@@ -63,4 +78,5 @@ var ContractListCtrl = function ($scope, AccountingService, ContractModalService
     $scope.init();
 };
 
-WebMis20.controller('ContractListCtrl', ['$scope', 'AccountingService', 'ContractModalService', ContractListCtrl]);
+WebMis20.controller('ContractListCtrl', ['$scope', 'AccountingService', 'ContractModalService',
+    'MessageBox', ContractListCtrl]);

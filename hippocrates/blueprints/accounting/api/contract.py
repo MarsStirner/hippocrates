@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 
+import datetime
+
 from flask import request
 
 from ..app import module
 from nemesis.lib.apiutils import api_method, ApiException
-from nemesis.lib.utils import safe_bool, safe_int
+from nemesis.lib.utils import safe_bool, safe_int, safe_date
 from blueprints.accounting.lib.contract import ContractController
 from blueprints.accounting.lib.represent import ContractRepr
 
@@ -65,15 +67,29 @@ def api_0_contract_list():
         return ContractRepr().represent_listed_contracts(data)
 
 
-@module.route('/api/0/contract/available')
+@module.route('/api/0/contract/', methods=['DELETE'])
+@module.route('/api/0/contract/<int:contract_id>', methods=['DELETE'])
+@api_method
+def api_0_contract_delete(contract_id=None):
+    if not contract_id:
+        raise ApiException(404, u'`contract_id` required')
+    con_ctrl = ContractController()
+    contract = con_ctrl.get_contract(contract_id)
+    con_ctrl.delete_contract(contract)
+    con_ctrl.store(contract)
+    return True
+
+
+@module.route('/api/0/contract/list/available')
 @api_method
 def api_0_contract_get_available():
-    # TODO
     client_id = safe_int(request.args.get('client_id'))
     if not client_id:
         raise ApiException(400, '`client_id` argument required')
     finance_id = safe_int(request.args.get('finance_id'))
     if not finance_id:
         raise ApiException(400, '`finance_id` argument required')
-    # date ?
-    return
+    set_date = safe_date(request.args.get('event_set_date')) or datetime.date.today()
+    con_ctrl = ContractController()
+    data = con_ctrl.get_avalable_contracts(client_id, finance_id, set_date)
+    return ContractRepr().represent_listed_contracts(data)

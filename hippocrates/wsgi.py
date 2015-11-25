@@ -116,6 +116,8 @@ def fc_urls():
             'api_contract_get': url_for('accounting.api_0_contract_get'),
             'api_contract_list': url_for('accounting.api_0_contract_list'),
             'api_contract_save': url_for('accounting.api_0_contract_save'),
+            'api_contract_delete': url_for('accounting.api_0_contract_delete'),
+            'api_contract_get_available': url_for('accounting.api_0_contract_get_available'),
             'api_contragent_list': url_for('accounting.api_0_contragent_list'),
             'api_contingent_get': url_for('accounting.api_0_contingent_get')
         }

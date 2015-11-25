@@ -11,6 +11,11 @@
                 <div class="alert alert-warning" ng-show="event.is_new() && event.services.length">
                     <strong>Внимание!</strong> Для разблокирования полей необходимо очистить список выбранных
                         <a href="#services" class="alert-link">услуг</a>.</div>
+                <div class="marginal" id="mainInfoErrorBlock">
+                    <div ng-repeat="(field, error_msg) in formErrors">
+                        <span class="text-danger" ng-show="error_msg">* [[ error_msg ]]</span>
+                    </div>
+                </div>
                 <div class="row marginal">
                     <div class="col-md-4">
                         <label for="request_type">Тип обращения</label>
@@ -51,47 +56,31 @@
                         </ui-select>
                     </div>
                 </div>
-                <div class="row marginal" ng-show="formstate.is_dms()">
-                    <div class="col-md-4"
-                         ng-class="{'has-error': event_maininfo_form.dms.$invalid && editing.submit_attempt}">
-                        <label for="dms">Полис ДМС</label>
-                        <ui-select id="dms" name="dms" theme="select2"
-                                   ng-model="dms.selected" ng-required="formstate.is_dms()" ng-change="on_dms_changed()"
-                                   ng-disabled="widget_disabled('dms') || services_added()">
-                            <ui-select-match placeholder="Полис ДМС">[[$select.selected.policy_text]]</ui-select-match>
-                            <ui-select-choices repeat="policy in dms_policies | filter: $select.search">
-                                <div ng-bind-html="policy.policy_text | highlight: $select.search"></div>
-                            </ui-select-choices>
-                        </ui-select>
-                    </div>
-                </div>
                 <div class="row marginal">
                     <div class="col-md-9"
                          ng-class="{'has-error': event_maininfo_form.contract.$invalid && editing.submit_attempt}">
                         <label for="contract">Договор</label>
                         <div class="row">
                         <div class="col-md-10">
-                            <ui-select id="contract" name="contract" theme="select2"
-                                       ng-model="event.info.contract" ng-required="true" ng-change="on_contract_changed()"
-                                       ng-disabled="widget_disabled('contract') || services_added()">
-                                <ui-select-match placeholder="Договор">[[$select.selected.number]] [[$select.selected.date]]
-                                                             [[$select.selected.resolution]]</ui-select-match>
-                                <ui-select-choices repeat="c in Contract.objects | contract_filter:event.info | filter: $select.search">
-                                    <div ng-bind-html="(c.number+' '+c.date+' '+c.resolution) | highlight: $select.search"></div>
-                                </ui-select-choices>
+                            <ui-select ext-select-contract-event contract-list="available_contracts.list"
+                                id="contract" name="contract" theme="select2"
+                                ng-model="event.info.contract" ng-required="true"
+                                ng-disabled="widget_disabled('contract') || services_added()">
                             </ui-select>
+                            <span class="text-warning" ng-show="isContractListEmptyLabelVisible()">Не найдено подходящего договора</span>
                         </div>
                         <div class="col-md-2">
                             <div class="btn-group">
                                 <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"
-                                    aria-haspopup="true" aria-expanded="false">
+                                    aria-haspopup="true" aria-expanded="false"
+                                    ng-disabled="widget_disabled('contract') || services_added()">
                                     <span class="fa fa-reorder"></span> <span class="caret"></span>
                                 </button>
                                 <ul class="dropdown-menu">
-                                    <li><a href="#">Редактировать</a></li>
-                                    <li><a href="#">Создать новый договор</a></li>
+                                    <li><a href="javascript:void(0)" ng-click="editContract()">Редактировать</a></li>
+                                    <li><a href="javascript:void(0)" ng-click="createContract()">Создать новый договор</a></li>
                                     <li role="separator" class="divider"></li>
-                                    <li><a href="#">Перейти к списку договоров</a></li>
+                                    <li><a href="javascript:void(0)" ng-click="openContractListUi()">Перейти к списку договоров</a></li>
                                 </ul>
                             </div>
                         </div>
@@ -195,11 +184,6 @@
             </div>
         </div>
     </ng-form>
-{#<div>#}
-{#    <p>debug:</p>#}
-{#    <pre>[[event.info | json]]</pre>#}
-{#    <p>[[request_type.selected | json]]</p>#}
-{#    <p>[[finance.selected | json]]</p>#}
-{#</div>#}
+{#    <pre>[[ event.info | json ]]</pre>#}
 </div>
 

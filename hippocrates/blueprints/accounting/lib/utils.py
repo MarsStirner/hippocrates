@@ -11,3 +11,7 @@ def get_contragent_type(contragent):
             else ContragentType.undefined[0]
         )
     )
+
+
+def check_contract_type_with_insurance_policy(contract):
+    pass
