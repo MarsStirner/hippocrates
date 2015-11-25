@@ -54,6 +54,9 @@ class ContractController(BaseModelController):
         super(ContractController, self).__init__()
         self.contragent_ctrl = ContragentController()
         self.contingent_ctrl = ContingentController()
+        # TODO:
+        from blueprints.accounting.lib.pricelist import PriceListController
+        self.pricelist_ctrl = PriceListController()
 
     def get_selecter(self):
         return ContractSelecter()
@@ -87,6 +90,7 @@ class ContractController(BaseModelController):
                 setattr(contract, attr, json_data.get(attr))
         self.update_contract_ca_payer(contract, json_data['payer'])
         self.update_contract_ca_recipient(contract, json_data['recipient'])
+        self.update_contract_pricelist(contract, json_data['pricelist_list'])
         self.update_contract_contingent(contract, json_data['contingent_list'])
         return contract
 
@@ -125,6 +129,14 @@ class ContractController(BaseModelController):
             contingent = self.contingent_ctrl.update_contingent(contingent, cont_d, contract)
             contingent_list.append(contingent)
         contract.contingent_list = contingent_list
+
+    def update_contract_pricelist(self, contract, pl_data):
+        pricelist_list = []
+        for pl_d in pl_data:
+            pricelist_id = safe_int(pl_d.get('id'))
+            pricelist = self.pricelist_ctrl.get_pricelist(pricelist_id)
+            pricelist_list.append(pricelist)
+        contract.pricelist_list = pricelist_list
 
     def _format_contract_data(self, data):
         finance_id = safe_traverse(data, 'finance', 'id')

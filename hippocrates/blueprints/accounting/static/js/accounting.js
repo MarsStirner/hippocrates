@@ -51,4 +51,9 @@ WebMis20.service('AccountingService', ['WebMisApi', function (WebMisApi) {
     this.get_new_contingent = function (args) {
         return WebMisApi.contingent.get(undefined, args);
     };
+    this.get_pricelists = function (finance_id) {
+        return WebMisApi.pricelist.get_list({
+            finance_id: finance_id
+        });
+    };
 }]);

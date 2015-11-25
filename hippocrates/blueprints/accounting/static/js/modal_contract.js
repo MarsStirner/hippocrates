@@ -130,7 +130,28 @@ WebMis20.run(['$templateCache', function ($templateCache) {
                 <h3 class="box-title">Прайс листы</h3>\
             </div>\
             <div class="box-body">\
-                \
+                <ul class="list-group">\
+                    <li ng-repeat="pl in contract.pricelist_list | flt_not_deleted" class="list-group-item">\
+                        <span ng-bind="formatPriceListDescr(pl)"></span>\
+                        <span class="fa fa-remove text-danger cursor-pointer pull-right"\
+                            ng-click="removePricelist($index)" title="Удалить"></span>\
+                    </li>\
+                </ul>\
+            </div>\
+            <div class="box-footer">\
+                <div class="row">\
+                <div class="col-md-9">\
+                    <ui-select ng-model="new_pricelist.pl" ext-select-price-list-search finance="contract.finance" theme="bootstrap"\
+                        placeholder="Выберите подходящий прайс-лист">\
+                    </ui-select>\
+                </div>\
+                <div class="col-md-3">\
+                    <button type="button" class="btn btn-sm btn-primary pull-right" ng-click="addNewPricelist()"\
+                        ng-disabled="btnAddPricelistDisabled()">\
+                        <span class="fa fa-plus"> Добавить прайс-лист</span>\
+                    </button>\
+                </div>\
+                </div>\
             </div>\
         </div>\
     </div>\
@@ -169,7 +190,7 @@ WebMis20.run(['$templateCache', function ($templateCache) {
     </div>\
     </div>\
     </ng-form>\
-    <pre>[[ contract | json ]]</pre>\
+    <!-- <pre>[[ contract | json ]]</pre> -->\
 </div>\
 <div class="modal-footer">\
     <button type="button" class="btn btn-default" ng-click="$dismiss(\'cancel\')">Отменить</button>\
@@ -178,7 +199,7 @@ WebMis20.run(['$templateCache', function ($templateCache) {
 }]);
 
 
-var ContractModalCtrl = function ($scope, AccountingService, contract) {
+var ContractModalCtrl = function ($scope, $filter, AccountingService, contract) {
     $scope.contract = contract;
     $scope.ca_params = {
         payer_create_mode: false,
@@ -186,6 +207,9 @@ var ContractModalCtrl = function ($scope, AccountingService, contract) {
     };
     $scope.new_contingent = {
         client: null
+    };
+    $scope.new_pricelist = {
+        pl: null
     };
 
     $scope.saveAndClose = function () {
@@ -273,6 +297,24 @@ var ContractModalCtrl = function ($scope, AccountingService, contract) {
         }
     });
 
+    // pricelist
+    $scope.formatPriceListDescr = function (pl) {
+        return '{0}. {1| }{2} ({3}), с {4} по {5}'.formatNonEmpty(
+            pl.id, pl.code, pl.name, pl.finance.name,
+            $filter('asDate')(pl.beg_date), $filter('asDate')(pl.end_date)
+        );
+    };
+    $scope.addNewPricelist = function () {
+        $scope.contract.pricelist_list.push($scope.new_pricelist.pl);
+        $scope.new_pricelist.pl = null;
+    };
+    $scope.removePricelist = function (idx) {
+        $scope.contract.pricelist_list.splice(idx, 1);
+    };
+    $scope.btnAddPricelistDisabled = function () {
+        return !safe_traverse($scope.new_pricelist, ['pl', 'id']);
+    };
+
     // contingent
     $scope.addNewContingent = function () {
         AccountingService.get_new_contingent({
@@ -305,4 +347,4 @@ var ContractModalCtrl = function ($scope, AccountingService, contract) {
 };
 
 
-WebMis20.controller('ContractModalCtrl', ['$scope', 'AccountingService', ContractModalCtrl]);
+WebMis20.controller('ContractModalCtrl', ['$scope', '$filter', 'AccountingService', ContractModalCtrl]);

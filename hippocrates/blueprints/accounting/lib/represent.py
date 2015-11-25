@@ -10,6 +10,7 @@ class ContractRepr(object):
     def __init__(self):
         self.ca_repr = ContragentRepr()
         self.contingent_repr = ContingentRepr()
+        self.pricelist_repr = PriceListRepr()
 
     def represent_contract_full(self, contract):
         if not contract:
@@ -22,7 +23,10 @@ class ContractRepr(object):
                 self.contingent_repr.represent_contingent(cont)
                 for cont in contract.contingent_list if cont.deleted == 0  # TODO: think about selection
             ],
-            'pricelist_list': [],
+            'pricelist_list': [
+                self.pricelist_repr.represent_pricelist_short(pl)
+                for pl in contract.pricelist_list if pl.deleted == 0  # TODO: think about selection
+            ],
             'description': {
                 'full': self.make_full_description(contract),
                 'short': self.make_short_description(contract),
@@ -146,3 +150,33 @@ class ContingentRepr(object):
             'sex': Gender(client.sexCode),
             'full_name': client.nameText,
         }
+
+
+class PriceListRepr(object):
+
+    def represent_pricelist(self, pl):
+        return {
+            'id': pl.id,
+            'code': pl.code,
+            'name': pl.name,
+            'deleted': pl.deleted,
+            'finance': pl.finance,
+            'beg_date': pl.begDate,
+            'end_date': pl.endDate
+        }
+
+    def represent_pricelist_short(self, pl):
+        data = self.represent_pricelist(pl)
+        data['description'] = {
+            'short': self.make_short_description(pl),
+        }
+        return data
+
+    def make_short_description(self, pl):
+        return u'{0} ({1}), с {1} по {2}'.format(pl.name, pl.finance.name,
+                                                 format_date(pl.begDate), format_date(pl.endDate))
+
+    def represent_listed_pricelists(self, pl_list):
+        return [
+            self.represent_pricelist_short(pl) for pl in pl_list
+        ]
