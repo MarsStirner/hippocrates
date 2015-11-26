@@ -4,7 +4,7 @@ import datetime
 from flask import request
 
 from nemesis.lib.apiutils import api_method
-from nemesis.models.enums import PrenatalRiskRate
+from nemesis.models.enums import PerinatalRiskRate
 from nemesis.models.exists import Organisation, Person
 from blueprints.risar.app import module
 
@@ -76,7 +76,7 @@ def api_0_event_search():
             'exec_date': datetime.date.fromtimestamp(row['exec_date'] * 86400) if row['exec_date'] else None,
             'external_id': row['external_id'],
             'exec_person_name': row['person_name'],
-            'risk': PrenatalRiskRate(row['risk']),
+            'risk': PerinatalRiskRate(row['risk']),
             'mdate': datetime.date.fromtimestamp(row['modify_date']),
             'pddate': datetime.date.fromtimestamp(row['bdate'] * 86400) if row['bdate'] else None,
             'week':((

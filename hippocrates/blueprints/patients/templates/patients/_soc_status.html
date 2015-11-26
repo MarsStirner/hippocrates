@@ -61,8 +61,28 @@
                     <div class="box-body">
                         <wm-soc-status ss-class="3" id-postfix="w[[$index]]"
                             model-soc-status="socstat"
-                            edit-mode="socstat.id ? edit.activated : true">
+                            edit-mode="socstat.id ? edit.activated : true" edit-type="!socstat.id">
                         </wm-soc-status>
+                        <div class="row" ng-if="socstat.ss_type.code == '004' || socstat.ss_type.code == '003'">
+                            <div class=" col-md-4">
+                                <label for="company" class="control-label">[[ socstat.ss_type.code == '004'? 'Организация' : 'Школа']]</label>
+                                <input type="text" class="form-control" autocomplete="off" placeholder="Место работы"
+                                       ng-disabled="socstat.id ? !edit.activated : false"
+                                       id="company" name="company" ng-model="socstat.work.organisation"/>
+                            </div>
+                            <div class=" col-md-3">
+                                <label for="post" class="control-label">[[ socstat.ss_type.code == '004'? 'Должность' : 'Класс']]</label>
+                                <input type="text" class="form-control" autocomplete="off" placeholder="Должность"
+                                       ng-disabled="socstat.id ? !edit.activated : false"
+                                       id="post" name="post" ng-model="socstat.work.post"/>
+                            </div>
+                            <div class=" col-md-4">
+                                <label for="note" class="control-label">Примечание</label>
+                                <input type="text" class="form-control" autocomplete="off" placeholder="Примечание"
+                                       ng-disabled="socstat.id ? !edit.activated : false"
+                                       id="note" name="note" ng-model="socstat.note"/>
+                            </div>
+                        </div>
                         <h4>Документ
                             <small>
                                 <button type="button" class="btn btn-link" title="Заполнить документ"
@@ -83,7 +103,7 @@
                             model-document="socstat.self_document"
                             edit-mode="socstat.self_document.id ? edit.activated : socstat.self_document.id !== undefined">
                         </wm-document>
-                        <ng-form>
+                        </ng-form>
                         <div ng-if="socstat.self_document.file_attach">
                             <h5 class="attach-file-copy-heading">Копия документа</h5>
                             <wm-client-file-attach attach-type="document"
@@ -92,7 +112,8 @@
                                 on-add="add_new_file(documentInfo, policyInfo)"
                                 on-open="openFile(cfa_id, idx)">
                             </wm-client-file-attach>
-                            <button type="button" class="btn-link" ng-click="printFilesAttach([socstat.self_document.file_attach])" title="Печать копии">
+                            <button type="button" class="btn-link" ng-click="printFilesAttach([socstat.self_document.file_attach])"
+                                    title="Печать копии">
                                 <span class="glyphicon glyphicon-print"></span>
                             </button>
                         </div>
@@ -107,12 +128,11 @@
     </ng-form>
 
     <ng-form name="_nationalities" toc-element="Гражданство">
-        <h4>Гражданство</h4>
         <div ng-repeat="socstat in client.nationalities | flt_not_deleted">
             <ng-form name="socStatNationalityForm">
                 <div class="box box-info">
                     <div class="box-header with-border">
-                        <h3 class="box-title">Занятость</h3>
+                        <h3 class="box-title">Гражданство</h3>
                         <div class="box-tools pull-right">
                             <button ng-show="socstat.id" type="button" class="btn btn-box-tool" title="Редактировать"
                                     ng-click="edit.activated=true"><span class="glyphicon glyphicon-pencil text-primary"></span></button>

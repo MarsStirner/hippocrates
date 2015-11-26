@@ -61,7 +61,7 @@
                          ng-class="{'has-error': event_maininfo_form.contract.$invalid && editing.submit_attempt}">
                         <label for="contract">Договор</label>
                         <div class="row">
-                        <div class="col-md-10">
+                        <div class="col-md-9">
                             <ui-select ext-select-contract-event contract-list="available_contracts.list"
                                 id="contract" name="contract" theme="select2"
                                 ng-model="event.info.contract" ng-required="true"
@@ -69,7 +69,7 @@
                             </ui-select>
                             <span class="text-warning" ng-show="isContractListEmptyLabelVisible()">Не найдено подходящего договора</span>
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-md-1">
                             <div class="btn-group">
                                 <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"
                                     aria-haspopup="true" aria-expanded="false"
@@ -84,6 +84,12 @@
                                 </ul>
                             </div>
                         </div>
+                        {% if requestType_kind == 'stationary' %}
+                        <div class="col-md-4">
+                            <label for="primary" class="control-label">Первичность</label>
+                            <rb-select ng-model="event.info.is_primary" ref-book="EventPrimary"></rb-select>
+                        </div>
+                        {% endif %}
                         </div>
                     </div>
                 </div>
@@ -96,7 +102,8 @@
                             placeholder="Лечащий врач">
                         </wm-person-select>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-4"
+                         ng-class="{'has-error': event_maininfo_form.org_structure.$invalid && editing.submit_attempt}">
                         <label for="org_structure" class="control-label">Отделение поступления</label>
                         <ui-select id="org_structure" name="org_structure" theme="select2"
                                    ng-model="event.received.orgStructStay.value" ng-required="true">

@@ -95,13 +95,15 @@ def api_event_save():
     request_type_kind = all_data.get('request_type_kind')
     event_data = all_data.get('event')
     event_id = event_data.get('id')
-    contract_id = event_data['contract']['id']
+    # contract_id = event_data['contract']['id']
     services_data = all_data.get('services', [])
 
     event_ctrl = EventSaveController()
     try:
         if event_id:
             event = Event.query.get(event_id)
+            if not event:
+                raise ApiException(404, u'Не найдено обращение с id = {}'.format(event_id))
             event_data = all_data['event']
             local_contract_data = safe_traverse(all_data, 'payment', 'local_contract')
             event = event_ctrl.update_base_info(event, event_data, local_contract_data)
@@ -113,7 +115,7 @@ def api_event_save():
             event_id = int(event)
         result['id'] = int(event)
 
-        services_save(event_id, services_data, contract_id)
+        # services_save(event_id, services_data, contract_id)
         update_executives(event)
         if request_type_kind == 'policlinic':
             visit = Visit.make_default(event)
@@ -134,16 +136,36 @@ def api_event_save():
 @api_method
 def api_moving_save():
     vis = StationaryEventVisualizer()
+    mov_ctrl = MovingController()
     data = request.json
     event_id = data.get('event_id')
-    mov_ctrl = MovingController()
-    if data.get('id'):
-        moving = mov_ctrl.update_moving(data)
-        result = vis.make_action_info(moving)
+    moving_id = data.get('id')
+    if moving_id:
+        moving = Action.query.get(moving_id)
+        if not moving:
+            raise ApiException(404, u'Не найдено движение с id = {}'.format(moving_id))
+        moving = mov_ctrl.update_moving_data(moving, data)
+        result = vis.make_moving_info(moving)
     else:
         result = mov_ctrl.create_moving(event_id, data)
-        result = map(vis.make_action_info, result)
+        result = map(vis.make_moving_info, result)
     return result
+
+
+@module.route('api/event_moving_close.json', methods=['POST'])
+@api_method
+def api_event_moving_close():
+    vis = StationaryEventVisualizer()
+    mov_ctrl = MovingController()
+    moving_info = request.json
+    moving_id = moving_info['id']
+    if not moving_id:
+        raise ApiException(404, u'Не передан параметр moving_id')
+    moving = Action.query.get(moving_id)
+    if not moving:
+        raise ApiException(404, u'Не найдено движение с id = {}'.format(moving_id))
+    moving = mov_ctrl.close_moving(moving)
+    return vis.make_moving_info(moving)
 
 
 @module.route('api/event_hosp_beds_get.json', methods=['GET'])
@@ -156,7 +178,7 @@ def api_hosp_beds_get():
                                              ActionProperty_HospitalBed, OrgStructure_HospitalBed)\
         .filter(ActionProperty.deleted == 0, ActionPropertyType.code == 'hospitalBed', Action.deleted == 0,
                 Event.deleted == 0, ActionType.flatCode == 'moving',
-                Action.endDate.is_(None), OrgStructure_HospitalBed.master_id == org_str_id).all()
+                db.or_(Action.endDate.is_(None), Action.endDate >= datetime.datetime.now()), OrgStructure_HospitalBed.master_id == org_str_id).all()
     occupied_hb = [ap.value for ap in ap_hosp_beds]
     all_hb = OrgStructure_HospitalBed.query.filter(OrgStructure_HospitalBed.master_id == org_str_id).all()
     for hb in all_hb:

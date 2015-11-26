@@ -27,38 +27,31 @@
                             </tr>
                             <tr>
                                 <th>Медикаментозная непереносимость</th>
+                                <td ng-bind="event.intolerances | pluck:'name' | join:', '"></td>
                                 <td>
-
-                                </td>
-                                <td>
-                                    <button type="button" class="btn btn-sm btn-default" title="Удалить"
-                                            ng-click="edit_intolerance()" disabled><span class="glyphicon glyphicon-pencil"></span>
+                                    <button type="button" class="btn btn-sm btn-default" title="Изменить"
+                                            ng-click="edit_intolerances('intolerances')">
+                                        <span class="glyphicon glyphicon-pencil"></span>
                                     </button>
                                 </td>
                             </tr>
                             <tr>
                                 <th>Аллергия</th>
+                                <td ng-bind="event.allergies | pluck:'name' | join:', '"></td>
                                 <td>
-
-                                </td>
-                                <td>
-                                    <button type="button" class="btn btn-sm btn-default" title="Удалить"
-                                            ng-click="edit_alleries()" disabled><span class="glyphicon glyphicon-pencil"></span>
+                                    <button type="button" class="btn btn-sm btn-default" title="Изменить"
+                                            ng-click="edit_intolerances('allergies')"><span class="glyphicon glyphicon-pencil"></span>
                                     </button>
                                 </td>
                             </tr>
                             <tr>
                                 <th>Рост</th>
-                                <td>
-                                    [[event.received.height.value]]
-                                </td>
+                                <td>[[event.received.height.value]]</td>
                                 <td></td>
                             </tr>
                             <tr>
                                 <th>Вес</th>
-                                <td>
-                                    [[event.received.weight.value]]
-                                </td>
+                                <td>[[event.received.weight.value]]</td>
                                 <td></td>
                             </tr>
                             <tr>

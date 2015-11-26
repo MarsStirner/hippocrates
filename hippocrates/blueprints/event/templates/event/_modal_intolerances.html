@@ -1,0 +1,32 @@
+<div class="modal-header">
+    <h3 class="modal-title">Сведения об аллергиях и непереносимостях</h3>
+</div>
+<div class="modal-body">
+    <table class="table table-condensed">
+        <thead>
+        <tr>
+            <th class="col-md-6">Наименование</th>
+            <th class="col-md-2">Степень</th>
+            <th class="col-md-2">Дата установления</th>
+            <th class="col-md-2" colspan="2">Примечания</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="model in models">
+            <td ng-if="!model.deleted"><input class="form-control" type="text" ng-model="model.name" /></td>
+            <td ng-if="!model.deleted"><rb-select ref-book="AllergyPower" ng-model="model.power" /></td>
+            <td ng-if="!model.deleted"><div fs-date ng-model="model.date"></div></td>
+            <td ng-if="!model.deleted"><input class="form-control" type="text" ng-model="model.note" /></td>
+            <td ng-if="!model.deleted"><button class="btn btn-danger" ng-click="remove(model)"><i class="glyphicon glyphicon-trash"></i></button></td>
+            <td ng-if="model.deleted" colspan="5" class="text-center"><a ng-click="restore(model)">Восстановить</a></td>
+        </tr>
+        <tr>
+            <td colspan="5"><div class="pull-right"><button class="btn btn-success" ng-click="addModel()">Добавить</button></div></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-success" ng-click="$close(models)">Сохранить</button>
+    <button class="btn btn-default" ng-click="$dismiss()">Отменить</button>
+</div>
