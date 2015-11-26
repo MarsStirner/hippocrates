@@ -57,7 +57,7 @@
                             <tr ng-repeat="row in aux.range(grouped[reception_type].max_tickets)">
                                 <td ng-repeat="day in grouped[reception_type].schedule">
                                     <div class="btn-group btn-group-justified">
-                                        <div class="btn-group">[[day.tickets[row].finance.code]]
+                                        <div class="btn-group">
                                             <button ui-schedule-ticket="day.tickets[row]" day="day" show-name="true"
                                                     ng-click="appointment_toggle(day.tickets[row])"
                                                     {% if config['ORGANISATION_INFIS_CODE'] == 500 %}ng-class="{'bg-gray': (day.tickets[row].finance == '2' && !ticket_user_info_available(day.tickets[row])), 'bg-purple': (day.tickets[row].finance == '4' && !ticket_user_info_available(day.tickets[row])), 'bg-teal': (day.tickets[row].finance == '6' && !ticket_user_info_available(day.tickets[row]))}" style="border:none"{% endif %}></button>

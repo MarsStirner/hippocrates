@@ -355,7 +355,8 @@ var ScheduleMonthCtrl = function ($scope, $http, $modal, RefBook, PersonTreeUpda
                                 reception_type: interval.reception_type,
                                 CITO: interval.CITO,
                                 planned: interval.planned,
-                                extra: interval.extra
+                                extra: interval.extra,
+                                finance: interval.finance
                             }
                         }),
                         quotas: first_day_quotas.day_quotas.map(function(quota) {

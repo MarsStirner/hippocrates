@@ -50,6 +50,7 @@
                                               class="no-schedule-label bg-danger">Нет расписания</span>
                                         <span ng-if="!schedule_is_empty(person_schedule) && !schedule_has_free_tickets(person_schedule) && !is_folded(person_schedule.person.id)"
                                               class="no-schedule-label bg-danger">Нет свободных номерков</span>
+                                        {% if config['ORGANISATION_INFIS_CODE'] == 500 %}<span class="pull-right"><button class="btn btn-xs bg-gray " style="margin-right:2px">ОМС</button><button style="margin-right:2px" class="btn btn-xs bg-teal">ВМП</button><button style="margin-right:2px" class="btn btn-xs bg-purple">Платно</button><button class="btn btn-xs btn-success">Любой</button></span>{% endif %}
                                     </caption>
                                     <thead ng-if="schedule_has_free_tickets(person_schedule)">
                                     <tr>
@@ -62,7 +63,8 @@
                                     <tr ng-repeat="row in aux.range(person_schedule.grouped[reception_type].max_tickets)">
                                         <td ng-repeat="day in person_schedule.grouped[reception_type].schedule">
                                             <button ui-schedule-ticket="day.tickets[row]" day="day" show-name="false"
-                                                    ng-click="appointment_toggle(day.tickets[row], person_schedule.person)">
+                                                    ng-click="appointment_toggle(day.tickets[row], person_schedule.person)"
+                                                    {% if config['ORGANISATION_INFIS_CODE'] == 500 %}ng-class="{'bg-gray': (day.tickets[row].finance == '2'), 'bg-purple': (day.tickets[row].finance == '4'), 'bg-teal': (day.tickets[row].finance == '6')}" style="border:none"{% endif %}>
                                             </button>
                                         </td>
                                     </tr>

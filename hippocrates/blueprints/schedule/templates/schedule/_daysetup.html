@@ -85,7 +85,7 @@
                                                          ng-model="interval.begTime" ng-required="true"
                                                          ng-change="sync_times()"
                                                          ng-class="{'error-border': !times_valid}">
-                                                        <timepicker minute-step="15" show-meridian="false"></timepicker>
+                                                        <timepicker minute-step="15" show-meridian="false" mousewheel="false"></timepicker>
                                                     </div>
                                                 </div>
                                                 <div class="form-group col-md-2 text-center">
@@ -96,7 +96,7 @@
                                                          ng-model="interval.endTime" ng-required="true"
                                                          ng-change="sync_times()"
                                                          ng-class="{'error-border': !times_valid}">
-                                                        <timepicker minute-step="15" show-meridian="false"></timepicker>
+                                                        <timepicker minute-step="15" show-meridian="false" mousewheel="false"></timepicker>
                                                     </div>
                                                 </div>
                                                 <div class="form-group col-md-2">
@@ -176,7 +176,7 @@
                                                          ng-model="quota.time_start" ng-required="true"
 {#                                                         ng-change="sync_times()"#}
                                                          ng-class="{'error-border': !times_valid}">
-                                                        <timepicker minute-step="15" show-meridian="false"></timepicker>
+                                                        <timepicker minute-step="15" show-meridian="false" mousewheel="false"></timepicker>
                                                     </div>
                                                 </div>
                                                 <div class="form-group col-md-3 text-center">
@@ -187,7 +187,7 @@
                                                          ng-model="quota.time_end" ng-required="true"
 {#                                                         ng-change="sync_times()"#}
                                                          ng-class="{'error-border': !times_valid}">
-                                                        <timepicker minute-step="15" show-meridian="false"></timepicker>
+                                                        <timepicker minute-step="15" show-meridian="false" mousewheel="false"></timepicker>
                                                     </div>
                                                 </div>
                                             </div>
