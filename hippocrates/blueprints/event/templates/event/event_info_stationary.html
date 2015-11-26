@@ -43,9 +43,7 @@
                         {% if user_profiles_mng.has_ui_doctor() and user_utils.can_read_dignoses(event) %}
                             {% include "event/_diagnoses.html" %}
                         {% endif %}
-                        {% if user_profiles_mng.has_ui_registrator() or user_profiles_mng.has_ui_cashier() %}
-                            {% include "event/_payment.html" %}
-                        {% endif %}
+                        {% include "event/_services.html" %}
                         {% if user_profiles_mng.has_ui_registrator() or user_profiles_mng.has_ui_cashier() %}
                             {% include "event/_event_received.html" %}
                         {% endif %}
@@ -181,9 +179,6 @@
     <script src="{{ url_for('.static', filename='js/event.js', v=app_version) }}"></script>
     <script src="{{ url_for('static', filename='js/services/event/event-services.js', v=nemesis_version) }}"></script>
     <script src="{{ url_for('.static', filename='js/directives.js', v=app_version) }}"></script>
-    <script type="text/ng-template" id="modal-prev-event-contract.html">{% include "event/_modal_prev_event_contracts.html" %}</script>
-    <script type="text/ng-template" id="modal-relatives.html">{% include "event/_modal_relatives.html" %}</script>
-    <script type="text/ng-template" id="modal-switch-payer.html">{% include "event/_modal_switch_payer_tab.html" %}</script>
     <script type="text/ng-template" id="modal-received.html">{% include 'event/_modal_received.html' %}</script>
     <script type="text/ng-template" id="modal-create-moving.html">{% include 'event/_modal_create_moving.html' %}</script>
     <script type="text/ng-template" id="modal-create-hospBed.html">{% include 'event/_modal_create_hospBed.html' %}</script>

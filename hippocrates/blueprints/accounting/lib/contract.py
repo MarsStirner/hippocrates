@@ -264,6 +264,27 @@ class BaseSelecter(object):
         return Pagination(self, page, per_page, total, items)
 
 
+class BaseSphinxSearchSelecter(object):
+
+    def __init__(self, search):
+        self.search = search
+
+    def apply_filter(self, **flt_args):
+        pass
+
+    def apply_sort_order(self, **order_args):
+        pass
+
+    def apply_limit(self, **limit_args):
+        pass
+
+    def get_all(self):
+        return self.search.ask()
+
+    def paginate(self, page, per_page=20, error_out=False):
+        raise NotImplementedError()
+
+
 class ContractSelecter(BaseSelecter):
 
     def __init__(self):

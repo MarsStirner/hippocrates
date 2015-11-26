@@ -1,14 +1,7 @@
 # -*- coding: utf-8 -*-
 
-import datetime
-
-from sqlalchemy import or_, and_
-from sqlalchemy.sql.expression import between, union, func
-
-from nemesis.systemwide import db
 from nemesis.models.accounting import PriceList
-from nemesis.models.refbooks import rbFinance
-from nemesis.lib.utils import safe_int, safe_date, safe_unicode, safe_traverse
+from nemesis.lib.utils import safe_int
 
 from blueprints.accounting.lib.contract import BaseModelController, BaseSelecter
 
