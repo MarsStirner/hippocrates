@@ -316,13 +316,13 @@ var EventStationaryInfoCtrl = function($scope, $filter, $modal, $q, RisarApi) {
         var models = _.map($scope.event[field], function (source) {
             return angular.extend({}, source);
         });
-        open_edit(models, 'medicine').result.then(function (models) {
+        open_edit(models, field).result.then(function (models) {
             $q.all(
                 _.filter(
                     _.map(models, function (model) {
                         if (model.deleted) {
                             if (model.id) {
-                                RisarApi.anamnesis.intolerances.delete(model.id, model.type.code)
+                                RisarApi.anamnesis.intolerances.delete(model.id, field)
                             }
                         } else {
                             return RisarApi.anamnesis.intolerances.save($scope.$parent.event.info.client_id, model)
