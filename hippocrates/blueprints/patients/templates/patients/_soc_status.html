@@ -61,7 +61,7 @@
                     <div class="box-body">
                         <wm-soc-status ss-class="3" id-postfix="w[[$index]]"
                             model-soc-status="socstat"
-                            edit-mode="socstat.id ? edit.activated : true">
+                            edit-mode="socstat.id ? edit.activated : true" edit-type="!socstat.id">
                         </wm-soc-status>
                         <div class="row" ng-if="socstat.ss_type.code == '004' || socstat.ss_type.code == '003'">
                             <div class=" col-md-4">
