@@ -360,6 +360,7 @@ WebMis20.factory('WMAction', ['ApiCalls', 'EzekielLock', function (ApiCalls, Eze
         // ro - атрибут нашего представления действия, обозначающий, разрешено ли нам вообще это действие редактировать
         // в дальнейшем атрибут readonly определяет разрешения на редактирование с учётом блокировки.
         self.ro = source.ro;
+        self.readonly = self.readonly || self.ro;
         self.bak_lab_info = source.bak_lab_info;
     }
     function merge_properties (self, source) {
