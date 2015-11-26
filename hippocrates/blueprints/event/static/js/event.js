@@ -285,7 +285,7 @@ var EventStationaryInfoCtrl = function($scope, $filter, $modal, $q, RisarApi) {
     var IntolerancesCtrl = function ($scope, $modalInstance, models, type) {
         $scope.addModel = function () {
             var model = {
-                type: _.find(intolerance_types, {code: type}),
+                type: intolerance_map[type],
                 date: null,
                 name: '',
                 power: null,
@@ -302,15 +302,16 @@ var EventStationaryInfoCtrl = function($scope, $filter, $modal, $q, RisarApi) {
         };
     };
 
-    var intolerance_types = $scope.intolerance_types = [
-        {
+    var intolerance_map = {
+        allergies: {
             code: 'allergy',
             name: 'Аллергия'
-        }, {
+        },
+        intolerances: {
             code: 'medicine',
             name: 'Медикаментозная непереносимость'
         }
-    ];
+    };
 
     $scope.edit_intolerances = function (field) {
         var models = _.map($scope.event[field], function (source) {
