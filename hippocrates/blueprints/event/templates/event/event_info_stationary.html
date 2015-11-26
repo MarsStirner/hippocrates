@@ -181,10 +181,13 @@
     <script src="{{ url_for('.static', filename='js/event.js', v=app_version) }}"></script>
     <script src="{{ url_for('static', filename='js/services/event/event-services.js', v=nemesis_version) }}"></script>
     <script src="{{ url_for('.static', filename='js/directives.js', v=app_version) }}"></script>
+    <script src="{{ url_for('risar.config_js', v=app_version) }}"></script>
+    <script src="{{ url_for('risar.static', filename='js/risar.js', v=app_version) }}"></script>
     <script type="text/ng-template" id="modal-prev-event-contract.html">{% include "event/_modal_prev_event_contracts.html" %}</script>
     <script type="text/ng-template" id="modal-relatives.html">{% include "event/_modal_relatives.html" %}</script>
     <script type="text/ng-template" id="modal-switch-payer.html">{% include "event/_modal_switch_payer_tab.html" %}</script>
     <script type="text/ng-template" id="modal-received.html">{% include 'event/_modal_received.html' %}</script>
     <script type="text/ng-template" id="modal-create-moving.html">{% include 'event/_modal_create_moving.html' %}</script>
     <script type="text/ng-template" id="modal-create-hospBed.html">{% include 'event/_modal_create_hospBed.html' %}</script>
+    <script type="text/ng-template" id="modal-intolerances.html">{% include 'event/_modal_intolerances.html' %}</script>
 {% endblock %}

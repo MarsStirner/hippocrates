@@ -262,7 +262,7 @@ var EventMainInfoCtrl = function ($scope, $q, RefBookService, EventType, $filter
             false;
     });
 };
-var EventStationaryInfoCtrl = function($scope, $filter) {
+var EventStationaryInfoCtrl = function($scope, $filter, $modal, $q, RisarApi) {
     $scope.format_admission_date = function (date) {
         return date ? $filter('asDateTime')(date) : '&nbsp;';
     };
@@ -280,6 +280,77 @@ var EventStationaryInfoCtrl = function($scope, $filter) {
     };
     $scope.format_doctor = function (doctor) {
         return doctor ? (doctor.full_name) : '&nbsp;';
+    };
+
+    var IntolerancesCtrl = function ($scope, $modalInstance, models, type) {
+        $scope.addModel = function () {
+            var model = {
+                type: _.find(intolerance_types, {code: type}),
+                date: null,
+                name: '',
+                power: null,
+                note: '',
+                deleted: 0
+            };
+            models.push(model);
+        };
+        $scope.remove = function (p) {
+            p.deleted = 1;
+        };
+        $scope.restore = function (p) {
+            p.deleted = 0;
+        };
+    };
+
+    var intolerance_types = $scope.intolerance_types = [
+        {
+            code: 'allergy',
+            name: 'Аллергия'
+        }, {
+            code: 'medicine',
+            name: 'Медикаментозная непереносимость'
+        }
+    ];
+
+    $scope.edit_intolerances = function (field) {
+        var models = _.map($scope.event[field], function (source) {
+            return angular.extend({}, source);
+        });
+        open_edit(models, 'medicine').result.then(function (models) {
+            $q.all(
+                _.filter(
+                    _.map(models, function (model) {
+                        if (model.deleted) {
+                            if (model.id) {
+                                RisarApi.anamnesis.intolerances.delete(model.id, model.type.code)
+                            }
+                        } else {
+                            return RisarApi.anamnesis.intolerances.save($scope.$parent.event.info.client_id, model)
+                        }
+                    }),
+                    function (deferred) {
+                        return deferred !== undefined
+                    }
+                )
+            ).then(function (results) {
+                $scope.event[field] = results;
+            });
+        })
+    };
+    var open_edit = function (list, type) {
+        var scope = $scope.$new();
+        scope.models = list;
+        scope.type = type;
+        return $modal.open({
+            templateUrl: 'modal-intolerances.html',
+            controller: IntolerancesCtrl,
+            scope: scope,
+            resolve: {
+                models: function () {return list},
+                type: function() {return type}
+            },
+            size: 'lg'
+        })
     };
 };
 var EventPaymentCtrl = function($scope, RefBookService, $http, $modal, MessageBox) {
@@ -900,19 +971,21 @@ var StationaryEventInfoCtrl = function ($scope, $controller, WMStationaryEvent) 
     var event = $scope.event = new WMStationaryEvent($scope.event_id, $scope.client_id, $scope.ticket_id);
     $scope.create_mode = $scope.event.is_new();
     $scope.initialize();
-}
+};
 var PoliclinicEventInfoCtrl = function ($scope, $controller, WMPoliclinicEvent) {
     $controller('EventInfoCtrl', {$scope: $scope});
     var event = $scope.event = new WMPoliclinicEvent($scope.event_id, $scope.client_id, $scope.ticket_id);
     $scope.create_mode = $scope.event.is_new();
     $scope.initialize();
 
-}
+};
+
+
 
 WebMis20.controller('EventDiagnosesCtrl', ['$scope', 'RefBookService', '$http', EventDiagnosesCtrl]);
 WebMis20.controller('EventMainInfoCtrl', ['$scope', '$q', 'RefBookService', 'EventType', '$filter', 'MessageBox',
     'CurrentUser', EventMainInfoCtrl]);
-WebMis20.controller('EventStationaryInfoCtrl', ['$scope', '$filter', EventStationaryInfoCtrl]);
+WebMis20.controller('EventStationaryInfoCtrl', ['$scope', '$filter', '$modal', '$q', 'RisarApi', EventStationaryInfoCtrl]);
 WebMis20.controller('EventPaymentCtrl', ['$scope', 'RefBookService', '$http', '$modal', 'MessageBox',
     EventPaymentCtrl]);
 WebMis20.controller('EventReceivedCtrl', ['$scope', '$modal', 'RefBookService', EventReceivedCtrl]);
