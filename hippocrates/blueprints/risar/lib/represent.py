@@ -6,7 +6,7 @@ from nemesis.lib.utils import safe_traverse_attrs, safe_traverse
 from nemesis.lib.jsonify import EventVisualizer
 from nemesis.models.actions import Action, ActionType
 from nemesis.models.client import BloodHistory
-from nemesis.models.enums import Gender, AllergyPower, IntoleranceType, PrenatalRiskRate
+from nemesis.models.enums import Gender, AllergyPower, IntoleranceType, PerinatalRiskRate
 from nemesis.models.exists import rbAttachType
 from blueprints.risar.lib.card_attrs import get_card_attrs_action, get_all_diagnoses, check_disease
 from blueprints.risar.lib.utils import get_action, action_apt_values, get_action_type_id
@@ -78,7 +78,7 @@ def represent_event(event):
         'anamnesis': represent_anamnesis(event),
         'epicrisis': represent_epicrisis(event),
         'checkups': represent_checkups(event),
-        'risk_rate': PrenatalRiskRate(get_card_attrs_action(event, auto=True)['prenatal_risk_572'].value),
+        'risk_rate': PerinatalRiskRate(get_card_attrs_action(event, auto=True)['prenatal_risk_572'].value),
         'pregnancy_week': get_pregnancy_week(event),
         'diagnoses': all_diagnoses,
         'has_diseases': check_disease(all_diagnoses)
@@ -273,7 +273,7 @@ def represent_ticket(ticket):
         'event_id': ticket.client_ticket.event_id if ticket.client_ticket else None,
         'note': ticket.client_ticket.note if ticket.client else None,
         'checkup_n': checkup_n,
-        'risk_rate': PrenatalRiskRate(get_card_attrs_action(event)['prenatal_risk_572'].value) if event else None,
+        'risk_rate': PerinatalRiskRate(get_card_attrs_action(event)['prenatal_risk_572'].value) if event else None,
         'pregnancy_week': get_pregnancy_week(event) if event else None,
     }
 
