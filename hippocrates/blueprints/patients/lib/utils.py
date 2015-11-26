@@ -446,8 +446,7 @@ def add_or_update_work_soc_status(client, data):
     if deleted and soc_status.work:
         soc_status.work = deleted
         return soc_status
-    work = add_or_update_work(client, work_info) if (work_info and work_info.keys() and
-                                                     soc_status.socStatusType.code in ('004', '003')) else None
+    work = add_or_update_work(client, work_info) if (work_info and work_info.keys()) else None
     soc_status.work = work
     return soc_status
 
