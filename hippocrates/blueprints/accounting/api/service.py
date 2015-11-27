@@ -5,7 +5,7 @@ from flask import request
 from ..app import module
 from nemesis.lib.apiutils import api_method, ApiException
 from blueprints.accounting.lib.service import ServiceController
-from blueprints.accounting.lib.represent import PriceListRepr
+from blueprints.accounting.lib.represent import ServiceRepr
 
 
 @module.route('/api/0/service/search/mis_action_kind/', methods=['GET', 'POST'])
@@ -17,5 +17,4 @@ def api_0_service_search():
 
     service_ctrl = ServiceController()
     data = service_ctrl.search_mis_action_services(args)
-    return data
-    # return PriceListRepr().represent_listed_pricelists(data)
+    return ServiceRepr().represent_search_result_mis_action_services(data)

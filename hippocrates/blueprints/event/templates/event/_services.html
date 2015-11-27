@@ -24,32 +24,32 @@
                     </span>
                 </div>
             </div>
-            <div ng-show="query && search_processed && !found_services.length" class="alert alert-danger">
+            <div ng-show="query && search_processed && !search_result.length" class="alert alert-danger">
                 Нет услуг, удовлетворяющих запросу <strong>"[[query]]"</strong>
             </div>
-            <div ng-show="found_services">
-                <table class="table table-condensed table-striped table-hover table-clickable">
+            <div ng-show="search_result">
+                <table class="table table-condensed table-striped table-hover table-bordered table-clickable">
                     <thead>
                         <tr>
                             <th>Код</th>
                             <th>Услуга</th>
-                            <th>Тип действия</th>
+                            <th>Документ</th>
                             <th class="text-right nowrap" ng-show="formstate.is_paid()">Цена (руб.)</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr ng-repeat="service in found_services" ng-click="eventServices.add_service(event, service)">
-                            <td ng-bind="service.code"></td>
-                            <td ng-bind="service.name"></td>
-                            <td ng-bind="service.at_name"></td>
-                            <td ng-bind="service.price" class="text-right" ng-show="formstate.is_paid()"></td>
+                        <tr ng-repeat="item in search_result" ng-click="addNewService(item)">
+                            <td ng-bind="item.service.service_code"></td>
+                            <td ng-bind="item.service.service_name"></td>
+                            <td ng-bind="item.action.at_name"></td>
+                            <td ng-bind="item.service.price" class="text-right" ng-show="formstate.is_paid()"></td>
                         </tr>
                     </tbody>
                 </table>
             </div>
         </ng-form>
 
-        <div id="selected_services" ng-show="event.services.length">
+        <div id="selected_services" ng-show="event.services.sg_list.length">
             <h4>Выбранные услуги</h4>
             <div style="overflow-x: auto">
                 <table class="table table-condensed">
@@ -57,12 +57,12 @@
                         <tr wm-event-service-list-header></tr>
                     </thead>
                     <tbody>
-                        <tr wm-event-service-group model="service" event="event" idx="$index"
+                        <tr wm-event-service-group service-group="sg_data" event="event" idx="$index"
                             expanded="expanded" ng-class="get_class(service)"
-                            ng-repeat-start="service in event.services">
+                            ng-repeat-start="(key, sg_data) in event.services.sg_map">
                         </tr>
-                        <tr wm-event-service-record ng-show="expanded" action="act" service="service" event="event" idx="$index"
-                            ng-repeat="act in service.actions" ng-repeat-end>
+                        <tr wm-event-service-record ng-show="expanded" service="service" event="event" idx="$index"
+                            ng-repeat="service in event.services.sg_list[sg_data.idx]" ng-repeat-end>
                         </tr>
                     </tbody>
                 </table>
@@ -84,6 +84,6 @@
     </div>
 </ng-form>
 <div>
-{#    <pre>[[event.services | json]]</pre>#}
+<pre>[[event.services | json]]</pre>
 </div>
 </div>

@@ -180,3 +180,54 @@ class PriceListRepr(object):
         return [
             self.represent_pricelist_short(pl) for pl in pl_list
         ]
+
+
+class ServiceRepr(object):
+
+    def represent_mis_action_service_search_result(self, service_data):
+        return {
+            'service': {
+                'price_list_item_id': service_data['price_list_item_id'],
+                'service_id': service_data['service_id'],
+                'service_code': service_data['service_code'],
+                'service_name': service_data['service_name'],
+                'price': service_data['price'],
+                'amount': service_data['amount'],
+            },
+            'action': {
+                'action_type_id': service_data['action_type_id'],
+                'at_code': service_data['at_code'],
+                'at_name': service_data['at_name'],
+            }
+        }
+
+    def represent_search_result_mis_action_services(self, service_list):
+        return [
+            self.represent_mis_action_service_search_result(service) for service in service_list
+        ]
+
+    def represent_service(self, service):
+        return {
+            'id': service.id,
+            'price_list_item_id': service.priceListItem_id,
+            'amount': service.amount,
+            'price': service.price_list_item.price,
+            'service_id': service.price_list_item.service_id,
+            'deleted': service.deleted
+        }
+
+    def represent_service_action(self, action):
+        return {
+            'id': action.id,
+            'action_type_id': action.actionType_id,
+        }
+
+    def represent_grouped_event_services(self, grouped_data):
+        grouped_data['sg_list'] = [
+            {
+                'service': self.represent_service(service),
+                'action': self.represent_service_action(service.action)
+            }
+            for sg in grouped_data['sg_list'] for service in sg
+        ]
+        return grouped_data

@@ -448,40 +448,57 @@ var EventMovingsCtrl = function($scope, $modal, RefBookService, ApiCalls) {
     }
 };
 
-var EventServicesCtrl = function($scope, $http) {
+var EventServicesCtrl = function($scope, AccountingService) {
     $scope.query = "";
-    $scope.found_services = null;
+    $scope.search_result = null;
     $scope.search_processed = false;
 
-    $scope.perform_search = function(val) {
+    $scope.perform_search = function(query) {
         $scope.search_processed = false;
-        if (!val) {
-            $scope.found_services = null;
+        if (!query) {
+            $scope.search_result = null;
         } else {
-            $http.get(
-                url_for_event_api_search_services, {
-                    params: {
-                        q: val,
-                        client_id: $scope.event.info.client_id,
-                        event_type_id: $scope.event.info.event_type.id,
-                        contract_id: $scope.event.info.contract ? $scope.event.info.contract.id : null,
-                        person_id: $scope.event.info.exec_person ? $scope.event.info.exec_person.id : null
-                    }
-                }
-            ).success(function (data) {
-                $scope.found_services = data.result;
-                $scope.search_processed = true;
-            });
+            var contract_id = safe_traverse($scope.event.info, ['contract', 'id']),
+                client_id = $scope.event.info.client_id;
+            AccountingService.search_mis_action_services(query, client_id, contract_id)
+                .then(function (search_result) {
+                    $scope.search_result = search_result;
+                    $scope.search_processed = true;
+                });
         }
     };
-
     $scope.query_clear = function() {
-        $scope.found_services = null;
+        $scope.search_result = null;
         $scope.query = '';
     };
 
+    $scope.addNewService = function (search_item) {
+        var key = '{0}/{1}'.format(search_item.service.service_id, search_item.action.action_type_id),
+            sg_data = $scope.event.services.sg_map[key];
+        if (sg_data !== undefined) {
+            $scope.event.services.sg_list[sg_data.idx].push(search_item)
+        } else {
+            $scope.event.services.sg_map[key] = {
+                idx: $scope.event.services.sg_list.length,
+                service_code: search_item.service.service_code,
+                service_name: search_item.service.service_name,
+                at_name: search_item.action.at_name,
+                price: search_item.service.price,
+                total_amount: 0,
+                total_sum: 0
+            };
+            $scope.event.services.sg_list.push([search_item]);
+        }
+    };
+
+
+
+
+
     $scope.get_class = function (service) {
         var result = [];
+        result.push('info');
+        return result;
         if (service.check_payment() || service.check_coord()) {
             result.push('success');
         } else if (service.check_payment('partial') || service.check_coord('partial')) {
@@ -689,7 +706,7 @@ WebMis20.controller('EventMainInfoCtrl', ['$scope', '$q', 'RefBookService', 'Eve
 WebMis20.controller('EventStationaryInfoCtrl', ['$scope', '$filter', '$modal', '$q', 'RisarApi', EventStationaryInfoCtrl]);
 WebMis20.controller('EventReceivedCtrl', ['$scope', '$modal', 'RefBookService', EventReceivedCtrl]);
 WebMis20.controller('EventMovingsCtrl', ['$scope', '$modal', 'RefBookService', 'ApiCalls', EventMovingsCtrl]);
-WebMis20.controller('EventServicesCtrl', ['$scope', '$http', EventServicesCtrl]);
+WebMis20.controller('EventServicesCtrl', ['$scope', 'AccountingService', EventServicesCtrl]);
 WebMis20.controller('EventInfoCtrl', ['$scope', 'WMEvent', '$http', 'RefBookService', '$window', '$document',
     'PrintingService', '$filter', '$modal', 'WMEventServices', 'WMEventFormState', 'MessageBox', EventInfoCtrl]);
 WebMis20.controller('StationaryEventInfoCtrl', ['$scope', '$controller', 'WMStationaryEvent', StationaryEventInfoCtrl]);

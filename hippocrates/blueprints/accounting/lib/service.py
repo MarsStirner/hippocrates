@@ -2,7 +2,9 @@
 
 import datetime
 
+from nemesis.models.accounting import Service
 from nemesis.models.client import Client
+from nemesis.models.actions import Action
 from nemesis.lib.utils import safe_int, safe_unicode
 
 from blueprints.accounting.lib.contract import BaseModelController, BaseSelecter, BaseSphinxSearchSelecter
@@ -22,9 +24,20 @@ class ServiceController(BaseModelController):
     def get_selecter(self):
         return ServiceSelecter()
 
-    # def get_pricelist(self, pricelist_id):
-    #     contract = self.session.query(PriceList).get(pricelist_id)
-    #     return contract
+    def get_new_service(self, params=None):
+        if params is None:
+            params = {}
+        service = Service()
+        price_list_item_id = safe_int(params.get('price_list_item_id'))
+        if price_list_item_id:
+            service.priceListItem_id = price_list_item_id
+        service.amount = 1
+        service.deleted = 0
+        return service
+
+    def get_service(self, service_id):
+        contract = self.session.query(Service).get(service_id)
+        return contract
 
     def search_mis_action_services(self, args):
         service_sphinx = ServiceSphinxSearchSelecter()
@@ -50,19 +63,53 @@ class ServiceController(BaseModelController):
                 matched.append(item)
         return matched
 
+    def get_grouped_services_by_event(self, event_id):
+        args = {
+            'event_id': event_id
+        }
+        service_list = self.get_listed_data(args)
+        grouped = {
+            'sg_map': {},
+            'sg_list': []
+        }
+        for service in service_list:
+            key = u'{0}/{1}'.format(service.price_list_item.service_id, service.action.actionType_id)
+            if key not in grouped['sg_map']:
+                grouped['sg_map'][key] = {
+                    'idx': len(grouped['sg_list']),
+                    'service_code': service.price_list_item.serviceCodeOW,
+                    'service_name': service.price_list_item.serviceNameOW,
+                    'at_name': service.action.actionType.name,
+                    'price': service.price_list_item.price,
+                    'total_amount': 0,
+                    'total_sum': 0
+                }
+                grouped['sg_list'].append([])
+            sg_map_item = grouped['sg_map'][key]
+            grouped['sg_list'][sg_map_item['idx']] = {
+                'service': service,
+                'action': service.action
+            }
+            sg_map_item['total_amount'] += service.amount
+            sg_map_item['total_sum'] += (service.price_list_item.price * service.amount)
+        return grouped
+
 
 class ServiceSelecter(BaseSelecter):
-    pass
 
-    # def __init__(self):
-    #     query = self.session.query(PriceList).order_by(PriceList.begDate)
-    #     super(ServiceSelecter, self).__init__(query)
-    #
-    # def apply_filter(self, **flt_args):
-    #     if 'finance_id' in flt_args:
-    #         finance_id = safe_int(flt_args['finance_id'])
-    #         self.query = self.query.filter(PriceList.finance_id == finance_id)
-    #     return self
+    def __init__(self):
+        query = self.session.query(Service)
+        super(ServiceSelecter, self).__init__(query)
+
+    def apply_filter(self, **flt_args):
+        if 'event_id' in flt_args:
+            event_id = safe_int(flt_args['event_id'])
+            self.query = self.query.join(Action).filter(
+                Action.event_id == event_id,
+                Action.deleted == 0,
+                Service.deleted == 0
+            )
+        return self
 
 
 class ServiceSphinxSearchSelecter(BaseSphinxSearchSelecter):

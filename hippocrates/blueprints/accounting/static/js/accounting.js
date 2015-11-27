@@ -56,4 +56,11 @@ WebMis20.service('AccountingService', ['WebMisApi', function (WebMisApi) {
             finance_id: finance_id
         });
     };
+    this.search_mis_action_services = function (query, client_id, contract_id) {
+        return WebMisApi.service.search_mis_action_services({
+            query: query,
+            client_id: client_id,
+            contract_id: contract_id
+        });
+    }
 }]);
