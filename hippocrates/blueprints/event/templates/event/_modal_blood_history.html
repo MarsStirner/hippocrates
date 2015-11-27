@@ -1,0 +1,36 @@
+<div class="modal-header">
+    <h3 class="modal-title">Сведения о переливаниях крови</h3>
+</div>
+<div class="modal-body">
+    <table class="table table-condensed">
+        <thead>
+        <tr>
+            <th class="col-md-2">Дата установления</th>
+            <th class="col-md-2">Тип</th>
+            <th class="col-md-6">Врач, установивший группу крови</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="model in models">
+            <td class="col-md-2" ng-if="!model.deleted"><div fs-date ng-model="model.date"></div></td>
+            <td class="col-md-2" ng-if="!model.deleted">
+                <rb-select id="type" name="type" ng-model="model.blood_type"
+                           ref-book="rbBloodType"></rb-select>
+            </td>
+            <td class="col-md-6" ng-if="!model.deleted">
+                <wm-person-select id="person" name="person"
+                                  ng-model="model.person"
+                                  placeholder="Врач">
+                </wm-person-select>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="5"><div class="pull-right"><button class="btn btn-success" ng-click="addModel()">Добавить</button></div></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-success" ng-click="$close(models)">Сохранить</button>
+    <button class="btn btn-default" ng-click="$dismiss()">Отменить</button>
+</div>
