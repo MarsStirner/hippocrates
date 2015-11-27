@@ -37,7 +37,7 @@ var EventMainInfoCtrl = function ($scope, $q, RefBookService, EventType, $filter
             return !(CurrentUser.current_role_in('admin') ||
                 !$scope.event.ro && (
                     (
-                        ($scope.formstate.is_policlinic() && (
+                        (($scope.formstate.is_policlinic() || $scope.formstate.is_stationary()) && (
                             main_user.id === safe_traverse($scope.event, ['info', 'exec_person', 'id']) ||
                             main_user.id === safe_traverse($scope.event, ['info', 'create_person_id'])
                         )) || (
