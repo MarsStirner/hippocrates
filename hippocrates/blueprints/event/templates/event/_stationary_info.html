@@ -18,7 +18,8 @@
                         <tbody>
                             <tr>
                                 <th>Группа крови и резус</th>
-                                <td  ng-bind="event.blood_history | pluck:'blood_type' | pluck:'name' | join:', '"></td>
+                                <td>
+                                    [[event.blood_history.length ? event.blood_history[0].blood_type.name: '']]</td>
                                 <td>
                                     <button type="button" class="btn btn-sm btn-default" title="Изменить"
                                             ng-click="edit_blood()"><span class="glyphicon glyphicon-pencil"></span>
