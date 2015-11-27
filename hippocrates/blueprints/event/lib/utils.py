@@ -57,6 +57,8 @@ class EventSaveController():
         # event.contract_id = event_data['contract']['id']
         event.note = event_data['note']
         event.orgStructure_id = event_data['org_structure']['id'] if event_data['org_structure'] else None
+        event.result_id = safe_traverse(event_data, 'result', 'id')
+        event.rbAcheResult_id = safe_traverse(event_data, 'ache_result', 'id')
         # if local_contract_data:
         #     lcon = create_or_update_local_contract(event, local_contract_data)
         #     event.localContract = lcon
