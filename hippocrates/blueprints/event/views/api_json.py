@@ -24,6 +24,7 @@ from nemesis.lib.event.event_builder import PoliclinicEventBuilder, StationaryEv
 from blueprints.event.app import module
 from blueprints.event.lib.utils import (EventSaveException, create_services, save_event, received_save,
                                         save_executives, EventSaveController, ReceivedController, MovingController)
+from blueprints.patients.lib.utils import add_or_update_blood_type
 from nemesis.lib.sphinx_search import SearchEventService, SearchEvent
 from nemesis.lib.data import get_planned_end_datetime, int_get_atl_dict_all, _get_stationary_location_query
 from nemesis.lib.agesex import recordAcceptableEx
@@ -185,6 +186,20 @@ def api_hosp_beds_get():
         hb.occupied = True if hb in occupied_hb else False
         hb.chosen = True if (hb_id and hb.id == hb_id) else False
     return map(vis.make_hosp_bed, all_hb)
+
+
+@module.route('api/blood_history_save.json', methods=['POST'])
+@api_method
+def api_blood_history_save():
+    vis = StationaryEventVisualizer()
+    data = request.json
+    blood_type_info = data.get('blood_type_info')
+    client_id = data.get('client_id')
+    client = Client.query.get(client_id)
+    bt = add_or_update_blood_type(client, blood_type_info)
+    db.session.add(bt)
+    db.session.commit()
+    return vis.make_blood_history(bt)
 
 
 def services_save(event_id, services_data, contract_id):

@@ -262,7 +262,7 @@ var EventMainInfoCtrl = function ($scope, $q, RefBookService, EventType, $filter
             false;
     });
 };
-var EventStationaryInfoCtrl = function($scope, $filter, $modal, $q, RisarApi) {
+var EventStationaryInfoCtrl = function($scope, $filter, $modal, $q, RisarApi, ApiCalls) {
     $scope.format_admission_date = function (date) {
         return date ? $filter('asDateTime')(date) : '&nbsp;';
     };
@@ -290,6 +290,23 @@ var EventStationaryInfoCtrl = function($scope, $filter, $modal, $q, RisarApi) {
                 name: '',
                 power: null,
                 note: '',
+                deleted: 0
+            };
+            models.push(model);
+        };
+        $scope.remove = function (p) {
+            p.deleted = 1;
+        };
+        $scope.restore = function (p) {
+            p.deleted = 0;
+        };
+    };
+
+    var BloodHistoryCtrl = function ($scope, $modalInstance, models) {
+        $scope.addModel = function () {
+            var model = {
+                blood_type: null,
+                date: null,
                 deleted: 0
             };
             models.push(model);
@@ -349,6 +366,40 @@ var EventStationaryInfoCtrl = function($scope, $filter, $modal, $q, RisarApi) {
             resolve: {
                 models: function () {return list},
                 type: function() {return type}
+            },
+            size: 'lg'
+        })
+    };
+    $scope.edit_blood = function () {
+        var models = _.map($scope.event.blood_history, function (source) {
+            return angular.extend({}, source);
+        });
+        open_edit_blood(models).result.then(function (models) {
+            $q.all(
+                _.filter(
+                    _.map(models, function (model) {
+                        var data = {client_id: $scope.$parent.event.info.client_id,
+                                    blood_type_info: model}
+                        return ApiCalls.wrapper('POST', url_blood_history_save, {}, data)
+                    }),
+                    function (deferred) {
+                        return deferred !== undefined
+                    }
+                )
+            ).then(function (results) {
+                $scope.event.blood_history = results;
+            });
+        })
+    }
+    var open_edit_blood = function (list) {
+        var scope = $scope.$new();
+        scope.models = list;
+        return $modal.open({
+            templateUrl: 'modal-blood-history.html',
+            controller: BloodHistoryCtrl,
+            scope: scope,
+            resolve: {
+                models: function () {return list}
             },
             size: 'lg'
         })
@@ -986,7 +1037,7 @@ var PoliclinicEventInfoCtrl = function ($scope, $controller, WMPoliclinicEvent) 
 WebMis20.controller('EventDiagnosesCtrl', ['$scope', 'RefBookService', '$http', EventDiagnosesCtrl]);
 WebMis20.controller('EventMainInfoCtrl', ['$scope', '$q', 'RefBookService', 'EventType', '$filter', 'MessageBox',
     'CurrentUser', EventMainInfoCtrl]);
-WebMis20.controller('EventStationaryInfoCtrl', ['$scope', '$filter', '$modal', '$q', 'RisarApi', EventStationaryInfoCtrl]);
+WebMis20.controller('EventStationaryInfoCtrl', ['$scope', '$filter', '$modal', '$q', 'RisarApi', 'ApiCalls', EventStationaryInfoCtrl]);
 WebMis20.controller('EventPaymentCtrl', ['$scope', 'RefBookService', '$http', '$modal', 'MessageBox',
     EventPaymentCtrl]);
 WebMis20.controller('EventReceivedCtrl', ['$scope', '$modal', 'RefBookService', EventReceivedCtrl]);
