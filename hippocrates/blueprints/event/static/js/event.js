@@ -448,10 +448,68 @@ var EventMovingsCtrl = function($scope, $modal, RefBookService, ApiCalls) {
     }
 };
 
-var EventServicesCtrl = function($scope, AccountingService) {
+var EventServicesCtrl = function($scope, AccountingService, InvoiceModalService) {
     $scope.query = "";
     $scope.search_result = null;
     $scope.search_processed = false;
+    $scope.editing = false;
+    $scope.editingInvoice = false;
+    $scope.newInvoiceServiceList = [];
+
+    $scope.inEditMode = function () {
+        return $scope.editing;
+    };
+    $scope.startEditing = function () {
+        $scope.oldServices = _.deepCopy($scope.event.services);
+        $scope.editing = true;
+    };
+    $scope.cancelEditing = function () {
+        $scope.query_clear();
+        $scope.editing = false;
+        $scope.event.services = $scope.oldServices;
+    };
+    $scope.finishEditing = function () {
+        AccountingService.save_service_list($scope.event.event_id, $scope.event.services.grouped)
+            .then(function (service_data) {
+                $scope.event.services = service_data;
+                $scope.query_clear();
+                $scope.editing = false;
+            });
+    };
+    $scope.inInvoiceEditMode = function () {
+        return $scope.editingInvoice;
+    };
+    $scope.startEditingInvoice = function () {
+        $scope.editingInvoice = true;
+    };
+    $scope.cancelEditingInvoice = function () {
+        $scope.newInvoiceServiceList.splice(0, $scope.newInvoiceServiceList.length);
+        $scope.editingInvoice = false;
+    };
+    $scope.finishEditingInvoice = function () {
+        var contract_id = safe_traverse($scope.event.info, ['contract', 'id']);
+        InvoiceModalService.openNew($scope.newInvoiceServiceList, contract_id)
+            .then(function (result) {
+                $scope.event.invoices.push(result.invoice);
+                $scope.cancelEditingInvoice();
+            });
+    };
+    $scope.openInvoice = function (idx) {
+        var invoice = _.deepCopy($scope.event.invoices[idx]);
+        InvoiceModalService.openEdit(invoice)
+            .then(function (result) {
+                var status = result.status;
+                if (status === 'ok') {
+                    $scope.event.invoices.splice(idx, 1, result.invoice);
+                } else if (status === 'del') {
+                    $scope.event.invoices.splice(idx, 1);
+                    // TODO: refresh service list?
+                }
+            });
+    };
+    $scope.search_disabled = function () {
+        return $scope.event.ro || !$scope.inEditMode();
+    };
 
     $scope.perform_search = function(query) {
         $scope.search_processed = false;
@@ -472,24 +530,41 @@ var EventServicesCtrl = function($scope, AccountingService) {
         $scope.query = '';
     };
 
-    $scope.addNewService = function (search_item) {
-        var key = '{0}/{1}'.format(search_item.service.service_id, search_item.action.action_type_id),
-            sg_data = $scope.event.services.sg_map[key];
-        if (sg_data !== undefined) {
-            $scope.event.services.sg_list[sg_data.idx].push(search_item)
-        } else {
-            $scope.event.services.sg_map[key] = {
-                idx: $scope.event.services.sg_list.length,
-                service_code: search_item.service.service_code,
-                service_name: search_item.service.service_name,
-                at_name: search_item.action.at_name,
-                price: search_item.service.price,
-                total_amount: 0,
-                total_sum: 0
-            };
-            $scope.event.services.sg_list.push([search_item]);
-        }
+    $scope.refreshSGData = function () {
+        angular.forEach($scope.event.services.grouped, function (sg) {
+            var total_amount = 0,
+                total_sum = 0;
+            angular.forEach(sg.sg_list, function (service) {
+                total_amount += service.service.amount;
+                total_sum += service.service.sum;
+            });
+            sg.sg_data.total_amount = total_amount;
+            sg.sg_data.total_sum = total_sum;
+        })
     };
+    $scope.addNewService = function (search_item) {
+        search_item = _.deepCopy(search_item);
+        var key = '{0}/{1}'.format(search_item.service.service_id, search_item.action.action_type_id),
+            idx = $scope.event.services.sg_map[key];
+        if (idx === undefined) {
+            $scope.event.services.sg_map[key] = $scope.event.services.grouped.length;
+            idx = $scope.event.services.sg_map[key];
+            $scope.event.services.grouped[idx] = {
+                sg_data: {
+                    service_code: search_item.service.service_code,
+                    service_name: search_item.service.service_name,
+                    at_name: search_item.action.at_name,
+                    price: search_item.service.price,
+                    total_amount: 0,
+                    total_sum: 0
+                },
+                sg_list: []
+            };
+        }
+        $scope.event.services.grouped[idx].sg_list.push(search_item);
+        $scope.refreshSGData();
+    };
+
 
 
 
@@ -525,10 +600,6 @@ var EventServicesCtrl = function($scope, AccountingService) {
     $scope.$on('eventFormStateChanged', function() {
         $scope.query_clear();
     });
-
-    $scope.search_disabled = function () {
-        return $scope.event.ro;
-    };
 };
 
 var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $document, PrintingService,
@@ -706,7 +777,8 @@ WebMis20.controller('EventMainInfoCtrl', ['$scope', '$q', 'RefBookService', 'Eve
 WebMis20.controller('EventStationaryInfoCtrl', ['$scope', '$filter', '$modal', '$q', 'RisarApi', EventStationaryInfoCtrl]);
 WebMis20.controller('EventReceivedCtrl', ['$scope', '$modal', 'RefBookService', EventReceivedCtrl]);
 WebMis20.controller('EventMovingsCtrl', ['$scope', '$modal', 'RefBookService', 'ApiCalls', EventMovingsCtrl]);
-WebMis20.controller('EventServicesCtrl', ['$scope', 'AccountingService', EventServicesCtrl]);
+WebMis20.controller('EventServicesCtrl', ['$scope', 'AccountingService',
+    'InvoiceModalService', EventServicesCtrl]);
 WebMis20.controller('EventInfoCtrl', ['$scope', 'WMEvent', '$http', 'RefBookService', '$window', '$document',
     'PrintingService', '$filter', '$modal', 'WMEventServices', 'WMEventFormState', 'MessageBox', EventInfoCtrl]);
 WebMis20.controller('StationaryEventInfoCtrl', ['$scope', '$controller', 'WMStationaryEvent', StationaryEventInfoCtrl]);

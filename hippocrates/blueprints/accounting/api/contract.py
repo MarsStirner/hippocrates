@@ -42,11 +42,11 @@ def api_0_contract_save(contract_id=None):
     elif contract_id:
         contract = con_ctrl.get_contract(contract_id)
         if not contract:
-            raise ApiException(404, u'Не найден Contract с id = '.format(contract))
+            raise ApiException(404, u'Не найден Contract с id = '.format(contract_id))
         contract = con_ctrl.update_contract(contract, json_data)
         con_ctrl.store(contract)
     else:
-        raise ApiException(404, u'`appointment_id` required')
+        raise ApiException(404, u'`contract_id` required')
     return ContractRepr().represent_contract_full(contract)
 
 

@@ -2,7 +2,7 @@
 
 WebMis20.run(['$templateCache', function ($templateCache) {
     $templateCache.put(
-        '/WebMis20/modal/contract_edit.html',
+        '/WebMis20/modal/accounting/contract_edit.html',
         '\
 <div class="modal-header" xmlns="http://www.w3.org/1999/html">\
     <button type="button" class="close" ng-click="$dismiss(\'cancel\')">&times;</button>\

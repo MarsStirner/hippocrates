@@ -4,7 +4,7 @@ WebMis20.service('ContractModalService', ['$modal', function ($modal) {
     return {
         openEdit: function (contract) {
             var instance = $modal.open({
-                templateUrl: '/WebMis20/modal/contract_edit.html',
+                templateUrl: '/WebMis20/modal/accounting/contract_edit.html',
                 controller: ContractModalCtrl,
                 backdrop: 'static',
                 size: 'lg',
@@ -12,6 +12,46 @@ WebMis20.service('ContractModalService', ['$modal', function ($modal) {
                 resolve: {
                     contract: function () {
                         return contract
+                    }
+                }
+            });
+            return instance.result;
+        }
+    }
+}]);
+
+WebMis20.service('InvoiceModalService', ['$modal', 'AccountingService', function ($modal, AccountingService) {
+    return {
+        openNew: function (service_list, contract_id) {
+            return AccountingService.get_invoice(undefined, {
+                service_list: service_list,
+                contract_id: contract_id
+            }).then(function (newInvoice) {
+                var instance = $modal.open({
+                    templateUrl: '/WebMis20/modal/accounting/invoice.html',
+                    controller: InvoiceModalCtrl,
+                    backdrop: 'static',
+                    size: 'lg',
+                    windowClass: 'modal-scrollable',
+                    resolve: {
+                        invoice: function () {
+                            return newInvoice
+                        }
+                    }
+                });
+                return instance.result;
+            });
+        },
+        openEdit: function (invoice) {
+            var instance = $modal.open({
+                templateUrl: '/WebMis20/modal/accounting/invoice.html',
+                controller: InvoiceModalCtrl,
+                backdrop: 'static',
+                size: 'lg',
+                windowClass: 'modal-scrollable',
+                resolve: {
+                    invoice: function () {
+                        return invoice
                     }
                 }
             });
@@ -62,5 +102,22 @@ WebMis20.service('AccountingService', ['WebMisApi', function (WebMisApi) {
             client_id: client_id,
             contract_id: contract_id
         });
-    }
+    };
+    this.save_service_list = function (event_id, grouped_service_list) {
+        return WebMisApi.service.save_service_list({
+            event_id: event_id,
+            grouped: grouped_service_list
+        });
+    };
+    this.get_invoice = function (invoice_id, args) {
+        return WebMisApi.invoice.get(invoice_id, args);
+    };
+    this.save_invoice = function (invoice) {
+        var invoice_id = invoice.id;
+        return WebMisApi.invoice.save(invoice_id, invoice);
+    };
+    this.delete_invoice = function (invoice) {
+        var invoice_id = invoice.id;
+        return WebMisApi.invoice.del(invoice_id);
+    };
 }]);

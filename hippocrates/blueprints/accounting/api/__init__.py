@@ -5,3 +5,4 @@ from contragent import *
 from contingent import *
 from pricelist import *
 from service import *
+from invoice import *

@@ -54,7 +54,7 @@ class EventSaveController():
         if event.is_stationary:
             event.isPrimaryCode = event_data['is_primary']['id']
             event.order = event_data['order']['id']
-        # event.contract_id = event_data['contract']['id']
+        event.contract_id = event_data['contract']['id']
         event.note = event_data['note']
         event.orgStructure_id = event_data['org_structure']['id'] if event_data['org_structure'] else None
         # if local_contract_data:

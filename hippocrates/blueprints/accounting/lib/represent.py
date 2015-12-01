@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from blueprints.accounting.lib.utils import get_contragent_type
 from nemesis.models.enums import Gender, ContragentType
-from nemesis.lib.utils import format_date
+from nemesis.lib.utils import format_date, safe_double, safe_decimal
+from blueprints.accounting.lib.utils import get_contragent_type
+from blueprints.accounting.lib.service import ServiceController
 
 
 class ContractRepr(object):
@@ -50,9 +51,10 @@ class ContractRepr(object):
 
     def make_full_description(self, contract):
         return u'''\
-№{0} от {1}. {2}. с {3} по {4}</span>
-'''.format(contract.number, format_date(contract.date), contract.resolution or '', format_date(contract.begDate),
-           format_date(contract.endDate))
+№{0} от {1}. {2}. с {3} по {4}'''.format(
+            contract.number, format_date(contract.date), contract.resolution or '', format_date(contract.begDate),
+            format_date(contract.endDate)
+        )
 
     def make_short_description(self, contract):
         return u'№{0} от {1}. {2}'.format(contract.number, format_date(contract.date), contract.resolution or '')
@@ -184,6 +186,9 @@ class PriceListRepr(object):
 
 class ServiceRepr(object):
 
+    def __init__(self):
+        self.service_ctrl = ServiceController()
+
     def represent_mis_action_service_search_result(self, service_data):
         return {
             'service': {
@@ -193,6 +198,7 @@ class ServiceRepr(object):
                 'service_name': service_data['service_name'],
                 'price': service_data['price'],
                 'amount': service_data['amount'],
+                'sum': service_data['price'] * service_data['amount'],
             },
             'action': {
                 'action_type_id': service_data['action_type_id'],
@@ -213,21 +219,87 @@ class ServiceRepr(object):
             'amount': service.amount,
             'price': service.price_list_item.price,
             'service_id': service.price_list_item.service_id,
-            'deleted': service.deleted
+            'deleted': service.deleted,
+            'sum': safe_double(service.price_list_item.price * safe_decimal(service.amount)),
+            'service_code': service.price_list_item.serviceCodeOW,
+            'service_name': service.price_list_item.serviceNameOW,
+            'in_invoice': self.service_ctrl.check_service_in_invoice(service)
         }
 
     def represent_service_action(self, action):
         return {
             'id': action.id,
             'action_type_id': action.actionType_id,
+            'at_code': action.actionType.code,
+            'at_name': action.actionType.name,
         }
 
-    def represent_grouped_event_services(self, grouped_data):
-        grouped_data['sg_list'] = [
-            {
-                'service': self.represent_service(service),
-                'action': self.represent_service_action(service.action)
+    def represent_grouped_event_services(self, data):
+        for service_group in data['grouped']:
+            for idx, service in enumerate(service_group['sg_list']):
+                service_group['sg_list'][idx] = {
+                    'service': self.represent_service(service['service']),
+                    'action': self.represent_service_action(service['action'])
+                }
+        return data
+
+
+class InvoiceRepr(object):
+
+    def __init__(self):
+        self.service_repr = ServiceRepr()
+
+    def represent_invoice_full(self, invoice):
+        if not invoice:
+            return None
+        data = self.represent_invoice(invoice)
+        data.update({
+            'total_sum': invoice.total_sum,
+            'item_list': [
+                self.represent_invoice_item(item)
+                for item in invoice.item_list
+            ],
+            'description': {
+                'full': self.make_full_description(invoice),
             }
-            for sg in grouped_data['sg_list'] for service in sg
+        })
+        return data
+
+    def represent_invoice(self, invoice):
+        return {
+            'id': invoice.id,
+            'contract_id': invoice.contract_id,
+            'set_date': invoice.setDate,
+            'settle_date': invoice.settleDate,
+            'number': invoice.number,
+            'deed_number': invoice.deedNumber,
+            'deleted': invoice.deleted,
+            'note': invoice.note,
+            'draft': invoice.draft,
+        }
+
+    def make_full_description(self, invoice):
+        return u'''\
+№{0} от {1}.{2} Позиций: {3} шт.'''.format(
+            invoice.number or '',
+            format_date(invoice.setDate),
+            u' Дата погашения {0}.'.format(format_date(invoice.settleDate)) if invoice.settleDate else u'',
+            len(invoice.item_list)
+        )
+
+    def represent_invoice_item(self, item):
+        return {
+            'id': item.id,
+            'invoice_id': item.invoice_id,
+            'service_id': item.concreteService_id,
+            'service': self.service_repr.represent_service(item.service),
+            'price': item.price,
+            'amount': item.amount,
+            'sum': item.sum,
+            'deleted': item.deleted
+        }
+
+    def represent_listed_invoices(self, invoice_list):
+        return [
+            self.represent_invoice_full(invoice) for invoice in invoice_list
         ]
-        return grouped_data
