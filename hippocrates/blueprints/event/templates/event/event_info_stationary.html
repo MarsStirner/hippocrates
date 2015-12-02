@@ -86,13 +86,58 @@
                             <ng-form name="eventLabActionsForm" toc-element="Лаб.исследования">
                                 <div class="box box-info">
                                     <div class="box-header with-border">
-                                        <h3 class="box-title">Лаб.исследования</h3>
+                                                    <h3 class="box-title">Лаб.исследования</h3>
                                         <div class="box-tools pull-right">
                                             <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
                                         </div>
                                     </div>
                                     <div class="box-body">
-                                        <wm-action-list event="event" action-type-group="lab"></wm-action-list>
+                                        <div class="nav-tabs-custom">
+                                            <ul class="nav nav-tabs pull-left ui-sortable-handle">
+                                                <li class="active"><a href="#lab_action_list" data-toggle="tab"><b>Лаб.исследования</b></a></li>
+                                                <li><a href="#lab_dynamics" data-toggle="tab" ng-click="tab_dynamics()"><b>Динамика</b></a></li>
+                                            </ul>
+                                            <div class="tab-content no-padding">
+                                                <div class="chart tab-pane active" id="lab_action_list" style="position: relative;">
+                                                    <wm-action-list event="event" action-type-group="lab"></wm-action-list>
+                                                </div>
+                                                <div class="chart tab-pane" id="lab_dynamics" style="position: relative;">
+                                                    <div class="row">
+                                                        <div class="col-md-3">
+                                                            <label for="from_date" class="control-label">с</label>
+                                                            <wm-date id="from_date" name="from_date" ng-model="date_range[0]">
+                                                            </wm-date>
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <label for="to_date" class="control-label">по</label>
+                                                            <wm-date id="to_date" name="to_date" ng-model="date_range[1]"
+                                                                     max-date="currentDate">
+                                                            </wm-date>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-md-12" style="overflow-x:scroll;">
+                                                            <table class="table table-bordered">
+                                                                <thead>
+                                                                    <th></th>
+                                                                    <th ng-repeat="date in date_list">
+                                                                        [[ date ]]
+                                                                    </th>
+                                                                </thead>
+                                                                <tbody>
+                                                                    <tr ng-repeat="item in dynamics">
+                                                                        <td>[[item.test_name]]</td>
+                                                                        <td ng-repeat="date in date_list">
+                                                                            [[ item.values[date]? item.values[date] : '-' ]]
+                                                                        </td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                              </ng-form>

@@ -15,7 +15,7 @@ from nemesis.models.enums import EventPrimary, EventOrder
 from nemesis.models.event import (Event, EventType, Diagnosis, Diagnostic, Visit, Event_Persons)
 from nemesis.models.exists import Person, rbRequestType, rbResult, OrgStructure, MKB
 from nemesis.systemwide import db
-from nemesis.lib.utils import (jsonify, safe_traverse, safe_datetime, get_utc_datetime_with_tz, safe_int)
+from nemesis.lib.utils import (jsonify, safe_traverse, safe_date, safe_datetime, get_utc_datetime_with_tz, safe_int, format_date)
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.models.schedule import ScheduleClientTicket
 from nemesis.models.exists import (Organisation, )
@@ -167,6 +167,33 @@ def api_event_moving_close():
         raise ApiException(404, u'Не найдено движение с id = {}'.format(moving_id))
     moving = mov_ctrl.close_moving(moving)
     return vis.make_moving_info(moving)
+
+
+@module.route('api/event_lab-res-dynamics.json', methods=['GET'])
+@api_method
+def api_event_lab_res_dynamics():
+    event_id = request.args.get('event_id')
+    from_date = safe_date(request.args.get('from_date'))
+    to_date = safe_date(request.args.get('to_date'))
+    properties = ActionProperty.query.join(ActionPropertyType, Action, ActionType).filter(ActionProperty.deleted == 0,
+                                                                                          Action.deleted == 0,
+                                                                                          Action.begDate >= from_date,
+                                                                                          Action.begDate <= to_date,
+                                                                                          Action.event_id == event_id,
+                                                                                          ActionType.mnem == 'LAB',
+                                                                                          ActionPropertyType.test_id.isnot(None)).\
+        order_by(desc(Action.begDate))
+
+    dynamics = {}
+    for property in properties:
+        test_id = property.type.test_id
+        if property.value:
+            if test_id in dynamics:
+                dynamics[test_id]['values'][format_date(property.action.begDate)] = property.value
+            else:
+                dynamics[test_id] = {'test_name': property.type.test.name,
+                                     'values': {format_date(property.action.begDate): property.value}}
+    return dynamics
 
 
 @module.route('api/event_hosp_beds_get.json', methods=['GET'])

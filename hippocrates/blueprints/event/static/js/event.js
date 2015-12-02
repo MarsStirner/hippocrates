@@ -1018,10 +1018,44 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
 
 
 };
-var StationaryEventInfoCtrl = function ($scope, $controller, WMStationaryEvent) {
+var StationaryEventInfoCtrl = function ($scope, $controller, $modal, $http, WMStationaryEvent) {
     $controller('EventInfoCtrl', {$scope: $scope});
     var event = $scope.event = new WMStationaryEvent($scope.event_id, $scope.client_id, $scope.ticket_id);
     $scope.create_mode = $scope.event.is_new();
+    $scope.date_range = [null, null];
+    $scope.currentDate = new Date();
+    $scope.dynamics = [];
+    $scope.tab_dynamics = function(){
+        $scope.date_range[1] = $scope.date_range[1] ? $scope.date_range[1] : new Date();
+        $scope.date_range[0] = $scope.date_range[0] ? $scope.date_range[0] : moment().subtract(5, 'days').toDate();
+
+    }
+    $scope.get_dynamics_data = function() {
+        var num_days = moment($scope.date_range[1]).diff(moment($scope.date_range[0]), 'days');
+        $scope.date_list = [];
+        var d = moment($scope.date_range[0]);
+        for(var i = 0; i< num_days+1; i++){
+            $scope.date_list.push(d.format('DD.MM.YYYY'));
+            d.add(1, 'days');
+        }
+        $http.get(
+            url_lab_res_dynamics, {
+                params: {
+                    event_id: $scope.event.info.id,
+                    from_date: $scope.date_range[0],
+                    to_date: $scope.date_range[1]
+                }
+            }
+        ).success(function (data) {
+            $scope.dynamics = data.result;
+        })
+    };
+    $scope.$watchCollection('date_range', function (new_val, old_val) {
+                if (angular.equals(new_val, old_val)) return;
+                if(new_val[0] && new_val[1]){
+                    $scope.get_dynamics_data();
+                }
+            });
     $scope.initialize();
 };
 var PoliclinicEventInfoCtrl = function ($scope, $controller, WMPoliclinicEvent) {
@@ -1045,5 +1079,5 @@ WebMis20.controller('EventMovingsCtrl', ['$scope', '$modal', 'RefBookService', '
 WebMis20.controller('EventServicesCtrl', ['$scope', '$http', EventServicesCtrl]);
 WebMis20.controller('EventInfoCtrl', ['$scope', 'WMEvent', '$http', 'RefBookService', '$window', '$document',
     'PrintingService', '$filter', '$modal', 'WMEventServices', 'WMEventFormState', 'MessageBox', EventInfoCtrl]);
-WebMis20.controller('StationaryEventInfoCtrl', ['$scope', '$controller', 'WMStationaryEvent', StationaryEventInfoCtrl]);
+WebMis20.controller('StationaryEventInfoCtrl', ['$scope', '$controller', '$modal', '$http', 'WMStationaryEvent', StationaryEventInfoCtrl]);
 WebMis20.controller('PoliclinicEventInfoCtrl', ['$scope', '$controller', 'WMPoliclinicEvent', PoliclinicEventInfoCtrl]);
