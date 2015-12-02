@@ -114,12 +114,6 @@ var EventMeasureTableViewCtrl = function ($scope, RisarApi, TimeoutCallback) {
     $scope.onPageChanged = function () {
         refreshMeasureList(true);
     };
-    $scope.getStatusColorStyle = function (status) {
-        var style = {};
-        if (status.code === 'assigned') style['background-color'] = '#3C8DBC';
-        else if (status.code  === 'upon_med_indications') style['background-color'] = '#9600CD';
-        return style;
-    };
 
     var registered_watchers = [];
     $scope.$on('viewModeChanged', function (event, data) {
@@ -143,7 +137,8 @@ var EventMeasureCalendarViewCtrl = function ($scope, $timeout, RisarApi, Timeout
         return {
             title: data.scheme_measure.measure.name,
             start: data.beg_datetime,
-            end: data.end_datetime
+            end: data.end_datetime,
+            className: 'measure-status-' + data.status.code
         }
     }
     var refreshMeasureCalendar = function (start, end) {

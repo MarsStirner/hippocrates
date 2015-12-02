@@ -96,7 +96,7 @@ var EventSearchCtrl = function ($scope, $q, RisarApi, TimeoutCallback, RefBookSe
             $scope.query.person = $scope.doctors[0];
         });
     };
-    $scope.risks_rb = RefBookService.get('PrenatalRiskRate');
+    $scope.risks_rb = RefBookService.get('PerinatalRiskRate');
 
     var areas_promise = $scope.refresh_areas();
 

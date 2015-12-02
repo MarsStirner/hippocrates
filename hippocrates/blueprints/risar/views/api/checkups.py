@@ -7,9 +7,10 @@ from nemesis.models.event import Event
 from nemesis.systemwide import db
 from blueprints.risar.app import module
 from blueprints.risar.lib.card_attrs import reevaluate_card_attrs
-from blueprints.risar.lib.represent import represent_checkup, represent_checkups, get_pregnancy_week
+from blueprints.risar.lib.represent import represent_checkup, represent_checkups
 from blueprints.risar.lib.utils import get_action_by_id, close_open_checkups
-from blueprints.risar.lib.expert.protocols import EventMeasureGenerator
+from blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
+from blueprints.risar.lib.expert.em_generation import EventMeasureGenerator
 
 
 @module.route('/api/0/checkup/', methods=['POST'])
@@ -40,8 +41,8 @@ def api_0_checkup(event_id):
         reevaluate_card_attrs(event)
         db.session.commit()
 
-        measure_mng = EventMeasureGenerator.create_for_risar(action.id)
-        measure_mng.generate_measures()
+        # measure_mng = EventMeasureGenerator(action)
+        # measure_mng.generate_measures()
     return represent_checkup(action)
 
 

@@ -9,7 +9,7 @@ from nemesis.app import app
 from nemesis.lib.apiutils import api_method
 from nemesis.lib.utils import safe_int
 from nemesis.lib.vesta import Vesta
-from nemesis.models.enums import PrenatalRiskRate
+from nemesis.models.enums import PerinatalRiskRate
 from nemesis.models.exists import Organisation, Person
 from blueprints.risar.app import module
 
@@ -124,8 +124,8 @@ def api_0_event_search():
                 'exec_date': datetime.date.fromtimestamp(row['exec_date']) if row['exec_date'] else None,
                 'external_id': row['external_id'],
                 'exec_person_name': row['person_name'],
-                'risk': PrenatalRiskRate(row['risk']),
-                'mdate': datetime.date.fromtimestamp(row['card_modify_date']) if row['card_modify_date'] else None,
+                'risk': PerinatalRiskRate(row['risk']),
+                'mdate': datetime.date.fromtimestamp(row['card_modify_date']) if 'card_modify_date' in row else None,
                 'pddate': datetime.date.fromtimestamp(row['bdate']) if row['bdate'] else None,
                 'week':((
                     (min(today, datetime.date.fromtimestamp(row['bdate'])) if row['bdate'] else today) -

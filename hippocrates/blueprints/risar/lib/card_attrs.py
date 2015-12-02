@@ -267,7 +267,11 @@ def reevaluate_dates(event, action=None):
                 # вычисленная дата начала беременности
                 new_start_date = (inspection.begDate.date() + datetime.timedelta(weeks=-p_week, days=1))
                 # Не надо трогать дату начала беременности, если она не слишком отличается от предыдущей вычисленной
-                start_date = new_start_date if abs((new_start_date - prev_start_date).days) > 3 else prev_start_date
+                start_date = (
+                    new_start_date
+                    if (prev_start_date is None or abs((new_start_date - prev_start_date).days) > 3)
+                    else prev_start_date
+                )
                 break
 
     if not start_date:
@@ -305,7 +309,7 @@ def reevaluate_pregnacy_pathology(event, action=None):
         action = get_card_attrs_action(event)
 
     event_mkb_codes = set()
-    for mkb in get_event_diag_mkbs(event, checkup_flat_codes):
+    for mkb in get_event_diag_mkbs(event, at_flatcodes=checkup_flat_codes):
         event_mkb_codes.add(mkb.DiagID)
 
     event_pathologies = set()

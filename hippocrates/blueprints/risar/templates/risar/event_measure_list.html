@@ -103,7 +103,9 @@
                             <tr ng-repeat="em in measure_list">
                                 <td><span measure-type-icon="em.scheme_measure.measure.measure_type" style="font-size: x-large"></span></td>
                                 <td>[[ em.scheme_measure.measure.name ]]</td>
-                                <td><span class="label" ng-style="getStatusColorStyle(em.status)">[[ em.status.name ]]</span></td>
+                                <td>
+                                    <event-measure-status status="em.status"></event-measure-status>
+                                </td>
                                 <td>[[ em.beg_datetime | asDate ]]</td>
                                 <td>[[ em.end_datetime | asDate ]]</td>
                                 <td><a ng-href="{{ url_for('.html_inspection_edit') +
@@ -144,4 +146,5 @@
 {% block modules_js %}
     {{ super() }}
     <script src="{{ url_for('.static', filename='js/event_measure_list.js', v=app_version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/event_measure/event_measure_info.js', v=app_version) }}"></script>
 {% endblock %}

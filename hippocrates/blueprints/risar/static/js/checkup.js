@@ -50,13 +50,6 @@ var CheckupCtrl = function ($scope, RisarApi, RefBookService, PrintingService, P
         }
     };
 
-    $scope.generateMeasures = function () {
-        RisarApi.measure.regenerate($scope.checkup.id).
-            then(function (measures) {
-                $scope.checkup.measures = measures;
-            });
-    };
-
     $scope.init = function () {
         var hash = document.location.hash;
         if (hash) {
@@ -172,7 +165,8 @@ var CheckupSecondEditCtrl = function ($scope, $controller, $window, $location, $
     $scope.init();
 };
 
-WebMis20.controller('CheckupCtrl', ['$scope', 'RisarApi', 'RefBookService', 'PrintingService', 'PrintingDialog', CheckupCtrl]);
+WebMis20.controller('CheckupCtrl', ['$scope', 'RisarApi', 'RefBookService', 'PrintingService', 'PrintingDialog',
+    CheckupCtrl]);
 WebMis20.controller('CheckupFirstEditCtrl', ['$scope', '$controller', '$window', '$location', '$document', 'RisarApi',
     'Config', CheckupFirstEditCtrl]);
 WebMis20.controller('CheckupSecondEditCtrl', ['$scope', '$controller', '$window', '$location', '$document', 'RisarApi',

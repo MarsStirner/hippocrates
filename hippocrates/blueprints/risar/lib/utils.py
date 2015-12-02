@@ -3,15 +3,16 @@
 import datetime
 from sqlalchemy.orm import lazyload
 
-from nemesis.lib.data import create_action
-from nemesis.lib.utils import safe_traverse_attrs, safe_dict
+from nemesis.lib.data import create_action, update_action
+from nemesis.lib.utils import safe_traverse_attrs, safe_dict, safe_traverse, safe_datetime
 from nemesis.models.actions import Action, ActionType, ActionProperty, ActionPropertyType
 from nemesis.models.event import Event, Diagnostic, Diagnosis
 from nemesis.models.risar import rbPregnancyPathology, rbPerinatalRiskRate
 from nemesis.models.enums import ActionStatus
 from nemesis.models.exists import MKB
+from nemesis.models.person import Person
 from nemesis.systemwide import cache, db
-from blueprints.risar.risar_config import checkup_flat_codes
+from blueprints.risar.risar_config import checkup_flat_codes, first_inspection_code, inspection_preg_week_code
 
 
 risk_rates_diagID = {
@@ -209,7 +210,7 @@ def get_last_checkup_date(event_id):
     return query[0] if query else None
 
 
-def get_event_diag_mkbs(event, at_flatcodes=None):
+def get_event_diag_mkbs(event, **kwargs):
     query = db.session.query(Event).join(
         Diagnostic, Diagnosis
     ).join(
@@ -219,14 +220,27 @@ def get_event_diag_mkbs(event, at_flatcodes=None):
         Diagnostic.deleted == 0,
         Diagnosis.deleted == 0
     )
-    if isinstance(at_flatcodes, (list, tuple)):
-        query = query.join(
-            (Action, Diagnostic.action_id == Action.id),
-            ActionType
-        ).filter(
-            ActionType.flatCode.in_(at_flatcodes),
-            Action.deleted == 0
-        )
+    if 'at_flatcodes' in kwargs:
+        at_flatcodes = kwargs['at_flatcodes']
+        if isinstance(at_flatcodes, (list, tuple)):
+            query = query.join(
+                (Action, Diagnostic.action_id == Action.id),
+                ActionType
+            ).filter(
+                ActionType.flatCode.in_(at_flatcodes),
+                Action.deleted == 0
+            )
+    if 'action_id' in kwargs:
+        action_id = kwargs['action_id']
+        query = query.filter(Diagnostic.action_id == action_id)
+    if 'without_action_id' in kwargs:
+        action_id = kwargs['without_action_id']
+        query = query.filter(Diagnostic.action_id != action_id)
+    if 'opened' in kwargs:
+        if kwargs['opened']:
+            query = query.filter(Diagnostic.endDate.is_(None))
+        else:
+            query = query.filter(Diagnostic.endDate.isnot(None))
     query = query.with_entities(MKB)
     return query.all()
 
@@ -248,7 +262,7 @@ def close_open_checkups(event_id):
 
 @cache.memoize()
 def pregnancy_pathologies():
-    query = db.session.query(rbPregnancyPathology).outerjoin(rbPregnancyPathology.pp_mkbs)
+    query = db.session.query(rbPregnancyPathology)
     result = dict((rb_pp.code, [safe_dict(mkb) for mkb in rb_pp.mkbs]) for rb_pp in query)
     return result
 
@@ -256,5 +270,41 @@ def pregnancy_pathologies():
 @cache.memoize()
 def risk_mkbs():
     query = db.session.query(rbPerinatalRiskRate)
-    result = dict((rb_prr.code, [safe_dict(prr_mkb.mkb) for prr_mkb in rb_prr.prr_mkbs]) for rb_prr in query)
+    result = dict((rb_prr.code, [safe_dict(mkb) for mkb in rb_prr.mkbs]) for rb_prr in query)
     return result
+
+
+def is_event_late_first_visit(event):
+    result = False
+    fi = get_action(event, first_inspection_code)
+    if fi:
+        preg_week = fi[inspection_preg_week_code]
+        if preg_week is not None:
+            result = preg_week >= 10
+    return result
+
+
+def format_action_data(json_data):
+    set_person_id = safe_traverse(json_data, 'set_person', 'id')
+    person_id = safe_traverse(json_data, 'person', 'id')
+    data = {
+        'begDate': safe_datetime(json_data['beg_date']),
+        'endDate': safe_datetime(json_data['end_date']),
+        'plannedEndDate': safe_datetime(json_data['planned_end_date']),
+        'directionDate': safe_datetime(json_data['direction_date']),
+        'isUrgent': json_data['is_urgent'],
+        'status': json_data['status']['id'],
+        'setPerson_id': set_person_id,
+        'person_id':  person_id,
+        'setPerson': Person.query.get(set_person_id) if set_person_id else None,
+        'person':  Person.query.get(person_id) if person_id else None,
+        'note': json_data['note'],
+        'amount': json_data['amount'],
+        'account': json_data['account'] or 0,
+        'uet': json_data['uet'],
+        'payStatus': json_data['pay_status'] or 0,
+        'coordDate': safe_datetime(json_data['coord_date']),
+        'office': json_data['office'],
+        'properties': json_data['properties']
+    }
+    return data

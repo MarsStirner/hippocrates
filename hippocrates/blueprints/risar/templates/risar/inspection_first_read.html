@@ -446,10 +446,14 @@
                             </thead>
                             <tbody>
                                 <tr ng-repeat="measure in checkup.measures">
-                                    <td>[[ measure.scheme_measure.measure.name ]]</td>
-                                    <td>[[ measure.beg_datetime | asDate ]]</td>
-                                    <td>[[ measure.end_datetime | asDate ]]</td>
-                                    <td>[[ measure.status.name ]]</td>
+                                    <td><span ng-bind="measure.data.scheme_measure.measure.name"></span>
+                                    </td>
+                                    <td>[[ measure.data.beg_datetime | asDateTime ]]</td>
+                                    <td>[[ measure.data.end_datetime | asDateTime ]]</td>
+                                    <td>
+                                        <event-measure-status status="measure.data.status"></event-measure-status>
+                                        <span ng-if="emIsNotActual(em)">(Неактуально)</span>
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
@@ -464,4 +468,6 @@
 {% block modules_js %}
     {{ super() }}
     <script src="{{ url_for('.static', filename='js/checkup.js', v=app_version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/event_measure/event_measure_info.js', v=app_version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/event_measure/em_action_view.js', v=app_version) }}"></script>
 {% endblock %}
