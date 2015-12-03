@@ -42,30 +42,12 @@ def api_0_invoice_save(invoice_id=None):
     elif invoice_id:
         invoice = invoice_ctrl.get_invoice(invoice_id)
         if not invoice:
-            raise ApiException(404, u'Не найден Invoice с id = '.format(invoice_id))
+            raise ApiException(404, u'Не найден Invoice с id = {0}'.format(invoice_id))
         invoice = invoice_ctrl.update_invoice(invoice, json_data)
         invoice_ctrl.store(invoice)
     else:
         raise ApiException(404, u'`invoice_id` required')
     return InvoiceRepr().represent_invoice_full(invoice)
-
-
-# @module.route('/api/0/invoice/list/', methods=['GET', 'POST'])
-# @api_method
-# def api_0_invoice_list():
-    # args = request.args.to_dict()
-    # if request.json:
-    #     args.update(request.json)
-    #
-    # paginate = safe_bool(args.get('paginate', True))
-    # con_ctrl = ContractController()
-    # if paginate:
-    #     data = con_ctrl.get_paginated_data(args)
-    #     return ContractRepr().represent_paginated_contracts(data)
-    # else:
-    #     data = con_ctrl.get_listed_data(args)
-    #     return ContractRepr().represent_listed_contracts(data)
-    # return
 
 
 @module.route('/api/0/invoice/', methods=['DELETE'])
@@ -79,3 +61,15 @@ def api_0_invoice_delete(invoice_id=None):
     invoice_ctrl.delete_invoice(invoice)
     invoice_ctrl.store(invoice)
     return True
+
+
+@module.route('/api/0/invoice/search/', methods=['GET', 'POST'])
+@api_method
+def api_0_invoice_search():
+    args = request.args.to_dict()
+    if request.json:
+        args.update(request.json)
+
+    invoice_ctrl = InvoiceController()
+    data = invoice_ctrl.search_invoices(args)
+    return InvoiceRepr().represent_listed_invoices_for_payment(data)

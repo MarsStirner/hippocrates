@@ -6,15 +6,16 @@ from sqlalchemy import or_, and_
 from sqlalchemy.sql.expression import between, union, func
 
 from nemesis.systemwide import db
-from nemesis.models.accounting import Contract, rbContractType, Contract_Contragent, Contract_Contingent
+from nemesis.models.accounting import Contract, rbContractType, Contract_Contragent, Contract_Contingent, PriceList
 from nemesis.models.refbooks import rbFinance
 from nemesis.models.client import Client, ClientPolicy
 from nemesis.models.exists import rbPolicyType
 from nemesis.models.organisation import Organisation
-from nemesis.models.enums import ContragentType, ContractTypeInsurance
+from nemesis.models.enums import ContragentType, ContractTypeInsurance, ContractContragentType
 from nemesis.lib.utils import safe_int, safe_date, safe_unicode, safe_traverse
 from nemesis.lib.const import COMP_POLICY_CODES, VOL_POLICY_CODES, OMS_EVENT_CODE, DMS_EVENT_CODE
 from nemesis.lib.apiutils import ApiException
+from blueprints.accounting.lib.utils import calc_payer_balance
 
 
 class BaseModelController(object):
@@ -156,6 +157,13 @@ class ContractController(BaseModelController):
         available_contracts = selecter.get_all()
         return available_contracts
 
+    def get_contract_pricelist_id_list(self, contract_id):
+        selecter = self.get_selecter()
+        selecter.set_availalble_pl_id_list(contract_id)
+        data_list = selecter.get_all()
+        pl_id_list = [safe_int(item[0]) for item in data_list]
+        return pl_id_list
+
 
 class ContragentController(BaseModelController):
 
@@ -190,6 +198,22 @@ class ContragentController(BaseModelController):
         data['client'] = self.session.query(Client).filter(Client.id == client_id).first() if client_id else None
         data['org'] = self.session.query(Organisation).filter(Organisation.id == org_id).first() if org_id else None
         return data
+
+    def search_payers(self, args):
+        selecter = self.get_selecter()
+        selecter.apply_filter(con_ca_type=ContractContragentType.payer[0], **args)
+        selecter.apply_sort_order(**args)
+        listed_data = selecter.get_all()
+        return listed_data
+
+    def get_payer(self, payer_id):
+        payer = self.session.query(Contract_Contragent).get(payer_id)
+        if not payer:
+            raise ApiException(404, u'Не найден плательщик с id = {0}'.format(payer_id))
+        return payer
+
+    def get_payer_balance(self, payer):
+        return calc_payer_balance(payer)
 
 
 class ContingentController(BaseModelController):
@@ -352,13 +376,18 @@ class ContractSelecter(BaseSelecter):
                     func.coalesce(ClientPolicy.endDate, func.curdate())
                 )
             )
-            contingent_query = contingent_query
-            through_policy_query = through_policy_query
             self.query = self.session.query(Contract).select_entity_from(
                 union(contingent_query, through_policy_query)
             ).order_by(Contract.date)
         else:
             self.query = contingent_query.order_by(Contract.id)
+
+    def set_availalble_pl_id_list(self, contract_id):
+        self.query = self.query.join(Contract.pricelist_list).filter(
+            Contract.id == contract_id,
+            PriceList.deleted == 0
+        ).with_entities(PriceList.id)
+        return self
 
 
 class ContragentSelecter(BaseSelecter):
@@ -387,6 +416,32 @@ class ContragentSelecter(BaseSelecter):
                         Client.lastName.like(query),
                         Client.patrName.like(query)
                     ))
+            return self
+
+        if 'con_ca_type' in flt_args:
+            con_ca_type_id = flt_args['con_ca_type']
+            if con_ca_type_id == ContractContragentType.payer[0]:
+                self.query = self.query.join(
+                    (Contract, Contract.payer_id == Contract_Contragent.id)
+                ).filter(
+                    Contract.deleted == 0,
+                    Contract_Contragent.deleted == 0
+                )
+            if 'query' in flt_args:
+                query = u'%{0}%'.format(flt_args['query'])
+                self.query = self.query.outerjoin(Client).outerjoin(Organisation).filter(or_(
+                    and_(
+                        Contract_Contragent.client_id.isnot(None),
+                        or_(Client.firstName.like(query),
+                            Client.lastName.like(query),
+                            Client.patrName.like(query))
+                    ),
+                    and_(
+                        Contract_Contragent.organisation_id.isnot(None),
+                        or_(Organisation.shortName.like(query),
+                            Organisation.fullName.like(query))
+                    )
+                ))
         return self
 
     # def apply_sort_order(self, **order_options):

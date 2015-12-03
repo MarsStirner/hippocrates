@@ -60,6 +60,65 @@ WebMis20.service('InvoiceModalService', ['$modal', 'AccountingService', function
     }
 }]);
 
+WebMis20.service('CashBookModalService', ['$modal', '$q', 'AccountingService',
+        function ($modal, $q, AccountingService) {
+    return {
+        openEditPayerBalance: function (contragent_id) {
+            var finance_trx_promise = AccountingService.get_new_finance_trx(contragent_id),
+                payer_promise = AccountingService.get_contragent_payer(contragent_id);
+            return $q.all([finance_trx_promise, payer_promise])
+                .then(function (data) {
+                    var trx = data[0],
+                        payer = data[1];
+                    var instance = $modal.open({
+                        templateUrl: '/WebMis20/modal/accounting/cashbook_payer_balance.html',
+                        controller: CashbookPayerModalCtrl,
+                        backdrop: 'static',
+                        resolve: {
+                            payer: function () {
+                                return payer;
+                            },
+                            trx: function () {
+                                return trx;
+                            }
+                        }
+                    });
+                    return instance.result;
+            });
+        },
+        openProcessInvoicePayment: function (invoice_id, contragent_id) {
+            var finance_trx_promise = AccountingService.get_new_finance_trx_invoice(contragent_id, invoice_id),
+                payer_promise = AccountingService.get_contragent_payer(contragent_id),
+                invoice_promise = AccountingService.get_invoice(invoice_id);
+            return $q.all([finance_trx_promise, payer_promise, invoice_promise])
+                .then(function (data) {
+                    var trxes = data[0],
+                        payer = data[1],
+                        invoice = data[2];
+                    var instance = $modal.open({
+                        templateUrl: '/WebMis20/modal/accounting/cashbook_invoice.html',
+                        controller: CashbookInvoiceModalCtrl,
+                        backdrop: 'static',
+                        size: 'lg',
+                        windowClass: 'modalScrollable',
+                        resolve: {
+                            payer: function () {
+                                return payer;
+                            },
+                            trxes: function () {
+                                return trxes;
+                            },
+                            invoice: function () {
+                                return invoice;
+                            }
+                        }
+                    });
+                    return instance.result;
+            });
+        }
+    }
+}]);
+
 WebMis20.service('AccountingService', ['WebMisApi', function (WebMisApi) {
     this.get_contract = function (contract_id) {
         return WebMisApi.contract.get(contract_id);
@@ -87,6 +146,14 @@ WebMis20.service('AccountingService', ['WebMisApi', function (WebMisApi) {
             query: query,
             ca_type_code: ca_type_code
         });
+    };
+    this.search_payer = function (query) {
+        return WebMisApi.contragent.search_payer({
+            query: query
+        });
+    };
+    this.get_contragent_payer = function (payer_id) {
+        return WebMisApi.contragent.get_payer(payer_id);
     };
     this.get_new_contingent = function (args) {
         return WebMisApi.contingent.get(undefined, args);
@@ -119,5 +186,28 @@ WebMis20.service('AccountingService', ['WebMisApi', function (WebMisApi) {
     this.delete_invoice = function (invoice) {
         var invoice_id = invoice.id;
         return WebMisApi.invoice.del(invoice_id);
+    };
+    this.search_invoice = function (query, payer_id) {
+        return WebMisApi.invoice.search({
+            query: query,
+            payer_id: payer_id
+        });
+    };
+    this.get_new_finance_trx = function (contragent_id) {
+        return WebMisApi.finance_trx.get_new({
+            contragent_id: contragent_id
+        });
+    };
+    this.make_finance_transaction = function (trx_type, args) {
+        return WebMisApi.finance_trx.make_trx(trx_type.code, args);
+    };
+    this.get_new_finance_trx_invoice = function (contragent_id, invoice_id) {
+        return WebMisApi.finance_trx.get_new_invoice_trxes({
+            contragent_id: contragent_id,
+            invoice_id: invoice_id
+        });
+    };
+    this.make_finance_transaction_invoice = function (trx_type, args) {
+        return WebMisApi.finance_trx.make_invoice_trx(trx_type.code, args);
     };
 }]);

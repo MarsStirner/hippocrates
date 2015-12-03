@@ -2,8 +2,13 @@
 
 import datetime
 
-from nemesis.models.accounting import Invoice, InvoiceItem, Service, Contract
+from sqlalchemy import or_
+from sqlalchemy.sql.expression import union
+
+from nemesis.models.accounting import Invoice, InvoiceItem, Service, Contract, Contract_Contragent
 from nemesis.models.actions import Action
+from nemesis.models.client import Client
+from nemesis.models.organisation import Organisation
 from nemesis.lib.utils import safe_int, safe_date, safe_unicode, safe_decimal, safe_double, safe_traverse
 from nemesis.lib.apiutils import ApiException
 from blueprints.accounting.lib.contract import BaseModelController, BaseSelecter
@@ -89,6 +94,13 @@ class InvoiceController(BaseModelController):
     def calc_invoice_total_sum(self, invoice):
         return calc_invoice_total_sum(invoice)
 
+    def search_invoices(self, args):
+        selecter = self.get_selecter()
+        selecter.apply_filter(**args)
+        selecter.apply_sort_order(**args)
+        listed_data = selecter.get_all()
+        return listed_data
+
 
 class InvoiceSelecter(BaseSelecter):
 
@@ -104,6 +116,56 @@ class InvoiceSelecter(BaseSelecter):
                 Action.deleted == 0,
                 Invoice.deleted == 0
             )
+
+        if 'query' in flt_args:
+            query = u'%{0}%'.format(flt_args['query'])
+
+            invoice_num_q = self.session.query(Invoice).filter(
+                Invoice.number.like(query),
+                Invoice.deleted == 0
+            )
+
+            payer_individual_q = self.session.query(Invoice).join(
+                Contract,
+                (Contract_Contragent, Contract.payer_id == Contract_Contragent.id),
+                (Client, Contract_Contragent.client_id == Client.id)
+            ).filter(or_(
+                Client.firstName.like(query),
+                Client.lastName.like(query),
+                Client.patrName.like(query)
+            ),
+                Invoice.deleted == 0,
+                Contract.deleted == 0,
+                Contract_Contragent.deleted == 0
+            )
+
+            payer_legal_q = self.session.query(Invoice).join(
+                Contract,
+                (Contract_Contragent, Contract.payer_id == Contract_Contragent.id),
+                (Organisation, Contract_Contragent.organisation_id == Organisation.id)
+            ).filter(or_(
+                Organisation.shortName.like(query),
+                Organisation.fullName.like(query)
+            ),
+                Invoice.deleted == 0,
+                Contract.deleted == 0,
+                Contract_Contragent.deleted == 0
+            )
+            self.query = self.session.query(Invoice).select_entity_from(
+                union(invoice_num_q, payer_individual_q, payer_legal_q)
+            ).order_by(Invoice.settleDate.is_(None).desc(), Invoice.setDate.desc())
+        elif 'payer_id' in flt_args:
+            payer_id = safe_int(flt_args['payer_id'])
+            self.query = self.session.query(Invoice).join(
+                Contract,
+                (Contract_Contragent, Contract.payer_id == Contract_Contragent.id)
+            ).filter(
+                Contract_Contragent.id == payer_id,
+                Invoice.deleted == 0,
+                Contract.deleted == 0,
+                Contract_Contragent.deleted == 0
+            ).order_by(Invoice.settleDate.is_(None).desc(), Invoice.setDate.desc())
+
         return self
 
 
@@ -111,9 +173,6 @@ class InvoiceItemController(BaseModelController):
 
     def __init__(self):
         super(InvoiceItemController, self).__init__()
-
-    # def get_selecter(self):
-    #     return InvoiceSelecter()
 
     def get_new_invoice_item(self, params=None):
         if params is None:

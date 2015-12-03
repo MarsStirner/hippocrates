@@ -6,7 +6,7 @@ WebMis20.run(['$templateCache', function ($templateCache) {
         '\
 <div class="modal-header" xmlns="http://www.w3.org/1999/html">\
     <button type="button" class="close" ng-click="$dismiss(\'cancel\')">&times;</button>\
-    <h4 class="modal-title">Создание счета</h4>\
+    <h4 class="modal-title">[[ isNewInvoice() ? "Создание счёта" : "Просмотр счёта" ]]</h4>\
 </div>\
 <div class="modal-body">\
     <ng-form name="invoiceForm">\
@@ -19,7 +19,7 @@ WebMis20.run(['$templateCache', function ($templateCache) {
                     <div class="form-group"\
                         ng-class="{\'has-error\': invoiceForm.number.$invalid}">\
                         <label class="control-label" for="number">Номер счета</label>\
-                        <input type="text" class="form-control" ng-model="invoice.number" id="number"\
+                        <input type="text" class="form-control" ng-model="invoice.number" id="number" name="number"\
                             ng-required="true">\
                     </div>\
                     <div class="form-group">\
@@ -89,17 +89,22 @@ WebMis20.run(['$templateCache', function ($templateCache) {
     <!-- <pre>[[ invoice | json ]]</pre> -->\
 </div>\
 <div class="modal-footer">\
-    <button type="button" class="btn btn-danger pull-left" ng-click="deleteAndClose()">Удалить</button>\
-    <button type="button" class="btn btn-default" ng-click="$dismiss(\'cancel\')">Отменить</button>\
-    <button type="button" class="btn btn-primary" ng-disabled="invoiceForm.$invalid" ng-click="saveAndClose()">Сохранить</button>\
+    <button type="button" class="btn btn-danger pull-left" ng-click="deleteAndClose()"\
+        ng-if="!isInvoiceClosed()">Удалить</button>\
+    <button type="button" class="btn btn-default" ng-click="$dismiss(\'cancel\')">Закрыть</button>\
+    <button type="button" class="btn btn-primary" ng-disabled="invoiceForm.$invalid"\
+        ng-click="saveAndClose()" ng-if="!isInvoiceClosed()">Сохранить</button>\
 </div>');
 }]);
 
 
 var InvoiceModalCtrl = function ($scope, $filter, AccountingService, invoice) {
     $scope.invoice = invoice;
+
+    $scope.isNewInvoice = function () {
+        return !$scope.invoice.id;
+    };
     $scope.saveAndClose = function () {
-        if (!$scope.invoiceForm.$valid) return;
         $scope.save_invoice().then(function (updInvoice) {
             $scope.$close({
                 status: 'ok',
@@ -123,6 +128,9 @@ var InvoiceModalCtrl = function ($scope, $filter, AccountingService, invoice) {
         return AccountingService.delete_invoice(
             $scope.invoice
         );
+    };
+    $scope.isInvoiceClosed = function () {
+        return $scope.invoice.closed;
     };
 
     $scope.init = function () { };

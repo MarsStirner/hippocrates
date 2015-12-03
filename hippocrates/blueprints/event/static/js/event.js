@@ -511,7 +511,7 @@ var EventServicesCtrl = function($scope, AccountingService, InvoiceModalService)
         return $scope.event.ro || !$scope.inEditMode();
     };
 
-    $scope.perform_search = function(query) {
+    $scope.perform_search = function (query) {
         $scope.search_processed = false;
         if (!query) {
             $scope.search_result = null;
@@ -525,7 +525,7 @@ var EventServicesCtrl = function($scope, AccountingService, InvoiceModalService)
                 });
         }
     };
-    $scope.query_clear = function() {
+    $scope.query_clear = function () {
         $scope.search_result = null;
         $scope.query = '';
     };
@@ -567,9 +567,6 @@ var EventServicesCtrl = function($scope, AccountingService, InvoiceModalService)
 
 
 
-
-
-
     $scope.get_class = function (service) {
         var result = [];
         result.push('info');
@@ -582,16 +579,6 @@ var EventServicesCtrl = function($scope, AccountingService, InvoiceModalService)
             result.push(service.is_new() ? 'info' : 'danger');
         }
         return result;
-    };
-    $scope.getPaymentsInTooltipText = function () {
-        if ($scope.eventServices.isPaymentPerService($scope.event)) {
-            return 'Поступило платежей всего на сумму {0} руб., с учетом скидок {1} руб.'.format(
-                safe_traverse($scope.event, ['payment', 'payments', 'total_in']),
-                safe_traverse($scope.event, ['payment', 'payments', 'total_discount'])
-            );
-        } else {
-            return 'Поступило платежей всего';
-        }
     };
 
     $scope.$on('event_loaded', function() {

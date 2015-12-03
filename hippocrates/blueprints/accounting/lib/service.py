@@ -9,8 +9,10 @@ from nemesis.models.accounting import Service, PriceListItem, Invoice, InvoiceIt
 from nemesis.models.client import Client
 from nemesis.models.actions import Action
 from nemesis.lib.utils import safe_int, safe_unicode, safe_double, safe_decimal
+from nemesis.lib.apiutils import ApiException
 
-from blueprints.accounting.lib.contract import BaseModelController, BaseSelecter, BaseSphinxSearchSelecter
+from blueprints.accounting.lib.contract import BaseModelController, BaseSelecter, BaseSphinxSearchSelecter, \
+    ContractController
 from nemesis.lib.sphinx_search import SearchEventService
 from nemesis.lib.data import int_get_atl_dict_all, create_action, update_action, format_action_data
 from nemesis.lib.agesex import recordAcceptableEx
@@ -23,6 +25,7 @@ class ServiceController(BaseModelController):
 
     def __init__(self):
         super(ServiceController, self).__init__()
+        self.contract_ctrl = ContractController()
 
     def get_selecter(self):
         return ServiceSelecter()
@@ -59,10 +62,17 @@ class ServiceController(BaseModelController):
         return data
 
     def search_mis_action_services(self, args):
+        contract_id = safe_int(args.get('contract_id'))
+        if not contract_id:
+            raise ApiException(422, u'`contract_id` required')
+        pricelist_id_list = self.contract_ctrl.get_contract_pricelist_id_list(contract_id)
         service_sphinx = ServiceSphinxSearchSelecter()
-        service_sphinx.apply_filter(**args)
+        service_sphinx.apply_filter(pricelist_id_list=pricelist_id_list, **args)
         search_result = service_sphinx.get_all()
         data = search_result['result']['items']
+        for item in data:
+            item['amount'] = 1
+            item['sum'] = item['price'] * item['amount']
         data = self._filter_mis_action_search_results(args, data)
         return data
 
@@ -185,8 +195,12 @@ class ServiceSphinxSearchSelecter(BaseSphinxSearchSelecter):
     def apply_filter(self, **flt_args):
         if 'query' in flt_args:
             self.search = self.search.match(safe_unicode(flt_args['query']))
-        if 'contract_id' in flt_args:
-            self.search = self.search.filter(contract_id__eq=safe_int(flt_args['contract_id']))
+        if 'pricelist_id_list' in flt_args:
+            id_list = flt_args['pricelist_id_list']
+            if not id_list:
+                self.search = self.search.filter(pricelist_id__in=[-1])
+            else:
+                self.search = self.search.filter(pricelist_id__in=id_list)
         return self
 
     def apply_limit(self, **limit_args):
