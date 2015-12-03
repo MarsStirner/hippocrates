@@ -18,10 +18,11 @@
                         <tbody>
                             <tr>
                                 <th>Группа крови и резус</th>
-                                <td></td>
                                 <td>
-                                    <button type="button" class="btn btn-sm btn-default" title="Удалить"
-                                            ng-click="edit_blood()" disabled><span class="glyphicon glyphicon-pencil"></span>
+                                    [[event.blood_history.length ? event.blood_history[0].blood_type.name: '']]</td>
+                                <td>
+                                    <button type="button" class="btn btn-sm btn-default" title="Изменить"
+                                            ng-click="edit_blood()"><span class="glyphicon glyphicon-pencil"></span>
                                     </button>
                                 </td>
                             </tr>
@@ -81,7 +82,8 @@
                             <tr>
                                 <th>Дата выписки и/или продолжительность лечения (дней)</th>
                                 <td>
-                                    [[format_discharge_date(event.discharge_date)]], [[format_hosp_length(event.hosp_length)]]
+                                    <span ng-bind-html="format_discharge_date(event.discharge_date)"></span>
+                                    <span ng-if="event.discharge_date">, </span>[[format_hosp_length(event.hosp_length)]]
                                 </td>
                             </tr>
                             <tr>

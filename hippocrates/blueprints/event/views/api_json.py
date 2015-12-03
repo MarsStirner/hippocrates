@@ -15,7 +15,7 @@ from nemesis.models.enums import EventPrimary, EventOrder
 from nemesis.models.event import (Event, EventType, Diagnosis, Diagnostic, Visit, Event_Persons)
 from nemesis.models.exists import Person, rbRequestType, rbResult, OrgStructure, MKB
 from nemesis.systemwide import db
-from nemesis.lib.utils import (jsonify, safe_traverse, safe_datetime, get_utc_datetime_with_tz, safe_int)
+from nemesis.lib.utils import (jsonify, safe_traverse, safe_date, safe_datetime, get_utc_datetime_with_tz, safe_int, format_date)
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.models.schedule import ScheduleClientTicket
 from nemesis.models.exists import (Organisation, )
@@ -24,6 +24,7 @@ from nemesis.lib.event.event_builder import PoliclinicEventBuilder, StationaryEv
 from blueprints.event.app import module
 from blueprints.event.lib.utils import (EventSaveException, create_services, save_event, received_save,
                                         save_executives, EventSaveController, ReceivedController, MovingController)
+from blueprints.patients.lib.utils import add_or_update_blood_type
 from nemesis.lib.sphinx_search import SearchEventService, SearchEvent
 from nemesis.lib.data import get_planned_end_datetime, int_get_atl_dict_all, _get_stationary_location_query
 from nemesis.lib.agesex import recordAcceptableEx
@@ -168,6 +169,67 @@ def api_event_moving_close():
     return vis.make_moving_info(moving)
 
 
+# @module.route('api/event_lab-res-dynamics.json', methods=['GET'])
+# @api_method
+# def api_event_lab_res_dynamics():
+#     # общая динамика по тестам в обращении
+#     event_id = request.args.get('event_id')
+#     from_date = safe_date(request.args.get('from_date'))
+#     to_date = safe_date(request.args.get('to_date'))
+#     properties = ActionProperty.query.join(ActionPropertyType, Action, ActionType).filter(ActionProperty.deleted == 0,
+#                                                                                           Action.deleted == 0,
+#                                                                                           Action.begDate >= from_date,
+#                                                                                           Action.begDate <= to_date,
+#                                                                                           Action.event_id == event_id,
+#                                                                                           ActionType.mnem == 'LAB',
+#                                                                                           ActionPropertyType.test_id.isnot(None)).\
+#         order_by(desc(Action.begDate))
+#
+#     dynamics = {}
+#     for property in properties:
+#         test_id = property.type.test_id
+#         if property.value:
+#             if test_id in dynamics:
+#                 dynamics[test_id]['values'][format_date(property.action.begDate)] = property.value
+#             else:
+#                 dynamics[test_id] = {'test_name': property.type.test.name,
+#                                      'values': {format_date(property.action.begDate): property.value}}
+#     return dynamics
+
+
+@module.route('api/event_lab-res-dynamics.json', methods=['GET'])
+@api_method
+def api_event_lab_res_dynamics():
+    # динамика по тестам в действиях с одинаковым ActionType
+    event_id = request.args.get('event_id')
+    action_type_id = request.args.get('action_type_id')
+    from_date = safe_date(request.args.get('from_date'))
+    to_date = safe_date(request.args.get('to_date'))
+    properties = ActionProperty.query.join(ActionPropertyType, Action, ActionType).filter(Action.event_id == event_id,
+                                                                                          Action.deleted == 0,
+                                                                                          Action.begDate >= from_date,
+                                                                                          Action.begDate <= to_date,
+                                                                                          ActionType.id == action_type_id,
+                                                                                          ActionProperty.deleted == 0,
+                                                                                          ActionProperty.isAssigned == 1,
+                                                                                          ActionPropertyType.test_id.isnot(None)).\
+        order_by(Action.begDate)
+    dynamics = {}
+    dates = []
+    for property in properties:
+        test_id = property.type.test_id
+        if property.value:
+            date = format_date(property.action.begDate)
+            if date not in dates:
+                dates.append(date)
+            if test_id in dynamics:
+                dynamics[test_id]['values'][date] = property.value
+            else:
+                dynamics[test_id] = {'test_name': property.type.test.name,
+                                     'values': {date: property.value}}
+    return dates, dynamics
+
+
 @module.route('api/event_hosp_beds_get.json', methods=['GET'])
 @api_method
 def api_hosp_beds_get():
@@ -185,6 +247,20 @@ def api_hosp_beds_get():
         hb.occupied = True if hb in occupied_hb else False
         hb.chosen = True if (hb_id and hb.id == hb_id) else False
     return map(vis.make_hosp_bed, all_hb)
+
+
+@module.route('api/blood_history_save.json', methods=['POST'])
+@api_method
+def api_blood_history_save():
+    vis = StationaryEventVisualizer()
+    data = request.json
+    blood_type_info = data.get('blood_type_info')
+    client_id = data.get('client_id')
+    client = Client.query.get(client_id)
+    bt = add_or_update_blood_type(client, blood_type_info)
+    db.session.add(bt)
+    db.session.commit()
+    return vis.make_blood_history(bt)
 
 
 def services_save(event_id, services_data, contract_id):

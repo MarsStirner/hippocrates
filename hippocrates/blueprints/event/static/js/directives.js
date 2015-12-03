@@ -259,8 +259,8 @@ function(WMEventFormState, WMEventServices, ActionTypeTreeModal, $filter, RefBoo
     };
 }])
 .directive('wmActionList', [
-    '$window', '$http', 'ActionTypeTreeModal', 'MessageBox', 'WMEventServices', 'WMWindowSync', 'CurrentUser', 'WMConfig',
-function ($window, $http, ActionTypeTreeModal, MessageBox, WMEventServices, WMWindowSync, CurrentUser, WMConfig) {
+    '$window', '$http', 'LabDynamicsModal', 'ActionTypeTreeModal', 'MessageBox', 'WMEventServices', 'WMWindowSync', 'CurrentUser', 'WMConfig',
+function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WMEventServices, WMWindowSync, CurrentUser, WMConfig) {
     return {
         restrict: 'E',
         scope: {
@@ -333,8 +333,8 @@ function ($window, $http, ActionTypeTreeModal, MessageBox, WMEventServices, WMWi
                     scope.event.info.client.info,
                     {
                         at_group: at_class,
-                        event_type_id: scope.event.info.event_type.id,
-                        contract_id: scope.event.info.contract.id
+                        event_type_id: scope.event.info.event_type.id
+//                        contract_id: scope.event.info.contract.id
                     },
                     function afterActionCreate() {
                         scope.pager.current_page = 1;
@@ -362,7 +362,9 @@ function ($window, $http, ActionTypeTreeModal, MessageBox, WMEventServices, WMWi
                     });
                 });
             };
-
+            scope.open_lab_res_dynamics = function(action){
+                LabDynamicsModal.openLabDynamicsModal(scope.event, action);
+            }
             scope.reset_sorting();
             scope.reload();
         },
@@ -376,6 +378,7 @@ function ($window, $http, ActionTypeTreeModal, MessageBox, WMEventServices, WMWi
         <th width="10%" wm-sortable-column="end_date" on-change-order="sort_by_column(params)">Конец</th>\
         <th width="20%" wm-sortable-column="person_name" on-change-order="sort_by_column(params)">Исполнитель</th>\
         <th width="5%"></th>\
+        <th width="5%" ng-if="actionTypeGroup == \'lab\'"></th>\
     </tr>\
     </thead>\
     <tbody>\
@@ -388,6 +391,11 @@ function ($window, $http, ActionTypeTreeModal, MessageBox, WMEventServices, WMWi
         <td>\
             <button type="button" class="btn btn-sm btn-danger" title="Удалить" ng-show="can_delete_action(action)"\
                     ng-click="delete_action(action)"><span class="glyphicon glyphicon-trash"></span>\
+            </button>\
+        </td>\
+        <td ng-if="actionTypeGroup == \'lab\'">\
+            <button type="button" class="btn btn-sm btn-info" title="Динамика"\
+                    ng-click="open_lab_res_dynamics(action)"><span class="glyphicon glyphicon-stats"></span>\
             </button>\
         </td>\
     </tr>\
@@ -405,5 +413,49 @@ function ($window, $http, ActionTypeTreeModal, MessageBox, WMEventServices, WMWi
     </tfoot>\
 </table>'
     }
+}])
+.service('LabDynamicsModal', ['$modal', '$http', function ($modal, $http) {
+        return {
+        openLabDynamicsModal: function (event, action) {
+            var LabResDynamicsCtrl = function ($scope) {
+                $scope.date_range = [moment().subtract(5, 'days').toDate(), new Date()];
+                $scope.currentDate = new Date();
+                $scope.dynamics = [];
+                $scope.xAxisTickFormat = function(d){
+                    return moment(d).format('DD.MM.YYYY');
+                }
+                $scope.get_dynamics_data = function() {
+                    $http.get(
+                        url_lab_res_dynamics, {
+                            params: {
+                                event_id: event.event_id,
+                                action_type_id: action.type.id,
+                                from_date: $scope.date_range[0],
+                                to_date: $scope.date_range[1]
+                            }
+                        }
+                    ).success(function (data) {
+                        $scope.dates_list = data.result[0]
+                        $scope.dynamics = data.result[1];
+                    })
+                    };
+                $scope.$watchCollection('date_range', function (new_val, old_val) {
+                            if (angular.equals(new_val, old_val)) return;
+                            if(new_val[0] && new_val[1]){
+                                $scope.get_dynamics_data();
+                            }
+                        });
+                $scope.get_dynamics_data();
+            };
+            var instance = $modal.open({
+                templateUrl: 'modal-lab-res-dynamics.html',
+                controller: LabResDynamicsCtrl,
+                size: 'lg'
+            });
+            return instance.result.then(function() {
+
+            });
+        }
+   }
 }])
 ;

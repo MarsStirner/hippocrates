@@ -37,7 +37,7 @@ var EventMainInfoCtrl = function ($scope, $q, RefBookService, EventType, $filter
             return !(CurrentUser.current_role_in('admin') ||
                 !$scope.event.ro && (
                     (
-                        ($scope.formstate.is_policlinic() && (
+                        (($scope.formstate.is_policlinic() || $scope.formstate.is_stationary()) && (
                             main_user.id === safe_traverse($scope.event, ['info', 'exec_person', 'id']) ||
                             main_user.id === safe_traverse($scope.event, ['info', 'create_person_id'])
                         )) || (
@@ -262,7 +262,7 @@ var EventMainInfoCtrl = function ($scope, $q, RefBookService, EventType, $filter
     });
 };
 
-var EventStationaryInfoCtrl = function($scope, $filter, $modal, $q, RisarApi) {
+var EventStationaryInfoCtrl = function($scope, $filter, $modal, $q, RisarApi, ApiCalls) {
     $scope.format_admission_date = function (date) {
         return date ? $filter('asDateTime')(date) : '&nbsp;';
     };
@@ -290,6 +290,23 @@ var EventStationaryInfoCtrl = function($scope, $filter, $modal, $q, RisarApi) {
                 name: '',
                 power: null,
                 note: '',
+                deleted: 0
+            };
+            models.push(model);
+        };
+        $scope.remove = function (p) {
+            p.deleted = 1;
+        };
+        $scope.restore = function (p) {
+            p.deleted = 0;
+        };
+    };
+
+    var BloodHistoryCtrl = function ($scope, $modalInstance, models) {
+        $scope.addModel = function () {
+            var model = {
+                blood_type: null,
+                date: null,
                 deleted: 0
             };
             models.push(model);
@@ -349,6 +366,40 @@ var EventStationaryInfoCtrl = function($scope, $filter, $modal, $q, RisarApi) {
             resolve: {
                 models: function () {return list},
                 type: function() {return type}
+            },
+            size: 'lg'
+        })
+    };
+    $scope.edit_blood = function () {
+        var models = _.map($scope.event.blood_history, function (source) {
+            return angular.extend({}, source);
+        });
+        open_edit_blood(models).result.then(function (models) {
+            $q.all(
+                _.filter(
+                    _.map(models, function (model) {
+                        var data = {client_id: $scope.$parent.event.info.client_id,
+                                    blood_type_info: model}
+                        return ApiCalls.wrapper('POST', url_blood_history_save, {}, data)
+                    }),
+                    function (deferred) {
+                        return deferred !== undefined
+                    }
+                )
+            ).then(function (results) {
+                $scope.event.blood_history = results;
+            });
+        })
+    }
+    var open_edit_blood = function (list) {
+        var scope = $scope.$new();
+        scope.models = list;
+        return $modal.open({
+            templateUrl: 'modal-blood-history.html',
+            controller: BloodHistoryCtrl,
+            scope: scope,
+            resolve: {
+                models: function () {return list}
             },
             size: 'lg'
         })
@@ -743,7 +794,7 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
 
 
 };
-var StationaryEventInfoCtrl = function ($scope, $controller, WMStationaryEvent) {
+var StationaryEventInfoCtrl = function ($scope, $controller, $modal, $http, WMStationaryEvent) {
     $controller('EventInfoCtrl', {$scope: $scope});
     var event = $scope.event = new WMStationaryEvent($scope.event_id, $scope.client_id, $scope.ticket_id);
     $scope.create_mode = $scope.event.is_new();
@@ -761,12 +812,12 @@ var PoliclinicEventInfoCtrl = function ($scope, $controller, WMPoliclinicEvent) 
 WebMis20.controller('EventDiagnosesCtrl', ['$scope', 'RefBookService', '$http', EventDiagnosesCtrl]);
 WebMis20.controller('EventMainInfoCtrl', ['$scope', '$q', 'RefBookService', 'EventType', '$filter',
     'CurrentUser', 'AccountingService', 'ContractModalService', 'WMConfig', 'WMWindowSync', EventMainInfoCtrl]);
-WebMis20.controller('EventStationaryInfoCtrl', ['$scope', '$filter', '$modal', '$q', 'RisarApi', EventStationaryInfoCtrl]);
+WebMis20.controller('EventStationaryInfoCtrl', ['$scope', '$filter', '$modal', '$q', 'RisarApi', 'ApiCalls', EventStationaryInfoCtrl]);
 WebMis20.controller('EventReceivedCtrl', ['$scope', '$modal', 'RefBookService', EventReceivedCtrl]);
 WebMis20.controller('EventMovingsCtrl', ['$scope', '$modal', 'RefBookService', 'ApiCalls', EventMovingsCtrl]);
 WebMis20.controller('EventServicesCtrl', ['$scope', 'AccountingService',
     'InvoiceModalService', EventServicesCtrl]);
 WebMis20.controller('EventInfoCtrl', ['$scope', 'WMEvent', '$http', 'RefBookService', '$window', '$document',
     'PrintingService', '$filter', '$modal', 'WMEventServices', 'WMEventFormState', 'MessageBox', EventInfoCtrl]);
-WebMis20.controller('StationaryEventInfoCtrl', ['$scope', '$controller', 'WMStationaryEvent', StationaryEventInfoCtrl]);
+WebMis20.controller('StationaryEventInfoCtrl', ['$scope', '$controller', '$modal', '$http', 'WMStationaryEvent', StationaryEventInfoCtrl]);
 WebMis20.controller('PoliclinicEventInfoCtrl', ['$scope', '$controller', 'WMPoliclinicEvent', PoliclinicEventInfoCtrl]);

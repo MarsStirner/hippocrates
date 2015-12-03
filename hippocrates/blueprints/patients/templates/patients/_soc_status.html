@@ -63,15 +63,45 @@
                             model-soc-status="socstat"
                             edit-mode="socstat.id ? edit.activated : true" edit-type="!socstat.id">
                         </wm-soc-status>
-                        <div class="row" ng-if="socstat.ss_type.code == '004' || socstat.ss_type.code == '003'">
+                        <div class="row" ng-if="socstat.ss_type.code == '004' || socstat.ss_type.code == '003' || socstat.ss_type.code == '001'">
                             <div class=" col-md-4">
-                                <label for="company" class="control-label">[[ socstat.ss_type.code == '004'? 'Организация' : 'Школа']]</label>
+                                <label for="company" class="control-label">
+                                    <div ng-switch on="socstat.ss_type.code">
+                                        <div ng-switch-when="004">
+                                            Организация
+                                        </div>
+                                        <div ng-switch-when="003">
+                                            Школа
+                                        </div>
+                                        <div ng-switch-when="001">
+                                            Номер детсада (яслей)
+                                        </div>
+                                        <div ng-switch-default>
+                                            Организация
+                                        </div>
+                                    </div>
+                                </label>
                                 <input type="text" class="form-control" autocomplete="off" placeholder="Место работы"
                                        ng-disabled="socstat.id ? !edit.activated : false"
                                        id="company" name="company" ng-model="socstat.work.organisation"/>
                             </div>
                             <div class=" col-md-3">
-                                <label for="post" class="control-label">[[ socstat.ss_type.code == '004'? 'Должность' : 'Класс']]</label>
+                                <label for="post" class="control-label">
+                                    <div ng-switch on="socstat.ss_type.code">
+                                        <div ng-switch-when="004">
+                                            Должность
+                                        </div>
+                                        <div ng-switch-when="003">
+                                            Класс
+                                        </div>
+                                        <div ng-switch-when="001">
+                                            Группа
+                                        </div>
+                                        <div ng-switch-default>
+                                            Должность
+                                        </div>
+                                    </div>
+                                </label>
                                 <input type="text" class="form-control" autocomplete="off" placeholder="Должность"
                                        ng-disabled="socstat.id ? !edit.activated : false"
                                        id="post" name="post" ng-model="socstat.work.post"/>

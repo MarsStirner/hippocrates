@@ -126,7 +126,7 @@ var ScheduleDayCtrl = function ($scope, $http, $filter, $interval, $location, $a
         if (ticket_id){
             query += '&ticket_id=' + ticket_id;
         }
-        $scope.child_window = window.open(url_event_new_event_html + query, '_blank');
+        $scope.child_window = window.open(url_request_type_kind_html + query, '_blank');
     };
 
     $scope.open_event = function(event_id) {
