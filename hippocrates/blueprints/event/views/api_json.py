@@ -169,31 +169,65 @@ def api_event_moving_close():
     return vis.make_moving_info(moving)
 
 
+# @module.route('api/event_lab-res-dynamics.json', methods=['GET'])
+# @api_method
+# def api_event_lab_res_dynamics():
+#     # общая динамика по тестам в обращении
+#     event_id = request.args.get('event_id')
+#     from_date = safe_date(request.args.get('from_date'))
+#     to_date = safe_date(request.args.get('to_date'))
+#     properties = ActionProperty.query.join(ActionPropertyType, Action, ActionType).filter(ActionProperty.deleted == 0,
+#                                                                                           Action.deleted == 0,
+#                                                                                           Action.begDate >= from_date,
+#                                                                                           Action.begDate <= to_date,
+#                                                                                           Action.event_id == event_id,
+#                                                                                           ActionType.mnem == 'LAB',
+#                                                                                           ActionPropertyType.test_id.isnot(None)).\
+#         order_by(desc(Action.begDate))
+#
+#     dynamics = {}
+#     for property in properties:
+#         test_id = property.type.test_id
+#         if property.value:
+#             if test_id in dynamics:
+#                 dynamics[test_id]['values'][format_date(property.action.begDate)] = property.value
+#             else:
+#                 dynamics[test_id] = {'test_name': property.type.test.name,
+#                                      'values': {format_date(property.action.begDate): property.value}}
+#     return dynamics
+
+
 @module.route('api/event_lab-res-dynamics.json', methods=['GET'])
 @api_method
 def api_event_lab_res_dynamics():
+    # динамика по тестам в действиях с одинаковым ActionType
     event_id = request.args.get('event_id')
+    action_type_id = request.args.get('action_type_id')
     from_date = safe_date(request.args.get('from_date'))
     to_date = safe_date(request.args.get('to_date'))
-    properties = ActionProperty.query.join(ActionPropertyType, Action, ActionType).filter(ActionProperty.deleted == 0,
+    properties = ActionProperty.query.join(ActionPropertyType, Action, ActionType).filter(Action.event_id == event_id,
                                                                                           Action.deleted == 0,
                                                                                           Action.begDate >= from_date,
                                                                                           Action.begDate <= to_date,
-                                                                                          Action.event_id == event_id,
-                                                                                          ActionType.mnem == 'LAB',
+                                                                                          ActionType.id == action_type_id,
+                                                                                          ActionProperty.deleted == 0,
+                                                                                          ActionProperty.isAssigned == 1,
                                                                                           ActionPropertyType.test_id.isnot(None)).\
-        order_by(desc(Action.begDate))
-
+        order_by(Action.begDate)
     dynamics = {}
+    dates = []
     for property in properties:
         test_id = property.type.test_id
         if property.value:
+            date = format_date(property.action.begDate)
+            if date not in dates:
+                dates.append(date)
             if test_id in dynamics:
-                dynamics[test_id]['values'][format_date(property.action.begDate)] = property.value
+                dynamics[test_id]['values'][date] = property.value
             else:
                 dynamics[test_id] = {'test_name': property.type.test.name,
-                                     'values': {format_date(property.action.begDate): property.value}}
-    return dynamics
+                                     'values': {date: property.value}}
+    return dates, dynamics
 
 
 @module.route('api/event_hosp_beds_get.json', methods=['GET'])
