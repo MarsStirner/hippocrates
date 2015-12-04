@@ -5,7 +5,7 @@ from flask import request
 from ..app import module
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.utils import safe_bool, safe_int, safe_date
-from blueprints.accounting.lib.invoice import InvoiceController
+from nemesis.lib.data_ctrl.accounting.invoice import InvoiceController
 from blueprints.accounting.lib.represent import InvoiceRepr
 
 

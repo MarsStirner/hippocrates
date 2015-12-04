@@ -5,7 +5,7 @@ from flask import request
 from ..app import module
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.utils import safe_bool, safe_int
-from blueprints.accounting.lib.contract import ContingentController
+from nemesis.lib.data_ctrl.accounting.contract import ContingentController
 from blueprints.accounting.lib.represent import ContingentRepr
 
 

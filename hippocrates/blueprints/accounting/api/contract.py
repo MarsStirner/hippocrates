@@ -7,7 +7,7 @@ from flask import request
 from ..app import module
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.utils import safe_bool, safe_int, safe_date
-from blueprints.accounting.lib.contract import ContractController
+from nemesis.lib.data_ctrl.accounting.contract import ContractController
 from blueprints.accounting.lib.represent import ContractRepr
 
 
