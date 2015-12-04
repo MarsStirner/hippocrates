@@ -99,13 +99,13 @@
         {% endif %}
         {% if user_profiles_mng.has_ui_cashier() %}
             <div class="col-lg-3 col-md-4 col-xs-6">
-                <a href="{{ url_for('accounting.cashbook_html') }}" title="Расчет пациентов" class="small-box bg-light-blue">
+                <a href="{{ url_for('accounting.cashbook_html') }}" title="Приём платежей" class="small-box bg-light-blue">
                     <div class="inner">
-                        <h4>Расчет пациентов</h4>
+                        <h4>Приём платежей</h4>
                         <ul class="list-unstyled lmargin20 vbmargin10">
-                            <li>&ndash; Искать обращение для оплаты</li>
-                            <li>&ndash; Вести учёт денежных средств</li>
-                            <li>&ndash; Вести номера договоров</li>
+                            <li>&ndash; Принимать платежи по выставленным счетам</li>
+                            <li>&ndash; Вести учёт денежных средств плательщиков</li>
+                            <li>&nbsp;</li>
                         </ul>
                     </div>
                     <div class="icon">
@@ -114,23 +114,24 @@
                     <span class="small-box-footer">Продолжить <i class="fa fa-arrow-circle-right"></i></span>
                 </a>
             </div>
-
-            <div class="col-lg-3 col-md-4 col-xs-6">
-                <a href="{{ url_for('accounting.cashbook_operations') }}" title="Журнал кассовых операций" class="small-box bg-yellow">
-                    <div class="inner">
-                        <h4>Журнал кассовых операций</h4>
-                        <ul class="list-unstyled lmargin20 vbmargin10">
-                            <li>&ndash; Сформировать журнал кассовых операций</li>
-                            <li>&ndash; Распечатать журнал кассовых операций</li>
-                            <li>&nbsp;</li>
-                        </ul>
-                    </div>
-                    <div class="icon">
-                        <i class="ion ion-ios-paper-outline"></i>
-                    </div>
-                    <span class="small-box-footer">Продолжить <i class="fa fa-arrow-circle-right"></i></span>
-                </a>
-            </div>
+        {% endif %}
+        {% if user_profiles_mng.has_ui_registrator() or user_profiles_mng.has_ui_cashier() %}
+        <div class="col-lg-3 col-md-4 col-xs-6">
+            <a href="{{ url_for('accounting.html_contract_list') }}" title="Список договоров" class="small-box bg-yellow">
+                <div class="inner">
+                    <h4>Список договоров</h4>
+                    <ul class="list-unstyled lmargin20 vbmargin10">
+                        <li>&ndash; Формировать и просматривать договоры МИС</li>
+                        <li>&nbsp;</li>
+                        <li>&nbsp;</li>
+                    </ul>
+                </div>
+                <div class="icon">
+                    <i class="ion ion-ios-paper-outline"></i>
+                </div>
+                <span class="small-box-footer">Продолжить <i class="fa fa-arrow-circle-right"></i></span>
+            </a>
+        </div>
         {% endif %}
         </div>
     </section>
