@@ -205,21 +205,25 @@ def api_event_lab_res_dynamics():
     action_type_id = request.args.get('action_type_id')
     from_date = safe_date(request.args.get('from_date'))
     to_date = safe_date(request.args.get('to_date'))
+
+    test_ids = db.session.query(ActionPropertyType.test_id,).select_from(ActionPropertyType).join(ActionType).\
+        filter(ActionType.id == action_type_id, ActionPropertyType.test_id.isnot(None)).all()
+    test_ids = [row[0] for row in test_ids]
+
     properties = ActionProperty.query.join(ActionPropertyType, Action, ActionType).filter(Action.event_id == event_id,
                                                                                           Action.deleted == 0,
-                                                                                          Action.begDate >= from_date,
-                                                                                          Action.begDate <= to_date,
-                                                                                          ActionType.id == action_type_id,
+                                                                                          func.date(Action.begDate) >= from_date,
+                                                                                          func.date(Action.begDate) <= to_date,
                                                                                           ActionProperty.deleted == 0,
                                                                                           ActionProperty.isAssigned == 1,
-                                                                                          ActionPropertyType.test_id.isnot(None)).\
+                                                                                          ActionPropertyType.test_id.in_(test_ids)).\
         order_by(Action.begDate)
     dynamics = {}
     dates = []
     for property in properties:
         test_id = property.type.test_id
         if property.value:
-            date = format_date(property.action.begDate)
+            date = property.action.propsByCode['TAKINGTIME'].value.datetime.strftime('%d.%m.%Y %H:%M')
             if date not in dates:
                 dates.append(date)
             if test_id in dynamics:
