@@ -363,6 +363,7 @@ class ContractSelecter(BaseSelecter):
             ).join(
                 Client, (ClientPolicy.clientId == Client.id)
             ).filter(
+                ClientPolicy.id == client_id,
                 Contract.finance_id == finance_id,
                 between(
                     set_date,
