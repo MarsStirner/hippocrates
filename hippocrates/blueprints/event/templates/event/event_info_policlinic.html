@@ -4,6 +4,8 @@
 <div ng-controller="PoliclinicEventInfoCtrl" class="ng-cloak">
     <section class="content-header">
         <div class="wm-page-header-button-box">
+            <a type="button" class="btn btn-sm btn-primary"
+               href="{{ url_for('patients.patient_events', client_id=client_id) }}">Все обращения пациента</a>
             <wm-subscription-btn oid="hitsl.event.[[ event.event_id ]]" ng-if="!event.is_new()"></wm-subscription-btn>
             <ui-print-button ps="ps" resolve="ps_resolve()" ng-if="!event.is_new()"></ui-print-button>
         </div>
@@ -131,10 +133,12 @@
                             user_utils.can_edit_event(event) or user_utils.can_edit_event_payment_info(event)
                         )) %}
                     <div class="row">
-                        <div class="col-md-12">
-                            <button type="button" ng-click="save_event()" class="btn btn-lg btn-success"
+                        <div class="col-md-6">
+                            <button type="button" ng-click="save_event()" class="btn btn-lg btn-success btn-block"
                             ng-bind="event.is_new() ? 'Создать' : 'Сохранить'">Создать</button>
-                            <button type="button" ng-click="cancel_editing()" class="btn btn-lg btn-default">Отмена</button>
+                        </div>
+                        <div class="col-md-6">
+                            <button type="button" ng-click="cancel_editing()" class="btn btn-lg btn-default btn-block">Отмена</button>
                         </div>
                     </div>
                     {%- endif %}
@@ -155,7 +159,7 @@
                     {% if user_utils.can_delete_event(event) %}
                     <div class="row vmargin10">
                         <div class="col-md-12">
-                            <button type="button" ng-click="delete_event()" class="btn btn-lg btn-danger"
+                            <button type="button" ng-click="delete_event()" class="btn btn-lg btn-danger btn-block"
                                     ng-if="btn_delete_event_visible()">Удалить обращение</button>
                         </div>
                     </div>
