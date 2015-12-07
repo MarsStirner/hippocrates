@@ -88,6 +88,18 @@ def api_patient_get():
         })
 
 
+@module.route('/api/patient_events.json', methods=['GET'])
+@api_method
+def api_patient_events_get():
+    client_id = parse_id(request.args, 'client_id')
+    vsl = ClientVisualizer()
+    client = Client.query.get(client_id)
+    return {
+        'info': client,
+        'events': vsl.make_events(client)
+    }
+
+
 @module.route('/api/appointments.json')
 @public_endpoint
 def api_patient_appointments():
