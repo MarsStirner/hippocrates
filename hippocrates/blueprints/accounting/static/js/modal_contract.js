@@ -200,7 +200,7 @@ WebMis20.run(['$templateCache', function ($templateCache) {
     </div>\
     </div>\
     </ng-form>\
-    <pre>[[ contract | json ]]</pre>\
+    <!-- <pre>[[ contract | json ]]</pre> -->\
 </div>\
 <div class="modal-footer">\
     <button type="button" class="btn btn-default" ng-click="$dismiss(\'cancel\')">Отменить</button>\
