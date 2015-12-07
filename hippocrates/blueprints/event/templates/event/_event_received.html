@@ -1,13 +1,15 @@
 <div ng-controller="EventReceivedCtrl">
-<ng-form name="event_received_form" role="form" toc-element="Поступление" toc-name="tocEventForm">
-    <div class="box box-info">
+<ng-form name="event_received_form" role="form" toc-element="Сведения о госпитализации" toc-name="tocEventForm">
+    <div class="box box-info" ng-class="{'collapsed-box': !event.is_new()}">
         <div class="box-header with-border">
-            <h3 class="box-title">Поступление</h3>
+            <h3 class="box-title">Сведения о госпитализации</h3>
             <div class="box-tools pull-right">
                 <button type="button" class="btn btn-box-tool" ng-click="received_edit()" title="Редактировать">
                     <span class="glyphicon glyphicon-pencil text-primary"></span>
                 </button>
-                <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                <button class="btn btn-box-tool" data-widget="collapse">
+                    <i class="fa" ng-class="{'fa-minus': event.is_new(), 'fa-plus': !event.is_new()}"></i>
+                </button>
             </div>
         </div>
         <div class="box-body">
@@ -143,13 +145,16 @@
                                     ng-model="event.received.delivered_after.value"
                                     ng-options="val for val in event.received.delivered_after.type.values"></select>
                         </div>
-                        <div class="form-group col-md-3"
+                        <div class="col-md-3"
                              ng-class="{'has-error': event_received_form.transp_type.$invalid && editing.submit_attempt}">
-                            <label for="transp_type">Вид транспортировки</label>
-                            <select id="transp_type" name="transp_type" class="form-control"
-                                    ng-model="event.received.transp_type.value"
-                                    ng-options="val for val in event.received.transp_type.type.values"
-                                    ng-required="true"></select>
+                            <label for="transp_type" class="control-label">Вид транспортировки</label>
+                            <ui-select id="transp_type" name="transp_type" theme="select2"
+                                       ng-model="event.received.transp_type.value" ng-required="true">
+                                <ui-select-match placeholder="Вид транспортировки">[[$select.selected]]</ui-select-match>
+                                <ui-select-choices repeat="val in event.received.transp_type.type.values">
+                                    <div ng-bind-html="val | highlight: $select.search"></div>
+                                </ui-select-choices>
+                            </ui-select>
                         </div>
                         <div class="form-group col-md-4">
                             <label for="intoxication">Доставлен в состоянии опьянения</label>

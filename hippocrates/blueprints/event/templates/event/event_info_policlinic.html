@@ -38,7 +38,19 @@
                                 <wm-client-info client="event.info.client"></wm-client-info>
                             </div>
                         </div>
-                        {% include "event/_main_info.html" %}
+                        <ng-form name="event_maininfo_form" toc-element="Информация об обращении">
+                            <div class="box box-info">
+                                <div class="box-header with-border">
+                                    <h3 class="box-title">Информация об обращении</h3>
+                                    <div class="box-tools pull-right">
+                                        <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                                    </div>
+                                </div>
+                                <div class="box-body">
+                                    {% include "event/_main_info.html" %}
+                                </div>
+                            </div>
+                        </ng-form>
                         {% if user_profiles_mng.has_ui_doctor() and user_utils.can_read_dignoses(event) %}
                             {% include "event/_diagnoses.html" %}
                         {% endif %}

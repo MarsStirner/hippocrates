@@ -1,13 +1,4 @@
-<div ng-controller="EventMainInfoCtrl">
-    <ng-form name="event_maininfo_form" toc-element="Информация об обращении">
-        <div class="box box-info">
-            <div class="box-header with-border">
-                <h3 class="box-title">Информация об обращении</h3>
-                <div class="box-tools pull-right">
-                    <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
-                </div>
-            </div>
-            <div class="box-body">
+            <div ng-controller="EventMainInfoCtrl">
                 <div class="alert alert-warning" ng-show="event.is_new() && event.services.length">
                     <strong>Внимание!</strong> Для разблокирования полей необходимо очистить список выбранных
                         <a href="#services" class="alert-link">услуг</a>.</div>
@@ -84,12 +75,6 @@
                                 </ul>
                             </div>
                         </div>
-                        {% if requestType_kind == 'stationary' %}
-                        <div class="col-md-4">
-                            <label for="primary" class="control-label">Первичность</label>
-                            <rb-select ng-model="event.info.is_primary" ref-book="EventPrimary"></rb-select>
-                        </div>
-                        {% endif %}
                         </div>
                     </div>
                 </div>
@@ -164,7 +149,13 @@
                         </wm-time>
                     </div>
                 </div>
-                <div class="row marginal" ng-if="cmb_result_available() || cmb_ache_result_available()">
+                <div class="row marginal">
+                    {% if requestType_kind == 'stationary' %}
+                        <div class="col-md-3">
+                            <label for="primary" class="control-label">Первичность</label>
+                            <rb-select ng-model="event.info.is_primary" ref-book="EventPrimary"></rb-select>
+                        </div>
+                    {% endif %}
                     <div class="col-md-3" ng-if="cmb_result_available()">
                         <label for="result" class="control-label">Результат обращения</label>
                         <ui-select id="result" name="result" theme="select2"
@@ -189,8 +180,5 @@
                     </div>
                 </div>
             </div>
-        </div>
-    </ng-form>
 {#    <pre>[[ event.info | json ]]</pre>#}
-</div>
 
