@@ -553,7 +553,7 @@ var EventServicesCtrl = function($scope, AccountingService, InvoiceModalService)
     };
     $scope.openInvoice = function (idx) {
         var invoice = _.deepCopy($scope.event.invoices[idx]);
-        InvoiceModalService.openEdit(invoice)
+        InvoiceModalService.openEdit(invoice, $scope.event)
             .then(function (result) {
                 var status = result.status;
                 if (status === 'ok') {
@@ -627,14 +627,6 @@ var EventServicesCtrl = function($scope, AccountingService, InvoiceModalService)
     $scope.get_class = function (service) {
         var result = [];
         result.push('info');
-        return result;
-        if (service.check_payment() || service.check_coord()) {
-            result.push('success');
-        } else if (service.check_payment('partial') || service.check_coord('partial')) {
-            result.push('warning');
-        } else {
-            result.push(service.is_new() ? 'info' : 'danger');
-        }
         return result;
     };
 

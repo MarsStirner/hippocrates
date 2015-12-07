@@ -100,8 +100,9 @@ WebMis20.run(['$templateCache', function ($templateCache) {
 }]);
 
 
-var InvoiceModalCtrl = function ($scope, $filter, AccountingService, PrintingService, invoice) {
+var InvoiceModalCtrl = function ($scope, $filter, AccountingService, PrintingService, invoice, event) {
     $scope.invoice = invoice;
+    $scope.event = event;
 
     $scope.isNewInvoice = function () {
         return !$scope.invoice.id;
@@ -136,7 +137,8 @@ var InvoiceModalCtrl = function ($scope, $filter, AccountingService, PrintingSer
     };
     $scope.ps_resolve = function () {
         return {
-            invoice_id: $scope.invoice.id
+            invoice_id: $scope.invoice.id,
+            event_id: $scope.event.info.id
         }
     };
 

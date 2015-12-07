@@ -45,7 +45,7 @@ WebMis20.service('InvoiceModalService', ['$modal', 'AccountingService', function
                 return instance.result;
             });
         },
-        openEdit: function (invoice) {
+        openEdit: function (invoice, event) {
             var instance = $modal.open({
                 templateUrl: '/WebMis20/modal/accounting/invoice.html',
                 controller: InvoiceModalCtrl,
@@ -55,6 +55,9 @@ WebMis20.service('InvoiceModalService', ['$modal', 'AccountingService', function
                 resolve: {
                     invoice: function () {
                         return invoice
+                    },
+                    event: function () {
+                        return event
                     }
                 }
             });
