@@ -4,7 +4,7 @@ from flask import request
 
 from ..app import module
 from nemesis.lib.apiutils import api_method, ApiException
-from blueprints.accounting.lib.pricelist import PriceListController
+from nemesis.lib.data_ctrl.accounting.pricelist import PriceListController
 from blueprints.accounting.lib.represent import PriceListRepr
 
 

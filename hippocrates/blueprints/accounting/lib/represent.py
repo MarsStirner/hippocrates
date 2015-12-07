@@ -2,9 +2,9 @@
 
 from nemesis.models.enums import Gender, ContragentType
 from nemesis.lib.utils import format_date, safe_double, safe_decimal, format_money
-from blueprints.accounting.lib.utils import get_contragent_type, check_invoice_closed
-from blueprints.accounting.lib.service import ServiceController
-from blueprints.accounting.lib.contract import ContragentController
+from nemesis.lib.data_ctrl.accounting.utils import get_contragent_type, check_invoice_closed
+from nemesis.lib.data_ctrl.accounting.service import ServiceController
+from nemesis.lib.data_ctrl.accounting.contract import ContragentController
 
 
 class ContractRepr(object):

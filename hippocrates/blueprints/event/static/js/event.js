@@ -72,9 +72,15 @@ var EventMainInfoCtrl = function ($scope, $q, RefBookService, EventType, $filter
     };
 
     $scope.createContract = function () {
-        AccountingService.get_contract()
+        var client_id = safe_traverse($scope.event.info, ['client_id']),
+            finance_id = safe_traverse($scope.event.info, ['event_type', 'finance', 'id']),
+            client = $scope.event.info.client;
+        AccountingService.get_contract(undefined, {
+            finance_id: finance_id,
+            client_id: client_id
+        })
             .then(function (contract) {
-                return ContractModalService.openEdit(contract);
+                return ContractModalService.openEdit(contract, client);
             })
             .then(function (result) {
                 var contract = result.contract;
@@ -547,7 +553,7 @@ var EventServicesCtrl = function($scope, AccountingService, InvoiceModalService)
     };
     $scope.openInvoice = function (idx) {
         var invoice = _.deepCopy($scope.event.invoices[idx]);
-        InvoiceModalService.openEdit(invoice)
+        InvoiceModalService.openEdit(invoice, $scope.event)
             .then(function (result) {
                 var status = result.status;
                 if (status === 'ok') {
@@ -621,14 +627,6 @@ var EventServicesCtrl = function($scope, AccountingService, InvoiceModalService)
     $scope.get_class = function (service) {
         var result = [];
         result.push('info');
-        return result;
-        if (service.check_payment() || service.check_coord()) {
-            result.push('success');
-        } else if (service.check_payment('partial') || service.check_coord('partial')) {
-            result.push('warning');
-        } else {
-            result.push(service.is_new() ? 'info' : 'danger');
-        }
         return result;
     };
 

@@ -4,7 +4,7 @@ from flask import request
 
 from ..app import module
 from nemesis.lib.apiutils import api_method, ApiException
-from blueprints.accounting.lib.service import ServiceController
+from nemesis.lib.data_ctrl.accounting.service import ServiceController
 from blueprints.accounting.lib.represent import ServiceRepr
 from nemesis.lib.utils import safe_int
 

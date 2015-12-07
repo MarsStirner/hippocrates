@@ -5,9 +5,9 @@ from flask import request
 from ..app import module
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.utils import safe_bool, safe_int, safe_date
-from blueprints.accounting.lib.finance_trx import FinanceTrxController
+from nemesis.lib.data_ctrl.accounting.finance_trx import FinanceTrxController
+from nemesis.lib.data_ctrl.accounting.utils import get_finance_trx_type
 from blueprints.accounting.lib.represent import FinanceTrxRepr, ContragentRepr, InvoiceRepr
-from blueprints.accounting.lib.utils import get_finance_trx_type
 
 
 @module.route('/api/0/finance_transaction/')

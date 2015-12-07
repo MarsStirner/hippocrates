@@ -71,7 +71,7 @@ WebMis20.run(['$templateCache', function ($templateCache) {
                     <td>[[ item.service.service_name ]]</td>\
                     <td>[[ item.service.price ]]</td>\
                     <td>[[ item.service.amount ]]</td>\
-                    <td>[[ item.service.sum ]]</td>\
+                    <td>[[ item.sum ]]</td>\
                 </tr>\
                 </tbody>\
                 <tbody>\
@@ -92,14 +92,17 @@ WebMis20.run(['$templateCache', function ($templateCache) {
     <button type="button" class="btn btn-danger pull-left" ng-click="deleteAndClose()"\
         ng-if="!isInvoiceClosed()">Удалить</button>\
     <button type="button" class="btn btn-default" ng-click="$dismiss(\'cancel\')">Закрыть</button>\
+    <ui-print-button ps="ps" resolve="ps_resolve()" ng-if="!isNewInvoice()"\
+        fast-print="true"></ui-print-button>\
     <button type="button" class="btn btn-primary" ng-disabled="invoiceForm.$invalid"\
         ng-click="saveAndClose()" ng-if="!isInvoiceClosed()">Сохранить</button>\
 </div>');
 }]);
 
 
-var InvoiceModalCtrl = function ($scope, $filter, AccountingService, invoice) {
+var InvoiceModalCtrl = function ($scope, $filter, AccountingService, PrintingService, invoice, event) {
     $scope.invoice = invoice;
+    $scope.event = event;
 
     $scope.isNewInvoice = function () {
         return !$scope.invoice.id;
@@ -132,11 +135,20 @@ var InvoiceModalCtrl = function ($scope, $filter, AccountingService, invoice) {
     $scope.isInvoiceClosed = function () {
         return $scope.invoice.closed;
     };
+    $scope.ps_resolve = function () {
+        return {
+            invoice_id: $scope.invoice.id,
+            event_id: $scope.event.info.id
+        }
+    };
 
-    $scope.init = function () { };
+    $scope.init = function () {
+        $scope.ps = new PrintingService("invoice");
+        $scope.ps.set_context('invoice');
+    };
 
     $scope.init();
 };
 
 
-WebMis20.controller('InvoiceModalCtrl', ['$scope', '$filter', 'AccountingService', InvoiceModalCtrl]);
+WebMis20.controller('InvoiceModalCtrl', ['$scope', '$filter', 'AccountingService', 'PrintingService', InvoiceModalCtrl]);
