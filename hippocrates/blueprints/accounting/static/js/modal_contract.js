@@ -7,6 +7,7 @@ WebMis20.run(['$templateCache', function ($templateCache) {
 <div class="modal-header" xmlns="http://www.w3.org/1999/html">\
     <button type="button" class="close" ng-click="$dismiss(\'cancel\')">&times;</button>\
     <h4 class="modal-title">[[ is_new_contract() ? "Создание договора" : "Редактирование договора" ]]</h4>\
+    <span class="text-muted" ng-if="is_new_contract()">пациент [[ client.info.full_name ]], [[ client.info.birth_date | asDate ]]</span>\
 </div>\
 <div class="modal-body">\
     <ng-form name="contractForm">\
@@ -16,34 +17,43 @@ WebMis20.run(['$templateCache', function ($templateCache) {
             <div class="box-body">\
                 <div class="row">\
                 <div class="col-md-6">\
-                    <div class="form-group">\
-                        <label for="finance">Источник финансирования</label>\
-                        <rb-select ref-book="rbFinance" ng-model="contract.finance" id="finance"></rb-select>\
+                    <div class="form-group"\
+                        ng-class="{\'has-error\': contractForm.finance.$invalid}">\
+                        <label for="finance" class="control-label">Источник финансирования</label>\
+                        <rb-select ref-book="rbFinance" ng-model="contract.finance" id="finance" name="finance"\
+                            ng-required="true"></rb-select>\
                     </div>\
                     <div class="row">\
-                        <div class="col-md-6">\
-                            <label for="number">Номер</label>\
-                            <input type="text" class="form-control" ng-model="contract.number" id="number">\
+                        <div class="col-md-6"\
+                            ng-class="{\'has-error\': contractForm.number.$invalid}">\
+                            <label for="number" class="control-label">Номер</label>\
+                            <input type="text" class="form-control" ng-model="contract.number" id="number" name="number"\
+                                ng-required="true">\
                         </div>\
-                        <div class="col-md-6">\
-                            <label for="date">Дата заключения</label>\
-                            <wm-date ng-model="contract.date" id="date"></wm-date>\
+                        <div class="col-md-6"\
+                            ng-class="{\'has-error\': contractForm.date.$invalid}">\
+                            <label for="date" class="control-label">Дата заключения</label>\
+                            <wm-date ng-model="contract.date" id="date" name="date" ng-required="true"></wm-date>\
                         </div>\
                     </div>\
                 </div>\
                 <div class="col-md-6">\
-                    <div class="form-group">\
-                        <label for="contract_type">Тип договора</label>\
-                        <rb-select ref-book="rbContractType" ng-model="contract.contract_type" id="contract_type"></rb-select>\
+                    <div class="form-group"\
+                        ng-class="{\'has-error\': contractForm.contract_type.$invalid}">\
+                        <label for="contract_type" class="control-label">Тип договора</label>\
+                        <rb-select ref-book="rbContractType" ng-model="contract.contract_type" id="contract_type"\
+                            name="contract_type" ng-required="true"></rb-select>\
                     </div>\
                     <div class="row">\
-                        <div class="col-md-6">\
-                            <label for="date">Дата начала</label>\
-                            <wm-date ng-model="contract.beg_date" id="beg_date"></wm-date>\
+                        <div class="col-md-6"\
+                            ng-class="{\'has-error\': contractForm.beg_date.$invalid}">\
+                            <label for="date" class="control-label">Дата начала</label>\
+                            <wm-date ng-model="contract.beg_date" id="beg_date" name="beg_date" ng-required="true"></wm-date>\
                         </div>\
-                        <div class="col-md-6">\
-                            <label for="date">Дата окончания</label>\
-                            <wm-date ng-model="contract.end_date" id="end_date"></wm-date>\
+                        <div class="col-md-6"\
+                            ng-class="{\'has-error\': contractForm.end_date.$invalid}">\
+                            <label for="date" class="control-label">Дата окончания</label>\
+                            <wm-date ng-model="contract.end_date" id="end_date" name="end_date"></wm-date>\
                         </div>\
                     </div>\
                 </div>\
@@ -82,13 +92,13 @@ WebMis20.run(['$templateCache', function ($templateCache) {
                             <input type="radio" ng-model="contract.payer.ca_type_code" ng-value="\'legal\'">Юр. лицо</label>\
                         </span>\
                         <ui-select ng-model="contract.payer" ext-select-contragent-search ca-type-code="[[contract.payer.ca_type_code]]"\
-                            theme="bootstrap" ng-show="!isPayerCreateMode()">\
+                            append-to-body="true" theme="select2" ng-if="!isPayerCreateMode()">\
                         </ui-select>\
-                        <ui-select ng-model="contract.payer.org" ext-select-org theme="bootstrap"\
-                            placeholder="Выберите организацию" ng-show="isPayerCreateMode() && isPayerLegal()">\
+                        <ui-select ng-model="contract.payer.org" ext-select-org theme="select2"\
+                            append-to-body="true" placeholder="Выберите организацию" ng-if="isPayerCreateMode() && isPayerLegal()">\
                         </ui-select>\
-                        <ui-select ng-model="contract.payer.client" ext-select-client-search theme="bootstrap"\
-                            placeholder="Выберите клиента" ng-show="isPayerCreateMode() && isPayerIndividual()">\
+                        <ui-select ng-model="contract.payer.client" ext-select-client-search theme="select2"\
+                            append-to-body="true" placeholder="Выберите клиента" ng-if="isPayerCreateMode() && isPayerIndividual()">\
                         </ui-select>\
                     </div>\
                 </div>\
@@ -108,13 +118,13 @@ WebMis20.run(['$templateCache', function ($templateCache) {
                             <input type="radio" ng-model="contract.recipient.ca_type_code" ng-value="\'legal\'">Юр. лицо</label>\
                         </span>\
                         <ui-select ng-model="contract.recipient" ext-select-contragent-search ca-type-code="[[contract.recipient.ca_type_code]]"\
-                            theme="bootstrap" ng-show="!isRecipientCreateMode()">\
+                            append-to-body="true" theme="select2" ng-if="!isRecipientCreateMode()">\
                         </ui-select>\
-                        <ui-select ng-model="contract.recipient.org" ext-select-org theme="bootstrap"\
-                            placeholder="Выберите организацию" ng-show="isRecipientCreateMode() && isRecipientLegal()">\
+                        <ui-select ng-model="contract.recipient.org" ext-select-org theme="select2"\
+                            append-to-body="true" placeholder="Выберите организацию" ng-if="isRecipientCreateMode() && isRecipientLegal()">\
                         </ui-select>\
-                        <ui-select ng-model="contract.recipient.client" ext-select-client-search theme="bootstrap"\
-                            placeholder="Выберите клиента" ng-show="isRecipientCreateMode() && isRecipientIndividual()">\
+                        <ui-select ng-model="contract.recipient.client" ext-select-client-search theme="select2"\
+                            append-to-body="true" placeholder="Выберите клиента" ng-if="isRecipientCreateMode() && isRecipientIndividual()">\
                         </ui-select>\
                     </div>\
                 </div>\
@@ -141,8 +151,8 @@ WebMis20.run(['$templateCache', function ($templateCache) {
             <div class="box-footer">\
                 <div class="row">\
                 <div class="col-md-9">\
-                    <ui-select ng-model="new_pricelist.pl" ext-select-price-list-search finance="contract.finance" theme="bootstrap"\
-                        placeholder="Выберите подходящий прайс-лист">\
+                    <ui-select ng-model="new_pricelist.pl" ext-select-price-list-search finance="contract.finance"\
+                        theme="select2" append-to-body="true" placeholder="Выберите подходящий прайс-лист">\
                     </ui-select>\
                 </div>\
                 <div class="col-md-3">\
@@ -174,8 +184,8 @@ WebMis20.run(['$templateCache', function ($templateCache) {
             <div class="box-footer">\
                 <div class="row">\
                 <div class="col-md-9">\
-                    <ui-select ng-model="new_contingent.client" ext-select-client-search theme="bootstrap"\
-                        placeholder="Выберите пациента">\
+                    <ui-select ng-model="new_contingent.client" ext-select-client-search theme="select2"\
+                        append-to-body="true" placeholder="Выберите пациента">\
                     </ui-select>\
                 </div>\
                 <div class="col-md-3">\
@@ -190,17 +200,18 @@ WebMis20.run(['$templateCache', function ($templateCache) {
     </div>\
     </div>\
     </ng-form>\
-    <!-- <pre>[[ contract | json ]]</pre> -->\
+    <pre>[[ contract | json ]]</pre>\
 </div>\
 <div class="modal-footer">\
     <button type="button" class="btn btn-default" ng-click="$dismiss(\'cancel\')">Отменить</button>\
-    <button type="button" class="btn btn-primary" ng-click="saveAndClose()">Сохранить</button>\
+    <button type="button" class="btn btn-primary" ng-disabled="contractForm.$invalid" ng-click="saveAndClose()">Сохранить</button>\
 </div>');
 }]);
 
 
-var ContractModalCtrl = function ($scope, $filter, AccountingService, contract) {
+var ContractModalCtrl = function ($scope, $filter, AccountingService, contract, client) {
     $scope.contract = contract;
+    $scope.client = client;
     $scope.ca_params = {
         payer_create_mode: false,
         recipient_create_mode: false
@@ -341,7 +352,16 @@ var ContractModalCtrl = function ($scope, $filter, AccountingService, contract) 
         return url_for_patien_info_full + '?client_id=' + client_id;
     };
 
-    $scope.init = function () { };
+    $scope.init = function () {
+        if ($scope.is_new_contract()) {
+            if (!$scope.contract.payer.ca_type_code || $scope.contract.payer.ca_type_code === 'undefined') {
+                $scope.contract.payer.ca_type_code = 'individual';
+            }
+            if (!$scope.contract.recipient.ca_type_code || $scope.contract.recipient.ca_type_code === 'undefined') {
+                $scope.contract.recipient.ca_type_code = 'legal';
+            }
+        }
+    };
 
     $scope.init();
 };

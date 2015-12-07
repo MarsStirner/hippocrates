@@ -2,7 +2,7 @@
 
 WebMis20.service('ContractModalService', ['$modal', function ($modal) {
     return {
-        openEdit: function (contract) {
+        openEdit: function (contract, client) {
             var instance = $modal.open({
                 templateUrl: '/WebMis20/modal/accounting/contract_edit.html',
                 controller: ContractModalCtrl,
@@ -12,6 +12,9 @@ WebMis20.service('ContractModalService', ['$modal', function ($modal) {
                 resolve: {
                     contract: function () {
                         return contract
+                    },
+                    client: function () {
+                        return client
                     }
                 }
             });
@@ -42,7 +45,7 @@ WebMis20.service('InvoiceModalService', ['$modal', 'AccountingService', function
                 return instance.result;
             });
         },
-        openEdit: function (invoice) {
+        openEdit: function (invoice, event) {
             var instance = $modal.open({
                 templateUrl: '/WebMis20/modal/accounting/invoice.html',
                 controller: InvoiceModalCtrl,
@@ -52,6 +55,9 @@ WebMis20.service('InvoiceModalService', ['$modal', 'AccountingService', function
                 resolve: {
                     invoice: function () {
                         return invoice
+                    },
+                    event: function () {
+                        return event
                     }
                 }
             });
@@ -120,8 +126,8 @@ WebMis20.service('CashBookModalService', ['$modal', '$q', 'AccountingService',
 }]);
 
 WebMis20.service('AccountingService', ['WebMisApi', function (WebMisApi) {
-    this.get_contract = function (contract_id) {
-        return WebMisApi.contract.get(contract_id);
+    this.get_contract = function (contract_id, args) {
+        return WebMisApi.contract.get(contract_id, args);
     };
     this.get_contract_list = function (args) {
         return WebMisApi.contract.get_list(args);
