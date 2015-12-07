@@ -140,7 +140,7 @@ WebMis20.run(['$templateCache', function ($templateCache) {
             <div class="col-sm-offset-3 col-sm-7">\
                 <div class="checkbox">\
                     <label>\
-                        <input type="checkbox" ng-model="deposit_payment.checked"> Внести сумму\
+                        <input type="checkbox" ng-model="deposit_payment.checked" ng-change="setDepositSum()"> Внести сумму\
                     </label>\
                 </div>\
             </div>\
@@ -240,6 +240,11 @@ var CashbookInvoiceModalCtrl = function ($scope, $q, AccountingService, RefBookS
 
     $scope.isDepositPayment = function () {
         return $scope.deposit_payment.checked;
+    };
+    $scope.setDepositSum = function () {
+        if ($scope.deposit_payment.checked) {
+            $scope.trxes.payer_balance_trx.sum = $scope.invoice.total_sum;
+        }
     };
     $scope.saveAndClose = function () {
         $scope.make_invoice_trxes().then(function (invoice) {
