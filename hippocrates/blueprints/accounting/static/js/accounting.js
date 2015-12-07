@@ -39,6 +39,9 @@ WebMis20.service('InvoiceModalService', ['$modal', 'AccountingService', function
                     resolve: {
                         invoice: function () {
                             return newInvoice
+                        },
+                        event: function () {
+                            return undefined;
                         }
                     }
                 });
