@@ -13,6 +13,7 @@ angular.module('WebMis20')
 <th>Услуга</th>\
 <th class="nowrap">Документ</th>\
 <th class="nowrap" ng-show="formstate.is_paid()">Цена (руб.)</th>\
+<th ng-show="formstate.is_paid()">Скидка</th>\
 <th>Количество</th>\
 <th class="nowrap" ng-show="formstate.is_paid()">Сумма (руб.)</th>\
 <th></th>'
@@ -102,9 +103,10 @@ function(WMEventFormState, WMEventServices, ActionTypeTreeModal, CurrentUser) {
         ng-disabled="lab_components_disabled()">Выбрать назначаемые исследования</a> -->\
 </td>\
 <td ng-bind="serviceGroupData.at_name"></td>\
-<td ng-bind="serviceGroupData.price" class="text-right" ng-show="formstate.is_paid()"></td>\
+<td ng-bind="serviceGroupData.price | moneyCut" class="text-right" ng-show="formstate.is_paid()"></td>\
+<td ng-show="formstate.is_paid()"></td>\
 <td ng-bind="serviceGroupData.total_amount" class="text-right"></td>\
-<td ng-bind="serviceGroupData.total_sum" class="text-right" ng-show="formstate.is_paid()"></td>\
+<td ng-bind="serviceGroupData.total_sum | moneyCut" class="text-right" ng-show="formstate.is_paid()"></td>\
 <td nowrap class="text-right">\
     <button type="button" class="btn btn-sm btn-danger" title="Удалить услуги"\
             ng-show="btn_delete_visible()"\
@@ -113,9 +115,8 @@ function(WMEventFormState, WMEventServices, ActionTypeTreeModal, CurrentUser) {
 </td>'
     };
 }])
-.directive('wmEventServiceRecord', [
-    'WMEventFormState', 'WMEventServices', 'ActionTypeTreeModal', '$filter', 'RefBookService', 'CurrentUser',
-function(WMEventFormState, WMEventServices, ActionTypeTreeModal, $filter, RefBookService, CurrentUser) {
+.directive('wmEventServiceRecord', ['WMEventFormState', 'AccountingService',
+        function(WMEventFormState, AccountingService) {
     return {
         restrict: 'A',
         scope: {
@@ -129,12 +130,17 @@ function(WMEventFormState, WMEventServices, ActionTypeTreeModal, $filter, RefBoo
         },
         link: function(scope, elm, attrs) {
             scope.formstate = WMEventFormState;
-            scope.eventServices = WMEventServices;
-            scope.ActionStatus = RefBookService.get('ActionStatus');
 
             scope.onAmountChanged = function () {
-                scope.service.service.sum = scope.service.service.price * scope.service.service.amount;
-                scope.onChangeCallback();
+                AccountingService.calc_service_sum(
+                    scope.service,
+                    scope.service.service.amount,
+                    scope.service.service.discount
+                )
+                    .then(function (new_sum) {
+                        scope.service.service.sum = new_sum;
+                        scope.onChangeCallback();
+                    });
             };
             scope.removeService = function () {
                 if (scope.service.service.id) {
@@ -237,13 +243,14 @@ function(WMEventFormState, WMEventServices, ActionTypeTreeModal, $filter, RefBoo
         ng-disabled="lab_components_disabled()">Выбрать назначаемые исследования</a> -->\
 </td>\
 <td ng-bind="service.action.at_name"></td>\
-<td ng-bind="service.service.price" class="text-right" ng-show="formstate.is_paid()"></td>\
+<td ng-bind="service.service.price | moneyCut" class="text-right" ng-show="formstate.is_paid()"></td>\
+<td ng-show="formstate.is_paid()">[[ service.service.discount ? service.service.discount.description.short : ""]]</td>\
 <td class="col-md-1">\
     <input type="text" class="form-control input-sm"\
            ng-disabled="amountDisabled()" ng-model="service.service.amount" ng-change="onAmountChanged()"\
-           valid-number minval="1"/>\
+           valid-number minval="1" wm-debounce/>\
 </td>\
-<td ng-bind="service.service.sum" class="text-right" ng-show="formstate.is_paid()"></td>\
+<td ng-bind="service.service.sum | moneyCut" class="text-right" ng-show="formstate.is_paid()"></td>\
 <!-- <td class="text-center" ng-show="formstate.is_paid()">\
     <span class="glyphicon" ng-class="{\'glyphicon-ok\': action.is_paid_for(), \'glyphicon-remove\':!action.is_paid_for()}"></span>\
 </td> -->\

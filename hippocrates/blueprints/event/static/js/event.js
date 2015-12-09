@@ -593,11 +593,11 @@ var EventServicesCtrl = function($scope, AccountingService, InvoiceModalService)
                 total_sum = 0;
             angular.forEach(sg.sg_list, function (service) {
                 total_amount += service.service.amount;
-                total_sum += service.service.sum;
+                total_sum += parseFloat(service.service.sum);
             });
             sg.sg_data.total_amount = total_amount;
-            sg.sg_data.total_sum = total_sum;
-        })
+            sg.sg_data.total_sum = total_sum.toFixed(2);
+        });
     };
     $scope.addNewService = function (search_item) {
         search_item = _.deepCopy(search_item);
@@ -621,8 +621,6 @@ var EventServicesCtrl = function($scope, AccountingService, InvoiceModalService)
         $scope.event.services.grouped[idx].sg_list.push(search_item);
         $scope.refreshSGData();
     };
-
-
 
     $scope.get_class = function (service) {
         var result = [];

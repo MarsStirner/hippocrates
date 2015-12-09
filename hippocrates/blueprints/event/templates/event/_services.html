@@ -56,7 +56,7 @@
                             <td ng-bind="item.service.service_code"></td>
                             <td ng-bind="item.service.service_name"></td>
                             <td ng-bind="item.action.at_name"></td>
-                            <td ng-bind="item.service.price" class="text-right" ng-show="formstate.is_paid()"></td>
+                            <td ng-bind="item.service.price | moneyCut" class="text-right" ng-show="formstate.is_paid()"></td>
                         </tr>
                     </tbody>
                 </table>
@@ -99,18 +99,6 @@
     </div>
     </div>
 
-    <div class="box-footer">
-        <blockquote class="novmargin blockquote-reverse" ng-show="formstate.is_paid() && event.services.length">
-            <span class="text-muted">Итого к оплате: </span>
-            <span class="text-primary" ng-bind="event.payment.payments.total_out"></span><span class="text-primary"> руб.</span>
-            <span class="text-muted"> Оплачено: </span>
-            <span title="[[getPaymentsInTooltipText()]]">
-                <span class="text-success" ng-bind="event.payment.payments.total_in"></span><span class="text-success"> руб.</span>
-            </span>
-            <span class="text-muted"> Долг: </span>
-            <span class="text-danger" ng-bind="event.payment.payments.diff"></span><span class="text-danger"> руб.</span>
-        </blockquote>
-    </div>
     </div>
 </ng-form>
 <div>
