@@ -326,6 +326,9 @@ def add_or_update_blood_type(client, data):
     err_msg = u'Ошибка сохранения группы крови'
     bt_id = data.get('id')
     bt_type = safe_traverse(data, 'blood_type', 'id')
+    bt_phenotype = safe_traverse(data, 'blood_phenotype', 'id')
+    bt_kell = safe_traverse(data, 'blood_kell', 'id')
+
     if not bt_type:
         raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Группа крови')
     date = safe_date(data.get('date'))
@@ -340,8 +343,10 @@ def add_or_update_blood_type(client, data):
         bt.bloodDate = date
         bt.bloodType_id = bt_type
         bt.person_id = person
+        bt.bloodPhenotype_id = bt_phenotype
+        bt.bloodKell_id = bt_kell
     else:
-        bt = BloodHistory(bt_type, date, person, client)
+        bt = BloodHistory(bt_type, date, person, client, bt_phenotype, bt_kell)
     return bt
 
 
