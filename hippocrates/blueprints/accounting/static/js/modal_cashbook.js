@@ -78,7 +78,7 @@ var CashbookPayerModalCtrl = function ($scope, $q, AccountingService, RefBookSer
     $scope.make_trx = function (operation) {
         var data = angular.extend($scope.trx, {
             contragent_id: $scope.payer.id,
-            finance_operation: operation
+            finance_operation_type: operation
         });
         return AccountingService.make_finance_transaction($scope.trx_type, data);
     };
@@ -257,11 +257,11 @@ var CashbookInvoiceModalCtrl = function ($scope, $q, AccountingService, RefBookS
     $scope.make_invoice_trxes = function () {
         var data = {};
         data.invoice_trx = angular.extend($scope.trxes.invoice_trx, {
-            finance_operation: $scope.ops.invoice_pay
+            finance_operation_type: $scope.ops.invoice_pay
         });
         if ($scope.isDepositPayment()) {
             data.payer_balance_trx = angular.extend($scope.trxes.payer_balance_trx, {
-                finance_operation: $scope.ops.balance_in
+                finance_operation_type: $scope.ops.balance_in
             })
         }
         return AccountingService.make_finance_transaction_invoice($scope.trx_type, data);
