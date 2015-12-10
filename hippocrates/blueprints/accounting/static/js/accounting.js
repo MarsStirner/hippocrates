@@ -219,4 +219,18 @@ WebMis20.service('AccountingService', ['WebMisApi', function (WebMisApi) {
     this.make_finance_transaction_invoice = function (trx_type, args) {
         return WebMisApi.finance_trx.make_invoice_trx(trx_type.code, args);
     };
+    this.get_service_discounts = function () {
+        return WebMisApi.service_discount.get_list();
+    };
+    this.calc_service_sum = function (service, amount, discount) {
+        return WebMisApi.service.calc_sum({
+            service_id: service.service.id,
+            price_list_item_id: service.service.price_list_item_id,
+            amount: amount,
+            discount_id: discount.id
+        });
+    };
+    this.calc_invoice_sum = function (invoice) {
+        return WebMisApi.invoice.calc_sum(invoice.id, invoice);
+    };
 }]);

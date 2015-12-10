@@ -7,3 +7,4 @@ from pricelist import *
 from service import *
 from invoice import *
 from finance_trx import *
+from service_discount import *

@@ -73,3 +73,23 @@ def api_0_invoice_search():
     invoice_ctrl = InvoiceController()
     data = invoice_ctrl.search_invoices(args)
     return InvoiceRepr().represent_listed_invoices_for_payment(data)
+
+
+@module.route('/api/0/invoice/calc_sum/', methods=['POST'])
+@module.route('/api/0/invoice/calc_sum/<int:invoice_id>', methods=['POST'])
+@api_method
+def api_0_invoice_calc_sum(invoice_id=None):
+    json_data = request.get_json()
+
+    invoice_ctrl = InvoiceController()
+    if not invoice_id:
+        invoice = invoice_ctrl.get_new_invoice()
+        invoice = invoice_ctrl.update_invoice(invoice, json_data)
+    elif invoice_id:
+        invoice = invoice_ctrl.get_invoice(invoice_id)
+        if not invoice:
+            raise ApiException(404, u'Не найден Invoice с id = {0}'.format(invoice_id))
+        invoice = invoice_ctrl.update_invoice(invoice, json_data)
+    else:
+        raise ApiException(404, u'`invoice_id` required')
+    return InvoiceRepr().represent_invoice_full(invoice)

@@ -59,8 +59,9 @@ WebMis20.run(['$templateCache', function ($templateCache) {
                 <thead>\
                 <tr>\
                     <th>№</th>\
-                    <th>Услуга</th>\
-                    <th>Стоимость (руб.)</th>\
+                    <th style="max-width: 60%">Услуга</th>\
+                    <th>Стоимость<br>(руб.)</th>\
+                    <th ng-if="isInvoiceWithDiscounts()" style="min-width: 100px">Скидка</th>\
                     <th>Кол-во</th>\
                     <th>Итог (руб.)</th>\
                 </tr>\
@@ -69,18 +70,46 @@ WebMis20.run(['$templateCache', function ($templateCache) {
                 <tr ng-repeat="item in invoice.item_list">\
                     <td>[[ $index + 1 ]]</td>\
                     <td>[[ item.service.service_name ]]</td>\
-                    <td>[[ item.service.price ]]</td>\
+                    <td>[[ item.service.price | moneyCut ]]</td>\
+                    <td ng-if="isInvoiceWithDiscounts()">\
+                        <ui-select ng-model="item.discount" ext-select-service-discount\
+                            ng-change="applyDiscount()" ng-if="!isInvoiceClosed()" allow-clear="true"\
+                            theme="select2" append-to-body="true" placeholder="...">\
+                        </ui-select>\
+                        <span ng-if="isInvoiceClosed()">[[ item.discount.description.short ]]</span>\
+                    </td>\
                     <td>[[ item.service.amount ]]</td>\
-                    <td>[[ item.sum ]]</td>\
+                    <td>[[ item.sum | moneyCut ]]</td>\
                 </tr>\
                 </tbody>\
                 <tbody>\
-                <tr>\
-                    <td colspan="4" class="text-right">Итого:</td>\
+                <tr ng-if="showSumWoDiscounts()">\
+                    <td colspan="5" class="text-right">Итого без учёта скидок:</td>\
+                    <td class="text-left">[[ invoice.sum_wo_discounts ]]</td>\
+                </tr>\
+                <tr style="font-size: larger; font-weight: bold">\
+                    <td colspan="[[isInvoiceWithDiscounts() ? 5 : 4]]" class="text-right">Итого:</td>\
                     <td class="text-left">[[ invoice.total_sum ]]</td>\
                 </tr>\
                 </tbody>\
                 </table>\
+                \
+                <div class="row tmargin20" ng-if="!isInvoiceClosed()">\
+                    <div class="form-group col-md-9">\
+                        <label for="new_discount">Выбрать скидку</label>\
+                        <div class="row">\
+                        <div class="col-md-9">\
+                        <ui-select ng-model="newDiscount.val" ext-select-service-discount\
+                            allow-clear="true" id="new_discount"\
+                            theme="select2" append-to-body="true" placeholder="Выберите скидку">\
+                        </ui-select>\
+                        </div>\
+                        <div class="cold-md-3">\
+                            <button type="button" class="btn btn-info" ng-click="applyDiscounts()">Применить ко всем</button>\
+                        </div>\
+                        </div>\
+                    </div>\
+                </div>\
             </div>\
         </div>\
     </div>\
@@ -103,6 +132,9 @@ WebMis20.run(['$templateCache', function ($templateCache) {
 var InvoiceModalCtrl = function ($scope, $filter, AccountingService, PrintingService, invoice, event) {
     $scope.invoice = invoice;
     $scope.event = event;
+    $scope.newDiscount = {
+        val: null
+    };
 
     $scope.isNewInvoice = function () {
         return !$scope.invoice.id;
@@ -134,6 +166,27 @@ var InvoiceModalCtrl = function ($scope, $filter, AccountingService, PrintingSer
     };
     $scope.isInvoiceClosed = function () {
         return $scope.invoice.closed;
+    };
+    $scope.isInvoiceWithDiscounts = function () {
+        return $scope.invoice.can_add_discounts;
+    };
+    $scope.applyDiscount = function () {
+        AccountingService.calc_invoice_sum($scope.invoice)
+            .then(function (new_invoice) {
+                $scope.invoice = new_invoice;
+            });
+    };
+    $scope.applyDiscounts = function () {
+        angular.forEach($scope.invoice.item_list, function (item) {
+            item.discount = angular.copy($scope.newDiscount.val);
+        });
+        AccountingService.calc_invoice_sum($scope.invoice)
+            .then(function (new_invoice) {
+                $scope.invoice = new_invoice;
+            });
+    };
+    $scope.showSumWoDiscounts = function () {
+        return $scope.invoice.sum_wo_discounts !== $scope.invoice.total_sum;
     };
     $scope.ps_resolve = function () {
         return {
