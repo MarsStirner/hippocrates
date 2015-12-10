@@ -6,6 +6,7 @@ from nemesis.lib.data_ctrl.accounting.utils import (get_contragent_type, check_i
     check_invoice_can_add_discounts, calc_invoice_sum_wo_discounts)
 from nemesis.lib.data_ctrl.accounting.service import ServiceController
 from nemesis.lib.data_ctrl.accounting.contract import ContragentController
+from nemesis.lib.data_ctrl.accounting.invoice import InvoiceController
 
 
 class ContractRepr(object):
@@ -388,15 +389,19 @@ class InvoiceRepr(object):
 
     def make_full_description(self, invoice):
         return u'''\
-№{0} от {1}.{2} Позиций: {3} шт.'''.format(
+№{0} от {1}.{2}'''.format(
             invoice.number or '',
             format_date(invoice.setDate),
-            u' Дата погашения {0}.'.format(format_date(invoice.settleDate)) if invoice.settleDate else u'',
-            len(invoice.item_list)
+            u' Дата погашения {0}.'.format(format_date(invoice.settleDate)) if invoice.settleDate else u''
         )
 
     def represent_invoice_payment(self, invoice):
-        return None
+        invoice_ctrl = InvoiceController()
+        pay_info = invoice_ctrl.get_invoice_payment_info(invoice)
+        pay_info['invoice_total_sum'] = format_money(pay_info['invoice_total_sum'])
+        pay_info['paid_sum'] = format_money(pay_info['paid_sum'])
+        pay_info['debt_sum'] = format_money(pay_info['debt_sum'])
+        return pay_info
 
     def represent_invoice_item(self, item):
         return {

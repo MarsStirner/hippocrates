@@ -93,7 +93,10 @@
     <div class="box-body">
         <ul>
             <li ng-repeat="invoice in event.invoices">
-                <a href="javascript:void(0);" ng-click="openInvoice($index)">[[ invoice.description.full ]]</a>
+                <a href="javascript:void(0);" ng-click="openInvoice($index)">[[ invoice.description.full ]]</a><br>
+                Сумма счёта <span class="text-black text-bold">[[ invoice.payment.invoice_total_sum ]]</span>
+                <span ng-show="invoice.payment.paid">, Оплачено <span class="text-success text-bold">[[ invoice.payment.paid_sum ]]</span></span>
+                <span ng-show="!invoice.payment.paid">, Долг <span class="text-danger text-bold">[[ invoice.payment.debt_sum ]]</span></span>
             </li>
         </ul>
     </div>

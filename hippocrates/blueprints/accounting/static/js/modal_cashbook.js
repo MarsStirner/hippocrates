@@ -84,7 +84,7 @@ var CashbookPayerModalCtrl = function ($scope, $q, AccountingService, RefBookSer
     };
 
     $scope.init = function () {
-        var trxOperations = RefBookService.get('FinanceTransactionOperation');
+        var trxOperations = RefBookService.get('FinanceOperationType');
         var trxTypes = RefBookService.get('FinanceTransactionType');
         $q.all([trxOperations.loading, trxTypes.loading])
             .then(function () {
@@ -268,7 +268,7 @@ var CashbookInvoiceModalCtrl = function ($scope, $q, AccountingService, RefBookS
     };
 
     $scope.init = function () {
-        var trxOperations = RefBookService.get('FinanceTransactionOperation');
+        var trxOperations = RefBookService.get('FinanceOperationType');
         var trxTypes = RefBookService.get('FinanceTransactionType');
         $q.all([trxOperations.loading, trxTypes.loading])
             .then(function () {
