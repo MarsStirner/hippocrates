@@ -1,8 +1,8 @@
 <div ng-controller="EventMovingsCtrl">
-<ng-form name="eventReceivedForm" role="form" toc-element="Движения" toc-name="tocEventForm">
-    <div class="box box-info">
+<ng-form name="eventReceivedForm" role="form" toc-element="Движение пациента" toc-name="tocEventForm">
+    <div class="box box-info collapsed-box">
         <div class="box-header with-border">
-            <h3 class="box-title">Движения пациентов</h3>
+            <h3 class="box-title">Движение пациента</h3>
             <div class="box-tools pull-right">
                 <button type="button" class="btn btn-default btn-box-tool" ng-click="create_moving()"
                         ng-disabled="(event.movings.length != 0) && (event.movings[event.movings.length-1].hospitalBed.value == null)">
@@ -12,7 +12,7 @@
                         ng-disabled="(event.movings.length == 0) || (event.movings[event.movings.length-1].hospitalBed.value == null)">
                     Закрыть движение
                 </button>
-                <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i></button>
             </div>
         </div>
         <div class="box-body">

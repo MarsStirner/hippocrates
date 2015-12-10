@@ -7,7 +7,9 @@
         <tr>
             <th class="col-md-2">Дата установления</th>
             <th class="col-md-2">Тип</th>
-            <th class="col-md-6">Врач, установивший группу крови</th>
+            <th class="col-md-3">Врач, установивший группу крови</th>
+            <th class="col-md-2">Фенотип Rh</th>
+            <th class="col-md-2">Kell</th>
         </tr>
         </thead>
         <tbody>
@@ -17,11 +19,19 @@
                 <rb-select id="type" name="type" ng-model="model.blood_type"
                            ref-book="rbBloodType"></rb-select>
             </td>
-            <td class="col-md-6" ng-if="!model.deleted">
+            <td class="col-md-3" ng-if="!model.deleted">
                 <wm-person-select id="person" name="person"
                                   ng-model="model.person"
                                   placeholder="Врач">
                 </wm-person-select>
+            </td>
+            <td class="col-md-2" ng-if="!model.deleted">
+                <rb-select id="type" name="type" ng-model="model.blood_phenotype"
+                           ref-book="rbBloodPhenotype"></rb-select>
+            </td>
+            <td class="col-md-2" ng-if="!model.deleted">
+                <rb-select id="type" name="type" ng-model="model.blood_kell"
+                           ref-book="rbBloodKell"></rb-select>
             </td>
         </tr>
         <tr>
