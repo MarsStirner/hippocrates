@@ -1,0 +1,63 @@
+{% extends 'biomaterials/base.html' %}
+
+{% block title %}> {{ module_name }}{% endblock %}
+
+{% block main %}
+<section class="content-header">
+    <h1>Биоматериалы</h1>
+</section>
+<section class="content">
+    <div ng-controller="IndexCtrl" class="ng-cloak">
+        <div class="row marginal">
+            <div class="col-md-3 col-lg-2">
+                <label for="exec_date" class="control-label">Дата выполнения</label>
+                <wm-date id="execDate" name="execDate" ng-model="search_date.execDate">
+                </wm-date>
+            </div>
+        </div>
+        <div class="box box-info">
+            <div class="box-header with-border">
+                <h3 class="box-title">Забор материалов</h3>
+            </div>
+            <div class="box-body">
+                <table class="table table-condensed">
+                    <thead>
+                        <tr>
+                            <th>Дата и время</th>
+                            <th>ФИО</th>
+                            <th>Пол</th>
+                            <th>Дата рожд.</th>
+                            <th>Назначил врач</th>
+                            <th>Биоматериал</th>
+                            <th>Лабораторное исследование</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="record in ttj_records">
+                            <td>[[record.datetime | asDateTime]]</td>
+                            <td>[[record.client.full_name]]</td>
+                            <td>[[record.client.sex.name]]</td>
+                            <td>[[record.client.birth_date | asDate]]</td>
+                            <td>[[record.execPerson]]</td>
+                            <td>[[record.tissueType.name]]</td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="box box-info">
+            <div class="box-header with-border">
+                <h3 class="box-title">Пробирки</h3>
+            </div>
+            <div class="box-body">
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+{% block modules_js %}
+    {{ super() }}
+    <script src="{{ url_for('.static', filename='js/index.js', v=app_version) }}"></script>
+{% endblock %}
