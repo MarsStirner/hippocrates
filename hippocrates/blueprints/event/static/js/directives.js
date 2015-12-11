@@ -283,7 +283,7 @@ function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WME
             scope.actions = [];
             scope.pager = {
                 current_page: 1,
-                per_page: 15,
+                per_page: 10,
                 max_size: 10,
                 pages: 1
             };
@@ -303,6 +303,9 @@ function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WME
                     scope.pager.pages = data.result.pages;
                 });
             };
+            scope.$on('serviceListChanged', function() {
+                scope.reload();
+            });
             scope.reset_sorting = function () {
                 scope.current_sorting = {
                     order: 'DESC',

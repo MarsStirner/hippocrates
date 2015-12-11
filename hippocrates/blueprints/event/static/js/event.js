@@ -505,7 +505,7 @@ var EventMovingsCtrl = function($scope, $modal, RefBookService, ApiCalls) {
     }
 };
 
-var EventServicesCtrl = function($scope, AccountingService, InvoiceModalService) {
+var EventServicesCtrl = function($scope, $rootScope, AccountingService, InvoiceModalService) {
     $scope.query = "";
     $scope.search_result = null;
     $scope.search_processed = false;
@@ -531,6 +531,7 @@ var EventServicesCtrl = function($scope, AccountingService, InvoiceModalService)
                 $scope.event.services = service_data;
                 $scope.query_clear();
                 $scope.editing = false;
+                $rootScope.$broadcast('serviceListChanged');
             });
     };
     $scope.inInvoiceEditMode = function () {
@@ -549,6 +550,10 @@ var EventServicesCtrl = function($scope, AccountingService, InvoiceModalService)
             .then(function (result) {
                 $scope.event.invoices.push(result.invoice);
                 $scope.cancelEditingInvoice();
+                AccountingService.get_grouped_services($scope.event.event_id)
+                    .then(function (service_data) {
+                        $scope.event.services = service_data;
+                    });
             });
     };
     $scope.openInvoice = function (idx) {
@@ -811,7 +816,7 @@ WebMis20.controller('EventMainInfoCtrl', ['$scope', '$q', 'RefBookService', 'Eve
 WebMis20.controller('EventStationaryInfoCtrl', ['$scope', '$filter', '$modal', '$q', 'RisarApi', 'ApiCalls', EventStationaryInfoCtrl]);
 WebMis20.controller('EventReceivedCtrl', ['$scope', '$modal', 'RefBookService', EventReceivedCtrl]);
 WebMis20.controller('EventMovingsCtrl', ['$scope', '$modal', 'RefBookService', 'ApiCalls', EventMovingsCtrl]);
-WebMis20.controller('EventServicesCtrl', ['$scope', 'AccountingService',
+WebMis20.controller('EventServicesCtrl', ['$scope', '$rootScope', 'AccountingService',
     'InvoiceModalService', EventServicesCtrl]);
 WebMis20.controller('EventInfoCtrl', ['$scope', 'WMEvent', '$http', 'RefBookService', '$window', '$document',
     'PrintingService', '$filter', '$modal', 'WMEventServices', 'WMEventFormState', 'MessageBox', EventInfoCtrl]);

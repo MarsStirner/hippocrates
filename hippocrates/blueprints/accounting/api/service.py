@@ -41,6 +41,18 @@ def api_0_service_list_save():
     return service_repr.represent_grouped_event_services(grouped)
 
 
+@module.route('/api/0/service/list/grouped/')
+@module.route('/api/0/service/list/grouped/<int:event_id>')
+@api_method
+def api_0_service_list_grouped(event_id=None):
+    if not event_id:
+        raise ApiException(404, u'`event_id` required')
+    service_ctrl = ServiceController()
+    grouped = service_ctrl.get_grouped_services_by_event(event_id)
+    service_repr = ServiceRepr()
+    return service_repr.represent_grouped_event_services(grouped)
+
+
 @module.route('/api/0/service/calc_sum/', methods=['POST'])
 @api_method
 def api_0_service_calc_sum():
