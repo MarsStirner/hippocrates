@@ -196,7 +196,7 @@ function(WMEventFormState, WMEventServices, ActionTypeTreeModal, CurrentUser) {
                 return !scope.editMode;
             };
             scope.btnRemoveVisible = function () {
-                return scope.editMode;
+                return scope.editMode; // && scope.service.access.canDelete;
                 return !(scope.action.is_paid_for() || scope.action.is_coordinated() ||
                     scope.action.is_closed() || scope.event.ro);
             };

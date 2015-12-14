@@ -515,6 +515,9 @@ var EventServicesCtrl = function($scope, $rootScope, AccountingService, InvoiceM
     $scope.newInvoiceServiceList = [];
     $scope.ps_invoice = new PrintingService("invoice");
 
+    $scope.controlsAvailable = function () {
+        return !$scope.event.ro;
+    };
     $scope.inEditMode = function () {
         return $scope.editing;
     };
