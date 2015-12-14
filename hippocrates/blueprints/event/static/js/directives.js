@@ -250,10 +250,9 @@ function(WMEventFormState, WMEventServices, ActionTypeTreeModal, CurrentUser) {
            ng-disabled="amountDisabled()" ng-model="service.service.amount" ng-change="onAmountChanged()"\
            valid-number minval="1" wm-debounce/>\
 </td>\
-<td ng-bind="service.service.sum | moneyCut" class="text-right" ng-show="formstate.is_paid()"></td>\
-<!-- <td class="text-center" ng-show="formstate.is_paid()">\
-    <span class="glyphicon" ng-class="{\'glyphicon-ok\': action.is_paid_for(), \'glyphicon-remove\':!action.is_paid_for()}"></span>\
-</td> -->\
+<td class="text-right" ng-show="formstate.is_paid()">\
+    <span ng-bind="service.service.sum | moneyCut"></span> <span class="glyphicon glyphicon-ok text-success" title="Оплачено" ng-show="service.service.is_paid"></span>\
+</td>\
 <td nowrap class="text-right">\
     <!-- <span class="glyphicon glyphicon-info-sign" ng-if="action.action_id"\
         popover-trigger="mouseenter" popover-popup-delay=\'1000\' popover-placement="left" popover="[[get_info_text()]]"></span>\
@@ -284,7 +283,7 @@ function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WME
             scope.actions = [];
             scope.pager = {
                 current_page: 1,
-                per_page: 15,
+                per_page: 10,
                 max_size: 10,
                 pages: 1
             };
@@ -304,6 +303,9 @@ function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WME
                     scope.pager.pages = data.result.pages;
                 });
             };
+            scope.$on('serviceListChanged', function() {
+                scope.reload();
+            });
             scope.reset_sorting = function () {
                 scope.current_sorting = {
                     order: 'DESC',
@@ -371,7 +373,10 @@ function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WME
             };
             scope.open_lab_res_dynamics = function(action){
                 LabDynamicsModal.openLabDynamicsModal(scope.event, action);
-            }
+            };
+            scope.action_has_payment = function (action) {
+                return Boolean(action.payment);
+            };
             scope.reset_sorting();
             scope.reload();
         },
@@ -390,7 +395,12 @@ function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WME
     </thead>\
     <tbody>\
     <tr ng-repeat="action in actions" ng-class="{\'success\': action.status.code == \'finished\'}">\
-        <td ng-click="open_action(action.id)">[[ action.name ]]</td>\
+        <td ng-click="open_action(action.id)">\
+            <span ng-bind="action.name"></span>\
+            <span ng-show="action_has_payment(action)" class="text-muted lmargin20"><br>\
+            Стоимость: [[ action.payment.sum ]] руб. <span class="glyphicon glyphicon-ok text-success" title="Оплачено"\
+            ng-show="action.payment.is_paid"></span>\
+        </td>\
         <td ng-click="open_action(action.id)">[[action.status.name]]</td>\
         <td ng-click="open_action(action.id)">[[ action.begDate | asDate ]]</td>\
         <td ng-click="open_action(action.id)">[[ action.endDate | asDateTime ]]</td>\

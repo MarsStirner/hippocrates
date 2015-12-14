@@ -123,6 +123,7 @@ def fc_urls():
             'api_pricelist_list': url_for('accounting.api_0_pricelist_list'),
             'api_service_search': url_for('accounting.api_0_service_search'),
             'api_service_list_save': url_for('accounting.api_0_service_list_save'),
+            'api_service_list_grouped': url_for('accounting.api_0_service_list_grouped'),
             'api_invoice_get': url_for('accounting.api_0_invoice_get'),
             'api_invoice_save': url_for('accounting.api_0_invoice_save'),
             'api_invoice_delete': url_for('accounting.api_0_invoice_delete'),

@@ -5,7 +5,7 @@ from nemesis.lib.utils import format_date, safe_double, safe_decimal, format_mon
 from nemesis.lib.data_ctrl.accounting.utils import (get_contragent_type, check_invoice_closed,
     check_invoice_can_add_discounts, calc_invoice_sum_wo_discounts)
 from nemesis.lib.data_ctrl.accounting.service import ServiceController
-from nemesis.lib.data_ctrl.accounting.contract import ContragentController
+from nemesis.lib.data_ctrl.accounting.contract import ContragentController, ContractController
 from nemesis.lib.data_ctrl.accounting.invoice import InvoiceController
 
 
@@ -36,6 +36,9 @@ class ContractRepr(object):
                 'short': self.make_short_description(contract),
             }
         })
+        if not contract.id:
+            con_ctrl = ContractController()
+            data['last_contract_number'] = con_ctrl.get_last_contract_number()
         return data
 
     def represent_contract(self, contract):
@@ -236,9 +239,6 @@ class PriceListRepr(object):
 
 class ServiceRepr(object):
 
-    def __init__(self):
-        self.service_ctrl = ServiceController()
-
     def represent_mis_action_service_search_result(self, service_data):
         return {
             'service': {
@@ -271,12 +271,20 @@ class ServiceRepr(object):
             'price': service.price_list_item.price,
             'service_id': service.price_list_item.service_id,
             'deleted': service.deleted,
-            'sum': format_money(service.sum_),
             'service_code': service.price_list_item.serviceCodeOW,
             'service_name': service.price_list_item.serviceNameOW,
-            'discount': ServiceDiscountRepr.represent_discount_short(service.discount),
-            'in_invoice': self.service_ctrl.check_service_in_invoice(service)
+            'discount': ServiceDiscountRepr.represent_discount_short(service.discount)
         }
+
+    def represent_service_full(self, service):
+        data = self.represent_service(service)
+        service_ctrl = ServiceController()
+        in_invoice = service_ctrl.check_service_in_invoice(service)
+        is_paid = service_ctrl.check_service_is_paid(service)
+        data['sum'] = format_money(service.sum_)
+        data['in_invoice'] = in_invoice
+        data['is_paid'] = is_paid
+        return data
 
     def represent_service_action(self, action):
         return {
@@ -290,7 +298,7 @@ class ServiceRepr(object):
         for service_group in data['grouped']:
             for idx, service in enumerate(service_group['sg_list']):
                 service_group['sg_list'][idx] = {
-                    'service': self.represent_service(service['service']),
+                    'service': self.represent_service_full(service['service']),
                     'action': self.represent_service_action(service['action'])
                 }
         return data

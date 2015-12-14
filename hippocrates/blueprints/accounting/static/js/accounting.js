@@ -185,6 +185,9 @@ WebMis20.service('AccountingService', ['WebMisApi', function (WebMisApi) {
             grouped: grouped_service_list
         });
     };
+    this.get_grouped_services = function (event_id) {
+        return WebMisApi.service.get_list_grouped(event_id);
+    };
     this.get_invoice = function (invoice_id, args) {
         return WebMisApi.invoice.get(invoice_id, args);
     };
