@@ -29,6 +29,9 @@ WebMis20.run(['$templateCache', function ($templateCache) {
                             <label for="number" class="control-label">Номер</label>\
                             <input type="text" class="form-control" ng-model="contract.number" id="number" name="number"\
                                 ng-required="true">\
+                            <span class="text-warning" ng-show="is_new_contract()">\
+                                предыдущий номер: [[ contract.last_contract_number ? contract.last_contract_number : "нет" ]]\
+                            </span>\
                         </div>\
                         <div class="col-md-6"\
                             ng-class="{\'has-error\': contractForm.date.$invalid}">\

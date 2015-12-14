@@ -14,6 +14,7 @@ from nemesis.models.client import Client
 from nemesis.models.enums import EventPrimary, EventOrder
 from nemesis.models.event import (Event, EventType, Diagnosis, Diagnostic, Visit, Event_Persons)
 from nemesis.models.exists import Person, rbRequestType, rbResult, OrgStructure, MKB
+from nemesis.models.accounting import Service
 from nemesis.systemwide import db
 from nemesis.lib.utils import (jsonify, safe_traverse, safe_date, safe_datetime, get_utc_datetime_with_tz, safe_int, format_date)
 from nemesis.lib.apiutils import api_method, ApiException
@@ -581,6 +582,12 @@ def api_delete_event():
             ScheduleClientTicket.event_id == event.id
         ).update({
             ScheduleClientTicket.event_id: None,
+        }, synchronize_session=False)
+        db.session.query(Service).join(Action).filter(
+            Action.event_id == event.id,
+            Service.action_id == Action.id
+        ).update({
+            Service.deleted: 1,
         }, synchronize_session=False)
         db.session.commit()
         return jsonify(None)

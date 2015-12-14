@@ -728,16 +728,12 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
     };
 
     $scope.delete_event = function () {
-        if($scope.event_has_payments()) {
-            alert('Невозможно удалить обращение! По нему была совершена оплата.');
-            return;
-        }
         MessageBox.question(
             'Удаление обращения',
             'Вы уверены, что хотите удалить текущее обращение?'
         ).then(function () {
             $scope.eventServices.delete_event(
-                event
+                $scope.event
             ).then(function () {
                 if (window.opener) {
                     window.opener.focus();
@@ -748,13 +744,6 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
                 MessageBox.error('Невозможно удалить обращение', safe_traverse(response, ['data', 'meta', 'name']));
             });
         });
-    };
-
-    $scope.event_has_payments = function () {
-        return $scope.event.payment && $scope.event.payment.payments.payments.length;
-    };
-    $scope.btn_delete_event_visible = function () {
-        return !$scope.event.is_new() && $scope.event.payment && !$scope.event_has_payments();
     };
 
     $scope.close_event = function() {

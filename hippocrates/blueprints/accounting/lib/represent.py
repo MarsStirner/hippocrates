@@ -5,7 +5,7 @@ from nemesis.lib.utils import format_date, safe_double, safe_decimal, format_mon
 from nemesis.lib.data_ctrl.accounting.utils import (get_contragent_type, check_invoice_closed,
     check_invoice_can_add_discounts, calc_invoice_sum_wo_discounts)
 from nemesis.lib.data_ctrl.accounting.service import ServiceController
-from nemesis.lib.data_ctrl.accounting.contract import ContragentController
+from nemesis.lib.data_ctrl.accounting.contract import ContragentController, ContractController
 from nemesis.lib.data_ctrl.accounting.invoice import InvoiceController
 
 
@@ -36,6 +36,9 @@ class ContractRepr(object):
                 'short': self.make_short_description(contract),
             }
         })
+        if not contract.id:
+            con_ctrl = ContractController()
+            data['last_contract_number'] = con_ctrl.get_last_contract_number()
         return data
 
     def represent_contract(self, contract):
