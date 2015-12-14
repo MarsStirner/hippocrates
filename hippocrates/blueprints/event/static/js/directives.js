@@ -37,9 +37,6 @@ function(WMEventFormState, WMEventServices, ActionTypeTreeModal, CurrentUser) {
                 scope.expanded = newVal;
             });
 
-            //scope.coord_all = function (off) {
-            //    scope.service.coord_all = !Boolean(off);
-            //};
             //scope.open_assignments = function () {
             //    var assigned = scope.service.all_assigned,
             //        ped = scope.service.all_planned_end_date;
@@ -74,13 +71,6 @@ function(WMEventFormState, WMEventServices, ActionTypeTreeModal, CurrentUser) {
             //            }
             //        });
             //    });
-            //};
-            //
-            //scope.btn_coordinate_visible = function () {
-            //    return !scope.service.fully_coord && !scope.service.all_actions_closed && !scope.event.ro;
-            //};
-            //scope.btn_cancel_coordinate_visible = function () {
-            //    return scope.service.fully_coord && !scope.service.all_actions_closed && !scope.event.ro;
             //};
             //scope.btn_delete_visible = function () {
             //    var s = scope.service;
@@ -202,15 +192,6 @@ function(WMEventFormState, WMEventServices, ActionTypeTreeModal, CurrentUser) {
             //    ];
             //    return msg.join('; ');
             //};
-            //scope.get_ps = function () {
-            //    return scope.service.print_services[scope.idx];
-            //};
-            //scope.get_ps_resolve = function () {
-            //    return {
-            //        action_id: scope.action.action_id
-            //    };
-            //};
-            //
             scope.amountDisabled = function () {
                 return !scope.editMode;
             };
@@ -255,9 +236,7 @@ function(WMEventFormState, WMEventServices, ActionTypeTreeModal, CurrentUser) {
 </td>\
 <td nowrap class="text-right">\
     <!-- <span class="glyphicon glyphicon-info-sign" ng-if="action.action_id"\
-        popover-trigger="mouseenter" popover-popup-delay=\'1000\' popover-placement="left" popover="[[get_info_text()]]"></span>\
-    <ui-print-button ps="get_ps()" resolve="get_ps_resolve()" lazy-load-context="[[service.print_context]]"\
-        ng-if="action.action_id"></ui-print-button> -->\
+        popover-trigger="mouseenter" popover-popup-delay=\'1000\' popover-placement="left" popover="[[get_info_text()]]"></span> -->\
     <button type="button" class="btn btn-sm btn-danger" title="Убрать из списка услуг" ng-show="btnRemoveVisible()"\
             ng-click="removeService()"><span class="fa fa-trash"></span>\
     </button>\

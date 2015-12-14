@@ -506,13 +506,14 @@ var EventMovingsCtrl = function($scope, $modal, RefBookService, ApiCalls) {
     }
 };
 
-var EventServicesCtrl = function($scope, $rootScope, AccountingService, InvoiceModalService) {
+var EventServicesCtrl = function($scope, $rootScope, AccountingService, InvoiceModalService, PrintingService) {
     $scope.query = "";
     $scope.search_result = null;
     $scope.search_processed = false;
     $scope.editing = false;
     $scope.editingInvoice = false;
     $scope.newInvoiceServiceList = [];
+    $scope.ps_invoice = new PrintingService("invoice");
 
     $scope.inEditMode = function () {
         return $scope.editing;
@@ -626,6 +627,12 @@ var EventServicesCtrl = function($scope, $rootScope, AccountingService, InvoiceM
         }
         $scope.event.services.grouped[idx].sg_list.push(search_item);
         $scope.refreshSGData();
+    };
+    $scope.get_ps_resolve = function (invoice) {
+        return {
+            invoice_id: invoice.id,
+            event_id: $scope.event.info.id
+        }
     };
 
     $scope.get_class = function (service) {
@@ -807,7 +814,7 @@ WebMis20.controller('EventStationaryInfoCtrl', ['$scope', '$filter', '$modal', '
 WebMis20.controller('EventReceivedCtrl', ['$scope', '$modal', 'RefBookService', EventReceivedCtrl]);
 WebMis20.controller('EventMovingsCtrl', ['$scope', '$modal', 'RefBookService', 'ApiCalls', EventMovingsCtrl]);
 WebMis20.controller('EventServicesCtrl', ['$scope', '$rootScope', 'AccountingService',
-    'InvoiceModalService', EventServicesCtrl]);
+    'InvoiceModalService', 'PrintingService', EventServicesCtrl]);
 WebMis20.controller('EventInfoCtrl', ['$scope', 'WMEvent', '$http', 'RefBookService', '$window', '$document',
     'PrintingService', '$filter', '$modal', 'WMEventServices', 'WMEventFormState', 'MessageBox', EventInfoCtrl]);
 WebMis20.controller('StationaryEventInfoCtrl', ['$scope', '$controller', '$modal', '$http', 'WMStationaryEvent', StationaryEventInfoCtrl]);

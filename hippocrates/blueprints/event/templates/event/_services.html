@@ -94,9 +94,11 @@
         <ul>
             <li ng-repeat="invoice in event.invoices">
                 <a href="javascript:void(0);" ng-click="openInvoice($index)">[[ invoice.description.full ]]</a><br>
-                Сумма счёта <span class="text-black text-bold">[[ invoice.payment.invoice_total_sum ]]</span>
-                <span ng-show="invoice.payment.paid">, Оплачено <span class="text-success text-bold">[[ invoice.payment.paid_sum ]]</span></span>
-                <span ng-show="!invoice.payment.paid">, Долг <span class="text-danger text-bold">[[ invoice.payment.debt_sum ]]</span></span>
+                Сумма счёта <span class="text-black text-bold">[[ invoice.payment.invoice_total_sum ]]</span><span
+                    ng-show="invoice.payment.paid">, Оплачено <span class="text-success text-bold">[[ invoice.payment.paid_sum ]]</span></span><span
+                        ng-show="!invoice.payment.paid">, Долг <span class="text-danger text-bold">[[ invoice.payment.debt_sum ]]</span></span>
+                <ui-print-button ps="ps_invoice" resolve="get_ps_resolve(invoice)" lazy-load-context="invoice" fast-print="true"
+                    class="btn-sm lmargin20"></ui-print-button>
             </li>
         </ul>
     </div>
