@@ -363,6 +363,8 @@ var ContractModalCtrl = function ($scope, $filter, AccountingService, contract, 
             if (!$scope.contract.recipient.ca_type_code || $scope.contract.recipient.ca_type_code === 'undefined') {
                 $scope.contract.recipient.ca_type_code = 'legal';
             }
+            $scope.ca_params.payer_create_mode = !Boolean($scope.contract.payer.id);
+            $scope.ca_params.recipient_create_mode = !Boolean($scope.contract.recipient.id);
         }
     };
 
