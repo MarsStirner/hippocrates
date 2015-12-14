@@ -119,12 +119,12 @@ WebMis20.run(['$templateCache', function ($templateCache) {
 </div>\
 <div class="modal-footer">\
     <button type="button" class="btn btn-danger pull-left" ng-click="deleteAndClose()"\
-        ng-if="!isInvoiceClosed()">Удалить</button>\
+        ng-if="btnDeleteAvailable()">Удалить</button>\
     <button type="button" class="btn btn-default" ng-click="$dismiss(\'cancel\')">Закрыть</button>\
     <ui-print-button ps="ps" resolve="ps_resolve()" ng-if="!isNewInvoice()"\
         fast-print="true"></ui-print-button>\
     <button type="button" class="btn btn-primary" ng-disabled="invoiceForm.$invalid"\
-        ng-click="saveAndClose()" ng-if="!isInvoiceClosed()">Сохранить</button>\
+        ng-click="saveAndClose()" ng-if="btnSaveAvailable()">Сохранить</button>\
 </div>');
 }]);
 
@@ -193,6 +193,12 @@ var InvoiceModalCtrl = function ($scope, $filter, AccountingService, PrintingSer
             invoice_id: $scope.invoice.id,
             event_id: $scope.event.info.id
         }
+    };
+    $scope.btnDeleteAvailable = function () {
+        return !$scope.event.ro && !$scope.isInvoiceClosed();
+    };
+    $scope.btnSaveAvailable = function () {
+        return !$scope.event.ro && !$scope.isInvoiceClosed();
     };
 
     $scope.init = function () {

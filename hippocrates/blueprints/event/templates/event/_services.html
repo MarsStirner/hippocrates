@@ -4,7 +4,7 @@
         <div class="box-header with-border">
             <h3 class="box-title">Услуги</h3>
             <div class="box-tools pull-right">
-                <div class="btn-group btn-group-sm rmargin10">
+                <div class="btn-group btn-group-sm rmargin10" ng-if="controlsAvailable()">
                     <button type="button" class="btn btn-primary" ng-click="startEditingInvoice()"
                         ng-if="!inInvoiceEditMode() && !inEditMode()"><i class="fa fa-list-alt"></i> Выставить счёт</button>
                     <button type="button" class="btn btn-success" ng-click="finishEditingInvoice()"
@@ -12,7 +12,7 @@
                     <button type="button" class="btn btn-danger" ng-click="cancelEditingInvoice()"
                         ng-if="inInvoiceEditMode()">Отменить</button>
                 </div>
-                <div class="btn-group btn-group-sm rmargin10">
+                <div class="btn-group btn-group-sm rmargin10" ng-if="controlsAvailable()">
                     <button type="button" class="btn btn-primary" ng-click="startEditing()"
                         ng-if="!inEditMode() && !inInvoiceEditMode()"><i class="fa fa-edit"></i> Редактировать услуги</button>
                     <button type="button" class="btn btn-success" ng-click="finishEditing()" ng-if="inEditMode()">Сохранить</button>
@@ -94,9 +94,11 @@
         <ul>
             <li ng-repeat="invoice in event.invoices">
                 <a href="javascript:void(0);" ng-click="openInvoice($index)">[[ invoice.description.full ]]</a><br>
-                Сумма счёта <span class="text-black text-bold">[[ invoice.payment.invoice_total_sum ]]</span>
-                <span ng-show="invoice.payment.paid">, Оплачено <span class="text-success text-bold">[[ invoice.payment.paid_sum ]]</span></span>
-                <span ng-show="!invoice.payment.paid">, Долг <span class="text-danger text-bold">[[ invoice.payment.debt_sum ]]</span></span>
+                Сумма счёта <span class="text-black text-bold">[[ invoice.payment.invoice_total_sum ]]</span><span
+                    ng-show="invoice.payment.paid">, Оплачено <span class="text-success text-bold">[[ invoice.payment.paid_sum ]]</span></span><span
+                        ng-show="!invoice.payment.paid">, Долг <span class="text-danger text-bold">[[ invoice.payment.debt_sum ]]</span></span>
+                <ui-print-button ps="ps_invoice" resolve="get_ps_resolve(invoice)" lazy-load-context="invoice" fast-print="true"
+                    class="btn-sm lmargin20"></ui-print-button>
             </li>
         </ul>
     </div>
