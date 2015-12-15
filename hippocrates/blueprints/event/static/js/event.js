@@ -1065,7 +1065,12 @@ var PoliclinicEventInfoCtrl = function ($scope, $controller, WMPoliclinicEvent) 
     $scope.initialize();
 
 };
-
+var EventQuotingCtrl = function ($scope, RefBookService) {
+    var original_quoting = angular.extend({}, $scope.event.vmp_quoting);
+    $scope.rbQuotaType = RefBookService.get('QuotaType');
+    $scope.rbPatientModel = RefBookService.get('rbPacientModel');
+    $scope.rbTreatment = RefBookService.get('rbTreatment');
+};
 
 
 WebMis20.controller('EventDiagnosesCtrl', ['$scope', 'RefBookService', '$http', EventDiagnosesCtrl]);

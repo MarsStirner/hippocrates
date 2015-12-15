@@ -1,0 +1,37 @@
+<div ng-controller="EventQuotingCtrl">
+    <ng-form name="eventCouponsForm" role="form" toc-element="Талоны ВМП" toc-name="tocCouponsForm">
+        <div class="box box-info">
+            <div class="box-header with-border">
+                <h3 class="box-title">Квоты ВМП</h3>
+            </div>
+            <div class="box-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <ui-mkb ng-model="event.vmp_quoting.mkb"></ui-mkb>
+                    </div>
+                    <div class="col-md-4">
+                        <rb-select ng-model="event.vmp_quoting.coupon"></rb-select>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        <rb-select ng-model="event.vmp_quoting.quota_type"></rb-select>
+                    </div>
+                    <div class="col-md-8">[[ event.vmp_quoting.quota_type.code ]] - [[ event.vmp_quoting.quota_type.name ]]</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        <rb-select ng-model="event.vmp_quoting.patient_model"></rb-select>
+                    </div>
+                    <div class="col-md-8">[[ event.vmp_quoting.patient_model.code ]] - [[ event.vmp_quoting.patient_model.name ]]</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        <rb-select ng-model="event.vmp_quoting.treatment"></rb-select>
+                    </div>
+                    <div class="col-md-8">[[ event.vmp_quoting.treatment.code ]] - [[ event.vmp_quoting.treatment.name ]]</div>
+                </div>
+            </div>
+        </div>
+    </ng-form>
+</div>

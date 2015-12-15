@@ -206,7 +206,7 @@ angular.module('WebMis20')
                                     <div class="col-sm-3">\
                                         <label><input type="checkbox" ng-model="{1}.is_assigned">{0}</label>\
                                     </div>\
-                                    <div class="col-sm-9"><div ng-show="sas.selected({2})">{1}</div></div>\
+                                    <div class="col-sm-9"><div ng-show="sas.selected({3})">{2}</div></div>\
                                 </div>'.format(
                                     property_name,
                                     property_code,
