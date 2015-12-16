@@ -11,18 +11,59 @@
         <div class="row marginal">
             <div class="col-md-3 col-lg-2">
                 <label for="exec_date" class="control-label">Дата выполнения</label>
-                <wm-date id="execDate" name="execDate" ng-model="search_date.execDate">
+                <wm-date id="execDate" name="execDate" ng-model="filter.execDate">
                 </wm-date>
+            </div>
+            <div class="col-md-3 col-lg-2">
+                <label for="biomaterial" class="control-label">Биоматериал</label>
+                <rb-select ng-model="filter.biomaterial" ref-book="rbTissueType"
+                           id="biomaterial" name="biomaterial" allow-clear="true"></rb-select>
+            </div>
+        </div>
+        <div class="row marginal">
+            <div class="col-md-12 col-lg-12">
+                <button type="button" class="btn btn-sm rmargin10" ng-click="$scope.filter.status = null"
+                        ng-class="{'btn-info': filter.status != null, 'btn-primary': filter.status == null}">
+                    Все <span title="" class="badge bg-white">[[ number_by_status.all ]]</span>
+                </button>
+                <button type="button" class="btn btn-sm rmargin10" ng-click="$scope.filter.status = 0"
+                        ng-class="{'btn-info': filter.status != 0, 'btn-primary': filter.status == 0}">
+                    Ожидается <span title="" class="badge bg-white">[[ number_by_status.waiting ]]</span>
+                </button>
+                <button type="button" class="btn btn-sm rmargin10" ng-click="$scope.filter.status = 1"
+                        ng-class="{'btn-info': filter.status != 1, 'btn-primary': filter.status == 1}">
+                    Выполняется <span title="" class="badge bg-white">[[ number_by_status.in_progress ]]</span>
+                </button>
+                <button type="button" class="btn btn-sm rmargin10" ng-click="$scope.filter.status = 3"
+                        ng-class="{'btn-info': filter.status != 3, 'btn-primary': filter.status == 3}">
+                    Отправка в лаб. <span title="" class="badge bg-white">[[ number_by_status.sending_to_lab ]]</span>
+                </button>
+                <button type="button" class="btn btn-sm rmargin10" ng-click="$scope.filter.status = 2"
+                        ng-class="{'btn-info': filter.status != 2, 'btn-primary': filter.status == 2}">
+                    Закончено <span title="" class="badge bg-white">[[ number_by_status.finished ]]</span>
+                </button>
             </div>
         </div>
         <div class="box box-info">
             <div class="box-header with-border">
                 <h3 class="box-title">Забор материалов</h3>
+            <div class="box-tools pull-right">
+                <button type="button" class="btn btn-default btn-box-tool" ng-click="change_status('in_progress')"
+                        ng-disabled="false">
+                    Выполнить
+                </button>
+                <button type="button" class="btn btn-default btn-box-tool" ng-click="change_status('finished')"
+                        ng-disabled="false">
+                    Отправить в лабораторию
+                </button>
+            </div>
             </div>
             <div class="box-body">
                 <table class="table table-condensed">
                     <thead>
                         <tr>
+                            <th><input type="checkbox" ng-checked="ttj_records.length && ttj_records.length == selected_records.length"
+                                       ng-click="select_all_records()"></th>
                             <th>Дата и время</th>
                             <th>ФИО</th>
                             <th>Пол</th>
@@ -34,12 +75,14 @@
                     </thead>
                     <tbody>
                         <tr ng-repeat="record in ttj_records">
+                            <td><input type="checkbox" ng-checked="selected_records.has(record)" id="record-id-[[record.id]]"
+                                       ng-click="toggle_select_record(record)"></td>
                             <td>[[record.datetime | asDateTime]]</td>
                             <td>[[record.client.full_name]]</td>
                             <td>[[record.client.sex.name]]</td>
                             <td>[[record.client.birth_date | asDate]]</td>
                             <td>[[record.execPerson]]</td>
-                            <td>[[record.tissueType.name]]</td>
+                            <td>[[record.tissueType.name]] ([[record.amount]])</td>
                             <td></td>
                         </tr>
                     </tbody>
@@ -51,6 +94,24 @@
                 <h3 class="box-title">Пробирки</h3>
             </div>
             <div class="box-body">
+                <div class="row">
+                    <div class="col-md-5">
+                        <table class="table table-condensed">
+                            <thead>
+                                <tr>
+                                    <th class="col-md-11">Тип контейнера</th>
+                                    <th class="col-md-1">Количество</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="record in tubes">
+                                    <td>[[record.name]]</td>
+                                    <td>[[record.amount]] шт.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
