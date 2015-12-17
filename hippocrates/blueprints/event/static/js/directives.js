@@ -132,13 +132,18 @@ function(WMEventFormState, WMEventServices, ActionTypeTreeModal, CurrentUser) {
                         scope.onChangeCallback();
                     });
             };
+            var deleteService = function () {
+                scope.serviceGroup.sg_list.splice(scope.idx, 1);
+                scope.onChangeCallback();
+                // todo - удалить группу, если услуга одна
+            };
             scope.removeService = function () {
                 if (scope.service.service.id) {
                     if (!confirm('Вы действительно хотите удалить выбранную услугу?')) return;
-                    // todo
+                    AccountingService.delete_service(scope.service)
+                        .then(deleteService);
                 } else {
-                    scope.serviceGroup.sg_list.splice(scope.idx, 1);
-                    // todo - удалить группу, если услуга одна
+                    deleteService();
                 }
             };
             scope.inNewInvoice = false;
@@ -196,9 +201,7 @@ function(WMEventFormState, WMEventServices, ActionTypeTreeModal, CurrentUser) {
                 return !scope.editMode;
             };
             scope.btnRemoveVisible = function () {
-                return scope.editMode; // && scope.service.access.canDelete;
-                return !(scope.action.is_paid_for() || scope.action.is_coordinated() ||
-                    scope.action.is_closed() || scope.event.ro);
+                return scope.editMode && scope.service.service.access.can_delete;
             };
             scope.btnAddToInvoiceVisible = function () {
                 return scope.editInvoiceMode && !scope.service.service.in_invoice && !scope.isInNewInvoice();

@@ -11,7 +11,7 @@ from blueprints.actions.lib.api import represent_action_template
 from ..lib.api import update_template_action, is_template_action
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.data import create_action, update_action, create_new_action, get_planned_end_datetime, int_get_atl_flat, \
-    get_patient_location
+    get_patient_location, delete_action
 from nemesis.lib.jsonify import ActionVisualizer
 from nemesis.lib.subscriptions import notify_object, subscribe_user
 from nemesis.lib.user import UserUtils
@@ -101,10 +101,10 @@ def api_delete_action(action_id=None):
     action = Action.query.get(action_id)
     if not action:
         raise ApiException(404, "Действие с id=%s не найдено" % action_id)
-    if not UserUtils.can_delete_action(action):
-        raise ApiException(403, u'У пользователя нет прав на удаление действия с id = %s' % action.id)
-
-    action.delete()
+    try:
+        delete_action(action)
+    except Exception, e:
+        raise ApiException(403, unicode(e))
     db.session.commit()
 
 

@@ -25,7 +25,7 @@ WebMis20.service('ContractModalService', ['$modal', function ($modal) {
 
 WebMis20.service('InvoiceModalService', ['$modal', 'AccountingService', function ($modal, AccountingService) {
     return {
-        openNew: function (service_list, contract_id) {
+        openNew: function (service_list, contract_id, event) {
             return AccountingService.get_invoice(undefined, {
                 service_list: service_list,
                 contract_id: contract_id
@@ -41,7 +41,7 @@ WebMis20.service('InvoiceModalService', ['$modal', 'AccountingService', function
                             return newInvoice
                         },
                         event: function () {
-                            return undefined;
+                            return event;
                         }
                     }
                 });
@@ -184,6 +184,9 @@ WebMis20.service('AccountingService', ['WebMisApi', function (WebMisApi) {
             event_id: event_id,
             grouped: grouped_service_list
         });
+    };
+    this.delete_service = function (service) {
+        return WebMisApi.service.del(service.service.id);
     };
     this.get_grouped_services = function (event_id) {
         return WebMisApi.service.get_list_grouped(event_id);
