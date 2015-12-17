@@ -28,9 +28,9 @@ var IndexCtrl = function ($scope, $modal, $http, RefBookService, PrintingService
                 filter: $scope.filter
         })
         .then(function (res) {
-                $scope.ttj_records = res.data.result[0];
-                $scope.tubes = res.data.result[1];
-                $scope.number_by_status = res.data.result[2];
+                $scope.ttj_records = res.data.result.ttj_records;
+                $scope.tubes = res.data.result.test_tubes;
+                $scope.number_by_status = res.data.result.number_by_status;
         });
     };
     $scope.change_status = function(status){
@@ -40,6 +40,16 @@ var IndexCtrl = function ($scope, $modal, $http, RefBookService, PrintingService
             status: $scope.TTJStatus.get_by_code(status)
         })
         .success(function(result) {
+        })
+    }
+
+    $scope.open_info = function(record){
+        var scope = $scope.$new();
+        scope.model = record;
+        return $modal.open({
+            templateUrl: 'modal-ttj-info.html',
+            scope: scope,
+            size: 'lg'
         })
     }
 

@@ -71,19 +71,21 @@
                             <th>Назначил врач</th>
                             <th>Биоматериал</th>
                             <th>Лабораторное исследование</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr ng-repeat="record in ttj_records">
                             <td><input type="checkbox" ng-checked="selected_records.has(record)" id="record-id-[[record.id]]"
                                        ng-click="toggle_select_record(record)"></td>
-                            <td>[[record.datetime | asDateTime]]</td>
-                            <td>[[record.client.full_name]]</td>
-                            <td>[[record.client.sex.name]]</td>
-                            <td>[[record.client.birth_date | asDate]]</td>
-                            <td>[[record.execPerson]]</td>
-                            <td>[[record.tissueType.name]] ([[record.amount]])</td>
-                            <td></td>
+                            <td ng-click="open_info(record)">[[record.datetime | asDateTime]]</td>
+                            <td ng-click="open_info(record)">[[record.client.full_name]]</td>
+                            <td ng-click="open_info(record)">[[record.client.sex.name]]</td>
+                            <td ng-click="open_info(record)">[[record.client.birth_date | asDate]]</td>
+                            <td ng-click="open_info(record)"><div ng-repeat="person in record.set_persons">[[person.short_name]]</div></td>
+                            <td ng-click="open_info(record)">[[record.tissueType.name]] ([[record.actions.length]])</td>
+                            <td ng-click="open_info(record)"><div ng-repeat="action in record.actions">[[action.action_type.title]]</div></td>
+                            <td><span ng-if="record.isUrgent" class="label label-warning">CITO</span></td>
                         </tr>
                     </tbody>
                 </table>
@@ -106,7 +108,7 @@
                             <tbody>
                                 <tr ng-repeat="record in tubes">
                                     <td>[[record.name]]</td>
-                                    <td>[[record.amount]] шт.</td>
+                                    <td>[[record.number]] шт.</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -121,4 +123,5 @@
 {% block modules_js %}
     {{ super() }}
     <script src="{{ url_for('.static', filename='js/index.js', v=app_version) }}"></script>
+    <script type="text/ng-template" id="modal-ttj-info.html">{% include "biomaterials/_modal_ttj_info.html" %}</script>
 {% endblock %}
