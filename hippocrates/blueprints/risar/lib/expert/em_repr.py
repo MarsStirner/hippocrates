@@ -1,67 +1,14 @@
 # -*- coding: utf-8 -*-
 
-from sqlalchemy.orm import aliased
-
 from nemesis.lib.utils import safe_int, safe_datetime, safe_bool
-from nemesis.models.actions import Action
-from nemesis.models.expert_protocol import (EventMeasure, ExpertSchemeMeasureAssoc, rbMeasureType, Measure)
 from nemesis.models.enums import MeasureStatus, EventMeasureActuality
 from blueprints.risar.lib.expert.utils import can_edit_em_appointment, can_edit_em_result
-
-
-class EventMeasureSelecter(object):
-
-    def __init__(self, event, action=None):
-        self.event = event
-        self.query = EventMeasure.query.filter(EventMeasure.event_id == self.event.id)
-
-    def apply_filter(self, action_id=None, **flt):
-        if 'id' in flt:
-            self.query = self.query.filter(EventMeasure.id == flt['id'])
-            return self
-        if action_id:
-            self.query = self.query.filter(EventMeasure.sourceAction_id == action_id)
-        if 'measure_type_id_list' in flt:
-            self.query = self.query.join(
-                ExpertSchemeMeasureAssoc, Measure, rbMeasureType
-            ).filter(rbMeasureType.id.in_(flt['measure_type_id_list']))
-        if 'beg_date_from' in flt:
-            self.query = self.query.filter(EventMeasure.begDateTime >= safe_datetime(flt['beg_date_from']))
-        if 'beg_date_to' in flt:
-            self.query = self.query.filter(EventMeasure.begDateTime <= safe_datetime(flt['beg_date_to']))
-        if 'end_date_from' in flt:
-            self.query = self.query.filter(EventMeasure.endDateTime >= safe_datetime(flt['end_date_from']))
-        if 'end_date_to' in flt:
-            self.query = self.query.filter(EventMeasure.endDateTime <= safe_datetime(flt['end_date_to']))
-        if 'measure_status_id_list' in flt:
-            self.query = self.query.filter(EventMeasure.status.in_(flt['measure_status_id_list']))
-        return self
-
-    def apply_sort_order(self, **order_options):
-        desc_order = order_options.get('order', 'ASC') == 'DESC'
-        if order_options:
-            pass
-        else:
-            source_action = aliased(Action, name='SourceAction')
-            self.query = self.query.join(
-                source_action, EventMeasure.sourceAction_id == source_action.id
-            ).order_by(
-                source_action.begDate.desc(),
-                EventMeasure.begDateTime.desc(),
-                EventMeasure.id.desc()
-            )
-        return self
-
-    def get_all(self):
-        return self.query.all()
-
-    def paginate(self, per_page=20, page=1):
-        return self.query.paginate(page, per_page, False)
 
 
 class EventMeasureRepr(object):
 
     def represent_by_action(self, action):
+        return []
         if not action.id:
             return []
         em_selecter = EventMeasureSelecter(action.event, action)
@@ -72,6 +19,7 @@ class EventMeasureRepr(object):
         ]
 
     def represent_by_event(self, event, query_filter=None):
+        return []
         em_selecter = EventMeasureSelecter(event)
         if query_filter is not None:
             paginate = safe_bool(query_filter.get('paginate', True))
