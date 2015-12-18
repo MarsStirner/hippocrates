@@ -378,7 +378,9 @@ def represent_checkup(action, with_measures=True):
     result['calculated_pregnancy_week'] = get_pregnancy_week(action.event, action.begDate)
 
     if with_measures:
-        result['measures'] = EventMeasureRepr().represent_by_action(action)
+        em_ctrl = EventMeasureController()
+        measures = em_ctrl.get_measures_in_action(action)
+        result['measures'] = EventMeasureRepr().represent_listed_event_measures_in_action(measures)
     return result
 
 

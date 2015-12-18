@@ -1,59 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from nemesis.lib.utils import safe_int, safe_datetime, safe_bool
 from nemesis.models.enums import MeasureStatus, EventMeasureActuality
 from blueprints.risar.lib.expert.utils import can_edit_em_appointment, can_edit_em_result
 
 
 class EventMeasureRepr(object):
-
-    def represent_by_action(self, action):
-        return []
-        if not action.id:
-            return []
-        em_selecter = EventMeasureSelecter(action.event, action)
-        # em_selecter.apply_filter(action_id=action.id)
-        em_data = em_selecter.get_all()
-        return [
-            self.represent_em_full(event_measure) for event_measure in em_data
-        ]
-
-    def represent_by_event(self, event, query_filter=None):
-        return []
-        em_selecter = EventMeasureSelecter(event)
-        if query_filter is not None:
-            paginate = safe_bool(query_filter.get('paginate', True))
-            per_page = safe_int(query_filter.get('per_page')) or 20
-            page = safe_int(query_filter.get('page')) or 1
-            em_selecter.apply_filter(**query_filter)
-        else:
-            paginate = True
-            per_page = 20
-            page = 1
-        em_selecter.apply_sort_order()
-
-        if paginate:
-            return self._paginate_data(em_selecter, per_page, page)
-        else:
-            return self._list_data(em_selecter)
-
-    def _paginate_data(self, selecter, per_page, page):
-        em_data = selecter.paginate(per_page, page)
-        return {
-            'count': em_data.total,
-            'total_pages': em_data.pages,
-            'measures': [
-                self.represent_event_measure(event_measure) for event_measure in em_data.items
-            ]
-        }
-
-    def _list_data(self, selecter):
-        em_data = selecter.get_all()
-        return {
-            'measures': [
-                self.represent_event_measure(event_measure) for event_measure in em_data
-            ]
-        }
 
     def represent_em_full(self, em):
         em_data = self.represent_event_measure(em)
@@ -133,3 +84,22 @@ class EventMeasureRepr(object):
             'id': action.id,
             'beg_date': action.begDate
         }
+
+    def represent_paginated_event_measures(self, paginated_data):
+        return {
+            'count': paginated_data.total,
+            'total_pages': paginated_data.pages,
+            'measures': [
+                self.represent_event_measure(event_measure) for event_measure in paginated_data.items
+            ]
+        }
+
+    def represent_listed_event_measures(self, em_list):
+        return [
+            self.represent_event_measure(event_measure) for event_measure in em_list
+        ]
+
+    def represent_listed_event_measures_in_action(self, em_list):
+        return [
+            self.represent_em_full(event_measure) for event_measure in em_list
+        ]

@@ -71,6 +71,30 @@ class EventMeasureController(BaseModelController):
         em.result_action = em_result
         return em_result
 
+    def get_measures_in_event(self, event, args, paginate=False):
+        if paginate:
+            return self.get_paginated_data(args)
+        else:
+            return self.get_listed_data(args)
+
+    def get_measures_in_action(self, action):
+        if not action.id:
+            return []
+        start_date = safe_datetime(action.begDate)
+        end_date = safe_datetime(action.propsByCode['next_date'].value)
+        if not end_date:
+            end_date = action.endDate
+        if not end_date:
+            end_date = None
+        args = {
+            'event_id': action.event_id,
+            'action_id': action.id,
+            'beg_date_from': start_date
+        }
+        if end_date is not None:
+            args['end_date_to'] = end_date
+        return self.get_listed_data(args)
+
     def calc_event_measure_stats(self, event):
         sel = self.get_selecter()
         sel.set_calc_event_stats(event.id)
@@ -114,20 +138,22 @@ class EventMeasureController(BaseModelController):
 class EventMeasureSelecter(BaseSelecter):
 
     def __init__(self):
-        query = self.model_provider.get_query('EventMeasure')  #.query.filter(EventMeasure.event_id == self.event.id)
+        query = self.model_provider.get_query('EventMeasure')
         super(EventMeasureSelecter, self).__init__(query)
 
-    def apply_filter(self, action_id=None, **flt):
-        EventMeasure = self.model_provider.get_query('EventMeasure')
-        ExpertSchemeMeasureAssoc = self.model_provider.get_query('ExpertSchemeMeasureAssoc')
-        Measure = self.model_provider.get_query('Measure')
-        rbMeasureType = self.model_provider.get_query('rbMeasureType')
+    def apply_filter(self, **flt):
+        EventMeasure = self.model_provider.get('EventMeasure')
+        ExpertSchemeMeasureAssoc = self.model_provider.get('ExpertSchemeMeasureAssoc')
+        Measure = self.model_provider.get('Measure')
+        rbMeasureType = self.model_provider.get('rbMeasureType')
 
         if 'id' in flt:
             self.query = self.query.filter(EventMeasure.id == flt['id'])
             return self
-        if action_id:
-            self.query = self.query.filter(EventMeasure.sourceAction_id == action_id)
+        if 'event_id' in flt:
+            self.query = self.query.filter(EventMeasure.event_id == flt['event_id'])
+        if 'action_id' in flt:
+            self.query = self.query.filter(EventMeasure.sourceAction_id == flt['action_id'])
         if 'measure_type_id_list' in flt:
             self.query = self.query.join(
                 ExpertSchemeMeasureAssoc, Measure, rbMeasureType
@@ -145,8 +171,8 @@ class EventMeasureSelecter(BaseSelecter):
         return self
 
     def apply_sort_order(self, **order_options):
-        EventMeasure = self.model_provider.get_query('EventMeasure')
-        Action = self.model_provider.get_query('Action')
+        EventMeasure = self.model_provider.get('EventMeasure')
+        Action = self.model_provider.get('Action')
 
         desc_order = order_options.get('order', 'ASC') == 'DESC'
         if order_options:
@@ -163,7 +189,6 @@ class EventMeasureSelecter(BaseSelecter):
         return self
 
     def set_calc_event_stats(self, event_id):
-        # TODO: look at fetcher
         EventMeasure = self.model_provider.get('EventMeasure')
         ExpertSchemeMeasureAssoc = self.model_provider.get('ExpertSchemeMeasureAssoc')
         Measure = self.model_provider.get('Measure')

@@ -23,7 +23,9 @@ def api_0_event_measure_generate(action_id):
     action = Action.query.get_or_404(action_id)
     measure_gen = EventMeasureGenerator(action)
     measure_gen.generate_measures()
-    return EventMeasureRepr().represent_by_action(action)
+    em_ctrl = EventMeasureController()
+    measures = em_ctrl.get_measures_in_action(action)
+    return EventMeasureRepr().represent_listed_event_measures_in_action(measures)
 
 
 @module.route('/api/0/event_measure/')
@@ -181,4 +183,10 @@ def api_0_measure_list(event_id):
     if event.eventType.requestType.code != 'pregnancy':
         raise ApiException(400, u'Обращение не является случаем беременности')
 
-    return EventMeasureRepr().represent_by_event(event, data)
+    paginate = safe_bool(data.get('paginate', True))
+    em_ctrl = EventMeasureController()
+    data = em_ctrl.get_measures_in_event(event, data, paginate)
+    if paginate:
+        return EventMeasureRepr().represent_paginated_event_measures(data)
+    else:
+        return EventMeasureRepr().represent_listed_event_measures(data)
