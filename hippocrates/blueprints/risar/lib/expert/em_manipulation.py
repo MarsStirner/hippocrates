@@ -4,7 +4,7 @@ from sqlalchemy.orm import aliased
 from sqlalchemy.sql.expression import func, and_
 
 from blueprints.risar.lib.utils import format_action_data
-from blueprints.risar.lib.expert.utils import em_final_status_list
+from blueprints.risar.lib.expert.utils import em_final_status_list, em_garbage_status_list
 
 from nemesis.models.enums import MeasureStatus
 from nemesis.lib.data import create_action, update_action, safe_datetime
@@ -84,6 +84,9 @@ class EventMeasureController(BaseModelController):
         checkup_total = data.count_checkup if data is not None else 0
         checkup_complete = data.count_checkup_completed if data is not None else 0
         checkup_pct = round(checkup_complete * 100 / checkup_total if (checkup_total != 0 and checkup_complete != 0) else 0)
+        hosp_total = data.count_hosp if data is not None else 0
+        hosp_complete = data.count_hosp_completed if data is not None else 0
+        hosp_pct = round(hosp_complete * 100 / hosp_total if (hosp_total != 0 and hosp_complete != 0) else 0)
         return {
             'lab': {
                 'complete': lab_complete,
@@ -99,6 +102,11 @@ class EventMeasureController(BaseModelController):
                 'complete': checkup_complete,
                 'total': checkup_total,
                 'percent': checkup_pct,
+            },
+            'hosp': {
+                'complete': hosp_complete,
+                'total': hosp_total,
+                'percent': hosp_pct,
             }
         }
 
@@ -167,6 +175,7 @@ class EventMeasureSelecter(BaseSelecter):
         ).filter(
             EventMeasure.event_id == event_id,
             EventMeasure.deleted == 0,
+            ~EventMeasure.status.in_(em_garbage_status_list)
         ).with_entities(
             EventMeasure.id
         ).add_columns(
@@ -183,4 +192,8 @@ class EventMeasureSelecter(BaseSelecter):
             func.sum(func.IF(and_(rbMeasureType.code == 'checkup',
                                   EventMeasure.status.in_(em_final_status_list)
                                   ), 1, 0)).label('count_checkup_completed'),
+            func.sum(func.IF(rbMeasureType.code == 'hospitalization', 1, 0)).label('count_hosp'),
+            func.sum(func.IF(and_(rbMeasureType.code == 'hospitalization',
+                                  EventMeasure.status.in_(em_final_status_list)
+                                  ), 1, 0)).label('count_hosp_completed'),
         )
