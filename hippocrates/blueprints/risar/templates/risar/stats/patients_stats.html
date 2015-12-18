@@ -9,22 +9,38 @@
         <table class="table table-condensed no-border">
             <tr>
                 <td>Всего открытых карт</td>
-                <td><span class="badge label-info pull-right">[[current_stats.events_all]]</span></td>
+                <td>
+                    <a href="{{ url_for('risar.html_search') }}">
+                        <span class="badge label-info pull-right">[[current_stats.events_all]]</span>
+                    </a>
+                </td>
             </tr>
             <tr>
                 <td>Не закрыты карты пациенток (срок более 45 недель)</td>
-                <td><span class="badge  pull-right"ng-class="{'label-info': current_stats.events_45 == 0,
-                'label-danger': current_stats.events_45 != 0}">[[current_stats.events_45]]</span></td>
+                <td>
+                    <a href="{{ url_for('risar.html_search') }}">
+                        <span class="badge  pull-right" ng-class="{'label-info': current_stats.events_45 == 0,
+                        'label-danger': current_stats.events_45 != 0}">[[current_stats.events_45]]</span>
+                    </a>
+                </td>
             </tr>
             <tr>
                 <td>Пропущено плановое посещение (2 месяца)</td>
-                <td><span class="badge pull-right" ng-class="{'label-info': current_stats.events_2_months == 0,
-                'label-danger': current_stats.events_2_months != 0}">[[current_stats.events_2_months]]</span></td>
+                <td>
+                    <a href="{{ url_for('risar.html_search') }}">
+                        <span class="badge pull-right" ng-class="{'label-info': current_stats.events_2_months == 0,
+                        'label-danger': current_stats.events_2_months != 0}">[[current_stats.events_2_months]]</span>
+                    </a>
+                </td>
             </tr>
             <tr>
                 <td>Карты с неопределенными степенями риска</td>
-                <td><span class="badge pull-right" ng-class="{'label-info': current_stats.events_undefined_risk == 0,
-                'label-danger': current_stats.events_undefined_risk != 0}">[[current_stats.events_undefined_risk]]</span></td>
+                <td>
+                    <a href="{{ url_for('risar.html_search') }}">
+                        <span class="badge pull-right" ng-class="{'label-info': current_stats.events_undefined_risk == 0,
+                        'label-danger': current_stats.events_undefined_risk != 0}">[[current_stats.events_undefined_risk]]</span>
+                    </a>
+                </td>
             </tr>
         </table>
     </div>

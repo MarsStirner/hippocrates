@@ -150,8 +150,8 @@ var EventMeasureCalendarViewCtrl = function ($scope, $timeout, RisarApi, Timeout
             measure_status_id_list: $scope.query.status.length ? _.pluck($scope.query.status, 'id') : undefined
         };
         return RisarApi.measure.get_by_event($scope.event_id, query).
-            then(function (data) {
-                return data.measures.map(makeTask);
+            then(function (measures) {
+                return measures.map(makeTask);
             });
     };
     var firstRender = false;

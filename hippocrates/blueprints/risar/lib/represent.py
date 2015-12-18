@@ -19,6 +19,7 @@ from nemesis.models.exists import rbAttachType, MKB
 from blueprints.risar.lib.card_attrs import get_card_attrs_action, get_all_diagnoses, check_disease
 from blueprints.risar.lib.utils import get_action, action_apt_values, get_action_type_id, risk_rates_diagID, \
     risk_rates_blockID, get_action_list
+from blueprints.risar.lib.expert.em_manipulation import EventMeasureController
 from blueprints.risar.lib.expert.em_repr import EventMeasureRepr
 from blueprints.risar.risar_config import pregnancy_apt_codes, risar_anamnesis_pregnancy, transfusion_apt_codes, \
     risar_anamnesis_transfusion, mother_codes, father_codes, risar_father_anamnesis, risar_mother_anamnesis, \
@@ -60,7 +61,7 @@ def represent_event(event):
     client = event.client
     all_diagnoses = list(get_all_diagnoses(event))
     card_attrs_action = get_card_attrs_action(event, auto=True)
-
+    em_ctrl = EventMeasureController()
     return {
         'id': event.id,
         'client': {
@@ -85,23 +86,7 @@ def represent_event(event):
         'person': event.execPerson,
         'external_id': event.externalId,
         'type': event.eventType,
-        'progress': {
-            'lab': {
-                'complete': 5,
-                'total': 14,
-                'percent': 500 / 14,
-            },
-            'func': {
-                'complete': 3,
-                'total': 10,
-                'percent': 300 / 10,
-            },
-            'checkups': {
-                'complete': 9,
-                'total': 10,
-                'percent': 900 / 10,
-            }
-        },
+        'em_progress': em_ctrl.calc_event_measure_stats(event),
         'card_attributes': represent_card_attributes(event),
         'anamnesis': represent_anamnesis(event),
         'epicrisis': represent_epicrisis(event),
@@ -393,7 +378,9 @@ def represent_checkup(action, with_measures=True):
     result['calculated_pregnancy_week'] = get_pregnancy_week(action.event, action.begDate)
 
     if with_measures:
-        result['measures'] = EventMeasureRepr().represent_by_action(action)
+        em_ctrl = EventMeasureController()
+        measures = em_ctrl.get_measures_in_action(action)
+        result['measures'] = EventMeasureRepr().represent_listed_event_measures_in_action(measures)
     return result
 
 
