@@ -233,15 +233,17 @@
                         <tr>
                             <td class="col-md-6 text-right">Лабораторные исследования:</td>
                             <td class="col-md-6">
-                                <progressbar class="progress" value="chart.em_progress.lab.percent">
-                                    [[ chart.em_progress.lab.complete ]]/[[ chart.em_progress.lab.total ]]
+                                <span ng-if="chart.em_progress.lab.complete === 0">[[ chart.em_progress.lab.complete ]]/[[ chart.em_progress.lab.total ]]</span>
+                                <progressbar ng-if="chart.em_progress.lab.complete !== 0" class="progress" value="chart.em_progress.lab.percent">
+                                    <span>[[ chart.em_progress.lab.complete ]]/[[ chart.em_progress.lab.total ]]</span>
                                 </progressbar>
                             </td>
                         </tr>
                         <tr>
                             <td class="text-right">Функциональные исследования:</td>
                             <td>
-                                <progressbar class="progress" value="chart.em_progress.func.percent">
+                                <span ng-if="chart.em_progress.func.complete === 0">[[ chart.em_progress.func.complete ]]/[[ chart.em_progress.func.total ]]</span>
+                                <progressbar ng-if="chart.em_progress.func.complete !== 0" class="progress" value="chart.em_progress.func.percent">
                                     [[ chart.em_progress.func.complete ]]/[[ chart.em_progress.func.total ]]
                                 </progressbar>
                             </td>
@@ -249,7 +251,8 @@
                         <tr>
                             <td class="text-right">Осмотры специалистами:</td>
                             <td>
-                                <progressbar class="progress" value="chart.em_progress.checkups.percent">
+                                <span ng-if="chart.em_progress.checkups.complete === 0">[[ chart.em_progress.checkups.complete ]]/[[ chart.em_progress.checkups.total ]]</span>
+                                <progressbar ng-if="chart.em_progress.checkups.complete !== 0" class="progress" value="chart.em_progress.checkups.percent">
                                     [[ chart.em_progress.checkups.complete ]]/[[ chart.em_progress.checkups.total ]]
                                 </progressbar>
                             </td>
@@ -257,7 +260,8 @@
                         <tr>
                             <td class="text-right">Госпитализации:</td>
                             <td>
-                                <progressbar class="progress" value="chart.em_progress.hosp.percent">
+                                <span ng-if="chart.em_progress.hosp.complete === 0">[[ chart.em_progress.hosp.complete ]]/[[ chart.em_progress.hosp.total ]]</span>
+                                <progressbar ng-if="chart.em_progress.hosp.complete !== 0" class="progress" value="chart.em_progress.hosp.percent">
                                     [[ chart.em_progress.hosp.complete ]]/[[ chart.em_progress.hosp.total ]]
                                 </progressbar>
                             </td>

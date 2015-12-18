@@ -17,6 +17,9 @@ em_garbage_status_list = em_cancelled_implicit
 em_touched_status_list = (MeasureStatus.assigned[0], MeasureStatus.waiting[0],
                           MeasureStatus.overdue[0], MeasureStatus.performed[0]) + em_cancelled_explicit
 
+em_stats_status_list = (MeasureStatus.created[0], MeasureStatus.assigned[0], MeasureStatus.waiting[0],
+                        MeasureStatus.overdue[0], MeasureStatus.performed[0])
+
 
 def is_em_touched(em):
     """Проверить, что с мероприятием случая провзаимодействовал кто-то или что-то."""

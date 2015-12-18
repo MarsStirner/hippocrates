@@ -4,7 +4,7 @@ from sqlalchemy.orm import aliased
 from sqlalchemy.sql.expression import func, and_
 
 from blueprints.risar.lib.utils import format_action_data
-from blueprints.risar.lib.expert.utils import em_final_status_list, em_garbage_status_list
+from blueprints.risar.lib.expert.utils import em_stats_status_list
 
 from nemesis.models.enums import MeasureStatus
 from nemesis.lib.data import create_action, update_action, safe_datetime
@@ -72,6 +72,9 @@ class EventMeasureController(BaseModelController):
         return em_result
 
     def get_measures_in_event(self, event, args, paginate=False):
+        args.update({
+            'event_id': event.id
+        })
         if paginate:
             return self.get_paginated_data(args)
         else:
@@ -168,6 +171,7 @@ class EventMeasureSelecter(BaseSelecter):
             self.query = self.query.filter(EventMeasure.endDateTime <= safe_datetime(flt['end_date_to']))
         if 'measure_status_id_list' in flt:
             self.query = self.query.filter(EventMeasure.status.in_(flt['measure_status_id_list']))
+        self.query = self.query.filter(EventMeasure.deleted == 0)
         return self
 
     def apply_sort_order(self, **order_options):
@@ -200,25 +204,25 @@ class EventMeasureSelecter(BaseSelecter):
         ).filter(
             EventMeasure.event_id == event_id,
             EventMeasure.deleted == 0,
-            ~EventMeasure.status.in_(em_garbage_status_list)
+            EventMeasure.status.in_(em_stats_status_list)
         ).with_entities(
             EventMeasure.id
         ).add_columns(
             # todo: code in const
             func.sum(func.IF(rbMeasureType.code == 'lab_test', 1, 0)).label('count_lab_test'),
             func.sum(func.IF(and_(rbMeasureType.code == 'lab_test',
-                                  EventMeasure.status.in_(em_final_status_list)
+                                  EventMeasure.status == MeasureStatus.performed[0]
                                   ), 1, 0)).label('count_lab_test_completed'),
             func.sum(func.IF(rbMeasureType.code == 'func_test', 1, 0)).label('count_func_test'),
             func.sum(func.IF(and_(rbMeasureType.code == 'func_test',
-                                  EventMeasure.status.in_(em_final_status_list)
+                                  EventMeasure.status == MeasureStatus.performed[0]
                                   ), 1, 0)).label('count_func_test_completed'),
             func.sum(func.IF(rbMeasureType.code == 'checkup', 1, 0)).label('count_checkup'),
             func.sum(func.IF(and_(rbMeasureType.code == 'checkup',
-                                  EventMeasure.status.in_(em_final_status_list)
+                                  EventMeasure.status == MeasureStatus.performed[0]
                                   ), 1, 0)).label('count_checkup_completed'),
             func.sum(func.IF(rbMeasureType.code == 'hospitalization', 1, 0)).label('count_hosp'),
             func.sum(func.IF(and_(rbMeasureType.code == 'hospitalization',
-                                  EventMeasure.status.in_(em_final_status_list)
+                                  EventMeasure.status == MeasureStatus.performed[0]
                                   ), 1, 0)).label('count_hosp_completed'),
         )
