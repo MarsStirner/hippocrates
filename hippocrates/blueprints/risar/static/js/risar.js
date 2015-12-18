@@ -534,9 +534,9 @@ WebMis20
                 return 'fa fa-exclamation-triangle text-darkgray';
             };
             scope.tooltip = function (rate) {
-                if (rate.code == 'unknown') return 'Диагноз преэклампсии не подтверждён';
-                return 'Внимание! Установлен диагноз: преэклампсия '+rate.name;
-
+                if (!rate) return '';
+                if (rate.code === 'unknown') return 'Диагноз преэклампсии не подтверждён';
+                return 'Внимание! Установлен диагноз: преэклампсия ' + rate.name;
             }
         }
     }
