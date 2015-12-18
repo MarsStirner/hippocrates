@@ -67,3 +67,16 @@ def api_0_service_calc_sum():
         service = service_ctrl.get_new_service(json_data)
     new_sum = service_ctrl.calc_service_sum(service, json_data)
     return format_money(new_sum)
+
+
+@module.route('/api/0/service/', methods=['DELETE'])
+@module.route('/api/0/service/<int:service_id>', methods=['DELETE'])
+@api_method
+def api_0_service_delete(service_id=None):
+    if not service_id:
+        raise ApiException(404, u'`contract_id` required')
+    service_ctrl = ServiceController()
+    service = service_ctrl.get_service(service_id)
+    service_ctrl.delete_service(service)
+    service_ctrl.store(service)
+    return True

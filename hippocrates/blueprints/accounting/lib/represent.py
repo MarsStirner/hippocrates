@@ -249,7 +249,11 @@ class ServiceRepr(object):
                 'price': format_money(service_data['price']),
                 'amount': service_data['amount'],
                 'sum': format_money(service_data['sum']),
-                'discount': None
+                'discount': None,
+                'access': {
+                    'can_edit': True,
+                    'can_delete': True
+                },
             },
             'action': {
                 'action_type_id': service_data['action_type_id'],
@@ -279,11 +283,15 @@ class ServiceRepr(object):
     def represent_service_full(self, service):
         data = self.represent_service(service)
         service_ctrl = ServiceController()
-        in_invoice = service_ctrl.check_service_in_invoice(service)
+        in_invoice = service.in_invoice
         is_paid = service_ctrl.check_service_is_paid(service)
         data['sum'] = format_money(service.sum_)
         data['in_invoice'] = in_invoice
         data['is_paid'] = is_paid
+        data['access'] = {
+            'can_edit': service_ctrl.check_can_edit_service(service),
+            'can_delete': service_ctrl.check_can_delete_service(service)
+        }
         return data
 
     def represent_service_action(self, action):

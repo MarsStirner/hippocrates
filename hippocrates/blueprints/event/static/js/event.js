@@ -551,7 +551,7 @@ var EventServicesCtrl = function($scope, $rootScope, AccountingService, InvoiceM
     };
     $scope.finishEditingInvoice = function () {
         var contract_id = safe_traverse($scope.event.info, ['contract', 'id']);
-        InvoiceModalService.openNew($scope.newInvoiceServiceList, contract_id)
+        InvoiceModalService.openNew($scope.newInvoiceServiceList, contract_id, $scope.event)
             .then(function (result) {
                 $scope.event.invoices.push(result.invoice);
                 $scope.cancelEditingInvoice();
