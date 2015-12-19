@@ -284,7 +284,7 @@ def api_0_chart_mother(event_id):
                     .order_by(BloodHistory.bloodDate.desc()) \
                     .first()
                 if mother_blood_type and value['id'] != mother_blood_type.bloodType_id or not mother_blood_type:
-                    n = BloodHistory(value['id'], datetime.date.today(), current_user.id, event.client)
+                    n = BloodHistory.create(value['id'], datetime.date.today(), current_user.id, event.client)
                     db.session.add(n)
             elif (code == 'finished_diseases' or code == 'current_diseases') and value:
                 prop = action.propsByCode[code]

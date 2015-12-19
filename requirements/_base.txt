@@ -19,6 +19,7 @@ Flask-Cache
 fabric
 mock
 PyYAML
+jsonschema
 
 -e git+https://github.com/hitsl/pysimplelogs.git#egg=pysimplelogs
 -e git+https://github.com/hitsl/nemesis.git@develop#egg=nemesis
