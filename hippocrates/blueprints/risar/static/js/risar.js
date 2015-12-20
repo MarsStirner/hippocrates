@@ -282,6 +282,9 @@ WebMis20
         remove: function (action_id) {
             return wrapper('POST', Config.url.api_event_measure_remove + action_id)
         },
+        execute: function (event_measure_id) {
+            return wrapper('POST', Config.url.api_event_measure_execute + event_measure_id);
+        },
         cancel: function (event_measure_id) {
             return wrapper('POST', Config.url.api_event_measure_cancel + event_measure_id);
         },

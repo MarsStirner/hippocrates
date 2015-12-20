@@ -17,6 +17,13 @@ var EventMeasureActionViewCtrl = function ($scope, RisarApi, EMModalService, Eve
         var em = $scope.checkup.measures[idx];
         EMModalService.openView(em.data);
     };
+    $scope.executeEm = function (idx) {
+        var em = $scope.checkup.measures[idx];
+        EventMeasureService.execute(em.data)
+            .then(function (upd_em) {
+                $scope.checkup.measures.splice(idx, 1, upd_em);
+            });
+    };
     $scope.cancelEm = function (idx) {
         var em = $scope.checkup.measures[idx];
         EventMeasureService.cancel(em.data)

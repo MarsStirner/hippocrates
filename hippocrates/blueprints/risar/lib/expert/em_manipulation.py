@@ -16,6 +16,10 @@ class EventMeasureController(BaseModelController):
     def get_selecter(self):
         return EventMeasureSelecter()
 
+    def execute(self, em):
+        em.status = MeasureStatus.performed[0]
+        return em
+
     def cancel(self, em):
         em.status = MeasureStatus.cancelled[0]
         return em
@@ -92,27 +96,27 @@ class EventMeasureController(BaseModelController):
         args = {
             'event_id': action.event_id,
             'action_id': action.id,
-            'beg_date_from': start_date
+            'beg_date_from': start_date.replace(hour=0, minute=0, second=0)
         }
         if end_date is not None:
-            args['end_date_to'] = end_date
+            args['end_date_to'] = end_date.replace(hour=23, minute=59, second=59)
         return self.get_listed_data(args)
 
     def calc_event_measure_stats(self, event):
         sel = self.get_selecter()
         sel.set_calc_event_stats(event.id)
         data = sel.get_one()
-        lab_total = data.count_lab_test if data is not None else 0
-        lab_complete = data.count_lab_test_completed if data is not None else 0
+        lab_total = data.count_lab_test or 0
+        lab_complete = data.count_lab_test_completed or 0
         lab_pct = round(lab_complete * 100 / lab_total if (lab_total != 0 and lab_complete != 0) else 0)
-        func_total = data.count_func_test if data is not None else 0
-        func_complete = data.count_func_test_completed if data is not None else 0
+        func_total = data.count_func_test or 0
+        func_complete = data.count_func_test_completed or 0
         func_pct = round(func_complete * 100 / func_total if (func_total != 0 and func_complete != 0) else 0)
-        checkup_total = data.count_checkup if data is not None else 0
-        checkup_complete = data.count_checkup_completed if data is not None else 0
+        checkup_total = data.count_checkup or 0
+        checkup_complete = data.count_checkup_completed or 0
         checkup_pct = round(checkup_complete * 100 / checkup_total if (checkup_total != 0 and checkup_complete != 0) else 0)
-        hosp_total = data.count_hosp if data is not None else 0
-        hosp_complete = data.count_hosp_completed if data is not None else 0
+        hosp_total = data.count_hosp or 0
+        hosp_complete = data.count_hosp_completed or 0
         hosp_pct = round(hosp_complete * 100 / hosp_total if (hosp_total != 0 and hosp_complete != 0) else 0)
         return {
             'lab': {

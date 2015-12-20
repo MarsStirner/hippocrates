@@ -37,6 +37,7 @@ WebMis20
         api_event_measure_generate: '{{ url_for('.api_0_event_measure_generate') }}',
         api_event_measure_get: '{{ url_for('.api_0_event_measure_get') }}',
         api_event_measure_remove: '{{ url_for('.api_0_event_measure_remove') }}',
+        api_event_measure_execute: '{{ url_for('.api_0_event_measure_execute') }}',
         api_event_measure_cancel: '{{ url_for('.api_0_event_measure_cancel') }}',
         api_event_measure_appointment_get: '{{ url_for('.api_0_event_measure_appointment_get', event_measure_id=-90) | replace("-90", "{0}") }}',
         api_event_measure_appointment_save: '{{ url_for('.api_0_event_measure_appointment_save', event_measure_id=-90) | replace("-90", "{0}") }}',

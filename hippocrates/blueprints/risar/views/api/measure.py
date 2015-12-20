@@ -48,6 +48,17 @@ def api_0_event_measure_remove(action_id):
     return []
 
 
+@module.route('/api/0/event_measure/execute/', methods=['POST'])
+@module.route('/api/0/event_measure/execute/<int:event_measure_id>', methods=['POST'])
+@api_method
+def api_0_event_measure_execute(event_measure_id):
+    em = EventMeasure.query.get_or_404(event_measure_id)
+    em_ctrl = EventMeasureController()
+    em_ctrl.execute(em)
+    em_ctrl.store(em)
+    return EventMeasureRepr().represent_em_full(em)
+
+
 @module.route('/api/0/event_measure/cancel/', methods=['POST'])
 @module.route('/api/0/event_measure/cancel/<int:event_measure_id>', methods=['POST'])
 @api_method

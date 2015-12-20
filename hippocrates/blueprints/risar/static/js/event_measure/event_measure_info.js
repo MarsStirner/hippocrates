@@ -57,6 +57,9 @@ WebMis20.service('EventMeasureService', ['RisarApi', function (RisarApi) {
     this.get = function (em_id) {
         return RisarApi.measure.get(em_id);
     };
+    this.execute = function (em) {
+        return RisarApi.measure.execute(em.id);
+    };
     this.cancel = function (em) {
         return RisarApi.measure.cancel(em.id);
     };
