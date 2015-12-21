@@ -503,7 +503,7 @@ class EventMeasureGenerator(object):
         return None
 
     def set_event_measure_overdue(self, em):
-        if em.status not in em_final_status_list:
+        if em.status not in em_final_status_list and em.status != MeasureStatus.upon_med_indications[0]:
             em.status = MeasureStatus.overdue[0]
             return em
         return None
