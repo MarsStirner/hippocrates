@@ -4,13 +4,14 @@ import functools
 import datetime
 
 import itertools
+
+import jsonschema
 from dateutil.parser import parse as date_parse
 
 from blueprints.risar.views.api.integration.schemas import ClientSchema
 from nemesis.lib.apiutils import ApiException
 from nemesis.models.client import Client, ClientIdentification, ClientDocument, ClientPolicy, BloodHistory, \
     ClientAllergy, ClientIntoleranceMedicament
-from jsonschema import validate
 
 from nemesis.models.exists import rbAccountingSystem, rbDocumentType, rbPolicyType, rbBloodType
 from nemesis.models.organisation import Organisation
@@ -38,9 +39,11 @@ class XForm(object):
     version = 0
 
     def set_version(self, version):
-        for v in xrange(self.version, version + 1):
+        for v in xrange(self.version + 1, version + 1):
             method = getattr(self, 'set_version_%i' % v, None)
-            if method is not None:
+            if method is None:
+                raise ApiException(400, 'Version %i of API is unsupported' % (version, ))
+            else:
                 method()
         self.version = version
 
@@ -52,50 +55,80 @@ class ClientXForm(XForm, ClientSchema):
     client = None
     new = False
     rbAccountingSystem = None
+    external_system_id = None
+    external_client_id = None
 
     def set_external_system(self, external_system_id):
+        self.external_system_id = external_system_id
         self.rbAccountingSystem = rbAS = rbAccountingSystem.query.filter(rbAccountingSystem.code == external_system_id).first()
         if not rbAS:
             raise ApiException(404, 'External system not found')
 
-    def find_client(self, external_client_id=None, data=None):
+    def _find_client_query(self, external_client_id):
         if not self.rbAccountingSystem:
             raise Exception('rbAccountingSystem not set')
+        return Client.query.join(ClientIdentification).filter(
+            ClientIdentification.identifier == external_client_id,
+            ClientIdentification.accountingSystems == self.rbAccountingSystem,
+        )
+
+    def find_client(self, external_client_id=None, data=None):
+        self.external_client_id = external_client_id
         if external_client_id is None:
             # Нас просят создать пациента, но мы должны убедиться, что с таким ИД пациента ещё нет
+
+            # Ручная валидация
             if data is None:
                 raise Exception('ClientXForm.find_client called for creation without "data"')
+
             if 'patient_external_code' not in data:
-                raise ApiException(400, 'Invalid request')
-            external_client_id = data['patient_external_code']
-            if Client.query.join(ClientIdentification).filter(
-                ClientIdentification.identifier == external_client_id,
-                ClientIdentification.accountingSystems == self.rbAccountingSystem,
-            ).count():
-                raise ApiException(400, 'Client already registered')
+                raise ApiException(406, 'Validation error', errors=[{
+                    'error': '"patient_external_code" is required',
+                    'instance': data,
+                    'path': '/',
+                }])
+
+            # Ищем клиента
+            self.external_client_id = external_client_id = data['patient_external_code']
+            if self._find_client_query(external_client_id).count():
+                raise ApiException(400, u'Client already registered')
+                # self.client = self._find_client_query(external_client_id).first()
             client = Client()
+            db.session.add(client)
             self.new = True
         else:
-            client = Client.query.join(ClientIdentification).filter(
-                ClientIdentification.identifier == external_client_id,
-                ClientIdentification.accountingSystems == self.rbAccountingSystem,
-            ).first()
+            client = self._find_client_query(external_client_id).first()
             if not client:
                 raise ApiException(404, u'Client not found')
         self.client = client
 
     def validate(self, data):
-        validate(data, self.schema[self.version])
+        if data is None:
+            raise ApiException(400, 'No JSON body')
+        schema = self.schema[self.version]
+        cls = jsonschema.validators.validator_for(schema)
+        val = cls(schema)
+        errors = [{
+            'error': error.message,
+            'instance': error.instance,
+            'path': '/' + '/'.join(map(unicode, error.absolute_path)),
+        } for error in val.iter_errors(data)]
+        if errors:
+            raise ApiException(
+                406,
+                'Validation error',
+                errors=errors,
+            )
 
     def update_client(self, data):
-        self.validate(data)
-        self._update_main_data(data)
-        self._update_id_document(data['document'])
-        self._update_policies(data['insurance_documents'])
-        self._update_address(data['residental_address'])
-        self._update_blood(data['blood_type_info'])
-        self._update_allergies(data['allergies_info'])
-        self._update_intolerances(data['medicine_intolerance_info'])
+        with db.session.no_autoflush:
+            self._update_main_data(data)
+            self._update_id_document(data['document'])
+            self._update_policies(data['insurance_documents'])
+            self._update_address(data['residential_address'])
+            self._update_blood(data['blood_type_info'])
+            self._update_allergies(data['allergies_info'])
+            self._update_intolerances(data['medicine_intolerance_info'])
 
     def _update_main_data(self, data):
         client = self.client
@@ -104,21 +137,20 @@ class ClientXForm(XForm, ClientSchema):
         client.patrName = data['FIO'].get('middlename')
         client.birthDate = date_parse(data['birthday_date'])
         client.sexCode = data['gender']
-        external_code = data['MIS_external_code']
-        rbAS = rbAccountingSystem.query.filter(rbAccountingSystem.code == external_code).first()
-        ident = client.identifications.filter(ClientIdentification.accountingSystems == rbAS).first()
+        client.SNILS = data['SNILS'].replace('-', '')
+        ident = client.identifications.filter(ClientIdentification.accountingSystems == self.rbAccountingSystem).first()
         if not ident:
             ident = ClientIdentification()
-            ident.accountingSystems = rbAS
+            ident.accountingSystems = self.rbAccountingSystem
             ident.checkDate = datetime.date.today()
             ident.client = client
             db.session.add(ident)
-        ident.identifier = data['patient_external_code']
+        ident.identifier = data.get('patient_external_code', self.external_client_id)
 
     def _update_id_document(self, data):
         client = self.client
         doc_type = rbDocumentType.query.filter(rbDocumentType.TFOMSCode == data['document_type_code']).first()
-        document = client.documents.filter(ClientDocument.documentType == doc_type)
+        document = client.documents.filter(ClientDocument.documentType == doc_type).first()
         if not document:
             document = ClientDocument()
             document.client = client
@@ -132,7 +164,7 @@ class ClientXForm(XForm, ClientSchema):
     def _update_policies(self, policies):
         client = self.client
         rbpt_map = dict(
-            (item.TFOMScode or item.code, item)
+            (str(item.TFOMSCode) or item.code, item)
             for item in rbPolicyType.query
         )
 
@@ -142,19 +174,20 @@ class ClientXForm(XForm, ClientSchema):
             if not pol_data:
                 policy.deleted = 1
                 continue
-            policy_type = rbpt_map.get(pol_data['insurance_document_type']) or rbpt_map.get('vmi')
+            policy_type = rbpt_map.get(str(pol_data['insurance_document_type'])) or rbpt_map.get('vmi')
             org = Organisation.query.filter(Organisation.INN == pol_data['insurance_document_issuing_authority']).first()
             if not policy:
                 policy = ClientPolicy()
                 policy.client = client
                 db.session.add(policy)
             policy.policyType = policy_type
-            policy.serial = pol_data['insurance_document_series']
+            policy.serial = pol_data.get('insurance_document_series', '')
             policy.number = pol_data['insurance_document_number']
             policy.begDate = pol_data['insurance_document_beg_date']
             policy.insurer = org
 
     def _update_address(self, data):
+        return
         client = self.client
         address = client.loc_address
         address.KLADRCode = data['KLADR_locality']
@@ -217,13 +250,10 @@ class ClientXForm(XForm, ClientSchema):
             'gender': client.sexCode,
             'document': self._represent_document(client.document),
             'insurance_documents': map(self._represent_policy, client.policies_all),
-            'residental_address': self._represent_residental_address(client.loc_address),
+            'residential_address': self._represent_residential_address(client.loc_address),
             'blood_type_info': map(self._represent_blood_type, client.blood_history),
             'allergies_info': map(self._represent_allergy, client.allergies),
             'medicine_intolerance_info': map(self._represent_intolerance, client.intolerances),
-            'patient_external_code': self._represent_patient_external_code(client),
-            'MIS_external_code': 'Mis-Bars',
-            'transfering_data_method_version': 0,
         }
 
     @none_default
@@ -253,11 +283,11 @@ class ClientXForm(XForm, ClientSchema):
             "insurance_document_series": doc.serial,
             "insurance_document_number": doc.number,
             "insurance_document_beg_date": doc.begDate,
-            "insurance_document_issuing_authority": doc.insurer.INN,
+            "insurance_document_issuing_authority": doc.insurer.INN if doc.insurer else None,
         }
 
     @none_default
-    def _represent_residental_address(self, address):
+    def _represent_residential_address(self, address):
         """
         :type address: nemesis.models.client.ClientAddress
         :param address:

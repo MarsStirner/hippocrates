@@ -3,7 +3,7 @@
 __author__ = 'viruzzz-kun'
 
 
-class ClientSchema:
+class ClientSchema(object):
     """
     Схемы для проверки валидности данных пациента
     """
@@ -47,9 +47,14 @@ class ClientSchema:
                 "type": "integer",
                 "id": "http://jsonschema.net/gender",
                 "description": "Пол пациента: 0 - Пол не указан, 1 - Мужской, 2 - Женский",
-                "enum": [
-                    2
-                ]
+                "enum": [2],
+            },
+            "SNILS": {
+                "type": "string",
+                "id": "http://jsonschema.net/SNILS",
+                "description": "СНИЛС пациента",
+                "minLength": 11,
+                "maxLength": 14,
             },
             "document": {
                 "type": "object",
@@ -61,11 +66,18 @@ class ClientSchema:
                         "id": "http://jsonschema.net/document/document_type_code",
                         "description": "Код типа документа, идентифицирующего личность по федеральному приказу ФОМС №79 от 7.04.2011",
                         "enum": [
-                            14,
+                            1,
                             2,
+                            3,
                             5,
                             8,
                             9,
+                            10,
+                            11,
+                            12,
+                            13,
+                            14,
+                            15,
                             21,
                             22,
                             23,
@@ -74,13 +86,6 @@ class ClientSchema:
                             26,
                             27,
                             28,
-                            1,
-                            15,
-                            3,
-                            10,
-                            11,
-                            12,
-                            13
                         ]
                     },
                     "document_series": {
@@ -122,7 +127,8 @@ class ClientSchema:
                         "insurance_document_type": {
                             "type": "string",
                             "id": "http://jsonschema.net/insurance_documents/insurance_document_type",
-                            "description": "Код ТФОМС типа полиса медицинского страхования"
+                            "description": "Код ТФОМС типа полиса медицинского страхования",
+                            "enum": ["1", "2", "3", "4", "5", "vmi"],
                         },
                         "insurance_document_series": {
                             "type": "string",
@@ -302,17 +308,19 @@ class ClientSchema:
                 "id": "http://jsonschema.net/patient_external_code",
                 "description": "Идентификатор пациента во внешней учетной системе"
             },
-            "required": [
-                "FIO",
-                "birthday_date",
-                "gender",
-                "document",
-                "residential_address",
-                "insurance_documents",
-                "blood_type_info",
-                "allergies_info",
-                "medicine_intolerance_info",
-                # "patient_external_code" # эта проверка будет проходить в ручном режиме при создании
-            ]
-        }
-    }, ]
+        },
+        "required": [
+            "FIO",
+            "birthday_date",
+            "gender",
+            "SNILS",
+            "document",
+            "residential_address",
+            "insurance_documents",
+            "blood_type_info",
+            "allergies_info",
+            "medicine_intolerance_info",
+            # "patient_external_code" # эта проверка будет проходить в ручном режиме при создании
+        ]
+    },
+]
