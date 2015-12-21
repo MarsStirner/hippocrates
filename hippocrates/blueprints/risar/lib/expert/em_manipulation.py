@@ -92,14 +92,13 @@ class EventMeasureController(BaseModelController):
         if not end_date:
             end_date = action.endDate
         if not end_date:
-            end_date = None
+            end_date = start_date
         args = {
             'event_id': action.event_id,
             'action_id': action.id,
-            'beg_date_from': start_date.replace(hour=0, minute=0, second=0)
+            'beg_date_to': end_date,
+            'end_date_from': start_date
         }
-        if end_date is not None:
-            args['end_date_to'] = end_date.replace(hour=23, minute=59, second=59)
         return self.get_listed_data(args)
 
     def calc_event_measure_stats(self, event):
