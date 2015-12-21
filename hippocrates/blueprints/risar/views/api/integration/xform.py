@@ -11,7 +11,7 @@ from dateutil.parser import parse as date_parse
 from blueprints.risar.views.api.integration.schemas import ClientSchema
 from nemesis.lib.apiutils import ApiException
 from nemesis.models.client import Client, ClientIdentification, ClientDocument, ClientPolicy, BloodHistory, \
-    ClientAllergy, ClientIntoleranceMedicament
+    ClientAllergy, ClientIntoleranceMedicament, ClientAddress, Address, AddressHouse
 
 from nemesis.models.exists import rbAccountingSystem, rbDocumentType, rbPolicyType, rbBloodType
 from nemesis.models.organisation import Organisation
@@ -187,13 +187,29 @@ class ClientXForm(XForm, ClientSchema):
             policy.insurer = org
 
     def _update_address(self, data):
-        return
         client = self.client
-        address = client.loc_address
-        address.KLADRCode = data['KLADR_locality']
-        address.KLADRStreetCode = data['KLADR_street']
-        # дальше хер знает, что делать
-        address.house = data['house']
+        client_address = client.loc_address
+        if not client_address:
+            client.loc_address = client_address = ClientAddress()
+            db.session.add(client_address)
+
+        address = client_address.address
+        if not address:
+            address = client_address.address = Address()
+            db.session.add(address)
+
+        house = address.house
+        if not house:
+            house = address.house = AddressHouse()
+            db.session.add(house)
+
+        house.KLADRStreetCode = data['KLADR_street']
+        house.KLADRCode = data['KLADR_locality']
+        house.number = data['house']
+        house.corpus = data.get('building', '')
+        address.flat = data.get('flat')
+        client_address.localityType = data.get('locality_type')
+        client_address.type = 1
 
     def _update_blood(self, data_list):
         blood_types = dict(
@@ -296,7 +312,8 @@ class ClientXForm(XForm, ClientSchema):
         return {
             "KLADR_locality": address.KLADRCode,
             "KLADR_street": address.KLADRStreetCode,
-            "house": ' '.join(filter(None, [address.number, address.corpus])),
+            "house": address.number,
+            "building": address.corpus,
             "flat": address.flat,
             "locality_type": address.localityType
         }
