@@ -95,7 +95,6 @@ class EventMeasureController(BaseModelController):
             end_date = start_date
         args = {
             'event_id': action.event_id,
-            'action_id': action.id,
             'beg_date_to': end_date,
             'end_date_from': start_date
         }
