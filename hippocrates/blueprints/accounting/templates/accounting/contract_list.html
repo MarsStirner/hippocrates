@@ -9,10 +9,76 @@
 </section>
 <section class="content">
     <div class="row">
-    <div class="col-md-12">
+    <div class="col-md-3" ng-show="isFilterEnabled()">
+        <div class="box box-primary">
+            <div class="box-header">
+                <h3 class="box-title">Фильтр</h3>
+            </div>
+            <div class="box-body">
+                <label for="filter-number">Номер</label>
+                <input class="form-control" id="filter-number" type="text" ng-model="flt.model.number" placeholder="Номер договора">
+
+                <label for="filter-finance">Тип финансирования</label>
+                <rb-select id="filter-finance" ng-model="flt.model.finance_type" placeholder="Тип финансирования" ref-book="rbFinance"></rb-select>
+
+                <label for="filter-beg-date-from">Начало действия (от, до)</label>
+                <div class="row">
+                    <div class="col-md-6">
+                        <wm-date id="filter-beg-date-from" ng-model="flt.model.beg_date_from"></wm-date>
+                    </div>
+                    <div class="col-md-6">
+                        <wm-date id="filter-beg-date-to" ng-model="flt.model.beg_date_to"></wm-date>
+                    </div>
+                </div>
+
+                <label for="filter-end-date">Окончание действия (от, до)</label>
+                <div class="row">
+                    <div class="col-md-6">
+                        <wm-date id="filter-end-date-from" ng-model="flt.model.end_date_from"></wm-date>
+                    </div>
+                    <div class="col-md-6">
+                        <wm-date id="filter-end-date-to" ng-model="flt.model.end_date_to"></wm-date>
+                    </div>
+                </div>
+
+                <label for="filter-set-date">Дата заключения (от, до)</label>
+                <div class="row">
+                    <div class="col-md-6">
+                        <wm-date id="filter-set-date-from" ng-model="flt.model.set_date_from"></wm-date>
+                    </div>
+                    <div class="col-md-6">
+                        <wm-date id="filter-set-date-to" ng-model="flt.model.set_date_to"></wm-date>
+                    </div>
+                </div>
+
+                <label for="filter-payer">Плательщик</label>
+                <input class="form-control" id="filter-payer" type="text" ng-model="flt.model.payer_query" placeholder="ФИО или название организации">
+
+                <label for="filter-recipient">Получатель</label>
+                <input class="form-control" id="filter-recipient" type="text" ng-model="flt.model.recipient_query" placeholder="ФИО или название организации">
+
+            </div>
+            <div class="box-footer">
+                <button class="btn btn-default" ng-click="getData()">Получить данные</button>
+                <div class="btn-group">
+                    <button class="btn btn-default" ng-click="clear()">Сбросить</button>
+                    <button class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                        <span class="caret"></span>
+                        <span class="sr-only">Toggle Dropdown</span>
+                    </button>
+                    <ul class="dropdown-menu" role="menu">
+                        <li><a ng-click="clearAll()">Сбросить и очистить результаты</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-[[ isFilterEnabled() ? 9 : 12 ]]">
     <div class="box">
         <div class="box-header with-border">
-{#              <h3 class="box-title">Bordered Table</h3>#}
+            <button type="button" title="[[ isFilterEnabled() ? 'Скрыть' : 'Показать' ]] фильтр" ng-click="toggleFilter()" class="btn btn-primary">
+                <i class="fa fa-filter"></i>
+            </button>
             <button type="button" title="Создать договор" ng-click="create()" class="btn btn-success pull-right">
                 <i class="fa fa-plus"> Создать договор</i>
             </button>

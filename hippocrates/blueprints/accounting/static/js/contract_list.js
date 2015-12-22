@@ -9,6 +9,10 @@ var ContractListCtrl = function ($scope, AccountingService, ContractModalService
         pages: null,
         record_count: null
     };
+    $scope.flt = {
+        enabled: false,
+        model: {}
+    };
 
     var setContractListData = function (paged_data) {
         $scope.contract_list = paged_data.contract_list;
@@ -22,13 +26,17 @@ var ContractListCtrl = function ($scope, AccountingService, ContractModalService
         var args = {
             paginate: true,
             page: $scope.pager.current_page,
-            per_page: $scope.pager.per_page
-            //measure_type_id_list: $scope.query.measure_type.length ? _.pluck($scope.query.measure_type, 'id') : undefined,
-            //beg_date_from: $scope.query.beg_date_from ? moment($scope.query.beg_date_from).startOf('day').toDate() : undefined,
-            //beg_date_to: $scope.query.beg_date_to ? moment($scope.query.beg_date_to).endOf('day').toDate() : undefined,
-            //end_date_from: $scope.query.end_date_from ? moment($scope.query.end_date_from).startOf('day').toDate() : undefined,
-            //end_date_to: $scope.query.end_date_to ? moment($scope.query.end_date_to).endOf('day').toDate() : undefined,
-            //measure_status_id_list: $scope.query.status.length ? _.pluck($scope.query.status, 'id') : undefined
+            per_page: $scope.pager.per_page,
+            number: $scope.flt.model.number || undefined,
+            finance_id: safe_traverse($scope.flt.model, ['finance_type', 'id']),
+            payer_query: $scope.flt.model.payer_query || undefined,
+            recipient_query: $scope.flt.model.recipient_query || undefined,
+            beg_date_from: $scope.flt.model.beg_date_from || undefined,
+            beg_date_to: $scope.flt.model.beg_date_to || undefined,
+            end_date_from: $scope.flt.model.end_date_from || undefined,
+            end_date_to: $scope.flt.model.end_date_to || undefined,
+            set_date_from: $scope.flt.model.set_date_from || undefined,
+            set_date_to: $scope.flt.model.set_date_to || undefined
         };
         AccountingService.get_contract_list(args).then(setContractListData);
     };
@@ -71,6 +79,26 @@ var ContractListCtrl = function ($scope, AccountingService, ContractModalService
     $scope.canDelete = function () {
         return true;
     };
+    $scope.toggleFilter = function () {
+        $scope.flt.enabled = !$scope.flt.enabled;
+    };
+    $scope.isFilterEnabled = function () {
+        return $scope.flt.enabled;
+    };
+    $scope.clear = function () {
+        $scope.pager.current_page = 1;
+        $scope.pager.pages = null;
+        $scope.pager.record_count = null;
+        $scope.flt.model = {};
+    };
+    $scope.clearAll = function () {
+        $scope.clear();
+        $scope.contract_list = [];
+    };
+    $scope.getData = function () {
+        refreshContractList();
+    };
+
     $scope.init = function () {
         refreshContractList();
     };
