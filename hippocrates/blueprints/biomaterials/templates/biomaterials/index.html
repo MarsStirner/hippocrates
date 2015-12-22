@@ -1,0 +1,140 @@
+{% extends 'biomaterials/base.html' %}
+
+{% block title %}> {{ module_name }}{% endblock %}
+
+{% block main %}
+<div ng-controller="IndexCtrl" class="ng-cloak">
+    <section class="content-header">
+        <div class="wm-page-header-button-box">
+            <ui-print-button ps="ps_bm" resolve="ps_resolve()"></ui-print-button>
+        </div>
+        <h1>Биоматериалы</h1>
+    </section>
+    <section class="content">
+        <div class="row marginal">
+            <div class="col-md-3 col-lg-2">
+                <label for="exec_date" class="control-label">Дата выполнения</label>
+                <wm-date id="execDate" name="execDate" ng-model="filter.execDate">
+                </wm-date>
+            </div>
+            <div class="col-md-4 col-lg-3">
+                <label for="filter-org-struct">Подразделение</label>
+                <wm-custom-dropdown id="filter-org-struct" ng-model="filter.org_struct">
+                    <wm-org-structure-tree nodes-selectable="true"></wm-org-structure-tree>
+                </wm-custom-dropdown>
+            </div>
+            <div class="col-md-3 col-lg-2">
+                <label for="biomaterial" class="control-label">Биоматериал</label>
+                <rb-select ng-model="filter.biomaterial" ref-book="rbTissueType" placeholder="Биоматериал"
+                           id="biomaterial" name="biomaterial" allow-clear="true"></rb-select>
+            </div>
+            <div class="col-md-3 col-lg-2" ng-if="filter.status == 2">
+                <label for="lab" class="control-label">Лаборатория</label>
+                <rb-select ng-model="filter.lab" ref-book="rbLaboratory" placeholder="Лаборатория"
+                           id="lab" name="lab" allow-clear="true"></rb-select>
+            </div>
+        </div>
+        <div class="row marginal">
+            <div class="col-md-12 col-lg-12">
+                <button type="button" class="btn btn-sm rmargin10" ng-click="filter.status = null"
+                        ng-class="{'btn-info': filter.status != null, 'btn-primary': filter.status == null}">
+                    Все <span title="" class="badge bg-white">[[ number_by_status.all ]]</span>
+                </button>
+                <button type="button" class="btn btn-sm rmargin10" ng-click="filter.status = 0"
+                        ng-class="{'btn-info': filter.status != 0, 'btn-primary': filter.status == 0}">
+                    Ожидается <span title="" class="badge bg-white">[[ number_by_status.waiting ]]</span>
+                </button>
+                <button type="button" class="btn btn-sm rmargin10" ng-click="filter.status = 1"
+                        ng-class="{'btn-info': filter.status != 1, 'btn-primary': filter.status == 1}">
+                    Выполняется <span title="" class="badge bg-white">[[ number_by_status.in_progress ]]</span>
+                </button>
+                <button type="button" class="btn btn-sm rmargin10" ng-click="filter.status = 3"
+                        ng-class="{'btn-info': filter.status != 3, 'btn-primary': filter.status == 3}">
+                    Отправка в лаб. <span title="" class="badge bg-white">[[ number_by_status.sending_to_lab ]]</span>
+                </button>
+                <button type="button" class="btn btn-sm rmargin10" ng-click="filter.status = 2"
+                        ng-class="{'btn-info': filter.status != 2, 'btn-primary': filter.status == 2}">
+                    Закончено <span title="" class="badge bg-white">[[ number_by_status.finished ]]</span>
+                </button>
+            </div>
+        </div>
+        <div class="box box-info">
+            <div class="box-header with-border">
+                <h3 class="box-title">Забор материалов</h3>
+            <div class="box-tools pull-right">
+                <button type="button" class="btn btn-default btn-box-tool" ng-click="change_status('in_progress')"
+                        ng-disabled="!selected_records.length" ng-if="filter.status == 0">
+                    Выполнить
+                </button>
+                <button type="button" class="btn btn-default btn-box-tool" ng-click="change_status('finished')"
+                        ng-disabled="!selected_records.length" ng-if="filter.status == 1">
+                    Отправить в лабораторию
+                </button>
+            </div>
+            </div>
+            <div class="box-body">
+                <table class="table table-condensed">
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" ng-checked="ttj_records.length && ttj_records.length == selected_records.length"
+                                       ng-click="select_all_records()"></th>
+                            <th>Дата и время</th>
+                            <th>ФИО</th>
+                            <th>Пол</th>
+                            <th>Дата рожд.</th>
+                            <th>Назначил врач</th>
+                            <th>Биоматериал</th>
+                            <th>Лабораторное исследование</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="record in ttj_records">
+                            <td><input type="checkbox" ng-checked="selected_records.has(record)" id="record-id-[[record.id]]"
+                                       ng-click="toggle_select_record(record)"></td>
+                            <td ng-click="open_info(record)">[[record.datetime | asDateTime]]</td>
+                            <td ng-click="open_info(record)">[[record.client.full_name]]</td>
+                            <td ng-click="open_info(record)">[[record.client.sex.name]]</td>
+                            <td ng-click="open_info(record)">[[record.client.birth_date | asDate]]</td>
+                            <td ng-click="open_info(record)"><div ng-repeat="person in record.set_persons">[[person.short_name]]</div></td>
+                            <td ng-click="open_info(record)">[[record.tissueType.name]] ([[record.actions.length]])</td>
+                            <td ng-click="open_info(record)"><div ng-repeat="action in record.actions">[[action.action_type.title]]</div></td>
+                            <td><span ng-if="record.isUrgent" class="label label-warning">CITO</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="box box-info">
+            <div class="box-header with-border">
+                <h3 class="box-title">Пробирки</h3>
+            </div>
+            <div class="box-body">
+                <div class="row">
+                    <div class="col-md-5">
+                        <table class="table table-condensed">
+                            <thead>
+                                <tr>
+                                    <th class="col-md-11">Тип контейнера</th>
+                                    <th class="col-md-1">Количество</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="record in tubes">
+                                    <td>[[record.name]]</td>
+                                    <td>[[record.number]] шт.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
+{% block modules_js %}
+    {{ super() }}
+    <script src="{{ url_for('.static', filename='js/index.js', v=app_version) }}"></script>
+    <script type="text/ng-template" id="modal-ttj-info.html">{% include "biomaterials/_modal_ttj_info.html" %}</script>
+{% endblock %}

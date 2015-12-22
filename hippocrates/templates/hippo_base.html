@@ -61,6 +61,8 @@
         url_schedule_index = '{{ url_for('schedule.index') }}',
         url_wm10_create_event = '{{ "{0}patients/{{0}}/appeals/new/?token={1}&role={2}".format(config['WEBMIS10_URL'], request.cookies.get(config['CASTIEL_AUTH_TOKEN']), current_user.current_role) | safe}}',
         url_api_event_make_payment = '{{ url_for('accounting.api_event_make_payment') }}',
-        url_api_get_event_payments = '{{ url_for('accounting.api_get_event_payments') }}';
+        url_api_get_event_payments = '{{ url_for('accounting.api_get_event_payments') }}',
+        url_get_ttj_records = '{{ url_for('biomaterials.api_get_ttj_records') }}',
+        url_ttj_update_status = '{{ url_for('biomaterials.api_ttj_change_status') }}';
     </script>
 {% endblock -%}
