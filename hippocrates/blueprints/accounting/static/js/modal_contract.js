@@ -29,6 +29,9 @@ WebMis20.run(['$templateCache', function ($templateCache) {
                             <label for="number" class="control-label">Номер</label>\
                             <input type="text" class="form-control" ng-model="contract.number" id="number" name="number"\
                                 ng-required="true">\
+                            <span class="text-warning" ng-show="is_new_contract()">\
+                                предыдущий номер: [[ contract.last_contract_number ? contract.last_contract_number : "нет" ]]\
+                            </span>\
                         </div>\
                         <div class="col-md-6"\
                             ng-class="{\'has-error\': contractForm.date.$invalid}">\
@@ -360,6 +363,8 @@ var ContractModalCtrl = function ($scope, $filter, AccountingService, contract, 
             if (!$scope.contract.recipient.ca_type_code || $scope.contract.recipient.ca_type_code === 'undefined') {
                 $scope.contract.recipient.ca_type_code = 'legal';
             }
+            $scope.ca_params.payer_create_mode = !Boolean($scope.contract.payer.id);
+            $scope.ca_params.recipient_create_mode = !Boolean($scope.contract.recipient.id);
         }
     };
 

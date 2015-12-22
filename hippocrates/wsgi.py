@@ -130,14 +130,18 @@ def fc_urls():
             'api_pricelist_list': url_for('accounting.api_0_pricelist_list'),
             'api_service_search': url_for('accounting.api_0_service_search'),
             'api_service_list_save': url_for('accounting.api_0_service_list_save'),
+            'api_service_list_grouped': url_for('accounting.api_0_service_list_grouped'),
+            'api_service_delete': url_for('accounting.api_0_service_delete'),
             'api_invoice_get': url_for('accounting.api_0_invoice_get'),
             'api_invoice_save': url_for('accounting.api_0_invoice_save'),
             'api_invoice_delete': url_for('accounting.api_0_invoice_delete'),
             'api_invoice_search': url_for('accounting.api_0_invoice_search'),
+            'api_invoice_calc_sum': url_for('accounting.api_0_invoice_calc_sum'),
             'api_finance_transaction_get': url_for('accounting.api_0_finance_transaction_get'),
             'api_finance_transaction_make': url_for('accounting.api_0_finance_transaction_make'),
             'api_finance_transaction_invoice_get': url_for('accounting.api_0_finance_transaction_invoice_get'),
-            'api_finance_transaction_invoice_make': url_for('accounting.api_0_finance_transaction_invoice_make')
+            'api_finance_transaction_invoice_make': url_for('accounting.api_0_finance_transaction_invoice_make'),
+            'api_service_discount_list': url_for('accounting.api_0_service_discount_list')
         }
     }
 

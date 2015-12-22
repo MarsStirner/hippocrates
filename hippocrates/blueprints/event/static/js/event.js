@@ -77,7 +77,8 @@ var EventMainInfoCtrl = function ($scope, $q, RefBookService, EventType, $filter
             client = $scope.event.info.client;
         AccountingService.get_contract(undefined, {
             finance_id: finance_id,
-            client_id: client_id
+            client_id: client_id,
+            payer_client_id: client_id
         })
             .then(function (contract) {
                 return ContractModalService.openEdit(contract, client);
@@ -505,14 +506,18 @@ var EventMovingsCtrl = function($scope, $modal, RefBookService, ApiCalls) {
     }
 };
 
-var EventServicesCtrl = function($scope, AccountingService, InvoiceModalService) {
+var EventServicesCtrl = function($scope, $rootScope, AccountingService, InvoiceModalService, PrintingService) {
     $scope.query = "";
     $scope.search_result = null;
     $scope.search_processed = false;
     $scope.editing = false;
     $scope.editingInvoice = false;
     $scope.newInvoiceServiceList = [];
+    $scope.ps_invoice = new PrintingService("invoice");
 
+    $scope.controlsAvailable = function () {
+        return !$scope.event.ro;
+    };
     $scope.inEditMode = function () {
         return $scope.editing;
     };
@@ -531,6 +536,7 @@ var EventServicesCtrl = function($scope, AccountingService, InvoiceModalService)
                 $scope.event.services = service_data;
                 $scope.query_clear();
                 $scope.editing = false;
+                $rootScope.$broadcast('serviceListChanged');
             });
     };
     $scope.inInvoiceEditMode = function () {
@@ -545,10 +551,14 @@ var EventServicesCtrl = function($scope, AccountingService, InvoiceModalService)
     };
     $scope.finishEditingInvoice = function () {
         var contract_id = safe_traverse($scope.event.info, ['contract', 'id']);
-        InvoiceModalService.openNew($scope.newInvoiceServiceList, contract_id)
+        InvoiceModalService.openNew($scope.newInvoiceServiceList, contract_id, $scope.event)
             .then(function (result) {
                 $scope.event.invoices.push(result.invoice);
                 $scope.cancelEditingInvoice();
+                AccountingService.get_grouped_services($scope.event.event_id)
+                    .then(function (service_data) {
+                        $scope.event.services = service_data;
+                    });
             });
     };
     $scope.openInvoice = function (idx) {
@@ -593,11 +603,11 @@ var EventServicesCtrl = function($scope, AccountingService, InvoiceModalService)
                 total_sum = 0;
             angular.forEach(sg.sg_list, function (service) {
                 total_amount += service.service.amount;
-                total_sum += service.service.sum;
+                total_sum += parseFloat(service.service.sum);
             });
             sg.sg_data.total_amount = total_amount;
-            sg.sg_data.total_sum = total_sum;
-        })
+            sg.sg_data.total_sum = total_sum.toFixed(2);
+        });
     };
     $scope.addNewService = function (search_item) {
         search_item = _.deepCopy(search_item);
@@ -621,8 +631,12 @@ var EventServicesCtrl = function($scope, AccountingService, InvoiceModalService)
         $scope.event.services.grouped[idx].sg_list.push(search_item);
         $scope.refreshSGData();
     };
-
-
+    $scope.get_ps_resolve = function (invoice) {
+        return {
+            invoice_id: invoice.id,
+            event_id: $scope.event.info.id
+        }
+    };
 
     $scope.get_class = function (service) {
         var result = [];
@@ -725,16 +739,12 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
     };
 
     $scope.delete_event = function () {
-        if($scope.event_has_payments()) {
-            alert('Невозможно удалить обращение! По нему была совершена оплата.');
-            return;
-        }
         MessageBox.question(
             'Удаление обращения',
             'Вы уверены, что хотите удалить текущее обращение?'
         ).then(function () {
             $scope.eventServices.delete_event(
-                event
+                $scope.event
             ).then(function () {
                 if (window.opener) {
                     window.opener.focus();
@@ -745,13 +755,6 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
                 MessageBox.error('Невозможно удалить обращение', safe_traverse(response, ['data', 'meta', 'name']));
             });
         });
-    };
-
-    $scope.event_has_payments = function () {
-        return $scope.event.payment && $scope.event.payment.payments.payments.length;
-    };
-    $scope.btn_delete_event_visible = function () {
-        return !$scope.event.is_new() && $scope.event.payment && !$scope.event_has_payments();
     };
 
     $scope.close_event = function() {
@@ -813,8 +816,8 @@ WebMis20.controller('EventMainInfoCtrl', ['$scope', '$q', 'RefBookService', 'Eve
 WebMis20.controller('EventStationaryInfoCtrl', ['$scope', '$filter', '$modal', '$q', 'RisarApi', 'ApiCalls', EventStationaryInfoCtrl]);
 WebMis20.controller('EventReceivedCtrl', ['$scope', '$modal', 'RefBookService', EventReceivedCtrl]);
 WebMis20.controller('EventMovingsCtrl', ['$scope', '$modal', 'RefBookService', 'ApiCalls', EventMovingsCtrl]);
-WebMis20.controller('EventServicesCtrl', ['$scope', 'AccountingService',
-    'InvoiceModalService', EventServicesCtrl]);
+WebMis20.controller('EventServicesCtrl', ['$scope', '$rootScope', 'AccountingService',
+    'InvoiceModalService', 'PrintingService', EventServicesCtrl]);
 WebMis20.controller('EventInfoCtrl', ['$scope', 'WMEvent', '$http', 'RefBookService', '$window', '$document',
     'PrintingService', '$filter', '$modal', 'WMEventServices', 'WMEventFormState', 'MessageBox', EventInfoCtrl]);
 WebMis20.controller('StationaryEventInfoCtrl', ['$scope', '$controller', '$modal', '$http', 'WMStationaryEvent', StationaryEventInfoCtrl]);

@@ -25,7 +25,7 @@ WebMis20.service('ContractModalService', ['$modal', function ($modal) {
 
 WebMis20.service('InvoiceModalService', ['$modal', 'AccountingService', function ($modal, AccountingService) {
     return {
-        openNew: function (service_list, contract_id) {
+        openNew: function (service_list, contract_id, event) {
             return AccountingService.get_invoice(undefined, {
                 service_list: service_list,
                 contract_id: contract_id
@@ -41,7 +41,7 @@ WebMis20.service('InvoiceModalService', ['$modal', 'AccountingService', function
                             return newInvoice
                         },
                         event: function () {
-                            return undefined;
+                            return event;
                         }
                     }
                 });
@@ -185,6 +185,12 @@ WebMis20.service('AccountingService', ['WebMisApi', function (WebMisApi) {
             grouped: grouped_service_list
         });
     };
+    this.delete_service = function (service) {
+        return WebMisApi.service.del(service.service.id);
+    };
+    this.get_grouped_services = function (event_id) {
+        return WebMisApi.service.get_list_grouped(event_id);
+    };
     this.get_invoice = function (invoice_id, args) {
         return WebMisApi.invoice.get(invoice_id, args);
     };
@@ -218,5 +224,19 @@ WebMis20.service('AccountingService', ['WebMisApi', function (WebMisApi) {
     };
     this.make_finance_transaction_invoice = function (trx_type, args) {
         return WebMisApi.finance_trx.make_invoice_trx(trx_type.code, args);
+    };
+    this.get_service_discounts = function () {
+        return WebMisApi.service_discount.get_list();
+    };
+    this.calc_service_sum = function (service, amount, discount) {
+        return WebMisApi.service.calc_sum({
+            service_id: service.service.id,
+            price_list_item_id: service.service.price_list_item_id,
+            amount: amount,
+            discount_id: discount.id
+        });
+    };
+    this.calc_invoice_sum = function (invoice) {
+        return WebMisApi.invoice.calc_sum(invoice.id, invoice);
     };
 }]);

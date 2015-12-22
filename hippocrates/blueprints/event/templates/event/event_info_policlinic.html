@@ -171,8 +171,7 @@
                     {% if user_utils.can_delete_event(event) %}
                     <div class="row vmargin10">
                         <div class="col-md-12">
-                            <button type="button" ng-click="delete_event()" class="btn btn-lg btn-danger btn-block"
-                                    ng-if="btn_delete_event_visible()">Удалить обращение</button>
+                            <button type="button" ng-click="delete_event()" class="btn btn-lg btn-danger btn-block">Удалить обращение</button>
                         </div>
                     </div>
                     {% endif %}
@@ -190,4 +189,5 @@
     <script src="{{ url_for('.static', filename='js/event.js', v=app_version) }}"></script>
     <script src="{{ url_for('static', filename='js/services/event/event-services.js', v=nemesis_version) }}"></script>
     <script src="{{ url_for('.static', filename='js/directives.js', v=app_version) }}"></script>
+    <script type="text/ng-template" id="modal-lab-res-dynamics.html">{% include 'event/_modal_lab_res_dynamics.html' %}</script>
 {% endblock %}

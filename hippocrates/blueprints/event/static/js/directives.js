@@ -13,6 +13,7 @@ angular.module('WebMis20')
 <th>Услуга</th>\
 <th class="nowrap">Документ</th>\
 <th class="nowrap" ng-show="formstate.is_paid()">Цена (руб.)</th>\
+<th ng-show="formstate.is_paid()">Скидка</th>\
 <th>Количество</th>\
 <th class="nowrap" ng-show="formstate.is_paid()">Сумма (руб.)</th>\
 <th></th>'
@@ -36,9 +37,6 @@ function(WMEventFormState, WMEventServices, ActionTypeTreeModal, CurrentUser) {
                 scope.expanded = newVal;
             });
 
-            //scope.coord_all = function (off) {
-            //    scope.service.coord_all = !Boolean(off);
-            //};
             //scope.open_assignments = function () {
             //    var assigned = scope.service.all_assigned,
             //        ped = scope.service.all_planned_end_date;
@@ -74,13 +72,6 @@ function(WMEventFormState, WMEventServices, ActionTypeTreeModal, CurrentUser) {
             //        });
             //    });
             //};
-            //
-            //scope.btn_coordinate_visible = function () {
-            //    return !scope.service.fully_coord && !scope.service.all_actions_closed && !scope.event.ro;
-            //};
-            //scope.btn_cancel_coordinate_visible = function () {
-            //    return scope.service.fully_coord && !scope.service.all_actions_closed && !scope.event.ro;
-            //};
             //scope.btn_delete_visible = function () {
             //    var s = scope.service;
             //    return !(
@@ -102,9 +93,10 @@ function(WMEventFormState, WMEventServices, ActionTypeTreeModal, CurrentUser) {
         ng-disabled="lab_components_disabled()">Выбрать назначаемые исследования</a> -->\
 </td>\
 <td ng-bind="serviceGroupData.at_name"></td>\
-<td ng-bind="serviceGroupData.price" class="text-right" ng-show="formstate.is_paid()"></td>\
+<td ng-bind="serviceGroupData.price | moneyCut" class="text-right" ng-show="formstate.is_paid()"></td>\
+<td ng-show="formstate.is_paid()"></td>\
 <td ng-bind="serviceGroupData.total_amount" class="text-right"></td>\
-<td ng-bind="serviceGroupData.total_sum" class="text-right" ng-show="formstate.is_paid()"></td>\
+<td ng-bind="serviceGroupData.total_sum | moneyCut" class="text-right" ng-show="formstate.is_paid()"></td>\
 <td nowrap class="text-right">\
     <button type="button" class="btn btn-sm btn-danger" title="Удалить услуги"\
             ng-show="btn_delete_visible()"\
@@ -113,9 +105,8 @@ function(WMEventFormState, WMEventServices, ActionTypeTreeModal, CurrentUser) {
 </td>'
     };
 }])
-.directive('wmEventServiceRecord', [
-    'WMEventFormState', 'WMEventServices', 'ActionTypeTreeModal', '$filter', 'RefBookService', 'CurrentUser',
-function(WMEventFormState, WMEventServices, ActionTypeTreeModal, $filter, RefBookService, CurrentUser) {
+.directive('wmEventServiceRecord', ['WMEventFormState', 'AccountingService',
+        function(WMEventFormState, AccountingService) {
     return {
         restrict: 'A',
         scope: {
@@ -129,20 +120,30 @@ function(WMEventFormState, WMEventServices, ActionTypeTreeModal, $filter, RefBoo
         },
         link: function(scope, elm, attrs) {
             scope.formstate = WMEventFormState;
-            scope.eventServices = WMEventServices;
-            scope.ActionStatus = RefBookService.get('ActionStatus');
 
             scope.onAmountChanged = function () {
-                scope.service.service.sum = scope.service.service.price * scope.service.service.amount;
+                AccountingService.calc_service_sum(
+                    scope.service,
+                    scope.service.service.amount,
+                    scope.service.service.discount
+                )
+                    .then(function (new_sum) {
+                        scope.service.service.sum = new_sum;
+                        scope.onChangeCallback();
+                    });
+            };
+            var deleteService = function () {
+                scope.serviceGroup.sg_list.splice(scope.idx, 1);
                 scope.onChangeCallback();
+                // todo - удалить группу, если услуга одна
             };
             scope.removeService = function () {
                 if (scope.service.service.id) {
                     if (!confirm('Вы действительно хотите удалить выбранную услугу?')) return;
-                    // todo
+                    AccountingService.delete_service(scope.service)
+                        .then(deleteService);
                 } else {
-                    scope.serviceGroup.sg_list.splice(scope.idx, 1);
-                    // todo - удалить группу, если услуга одна
+                    deleteService();
                 }
             };
             scope.inNewInvoice = false;
@@ -196,22 +197,11 @@ function(WMEventFormState, WMEventServices, ActionTypeTreeModal, $filter, RefBoo
             //    ];
             //    return msg.join('; ');
             //};
-            //scope.get_ps = function () {
-            //    return scope.service.print_services[scope.idx];
-            //};
-            //scope.get_ps_resolve = function () {
-            //    return {
-            //        action_id: scope.action.action_id
-            //    };
-            //};
-            //
             scope.amountDisabled = function () {
                 return !scope.editMode;
             };
             scope.btnRemoveVisible = function () {
-                return scope.editMode;
-                return !(scope.action.is_paid_for() || scope.action.is_coordinated() ||
-                    scope.action.is_closed() || scope.event.ro);
+                return scope.editMode && scope.service.service.access.can_delete;
             };
             scope.btnAddToInvoiceVisible = function () {
                 return scope.editInvoiceMode && !scope.service.service.in_invoice && !scope.isInNewInvoice();
@@ -237,21 +227,19 @@ function(WMEventFormState, WMEventServices, ActionTypeTreeModal, $filter, RefBoo
         ng-disabled="lab_components_disabled()">Выбрать назначаемые исследования</a> -->\
 </td>\
 <td ng-bind="service.action.at_name"></td>\
-<td ng-bind="service.service.price" class="text-right" ng-show="formstate.is_paid()"></td>\
+<td ng-bind="service.service.price | moneyCut" class="text-right" ng-show="formstate.is_paid()"></td>\
+<td ng-show="formstate.is_paid()">[[ service.service.discount ? service.service.discount.description.short : ""]]</td>\
 <td class="col-md-1">\
     <input type="text" class="form-control input-sm"\
            ng-disabled="amountDisabled()" ng-model="service.service.amount" ng-change="onAmountChanged()"\
-           valid-number minval="1"/>\
+           valid-number minval="1" wm-debounce/>\
 </td>\
-<td ng-bind="service.service.sum" class="text-right" ng-show="formstate.is_paid()"></td>\
-<!-- <td class="text-center" ng-show="formstate.is_paid()">\
-    <span class="glyphicon" ng-class="{\'glyphicon-ok\': action.is_paid_for(), \'glyphicon-remove\':!action.is_paid_for()}"></span>\
-</td> -->\
+<td class="text-right" ng-show="formstate.is_paid()">\
+    <span ng-bind="service.service.sum | moneyCut"></span> <span class="glyphicon glyphicon-ok text-success" title="Оплачено" ng-show="service.service.is_paid"></span>\
+</td>\
 <td nowrap class="text-right">\
     <!-- <span class="glyphicon glyphicon-info-sign" ng-if="action.action_id"\
-        popover-trigger="mouseenter" popover-popup-delay=\'1000\' popover-placement="left" popover="[[get_info_text()]]"></span>\
-    <ui-print-button ps="get_ps()" resolve="get_ps_resolve()" lazy-load-context="[[service.print_context]]"\
-        ng-if="action.action_id"></ui-print-button> -->\
+        popover-trigger="mouseenter" popover-popup-delay=\'1000\' popover-placement="left" popover="[[get_info_text()]]"></span> -->\
     <button type="button" class="btn btn-sm btn-danger" title="Убрать из списка услуг" ng-show="btnRemoveVisible()"\
             ng-click="removeService()"><span class="fa fa-trash"></span>\
     </button>\
@@ -277,7 +265,7 @@ function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WME
             scope.actions = [];
             scope.pager = {
                 current_page: 1,
-                per_page: 15,
+                per_page: 10,
                 max_size: 10,
                 pages: 1
             };
@@ -297,6 +285,9 @@ function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WME
                     scope.pager.pages = data.result.pages;
                 });
             };
+            scope.$on('serviceListChanged', function() {
+                scope.reload();
+            });
             scope.reset_sorting = function () {
                 scope.current_sorting = {
                     order: 'DESC',
@@ -364,7 +355,10 @@ function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WME
             };
             scope.open_lab_res_dynamics = function(action){
                 LabDynamicsModal.openLabDynamicsModal(scope.event, action);
-            }
+            };
+            scope.action_has_payment = function (action) {
+                return Boolean(action.payment);
+            };
             scope.reset_sorting();
             scope.reload();
         },
@@ -383,7 +377,12 @@ function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WME
     </thead>\
     <tbody>\
     <tr ng-repeat="action in actions" ng-class="{\'success\': action.status.code == \'finished\'}">\
-        <td ng-click="open_action(action.id)">[[ action.name ]]</td>\
+        <td ng-click="open_action(action.id)">\
+            <span ng-bind="action.name"></span>\
+            <span ng-show="action_has_payment(action)" class="text-muted lmargin20"><br>\
+            Стоимость: [[ action.payment.sum ]] руб. <span class="glyphicon glyphicon-ok text-success" title="Оплачено"\
+            ng-show="action.payment.is_paid"></span>\
+        </td>\
         <td ng-click="open_action(action.id)">[[action.status.name]]</td>\
         <td ng-click="open_action(action.id)">[[ action.begDate | asDate ]]</td>\
         <td ng-click="open_action(action.id)">[[ action.endDate | asDateTime ]]</td>\

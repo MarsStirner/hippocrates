@@ -78,13 +78,13 @@ var CashbookPayerModalCtrl = function ($scope, $q, AccountingService, RefBookSer
     $scope.make_trx = function (operation) {
         var data = angular.extend($scope.trx, {
             contragent_id: $scope.payer.id,
-            finance_operation: operation
+            finance_operation_type: operation
         });
         return AccountingService.make_finance_transaction($scope.trx_type, data);
     };
 
     $scope.init = function () {
-        var trxOperations = RefBookService.get('FinanceTransactionOperation');
+        var trxOperations = RefBookService.get('FinanceOperationType');
         var trxTypes = RefBookService.get('FinanceTransactionType');
         $q.all([trxOperations.loading, trxTypes.loading])
             .then(function () {
@@ -140,7 +140,7 @@ WebMis20.run(['$templateCache', function ($templateCache) {
             <div class="col-sm-offset-3 col-sm-7">\
                 <div class="checkbox">\
                     <label>\
-                        <input type="checkbox" ng-model="deposit_payment.checked"> Внести сумму\
+                        <input type="checkbox" ng-model="deposit_payment.checked" ng-change="setDepositSum()"> Внести сумму\
                     </label>\
                 </div>\
             </div>\
@@ -241,6 +241,11 @@ var CashbookInvoiceModalCtrl = function ($scope, $q, AccountingService, RefBookS
     $scope.isDepositPayment = function () {
         return $scope.deposit_payment.checked;
     };
+    $scope.setDepositSum = function () {
+        if ($scope.deposit_payment.checked) {
+            $scope.trxes.payer_balance_trx.sum = $scope.invoice.total_sum;
+        }
+    };
     $scope.saveAndClose = function () {
         $scope.make_invoice_trxes().then(function (invoice) {
             $scope.$close({
@@ -252,18 +257,18 @@ var CashbookInvoiceModalCtrl = function ($scope, $q, AccountingService, RefBookS
     $scope.make_invoice_trxes = function () {
         var data = {};
         data.invoice_trx = angular.extend($scope.trxes.invoice_trx, {
-            finance_operation: $scope.ops.invoice_pay
+            finance_operation_type: $scope.ops.invoice_pay
         });
         if ($scope.isDepositPayment()) {
             data.payer_balance_trx = angular.extend($scope.trxes.payer_balance_trx, {
-                finance_operation: $scope.ops.balance_in
+                finance_operation_type: $scope.ops.balance_in
             })
         }
         return AccountingService.make_finance_transaction_invoice($scope.trx_type, data);
     };
 
     $scope.init = function () {
-        var trxOperations = RefBookService.get('FinanceTransactionOperation');
+        var trxOperations = RefBookService.get('FinanceOperationType');
         var trxTypes = RefBookService.get('FinanceTransactionType');
         $q.all([trxOperations.loading, trxTypes.loading])
             .then(function () {

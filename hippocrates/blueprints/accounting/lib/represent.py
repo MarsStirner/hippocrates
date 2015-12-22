@@ -2,9 +2,11 @@
 
 from nemesis.models.enums import Gender, ContragentType
 from nemesis.lib.utils import format_date, safe_double, safe_decimal, format_money
-from nemesis.lib.data_ctrl.accounting.utils import get_contragent_type, check_invoice_closed
+from nemesis.lib.data_ctrl.accounting.utils import (get_contragent_type, check_invoice_closed,
+    check_invoice_can_add_discounts, calc_invoice_sum_wo_discounts)
 from nemesis.lib.data_ctrl.accounting.service import ServiceController
-from nemesis.lib.data_ctrl.accounting.contract import ContragentController
+from nemesis.lib.data_ctrl.accounting.contract import ContragentController, ContractController
+from nemesis.lib.data_ctrl.accounting.invoice import InvoiceController
 
 
 class ContractRepr(object):
@@ -23,17 +25,20 @@ class ContractRepr(object):
             'payer': self.ca_repr.represent_contragent(contract.payer),
             'contingent_list': [
                 self.contingent_repr.represent_contingent(cont)
-                for cont in contract.contingent_list if cont.deleted == 0  # TODO: think about selection
+                for cont in contract.contingent_list
             ],
             'pricelist_list': [
                 self.pricelist_repr.represent_pricelist_short(pl)
-                for pl in contract.pricelist_list if pl.deleted == 0  # TODO: think about selection
+                for pl in contract.pricelist_list
             ],
             'description': {
                 'full': self.make_full_description(contract),
                 'short': self.make_short_description(contract),
             }
         })
+        if not contract.id:
+            con_ctrl = ContractController()
+            data['last_contract_number'] = con_ctrl.get_last_contract_number()
         return data
 
     def represent_contract(self, contract):
@@ -50,7 +55,7 @@ class ContractRepr(object):
             'draft': contract.draft,
         }
 
-    def represent_contract_for_payer(self, contract):
+    def represent_contract_with_description(self, contract):
         if not contract:
             return None
         data = self.represent_contract(contract)
@@ -123,7 +128,7 @@ class ContragentRepr(object):
         data = self.represent_contragent(contragent)
         contract_repr = ContractRepr()
         data['contract_list'] = [
-            contract_repr.represent_contract_for_payer(contract)
+            contract_repr.represent_contract_with_description(contract)
             for contract in contragent.payer_contract_list
         ]
         return data
@@ -234,9 +239,6 @@ class PriceListRepr(object):
 
 class ServiceRepr(object):
 
-    def __init__(self):
-        self.service_ctrl = ServiceController()
-
     def represent_mis_action_service_search_result(self, service_data):
         return {
             'service': {
@@ -244,9 +246,14 @@ class ServiceRepr(object):
                 'service_id': service_data['service_id'],
                 'service_code': service_data['service_code'],
                 'service_name': service_data['service_name'],
-                'price': format_money(service_data['price'], scale=0),
+                'price': format_money(service_data['price']),
                 'amount': service_data['amount'],
-                'sum': format_money(service_data['sum'], scale=0),
+                'sum': format_money(service_data['sum']),
+                'discount': None,
+                'access': {
+                    'can_edit': True,
+                    'can_delete': True
+                },
             },
             'action': {
                 'action_type_id': service_data['action_type_id'],
@@ -268,11 +275,24 @@ class ServiceRepr(object):
             'price': service.price_list_item.price,
             'service_id': service.price_list_item.service_id,
             'deleted': service.deleted,
-            'sum': format_money(service.price_list_item.price * safe_decimal(service.amount)),
             'service_code': service.price_list_item.serviceCodeOW,
             'service_name': service.price_list_item.serviceNameOW,
-            'in_invoice': self.service_ctrl.check_service_in_invoice(service)
+            'discount': ServiceDiscountRepr.represent_discount_short(service.discount)
         }
+
+    def represent_service_full(self, service):
+        data = self.represent_service(service)
+        service_ctrl = ServiceController()
+        in_invoice = service.in_invoice
+        is_paid = service_ctrl.check_service_is_paid(service)
+        data['sum'] = format_money(service.sum_)
+        data['in_invoice'] = in_invoice
+        data['is_paid'] = is_paid
+        data['access'] = {
+            'can_edit': service_ctrl.check_can_edit_service(service),
+            'can_delete': service_ctrl.check_can_delete_service(service)
+        }
+        return data
 
     def represent_service_action(self, action):
         return {
@@ -286,10 +306,50 @@ class ServiceRepr(object):
         for service_group in data['grouped']:
             for idx, service in enumerate(service_group['sg_list']):
                 service_group['sg_list'][idx] = {
-                    'service': self.represent_service(service['service']),
+                    'service': self.represent_service_full(service['service']),
                     'action': self.represent_service_action(service['action'])
                 }
         return data
+
+
+class ServiceDiscountRepr(object):
+
+    @staticmethod
+    def represent_discount(discount):
+        return {
+            'id': discount.id,
+            'code': discount.code,
+            'name': discount.name,
+            'deleted': discount.deleted,
+            'value_pct': discount.valuePct,
+            'value_fixed': discount.valueFixed,
+            'beg_date': discount.begDate,
+            'end_date': discount.endDate
+        }
+
+    @staticmethod
+    def represent_discount_short(discount):
+        if not discount:
+            return None
+        data = ServiceDiscountRepr.represent_discount(discount)
+        data['description'] = {
+            'short': ServiceDiscountRepr.make_short_description(discount),
+        }
+        return data
+
+    @staticmethod
+    def make_short_description(discount):
+        return u'{0}'.format(
+            u'{0} %'.format(discount.valuePct) if discount.valuePct is not None
+            else u'{0}'.format(discount.valueFixed) if discount.valueFixed is not None
+            else 'invalid'
+        )
+
+    @staticmethod
+    def represent_listed_discounts(sd_list):
+        return [
+            ServiceDiscountRepr.represent_discount_short(discount) for discount in sd_list
+        ]
 
 
 class InvoiceRepr(object):
@@ -303,6 +363,7 @@ class InvoiceRepr(object):
         data = self.represent_invoice(invoice)
         data.update({
             'total_sum': format_money(invoice.total_sum),
+            'sum_wo_discounts': format_money(calc_invoice_sum_wo_discounts(invoice)),
             'item_list': [
                 self.represent_invoice_item(item)
                 for item in invoice.item_list
@@ -310,7 +371,9 @@ class InvoiceRepr(object):
             'description': {
                 'full': self.make_full_description(invoice),
             },
-            'closed': check_invoice_closed(invoice)
+            'closed': check_invoice_closed(invoice),
+            'payment': self.represent_invoice_payment(invoice),
+            'can_add_discounts': check_invoice_can_add_discounts(invoice)
         })
         return data
 
@@ -342,12 +405,19 @@ class InvoiceRepr(object):
 
     def make_full_description(self, invoice):
         return u'''\
-№{0} от {1}.{2} Позиций: {3} шт.'''.format(
+№{0} от {1}.{2}'''.format(
             invoice.number or '',
             format_date(invoice.setDate),
-            u' Дата погашения {0}.'.format(format_date(invoice.settleDate)) if invoice.settleDate else u'',
-            len(invoice.item_list)
+            u' Дата погашения {0}.'.format(format_date(invoice.settleDate)) if invoice.settleDate else u''
         )
+
+    def represent_invoice_payment(self, invoice):
+        invoice_ctrl = InvoiceController()
+        pay_info = invoice_ctrl.get_invoice_payment_info(invoice)
+        pay_info['invoice_total_sum'] = format_money(pay_info['invoice_total_sum'])
+        pay_info['paid_sum'] = format_money(pay_info['paid_sum'])
+        pay_info['debt_sum'] = format_money(pay_info['debt_sum'])
+        return pay_info
 
     def represent_invoice_item(self, item):
         return {
@@ -355,7 +425,9 @@ class InvoiceRepr(object):
             'invoice_id': item.invoice_id,
             'service_id': item.concreteService_id,
             'service': self.service_repr.represent_service(item.service),
-            'price': format_money(item.price, scale=0),
+            'discount_id': item.discount_id,
+            'discount': ServiceDiscountRepr.represent_discount_short(item.discount),
+            'price': format_money(item.price),
             'amount': item.amount,
             'sum': format_money(item.sum),
             'deleted': item.deleted

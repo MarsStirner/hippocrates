@@ -14,6 +14,7 @@ from nemesis.models.client import Client
 from nemesis.models.enums import EventPrimary, EventOrder
 from nemesis.models.event import (Event, EventType, Diagnosis, Diagnostic, Visit, Event_Persons)
 from nemesis.models.exists import Person, rbRequestType, rbResult, OrgStructure, MKB
+from nemesis.models.accounting import Service
 from nemesis.systemwide import db
 from nemesis.lib.utils import (jsonify, safe_traverse, safe_date, safe_datetime, get_utc_datetime_with_tz, safe_int, format_date)
 from nemesis.lib.apiutils import api_method, ApiException
@@ -22,7 +23,7 @@ from nemesis.models.exists import (Organisation, )
 from nemesis.lib.jsonify import EventVisualizer, StationaryEventVisualizer
 from nemesis.lib.event.event_builder import PoliclinicEventBuilder, StationaryEventBuilder, EventConstructionDirector
 from blueprints.event.app import module
-from blueprints.event.lib.utils import (EventSaveException, create_services, save_event, received_save,
+from blueprints.event.lib.utils import (EventSaveException, save_event, received_save,
                                         save_executives, EventSaveController, ReceivedController, MovingController)
 from blueprints.patients.lib.utils import add_or_update_blood_type
 from nemesis.lib.sphinx_search import SearchEventService, SearchEvent
@@ -96,8 +97,6 @@ def api_event_save():
     request_type_kind = all_data.get('request_type_kind')
     event_data = all_data.get('event')
     event_id = event_data.get('id')
-    # contract_id = event_data['contract']['id']
-    services_data = all_data.get('services', [])
 
     event_ctrl = EventSaveController()
     try:
@@ -106,8 +105,7 @@ def api_event_save():
             if not event:
                 raise ApiException(404, u'Не найдено обращение с id = {}'.format(event_id))
             event_data = all_data['event']
-            local_contract_data = safe_traverse(all_data, 'payment', 'local_contract')
-            event = event_ctrl.update_base_info(event, event_data, local_contract_data)
+            event = event_ctrl.update_base_info(event, event_data)
             event_ctrl.store(event)
         else:
             event = Event()
@@ -116,7 +114,6 @@ def api_event_save():
             event_id = int(event)
         result['id'] = int(event)
 
-        # services_save(event_id, services_data, contract_id)
         update_executives(event)
         if request_type_kind == 'policlinic':
             visit = Visit.make_default(event)
@@ -265,25 +262,6 @@ def api_blood_history_save():
     db.session.add(bt)
     db.session.commit()
     return vis.make_blood_history(bt)
-
-
-def services_save(event_id, services_data, contract_id):
-    try:
-        actions, errors = create_services(event_id, services_data, contract_id)
-    except Exception, e:
-        db.session.rollback()
-        logger.error(u'Ошибка сохранения услуг для обращения %s: %s' % (event_id, e), exc_info=True)
-        raise EventSaveException(u'Ошибка сохранения услуг', {
-            'ext_msg': u'Свяжитесь с администратором.'
-        })
-    else:
-        if errors:
-            err_msg = u'<br><br> - %s<br>Свяжитесь с администратором.' % (
-                u'<br> - '.join(errors)
-            )
-            raise EventSaveException(u'Произошла ошибка при сохранении следующих услуг', {
-                'ext_msg': err_msg
-            })
 
 
 def update_executives(event):
@@ -497,52 +475,6 @@ def api_client_payment_info_get():
     return jsonify(res)
 
 
-@module.route('/api/event_payment/service_remove_coord.json', methods=['POST'])
-def api_service_remove_coord():
-    # not used
-    data = request.json
-    if data['action_id']:
-        actions = Action.query.filter(Action.id.in_(data['action_id']))
-        actions.update({Action.coordDate: None, Action.coordPerson_id: None},
-                       synchronize_session=False)
-        db.session.commit()
-
-    return jsonify(None)
-
-
-@module.route('/api/event_payment/service_coordinate.json', methods=['POST'])
-def api_service_coordinate():
-    # not used
-    data = request.json
-    service = data['service']
-    result = service['actions']
-    if service['actions'] and service['coord_person_id']:
-        actions = Action.query.filter(db.and_(Action.id.in_(service['actions']), Action.coordPerson_id==None))
-        actions.update({Action.coordDate: datetime.datetime.now(), Action.coordPerson_id: service['coord_person_id']},
-                       synchronize_session=False)
-        db.session.commit()
-
-    if len(service['actions']) < service['amount']:
-        result.extend(create_services(data['event_id'], [service], data['finance_id']))
-
-    return jsonify({
-        'result': 'ok',
-        'data': result
-    })
-
-
-@module.route('/api/event_payment/service_change_account.json', methods=['POST'])
-def api_service_change_account():
-    # not used
-    data = request.json
-    if data['actions']:
-        actions = Action.query.filter(Action.id.in_(data['actions']))
-        actions.update({Action.account: data['account']}, synchronize_session=False)
-        db.session.commit()
-
-    return jsonify(None)
-
-
 @module.route('/api/event_payment/delete_service.json', methods=['POST'])
 def api_service_delete_service():
     # TODO: validations
@@ -581,6 +513,12 @@ def api_delete_event():
             ScheduleClientTicket.event_id == event.id
         ).update({
             ScheduleClientTicket.event_id: None,
+        }, synchronize_session=False)
+        db.session.query(Service).join(Action).filter(
+            Action.event_id == event.id,
+            Service.action_id == Action.id
+        ).update({
+            Service.deleted: 1,
         }, synchronize_session=False)
         db.session.commit()
         return jsonify(None)
