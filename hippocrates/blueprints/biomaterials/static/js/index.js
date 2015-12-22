@@ -1,6 +1,21 @@
-var IndexCtrl = function ($scope, $modal, $http, RefBookService, PrintingService) {
+var IndexCtrl = function ($scope, $modal, $http, RefBookService, PrintingService, MessageBox) {
     $scope.selected_records = [];
     $scope.TTJStatus = RefBookService.get('TTJStatus');
+    $scope.rbLaboratory = RefBookService.get('rbLaboratory');
+    $scope.ps_bm = new PrintingService("biomaterials");
+    $scope.ps_bm.set_context("biomaterials");
+    $scope.ps_resolve = function () {
+        if (!$scope.selected_records.length) {
+            return MessageBox.error('Печать невозможна', 'Выберите хотя бы один забор биоматериала');
+        }
+        var ttj_ids = [];
+        $scope.selected_records.forEach(function(record){
+            ttj_ids.push(record.id)
+        })
+        return {
+            ttj_ids: ttj_ids
+        }
+    };
     $scope.filter = {execDate:new Date(),
                      status: null
     }
@@ -55,5 +70,6 @@ var IndexCtrl = function ($scope, $modal, $http, RefBookService, PrintingService
 
     $scope.$watchCollection('filter', function (new_value, old_value) {
         $scope.get_data();
+        $scope.selected_records = [];
     });
 };

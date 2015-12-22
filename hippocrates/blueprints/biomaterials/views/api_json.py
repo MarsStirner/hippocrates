@@ -20,11 +20,12 @@ def api_get_ttj_records():
     data = request.json
     number_by_status = {'all': 0, 'waiting': 0, 'in_progress': 0, 'sending_to_lab': 0, 'finished': 0}
 
-    filter = data.get('filter')
+    flt = data.get('filter')
 
-    status = filter.get('status')
-    exec_date = safe_date(filter.get('execDate'))
-    biomaterial = filter.get('biomaterial')
+    status = flt.get('status')
+    exec_date = safe_date(flt.get('execDate'))
+    biomaterial = flt.get('biomaterial')
+    lab = flt.get('lab')
 
     test_tubes = collections.defaultdict(lambda: {'number': 0})
     query = TakenTissueJournal.query.filter(func.date(TakenTissueJournal.datetimeTaken) == exec_date)
@@ -34,6 +35,16 @@ def api_get_ttj_records():
         query = query.filter(TakenTissueJournal.tissueType_id == biomaterial['id'])
     ttj_records = query.all()
     number_by_status['all'] = len(ttj_records)
+
+    def filter_by_lab(ttj_record):
+        for action in ttj_record.actions:
+            for property in action.properties:
+                lab_codes = [item.laboratory.code for item in property.type.test.lab_test] if property.type.test else []
+                if property.isAssigned and lab['code'] in lab_codes:
+                    return True
+
+    if lab:
+        ttj_records = filter(filter_by_lab, ttj_records)
 
     def count_tubes(x, y):
         x[y.testTubeType.code]['name'] = y.testTubeType.name

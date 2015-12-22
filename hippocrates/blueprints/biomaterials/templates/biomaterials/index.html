@@ -3,11 +3,14 @@
 {% block title %}> {{ module_name }}{% endblock %}
 
 {% block main %}
-<section class="content-header">
-    <h1>Биоматериалы</h1>
-</section>
-<section class="content">
-    <div ng-controller="IndexCtrl" class="ng-cloak">
+<div ng-controller="IndexCtrl" class="ng-cloak">
+    <section class="content-header">
+        <div class="wm-page-header-button-box">
+            <ui-print-button ps="ps_bm" resolve="ps_resolve()"></ui-print-button>
+        </div>
+        <h1>Биоматериалы</h1>
+    </section>
+    <section class="content">
         <div class="row marginal">
             <div class="col-md-3 col-lg-2">
                 <label for="exec_date" class="control-label">Дата выполнения</label>
@@ -16,29 +19,34 @@
             </div>
             <div class="col-md-3 col-lg-2">
                 <label for="biomaterial" class="control-label">Биоматериал</label>
-                <rb-select ng-model="filter.biomaterial" ref-book="rbTissueType"
+                <rb-select ng-model="filter.biomaterial" ref-book="rbTissueType" placeholder="Биоматериал"
                            id="biomaterial" name="biomaterial" allow-clear="true"></rb-select>
+            </div>
+            <div class="col-md-3 col-lg-2">
+                <label for="lab" class="control-label">Лаборатория</label>
+                <rb-select ng-model="filter.lab" ref-book="rbLaboratory" placeholder="Лаборатория"
+                           id="lab" name="lab" allow-clear="true"></rb-select>
             </div>
         </div>
         <div class="row marginal">
             <div class="col-md-12 col-lg-12">
-                <button type="button" class="btn btn-sm rmargin10" ng-click="$scope.filter.status = null"
+                <button type="button" class="btn btn-sm rmargin10" ng-click="filter.status = null"
                         ng-class="{'btn-info': filter.status != null, 'btn-primary': filter.status == null}">
                     Все <span title="" class="badge bg-white">[[ number_by_status.all ]]</span>
                 </button>
-                <button type="button" class="btn btn-sm rmargin10" ng-click="$scope.filter.status = 0"
+                <button type="button" class="btn btn-sm rmargin10" ng-click="filter.status = 0"
                         ng-class="{'btn-info': filter.status != 0, 'btn-primary': filter.status == 0}">
                     Ожидается <span title="" class="badge bg-white">[[ number_by_status.waiting ]]</span>
                 </button>
-                <button type="button" class="btn btn-sm rmargin10" ng-click="$scope.filter.status = 1"
+                <button type="button" class="btn btn-sm rmargin10" ng-click="filter.status = 1"
                         ng-class="{'btn-info': filter.status != 1, 'btn-primary': filter.status == 1}">
                     Выполняется <span title="" class="badge bg-white">[[ number_by_status.in_progress ]]</span>
                 </button>
-                <button type="button" class="btn btn-sm rmargin10" ng-click="$scope.filter.status = 3"
+                <button type="button" class="btn btn-sm rmargin10" ng-click="filter.status = 3"
                         ng-class="{'btn-info': filter.status != 3, 'btn-primary': filter.status == 3}">
                     Отправка в лаб. <span title="" class="badge bg-white">[[ number_by_status.sending_to_lab ]]</span>
                 </button>
-                <button type="button" class="btn btn-sm rmargin10" ng-click="$scope.filter.status = 2"
+                <button type="button" class="btn btn-sm rmargin10" ng-click="filter.status = 2"
                         ng-class="{'btn-info': filter.status != 2, 'btn-primary': filter.status == 2}">
                     Закончено <span title="" class="badge bg-white">[[ number_by_status.finished ]]</span>
                 </button>
@@ -116,9 +124,8 @@
                 </div>
             </div>
         </div>
-    </div>
-</section>
-
+    </section>
+</div>
 {% endblock %}
 {% block modules_js %}
     {{ super() }}
