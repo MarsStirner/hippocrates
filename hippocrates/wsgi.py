@@ -41,6 +41,11 @@ def general_menu():
         title=u'МИС',
         visible=True,
         icon='fa fa-medkit'
+    ), dict(
+        link='anareports.index_html',
+        title=u'Аналитические отчёты',
+        visible=True,
+        icon='fa fa-bar-chart'
     )]
     return dict(main_menu=menu_items)
 
