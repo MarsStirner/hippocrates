@@ -34,18 +34,17 @@ class EventSaveController():
     def create_base_info(self, event, all_data):
         # для всех request type
         event_data = all_data['event']
-        local_contract_data = safe_traverse(all_data, 'payment', 'local_contract')
         event.setPerson_id = current_user.get_main_user().id
         event.client_id = event_data['client_id']
         event.client = Client.query.get(event_data['client_id'])
         event.org_id = event_data['organisation']['id']
         event.payStatus = 0
-        event = self.update_base_info(event, event_data, local_contract_data)
+        event = self.update_base_info(event, event_data)
         event.externalId = get_new_event_ext_id(event.eventType.id, event.client_id)
         event.uuid = get_new_uuid()
         return event
 
-    def update_base_info(self, event, event_data, local_contract_data):
+    def update_base_info(self, event, event_data):
         event.eventType = EventType.query.get(event_data['event_type']['id'])
         exec_person_id = safe_traverse(event_data, 'exec_person', 'id')
         event.setDate = safe_datetime(event_data['set_date'])
@@ -54,15 +53,21 @@ class EventSaveController():
         if event.is_stationary:
             event.isPrimaryCode = event_data['is_primary']['id']
             event.order = event_data['order']['id']
-        event.contract_id = event_data['contract']['id']
+        contract_id = event_data['contract']['id']
+        event.contract_id = contract_id
+        if not event.id:
+            self.update_contract(contract_id, event.client_id)
         event.note = event_data['note']
         event.orgStructure_id = event_data['org_structure']['id'] if event_data['org_structure'] else None
         event.result_id = safe_traverse(event_data, 'result', 'id')
         event.rbAcheResult_id = safe_traverse(event_data, 'ache_result', 'id')
-        # if local_contract_data:
-        #     lcon = create_or_update_local_contract(event, local_contract_data)
-        #     event.localContract = lcon
         return event
+
+    def update_contract(self, contract_id, client_id):
+        from nemesis.lib.data_ctrl.accounting.contract import ContractController
+        contract_ctrl = ContractController()
+        contract = contract_ctrl.get_contract(contract_id)
+        contract_ctrl.try_add_contingent(contract, client_id)
 
     def store(self, *entity_list):
         db.session.add_all(entity_list)
@@ -150,7 +155,7 @@ class MovingController():
         return moving
 
 
-def create_new_event(event_data, local_contract_data):
+def create_new_event(event_data):
     base_msg = u'Невозможно создать обращение: %s.'
     event = Event()
     event.setPerson_id = current_user.get_main_user().id
@@ -177,15 +182,6 @@ def create_new_event(event_data, local_contract_data):
             'code': 403
         })
 
-    # if event.payer_required:
-    #     if not local_contract_data:
-    #         raise EventSaveException(base_msg % error_msg['message'], {
-    #             'code': 422,
-    #             'ext_msg': u'Не заполнена информация о плательщике.'
-    #         })
-    #     lcon = create_or_update_local_contract(event, local_contract_data)
-    #     event.localContract = lcon
-
     if event.is_policlinic:
         visit = Visit.make_default(event)
         db.session.add(visit)
@@ -197,7 +193,7 @@ def create_new_event(event_data, local_contract_data):
     return event
 
 
-def update_event(event_id, event_data, local_contract_data):
+def update_event(event_id, event_data):
     event = Event.query.get(event_id)
     event.eventType = EventType.query.get(event_data['event_type']['id'])
     exec_person_id = safe_traverse(event_data, 'exec_person', 'id')
@@ -212,11 +208,7 @@ def update_event(event_id, event_data, local_contract_data):
     event.result_id = safe_traverse(event_data, 'result', 'id')
     event.rbAcheResult_id = safe_traverse(event_data, 'ache_result', 'id')
     event.note = event_data['note']
-
-    # if local_contract_data:
-    #     lcon = create_or_update_local_contract(event, local_contract_data)
-    #     event.localContract = lcon
-    # return event
+    return event
 
 
 def save_event(event_id, data):
@@ -226,13 +218,11 @@ def save_event(event_id, data):
             'ext_msg': u'Отсутствует основная информация об обращении'
         })
     create_mode = not event_id
-    local_contract_data = safe_traverse(data, 'payment', 'local_contract')
-    services_data = data.get('services', [])
     if event_id:
-        event = update_event(event_id, event_data, local_contract_data)
+        event = update_event(event_id, event_data)
         db.session.add(event)
     else:
-        event = create_new_event(event_data, local_contract_data)
+        event = create_new_event(event_data)
     db.session.add(event)
 
     result = {}
@@ -252,39 +242,6 @@ def save_event(event_id, data):
                 ticket = ScheduleClientTicket.query.get(int(ticket_id))
                 ticket.event_id = int(event)
                 db.session.commit()
-
-        # save actions
-        contract_id = event_data['contract']['id']
-        if create_mode:
-            try:
-                actions, errors = create_services(event.id, services_data, contract_id)
-            except Exception, e:
-                db.session.rollback()
-                logger.error(u'Ошибка сохранения услуг при создании обращения %s: %s' % (event.id, e), exc_info=True)
-                result['error_text'] = u'Обращение создано, но произошла ошибка при сохранении услуг. ' \
-                                       u'Свяжитесь с администратором.'
-            else:
-                if errors:
-                    err_msg = u'Обращение создано, но произошла ошибка при сохранении следующих услуг:' \
-                              u'<br><br> - %s<br>Свяжитесь с администратором.' % (u'<br> - '.join(errors))
-                    result['error_text'] = err_msg
-        else:
-            try:
-                actions, errors = create_services(event.id, services_data, contract_id)
-            except Exception, e:
-                db.session.rollback()
-                logger.error(u'Ошибка сохранения услуг для обращения %s: %s' % (event.id, e), exc_info=True)
-                raise EventSaveException(u'Ошибка сохранения услуг', {
-                    'ext_msg': u'Свяжитесь с администратором.'
-                })
-            else:
-                if errors:
-                    err_msg = u'<br><br> - %s<br>Свяжитесь с администратором.' % (
-                        u'<br> - '.join(errors)
-                    )
-                    raise EventSaveException(u'Произошла ошибка при сохранении следующих услуг', {
-                        'ext_msg': err_msg
-                    })
 
     return result
 
