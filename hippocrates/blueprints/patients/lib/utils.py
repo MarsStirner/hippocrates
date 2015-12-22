@@ -145,7 +145,7 @@ def add_or_update_doc(client, data):
         doc.origin = origin
         doc.client = client
     else:
-        doc = ClientDocument(doc_type, serial, number, beg_date, end_date, origin, client)
+        doc = ClientDocument.create(doc_type, serial, number, beg_date, end_date, origin, client)
     return doc
 
 
@@ -308,7 +308,7 @@ def add_or_update_policy(client, data):
         policy.name = insurer['full_name'] if not insurer['id'] else None
         policy.client = client
     else:
-        policy = ClientPolicy(pol_type, serial, number, beg_date, end_date, insurer, client)
+        policy = ClientPolicy.create(pol_type, serial, number, beg_date, end_date, insurer, client)
     return policy
 
 
@@ -346,7 +346,7 @@ def add_or_update_blood_type(client, data):
         bt.bloodPhenotype_id = bt_phenotype
         bt.bloodKell_id = bt_kell
     else:
-        bt = BloodHistory(bt_type, date, person, client, bt_phenotype, bt_kell)
+        bt = BloodHistory.create(bt_type, date, person, client, bt_phenotype, bt_kell)
     return bt
 
 

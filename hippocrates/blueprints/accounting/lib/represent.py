@@ -25,11 +25,11 @@ class ContractRepr(object):
             'payer': self.ca_repr.represent_contragent(contract.payer),
             'contingent_list': [
                 self.contingent_repr.represent_contingent(cont)
-                for cont in contract.contingent_list if cont.deleted == 0  # TODO: think about selection
+                for cont in contract.contingent_list
             ],
             'pricelist_list': [
                 self.pricelist_repr.represent_pricelist_short(pl)
-                for pl in contract.pricelist_list if pl.deleted == 0  # TODO: think about selection
+                for pl in contract.pricelist_list
             ],
             'description': {
                 'full': self.make_full_description(contract),
@@ -55,7 +55,7 @@ class ContractRepr(object):
             'draft': contract.draft,
         }
 
-    def represent_contract_for_payer(self, contract):
+    def represent_contract_with_description(self, contract):
         if not contract:
             return None
         data = self.represent_contract(contract)
@@ -128,7 +128,7 @@ class ContragentRepr(object):
         data = self.represent_contragent(contragent)
         contract_repr = ContractRepr()
         data['contract_list'] = [
-            contract_repr.represent_contract_for_payer(contract)
+            contract_repr.represent_contract_with_description(contract)
             for contract in contragent.payer_contract_list
         ]
         return data
