@@ -17,12 +17,18 @@
                 <wm-date id="execDate" name="execDate" ng-model="filter.execDate">
                 </wm-date>
             </div>
+            <div class="col-md-4 col-lg-3">
+                <label for="filter-org-struct">Подразделение</label>
+                <wm-custom-dropdown id="filter-org-struct" ng-model="filter.org_struct">
+                    <wm-org-structure-tree nodes-selectable="true"></wm-org-structure-tree>
+                </wm-custom-dropdown>
+            </div>
             <div class="col-md-3 col-lg-2">
                 <label for="biomaterial" class="control-label">Биоматериал</label>
                 <rb-select ng-model="filter.biomaterial" ref-book="rbTissueType" placeholder="Биоматериал"
                            id="biomaterial" name="biomaterial" allow-clear="true"></rb-select>
             </div>
-            <div class="col-md-3 col-lg-2">
+            <div class="col-md-3 col-lg-2" ng-if="filter.status == 2">
                 <label for="lab" class="control-label">Лаборатория</label>
                 <rb-select ng-model="filter.lab" ref-book="rbLaboratory" placeholder="Лаборатория"
                            id="lab" name="lab" allow-clear="true"></rb-select>
@@ -57,11 +63,11 @@
                 <h3 class="box-title">Забор материалов</h3>
             <div class="box-tools pull-right">
                 <button type="button" class="btn btn-default btn-box-tool" ng-click="change_status('in_progress')"
-                        ng-disabled="false">
+                        ng-disabled="!selected_records.length" ng-if="filter.status == 0">
                     Выполнить
                 </button>
                 <button type="button" class="btn btn-default btn-box-tool" ng-click="change_status('finished')"
-                        ng-disabled="false">
+                        ng-disabled="!selected_records.length" ng-if="filter.status == 1">
                     Отправить в лабораторию
                 </button>
             </div>

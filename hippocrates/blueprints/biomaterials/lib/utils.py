@@ -21,7 +21,8 @@ class TTJVisualizer(object):
             'status': ttj.status,
             'isUrgent': True if filter(lambda a: a.isUrgent, ttj.actions) else False,
             'actions': [avis.make_small_action_info(action) for action in ttj.actions],
-            'set_persons': self.get_set_persons(ttj.actions)
+            'set_persons': self.get_set_persons(ttj.actions),
+            'org_str': ttj.actions[0].event.current_org_structure if ttj.actions else None
         }
 
     def get_set_persons(self, actions):

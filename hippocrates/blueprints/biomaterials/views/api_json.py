@@ -26,6 +26,7 @@ def api_get_ttj_records():
     exec_date = safe_date(flt.get('execDate'))
     biomaterial = flt.get('biomaterial')
     lab = flt.get('lab')
+    org_str = flt.get('org_struct')
 
     test_tubes = collections.defaultdict(lambda: {'number': 0})
     query = TakenTissueJournal.query.filter(func.date(TakenTissueJournal.datetimeTaken) == exec_date)
@@ -43,8 +44,14 @@ def api_get_ttj_records():
                 if property.isAssigned and lab['code'] in lab_codes:
                     return True
 
+    def filter_by_org_str(ttj_record):
+        if ttj_record.actions[0].event.current_org_structure.code == org_str['code']:
+            return True
+
     if lab:
         ttj_records = filter(filter_by_lab, ttj_records)
+    if org_str:
+        ttj_records = filter(filter_by_org_str, ttj_records)
 
     def count_tubes(x, y):
         x[y.testTubeType.code]['name'] = y.testTubeType.name

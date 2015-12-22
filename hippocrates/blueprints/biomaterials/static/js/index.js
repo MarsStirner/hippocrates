@@ -69,6 +69,9 @@ var IndexCtrl = function ($scope, $modal, $http, RefBookService, PrintingService
     }
 
     $scope.$watchCollection('filter', function (new_value, old_value) {
+        if($scope.filter.lab && $scope.filter.status != 2) {
+            $scope.filter.lab = null;
+        }
         $scope.get_data();
         $scope.selected_records = [];
     });
