@@ -55,6 +55,7 @@ var IndexCtrl = function ($scope, $modal, $http, RefBookService, PrintingService
             status: $scope.TTJStatus.get_by_code(status)
         })
         .success(function(result) {
+            $scope.get_data();
         })
     }
 
