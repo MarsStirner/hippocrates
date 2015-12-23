@@ -43,68 +43,83 @@
                         {% if user_profiles_mng.has_ui_doctor() and user_utils.can_read_dignoses(event) %}
                             {% include "event/_diagnoses.html" %}
                         {% endif %}
-                        {% if user_profiles_mng.has_ui_registrator() or user_profiles_mng.has_ui_cashier() %}
-                            {% include "event/_services.html" %}
-                            {% include "event/_payment.html" %}
-                        {% endif %}
+{#                        {% if user_profiles_mng.has_ui_registrator() or user_profiles_mng.has_ui_cashier() %}#}
+{#                            {% include "event/_services.html" %}#}
+{#                            {% include "event/_payment.html" %}#}
+{#                        {% endif %}#}
                         {% if user_utils.can_read_actions_meddoc(event) %}
-                            <div class="box box-info">
-                                <ng-form name="eventMedDocActionsForm" toc-element="Медицинские документы">
+                            <ng-form name="eventMedDocActionsForm" toc-element="Медицинские документы">
+                                <div class="box box-info">
                                     <div class="box-header with-border">
                                         <h3 class="box-title">Медицинские документы</h3>
+                                        <div class="box-tools pull-right">
+                                            <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                                        </div>
                                     </div>
                                     <div class="box-body">
                                         <wm-action-list event="event" action-type-group="medical_documents"></wm-action-list>
                                     </div>
-                                </ng-form>
-                            </div>
+                                </div>
+                            </ng-form>
                         {% endif %}
                         {% if user_utils.can_read_actions_diagnostic(event) %}
-                            <div class="box box-info">
-                                <ng-form name="eventDiagActionsForm" toc-element="Диагностика">
+                            <ng-form name="eventDiagActionsForm" toc-element="Диагностика">
+                                <div class="box box-info">
                                     <div class="box-header with-border">
                                         <h3 class="box-title">Диагностика</h3>
+                                        <div class="box-tools pull-right">
+                                            <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                                        </div>
                                     </div>
                                     <div class="box-body">
                                         <wm-action-list event="event" action-type-group="diagnostics"></wm-action-list>
                                     </div>
-                                </ng-form>
-                            </div>
+                                </div>
+                            </ng-form>
                         {% endif %}
                         {% if user_utils.can_read_actions_lab(event) %}
-                            <div class="box box-info">
-                                <ng-form name="eventLabActionsForm" toc-element="Лаб.исследования">
+                            <ng-form name="eventLabActionsForm" toc-element="Лаб.исследования">
+                                <div class="box box-info">
                                     <div class="box-header with-border">
                                         <h3 class="box-title">Лаб.исследования</h3>
+                                        <div class="box-tools pull-right">
+                                            <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                                        </div>
                                     </div>
                                     <div class="box-body">
                                         <wm-action-list event="event" action-type-group="lab"></wm-action-list>
                                     </div>
-                                </ng-form>
-                            </div>
+                                </div>
+                             </ng-form>
                         {% endif %}
                         {% if user_utils.can_read_actions_treatment(event) %}
-                            <div class="box box-info">
-                                <ng-form name="eventCureActionsForm" toc-element="Лечение">
+                            <ng-form name="eventCureActionsForm" toc-element="Лечение">
+                                <div class="box box-info">
                                     <div class="box-header with-border">
                                         <h3 class="box-title">Лечение</h3>
+                                        <div class="box-tools pull-right">
+                                            <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                                        </div>
                                     </div>
                                     <div class="box-body">
                                         <wm-action-list event="event" action-type-group="treatments"></wm-action-list>
                                     </div>
-                                </ng-form>
-                            </div>
-                        {% endif %}
-                        <div class="box box-info">
-                            <ng-form name="eventPrescriptions" toc-element="Назначения">
-                                <div class="box-header with-border">
-                                    <h3 class="box-title">Назначения</h3>
-                                </div>
-                                <div class="box-body">
-                                    <medication-prescriptions model="event.info.prescriptions">
                                 </div>
                             </ng-form>
-                        </div>
+                        {% endif %}
+                        <ng-form name="eventPrescriptions" toc-element="Назначения">
+                            <div class="box box-info">
+                                <div class="box-header with-border">
+                                    <h3 class="box-title">Назначения</h3>
+                                    <div class="box-tools pull-right">
+                                        <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                                    </div>
+                                </div>
+                                <div class="box-body">
+                                    <medication-prescriptions model="event.info.prescriptions"/>
+                                </div>
+                            </div>
+                        </ng-form>
                     </ng-form>
                 </div>
             </div>

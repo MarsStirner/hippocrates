@@ -1,0 +1,138 @@
+{% extends 'accounting/base.html' %}
+
+{% block title %}> Список договоров{% endblock %}
+
+{% block main %}
+<div ng-controller="ContractListCtrl" class="ng-cloak">
+<section class="content-header">
+    <h1>Список договоров МИС</h1>
+</section>
+<section class="content">
+    <div class="row">
+    <div class="col-md-3" ng-show="isFilterEnabled()">
+        <div class="box box-primary">
+            <div class="box-header">
+                <h3 class="box-title">Фильтр</h3>
+            </div>
+            <div class="box-body">
+                <label for="filter-number">Номер</label>
+                <input class="form-control" id="filter-number" type="text" ng-model="flt.model.number" placeholder="Номер договора">
+
+                <label for="filter-finance">Тип финансирования</label>
+                <rb-select id="filter-finance" ng-model="flt.model.finance_type" placeholder="Тип финансирования" ref-book="rbFinance"></rb-select>
+
+                <label for="filter-beg-date-from">Начало действия (от, до)</label>
+                <div class="row">
+                    <div class="col-md-6">
+                        <wm-date id="filter-beg-date-from" ng-model="flt.model.beg_date_from"></wm-date>
+                    </div>
+                    <div class="col-md-6">
+                        <wm-date id="filter-beg-date-to" ng-model="flt.model.beg_date_to"></wm-date>
+                    </div>
+                </div>
+
+                <label for="filter-end-date">Окончание действия (от, до)</label>
+                <div class="row">
+                    <div class="col-md-6">
+                        <wm-date id="filter-end-date-from" ng-model="flt.model.end_date_from"></wm-date>
+                    </div>
+                    <div class="col-md-6">
+                        <wm-date id="filter-end-date-to" ng-model="flt.model.end_date_to"></wm-date>
+                    </div>
+                </div>
+
+                <label for="filter-set-date">Дата заключения (от, до)</label>
+                <div class="row">
+                    <div class="col-md-6">
+                        <wm-date id="filter-set-date-from" ng-model="flt.model.set_date_from"></wm-date>
+                    </div>
+                    <div class="col-md-6">
+                        <wm-date id="filter-set-date-to" ng-model="flt.model.set_date_to"></wm-date>
+                    </div>
+                </div>
+
+                <label for="filter-payer">Плательщик</label>
+                <input class="form-control" id="filter-payer" type="text" ng-model="flt.model.payer_query" placeholder="ФИО или название организации">
+
+                <label for="filter-recipient">Получатель</label>
+                <input class="form-control" id="filter-recipient" type="text" ng-model="flt.model.recipient_query" placeholder="ФИО или название организации">
+
+            </div>
+            <div class="box-footer">
+                <button class="btn btn-default" ng-click="getData()">Получить данные</button>
+                <div class="btn-group">
+                    <button class="btn btn-default" ng-click="clear()">Сбросить</button>
+                    <button class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                        <span class="caret"></span>
+                        <span class="sr-only">Toggle Dropdown</span>
+                    </button>
+                    <ul class="dropdown-menu" role="menu">
+                        <li><a ng-click="clearAll()">Сбросить и очистить результаты</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-[[ isFilterEnabled() ? 9 : 12 ]]">
+    <div class="box">
+        <div class="box-header with-border">
+            <button type="button" title="[[ isFilterEnabled() ? 'Скрыть' : 'Показать' ]] фильтр" ng-click="toggleFilter()" class="btn btn-primary">
+                <i class="fa fa-filter"></i>
+            </button>
+            <button type="button" title="Создать договор" ng-click="create()" class="btn btn-success pull-right">
+                <i class="fa fa-plus"> Создать договор</i>
+            </button>
+        </div>
+        <div class="box-body">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                    <th width="2%">#</th>
+                    <th>Номер</th>
+                    <th>Источник финансирования</th>
+                    <th>Дата заключения</th>
+                    <th>Дата начала</th>
+                    <th>Дата окончания</th>
+                    <th width="25%">Заказчик (Плательщик)</th>
+                    <th width="25%">Исполнитель (Получатель)</th>
+                    <th>Контингент<br>(Кол-во)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="contract in contract_list track by contract.id" ng-class="{'bg-danger': item.deleted}">
+                        <td>[[ ((pager.current_page - 1) * pager.per_page) + $index + 1 ]]</td>
+                        <td>[[ contract.number ]]</td>
+                        <td>[[ contract.finance.name ]]</td>
+                        <td>[[ contract.date | asDate ]]</td>
+                        <td>[[ contract.beg_date | asDate ]]</td>
+                        <td>[[ contract.end_date | asDate ]]</td>
+                        <td>[[ contract.payer.full_descr ]]</td>
+                        <td>[[ contract.recipient.full_descr ]]</td>
+                        <td>[[ contract.contingent_list.length ]]</td>
+                        <td class="nowrap" width="1%">
+                            <i class="fa fa-edit text-primary cursor-pointer" title="Редактировать"
+                                ng-if="canEdit(item)" ng-click="editContract($index)"></i>
+                            <i class="fa fa-trash-o text-danger cursor-pointer lmargin20"
+                                ng-if="canDelete(item)" ng-click="deleteContract($index)"></i>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="box-footer clearfix">
+            <pagination ng-model="pager.current_page" total-items="pager.pages" items-per-page="1"
+                max-size="pager.max_pages" ng-change="onPageChanged()" ng-show="pager.pages > 1" boundary-links="true"
+                class="pagination pagination-sm no-margin pull-right">
+            </pagination>
+        </div>
+      </div>
+    </div>
+    </div>
+</section>
+</div>
+{% endblock %}
+{% block modules_js %}
+    {{ super() }}
+    <script src="{{ url_for('.static', filename='js/contract_list.js', v=app_version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/modal_contract.js', v=app_version) }}"></script>
+{% endblock %}

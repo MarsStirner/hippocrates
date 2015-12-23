@@ -9,19 +9,23 @@ from sqlalchemy import desc, func
 from sqlalchemy.orm import joinedload
 
 from nemesis.app import app
-from nemesis.models.actions import Action, ActionType
+from nemesis.models.actions import Action, ActionType, ActionProperty, ActionPropertyType, OrgStructure_HospitalBed, ActionProperty_HospitalBed
 from nemesis.models.client import Client
 from nemesis.models.enums import EventPrimary, EventOrder
-from nemesis.models.event import (Event, EventType, Diagnosis, Diagnostic, Visit)
+from nemesis.models.event import (Event, EventType, Diagnosis, Diagnostic, Visit, Event_Persons)
 from nemesis.models.exists import Person, rbRequestType, rbResult, OrgStructure, MKB
+from nemesis.models.accounting import Service
 from nemesis.systemwide import db
-from nemesis.lib.utils import (jsonify, safe_traverse, safe_datetime, get_utc_datetime_with_tz)
+from nemesis.lib.utils import (jsonify, safe_traverse, safe_date, safe_datetime, get_utc_datetime_with_tz, safe_int, format_date)
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.models.schedule import ScheduleClientTicket
 from nemesis.models.exists import (Organisation, )
-from nemesis.lib.jsonify import EventVisualizer
+from nemesis.lib.jsonify import EventVisualizer, StationaryEventVisualizer
+from nemesis.lib.event.event_builder import PoliclinicEventBuilder, StationaryEventBuilder, EventConstructionDirector
 from blueprints.event.app import module
-from blueprints.event.lib.utils import (EventSaveException, create_services, save_event, save_executives)
+from blueprints.event.lib.utils import (EventSaveException, save_event, received_save,
+                                        save_executives, EventSaveController, ReceivedController, MovingController)
+from blueprints.patients.lib.utils import add_or_update_blood_type
 from nemesis.lib.sphinx_search import SearchEventService, SearchEvent
 from nemesis.lib.data import get_planned_end_datetime, int_get_atl_dict_all, _get_stationary_location_query
 from nemesis.lib.agesex import recordAcceptableEx
@@ -43,49 +47,33 @@ def handle_event_error(err):
 
 
 @module.route('/api/event_info.json')
+@api_method
 def api_event_info():
     event_id = int(request.args['event_id'])
     event = Event.query.get(event_id)
-    vis = EventVisualizer()
-    return jsonify(vis.make_event_info_for_current_role(event))
+    if event.is_stationary:
+        vis = StationaryEventVisualizer()
+    else:
+        vis = EventVisualizer()
+    return vis.make_event_info_for_current_role(event)
 
 
 @module.route('/api/event_new.json', methods=['GET'])
+@api_method
 def api_event_new_get():
-    event = Event()
-    event.eventType = EventType.get_default_et()
-    event.organisation = Organisation.query.filter_by(infisCode=str(app.config['ORGANISATION_INFIS_CODE'])).first()
-    event.isPrimaryCode = EventPrimary.primary[0]
-    event.order = EventOrder.planned[0]
-
-    ticket_id = request.args.get('ticket_id')
-    if ticket_id:
-        ticket = ScheduleClientTicket.query.get(int(ticket_id))
-        client_id = ticket.client_id
-        setDate = ticket.get_date_for_new_event()
-        note = ticket.note
-        exec_person_id = ticket.ticket.schedule.person_id
-        if ticket.ticket.schedule.finance_id:
-            request_type = rbRequestType.query.filter_by(code='policlinic').first()
-            event_type_by_ticket = EventType.query.filter_by(finance_id=ticket.ticket.schedule.finance_id,
-                                                             requestType_id=request_type.id).first()
-            if event_type_by_ticket:
-                event.eventType = event_type_by_ticket
-
-    else:
-        client_id = int(request.args['client_id'])
-        setDate = datetime.datetime.now()
-        note = ''
-        exec_person_id = current_user.get_main_user().id
-    if not event.is_diagnostic:
-        event.execPerson_id = exec_person_id
-        event.execPerson = Person.query.get(exec_person_id)
-        event.orgStructure = event.execPerson.org_structure
-    event.client = Client.query.get(client_id)
-    event.setDate = setDate
-    event.note = note
+    ticket_id = safe_int(request.args.get('ticket_id'))
+    client_id = safe_int(request.args['client_id'])
+    request_type_kind = request.args['request_type_kind']
     v = EventVisualizer()
-    return jsonify(v.make_new_event(event))
+    if request_type_kind == 'policlinic':
+        event_builder = PoliclinicEventBuilder(client_id, ticket_id)
+    elif request_type_kind == 'stationary':
+        event_builder = StationaryEventBuilder(client_id, ticket_id)
+        v = StationaryEventVisualizer()
+    event_construction_director = EventConstructionDirector()
+    event_construction_director.set_builder(event_builder)
+    event = event_construction_director.construct()
+    return v.make_new_event(event)
 
 
 @module.route('/api/event_stationary_opened.json', methods=['GET'])
@@ -102,20 +90,192 @@ def api_event_stationary_open_get():
 
 
 @module.route('api/event_save.json', methods=['POST'])
+@api_method
 def api_event_save():
+    result = {}
     all_data = request.json
+    request_type_kind = all_data.get('request_type_kind')
     event_data = all_data.get('event')
     event_id = event_data.get('id')
 
+    event_ctrl = EventSaveController()
     try:
-        result = save_event(event_id, all_data)
+        if event_id:
+            event = Event.query.get(event_id)
+            if not event:
+                raise ApiException(404, u'Не найдено обращение с id = {}'.format(event_id))
+            event_data = all_data['event']
+            event = event_ctrl.update_base_info(event, event_data)
+            event_ctrl.store(event)
+        else:
+            event = Event()
+            event = event_ctrl.create_base_info(event, all_data)
+            event_ctrl.store(event)
+            event_id = int(event)
+        result['id'] = int(event)
+
+        update_executives(event)
+        if request_type_kind == 'policlinic':
+            visit = Visit.make_default(event)
+            db.session.add(visit)
+            db.session.commit()
+        elif request_type_kind == 'stationary':
+            received_data = all_data['received']
+            received_save(event_id, received_data)
     except EventSaveException:
         raise
     except Exception, e:
         logger.error(e, exc_info=True)
         raise EventSaveException()
+    return result
 
-    return jsonify(result)
+
+@module.route('api/event_moving_save.json', methods=['POST'])
+@api_method
+def api_moving_save():
+    vis = StationaryEventVisualizer()
+    mov_ctrl = MovingController()
+    data = request.json
+    event_id = data.get('event_id')
+    moving_id = data.get('id')
+    if moving_id:
+        moving = Action.query.get(moving_id)
+        if not moving:
+            raise ApiException(404, u'Не найдено движение с id = {}'.format(moving_id))
+        moving = mov_ctrl.update_moving_data(moving, data)
+        result = vis.make_moving_info(moving)
+    else:
+        result = mov_ctrl.create_moving(event_id, data)
+        result = map(vis.make_moving_info, result)
+    return result
+
+
+@module.route('api/event_moving_close.json', methods=['POST'])
+@api_method
+def api_event_moving_close():
+    vis = StationaryEventVisualizer()
+    mov_ctrl = MovingController()
+    moving_info = request.json
+    moving_id = moving_info['id']
+    if not moving_id:
+        raise ApiException(404, u'Не передан параметр moving_id')
+    moving = Action.query.get(moving_id)
+    if not moving:
+        raise ApiException(404, u'Не найдено движение с id = {}'.format(moving_id))
+    moving = mov_ctrl.close_moving(moving)
+    return vis.make_moving_info(moving)
+
+
+# @module.route('api/event_lab-res-dynamics.json', methods=['GET'])
+# @api_method
+# def api_event_lab_res_dynamics():
+#     # общая динамика по тестам в обращении
+#     event_id = request.args.get('event_id')
+#     from_date = safe_date(request.args.get('from_date'))
+#     to_date = safe_date(request.args.get('to_date'))
+#     properties = ActionProperty.query.join(ActionPropertyType, Action, ActionType).filter(ActionProperty.deleted == 0,
+#                                                                                           Action.deleted == 0,
+#                                                                                           Action.begDate >= from_date,
+#                                                                                           Action.begDate <= to_date,
+#                                                                                           Action.event_id == event_id,
+#                                                                                           ActionType.mnem == 'LAB',
+#                                                                                           ActionPropertyType.test_id.isnot(None)).\
+#         order_by(desc(Action.begDate))
+#
+#     dynamics = {}
+#     for property in properties:
+#         test_id = property.type.test_id
+#         if property.value:
+#             if test_id in dynamics:
+#                 dynamics[test_id]['values'][format_date(property.action.begDate)] = property.value
+#             else:
+#                 dynamics[test_id] = {'test_name': property.type.test.name,
+#                                      'values': {format_date(property.action.begDate): property.value}}
+#     return dynamics
+
+
+@module.route('api/event_lab-res-dynamics.json', methods=['GET'])
+@api_method
+def api_event_lab_res_dynamics():
+    # динамика по тестам в действиях с одинаковым ActionType
+    event_id = request.args.get('event_id')
+    action_type_id = request.args.get('action_type_id')
+    from_date = safe_date(request.args.get('from_date'))
+    to_date = safe_date(request.args.get('to_date'))
+
+    test_ids = db.session.query(ActionPropertyType.test_id,).select_from(ActionPropertyType).join(ActionType).\
+        filter(ActionType.id == action_type_id, ActionPropertyType.test_id.isnot(None)).all()
+    test_ids = [row[0] for row in test_ids]
+
+    properties = ActionProperty.query.join(ActionPropertyType, Action, ActionType).filter(Action.event_id == event_id,
+                                                                                          Action.deleted == 0,
+                                                                                          func.date(Action.begDate) >= from_date,
+                                                                                          func.date(Action.begDate) <= to_date,
+                                                                                          ActionProperty.deleted == 0,
+                                                                                          ActionProperty.isAssigned == 1,
+                                                                                          ActionPropertyType.test_id.in_(test_ids)).\
+        order_by(Action.begDate)
+    dynamics = {}
+    dates = []
+    for property in properties:
+        test_id = property.type.test_id
+        if property.value:
+            date = property.action.propsByCode['TAKINGTIME'].value.datetime.strftime('%d.%m.%Y %H:%M')
+            if date not in dates:
+                dates.append(date)
+            if test_id in dynamics:
+                dynamics[test_id]['values'][date] = property.value
+            else:
+                dynamics[test_id] = {'test_name': property.type.test.name,
+                                     'values': {date: property.value}}
+    return dates, dynamics
+
+
+@module.route('api/event_hosp_beds_get.json', methods=['GET'])
+@api_method
+def api_hosp_beds_get():
+    vis = StationaryEventVisualizer()
+    org_str_id = request.args.get('org_str_id')
+    hb_id = request.args.get('hb_id')
+    ap_hosp_beds = ActionProperty.query.join(ActionPropertyType, Action, ActionType, Event,
+                                             ActionProperty_HospitalBed, OrgStructure_HospitalBed)\
+        .filter(ActionProperty.deleted == 0, ActionPropertyType.code == 'hospitalBed', Action.deleted == 0,
+                Event.deleted == 0, ActionType.flatCode == 'moving',
+                db.or_(Action.endDate.is_(None), Action.endDate >= datetime.datetime.now()), OrgStructure_HospitalBed.master_id == org_str_id).all()
+    occupied_hb = [ap.value for ap in ap_hosp_beds]
+    all_hb = OrgStructure_HospitalBed.query.filter(OrgStructure_HospitalBed.master_id == org_str_id).all()
+    for hb in all_hb:
+        hb.occupied = True if hb in occupied_hb else False
+        hb.chosen = True if (hb_id and hb.id == hb_id) else False
+    return map(vis.make_hosp_bed, all_hb)
+
+
+@module.route('api/blood_history_save.json', methods=['POST'])
+@api_method
+def api_blood_history_save():
+    vis = StationaryEventVisualizer()
+    data = request.json
+    blood_type_info = data.get('blood_type_info')
+    client_id = data.get('client_id')
+    client = Client.query.get(client_id)
+    bt = add_or_update_blood_type(client, blood_type_info)
+    db.session.add(bt)
+    db.session.commit()
+    return vis.make_blood_history(bt)
+
+
+def update_executives(event):
+    last_executive = Event_Persons.query.filter(Event_Persons.event_id == event.id).order_by(desc(Event_Persons.begDate)).first()
+    if not last_executive or last_executive.person_id != event.execPerson_id:
+        executives = Event_Persons()
+        executives.person = event.execPerson
+        executives.event = event
+        executives.begDate = event.setDate
+        db.session.add(executives)
+        if last_executive:
+            last_executive.endDate = event.setDate
+            db.session.add(last_executive)
+        db.session.commit()
 
 
 @module.route('api/event_close.json', methods=['POST'])
@@ -315,52 +475,6 @@ def api_client_payment_info_get():
     return jsonify(res)
 
 
-@module.route('/api/event_payment/service_remove_coord.json', methods=['POST'])
-def api_service_remove_coord():
-    # not used
-    data = request.json
-    if data['action_id']:
-        actions = Action.query.filter(Action.id.in_(data['action_id']))
-        actions.update({Action.coordDate: None, Action.coordPerson_id: None},
-                       synchronize_session=False)
-        db.session.commit()
-
-    return jsonify(None)
-
-
-@module.route('/api/event_payment/service_coordinate.json', methods=['POST'])
-def api_service_coordinate():
-    # not used
-    data = request.json
-    service = data['service']
-    result = service['actions']
-    if service['actions'] and service['coord_person_id']:
-        actions = Action.query.filter(db.and_(Action.id.in_(service['actions']), Action.coordPerson_id==None))
-        actions.update({Action.coordDate: datetime.datetime.now(), Action.coordPerson_id: service['coord_person_id']},
-                       synchronize_session=False)
-        db.session.commit()
-
-    if len(service['actions']) < service['amount']:
-        result.extend(create_services(data['event_id'], [service], data['finance_id']))
-
-    return jsonify({
-        'result': 'ok',
-        'data': result
-    })
-
-
-@module.route('/api/event_payment/service_change_account.json', methods=['POST'])
-def api_service_change_account():
-    # not used
-    data = request.json
-    if data['actions']:
-        actions = Action.query.filter(Action.id.in_(data['actions']))
-        actions.update({Action.account: data['account']}, synchronize_session=False)
-        db.session.commit()
-
-    return jsonify(None)
-
-
 @module.route('/api/event_payment/delete_service.json', methods=['POST'])
 def api_service_delete_service():
     # TODO: validations
@@ -399,6 +513,12 @@ def api_delete_event():
             ScheduleClientTicket.event_id == event.id
         ).update({
             ScheduleClientTicket.event_id: None,
+        }, synchronize_session=False)
+        db.session.query(Service).join(Action).filter(
+            Action.event_id == event.id,
+            Service.action_id == Action.id
+        ).update({
+            Service.deleted: 1,
         }, synchronize_session=False)
         db.session.commit()
         return jsonify(None)

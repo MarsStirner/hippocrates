@@ -1,0 +1,43 @@
+<div class="modal-header">
+    <button type="button" class="close"  ng-click="$dismiss()">&times;</button>
+    <h3 class="modal-title">Динамика лабораторных показателей</h3>
+</div>
+<div class="modal-body">
+	  <div class="row marginal">
+	      <div class="col-md-3">
+              <div class="input-group">
+                  <span class="input-group-addon" id="basic-addon1">c</span>
+                  <wm-date id="from_date" name="from_date" ng-model="date_range[0]" aria-describedby="basic-addon1">
+                  </wm-date>
+              </div>
+	      </div>
+	      <div class="col-md-3">
+              <div class="input-group">
+                  <span class="input-group-addon" id="basic-addon2">по</span>
+                  <wm-date id="to_date" name="to_date" ng-model="date_range[1]" aria-describedby="basic-addon2"
+                           max-date="currentDate">
+                  </wm-date>
+              </div>
+	      </div>
+	  </div>
+	  <div class="row">
+	      <div class="col-md-12"  style="overflow-x:scroll;">
+		  <table class="table table-bordered">
+		      <thead>
+			  <th></th>
+			  <th ng-repeat="date in dates_list">
+			      [[ date ]]
+			  </th>
+		      </thead>
+		      <tbody>
+			  <tr ng-repeat="item in dynamics">
+			      <td>[[item.test_name]]</td>
+			      <td ng-repeat="date in dates_list">
+				  [[ item.values[date]? item.values[date] : '-' ]]
+			      </td>
+			  </tr>
+		      </tbody>
+		  </table>
+	      </div>
+	  </div>
+</div>

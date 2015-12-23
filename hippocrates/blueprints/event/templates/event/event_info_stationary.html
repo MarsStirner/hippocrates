@@ -1,0 +1,207 @@
+{% extends "event/base.html" %}
+
+{% block main %}
+<div ng-controller="StationaryEventInfoCtrl" class="ng-cloak">
+    <section class="content-header">
+        <div class="wm-page-header-button-box">
+            <a type="button" class="btn btn-sm btn-primary"
+               href="{{ url_for('patients.patient_events', client_id=client_id) }}">Все обращения пациента</a>
+            <wm-subscription-btn oid="hitsl.event.[[ event.event_id ]]" ng-if="!event.is_new()"></wm-subscription-btn>
+            <ui-print-button ps="ps" resolve="ps_resolve()" ng-if="!event.is_new()"></ui-print-button>
+        </div>
+        <h1>
+            {% if event and event.is_stationary %}История болезни №
+            {% elif event and not event.is_stationary %}Обращение №
+            {% elif not event and event.is_stationary %}Создание госпитализации
+            {% elif not event and not event.is_stationary %}Создание обращения
+            {% endif %}{{ event.externalId }}, пациент
+            {% if user_profiles_mng.has_ui_registrator() %}
+            <a href="{{ url_for('patients.patient', client_id=client_id) }}" tooltip="Редактирование регистрационной карты">
+                [[ event.info.client.info.full_name ]]
+            </a>
+            {% elif user_profiles_mng.has_ui_doctor() %}
+            <a href="{{ url_for('patients.patient_info_full', client_id=client_id) }}" tooltip="Просмотр регистрационной карты">
+                [[ event.info.client.info.full_name ]]
+            </a>
+            {% else %}[[ event.info.client.info.full_name ]]{% endif %}
+        </h1>
+        </section>
+        <section class="content">
+        <div class="row">
+            <div class="col-md-9">
+                <div ui-alert-list="alerts"></div>
+                <div class="marginal">
+                    <ng-form name="eventForm" id="eventForm" role="form" novalidate
+                             toc-element toc-name="tocEventForm" form-safe-close>
+                        <div class="box box-info">
+                            <div class="box-body">
+                                <wm-client-info client="event.info.client"></wm-client-info>
+                            </div>
+                        </div>
+                        {% if event and event.is_stationary %}
+                            {% include "event/_stationary_info.html" %}
+                        {% endif %}
+                        <ng-form name="event_maininfo_form" toc-element="Информация об обращении">
+                            <div class="box box-info" ng-class="{'collapsed-box': !event.is_new()}">
+                                <div class="box-header with-border">
+                                    <h3 class="box-title">Информация об обращении</h3>
+                                    <div class="box-tools pull-right">
+                                        <button class="btn btn-box-tool" data-widget="collapse">
+                                            <i class="fa" ng-class="{'fa-minus': event.is_new(), 'fa-plus': !event.is_new()}"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="box-body">
+                                    {% include "event/_main_info.html" %}
+                                </div>
+                            </div>
+                        </ng-form>
+                        {% if user_profiles_mng.has_ui_doctor() and user_utils.can_read_dignoses(event) %}
+                            {% include "event/_diagnoses.html" %}
+                        {% endif %}
+                        {% include "event/_services.html" %}
+                        {% if user_profiles_mng.has_ui_registrator() or user_profiles_mng.has_ui_cashier() %}
+                            {% include "event/_event_received.html" %}
+                        {% endif %}
+                        {% if event %}
+                            {% include "event/_movings.html" %}
+                        {% endif %}
+                        {% if user_utils.can_read_actions_meddoc(event) %}
+                            <ng-form name="eventMedDocActionsForm" toc-element="Медицинские документы">
+                                <div class="box box-info collapsed-box">
+                                    <div class="box-header with-border">
+                                        <h3 class="box-title">Медицинские документы</h3>
+                                        <div class="box-tools pull-right">
+                                            <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i></button>
+                                        </div>
+                                    </div>
+                                    <div class="box-body">
+                                        <wm-action-list event="event" action-type-group="medical_documents"></wm-action-list>
+                                    </div>
+                                </div>
+                            </ng-form>
+                        {% endif %}
+                        {% if user_utils.can_read_actions_diagnostic(event) %}
+                            <ng-form name="eventDiagActionsForm" toc-element="Инструментальные исследования">
+                                <div class="box box-info collapsed-box">
+                                    <div class="box-header with-border">
+                                        <h3 class="box-title">Инструментальные исследования</h3>
+                                        <div class="box-tools pull-right">
+                                            <button class="btn btn-box-tool collapsed-box" data-widget="collapse"><i class="fa fa-plus"></i></button>
+                                        </div>
+                                    </div>
+                                    <div class="box-body">
+                                        <wm-action-list event="event" action-type-group="diagnostics"></wm-action-list>
+                                    </div>
+                                </div>
+                            </ng-form>
+                        {% endif %}
+                        {% if user_utils.can_read_actions_lab(event) %}
+                            <ng-form name="eventLabActionsForm" toc-element="Лабораторные исследования">
+                                <div class="box box-info collapsed-box">
+                                    <div class="box-header with-border">
+                                                    <h3 class="box-title">Лабораторные исследования</h3>
+                                        <div class="box-tools pull-right">
+                                            <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i></button>
+                                        </div>
+                                    </div>
+                                    <div class="box-body">
+                                        <wm-action-list event="event" action-type-group="lab"></wm-action-list>
+                                    </div>
+                                </div>
+                             </ng-form>
+                        {% endif %}
+                        {% if user_utils.can_read_actions_treatment(event) %}
+                            <ng-form name="eventCureActionsForm" toc-element="Лечение">
+                                <div class="box box-info collapsed-box">
+                                    <div class="box-header with-border">
+                                        <h3 class="box-title">Лечение</h3>
+                                        <div class="box-tools pull-right">
+                                            <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i></button>
+                                        </div>
+                                    </div>
+                                    <div class="box-body">
+                                        <wm-action-list event="event" action-type-group="treatments"></wm-action-list>
+                                    </div>
+                                </div>
+                            </ng-form>
+                        {% endif %}
+{#                        <ng-form name="eventPrescriptions" toc-element="Назначения">#}
+{#                            <div class="box box-info">#}
+{#                                <div class="box-header with-border">#}
+{#                                    <h3 class="box-title">Назначения</h3>#}
+{#                                    <div class="box-tools pull-right">#}
+{#                                        <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>#}
+{#                                    </div>#}
+{#                                </div>#}
+{#                                <div class="box-body">#}
+{#                                    <medication-prescriptions model="event.info.prescriptions"/>#}
+{#                                </div>#}
+{#                            </div>#}
+{#                        </ng-form>#}
+                    </ng-form>
+                </div>
+            </div>
+            <div class="col-md-3 affix-holder">
+                <div class="toc-affix box" bs-affix>
+                    <div class="box-body">
+                        <toc-affix toc-name="tocEventForm">
+                    <hr>
+                    {% if not event or (event.is_closed and user_profiles_mng.has_ui_registrator()) or (
+                        not event.is_closed and (
+                            user_utils.can_edit_event(event) or user_utils.can_edit_event_payment_info(event)
+                        )) %}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <button type="button" ng-click="save_event()" class="btn btn-lg btn-success btn-block"
+                            ng-bind="event.is_new() ? 'Создать' : 'Сохранить'">Создать</button>
+                        </div>
+                        <div class="col-md-6">
+                            <button type="button" ng-click="cancel_editing()" class="btn btn-lg btn-default btn-block">Отмена</button>
+                        </div>
+                    </div>
+                    {%- endif %}
+                    {% if user_utils.can_close_event(event) %}
+                    <div class="row vmargin10">
+                        <div class="col-md-12">
+                            <button type="button" ng-click="close_event()" class="btn btn-block btn-info">Закрыть обращение</button>
+                        </div>
+                    </div>
+                    {%- endif %}
+                    {% if event.is_closed %}
+                    <div class="row vmargin10">
+                        <div class="col-md-12">
+                            <button type="button" class="btn btn-block btn-gray disabled">Обращение закрыто</button>
+                        </div>
+                    </div>
+                    {%- endif %}
+                    {% if user_utils.can_delete_event(event) %}
+                    <div class="row vmargin10">
+                        <div class="col-md-12">
+                            <button type="button" ng-click="delete_event()" class="btn btn-lg btn-danger btn-block">Удалить обращение</button>
+                        </div>
+                    </div>
+                    {% endif %}
+                    </toc-affix>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block modules_js %}
+    {{ super() }}
+    <script src="{{ url_for('.static', filename='js/event.js', v=app_version) }}"></script>
+    <script src="{{ url_for('static', filename='js/services/event/event-services.js', v=nemesis_version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/directives.js', v=app_version) }}"></script>
+    <script src="{{ url_for('risar.config_js', v=app_version) }}"></script>
+    <script src="{{ url_for('risar.static', filename='js/risar.js', v=app_version) }}"></script>
+    <script type="text/ng-template" id="modal-received.html">{% include 'event/_modal_received.html' %}</script>
+    <script type="text/ng-template" id="modal-create-moving.html">{% include 'event/_modal_create_moving.html' %}</script>
+    <script type="text/ng-template" id="modal-create-hospBed.html">{% include 'event/_modal_create_hospBed.html' %}</script>
+    <script type="text/ng-template" id="modal-intolerances.html">{% include 'event/_modal_intolerances.html' %}</script>
+    <script type="text/ng-template" id="modal-blood-history.html">{% include 'event/_modal_blood_history.html' %}</script>
+    <script type="text/ng-template" id="modal-lab-res-dynamics.html">{% include 'event/_modal_lab_res_dynamics.html' %}</script>
+{% endblock %}

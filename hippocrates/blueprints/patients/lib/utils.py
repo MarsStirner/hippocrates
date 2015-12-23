@@ -10,7 +10,7 @@ from nemesis.app import app
 from nemesis.systemwide import db
 from nemesis.lib.utils import safe_date, safe_traverse, get_new_uuid, encode_file_name
 from nemesis.lib.const import SS_WORK_CODE, SS_NATIONALITY_CODE
-from nemesis.models.client import (ClientAllergy, ClientContact, ClientDocument,
+from nemesis.models.client import (ClientAllergy, ClientContact, ClientDocument, ClientWork,
    ClientIntoleranceMedicament, ClientSocStatus, ClientPolicy, BloodHistory, ClientAddress,
    ClientRelation, Address, ClientFileAttach
 )
@@ -145,8 +145,28 @@ def add_or_update_doc(client, data):
         doc.origin = origin
         doc.client = client
     else:
-        doc = ClientDocument(doc_type, serial, number, beg_date, end_date, origin, client)
+        doc = ClientDocument.create(doc_type, serial, number, beg_date, end_date, origin, client)
     return doc
+
+
+def add_or_update_work(client, data):
+    work_id = data.get('id')
+    deleted = data.get('deleted', 0)
+
+    organisation = data.get('organisation') or ''
+    post = data.get('post') or ''
+    if work_id:
+        work = ClientWork.query.get(work_id)
+        work.shortName = organisation
+        work.post = post
+        work.client = client
+        work.deleted = deleted
+    else:
+        work = ClientWork(organisation, post, client) if (organisation or post) else None
+
+    if work:
+        db.session.add(work)
+    return work
 
 
 def delete_document(doc_id, deleted):
@@ -288,7 +308,7 @@ def add_or_update_policy(client, data):
         policy.name = insurer['full_name'] if not insurer['id'] else None
         policy.client = client
     else:
-        policy = ClientPolicy(pol_type, serial, number, beg_date, end_date, insurer, client)
+        policy = ClientPolicy.create(pol_type, serial, number, beg_date, end_date, insurer, client)
     return policy
 
 
@@ -306,6 +326,9 @@ def add_or_update_blood_type(client, data):
     err_msg = u'Ошибка сохранения группы крови'
     bt_id = data.get('id')
     bt_type = safe_traverse(data, 'blood_type', 'id')
+    bt_phenotype = safe_traverse(data, 'blood_phenotype', 'id')
+    bt_kell = safe_traverse(data, 'blood_kell', 'id')
+
     if not bt_type:
         raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Группа крови')
     date = safe_date(data.get('date'))
@@ -320,8 +343,10 @@ def add_or_update_blood_type(client, data):
         bt.bloodDate = date
         bt.bloodType_id = bt_type
         bt.person_id = person
+        bt.bloodPhenotype_id = bt_phenotype
+        bt.bloodKell_id = bt_kell
     else:
-        bt = BloodHistory(bt_type, date, person, client)
+        bt = BloodHistory.create(bt_type, date, person, client, bt_phenotype, bt_kell)
     return bt
 
 
@@ -401,6 +426,7 @@ def add_or_update_soc_status(client, data):
     if not beg_date and soc_status_class_code not in (SS_WORK_CODE, SS_NATIONALITY_CODE):
         raise ClientSaveException(err_msg, u'Отсутствует обязательное поле Дата начала')
     end_date = safe_date(data.get('end_date'))
+    note = data.get('note')
     doc_info = data.get('self_document')
     doc = add_or_update_doc(client, doc_info) if doc_info and doc_info.keys() else None
 
@@ -411,9 +437,22 @@ def add_or_update_soc_status(client, data):
         soc_status.endDate = end_date
         soc_status.client = client
         soc_status.self_document = doc
+        soc_status.note = note
     else:
         soc_status_class = rbSocStatusClass.query.filter(rbSocStatusClass.code == soc_status_class_code).first().id
-        soc_status = ClientSocStatus(soc_status_class, soc_status_type, beg_date, end_date, client, doc)
+        soc_status = ClientSocStatus(soc_status_class, soc_status_type, beg_date, end_date, client, doc, note)
+    return soc_status
+
+
+def add_or_update_work_soc_status(client, data):
+    deleted = data.get('deleted', 0)
+    work_info = data.get('work')
+    soc_status = add_or_update_soc_status(client, data)
+    if deleted and soc_status.work:
+        soc_status.work = deleted
+        return soc_status
+    work = add_or_update_work(client, work_info) if (work_info and work_info.keys()) else None
+    soc_status.work = work
     return soc_status
 
 

@@ -3,6 +3,23 @@
     <div class="box box-info">
         <div class="box-header with-border">
             <h3 class="box-title">Услуги</h3>
+            <div class="box-tools pull-right">
+                <div class="btn-group btn-group-sm rmargin10" ng-if="controlsAvailable()">
+                    <button type="button" class="btn btn-primary" ng-click="startEditingInvoice()"
+                        ng-if="!inInvoiceEditMode() && !inEditMode()"><i class="fa fa-list-alt"></i> Выставить счёт</button>
+                    <button type="button" class="btn btn-success" ng-click="finishEditingInvoice()"
+                        ng-if="inInvoiceEditMode()">Сформировать счёт</button>
+                    <button type="button" class="btn btn-danger" ng-click="cancelEditingInvoice()"
+                        ng-if="inInvoiceEditMode()">Отменить</button>
+                </div>
+                <div class="btn-group btn-group-sm rmargin10" ng-if="controlsAvailable()">
+                    <button type="button" class="btn btn-primary" ng-click="startEditing()"
+                        ng-if="!inEditMode() && !inInvoiceEditMode()"><i class="fa fa-edit"></i> Редактировать услуги</button>
+                    <button type="button" class="btn btn-success" ng-click="finishEditing()" ng-if="inEditMode()">Сохранить</button>
+                    <button type="button" class="btn btn-danger" ng-click="cancelEditing()" ng-if="inEditMode()">Отменить</button>
+                </div>
+                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+            </div>
         </div>
         <div class="box-body">
         <ng-form name="sr_services">
@@ -21,32 +38,32 @@
                     </span>
                 </div>
             </div>
-            <div ng-show="query && search_processed && !found_services.length" class="alert alert-danger">
+            <div ng-show="query && search_processed && !search_result.length" class="alert alert-danger">
                 Нет услуг, удовлетворяющих запросу <strong>"[[query]]"</strong>
             </div>
-            <div ng-show="found_services">
-                <table class="table table-condensed table-striped table-hover table-clickable">
+            <div ng-show="search_result" style="max-height: 300px; overflow-y: scroll">
+                <table class="table table-condensed table-striped table-hover table-bordered table-clickable">
                     <thead>
                         <tr>
                             <th>Код</th>
                             <th>Услуга</th>
-                            <th>Тип действия</th>
+                            <th>Документ</th>
                             <th class="text-right nowrap" ng-show="formstate.is_paid()">Цена (руб.)</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr ng-repeat="service in found_services" ng-click="eventServices.add_service(event, service)">
-                            <td ng-bind="service.code"></td>
-                            <td ng-bind="service.name"></td>
-                            <td ng-bind="service.at_name"></td>
-                            <td ng-bind="service.price" class="text-right" ng-show="formstate.is_paid()"></td>
+                        <tr ng-repeat="item in search_result" ng-click="addNewService(item)">
+                            <td ng-bind="item.service.service_code"></td>
+                            <td ng-bind="item.service.service_name"></td>
+                            <td ng-bind="item.action.at_name"></td>
+                            <td ng-bind="item.service.price | moneyCut" class="text-right" ng-show="formstate.is_paid()"></td>
                         </tr>
                     </tbody>
                 </table>
             </div>
         </ng-form>
 
-        <div id="selected_services" ng-show="event.services.length">
+        <div id="selected_services" ng-show="event.services.grouped.length">
             <h4>Выбранные услуги</h4>
             <div style="overflow-x: auto">
                 <table class="table table-condensed">
@@ -54,34 +71,43 @@
                         <tr wm-event-service-list-header></tr>
                     </thead>
                     <tbody>
-                        <tr wm-event-service-group model="service" event="event" idx="$index"
-                            expanded="expanded" ng-class="get_class(service)"
-                            ng-repeat-start="service in event.services">
+                        <tr wm-event-service-group service-group-data="service_group.sg_data" event="event" idx="$index"
+                            expanded="expanded" ng-class="get_class(service_group)" edit-invoice-mode="inInvoiceEditMode()"
+                            ng-repeat-start="service_group in event.services.grouped">
                         </tr>
-                        <tr wm-event-service-record ng-show="expanded" action="act" service="service" event="event" idx="$index"
-                            ng-repeat="act in service.actions" ng-repeat-end>
+                        <tr wm-event-service-record ng-show="expanded" service="service" idx="$index"
+                            service-group="service_group" edit-mode="inEditMode()" edit-invoice-mode="inInvoiceEditMode()"
+                            on-change="refreshSGData()" new-invoice="newInvoiceServiceList"
+                            ng-repeat="service in service_group.sg_list track by $index" ng-repeat-end>
                         </tr>
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
-    <div class="box-footer">
-        <blockquote class="novmargin blockquote-reverse" ng-show="formstate.is_paid() && event.services.length">
-            <span class="text-muted">Итого к оплате: </span>
-            <span class="text-primary" ng-bind="event.payment.payments.total_out"></span><span class="text-primary"> руб.</span>
-            <span class="text-muted"> Оплачено: </span>
-            <span title="[[getPaymentsInTooltipText()]]">
-                <span class="text-success" ng-bind="event.payment.payments.total_in"></span><span class="text-success"> руб.</span>
-            </span>
-            <span class="text-muted"> Долг: </span>
-            <span class="text-danger" ng-bind="event.payment.payments.diff"></span><span class="text-danger"> руб.</span>
-        </blockquote>
+
+    <div id="invoices" ng-show="event.invoices.length">
+    <div class="box-header with-border">
+        <h3 class="box-title">Счета</h3>
     </div>
+    <div class="box-body">
+        <ul>
+            <li ng-repeat="invoice in event.invoices">
+                <a href="javascript:void(0);" ng-click="openInvoice($index)">[[ invoice.description.full ]]</a><br>
+                Сумма счёта <span class="text-black text-bold">[[ invoice.payment.invoice_total_sum ]]</span><span
+                    ng-show="invoice.payment.paid">, Оплачено <span class="text-success text-bold">[[ invoice.payment.paid_sum ]]</span></span><span
+                        ng-show="!invoice.payment.paid">, Долг <span class="text-danger text-bold">[[ invoice.payment.debt_sum ]]</span></span>
+                <ui-print-button ps="ps_invoice" resolve="get_ps_resolve(invoice)" lazy-load-context="invoice" fast-print="true"
+                    class="btn-sm lmargin20"></ui-print-button>
+            </li>
+        </ul>
+    </div>
+    </div>
+
     </div>
 </ng-form>
 <div>
-{#    <pre>[[event.services | json]]</pre>#}
-{#    <pre>[[event.payment | json]]</pre>#}
+{#<pre>[[event.services | json]]</pre>#}
+{#<pre>[[event.invoices | json]]</pre>#}
 </div>
 </div>

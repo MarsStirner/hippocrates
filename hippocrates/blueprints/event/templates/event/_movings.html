@@ -1,0 +1,54 @@
+<div ng-controller="EventMovingsCtrl">
+<ng-form name="eventReceivedForm" role="form" toc-element="Движение пациента" toc-name="tocEventForm">
+    <div class="box box-info collapsed-box">
+        <div class="box-header with-border">
+            <h3 class="box-title">Движение пациента</h3>
+            <div class="box-tools pull-right">
+                <button type="button" class="btn btn-default btn-box-tool" ng-click="create_moving()"
+                        ng-disabled="(event.movings.length != 0) && (event.movings[event.movings.length-1].hospitalBed.value == null)">
+                    Направить в отделение
+                </button>
+                <button type="button" class="btn btn-default btn-box-tool" ng-click="close_last_moving()"
+                        ng-disabled="(event.movings.length == 0) || (event.movings[event.movings.length-1].hospitalBed.value == null)">
+                    Закрыть движение
+                </button>
+                <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i></button>
+            </div>
+        </div>
+        <div class="box-body">
+            <div>
+                <table class="table table-condensed">
+                    <thead>
+                        <tr>
+                            <th>Отделение</th>
+                            <th>Поступление</th>
+                            <th>Выбытие</th>
+                            <th>Дни</th>
+                            <th>Койко-дни</th>
+                            <th>Койка</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="moving in event.movings">
+                            <td ng-bind="moving.orgStructStay.value.name"></td>
+                            <td>[[moving.beg_date | asDateTime]]</td>
+                            <td>[[moving.end_date | asDateTime]]</td>
+                            <td></td>
+                            <td>[[moving.hb_days]]</td>
+                            <td>
+                                <span ng-if="moving.hospitalBed.value">[[moving.hospitalBed.value.code]]</span>
+                                <button ng-if="!moving.hospitalBed.value" type="button" class="btn btn-link btn-md"
+                                        ng-click="create_hospitalBed(moving)">
+                                    <i class="ion ion-plus-round fa-fw"></i>Положить на койку</button>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</ng-form>
+<div>
+</div>
+</div>

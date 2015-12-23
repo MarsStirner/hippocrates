@@ -1,0 +1,43 @@
+{% extends 'patients/base.html' %}
+
+{% block title %}> {{ module_name }}{% endblock %}
+
+{% block main %}
+    <div ng-controller="PatientEventsCtrl" class="ng-cloak">
+        <section class="content-header">
+            <div class="pull-right">
+                <a class="btn btn-sm btn-primary" href="{{ url_for('event.request_type_kind_choose') }}?event_id=new&client_id={{ client_id }}">
+                    Создать обращение</a>
+            </div>
+            <h1>Пациент:
+            {% if user_profiles_mng.has_ui_registrator() %}
+            <a href="{{ url_for('patients.patient', client_id=client_id) }}" tooltip="Редактирование регистрационной карты">
+                [[ client.info.full_name ]]
+            </a>
+            {% elif user_profiles_mng.has_ui_doctor() %}
+            <a href="{{ url_for('patients.patient_info_full', client_id=client_id) }}" tooltip="Просмотр регистрационной карты">
+                [[ client.info.full_name ]]
+            </a>
+            {% else %}[[ client.info.full_name ]]{% endif %}
+            </h1>
+        </section>
+        <section class="content">
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title">Обращения</h3>
+            </div>
+            <div class="box-body">
+                {% include "patients/_event_list.html" %}
+                <div class="box-footer center-block">
+                    <pagination page="page" ng-model="page" total-items="pages" items-per-page="1" max-size="max_size" ng-change="get_data(page)" ng-show="pages > 1" boundary-links="true"></pagination>
+                </div>
+            </div>
+        </div>
+        </section>
+    </div>
+{% endblock %}
+
+{% block modules_js %}
+    {{ super() }}
+    <script src="{{ url_for('.static', filename='js/patient_events.js', v=app_version) }}"></script>
+{% endblock %}

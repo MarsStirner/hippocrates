@@ -16,7 +16,8 @@ from nemesis.models.exists import FileMeta, FileGroupDocument
 from blueprints.patients.lib.utils import (set_client_main_info, ClientSaveException, add_or_update_doc,
     add_or_update_address, add_or_update_copy_address, add_or_update_policy, add_or_update_blood_type,
     add_or_update_allergy, add_or_update_intolerance, add_or_update_soc_status, add_or_update_relation,
-    add_or_update_contact, generate_filename, save_new_file, delete_client_file_attach_and_relations
+    add_or_update_contact, generate_filename, save_new_file, delete_client_file_attach_and_relations,
+    add_or_update_work_soc_status
 )
 
 
@@ -47,13 +48,13 @@ def api_search_clients():
     id_list = []
 
     if query_string:
-        result = SearchPatient.search(query_string)
+        result = SearchPatient.search(query_string, limit)
         id_list = [item['id'] for item in result['result']['items']]
         if id_list:
             base_query = base_query.filter(Client.id.in_(id_list))
         else:
             return jsonify([])
-    clients = base_query.order_by(db.func.field(Client.id, *id_list)).limit(limit).all()
+    clients = base_query.order_by(db.func.field(Client.id, *id_list)).all()
     context = ClientVisualizer()
     if 'short' in request.args:
         return jsonify(map(context.make_short_client_info, clients))
@@ -85,6 +86,18 @@ def api_patient_get():
         return jsonify({
             'client_data': context.make_client_info(client)
         })
+
+
+@module.route('/api/patient_events.json', methods=['GET'])
+@api_method
+def api_patient_events_get():
+    client_id = parse_id(request.args, 'client_id')
+    vsl = ClientVisualizer()
+    client = Client.query.get(client_id)
+    return {
+        'info': client,
+        'events': vsl.make_events(client)
+    }
 
 
 @module.route('/api/appointments.json')
@@ -174,7 +187,19 @@ def api_patient_save():
                     intlr = add_or_update_intolerance(client, intolerance)
                     db.session.add(intlr)
 
-            ss_info = client_data.get('soc_statuses')
+            works_info = client_data.get('works')
+            if works_info:
+                for w in works_info:
+                    work = add_or_update_work_soc_status(client, w)
+                    db.session.add(work)
+
+            ss_info = client_data.get('invalidities')
+            if ss_info:
+                for ss in ss_info:
+                    sstat = add_or_update_soc_status(client, ss)
+                    db.session.add(sstat)
+
+            ss_info = client_data.get('nationalities')
             if ss_info:
                 for ss in ss_info:
                     sstat = add_or_update_soc_status(client, ss)
