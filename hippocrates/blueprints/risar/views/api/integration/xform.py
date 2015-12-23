@@ -4,6 +4,7 @@ import functools
 import datetime
 
 import itertools
+import logging
 
 import jsonschema
 from dateutil.parser import parse as date_parse
@@ -18,6 +19,8 @@ from nemesis.models.organisation import Organisation
 from nemesis.systemwide import db
 
 __author__ = 'viruzzz-kun'
+
+logger = logging.getLogger('simple')
 
 
 def none_default(function=None, default=None):
@@ -114,6 +117,7 @@ class ClientXForm(XForm, ClientSchema):
             'path': '/' + '/'.join(map(unicode, error.absolute_path)),
         } for error in val.iter_errors(data)]
         if errors:
+            logger.error(u'Ошибка валидации данных', extra={'errors': errors})
             raise ApiException(
                 406,
                 'Validation error',

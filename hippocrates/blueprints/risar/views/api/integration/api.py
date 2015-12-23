@@ -1,25 +1,30 @@
 # -*- coding: utf-8 -*-
 from flask import request
 
-from blueprints.risar.views.api.integration.xform import ClientXForm
-from nemesis.lib.apiutils import api_method
+from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.utils import public_endpoint
 from nemesis.systemwide import db
 from ....app import module
+
+from .logformat import hook
+from .xform import ClientXForm
+
 
 __author__ = 'viruzzz-kun'
 
 
 @module.route('/api/integration/<int:api_version>/client/schema.json', methods=["GET"])
-@api_method
+@api_method(hook=hook)
 @public_endpoint
 def api_client_schema(api_version):
-    return ClientXForm.schema[api_version]
+    try:
+        return ClientXForm.schema[api_version]
+    except IndexError:
+        raise ApiException(404, u'Api version %i is not supported. Maximum is %i' % (api_version, len(ClientXForm.schema) - 1))
 
 
 @module.route('/api/integration/<int:api_version>/client/<external_system_id>/<external_client_id>', methods=['GET'])
-@api_method
-@public_endpoint
+@api_method(hook=hook)
 def api_client_get(api_version, external_system_id, external_client_id):
     xform = ClientXForm()
     xform.set_version(api_version)
@@ -30,8 +35,7 @@ def api_client_get(api_version, external_system_id, external_client_id):
 
 @module.route('/api/integration/<int:api_version>/client/<external_system_id>/<external_client_id>', methods=['PUT'])
 @module.route('/api/integration/<int:api_version>/client/<external_system_id>/', methods=['POST'])
-@api_method
-@public_endpoint
+@api_method(hook=hook)
 def api_client_save(api_version, external_system_id, external_client_id=None):
     data = request.get_json()
     xform = ClientXForm()
