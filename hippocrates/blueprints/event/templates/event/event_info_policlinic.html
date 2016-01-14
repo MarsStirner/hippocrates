@@ -4,6 +4,8 @@
 <div ng-controller="PoliclinicEventInfoCtrl" class="ng-cloak">
     <section class="content-header">
         <div class="wm-page-header-button-box">
+            <a type="button" class="btn btn-sm btn-primary"
+               href="{{ url_for('patients.patient_events', client_id=client_id) }}">Все обращения пациента</a>
             <wm-subscription-btn oid="hitsl.event.[[ event.event_id ]]" ng-if="!event.is_new()"></wm-subscription-btn>
             <ui-print-button ps="ps" resolve="ps_resolve()" ng-if="!event.is_new()"></ui-print-button>
         </div>
@@ -36,17 +38,25 @@
                                 <wm-client-info client="event.info.client"></wm-client-info>
                             </div>
                         </div>
-                        {% if event and event.is_stationary %}
-                            {% include "event/_stationary_info.html" %}
-                        {% endif %}
-                        {% include "event/_main_info.html" %}
+                        <ng-form name="event_maininfo_form" toc-element="Информация об обращении">
+                            <div class="box box-info">
+                                <div class="box-header with-border">
+                                    <h3 class="box-title">Информация об обращении</h3>
+                                    <div class="box-tools pull-right">
+                                        <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                                    </div>
+                                </div>
+                                <div class="box-body">
+                                    {% include "event/_main_info.html" %}
+                                </div>
+                            </div>
+                        </ng-form>
                         {% if user_profiles_mng.has_ui_doctor() and user_utils.can_read_dignoses(event) %}
                             {% include "event/_diagnoses.html" %}
                         {% endif %}
-{#                        {% if user_profiles_mng.has_ui_registrator() or user_profiles_mng.has_ui_cashier() %}#}
-{#                            {% include "event/_services.html" %}#}
-{#                            {% include "event/_payment.html" %}#}
-{#                        {% endif %}#}
+                        {% if event.id %}
+                        {% include "event/_services.html" %}
+                        {% endif %}
                         {% if user_utils.can_read_actions_meddoc(event) %}
                             <ng-form name="eventMedDocActionsForm" toc-element="Медицинские документы">
                                 <div class="box box-info">
@@ -107,6 +117,7 @@
                                 </div>
                             </ng-form>
                         {% endif %}
+                        {% if event.id %}
                         <ng-form name="eventPrescriptions" toc-element="Назначения">
                             <div class="box box-info">
                                 <div class="box-header with-border">
@@ -120,6 +131,7 @@
                                 </div>
                             </div>
                         </ng-form>
+                        {% endif %}
                     </ng-form>
                 </div>
             </div>
@@ -133,10 +145,12 @@
                             user_utils.can_edit_event(event) or user_utils.can_edit_event_payment_info(event)
                         )) %}
                     <div class="row">
-                        <div class="col-md-12">
-                            <button type="button" ng-click="save_event()" class="btn btn-lg btn-success"
+                        <div class="col-md-6">
+                            <button type="button" ng-click="save_event()" class="btn btn-lg btn-success btn-block"
                             ng-bind="event.is_new() ? 'Создать' : 'Сохранить'">Создать</button>
-                            <button type="button" ng-click="cancel_editing()" class="btn btn-lg btn-default">Отмена</button>
+                        </div>
+                        <div class="col-md-6">
+                            <button type="button" ng-click="cancel_editing()" class="btn btn-lg btn-default btn-block">Отмена</button>
                         </div>
                     </div>
                     {%- endif %}
@@ -157,8 +171,7 @@
                     {% if user_utils.can_delete_event(event) %}
                     <div class="row vmargin10">
                         <div class="col-md-12">
-                            <button type="button" ng-click="delete_event()" class="btn btn-lg btn-danger"
-                                    ng-if="btn_delete_event_visible()">Удалить обращение</button>
+                            <button type="button" ng-click="delete_event()" class="btn btn-lg btn-danger btn-block">Удалить обращение</button>
                         </div>
                     </div>
                     {% endif %}
@@ -176,7 +189,5 @@
     <script src="{{ url_for('.static', filename='js/event.js', v=app_version) }}"></script>
     <script src="{{ url_for('static', filename='js/services/event/event-services.js', v=nemesis_version) }}"></script>
     <script src="{{ url_for('.static', filename='js/directives.js', v=app_version) }}"></script>
-    <script type="text/ng-template" id="modal-prev-event-contract.html">{% include "event/_modal_prev_event_contracts.html" %}</script>
-    <script type="text/ng-template" id="modal-relatives.html">{% include "event/_modal_relatives.html" %}</script>
-    <script type="text/ng-template" id="modal-switch-payer.html">{% include "event/_modal_switch_payer_tab.html" %}</script>
+    <script type="text/ng-template" id="modal-lab-res-dynamics.html">{% include 'event/_modal_lab_res_dynamics.html' %}</script>
 {% endblock %}

@@ -11,7 +11,7 @@ from blueprints.actions.lib.api import represent_action_template
 from ..lib.api import update_template_action, is_template_action
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.data import create_action, update_action, create_new_action, get_planned_end_datetime, int_get_atl_flat, \
-    get_patient_location
+    get_patient_location, delete_action
 from nemesis.lib.jsonify import ActionVisualizer
 from nemesis.lib.subscriptions import notify_object, subscribe_user
 from nemesis.lib.user import UserUtils
@@ -20,8 +20,9 @@ from nemesis.models.actions import Action, ActionType, ActionTemplate
 from nemesis.models.event import Event
 from nemesis.models.exists import Person
 from nemesis.models.utils import safe_current_user_id
+from nemesis.models.rls import v_Nomen
 from nemesis.systemwide import db, cache
-from nemesis.lib.utils import public_api
+from nemesis.lib.utils import public_api, jsonify
 
 
 __author__ = 'viruzzz-kun'
@@ -101,10 +102,10 @@ def api_delete_action(action_id=None):
     action = Action.query.get(action_id)
     if not action:
         raise ApiException(404, "Действие с id=%s не найдено" % action_id)
-    if not UserUtils.can_delete_action(action):
-        raise ApiException(403, u'У пользователя нет прав на удаление действия с id = %s' % action.id)
-
-    action.delete()
+    try:
+        delete_action(action)
+    except Exception, e:
+        raise ApiException(403, unicode(e))
     db.session.commit()
 
 
@@ -409,3 +410,21 @@ def api_action_template_save(type_id, id_=None):
 
         db.session.commit()
         return represent_action_template(template)
+
+
+@module.route('/api/search_rls.json')
+def api_search_rls():
+    try:
+        query_string = request.args['q']
+        limit = int(request.args.get('limit', 100))
+    except (KeyError, ValueError):
+        return abort(404)
+
+    base_query = v_Nomen.query
+
+    if query_string:
+        query_string = u'{0}%'.format(query_string)
+        base_query = base_query.filter(v_Nomen.tradeLocalName.like(query_string))
+
+    result = base_query.limit(limit).all()
+    return jsonify(result)

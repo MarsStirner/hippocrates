@@ -51,13 +51,13 @@ def api_search_clients():
     id_list = []
 
     if query_string:
-        result = SearchPatient.search(query_string)
+        result = SearchPatient.search(query_string, limit)
         id_list = [item['id'] for item in result['result']['items']]
         if id_list:
             base_query = base_query.filter(Client.id.in_(id_list))
         else:
             return jsonify([])
-    clients = base_query.order_by(db.func.field(Client.id, *id_list)).limit(limit).all()
+    clients = base_query.order_by(db.func.field(Client.id, *id_list)).all()
     context = ClientVisualizer()
     if 'short' in request.args:
         return jsonify(map(context.make_short_client_info, clients))
@@ -89,6 +89,18 @@ def api_patient_get():
         return jsonify({
             'client_data': context.make_client_info(client)
         })
+
+
+@module.route('/api/patient_events.json', methods=['GET'])
+@api_method
+def api_patient_events_get():
+    client_id = parse_id(request.args, 'client_id')
+    vsl = ClientVisualizer()
+    client = Client.query.get(client_id)
+    return {
+        'info': client,
+        'events': vsl.make_events(client)
+    }
 
 
 @module.route('/api/appointments.json')

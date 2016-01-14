@@ -1,0 +1,43 @@
+<div class="modal-header">
+    <button type="button" class="close"  ng-click="$dismiss()">&times;</button>
+    <h3 class="modal-title">
+        Пациент:
+        {%- if user_profiles_mng.has_ui_registrator() -%}
+        <a href="{{ url_for('patients.patient') }}?client_id=[[model.client.id]]" tooltip="Редактирование регистрационной карты">
+            [[ model.client.full_name ]]</a>
+        {%- elif user_profiles_mng.has_ui_doctor() -%}
+        <a href="{{ url_for('patients.patient_info_full') }}?client_id=[[model.client.id]]" tooltip="Просмотр регистрационной карты">
+            [[ model.client.full_name ]]</a>
+        {%- else -%}[[ model.client.full_name ]]{%- endif %} ([[model.client.age]], [[model.client.birth_date | asDate]])
+    </h3>
+</div>
+<div class="modal-body">
+    <dl class="dl-horizontal">
+        <dt>История болезни №</dt>
+            <dd>[[model.externalId]]</dd>
+        <dt>Отделение</dt>
+            <dd>[[model.org_str.name]]</dd>
+        <dt>Койка</dt>
+            <dd></dd>
+    </dl>
+    <h4>Биоматериал: [[model.tissueType.name]], [[model.amount]][[model.unit.name]]</h4>
+    <h4>Пробирки:</h4>
+    <dl class="dl-horizontal">
+        <dt>Количество</dt>
+            <dd>[[model.actions.length]]шт.</dd>
+        <dt>Объем</dt>
+            <dd>[[model.testTubeType.volume]] [[model.testTubeType.unit.name ]]</dd>
+        <dt>Тип пробирки</dt>
+            <dd>[[model.testTubeType.name]]</dd>
+        <dt>Цвет пробирки</dt>
+            <dd>[[model.testTubeType.covCol]]</dd>
+    </dl>
+    <table class="table table-condensed">
+        <caption>Лабораторные исследования</caption>
+        <tbody>
+            <tr ng-repeat="action in model.actions">
+                <td>[[action.action_type.title]]</td>
+            </tr>
+        </tbody>
+    </table>
+</div>

@@ -19,7 +19,13 @@
                             <tr>
                                 <th>Группа крови и резус</th>
                                 <td>
-                                    [[event.blood_history.length ? event.blood_history[0].blood_type.name: '']]</td>
+                                    <span ng-if="event.blood_history.length">
+                                        [[event.blood_history[0].blood_type.name]],
+                                        [[event.blood_history[0].blood_phenotype ? 'фенотип' : '' ]] [[event.blood_history[0].blood_phenotype.name]]
+                                        [[event.blood_history[0].blood_phenotype ? ',' : '' ]]
+                                        [[event.blood_history[0].blood_kell.name]]
+                                    </span>
+                                </td>
                                 <td>
                                     <button type="button" class="btn btn-sm btn-default" title="Изменить"
                                             ng-click="edit_blood()"><span class="glyphicon glyphicon-pencil"></span>

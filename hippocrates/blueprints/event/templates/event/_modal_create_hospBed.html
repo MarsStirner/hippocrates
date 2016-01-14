@@ -45,10 +45,11 @@
             </div>
         </div>
     </div>
-    <div class="row">
+    <div class="row marginal">
         <div class="col-lg-12 col-md-12 col-sm-12">
             <button  style="margin:3px 3px;" ng-repeat="hb in model.hosp_beds" class="btn" ng-click="choose_hb(model, hb)"
                      ng-class="{'btn-danger': hb.occupied, 'btn-success': hb.chosen}" ng-disabled="hb.occupied">[[hb.code]]</button>
+            <span class="text-danger" ng-if="!model.hosp_beds.length">В отделении нет коек</span>
         </div>
     </div>
     <div class="row">

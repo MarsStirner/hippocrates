@@ -2,15 +2,18 @@
 
 {%- block modules_js %}
     {{ super() }}
+    <script src="{{ url_for('static', filename='js/services/webmis.api.js', v=nemesis_version) }}"></script>
     <script>
     var
         url_client_get = '{{ url_for('patients.api_patient_get') }}',
         url_client_save = '{{ url_for('patients.api_patient_save') }}',
         url_client_html = '{{ url_for('patients.patient') }}',
         url_client_search = '{{ url_for('patients.api_search_clients') }}',
+        url_client_patients = '{{ url_for('patients.api_patient_events_get') }}',
         url_action_get = '{{ url_for('actions.api_action_get') }}',
         url_action_new = '{{ url_for('actions.api_action_new_get') }}',
         url_action_save = '{{ url_for('actions.api_action_post') }}',
+        url_rls_search = '{{ url_for('actions.api_search_rls') }}',
         url_event_get = '{{ url_for('event.api_event_info') }}',
         url_event_new = '{{ url_for('event.api_event_new_get') }}',
         url_event_save = '{{ url_for('event.api_event_save') }}',
@@ -31,9 +34,6 @@
         url_api_prev_event_payment_info_get = '{{ url_for('event.api_prev_event_payment_info_get') }}',
         url_for_event_api_search_services = '{{ url_for('event.api_search_services') }}',
         url_for_event_api_service_delete_service = '{{ url_for('event.api_service_delete_service') }}',
-        url_for_event_api_service_coordinate = '{{ url_for('event.api_service_coordinate') }}',
-        url_for_event_api_service_remove_coord = '{{ url_for('event.api_service_remove_coord') }}',
-        url_for_event_api_service_change_account = '{{ url_for('event.api_service_change_account') }}',
         url_for_actions_api_delete_action = '{{ url_for('actions.api_delete_action') }}',
         url_for_delete_event = '{{ url_for('event.api_delete_event') }}',
         url_for_schedule_api_atl_get = '{{ url_for('actions.api_atl_get') }}',
@@ -65,6 +65,8 @@
         url_api_get_event_payments = '{{ url_for('accounting.api_get_event_payments') }}',
         url_api_coupon_parse = '{{ url_for('patients.api_patient_coupon_parse') }}',
         url_api_coupon_save = '{{ url_for('patients.api_patient_coupon_save') }}',
-        url_api_coupon_delete = '{{ url_for('patients.api_patient_coupon_delete') }}';
+        url_api_coupon_delete = '{{ url_for('patients.api_patient_coupon_delete') }}',
+        url_get_ttj_records = '{{ url_for('biomaterials.api_get_ttj_records') }}',
+        url_ttj_update_status = '{{ url_for('biomaterials.api_ttj_change_status') }}';
     </script>
 {% endblock -%}
