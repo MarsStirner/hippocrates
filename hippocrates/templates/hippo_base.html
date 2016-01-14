@@ -62,6 +62,9 @@
         url_schedule_index = '{{ url_for('schedule.index') }}',
         url_wm10_create_event = '{{ "{0}patients/{{0}}/appeals/new/?token={1}&role={2}".format(config['WEBMIS10_URL'], request.cookies.get(config['CASTIEL_AUTH_TOKEN']), current_user.current_role) | safe}}',
         url_api_event_make_payment = '{{ url_for('accounting.api_event_make_payment') }}',
-        url_api_get_event_payments = '{{ url_for('accounting.api_get_event_payments') }}';
+        url_api_get_event_payments = '{{ url_for('accounting.api_get_event_payments') }}',
+        url_api_coupon_parse = '{{ url_for('patients.api_patient_coupon_parse') }}',
+        url_api_coupon_save = '{{ url_for('patients.api_patient_coupon_save') }}',
+        url_api_coupon_delete = '{{ url_for('patients.api_patient_coupon_delete') }}';
     </script>
 {% endblock -%}
