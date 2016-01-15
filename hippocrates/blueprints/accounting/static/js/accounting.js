@@ -179,6 +179,9 @@ WebMis20.service('AccountingService', ['WebMisApi', function (WebMisApi) {
             contract_id: contract_id
         });
     };
+    this.get_service = function (service_id, args) {
+        return WebMisApi.service.get(service_id, args);
+    };
     this.save_service_list = function (event_id, grouped_service_list) {
         return WebMisApi.service.save_service_list({
             event_id: event_id,
@@ -188,8 +191,8 @@ WebMis20.service('AccountingService', ['WebMisApi', function (WebMisApi) {
     this.delete_service = function (service) {
         return WebMisApi.service.del(service.service.id);
     };
-    this.get_grouped_services = function (event_id) {
-        return WebMisApi.service.get_list_grouped(event_id);
+    this.get_listed_services = function (event_id) {
+        return WebMisApi.service.get_list(event_id);
     };
     this.get_invoice = function (invoice_id, args) {
         return WebMisApi.invoice.get(invoice_id, args);

@@ -47,23 +47,23 @@
                         <tr>
                             <th>Код</th>
                             <th>Услуга</th>
-                            <th>Документ</th>
+                            <th>Наименование</th>
                             <th class="text-right nowrap" ng-show="formstate.is_paid()">Цена (руб.)</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr ng-repeat="item in search_result" ng-click="addNewService(item)">
-                            <td ng-bind="item.service.service_code"></td>
-                            <td ng-bind="item.service.service_name"></td>
-                            <td ng-bind="item.action.at_name"></td>
-                            <td ng-bind="item.service.price | moneyCut" class="text-right" ng-show="formstate.is_paid()"></td>
+                            <td ng-bind="item.service_code"></td>
+                            <td ng-bind="item.service_name"></td>
+                            <td ng-bind="item.serviced_entity.name"></td>
+                            <td ng-bind="item.price | moneyCut" class="text-right" ng-show="formstate.is_paid()"></td>
                         </tr>
                     </tbody>
                 </table>
             </div>
         </ng-form>
 
-        <div id="selected_services" ng-show="event.services.grouped.length">
+        <div id="selected_services" ng-show="event.services.length">
             <h4>Выбранные услуги</h4>
             <div style="overflow-x: auto">
                 <table class="table table-condensed">
@@ -71,16 +71,21 @@
                         <tr wm-event-service-list-header></tr>
                     </thead>
                     <tbody>
-                        <tr wm-event-service-group service-group-data="service_group.sg_data" event="event" idx="$index"
-                            expanded="expanded" ng-class="get_class(service_group)" edit-invoice-mode="inInvoiceEditMode()"
-                            ng-repeat-start="service_group in event.services.grouped">
-                        </tr>
-                        <tr wm-event-service-record ng-show="expanded" service="service" idx="$index"
-                            service-group="service_group" edit-mode="inEditMode()" edit-invoice-mode="inInvoiceEditMode()"
-                            on-change="refreshSGData()" new-invoice="newInvoiceServiceList"
-                            ng-repeat="service in service_group.sg_list track by $index" ng-repeat-end>
+                        <tr wm-event-service-record ng-repeat="service in event.services | flattenServiceGroup track by $index"
+                            service="service">
                         </tr>
                     </tbody>
+{#                    <tbody>#}
+{#                        <tr wm-event-service-group service-group-data="service_group.sg_data" event="event" idx="$index"#}
+{#                            expanded="expanded" ng-class="get_class(service_group)" edit-invoice-mode="inInvoiceEditMode()"#}
+{#                            ng-repeat-start="service_group in event.services.grouped">#}
+{#                        </tr>#}
+{#                        <tr wm-event-service-record ng-show="expanded" service="service" idx="$index"#}
+{#                            service-group="service_group" edit-mode="inEditMode()" edit-invoice-mode="inInvoiceEditMode()"#}
+{#                            new-invoice="newInvoiceServiceList"#}
+{#                            ng-repeat="service in service_group.sg_list track by $index" ng-repeat-end>#}
+{#                        </tr>#}
+{#                    </tbody>#}
                 </table>
             </div>
         </div>

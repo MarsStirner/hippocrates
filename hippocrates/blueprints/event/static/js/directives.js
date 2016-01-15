@@ -11,7 +11,7 @@ angular.module('WebMis20')
 '<th></th>\
 <th>Код</th>\
 <th>Услуга</th>\
-<th class="nowrap">Документ</th>\
+<th class="nowrap">Наименование</th>\
 <th class="nowrap" ng-show="formstate.is_paid()">Цена (руб.)</th>\
 <th ng-show="formstate.is_paid()">Скидка</th>\
 <th>Количество</th>\
@@ -105,7 +105,7 @@ function(WMEventFormState, WMEventServices, ActionTypeTreeModal, CurrentUser) {
 </td>'
     };
 }])
-.directive('wmEventServiceRecord', ['WMEventFormState', 'AccountingService',
+.directive('wmEventServiceRecord1', ['WMEventFormState', 'AccountingService',
         function(WMEventFormState, AccountingService) {
     return {
         restrict: 'A',
@@ -246,6 +246,210 @@ function(WMEventFormState, WMEventServices, ActionTypeTreeModal, CurrentUser) {
 </td>'
     };
 }])
+.directive('wmEventServiceRecord', ['WMEventFormState', 'AccountingService',
+        function(WMEventFormState, AccountingService) {
+    return {
+        restrict: 'A',
+        replace: true,
+        scope: {
+            service: '=',
+            level: '='
+            //idx: '=',
+            //serviceGroup: '=',
+            //editMode: '=',
+            //editInvoiceMode: '=',
+            //newInvoice: '='
+        },
+        link: function(scope, elm, attrs) {
+            scope.formstate = WMEventFormState;
+
+            scope.getLevelMarkClass = function () {
+                if (scope.service.ui_attrs.is_expandable) {
+                    return scope.isExpanded() ? 'chevron-down' : 'chevron-right';
+                } else {
+                    return 'minus';
+                }
+            };
+            scope.getLevelIndentStyle = function () {
+                return {
+                    'margin-left': '{0}px'.format(10 * scope.service.ui_attrs.level)
+                }
+            };
+            var traverseToggleVisible = function (service, state) {
+                service.ui_attrs.visible = state;
+                if (service.ui_attrs.is_expandable) {
+                    angular.forEach(service.subservice_list, function (sub_service) {
+                        traverseToggleVisible(sub_service, service.ui_attrs.visible && service.ui_attrs.expanded);
+                    });
+                }
+            };
+            scope.toggleExpanded = function () {
+                scope.service.ui_attrs.expanded = !scope.service.ui_attrs.expanded;
+                angular.forEach(scope.service.subservice_list, function(sub_service) {
+                    traverseToggleVisible(sub_service, scope.service.ui_attrs.expanded)
+                });
+            };
+            scope.isExpanded = function () {
+                return scope.service.ui_attrs.expanded;
+            };
+            scope.isVisible = function () {
+                return scope.service.ui_attrs.visible;
+            };
+
+            scope.onAmountChanged = function () {
+                AccountingService.calc_service_sum(
+                    scope.service,
+                    scope.service.amount,
+                    scope.service.discount
+                )
+                    .then(function (new_sum) {
+                        scope.service.sum = new_sum;
+                    });
+            };
+            var deleteService = function () {
+                scope.serviceGroup.sg_list.splice(scope.idx, 1);
+            };
+            scope.removeService = function () {
+                if (scope.service.service.id) {
+                    if (!confirm('Вы действительно хотите удалить выбранную услугу?')) return;
+                    AccountingService.delete_service(scope.service)
+                        .then(deleteService);
+                } else {
+                    deleteService();
+                }
+            };
+            //scope.inNewInvoice = false;
+            //scope.isInNewInvoice = function () {
+            //    return scope.inNewInvoice;
+            //};
+            //scope.addServiceToInvoice = function () {
+            //    scope.newInvoice.push(scope.service);
+            //    scope.inNewInvoice = true;
+            //};
+            //scope.removeServiceFromInvoice = function () {
+            //    var idx = _.indexOf(scope.newInvoice, scope.service);
+            //    scope.newInvoice.splice(idx, 1);
+            //    scope.inNewInvoice = false;
+            //};
+            //scope.$watch('editInvoiceMode', function (newVal) {
+            //    if (newVal) scope.inNewInvoice = false;
+            //});
+
+            //scope.open_assignments = function () {
+            //    var model = {
+            //        assignable: scope.service.assignable,
+            //        assigned: scope.action.assigned,
+            //        planned_end_date: scope.action.planned_end_date,
+            //        ped_disabled: Boolean(scope.action.action_id)
+            //    };
+            //    ActionTypeTreeModal.openAppointmentModal(model, true).then(function () {
+            //        scope.action.assigned = model.assigned;
+            //        scope.action.planned_end_date = model.planned_end_date;
+            //    });
+            //};
+            //scope.get_info_text = function () {
+            //    function get_action_status_text(status_code) {
+            //        var status_item = scope.ActionStatus.objects.filter(function (status) {
+            //            return status.id === status_code;
+            //        })[0];
+            //        return status_item ? status_item.name : '';
+            //    }
+            //    var msg = [
+            //        'Идентификатор: ' + scope.action.action_id,
+            //        'Дата начала: ' + (scope.action.beg_date ? $filter('asDateTime')(scope.action.beg_date) : 'отсутствует'),
+            //        'Дата окончания: ' + (scope.action.end_date ? $filter('asDateTime')(scope.action.end_date) : 'отсутствует'),
+            //        'Статус: ' + get_action_status_text(scope.action.status),
+            //        scope.formstate.is_dms() ?
+            //            'Согласовано: ' + (
+            //                scope.action.is_coordinated() ?
+            //                    '' + $filter('asDateTime')(scope.action.coord_date) + ', ' + (
+            //                        scope.action.coord_person.name ? scope.action.coord_person.name : '') :
+            //                    'нет') :
+            //            ''
+            //    ];
+            //    return msg.join('; ');
+            //};
+            scope.amountDisabled = function () {
+                return !scope.editMode;
+            };
+            scope.btnRemoveVisible = function () {
+                return scope.editMode && scope.service.access.can_delete;
+            };
+            //scope.btnAddToInvoiceVisible = function () {
+            //    return scope.editInvoiceMode && !scope.service.in_invoice && !scope.isInNewInvoice();
+            //};
+            //scope.btnRemoveFromInvoiceVisible = function () {
+            //    return scope.editInvoiceMode && !scope.service.in_invoice && scope.isInNewInvoice();
+            //};
+        },
+        template:
+'<tr ng-show="isVisible()">\
+    <!-- <td>\
+        <i class="fa fa-square-o cursor-pointer" ng-if="btnAddToInvoiceVisible()" ng-click="addServiceToInvoice()"\
+            style="font-size: larger"></i>\
+        <i class="fa fa-check-square-o cursor-pointer" ng-if="btnRemoveFromInvoiceVisible()" ng-click="removeServiceFromInvoice()"\
+            style="font-size: larger"></i>\
+    </td> -->\
+    <td class="cursor-pointer" ng-click="toggleExpanded()">\
+        <span class="glyphicon glyphicon-[[getLevelMarkClass()]]"\
+            ng-style="getLevelIndentStyle()"></span>\
+    </td>\
+    <td ng-bind="service.service_code"></td>\
+    <td>\
+        [[service.service_name]]\
+    </td>\
+    <td ng-bind="service.serviced_entity.name"></td>\
+    <td ng-bind="service.price | moneyCut" class="text-right" ng-show="formstate.is_paid()"></td>\
+    <td ng-show="formstate.is_paid()">[[ service.discount ? service.discount.description.short : ""]]</td>\
+    <td class="col-md-1">\
+        <input type="text" class="form-control input-sm"\
+               ng-disabled="amountDisabled()" ng-model="service.amount" ng-change="onAmountChanged()"\
+               valid-number minval="1" wm-debounce/><span ng-bind="service.service_kind.name"></span>\
+    </td>\
+    <td class="text-right" ng-show="formstate.is_paid()">\
+        <span ng-bind="service.sum | moneyCut"></span> <span class="glyphicon glyphicon-ok text-success" title="Оплачено" ng-show="service.is_paid"></span>\
+    </td>\
+    <td nowrap class="text-right">\
+        <button type="button" class="btn btn-sm btn-danger" title="Убрать из списка услуг" ng-show="btnRemoveVisible()"\
+                ng-click="removeService()"><span class="fa fa-trash"></span>\
+        </button>\
+    </td>\
+</tr>'
+    };
+}])
+.filter('flattenServiceGroup', function () {
+    function traverse (service, out, level) {
+        if (!service.hasOwnProperty('ui_attrs')) service.ui_attrs = {};
+
+        var is_expandable = Boolean(service.subservice_list.length);
+        angular.extend(
+            service.ui_attrs,
+            {
+                level: level,
+                is_expandable: is_expandable,
+                expanded: service.ui_attrs.expanded !== undefined ? service.ui_attrs.expanded : true,
+                visible: service.ui_attrs.visible !== undefined ? service.ui_attrs.visible : true
+            }
+        );
+        out.push(service);
+        if (is_expandable) {
+            for (var i = 0; i < service.subservice_list.length; i++) {
+                traverse(service.subservice_list[i], out, level + 1);
+            }
+        }
+    }
+    return function (service_list) {
+        var flatten = [],
+            curLevel = 1;
+
+        for (var i = 0; i < service_list.length; i++) {
+            curLevel = 1;
+            var service = service_list[i];
+            traverse(service, flatten, 0);
+        }
+        return flatten;
+    }
+})
 .directive('wmActionList', [
     '$window', '$http', 'LabDynamicsModal', 'ActionTypeTreeModal', 'MessageBox', 'WMEventServices', 'WMWindowSync', 'CurrentUser', 'WMConfig',
 function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WMEventServices, WMWindowSync, CurrentUser, WMConfig) {

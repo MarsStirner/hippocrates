@@ -555,7 +555,7 @@ var EventServicesCtrl = function($scope, $rootScope, AccountingService, InvoiceM
             .then(function (result) {
                 $scope.event.invoices.push(result.invoice);
                 $scope.cancelEditingInvoice();
-                AccountingService.get_grouped_services($scope.event.event_id)
+                AccountingService.get_listed_services($scope.event.event_id)
                     .then(function (service_data) {
                         $scope.event.services = service_data;
                     });
@@ -597,39 +597,18 @@ var EventServicesCtrl = function($scope, $rootScope, AccountingService, InvoiceM
         $scope.query = '';
     };
 
-    $scope.refreshSGData = function () {
-        angular.forEach($scope.event.services.grouped, function (sg) {
-            var total_amount = 0,
-                total_sum = 0;
-            angular.forEach(sg.sg_list, function (service) {
-                total_amount += service.service.amount;
-                total_sum += parseFloat(service.service.sum);
-            });
-            sg.sg_data.total_amount = total_amount;
-            sg.sg_data.total_sum = total_sum.toFixed(2);
-        });
-    };
     $scope.addNewService = function (search_item) {
-        search_item = _.deepCopy(search_item);
-        var key = '{0}/{1}'.format(search_item.service.service_id, search_item.action.action_type_id),
-            idx = $scope.event.services.sg_map[key];
-        if (idx === undefined) {
-            $scope.event.services.sg_map[key] = $scope.event.services.grouped.length;
-            idx = $scope.event.services.sg_map[key];
-            $scope.event.services.grouped[idx] = {
-                sg_data: {
-                    service_code: search_item.service.service_code,
-                    service_name: search_item.service.service_name,
-                    at_name: search_item.action.at_name,
-                    price: search_item.service.price,
-                    total_amount: 0,
-                    total_sum: 0
-                },
-                sg_list: []
-            };
-        }
-        $scope.event.services.grouped[idx].sg_list.push(search_item);
-        $scope.refreshSGData();
+        AccountingService.get_service(undefined, {
+            service_kind_id: safe_traverse(search_item, ['service_kind', 'id']),
+            price_list_item_id: search_item.price_list_item_id,
+            event_id: $scope.event.info.id,
+            // on top level this can be ActionType.id for simple and lab services
+            // or undefined for service groups
+            serviced_entity_id: safe_traverse(search_item, ['serviced_entity', 'at_id'])
+        })
+            .then(function (new_service) {
+                $scope.event.services.push(new_service);
+            });
     };
     $scope.get_ps_resolve = function (invoice) {
         return {

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from nemesis.models.enums import Gender, ContragentType
-from nemesis.lib.utils import format_date, safe_double, safe_decimal, format_money
+from nemesis.models.enums import Gender, ContragentType, ServiceKind
+from nemesis.lib.utils import format_date, safe_double, safe_decimal, format_money, safe_bool
 from nemesis.lib.data_ctrl.accounting.utils import (get_contragent_type, check_invoice_closed,
     check_invoice_can_add_discounts, calc_invoice_sum_wo_discounts)
 from nemesis.lib.data_ctrl.accounting.service import ServiceController
@@ -240,26 +240,34 @@ class PriceListRepr(object):
 class ServiceRepr(object):
 
     def represent_mis_action_service_search_result(self, service_data):
+        # should be similar to represent_service_full
         return {
-            'service': {
-                'price_list_item_id': service_data['price_list_item_id'],
-                'service_id': service_data['service_id'],
-                'service_code': service_data['service_code'],
-                'service_name': service_data['service_name'],
-                'price': format_money(service_data['price']),
-                'amount': service_data['amount'],
-                'sum': format_money(service_data['sum']),
-                'discount': None,
-                'access': {
-                    'can_edit': True,
-                    'can_delete': True
-                },
+            'id': None,
+            'price_list_item_id': service_data['price_list_item_id'],
+            'service_kind': service_data['service_kind'],
+            'event_id': None,
+            'parent_id': None,
+            'service_id': service_data['service_id'],
+            'service_code': service_data['service_code'],
+            'service_name': service_data['service_name'],
+            'price': format_money(service_data['price']),
+            'amount': service_data['amount'],
+            'sum': format_money(service_data['sum']),
+            'is_accumulative_price': safe_bool(service_data['is_accumulative_price']),
+            'in_invoice': False,
+            'is_paid': False,
+            'discount': None,
+            'access': {
+                'can_edit': True,
+                'can_delete': True
             },
-            'action': {
-                'action_type_id': service_data['action_type_id'],
-                'at_code': service_data['at_code'],
-                'at_name': service_data['at_name'],
-            }
+            'serviced_entity': {
+                'id': None,
+                'code': service_data.get('at_code'),
+                'name': service_data.get('at_name'),
+                'at_id': service_data.get('action_type_id')
+            },
+            'subservice_list': [],
         }
 
     def represent_search_result_mis_action_services(self, service_list):
@@ -271,12 +279,16 @@ class ServiceRepr(object):
         return {
             'id': service.id,
             'price_list_item_id': service.priceListItem_id,
-            'amount': service.amount,
-            'price': service.price_list_item.price,
             'service_id': service.price_list_item.service_id,
+            'service_kind': service.service_kind,
+            'event_id': service.event_id,
+            'parent_id': service.parent_id,
             'deleted': service.deleted,
             'service_code': service.price_list_item.serviceCodeOW,
             'service_name': service.price_list_item.serviceNameOW,
+            'price': service.price_list_item.price,
+            'amount': service.amount,
+            'is_accumulative_price': safe_bool(service.price_list_item.isAccumulativePrice),
             'discount': ServiceDiscountRepr.represent_discount_short(service.discount)
         }
 
@@ -292,24 +304,63 @@ class ServiceRepr(object):
             'can_edit': service_ctrl.check_can_edit_service(service),
             'can_delete': service_ctrl.check_can_delete_service(service)
         }
+        data['serviced_entity'] = self.represent_serviced_entity(service)
+        data['subservice_list'] = [
+            self.represent_service_full(ss)  # represent_subservice for custom repr
+            for ss in service.subservice_list
+        ]
         return data
 
-    def represent_service_action(self, action):
+    def represent_serviced_entity(self, service):
+        ent = service.get_serviced_entity()
+        if not ent:
+            return None
+        if service.serviceKind_id == ServiceKind.simple_action[0]:
+            return self.represent_entity_action(ent)
+        elif service.serviceKind_id == ServiceKind.group[0]:
+            return self.represent_entity_group()
+        elif service.serviceKind_id == ServiceKind.lab_action[0]:
+            return self.represent_entity_lab_action(ent)
+        elif service.serviceKind_id == ServiceKind.lab_test[0]:
+            return self.represent_entity_lab_test(ent)
+
+    def represent_entity_action(self, action):
         return {
             'id': action.id,
-            'action_type_id': action.actionType_id,
-            'at_code': action.actionType.code,
-            'at_name': action.actionType.name,
+            'code': action.actionType.code,
+            'name': action.actionType.name,
+            'at_id': action.actionType_id
         }
 
-    def represent_grouped_event_services(self, data):
-        for service_group in data['grouped']:
-            for idx, service in enumerate(service_group['sg_list']):
-                service_group['sg_list'][idx] = {
-                    'service': self.represent_service_full(service['service']),
-                    'action': self.represent_service_action(service['action'])
-                }
-        return data
+    def represent_entity_group(self):
+        return {
+            'id': None,
+            'code': '',
+            'name': ''
+        }
+
+    def represent_entity_lab_action(self, action):
+        return {
+            'id': action.id,
+            'code': action.actionType.code,
+            'name': action.actionType.name,
+            'at_id': action.actionType_id
+        }
+
+    def represent_entity_lab_test(self, action_property):
+        return {
+            'id': action_property.id,
+            'code': action_property.type.code,
+            'name': action_property.type.name,
+            'apt_id': action_property.type_id,
+            'action_id': action_property.action_id
+        }
+
+    def represent_listed_event_services(self, data):
+        return [
+            self.represent_service_full(service)
+            for service in data
+        ]
 
 
 class ServiceDiscountRepr(object):

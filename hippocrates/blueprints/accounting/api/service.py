@@ -6,7 +6,7 @@ from ..app import module
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.data_ctrl.accounting.service import ServiceController
 from blueprints.accounting.lib.represent import ServiceRepr
-from nemesis.lib.utils import safe_int, format_money
+from nemesis.lib.utils import safe_int, format_money, safe_bool
 
 
 @module.route('/api/0/service/search/mis_action_kind/', methods=['GET', 'POST'])
@@ -21,6 +21,36 @@ def api_0_service_search():
     return ServiceRepr().represent_search_result_mis_action_services(data)
 
 
+@module.route('/api/0/service/')
+@module.route('/api/0/service/<int:service_id>')
+@api_method
+def api_0_service_get(service_id=None):
+    args = request.args.to_dict()
+    get_new = safe_bool(args.get('new', False))
+
+    service_ctrl = ServiceController()
+    with service_ctrl.session.no_autoflush:
+        if get_new:
+            service = service_ctrl.get_new_service(args)
+        elif service_id:
+            service = service_ctrl.get_service(service_id)
+        else:
+            raise ApiException(404, u'`service_id` required')
+        return ServiceRepr().represent_service_full(service)
+
+
+@module.route('/api/0/service/list/')
+@module.route('/api/0/service/list/<int:event_id>')
+@api_method
+def api_0_service_list(event_id=None):
+    if not event_id:
+        raise ApiException(404, u'`event_id` required')
+    service_ctrl = ServiceController()
+    grouped = service_ctrl.get_services_by_event(event_id)
+    service_repr = ServiceRepr()
+    return service_repr.represent_listed_event_services(grouped)
+
+
 @module.route('/api/0/service/service_list/', methods=['POST'])
 @api_method
 def api_0_service_list_save():
@@ -33,24 +63,12 @@ def api_0_service_list_save():
     service_ctrl = ServiceController()
     service_list = service_ctrl.save_service_list(grouped_service_list, event_id)
     service_ctrl.store(*service_list)
-    # to enable orm.reconstruct in Service
+    # to launch orm.reconstruct in Service
     service_ctrl.session.close()
 
-    grouped = service_ctrl.get_grouped_services_by_event(event_id)
+    grouped = service_ctrl.get_services_by_event(event_id)
     service_repr = ServiceRepr()
-    return service_repr.represent_grouped_event_services(grouped)
-
-
-@module.route('/api/0/service/list/grouped/')
-@module.route('/api/0/service/list/grouped/<int:event_id>')
-@api_method
-def api_0_service_list_grouped(event_id=None):
-    if not event_id:
-        raise ApiException(404, u'`event_id` required')
-    service_ctrl = ServiceController()
-    grouped = service_ctrl.get_grouped_services_by_event(event_id)
-    service_repr = ServiceRepr()
-    return service_repr.represent_grouped_event_services(grouped)
+    return service_repr.represent_listed_event_services(grouped)
 
 
 @module.route('/api/0/service/calc_sum/', methods=['POST'])
