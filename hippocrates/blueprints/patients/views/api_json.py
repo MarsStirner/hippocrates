@@ -508,6 +508,14 @@ def api_patient_file_attach_delete():
         db.session.commit()
 
 
+@module.route('/api/patient_get_vmpcoupons.json', methods=['GET'])
+@api_method
+def api_patient_get_vmpcoupons():
+    client_id = request.args['client_id']
+    coupon_list = VMPCoupon.query.filter(VMPCoupon.client_id == client_id, VMPCoupon.deleted == 0).all()
+    return coupon_list
+
+
 @module.route('/api/patient_coupon_parse.json', methods=['POST'])
 @api_method
 def api_patient_coupon_parse():

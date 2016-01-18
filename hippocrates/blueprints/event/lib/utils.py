@@ -13,7 +13,7 @@ from nemesis.models.client import Client
 from nemesis.lib.apiutils import ApiException
 from nemesis.models.event import EventLocalContract, Event, EventType, Visit, Event_Persons
 from nemesis.lib.utils import safe_date, safe_traverse, safe_datetime, get_new_event_ext_id, get_new_uuid
-from nemesis.models.exists import rbDocumentType, Person, OrgStructure
+from nemesis.models.exists import rbDocumentType, Person, OrgStructure, ClientQuoting, MKB, VMPQuotaDetails, VMPCoupon
 from nemesis.lib.settings import Settings
 from nemesis.models.schedule import ScheduleClientTicket
 from nemesis.systemwide import db
@@ -257,6 +257,34 @@ def received_save(event_id, received_data):
     else:
         received = received_ctrl.create_received(event_id, received_data)
     db.session.add(received)
+    db.session.commit()
+
+
+def client_quota_save(event, quota_data):
+    quota_id = quota_data.get('id')
+    coupon = VMPCoupon.query.get(safe_traverse(quota_data, 'coupon', 'id'))
+    if quota_id:
+        quota = ClientQuoting.query.get(quota_id)
+        if not quota:
+            raise ApiException(404, u'Не найдена квота с id = {}'.format(quota_id))
+        quota.MKB_object = MKB.query.get(quota_data.get('MKB_id'))
+        quota.quotaDetails.pacientModel_id = safe_traverse(quota_data, 'patient_model', 'id')
+        quota.quotaDetails.quotaType_id = safe_traverse(quota_data, 'quota_type', 'id')
+        quota.quotaDetails.treatment_id = safe_traverse(quota_data, 'treatment', 'id')
+        quota.vmpCoupon = coupon
+    else:
+        quota = ClientQuoting()
+        quota.master = event.client
+        quota.MKB_object = MKB.query.get(safe_traverse(quota_data, 'mkb', 'id'))
+        quota_ditails = VMPQuotaDetails()
+        quota_ditails.pacientModel_id = safe_traverse(quota_data, 'patient_model', 'id')
+        quota_ditails.quotaType_id = safe_traverse(quota_data, 'quota_type', 'id')
+        quota_ditails.treatment_id = safe_traverse(quota_data, 'treatment', 'id')
+        quota.quotaDetails = quota_ditails
+        quota.event = event
+        quota.vmpCoupon = coupon
+
+    db.session.add(quota)
     db.session.commit()
 
 
