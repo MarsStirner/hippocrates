@@ -41,10 +41,10 @@
                         {% if event and event.is_stationary %}
                             {% include "event/_stationary_info.html" %}
                         {% endif %}
-                        <ng-form name="event_maininfo_form" toc-element="Информация об обращении">
+                        <ng-form name="event_maininfo_form" toc-element="Информация об госпитализации">
                             <div class="box box-info" ng-class="{'collapsed-box': !event.is_new()}">
                                 <div class="box-header with-border">
-                                    <h3 class="box-title">Информация об обращении</h3>
+                                    <h3 class="box-title">Информация о госпитализации</h3>
                                     <div class="box-tools pull-right">
                                         <button class="btn btn-box-tool" data-widget="collapse">
                                             <i class="fa" ng-class="{'fa-minus': event.is_new(), 'fa-plus': !event.is_new()}"></i>
