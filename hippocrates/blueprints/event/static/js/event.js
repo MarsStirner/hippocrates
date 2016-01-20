@@ -800,6 +800,14 @@ var StationaryEventInfoCtrl = function ($scope, $controller, $modal, $http, WMSt
     var event = $scope.event = new WMStationaryEvent($scope.event_id, $scope.client_id, $scope.ticket_id);
     $scope.create_mode = $scope.event.is_new();
     $scope.initialize();
+    $scope.$watchCollection(function() {
+        return [safe_traverse($scope.event, ['received', 'weight', 'value']),
+                safe_traverse($scope.event, ['received', 'height', 'value'])];
+    }, function(n, o) {
+        if (n !== o && n[0] && n[1]) {
+            $scope.event.info.body_area = Math.sqrt(n[0]*n[1]/3600).toFixed(2);
+        }
+    });
 };
 var PoliclinicEventInfoCtrl = function ($scope, $controller, WMPoliclinicEvent) {
     $controller('EventInfoCtrl', {$scope: $scope});

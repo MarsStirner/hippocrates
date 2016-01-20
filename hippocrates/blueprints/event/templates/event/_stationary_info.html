@@ -64,7 +64,9 @@
                             <tr>
                                 <th>Площадь поверхности тела</th>
                                 <td>
-
+                                    <span ng-if="event.received.height.value&&event.received.weight.value">
+                                        [[ event.info.body_area ]]
+                                    </span>
                                 </td>
                                 <td></td>
                             </tr>
