@@ -67,19 +67,19 @@
         <div class="col-md-12">
             <div class="form-group">
                 <label for="status" class="col-md-1 control-label">Состояние</label>
-                <div class="col-md-1">
+                <div class="col-md-2">
                     <select class="form-control" id="status" name="status"
                             ng-model="action.status" ng-change="on_status_changed()"
                             ng-options="status as status.name for status in ActionStatus.objects track by status.id">
                     </select>
                 </div>
-                <label for="beg_date" class="col-md-1 control-label">Начато</label>
                 <div class="col-md-4">
                     <div class="row">
-                    <div class="col-md-7">
+                    <label for="beg_date" class="col-md-2 control-label">Начато</label>
+                    <div class="col-md-6">
                         <wm-date id="beg_date" name="beg_date" ng-model="action.beg_date"></wm-date>
                     </div>
-                    <div class="col-md-5">
+                    <div class="col-md-4">
                         <wm-time id="beg_date" name="beg_date" ng-model="action.beg_date"></wm-time>
                     </div>
                     </div>
