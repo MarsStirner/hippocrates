@@ -129,7 +129,7 @@ def api_event_save():
         raise
     except Exception, e:
         logger.error(e, exc_info=True)
-        raise EventSaveException()
+        raise EventSaveException(e)
     return result
 
 

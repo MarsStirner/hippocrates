@@ -263,29 +263,30 @@ def received_save(event_id, received_data):
 def client_quota_save(event, quota_data):
     quota_id = quota_data.get('id')
     coupon = VMPCoupon.query.get(safe_traverse(quota_data, 'coupon', 'id'))
-    if quota_id:
-        quota = ClientQuoting.query.get(quota_id)
-        if not quota:
-            raise ApiException(404, u'Не найдена квота с id = {}'.format(quota_id))
-        quota.MKB_object = MKB.query.get(quota_data.get('MKB_id'))
-        quota.quotaDetails.pacientModel_id = safe_traverse(quota_data, 'patient_model', 'id')
-        quota.quotaDetails.quotaType_id = safe_traverse(quota_data, 'quota_type', 'id')
-        quota.quotaDetails.treatment_id = safe_traverse(quota_data, 'treatment', 'id')
-        quota.vmpCoupon = coupon
-    else:
-        quota = ClientQuoting()
-        quota.master = event.client
-        quota.MKB_object = MKB.query.get(safe_traverse(quota_data, 'mkb', 'id'))
-        quota_ditails = VMPQuotaDetails()
-        quota_ditails.pacientModel_id = safe_traverse(quota_data, 'patient_model', 'id')
-        quota_ditails.quotaType_id = safe_traverse(quota_data, 'quota_type', 'id')
-        quota_ditails.treatment_id = safe_traverse(quota_data, 'treatment', 'id')
-        quota.quotaDetails = quota_ditails
-        quota.event = event
-        quota.vmpCoupon = coupon
+    with db.session.no_autoflush:
+        if quota_id:
+            quota = ClientQuoting.query.get(quota_id)
+            if not quota:
+                raise ApiException(404, u'Не найдена квота с id = {}'.format(quota_id))
+            quota.MKB_object = MKB.query.get(quota_data.get('MKB_id'))
+            quota.quotaDetails.pacientModel_id = safe_traverse(quota_data, 'patient_model', 'id')
+            quota.quotaDetails.quotaType_id = safe_traverse(quota_data, 'quota_type', 'id')
+            quota.quotaDetails.treatment_id = safe_traverse(quota_data, 'treatment', 'id')
+            quota.vmpCoupon = coupon
+        else:
+            quota = ClientQuoting()
+            quota.master = event.client
+            quota.MKB_object = MKB.query.get(safe_traverse(quota_data, 'mkb', 'id'))
+            quota_ditails = VMPQuotaDetails()
+            quota_ditails.pacientModel_id = safe_traverse(quota_data, 'patient_model', 'id')
+            quota_ditails.quotaType_id = safe_traverse(quota_data, 'quota_type', 'id')
+            quota_ditails.treatment_id = safe_traverse(quota_data, 'treatment', 'id')
+            quota.quotaDetails = quota_ditails
+            quota.event = event
+            quota.vmpCoupon = coupon
 
-    db.session.add(quota)
-    db.session.commit()
+        db.session.add(quota)
+        db.session.commit()
 
 
 def save_executives(event_id):
