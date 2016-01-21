@@ -112,14 +112,15 @@ def api_event_save():
             event = event_ctrl.create_base_info(event, all_data)
             event_ctrl.store(event)
             event_id = int(event)
+            if request_type_kind == 'policlinic':
+                visit = Visit.make_default(event)
+                db.session.add(visit)
+                db.session.commit()
         result['id'] = int(event)
 
         update_executives(event)
-        if request_type_kind == 'policlinic':
-            visit = Visit.make_default(event)
-            db.session.add(visit)
-            db.session.commit()
-        elif request_type_kind == 'stationary':
+
+        if request_type_kind == 'stationary':
             received_data = all_data['received']
             received_save(event_id, received_data)
     except EventSaveException:
