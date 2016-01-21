@@ -123,7 +123,8 @@ def api_event_save():
             received_data = all_data['received']
             quota_data = all_data['vmp_quoting']
             received_save(event_id, received_data)
-            client_quota_save(event, quota_data)
+            if quota_data:
+                client_quota_save(event, quota_data)
     except EventSaveException:
         raise
     except Exception, e:
