@@ -534,7 +534,7 @@ def api_patient_coupon_save():
     data = request.json
     coupon_data = data['coupon']
     coupon_file = data['coupon_file']
-    client_id = safe_traverse(coupon_data, 'client', 'id')
+    client_id = data['client_id']
     number = coupon_data.get('number')
 
     directory = 'c%s' % client_id
