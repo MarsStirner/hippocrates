@@ -20,9 +20,9 @@ from nemesis.models.actions import Action, ActionType, ActionTemplate
 from nemesis.models.event import Event
 from nemesis.models.exists import Person
 from nemesis.models.utils import safe_current_user_id
-from nemesis.models.rls import v_Nomen
+from nemesis.models.rls import rlsNomen, rlsTradeName
 from nemesis.systemwide import db, cache
-from nemesis.lib.utils import public_api, jsonify
+from nemesis.lib.utils import public_api
 
 
 __author__ = 'viruzzz-kun'
@@ -413,6 +413,7 @@ def api_action_template_save(type_id, id_=None):
 
 
 @module.route('/api/search_rls.json')
+@api_method
 def api_search_rls():
     try:
         query_string = request.args['q']
@@ -420,11 +421,12 @@ def api_search_rls():
     except (KeyError, ValueError):
         return abort(404)
 
-    base_query = v_Nomen.query
+    base_query = rlsNomen.query
 
     if query_string:
         query_string = u'{0}%'.format(query_string)
-        base_query = base_query.filter(v_Nomen.tradeLocalName.like(query_string))
+        base_query = base_query \
+            .outerjoin(rlsTradeName) \
+            .filter(rlsTradeName.localName.like(query_string))
 
-    result = base_query.limit(limit).all()
-    return jsonify(result)
+    return base_query.limit(limit).all()
