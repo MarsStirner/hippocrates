@@ -816,7 +816,18 @@ var EventQuotingCtrl = function ($scope, RefBookService) {
     $scope.quotaTypeFormatter = function (selected) {
         return selected ? '{0} - {1}'.format(selected.code, selected.name) : undefined;
     };
-
+    $scope.$watch(function () {
+        return safe_traverse($scope.event, ['vmp_quoting', 'coupon']);
+    }, function (n, o) {
+        if (n !== o) {
+            if(!$scope.event.vmp_quoting.mkb){
+                $scope.event.vmp_quoting.mkb = $scope.event.vmp_quoting.coupon.mkb;
+            }
+            if(!$scope.event.vmp_quoting.quota_type){
+                $scope.event.vmp_quoting.quota_type = $scope.event.vmp_quoting.coupon.quota_type;
+            }
+        }
+    });
 };
 
 WebMis20.controller('EventDiagnosesCtrl', ['$scope', 'RefBookService', '$http', EventDiagnosesCtrl]);

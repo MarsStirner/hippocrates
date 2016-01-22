@@ -6,7 +6,7 @@
             </div>
             <div class="box-body">
                 <div class="row vmargin10">
-                    <div class="col-md-7">
+                    <div class="col-md-6">
                         <label>Диагноз</label>
                         <ui-mkb ng-model="event.vmp_quoting.mkb"></ui-mkb>
                     </div>
@@ -20,29 +20,29 @@
                     </div>
                 </div>
                 <div class="row vmargin10">
-                    <div class="col-md-5">
+                    <div class="col-md-6">
                         <label>Код вида ВМП</label>
                         <rb-select ref-book="QuotaType" ng-model="event.vmp_quoting.quota_type" custom-name="quotaTypeFormatter"></rb-select>
                     </div>
-                    <div class="col-md-7">
+                    <div class="col-md-6" style="text-align: justify">
                         [[ event.vmp_quoting.quota_type.code ]] - [[ event.vmp_quoting.quota_type.name ]]
                     </div>
                 </div>
                 <div class="row vmargin10">
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <label>Модель пациента</label>
                         <rb-select ref-book="rbPacientModel" ng-model="event.vmp_quoting.patient_model"></rb-select>
                     </div>
-                    <div class="col-md-8">
+                    <div class="col-md-6" style="text-align: justify">
                         [[ event.vmp_quoting.patient_model.code ]] - [[ event.vmp_quoting.patient_model.name ]]
                     </div>
                 </div>
                 <div class="row vmargin10">
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <label>Метод лечения</label>
                         <rb-select  ref-book="rbTreatment" ng-model="event.vmp_quoting.treatment"></rb-select>
                     </div>
-                    <div class="col-md-8">
+                    <div class="col-md-6" style="text-align: justify">
                         [[ event.vmp_quoting.treatment.code ]] - [[ event.vmp_quoting.treatment.name ]]
                     </div>
                 </div>

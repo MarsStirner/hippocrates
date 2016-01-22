@@ -19,7 +19,7 @@
                 <tr ng-repeat="coupon in client.vmp_coupons | flt_not_deleted">
                     <td>[[ coupon.number ]]</td>
                     <td>[[ coupon.mkb.code ]] [[ coupon.mkb.name ]]</td>
-                    <td>[[ coupon.code ]]</td>
+                    <td>[[ coupon.quota_type.code ]]</td>
                     <td>[[ coupon.date | asDate ]]</td>
                     <td>[[ coupon.event ]]</td>
                     <td>
