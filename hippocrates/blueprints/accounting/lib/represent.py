@@ -241,6 +241,8 @@ class ServiceRepr(object):
 
     def represent_mis_action_service_search_result(self, service_data):
         # should be similar to represent_service_full
+        service_ctrl = ServiceController()
+        service_kind_id = service_data['service_kind'].value
         return {
             'id': None,
             'price_list_item_id': service_data['price_list_item_id'],
@@ -261,12 +263,12 @@ class ServiceRepr(object):
                 'can_edit': True,
                 'can_delete': True
             },
-            'serviced_entity': {
-                'id': None,
-                'code': service_data.get('at_code'),
-                'name': service_data.get('at_name'),
-                'at_id': service_data.get('action_type_id')
-            },
+            'serviced_entity': service_ctrl.make_new_serviced_entity_data(
+                service_kind_id,
+                code=service_data.get('at_code'),
+                name=service_data.get('at_name'),
+                at_id=service_data.get('action_type_id')
+            ),
             'subservice_list': [],
         }
 
@@ -313,8 +315,8 @@ class ServiceRepr(object):
 
     def represent_serviced_entity(self, service):
         ent = service.get_serviced_entity()
-        if not ent:
-            return None
+        # if not ent:
+        #     return None
         if service.serviceKind_id == ServiceKind.simple_action[0]:
             return self.represent_entity_action(ent)
         elif service.serviceKind_id == ServiceKind.group[0]:
@@ -340,11 +342,24 @@ class ServiceRepr(object):
         }
 
     def represent_entity_lab_action(self, action):
+        assignable = []
+        assigned = []
+        for ap in action.properties:
+            if ap.deleted != 1 and ap.type.isAssignable:
+                assignable.append([ap.type.id, ap.type.name])
+                if ap.isAssigned:
+                    assigned.append(ap.type.id)
         return {
             'id': action.id,
             'code': action.actionType.code,
             'name': action.actionType.name,
-            'at_id': action.actionType_id
+            'at_id': action.actionType_id,
+            'tests_data': {
+                'assignable': assignable,
+                'assigned': assigned,
+                'planned_end_date': action.plannedEndDate,
+                'ped_disabled': safe_bool(action.id)
+            }
         }
 
     def represent_entity_lab_test(self, action_property):
@@ -356,10 +371,10 @@ class ServiceRepr(object):
             'action_id': action_property.action_id
         }
 
-    def represent_listed_event_services(self, data):
+    def represent_listed_event_services(self, service_list):
         return [
             self.represent_service_full(service)
-            for service in data
+            for service in service_list
         ]
 
 

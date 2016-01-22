@@ -72,7 +72,7 @@
                     </thead>
                     <tbody>
                         <tr wm-event-service-record ng-repeat="service in event.services | flattenServiceGroup track by $index"
-                            service="service">
+                            service="service" event="event" edit-mode="inEditMode()">
                         </tr>
                     </tbody>
 {#                    <tbody>#}

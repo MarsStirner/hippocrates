@@ -133,6 +133,7 @@ def fc_urls():
             'api_service_list_save': url_for('accounting.api_0_service_list_save'),
             'api_service_list': url_for('accounting.api_0_service_list'),
             'api_service_delete': url_for('accounting.api_0_service_delete'),
+            'api_service_refresh_subservices': url_for('accounting.api_0_service_refresh_subservices'),
             'api_invoice_get': url_for('accounting.api_0_invoice_get'),
             'api_invoice_save': url_for('accounting.api_0_invoice_save'),
             'api_invoice_delete': url_for('accounting.api_0_invoice_delete'),

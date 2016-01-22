@@ -6,7 +6,7 @@ from ..app import module
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.data_ctrl.accounting.service import ServiceController
 from blueprints.accounting.lib.represent import ServiceRepr
-from nemesis.lib.utils import safe_int, format_money, safe_bool
+from nemesis.lib.utils import safe_int, format_money, safe_bool, parse_json
 
 
 @module.route('/api/0/service/search/mis_action_kind/', methods=['GET', 'POST'])
@@ -27,6 +27,8 @@ def api_0_service_search():
 def api_0_service_get(service_id=None):
     args = request.args.to_dict()
     get_new = safe_bool(args.get('new', False))
+    if 'serviced_entity' in args:
+        args['serviced_entity'] = parse_json(args['serviced_entity'])
 
     service_ctrl = ServiceController()
     with service_ctrl.session.no_autoflush:
@@ -46,9 +48,9 @@ def api_0_service_list(event_id=None):
     if not event_id:
         raise ApiException(404, u'`event_id` required')
     service_ctrl = ServiceController()
-    grouped = service_ctrl.get_services_by_event(event_id)
+    service_list = service_ctrl.get_services_by_event(event_id)
     service_repr = ServiceRepr()
-    return service_repr.represent_listed_event_services(grouped)
+    return service_repr.represent_listed_event_services(service_list)
 
 
 @module.route('/api/0/service/service_list/', methods=['POST'])
@@ -58,17 +60,17 @@ def api_0_service_list_save():
     event_id = safe_int(json_data.get('event_id'))
     if not event_id:
         raise ApiException(422, u'`event_id` required')
-    grouped_service_list = json_data.get('grouped', [])
+    service_list = json_data.get('service_list', [])
 
     service_ctrl = ServiceController()
-    service_list = service_ctrl.save_service_list(grouped_service_list, event_id)
+    service_list = service_ctrl.save_service_list(service_list)
     service_ctrl.store(*service_list)
     # to launch orm.reconstruct in Service
     service_ctrl.session.close()
 
-    grouped = service_ctrl.get_services_by_event(event_id)
+    service_list = service_ctrl.get_services_by_event(event_id)
     service_repr = ServiceRepr()
-    return service_repr.represent_listed_event_services(grouped)
+    return service_repr.represent_listed_event_services(service_list)
 
 
 @module.route('/api/0/service/calc_sum/', methods=['POST'])
@@ -85,6 +87,17 @@ def api_0_service_calc_sum():
         service = service_ctrl.get_new_service(json_data)
     new_sum = service_ctrl.calc_service_sum(service, json_data)
     return format_money(new_sum)
+
+
+@module.route('/api/0/service/refresh_subservices/', methods=['POST'])
+@api_method
+def api_0_service_refresh_subservices():
+    json_data = request.get_json()
+
+    service_ctrl = ServiceController()
+    with service_ctrl.session.no_autoflush:
+        service = service_ctrl.refresh_service_subservices(json_data)
+        return ServiceRepr().represent_service_full(service)
 
 
 @module.route('/api/0/service/', methods=['DELETE'])

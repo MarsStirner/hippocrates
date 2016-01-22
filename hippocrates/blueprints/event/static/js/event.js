@@ -531,7 +531,7 @@ var EventServicesCtrl = function($scope, $rootScope, AccountingService, InvoiceM
         $scope.event.services = $scope.oldServices;
     };
     $scope.finishEditing = function () {
-        AccountingService.save_service_list($scope.event.event_id, $scope.event.services.grouped)
+        AccountingService.save_service_list($scope.event.event_id, $scope.event.services)
             .then(function (service_data) {
                 $scope.event.services = service_data;
                 $scope.query_clear();
@@ -602,9 +602,7 @@ var EventServicesCtrl = function($scope, $rootScope, AccountingService, InvoiceM
             service_kind_id: safe_traverse(search_item, ['service_kind', 'id']),
             price_list_item_id: search_item.price_list_item_id,
             event_id: $scope.event.info.id,
-            // on top level this can be ActionType.id for simple and lab services
-            // or undefined for service groups
-            serviced_entity_id: safe_traverse(search_item, ['serviced_entity', 'at_id'])
+            serviced_entity: search_item.serviced_entity
         })
             .then(function (new_service) {
                 $scope.event.services.push(new_service);
@@ -615,12 +613,6 @@ var EventServicesCtrl = function($scope, $rootScope, AccountingService, InvoiceM
             invoice_id: invoice.id,
             event_id: $scope.event.info.id
         }
-    };
-
-    $scope.get_class = function (service) {
-        var result = [];
-        result.push('info');
-        return result;
     };
 
     $scope.$on('event_loaded', function() {
