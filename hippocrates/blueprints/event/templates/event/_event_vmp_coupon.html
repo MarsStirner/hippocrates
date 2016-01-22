@@ -2,7 +2,7 @@
     <ng-form name="eventCouponsForm" role="form" toc-element="Талоны ВМП" toc-name="tocCouponsForm">
         <div class="box box-info">
             <div class="box-header with-border">
-                <h3 class="box-title">Квоты ВМП</h3>
+                <h3 class="box-title">Талон ВМП</h3>
             </div>
             <div class="box-body">
                 <div class="row vmargin10">
@@ -22,7 +22,7 @@
                 <div class="row vmargin10">
                     <div class="col-md-4">
                         <label>Код вида ВМП</label>
-                        <rb-select ref-book="QuotaType" ng-model="event.vmp_quoting.quota_type"></rb-select>
+                        <rb-select ref-book="QuotaType" ng-model="event.vmp_quoting.quota_type" custom-name="quotaTypeFormatter"></rb-select>
                     </div>
                     <div class="col-md-8">[[ event.vmp_quoting.quota_type.code ]] - [[ event.vmp_quoting.quota_type.name ]]</div>
                 </div>

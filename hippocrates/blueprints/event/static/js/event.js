@@ -813,6 +813,10 @@ var EventQuotingCtrl = function ($scope, RefBookService) {
     $scope.rbQuotaType = RefBookService.get('QuotaType');
     $scope.rbPatientModel = RefBookService.get('rbPacientModel');
     $scope.rbTreatment = RefBookService.get('rbTreatment');
+    $scope.quotaTypeFormatter = function (selected) {
+        return selected ? '{0} - {1}'.format(selected.code, selected.name) : undefined;
+    };
+
 };
 
 WebMis20.controller('EventDiagnosesCtrl', ['$scope', 'RefBookService', '$http', EventDiagnosesCtrl]);
