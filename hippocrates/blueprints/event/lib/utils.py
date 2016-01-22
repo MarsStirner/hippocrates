@@ -268,7 +268,7 @@ def client_quota_save(event, quota_data):
             quota = ClientQuoting.query.get(quota_id)
             if not quota:
                 raise ApiException(404, u'Не найдена квота с id = {}'.format(quota_id))
-            quota.MKB_object = MKB.query.get(quota_data.get('MKB_id'))
+            quota.MKB_object = MKB.query.get(safe_traverse(quota_data, 'mkb', 'id'))
             quota.quotaDetails.pacientModel_id = safe_traverse(quota_data, 'patient_model', 'id')
             quota.quotaDetails.quotaType_id = safe_traverse(quota_data, 'quota_type', 'id')
             quota.quotaDetails.treatment_id = safe_traverse(quota_data, 'treatment', 'id')
