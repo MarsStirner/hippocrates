@@ -7,6 +7,7 @@ import os
 import mimetypes
 
 from nemesis.app import app
+from nemesis.lib.apiutils import ApiException
 from nemesis.systemwide import db
 from nemesis.lib.utils import safe_date, safe_traverse, get_new_uuid, encode_file_name
 from nemesis.lib.const import SS_WORK_CODE, SS_NATIONALITY_CODE
@@ -31,10 +32,11 @@ def unformat_snils(snils):
     return snils.replace('-', '').replace(' ', '')
 
 
-class ClientSaveException(Exception):
+class ClientSaveException(ApiException):
     def __init__(self, message, data=None):
-        super(ClientSaveException, self).__init__(message)
-        self.data = data
+        if data:
+            message = '{0} {1}'.format(message, data)
+        super(ClientSaveException, self).__init__(422, message)
 
 
 def is_valid_name(name):

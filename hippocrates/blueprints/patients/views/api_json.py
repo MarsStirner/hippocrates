@@ -26,16 +26,6 @@ __author__ = 'mmalkov'
 logger = logging.getLogger('simple')
 
 
-@module.errorhandler(ClientSaveException)
-def handle_client_error(err):
-    return jsonify({
-        'name': err.message,
-        'data': {
-            'err_msg': err.data
-        }
-    }, 422, 'error')
-
-
 @module.route('/api/search_clients.json')
 def api_search_clients():
     try:
@@ -117,211 +107,116 @@ def api_patient_appointments():
 
 
 @module.route('/api/save_patient_info.json', methods=['POST'])
+@api_method
 def api_patient_save():
     client_data = request.json
     client_id = parse_id(client_data, 'client_id', True)
     if client_id is False:
-        return abort(404)
+        raise ApiException(404, u'Пациент %s не найден' % client_id)
 
     err_msg = u'Ошибка сохранения данных пациента'
-    try:
-        if client_id:
-            client = Client.query.get(client_id)
-            client_info = client_data.get('info')
-            if client_info:
-                client = set_client_main_info(client, client_info)
-                db.session.add(client)
-
-            id_doc_info = client_data.get('id_docs')
-            if id_doc_info:
-                for id_doc in id_doc_info:
-                    doc = add_or_update_doc(client, id_doc)
-                    db.session.add(doc)
-
-            reg_addr_info = client_data.get('reg_addresses')
-            actual_reg_address = None
-            if reg_addr_info:
-                for reg_addr in reg_addr_info:
-                    ra = add_or_update_address(client, reg_addr)
-                    if ra.deleted != 1 and ra.deleted != 2:
-                        actual_reg_address = ra
-                    db.session.add(ra)
-
-            live_addr_info = client_data.get('live_addresses')
-            if live_addr_info:
-                for live_addr in live_addr_info:
-                    same_as_reg = live_addr.get('synced', False)
-                    if same_as_reg:
-                        la = add_or_update_copy_address(client, live_addr, actual_reg_address)
-                    else:
-                        la = add_or_update_address(client, live_addr)
-                    db.session.add(la)
-
-            cpol_info = client_data.get('compulsory_policies')
-            if cpol_info:
-                for cpol in cpol_info:
-                    pol = add_or_update_policy(client, cpol)
-                    db.session.add(pol)
-
-            vpol_info = client_data.get('voluntary_policies')
-            if vpol_info:
-                for vpol in vpol_info:
-                    pol = add_or_update_policy(client, vpol)
-                    db.session.add(pol)
-
-            blood_type_info = client_data.get('blood_types')
-            if blood_type_info:
-                for bt in blood_type_info:
-                    bt = add_or_update_blood_type(client, bt)
-                    db.session.add(bt)
-
-            allergy_info = client_data.get('allergies')
-            if allergy_info:
-                for allergy in allergy_info:
-                    alg = add_or_update_allergy(client, allergy)
-                    db.session.add(alg)
-
-            intolerance_info = client_data.get('intolerances')
-            if intolerance_info:
-                for intolerance in intolerance_info:
-                    intlr = add_or_update_intolerance(client, intolerance)
-                    db.session.add(intlr)
-
-            works_info = client_data.get('works')
-            if works_info:
-                for w in works_info:
-                    work = add_or_update_work_soc_status(client, w)
-                    db.session.add(work)
-
-            ss_info = client_data.get('invalidities')
-            if ss_info:
-                for ss in ss_info:
-                    sstat = add_or_update_soc_status(client, ss)
-                    db.session.add(sstat)
-
-            ss_info = client_data.get('nationalities')
-            if ss_info:
-                for ss in ss_info:
-                    sstat = add_or_update_soc_status(client, ss)
-                    db.session.add(sstat)
-
-            relation_info = client_data.get('relations')
-            if relation_info:
-                for relation in relation_info:
-                    rel = add_or_update_relation(client, relation)
-                    db.session.add(rel)
-
-            contact_info = client_data.get('contacts')
-            if contact_info:
-                for contact in contact_info:
-                    cont = add_or_update_contact(client, contact)
-                    db.session.add(cont)
-        else:
-            client = Client()
-            client_info = client_data.get('info')
-            if not client_info:
-                raise ClientSaveException(err_msg, u'Отсутствует основная информация о пациенте.')
+    if client_id:
+        client = Client.query.get(client_id)
+        client_info = client_data.get('info')
+        if client_info:
             client = set_client_main_info(client, client_info)
             db.session.add(client)
+    else:
+        client = Client()
+        client_info = client_data.get('info')
+        if not client_info:
+            raise ClientSaveException(err_msg, u'Отсутствует основная информация о пациенте.')
+        client = set_client_main_info(client, client_info)
+        db.session.add(client)
 
-            id_doc_info = client_data.get('id_docs')
-            if id_doc_info:
-                for id_doc in id_doc_info:
-                    doc = add_or_update_doc(client, id_doc)
-                    db.session.add(doc)
+    id_doc_info = client_data.get('id_docs')
+    if id_doc_info:
+        for id_doc in id_doc_info:
+            doc = add_or_update_doc(client, id_doc)
+            db.session.add(doc)
 
-            reg_addr_info = client_data.get('reg_addresses')
-            actual_reg_address = None
-            if reg_addr_info:
-                for reg_addr in reg_addr_info:
-                    ra = add_or_update_address(client, reg_addr)
-                    if ra.deleted != 1 and ra.deleted != 2:
-                        actual_reg_address = ra
-                    db.session.add(ra)
+    reg_addr_info = client_data.get('reg_addresses')
+    actual_reg_address = None
+    if reg_addr_info:
+        for reg_addr in reg_addr_info:
+            ra = add_or_update_address(client, reg_addr)
+            if ra.deleted != 1 and ra.deleted != 2:
+                actual_reg_address = ra
+            db.session.add(ra)
 
-            live_addr_info = client_data.get('live_addresses')
-            if live_addr_info:
-                for live_addr in live_addr_info:
-                    same_as_reg = live_addr.get('synced', False)
-                    if same_as_reg:
-                        la = add_or_update_copy_address(client, live_addr, actual_reg_address)
-                    else:
-                        la = add_or_update_address(client, live_addr)
-                    db.session.add(la)
+    live_addr_info = client_data.get('live_addresses')
+    if live_addr_info:
+        for live_addr in live_addr_info:
+            same_as_reg = live_addr.get('synced', False)
+            if same_as_reg:
+                la = add_or_update_copy_address(client, live_addr, actual_reg_address)
+            else:
+                la = add_or_update_address(client, live_addr)
+            db.session.add(la)
 
-            cpol_info = client_data.get('compulsory_policies')
-            if cpol_info:
-                for cpol in cpol_info:
-                    pol = add_or_update_policy(client, cpol)
-                    db.session.add(pol)
+    cpol_info = client_data.get('compulsory_policies')
+    if cpol_info:
+        for cpol in cpol_info:
+            pol = add_or_update_policy(client, cpol)
+            db.session.add(pol)
 
-            vpol_info = client_data.get('voluntary_policies')
-            if vpol_info:
-                for vpol in vpol_info:
-                    pol = add_or_update_policy(client, vpol)
-                    db.session.add(pol)
+    vpol_info = client_data.get('voluntary_policies')
+    if vpol_info:
+        for vpol in vpol_info:
+            pol = add_or_update_policy(client, vpol)
+            db.session.add(pol)
 
-            blood_type_info = client_data.get('blood_types')
-            if blood_type_info:
-                for bt in blood_type_info:
-                    bt = add_or_update_blood_type(client, bt)
-                    db.session.add(bt)
+    blood_type_info = client_data.get('blood_types')
+    if blood_type_info:
+        for bt in blood_type_info:
+            bt = add_or_update_blood_type(client, bt)
+            db.session.add(bt)
 
-            allergy_info = client_data.get('allergies')
-            if allergy_info:
-                for allergy in allergy_info:
-                    alg = add_or_update_allergy(client, allergy)
-                    db.session.add(alg)
+    allergy_info = client_data.get('allergies')
+    if allergy_info:
+        for allergy in allergy_info:
+            alg = add_or_update_allergy(client, allergy)
+            db.session.add(alg)
 
-            intolerance_info = client_data.get('intolerances')
-            if intolerance_info:
-                for intolerance in intolerance_info:
-                    intlr = add_or_update_intolerance(client, intolerance)
-                    db.session.add(intlr)
+    intolerance_info = client_data.get('intolerances')
+    if intolerance_info:
+        for intolerance in intolerance_info:
+            intlr = add_or_update_intolerance(client, intolerance)
+            db.session.add(intlr)
 
-            ss_info = client_data.get('soc_statuses')
-            if ss_info:
-                for ss in ss_info:
-                    sstat = add_or_update_soc_status(client, ss)
-                    db.session.add(sstat)
+    works_info = client_data.get('works')
+    if works_info:
+        for w in works_info:
+            work = add_or_update_work_soc_status(client, w)
+            db.session.add(work)
 
-            relation_info = client_data.get('relations')
-            if relation_info:
-                for relation in relation_info:
-                    rel = add_or_update_relation(client, relation)
-                    db.session.add(rel)
+    ss_info = client_data.get('invalidities')
+    if ss_info:
+        for ss in ss_info:
+            sstat = add_or_update_soc_status(client, ss)
+            db.session.add(sstat)
 
-            contact_info = client_data.get('contacts')
-            if contact_info:
-                for contact in contact_info:
-                    cont = add_or_update_contact(client, contact)
-                    db.session.add(cont)
+    ss_info = client_data.get('nationalities')
+    if ss_info:
+        for ss in ss_info:
+            sstat = add_or_update_soc_status(client, ss)
+            db.session.add(sstat)
 
-    #     for id_info in client_info['identifications']:
-    #         if not 'id' in id_info:
-    #             id_ext = get_new_identification(id_info)
-    #             client.identifications.append(id_ext)
-    #         else:
-    #             id_ext = get_modified_identification(client, id_info)
-    #             db.session.add(id_ext)
-        db.session.commit()
-    except ClientSaveException:
-        raise
-    except Exception, e:
-        logger.error(e, exc_info=True)
-        db.session.rollback()
-        return jsonify(
-            {
-                'name': err_msg,
-                'data': {
-                    'err_msg': 'INTERNAL SERVER ERROR'
-                }
-            },
-            500,
-            'save client data error'
-        )
+    relation_info = client_data.get('relations')
+    if relation_info:
+        for relation in relation_info:
+            rel = add_or_update_relation(client, relation)
+            db.session.add(rel)
 
-    return jsonify(int(client))
+    contact_info = client_data.get('contacts')
+    if contact_info:
+        for contact in contact_info:
+            cont = add_or_update_contact(client, contact)
+            db.session.add(cont)
+
+    db.session.commit()
+
+    return int(client)
 
 # for tests without external kladr
 @module.route('/api/kladr_city.json', methods=['GET'])
