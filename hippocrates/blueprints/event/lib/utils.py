@@ -94,7 +94,7 @@ class ReceivedController():
     def create_received(self, event_id, received_info):
 
         event = Event.query.get(event_id)
-        action_type = ActionType.query.filter(ActionType.flatCode == 'received').first()
+        action_type = ActionType.query.filter(ActionType.flatCode == u'received').first()
 
         received = create_action(action_type.id, event)
         received = self.update_received_data(received, received_info)
@@ -134,7 +134,7 @@ class MovingController():
 
     def create_moving(self, event_id, moving_info):
         event = Event.query.get(event_id)
-        action_type = ActionType.query.filter(ActionType.flatCode == 'moving').first()
+        action_type = ActionType.query.filter(ActionType.flatCode == u'moving').first()
 
         moving = create_action(action_type.id, event)
         prev_action = self.get_prev_action(moving_info.get('event_id'))

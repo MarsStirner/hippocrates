@@ -113,9 +113,9 @@ def api_errand_edit(errand_id):
         errand.result = data['result']
         if data.get('exec', 0):
             if errand.plannedExecDate.date() >= now.date():
-                errand.status = rbErrandStatus.query.filter(rbErrandStatus.code == 'executed').first()
+                errand.status = rbErrandStatus.query.filter(rbErrandStatus.code == u'executed').first()
             else:
-                errand.status = rbErrandStatus.query.filter(rbErrandStatus.code == 'late_execution').first()
+                errand.status = rbErrandStatus.query.filter(rbErrandStatus.code == u'late_execution').first()
             errand.execDate = data['exec_date'] if data['exec_date'] else now
         db.session.add(errand)
         db.session.commit()
