@@ -1,0 +1,22 @@
+{% extends 'risar/base/_base.html' %}
+
+{% block container %}
+    <div id="container">
+        {% block main -%}{%- endblock %}
+    </div>
+{% endblock %}
+
+{% block modules_css -%}
+{{- super() -}}
+<link href="{{ url_for('.static', filename='css/style.css') }}" media="screen" rel="stylesheet">
+<link href="{{ url_for('.static', filename='css/print.css') }}" media="print" rel="stylesheet">
+<link href="{{ url_for('.static', filename='i/risar_icons/style.css', v=app_version) }}" media="screen" rel="stylesheet">
+<link href="{{ url_for('.static', filename='i/risar_logo/style.css', v=app_version) }}" media="screen" rel="stylesheet">
+{%- endblock %}
+
+{% block modules_js -%}
+{{ super() }}
+<script src="{{ url_for('.config_js', v=app_version) }}"></script>
+<script src="{{ url_for('.current_user_js', v=app_version) }}"></script>
+<script src="{{ url_for('.static', filename='js/risar.js', v=app_version) }}"></script>
+{%- endblock %}

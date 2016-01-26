@@ -449,6 +449,14 @@ WebMis20.factory('WMAction', ['$q', 'ApiCalls', 'EzekielLock', function ($q, Api
         process_properties(this, src_action);
         return this;
     };
+    Action.prototype.get_data = function () {
+        var data = {};
+        merge_fields(data, this);
+        data.action_type_id = this.action_type_id || this.action_type.id;
+        merge_properties(data, this);
+        data.id = self.id;
+        return data;
+    };
     Action.prototype.is_new = function () {
         return !this.id;
     };

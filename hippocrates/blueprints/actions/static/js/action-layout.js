@@ -269,8 +269,10 @@ angular.module('WebMis20')
                         return '<bak-lab-view model="action.get_baklab_info()"></bak-lab-view>';
 
                     case 'prescriptions':
-                        return '<legend class="vmargin10">Назначения медицинских препаратов</legend>\
-                                <medication-prescriptions model="action.prescriptions" action="action"/>';
+                        return scope.action.prescriptions ?
+                            '<legend class="vmargin10">Назначения медицинских препаратов</legend>\
+                             <medication-prescriptions model="action.prescriptions" action="action"/>' :
+                            '';
 
                     case 'root':
                         inner_template = tag.children.map(function (child) {
@@ -287,7 +289,7 @@ angular.module('WebMis20')
             var sas_vgroup = scope.sas_vgroup = new SelectAll([]);
 
             scope.$watchCollection('action.properties', function (properties, old) {
-                if (angular.equals(properties, old)) return;
+                //if (angular.equals(properties, old)) return;
                 properties = properties || [];
                 sas.setSource(properties.map(function (item) {return item.type.id}));
             });
@@ -310,7 +312,7 @@ angular.module('WebMis20')
                 if (!angular.equals(n, o)) {
                     rebuild_layout(scope.action.layout)
                 }
-            })
+            });
         }
     }
 }])

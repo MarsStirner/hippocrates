@@ -1,0 +1,261 @@
+@font-face {
+	font-family: 'icomoon';
+	src:url('fonts/icomoon.eot');
+	src:url('fonts/icomoon.eot#iefix') format('embedded-opentype'),
+		url('fonts/icomoon.woff') format('woff'),
+		url('fonts/icomoon.ttf') format('truetype'),
+		url('fonts/icomoon.svg#icomoon') format('svg');
+	font-weight: normal;
+	font-style: normal;
+}
+
+[class^="icon-"], [class*=" icon-"], [class^="ri-"], [class*=" ri-"] {
+	font-family: 'icomoon';
+	speak: none;
+	font-style: normal;
+	font-weight: normal;
+	font-variant: normal;
+	text-transform: none;
+	line-height: 1;
+
+	/* Better Font Rendering =========== */
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.ri-pregnancy-week-38:before {
+	content: "\e636";
+}
+
+.ri-pregnancy-week-undefined:before {
+	content: "\e63a";
+}
+
+.ri-pregnancy-week-15:before {
+	content: "\e607";
+}
+
+.icon-icon8_1:before {
+	content: "\e608";
+}
+
+.icon-icon8_2:before {
+	content: "\e609";
+}
+
+.icon-icon8_3:before {
+	content: "\e60a";
+}
+
+.icon-icon8_4:before {
+	content: "\e60b";
+}
+
+.ri-chart-fill-pct-50:before {
+	content: "\e60c";
+}
+
+.icon-icon8_6:before {
+	content: "\e60d";
+}
+
+.icon-icon8_7:before {
+	content: "\e60e";
+}
+
+.icon-icon8_8:before {
+	content: "\e60f";
+}
+
+.icon-icon8_9:before {
+	content: "\e610";
+}
+
+.icon-icon8_10:before {
+	content: "\e611";
+}
+
+.ri-pregnancy-week-1:before {
+	content: "\e612";
+}
+
+.ri-pregnancy-week-2:before {
+	content: "\e613";
+}
+
+.ri-pregnancy-week-3:before {
+	content: "\e614";
+}
+
+.ri-pregnancy-week-4:before {
+	content: "\e615";
+}
+
+.ri-pregnancy-week-5:before {
+	content: "\e616";
+}
+
+.ri-pregnancy-week-6:before {
+	content: "\e617";
+}
+
+.ri-pregnancy-week-7:before {
+	content: "\e618";
+}
+
+.ri-pregnancy-week-8:before {
+	content: "\e619";
+}
+
+.ri-pregnancy-week-9:before {
+	content: "\e61a";
+}
+
+.ri-pregnancy-week-10:before {
+	content: "\e61b";
+}
+
+.ri-pregnancy-week-11:before {
+	content: "\e61c";
+}
+
+.ri-pregnancy-week-12:before {
+	content: "\e61d";
+}
+
+.ri-pregnancy-week-13:before {
+	content: "\e61e";
+}
+
+.ri-pregnancy-week-14:before {
+	content: "\e61f";
+}
+
+.ri-pregnancy-week-16:before {
+	content: "\e620";
+}
+
+.ri-pregnancy-week-17:before {
+	content: "\e621";
+}
+
+.ri-pregnancy-week-18:before {
+	content: "\e622";
+}
+
+.ri-pregnancy-week-19:before {
+	content: "\e623";
+}
+
+.ri-pregnancy-week-20:before {
+	content: "\e624";
+}
+
+.ri-pregnancy-week-21:before {
+	content: "\e625";
+}
+
+.ri-pregnancy-week-22:before {
+	content: "\e626";
+}
+
+.ri-pregnancy-week-23:before {
+	content: "\e627";
+}
+
+.ri-pregnancy-week-24:before {
+	content: "\e628";
+}
+
+.ri-pregnancy-week-25:before {
+	content: "\e629";
+}
+
+.ri-pregnancy-week-26:before {
+	content: "\e62a";
+}
+
+.ri-pregnancy-week-27:before {
+	content: "\e62b";
+}
+
+.ri-pregnancy-week-28:before {
+	content: "\e62c";
+}
+
+.ri-pregnancy-week-29:before {
+	content: "\e62d";
+}
+
+.ri-pregnancy-week-30:before {
+	content: "\e62e";
+}
+
+.ri-pregnancy-week-31:before {
+	content: "\e62f";
+}
+
+.ri-pregnancy-week-32:before {
+	content: "\e630";
+}
+
+.ri-pregnancy-week-33:before {
+	content: "\e631";
+}
+
+.ri-pregnancy-week-34:before {
+	content: "\e632";
+}
+
+.ri-pregnancy-week-35:before {
+	content: "\e633";
+}
+
+.ri-pregnancy-week-36:before {
+	content: "\e634";
+}
+
+.ri-pregnancy-week-37:before {
+	content: "\e635";
+}
+
+.ri-pregnancy-week-39:before {
+	content: "\e637";
+}
+
+.ri-pregnancy-week-40:before {
+	content: "\e638";
+}
+
+.ri-pregnancy-week-40h:before {
+	content: "\e639";
+}
+
+.ri-due-date:before {
+	content: "\e600";
+}
+
+.ri-prenatal-risk-undefined:before {
+	content: "\e601";
+}
+
+.ri-prenatal-risk:before {
+	content: "\e602";
+}
+
+.ri-mt-lab-test:before {
+	content: "\e603";
+}
+
+.ri-mt-func-test:before {
+	content: "\e604";
+}
+
+.ri-mt-checkup:before {
+	content: "\e605";
+}
+
+.ri-mt-other:before {
+	content: "\e606";
+}
+

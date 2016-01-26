@@ -1,0 +1,45 @@
+<div class="box box-info" ng-controller="UrgentErrandsCtrl">
+    <div class="box-header">
+        <h3 class="box-title">Срочные поручения</h3>
+        <span class="badge label-info">[[urgent_errands.length]]</span>
+        <div class="box-tools pull-right">
+            <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+        </div>
+    </div>
+    <div class="box-body no-padding">
+        <table class="table">
+            <tbody>
+            <tr>
+                <th>Номер</th>
+                <th>Риск</th>
+                <th>ФИО</th>
+                <th>Статус</th>
+            </tr>
+            <tr ng-repeat="errand in urgent_errands">
+                <td>
+                    <a ng-href="#" ng-click="edit_errand(errand, false)">[[errand.number]]</a>
+                </td>
+                <td>
+                    <span class="label"
+                          ng-class="{'label-default': errand.event.risk_rate.code == 'undefined',
+                                     'label-success': errand.event.risk_rate.code == 'low',
+                                     'label-warning': errand.event.risk_rate.code == 'medium',
+                                     'label-danger': errand.event.risk_rate.code == 'high'}">[[ errand.event.risk_rate.name ]]</span>
+                </td>
+                <td>[[errand.event.client]]</td>
+                <td>
+                    <span ng-class="{'label-info': errand.status.code == 'waiting',
+                                     'label-success': errand.status.code == 'executed',
+                                     'label-danger': errand.status.code == 'expired',
+                                     'label-warning': errand.status.code == 'late_execution'}" class="label">
+                        [[errand.status.name]]
+                    </span>
+                </td>
+            </tr>
+            <tr class="text-center">
+                <td colspan="4"><a href="{{ url_for('risar.html_errands_list') }}">Все поручения</a></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

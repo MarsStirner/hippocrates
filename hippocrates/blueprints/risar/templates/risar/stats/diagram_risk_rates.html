@@ -1,0 +1,35 @@
+<div class="box box-danger" ng-controller="PerinatalRiskRateViewCtrl">
+    <div class="box-header with-border">
+        <h3 class="box-title">Пациентки по степени риска</h3>
+        <div class="box-tools pull-right">
+            <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+        </div>
+    </div>
+    <div class="box-body">
+        <nvd3-pie-chart
+            id="noid"
+            data="slices"
+            width="350"
+            height="370"
+            margin="{left:0,top:0,bottom:0,right:10}"
+            x="slices_x"
+            y="slices_y"
+            color="slices_c"
+            nodata="Нет данных"
+            showlegend="true"
+            showlabels="true"
+            labeltype="value"
+            donut="true"
+            donut-ratio="0.33"
+            ><svg></svg>
+        </nvd3-pie-chart>
+    </div>
+    <div class="box-footer">
+        <h4>По патологиям</h4>
+        <ul class="nav nav-pills nav-stacked">
+            <li ng-repeat="pp in PregnancyPathology.objects | filter:flt_pp">
+                <a href="javascript:void(0);">[[ pp.name ]] <span class="pull-right text-bold" ng-bind="getPregPathgPct(pp.code)"></span></a>
+            </li>
+        </ul>
+    </div>
+</div>

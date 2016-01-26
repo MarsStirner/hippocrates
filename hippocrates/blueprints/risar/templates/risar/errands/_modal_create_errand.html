@@ -1,0 +1,102 @@
+<div class="modal-header">
+    <h3 class="modal-title">Поручение [[model.number]] по карте [[model.event.external_id]]</h3>
+</div>
+<div class="modal-body">
+    <div class="das-form">
+        <ng-form id="createErrandForm" name="createErrandForm">
+        <table class="table table-condensed">
+            <thead>
+                <tr>
+                    <th class="col-md-3"></th>
+                    <th class="col-md-9"></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th class="text-right">Статус</th>
+                    <td>
+                        <div class="col-md-12">
+                            <span ng-class="{'label-info': model.status.code == 'waiting',
+                                             'label-success': model.status.code == 'executed',
+                                             'label-danger': model.status.code == 'expired',
+                                             'label-warning': model.status.code == 'late_execution'}" class="label">
+                                [[model.status.name]]
+                            </span>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="text-right">Описание <span class="text-danger">*</span></th>
+                    <td>
+                        <div class="col-md-12"><wysiwyg ng-disabled="!model.is_author" contenteditable="model.is_author"
+                                                        ng-model="model.text" ng-required="true" /></div>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="text-right">Автор, дата создания</th>
+                    <td>
+                        <div class="col-md-5">
+                            [[model.set_person.short_name]]<span ng-if="model.create_datetime">, </span>[[model.create_datetime | asDate]]
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="text-right">Выполнить до <span class="text-danger">*</span></th>
+                    <td>
+                        <div class="col-md-4">
+                            <wm-date name="date" ng-disabled="!model.is_author" ng-model="model.planned_exec_date"
+                                     style="width: 250px" ng-required="true"></wm-date>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="text-right">Исполнитель <span class="text-danger">*</span></th>
+                    <td>
+                        <div class="col-md-5">
+                            <ui-select ng-model="model.exec_person" theme="select2" class="form-control" ref-book="vrbPersonWithSpeciality"
+                                       ng-disabled="!model.is_author" ng-required="true">
+                                <ui-select-match>[[ $select.selected.name ]]</ui-select-match>
+                                <ui-select-choices repeat="item in $refBook.objects | filter: $select.search | limitTo: 50">
+                                    <span ng-bind-html="item.name | highlight: $select.search"></span>
+                                </ui-select-choices>
+                            </ui-select>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <table class="table table-condensed" ng-disabled="is_author" ng-if="model.id">
+            <thead>
+                <tr>
+                    <th class="col-md-3"></th>
+                    <th class="col-md-9"></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th class="text-right">Ответ </th>
+                    <td>
+                        <div class="col-md-12">
+                            <span ng-show="!model.is_author"><wysiwyg ng-model="model.result"/></span>
+                            <span ng-show="model.is_author">[[model.result]]</span>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="text-right">Дата выполнения</th>
+                    <td>
+                        <div class="col-md-4">
+                            [[model.exec_date | asDateTime]]
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        </ng-form>
+    </div>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-success" ng-click="$close([model, exec=true])" ng-if="!model.is_author">Выполнить</button>
+    <button class="btn btn-success" ng-click="$close([model, exec=false])" ng-disabled="createErrandForm.$invalid" >Сохранить</button>
+    <button class="btn btn-default" ng-click="$dismiss()">Отменить</button>
+</div>

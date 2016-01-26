@@ -1,0 +1,150 @@
+{% extends 'risar/base/base.html' %}
+{% import 'risar/_macros.html' as rimacros %}
+
+{% block title %}> {{ module_name }}{% endblock %}
+
+{% block main %}
+<div ng-controller="EventMeasureListCtrl" ng-cloak>
+    <section class="content-header">
+        {{ rimacros.page_title_n('Мероприятия случая') }}
+        <div class="novmargin">
+            <div class="btn-group">
+                <a ng-href="{{ url_for('.html_chart') }}?event_id=[[ event_id ]]" class="btn btn-default">Карта пациентки</a>
+                <a ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ event_id ]]" class="btn btn-default">Анамнез</a>
+                <a ng-href="{{ url_for('.html_inspection') }}?event_id=[[ event_id ]]" class="btn btn-default">Осмотры</a>
+                <a ng-href="{{ url_for('.html_routing') }}?event_id=[[ event_id ]]&emergency=1" class="btn btn-default">Маршрутизация</a>
+                <a ng-href="{{ url_for('.html_epicrisis') }}?event_id=[[ event_id ]]" class="btn btn-default">Эпикриз</a>
+                <a ng-class="{disabled: !ps.is_available()}" ng-click="open_print_window()" class="btn btn-default">Печать</a>
+                <div class="btn-group">
+                    <button class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Дополнительно <span class="fa fa-caret-down"></span></button>
+                    <ul role="menu" class="dropdown-menu">
+                        <li><a ng-href="{{ url_for('.html_event_diagnoses') }}?event_id=[[ event_id ]]">Диагнозы случая</a></li>
+                        <li><a ng-href="{{ url_for('.html_event_measure') }}?event_id=[[ event_id ]]">Мероприятия случая</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="content">
+        <div class="row">
+            <form class="col-md-3">
+            <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title">Фильтры</h3>
+            </div>
+            <div class="box-body">
+                <div class="form-group">
+                    <label>Тип мероприятия</label>
+                    <div fs-checkbox="" items="rbMeasureType.objects" ng-model="query.measure_type" class="nopadding">
+                        [[ item.name ]]
+                    </div>
+                </div>
+
+                <div class="form-group" ng-show="!isCalendarMode()">
+                    <label>Дата начала</label>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <wm-date ng-model="query.beg_date_from"></wm-date>
+                        </div>
+                        <div class="col-md-6">
+                            <wm-date ng-model="query.beg_date_to"></wm-date>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group" ng-show="!isCalendarMode()">
+                    <label>Дата окончания</label>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <wm-date ng-model="query.end_date_from"></wm-date>
+                        </div>
+                        <div class="col-md-6">
+                            <wm-date ng-model="query.end_date_to"></wm-date>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Статус мероприятия</label>
+                    <div fs-checkbox="" items="rbMeasureStatus.objects" ng-model="query.status" class="nopadding">
+                        [[ item.name ]]
+                    </div>
+                </div>
+
+                <div class="pull-right">
+                    <button type="button" class="btn btn-default" ng-click="resetFilters()">Очистить фильтры</button>
+                </div>
+            </div>
+            </div>
+            </form>
+            <div class="col-md-9">
+                <div class="box box-primary" ng-controller="EventMeasureTableViewCtrl" ng-show="isTableMode()">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Мероприятия: <b>[[pager.record_count]]</b></h3>
+                        <div class="box-tools">
+                        <a href="javascript:void(0);" class="fa fa-calendar-o btn-box-tool" style="font-size: x-large"
+                            title="Переключить отображение в виде календаря" ng-click="setViewMode('calendar')"></a>
+                        </div>
+                    </div>
+                    <div class="box-body">
+                        <table class="table table-condensed">
+                            <thead>
+                            <tr>
+                                <th>Тип</th>
+                                <th>Название</th>
+                                <th>Статус</th>
+                                <th>Дата начала</th>
+                                <th>Дата окончания</th>
+                                <th>Дата осмотра</th>
+                                <th></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr ng-repeat="em in measure_list">
+                                <td><span measure-type-icon="em.scheme_measure.measure.measure_type" style="font-size: x-large"></span></td>
+                                <td>[[ em.scheme_measure.measure.name ]]</td>
+                                <td>
+                                    <event-measure-status status="em.status"></event-measure-status>
+                                </td>
+                                <td>[[ em.beg_datetime | asDate ]]</td>
+                                <td>[[ em.end_datetime | asDate ]]</td>
+                                <td><a ng-href="{{ url_for('.html_inspection_edit') +
+                                    '?event_id={0}&checkup_id={1}'.format('[[ em.event_id ]]', '[[ em.source_action.id ]]') }}"
+                                    title="Перейти к осмотру, на основе которого было создано мероприятие">
+                                    [[ em.source_action.beg_date | asDate ]]</a>
+                                </td>
+                                <td></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <div class="box-footer">
+                            <pagination ng-model="pager.current_page" total-items="pager.pages" items-per-page="1"
+                                max-size="pager.max_pages" ng-change="onPageChanged()" ng-show="pager.pages > 1" boundary-links="true">
+                            </pagination>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="box box-primary" ng-controller="EventMeasureCalendarViewCtrl" ng-show="isCalendarMode()">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Календарь мероприятий</h3>
+                        <div class="box-tools">
+                            <a href="javascript:void(0);" class="fa fa-table btn-box-tool" style="font-size: x-large"
+                                title="Переключить отображение в виде таблицы" ng-click="setViewMode('table')"></a>
+                        </div>
+                    </div>
+                    <div class="box-body">
+                        <div ui-calendar="uiConfig.calendar" ng-model="eventSources" calendar="measureList"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block modules_js %}
+    {{ super() }}
+    <script src="{{ url_for('.static', filename='js/event_measure_list.js', v=app_version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/event_measure/event_measure_info.js', v=app_version) }}"></script>
+{% endblock %}
