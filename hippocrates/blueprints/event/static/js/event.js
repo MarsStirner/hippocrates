@@ -55,7 +55,6 @@ var EventMainInfoCtrl = function ($scope, $q, RefBookService, EventType, $filter
         }
     };
     $scope.services_added = function () {
-        // TODO:
         return $scope.event.is_new() && $scope.event.services.length;
     };
     $scope.cmb_result_available = function () {
@@ -108,7 +107,6 @@ var EventMainInfoCtrl = function ($scope, $q, RefBookService, EventType, $filter
     };
 
     $scope.filter_rb_request_type = function(request_type_kind) {
-        // TODO:
         return function(elem) {
             if (request_type_kind == 'policlinic'){
                 return elem.relevant && (elem.code == 'policlinic' || elem.code == '4' || elem.code == 'diagnosis' || elem.code == 'diagnostic');
@@ -539,6 +537,13 @@ var EventServicesCtrl = function($scope, $rootScope, AccountingService, InvoiceM
                 $rootScope.$broadcast('serviceListChanged');
             });
     };
+    $scope.refreshServiceList = function () {
+        AccountingService.get_listed_services($scope.event.event_id)
+        .then(function (service_data) {
+            $scope.event.services = service_data;
+            $rootScope.$broadcast('serviceListChanged');
+        });
+    };
     $scope.inInvoiceEditMode = function () {
         return $scope.editingInvoice;
     };
@@ -555,10 +560,7 @@ var EventServicesCtrl = function($scope, $rootScope, AccountingService, InvoiceM
             .then(function (result) {
                 $scope.event.invoices.push(result.invoice);
                 $scope.cancelEditingInvoice();
-                AccountingService.get_listed_services($scope.event.event_id)
-                    .then(function (service_data) {
-                        $scope.event.services = service_data;
-                    });
+                $scope.refreshServiceList();
             });
     };
     $scope.openInvoice = function (idx) {
@@ -570,7 +572,7 @@ var EventServicesCtrl = function($scope, $rootScope, AccountingService, InvoiceM
                     $scope.event.invoices.splice(idx, 1, result.invoice);
                 } else if (status === 'del') {
                     $scope.event.invoices.splice(idx, 1);
-                    // TODO: refresh service list?
+                    $scope.refreshServiceList();
                 }
             });
     };

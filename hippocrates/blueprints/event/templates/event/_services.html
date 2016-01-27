@@ -68,11 +68,12 @@
             <div style="overflow-x: auto">
                 <table class="table table-condensed">
                     <thead>
-                        <tr wm-event-service-list-header></tr>
+                        <tr wm-event-service-list-header edit-invoice-mode="inInvoiceEditMode()"></tr>
                     </thead>
                     <tbody>
-                        <tr wm-event-service-record ng-repeat="service in event.services | flattenServiceGroup track by $index"
-                            service="service" event="event" edit-mode="inEditMode()">
+                        <tr wm-event-service-record ng-repeat="service in event.services | flattenNested:'subservice_list' track by $index"
+                            service="service" event="event" edit-mode="inEditMode()"
+                            edit-invoice-mode="inInvoiceEditMode()" new-invoice="newInvoiceServiceList">
                         </tr>
                     </tbody>
 {#                    <tbody>#}

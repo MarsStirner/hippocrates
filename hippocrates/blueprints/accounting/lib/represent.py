@@ -431,7 +431,7 @@ class InvoiceRepr(object):
             'total_sum': format_money(invoice.total_sum),
             'sum_wo_discounts': format_money(calc_invoice_sum_wo_discounts(invoice)),
             'item_list': [
-                self.represent_invoice_item(item)
+                self.represent_invoice_item_full(item)
                 for item in invoice.item_list
             ],
             'description': {
@@ -484,6 +484,14 @@ class InvoiceRepr(object):
         pay_info['paid_sum'] = format_money(pay_info['paid_sum'])
         pay_info['debt_sum'] = format_money(pay_info['debt_sum'])
         return pay_info
+
+    def represent_invoice_item_full(self, item):
+        data = self.represent_invoice_item(item)
+        data['subitem_list'] = [
+            self.represent_invoice_item_full(si)
+            for si in item.subitem_list
+        ]
+        return data
 
     def represent_invoice_item(self, item):
         return {
