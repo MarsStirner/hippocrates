@@ -272,7 +272,11 @@ def client_quota_save(event, quota_data):
             quota.quotaDetails.pacientModel_id = safe_traverse(quota_data, 'patient_model', 'id')
             quota.quotaDetails.quotaType_id = safe_traverse(quota_data, 'quota_type', 'id')
             quota.quotaDetails.treatment_id = safe_traverse(quota_data, 'treatment', 'id')
+            if quota.vmpCoupon != coupon:
+                quota.vmpCoupon.clientQuoting_id = None
+                db.session.add(quota.vmpCoupon)
             quota.vmpCoupon = coupon
+            coupon.clientQuoting_id = quota_id
         else:
             quota = ClientQuoting()
             quota.master = event.client
@@ -286,6 +290,9 @@ def client_quota_save(event, quota_data):
             quota.vmpCoupon = coupon
 
         db.session.add(quota)
+        db.session.commit()
+        coupon.clientQuoting_id = quota.id
+        db.session.add(coupon)
         db.session.commit()
 
 
