@@ -604,7 +604,7 @@ var EventServicesCtrl = function($scope, $rootScope, AccountingService, InvoiceM
             service_kind_id: safe_traverse(search_item, ['service_kind', 'id']),
             price_list_item_id: search_item.price_list_item_id,
             event_id: $scope.event.info.id,
-            serviced_entity: search_item.serviced_entity
+            serviced_entity_from_search: search_item
         })
             .then(function (new_service) {
                 $scope.event.services.push(new_service);

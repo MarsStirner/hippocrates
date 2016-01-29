@@ -240,9 +240,7 @@ class PriceListRepr(object):
 class ServiceRepr(object):
 
     def represent_mis_action_service_search_result(self, service_data):
-        # should be similar to represent_service_full
-        service_ctrl = ServiceController()
-        service_kind_id = service_data['service_kind'].value
+        # should be ~ similar to represent_service_full
         return {
             'id': None,
             'price_list_item_id': service_data['price_list_item_id'],
@@ -263,12 +261,9 @@ class ServiceRepr(object):
                 'can_edit': True,
                 'can_delete': True
             },
-            'serviced_entity': service_ctrl.make_new_serviced_entity_data(
-                service_kind_id,
-                code=service_data.get('at_code'),
-                name=service_data.get('at_name'),
-                at_id=service_data.get('action_type_id')
-            ),
+            'action_type_id': service_data['action_type_id'],
+            'at_code': service_data['at_code'],
+            'at_name': service_data['at_name'],
             'subservice_list': [],
         }
 
@@ -276,6 +271,12 @@ class ServiceRepr(object):
         return [
             self.represent_mis_action_service_search_result(service) for service in service_list
         ]
+
+    def represent_services_by_at(self, at_service_map):
+        return dict(
+            (at_id, self.represent_mis_action_service_search_result(service_data))
+            for at_id, service_data in at_service_map.iteritems()
+        )
 
     def represent_service(self, service):
         return {
@@ -345,8 +346,8 @@ class ServiceRepr(object):
         assignable = []
         assigned = []
         for ap in action.properties:
-            if ap.deleted != 1 and ap.type.isAssignable:
-                assignable.append([ap.type.id, ap.type.name])
+            if ap.deleted != 1 and ap.type.isAssignable and ap.has_pricelist_service:
+                assignable.append([ap.type.id, ap.type.name, ap.pl_price])
                 if ap.isAssigned:
                     assigned.append(ap.type.id)
         return {

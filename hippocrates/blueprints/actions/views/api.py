@@ -15,14 +15,14 @@ from nemesis.lib.data import create_action, update_action, create_new_action, ge
 from nemesis.lib.jsonify import ActionVisualizer
 from nemesis.lib.subscriptions import notify_object, subscribe_user
 from nemesis.lib.user import UserUtils
-from nemesis.lib.utils import safe_traverse, safe_datetime, parse_id
+from nemesis.lib.utils import safe_traverse, safe_datetime, parse_id, public_api, jsonify
 from nemesis.models.actions import Action, ActionType, ActionTemplate
 from nemesis.models.event import Event
 from nemesis.models.exists import Person
 from nemesis.models.utils import safe_current_user_id
 from nemesis.models.rls import v_Nomen
 from nemesis.systemwide import db, cache
-from nemesis.lib.utils import public_api, jsonify
+from nemesis.lib.action.utils import check_at_service_requirement
 
 
 __author__ = 'viruzzz-kun'
@@ -278,10 +278,9 @@ def api_atl_get():
 def api_atl_get_flat():
     at_class = int(request.args['at_class'])
     event_type_id = parse_id(request.args, 'event_type_id') or None
-    contract_id = parse_id(request.args, 'contract_id') or None
     if not (0 <= at_class < 4):
         return abort(401)
-    result = int_get_atl_flat(at_class, event_type_id, contract_id)
+    result = int_get_atl_flat(at_class, event_type_id)
 
     return result
 
@@ -302,11 +301,13 @@ def api_create_lab_direction():
         data = {
             'plannedEndDate': safe_datetime(j['planned_end_date'])
         }
+        service_data = j.get('service')
         action = create_new_action(
             action_type_id,
             event_id,
             assigned=assigned,
-            data=data
+            data=data,
+            service_data=service_data
         )
         db.session.add(action)
 
@@ -428,3 +429,13 @@ def api_search_rls():
 
     result = base_query.limit(limit).all()
     return jsonify(result)
+
+
+@module.route('/api/check_service_requirement')
+@module.route('/api/check_service_requirement/<int:action_type_id>')
+@api_method
+def api_check_action_service_requirement(action_type_id=None):
+    if not action_type_id:
+        raise ApiException(404, '`action_type_id` reuqired')
+
+    return check_at_service_requirement(action_type_id)

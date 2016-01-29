@@ -273,8 +273,8 @@ function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WME
                     scope.event.info.client.info,
                     {
                         at_group: at_class,
-                        event_type_id: scope.event.info.event_type.id
-//                        contract_id: scope.event.info.contract.id
+                        event_type_id: scope.event.info.event_type.id,
+                        contract_id: scope.event.info.contract.id
                     },
                     function afterActionCreate() {
                         scope.pager.current_page = 1;
@@ -321,7 +321,6 @@ function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WME
         <th width="10%" wm-sortable-column="end_date" on-change-order="sort_by_column(params)">Конец</th>\
         <th width="20%" wm-sortable-column="person_name" on-change-order="sort_by_column(params)">Исполнитель</th>\
         <th width="5%"></th>\
-        <th width="5%" ng-if="actionTypeGroup == \'lab\'"></th>\
     </tr>\
     </thead>\
     <tbody>\
@@ -336,13 +335,11 @@ function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WME
         <td ng-click="open_action(action.id)">[[ action.begDate | asDate ]]</td>\
         <td ng-click="open_action(action.id)">[[ action.endDate | asDateTime ]]</td>\
         <td ng-click="open_action(action.id)">[[ action.person_text ]]</td>\
-        <td>\
+        <td class="nowrap">\
             <button type="button" class="btn btn-sm btn-danger" title="Удалить" ng-show="can_delete_action(action)"\
                     ng-click="delete_action(action)"><span class="glyphicon glyphicon-trash"></span>\
             </button>\
-        </td>\
-        <td ng-if="actionTypeGroup == \'lab\'">\
-            <button type="button" class="btn btn-sm btn-info" title="Динамика"\
+            <button type="button" class="btn btn-sm btn-info lmargin20" ng-if="actionTypeGroup === \'lab\'" title="Динамика"\
                     ng-click="open_lab_res_dynamics(action)"><span class="glyphicon glyphicon-stats"></span>\
             </button>\
         </td>\

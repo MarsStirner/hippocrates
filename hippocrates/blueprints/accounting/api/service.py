@@ -21,14 +21,16 @@ def api_0_service_search():
     return ServiceRepr().represent_search_result_mis_action_services(data)
 
 
-@module.route('/api/0/service/')
-@module.route('/api/0/service/<int:service_id>')
+@module.route('/api/0/service/', methods=['GET', 'POST'])
+@module.route('/api/0/service/<int:service_id>', methods=['GET', 'POST'])
 @api_method
 def api_0_service_get(service_id=None):
     args = request.args.to_dict()
+    if 'serviced_entity_from_search' in args:
+        args['serviced_entity_from_search'] = parse_json(args['serviced_entity_from_search'])
+    if request.json:
+        args.update(request.json)
     get_new = safe_bool(args.get('new', False))
-    if 'serviced_entity' in args:
-        args['serviced_entity'] = parse_json(args['serviced_entity'])
 
     service_ctrl = ServiceController()
     with service_ctrl.session.no_autoflush:
@@ -111,3 +113,20 @@ def api_0_service_delete(service_id=None):
     service_ctrl.delete_service(service)
     service_ctrl.store(service)
     return True
+
+
+@module.route('/api/0/service/at_price/')
+@module.route('/api/0/service/at_price/<int:contract_id>')
+@api_method
+def api_0_service_at_price_get(contract_id=None):
+    if not contract_id:
+        raise ApiException(404, '`contract_id` required')
+    args = request.args.to_dict()
+
+    service_ctrl = ServiceController()
+    args.update({
+        'contract_id': contract_id
+    })
+    at_service_data = service_ctrl.get_service_data_for_at_tree(args)
+
+    return ServiceRepr().represent_services_by_at(at_service_data)

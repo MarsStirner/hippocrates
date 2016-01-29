@@ -197,6 +197,9 @@ WebMis20.service('AccountingService', ['WebMisApi', function (WebMisApi) {
     this.refreshServiceSubservices = function (service) {
         return WebMisApi.service.refreshServiceSubservices(service);
     };
+    this.getServiceActionTypePrices = function (contract_id) {
+        return WebMisApi.service.get_service_at_price(contract_id);
+    };
     this.get_invoice = function (invoice_id, args) {
         return WebMisApi.invoice.get(invoice_id, args);
     };
