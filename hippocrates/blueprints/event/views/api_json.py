@@ -29,6 +29,7 @@ from nemesis.lib.agesex import recordAcceptableEx
 from nemesis.lib.const import STATIONARY_EVENT_CODES, POLICLINIC_EVENT_CODES, DIAGNOSTIC_EVENT_CODES
 from nemesis.lib.user import UserUtils
 
+
 logger = logging.getLogger('simple')
 
 
@@ -408,6 +409,7 @@ def api_delete_event():
 
 
 @module.route('/api/events.json', methods=["POST"])
+@api_method
 def api_get_events():
     flt = request.get_json()
     base_query = Event.query.join(Client).filter(Event.deleted == 0)
@@ -444,12 +446,24 @@ def api_get_events():
     if 'result_id' in flt:
         base_query = base_query.filter(Event.result_id == flt['result_id'])
     if 'org_struct_id' in flt:
+        if not ('beg_date_from' in flt or 'end_date_from' in flt):
+            raise ApiException(422, u'Невозможно провести поиск обращений по отделению без указания диапазона дат')
         moving_query = _get_moving_query(Event)
         stat_loc_query = _get_stationary_location_query(
             Event, moving_query=moving_query
         ).with_entities(
             Event.id.label('event_id'), OrgStructure.id.label('org_struct_id')
-        ).subquery('StationaryOs')
+        )
+        if 'beg_date_from' in flt:
+            stat_loc_query = stat_loc_query.filter(Event.setDate >= safe_datetime(flt['beg_date_from']))
+        if 'beg_date_to' in flt:
+            stat_loc_query = stat_loc_query.filter(Event.setDate <= safe_datetime(flt['beg_date_to']))
+        if 'end_date_from' in flt:
+            stat_loc_query = stat_loc_query.filter(Event.execDate >= safe_datetime(flt['end_date_from']))
+        if 'end_date_to' in flt:
+            stat_loc_query = stat_loc_query.filter(Event.execDate <= safe_datetime(flt['end_date_to']))
+        stat_loc_query = stat_loc_query.subquery('StationaryOs')
+
         base_query = base_query.join(EventType).join(rbRequestType).outerjoin(
             stat_loc_query, Event.id == stat_loc_query.c.event_id
         ).filter(
@@ -495,14 +509,14 @@ def api_get_events():
     per_page = int(flt.get('per_page', 20))
     page = int(flt.get('page', 1))
     paginate = base_query.paginate(page, per_page, False)
-    return jsonify({
+    return {
         'pages': paginate.pages,
         'total': paginate.total,
         'items': [
             context.make_short_event(event)
             for event in paginate.items
         ]
-    })
+    }
 
 
 @module.route('/api/search.json', methods=['GET'])

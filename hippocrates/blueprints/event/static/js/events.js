@@ -2,7 +2,7 @@
  * Created by mmalkov on 21.07.14.
  */
 
-var EventListCtrl = function ($scope, $http, $window) {
+var EventListCtrl = function ($scope, $http, $window, $q, MessageBox) {
     function get_model(page) {
         var model = {
             page: page
@@ -24,24 +24,41 @@ var EventListCtrl = function ($scope, $http, $window) {
         if ($scope.flt.diag_mkb) model.diag_mkb = $scope.flt.diag_mkb;
         return model;
     }
+
+    var current_monday = moment().startOf('week').toDate();
+
+    var checkSearchParams = function (flt) {
+        var deferred = $q.defer();
+        if (flt.org_struct_id && !(flt.beg_date_from || flt.end_date_from)) {
+            return MessageBox.error(
+                'Укажите диапазон дат для поиска',
+                'При выборе отделения для поиска обращений необходимо также указать дату начала и завершения'
+            );
+        }
+        deferred.resolve();
+        return deferred.promise;
+    };
     $scope.get_data = function (page, reset_sorting) {
         var flt = get_model(page);
-        if (reset_sorting) {
-            $scope.reset_sorting();
-        }
-        if ($scope.current_sorting) {
-            flt.sorting_params = $scope.current_sorting;
-        }
-        $http.post(url_event_api_get_events, flt)
-        .success(function (data) {
-            $scope.page = page;
-            $scope.pages = data.result.pages;
-            $scope.results = data.result.items;
-            $scope.total = data.result.total;
-            if (!$scope.current_sorting) {
-                $scope.reset_sorting();
-            }
-        });
+        checkSearchParams(flt)
+            .then(function () {
+                if (reset_sorting) {
+                    $scope.reset_sorting();
+                }
+                if ($scope.current_sorting) {
+                    flt.sorting_params = $scope.current_sorting;
+                }
+                $http.post(url_event_api_get_events, flt)
+                    .success(function (data) {
+                        $scope.page = page;
+                        $scope.pages = data.result.pages;
+                        $scope.results = data.result.items;
+                        $scope.total = data.result.total;
+                        if (!$scope.current_sorting) {
+                            $scope.reset_sorting();
+                        }
+                    });
+            });
     };
     $scope.get_clients = function (query) {
         if (!query) return;
@@ -88,7 +105,7 @@ var EventListCtrl = function ($scope, $http, $window) {
             id: null,
             external_id: undefined,
             client: undefined,
-            beg_date_from: null,
+            beg_date_from: current_monday,
             beg_date_to: null,
             end_date_from: null,
             end_date_to: null,
@@ -135,4 +152,4 @@ var EventListCtrl = function ($scope, $http, $window) {
 
     $scope.clear_all();
 };
-WebMis20.controller('EventListCtrl', ['$scope', '$http', '$window', EventListCtrl]);
+WebMis20.controller('EventListCtrl', ['$scope', '$http', '$window', '$q', 'MessageBox', EventListCtrl]);
