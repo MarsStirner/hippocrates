@@ -1,0 +1,61 @@
+{% extends 'risar/base/base.html' %}
+
+{% block title %}> Рабочий стол{% endblock %}
+
+{% block main %}
+<section class="content-header">
+    <h1>Рабочий стол куратора второго уровня</h1>
+</section>
+<section class="content">
+    <div ng-controller="IndexOverseer2Ctrl" class="ng-cloak">
+        <div class="row">
+            <div class="col-md-12">
+                <input class="form-control" ng-model="query" placeholder="Быстрый поиск" autofocus>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 text-right">
+                <a href="{{ url_for('.html_search') }}">Расширенный поиск</a>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-9">
+                {% include "risar/stats/patient_list.html" %}
+                <div class ="row">
+                    <div class="col-md-6">
+                        {% include "risar/stats/annual_reports.html" %}
+                    </div>
+                    <div class="col-md-6">
+                        {% include "risar/stats/recently_modified_charts.html" %}
+                    </div>
+                </div>
+                {% include "risar/stats/diagram_pregnancy_week.html" %}
+            </div>
+            <div class="col-md-3">
+                <div class="info-box bg-green">
+                    <span class="info-box-icon"><i class="fa fa-trophy"></i></span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">Совокупная оценка</span>
+                        <span class="info-box-number">90%</span>
+                        <div class="progress">
+                            <div class="progress-bar" style="width: 20%"></div>
+                        </div>
+                        <span class="progress-description">
+                        20% рост за последние 30 дней
+                      </span>
+                    </div>
+                </div>
+                {% include "risar/stats/chart_fill_assessment.html" %}
+                {% include "risar/stats/patients_stats.html" %}
+                {% include "risar/stats/diagram_risk_rates.html" %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block modules_js %}
+    {{ super() }}
+    <script src="{{ url_for('.static', filename='js/desktop/index_overseer2.js', v=app_version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/stats/perinatal_risk_rate.js', v=app_version) }}"></script>
+{% endblock %}

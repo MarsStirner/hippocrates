@@ -773,6 +773,14 @@ var StationaryEventInfoCtrl = function ($scope, $controller, $modal, $http, WMSt
     var event = $scope.event = new WMStationaryEvent($scope.event_id, $scope.client_id, $scope.ticket_id);
     $scope.create_mode = $scope.event.is_new();
     $scope.initialize();
+    $scope.$watchCollection(function() {
+        return [safe_traverse($scope.event, ['received', 'weight', 'value']),
+                safe_traverse($scope.event, ['received', 'height', 'value'])];
+    }, function(n, o) {
+        if (n !== o && n[0] && n[1]) {
+            $scope.event.info.body_area = Math.sqrt(n[0]*n[1]/3600).toFixed(2);
+        }
+    });
 };
 var PoliclinicEventInfoCtrl = function ($scope, $controller, WMPoliclinicEvent) {
     $controller('EventInfoCtrl', {$scope: $scope});
@@ -781,7 +789,27 @@ var PoliclinicEventInfoCtrl = function ($scope, $controller, WMPoliclinicEvent) 
     $scope.initialize();
 
 };
-
+var EventQuotingCtrl = function ($scope, RefBookService) {
+    var original_quoting = angular.extend({}, $scope.event.vmp_quoting);
+    $scope.rbQuotaType = RefBookService.get('QuotaType');
+    $scope.rbPatientModel = RefBookService.get('rbPacientModel');
+    $scope.rbTreatment = RefBookService.get('rbTreatment');
+    $scope.quotaTypeFormatter = function (selected) {
+        return selected ? '{0} - {1}'.format(selected.code, selected.name) : undefined;
+    };
+    $scope.$watch(function () {
+        return safe_traverse($scope.event, ['vmp_quoting', 'coupon']);
+    }, function (n, o) {
+        if (n !== o) {
+            if(!$scope.event.vmp_quoting.mkb){
+                $scope.event.vmp_quoting.mkb = $scope.event.vmp_quoting.coupon.mkb;
+            }
+            if(!$scope.event.vmp_quoting.quota_type){
+                $scope.event.vmp_quoting.quota_type = $scope.event.vmp_quoting.coupon.quota_type;
+            }
+        }
+    });
+};
 
 WebMis20.controller('EventDiagnosesCtrl', ['$scope', 'RefBookService', '$http', EventDiagnosesCtrl]);
 WebMis20.controller('EventMainInfoCtrl', ['$scope', '$q', 'RefBookService', 'EventType', '$filter',

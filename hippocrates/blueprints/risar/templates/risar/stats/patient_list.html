@@ -1,0 +1,44 @@
+<div class="box box-info">
+    <div class="box-header">
+        <h3 class="box-title">Пациентки на прием</h3>
+        <span class="badge label-info" style="margin-right: 5px;">[[ tickets.length ]]</span>
+        <div class="box-tools pull-right">
+            <span style="display: inline-block; vertical-align: middle;margin-bottom: -5px; margin-right:10px"><wm-date
+                ng-model="search_date.date" style="width: 274px"></wm-date></span>
+{#            <ul class="pagination pagination-sm no-margin" style="vertical-align: middle;">#}
+{#                <li><a href="#">«</a></li>#}
+{#                <li><a href="#">1</a></li>#}
+{#                <li><a href="#">2</a></li>#}
+{#                <li><a href="#">3</a></li>#}
+{#                <li><a href="#">»</a></li>#}
+{#            </ul>#}
+            <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+        </div>
+    </div>
+
+    <div class="box-body no-padding">
+        <table class="table">
+            <tbody>
+            <tr>
+                <th>Время</th>
+                <th>Риск</th>
+                <th>ФИО</th>
+                <th>Срок беременности</th>
+                <th>Примечание</th>
+            </tr>
+            <tr ng-repeat="row in tickets | filter:query">
+                <td ng-bind="row.beg_time | asTime"></td>
+                <td><span class="label"
+                          ng-class="{'label-default': row.risk_rate.code == 'undefined',
+                                     'label-success': row.risk_rate.code == 'low',
+                                     'label-warning': row.risk_rate.code == 'medium',
+                                     'label-danger': row.risk_rate.code == 'high'}">[[ row.risk_rate.name ]]</span></td>
+                <td><a ng-href="{{ url_for('.html_chart') }}?ticket_id=[[ row.client_ticket_id ]]">[[
+                    row.client.full_name ]]</a></td>
+                <td>[[ row.pregnancy_week ]]<i class="fa fa-question" ng-if="!row.pregnancy_week"></i></td>
+                <td ng-bind="(row.checkup_n)?('Повторный осмотр: ' + row.checkup_n):('Первичный осмотр')"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

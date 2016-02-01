@@ -14,7 +14,8 @@ params = {
 }
 
 
-def make_sphinx_conf():
+def make_sphinx_conf(suffix=''):
+    params['%APP_NAME%'] = suffix
     with open('sphinx.conf.new', 'w') as new_conf:
         with open('sphinx.conf', 'r') as skel:
             f = skel.read()
@@ -24,4 +25,5 @@ def make_sphinx_conf():
 
 
 if __name__ == '__main__':
-    make_sphinx_conf()
+    suffix = sys.argv[1] if len(sys.argv) > 1 else ''
+    make_sphinx_conf(suffix)

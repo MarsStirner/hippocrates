@@ -1,0 +1,18 @@
+@font-face {
+  font-family: 'FontRisar';
+  src: url('fonts/Risar.eot');
+  src: url('fonts/Risar.eot?#iefix') format('embedded-opentype'),
+       url('fonts/Risar.woff') format('woff'),
+       url('fonts/Risar.ttf') format('truetype'),
+       url('fonts/Risar.svg#risar') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+.rlogo {
+  display: inline-block;
+  font: normal normal normal 26px/1 FontRisar;
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+

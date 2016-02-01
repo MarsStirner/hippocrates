@@ -1,0 +1,112 @@
+{% extends 'risar/base/base.html' %}
+
+{% block title %}> {{ module_name }}{% endblock %}
+
+{% block main %}
+    <div ng-controller="AmbulancPatientInfoCtrl" ng-cloak>
+    <div class="panel panel-default">
+      <div class="panel-body"  ng-style="{'background-color': riskColor}">
+        <a class="btn btn-small btn-default navbar-btn" href="{{ url_for('.index_html') }}"><span class="glyphicon glyphicon-arrow-left"></span></a>
+        <span style="font-size: large;">[[ chart.client.full_name ]]</span>
+      </div>
+    </div>
+    <legend>ЛПУ родоразрешения</legend>
+        <div class="row">
+            <div class="col-md-4 col-sm-4 col-xs-4 text-right">
+                Экстренное
+            </div>
+            <div class="col-md-8 col-sm-8 col-xs-8">
+                [[ chart.client.attach_lpu.extra_lpu.org.short_name ]]</br>
+                [[ chart.client.attach_lpu.extra_lpu.org.address ]][[ chart.client.attach_lpu.extra_lpu.org.phone ? ', тел:'+chart.client.attach_lpu.extra_lpu.org.phone :'']]
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 col-sm-4 col-xs-4 text-right" class="text-right">
+                Плановое
+            </div>
+            <div class="col-md-8 col-sm-8 col-xs-8">
+                [[ chart.client.attach_lpu.plan_lpu.org.short_name ]]</br>
+                [[ chart.client.attach_lpu.plan_lpu.org.address ]][[ chart.client.attach_lpu.plan_lpu.org.phone ? ', тел: '+chart.client.attach_lpu.plan_lpu.org.phone :'']]
+            </div>
+        </div>
+    <legend>Особенности пациентки</legend>
+        <div class="row" style="font-size: large;">
+            <div class="col-md-4 col-sm-4 col-xs-4 text-right">
+                <b>Группа крови</b>
+            </div>
+            <div class="col-md-8 col-sm-8" ng-class="{'text-danger': chart.anamnesis.mother.blood_type.code.slice(-1) == '-'}">
+                [[ chart.anamnesis.mother.blood_type.name ]]
+            </div>
+        </div>
+        <div class="row" style="font-size: large;">
+            <div class="col-md-4 col-sm-4 col-xs-4 text-right">
+                <b>Риск невынашивания</b>
+            </div>
+            <div class="col-md-8 col-sm-8 col-xs-8" ng-style="{'color': riskColor}">
+                [[ chart.risk_rate.name ]]
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 col-sm-4 col-xs-4 text-right">
+                Непереносимость
+            </div>
+            <div class="col-md-8 col-sm-8 col-xs-8">
+                <p ng-repeat="intolerance in chart.anamnesis.intolerances">[[ intolerance.name ]]</p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 col-sm-4 col-xs-4 text-right">
+                Туберкулез
+            </div>
+            <div class="col-md-8 col-sm-8 col-xs-8">
+                <span ng-class="{'text-danger': chart.has_diseases.has_tuberculosis}">[[chart.has_diseases.has_tuberculosis ? 'Да': 'Нет']]</span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 col-sm-4 col-xs-4 text-right">
+                Чесотка
+            </div>
+            <div class="col-md-8 col-sm-8 col-xs-8">
+                <span ng-class="{'text-danger': chart.has_diseases.has_scabies}">[[chart.has_diseases.has_scabies ? 'Да': 'Нет']]</span>
+            </div>
+        </div>
+    <legend>Контакты врача</legend>
+        <div class="row">
+            <div class="col-md-4 col-sm-4 col-xs-4 text-right">
+                Врач
+            </div>
+            <div class="col-md-8 col-sm-8 col-xs-8">
+                [[ chart.person.full_name ]]
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 col-sm-4 col-xs-4 text-right">
+                Телефон врача
+            </div>
+            <div class="col-md-8 col-sm-8 col-xs-8">
+                 8(812) 845-38-49
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 col-sm-4 col-xs-4 text-right">
+                ЛПУ наблюдения
+            </div>
+            <div class="col-md-8 col-sm-8 col-xs-8">
+                [[ chart.person.organisation.short_name ]]
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 col-sm-4 col-xs-4 text-right">
+                Телефон ЛПУ
+            </div>
+            <div class="col-md-8 col-sm-8 col-xs-8">
+                [[ chart.person.organisation.phone ]]
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block modules_js %}
+    {{ super() }}
+    <script src="{{ url_for('.static', filename='js/ambulance_patient_info.js', v=app_version) }}"></script>
+{% endblock %}

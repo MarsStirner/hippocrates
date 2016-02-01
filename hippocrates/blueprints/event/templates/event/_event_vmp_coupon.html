@@ -1,0 +1,52 @@
+<div ng-controller="EventQuotingCtrl">
+    <ng-form name="eventCouponsForm" role="form" toc-element="Талоны ВМП" toc-name="tocCouponsForm">
+        <div class="box box-info">
+            <div class="box-header with-border">
+                <h3 class="box-title">Талон ВМП</h3>
+            </div>
+            <div class="box-body">
+                <div class="row vmargin10">
+                    <div class="col-md-6">
+                        <label>Диагноз</label>
+                        <ui-mkb ng-model="event.vmp_quoting.mkb"></ui-mkb>
+                    </div>
+                    <div class="col-md-6">
+                        <label>Талон ВМП</label>
+                            <ui-select ext-select-vmp-coupon contract-list="available_contracts.list"
+                                id="vmp_coupon" name="vmp_coupon" theme="select2" client="event.info.client_id"
+                                ng-model="event.vmp_quoting.coupon">
+                            </ui-select>
+{#                        <rb-select ng-model="event.vmp_quoting.coupon"></rb-select>#}
+                    </div>
+                </div>
+                <div class="row vmargin10">
+                    <div class="col-md-6">
+                        <label>Код вида ВМП</label>
+                        <rb-select ref-book="QuotaType" ng-model="event.vmp_quoting.quota_type" custom-name="quotaTypeFormatter"></rb-select>
+                    </div>
+                    <div class="col-md-6" style="text-align: justify">
+                        [[ event.vmp_quoting.quota_type.code ]]<span ng-if="event.vmp_quoting.quota_type.code"> - </span>[[ event.vmp_quoting.quota_type.name ]]
+                    </div>
+                </div>
+                <div class="row vmargin10">
+                    <div class="col-md-6">
+                        <label>Модель пациента</label>
+                        <rb-select ref-book="rbPacientModel" ng-model="event.vmp_quoting.patient_model"></rb-select>
+                    </div>
+                    <div class="col-md-6" style="text-align: justify">
+                        [[ event.vmp_quoting.patient_model.code ]]<span ng-if="event.vmp_quoting.patient_model.code"> - </span>[[ event.vmp_quoting.patient_model.name ]]
+                    </div>
+                </div>
+                <div class="row vmargin10">
+                    <div class="col-md-6">
+                        <label>Метод лечения</label>
+                        <rb-select  ref-book="rbTreatment" ng-model="event.vmp_quoting.treatment"></rb-select>
+                    </div>
+                    <div class="col-md-6" style="text-align: justify">
+                        [[ event.vmp_quoting.treatment.code ]]<span ng-if="event.vmp_quoting.treatment.code"> - </span>[[ event.vmp_quoting.treatment.name ]]
+                    </div>
+                </div>
+            </div>
+        </div>
+    </ng-form>
+</div>

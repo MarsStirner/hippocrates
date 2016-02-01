@@ -1,0 +1,24 @@
+<meta charset="utf-8">
+<meta content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no' name='viewport'>
+<meta name="description" content="WebMIS 2.0">
+<meta name="author" content="Высокотехнологичные решения">
+<link href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}" media="screen, print" rel="stylesheet">
+<link href="{{ url_for('static', filename='css/style.css', v=nemesis_version) }}" rel="stylesheet">
+{% if LPU_STYLE == 'FNKC' %}
+<link href="{{ url_for('static', filename='css/style_fnkc.css', v=nemesis_version) }}" rel="stylesheet">
+{% endif %}
+<link href="{{ url_for('static', filename='select2/select2.css') }}" rel="stylesheet">
+<link href="{{ url_for('static', filename='angular-ui-select/select.css') }}" rel="stylesheet">
+<link href="{{ url_for('static', filename='css/select2-bootstrap.css') }}" rel="stylesheet">
+<link href="{{ url_for('static', filename='css/font-awesome.min.css') }}" rel="stylesheet">
+<link href="{{ url_for('static', filename='angular-formstamp/formstamp.css') }}" rel="stylesheet">
+<link href="{{ url_for('static', filename='nvd3/nv.d3.css') }}" rel="stylesheet">
+<link href="{{ url_for('static', filename='jcrop/jquery.Jcrop.min.css') }}" rel="stylesheet">
+<link href="{{ url_for('static', filename='fullcalendar/fullcalendar.min.css') }}" rel="stylesheet">
+<script src="{{ url_for('static', filename='jquery/jquery.js') }}"></script>
+<script src="{{ url_for('static', filename='angular.js/angular.js') }}"></script>
+
+<link href="{{ url_for('static', filename='ionicons/css/ionicons.min.css') }}" rel="stylesheet" type="text/css" />
+<link href="{{ url_for('static', filename='theme/css/theme.min.css') }}" rel="stylesheet" type="text/css" />
+{#<link href="{{ url_for('static', filename='theme/css/skins/_all-skins.min.css') }}" rel="stylesheet" type="text/css" />#}
+<link href="{{ url_for('static', filename='theme/css/skins/skin-green-light.min.css') }}" rel="stylesheet" type="text/css" />

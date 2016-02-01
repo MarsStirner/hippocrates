@@ -64,7 +64,9 @@
                             <tr>
                                 <th>Площадь поверхности тела</th>
                                 <td>
-
+                                    <span ng-if="event.received.height.value&&event.received.weight.value">
+                                        [[ event.info.body_area ]]
+                                    </span>
                                 </td>
                                 <td></td>
                             </tr>
@@ -112,13 +114,13 @@
                             <tr>
                                 <th>Исход госпитализации</th>
                                 <td>
-
+                                    [[event.info.ache_result.name]]
                                 </td>
                             </tr>
                             <tr>
                                 <th>Результат госпитализации</th>
                                 <td>
-
+                                    [[event.info.result.name]]
                                 </td>
                             </tr>
                         </tbody>

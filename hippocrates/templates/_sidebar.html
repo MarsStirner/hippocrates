@@ -23,7 +23,13 @@
             {%- for item in main_menu -%}
             {% if item.visible %}
             <li class="{% if request.endpoint == item.link %}active{% endif %}">
+                {% if item.link %}
                 <a href="{{ url_for(item.link) }}" title="{{ item.title }}">
+                {% elif item.external_link %}
+                <a href="{{ item.external_link }}" target="_blank" title="{{ item.title }}">
+                {% else %}
+                <a href="javascript:void(0);" title="{{ item.title }}">
+                {% endif %}
                     <i class="{{ item.icon }}"></i>
                     <span>{{ item.title }}</span>
                 </a>

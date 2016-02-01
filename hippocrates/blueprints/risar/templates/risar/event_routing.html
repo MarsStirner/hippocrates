@@ -1,62 +1,146 @@
-{% extends 'risar/base.html' %}
+{% extends 'risar/base/base.html' %}
 
-{% block title %}> {{ module_name }}{% endblock %}
+{% block title %}> Выбор ЛПУ для {% if 'emergency' in request.args %}экстренной{% else %}плановой{% endif %} госпитализации{% endblock %}
 
 {% block main %}
-    <div ng-controller="EventRoutingCtrl">
+    <div ng-controller="EventRoutingCtrl" class="ng-cloak">
+    <section class="content-header">
         <div alert-notify></div>
-        <ul class="breadcrumb">
-            <li><a href="{{ url_for('.index_html') }}">Рабочий стол</a></li>
-            <li><a ng-href="{{ url_for('.html_chart') }}?event_id=[[ chart.id ]]">Карта пациентки</a></li>
-            <li>Выбор ЛПУ для {% if 'emergency' in request.args %}экстренного{% else %}планового{% endif %} случая</li>
-        </ul>
-{#        <div class="row marginal">#}
-{#            <div class="col-md-10">#}
-{#                <ui-select ng-model="chart.lpu" theme="select2" ref-book="Organisation">#}
-{#                    <ui-select-match>[[ $select.selected.short_name ]]</ui-select-match>#}
-{#                    <ui-select-choices repeat="org in $refBook.objects | filter: {is_hospital: true, short_name: $select.search} | limitTo:50">#}
-{#                        <div ng-bind-html="org.short_name | highlight: $select.search"></div>#}
-{#                    </ui-select-choices>#}
-{#                </ui-select>#}
-{#            </div>#}
-{#            <div class="col-md-2">#}
-{#                <button ng-click="save()" class="btn btn-success btn-block">Сохранить</button>#}
-{#            </div>#}
-{#        </div>#}
+        <h1>
+            Выбор ЛПУ для {% if 'emergency' in request.args %}экстренной{% else %}плановой{% endif %} госпитализации
+            ([[ header.event.external_id ]])
+            <a ng-href="{{ url_for('patients.patient_info_full') }}?client_id=[[ header.client.id ]]">[[ header.client.full_name ]]</a>
+        </h1>
+        <div class="row vmargin10">
+            <div class="col-md-12 col-lg-12">
+                <div class="alert-warning">Случай беременности. На учёте в <b>[[ header.event.person.organisation.short_name ]]</b>
+                    у <b>[[ header.event.person.name ]]</b>
+                    с <b>[[ header.event.set_date | asDate ]]</b>
+                </div>
+            </div>
+        </div>
+        <div class="novmargin">
+            <div class="btn-group">
+                <a ng-href="{{ url_for('.html_chart') }}?event_id=[[ chart.id ]]" class="btn btn-default">Карта пациентки</a>
+                <a ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ chart.id ]]" class="btn btn-default">Анамнез</a>
+                <a ng-href="{{ url_for('.html_inspection') }}?event_id=[[ chart.id ]]" class="btn btn-default">Осмотры</a>
+                <a ng-href="{{ url_for('.html_routing') }}?event_id=[[ chart.id ]]&emergency=1" class="btn btn-primary">Маршрутизация</a>
+                <a ng-href="{{ url_for('.html_epicrisis') }}?event_id=[[ chart.id ]]" class="btn btn-default">Эпикриз</a>
+                <a ng-class="{disabled: !ps.is_available()}" ng-click="open_print_window()" class="btn btn-default">Печать</a>
+                <div class="btn-group">
+                    <button class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Дополнительно <span class="fa fa-caret-down"></span></button>
+                    <ul role="menu" class="dropdown-menu">
+                        <li><a ng-href="{{ url_for('.html_event_diagnoses') }}?event_id=[[ chart.id ]]">Диагнозы случая</a></li>
+                        <li><a ng-href="{{ url_for('.html_event_measure') }}?event_id=[[ chart.id ]]">Мероприятия случая</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="content">
         <div class="row">
             <div class="col-md-6">
-                <div class="panel panel-default">
-                    <div class="panel-heading">Диагнозы</div>
-                    <div class="panel-body">
+                <div class="box box-primary">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Диагнозы</h3>
+                    </div>
+                    <div class="box-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <button type="button" class="btn btn-default" ng-if="chart.diagnoses.length"
+                                    ng-click="toggleDiagnosesSelection()" title="[[getToggleDiagnosesBtnText()]]">
+                                    [[getToggleDiagnosesBtnText()]]
+                                </button>
+                            </div>
+                            <div class="col-md-8">
+                                <span class="pull-right text-muted">Диагнозы, выделенные <b>жирным</b>, определяют перинатальный риск,<br>цвет указывает на степень риска
+                                    <span class="rmargin10" style="font-size: x-large" ><i tooltip="Низкая степень риска" class="ri-prenatal-risk text-green"></i></span>
+                                    <span class="rmargin10" style="font-size: x-large" ><i tooltip="Средняя степень риска" class="ri-prenatal-risk text-yellow"></i></span>
+                                    <span class="rmargin10" style="font-size: x-large" ><i tooltip="Высокая степень риска" class="ri-prenatal-risk text-red"></i></span>
+                                </span>
+                            </div>
+                        </div>
                         <div fs-checkbox items="chart.diagnoses" ng-model="selected_diagnoses">
-                            <span>[[ item.code ]] - [[ item.name ]]</span>
+                            <span ng-class="$parent.$parent.getMkbItemClass(item)">[[ item.code ]] - [[ item.name ]]</span>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="col-md-6">
-                <div class="panel panel-default">
-                    <div class="panel-heading">ЛПУ</div>
-                    <table class="table table-condensed" ng-if="results.length > 0">
-                        <tbody>
-                        <tr ng-repeat="row in results" ng-class="{success: chart.lpu.id == row.id}">
-                            <td>[[ $index + 1 ]]</td>
-                            <td>[[ row.name ]]</td>
-                            <td><a class="btn-link" ng-click="select_lpu(row)">Выбрать</a></td>
-                        </tr>
-                        </tbody>
-                    </table>
-                    <div class="panel-body" ng-if="results.length == 0">
-                        <h3>Подходящие ЛПУ не найдены</h3>
+                <form name="selectLpuForm" form-safe-close="getUnsavedFormText()">
+                    <div class="box box-primary">
+                        <div class="box-header with-border">
+                            <h3 class="box-title">ЛПУ для госпитализации</h3>
+                            <div class="box-tools"><a ng-href="{{ url_for('.html_routing', event_id=request.args.get('event_id'), emergency=None if request.args.get('emergency') else 1)}}"
+                                title="[[getOtherRoutingText()]]" ng-bind="getOtherRoutingText()"></a>
+                            </div>
+                        </div>
+                        <div class="box-body" >
+                            <div class="row">
+                                <div class="col-md-9">
+                                    <div class="small-marginal">
+                                        <p style="margin-top: 5px">Выбрано: <span style="font-weight: bold">[[ chart.lpu.short_name ]]</span>
+                                            <span ng-if="lpuSelected() && !currentLpuMatchesDiagnoses()" class="text-muted"><br>
+                                                Выбранное ЛПУ не поддерживает все диагнозы пациентки
+                                            </span>
+                                        </p>
+                                    </div>
+                                    <div class="small-marginal">
+                                        <p style="margin-top: 5px">Адрес проживания пациентки:
+                                            <span style="font-weight: bold" ng-bind="getPatientLiveAddressText()"></span>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <button type="button" class="btn btn-success pull-right" title="Сохранить" ng-click="save()">Сохранить</button>
+                                </div>
+                            </div>
+                            <div class="row">
+                            <div class="col-md-12">
+                                <div id="district_orgs" ng-if="districtLpuAvailable()">
+                                    <hr>
+                                    <div ng-repeat="(loc_code, org_info) in district_orgs">
+                                        <h3>В районе проживания пациентки ([[ org_info.kladr_locality.name ]]) найдено:</h3>
+                                        <div class="radio" ng-repeat="item in org_info.orgs">
+                                            <label class="label-no-bold lmargin20" for="org[[loc_code]]_[[$index]]">
+                                                <input type="radio" id="org[[loc_code]]_[[$index]]" ng-value="item" ng-model="chart.lpu">
+                                                [[item.short_name]]<br><span class="text-muted" ng-bind="item.address"></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="region_orgs" ng-if="regionLpuAvailable()">
+                                    <hr>
+                                    <h3>В обслуживаемом регионе найдено:</h3>
+                                    <div ng-repeat="(loc_code, org_info) in region_orgs">
+                                        <div>
+                                            <h4>[[ org_info.kladr_locality.name ]]</h4>
+                                            <div class="radio" ng-repeat="item in org_info.orgs">
+                                                <label class="label-no-bold lmargin20" for="org[[loc_code]]_[[$index]]">
+                                                    <input type="radio" id="org[[loc_code]]_[[$index]]" ng-value="item" ng-model="chart.lpu">
+                                                    [[item.short_name]]<br><span class="text-muted" ng-bind="item.address"></span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            </div>
+                            <div ng-if="noLpuAvailable()">
+                                <hr>
+                                <h3 class="text-center">Подходящие ЛПУ не найдены</h3>
+                                <span class="text-muted">Уберите часть выбранных диагнозов для вывода учреждений более широкого профиля</span>
+                            </div>
+                        </div>
                     </div>
-                </div>
+                </form>
             </div>
         </div>
+    </section>
     </div>
 {% endblock %}
 
 {% block modules_js %}
     {{ super() }}
-    <script src="{{ url_for('.static', filename='js/event_routing.js', v=version) }}"></script>
-    <script src="{{ url_for('.static', filename='js/risar.js', v=version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/event_routing.js', v=app_version) }}"></script>
 {% endblock %}
