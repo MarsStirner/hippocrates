@@ -816,7 +816,27 @@ var PoliclinicEventInfoCtrl = function ($scope, $controller, WMPoliclinicEvent) 
     $scope.initialize();
 
 };
-
+var EventQuotingCtrl = function ($scope, RefBookService) {
+    var original_quoting = angular.extend({}, $scope.event.vmp_quoting);
+    $scope.rbQuotaType = RefBookService.get('QuotaType');
+    $scope.rbPatientModel = RefBookService.get('rbPacientModel');
+    $scope.rbTreatment = RefBookService.get('rbTreatment');
+    $scope.quotaTypeFormatter = function (selected) {
+        return selected ? '{0} - {1}'.format(selected.code, selected.name) : undefined;
+    };
+    $scope.$watch(function () {
+        return safe_traverse($scope.event, ['vmp_quoting', 'coupon']);
+    }, function (n, o) {
+        if (n !== o) {
+            if(!$scope.event.vmp_quoting.mkb){
+                $scope.event.vmp_quoting.mkb = $scope.event.vmp_quoting.coupon.mkb;
+            }
+            if(!$scope.event.vmp_quoting.quota_type){
+                $scope.event.vmp_quoting.quota_type = $scope.event.vmp_quoting.coupon.quota_type;
+            }
+        }
+    });
+};
 
 WebMis20.controller('EventDiagnosesCtrl', ['$scope', 'RefBookService', '$http', EventDiagnosesCtrl]);
 WebMis20.controller('EventMainInfoCtrl', ['$scope', '$q', 'RefBookService', 'EventType', '$filter',

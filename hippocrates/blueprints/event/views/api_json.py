@@ -23,7 +23,7 @@ from nemesis.models.exists import (Organisation, )
 from nemesis.lib.jsonify import EventVisualizer, StationaryEventVisualizer
 from nemesis.lib.event.event_builder import PoliclinicEventBuilder, StationaryEventBuilder, EventConstructionDirector
 from blueprints.event.app import module
-from blueprints.event.lib.utils import (EventSaveException, save_event, received_save,
+from blueprints.event.lib.utils import (EventSaveException, save_event, received_save, client_quota_save,
                                         save_executives, EventSaveController, ReceivedController, MovingController)
 from blueprints.patients.lib.utils import add_or_update_blood_type
 from nemesis.lib.sphinx_search import SearchEventService, SearchEvent
@@ -122,12 +122,15 @@ def api_event_save():
 
         if request_type_kind == 'stationary':
             received_data = all_data['received']
+            quota_data = all_data['vmp_quoting']
             received_save(event_id, received_data)
+            if quota_data:
+                client_quota_save(event, quota_data)
     except EventSaveException:
         raise
     except Exception, e:
         logger.error(e, exc_info=True)
-        raise EventSaveException()
+        raise EventSaveException(e)
     return result
 
 

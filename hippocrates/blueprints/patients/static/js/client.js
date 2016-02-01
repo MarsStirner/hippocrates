@@ -220,6 +220,14 @@ angular.module('WebMis20.controllers').
                 });
             };
 
+            $scope.addVmpCoupon= function(client){
+                $scope.clientServices.addVmpCoupon(client)
+            }
+
+            $scope.removeVmpCoupon= function(client){
+                $scope.clientServices.removeVmpCoupon(client)
+            }
+
             $scope.reloadClient();
         }
     ]);

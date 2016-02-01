@@ -1,0 +1,37 @@
+<ng-form name="_vmp_coupons_form" toc-element="Талоны ВМП">
+    <div class="box box-primary">
+        <div class="box-header with-border">
+            <h3 class="box-title">Талоны ВМП</h3>
+        </div>
+        <div class="box-body">
+            <table class="table table-condensed">
+                <thead>
+                <tr>
+                    <th>№ талона</th>
+                    <th>Диагноз</th>
+                    <th>Код ВМП</th>
+                    <th>Дата планируемой госпитализации</th>
+                    <th>История болезни</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="coupon in client.vmp_coupons | flt_not_deleted">
+                    <td>[[ coupon.number ]]</td>
+                    <td>[[ coupon.mkb.code ]] [[ coupon.mkb.name ]]</td>
+                    <td>[[ coupon.quota_type.code ]]</td>
+                    <td>[[ coupon.date | asDate ]]</td>
+                    <td>[[ coupon.event ]]</td>
+                    <td>
+                        <button class="btn btn-primary" ng-click="clientServices.removeVmpCoupon(client, coupon)" ng-if="!coupon.event"><i class="fa fa-trash"></i></button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <div class="panel">
+                <button type="button" class="btn btn-lg btn-link btn-block"
+                        ng-click="addVmpCoupon(client)"><i class="ion ion-plus-round fa-fw"></i>Добавить талон ВМП</button>
+            </div>
+        </div>
+    </div>
+</ng-form>
