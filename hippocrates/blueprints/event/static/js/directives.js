@@ -1,149 +1,118 @@
 'use strict';
 
 angular.module('WebMis20')
-.directive('wmEventServiceListHeader', [function () {
+.directive('wmEventServiceListHeader', ['WMEventFormState', function (WMEventFormState) {
     return {
         restrict: 'A',
-        link: function (scope, element, attrs) {
-
-        },
-        template:
-'<th></th>\
-<th>Код</th>\
-<th>Услуга</th>\
-<th class="nowrap">Документ</th>\
-<th class="nowrap" ng-show="formstate.is_paid()">Цена (руб.)</th>\
-<th ng-show="formstate.is_paid()">Скидка</th>\
-<th>Количество</th>\
-<th class="nowrap" ng-show="formstate.is_paid()">Сумма (руб.)</th>\
-<th></th>'
-    };
-}])
-.directive('wmEventServiceGroup', ['WMEventFormState', 'WMEventServices', 'ActionTypeTreeModal', 'CurrentUser',
-function(WMEventFormState, WMEventServices, ActionTypeTreeModal, CurrentUser) {
-    return {
-        restrict: 'A',
+        replace: true,
         scope: {
-            serviceGroupData: '=',
-            idx: '=',
-            expanded: '=',
             editInvoiceMode: '='
         },
-        link: function (scope, elm, attrs) {
+        link: function (scope, element, attrs) {
             scope.formstate = WMEventFormState;
-            scope.eventServices = WMEventServices;
-
-            scope.$watch('editInvoiceMode', function (newVal) {
-                scope.expanded = newVal;
-            });
-
-            //scope.open_assignments = function () {
-            //    var assigned = scope.service.all_assigned,
-            //        ped = scope.service.all_planned_end_date;
-            //
-            //    if (assigned === false || ped === false) {
-            //        if (!confirm(
-            //                'Осмотры данной группы имеют разные наборы назначаемых исследований или ' +
-            //                'разные даты проведения. Выбрать новые параметры исследований ' +
-            //                'для всех осмотров группы?')) {
-            //            return
-            //        }
-            //        assigned = scope.service.assignable.map(function (asgn_data) {
-            //            return asgn_data[0];
-            //        });
-            //        ped = null;
-            //    }
-            //    var model = {
-            //        assignable: scope.service.assignable,
-            //        assigned: assigned,
-            //        planned_end_date: ped,
-            //        ped_disabled: scope.service.actions.every(function (act) {
-            //            return act.action_id;
-            //        })
-            //    };
-            //    ActionTypeTreeModal.openAppointmentModal(model, true).then(function () {
-            //        scope.service.actions.forEach(function (act) {
-            //            if (!act.is_closed()) {
-            //                act.assigned = model.assigned;
-            //            }
-            //            if (!act.action_id) {
-            //                act.planned_end_date = model.planned_end_date;
-            //            }
-            //        });
-            //    });
-            //};
-            //scope.btn_delete_visible = function () {
-            //    var s = scope.service;
-            //    return !(
-            //        s.fully_paid || s.partially_paid || s.fully_coord || s.partially_coord ||
-            //        scope.service.all_actions_closed || scope.event.ro
-            //    );
-            //};
-            //scope.lab_components_disabled = function () {
-            //    return (scope.service.fully_paid || scope.service.fully_coord ||
-            //        scope.service.all_actions_closed || scope.event.ro);
-            //};
+            scope.inEditInvoiceMode = function () {
+                return scope.editInvoiceMode;
+            };
         },
         template:
-'<td class="sg-expander" ng-click="expanded = !expanded"><span class="glyphicon glyphicon-chevron-[[expanded ? \'down\' : \'right\']]"></span></td>\
-<td ng-bind="serviceGroupData.service_code"></td>\
-<td>\
-    [[serviceGroupData.service_name]]\
-    <!-- <a href="javascript:;" class="btn btn-link nomarpad" ng-click="open_assignments()" ng-if="service.is_lab"\
-        ng-disabled="lab_components_disabled()">Выбрать назначаемые исследования</a> -->\
-</td>\
-<td ng-bind="serviceGroupData.at_name"></td>\
-<td ng-bind="serviceGroupData.price | moneyCut" class="text-right" ng-show="formstate.is_paid()"></td>\
-<td ng-show="formstate.is_paid()"></td>\
-<td ng-bind="serviceGroupData.total_amount" class="text-right"></td>\
-<td ng-bind="serviceGroupData.total_sum | moneyCut" class="text-right" ng-show="formstate.is_paid()"></td>\
-<td nowrap class="text-right">\
-    <button type="button" class="btn btn-sm btn-danger" title="Удалить услуги"\
-            ng-show="btn_delete_visible()"\
-            ng-click="eventServices.remove_service(event, idx)"><span class="glyphicon glyphicon-trash"></span>\
-    </button>\
-</td>'
+'<tr>\
+    <th ng-if="inEditInvoiceMode()"></th>\
+    <th></th>\
+    <th>Код</th>\
+    <th>Услуга</th>\
+    <th class="nowrap">Наименование</th>\
+    <th class="nowrap" ng-show="formstate.is_paid()">Цена (руб.)</th>\
+    <th ng-show="formstate.is_paid()">Скидка</th>\
+    <th>Количество</th>\
+    <th class="nowrap" ng-show="formstate.is_paid()">Сумма (руб.)</th>\
+    <th></th>\
+</tr>'
     };
 }])
-.directive('wmEventServiceRecord', ['WMEventFormState', 'AccountingService',
-        function(WMEventFormState, AccountingService) {
+.directive('wmEventServiceRecord', ['WMEventFormState', 'AccountingService', 'ActionTypeTreeModal', '$timeout',
+        function(WMEventFormState, AccountingService, ActionTypeTreeModal, $timeout) {
     return {
         restrict: 'A',
+        replace: true,
         scope: {
             service: '=',
-            idx: '=',
-            serviceGroup: '=',
+            event: '=',
             editMode: '=',
             editInvoiceMode: '=',
-            newInvoice: '=',
-            onChangeCallback: '&onChange'
+            newInvoice: '='
         },
         link: function(scope, elm, attrs) {
             scope.formstate = WMEventFormState;
 
-            scope.onAmountChanged = function () {
-                AccountingService.calc_service_sum(
-                    scope.service,
-                    scope.service.service.amount,
-                    scope.service.service.discount
-                )
-                    .then(function (new_sum) {
-                        scope.service.service.sum = new_sum;
-                        scope.onChangeCallback();
+            scope.getLevelMarkClass = function () {
+                if (scope.service.ui_attrs.is_expandable) {
+                    return scope.isExpanded() ? 'chevron-down' : 'chevron-right';
+                } else {
+                    return 'minus';
+                }
+            };
+            scope.getLevelIndentStyle = function () {
+                return {
+                    'margin-left': '{0}px'.format(10 * scope.service.ui_attrs.level)
+                }
+            };
+            var traverseToggleVisible = function (service, state) {
+                service.ui_attrs.visible = state;
+                if (service.ui_attrs.is_expandable) {
+                    angular.forEach(service.subservice_list, function (sub_service) {
+                        traverseToggleVisible(sub_service, service.ui_attrs.visible && service.ui_attrs.expanded);
                     });
+                }
             };
-            var deleteService = function () {
-                scope.serviceGroup.sg_list.splice(scope.idx, 1);
-                scope.onChangeCallback();
-                // todo - удалить группу, если услуга одна
+            scope.toggleExpanded = function () {
+                scope.service.ui_attrs.expanded = !scope.service.ui_attrs.expanded;
+                angular.forEach(scope.service.subservice_list, function(sub_service) {
+                    traverseToggleVisible(sub_service, scope.service.ui_attrs.expanded)
+                });
             };
-            scope.removeService = function () {
-                if (scope.service.service.id) {
+            scope.isExpanded = function () {
+                return scope.service.ui_attrs.expanded;
+            };
+            scope.isVisible = function () {
+                return scope.service.ui_attrs.visible;
+            };
+            scope.getRowClass = function () {
+                if (scope.service.ui_attrs.idx % 2 !== 0) return 'bg-muted';
+                else return '';
+            };
+
+            scope.isServiceLab = function () {
+                return scope.service.service_kind.code === 'lab_action';
+            };
+            scope.openLabTestModal = function () {
+                var cur_service = _.deepCopy(scope.service);
+                var model = {
+                    assignable: cur_service.serviced_entity.tests_data.assignable,
+                    assigned: cur_service.serviced_entity.tests_data.assigned,
+                    planned_end_date: aux.safe_date(cur_service.serviced_entity.tests_data.planned_end_date),
+                    ped_disabled: cur_service.serviced_entity.tests_data.ped_disabled
+                };
+                ActionTypeTreeModal.openAppointmentModal(model, true).then(function () {
+                    cur_service.serviced_entity.tests_data.assigned = model.assigned;
+                    cur_service.serviced_entity.tests_data.planned_end_date = model.planned_end_date;
+
+                    AccountingService.refreshServiceSubservices(cur_service)
+                        .then(function (upd_service) {
+                            angular.copy(upd_service, scope.service);
+                        });
+                });
+            };
+
+            scope.deleteService = function () {
+                var idx = scope.service.ui_attrs.idx;
+                if (scope.service.id) {
                     if (!confirm('Вы действительно хотите удалить выбранную услугу?')) return;
                     AccountingService.delete_service(scope.service)
-                        .then(deleteService);
+                        .then(function () {
+                            scope.event.services.splice(idx, 1);
+                        });
                 } else {
-                    deleteService();
+                    scope.event.services.splice(idx, 1);
                 }
             };
             scope.inNewInvoice = false;
@@ -162,88 +131,68 @@ function(WMEventFormState, WMEventServices, ActionTypeTreeModal, CurrentUser) {
             scope.$watch('editInvoiceMode', function (newVal) {
                 if (newVal) scope.inNewInvoice = false;
             });
+            scope.invoiceControlsVisible = function () {
+                return scope.editInvoiceMode;
+            };
+            scope.btnAddToInvoiceVisible = function () {
+                return scope.editInvoiceMode && !scope.service.in_invoice && !scope.isInNewInvoice() &&
+                    scope.service.ui_attrs.level === 0;
+            };
+            scope.btnRemoveFromInvoiceVisible = function () {
+                return scope.editInvoiceMode && !scope.service.in_invoice && scope.isInNewInvoice() &&
+                    scope.service.ui_attrs.level === 0;
+            };
 
-            //scope.open_assignments = function () {
-            //    var model = {
-            //        assignable: scope.service.assignable,
-            //        assigned: scope.action.assigned,
-            //        planned_end_date: scope.action.planned_end_date,
-            //        ped_disabled: Boolean(scope.action.action_id)
-            //    };
-            //    ActionTypeTreeModal.openAppointmentModal(model, true).then(function () {
-            //        scope.action.assigned = model.assigned;
-            //        scope.action.planned_end_date = model.planned_end_date;
-            //    });
-            //};
-            //scope.get_info_text = function () {
-            //    function get_action_status_text(status_code) {
-            //        var status_item = scope.ActionStatus.objects.filter(function (status) {
-            //            return status.id === status_code;
-            //        })[0];
-            //        return status_item ? status_item.name : '';
-            //    }
-            //    var msg = [
-            //        'Идентификатор: ' + scope.action.action_id,
-            //        'Дата начала: ' + (scope.action.beg_date ? $filter('asDateTime')(scope.action.beg_date) : 'отсутствует'),
-            //        'Дата окончания: ' + (scope.action.end_date ? $filter('asDateTime')(scope.action.end_date) : 'отсутствует'),
-            //        'Статус: ' + get_action_status_text(scope.action.status),
-            //        scope.formstate.is_dms() ?
-            //            'Согласовано: ' + (
-            //                scope.action.is_coordinated() ?
-            //                    '' + $filter('asDateTime')(scope.action.coord_date) + ', ' + (
-            //                        scope.action.coord_person.name ? scope.action.coord_person.name : '') :
-            //                    'нет') :
-            //            ''
-            //    ];
-            //    return msg.join('; ');
-            //};
             scope.amountDisabled = function () {
                 return !scope.editMode;
             };
             scope.btnRemoveVisible = function () {
-                return scope.editMode && scope.service.service.access.can_delete;
+                return scope.editMode && scope.service.access.can_delete;
             };
-            scope.btnAddToInvoiceVisible = function () {
-                return scope.editInvoiceMode && !scope.service.service.in_invoice && !scope.isInNewInvoice();
+            scope.btnLabTestModalDisabled = function () {
+                return !scope.editMode || !scope.service.access.can_edit;
             };
-            scope.btnRemoveFromInvoiceVisible = function () {
-                return scope.editInvoiceMode && !scope.service.service.in_invoice && scope.isInNewInvoice();
-            };
-            //scope.lab_components_disabled = function () {
-            //    return scope.action.account || scope.action.is_coordinated() || scope.action.is_closed() || scope.event.ro;
-            //};
+
+            $timeout(function () {
+                scope.service.ui_attrs.expanded = (!scope.service.id || scope.service.service_kind.code !== 'lab_action');
+                scope.service.ui_attrs.visible = (!scope.service.id || scope.service.service_kind.code !== 'lab_test');
+            }, 0);
         },
         template:
-'<td>\
-    <i class="fa fa-square-o cursor-pointer" ng-if="btnAddToInvoiceVisible()" ng-click="addServiceToInvoice()"\
-        style="font-size: larger"></i>\
-    <i class="fa fa-check-square-o cursor-pointer" ng-if="btnRemoveFromInvoiceVisible()" ng-click="removeServiceFromInvoice()"\
-        style="font-size: larger"></i>\
-</td>\
-<td ng-bind="service.service.service_code"></td>\
-<td>\
-    [[service.service.service_name]]\
-    <!-- <a  href="javascript:;" class="btn btn-link nomarpad" ng-click="open_assignments()" ng-if="service.is_lab"\
-        ng-disabled="lab_components_disabled()">Выбрать назначаемые исследования</a> -->\
-</td>\
-<td ng-bind="service.action.at_name"></td>\
-<td ng-bind="service.service.price | moneyCut" class="text-right" ng-show="formstate.is_paid()"></td>\
-<td ng-show="formstate.is_paid()">[[ service.service.discount ? service.service.discount.description.short : ""]]</td>\
-<td class="col-md-1">\
-    <input type="text" class="form-control input-sm"\
-           ng-disabled="amountDisabled()" ng-model="service.service.amount" ng-change="onAmountChanged()"\
-           valid-number minval="1" wm-debounce/>\
-</td>\
-<td class="text-right" ng-show="formstate.is_paid()">\
-    <span ng-bind="service.service.sum | moneyCut"></span> <span class="glyphicon glyphicon-ok text-success" title="Оплачено" ng-show="service.service.is_paid"></span>\
-</td>\
-<td nowrap class="text-right">\
-    <!-- <span class="glyphicon glyphicon-info-sign" ng-if="action.action_id"\
-        popover-trigger="mouseenter" popover-popup-delay=\'1000\' popover-placement="left" popover="[[get_info_text()]]"></span> -->\
-    <button type="button" class="btn btn-sm btn-danger" title="Убрать из списка услуг" ng-show="btnRemoveVisible()"\
-            ng-click="removeService()"><span class="fa fa-trash"></span>\
-    </button>\
-</td>'
+'<tr ng-show="isVisible()" ng-class="getRowClass()">\
+    <td ng-if="invoiceControlsVisible()">\
+        <i class="fa fa-square-o cursor-pointer" ng-show="btnAddToInvoiceVisible()" ng-click="addServiceToInvoice()"\
+            style="font-size: larger"></i>\
+        <i class="fa fa-check-square-o cursor-pointer" ng-show="btnRemoveFromInvoiceVisible()" ng-click="removeServiceFromInvoice()"\
+            style="font-size: larger"></i>\
+    </td>\
+    <td class="cursor-pointer" ng-click="toggleExpanded()">\
+        <span class="glyphicon glyphicon-[[getLevelMarkClass()]]" ng-style="getLevelIndentStyle()"></span>\
+    </td>\
+    <td ng-bind="service.service_code"></td>\
+    <td>\
+        <span title="[[service.service_kind.name]]">[[service.service_name]]</span>\
+        <button class="btn btn-sm btn-link" ng-click="openLabTestModal()" ng-if="isServiceLab()"\
+            title="Выбрать показатели исследований" ng-disabled="btnLabTestModalDisabled()"><i class="fa fa-flask"></i></button>\
+    </td>\
+    <td ng-bind="service.serviced_entity.name"></td>\
+    <td ng-bind="service.price | moneyCut" class="text-right" ng-show="formstate.is_paid()"></td>\
+    <td ng-show="formstate.is_paid()">[[ service.discount ? service.discount.description.short : ""]]</td>\
+    <td>\
+        <span ng-bind="service.amount"></span>\
+        <!-- <input type="text" class="form-control input-sm"\
+               ng-disabled="amountDisabled()" ng-model="service.amount" ng-change="onAmountChanged()"\
+               valid-number minval="1" wm-debounce/> -->\
+    </td>\
+    <td class="text-right" ng-show="formstate.is_paid()">\
+        <span ng-bind="service.sum | moneyCut"></span> <span class="glyphicon glyphicon-ok text-success" title="Оплачено" ng-show="service.is_paid"></span>\
+    </td>\
+    <td nowrap class="text-right">\
+        <button type="button" class="btn btn-sm btn-danger" title="Удалить услугу" ng-show="btnRemoveVisible()"\
+            ng-click="deleteService()"><span class="fa fa-trash"></span>\
+        </button>\
+    </td>\
+</tr>'
     };
 }])
 .directive('wmActionList', [
@@ -324,8 +273,8 @@ function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WME
                     scope.event.info.client.info,
                     {
                         at_group: at_class,
-                        event_type_id: scope.event.info.event_type.id
-//                        contract_id: scope.event.info.contract.id
+                        event_type_id: scope.event.info.event_type.id,
+                        contract_id: scope.event.info.contract.id
                     },
                     function afterActionCreate() {
                         scope.pager.current_page = 1;
@@ -372,7 +321,6 @@ function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WME
         <th width="10%" wm-sortable-column="end_date" on-change-order="sort_by_column(params)">Конец</th>\
         <th width="20%" wm-sortable-column="person_name" on-change-order="sort_by_column(params)">Исполнитель</th>\
         <th width="5%"></th>\
-        <th width="5%" ng-if="actionTypeGroup == \'lab\'"></th>\
     </tr>\
     </thead>\
     <tbody>\
@@ -387,13 +335,11 @@ function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WME
         <td ng-click="open_action(action.id)">[[ action.begDate | asDate ]]</td>\
         <td ng-click="open_action(action.id)">[[ action.endDate | asDateTime ]]</td>\
         <td ng-click="open_action(action.id)">[[ action.person_text ]]</td>\
-        <td>\
+        <td class="nowrap">\
             <button type="button" class="btn btn-sm btn-danger" title="Удалить" ng-show="can_delete_action(action)"\
                     ng-click="delete_action(action)"><span class="glyphicon glyphicon-trash"></span>\
             </button>\
-        </td>\
-        <td ng-if="actionTypeGroup == \'lab\'">\
-            <button type="button" class="btn btn-sm btn-info" title="Динамика"\
+            <button type="button" class="btn btn-sm btn-info lmargin20" ng-if="actionTypeGroup === \'lab\'" title="Динамика"\
                     ng-click="open_lab_res_dynamics(action)"><span class="glyphicon glyphicon-stats"></span>\
             </button>\
         </td>\

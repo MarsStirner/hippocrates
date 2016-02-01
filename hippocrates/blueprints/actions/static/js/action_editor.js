@@ -2,7 +2,7 @@
  * Created by mmalkov on 14.07.14.
  */
 var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, WMAction, PrintingService, PrintingDialog,
-        RefBookService, WMEventCache, MessageBox, NotificationService, WMConfig) {
+        RefBookService, WMEventCache, MessageBox, NotificationService, WMConfig, AccountingService) {
     var params = aux.getQueryParams(location.search);
     $scope.ps = new PrintingService("action");
     $scope.ps_resolve = function () {
@@ -14,39 +14,55 @@ var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, WMAction, P
     $scope.action_id = params.action_id;
     $scope.action = new WMAction();
     $scope.locker_person = null;
-    if (params.action_id) {
-        WMAction.get(params.action_id).then(function (action) {
-            $scope.action = action;
-            update_print_templates(action.action_type.context_name);
-            process_printing();
-            WMEventCache.get($scope.action.event_id).then(function (event) {
+
+    $scope.init = function () {
+        if (params.action_id) {
+            WMAction.get(params.action_id).then(function (action) {
+                $scope.action = action;
+                update_print_templates(action.action_type.context_name);
+                process_printing();
+                WMEventCache.get($scope.action.event_id).then(function (event) {
+                    $scope.event = event;
+                });
+                return action;
+            }).then(function (action) {
+                console.log(action.lock);
+                $scope.$watch('action.lock.locker', function (newVal, oldVal) {
+                    if (!$scope.action.lock.success && newVal) {
+                        var locker_id = $scope.action.lock.locker;
+                        $http.get(WMConfig.url.api_person_get + locker_id)
+                            .success(function (data) {
+                                $scope.locker_person = data.result;
+                            })
+                    }
+                });
+            });
+        } else if (params.event_id && params.action_type_id) {
+            WMAction.get_new(
+                params.event_id,
+                params.action_type_id
+            ).then(function (action) {
+                $scope.action = action;
+                update_print_templates(action.action_type.context_name);
+            });
+            WMEventCache.get(parseInt(params.event_id)).then(function (event) {
                 $scope.event = event;
             });
-            return action;
-        }).then(function (action) {
-            console.log(action.lock);
-            $scope.$watch('action.lock.locker', function (newVal, oldVal) {
-                if (!$scope.action.lock.success && newVal) {
-                    var locker_id = $scope.action.lock.locker;
-                    $http.get(WMConfig.url.api_person_get + locker_id)
-                        .success(function (data) {
-                            $scope.locker_person = data.result;
-                        })
-                }
-            });
-        });
-    } else if (params.event_id && params.action_type_id) {
-        WMAction.get_new(
-            params.event_id,
-            params.action_type_id
-        ).then(function (action) {
-            $scope.action = action;
-            update_print_templates(action.action_type.context_name);
-        });
-        WMEventCache.get(parseInt(params.event_id)).then(function (event) {
-            $scope.event = event;
-        });
-    }
+
+            if (params.price_list_item_id && params.service_kind_id) {
+                AccountingService.get_service(undefined, {
+                    price_list_item_id: params.price_list_item_id,
+                    service_kind_id: params.service_kind_id,
+                    event_id: params.event_id,
+                    serviced_entity_from_search: {
+                        action_type_id: params.action_type_id
+                    }
+                }).then(function (new_service) {
+                    $scope.action.service = new_service;
+                });
+            }
+        }
+    };
 
     function update_print_templates (context_name) {
         $scope.ps.set_context(context_name);
@@ -226,6 +242,8 @@ var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, WMAction, P
             $scope.action.merge_template(action);
         })
     };
+
+    $scope.init();
 };
 var ActionTemplateController = function ($scope, $modalInstance, $http, FlatTree, SelectAll, args) {
     $scope.model = {
@@ -327,13 +345,13 @@ var ActionTemplateController = function ($scope, $modalInstance, $http, FlatTree
 
 WebMis20.controller('ActionEditorCtrl', ['$scope', '$window', '$modal', '$q', '$http', 'WMAction', 'PrintingService',
     'PrintingDialog', 'RefBookService', 'WMEventCache', 'MessageBox', 'NotificationService',
-    'WMConfig', ActionEditorCtrl]);
+    'WMConfig', 'AccountingService', ActionEditorCtrl]);
 
 WebMis20.factory('WMAction', ['$q', 'ApiCalls', 'EzekielLock', function ($q, ApiCalls, EzekielLock) {
     // FIXME: На данный момент это ломает функциональность действий, но пока пофиг.
     var template_fields = ['direction_date', 'beg_date', 'end_date', 'planned_end_date', 'status', 'set_person',
         'person', 'note', 'office', 'amount', 'uet', 'pay_status', 'account', 'is_urgent', 'coord_date'];
-    var fields = ['id', 'event_id', 'client', 'prescriptions'].concat(template_fields);
+    var fields = ['id', 'event_id', 'client', 'prescriptions', 'service'].concat(template_fields);
     var Action = function () {
         this.action = {};
         this.layout = {};

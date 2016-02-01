@@ -15,14 +15,14 @@ from nemesis.lib.data import create_action, update_action, create_new_action, ge
 from nemesis.lib.jsonify import ActionVisualizer
 from nemesis.lib.subscriptions import notify_object, subscribe_user
 from nemesis.lib.user import UserUtils
-from nemesis.lib.utils import safe_traverse, safe_datetime, parse_id
+from nemesis.lib.utils import safe_traverse, safe_datetime, parse_id, public_api
 from nemesis.models.actions import Action, ActionType, ActionTemplate
 from nemesis.models.event import Event
 from nemesis.models.exists import Person
 from nemesis.models.utils import safe_current_user_id
 from nemesis.models.rls import rlsNomen, rlsTradeName
 from nemesis.systemwide import db, cache
-from nemesis.lib.utils import public_api
+from nemesis.lib.action.utils import check_at_service_requirement
 
 
 __author__ = 'viruzzz-kun'
@@ -136,8 +136,9 @@ def api_action_post(action_id=None):
         'payStatus': action_desc['pay_status'] or 0,
         'coordDate': safe_datetime(action_desc['coord_date']),
         'office': action_desc['office'],
-        'prescriptions': action_desc.get('prescriptions'),
+        'prescriptions': action_desc.get('prescriptions')
     }
+    service_data = action_desc.get('service')
     properties_desc = action_desc['properties']
     if action_id:
         data['properties'] = properties_desc
@@ -179,7 +180,11 @@ def api_action_post(action_id=None):
                 'person_id': person_id,
                 'reason': 'exec_assigned',
             })
-        action = create_new_action(at_id, event_id, properties=properties_desc, data=data)
+        try:
+            action = create_new_action(at_id, event_id, properties=properties_desc, data=data,
+                                       service_data=service_data)
+        except Exception, e:
+            raise ApiException(500, e.message)
 
     db.session.add(action)
     db.session.commit()
@@ -278,10 +283,9 @@ def api_atl_get():
 def api_atl_get_flat():
     at_class = int(request.args['at_class'])
     event_type_id = parse_id(request.args, 'event_type_id') or None
-    contract_id = parse_id(request.args, 'contract_id') or None
     if not (0 <= at_class < 4):
         return abort(401)
-    result = int_get_atl_flat(at_class, event_type_id, contract_id)
+    result = int_get_atl_flat(at_class, event_type_id)
 
     return result
 
@@ -302,11 +306,13 @@ def api_create_lab_direction():
         data = {
             'plannedEndDate': safe_datetime(j['planned_end_date'])
         }
+        service_data = j.get('service')
         action = create_new_action(
             action_type_id,
             event_id,
             assigned=assigned,
-            data=data
+            data=data,
+            service_data=service_data
         )
         db.session.add(action)
 
@@ -430,3 +436,17 @@ def api_search_rls():
             .filter(rlsTradeName.localName.like(query_string))
 
     return base_query.limit(limit).all()
+
+
+@module.route('/api/check_service_requirement/')
+@module.route('/api/check_service_requirement/<int:action_type_id>')
+@api_method
+def api_check_action_service_requirement(action_type_id=None):
+    if not action_type_id:
+        raise ApiException(404, '`action_type_id` reuqired')
+
+    try:
+        res = check_at_service_requirement(action_type_id)
+    except Exception, e:
+        raise ApiException(500, e.message)
+    return res
