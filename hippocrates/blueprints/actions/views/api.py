@@ -136,8 +136,9 @@ def api_action_post(action_id=None):
         'payStatus': action_desc['pay_status'] or 0,
         'coordDate': safe_datetime(action_desc['coord_date']),
         'office': action_desc['office'],
-        'prescriptions': action_desc.get('prescriptions'),
+        'prescriptions': action_desc.get('prescriptions')
     }
+    service_data = action_desc.get('service')
     properties_desc = action_desc['properties']
     if action_id:
         data['properties'] = properties_desc
@@ -179,7 +180,11 @@ def api_action_post(action_id=None):
                 'person_id': person_id,
                 'reason': 'exec_assigned',
             })
-        action = create_new_action(at_id, event_id, properties=properties_desc, data=data)
+        try:
+            action = create_new_action(at_id, event_id, properties=properties_desc, data=data,
+                                       service_data=service_data)
+        except Exception, e:
+            raise ApiException(500, e.message)
 
     db.session.add(action)
     db.session.commit()
@@ -431,11 +436,15 @@ def api_search_rls():
     return jsonify(result)
 
 
-@module.route('/api/check_service_requirement')
+@module.route('/api/check_service_requirement/')
 @module.route('/api/check_service_requirement/<int:action_type_id>')
 @api_method
 def api_check_action_service_requirement(action_type_id=None):
     if not action_type_id:
         raise ApiException(404, '`action_type_id` reuqired')
 
-    return check_at_service_requirement(action_type_id)
+    try:
+        res = check_at_service_requirement(action_type_id)
+    except Exception, e:
+        raise ApiException(500, e.message)
+    return res

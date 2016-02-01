@@ -316,8 +316,6 @@ class ServiceRepr(object):
 
     def represent_serviced_entity(self, service):
         ent = service.get_serviced_entity()
-        # if not ent:
-        #     return None
         if service.serviceKind_id == ServiceKind.simple_action[0]:
             return self.represent_entity_action(ent)
         elif service.serviceKind_id == ServiceKind.group[0]:
