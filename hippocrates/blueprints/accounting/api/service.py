@@ -125,7 +125,8 @@ def api_0_service_at_price_get(contract_id=None):
 
     service_ctrl = ServiceController()
     args.update({
-        'contract_id': contract_id
+        'contract_id': contract_id,
+        'limit_max': 10000  # sphinx limits to 100 by default
     })
     at_service_data = service_ctrl.get_service_data_for_at_tree(args)
 
