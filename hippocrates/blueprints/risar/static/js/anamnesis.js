@@ -15,7 +15,7 @@ var AnamnesisBaseCtrl = function ($scope, RisarApi, RefBookService, PrintingServ
     };
 
     var params = aux.getQueryParams(window.location.search);
-    var event_id = $scope.event_id = params.event_id;
+    $scope.event_id = params.event_id;
     $scope.reload_header = function () {
         RisarApi.chart.get_header($scope.event_id).
             then(function (data) {
@@ -54,7 +54,7 @@ var AnamnesisCtrl = function ($scope, $controller, RisarApi) {
         })
     };
     reload_anamnesis();
-}
+};
 
 var MotherFatherCtrl = function ($scope) {
     $scope.warnings = {
@@ -94,7 +94,7 @@ var PregnanciesCtrl = function ($scope, $modal, $timeout, RisarApi) {
     $scope.add_child = function (pregnancy){
         pregnancy.newborn_inspections.push({});
         $timeout(function(){
-            $('#childrenTabs a:last').tab('show');
+            $('#childrenTabs').find('a:last').tab('show');
         }, 0);
 
     };
@@ -125,6 +125,38 @@ var PregnanciesCtrl = function ($scope, $modal, $timeout, RisarApi) {
         } else {
             p.deleted = 0;
         }
+    };
+    $scope.format_newborn_inspection = function (child, index) {
+        var result = [];
+        result.push((child.alive)?('живой'):('мёртвый'));
+        result.push('масса: ' + child.weight);
+        if (!child.alive) {
+            result.push(child.died_at.name);
+        }
+        if (!child.alive && child.death_reason) {
+            result.push('причина смерти: ' + child.death_reason);
+        }
+        return result.join(', ');
+    };
+    $scope.format_characteristics = function (p) {
+        var result = [];
+        if (p.note) {
+            result.push(p.note)
+        }
+        if (p.maternity_aid) {
+            result.push('Пособия, операции: ' + p.maternity_aid.name)
+        }
+        if (p.pregnancy_pathologies.length) {
+            result.push('патологии беременности: ' + _.map(p.pregnancy_pathologies, function (pat) {
+                return pat.name;
+            }).join(', '))
+        }
+        if (p.delivery_pathologies.length) {
+            result.push('Патологии родов/абортов: ' + _.map(p.delivery_pathologies, function (pat) {
+                return pat.name;
+            }).join(', '))
+        }
+        return result.join('<br/>')
     };
     var open_edit = function (p) {
         var scope = $scope.$new();
@@ -292,7 +324,7 @@ var AnamnesisMotherEditCtrl = function ($scope, $controller, $document, RisarApi
         .then(function (data) {
             $scope.anamnesis_mother = data;
         })
-    }
+    };
     reload_anamnesis();
 };
 var AnamnesisFatherEditCtrl = function ($scope, $controller, RisarApi) {
@@ -311,6 +343,6 @@ var AnamnesisFatherEditCtrl = function ($scope, $controller, RisarApi) {
         .then(function (data) {
             $scope.anamnesis_father = data;
         })
-    }
+    };
     reload_anamnesis();
 };

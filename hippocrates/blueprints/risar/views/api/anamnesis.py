@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import datetime
+import logging
 
 from flask import request
 from flask.ext.login import current_user
@@ -18,6 +19,9 @@ from ...lib.represent import represent_intolerance, represent_mother_action, rep
 from blueprints.risar.lib.utils import get_action, action_apt_values, get_action_type_id, get_action_by_id
 from ...risar_config import pregnancy_apt_codes, risar_anamnesis_pregnancy, transfusion_apt_codes, \
     risar_anamnesis_transfusion, risar_father_anamnesis, risar_mother_anamnesis, risar_newborn_inspection
+
+
+logger = logging.getLogger('simple')
 
 
 __author__ = 'mmalkov'
@@ -79,24 +83,36 @@ def api_0_pregnancies_post(action_id=None):
             raise ApiException(404, 'Action not found')
     event = Event.query.get(action.event_id)
     json = request.get_json()
-    for code, value in json.iteritems():
-        if code not in ('newborn_inspections',) and code in pregnancy_apt_codes:
-            action.propsByCode[code].value = value
+    newborn_inspections = json.pop('newborn_inspections', [])
+    for code in pregnancy_apt_codes:
+        if code not in action.propsByCode:
+            logger.info('Skipping "%s" in old/corrupted Action id = %s, flat_code = "%s"', code, action_id, risar_anamnesis_pregnancy)
+            continue
+        action.propsByCode[code].value = json.get(code)
 
     child_inspection_actions = []
-    for child_inspection in json.get('newborn_inspections'):
-        if child_inspection:
-            child_action = get_action_by_id(child_inspection.get('id'), event,  risar_newborn_inspection, True)
-            for code, value in child_inspection.iteritems():
-                if code not in ('id',) and code in child_action.propsByCode:
-                    child_action.propsByCode[code].value = value
-            child_action.deleted = child_inspection.get('deleted', 0)
-            db.session.add(child_action)
-            db.session.commit()
-            if not child_action.deleted:
-                child_inspection_actions.append({'id': child_action.id})
+    for child_inspection in newborn_inspections:
+        if not child_inspection:
+            continue  # How can it be?
+        child_action_id = child_inspection.pop('id', None)
+        child_action = get_action_by_id(child_action_id, event,  risar_newborn_inspection, True)
+        child_action.deleted = child_inspection.get('deleted', 0)
+        for code, value in child_inspection.iteritems():
+            prop = child_action.propsByCode.get(code)
+            if not prop:
+                logger.info('Skipping "%s" in old/corrupted Action id = %s, flat_code = "%s"', code, child_action_id, risar_newborn_inspection)
+                continue
+            prop.value = value
+        db.session.add(child_action)
+        if not child_action.deleted:
+            child_inspection_actions.append(child_action)
 
-    action.propsByCode['newborn_inspections'].value = child_inspection_actions
+    db.session.commit()
+
+    action.propsByCode['newborn_inspections'].value = [
+        {'id': child_action.id}
+        for child_action in child_inspection_actions
+    ]
 
     db.session.add(action)
     db.session.commit()
