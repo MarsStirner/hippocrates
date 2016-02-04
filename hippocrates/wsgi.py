@@ -1,15 +1,18 @@
 # -*- coding: utf-8 -*-
 import os
+
 from flask import url_for
-from nemesis.app import app, bootstrap_app
-import config
+
+from nemesis.app import app
 from nemesis.lib.frontend import frontend_config
+from usagicompat import HippoUsagiClient
 from version import version as app_version
 
 __author__ = 'viruzzz-kun'
 
-app.config.from_object(config)
-bootstrap_app(os.path.join(os.path.dirname(__file__), 'templates'))
+usagi = HippoUsagiClient(app, os.getenv('TSUKINO_USAGI_URL', 'http://127.0.0.1:5900'), 'hippo')
+
+usagi()
 
 
 @app.context_processor
