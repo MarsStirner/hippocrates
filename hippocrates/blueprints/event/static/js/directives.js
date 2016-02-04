@@ -29,8 +29,8 @@ angular.module('WebMis20')
 </tr>'
     };
 }])
-.directive('wmEventServiceRecord', ['WMEventFormState', 'AccountingService', 'ActionTypeTreeModal', '$timeout',
-        function(WMEventFormState, AccountingService, ActionTypeTreeModal, $timeout) {
+.directive('wmEventServiceRecord', ['WMEventFormState', 'AccountingService', 'ActionTypeTreeModal',
+        function(WMEventFormState, AccountingService, ActionTypeTreeModal) {
     return {
         restrict: 'A',
         replace: true,
@@ -96,10 +96,23 @@ angular.module('WebMis20')
                     cur_service.serviced_entity.tests_data.assigned = model.assigned;
                     cur_service.serviced_entity.tests_data.planned_end_date = model.planned_end_date;
 
-                    AccountingService.refreshServiceSubservices(cur_service)
-                        .then(function (upd_service) {
-                            angular.copy(upd_service, scope.service);
-                        });
+                    if (scope.service.ui_attrs.level === 0) {
+                        AccountingService.refreshServiceSubservices(cur_service)
+                            .then(function (upd_service) {
+                                angular.copy(upd_service, scope.service);
+                            });
+                    } else {
+                        var root_service = scope.event.services[scope.service.ui_attrs.root_idx],
+                            saved_root_service = _.deepCopy(root_service);
+                        angular.copy(cur_service, scope.service);
+
+                        AccountingService.refreshServiceSubservices(root_service)
+                            .then(function (upd_service) {
+                                angular.copy(upd_service, root_service);
+                            }, function () {
+                                angular.copy(saved_root_service, root_service);
+                            });
+                    }
                 });
             };
 
@@ -152,11 +165,6 @@ angular.module('WebMis20')
             scope.btnLabTestModalDisabled = function () {
                 return !scope.editMode || !scope.service.access.can_edit;
             };
-
-            $timeout(function () {
-                scope.service.ui_attrs.expanded = (!scope.service.id || scope.service.service_kind.code !== 'lab_action');
-                scope.service.ui_attrs.visible = (!scope.service.id || scope.service.service_kind.code !== 'lab_test');
-            }, 0);
         },
         template:
 '<tr ng-show="isVisible()" ng-class="getRowClass()">\
