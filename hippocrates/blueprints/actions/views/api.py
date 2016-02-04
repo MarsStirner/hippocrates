@@ -11,7 +11,7 @@ from blueprints.actions.lib.api import represent_action_template
 from ..lib.api import update_template_action, is_template_action
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.data import create_action, update_action, create_new_action, get_planned_end_datetime, int_get_atl_flat, \
-    get_patient_location, delete_action
+    get_patient_location, delete_action, create_or_update_diagnoses
 from nemesis.lib.jsonify import ActionVisualizer
 from nemesis.lib.subscriptions import notify_object, subscribe_user
 from nemesis.lib.user import UserUtils
@@ -138,6 +138,7 @@ def api_action_post(action_id=None):
         'office': action_desc['office'],
         'prescriptions': action_desc.get('prescriptions'),
     }
+    diagnoses_data = action_desc.get('diagnoses')
     properties_desc = action_desc['properties']
     if action_id:
         data['properties'] = properties_desc
@@ -183,6 +184,8 @@ def api_action_post(action_id=None):
 
     db.session.add(action)
     db.session.commit()
+
+    create_or_update_diagnoses(action, diagnoses_data)
 
     object_id = 'hitsl.action.%s' % action.id
 

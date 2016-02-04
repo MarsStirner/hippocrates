@@ -333,7 +333,7 @@ WebMis20.factory('WMAction', ['$q', 'ApiCalls', 'EzekielLock', function ($q, Api
     // FIXME: На данный момент это ломает функциональность действий, но пока пофиг.
     var template_fields = ['direction_date', 'beg_date', 'end_date', 'planned_end_date', 'status', 'set_person',
         'person', 'note', 'office', 'amount', 'uet', 'pay_status', 'account', 'is_urgent', 'coord_date'];
-    var fields = ['id', 'event_id', 'client', 'prescriptions'].concat(template_fields);
+    var fields = ['id', 'event_id', 'client', 'prescriptions', 'diagnoses'].concat(template_fields);
     var Action = function () {
         this.action = {};
         this.layout = {};
@@ -457,6 +457,7 @@ WebMis20.factory('WMAction', ['$q', 'ApiCalls', 'EzekielLock', function ($q, Api
             data = {},
             url = '/actions/api/action/{0}'.format(self.id || '');
         merge_fields(data, this);
+        data.diagnoses = this._get_entity_changes('diagnoses');
         data.action_type_id = this.action_type_id || this.action_type.id;
         merge_properties(data, this);
         data.id = self.id;
@@ -484,6 +485,17 @@ WebMis20.factory('WMAction', ['$q', 'ApiCalls', 'EzekielLock', function ($q, Api
     Action.prototype.is_assignable = function (id) {
         var prop = this.get_property(id);
         return prop ? prop.type.is_assignable : false;
+    };
+    Action.prototype._get_entity_changes = function(entity) {
+        var dirty_elements = this[entity].filter(function(el) {
+            return el.kind_changed || el.diagnostic_changed;
+        });
+        var deleted_elements = [];
+//        var deleted_elements = this.deleted_entities[entity] || [];
+        var changes = dirty_elements.concat(deleted_elements.filter(function(del_elmnt) {
+            return dirty_elements.indexOf(del_elmnt) === -1;
+        }));
+        return changes.length ? changes : undefined;
     };
     return Action;
 }]);

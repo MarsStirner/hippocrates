@@ -12,8 +12,9 @@ from nemesis.app import app
 from nemesis.models.actions import Action, ActionType, ActionProperty, ActionPropertyType, OrgStructure_HospitalBed, ActionProperty_HospitalBed
 from nemesis.models.client import Client
 from nemesis.models.enums import EventPrimary, EventOrder
-from nemesis.models.event import (Event, EventType, Diagnosis, Diagnostic, Visit, Event_Persons)
+from nemesis.models.event import (Event, EventType, Visit, Event_Persons)
 from nemesis.models.exists import Person, rbRequestType, rbResult, OrgStructure, MKB
+from nemesis.models.diagnosis import Diagnosis, Diagnostic
 from nemesis.models.accounting import Service
 from nemesis.systemwide import db
 from nemesis.lib.utils import (jsonify, safe_traverse, safe_date, safe_datetime, get_utc_datetime_with_tz, safe_int, format_date)
