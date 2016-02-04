@@ -73,7 +73,7 @@ WebMis20.run(['$templateCache', function ($templateCache) {
                         <span ng-style="getLevelIndentStyle(item)" ng-bind="getNumerationText(item)"></span>\
                     </td>\
                     <td>[[ item.service.service_name ]]</td>\
-                    <td>[[ item.service.price | moneyCut ]]</td>\
+                    <td>[[ item.price | moneyCut ]]</td>\
                     <td ng-if="isInvoiceWithDiscounts()">\
                         <ui-select ng-model="item.discount" ext-select-service-discount\
                             ng-change="onDiscountChanged(item)" ng-if="!isInvoiceClosed() && isDiscountAvailable(item)" allow-clear="true"\
@@ -226,7 +226,7 @@ var InvoiceModalCtrl = function ($scope, $filter, AccountingService, PrintingSer
         } else {
             var root_idx = item.ui_attrs.root_idx,
                 root_item = $scope.invoice.item_list[root_idx];
-            return root_item.service.is_accumulative_price;
+            return root_item.service.is_accumulative_price ? !item.service.is_accumulative_price : false;
         }
     };
     $scope.ps_resolve = function () {

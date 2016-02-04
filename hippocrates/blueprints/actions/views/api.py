@@ -98,10 +98,10 @@ def api_find_previous():
 @api_method
 def api_delete_action(action_id=None):
     if not action_id:
-        raise ApiException(404, "Argument 'action_id' cannot be found.")
+        raise ApiException(404, u"Argument 'action_id' cannot be found.")
     action = Action.query.get(action_id)
     if not action:
-        raise ApiException(404, "Действие с id=%s не найдено" % action_id)
+        raise ApiException(404, u"Действие с id=%s не найдено" % action_id)
     try:
         delete_action(action)
     except Exception, e:
@@ -307,13 +307,16 @@ def api_create_lab_direction():
             'plannedEndDate': safe_datetime(j['planned_end_date'])
         }
         service_data = j.get('service')
-        action = create_new_action(
-            action_type_id,
-            event_id,
-            assigned=assigned,
-            data=data,
-            service_data=service_data
-        )
+        try:
+            action = create_new_action(
+                action_type_id,
+                event_id,
+                assigned=assigned,
+                data=data,
+                service_data=service_data
+            )
+        except Exception, e:
+            raise ApiException(500, e.message)
         db.session.add(action)
 
     db.session.commit()
