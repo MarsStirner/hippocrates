@@ -106,7 +106,7 @@
                                                     <label>
                                                         <input type="radio" name="optionsAlive_[[$index]]"
                                                                ng-model="child.alive" data-ng-value="true"
-                                                               ng-click="child.death_reason=''">
+                                                               ng-click="child.death_reason=''; child.died_at=null">
                                                         Да
                                                     </label>
                                                 </div>
@@ -124,8 +124,8 @@
                                         <td>
                                             <div class="row">
                                             <div class="col-md-4 col-lg-3">
-                                                <input type="number" ng-model="child.weight"
-                                                       class="form-control" name="weight_[[$index]]">
+                                                <input type="number" ng-model="child.weight" valid-number
+                                                       class="form-control" name="__weight_[[$index]]">
                                             </div>
                                             </div>
                                         </td>
@@ -136,7 +136,7 @@
                                             <div class="row">
                                                 <div class="col-md-8">
                                                     <rb-select ref-book="rbRisarDiedAt" ng-model="child.died_at"
-                                                               name="died_at_[[$index]]">
+                                                               name="died_at_[[$index]]" ng-required="true">
                                                 </div>
                                             </div>
                                         </td>
@@ -163,6 +163,6 @@
 </div>
 <div class="modal-footer">
     <input type="checkbox" ng-model="restart" id="another"><label for="another"> Создать ещё </label>
-    <button class="btn btn-success" ng-click="$close([model, restart])">Сохранить</button>
+    <button class="btn btn-success" ng-click="$close([model, restart])" ng-disabled="form_is_invalid()">Сохранить</button>
     <button class="btn btn-default" ng-click="$dismiss()">Отменить</button>
 </div>

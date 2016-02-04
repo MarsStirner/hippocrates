@@ -126,11 +126,12 @@ var PregnanciesCtrl = function ($scope, $modal, $timeout, RisarApi) {
             p.deleted = 0;
         }
     };
-    $scope.format_newborn_inspection = function (child, index) {
+    $scope.format_newborn_inspection = function (child) {
+        if (!child) { return '' }
         var result = [];
         result.push((child.alive)?('живой'):('мёртвый'));
         result.push('масса: ' + child.weight);
-        if (!child.alive) {
+        if (!child.alive && child.died_at) {
             result.push(child.died_at.name);
         }
         if (!child.alive && child.death_reason) {
@@ -139,6 +140,7 @@ var PregnanciesCtrl = function ($scope, $modal, $timeout, RisarApi) {
         return result.join(', ');
     };
     $scope.format_characteristics = function (p) {
+        if (!p) { return '' }
         var result = [];
         if (p.note) {
             result.push(p.note)
@@ -146,12 +148,12 @@ var PregnanciesCtrl = function ($scope, $modal, $timeout, RisarApi) {
         if (p.maternity_aid) {
             result.push('Пособия, операции: ' + p.maternity_aid.name)
         }
-        if (p.pregnancy_pathologies.length) {
+        if (p.pregnancy_pathologies && p.pregnancy_pathologies.length) {
             result.push('патологии беременности: ' + _.map(p.pregnancy_pathologies, function (pat) {
                 return pat.name;
             }).join(', '))
         }
-        if (p.delivery_pathologies.length) {
+        if (p.delivery_pathologies && p.delivery_pathologies.length) {
             result.push('Патологии родов/абортов: ' + _.map(p.delivery_pathologies, function (pat) {
                 return pat.name;
             }).join(', '))
@@ -159,14 +161,24 @@ var PregnanciesCtrl = function ($scope, $modal, $timeout, RisarApi) {
         return result.join('<br/>')
     };
     var open_edit = function (p) {
+        var year_regexp = new RegExp('^[12]\\d{3}$');
         var scope = $scope.$new();
         scope.model = p;
+        // Не думайте, что это элегантное решение. Вообще не думайте о нём.
+        scope.form_is_invalid = function () {
+            return ! (
+                year_regexp.test(String(scope.model.year))
+                && _.all(scope.model.newborn_inspections, function (inspection) {
+                    return (
+                        (inspection.alive || inspection.died_at && inspection.died_at.code)
+                        && _.isFinite(inspection.weight)
+                    )
+                })
+            )
+        };
         return $modal.open({
             templateUrl: '/WebMis20/RISAR/modal/pregnancies.html',
             scope: scope,
-            resolve: {
-                model: function () {return p}
-            },
             size: 'lg'
         })
     };
