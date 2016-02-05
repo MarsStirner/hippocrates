@@ -11,6 +11,8 @@ var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, WMAction, P
         }
     };
     $scope.ActionStatus = RefBookService.get('ActionStatus');
+    $scope.rbDiagnosisType = RefBookService.get('rbDiagnosisTypeN');
+
     $scope.action_id = params.action_id;
     $scope.action = new WMAction();
     $scope.locker_person = null;
@@ -162,6 +164,27 @@ var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, WMAction, P
             return deferred.promise;
         }
 
+        function check_diagnosis (action){
+            var deferred = $q.defer();
+            var diags_without_result = action.diagnoses.filter(function(diag){
+                for (var diag_type_code in diag.diagnosis_types){
+                    var diag_type = $scope.rbDiagnosisType.get_by_code(diag_type_code);
+                    if (diag.diagnosis_types[diag_type_code].code != 'associated' && diag_type.require_result && !diag.diagnostic.ache_result){
+                        return true
+                    }
+                }
+                return false
+            })
+            if (action.status.code === 'finished' && diags_without_result.length) {
+                deferred.reject({
+                    silent: false,
+                    message: 'Необходимо указать результат для дагнозов.'
+                });
+            }
+            deferred.resolve();
+            return deferred.promise;
+        }
+
         var deferred = $q.defer();
         if ($scope.action.readonly) {
             deferred.reject({
@@ -169,7 +192,7 @@ var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, WMAction, P
                 message: 'Действие открыто в режиме чтения'
             });
         } else {
-            return check_diagnoses_conflicts($scope.event, $scope.action);
+            return check_diagnosis($scope.action);
         }
         return deferred.promise;
     };

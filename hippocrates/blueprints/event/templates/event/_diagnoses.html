@@ -8,7 +8,8 @@
                 </div>
             </div>
             <div class="box-body">
-                <wm-diagnosis model="event.diagnoses" event="event" clickable="can_open_diagnoses()" list-mode="true"></wm-diagnosis>
+                <wm-diagnosis-new model="event.diagnoses" event="event" can-edit="false"
+                                  diag_types="event.info.event_type.diagnosis_types" can-add-new="false"></wm-diagnosis-new>
             </div>
         </div>
     </ng-form>

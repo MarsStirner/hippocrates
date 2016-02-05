@@ -185,7 +185,8 @@ def api_action_post(action_id=None):
     db.session.add(action)
     db.session.commit()
 
-    create_or_update_diagnoses(action, diagnoses_data)
+    if diagnoses_data:
+        create_or_update_diagnoses(action, diagnoses_data)
 
     object_id = 'hitsl.action.%s' % action.id
 
