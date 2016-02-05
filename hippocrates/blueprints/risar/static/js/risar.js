@@ -21,14 +21,14 @@ WebMis20
         get: function(){
             return wrapper('GET', Config.url.api_need_hospitalization)
         }
-    }
+    };
     this.pregnancy_week_diagram  = {
         get: function(curation_level){
             return wrapper('GET', Config.url.api_pregnancy_week_diagram, {
                 curation_level: curation_level
             });
         }
-    }
+    };
     this.search_event = {
         get: function (query) {
             return wrapper('POST', Config.url.api_event_search, {}, query)
@@ -59,7 +59,7 @@ WebMis20
         get: function(){
             return wrapper('GET', Config.url.api_stats_urgent_errands)
         }
-    }
+    };
     this.recent_charts = {
         get: function (data) {
             return wrapper('GET', Config.url.api_recent_charts, data);
@@ -414,10 +414,9 @@ WebMis20
         return ApiCalls.wrapper('POST', Config.url.api_errand_edit.format(errand.id), {}, errand).then(get_errands_summary);
     };
     this.mark_as_read = function (errand){
-        var current_date = new Date();
-        errand.reading_date =  current_date;
+        errand.reading_date =  new Date();
         return ApiCalls.wrapper('POST', Config.url.api_errand_mark_as_read.format(errand.id), {}, errand).then(get_errands_summary);
-    }
+    };
     this.delete_errand = function (errand) {
         errand.deleted = 1;
         return ApiCalls.wrapper('POST', Config.url.api_errand_edit.format(errand.id), {}, errand).then(get_errands_summary);

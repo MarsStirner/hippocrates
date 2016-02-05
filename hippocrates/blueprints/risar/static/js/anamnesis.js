@@ -15,7 +15,7 @@ var AnamnesisBaseCtrl = function ($scope, RisarApi, RefBookService, PrintingServ
     };
 
     var params = aux.getQueryParams(window.location.search);
-    var event_id = $scope.event_id = params.event_id;
+    $scope.event_id = params.event_id;
     $scope.reload_header = function () {
         RisarApi.chart.get_header($scope.event_id).
             then(function (data) {
@@ -54,7 +54,7 @@ var AnamnesisCtrl = function ($scope, $controller, RisarApi) {
         })
     };
     reload_anamnesis();
-}
+};
 
 var MotherFatherCtrl = function ($scope) {
     $scope.warnings = {
@@ -94,7 +94,7 @@ var PregnanciesCtrl = function ($scope, $modal, $timeout, RisarApi) {
     $scope.add_child = function (pregnancy){
         pregnancy.newborn_inspections.push({});
         $timeout(function(){
-            $('#childrenTabs a:last').tab('show');
+            $('#childrenTabs').find('a:last').tab('show');
         }, 0);
 
     };
@@ -126,15 +126,59 @@ var PregnanciesCtrl = function ($scope, $modal, $timeout, RisarApi) {
             p.deleted = 0;
         }
     };
+    $scope.format_newborn_inspection = function (child) {
+        if (!child) { return '' }
+        var result = [];
+        result.push((child.alive)?('живой'):('мёртвый'));
+        result.push('масса: ' + child.weight);
+        if (!child.alive && child.died_at) {
+            result.push(child.died_at.name);
+        }
+        if (!child.alive && child.death_reason) {
+            result.push('причина смерти: ' + child.death_reason);
+        }
+        return result.join(', ');
+    };
+    $scope.format_characteristics = function (p) {
+        if (!p) { return '' }
+        var result = [];
+        if (p.note) {
+            result.push(p.note)
+        }
+        if (p.maternity_aid) {
+            result.push('Пособия, операции: ' + p.maternity_aid.name)
+        }
+        if (p.pregnancy_pathologies && p.pregnancy_pathologies.length) {
+            result.push('патологии беременности: ' + _.map(p.pregnancy_pathologies, function (pat) {
+                return pat.name;
+            }).join(', '))
+        }
+        if (p.delivery_pathologies && p.delivery_pathologies.length) {
+            result.push('Патологии родов/абортов: ' + _.map(p.delivery_pathologies, function (pat) {
+                return pat.name;
+            }).join(', '))
+        }
+        return result.join('<br/>')
+    };
     var open_edit = function (p) {
+        var year_regexp = new RegExp('^[12]\\d{3}$');
         var scope = $scope.$new();
         scope.model = p;
+        // Не думайте, что это элегантное решение. Вообще не думайте о нём.
+        scope.form_is_invalid = function () {
+            return ! (
+                year_regexp.test(String(scope.model.year))
+                && _.all(scope.model.newborn_inspections, function (inspection) {
+                    return (
+                        (inspection.alive || inspection.died_at && inspection.died_at.code)
+                        && _.isFinite(inspection.weight)
+                    )
+                })
+            )
+        };
         return $modal.open({
             templateUrl: '/WebMis20/RISAR/modal/pregnancies.html',
             scope: scope,
-            resolve: {
-                model: function () {return p}
-            },
             size: 'lg'
         })
     };
@@ -292,7 +336,7 @@ var AnamnesisMotherEditCtrl = function ($scope, $controller, $document, RisarApi
         .then(function (data) {
             $scope.anamnesis_mother = data;
         })
-    }
+    };
     reload_anamnesis();
 };
 var AnamnesisFatherEditCtrl = function ($scope, $controller, RisarApi) {
@@ -311,6 +355,6 @@ var AnamnesisFatherEditCtrl = function ($scope, $controller, RisarApi) {
         .then(function (data) {
             $scope.anamnesis_father = data;
         })
-    }
+    };
     reload_anamnesis();
 };

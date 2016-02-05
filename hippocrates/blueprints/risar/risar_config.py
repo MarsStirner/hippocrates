@@ -10,7 +10,10 @@ risar_newborn_inspection = 'risar_newborn_inspection'
 risar_anamnesis_pregnancy = 'risar_anamnesis_pregnancy'
 risar_anamnesis_transfusion = 'risar_anamnesis_transfusion'
 
-pregnancy_apt_codes = ['year', 'pregnancyResult', 'pregnancy_week', 'note', 'preeclampsia', 'newborn_inspections']
+pregnancy_apt_codes = [
+    'year', 'pregnancyResult', 'pregnancy_week', 'note', 'preeclampsia', 'newborn_inspections', 'pregnancy_pathologies',
+    'delivery_pathologies', 'maternity_aid'
+]
 transfusion_apt_codes = ['date', 'type', 'blood_type', 'reaction']
 
 common_codes = [

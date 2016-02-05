@@ -37,6 +37,30 @@
                     </td>
                 </tr>
                 <tr>
+                    <th class="text-right">Патологии беременности</th>
+                    <td>
+                        <div class="col-md-12">
+                            <wm-mkb-multiple ng-model="model.pregnancy_pathologies"></wm-mkb-multiple>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="text-right">Патологии родов/абортов</th>
+                    <td>
+                        <div class="col-md-12">
+                            <wm-mkb-multiple ng-model="model.delivery_pathologies"></wm-mkb-multiple>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="text-right">Пособия, операции</th>
+                    <td>
+                        <div class="col-md-12">
+                            <rb-select ref-book="rbRisarMaternityAid" ng-model="model.maternity_aid"></rb-select>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
                     <th class="text-right">Преэклампсия</th>
                     <td>
                     <div class="col-md-8"><input type="checkbox" class="checkbox" ng-model="model.preeclampsia"></div>
@@ -52,13 +76,15 @@
                 </tr>
             </tbody>
         </table>
-        <div ng-if="['normal', 'miscarriage37', 'miscarriage27', 'belated_birth'].indexOf(model.pregnancyResult.code) != -1">
+        <div ng-if="['normal', 'miscarriage37', 'miscarriage27', 'belated_birth'].has(model.pregnancyResult.code)">
             <h4>Информация о детях</h4>
             <div class="row">
                 <div class="col-md-3">
                     <button type="button" class="btn btn-primary text-left marginal" ng-click="add_child(model)"><span class="glyphicon glyphicon-plus"></span> Добавить</button>
                     <ul class="nav nav-pills nav-stacked  marginal" id="childrenTabs">
-                        <li ng-class="{'active': $index==0}" ng-repeat="child in model.newborn_inspections"><a href="#child[[$index+1]]" data-toggle="pill"> Ребенок [[$index+1]]</a></li>
+                        <li ng-class="{'active': $index==0}" ng-repeat="child in model.newborn_inspections">
+                            <a href="#child[[$index+1]]" data-toggle="pill"> Ребенок [[$index+1]]</a>
+                        </li>
                     </ul>
                 </div>
                 <div class="col-md-9">
@@ -76,11 +102,11 @@
                                     <tr>
                                         <th class="text-right">Живой</th>
                                         <td>
-                                            <div>
                                                 <div class="radio-inline">
                                                     <label>
                                                         <input type="radio" name="optionsAlive_[[$index]]"
-                                                               ng-model="child.alive" data-ng-value="true" ng-click="child.death_reason=''">
+                                                               ng-model="child.alive" data-ng-value="true"
+                                                               ng-click="child.death_reason=''; child.died_at=null">
                                                         Да
                                                     </label>
                                                 </div>
@@ -91,7 +117,6 @@
                                                         Нет
                                                     </label>
                                                 </div>
-                                            </div>
                                         </td>
                                     </tr>
                                     <tr>
@@ -99,17 +124,28 @@
                                         <td>
                                             <div class="row">
                                             <div class="col-md-4 col-lg-3">
-                                                <input type="number" ng-model="child.weight"
-                                                       class="form-control" name="weight_[[$index]]">
+                                                <input type="number" ng-model="child.weight" valid-number
+                                                       class="form-control" name="__weight_[[$index]]">
                                             </div>
                                             </div>
                                         </td>
                                     </tr>
-                                    <tr ng-if="child.alive==false">
+                                    <tr ng-if="! child.alive">
+                                        <th class="text-right">Умер в срок</th>
+                                        <td>
+                                            <div class="row">
+                                                <div class="col-md-8">
+                                                    <rb-select ref-book="rbRisarDiedAt" ng-model="child.died_at"
+                                                               name="died_at_[[$index]]" ng-required="true">
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr ng-if="! child.alive">
                                         <th class="text-right">Причина смерти</th>
                                         <td>
                                             <div class="row">
-                                            <div class="col-md-4">
+                                            <div class="col-md-8">
                                                 <input ng-model="child.death_reason" class="form-control"
                                                        name="death_reason_[[$index]]">
                                             </div>
@@ -127,6 +163,6 @@
 </div>
 <div class="modal-footer">
     <input type="checkbox" ng-model="restart" id="another"><label for="another"> Создать ещё </label>
-    <button class="btn btn-success" ng-click="$close([model, restart])">Сохранить</button>
+    <button class="btn btn-success" ng-click="$close([model, restart])" ng-disabled="form_is_invalid()">Сохранить</button>
     <button class="btn btn-default" ng-click="$dismiss()">Отменить</button>
 </div>
