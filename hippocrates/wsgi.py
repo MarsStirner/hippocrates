@@ -10,8 +10,8 @@ from version import version as app_version
 
 __author__ = 'viruzzz-kun'
 
-usagi = HippoUsagiClient(app, os.getenv('TSUKINO_USAGI_URL', 'http://127.0.0.1:5900'), 'hippo')
-
+usagi = HippoUsagiClient(app.wsgi_app, os.getenv('TSUKINO_USAGI_URL', 'http://127.0.0.1:5900'), 'hippo')
+app.wsgi_app = usagi.app
 usagi()
 
 
