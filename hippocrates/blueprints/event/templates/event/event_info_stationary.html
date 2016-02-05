@@ -62,7 +62,9 @@
                         {% if user_profiles_mng.has_ui_doctor() and user_utils.can_read_dignoses(event) %}
                             {% include "event/_diagnoses.html" %}
                         {% endif %}
+                        {% if event.id %}
                         {% include "event/_services.html" %}
+                        {% endif %}
                         {% if user_profiles_mng.has_ui_registrator() or user_profiles_mng.has_ui_cashier() %}
                             {% include "event/_event_received.html" %}
                         {% endif %}
