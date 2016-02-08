@@ -24,7 +24,7 @@ from nemesis.models.exists import (Organisation, )
 from nemesis.lib.jsonify import EventVisualizer, StationaryEventVisualizer
 from nemesis.lib.event.event_builder import PoliclinicEventBuilder, StationaryEventBuilder, EventConstructionDirector
 from blueprints.event.app import module
-from blueprints.event.lib.utils import (EventSaveException, save_event, received_save,
+from blueprints.event.lib.utils import (EventSaveException, save_event, received_save, client_quota_save,
                                         save_executives, EventSaveController, ReceivedController, MovingController)
 from blueprints.patients.lib.utils import add_or_update_blood_type
 from nemesis.lib.sphinx_search import SearchEventService, SearchEvent
@@ -32,6 +32,7 @@ from nemesis.lib.data import get_planned_end_datetime, int_get_atl_dict_all, _ge
 from nemesis.lib.agesex import recordAcceptableEx
 from nemesis.lib.const import STATIONARY_EVENT_CODES, POLICLINIC_EVENT_CODES, DIAGNOSTIC_EVENT_CODES
 from nemesis.lib.user import UserUtils
+
 
 logger = logging.getLogger('simple')
 
@@ -123,12 +124,15 @@ def api_event_save():
 
         if request_type_kind == 'stationary':
             received_data = all_data['received']
+            quota_data = all_data['vmp_quoting']
             received_save(event_id, received_data)
+            if quota_data:
+                client_quota_save(event, quota_data)
     except EventSaveException:
         raise
     except Exception, e:
         logger.error(e, exc_info=True)
-        raise EventSaveException()
+        raise EventSaveException(e)
     return result
 
 
@@ -529,6 +533,7 @@ def api_delete_event():
 
 
 @module.route('/api/events.json', methods=["POST"])
+@api_method
 def api_get_events():
     flt = request.get_json()
     base_query = Event.query.join(Client).filter(Event.deleted == 0)
@@ -565,9 +570,21 @@ def api_get_events():
     if 'result_id' in flt:
         base_query = base_query.filter(Event.result_id == flt['result_id'])
     if 'org_struct_id' in flt:
+        if not ('beg_date_from' in flt or 'end_date_from' in flt):
+            raise ApiException(422, u'Невозможно провести поиск обращений по отделению без указания диапазона дат')
         stat_loc_query = _get_stationary_location_query(Event).with_entities(
             Event.id.label('event_id'), OrgStructure.id.label('org_struct_id')
-        ).subquery('StationaryOs')
+        )
+        if 'beg_date_from' in flt:
+            stat_loc_query = stat_loc_query.filter(Event.setDate >= safe_datetime(flt['beg_date_from']))
+        if 'beg_date_to' in flt:
+            stat_loc_query = stat_loc_query.filter(Event.setDate <= safe_datetime(flt['beg_date_to']))
+        if 'end_date_from' in flt:
+            stat_loc_query = stat_loc_query.filter(Event.execDate >= safe_datetime(flt['end_date_from']))
+        if 'end_date_to' in flt:
+            stat_loc_query = stat_loc_query.filter(Event.execDate <= safe_datetime(flt['end_date_to']))
+        stat_loc_query = stat_loc_query.subquery('StationaryOs')
+
         base_query = base_query.join(EventType).join(rbRequestType).outerjoin(
             stat_loc_query, Event.id == stat_loc_query.c.event_id
         ).filter(
@@ -613,14 +630,14 @@ def api_get_events():
     per_page = int(flt.get('per_page', 20))
     page = int(flt.get('page', 1))
     paginate = base_query.paginate(page, per_page, False)
-    return jsonify({
+    return {
         'pages': paginate.pages,
         'total': paginate.total,
         'items': [
             context.make_short_event(event)
             for event in paginate.items
         ]
-    })
+    }
 
 
 @module.route('/api/search.json', methods=['GET'])

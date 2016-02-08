@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="ru" ng-app="WebMis20">
+<head>
+    <title>{{ config['TITLE'] }} {% block title %}{% endblock %}</title>
+    {%- include 'risar/base/_header.html' -%}
+    {%- block modules_css %}{% endblock -%}
+</head>
+<body ng-class="{loading: pendingRequests}" class="skin-green-light sidebar-mini sidebar-collapse">
+<div class="wrapper">
+    {%- include 'risar/base/_top.html' -%}
+    {%- include 'risar/base/_sidebar.html' -%}
+    <div class="content-wrapper" style="min-height: 855px">{# FIXME: убрать явное указание min-height #}
+    {%- block container %}
+    {% endblock -%}
+    </div>
+    {%- include 'risar/base/_bottom.html' -%}
+    {%- include 'risar/base/_footer.html' with context -%}
+</div><!-- /#wrap -->
+{%- block modules_js %}{% endblock -%}
+</body>
+</html>

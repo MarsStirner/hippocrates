@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime
 
+from sqlalchemy import func
 from flask import request
+from flask.ext.login import current_user
 
 from nemesis.lib.data import create_action
 from nemesis.lib.utils import get_new_event_ext_id, safe_traverse, safe_datetime
@@ -9,13 +11,19 @@ from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.models.client import Client, ClientAttach
 from nemesis.models.enums import EventPrimary, EventOrder
 from nemesis.models.event import Event, EventType
-from nemesis.models.exists import Organisation, Person, rbAttachType, rbRequestType, rbFinance
+from nemesis.models.actions import Action
+from nemesis.models.exists import Organisation, Person, rbAttachType, rbRequestType, rbFinance, MKB
 from nemesis.models.schedule import ScheduleClientTicket
 from nemesis.systemwide import db
 from nemesis.lib.diagnosis import create_or_update_diagnosis
 from blueprints.risar.app import module
-from blueprints.risar.lib.card_attrs import default_AT_Heuristic, get_all_diagnoses
-from blueprints.risar.lib.represent import represent_event, represent_chart_for_routing
+from blueprints.risar.lib.card_attrs import default_AT_Heuristic, get_all_diagnoses, reevaluate_risk_rate, \
+    reevaluate_preeclampsia_risk, reevaluate_card_attrs, get_card_attrs_action, check_card_attrs_action_integrity, \
+    reevaluate_dates
+from blueprints.risar.lib.represent import represent_event, represent_chart_for_routing, represent_header, \
+    represent_org_for_routing, group_orgs_for_routing, represent_checkups, represent_card_attributes, \
+    represent_chart_for_epicrisis
+from blueprints.risar.lib.utils import get_last_checkup_date
 from blueprints.risar.risar_config import attach_codes
 
 
@@ -57,13 +65,35 @@ def default_ET_Heuristic():
 def api_0_chart(event_id=None):
     automagic = False
     ticket_id = request.args.get('ticket_id')
-    if not event_id and not ticket_id:
-        raise ApiException(400, u'Должен быть указан параметр event_id или ticket_id')
-    if ticket_id:
-        ticket = ScheduleClientTicket.query.get(ticket_id)
-        if not ticket:
-            raise ApiException(404, u'Талончик на приём не найден')
-        event = ticket.event
+    client_id = request.args.get('client_id')
+    if not event_id and not (ticket_id or client_id):
+        raise ApiException(400, u'Должен быть указан параметр event_id или (ticket_id или client_id)')
+
+    if event_id:
+        event = Event.query.filter(Event.id == event_id, Event.deleted == 0).first()
+        if not event:
+            raise ApiException(404, u'Обращение не найдено')
+        action = get_card_attrs_action(event)
+        check_card_attrs_action_integrity(action)
+    else:
+        ext = None
+        if ticket_id:
+            ticket = ScheduleClientTicket.query.get(ticket_id)
+            if not ticket:
+                raise ApiException(404, u'Талончик на приём не найден')
+            event = ticket.event
+            client_id = ticket.client_id
+            if not event or event.deleted:
+                # проверка наличия у пациентки открытого обращения, созданного по одному из прошлых записей на приём
+                event = Event.query.join(EventType, rbRequestType).filter(
+                    Event.client_id == client_id,
+                    Event.deleted == 0,
+                    rbRequestType.code == 'pregnancy',
+                    Event.execDate.is_(None)
+                ).order_by(Event.setDate.desc()).first()
+        else:  # client_id is not None
+            event = None
+            ticket = None
         if not event:
             event = Event()
             at = default_AT_Heuristic()
@@ -74,7 +104,7 @@ def api_0_chart(event_id=None):
                 raise ApiException(500, u'Не настроен тип события - Случай беременности ОМС')
             event.eventType = ET
 
-            exec_person_id = ticket.ticket.schedule.person_id
+            exec_person_id = ticket.ticket.schedule.person_id if ticket else current_user.get_main_user().id
             exec_person = Person.query.get(exec_person_id)
             event.execPerson = exec_person
             event.orgStructure = exec_person.org_structure
@@ -83,25 +113,23 @@ def api_0_chart(event_id=None):
             event.isPrimaryCode = EventPrimary.primary[0]
             event.order = EventOrder.planned[0]
 
-            client_id = ticket.client_id
-            setDate = ticket.ticket.begDateTime
-            note = ticket.note
+            note = ticket.note if ticket else ''
             event.client = Client.query.get(client_id)
-            event.setDate = setDate
+            event.setDate = datetime.now()
             event.note = note
-            event.externalId = get_new_event_ext_id(event.eventType.id, ticket.client_id)
+            event.externalId = get_new_event_ext_id(event.eventType.id, client_id)
             event.payStatus = 0
             db.session.add(event)
             ext = create_action(at.id, event)
             db.session.add(ext)
+            automagic = True
+        if ticket:
             ticket.event = event
             db.session.add(ticket)
-            db.session.commit()
-            automagic = True
-    else:
-        event = Event.query.get(event_id)
-        if not event:
-            raise ApiException(404, u'Обращение не найдено')
+        db.session.commit()
+        reevaluate_card_attrs(event, ext)
+        db.session.commit()
+
     if event.eventType.requestType.code != 'pregnancy':
         raise ApiException(400, u'Обращение не является случаем беременности')
     return {
@@ -122,7 +150,13 @@ def api_0_save_diagnoses(event_id=None):
         raise ApiException(404, u'Обращение не найдено')
     for diagnosis in diagnoses:
         diag = create_or_update_diagnosis(event, diagnosis)
+        if diagnosis['deleted']:
+            action = Action.query.get(diagnosis['action_id'])
+            property_code = diagnosis['action_property']['code']
+            action[property_code].value = [diag for diag in action[property_code].value if diag.id != diagnosis['id']]
         db.session.add(diag)
+    db.session.commit()
+    reevaluate_card_attrs(event)
     db.session.commit()
     return list(get_all_diagnoses(event))
 
@@ -136,27 +170,69 @@ def api_0_mini_chart(event_id=None):
         raise ApiException(404, u'Обращение не найдено')
     if event.eventType.requestType.code != 'pregnancy':
         raise ApiException(400, u'Обращение не является случаем беременности')
-    return represent_chart_for_routing(event)
+    return {
+        'header': represent_header(event),
+        'chart': represent_chart_for_routing(event)
+    }
+
+
+@module.route('/api/0/chart_measure_list/')
+@module.route('/api/0/chart_measure_list/<int:event_id>')
+@api_method
+def api_0_chart_measure_list(event_id=None):
+    event = Event.query.get(event_id)
+    if not event:
+        raise ApiException(404, u'Обращение не найдено')
+    if event.eventType.requestType.code != 'pregnancy':
+        raise ApiException(400, u'Обращение не является случаем беременности')
+    return {
+        'last_inspection_date': get_last_checkup_date(event_id)
+    }
+
+
+@module.route('/api/0/chart_header/')
+@module.route('/api/0/chart_header/<int:event_id>')
+@api_method
+def api_0_chart_header(event_id=None):
+    event = Event.query.get(event_id)
+    if not event:
+        raise ApiException(404, u'Обращение не найдено')
+    if event.eventType.requestType.code != 'pregnancy':
+        raise ApiException(400, u'Обращение не является случаем беременности')
+    return {
+        'header': represent_header(event),
+    }
 
 
 @module.route('/api/0/event_routing', methods=['POST'])
 @api_method
 def api_0_event_routing():
-    from nemesis.models.exists import MKB, organisation_mkb_assoc
-    diagnoses = request.get_json().get('diagnoses', None)
-    query = Organisation.query.filter(Organisation.isHospital == 1)
+    j = request.get_json()
+    diagnoses = j.get('diagnoses', None)
+    client_id = j.get('client_id')
+    if client_id:
+        client = Client.query.get(client_id)
+        if not client:
+            raise ApiException(404, u'Не найден пациент с id = {0}'.format(client_id))
+    else:
+        client = None
+
+    query = Organisation.query.filter(Organisation.isLPU == 1)
     if diagnoses:
-        # Без этого можно обойтись, но так хоть немного меньше надо будет проверить.
-        query = query.join(organisation_mkb_assoc, MKB).filter(MKB.id.in_([d['id'] for d in diagnoses]))
-    return [
-        {
-            'id': row.id,
-            'name': row.shortName,
-            'diagnoses': row.mkbs,
-        } for row in query
-        # Страшный костыль, потому что не получается сделать нормальный запрос
-        if not diagnoses or all(d['id'] in (m.id for m in row.mkbs) for d in diagnoses)
-    ]
+        mkb_ids = [d['id'] for d in diagnoses]
+        suit_orgs_q = db.session.query(Organisation.id).join(
+            Organisation.mkbs
+        ).filter(
+            MKB.id.in_(mkb_ids)
+        ).group_by(
+            Organisation.id
+        ).having(
+            func.Count(MKB.id.distinct()) == len(mkb_ids)
+        ).subquery('suitableOrgs')
+        query = query.join(suit_orgs_q, Organisation.id == suit_orgs_q.c.id)
+    suitable_orgs = query.all()
+    orgs = group_orgs_for_routing(suitable_orgs, client)
+    return orgs
 
 
 @module.route('/api/0/chart_close/')
@@ -170,7 +246,7 @@ def api_0_chart_close(event_id=None):
         event = Event.query.get(event_id)
         event.execDate = safe_datetime(data['exec_date'])
         db.session.commit()
-    return represent_event(event)
+    return represent_chart_for_epicrisis(event)
 
 
 @module.route('/api/0/chart/attach_lpu/', methods=['POST'])
@@ -252,6 +328,7 @@ def api_1_attach_lpu():
 @api_method
 def api_0_mini_attach_lpu(client_id):
     data = request.get_json()
+    event = Event.query.get(data['event_id'])
     now = datetime.now()
     attach_type = data['attach_type']
     attach_type_code = attach_codes.get(attach_type, str(attach_type))
@@ -270,7 +347,20 @@ def api_0_mini_attach_lpu(client_id):
     if attach.LPU_id != org_id:
         attach.LPU_id = org_id
         db.session.commit()
+        reevaluate_dates(event)
+        db.session.commit()
         return True
     else:
         db.session.rollback()
         return False
+
+
+@module.route('/api/0/gravidograma/')
+@module.route('/api/0/gravidograma/<int:event_id>')
+@api_method
+def api_0_gravidograma(event_id):
+    event = Event.query.get(event_id)
+    return {
+        'checkups': represent_checkups(event),
+        'card_attributes': represent_card_attributes(event)
+    }

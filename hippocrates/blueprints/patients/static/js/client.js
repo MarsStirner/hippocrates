@@ -84,8 +84,6 @@ angular.module('WebMis20.controllers').
                     } else {
                         $scope.reloadClient();
                     }
-                }, function(message) {
-                    alert(message);
                 });
             };
 
@@ -117,8 +115,6 @@ angular.module('WebMis20.controllers').
             $scope.reloadClient = function() {
                 client.reload().then(function() {
                     $scope.refresh_form();
-                }, function(message) {
-                    alert(message);
                 });
             };
 
@@ -223,6 +219,14 @@ angular.module('WebMis20.controllers').
                     alert(error);
                 });
             };
+
+            $scope.addVmpCoupon= function(client){
+                $scope.clientServices.addVmpCoupon(client)
+            }
+
+            $scope.removeVmpCoupon= function(client){
+                $scope.clientServices.removeVmpCoupon(client)
+            }
 
             $scope.reloadClient();
         }

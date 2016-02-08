@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import datetime
+import logging
 
 from flask import request
 from flask.ext.login import current_user
@@ -12,11 +13,15 @@ from nemesis.models.client import ClientAllergy, ClientIntoleranceMedicament, Bl
 from nemesis.models.event import Event
 from nemesis.systemwide import db
 from ...app import module
-from blueprints.risar.lib.card_attrs import reevaluate_card_attrs
-from ...lib.represent import represent_intolerance, represent_mother_action, represent_father_action
-from blueprints.risar.lib.utils import get_action, action_apt_values, get_action_type_id
+from blueprints.risar.lib.card_attrs import reevaluate_card_attrs, reevaluate_preeclampsia_risk
+from ...lib.represent import represent_intolerance, represent_mother_action, represent_father_action, \
+    represent_pregnancy, represent_anamnesis
+from blueprints.risar.lib.utils import get_action, action_apt_values, get_action_type_id, get_action_by_id
 from ...risar_config import pregnancy_apt_codes, risar_anamnesis_pregnancy, transfusion_apt_codes, \
-    risar_anamnesis_transfusion, risar_father_anamnesis, risar_mother_anamnesis
+    risar_anamnesis_transfusion, risar_father_anamnesis, risar_mother_anamnesis, risar_newborn_inspection
+
+
+logger = logging.getLogger('simple')
 
 
 __author__ = 'mmalkov'
@@ -76,15 +81,44 @@ def api_0_pregnancies_post(action_id=None):
         action = Action.query.get(action_id)
         if action is None:
             raise ApiException(404, 'Action not found')
+    event = Event.query.get(action.event_id)
     json = request.get_json()
-    for key in pregnancy_apt_codes:
-        action.propsByCode[key].value = json.get(key)
+    newborn_inspections = json.pop('newborn_inspections', [])
+    for code in pregnancy_apt_codes:
+        if code not in action.propsByCode:
+            logger.info('Skipping "%s" in old/corrupted Action id = %s, flat_code = "%s"', code, action_id, risar_anamnesis_pregnancy)
+            continue
+        action.propsByCode[code].value = json.get(code)
+
+    child_inspection_actions = []
+    for child_inspection in newborn_inspections:
+        if not child_inspection:
+            continue  # How can it be?
+        child_action_id = child_inspection.pop('id', None)
+        child_action = get_action_by_id(child_action_id, event,  risar_newborn_inspection, True)
+        child_action.deleted = child_inspection.get('deleted', 0)
+        for code, value in child_inspection.iteritems():
+            prop = child_action.propsByCode.get(code)
+            if not prop:
+                logger.info('Skipping "%s" in old/corrupted Action id = %s, flat_code = "%s"', code, child_action_id, risar_newborn_inspection)
+                continue
+            prop.value = value
+        db.session.add(child_action)
+        if not child_action.deleted:
+            child_inspection_actions.append(child_action)
+
+    db.session.commit()
+
+    action.propsByCode['newborn_inspections'].value = [
+        {'id': child_action.id}
+        for child_action in child_inspection_actions
+    ]
+
     db.session.add(action)
     db.session.commit()
-    return dict(
-        action_apt_values(action, pregnancy_apt_codes),
-        id=action.id
-    )
+    reevaluate_preeclampsia_risk(event)
+    db.session.commit()
+    return represent_pregnancy(action)
 
 
 # Переливания
@@ -237,6 +271,16 @@ def api_0_intolerances_post(i_type, object_id=None):
     return represent_intolerance(obj)
 
 
+@module.route('/api/0/chart/<int:event_id>/anamnesis', methods=['GET'])
+@api_method
+def api_0_chart_anamnesis(event_id):
+    event = Event.query.get(event_id)
+    return {
+        'client_id': event.client.id,
+        'anamnesis': represent_anamnesis(event),
+    }
+
+
 @module.route('/api/0/chart/<int:event_id>/mother', methods=['GET', 'POST'])
 @api_method
 def api_0_chart_mother(event_id):
@@ -245,8 +289,6 @@ def api_0_chart_mother(event_id):
         raise ApiException(404, 'Event not found')
     if request.method == 'GET':
         action = get_action(event, risar_mother_anamnesis)
-        if not action:
-            raise ApiException(404, 'Action not found')
     else:
         action = get_action(event, risar_mother_anamnesis, True)
         for code, value in request.get_json().iteritems():
@@ -258,7 +300,7 @@ def api_0_chart_mother(event_id):
                     .order_by(BloodHistory.bloodDate.desc()) \
                     .first()
                 if mother_blood_type and value['id'] != mother_blood_type.bloodType_id or not mother_blood_type:
-                    n = BloodHistory(value['id'], datetime.date.today(), current_user.id, event.client)
+                    n = BloodHistory.create(value['id'], datetime.date.today(), current_user.id, event.client)
                     db.session.add(n)
             elif (code == 'finished_diseases' or code == 'current_diseases') and value:
                 prop = action.propsByCode[code]
@@ -278,8 +320,6 @@ def api_0_chart_father(event_id):
         raise ApiException(404, 'Event not found')
     if request.method == 'GET':
         action = get_action(event, risar_father_anamnesis)
-        if not action:
-            raise ApiException(404, 'Action not found')
     else:
         action = get_action(event, risar_father_anamnesis, True)
         for code, value in request.get_json().iteritems():

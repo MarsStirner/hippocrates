@@ -1,3 +1,4 @@
+# -*- encoding: utf-8 -*-
 from flask import request
 
 from ...app import module
@@ -6,8 +7,8 @@ from nemesis.models.event import Event
 from nemesis.models.actions import Action, ActionProperty_Diagnosis
 from nemesis.systemwide import db
 from blueprints.risar.lib.card_attrs import reevaluate_card_attrs
-from ...lib.represent import represent_epicrisis, risar_newborn_inspection
-from blueprints.risar.lib.utils import get_action, get_action_by_id
+from ...lib.represent import represent_epicrisis, risar_newborn_inspection, represent_chart_for_epicrisis
+from blueprints.risar.lib.utils import get_action, get_action_by_id, close_open_checkups
 from ...risar_config import risar_epicrisis
 
 
@@ -21,17 +22,18 @@ def api_0_chart_epicrisis(event_id):
         raise ApiException(404, 'Event not found')
     if request.method == 'GET':
         action = get_action(event, risar_epicrisis)
-        if not action:
-            raise ApiException(404, 'Action not found')
     else:
         action = get_action(event, risar_epicrisis, True)
+        if not action.id:
+            close_open_checkups(event_id)  # закрыть все незакрытые осмотры
         for code, value in request.get_json().iteritems():
             if code not in ('id', 'newborn_inspections', ) + diag_codes and code in action.propsByCode:
                 action.propsByCode[code].value = value
             elif code in diag_codes and value:
                 property = action.propsByCode[code]
-                property.value = ActionProperty_Diagnosis.objectify(property, value)
+                property.value = value
 
+        child_inspection_actions = []
         for child_inspection in request.json['newborn_inspections']:
             if child_inspection:
                 child_action = get_action_by_id(child_inspection.get('id'), event,  risar_newborn_inspection, True)
@@ -41,10 +43,18 @@ def api_0_chart_epicrisis(event_id):
                     elif code == 'sex' and value:
                         child_action.propsByCode['sex'].value = 1 if value['code'] == 'male' else 2
                 db.session.add(child_action)
+                db.session.commit()
+                if not child_action.deleted:
+                    child_inspection_actions.append({'id': child_action.id})
+
+        action.propsByCode['newborn_inspections'].value = child_inspection_actions
         db.session.commit()
         reevaluate_card_attrs(event)
         db.session.commit()
-    return represent_epicrisis(event, action)
+    return {
+        'chart': represent_chart_for_epicrisis(event),
+        'epicrisis': represent_epicrisis(event, action) if action else None
+    }
 
 
 @module.route('/api/0/epicrisis/newborn_inspection/')
