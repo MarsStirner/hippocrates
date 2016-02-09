@@ -6,7 +6,8 @@ from sqlalchemy.orm import lazyload
 from nemesis.lib.data import create_action, update_action
 from nemesis.lib.utils import safe_traverse_attrs, safe_dict, safe_traverse, safe_datetime
 from nemesis.models.actions import Action, ActionType, ActionProperty, ActionPropertyType
-from nemesis.models.event import Event, Diagnostic, Diagnosis
+from nemesis.models.event import Event
+from nemesis.models.diagnosis import Diagnostic, Diagnosis
 from nemesis.models.risar import rbPregnancyPathology, rbPerinatalRiskRate
 from nemesis.models.enums import ActionStatus
 from nemesis.models.exists import MKB
