@@ -123,13 +123,7 @@
                 </tr>
                 <tr>
                     <th class="text-right">Перенесенные заболевания <span>&nbsp;</span></th>
-                    <td>
-                        <wm-diagnosis model="anamnesis_mother.finished_diseases" list-mode="true"
-                                      can-add-new="true" can-delete="true" can-edit="true"
-                                      action="anamnesis_mother" event="chart"
-                                      params="{defaults:{diagnosis_type:rbDiagnosisType.get_by_code('2')},
-                                               required:{end_date:true}}" risar="true"></wm-diagnosis>
-                    </td>
+                    <td><wm-mkb-multiple ng-model="anamnesis_mother.finished_diseases"></wm-mkb-multiple></td>
                 </tr>
                 <tr>
                     <th class="text-right">Наследственность <span>&nbsp;</span></th>
@@ -137,18 +131,11 @@
                 </tr>
                 <tr>
                     <th class="text-right">Текущие заболевания <span>&nbsp;</span></th>
-                    <td>
-                        <wm-diagnosis model="anamnesis_mother.current_diseases" list-mode="true"
-                                      can-add-new="true" can-delete="true" can-edit="true"
-                                      action="anamnesis_mother" event="chart"
-                                      params="{defaults:{diagnosis_type:rbDiagnosisType.get_by_code('2')}}" risar="true"></wm-diagnosis>
-                    </td>
+                    <td><wm-mkb-multiple ng-model="anamnesis_mother.current_diseases"></wm-mkb-multiple></td>
                 </tr>
                 <tr>
                     <th class="text-right">Преэклампсия была у матери или сестры <span>&nbsp;</span></th>
-                    <td>
-                        <input ng-model="anamnesis_mother.preeclampsia" class="checkbox" type="checkbox">
-                    </td>
+                    <td><input ng-model="anamnesis_mother.preeclampsia" class="checkbox" type="checkbox"></td>
                 </tr>
                 <tr>
                     <th class="text-right">Вредные привычки <span>&nbsp;</span></th>
