@@ -225,7 +225,7 @@ def api_event_lab_res_dynamics():
     for property in properties:
         test_id = property.type.test_id
         if property.value:
-            date = property.action.propsByCode['TAKINGTIME'].value.datetime.strftime('%d.%m.%Y %H:%M')
+            date = property.action.takenTissueJournal.datetimeTaken.strftime('%d.%m.%Y %H:%M')
             if date not in dates:
                 dates.append(date)
             if test_id in dynamics:
