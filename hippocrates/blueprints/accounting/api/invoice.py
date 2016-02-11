@@ -19,13 +19,14 @@ def api_0_invoice_get(invoice_id=None):
     get_new = safe_bool(args.get('new', False))
 
     invoice_ctrl = InvoiceController()
-    if get_new:
-        invoice = invoice_ctrl.get_new_invoice(args)
-    elif invoice_id:
-        invoice = invoice_ctrl.get_invoice(invoice_id)
-    else:
-        raise ApiException(404, u'`invoice_id` required')
-    return InvoiceRepr().represent_invoice_full(invoice)
+    with invoice_ctrl.session.no_autoflush:
+        if get_new:
+            invoice = invoice_ctrl.get_new_invoice(args)
+        elif invoice_id:
+            invoice = invoice_ctrl.get_invoice(invoice_id)
+        else:
+            raise ApiException(404, u'`invoice_id` required')
+        return InvoiceRepr().represent_invoice_full(invoice)
 
 
 @module.route('/api/0/invoice/', methods=['PUT'])
@@ -35,19 +36,20 @@ def api_0_invoice_save(invoice_id=None):
     json_data = request.get_json()
 
     invoice_ctrl = InvoiceController()
-    if not invoice_id:
-        invoice = invoice_ctrl.get_new_invoice()
-        invoice = invoice_ctrl.update_invoice(invoice, json_data)
-        invoice_ctrl.store(invoice)
-    elif invoice_id:
-        invoice = invoice_ctrl.get_invoice(invoice_id)
-        if not invoice:
-            raise ApiException(404, u'Не найден Invoice с id = {0}'.format(invoice_id))
-        invoice = invoice_ctrl.update_invoice(invoice, json_data)
-        invoice_ctrl.store(invoice)
-    else:
-        raise ApiException(404, u'`invoice_id` required')
-    return InvoiceRepr().represent_invoice_full(invoice)
+    with invoice_ctrl.session.no_autoflush:
+        if not invoice_id:
+            invoice = invoice_ctrl.get_new_invoice()
+            invoice = invoice_ctrl.update_invoice(invoice, json_data)
+            invoice_ctrl.store(*invoice.get_all_entities())
+        elif invoice_id:
+            invoice = invoice_ctrl.get_invoice(invoice_id)
+            if not invoice:
+                raise ApiException(404, u'Не найден Invoice с id = {0}'.format(invoice_id))
+            invoice = invoice_ctrl.update_invoice(invoice, json_data)
+            invoice_ctrl.store(invoice)
+        else:
+            raise ApiException(404, u'`invoice_id` required')
+        return InvoiceRepr().represent_invoice_full(invoice)
 
 
 @module.route('/api/0/invoice/', methods=['DELETE'])
@@ -82,14 +84,15 @@ def api_0_invoice_calc_sum(invoice_id=None):
     json_data = request.get_json()
 
     invoice_ctrl = InvoiceController()
-    if not invoice_id:
-        invoice = invoice_ctrl.get_new_invoice()
-        invoice = invoice_ctrl.update_invoice(invoice, json_data)
-    elif invoice_id:
-        invoice = invoice_ctrl.get_invoice(invoice_id)
-        if not invoice:
-            raise ApiException(404, u'Не найден Invoice с id = {0}'.format(invoice_id))
-        invoice = invoice_ctrl.update_invoice(invoice, json_data)
-    else:
-        raise ApiException(404, u'`invoice_id` required')
-    return InvoiceRepr().represent_invoice_full(invoice)
+    with invoice_ctrl.session.no_autoflush:
+        if not invoice_id:
+            invoice = invoice_ctrl.get_new_invoice()
+            invoice = invoice_ctrl.update_invoice(invoice, json_data)
+        elif invoice_id:
+            invoice = invoice_ctrl.get_invoice(invoice_id)
+            if not invoice:
+                raise ApiException(404, u'Не найден Invoice с id = {0}'.format(invoice_id))
+            invoice = invoice_ctrl.update_invoice(invoice, json_data)
+        else:
+            raise ApiException(404, u'`invoice_id` required')
+        return InvoiceRepr().represent_invoice_full(invoice)

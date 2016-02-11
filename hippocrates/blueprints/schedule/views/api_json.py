@@ -154,7 +154,7 @@ def api_schedule_description_post():
         dt = (datetime.datetime.combine(schedule.date, schedule.endTime) -
               datetime.datetime.combine(schedule.date, schedule.begTime)) / planned
         it = schedule.begTimeAsDt
-        attendanceType = rbAttendanceType.query.filter(rbAttendanceType.code == 'planned').first()
+        attendanceType = rbAttendanceType.query.filter(rbAttendanceType.code == u'planned').first()
         for i in xrange(planned):
             ticket = make_default_ticket(schedule)
             begDateTime = datetime.datetime.combine(schedule.date, it.time())
@@ -165,14 +165,14 @@ def api_schedule_description_post():
             db.session.add(ticket)
 
         if extra:
-            attendanceType = rbAttendanceType.query.filter(rbAttendanceType.code == 'extra').first()
+            attendanceType = rbAttendanceType.query.filter(rbAttendanceType.code == u'extra').first()
             for i in xrange(extra):
                 ticket = make_default_ticket(schedule)
                 ticket.attendanceType = attendanceType
                 db.session.add(ticket)
 
         if cito:
-            attendanceType = rbAttendanceType.query.filter(rbAttendanceType.code == 'CITO').first()
+            attendanceType = rbAttendanceType.query.filter(rbAttendanceType.code == u'CITO').first()
             for i in xrange(cito):
                 ticket = make_default_ticket(schedule)
                 ticket.attendanceType = attendanceType
@@ -401,7 +401,7 @@ def api_appointment():
         if appointment_type_id:
             client_ticket.appointmentType_id = appointment_type_id
         else:
-            client_ticket.appointmentType = rbAppointmentType.query.filter(rbAppointmentType.code == 'amb').first()
+            client_ticket.appointmentType = rbAppointmentType.query.filter(rbAppointmentType.code == u'amb').first()
         db.session.add(client_ticket)
     if 'note' in data:
         client_ticket.note = data['note']

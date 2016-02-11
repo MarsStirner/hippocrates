@@ -2,9 +2,11 @@
 
 import datetime
 import logging
+import os
 
 from flask import abort, request
 
+from nemesis.app import app
 from nemesis.systemwide import db
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.utils import jsonify, parse_id, public_endpoint, safe_int, safe_traverse, safe_traverse_attrs
@@ -12,12 +14,13 @@ from blueprints.patients.app import module
 from nemesis.lib.sphinx_search import SearchPatient
 from nemesis.lib.jsonify import ClientVisualizer
 from nemesis.models.client import Client, ClientFileAttach, ClientDocument, ClientPolicy, ClientContact
-from nemesis.models.exists import FileMeta, FileGroupDocument
+from nemesis.models.exists import FileMeta, FileGroupDocument, VMPCoupon, MKB, QuotaType
+from nemesis.lib.utils import safe_date
 from blueprints.patients.lib.utils import (set_client_main_info, ClientSaveException, add_or_update_doc,
     add_or_update_address, add_or_update_copy_address, add_or_update_policy, add_or_update_blood_type,
     add_or_update_allergy, add_or_update_intolerance, add_or_update_soc_status, add_or_update_relation,
     add_or_update_contact, generate_filename, save_new_file, delete_client_file_attach_and_relations,
-    add_or_update_work_soc_status
+    add_or_update_work_soc_status, store_file_locally
 )
 
 
@@ -398,3 +401,62 @@ def api_patient_file_attach_delete():
             'idx': FileMeta.idx - 1
         })
         db.session.commit()
+
+
+@module.route('/api/patient_get_vmpcoupons.json', methods=['GET'])
+@api_method
+def api_patient_get_vmpcoupons():
+    client_id = request.args['client_id']
+    coupon_list = VMPCoupon.query.filter(VMPCoupon.client_id == client_id, VMPCoupon.deleted == 0, VMPCoupon.clientQuoting == None).all()
+    return coupon_list
+
+
+@module.route('/api/patient_coupon_parse.json', methods=['POST'])
+@api_method
+def api_patient_coupon_parse():
+    data = request.json
+    coupon_file = data['coupon']
+    file_content = coupon_file.get('binary_b64')
+    head, content = file_content.split(',')
+    coupon = VMPCoupon.from_xlsx(content)
+    coupon.file = file_content
+    return coupon
+
+
+@module.route('/api/patient_coupon_save.json', methods=['POST'])
+@api_method
+def api_patient_coupon_save():
+    data = request.json
+    coupon_data = data['coupon']
+    coupon_file = data['coupon_file']
+    client_id = data['client_id']
+    number = coupon_data.get('number')
+
+    directory = 'c%s' % client_id
+    filepath = os.path.join(directory, '{}.xlsx'.format(number))
+    fullpath = os.path.join(app.config['FILE_STORAGE_PATH'], filepath)
+    store_file_locally(fullpath, coupon_file.get('binary_b64'))
+
+    coupon = VMPCoupon()
+    coupon.number = number
+    coupon.client_id = client_id
+    coupon.date = safe_date(coupon_data.get('date'))
+    coupon.MKB_object = MKB.query.get(safe_traverse(coupon_data, 'mkb', 'id'))
+    coupon.quotaType = QuotaType.query.filter(QuotaType.code == coupon_data.get('code')).first()
+    coupon.fileLink = fullpath
+    db.session.add(coupon)
+    db.session.commit()
+    return coupon
+
+
+@module.route('/api/patient_coupon_delete.json', methods=['POST'])
+@api_method
+def api_patient_coupon_delete():
+    data = request.json
+    coupon_data = data['coupon']
+    coupon_id = coupon_data.get('id')
+    coupon = VMPCoupon.query.get(coupon_id)
+    if not coupon:
+        raise ApiException(404, u'Не найдена запись VMPCoupon с id = {0}'.format(coupon_id))
+    coupon.deleted = 1
+    db.session.commit()

@@ -197,7 +197,7 @@ angular.module('WebMis20')
                                     property_name,
                                     property_code,
                                     property_is_assignable,
-                                    scope.action.readonly,
+                                    true,  // scope.action.readonly,
                                     inner_template.format(property_code),
                                     property.type.norm ? property.type.norm : ''
                                 );
@@ -206,7 +206,7 @@ angular.module('WebMis20')
                                     <div class="col-sm-3">\
                                         <label><input type="checkbox" ng-model="{1}.is_assigned">{0}</label>\
                                     </div>\
-                                    <div class="col-sm-9"><div ng-show="sas.selected({2})">{1}</div></div>\
+                                    <div class="col-sm-9"><div ng-show="sas.selected({3})">{2}</div></div>\
                                 </div>'.format(
                                     property_name,
                                     property_code,

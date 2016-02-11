@@ -101,13 +101,7 @@
                 </tr>
                 <tr>
                     <th>Перенесенные заболевания</th>
-                    <td>
-                        <wm-diagnosis model="anamnesis_father.finished_diseases" list-mode="true"
-                                      can-add-new="true" can-delete="true" can-edit="true"
-                                      action="anamnesis_father" event="chart"
-                                      params="{defaults:{diagnosis_type:rbDiagnosisType.get_by_code('2')},
-                                               required:{end_date:true}}" risar="true"></wm-diagnosis>
-                    </td>
+                    <td><wm-mkb-multiple ng-model="anamnesis_father.finished_diseases"></wm-mkb-multiple></td>
                 </tr>
                 <tr>
                     <th>Наследственность</th>
@@ -116,12 +110,7 @@
 
                 <tr>
                     <th>Текущие заболевания</th>
-                    <td>
-                        <wm-diagnosis model="anamnesis_father.current_diseases" list-mode="true"
-                                      can-add-new="true" can-delete="true" can-edit="true"
-                                      action="anamnesis_father" event="chart"
-                                      params="{defaults:{diagnosis_type:rbDiagnosisType.get_by_code('2')}}" risar="true"></wm-diagnosis>
-                    </td>
+                    <td><wm-mkb-multiple ng-model="anamnesis_father.current_diseases"></wm-mkb-multiple></td>
                 </tr>
 
                 <tr>

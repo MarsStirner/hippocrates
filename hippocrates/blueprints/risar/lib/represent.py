@@ -317,17 +317,12 @@ def represent_mother_action(event, action=None):
     )
 
     if represent_mother is not None:
-        evis = EventVisualizer()
         mother_blood_type = BloodHistory.query \
             .filter(BloodHistory.client_id == event.client_id) \
             .order_by(BloodHistory.bloodDate.desc()) \
             .first()
         if mother_blood_type:
             represent_mother['blood_type'] = mother_blood_type.bloodType
-        represent_mother['finished_diseases'] = [evis.make_diagnostic_record(diag) for diag in
-                                                 represent_mother['finished_diseases']] if represent_mother['finished_diseases'] else []
-        represent_mother['current_diseases'] = [evis.make_diagnostic_record(diag) for diag in
-                                                represent_mother['current_diseases']] if represent_mother['current_diseases'] else []
     return represent_mother
 
 
@@ -341,13 +336,6 @@ def represent_father_action(event, action=None):
         for prop in action.properties
         if prop.type.code in father_codes
     )
-
-    if represent_father is not None:
-        evis = EventVisualizer()
-        represent_father['finished_diseases'] = [evis.make_diagnostic_record(diag) for diag in
-                                                 represent_father['finished_diseases']] if represent_father['finished_diseases'] else []
-        represent_father['current_diseases'] = [evis.make_diagnostic_record(diag) for diag in
-                                                represent_father['current_diseases']] if represent_father['current_diseases'] else []
     return represent_father
 
 

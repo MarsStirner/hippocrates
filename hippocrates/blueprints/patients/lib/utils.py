@@ -35,7 +35,7 @@ def unformat_snils(snils):
 class ClientSaveException(ApiException):
     def __init__(self, message, data=None):
         if data:
-            message = '{0} {1}'.format(message, data)
+            message = u'{0} {1}'.format(message, data)
         super(ClientSaveException, self).__init__(422, message)
 
 

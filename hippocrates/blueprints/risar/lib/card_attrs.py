@@ -96,7 +96,7 @@ def default_AT_Heuristic():
     Получение ActionType, соответствующего атрибутам карточки
     :rtype: ActionType | None
     """
-    return ActionType.query.filter(ActionType.flatCode == 'cardAttributes').first()
+    return ActionType.query.filter(ActionType.flatCode == u'cardAttributes').first()
 
 
 def get_all_diagnoses(event):
@@ -110,7 +110,7 @@ def get_all_diagnoses(event):
     evis = EventVisualizer()
     for action in event.actions:
         for prop in action.properties:
-            if prop.type.typeName == 'Diagnosis' and prop.value:
+            if prop.type.typeName == u'Diagnosis' and prop.value:
                 if prop.type.isVector:
                     for diagnostic in prop.value:
                         diag = evis.make_diagnostic_record(diagnostic)

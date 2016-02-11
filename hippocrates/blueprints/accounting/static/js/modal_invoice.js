@@ -67,16 +67,19 @@ WebMis20.run(['$templateCache', function ($templateCache) {
                 </tr>\
                 </thead>\
                 <tbody>\
-                <tr ng-repeat="item in invoice.item_list">\
-                    <td>[[ $index + 1 ]]</td>\
+                <tr ng-repeat="item in invoice.item_list | flattenNested:\'subitem_list\'"\
+                    ng-class="getItemRowClass(item)">\
+                    <td>\
+                        <span ng-style="getLevelIndentStyle(item)" ng-bind="getNumerationText(item)"></span>\
+                    </td>\
                     <td>[[ item.service.service_name ]]</td>\
-                    <td>[[ item.service.price | moneyCut ]]</td>\
+                    <td>[[ item.price | moneyCut ]]</td>\
                     <td ng-if="isInvoiceWithDiscounts()">\
                         <ui-select ng-model="item.discount" ext-select-service-discount\
-                            ng-change="applyDiscount()" ng-if="!isInvoiceClosed()" allow-clear="true"\
+                            ng-change="onDiscountChanged(item)" ng-if="!isInvoiceClosed() && isDiscountAvailable(item)" allow-clear="true"\
                             theme="select2" append-to-body="true" placeholder="...">\
                         </ui-select>\
-                        <span ng-if="isInvoiceClosed()">[[ item.discount.description.short ]]</span>\
+                        <span ng-if="isInvoiceClosed() && isDiscountAvailable(item)">[[ item.discount.description.short ]]</span>\
                     </td>\
                     <td>[[ item.service.amount ]]</td>\
                     <td>[[ item.sum | moneyCut ]]</td>\
@@ -139,6 +142,19 @@ var InvoiceModalCtrl = function ($scope, $filter, AccountingService, PrintingSer
     $scope.isNewInvoice = function () {
         return !$scope.invoice.id;
     };
+    $scope.getLevelIndentStyle = function (item) {
+        return {
+            'margin-left': '{0}px'.format(10 * item.ui_attrs.level)
+        }
+    };
+    $scope.getNumerationText = function (item) {
+        if (item.ui_attrs.level === 0) return item.ui_attrs.idx + 1;
+        else return '‒';
+    };
+    $scope.getItemRowClass = function (item) {
+        if (item.ui_attrs.idx % 2 !== 0) return 'bg-muted';
+        else return '';
+    };
     $scope.saveAndClose = function () {
         $scope.save_invoice().then(function (updInvoice) {
             $scope.$close({
@@ -170,15 +186,31 @@ var InvoiceModalCtrl = function ($scope, $filter, AccountingService, PrintingSer
     $scope.isInvoiceWithDiscounts = function () {
         return $scope.invoice.can_add_discounts;
     };
+    $scope.onDiscountChanged = function (item) {
+        // при очистке значения виджета очищается атрибут модели
+        if (item.discount === undefined) {
+            item.discount = null;
+        }
+        $scope.applyDiscount();
+    };
     $scope.applyDiscount = function () {
         AccountingService.calc_invoice_sum($scope.invoice)
             .then(function (new_invoice) {
                 $scope.invoice = new_invoice;
             });
     };
+    var traverseApplyDiscounts = function (item) {
+        if ($scope.isDiscountAvailable(item)) {
+            item.discount = angular.copy($scope.newDiscount.val);
+        }
+
+        angular.forEach(item.subitem_list, function (subitem) {
+            traverseApplyDiscounts(subitem);
+        });
+    };
     $scope.applyDiscounts = function () {
         angular.forEach($scope.invoice.item_list, function (item) {
-            item.discount = angular.copy($scope.newDiscount.val);
+            traverseApplyDiscounts(item);
         });
         AccountingService.calc_invoice_sum($scope.invoice)
             .then(function (new_invoice) {
@@ -187,6 +219,15 @@ var InvoiceModalCtrl = function ($scope, $filter, AccountingService, PrintingSer
     };
     $scope.showSumWoDiscounts = function () {
         return $scope.invoice.sum_wo_discounts !== $scope.invoice.total_sum;
+    };
+    $scope.isDiscountAvailable = function (item) {
+        if (item.ui_attrs.level === 0) {
+            return !item.service.is_accumulative_price;
+        } else {
+            var root_idx = item.ui_attrs.root_idx,
+                root_item = $scope.invoice.item_list[root_idx];
+            return root_item.service.is_accumulative_price ? !item.service.is_accumulative_price : false;
+        }
     };
     $scope.ps_resolve = function () {
         return {

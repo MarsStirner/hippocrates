@@ -4,7 +4,7 @@ from flask import url_for
 from nemesis.app import app, bootstrap_app
 import config
 from nemesis.lib.frontend import frontend_config
-from version import version as app_version
+from blueprints.risar.risar_version import version as risar_version
 
 __author__ = 'viruzzz-kun'
 
@@ -16,56 +16,35 @@ bootstrap_app(os.path.join(os.path.dirname(__file__), 'templates'))
 def general_menu():
     from nemesis.lib.user import UserProfileManager
     menu_items = [dict(
-        link='index',
-        title=u'Главная страница',
-        homepage=True,
-        visible=(UserProfileManager.has_ui_doctor() or UserProfileManager.has_ui_registrator()),
-        icon='glyphicon glyphicon-home'
+        link='risar.index_html',
+        title=u'Рабочий стол',
+        visible=True,
+        icon='fa fa-home'
     ), dict(
-        link='patients.index',
-        title=u'Обслуживание пациентов',
-        visible=(UserProfileManager.has_ui_registrator() or UserProfileManager.has_ui_registrator_cut()),
-        icon='fa fa-users'
-    ), dict(
-        link='schedule.person_schedule_monthview',
-        title=u'Формирование графика',
-        visible=(UserProfileManager.has_ui_registrator()),
-        icon='fa fa-user-md'
-    ), dict(
-        link='schedule.index',
-        title=u'График работы',
-        visible=(UserProfileManager.has_ui_registrator() or UserProfileManager.has_ui_doctor()),
-        icon='fa fa-calendar'
-    ), dict(
-        link='schedule.doctor_schedule_day',
-        title=u'Приём пациентов',
-        visible=(UserProfileManager.has_ui_doctor()),
-        icon='fa fa-stethoscope'
-    ), dict(
-        link='patients.search',
-        title=u'Поиск пациентов',
-        visible=(UserProfileManager.has_ui_doctor()),
+        link='risar.html_search',
+        title=u'Расширенный поиск',
+        visible=True,
         icon='fa fa-search'
     ), dict(
-        link='event.get_events',
-        title=u'Обращения',
-        visible=(UserProfileManager.has_ui_registrator() or UserProfileManager.has_ui_doctor()),
-        icon='fa fa-medkit'
+        link='risar.html_errands_list',
+        title=u'Поручения',
+        visible=True,
+        icon='fa fa-flag-o'
     ), dict(
-        link='accounting.cashbook_html',
-        title=u'Приём платежей',
-        visible=UserProfileManager.has_ui_cashier(),
-        icon='fa fa-calculator'
+        external_link=app.config['CAESAR_URL'],
+        title=u'Администрирование системы',
+        visible=UserProfileManager.has_ui_admin(),
+        icon='fa fa-cog'
+    ), dict(
+        link='risar.html_mis',
+        title=u'МИС',
+        visible=True,
+        icon='fa fa-medkit'
     ), dict(
         link='anareports.index_html',
         title=u'Аналитические отчёты',
         visible=True,
         icon='fa fa-bar-chart'
-    ), dict(
-        link='biomaterials.index_html',
-        title=u'Биоматериалы',
-        visible=UserProfileManager.has_ui_nurse(),
-        icon='fa fa-eyedropper'
     )]
     return dict(main_menu=menu_items)
 
@@ -73,7 +52,7 @@ def general_menu():
 @app.context_processor
 def app_enum():
     return {
-        'app_version': app_version,
+        'app_version': risar_version,
     }
 
 
@@ -84,8 +63,8 @@ from blueprints.event.app import module as event_module
 from blueprints.patients.app import module as patients_module
 from blueprints.schedule.app import module as schedule_module
 from blueprints.actions.app import module as actions_module
-from blueprints.useraccount.app import module as useraccount_module
 from blueprints.risar.app import module as risar_module
+from blueprints.useraccount.app import module as useraccount_module
 
 app.register_blueprint(accounting_module, url_prefix='/accounting')
 app.register_blueprint(anareports_module, url_prefix='/anareports')
@@ -94,8 +73,8 @@ app.register_blueprint(event_module, url_prefix='/event')
 app.register_blueprint(patients_module, url_prefix='/patients')
 app.register_blueprint(schedule_module, url_prefix='/schedule')
 app.register_blueprint(actions_module, url_prefix='/actions')
-app.register_blueprint(useraccount_module, url_prefix='/user')
 app.register_blueprint(risar_module, url_prefix='/risar')
+app.register_blueprint(useraccount_module, url_prefix='/user')
 
 
 @frontend_config

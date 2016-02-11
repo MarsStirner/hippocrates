@@ -55,7 +55,6 @@ var EventMainInfoCtrl = function ($scope, $q, RefBookService, EventType, $filter
         }
     };
     $scope.services_added = function () {
-        // TODO:
         return $scope.event.is_new() && $scope.event.services.length;
     };
     $scope.cmb_result_available = function () {
@@ -108,7 +107,6 @@ var EventMainInfoCtrl = function ($scope, $q, RefBookService, EventType, $filter
     };
 
     $scope.filter_rb_request_type = function(request_type_kind) {
-        // TODO:
         return function(elem) {
             if (request_type_kind == 'policlinic'){
                 return elem.relevant && (elem.code == 'policlinic' || elem.code == '4' || elem.code == 'diagnosis' || elem.code == 'diagnostic');
@@ -506,7 +504,7 @@ var EventMovingsCtrl = function($scope, $modal, RefBookService, ApiCalls) {
     }
 };
 
-var EventServicesCtrl = function($scope, $rootScope, AccountingService, InvoiceModalService, PrintingService) {
+var EventServicesCtrl = function($scope, $rootScope, $timeout, AccountingService, InvoiceModalService, PrintingService) {
     $scope.query = "";
     $scope.search_result = null;
     $scope.search_processed = false;
@@ -522,20 +520,26 @@ var EventServicesCtrl = function($scope, $rootScope, AccountingService, InvoiceM
         return $scope.editing;
     };
     $scope.startEditing = function () {
-        $scope.oldServices = _.deepCopy($scope.event.services);
         $scope.editing = true;
     };
     $scope.cancelEditing = function () {
         $scope.query_clear();
         $scope.editing = false;
-        $scope.event.services = $scope.oldServices;
+        $scope.refreshServiceList();
     };
     $scope.finishEditing = function () {
-        AccountingService.save_service_list($scope.event.event_id, $scope.event.services.grouped)
+        AccountingService.save_service_list($scope.event.event_id, $scope.event.services)
             .then(function (service_data) {
                 $scope.event.services = service_data;
                 $scope.query_clear();
                 $scope.editing = false;
+                $rootScope.$broadcast('serviceListChanged');
+            });
+    };
+    $scope.refreshServiceList = function () {
+        AccountingService.get_listed_services($scope.event.event_id)
+            .then(function (service_data) {
+                $scope.event.services = service_data;
                 $rootScope.$broadcast('serviceListChanged');
             });
     };
@@ -555,10 +559,7 @@ var EventServicesCtrl = function($scope, $rootScope, AccountingService, InvoiceM
             .then(function (result) {
                 $scope.event.invoices.push(result.invoice);
                 $scope.cancelEditingInvoice();
-                AccountingService.get_grouped_services($scope.event.event_id)
-                    .then(function (service_data) {
-                        $scope.event.services = service_data;
-                    });
+                $scope.refreshServiceList();
             });
     };
     $scope.openInvoice = function (idx) {
@@ -568,9 +569,10 @@ var EventServicesCtrl = function($scope, $rootScope, AccountingService, InvoiceM
                 var status = result.status;
                 if (status === 'ok') {
                     $scope.event.invoices.splice(idx, 1, result.invoice);
+                    $scope.refreshServiceList();
                 } else if (status === 'del') {
                     $scope.event.invoices.splice(idx, 1);
-                    // TODO: refresh service list?
+                    $scope.refreshServiceList();
                 }
             });
     };
@@ -597,39 +599,16 @@ var EventServicesCtrl = function($scope, $rootScope, AccountingService, InvoiceM
         $scope.query = '';
     };
 
-    $scope.refreshSGData = function () {
-        angular.forEach($scope.event.services.grouped, function (sg) {
-            var total_amount = 0,
-                total_sum = 0;
-            angular.forEach(sg.sg_list, function (service) {
-                total_amount += service.service.amount;
-                total_sum += parseFloat(service.service.sum);
-            });
-            sg.sg_data.total_amount = total_amount;
-            sg.sg_data.total_sum = total_sum.toFixed(2);
-        });
-    };
     $scope.addNewService = function (search_item) {
-        search_item = _.deepCopy(search_item);
-        var key = '{0}/{1}'.format(search_item.service.service_id, search_item.action.action_type_id),
-            idx = $scope.event.services.sg_map[key];
-        if (idx === undefined) {
-            $scope.event.services.sg_map[key] = $scope.event.services.grouped.length;
-            idx = $scope.event.services.sg_map[key];
-            $scope.event.services.grouped[idx] = {
-                sg_data: {
-                    service_code: search_item.service.service_code,
-                    service_name: search_item.service.service_name,
-                    at_name: search_item.action.at_name,
-                    price: search_item.service.price,
-                    total_amount: 0,
-                    total_sum: 0
-                },
-                sg_list: []
-            };
-        }
-        $scope.event.services.grouped[idx].sg_list.push(search_item);
-        $scope.refreshSGData();
+        AccountingService.get_service(undefined, {
+            service_kind_id: safe_traverse(search_item, ['service_kind', 'id']),
+            price_list_item_id: search_item.price_list_item_id,
+            event_id: $scope.event.info.id,
+            serviced_entity_from_search: search_item
+        })
+            .then(function (new_service) {
+                $scope.event.services.push(new_service);
+            });
     };
     $scope.get_ps_resolve = function (invoice) {
         return {
@@ -637,12 +616,18 @@ var EventServicesCtrl = function($scope, $rootScope, AccountingService, InvoiceM
             event_id: $scope.event.info.id
         }
     };
-
-    $scope.get_class = function (service) {
-        var result = [];
-        result.push('info');
-        return result;
+    var traverseServices = function (service) {
+        service.ui_attrs.expanded = (!service.id || service.service_kind.code !== 'lab_action');
+        service.ui_attrs.visible = (!service.id || service.service_kind.code !== 'lab_test');
+        angular.forEach(service.subservice_list, traverseServices);
     };
+    $scope.hideLabSubservices = function () {
+        angular.forEach($scope.event.services, traverseServices);
+    };
+
+    $timeout(function () {
+        $scope.hideLabSubservices();
+    }, 0);
 
     $scope.$on('event_loaded', function() {
         $scope.query_clear();
@@ -800,6 +785,14 @@ var StationaryEventInfoCtrl = function ($scope, $controller, $modal, $http, WMSt
     var event = $scope.event = new WMStationaryEvent($scope.event_id, $scope.client_id, $scope.ticket_id);
     $scope.create_mode = $scope.event.is_new();
     $scope.initialize();
+    $scope.$watchCollection(function() {
+        return [safe_traverse($scope.event, ['received', 'weight', 'value']),
+                safe_traverse($scope.event, ['received', 'height', 'value'])];
+    }, function(n, o) {
+        if (n !== o && n[0] && n[1]) {
+            $scope.event.info.body_area = Math.sqrt(n[0]*n[1]/3600).toFixed(2);
+        }
+    });
 };
 var PoliclinicEventInfoCtrl = function ($scope, $controller, WMPoliclinicEvent) {
     $controller('EventInfoCtrl', {$scope: $scope});
@@ -808,7 +801,27 @@ var PoliclinicEventInfoCtrl = function ($scope, $controller, WMPoliclinicEvent) 
     $scope.initialize();
 
 };
-
+var EventQuotingCtrl = function ($scope, RefBookService) {
+    var original_quoting = angular.extend({}, $scope.event.vmp_quoting);
+    $scope.rbQuotaType = RefBookService.get('QuotaType');
+    $scope.rbPatientModel = RefBookService.get('rbPacientModel');
+    $scope.rbTreatment = RefBookService.get('rbTreatment');
+    $scope.quotaTypeFormatter = function (selected) {
+        return selected ? '{0} - {1}'.format(selected.code, selected.name) : undefined;
+    };
+    $scope.$watch(function () {
+        return safe_traverse($scope.event, ['vmp_quoting', 'coupon']);
+    }, function (n, o) {
+        if (n !== o) {
+            if(!$scope.event.vmp_quoting.mkb){
+                $scope.event.vmp_quoting.mkb = $scope.event.vmp_quoting.coupon.mkb;
+            }
+            if(!$scope.event.vmp_quoting.quota_type){
+                $scope.event.vmp_quoting.quota_type = $scope.event.vmp_quoting.coupon.quota_type;
+            }
+        }
+    });
+};
 
 WebMis20.controller('EventDiagnosesCtrl', ['$scope', 'RefBookService', '$http', EventDiagnosesCtrl]);
 WebMis20.controller('EventMainInfoCtrl', ['$scope', '$q', 'RefBookService', 'EventType', '$filter',
@@ -816,7 +829,7 @@ WebMis20.controller('EventMainInfoCtrl', ['$scope', '$q', 'RefBookService', 'Eve
 WebMis20.controller('EventStationaryInfoCtrl', ['$scope', '$filter', '$modal', '$q', 'RisarApi', 'ApiCalls', EventStationaryInfoCtrl]);
 WebMis20.controller('EventReceivedCtrl', ['$scope', '$modal', 'RefBookService', EventReceivedCtrl]);
 WebMis20.controller('EventMovingsCtrl', ['$scope', '$modal', 'RefBookService', 'ApiCalls', EventMovingsCtrl]);
-WebMis20.controller('EventServicesCtrl', ['$scope', '$rootScope', 'AccountingService',
+WebMis20.controller('EventServicesCtrl', ['$scope', '$rootScope', '$timeout', 'AccountingService',
     'InvoiceModalService', 'PrintingService', EventServicesCtrl]);
 WebMis20.controller('EventInfoCtrl', ['$scope', 'WMEvent', '$http', 'RefBookService', '$window', '$document',
     'PrintingService', '$filter', '$modal', 'WMEventServices', 'WMEventFormState', 'MessageBox', EventInfoCtrl]);

@@ -196,12 +196,15 @@ WebMis20.run(['$templateCache', function ($templateCache) {
                 </tr>\
                 </thead>\
                 <tbody>\
-                <tr ng-repeat="item in invoice.item_list">\
-                    <td>[[ $index + 1 ]]</td>\
+                <tr ng-repeat="item in invoice.item_list | flattenNested:\'subitem_list\'"\
+                    ng-class="getItemRowClass(item)">\
+                    <td>\
+                        <span ng-style="getLevelIndentStyle(item)" ng-bind="getNumerationText(item)"></span>\
+                    </td>\
                     <td>[[ item.service.service_name ]]</td>\
-                    <td>[[ item.service.price ]]</td>\
-                    <td>[[ item.service.amount ]]</td>\
-                    <td>[[ item.service.sum ]]</td>\
+                    <td>[[ item.price ]]</td>\
+                    <td>[[ item.amount ]]</td>\
+                    <td>[[ item.sum ]]</td>\
                 </tr>\
                 </tbody>\
                 <tbody>\
@@ -245,6 +248,19 @@ var CashbookInvoiceModalCtrl = function ($scope, $q, AccountingService, RefBookS
         if ($scope.deposit_payment.checked) {
             $scope.trxes.payer_balance_trx.sum = $scope.invoice.total_sum;
         }
+    };
+    $scope.getLevelIndentStyle = function (item) {
+        return {
+            'margin-left': '{0}px'.format(10 * item.ui_attrs.level)
+        }
+    };
+    $scope.getNumerationText = function (item) {
+        if (item.ui_attrs.level === 0) return item.ui_attrs.idx + 1;
+        else return '‒';
+    };
+    $scope.getItemRowClass = function (item) {
+        if (item.ui_attrs.idx % 2 !== 0) return 'bg-muted';
+        else return '';
     };
     $scope.saveAndClose = function () {
         $scope.make_invoice_trxes().then(function (invoice) {

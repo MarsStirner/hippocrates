@@ -10,9 +10,12 @@
         url_client_html = '{{ url_for('patients.patient') }}',
         url_client_search = '{{ url_for('patients.api_search_clients') }}',
         url_client_patients = '{{ url_for('patients.api_patient_events_get') }}',
+        url_client_get_vmpcoupons = '{{ url_for('patients.api_patient_get_vmpcoupons') }}',
         url_action_get = '{{ url_for('actions.api_action_get') }}',
         url_action_new = '{{ url_for('actions.api_action_new_get') }}',
         url_action_save = '{{ url_for('actions.api_action_post') }}',
+        url_rls_search = '{{ url_for('actions.api_search_rls') }}',
+        url_api_check_action_service_requirement = '{{ url_for('actions.api_check_action_service_requirement') }}',
         url_event_get = '{{ url_for('event.api_event_info') }}',
         url_event_new = '{{ url_for('event.api_event_new_get') }}',
         url_event_save = '{{ url_for('event.api_event_save') }}',
@@ -62,6 +65,9 @@
         url_wm10_create_event = '{{ "{0}patients/{{0}}/appeals/new/?token={1}&role={2}".format(config['WEBMIS10_URL'], request.cookies.get(config['CASTIEL_AUTH_TOKEN']), current_user.current_role) | safe}}',
         url_api_event_make_payment = '{{ url_for('accounting.api_event_make_payment') }}',
         url_api_get_event_payments = '{{ url_for('accounting.api_get_event_payments') }}',
+        url_api_coupon_parse = '{{ url_for('patients.api_patient_coupon_parse') }}',
+        url_api_coupon_save = '{{ url_for('patients.api_patient_coupon_save') }}',
+        url_api_coupon_delete = '{{ url_for('patients.api_patient_coupon_delete') }}',
         url_get_ttj_records = '{{ url_for('biomaterials.api_get_ttj_records') }}',
         url_ttj_update_status = '{{ url_for('biomaterials.api_ttj_change_status') }}';
     </script>
