@@ -16,6 +16,10 @@ def get_mother_bt(event):
         .first()
 
 
+def diags_in_card(card, needles):
+    return False
+
+
 def calc_risk_groups(event):
     card = PregnancyCard.get_for_event(event)
 
@@ -30,7 +34,7 @@ def calc_risk_groups(event):
         mkb_from_mkb
     )
     p2_needles = explode_needles(u'O10-O15, O20.0, O30, O33.1, O34.0, O34.1, O34.2, O34.3, O34.8, O35.0-O35.9, O98-O99, Z35.5, Z35.6')
-    p2 = True  # TODO: В диагнозах случая (всех)
+    p2 = diags_in_card(card, p2_needles)
     p3 = any(preg['pregnancyResult'].value_raw in ('miscarriage27', 'miscarriage37') for preg in card.prev_pregs)
     p4_needles = explode_needles(u'O10-O84, O00-O08')
     p4_a = any(
@@ -56,7 +60,7 @@ def calc_risk_groups(event):
         mkb_from_mkb
     )
     p2_needles = explode_needles(u'O10-O16, Z35.5, Z35.6, O36.0, O30.0-O30.9, O23.0, O26.6, O24.0-O24.4, O24.9, O99.0')
-    p2 = True
+    p2 = diags_in_card(card, p2_needles)
     p3_needles = explode_needles(u'O10-O92')
     p3_a = any(
         hay_check(preg['pregnancy_pathology'].value_raw, p3_needles)
@@ -77,7 +81,7 @@ def calc_risk_groups(event):
         mkb_from_mkb
     )
     p2_needles = explode_needles(u'O46.0, O46.8, O46.9, O43.0, O44.0, O44.1, O45.0, O45.8, O45.9, О99.0')
-    p2 = True
+    p2 = diags_in_card(card, p2_needles)
     p3_needles = explode_needles(u'O72.0-O72.3, O03-O08')
     p3_a = any(
         hay_check(preg['pregnancy_pathology'].value_raw, p3_needles)
@@ -102,7 +106,7 @@ def calc_risk_groups(event):
         mkb_from_mkb
     )
     p2_needles = explode_needles(u'O34.1, O34.4, O34.8, O33.0-O33.4, O32.5, O30, O65, O83.1')
-    p2 = True
+    p2 = diags_in_card(card, p2_needles)
     p3_needles = explode_needles(u'O00-O08, O82')
     p3_a = any(
         hay_check(preg['pregnancy_pathology'].value_raw, p3_needles)
@@ -127,6 +131,7 @@ def calc_risk_groups(event):
         mkb_from_mkb
     )
     p2_needles = explode_needles(u'O24.0-O24.4, O24.9, O33.4, O36.6')
+    p2 = diags_in_card(card, p2_needles)
     p3_needles = explode_needles(u'O36.6')
     p3_a = any(
         hay_check(preg['pregnancy_pathology'].value_raw, p3_needles)
@@ -136,7 +141,7 @@ def calc_risk_groups(event):
         hay_check(preg['delivery_pathology'].value_raw, p3_needles)
         for preg in card.prev_pregs
     )
-    p3 = any(
+    p4 = any(
         (preg['pregnancyResult'].value_raw == 'normal' and
          preg['pregnancy_week'] >= 36 and
          (max(child['weight'] for child in preg['newborn_inspections']) >= 4000))
@@ -153,7 +158,7 @@ def calc_risk_groups(event):
         mkb_from_mkb
     )
     p2_needles = explode_needles(u'O36.0')
-    p2 = True  # TODO:
+    p2 = diags_in_card(card, p2_needles)
     if p1 or p2:
         yield '06'
 
@@ -162,7 +167,9 @@ def calc_risk_groups(event):
     # p1 и p2 идентичны предыдущей группе риска
     father_bt = card.anamnesis.father['blood_type'].value
     mother_bt = get_mother_bt(event)
-    p3 = father_bt and mother_bt and mother_bt.bloodType.code in ('1-', '1+') and father_bt.code in ('2+', '2-','3+', '3-', '4+', '4-')
+    p3 = father_bt and mother_bt and \
+         mother_bt.bloodType.code in ('1-', '1+') and \
+         father_bt.code in ('2+', '2-', '3+', '3-', '4+', '4-')
     if p1 or p2 or p3:
         yield '07'
 
@@ -174,7 +181,7 @@ def calc_risk_groups(event):
         mkb_from_mkb
     )
     p2_needles = explode_needles(u'O10-O16, O23.0-O23.9, O24.0-O24.4, O24.9, O45, O48, O99.4, O99.5, O98.0-O98.9, O99.0')
-    p2 = True
+    p2 = diags_in_card(card, p2_needles)
     p3_needles = explode_needles(u'O10-O16, O45, O99.0')
     p3_a = any(
         hay_check(preg['pregnancy_pathology'].value_raw, p3_needles)
@@ -195,6 +202,7 @@ def calc_risk_groups(event):
         mkb_from_mkb
     )
     p2_needles = explode_needles(u'O10-O15.9, O23.0, O36.3, O36.5, O43.8')
+    p2 = diags_in_card(card, p2_needles)
     p3 = any(
         (preg['pregnancyResult'].value_raw == 'normal' and
          preg['pregnancy_week'] >= 36 and
@@ -212,7 +220,7 @@ def calc_risk_groups(event):
         mkb_from_mkb
     )
     p2_needles = explode_needles(u'О34.2, О20.0')
-    p2 = True
+    p2 = diags_in_card(card, p2_needles)
     p3_needles = explode_needles(u'O82.0-O82.9')
     p3_a = any(
         hay_check(preg['pregnancy_pathology'].value_raw, p3_needles)
@@ -233,7 +241,7 @@ def calc_risk_groups(event):
         mkb_from_mkb
     )
     p2_needles = explode_needles(u'O43.1, O44, O45.9')
-    p2 = True
+    p2 = diags_in_card(card, p2_needles)
     p3_needles = explode_needles(u'O03-O08, O43, O44, O45')
     p3_a = any(
         hay_check(preg['pregnancy_pathology'].value_raw, p3_needles)
@@ -258,7 +266,7 @@ def calc_risk_groups(event):
         mkb_from_mkb
     )
     p2_needles = explode_needles(u'O98.0, O99.4, O99.5, O99.8, J00-J99')
-    p2 = True
+    p2 = diags_in_card(card, p2_needles)
     p3_needles = explode_needles(u'J45, J46')
     p3_a = any(
         hay_check(preg['pregnancy_pathology'].value_raw, p3_needles)
@@ -279,7 +287,7 @@ def calc_risk_groups(event):
         mkb_from_mkb
     )
     p2_needles = explode_needles(u'O22, O23, O24, O26.6, O34.3')
-    p2 = True
+    p2 = diags_in_card(card, p2_needles)
     p3_needles = explode_needles(u'O85, О86, O87, O91, O92')
     p3_a = any(
         hay_check(preg['pregnancy_pathology'].value_raw, p3_needles)
@@ -300,7 +308,7 @@ def calc_risk_groups(event):
         mkb_from_mkb
     )
     p2_needles = explode_needles(u'O10-O15.9, O20-O29, O26.6, O30, O32.1, O34.2, O36.0, O36.1, O41.0, O43, O44, O98')
-    p2 = True
+    p2 = diags_in_card(card, p2_needles)
     p3_needles = explode_needles(u'О10-О92, O99.0')
     p3_a = any(
         hay_check(preg['pregnancy_pathology'].value_raw, p3_needles)
