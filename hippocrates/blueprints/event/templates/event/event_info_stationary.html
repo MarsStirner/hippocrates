@@ -56,7 +56,7 @@
                                 </div>
                             </div>
                         </ng-form>
-                        {% if event and event.is_stationary %}
+                        {% if event and event.is_stationary and (event.is_vmp or event.is_oms) %}
                             {% include "event/_event_vmp_coupon.html" %}
                         {% endif %}
                         {% if user_profiles_mng.has_ui_doctor() and user_utils.can_read_dignoses(event) %}
