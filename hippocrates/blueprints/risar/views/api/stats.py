@@ -4,6 +4,7 @@ import datetime
 
 from flask import request
 
+from blueprints.risar.lib.card import PregnancyCard
 from nemesis.app import app
 from nemesis.lib.apiutils import api_method
 from nemesis.lib.utils import safe_int
@@ -18,7 +19,6 @@ from nemesis.models.utils import safe_current_user_id
 from nemesis.models.risar import TerritorialRate, rbRateType, Errand, rbErrandStatus
 from nemesis.systemwide import db
 from blueprints.risar.app import module
-from blueprints.risar.lib.card_attrs import get_card_attrs_action
 from blueprints.risar.lib.represent import represent_chart_short, represent_errand
 from blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
 from blueprints.risar.risar_config import checkup_flat_codes
@@ -88,7 +88,7 @@ def api_0_current_stats():
     events_all = len(event_list)
     events_45 = len(filter(lambda x: get_pregnancy_week(x) >= 45, event_list))
     events_2_months = len(filter(lambda x: two_months(x), event_list))
-    events_undefined_risk = len(filter(lambda x: get_card_attrs_action(x)['prenatal_risk_572'].value.code == 'undefined', event_list))
+    events_undefined_risk = len(filter(lambda x: PregnancyCard.get_for_event(x).attrs['prenatal_risk_572'].value.code == 'undefined', event_list))
     return {
         'events_all': events_all,
         'events_45': events_45,
@@ -166,7 +166,7 @@ def api_0_need_hospitalization(person_id=None):
     # получение списка пациенток врача, которые нуждаются в госпитализации в стационар 2/3 уровня
 
     def get_delivery_date(event):
-        action = get_card_attrs_action(event)
+        action = PregnancyCard.get_for_event(event).attrs
         return action['predicted_delivery_date'].value
 
     if not person_id:

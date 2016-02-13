@@ -1,44 +1,21 @@
 # -*- coding: utf-8 -*-
-import itertools
 import datetime
 
-from nemesis.lib.data import create_action
+from blueprints.risar.lib.card import PregnancyCard
+from blueprints.risar.lib.utils import get_action, get_action_list, HIV_diags, syphilis_diags, hepatitis_diags, \
+    tuberculosis_diags, scabies_diags, pediculosis_diags, multiple_birth, hypertensia, kidney_diseases, collagenoses, \
+    vascular_diseases, diabetes, antiphospholipid_syndrome, get_event_diag_mkbs, pregnancy_pathologies, risk_mkbs
+from blueprints.risar.models.risar import RisarRiskGroup
+from blueprints.risar.risar_config import checkup_flat_codes, risar_mother_anamnesis, risar_epicrisis, risar_anamnesis_pregnancy
 from nemesis.lib.jsonify import EventVisualizer
 from nemesis.lib.utils import safe_dict
 from nemesis.models.actions import Action, ActionType, ActionPropertyType, ActionProperty
 from nemesis.models.enums import PregnancyPathology, PreeclampsiaRisk, PerinatalRiskRate
-from nemesis.models.risar import rbPreEclampsiaRate, rbPerinatalRiskRate
+from nemesis.models.risar import rbPreEclampsiaRate
+from nemesis.models.utils import safe_current_user_id
 from nemesis.systemwide import db
-from blueprints.risar.lib.utils import get_action, get_action_list, HIV_diags, syphilis_diags, hepatitis_diags, \
-    tuberculosis_diags, scabies_diags, pediculosis_diags, multiple_birth, hypertensia, kidney_diseases, collagenoses, \
-    vascular_diseases, diabetes, antiphospholipid_syndrome, get_event_diag_mkbs, risk_rates_blockID, risk_rates_diagID, \
-    pregnancy_pathologies, risk_mkbs
-from blueprints.risar.risar_config import checkup_flat_codes, risar_mother_anamnesis, risar_epicrisis, risar_anamnesis_pregnancy
 
 __author__ = 'viruzzz-kun'
-
-
-def get_card_attrs_action(event, auto=True):
-    """
-    Получение Action, соответствующего атрибутам карточки
-    :param event: карточка беременной, обращение
-    :param auto: создавать ли действие автоматически
-    :type event: nemesis.models.event.Event
-    :type auto: bool
-    :return: действие с атрибутами
-    :rtype: Action|NoneType
-    """
-    action = Action.query.join(ActionType).filter(
-        Action.event == event,
-        Action.deleted == 0,
-        ActionType.flatCode == 'cardAttributes',
-    ).first()
-    if action is None and auto:
-        action = create_action(default_AT_Heuristic().id, event)
-        reevaluate_card_attrs(event, action)
-        db.session.add(action)
-        db.session.commit()
-    return action
 
 
 def get_pregnancy_week(event, action, date=None):
@@ -50,7 +27,7 @@ def get_pregnancy_week(event, action, date=None):
     :return: число недель от начала беременности на дату
     """
     if action is None:
-        action = get_card_attrs_action(event)
+        action = PregnancyCard.get_for_event(event).attrs
     start_date = action['pregnancy_start_date'].value
     if date is None:
         date = action['predicted_delivery_date'].value
@@ -160,7 +137,7 @@ def reevaluate_risk_rate(event, action=None):
     :type event: nemesis.models.event.Event
     """
     if action is None:
-        action = get_card_attrs_action(event)
+        action = PregnancyCard.get_for_event(event).attrs
 
     risk_rate_mkbs = risk_mkbs()
 
@@ -185,7 +162,7 @@ def reevaluate_preeclampsia_risk(event, card_attrs_action=None):
     :type event: nemesis.models.event.Event
     """
     if card_attrs_action is None:
-        card_attrs_action = get_card_attrs_action(event)
+        card_attrs_action = PregnancyCard.get_for_event(event).attrs
 
     delivery_years = []
     all_diagnoses = []
@@ -242,7 +219,7 @@ def reevaluate_dates(event, action=None):
     now = datetime.datetime.now()
 
     if action is None:
-        action = get_card_attrs_action(event)
+        action = PregnancyCard.get_for_event(event).attrs
 
     action['chart_modify_date'].value = now
     action['chart_modify_time'].value = now
@@ -306,7 +283,7 @@ def reevaluate_pregnacy_pathology(event, action=None):
     :type event: nemesis.models.event.Event
     """
     if action is None:
-        action = get_card_attrs_action(event)
+        action = PregnancyCard.get_for_event(event).attrs
 
     event_mkb_codes = set()
     for mkb in get_event_diag_mkbs(event, at_flatcodes=checkup_flat_codes):
@@ -346,7 +323,7 @@ def reevaluate_preeclampsia_rate(event, action=None):
     has_CAH = False
     heavy_diags = False
     if action is None:
-        action = get_card_attrs_action(event)
+        action = PregnancyCard.get_for_event(event).attrs
     preg_week = get_pregnancy_week(event, action)
 
     inspections = get_action_list(event, checkup_flat_codes).all()
@@ -400,6 +377,30 @@ def reevaluate_preeclampsia_rate(event, action=None):
     action['preeclampsia_comfirmed'].value = rbPreEclampsiaRate.query.filter(rbPreEclampsiaRate.code == confirmed_rate[1]).first().__json__()
 
 
+def reevaluate_risk_groups(event):
+    """
+    :type event: nemesis.models.event.Event
+    :param event:
+    :return:
+    """
+    from blueprints.risar.lib.risk_groups.calc import calc_risk_groups
+    existing_groups = event.risk_groups
+    found_groups = set(calc_risk_groups(event))
+    for rg_record in existing_groups:
+        code = rg_record.riskGroup_code
+        if code not in found_groups:
+            rg_record.deleted = 1
+        else:
+            found_groups.remove(code)
+        rg_record.modifyDatetime = datetime.datetime.now()
+        rg_record.modifyPerson_id = safe_current_user_id()
+    for code in found_groups:
+        risk_group = RisarRiskGroup()
+        risk_group.event = event
+        risk_group.riskGroup_code = code
+        db.session.add(risk_group)
+
+
 def reevaluate_card_attrs(event, action=None):
     """
     Пересчёт атрибутов карточки беременной
@@ -407,13 +408,14 @@ def reevaluate_card_attrs(event, action=None):
     :type event: application.models.event.Event
     """
     if action is None:
-        action = get_card_attrs_action(event)
+        action = PregnancyCard.get_for_event(event).attrs
     check_card_attrs_action_integrity(action)
     reevaluate_risk_rate(event, action)
     reevaluate_preeclampsia_risk(event, action)
     reevaluate_pregnacy_pathology(event, action)
     reevaluate_dates(event, action)
     reevaluate_preeclampsia_rate(event, action)
+    reevaluate_risk_groups(event)
 
 
 def check_disease(diagnoses):

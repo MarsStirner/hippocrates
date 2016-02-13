@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 from weakref import WeakKeyDictionary
 
-from blueprints.risar.lib.card_attrs import get_card_attrs_action
 from blueprints.risar.lib.utils import get_action, get_action_list
 from blueprints.risar.risar_config import risar_mother_anamnesis, risar_father_anamnesis, checkup_flat_codes, \
     risar_anamnesis_pregnancy
+from nemesis.lib.data import create_action
+from nemesis.models.actions import Action, ActionType
+from nemesis.systemwide import db
 
 __author__ = 'viruzzz-kun'
 
@@ -82,3 +84,28 @@ class PregnancyCard(object):
         else:
             result = g._pregnancy_card_cache[event.id]
         return result
+
+
+def get_card_attrs_action(event, auto=True):
+    """
+    Получение Action, соответствующего атрибутам карточки
+    :param event: карточка беременной, обращение
+    :param auto: создавать ли действие автоматически
+    :type event: nemesis.models.event.Event
+    :type auto: bool
+    :return: действие с атрибутами
+    :rtype: Action|NoneType
+    """
+    from blueprints.risar.lib.card_attrs import default_AT_Heuristic, reevaluate_card_attrs
+
+    action = Action.query.join(ActionType).filter(
+        Action.event == event,
+        Action.deleted == 0,
+        ActionType.flatCode == 'cardAttributes',
+    ).first()
+    if action is None and auto:
+        action = create_action(default_AT_Heuristic().id, event)
+        reevaluate_card_attrs(event, action)
+        db.session.add(action)
+        db.session.commit()
+    return action

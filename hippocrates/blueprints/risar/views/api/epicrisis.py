@@ -1,15 +1,15 @@
 # -*- encoding: utf-8 -*-
 from flask import request
 
-from ...app import module
-from nemesis.lib.apiutils import api_method, ApiException
-from nemesis.models.event import Event
-from nemesis.models.actions import Action, ActionProperty_Diagnosis
-from nemesis.systemwide import db
 from blueprints.risar.lib.card_attrs import reevaluate_card_attrs
-from ...lib.represent import represent_epicrisis, risar_newborn_inspection, represent_chart_for_epicrisis
 from blueprints.risar.lib.utils import get_action, get_action_by_id, close_open_checkups
-from ...risar_config import risar_epicrisis
+from nemesis.lib.apiutils import api_method, ApiException
+from nemesis.models.actions import Action
+from nemesis.models.event import Event
+from nemesis.systemwide import db
+from ...app import module
+from ...lib.represent import represent_epicrisis, represent_chart_for_epicrisis
+from ...risar_config import risar_epicrisis, risar_newborn_inspection
 
 
 @module.route('/api/0/chart/<int:event_id>/epicrisis', methods=['GET', 'POST'])

@@ -5,21 +5,20 @@ import logging
 from flask import request
 from flask.ext.login import current_user
 
+from blueprints.risar.lib.card_attrs import reevaluate_card_attrs, reevaluate_preeclampsia_risk
+from blueprints.risar.lib.utils import get_action, action_apt_values, get_action_type_id, get_action_by_id
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.data import create_action
-from nemesis.models.actions import Action, ActionProperty_Diagnosis
-from nemesis.lib.utils import safe_traverse
+from nemesis.lib.utils import safe_traverse, public_endpoint
+from nemesis.models.actions import Action
 from nemesis.models.client import ClientAllergy, ClientIntoleranceMedicament, BloodHistory
 from nemesis.models.event import Event
 from nemesis.systemwide import db
 from ...app import module
-from blueprints.risar.lib.card_attrs import reevaluate_card_attrs, reevaluate_preeclampsia_risk
 from ...lib.represent import represent_intolerance, represent_mother_action, represent_father_action, \
     represent_pregnancy, represent_anamnesis
-from blueprints.risar.lib.utils import get_action, action_apt_values, get_action_type_id, get_action_by_id
 from ...risar_config import pregnancy_apt_codes, risar_anamnesis_pregnancy, transfusion_apt_codes, \
     risar_anamnesis_transfusion, risar_father_anamnesis, risar_mother_anamnesis, risar_newborn_inspection
-
 
 logger = logging.getLogger('simple')
 
@@ -329,3 +328,12 @@ def api_0_chart_father(event_id):
         reevaluate_card_attrs(event)
         db.session.commit()
     return represent_father_action(event, action)
+
+
+@module.route('/api/0/chart/<int:event_id>/risks')
+@api_method
+@public_endpoint
+def api_0_chart_risks(event_id):
+    from ...lib.risk_groups.calc import calc_risk_groups
+    event = Event.query.get(event_id)
+    return list(calc_risk_groups(event))

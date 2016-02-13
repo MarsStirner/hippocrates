@@ -2,30 +2,31 @@
 
 import datetime
 import itertools
-
 from collections import defaultdict
 
+from blueprints.risar.lib.card import PregnancyCard
+from blueprints.risar.lib.card import get_card_attrs_action
+from blueprints.risar.lib.card_attrs import get_all_diagnoses, check_disease
+from blueprints.risar.lib.expert.em_manipulation import EventMeasureController
+from blueprints.risar.lib.expert.em_repr import EventMeasureRepr
+from blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
+from blueprints.risar.lib.utils import get_action, action_apt_values, get_action_type_id, risk_rates_diagID, \
+    risk_rates_blockID, get_action_list
+from blueprints.risar.lib.utils import week_postfix, get_action_property_value
+from blueprints.risar.risar_config import pregnancy_apt_codes, risar_anamnesis_pregnancy, transfusion_apt_codes, \
+    risar_anamnesis_transfusion, mother_codes, father_codes, risar_father_anamnesis, risar_mother_anamnesis, \
+    checkup_flat_codes, risar_epicrisis, attach_codes
 from nemesis.app import app
-from nemesis.systemwide import db
-from nemesis.lib.utils import safe_traverse_attrs, safe_traverse, safe_dict
 from nemesis.lib.jsonify import EventVisualizer
+from nemesis.lib.utils import safe_traverse_attrs
 from nemesis.lib.vesta import Vesta
 from nemesis.models.actions import Action, ActionType
 from nemesis.models.client import BloodHistory
+from nemesis.models.diagnosis import Diagnosis, Diagnostic
 from nemesis.models.enums import (Gender, AllergyPower, IntoleranceType, PerinatalRiskRate, PreeclampsiaRisk,
     PregnancyPathology, ErrandStatus)
-from nemesis.models.diagnosis import Diagnosis, Diagnostic
 from nemesis.models.exists import rbAttachType, MKB
-from blueprints.risar.lib.card_attrs import get_card_attrs_action, get_all_diagnoses, check_disease
-from blueprints.risar.lib.utils import get_action, action_apt_values, get_action_type_id, risk_rates_diagID, \
-    risk_rates_blockID, get_action_list
-from blueprints.risar.lib.expert.em_manipulation import EventMeasureController
-from blueprints.risar.lib.expert.em_repr import EventMeasureRepr
-from blueprints.risar.risar_config import pregnancy_apt_codes, risar_anamnesis_pregnancy, transfusion_apt_codes, \
-    risar_anamnesis_transfusion, mother_codes, father_codes, risar_father_anamnesis, risar_mother_anamnesis, \
-    checkup_flat_codes, risar_epicrisis, risar_newborn_inspection, attach_codes
-from blueprints.risar.lib.utils import week_postfix, get_action_property_value
-from blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
+from nemesis.systemwide import db
 
 __author__ = 'mmalkov'
 
@@ -109,7 +110,7 @@ def represent_event(event):
 
 
 def represent_chart_short(event):
-    card_attrs_action = get_card_attrs_action(event)
+    card_attrs_action = PregnancyCard.get_for_event(event).attrs
     return {
         'id': event.id,
         'set_date': event.setDate,
@@ -138,7 +139,7 @@ def represent_chart_for_routing(event):
 
 
 def represent_chart_for_epicrisis(event):
-    card_attrs_action = get_card_attrs_action(event)
+    card_attrs_action = PregnancyCard.get_for_event(event).attrs
     second_inspections = get_action_list(event, 'risarSecondInspection', all=True)
     return {
         'id': event.id,
@@ -260,7 +261,7 @@ def get_lpu_attached(attachments):
 
 
 def represent_card_attributes(event):
-    action = get_card_attrs_action(event)
+    action = PregnancyCard.get_for_event(event).attrs
     return {
         'pregnancy_start_date': action['pregnancy_start_date'].value,
         'predicted_delivery_date': action['predicted_delivery_date'].value,
@@ -426,7 +427,7 @@ def represent_ticket(ticket):
         'event_id': ticket.client_ticket.event_id if ticket.client_ticket else None,
         'note': ticket.client_ticket.note if ticket.client else None,
         'checkup_n': checkup_n,
-        'risk_rate': get_card_attrs_action(event)['prenatal_risk_572'].value if event else None,
+        'risk_rate': PregnancyCard.get_for_event(event).attrs['prenatal_risk_572'].value if event else None,
         'pregnancy_week': get_pregnancy_week(event) if event else None,
     }
 
@@ -549,7 +550,7 @@ def represent_errand(errand_info):
 
     days_to_complete = (planned-create_date).days
     progress = (today - create_date).days*100/days_to_complete if (today < planned and days_to_complete) else 100
-    card_attrs_action = get_card_attrs_action(errand_info.event)
+    card_attrs_action = PregnancyCard.get_for_event(errand_info.event).attrs
     return {
         'id': errand_info.id,
         'create_datetime': errand_info.createDatetime,

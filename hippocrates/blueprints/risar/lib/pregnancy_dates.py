@@ -2,7 +2,7 @@
 
 import datetime
 
-from blueprints.risar.lib.card_attrs import get_card_attrs_action
+from blueprints.risar.lib.card import PregnancyCard
 
 
 def get_pregnancy_week(event, date=None):
@@ -13,7 +13,7 @@ def get_pregnancy_week(event, date=None):
     :param date: Интересующая дата или None (тогда - дата окончания беременности)
     :return: число недель от начала беременности на дату
     """
-    action = get_card_attrs_action(event)
+    action = PregnancyCard.get_for_event(event).attrs
     start_date = action['pregnancy_start_date'].value
     if date is None:
         date = action['predicted_delivery_date'].value
@@ -31,7 +31,7 @@ def get_pregnancy_start_date(event):
     :param event: Карточка пациентки
     :return: Предположительная дата начала беременности
     """
-    action = get_card_attrs_action(event)
+    action = PregnancyCard.get_for_event(event).attrs
     start_date = action['pregnancy_start_date'].value
     if isinstance(start_date, datetime.datetime):
         start_date = start_date.date()
