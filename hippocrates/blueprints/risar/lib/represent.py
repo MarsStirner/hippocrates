@@ -7,13 +7,13 @@ from collections import defaultdict
 
 from nemesis.app import app
 from nemesis.systemwide import db
-from nemesis.lib.utils import safe_traverse_attrs, safe_traverse, safe_dict
+from nemesis.lib.utils import safe_traverse_attrs, safe_traverse, safe_dict, safe_date
 from nemesis.lib.jsonify import EventVisualizer
 from nemesis.lib.vesta import Vesta
 from nemesis.models.actions import Action, ActionType
 from nemesis.models.client import BloodHistory
 from nemesis.models.enums import (Gender, AllergyPower, IntoleranceType, PerinatalRiskRate, PreeclampsiaRisk,
-    PregnancyPathology, ErrandStatus)
+    PregnancyPathology, ErrandStatus, CardFillRate)
 from nemesis.models.event import Diagnosis, Diagnostic
 from nemesis.models.exists import rbAttachType, MKB
 from blueprints.risar.lib.card_attrs import get_card_attrs_action, get_all_diagnoses, check_disease
@@ -26,6 +26,8 @@ from blueprints.risar.risar_config import pregnancy_apt_codes, risar_anamnesis_p
     checkup_flat_codes, risar_epicrisis, risar_newborn_inspection, attach_codes
 from blueprints.risar.lib.utils import week_postfix, get_action_property_value
 from blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
+from blueprints.risar.lib.card_fill_rate import make_card_fill_timeline
+
 
 __author__ = 'mmalkov'
 
@@ -102,6 +104,13 @@ def represent_event(event):
             PregnancyPathology(pathg)
             for pathg in card_attrs_action['pregnancy_pathology_list'].value
         ] if card_attrs_action['pregnancy_pathology_list'].value else [],
+        'card_fill_rates': {
+            'card_fill_rate': CardFillRate(card_attrs_action['card_fill_rate'].value),
+            'card_fill_rate_anamnesis': CardFillRate(card_attrs_action['card_fill_rate_anamnesis'].value),
+            'card_fill_rate_first_inspection': CardFillRate(card_attrs_action['card_fill_rate_first_inspection'].value),
+            'card_fill_rate_repeated_inspection': CardFillRate(card_attrs_action['card_fill_rate_repeated_inspection'].value),
+            'card_fill_rate_epicrisis': CardFillRate(card_attrs_action['card_fill_rate_epicrisis'].value),
+        },
         'pregnancy_week': get_pregnancy_week(event),
         'diagnoses': all_diagnoses,
         'has_diseases': check_disease(all_diagnoses)
@@ -146,6 +155,22 @@ def represent_chart_for_epicrisis(event):
         'exec_date': event.execDate,
         'pregnancy_start_date': card_attrs_action['pregnancy_start_date'].value,
         'num_of_inspections': len(second_inspections) + 1
+    }
+
+
+def represent_chart_for_card_fill_rate_history(event):
+    card_attrs_action = get_card_attrs_action(event)
+    return {
+        'id': event.id,
+        'card_fill_rates': {
+            'card_fill_rate': CardFillRate(card_attrs_action['card_fill_rate'].value),
+            'card_fill_rate_anamnesis': CardFillRate(card_attrs_action['card_fill_rate_anamnesis'].value),
+            'card_fill_rate_first_inspection': CardFillRate(card_attrs_action['card_fill_rate_first_inspection'].value),
+            'card_fill_rate_repeated_inspection': CardFillRate(card_attrs_action['card_fill_rate_repeated_inspection'].value),
+            'card_fill_rate_epicrisis': CardFillRate(card_attrs_action['card_fill_rate_epicrisis'].value),
+        },
+        'start_date': safe_date(event.setDate),
+        'timeline': make_card_fill_timeline(event)
     }
 
 

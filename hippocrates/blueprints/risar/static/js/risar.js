@@ -382,6 +382,11 @@ WebMis20
             });
         }
     };
+    this.card_fill_rate = {
+        get_chart: function (event_id) {
+            return wrapper('GET', Config.url.api_chart_card_fill_history + event_id)
+        }
+    }
 }])
 .service('UserErrand', function (Simargl, ApiCalls, Config, OneWayEvent, CurrentUser, NotificationService) {
     var event_source = new OneWayEvent(),
@@ -587,4 +592,37 @@ WebMis20
         }
     }
 })
+.directive('cardFillRateIcon', ['$window', 'Config', function ($window, Config) {
+    return {
+        restrict: 'A',
+        template: '\
+<span class="cursor-pointer" ng-class="icon_class()" tooltip="[[ get_tooltip() ]]"\
+    ng-click="open()"></span>\
+',
+        scope: {
+            cardFillRateIcon: '=',
+            eventId: '='
+        },
+        link: function (scope, element, attrs) {
+            scope.icon_class = function () {
+                if (!scope.cardFillRateIcon) return;
+                var cfr = scope.cardFillRateIcon.card_fill_rate;
+                if (cfr.code === 'filled') return 'fa fa-check-circle text-green';
+                if (cfr.code === 'not_filled') return 'fa fa-exclamation-circle text-red';
+                return 'fa fa-question text-darkgray';
+            };
+            scope.get_tooltip = function () {
+                if (!scope.cardFillRateIcon) return;
+                var cfr = scope.cardFillRateIcon.card_fill_rate;
+                if (cfr.code === 'filled') return 'Карта заполнена полностью';
+                else if (cfr.code === 'not_filled') return 'Карта заполнена не полностью';
+                return 'Нет информации о заполненности карты';
+
+            };
+            scope.open = function () {
+                $window.open('{0}?event_id={1}'.format(Config.url.card_fill_history, scope.eventId));
+            };
+        }
+    }
+}])
 ;

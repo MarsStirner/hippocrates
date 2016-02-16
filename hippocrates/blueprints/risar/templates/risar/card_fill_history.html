@@ -1,0 +1,96 @@
+{% extends 'risar/base/base.html' %}
+{% import 'risar/_macros.html' as rimacros %}
+
+{% block title %}> {{ module_name }}{% endblock %}
+
+{% block main %}
+<div ng-controller="CardFillHistoryCtrl" ng-cloak>
+    <section class="content-header">
+        {{ rimacros.page_title_n('Заполнение карты') }}
+        <div class="novmargin">
+            <div class="btn-group">
+                <a ng-href="{{ url_for('.html_chart') }}?event_id=[[ event_id ]]" class="btn btn-default">Карта пациентки</a>
+                <a ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ event_id ]]" class="btn btn-default">Анамнез</a>
+                <a ng-href="{{ url_for('.html_inspection') }}?event_id=[[ event_id ]]" class="btn btn-default">Осмотры</a>
+                <a ng-href="{{ url_for('.html_routing') }}?event_id=[[ event_id ]]&emergency=1" class="btn btn-default">Маршрутизация</a>
+                <a ng-href="{{ url_for('.html_epicrisis') }}?event_id=[[ event_id ]]" class="btn btn-default">Эпикриз</a>
+                <a ng-class="{disabled: !ps.is_available()}" ng-click="open_print_window()" class="btn btn-default">Печать</a>
+                <div class="btn-group">
+                    <button class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Дополнительно <span class="fa fa-caret-down"></span></button>
+                    <ul role="menu" class="dropdown-menu">
+                        <li><a ng-href="{{ url_for('.html_event_diagnoses') }}?event_id=[[ event_id ]]">Диагнозы случая</a></li>
+                        <li><a ng-href="{{ url_for('.html_event_measure') }}?event_id=[[ event_id ]]">Мероприятия случая</a></li>
+                        <li><a ng-href="{{ url_for('.html_card_fill_history') }}?event_id=[[ event_id ]]">Заполненность карты</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="content">
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title">Заполненность разделов карты</h3>
+            </div>
+            <div class="box-body">
+                <p ng-bind="get_summary_cfr_text()"></p>
+                <ul class="list-unstyled">
+                    <li><span class="rmargin10"
+                        tooltip="[[ get_summary_tooltip('anamnesis') ]]"
+                        ng-class="get_summary_icon('anamnesis')"></span>Анамнез</li>
+                    <li><span class="rmargin10"
+                        tooltip="[[ get_summary_tooltip('first_inspection') ]]"
+                        ng-class="get_summary_icon('first_inspection')"></span>Первичный осмотр</li>
+                    <li ng-if="summary_section_visible('repeated_inspection')"><span class="rmargin10"
+                        tooltip="[[ get_summary_tooltip('repeated_inspection') ]]"
+                        ng-class="get_summary_icon('repeated_inspection')"></span>Повторный осмотр</li>
+                    <li><span class="rmargin10"
+                        tooltip="[[ get_summary_tooltip('epicrisis') ]]"
+                        ng-class="get_summary_icon('epicrisis')"></span>Эпикриз</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title">План заполнения</h3>
+            </div>
+            <div class="box-body">
+                <ul class="timeline">
+                    <li class="time-label">
+                        <span class="bg-gray" ng-bind="chart.start_date | asDate"></span>
+                    </li>
+                    <li>
+                        <i class="fa fa-circle-o bg-blue"></i>
+                        <div class="timeline-item">
+                            <h3 class="timeline-header">
+                                <span>Дата постановки на учет</span>
+                            </h3>
+                        </div>
+                    </li>
+
+                    <li class="time-label" ng-repeat-start="item in chart.timeline">
+                        <span class="bg-gray" ng-bind="item.planned_date | asDate"></span>
+                    </li>
+                    <li ng-repeat-end>
+                        <i ng-class="get_timeline_icon(item.fill_rate)" tooltip="[[ get_icon_tooltip(item.fill_rate) ]]"></i>
+                        <div class="timeline-item">
+{#                            <span class="time"><i class="fa fa-clock-o"></i> 12:05</span>#}
+                            <h3 class="timeline-header"><span ng-bind="item.section_name"></span></h3>
+                            <div class="timeline-body">
+                                <span ng-bind="get_document_info(item)"></span> Просрочка (дней): <span ng-bind="get_delay(item)"></span>
+                            </div>
+{#                            <div class="timeline-footer">#}
+{#                            </div>#}
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block modules_js %}
+    {{ super() }}
+    <script src="{{ url_for('.static', filename='js/card_fill_history.js', v=app_version) }}"></script>
+{% endblock %}

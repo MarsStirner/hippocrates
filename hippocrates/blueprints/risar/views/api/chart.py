@@ -22,7 +22,7 @@ from blueprints.risar.lib.card_attrs import default_AT_Heuristic, get_all_diagno
     reevaluate_dates
 from blueprints.risar.lib.represent import represent_event, represent_chart_for_routing, represent_header, \
     represent_org_for_routing, group_orgs_for_routing, represent_checkups, represent_card_attributes, \
-    represent_chart_for_epicrisis
+    represent_chart_for_epicrisis, represent_chart_for_card_fill_rate_history
 from blueprints.risar.lib.utils import get_last_checkup_date
 from blueprints.risar.risar_config import attach_codes
 
@@ -188,6 +188,18 @@ def api_0_chart_measure_list(event_id=None):
     return {
         'last_inspection_date': get_last_checkup_date(event_id)
     }
+
+
+@module.route('/api/0/chart_card_fill_history/')
+@module.route('/api/0/chart_card_fill_history/<int:event_id>')
+@api_method
+def api_0_chart_card_fill_history(event_id=None):
+    event = Event.query.get(event_id)
+    if not event:
+        raise ApiException(404, u'Обращение не найдено')
+    if event.eventType.requestType.code != 'pregnancy':
+        raise ApiException(400, u'Обращение не является случаем беременности')
+    return represent_chart_for_card_fill_rate_history(event)
 
 
 @module.route('/api/0/chart_header/')

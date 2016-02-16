@@ -4,16 +4,19 @@ import datetime
 
 from nemesis.lib.data import create_action
 from nemesis.lib.jsonify import EventVisualizer
-from nemesis.lib.utils import safe_dict
+from nemesis.lib.utils import safe_dict, safe_bool, safe_int, safe_date
 from nemesis.models.actions import Action, ActionType, ActionPropertyType, ActionProperty
-from nemesis.models.enums import PregnancyPathology, PreeclampsiaRisk, PerinatalRiskRate
+from nemesis.models.enums import PregnancyPathology, PreeclampsiaRisk, PerinatalRiskRate, CardFillRate
 from nemesis.models.risar import rbPreEclampsiaRate, rbPerinatalRiskRate
 from nemesis.systemwide import db
 from blueprints.risar.lib.utils import get_action, get_action_list, HIV_diags, syphilis_diags, hepatitis_diags, \
     tuberculosis_diags, scabies_diags, pediculosis_diags, multiple_birth, hypertensia, kidney_diseases, collagenoses, \
     vascular_diseases, diabetes, antiphospholipid_syndrome, get_event_diag_mkbs, risk_rates_blockID, risk_rates_diagID, \
     pregnancy_pathologies, risk_mkbs
-from blueprints.risar.risar_config import checkup_flat_codes, risar_mother_anamnesis, risar_epicrisis, risar_anamnesis_pregnancy
+from blueprints.risar.risar_config import (checkup_flat_codes, risar_mother_anamnesis, risar_epicrisis,
+    risar_anamnesis_pregnancy, first_inspection_code, second_inspection_code)
+from blueprints.risar.lib.time_converter import DateTimeUtil
+
 
 __author__ = 'viruzzz-kun'
 
@@ -70,7 +73,11 @@ def check_card_attrs_action_integrity(action):
     :type action: nemesis.models.actions.Action
     :return: None
     """
-    property_type_codes = ['pregnancy_pathology_list', 'preeclampsia_susp', 'preeclampsia_comfirmed']
+    property_type_codes = [
+        'pregnancy_pathology_list', 'preeclampsia_susp', 'preeclampsia_comfirmed',
+        'card_fill_rate', 'card_fill_rate_anamnesis', 'card_fill_rate_first_inspection',
+        'card_fill_rate_repeated_inspection', 'card_fill_rate_epicrisis'
+    ]
     for apt_code in property_type_codes:
         if apt_code not in action.propsByCode:
             create_property(action, apt_code)
@@ -400,6 +407,193 @@ def reevaluate_preeclampsia_rate(event, action=None):
     action['preeclampsia_comfirmed'].value = rbPreEclampsiaRate.query.filter(rbPreEclampsiaRate.code == confirmed_rate[1]).first().__json__()
 
 
+def reevaluate_card_fill_rate_all(event, action=None):
+    """Пересчитать показатель заполненности карты полностью.
+
+    Пересчитать показатели для всех разделов карты, а хатем обновить общий показатель
+    заполненности.
+    """
+    anamnesis_fr = reevaluate_card_fill_rate_anamnesis(event, action, update_general_rate=False)
+    first_inspection_fr = reevaluate_card_fill_rate_first_inspection(event, action, update_general_rate=False)
+    repeated_inspection_fr = reevaluate_card_fill_rate_repeated_inspection(event, action, update_general_rate=False)
+    epicrisis_fr = reevaluate_card_fill_rate_epicrisis(event, action, update_general_rate=False)
+
+    reevaluate_card_fill_rate(
+        event, action,
+        anamnesis_fr=anamnesis_fr, first_inspection_fr=first_inspection_fr,
+        repeated_inspection_fr=repeated_inspection_fr, epicrisis_fr=epicrisis_fr
+    )
+
+
+def reevaluate_card_fill_rate(event, action=None, **kwargs):
+    """Пересчитать общий показатель заполненности карты в зависимости от переданных
+    данных о показателях различных разделов карты.
+
+    Разделы включают в себя:
+      - анамнез :arg anamnesis_fr
+      - первичный осмотр :arg first_inspection_fr
+      - повторный осмотр :arg repeated_inspection_fr
+      - эпикриз :arg epicrisis_fr
+    """
+    if action is None:
+        action = get_card_attrs_action(event)
+
+    cfr = CardFillRate.filled[0]
+
+    for section in ('anamnesis_fr', 'first_inspection_fr', 'repeated_inspection_fr', 'epicrisis_fr'):
+        if section in kwargs:
+            if kwargs[section] == CardFillRate.not_filled[0]:
+                cfr = CardFillRate.not_filled[0]
+                break
+
+    action['card_fill_rate'].value = cfr
+
+
+def reevaluate_card_fill_rate_anamnesis(event, action=None, update_general_rate=True):
+    """Пересчитать показатель заполненности анамнеза в карте пациентки.
+
+    Пересчитывается всегда, при любом состоянии карты пациентки.
+    Анамнез считается заполненным, если просто существует запись анамнеза матери,
+    без проверки на наличие данных в самом документе.
+    """
+    if action is None:
+        action = get_card_attrs_action(event)
+
+    event_date = safe_date(event.setDate)
+    mother_anamnesis = get_action(event, risar_mother_anamnesis)
+    anamnesis_fr = (
+        CardFillRate.filled[0]
+        if mother_anamnesis is not None
+        else (
+            CardFillRate.waiting[0]
+            if DateTimeUtil.get_current_date() <= DateTimeUtil.add_to_date(event_date, 7, DateTimeUtil.day)
+            else CardFillRate.not_filled[0]
+        )
+    )
+    action['card_fill_rate_anamnesis'].value = anamnesis_fr
+
+    if update_general_rate:
+        reevaluate_card_fill_rate(event, action, anamnesis_fr=anamnesis_fr)
+    return anamnesis_fr
+
+
+def reevaluate_card_fill_rate_first_inspection(event, action=None, update_general_rate=True):
+    """Пересчитать показатель заполненности первичного осмотра в карте пациентки.
+
+    Пересчитывается всегда, при любом состоянии карты пациентки.
+    Первичный осмотр считается заполненным, если просто существует запись первичного осмотра,
+    без проверки на наличие данных в самом документе.
+    """
+    if action is None:
+        action = get_card_attrs_action(event)
+
+    event_date = safe_date(event.setDate)
+    first_inspection = get_action(event, first_inspection_code)
+    fi_fr = (
+        CardFillRate.filled[0]
+        if first_inspection is not None
+        else (
+            CardFillRate.waiting[0]
+            if DateTimeUtil.get_current_date() <= DateTimeUtil.add_to_date(event_date, 7, DateTimeUtil.day)
+            else CardFillRate.not_filled[0]
+        )
+    )
+    action['card_fill_rate_first_inspection'].value = fi_fr
+
+    if update_general_rate:
+        reevaluate_card_fill_rate(event, action, first_inspection_fr=fi_fr)
+    return fi_fr
+
+
+def reevaluate_card_fill_rate_repeated_inspection(event, action=None, update_general_rate=True):
+    """Пересчитать показатель заполненности повторного осмотра в карте пациентки.
+
+    Пересчитывается только при наличии первичного осмотра и отсутствии эпикриза в карте пациентки.
+    Повторный осмотр считается заполненным, если просто существует запись повторного осмотра,
+    без проверки на наличие данных в самом документе.
+    """
+    if action is None:
+        action = get_card_attrs_action(event)
+
+    first_inspection = None
+    last_inspection = get_action_list(event, checkup_flat_codes).order_by(Action.begDate.desc()).first()
+    if last_inspection is not None and last_inspection.actionType.flatCode == first_inspection_code:
+        first_inspection = last_inspection
+
+    ri_fr = CardFillRate.not_required[0]
+    # Заполненность повторного осмотра актуальна только при наличии первого осмотра,
+    # плюс наличие эпикриза отменяет необходимость повторного осмотра
+    if last_inspection is not None:
+        inspection_date = safe_date(last_inspection.begDate)
+        valid_by_date = DateTimeUtil.get_current_date() <= DateTimeUtil.add_to_date(inspection_date,
+                                                                                    30,
+                                                                                    DateTimeUtil.day)
+        epicrisis = get_action(event, risar_epicrisis)
+        valid_epicrisis = epicrisis is not None
+        valid_by_epicrisis_date = (
+            safe_date(epicrisis.begDate) <= DateTimeUtil.add_to_date(inspection_date,
+                                                                     30,
+                                                                     DateTimeUtil.day)
+        ) if epicrisis is not None else False
+
+        if last_inspection == first_inspection:
+            ri_fr = (
+                CardFillRate.not_required[0]
+                if valid_epicrisis and valid_by_epicrisis_date else (
+                    CardFillRate.waiting[0]
+                    if valid_by_date else CardFillRate.not_filled[0]
+                )
+            )
+        else:
+            ri_fr = (
+                CardFillRate.filled[0]
+                if valid_epicrisis and valid_by_epicrisis_date else (
+                    CardFillRate.waiting[0] if valid_by_date else CardFillRate.not_filled[0]
+                )
+            )
+
+    action['card_fill_rate_repeated_inspection'].value = ri_fr
+
+    if update_general_rate:
+        reevaluate_card_fill_rate(event, action, repeated_inspection_fr=ri_fr)
+    return ri_fr
+
+
+def reevaluate_card_fill_rate_epicrisis(event, action=None, update_general_rate=True):
+    """Пересчитать показатель заполненности эпикриза в карте пациентки.
+
+    Пересчитывается всегда, при любом состоянии карты пациентки.
+    Эпикриз считается заполненным, если просто существует запись эпикриза,
+    без проверки на наличие данных в самом документе.
+    """
+    if action is None:
+        action = get_card_attrs_action(event)
+
+    preg_start_date = action['pregnancy_start_date'].value
+    epicrisis = get_action(event, risar_epicrisis)
+    epicrisis_fr = (
+        CardFillRate.filled[0]
+        if epicrisis is not None
+        else (
+            CardFillRate.waiting[0]
+            if (not preg_start_date or
+                DateTimeUtil.get_current_date() <= DateTimeUtil.add_to_date(preg_start_date,
+                                                                            # 47 недель
+                                                                            329,
+                                                                            DateTimeUtil.day))
+            else CardFillRate.not_filled[0]
+        )
+    )
+    old_cfr_epicrisis = action['card_fill_rate_epicrisis'].value
+    action['card_fill_rate_epicrisis'].value = epicrisis_fr
+
+    if update_general_rate:
+        if old_cfr_epicrisis != epicrisis_fr:
+            reevaluate_card_fill_rate_repeated_inspection(event, action, update_general_rate)
+        reevaluate_card_fill_rate(event, action, epicrisis_fr=epicrisis_fr)
+    return epicrisis_fr
+
+
 def reevaluate_card_attrs(event, action=None):
     """
     Пересчёт атрибутов карточки беременной
@@ -414,6 +608,7 @@ def reevaluate_card_attrs(event, action=None):
     reevaluate_pregnacy_pathology(event, action)
     reevaluate_dates(event, action)
     reevaluate_preeclampsia_rate(event, action)
+    reevaluate_card_fill_rate_all(event, action)
 
 
 def check_disease(diagnoses):

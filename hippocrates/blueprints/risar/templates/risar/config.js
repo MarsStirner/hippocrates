@@ -48,6 +48,7 @@ WebMis20
         inpection_read_html:'{{ url_for('.html_inspection_read') }}',
         inpection_edit_html:'{{ url_for('.html_inspection_edit') }}',
         ambulance_patient_info: '{{ url_for('.html_ambulance_patient_info') }}',
+        card_fill_history: '{{ url_for('.html_card_fill_history') }}',
         api_chart_measure_list: '{{ url_for('.api_0_chart_measure_list') }}',
         api_measure_list: '{{ url_for('.api_0_measure_list') }}',
         api_chart_header: '{{ url_for('.api_0_chart_header') }}',
@@ -65,7 +66,8 @@ WebMis20
         api_errands_summary: '{{ url_for('.api_errands_summary') }}',
         api_errand_edit: '{{ url_for('.api_errand_edit') }}{0}',
         api_errand_mark_as_read: '{{ url_for('.api_errand_mark_as_read') }}{0}',
-        api_stats_pregnancy_pathology: '{{ url_for('.api_0_stats_pregnancy_pathology') }}'
+        api_stats_pregnancy_pathology: '{{ url_for('.api_0_stats_pregnancy_pathology') }}',
+        api_chart_card_fill_history: '{{ url_for('.api_0_chart_card_fill_history') }}'
     }
 })
 ;
