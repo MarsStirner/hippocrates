@@ -1,10 +1,17 @@
 # -*- coding: utf-8 -*-
-from flask import render_template, request, redirect, url_for
+
+from flask import render_template, request, redirect, url_for, abort
 from flask.ext.login import current_user
 from ..app import module
 from nemesis.app import app
+from nemesis.systemwide import db
 from nemesis.models.actions import Action, ActionType
+from nemesis.models.event import Event
+from nemesis.lib.utils import safe_int
+from blueprints.risar.lib.card_attrs import (get_card_attrs_action, check_card_attrs_action_integrity,
+     reevaluate_card_fill_rate_all)
 from blueprints.risar.lib.debug import get_debug_data
+
 
 __author__ = 'mmalkov'
 
@@ -143,3 +150,17 @@ def html_stats_org_curation():
 @module.route('/errands/errands_list.html')
 def html_errands_list():
     return render_template('risar/errands/errands_list.html')
+
+
+@module.route('/card_fill_history.html')
+def html_card_fill_history():
+    args = request.args.to_dict()
+    event_id = safe_int(args.get('event_id'))
+    if not event_id:
+        raise abort(404)
+    event = Event.query.get(event_id)
+    action = get_card_attrs_action(event)
+    check_card_attrs_action_integrity(action)
+    reevaluate_card_fill_rate_all(event, action)
+    db.session.commit()
+    return render_template('risar/card_fill_history.html')
