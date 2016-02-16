@@ -34,8 +34,8 @@ def make_card_fill_timeline(event):
     cur_date = DateTimeUtil.get_current_date()
 
     inspections_iter = iter(
-        [inspection for inspection in inspections
-         if inspection.actionType.flatCode == second_inspection_code]
+        (inspection for inspection in inspections
+         if inspection.actionType.flatCode == second_inspection_code)
     )
 
     def get_next_repeated_inspection():
