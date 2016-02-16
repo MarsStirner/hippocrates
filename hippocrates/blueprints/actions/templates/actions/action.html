@@ -34,7 +34,7 @@
                     <h3 class="box-title">Диагноз</h3>
                 </div>
                 <div class="box-body">
-                    <wm-diagnosis-new model="action.diagnoses" event="acton.event" action="action" can-edit="!action.end_date"
+                    <wm-diagnosis-new ng-model="action.diagnoses" can-edit="!action.end_date"
                                       diag-types="action.action_type.diagnosis_types" can-add-new="true"></wm-diagnosis-new>
                 </div>
             </div>
