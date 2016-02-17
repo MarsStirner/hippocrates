@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import datetime
-from sqlalchemy.orm import lazyload
+from sqlalchemy.orm import lazyload, joinedload
 
 from nemesis.lib.data import create_action, update_action
 from nemesis.lib.utils import safe_traverse_attrs, safe_dict, safe_traverse, safe_datetime
@@ -117,7 +117,11 @@ def get_action_list(event, flat_code, all=False):
     :return: действие
     :rtype: sqlalchemy.orm.Query
     """
-    query = Action.query.join(ActionType).filter(Action.event == event, Action.deleted == 0)
+    query = Action.query.join(ActionType).filter(
+        Action.event == event, Action.deleted == 0
+    ).options(
+        joinedload(Action.actionType)
+    )
     if isinstance(flat_code, (list, tuple)):
         query = query.filter(ActionType.flatCode.in_(flat_code))
     elif isinstance(flat_code, basestring):

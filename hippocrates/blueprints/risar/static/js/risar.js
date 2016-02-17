@@ -380,6 +380,9 @@ WebMis20
             return wrapper('GET', Config.url.api_stats_pregnancy_pathology, {
                 curation_level_code: curation_level_code
             });
+        },
+        get_doctor_card_fill_rates: function (doctor_id) {
+            return wrapper('GET', Config.url.api_stats_doctor_card_fill_rates + doctor_id);
         }
     };
     this.card_fill_rate = {
@@ -596,7 +599,7 @@ WebMis20
     return {
         restrict: 'A',
         template: '\
-<span class="cursor-pointer" ng-class="icon_class()" tooltip="[[ get_tooltip() ]]"\
+<span style="font-size: 120%" class="cursor-pointer" ng-class="icon_class()" tooltip="[[ get_tooltip() ]]"\
     ng-click="open()"></span>\
 ',
         scope: {
@@ -620,7 +623,7 @@ WebMis20
 
             };
             scope.open = function () {
-                $window.open('{0}?event_id={1}'.format(Config.url.card_fill_history, scope.eventId));
+                $window.open('{0}?event_id={1}'.format(Config.url.card_fill_history, scope.eventId), '_self');
             };
         }
     }
