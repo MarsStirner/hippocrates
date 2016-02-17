@@ -631,9 +631,20 @@
                                         <th class="text-right">Возможность сохранения беременности <span class="text-danger">*</span></th>
                                         <td>
                                             <div ng-class="{'has-error': fifthForm.save.$invalid && fifthForm.submit_attempt}">
-                                                <input type="radio" ng-model="checkup.save" ng-value="true" required>  Да <br/>
-                                                <input type="radio" ng-model="checkup.save" ng-value="false" required> Нет <br/>
+                                                <input type="radio" ng-model="checkup.pregnancy_continuation" ng-value="true" required>  Да <br/>
+                                                <input type="radio" ng-model="checkup.pregnancy_continuation" ng-value="false" required> Нет <br/>
                                             </div>
+                                        </td>
+                                    </tr>
+                                    <tr ng-class="{'text-muted': pregContRefusalDisabled()}">
+                                        <th class="text-right">Отказ от прерывания <span ng-class="{'text-muted': pregContRefusalDisabled(), 'text-danger': !pregContRefusalDisabled()}">*</span></th>
+                                        <td>
+                                        <div>
+                                              <input type="radio" ng-model="checkup.pregnancy_continuation_refusal" ng-value="true"
+                                                ng-disabled="pregContRefusalDisabled()" ng-required="pregContRefusalRequired()">  Да <br/>
+                                              <input type="radio" ng-model="checkup.pregnancy_continuation_refusal" ng-value="false"
+                                                ng-disabled="pregContRefusalDisabled()" ng-required="pregContRefusalRequired()"> Нет <br/>
+                                        </div>
                                         </td>
                                     </tr>
                                     <tr>

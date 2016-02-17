@@ -381,7 +381,11 @@
                         </div>
                         <div class="row">
                             <div class="col-sm-6 col-md-6  text-right">Возможность сохранения беременности:</div>
-                            <div class="col-sm-6 col-md-6">[[checkup.save ? 'да': 'нет']]</div>
+                            <div class="col-sm-6 col-md-6">[[checkup.pregnancy_continuation ? 'да': 'нет']]</div>
+                        </div>
+                        <div class="row" ng-show="!pregContRefusalDisabled()">
+                            <div class="col-sm-6 col-md-6  text-right">Отказ от прерывания:</div>
+                            <div class="col-sm-6 col-md-6">[[checkup.pregnancy_continuation_refusal ? 'да': 'нет']]</div>
                         </div>
                         <div class="row">
                             <div class="col-sm-6 col-md-6  text-right">Изменение условий труда:</div>

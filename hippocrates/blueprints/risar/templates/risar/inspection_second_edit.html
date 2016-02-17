@@ -398,6 +398,17 @@
                                         </div>
                                         </td>
                                     </tr>
+                                    <tr ng-class="{'text-muted': pregContRefusalDisabled()}">
+                                        <th class="text-right">Отказ от прерывания <span ng-class="{'text-muted': pregContRefusalDisabled(), 'text-danger': !pregContRefusalDisabled()}">*</span></th>
+                                        <td>
+                                        <div>
+                                              <input type="radio" ng-model="checkup.pregnancy_continuation_refusal" ng-value="true"
+                                                ng-disabled="pregContRefusalDisabled()" ng-required="pregContRefusalRequired()">  Да <br/>
+                                              <input type="radio" ng-model="checkup.pregnancy_continuation_refusal" ng-value="false"
+                                                ng-disabled="pregContRefusalDisabled()" ng-required="pregContRefusalRequired()"> Нет <br/>
+                                        </div>
+                                        </td>
+                                    </tr>
                                     <tr>
                                         <th class="text-right">Витаминизация <span>&nbsp;</span></th>
                                         <td><div class="row"><div class="col-md-12"><wysiwyg ng-model="checkup.fortification" /></div></div></td>
