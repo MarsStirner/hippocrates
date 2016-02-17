@@ -383,6 +383,9 @@ WebMis20
         },
         get_doctor_card_fill_rates: function (doctor_id) {
             return wrapper('GET', Config.url.api_stats_doctor_card_fill_rates + doctor_id);
+        },
+        get_card_fill_rates_overview_lpu: function (curator_id) {
+            return wrapper('GET', Config.url.api_stats_card_fill_rates_lpu_overview + curator_id);
         }
     };
     this.card_fill_rate = {

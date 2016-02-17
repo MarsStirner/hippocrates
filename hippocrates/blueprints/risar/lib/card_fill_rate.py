@@ -2,7 +2,8 @@
 
 from collections import deque
 
-from sqlalchemy import func, or_, and_
+from sqlalchemy import func, and_
+from sqlalchemy.orm import aliased
 
 from nemesis.lib.utils import safe_date
 from nemesis.models.actions import Action
@@ -160,6 +161,26 @@ class CFRController(BaseModelController):
             'cards_count': data.count_all or 0
         }
 
+    def get_card_fill_rates_lpu_overview(self, curator_id):
+        def make_lpu_cfr_stats(cfrs):
+            total = float(cfrs.count_all) or 0
+            not_filled = float(cfrs.count_cfr_nf) or 0
+            fill_pct = round(not_filled / total * 100) if total != 0 else 0
+            return {
+                'org_id': cfrs.id,
+                'org_name': cfrs.shortName,
+                'cfr_not_filled': not_filled,
+                'cards_count': total,
+                'fill_pct': fill_pct
+            }
+
+        sel = self.get_selecter()
+        data = sel.get_cfrs_lpu_overview(curator_id)
+        return [
+            make_lpu_cfr_stats(lpu_cfrs)
+            for lpu_cfrs in data
+        ]
+
 
 class CFRSelecter(BaseSelecter):
 
@@ -207,3 +228,52 @@ class CFRSelecter(BaseSelecter):
             query = query.filter(Event.execDate == None)
         self.query = query
         return self.get_one()
+
+    def get_cfrs_lpu_overview(self, curator_id):
+        Event = self.model_provider.get('Event')
+        Person = self.model_provider.get('Person')
+        PersonInEvent = aliased(Person, name='PersonInEvent')
+        PersonCurationAssoc = self.model_provider.get('PersonCurationAssoc')
+        rbOrgCurationLevel = self.model_provider.get('rbOrgCurationLevel')
+        OrganisationCurationAssoc = self.model_provider.get('OrganisationCurationAssoc')
+        Organisation = self.model_provider.get('Organisation')
+        Action = self.model_provider.get('Action')
+        ActionType = self.model_provider.get('ActionType')
+        ActionProperty = self.model_provider.get('ActionProperty')
+        ActionPropertyType = self.model_provider.get('ActionPropertyType')
+        ActionProperty_Integer = self.model_provider.get('ActionProperty_Integer')
+        query = self.model_provider.get_query('Person')
+
+        query = query.join(
+            PersonCurationAssoc, rbOrgCurationLevel
+        ).join(
+            OrganisationCurationAssoc, OrganisationCurationAssoc.personCuration_id == PersonCurationAssoc.id
+        ).join(
+            Organisation, OrganisationCurationAssoc.org_id == Organisation.id
+        ).join(
+            PersonInEvent, PersonInEvent.org_id == Organisation.id
+        ).join(
+            Event, Event.execPerson_id == PersonInEvent.id
+        ).join(
+            Action, ActionType, ActionProperty, ActionPropertyType, ActionProperty_Integer
+        ).filter(
+            Person.id == curator_id,
+            rbOrgCurationLevel.code == '3',
+            Organisation.deleted == 0, PersonInEvent.deleted == 0, Event.deleted == 0,
+            Action.deleted == 0, ActionProperty.deleted == 0,
+            ActionType.flatCode == 'cardAttributes',
+            ActionPropertyType.code == 'card_fill_rate'
+        ).group_by(
+            PersonInEvent.org_id
+        ).with_entities(
+            Organisation.id, Organisation.shortName
+        ).add_columns(
+            func.sum(func.IF(and_(ActionPropertyType.code == 'card_fill_rate',
+                                  ActionProperty_Integer.value_ == CardFillRate.not_filled[0]), 1, 0)
+                     ).label('count_cfr_nf'),
+            func.count(Event.id.distinct()).label('count_all')
+        ).order_by(
+            func.count(Event.id.distinct()).desc()
+        )
+        self.query = query
+        return self.get_all()

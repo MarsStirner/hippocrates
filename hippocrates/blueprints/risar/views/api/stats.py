@@ -467,3 +467,14 @@ def api_0_stats_doctor_card_fill_rates(doctor_id=None):
     cfr_ctrl = CFRController()
     data = cfr_ctrl.get_doctor_card_fill_rates(doctor_id)
     return data
+
+
+@module.route('/api/0/stats/card_fill_rates/lpu_overview/')
+@module.route('/api/0/stats/card_fill_rates/lpu_overview/<int:curator_id>')
+@api_method
+def api_0_stats_card_fill_rates_lpu_overview(curator_id=None):
+    if not curator_id:
+        curator_id = safe_current_user_id()
+    cfr_ctrl = CFRController()
+    data = cfr_ctrl.get_card_fill_rates_lpu_overview(curator_id)
+    return data
