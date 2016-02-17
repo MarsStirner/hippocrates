@@ -1,0 +1,68 @@
+<div class="box box-warning" ng-controller="DoctorCardFillRatesCtrl">
+    <div class="box-header with-border">
+        <h3 class="box-title">Ведение карт</h3>
+        <div class="box-tools pull-right">
+          <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+        </div>
+    </div>
+    <div class="box-body">
+        <table class="table table-condensed no-border">
+            <tr>
+                <td>Заполненные карты</td>
+                <td>
+                    <a href="{{ url_for('risar.html_search') }}">
+                        <span class="badge label-info pull-right" ng-bind="stats_data.cfr_filled"></span>
+                    </a>
+                </td>
+            </tr>
+            <tr>
+                <td>Незаполненные карты</td>
+                <td>
+                    <a href="{{ url_for('risar.html_search') }}">
+                        <span class="badge label-danger pull-right" ng-bind="stats_data.cfr_not_filled"></span>
+                    </a>
+                </td>
+            </tr>
+            <tr>
+                <td>Из них с разделами:</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><span class="small-left-margin">Анамнез</span></td>
+                <td>
+                    <a href="{{ url_for('risar.html_search') }}">
+                        <span class="badge pull-right label-[[ stats_data.cfr_anamnesis_not_filled > 0 ? 'danger' : 'info' ]]"
+                            ng-bind="stats_data.cfr_anamnesis_not_filled"></span>
+                    </a>
+                </td>
+            </tr>
+            <tr>
+                <td><span class="small-left-margin">Первичный осмотр</span></td>
+                <td>
+                    <a href="{{ url_for('risar.html_search') }}">
+                        <span class="badge pull-right label-[[ stats_data.cfr_fi_not_filled > 0 ? 'danger' : 'info' ]]"
+                            ng-bind="stats_data.cfr_fi_not_filled"></span>
+                    </a>
+                </td>
+            </tr>
+            <tr>
+                <td><span class="small-left-margin">Повторный осмотр</span></td>
+                <td>
+                    <a href="{{ url_for('risar.html_search') }}">
+                        <span class="badge pull-right label-[[ stats_data.cfr_ri_not_filled > 0 ? 'danger' : 'info' ]]"
+                            ng-bind="stats_data.cfr_ri_not_filled"></span>
+                    </a>
+                </td>
+            </tr>
+            <tr>
+                <td><span class="small-left-margin">Эпикриз</span></td>
+                <td>
+                    <a href="{{ url_for('risar.html_search') }}">
+                        <span class="badge pull-right label-[[ stats_data.cfr_epicrisis_not_filled > 0 ? 'danger' : 'info' ]]"
+                            ng-bind="stats_data.cfr_epicrisis_not_filled"></span>
+                    </a>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>

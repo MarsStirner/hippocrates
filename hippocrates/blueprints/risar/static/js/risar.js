@@ -380,6 +380,9 @@ WebMis20
             return wrapper('GET', Config.url.api_stats_pregnancy_pathology, {
                 curation_level_code: curation_level_code
             });
+        },
+        get_doctor_card_fill_rates: function (doctor_id) {
+            return wrapper('GET', Config.url.api_stats_doctor_card_fill_rates + doctor_id);
         }
     };
     this.card_fill_rate = {

@@ -2,6 +2,8 @@
 
 from collections import deque
 
+from sqlalchemy import func, or_, and_
+
 from nemesis.lib.utils import safe_date
 from nemesis.models.actions import Action
 from nemesis.models.enums import CardFillRate
@@ -10,6 +12,7 @@ from blueprints.risar.lib.card_attrs import get_card_attrs_action
 from blueprints.risar.risar_config import (checkup_flat_codes, risar_mother_anamnesis, risar_epicrisis,
     first_inspection_code, second_inspection_code)
 from blueprints.risar.lib.time_converter import DateTimeUtil
+from nemesis.lib.data_ctrl.base import BaseModelController, BaseSelecter
 
 
 def make_card_fill_timeline(event):
@@ -136,3 +139,71 @@ def make_card_fill_timeline(event):
             q.appendleft('repeated_inspection')
 
     return timeline
+
+
+class CFRController(BaseModelController):
+
+    @classmethod
+    def get_selecter(cls):
+        return CFRSelecter()
+
+    def get_doctor_card_fill_rates(self, doctor_id):
+        sel = self.get_selecter()
+        data = sel.get_doctor_cfrs(doctor_id)
+        return {
+            'cfr_filled': data.count_cfr_filled or 0,
+            'cfr_not_filled': data.count_cfr_nf or 0,
+            'cfr_anamnesis_not_filled': data.count_cfr_anamnesis_nf or 0,
+            'cfr_fi_not_filled': data.count_cfr_fi_nf or 0,
+            'cfr_ri_not_filled': data.count_cfr_ri_nf or 0,
+            'cfr_epicrisis_not_filled': data.count_cfr_epicrisis_nf or 0,
+            'cards_count': data.count_all or 0
+        }
+
+
+class CFRSelecter(BaseSelecter):
+
+    def get_doctor_cfrs(self, doctor_id, only_open=True):
+        Action = self.model_provider.get('Action')
+        Event = self.model_provider.get('Event')
+        ActionType = self.model_provider.get('ActionType')
+        ActionProperty = self.model_provider.get('ActionProperty')
+        ActionPropertyType = self.model_provider.get('ActionPropertyType')
+        ActionProperty_Integer = self.model_provider.get('ActionProperty_Integer')
+        query = self.model_provider.get_query('Action')
+
+        query = query.join(
+            Event, ActionType, ActionProperty, ActionPropertyType, ActionProperty_Integer
+        ).filter(
+            Action.deleted == 0, Event.deleted == 0, ActionProperty.deleted == 0,
+            ActionType.flatCode == 'cardAttributes',
+            Event.execPerson_id == doctor_id
+        ).group_by(
+            Event.execPerson_id
+        ).with_entities(
+            Event.execPerson_id
+        ).add_columns(
+            func.sum(func.IF(and_(ActionPropertyType.code == 'card_fill_rate',
+                                  ActionProperty_Integer.value_ == CardFillRate.filled[0]), 1, 0)
+                     ).label('count_cfr_filled'),
+            func.sum(func.IF(and_(ActionPropertyType.code == 'card_fill_rate',
+                                  ActionProperty_Integer.value_ == CardFillRate.not_filled[0]), 1, 0)
+                     ).label('count_cfr_nf'),
+            func.sum(func.IF(and_(ActionPropertyType.code == 'card_fill_rate_anamnesis',
+                                  ActionProperty_Integer.value_ == CardFillRate.not_filled[0]), 1, 0)
+                     ).label('count_cfr_anamnesis_nf'),
+            func.sum(func.IF(and_(ActionPropertyType.code == 'card_fill_rate_first_inspection',
+                                  ActionProperty_Integer.value_ == CardFillRate.not_filled[0]), 1, 0)
+                     ).label('count_cfr_fi_nf'),
+            func.sum(func.IF(and_(ActionPropertyType.code == 'card_fill_rate_repeated_inspection',
+                                  ActionProperty_Integer.value_ == CardFillRate.not_filled[0]), 1, 0)
+                     ).label('count_cfr_ri_nf'),
+            func.sum(func.IF(and_(ActionPropertyType.code == 'card_fill_rate_epicrisis',
+                                  ActionProperty_Integer.value_ == CardFillRate.not_filled[0]), 1, 0)
+                     ).label('count_cfr_epicrisis_nf'),
+            func.count(Event.id.distinct()).label('count_all')
+        )
+        if only_open:
+            query = query.filter(Event.execDate == None)
+        self.query = query
+        return self.get_one()

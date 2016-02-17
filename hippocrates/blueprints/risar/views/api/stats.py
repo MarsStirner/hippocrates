@@ -3,6 +3,7 @@ import collections
 import datetime
 
 from flask import request
+from sqlalchemy import func
 
 from nemesis.app import app
 from nemesis.lib.apiutils import api_method
@@ -23,7 +24,7 @@ from blueprints.risar.lib.represent import represent_chart_short, represent_erra
 from blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
 from blueprints.risar.risar_config import checkup_flat_codes
 from blueprints.risar.lib.org_bcl import OrgBirthCareLevelRepr, OrganisationRepr, EventRepr
-from sqlalchemy import func
+from blueprints.risar.lib.card_fill_rate import CFRController
 
 
 def get_rate_for_regions(regions, rate_code):
@@ -455,3 +456,14 @@ def api_0_stats_urgent_errands():
                 ActionPropertyType.code == "prenatal_risk_572", ActionProperty.deleted == 0,)\
         .order_by(func.date(Errand.plannedExecDate)).order_by(ActionProperty_Integer.value_.desc()).limit(10).all()
     return [represent_errand(errand) for errand in errands]
+
+
+@module.route('/api/0/stats/card_fill_rates/doctor/')
+@module.route('/api/0/stats/card_fill_rates/doctor/<int:doctor_id>')
+@api_method
+def api_0_stats_doctor_card_fill_rates(doctor_id=None):
+    if not doctor_id:
+        doctor_id = safe_current_user_id()
+    cfr_ctrl = CFRController()
+    data = cfr_ctrl.get_doctor_card_fill_rates(doctor_id)
+    return data
