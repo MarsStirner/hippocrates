@@ -1,4 +1,4 @@
-<div ng-controller="EventStationaryInfoCtrl">
+<div ng-controller="EventStationaryInfoCtrl" xmlns="http://www.w3.org/1999/html">
 <ng-form name="event_stationary_info_form" toc-element="Текущий статус пациента">
     <div class="box box-info">
         <div class="box-header with-border">
@@ -53,19 +53,19 @@
                             </tr>
                             <tr>
                                 <th>Рост</th>
-                                <td>[[event.received.height.value]]</td>
+                                <td>[[event.received.height.value]]<span ng-if="event.received.height.value"> см</span></td>
                                 <td></td>
                             </tr>
                             <tr>
                                 <th>Вес</th>
-                                <td>[[event.received.weight.value]]</td>
+                                <td>[[event.received.weight.value]]<span ng-if="event.received.height.value"> кг</span></td>
                                 <td></td>
                             </tr>
                             <tr>
                                 <th>Площадь поверхности тела</th>
                                 <td>
                                     <span ng-if="event.received.height.value&&event.received.weight.value">
-                                        [[ event.info.body_area ]]
+                                        [[ event.info.body_area ]]<span ng-if="event.info.body_area"> м<sup>2</sup></span>
                                     </span>
                                 </td>
                                 <td></td>
