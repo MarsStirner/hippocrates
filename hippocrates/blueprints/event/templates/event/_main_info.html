@@ -157,7 +157,7 @@
                         </div>
                     {% endif %}
                     <div class="col-md-3" ng-if="cmb_result_available()">
-                        <label for="result" class="control-label">Результат госпитализации</label>
+                        <label for="result" class="control-label">[[ event.info.event_type.purpose.code == 1 ? 'Результат обращения' : 'Результат госпитализации']]</label>
                         <ui-select id="result" name="result" theme="select2"
                                    ng-model="event.info.result" ng-disabled="widget_disabled('result')">
                             <ui-select-match placeholder="Результат госпитализации">[[$select.selected.name]]</ui-select-match>
