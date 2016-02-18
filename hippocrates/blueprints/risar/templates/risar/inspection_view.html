@@ -20,6 +20,7 @@
                 <ul role="menu" class="dropdown-menu">
                     <li><a ng-href="{{ url_for('.html_event_diagnoses') }}?event_id=[[ header.event.id ]]">Диагнозы случая</a></li>
                     <li><a ng-href="{{ url_for('.html_event_measure') }}?event_id=[[ header.event.id ]]">Мероприятия случая</a></li>
+                    <li><a ng-href="{{ url_for('.html_card_fill_history') }}?event_id=[[ event_id ]]">Заполненность карты</a></li>
                 </ul>
             </div>
         </div>
