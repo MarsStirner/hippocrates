@@ -386,6 +386,13 @@ WebMis20
         },
         get_card_fill_rates_overview_lpu: function (curator_id) {
             return wrapper('GET', Config.url.api_stats_card_fill_rates_lpu_overview + curator_id);
+        },
+        get_card_fill_rates_overview_doctor: function (curator_id, curation_level_code) {
+            var url = Config.url.api_stats_card_fill_rates_doctor_overview + curator_id,
+                args = {
+                    curation_level_code: curation_level_code
+                };
+            return wrapper('GET', url, args);
         }
     };
     this.card_fill_rate = {

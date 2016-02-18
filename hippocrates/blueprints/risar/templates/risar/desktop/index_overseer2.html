@@ -45,7 +45,7 @@
                       </span>
                     </div>
                 </div>
-                {% include "risar/stats/chart_fill_assessment.html" %}
+                {% include "risar/stats/cfrs_doctor_overview.html" %}
                 {% include "risar/stats/patients_stats.html" %}
                 {% include "risar/stats/diagram_risk_rates.html" %}
             </div>
@@ -58,4 +58,5 @@
     {{ super() }}
     <script src="{{ url_for('.static', filename='js/desktop/index_overseer2.js', v=app_version) }}"></script>
     <script src="{{ url_for('.static', filename='js/stats/perinatal_risk_rate.js', v=app_version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/stats/card_fill_rates.js', v=app_version) }}"></script>
 {% endblock %}

@@ -53,7 +53,7 @@
                       </span>
                     </div>
                 </div>
-                {% include "risar/stats/chart_fill_assessment.html" %}
+                {% include "risar/stats/cfrs_doctor_overview.html" %}
                 {% include "risar/stats/patients_stats.html" %}
                 {% include "risar/stats/diagram_risk_rates.html" %}
             </div>
@@ -67,5 +67,6 @@
     <script src="{{ url_for('.static', filename='js/desktop/index_overseer1.js', v=app_version) }}"></script>
     <script src="{{ url_for('.static', filename='js/stats/perinatal_risk_rate.js', v=app_version) }}"></script>
     <script src="{{ url_for('.static', filename='js/stats/urgent_errands.js', v=app_version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/stats/card_fill_rates.js', v=app_version) }}"></script>
     <script type="text/ng-template" id="/WebMis20/RISAR/modal/create_errand.html">{% include 'risar/errands/_modal_create_errand.html' %}</script>
 {% endblock %}

@@ -5,7 +5,7 @@ from collections import deque
 from sqlalchemy import func, and_
 from sqlalchemy.orm import aliased
 
-from nemesis.lib.utils import safe_date
+from nemesis.lib.utils import safe_date, initialize_name
 from nemesis.models.actions import Action
 from nemesis.models.enums import CardFillRate
 from blueprints.risar.lib.utils import get_action, get_action_list
@@ -181,6 +181,27 @@ class CFRController(BaseModelController):
             for lpu_cfrs in data
         ]
 
+    def get_card_fill_rates_doctor_overview(self, curator_id, curation_level):
+        def make_doctor_cfr_stats(cfrs):
+            total = float(cfrs.count_all) or 0
+            not_filled = float(cfrs.count_cfr_nf) or 0
+            doctor_name = initialize_name(cfrs.lastName, cfrs.firstName, cfrs.patrName)
+            return {
+                'doctor_id': cfrs.doctor_id,
+                'doctor_name': doctor_name,
+                'org_id': cfrs.org_id,
+                'org_name': cfrs.shortName,
+                'cfr_not_filled': not_filled,
+                'cards_count': total
+            }
+
+        sel = self.get_selecter()
+        data = sel.get_cfrs_doctor_overview(curator_id, curation_level)
+        return [
+            make_doctor_cfr_stats(doctor_cfrs)
+            for doctor_cfrs in data
+        ]
+
 
 class CFRSelecter(BaseSelecter):
 
@@ -229,7 +250,7 @@ class CFRSelecter(BaseSelecter):
         self.query = query
         return self.get_one()
 
-    def get_cfrs_lpu_overview(self, curator_id):
+    def get_cfrs_lpu_overview(self, curator_id, only_open=True):
         Event = self.model_provider.get('Event')
         Person = self.model_provider.get('Person')
         PersonInEvent = aliased(Person, name='PersonInEvent')
@@ -275,5 +296,61 @@ class CFRSelecter(BaseSelecter):
         ).order_by(
             func.count(Event.id.distinct()).desc()
         )
+        if only_open:
+            query = query.filter(Event.execDate == None)
+        self.query = query
+        return self.get_all()
+
+    def get_cfrs_doctor_overview(self, curator_id, curation_level, only_open=True):
+        Event = self.model_provider.get('Event')
+        Person = self.model_provider.get('Person')
+        PersonInEvent = aliased(Person, name='PersonInEvent')
+        PersonCurationAssoc = self.model_provider.get('PersonCurationAssoc')
+        rbOrgCurationLevel = self.model_provider.get('rbOrgCurationLevel')
+        OrganisationCurationAssoc = self.model_provider.get('OrganisationCurationAssoc')
+        Organisation = self.model_provider.get('Organisation')
+        Action = self.model_provider.get('Action')
+        ActionType = self.model_provider.get('ActionType')
+        ActionProperty = self.model_provider.get('ActionProperty')
+        ActionPropertyType = self.model_provider.get('ActionPropertyType')
+        ActionProperty_Integer = self.model_provider.get('ActionProperty_Integer')
+        query = self.model_provider.get_query('Person')
+
+        query = query.join(
+            PersonCurationAssoc, rbOrgCurationLevel
+        ).join(
+            OrganisationCurationAssoc, OrganisationCurationAssoc.personCuration_id == PersonCurationAssoc.id
+        ).join(
+            Organisation, OrganisationCurationAssoc.org_id == Organisation.id
+        ).join(
+            PersonInEvent, PersonInEvent.org_id == Organisation.id
+        ).join(
+            Event, Event.execPerson_id == PersonInEvent.id
+        ).join(
+            Action, ActionType, ActionProperty, ActionPropertyType, ActionProperty_Integer
+        ).filter(
+            Person.id == curator_id,
+            Organisation.deleted == 0, PersonInEvent.deleted == 0, Event.deleted == 0,
+            Action.deleted == 0, ActionProperty.deleted == 0,
+            ActionType.flatCode == 'cardAttributes',
+            ActionPropertyType.code == 'card_fill_rate',
+            rbOrgCurationLevel.code == curation_level
+        ).group_by(
+            PersonInEvent.id
+        ).with_entities(
+            PersonInEvent.id.label('doctor_id'), PersonInEvent.firstName, PersonInEvent.lastName, PersonInEvent.patrName,
+            Organisation.id.label('org_id'), Organisation.shortName
+        ).add_columns(
+            func.sum(func.IF(and_(ActionPropertyType.code == 'card_fill_rate',
+                                  ActionProperty_Integer.value_ == CardFillRate.not_filled[0]), 1, 0)
+                     ).label('count_cfr_nf'),
+            func.count(Event.id.distinct()).label('count_all')
+        ).order_by(
+            func.sum(func.IF(and_(ActionPropertyType.code == 'card_fill_rate',
+                                  ActionProperty_Integer.value_ == CardFillRate.not_filled[0]), 1, 0)
+                     ).desc()
+        )
+        if only_open:
+            query = query.filter(Event.execDate == None)
         self.query = query
         return self.get_all()

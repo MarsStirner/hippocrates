@@ -1,4 +1,4 @@
-<div class="box box-info">
+<div class="box box-info" ng-controller="CardFillRatesDoctorOverviewCtrl">
     <div class="box-header">
         <h3 class="box-title">Худшие показатели по ведению карт</h3>
         <div class="box-tools pull-right">
@@ -7,8 +7,8 @@
     </div>
     <div class="box-body">
         <nvd3-multi-bar-horizontal-chart
-            id="chart_fill_assessment"
-            data="chart_fill_assessment"
+            id="chart_cfrs_doctor_overview"
+            data="widget_data"
             width="400"
             height="200"
             nodata="Нет данных"
@@ -17,10 +17,8 @@
             showlabels="true"
             labeltype="value"
             showValues="true"
+            valueFormat="chartValueFormatFunction()"
             ><svg></svg>
         </nvd3-multi-bar-horizontal-chart>
-    </div>
-    <div class="box-footer text-center">
-        <a href="#" class="uppercase">Подробнее</a>
     </div>
 </div>

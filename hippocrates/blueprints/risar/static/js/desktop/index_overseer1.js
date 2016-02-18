@@ -19,11 +19,6 @@ var IndexOverseer1Ctrl = function ($scope, RisarApi) {
         pages: 1,
         record_count: 0
     };
-    $scope.chart_fill_assessment = [{
-        "key": "Series 1",
-        "values": [['Трунова Н.С.', 25], ['Папуша Л.А.', 18], ['Мамзерова П.Р.', 15], ['Семенова В.Ф.', 11], ['Горячева Л.Л.', 7]],
-        "color": '#dd4b39'
-    }]
 
     $scope.toolTipContent_pregnancy_week = function(){
         return function(key, x, y, e, graph) {

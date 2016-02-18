@@ -64,6 +64,7 @@ WebMis20
         api_stats_urgent_errands: '{{ url_for('.api_0_stats_urgent_errands') }}',
         api_stats_doctor_card_fill_rates: '{{ url_for('.api_0_stats_doctor_card_fill_rates') }}',
         api_stats_card_fill_rates_lpu_overview: '{{ url_for('.api_0_stats_card_fill_rates_lpu_overview') }}',
+        api_stats_card_fill_rates_doctor_overview: '{{ url_for('.api_0_stats_card_fill_rates_doctor_overview') }}',
         api_errands: '{{ url_for('.api_errands_get') }}',
         api_errands_summary: '{{ url_for('.api_errands_summary') }}',
         api_errand_edit: '{{ url_for('.api_errand_edit') }}{0}',
