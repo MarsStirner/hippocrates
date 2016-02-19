@@ -9,6 +9,7 @@ from nemesis.lib.utils import safe_date, initialize_name
 from nemesis.models.actions import Action
 from nemesis.models.enums import CardFillRate
 from blueprints.risar.lib.utils import get_action, get_action_list
+from blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
 from blueprints.risar.lib.card_attrs import get_card_attrs_action
 from blueprints.risar.risar_config import (checkup_flat_codes, risar_mother_anamnesis, risar_epicrisis,
     first_inspection_code, second_inspection_code)
@@ -19,8 +20,20 @@ from nemesis.lib.data_ctrl.base import BaseModelController, BaseSelecter
 def make_card_fill_timeline(event):
     """Построить таймлайн заполнения карты пациентки.
 
+    Таймлайн представляет собой информацию о наличии определенных сущностей в карте
+    пациентки и содержит следующие разделы:
+      - анамнез (обязательно)
+      - первичный осмотр (обязательно)
+      - повторные осмотры - добавляются последовательно на основе имеющихся осмотров, плюс
+        1 плановый осмотр. Количество повторных осмотров ограничивается максимальной датой
+        случая - датой эпикриза. При наличии эпикриза осмотры позднее него не попадут в выборку, а
+        плановый осмотр будет добавляться только, если с момента последнего существующего осмотра
+        прошло более `waiting_period` дней.
+      - эпикриз - только если имеется дата начала случая
+
     :param event:
-    :return:
+    :return информация по сущностям карты в виде списка элементов, упорядоченных
+    по фактической/плановой дате
     """
     if not event:
         return
@@ -71,19 +84,27 @@ def make_card_fill_timeline(event):
         }
     }
 
-    def make_timeline_item(section, planned_date, fill_rate, document, delay_days, preg_week=None):
+    def make_timeline_item(section, planned_date, fill_rate, document, delay_days, inspection_num):
+        document_date = safe_date(document.begDate) if document else None
+        display_date = planned_date if not document_date else document_date
+        preg_week = get_pregnancy_week(event, card_attrs_action, display_date)
+        if section not in ('first_inspection', 'repeated_inspection'):
+            inspection_num = None
         return {
+            'display_date': display_date,
             'planned_date': planned_date,
             'fill_rate': CardFillRate(fill_rate),
             'delay_days': delay_days,
             'preg_week': preg_week,
+            'section': section,
             'section_name': rules[section]['section_name'],
             'document': {
                 'id': document.id,
                 'name': document.actionType.name,
                 'beg_date': document.begDate,
                 'set_person': document.setPerson,
-            } if document else None
+            } if document else None,
+            'inspection_num': inspection_num
         }
 
     timeline = []
@@ -92,17 +113,18 @@ def make_card_fill_timeline(event):
     if preg_start_date:
         q.append('epicrisis')
     latest_date = event_start_date
-    max_date = None
+    max_date = epicrisis_planned_date = None
     if preg_start_date:
         epicrisis_planned_date = DateTimeUtil.add_to_date(
             preg_start_date, rules['epicrisis']['waiting_period'], DateTimeUtil.day
         )
-        epicrisis_date = safe_date(epicrisis and epicrisis.begDate)
+        epicrisis_date = safe_date(epicrisis.begDate if epicrisis else None)
         max_date = (
             epicrisis_date
             if epicrisis_date and epicrisis_date < epicrisis_planned_date
             else epicrisis_planned_date
         )
+    inspection_num = 1
     while len(q):
         section = q.popleft()
 
@@ -111,7 +133,7 @@ def make_card_fill_timeline(event):
         # итерация с текущей датой >= максимальной возможна только для секции эпикриза или
         # для секции повторного осмотра, для которой найдется существующий повторный осмотр;
         # иначе - это плановый повторный осмотр, который будет не обязателен из-за наличия
-        # эпикриза, планового или фактического
+        # эпикриза планового или фактического
         if max_date and latest_date >= max_date and (
             section != 'epicrisis' and document is None
         ):
@@ -119,7 +141,10 @@ def make_card_fill_timeline(event):
             continue
 
         document_date = safe_date(document.begDate) if document is not None else None
-        due_date = DateTimeUtil.add_to_date(latest_date, rules[section]['waiting_period'], DateTimeUtil.day)
+        if section == 'epicrisis':
+            due_date = epicrisis_planned_date
+        else:
+            due_date = DateTimeUtil.add_to_date(latest_date, rules[section]['waiting_period'], DateTimeUtil.day)
 
         fill_rate = (
             CardFillRate.filled[0]
@@ -128,16 +153,22 @@ def make_card_fill_timeline(event):
                 if cur_date <= due_date else CardFillRate.not_filled[0]
             )
         )
-        delay = max(
-            0,
-            ((document_date if document_date else cur_date) - due_date).days
+        # при наличии документа [-, 0, +]
+        # при отсутствии документа: либо 0, если плановая дата еще не прошла, либо +, если плановая дата уже прошла
+        delay = (
+            (document_date - due_date).days
+            if document_date
+            else max(0, (cur_date - due_date).days)
         )
-        item = make_timeline_item(section, due_date, fill_rate, document, delay)
+        item = make_timeline_item(section, due_date, fill_rate, document, delay, inspection_num)
         timeline.append(item)
 
         if section in ('first_inspection', 'repeated_inspection') and document is not None:
             latest_date = document_date
+            inspection_num += 1
             q.appendleft('repeated_inspection')
+
+    timeline = sorted(timeline, key=lambda t: t['display_date'])
 
     return timeline
 

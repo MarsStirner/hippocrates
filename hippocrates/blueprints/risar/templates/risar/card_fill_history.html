@@ -69,15 +69,19 @@
                     </li>
 
                     <li class="time-label" ng-repeat-start="item in chart.timeline">
-                        <span class="bg-gray" ng-bind="item.planned_date | asDate"></span>
+                        <span class="bg-gray"><span ng-bind="item.display_date | asDate"></span> (<span ng-bind="item.preg_week"></span>)</span>
                     </li>
                     <li ng-repeat-end>
                         <i ng-class="get_timeline_icon(item.fill_rate)" tooltip="[[ get_icon_tooltip(item.fill_rate) ]]"></i>
                         <div class="timeline-item">
-{#                            <span class="time"><i class="fa fa-clock-o"></i> 12:05</span>#}
-                            <h3 class="timeline-header"><span ng-bind="item.section_name"></span></h3>
+                            <h3 class="timeline-header">
+                                <span ng-bind="getSectionTitle(item)"></span> <a style="font-weight: normal;"
+                                    ng-href="[[getDocumentUrl(item)]]" ng-if="itemFilled(item)">(подробнее)</a>
+                            </h3>
                             <div class="timeline-body">
-                                <span ng-bind="get_document_info(item)"></span> Просрочка (дней): <span ng-bind="get_delay(item)"></span>
+                                <div><span ng-bind="getDocumentAuthorText(item)" ng-if="itemFilled(item)"></span></div>
+                                <div><span ng-bind="getPlannedDateText(item)"></span></div>
+                                <div><span ng-bind="getOverdueText(item)" ng-if="!itemWaiting(item)"></span></div>
                             </div>
 {#                            <div class="timeline-footer">#}
 {#                            </div>#}
