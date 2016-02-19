@@ -24,7 +24,7 @@ from blueprints.risar.lib.represent import represent_event, represent_chart_for_
     represent_org_for_routing, group_orgs_for_routing, represent_checkups, represent_card_attributes, \
     represent_chart_for_epicrisis, represent_chart_for_card_fill_rate_history
 from blueprints.risar.lib.utils import get_last_checkup_date
-from blueprints.risar.risar_config import attach_codes
+from blueprints.risar.risar_config import attach_codes, request_type_pregnancy
 
 
 __author__ = 'mmalkov'
@@ -51,7 +51,7 @@ def default_ET_Heuristic():
     return EventType.query \
         .join(rbRequestType, rbFinance) \
         .filter(
-            rbRequestType.code == 'pregnancy',  # Случай беременности
+            rbRequestType.code == request_type_pregnancy,  # Случай беременности
             rbFinance.code == '2',  # ОМС
             EventType.deleted == 0,
         ) \
@@ -88,7 +88,7 @@ def api_0_chart(event_id=None):
                 event = Event.query.join(EventType, rbRequestType).filter(
                     Event.client_id == client_id,
                     Event.deleted == 0,
-                    rbRequestType.code == 'pregnancy',
+                    rbRequestType.code == request_type_pregnancy,
                     Event.execDate.is_(None)
                 ).order_by(Event.setDate.desc()).first()
         else:  # client_id is not None
@@ -130,7 +130,7 @@ def api_0_chart(event_id=None):
         reevaluate_card_attrs(event, ext)
         db.session.commit()
 
-    if event.eventType.requestType.code != 'pregnancy':
+    if event.eventType.requestType.code != request_type_pregnancy:
         raise ApiException(400, u'Обращение не является случаем беременности')
     return {
         'event': represent_event(event),
@@ -168,7 +168,7 @@ def api_0_mini_chart(event_id=None):
     event = Event.query.get(event_id)
     if not event:
         raise ApiException(404, u'Обращение не найдено')
-    if event.eventType.requestType.code != 'pregnancy':
+    if event.eventType.requestType.code != request_type_pregnancy:
         raise ApiException(400, u'Обращение не является случаем беременности')
     return {
         'header': represent_header(event),
@@ -183,7 +183,7 @@ def api_0_chart_measure_list(event_id=None):
     event = Event.query.get(event_id)
     if not event:
         raise ApiException(404, u'Обращение не найдено')
-    if event.eventType.requestType.code != 'pregnancy':
+    if event.eventType.requestType.code != request_type_pregnancy:
         raise ApiException(400, u'Обращение не является случаем беременности')
     return {
         'last_inspection_date': get_last_checkup_date(event_id)
@@ -197,7 +197,7 @@ def api_0_chart_card_fill_history(event_id=None):
     event = Event.query.get(event_id)
     if not event:
         raise ApiException(404, u'Обращение не найдено')
-    if event.eventType.requestType.code != 'pregnancy':
+    if event.eventType.requestType.code != request_type_pregnancy:
         raise ApiException(400, u'Обращение не является случаем беременности')
     return represent_chart_for_card_fill_rate_history(event)
 
@@ -209,7 +209,7 @@ def api_0_chart_header(event_id=None):
     event = Event.query.get(event_id)
     if not event:
         raise ApiException(404, u'Обращение не найдено')
-    if event.eventType.requestType.code != 'pregnancy':
+    if event.eventType.requestType.code != request_type_pregnancy:
         raise ApiException(400, u'Обращение не является случаем беременности')
     return {
         'header': represent_header(event),

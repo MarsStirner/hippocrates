@@ -2,6 +2,8 @@
 
 __author__ = 'mmalkov'
 
+request_type_pregnancy = 'pregnancy'
+
 risar_mother_anamnesis = 'risar_mother_anamnesis'
 risar_father_anamnesis = 'risar_father_anamnesis'
 risar_epicrisis = 'epicrisis'

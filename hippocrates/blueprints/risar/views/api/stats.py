@@ -22,7 +22,7 @@ from blueprints.risar.app import module
 from blueprints.risar.lib.card_attrs import get_card_attrs_action
 from blueprints.risar.lib.represent import represent_chart_short, represent_errand
 from blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
-from blueprints.risar.risar_config import checkup_flat_codes
+from blueprints.risar.risar_config import checkup_flat_codes, request_type_pregnancy
 from blueprints.risar.lib.org_bcl import OrgBirthCareLevelRepr, OrganisationRepr, EventRepr
 from blueprints.risar.lib.card_fill_rate import CFRController
 
@@ -72,7 +72,7 @@ def api_0_current_stats():
 
     query = Event.query.join(EventType, rbRequestType, Action, ActionType, ActionProperty,
                                     ActionPropertyType, ActionProperty_Integer)\
-        .filter(rbRequestType.code == 'pregnancy', Event.deleted == 0, Event.execDate.is_(None))
+        .filter(rbRequestType.code == request_type_pregnancy, Event.deleted == 0, Event.execDate.is_(None))
 
     if curation_level:
         query = query.join(Organisation, OrganisationCurationAssoc, PersonCurationAssoc, rbOrgCurationLevel)
@@ -106,7 +106,7 @@ def api_0_recent_charts():
     curation_level = request.args.get('curation_level')
 
     query = Event.query.join(EventType, rbRequestType)\
-        .filter(rbRequestType.code == 'pregnancy', Event.deleted == 0, Event.execDate.is_(None),
+        .filter(rbRequestType.code == request_type_pregnancy, Event.deleted == 0, Event.execDate.is_(None),
                 Event.setDate >= boundary_date)
 
     if curation_level:
@@ -138,7 +138,7 @@ def api_0_recently_modified_charts():
 
     query = Event.query.join(EventType, rbRequestType, Action, ActionType, ActionProperty, ActionPropertyType,
                              ActionProperty_Integer)\
-        .filter(rbRequestType.code == 'pregnancy', Event.deleted == 0, Event.execDate.is_(None), Action.deleted == 0,
+        .filter(rbRequestType.code == request_type_pregnancy, Event.deleted == 0, Event.execDate.is_(None), Action.deleted == 0,
                 ActionType.flatCode == 'cardAttributes', ActionPropertyType.code == "prenatal_risk_572",
                 ActionProperty.deleted == 0,
                 ActionProperty_Integer.value_.in_(risk_rate))
@@ -175,7 +175,7 @@ def api_0_need_hospitalization(person_id=None):
 
     patient_list = Event.query.join(EventType, rbRequestType, Action, ActionType, ActionProperty,
                                     ActionPropertyType, ActionProperty_Integer)\
-        .filter(rbRequestType.code == 'pregnancy', Event.deleted == 0, Event.execDate.is_(None), Event.execPerson_id == person_id,
+        .filter(rbRequestType.code == request_type_pregnancy, Event.deleted == 0, Event.execDate.is_(None), Event.execPerson_id == person_id,
                 ActionType.flatCode == 'cardAttributes', Action.deleted == 0,
                 ActionPropertyType.code == "prenatal_risk_572", ActionProperty.deleted == 0,
                 ActionProperty_Integer.value_.in_([3, 4]))\
@@ -198,7 +198,7 @@ def api_0_pregnancy_week_diagram(person_id=None):
     result.append(['40+', 0])
 
     query = Event.query.join(EventType, rbRequestType)\
-        .filter(rbRequestType.code == 'pregnancy', Event.deleted == 0, Event.execDate.is_(None))
+        .filter(rbRequestType.code == request_type_pregnancy, Event.deleted == 0, Event.execDate.is_(None))
 
     if curation_level:
         query = query.join(Organisation, OrganisationCurationAssoc, PersonCurationAssoc, rbOrgCurationLevel)
@@ -227,7 +227,7 @@ def api_0_stats_perinatal_risk_rate():
 
     where = [ActionType.flatCode == 'cardAttributes',
              ActionPropertyType.code == 'prenatal_risk_572',
-             rbRequestType.code == 'pregnancy',
+             rbRequestType.code == request_type_pregnancy,
              Action.event_id == Event.id,
              ActionProperty.action_id == Action.id,
              ActionPropertyType.id == ActionProperty.type_id,
@@ -281,7 +281,7 @@ def api_0_death_stats():
         whereclause=db.and_(
             ActionType.flatCode == 'risar_newborn_inspection',
             ActionPropertyType.code == 'alive',
-            rbRequestType.code == 'pregnancy',
+            rbRequestType.code == request_type_pregnancy,
             Action.event_id == Event.id,
             ActionProperty.action_id == Action.id,
             ActionPropertyType.id == ActionProperty.type_id,
@@ -307,7 +307,7 @@ def api_0_death_stats():
                 whereclause=db.and_(
                     ActionType.flatCode == 'risar_newborn_inspection',
                     ActionPropertyType.code == 'date',
-                    rbRequestType.code == 'pregnancy',
+                    rbRequestType.code == request_type_pregnancy,
                     Action.event_id == Event.id,
                     ActionProperty.action_id == Action.id,
                     ActionPropertyType.id == ActionProperty.type_id,
@@ -343,7 +343,7 @@ def api_0_death_stats():
                                    ActionPropertyType, ActionProperty_Date)\
             .filter(ActionType.flatCode == 'epicrisis',
                     ActionPropertyType.code == 'death_date',
-                    rbRequestType.code == 'pregnancy',
+                    rbRequestType.code == request_type_pregnancy,
                     Action.event_id == Event.id,
                     ActionProperty.action_id == Action.id,
                     ActionPropertyType.id == ActionProperty.type_id,
@@ -374,7 +374,7 @@ def api_0_pregnancy_final_stats():
         whereclause=db.and_(
             ActionType.flatCode == 'epicrisis',
             ActionPropertyType.code == 'delivery_date',
-            rbRequestType.code == 'pregnancy',
+            rbRequestType.code == request_type_pregnancy,
             Action.event_id == Event.id,
             ActionProperty.action_id == Action.id,
             ActionPropertyType.id == ActionProperty.type_id,
@@ -398,7 +398,7 @@ def api_0_pregnancy_final_stats():
         whereclause=db.and_(
             ActionType.flatCode == 'epicrisis',
             ActionPropertyType.code == 'pregnancy_final',
-            rbRequestType.code == 'pregnancy',
+            rbRequestType.code == request_type_pregnancy,
             Action.event_id == Event.id,
             ActionProperty.action_id == Action.id,
             ActionPropertyType.id == ActionProperty.type_id,
