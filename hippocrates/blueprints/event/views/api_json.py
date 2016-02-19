@@ -24,7 +24,7 @@ from blueprints.event.app import module
 from blueprints.event.lib.utils import (EventSaveException, create_services, save_event, save_executives)
 from nemesis.lib.sphinx_search import SearchEventService, SearchEvent
 from nemesis.lib.data import (get_planned_end_datetime, int_get_atl_dict_all, _get_stationary_location_query,
-    _get_moving_query)
+    _get_moving_query, get_default_org)
 from nemesis.lib.agesex import recordAcceptableEx
 from nemesis.lib.const import STATIONARY_EVENT_CODES, POLICLINIC_EVENT_CODES, DIAGNOSTIC_EVENT_CODES
 from nemesis.lib.user import UserUtils
@@ -56,7 +56,7 @@ def api_event_info():
 def api_event_new_get():
     event = Event()
     event.eventType = EventType.get_default_et()
-    event.organisation = Organisation.query.filter_by(infisCode=str(app.config['ORGANISATION_INFIS_CODE'])).first()
+    event.organisation = get_default_org()
     event.isPrimaryCode = EventPrimary.primary[0]
     event.order = EventOrder.planned[0]
 
