@@ -15,6 +15,7 @@ from blueprints.risar.risar_config import (checkup_flat_codes, risar_mother_anam
     first_inspection_code, second_inspection_code)
 from blueprints.risar.lib.time_converter import DateTimeUtil
 from nemesis.lib.data_ctrl.base import BaseModelController, BaseSelecter
+from blueprints.risar.risar_config import request_type_pregnancy
 
 
 def make_card_fill_timeline(event):
@@ -193,9 +194,9 @@ class CFRController(BaseModelController):
         }
 
     def get_card_fill_rates_lpu_overview(self, curator_id):
-        def make_lpu_cfr_stats(cfrs):
-            total = float(cfrs.count_all) or 0
-            not_filled = float(cfrs.count_cfr_nf) or 0
+        def make_lpu_cfr_stats(cfrs, cards_count):
+            total = float(cards_count or 0)
+            not_filled = float(cfrs.count_cfr_nf or 0)
             fill_pct = round(not_filled / total * 100) if total != 0 else 0
             return {
                 'org_id': cfrs.id,
@@ -206,16 +207,17 @@ class CFRController(BaseModelController):
             }
 
         sel = self.get_selecter()
-        data = sel.get_cfrs_lpu_overview(curator_id)
+        cfrs_data = sel.get_cfrs_lpu_overview(curator_id)
+        cards_count = sel.get_curator_cards_count(curator_id, '3')
         return [
-            make_lpu_cfr_stats(lpu_cfrs)
-            for lpu_cfrs in data
+            make_lpu_cfr_stats(lpu_cfrs, cards_count)
+            for lpu_cfrs in cfrs_data
         ]
 
     def get_card_fill_rates_doctor_overview(self, curator_id, curation_level):
         def make_doctor_cfr_stats(cfrs):
-            total = float(cfrs.count_all) or 0
-            not_filled = float(cfrs.count_cfr_nf) or 0
+            total = float(cfrs.count_all or 0)
+            not_filled = float(cfrs.count_cfr_nf or 0)
             doctor_name = initialize_name(cfrs.lastName, cfrs.firstName, cfrs.patrName)
             return {
                 'doctor_id': cfrs.doctor_id,
@@ -325,12 +327,51 @@ class CFRSelecter(BaseSelecter):
                      ).label('count_cfr_nf'),
             func.count(Event.id.distinct()).label('count_all')
         ).order_by(
-            func.count(Event.id.distinct()).desc()
+            func.sum(func.IF(and_(ActionPropertyType.code == 'card_fill_rate',
+                                  ActionProperty_Integer.value_ == CardFillRate.not_filled[0]), 1, 0)
+                     ).desc()
         )
         if only_open:
             query = query.filter(Event.execDate == None)
         self.query = query
         return self.get_all()
+
+    def get_curator_cards_count(self, curator_id, curation_level, only_open=True):
+        Event = self.model_provider.get('Event')
+        EventType = self.model_provider.get('EventType')
+        rbRequestType = self.model_provider.get('rbRequestType')
+        Person = self.model_provider.get('Person')
+        PersonInEvent = aliased(Person, name='PersonInEvent')
+        PersonCurationAssoc = self.model_provider.get('PersonCurationAssoc')
+        rbOrgCurationLevel = self.model_provider.get('rbOrgCurationLevel')
+        OrganisationCurationAssoc = self.model_provider.get('OrganisationCurationAssoc')
+        Organisation = self.model_provider.get('Organisation')
+        query = self.model_provider.get_query('Person')
+
+        query = query.join(
+            PersonCurationAssoc, rbOrgCurationLevel
+        ).join(
+            OrganisationCurationAssoc, OrganisationCurationAssoc.personCuration_id == PersonCurationAssoc.id
+        ).join(
+            Organisation, OrganisationCurationAssoc.org_id == Organisation.id
+        ).join(
+            PersonInEvent, PersonInEvent.org_id == Organisation.id
+        ).join(
+            Event, Event.execPerson_id == PersonInEvent.id
+        ).join(
+            EventType, rbRequestType
+        ).filter(
+            Person.id == curator_id,
+            rbOrgCurationLevel.code == curation_level,
+            rbRequestType.code == request_type_pregnancy,
+            Organisation.deleted == 0, PersonInEvent.deleted == 0, Event.deleted == 0,
+        ).with_entities(
+            func.count(Event.id.distinct()).label('count_all')
+        )
+        if only_open:
+            query = query.filter(Event.execDate == None)
+        self.query = query
+        return self.get_first()
 
     def get_cfrs_doctor_overview(self, curator_id, curation_level, only_open=True):
         Event = self.model_provider.get('Event')

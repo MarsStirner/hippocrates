@@ -8,7 +8,7 @@
     <div class="box-body">
         <div class="progress-group" ng-repeat="lpu_stats in stats_data">
             <span class="progress-text" ng-bind="lpu_stats.org_name"></span>
-            <span class="progress-number"><b ng-bind="lpu_stats.cfr_not_filled"></b>/<span ng-bind="lpu_stats.cards_count"></span></span>
+            <span class="progress-number"><b ng-bind="lpu_stats.cfr_not_filled"></b></span>
             <div class="progress sm">
               <div class="progress-bar progress-bar-danger" style="width: [[ lpu_stats.fill_pct ]]%"></div>
             </div>

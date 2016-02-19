@@ -119,6 +119,9 @@ var CardFillHistoryCtrl = function ($scope, $q, $filter, RisarApi, RefBookServic
     $scope.itemWaiting = function (item) {
         return item.delay_days === 0 && !$scope.itemFilled(item);
     };
+    $scope.getPregWeekText = function (item) {
+        return '{(|0|)}'.formatNonEmpty(item.preg_week)
+    };
 
     $scope.init();
 };
