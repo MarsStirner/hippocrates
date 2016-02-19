@@ -367,6 +367,7 @@ var EventStationaryInfoCtrl = function($scope, $filter, $modal, $q, RisarApi, Ap
         return $modal.open({
             templateUrl: 'modal-intolerances.html',
             controller: IntolerancesCtrl,
+            backdrop : 'static',
             scope: scope,
             resolve: {
                 models: function () {return list},
@@ -402,6 +403,7 @@ var EventStationaryInfoCtrl = function($scope, $filter, $modal, $q, RisarApi, Ap
         return $modal.open({
             templateUrl: 'modal-blood-history.html',
             controller: BloodHistoryCtrl,
+            backdrop : 'static',
             scope: scope,
             resolve: {
                 models: function () {return list}
@@ -421,6 +423,7 @@ var EventReceivedCtrl = function($scope, $modal, RefBookService) {
         scope.model = angular.copy($scope.event.received)
         $modal.open({
             templateUrl: 'modal-received.html',
+            backdrop : 'static',
             windowClass: 'modal-scrollable',
             size: 'lg',
             scope: scope,
@@ -451,6 +454,7 @@ var EventMovingsCtrl = function($scope, $modal, RefBookService, ApiCalls) {
         };
         $modal.open({
             templateUrl: 'modal-create-moving.html',
+            backdrop : 'static',
             size: 'lg',
             scope: scope
         }).result.then(function (result) {
@@ -474,6 +478,7 @@ var EventMovingsCtrl = function($scope, $modal, RefBookService, ApiCalls) {
         $scope.org_struct_changed(scope.model).then(function(){
             $modal.open({
                 templateUrl: 'modal-create-hospBed.html',
+                backdrop : 'static',
                 size: 'lg',
                 scope: scope
             }).result.then(function (result) {

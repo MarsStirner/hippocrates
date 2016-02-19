@@ -64,6 +64,7 @@ var IndexCtrl = function ($scope, $modal, $http, RefBookService, PrintingService
         scope.model = record;
         return $modal.open({
             templateUrl: 'modal-ttj-info.html',
+            backdrop : 'static',
             scope: scope,
             size: 'lg'
         })

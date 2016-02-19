@@ -208,7 +208,8 @@ var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, WMAction, P
                             mode: 'save'
                         }
                     }
-                }
+                },
+                backdrop : 'static'
             })
         }
         if ($scope.action.readonly) {
@@ -221,6 +222,7 @@ var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, WMAction, P
         $modal.open({
             templateUrl: '_action_template_load_model.html',
             controller: ActionTemplateController,
+            backdrop : 'static',
             size: 'lg',
             resolve: {
                 args: function () {

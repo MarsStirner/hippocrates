@@ -403,6 +403,7 @@ function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WME
             var instance = $modal.open({
                 templateUrl: 'modal-lab-res-dynamics.html',
                 controller: LabResDynamicsCtrl,
+                backdrop : 'static',
                 size: 'lg'
             });
             return instance.result.then(function() {
