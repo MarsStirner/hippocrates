@@ -2,12 +2,14 @@
 
 from collections import deque
 
-from sqlalchemy import func, or_, and_
+from sqlalchemy import func, and_
+from sqlalchemy.orm import aliased
 
-from nemesis.lib.utils import safe_date
+from nemesis.lib.utils import safe_date, initialize_name
 from nemesis.models.actions import Action
 from nemesis.models.enums import CardFillRate
 from blueprints.risar.lib.utils import get_action, get_action_list
+from blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
 from blueprints.risar.lib.card_attrs import get_card_attrs_action
 from blueprints.risar.risar_config import (checkup_flat_codes, risar_mother_anamnesis, risar_epicrisis,
     first_inspection_code, second_inspection_code)
@@ -18,8 +20,20 @@ from nemesis.lib.data_ctrl.base import BaseModelController, BaseSelecter
 def make_card_fill_timeline(event):
     """Построить таймлайн заполнения карты пациентки.
 
+    Таймлайн представляет собой информацию о наличии определенных сущностей в карте
+    пациентки и содержит следующие разделы:
+      - анамнез (обязательно)
+      - первичный осмотр (обязательно)
+      - повторные осмотры - добавляются последовательно на основе имеющихся осмотров, плюс
+        1 плановый осмотр. Количество повторных осмотров ограничивается максимальной датой
+        случая - датой эпикриза. При наличии эпикриза осмотры позднее него не попадут в выборку, а
+        плановый осмотр будет добавляться только, если с момента последнего существующего осмотра
+        прошло более `waiting_period` дней.
+      - эпикриз - только если имеется дата начала случая
+
     :param event:
-    :return:
+    :return информация по сущностям карты в виде списка элементов, упорядоченных
+    по фактической/плановой дате
     """
     if not event:
         return
@@ -70,19 +84,27 @@ def make_card_fill_timeline(event):
         }
     }
 
-    def make_timeline_item(section, planned_date, fill_rate, document, delay_days, preg_week=None):
+    def make_timeline_item(section, planned_date, fill_rate, document, delay_days, inspection_num):
+        document_date = safe_date(document.begDate) if document else None
+        display_date = planned_date if not document_date else document_date
+        preg_week = get_pregnancy_week(event, card_attrs_action, display_date)
+        if section not in ('first_inspection', 'repeated_inspection'):
+            inspection_num = None
         return {
+            'display_date': display_date,
             'planned_date': planned_date,
             'fill_rate': CardFillRate(fill_rate),
             'delay_days': delay_days,
             'preg_week': preg_week,
+            'section': section,
             'section_name': rules[section]['section_name'],
             'document': {
                 'id': document.id,
                 'name': document.actionType.name,
                 'beg_date': document.begDate,
                 'set_person': document.setPerson,
-            } if document else None
+            } if document else None,
+            'inspection_num': inspection_num
         }
 
     timeline = []
@@ -91,17 +113,18 @@ def make_card_fill_timeline(event):
     if preg_start_date:
         q.append('epicrisis')
     latest_date = event_start_date
-    max_date = None
+    max_date = epicrisis_planned_date = None
     if preg_start_date:
         epicrisis_planned_date = DateTimeUtil.add_to_date(
             preg_start_date, rules['epicrisis']['waiting_period'], DateTimeUtil.day
         )
-        epicrisis_date = safe_date(epicrisis and epicrisis.begDate)
+        epicrisis_date = safe_date(epicrisis.begDate if epicrisis else None)
         max_date = (
             epicrisis_date
             if epicrisis_date and epicrisis_date < epicrisis_planned_date
             else epicrisis_planned_date
         )
+    inspection_num = 1
     while len(q):
         section = q.popleft()
 
@@ -110,7 +133,7 @@ def make_card_fill_timeline(event):
         # итерация с текущей датой >= максимальной возможна только для секции эпикриза или
         # для секции повторного осмотра, для которой найдется существующий повторный осмотр;
         # иначе - это плановый повторный осмотр, который будет не обязателен из-за наличия
-        # эпикриза, планового или фактического
+        # эпикриза планового или фактического
         if max_date and latest_date >= max_date and (
             section != 'epicrisis' and document is None
         ):
@@ -118,7 +141,10 @@ def make_card_fill_timeline(event):
             continue
 
         document_date = safe_date(document.begDate) if document is not None else None
-        due_date = DateTimeUtil.add_to_date(latest_date, rules[section]['waiting_period'], DateTimeUtil.day)
+        if section == 'epicrisis':
+            due_date = epicrisis_planned_date
+        else:
+            due_date = DateTimeUtil.add_to_date(latest_date, rules[section]['waiting_period'], DateTimeUtil.day)
 
         fill_rate = (
             CardFillRate.filled[0]
@@ -127,16 +153,22 @@ def make_card_fill_timeline(event):
                 if cur_date <= due_date else CardFillRate.not_filled[0]
             )
         )
-        delay = max(
-            0,
-            ((document_date if document_date else cur_date) - due_date).days
+        # при наличии документа [-, 0, +]
+        # при отсутствии документа: либо 0, если плановая дата еще не прошла, либо +, если плановая дата уже прошла
+        delay = (
+            (document_date - due_date).days
+            if document_date
+            else max(0, (cur_date - due_date).days)
         )
-        item = make_timeline_item(section, due_date, fill_rate, document, delay)
+        item = make_timeline_item(section, due_date, fill_rate, document, delay, inspection_num)
         timeline.append(item)
 
         if section in ('first_inspection', 'repeated_inspection') and document is not None:
             latest_date = document_date
+            inspection_num += 1
             q.appendleft('repeated_inspection')
+
+    timeline = sorted(timeline, key=lambda t: t['display_date'])
 
     return timeline
 
@@ -159,6 +191,47 @@ class CFRController(BaseModelController):
             'cfr_epicrisis_not_filled': data.count_cfr_epicrisis_nf or 0,
             'cards_count': data.count_all or 0
         }
+
+    def get_card_fill_rates_lpu_overview(self, curator_id):
+        def make_lpu_cfr_stats(cfrs):
+            total = float(cfrs.count_all) or 0
+            not_filled = float(cfrs.count_cfr_nf) or 0
+            fill_pct = round(not_filled / total * 100) if total != 0 else 0
+            return {
+                'org_id': cfrs.id,
+                'org_name': cfrs.shortName,
+                'cfr_not_filled': not_filled,
+                'cards_count': total,
+                'fill_pct': fill_pct
+            }
+
+        sel = self.get_selecter()
+        data = sel.get_cfrs_lpu_overview(curator_id)
+        return [
+            make_lpu_cfr_stats(lpu_cfrs)
+            for lpu_cfrs in data
+        ]
+
+    def get_card_fill_rates_doctor_overview(self, curator_id, curation_level):
+        def make_doctor_cfr_stats(cfrs):
+            total = float(cfrs.count_all) or 0
+            not_filled = float(cfrs.count_cfr_nf) or 0
+            doctor_name = initialize_name(cfrs.lastName, cfrs.firstName, cfrs.patrName)
+            return {
+                'doctor_id': cfrs.doctor_id,
+                'doctor_name': doctor_name,
+                'org_id': cfrs.org_id,
+                'org_name': cfrs.shortName,
+                'cfr_not_filled': not_filled,
+                'cards_count': total
+            }
+
+        sel = self.get_selecter()
+        data = sel.get_cfrs_doctor_overview(curator_id, curation_level)
+        return [
+            make_doctor_cfr_stats(doctor_cfrs)
+            for doctor_cfrs in data
+        ]
 
 
 class CFRSelecter(BaseSelecter):
@@ -207,3 +280,108 @@ class CFRSelecter(BaseSelecter):
             query = query.filter(Event.execDate == None)
         self.query = query
         return self.get_one()
+
+    def get_cfrs_lpu_overview(self, curator_id, only_open=True):
+        Event = self.model_provider.get('Event')
+        Person = self.model_provider.get('Person')
+        PersonInEvent = aliased(Person, name='PersonInEvent')
+        PersonCurationAssoc = self.model_provider.get('PersonCurationAssoc')
+        rbOrgCurationLevel = self.model_provider.get('rbOrgCurationLevel')
+        OrganisationCurationAssoc = self.model_provider.get('OrganisationCurationAssoc')
+        Organisation = self.model_provider.get('Organisation')
+        Action = self.model_provider.get('Action')
+        ActionType = self.model_provider.get('ActionType')
+        ActionProperty = self.model_provider.get('ActionProperty')
+        ActionPropertyType = self.model_provider.get('ActionPropertyType')
+        ActionProperty_Integer = self.model_provider.get('ActionProperty_Integer')
+        query = self.model_provider.get_query('Person')
+
+        query = query.join(
+            PersonCurationAssoc, rbOrgCurationLevel
+        ).join(
+            OrganisationCurationAssoc, OrganisationCurationAssoc.personCuration_id == PersonCurationAssoc.id
+        ).join(
+            Organisation, OrganisationCurationAssoc.org_id == Organisation.id
+        ).join(
+            PersonInEvent, PersonInEvent.org_id == Organisation.id
+        ).join(
+            Event, Event.execPerson_id == PersonInEvent.id
+        ).join(
+            Action, ActionType, ActionProperty, ActionPropertyType, ActionProperty_Integer
+        ).filter(
+            Person.id == curator_id,
+            rbOrgCurationLevel.code == '3',
+            Organisation.deleted == 0, PersonInEvent.deleted == 0, Event.deleted == 0,
+            Action.deleted == 0, ActionProperty.deleted == 0,
+            ActionType.flatCode == 'cardAttributes',
+            ActionPropertyType.code == 'card_fill_rate'
+        ).group_by(
+            PersonInEvent.org_id
+        ).with_entities(
+            Organisation.id, Organisation.shortName
+        ).add_columns(
+            func.sum(func.IF(and_(ActionPropertyType.code == 'card_fill_rate',
+                                  ActionProperty_Integer.value_ == CardFillRate.not_filled[0]), 1, 0)
+                     ).label('count_cfr_nf'),
+            func.count(Event.id.distinct()).label('count_all')
+        ).order_by(
+            func.count(Event.id.distinct()).desc()
+        )
+        if only_open:
+            query = query.filter(Event.execDate == None)
+        self.query = query
+        return self.get_all()
+
+    def get_cfrs_doctor_overview(self, curator_id, curation_level, only_open=True):
+        Event = self.model_provider.get('Event')
+        Person = self.model_provider.get('Person')
+        PersonInEvent = aliased(Person, name='PersonInEvent')
+        PersonCurationAssoc = self.model_provider.get('PersonCurationAssoc')
+        rbOrgCurationLevel = self.model_provider.get('rbOrgCurationLevel')
+        OrganisationCurationAssoc = self.model_provider.get('OrganisationCurationAssoc')
+        Organisation = self.model_provider.get('Organisation')
+        Action = self.model_provider.get('Action')
+        ActionType = self.model_provider.get('ActionType')
+        ActionProperty = self.model_provider.get('ActionProperty')
+        ActionPropertyType = self.model_provider.get('ActionPropertyType')
+        ActionProperty_Integer = self.model_provider.get('ActionProperty_Integer')
+        query = self.model_provider.get_query('Person')
+
+        query = query.join(
+            PersonCurationAssoc, rbOrgCurationLevel
+        ).join(
+            OrganisationCurationAssoc, OrganisationCurationAssoc.personCuration_id == PersonCurationAssoc.id
+        ).join(
+            Organisation, OrganisationCurationAssoc.org_id == Organisation.id
+        ).join(
+            PersonInEvent, PersonInEvent.org_id == Organisation.id
+        ).join(
+            Event, Event.execPerson_id == PersonInEvent.id
+        ).join(
+            Action, ActionType, ActionProperty, ActionPropertyType, ActionProperty_Integer
+        ).filter(
+            Person.id == curator_id,
+            Organisation.deleted == 0, PersonInEvent.deleted == 0, Event.deleted == 0,
+            Action.deleted == 0, ActionProperty.deleted == 0,
+            ActionType.flatCode == 'cardAttributes',
+            ActionPropertyType.code == 'card_fill_rate',
+            rbOrgCurationLevel.code == curation_level
+        ).group_by(
+            PersonInEvent.id
+        ).with_entities(
+            PersonInEvent.id.label('doctor_id'), PersonInEvent.firstName, PersonInEvent.lastName, PersonInEvent.patrName,
+            Organisation.id.label('org_id'), Organisation.shortName
+        ).add_columns(
+            func.sum(func.IF(and_(ActionPropertyType.code == 'card_fill_rate',
+                                  ActionProperty_Integer.value_ == CardFillRate.not_filled[0]), 1, 0)
+                     ).label('count_cfr_nf'),
+            func.count(Event.id.distinct()).label('count_all')
+        ).order_by(
+            func.sum(func.IF(and_(ActionPropertyType.code == 'card_fill_rate',
+                                  ActionProperty_Integer.value_ == CardFillRate.not_filled[0]), 1, 0)
+                     ).desc()
+        )
+        if only_open:
+            query = query.filter(Event.execDate == None)
+        self.query = query
+        return self.get_all()

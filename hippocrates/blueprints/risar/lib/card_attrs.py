@@ -44,27 +44,6 @@ def get_card_attrs_action(event, auto=True):
     return action
 
 
-def get_pregnancy_week(event, action, date=None):
-    """
-    :type event: application.models.event.Event
-    :type date: datetime.date | None
-    :param event: Карточка пациентки
-    :param date: Интересующая дата или None (тогда - дата окончания беременности)
-    :return: число недель от начала беременности на дату
-    """
-    if action is None:
-        action = get_card_attrs_action(event)
-    start_date = action['pregnancy_start_date'].value
-    if date is None:
-        date = action['predicted_delivery_date'].value
-    if start_date:  # assume that date is not None
-        if isinstance(date, datetime.datetime):
-            date = date.date()
-        if isinstance(start_date, datetime.datetime):
-            start_date = start_date.date()
-        return (min(date, datetime.date.today()) - start_date).days / 7 + 1
-
-
 def check_card_attrs_action_integrity(action):
     """
     Проверка, что в action, соответствующего атрибутам карточки, существуют
@@ -338,6 +317,7 @@ def reevaluate_preeclampsia_rate(event, action=None):
     Расчет степени преэклампсии у пациентки
     и отображение преэклампсии установленной врачом
     """
+    from blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
 
     def preec_diag(diag):
         DiagID = diag['diagnosis']['mkb'].DiagID

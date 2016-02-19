@@ -388,7 +388,7 @@ def represent_checkup(action, with_measures=True):
         result['diag'] = evis.make_diagnostic_record(result['diag'])
         for code in ('diag2', 'diag3'):
             result[code] = [evis.make_diagnostic_record(diag) for diag in result[code]] if result[code] else []
-    result['calculated_pregnancy_week'] = get_pregnancy_week(action.event, action.begDate)
+    result['calculated_pregnancy_week'] = get_pregnancy_week(action.event, date=action.begDate)
 
     if with_measures:
         em_ctrl = EventMeasureController()
@@ -415,7 +415,7 @@ def represent_checkup_shortly(action):
         'end_date': action.endDate,
         'person': action.person,
         'pregnancy_week': pregnancy_week.value if pregnancy_week else None,
-        'calculated_pregnancy_week': get_pregnancy_week(action.event, action.begDate),
+        'calculated_pregnancy_week': get_pregnancy_week(action.event, date=action.begDate),
         'diag': represent_diag_shortly(diag.value) if diag and diag.value else None
     }
     return result
@@ -532,7 +532,7 @@ def represent_epicrisis(event, action=None):
         (code, prop.value)
         for (code, prop) in action.propsByCode.iteritems()
     )
-    #прибавка массы за всю беременность
+    # прибавка массы за всю беременность
     first_inspection = get_action(event, 'risarFirstInspection')
     second_inspection = Action.query.join(ActionType).filter(Action.event == event, Action.deleted == 0).\
         filter(ActionType.flatCode == 'risarSecondInspection').order_by(Action.begDate.desc()).first()
@@ -543,7 +543,7 @@ def represent_epicrisis(event, action=None):
         epicrisis['weight_gain'] = second_weight - first_weight
 
     finish_date = epicrisis['delivery_date']
-    epicrisis['registration_pregnancy_week'] = get_pregnancy_week(event, event.setDate.date()) if finish_date else None
+    epicrisis['registration_pregnancy_week'] = get_pregnancy_week(event, date=event.setDate.date()) if finish_date else None
     epicrisis['newborn_inspections'] = represent_newborn_inspections(epicrisis['newborn_inspections']) if \
         epicrisis.get('newborn_inspections') else []
     epicrisis['info'] = make_epicrisis_info(epicrisis)

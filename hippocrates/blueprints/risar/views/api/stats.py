@@ -6,8 +6,8 @@ from flask import request
 from sqlalchemy import func
 
 from nemesis.app import app
-from nemesis.lib.apiutils import api_method
-from nemesis.lib.utils import safe_int
+from nemesis.lib.apiutils import api_method, ApiException
+from nemesis.lib.utils import safe_int, safe_unicode
 from nemesis.lib.vesta import Vesta
 from nemesis.models.actions import ActionType, Action, ActionProperty, ActionPropertyType, ActionProperty_Integer, \
     ActionProperty_Date, ActionProperty_ExtReferenceRb
@@ -466,4 +466,31 @@ def api_0_stats_doctor_card_fill_rates(doctor_id=None):
         doctor_id = safe_current_user_id()
     cfr_ctrl = CFRController()
     data = cfr_ctrl.get_doctor_card_fill_rates(doctor_id)
+    return data
+
+
+@module.route('/api/0/stats/card_fill_rates/lpu_overview/')
+@module.route('/api/0/stats/card_fill_rates/lpu_overview/<int:curator_id>')
+@api_method
+def api_0_stats_card_fill_rates_lpu_overview(curator_id=None):
+    if not curator_id:
+        curator_id = safe_current_user_id()
+    cfr_ctrl = CFRController()
+    data = cfr_ctrl.get_card_fill_rates_lpu_overview(curator_id)
+    return data
+
+
+@module.route('/api/0/stats/card_fill_rates/doctor_overview/')
+@module.route('/api/0/stats/card_fill_rates/doctor_overview/<int:curator_id>')
+@api_method
+def api_0_stats_card_fill_rates_doctor_overview(curator_id=None):
+    if not curator_id:
+        curator_id = safe_current_user_id()
+    args = request.args.to_dict()
+    if 'curation_level_code' not in args:
+        raise ApiException(404, u'`curation_level_code` required')
+    curation_level = safe_unicode(args.get('curation_level_code'))
+
+    cfr_ctrl = CFRController()
+    data = cfr_ctrl.get_card_fill_rates_doctor_overview(curator_id, curation_level)
     return data

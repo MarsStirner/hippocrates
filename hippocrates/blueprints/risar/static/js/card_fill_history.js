@@ -1,6 +1,7 @@
 'use strict';
 
-var CardFillHistoryCtrl = function ($scope, $q, $filter, RisarApi, RefBookService, PrintingService, PrintingDialog) {
+var CardFillHistoryCtrl = function ($scope, $q, $filter, RisarApi, RefBookService, PrintingService, PrintingDialog,
+        Config) {
     var params = aux.getQueryParams(window.location.search);
     var event_id = $scope.event_id = params.event_id;
     $scope.ps = new PrintingService("risar");
@@ -33,16 +34,6 @@ var CardFillHistoryCtrl = function ($scope, $q, $filter, RisarApi, RefBookServic
         }
     };
 
-    $scope.get_document_info = function (item) {
-        return '{0}{, |1}{, |2}'.formatNonEmpty(
-            safe_traverse(item, ['document', 'name']),
-            safe_traverse(item, ['document', 'set_person', 'name']),
-            $filter('asDate')(safe_traverse(item, ['document', 'beg_date']))
-        );
-    };
-    $scope.get_delay = function (item) {
-        return item.delay_days || 'нет';
-    };
     $scope.get_timeline_icon = function (fill_rate) {
         var code = fill_rate.code,
             icon_class = '';
@@ -77,9 +68,60 @@ var CardFillHistoryCtrl = function ($scope, $q, $filter, RisarApi, RefBookServic
         else if (code === 'filled') return 'Данные по пациентке заполнены полностью';
         else return 'Данные по пациентке заполнены не полностью';
     };
+    $scope.getSectionTitle = function (item) {
+        var text = item.section_name;
+        if (item.section === 'first_inspection' || item.section === 'repeated_inspection') {
+            text += ' №' + item.inspection_num;
+        }
+        return text;
+    };
+    $scope.itemFilled = function (item) {
+        return safe_traverse(item, ['document', 'id']);
+    };
+    $scope.getDocumentUrl = function (item) {
+        var url;
+        if (item.section === 'first_inspection' || item.section === 'repeated_inspection') {
+            url = '{0}?event_id={1}&checkup_id={2}'.format(
+                Config.url.inpection_read_html, $scope.event_id, item.document.id
+            );
+        } else if (item.section === 'anamnesis') {
+            url = '{0}?event_id={1}'.format(
+                Config.url.anamnesis_html, $scope.event_id
+            );
+        } else if (item.section === 'epicrisis') {
+            url = '{0}?event_id={1}'.format(
+                Config.url.epicrisis_html, $scope.event_id
+            );
+        }
+        return url;
+    };
+    $scope.getDocumentAuthorText = function (item) {
+        return 'Автор: {0}, {1}'.format(
+            safe_traverse(item, ['document', 'set_person', 'name']),
+            $filter('asDate')(safe_traverse(item, ['document', 'beg_date']))
+        );
+    };
+    $scope.getPlannedDateText = function (item) {
+        return '{0} {1}'.format(
+            $scope.itemWaiting(item) ? 'Ожидается' : 'Ожидался до',
+            $filter('asDate')(item.planned_date)
+        );
+    };
+    $scope.getOverdueText = function (item) {
+        var text = '';
+        if (item.delay_days > 0) {
+            text = 'Заполнение просрочено на {0} д.'.format(item.delay_days);
+        } else if (item.delay_days <= 0 && $scope.itemFilled(item)) {
+            text = 'Заполнено вовремя';
+        }
+        return text;
+    };
+    $scope.itemWaiting = function (item) {
+        return item.delay_days === 0 && !$scope.itemFilled(item);
+    };
 
     $scope.init();
 };
 
 WebMis20.controller('CardFillHistoryCtrl', ['$scope', '$q', '$filter', 'RisarApi', 'RefBookService', 'PrintingService',
-    'PrintingDialog', CardFillHistoryCtrl]);
+    'PrintingDialog', 'Config', CardFillHistoryCtrl]);
