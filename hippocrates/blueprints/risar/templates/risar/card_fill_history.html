@@ -69,7 +69,7 @@
                     </li>
 
                     <li class="time-label" ng-repeat-start="item in chart.timeline">
-                        <span class="bg-gray"><span ng-bind="item.display_date | asDate"></span> (<span ng-bind="item.preg_week"></span>)</span>
+                        <span class="bg-gray"><span ng-bind="item.display_date | asDate"></span> <span ng-bind="getPregWeekText(item)"></span></span>
                     </li>
                     <li ng-repeat-end>
                         <i ng-class="get_timeline_icon(item.fill_rate)" tooltip="[[ get_icon_tooltip(item.fill_rate) ]]"></i>
