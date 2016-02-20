@@ -262,7 +262,8 @@ def received_save(event_id, received_data):
 
 def client_quota_save(event, quota_data):
     quota_id = quota_data.get('id')
-    coupon = VMPCoupon.query.get(safe_traverse(quota_data, 'coupon', 'id'))
+    coupon_id = safe_traverse(quota_data, 'coupon', 'id')
+    coupon = VMPCoupon.query.get(coupon_id) if coupon_id else None
     with db.session.no_autoflush:
         if quota_id:
             quota = ClientQuoting.query.get(quota_id)

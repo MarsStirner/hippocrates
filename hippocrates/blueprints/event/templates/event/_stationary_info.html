@@ -84,6 +84,20 @@
                         </thead>
                         <tbody>
                             <tr>
+                                <th>Тип обращения, источник финансирования</th>
+                                <td>
+                                    [[event.info.event_type.request_type.name]]<span ng-if="event.info.event_type.finance">, </span>
+                                    [[event.info.event_type.finance.name]]
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Первичность</th>
+                                <td>
+                                    <rb-select ng-model="event.info.is_primary" ref-book="EventPrimary"></rb-select>
+                                </td>
+                            </tr>
+
+                            <tr>
                                 <th>Дата поступления</th>
                                 <td ng-bind-html="format_admission_date(event.admission_date)"></td>
                             </tr>
@@ -102,15 +116,17 @@
                                 <th>Койка</th>
                                 <td ng-bind-html="format_hosp_bed(event.hospital_bed)"></td>
                             </tr>
-{#                            <tr>#}
-{#                                <th>Лечащий врач</th>#}
-{#                                <td ng-bind-html="format_doctor(event.attending_doctor)"></td>#}
-{#                                <td>#}
-{#                                    <button type="button" class="btn btn-sm btn-default" title="Удалить"#}
-{#                                            ng-click="" disabled><span class="glyphicon glyphicon-pencil"></span>#}
-{#                                    </button>#}
-{#                                </td>#}
-{#                            </tr>#}
+                            <tr>
+                                <th>Лечащий врач</th>
+                                <td>
+                                    <div ng-class="{'has-error': event_maininfo_form.exec_person.$invalid && editing.submit_attempt}">
+                                        <wm-person-select id="exec_person" name="exec_person"
+                                            ng-model="event.info.exec_person" ng-required="!formstate.is_diagnostic()"
+                                            placeholder="Лечащий врач">
+                                        </wm-person-select>
+                                    </div>
+                                </td>
+                            </tr>
                             <tr>
                                 <th>Исход госпитализации</th>
                                 <td>

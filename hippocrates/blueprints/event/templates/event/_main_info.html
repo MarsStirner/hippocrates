@@ -7,46 +7,48 @@
                         <span class="text-danger" ng-show="error_msg">* [[ error_msg ]]</span>
                     </div>
                 </div>
-                <div class="row marginal">
-                    <div class="col-md-4">
-                        <label for="request_type">Тип обращения</label>
-                        <ui-select id="request_type" name="request_type" theme="select2"
-                                   ng-model="request_type.selected" ng-change="on_request_type_changed()"
-                                   ng-disabled="widget_disabled('request_type') || services_added()">
-                            <ui-select-match placeholder="Тип обращения">[[$select.selected.name]]</ui-select-match>
-                            <ui-select-choices repeat="rt in rbRequestType.objects | filter: filter_rb_request_type(request_type_kind) | filter: $select.search">
-                                <div ng-bind-html="rt.name | highlight: $select.search"></div>
-                            </ui-select-choices>
-                        </ui-select>
+                {% if requestType_kind == 'policlinic' %}
+                    <div class="row marginal">
+                        <div class="col-md-4">
+                            <label for="request_type">Тип обращения</label>
+                            <ui-select id="request_type" name="request_type" theme="select2"
+                                       ng-model="request_type.selected" ng-change="on_request_type_changed()"
+                                       ng-disabled="widget_disabled('request_type') || services_added()">
+                                <ui-select-match placeholder="Тип обращения">[[$select.selected.name]]</ui-select-match>
+                                <ui-select-choices repeat="rt in rbRequestType.objects | filter: filter_rb_request_type(request_type_kind) | filter: $select.search">
+                                    <div ng-bind-html="rt.name | highlight: $select.search"></div>
+                                </ui-select-choices>
+                            </ui-select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="finance">Источник финансирования</label>
+                            <ui-select id="finance" name="finance" theme="select2"
+                                       ng-model="finance.selected" ng-change="on_finance_changed()"
+                                       ng-disabled="widget_disabled('finance') || services_added()">
+                                <ui-select-match placeholder="Источник финансирования">[[$select.selected.name]]</ui-select-match>
+                                <ui-select-choices repeat="f in rbFinance.objects
+                                                 | event_type_filter: rbEventType.get_finances_by_rt(request_type.selected.id)
+                                                 | filter: $select.search">
+                                    <div ng-bind-html="f.name | highlight: $select.search"></div>
+                                </ui-select-choices>
+                            </ui-select>
+                        </div>
+                        <div class="col-md-4"
+                             ng-class="{'has-error': event_maininfo_form.event_type.$invalid && editing.submit_attempt}">
+                            <label for="event_type">Тип события</label>
+                            <ui-select id="event_type" name="event_type" theme="select2"
+                                       ng-model="event.info.event_type" ng-required="true" ng-change="on_event_type_changed()"
+                                       ng-disabled="widget_disabled('event_type') || services_added()">
+                                <ui-select-match placeholder="Тип события">[[$select.selected.name]]</ui-select-match>
+                                <ui-select-choices repeat='et in rbEventType.objects
+                                                 | event_type_filter: rbEventType.get_filtered_by_rtf(request_type.selected.id, finance.selected.id)
+                                                 | filter: $select.search '>
+                                    <div ng-bind-html="et.name | highlight: $select.search"></div>
+                                </ui-select-choices>
+                            </ui-select>
+                        </div>
                     </div>
-                    <div class="col-md-4">
-                        <label for="finance">Источник финансирования</label>
-                        <ui-select id="finance" name="finance" theme="select2"
-                                   ng-model="finance.selected" ng-change="on_finance_changed()"
-                                   ng-disabled="widget_disabled('finance') || services_added()">
-                            <ui-select-match placeholder="Источник финансирования">[[$select.selected.name]]</ui-select-match>
-                            <ui-select-choices repeat="f in rbFinance.objects
-                                             | event_type_filter: rbEventType.get_finances_by_rt(request_type.selected.id)
-                                             | filter: $select.search">
-                                <div ng-bind-html="f.name | highlight: $select.search"></div>
-                            </ui-select-choices>
-                        </ui-select>
-                    </div>
-                    <div class="col-md-4"
-                         ng-class="{'has-error': event_maininfo_form.event_type.$invalid && editing.submit_attempt}">
-                        <label for="event_type">Тип события</label>
-                        <ui-select id="event_type" name="event_type" theme="select2"
-                                   ng-model="event.info.event_type" ng-required="true" ng-change="on_event_type_changed()"
-                                   ng-disabled="widget_disabled('event_type') || services_added()">
-                            <ui-select-match placeholder="Тип события">[[$select.selected.name]]</ui-select-match>
-                            <ui-select-choices repeat='et in rbEventType.objects
-                                             | event_type_filter: rbEventType.get_filtered_by_rtf(request_type.selected.id, finance.selected.id)
-                                             | filter: $select.search '>
-                                <div ng-bind-html="et.name | highlight: $select.search"></div>
-                            </ui-select-choices>
-                        </ui-select>
-                    </div>
-                </div>
+                {% endif %}
                 <div class="row marginal">
                     <div class="col-md-9"
                          ng-class="{'has-error': event_maininfo_form.contract.$invalid && editing.submit_attempt}">
@@ -80,13 +82,6 @@
                 </div>
                 <div class="row marginal">
                 {% if requestType_kind == 'stationary' %}
-                    <div class="col-md-4" ng-class="{'has-error': event_maininfo_form.exec_person.$invalid && editing.submit_attempt}">
-                        <label for="exec_person" class="control-label">Лечащий врач</label>
-                        <wm-person-select id="exec_person" name="exec_person"
-                            ng-model="event.info.exec_person" ng-required="!formstate.is_diagnostic()"
-                            placeholder="Лечащий врач">
-                        </wm-person-select>
-                    </div>
                     <div class="col-md-4"
                          ng-class="{'has-error': event_maininfo_form.org_structure.$invalid && editing.submit_attempt}">
                         <label for="org_structure" class="control-label">Отделение поступления</label>
@@ -150,12 +145,6 @@
                     </div>
                 </div>
                 <div class="row marginal">
-                    {% if requestType_kind == 'stationary' %}
-                        <div class="col-md-3">
-                            <label for="primary" class="control-label">Первичность</label>
-                            <rb-select ng-model="event.info.is_primary" ref-book="EventPrimary"></rb-select>
-                        </div>
-                    {% endif %}
                     <div class="col-md-3" ng-if="cmb_result_available()">
                         <label for="result" class="control-label">[[ event.info.event_type.purpose.code == 1 ? 'Результат обращения' : 'Результат госпитализации']]</label>
                         <ui-select id="result" name="result" theme="select2"
