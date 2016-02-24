@@ -371,6 +371,7 @@ def represent_event_diagnoses(event):
     # Расставляем ассоциации Diagnosis.id -> Action_Diagnosis
     associations = collections.defaultdict(set)
     for action_diagnosis in Event_Diagnosis.query.filter(
+        Event_Diagnosis.deleted == 0,
         Event_Diagnosis.event == event,
         Event_Diagnosis.diagnosis_id.in_(diagnosis_ids),
     ):
@@ -405,6 +406,7 @@ def represent_action_diagnoses(action):
     # Расставляем ассоциации Diagnosis.id -> Action_Diagnosis
     associations = collections.defaultdict(set)
     for action_diagnosis in Action_Diagnosis.query.filter(
+        Action_Diagnosis.deleted == 0,
         Action_Diagnosis.action == action,
         Action_Diagnosis.diagnosis_id.in_(diagnosis_ids),
     ):
