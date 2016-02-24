@@ -17,13 +17,29 @@ def get_mother_bt(event):
 
 
 def diags_in_card(card, needles):
-    return False
+    """
+    :type card: PregnancyCard
+    :param card:
+    :param needles:
+    :return:
+    """
+    diagnostics = card.get_client_diagnostics(card.event.setDate, card.event.execDate)
+    mkbs = [diag.MKB for diag in diagnostics]
+    return any_thing(
+        mkbs,
+        needles,
+        lambda x: x,
+    )
 
 
-def calc_risk_groups(event):
-    card = PregnancyCard.get_for_event(event)
+def calc_risk_groups(card):
+    """
+    :type card: PregnancyCard
+    :param card:
+    :return:
+    """
 
-    hemoglobin_action = get_action_list(event, 'general_blood_test').order_by(Action.begDate.desc()).first()
+    hemoglobin_action = get_action_list(card.event, 'general_blood_test').order_by(Action.begDate.desc()).first()
     low_hemo = hemoglobin_action['hemoglobin'].value <= 110 if hemoglobin_action is not None else False
 
     # 01 - Невынашивание беременности
@@ -166,7 +182,7 @@ def calc_risk_groups(event):
 
     # p1 и p2 идентичны предыдущей группе риска
     father_bt = card.anamnesis.father['blood_type'].value
-    mother_bt = get_mother_bt(event)
+    mother_bt = get_mother_bt(card.event)
     p3 = father_bt and mother_bt and \
          mother_bt.bloodType.code in ('1-', '1+') and \
          father_bt.code in ('2+', '2-', '3+', '3-', '4+', '4-')

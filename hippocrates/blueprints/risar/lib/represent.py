@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-
+import collections
+import copy
 import datetime
 import itertools
 from collections import defaultdict
 
 from blueprints.risar.lib.card import PregnancyCard
-from blueprints.risar.lib.card import get_card_attrs_action
 from blueprints.risar.lib.card_attrs import get_all_diagnoses, check_disease
 from blueprints.risar.lib.expert.em_manipulation import EventMeasureController
 from blueprints.risar.lib.expert.em_repr import EventMeasureRepr
@@ -17,7 +17,7 @@ from blueprints.risar.risar_config import pregnancy_apt_codes, risar_anamnesis_p
     risar_anamnesis_transfusion, mother_codes, father_codes, risar_father_anamnesis, risar_mother_anamnesis, \
     checkup_flat_codes, risar_epicrisis, attach_codes
 from nemesis.app import app
-from nemesis.lib.jsonify import EventVisualizer
+from nemesis.lib.jsonify import EventVisualizer, DiagnosisVisualizer
 from nemesis.lib.utils import safe_traverse_attrs
 from nemesis.lib.vesta import Vesta
 from nemesis.models.actions import Action, ActionType
@@ -59,9 +59,10 @@ def represent_event(event):
     """
     :type event: application.models.event.Event
     """
+    card = PregnancyCard.get_for_event(event)
     client = event.client
-    all_diagnoses = list(get_all_diagnoses(event))
-    card_attrs_action = get_card_attrs_action(event, auto=True)
+    all_diagnostics = card.get_client_diagnostics(event.setDate, event.execDate)
+    card_attrs_action = card.get_card_attrs_action(auto=True)
     em_ctrl = EventMeasureController()
     return {
         'id': event.id,
@@ -104,8 +105,8 @@ def represent_event(event):
             for pathg in card_attrs_action['pregnancy_pathology_list'].value
         ] if card_attrs_action['pregnancy_pathology_list'].value else [],
         'pregnancy_week': get_pregnancy_week(event),
-        'diagnoses': all_diagnoses,
-        'has_diseases': check_disease(all_diagnoses)
+        'diagnoses': represent_event_diagnoses(event),
+        'has_diseases': check_disease(all_diagnostics)
     }
 
 
@@ -151,34 +152,42 @@ def represent_chart_for_epicrisis(event):
 
 
 def represent_mkbs_for_routing(event):
-    mkbs = db.session.query(MKB).select_from(
-        Diagnostic
-    ).join(Diagnostic.diagnoses).join(Diagnosis.mkb).filter(
-        Diagnostic.event_id == event.id,
-        Diagnostic.endDate == None,
-        Diagnostic.deleted == 0
-    ).all()
-    mkbs = list(set(mkbs))
+    """
+    :type event: nemesis.models.event.Event
+    :param event:
+    :return:
+    """
+    card = PregnancyCard.get_for_event(event)
+    diagnostics = card.get_client_diagnostics(event.setDate, event.execDate)
 
-    def set_risk(mkb):
-        if mkb.DiagID in risk_rates_diagID['high'] or mkb.BlockID in risk_rates_blockID['high']:
-            rr = PerinatalRiskRate(PerinatalRiskRate.high[0])
-        elif mkb.DiagID in risk_rates_diagID['middle'] or mkb.BlockID in risk_rates_blockID['middle']:
-            rr = PerinatalRiskRate(PerinatalRiskRate.medium[0])
-        elif mkb.DiagID in risk_rates_diagID['low'] or mkb.BlockID in risk_rates_blockID['low']:
-            rr = PerinatalRiskRate(PerinatalRiskRate.low[0])
-        else:
-            rr = None
-        mkb.risk_rate = rr
-        return mkb
-    mkbs = map(set_risk, mkbs)
-    mkbs = sorted(mkbs, key=lambda x: x.DiagID)
-    return [{
-        'id': mkb.id,
-        'code': mkb.DiagID,
-        'name': mkb.DiagName,
-        'risk_rate': mkb.risk_rate
-    } for mkb in mkbs]
+    hi_diag_rates = set(risk_rates_diagID['high'])
+    hi_block_rates = set(risk_rates_blockID['high'])
+
+    mid_diag_rates = set(risk_rates_diagID['middle'])
+    mid_block_rates = set(risk_rates_blockID['middle'])
+
+    low_diag_rates = set(risk_rates_diagID['low'])
+    low_block_rates = set(risk_rates_blockID['low'])
+
+    def calc_risk(DiagID, BlockID):
+        if DiagID in hi_diag_rates or BlockID in hi_block_rates:
+            return PerinatalRiskRate(PerinatalRiskRate.high[0])
+        elif DiagID in mid_diag_rates or BlockID in mid_block_rates:
+            return PerinatalRiskRate(PerinatalRiskRate.medium[0])
+        elif DiagID in low_diag_rates or BlockID in low_block_rates:
+            return PerinatalRiskRate(PerinatalRiskRate.low[0])
+
+    result = []
+    for diag in diagnostics:
+        result.append({
+            'id': diag.mkb.id,
+            'code': diag.mkb.DiagID,
+            'name': diag.mkb.DiagName,
+            'risk_rate': calc_risk(diag.mkb.DiagID, diag.mkb.BlockID),
+        })
+
+    result.sort(key=lambda x: x['code'])
+    return result
 
 
 def represent_org_for_routing(org):
@@ -349,8 +358,78 @@ def represent_checkups(event):
     return map(represent_checkup, query)
 
 
+def represent_event_diagnoses(event):
+    from nemesis.models.diagnosis import Event_Diagnosis, rbDiagnosisKind
+
+    card = PregnancyCard.get_for_event(event)
+
+    # Сперва достаём диагностики на время действия
+    diagnostics = card.get_client_diagnostics(event.setDate, event.execDate)
+    # Потом достём id всех действовавших на тот момент диагнозов
+    diagnosis_ids = [diagnostic.diagnosis_id for diagnostic in diagnostics]
+
+    # Расставляем ассоциации Diagnosis.id -> Action_Diagnosis
+    associations = collections.defaultdict(set)
+    for action_diagnosis in Event_Diagnosis.query.filter(
+        Event_Diagnosis.event == event,
+        Event_Diagnosis.diagnosis_id.in_(diagnosis_ids),
+    ):
+        associations[action_diagnosis.diagnosis_id].add(action_diagnosis)
+
+    # Начинаем генерацию
+    dvis = DiagnosisVisualizer()
+    result = [
+        dvis.make_diagnosis_record(diagnostic.diagnosis, diagnostic)
+        for diagnostic in diagnostics
+    ]
+    return result
+
+
+def represent_action_diagnoses(action):
+    from nemesis.models.diagnosis import Action_Diagnosis, rbDiagnosisKind
+
+    card = PregnancyCard.get_for_event(action.event)
+
+    # Сперва достаём диагностики на время действия
+    diagnostics = card.get_client_diagnostics(action.begDate, action.endDate)
+    # Потом достём id всех действовавших на тот момент диагнозов
+    diagnosis_ids = [diagnostic.diagnosis_id for diagnostic in diagnostics]
+
+    # По умолчанию все диагнозы сопутствующие, если не указано иного
+    associated_kind = rbDiagnosisKind.query.filter(rbDiagnosisKind.code == 'associated').first()
+    types_info = {
+        diag_type.code: associated_kind
+        for diag_type in action.actionType.diagnosis_types
+    }
+
+    # Расставляем ассоциации Diagnosis.id -> Action_Diagnosis
+    associations = collections.defaultdict(set)
+    for action_diagnosis in Action_Diagnosis.query.filter(
+        Action_Diagnosis.action == action,
+        Action_Diagnosis.diagnosis_id.in_(diagnosis_ids),
+    ):
+        associations[action_diagnosis.diagnosis_id].add(action_diagnosis)
+
+    # Начинаем генерацию
+    dvis = DiagnosisVisualizer()
+    result = []
+    for diagnostic in diagnostics:
+        # Основа типов
+        types = copy.copy(types_info)
+        # Перегружаем перегруженные (основной/осложнения)
+        types.update({
+            action_diagnosis.diagnosisType.code: action_diagnosis.diagnosisKind
+            for action_diagnosis in associations.get(diagnostic.diagnosis_id, ())
+        })
+        # Собираем описание диагноза
+        result.append(dict(
+            dvis.make_diagnosis_record(diagnostic.diagnosis, diagnostic),
+            diagnosis_types=types,
+        ))
+    return result
+
+
 def represent_checkup(action, with_measures=True):
-    evis = EventVisualizer()
     result = dict(
         (code, prop.value)
         for (code, prop) in action.propsByCode.iteritems()
@@ -360,10 +439,9 @@ def represent_checkup(action, with_measures=True):
     result['person'] = action.person
     result['flat_code'] = action.actionType.flatCode
     result['id'] = action.id
-    if result:
-        result['diag'] = evis.make_diagnostic_record(result['diag'])
-        for code in ('diag2', 'diag3'):
-            result[code] = [evis.make_diagnostic_record(diag) for diag in result[code]] if result[code] else []
+
+    result['diagnoses'] = represent_action_diagnoses(action)
+    result['diagnosis_types'] = action.actionType.diagnosis_types
     result['calculated_pregnancy_week'] = get_pregnancy_week(action.event, action.begDate)
 
     if with_measures:
@@ -383,8 +461,26 @@ def represent_checkups_shortly(event):
 
 
 def represent_checkup_shortly(action):
+    from nemesis.models.diagnosis import Action_Diagnosis, rbDiagnosisTypeN
+
+    card = PregnancyCard.get_for_event(action.event)
+    # Получим диагностики, актуальные на начало действия (Diagnostic JOIN Diagnosis)
+    diagnostics = card.get_client_diagnostics(action.begDate, action.endDate)
+    diagnosis_ids = [
+        diagnostic.diagnosis_id for diagnostic in diagnostics
+    ]
+    # Ограничим диагностиками, связанными с действием как "Основной диагноз"
+    diagnostic = Diagnostic.query.join(
+        Action_Diagnosis, Action_Diagnosis.diagnosis_id == Diagnostic.diagnosis_id
+    ).join(
+        rbDiagnosisTypeN,
+    ).filter(
+        Action_Diagnosis.action == action,
+        Action_Diagnosis.diagnosis_id.in_(diagnosis_ids),
+        rbDiagnosisTypeN.code == 'main',
+    ).first()
+
     pregnancy_week = get_action_property_value(action.id, 'pregnancy_week')
-    diag = get_action_property_value(action.id, 'diag')
     result = {
         'id': action.id,
         'beg_date': action.begDate,
@@ -392,7 +488,7 @@ def represent_checkup_shortly(action):
         'person': action.person,
         'pregnancy_week': pregnancy_week.value if pregnancy_week else None,
         'calculated_pregnancy_week': get_pregnancy_week(action.event, action.begDate),
-        'diag': represent_diag_shortly(diag.value) if diag and diag.value else None
+        'diag': represent_diag_shortly(diagnostic) if diagnostic else None
     }
     return result
 
@@ -400,7 +496,7 @@ def represent_checkup_shortly(action):
 def represent_diag_shortly(diagnostic):
     return {
         'id': diagnostic.id,
-        'mkb': diagnostic.diagnosis.mkb
+        'mkb': diagnostic.mkb
     }
 
 
@@ -508,7 +604,7 @@ def represent_epicrisis(event, action=None):
         (code, prop.value)
         for (code, prop) in action.propsByCode.iteritems()
     )
-    #прибавка массы за всю беременность
+    # прибавка массы за всю беременность
     first_inspection = get_action(event, 'risarFirstInspection')
     second_inspection = Action.query.join(ActionType).filter(Action.event == event, Action.deleted == 0).\
         filter(ActionType.flatCode == 'risarSecondInspection').order_by(Action.begDate.desc()).first()
@@ -523,12 +619,8 @@ def represent_epicrisis(event, action=None):
     epicrisis['newborn_inspections'] = represent_newborn_inspections(epicrisis['newborn_inspections']) if \
         epicrisis.get('newborn_inspections') else []
     epicrisis['info'] = make_epicrisis_info(epicrisis)
-    if epicrisis:
-        evis = EventVisualizer()
-        epicrisis['main_diagnosis'] = evis.make_diagnostic_record(epicrisis['main_diagnosis'])
-        epicrisis['pat_diagnosis'] = evis.make_diagnostic_record(epicrisis['pat_diagnosis'])
-        for code in ('attend_diagnosis', 'complicating_diagnosis', 'operation_complication'):
-            epicrisis[code] = [evis.make_diagnostic_record(diag) for diag in epicrisis[code]] if epicrisis[code] else []
+    epicrisis['diagnoses'] = represent_action_diagnoses(action)
+    epicrisis['diagnosis_types'] = action.actionType.diagnosis_types
     return epicrisis
 
 

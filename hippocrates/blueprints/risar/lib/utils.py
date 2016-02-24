@@ -212,14 +212,16 @@ def get_last_checkup_date(event_id):
 
 
 def get_event_diag_mkbs(event, **kwargs):
-    query = db.session.query(Event).join(
-        Diagnostic, Diagnosis
+    query = MKB.query.join(
+        Diagnostic, Diagnostic.MKB == MKB.DiagID
     ).join(
-        MKB, Diagnosis.MKB == MKB.DiagID
+        Diagnosis,
+        Action,
     ).filter(
-        Event.id == event.id,
         Diagnostic.deleted == 0,
-        Diagnosis.deleted == 0
+        Diagnosis.deleted == 0,
+        Action.event == event,
+        Action.deleted == 0,
     )
     if 'at_flatcodes' in kwargs:
         at_flatcodes = kwargs['at_flatcodes']
@@ -247,18 +249,17 @@ def get_event_diag_mkbs(event, **kwargs):
 
 
 def close_open_checkups(event_id):
-    open_checkups = db.session.query(Action).join(ActionType).filter(
+    now = datetime.datetime.now()
+    db.session.query(Action).filter(
         Action.event_id == event_id,
         Action.endDate.is_(None),
         Action.deleted == 0,
+        ActionType.id == Action.actionType_id,
         ActionType.flatCode.in_(checkup_flat_codes)
-    ).all()
-    for action in open_checkups:
-        action.endDate = datetime.datetime.now()
-        action.status = ActionStatus.finished[0]
-        db.session.add(action)
-    if open_checkups:
-        db.session.commit()
+    ).update({
+        Action.endDate: now,
+        Action.status: ActionStatus.finished[0],
+    }, synchronize_session=False)
 
 
 @cache.memoize()

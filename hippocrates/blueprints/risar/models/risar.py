@@ -9,6 +9,8 @@ __author__ = 'viruzzz-kun'
 
 
 class RisarRiskGroup(db.Model):
+    __tablename__ = 'RisarRiskGroup'
+
     id = db.Column(db.Integer, primary_key=True)
     createDatetime = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now)
     createPerson_id = db.Column(db.Integer, index=True, default=safe_current_user_id)

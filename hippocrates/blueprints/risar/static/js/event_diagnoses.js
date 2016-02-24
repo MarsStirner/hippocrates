@@ -14,7 +14,7 @@ var EventDiagnosesCtrl = function ($scope, RisarApi, DiagnosisModal, WMEventServ
         if ($scope.ps.is_available()){
             PrintingDialog.open($scope.ps, $scope.ps_resolve());
         }
-    }
+    };
     var reload_anamnesis = function () {
         RisarApi.chart.get(event_id)
         .then(function (event) {
@@ -22,21 +22,5 @@ var EventDiagnosesCtrl = function ($scope, RisarApi, DiagnosisModal, WMEventServ
             $scope.client_id = event.client.id;
         })
     };
-    $scope.delete_diagnosis = function (diagnosis, deleted) {
-        if (arguments.length == 1) {
-            deleted = 1;
-        }
-        WMEventServices.delete_diagnosis($scope.chart.diagnoses, diagnosis, deleted);
-    };
-    $scope.edit_diagnosis = function (diagnosis) {
-        DiagnosisModal.openDiagnosisModalRisar(diagnosis, $scope.chart);
-    };
-    $scope.save = function () {
-        var model = $scope.chart.diagnoses;
-        RisarApi.chart.save_diagnoses($scope.chart.id, model)
-        .then(function (data) {
-            $scope.chart.diagnoses = data;
-        })
-    }
     reload_anamnesis();
 };

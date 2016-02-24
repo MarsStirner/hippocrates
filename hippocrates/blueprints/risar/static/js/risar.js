@@ -587,4 +587,22 @@ WebMis20
         }
     }
 })
+.filter('collapse_diagnoses', [function () {
+    return function (diag_list, kind) {
+        var types = arguments[2];
+        if (_.isUndefined(types)) {
+            return _.filter(diag_list, function (diagnosis) {
+                return _.any(diagnosis.diagnosis_types, function (value, key) {
+                    return value.code == kind;
+                });
+            })
+        } else {
+            return _.filter(diag_list, function (diagnosis) {
+                return _.any(diagnosis.diagnosis_types, function (value, key) {
+                    return value.code == kind && [].has.apply(types, [key]);
+                });
+            })
+        }
+    }
+}])
 ;

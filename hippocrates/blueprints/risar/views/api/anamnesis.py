@@ -5,7 +5,8 @@ import logging
 from flask import request
 from flask.ext.login import current_user
 
-from blueprints.risar.lib.card_attrs import reevaluate_card_attrs, reevaluate_preeclampsia_risk
+from blueprints.risar.lib.card import PregnancyCard
+from blueprints.risar.lib.card_attrs import reevaluate_preeclampsia_risk
 from blueprints.risar.lib.utils import get_action, action_apt_values, get_action_type_id, get_action_by_id
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.data import create_action
@@ -81,6 +82,7 @@ def api_0_pregnancies_post(action_id=None):
         if action is None:
             raise ApiException(404, 'Action not found')
     event = Event.query.get(action.event_id)
+    card = PregnancyCard.get_for_event(event)
     json = request.get_json()
     newborn_inspections = json.pop('newborn_inspections', [])
     for code in pregnancy_apt_codes:
@@ -115,7 +117,7 @@ def api_0_pregnancies_post(action_id=None):
 
     db.session.add(action)
     db.session.commit()
-    reevaluate_preeclampsia_risk(event)
+    reevaluate_preeclampsia_risk(card)
     db.session.commit()
     return represent_pregnancy(action)
 
@@ -284,6 +286,7 @@ def api_0_chart_anamnesis(event_id):
 @api_method
 def api_0_chart_mother(event_id):
     event = Event.query.get(event_id)
+    card = PregnancyCard.get_for_event(event)
     if not event:
         raise ApiException(404, 'Event not found')
     if request.method == 'GET':
@@ -303,7 +306,7 @@ def api_0_chart_mother(event_id):
                     db.session.add(n)
         db.session.add(action)
         db.session.commit()
-        reevaluate_card_attrs(event)
+        card.reevaluate_card_attrs()
         db.session.commit()
     return represent_mother_action(event, action)
 
@@ -312,6 +315,7 @@ def api_0_chart_mother(event_id):
 @api_method
 def api_0_chart_father(event_id):
     event = Event.query.get(event_id)
+    card = PregnancyCard.get_for_event(event)
     if not event:
         raise ApiException(404, 'Event not found')
     if request.method == 'GET':
@@ -325,7 +329,7 @@ def api_0_chart_father(event_id):
                 prop = action.propsByCode[code]
                 prop.value = value
         db.session.commit()
-        reevaluate_card_attrs(event)
+        card.reevaluate_card_attrs()
         db.session.commit()
     return represent_father_action(event, action)
 
@@ -336,4 +340,5 @@ def api_0_chart_father(event_id):
 def api_0_chart_risks(event_id):
     from ...lib.risk_groups.calc import calc_risk_groups
     event = Event.query.get(event_id)
-    return list(calc_risk_groups(event))
+    card = PregnancyCard.get_for_event(event)
+    return list(calc_risk_groups(card))
