@@ -100,7 +100,7 @@ def api_0_stats_current_cards_overview():
 
 
 @module.route('/api/1/stats/current_cards_overview/')
-@module.route('/api/1/stats/current_cards_overview/<int:person_id>')
+@module.route('/api/1/stats/current_cards_overview/<int:person_id>/')
 @api_method
 def api_1_stats_current_cards_overview(person_id=None):
     if not person_id:
@@ -176,7 +176,7 @@ def api_0_recently_modified_charts():
 
 
 @module.route('/api/0/need_hospitalization/')
-@module.route('/api/0/need_hospitalization/<int:person_id>')
+@module.route('/api/0/need_hospitalization/<int:person_id>/')
 @api_method
 def api_0_need_hospitalization(person_id=None):
     # получение списка пациенток врача, которые нуждаются в госпитализации в стационар 2/3 уровня
@@ -200,10 +200,10 @@ def api_0_need_hospitalization(person_id=None):
     return [represent_chart_short(event) for event in patient_list]
 
 
-@module.route('/api/0/pregnancy_week_diagram/')
-@module.route('/api/0/pregnancy_week_diagram/<int:person_id>')
+@module.route('/api/0/stats/pregnancy_week_diagram/')
+@module.route('/api/0/stats/pregnancy_week_diagram/<int:person_id>/')
 @api_method
-def api_0_pregnancy_week_diagram(person_id=None):
+def api_0_stats_pregnancy_week_diagram(person_id=None):
     """
     распределение пациенток на учете у врача по сроку беременности
     """
@@ -231,6 +231,20 @@ def api_0_pregnancy_week_diagram(person_id=None):
         elif pregnancy_week and pregnancy_week > 40:
             result[40][1] += 1
     return result
+
+
+@module.route('/api/1/stats/pregnancy_week_diagram/')
+@module.route('/api/1/stats/pregnancy_week_diagram/<int:person_id>/')
+@api_method
+def api_1_stats_pregnancy_week_diagram(person_id=None):
+    if not person_id:
+        person_id = safe_current_user_id()
+    args = request.args.to_dict()
+    curation_level = safe_unicode(args.get('curation_level_code'))
+
+    stats_ctrl = StatsController()
+    data = stats_ctrl.get_cards_pregnancy_week_distribution(person_id, curation_level)
+    return data
 
 
 @module.route('/api/0/stats/perinatal_risk_rate.json')
@@ -441,7 +455,7 @@ def api_0_stats_obcl_get():
 
 
 @module.route('/api/0/stats/org_birth_care_level/orgs_info/')
-@module.route('/api/0/stats/org_birth_care_level/orgs_info/<int:obcl_id>')
+@module.route('/api/0/stats/org_birth_care_level/orgs_info/<int:obcl_id>/')
 @api_method
 def api_0_stats_obcl_orgs_get(obcl_id=None):
     return OrgBirthCareLevelRepr().represent_level_orgs(obcl_id)
@@ -474,7 +488,7 @@ def api_0_stats_urgent_errands():
 
 
 @module.route('/api/0/stats/card_fill_rates/doctor/')
-@module.route('/api/0/stats/card_fill_rates/doctor/<int:doctor_id>')
+@module.route('/api/0/stats/card_fill_rates/doctor/<int:doctor_id>/')
 @api_method
 def api_0_stats_doctor_card_fill_rates(doctor_id=None):
     if not doctor_id:
@@ -485,7 +499,7 @@ def api_0_stats_doctor_card_fill_rates(doctor_id=None):
 
 
 @module.route('/api/0/stats/card_fill_rates/lpu_overview/')
-@module.route('/api/0/stats/card_fill_rates/lpu_overview/<int:curator_id>')
+@module.route('/api/0/stats/card_fill_rates/lpu_overview/<int:curator_id>/')
 @api_method
 def api_0_stats_card_fill_rates_lpu_overview(curator_id=None):
     if not curator_id:
@@ -496,7 +510,7 @@ def api_0_stats_card_fill_rates_lpu_overview(curator_id=None):
 
 
 @module.route('/api/0/stats/card_fill_rates/doctor_overview/')
-@module.route('/api/0/stats/card_fill_rates/doctor_overview/<int:curator_id>')
+@module.route('/api/0/stats/card_fill_rates/doctor_overview/<int:curator_id>/')
 @api_method
 def api_0_stats_card_fill_rates_doctor_overview(curator_id=None):
     if not curator_id:

@@ -7,8 +7,8 @@ var CurrentCardsOverviewCtrl = function ($scope, RisarApi, CurrentUser) {
 
     $scope.refresh_data = function () {
         RisarApi.stats.get_current_cards_overview(person_id, $scope.curation_level_code)
-            .then(function (result) {
-                $scope.stats_data = result;
+            .then(function (data) {
+                $scope.stats_data = data;
             });
     };
 

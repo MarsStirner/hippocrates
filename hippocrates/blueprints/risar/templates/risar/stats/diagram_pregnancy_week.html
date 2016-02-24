@@ -1,4 +1,4 @@
-<div class="box box-info">
+<div class="box box-info" ng-controller="PregnancyWeekDistributionCtrl">
     <div class="box-header with-border">
         <h3 class="box-title">Пациентки по сроку беременности, по группам риска</h3>
         <div class="box-tools pull-right">
@@ -7,26 +7,26 @@
     </div>
     <div class="box-body">
         <div class="row">
-
             <div class="col-md-12">
                 <p class="text-center">
                     <strong>По сроку беременности</strong>
                 </p>
                 <nvd3-discrete-bar-chart
-                        data="pregnancy_week"
-                        id="pregnancy_week"
-                        width="904"
-                        height="300"
-                        showXAxis="true"
-                        showYAxis="true"
-                        yAxisTickFormat="yAxisTickFormat"
-                        tooltips="true"
-                        interactive="true"
-        {#                margin="{left:30,top:20,bottom:20,right:20}"#}
-                        tooltipcontent="toolTipContent_pregnancy_week()"
-                        color="colorFunction()"
-                        showLegend="true"
-                        ><svg></svg>
+                    data="diagram_data"
+                    id="pregnancy_week"
+                    width="904"
+                    height="300"
+                    showXAxis="true"
+                    showYAxis="true"
+                    yAxisTickFormat="yAxisTickFormat"
+                    tooltips="true"
+                    interactive="true"
+    {#                margin="{left:30,top:20,bottom:20,right:20}"#}
+                    tooltipcontent="toolTipContent_pregnancy_week()"
+                    color="colorFunction()"
+                    showLegend="true"
+                    nodata="Нет данных"
+                    ><svg></svg>
                 </nvd3-discrete-bar-chart>
             </div>
         </div>
@@ -37,35 +37,35 @@
             <div class="col-md-4">
                 <div class="progress-group">
                     <span class="progress-text">Невынашивание беременности</span>
-                    <span class="progress-number"><b>2</b>/[[pregnancy_week_all]]</span>
+                    <span class="progress-number"><b>2</b>/[[stats_data.total_cards]]</span>
                     <div class="progress sm">
                       <div class="progress-bar progress-bar-primary" style="width: 6%"></div>
                     </div>
                 </div><!-- /.progress-group -->
                 <div class="progress-group">
                     <span class="progress-text">Развитие позднего токсикоза</span>
-                    <span class="progress-number"><b>0</b>/[[pregnancy_week_all]]</span>
+                    <span class="progress-number"><b>0</b>/[[stats_data.total_cards]]</span>
                     <div class="progress sm">
                       <div class="progress-bar progress-bar-primary" style="width: 0%"></div>
                     </div>
                 </div><!-- /.progress-group -->
                 <div class="progress-group">
                     <span class="progress-text">Кровотечение в родах и послеродовом периоде</span>
-                    <span class="progress-number"><b>0</b>/[[pregnancy_week_all]]</span>
+                    <span class="progress-number"><b>0</b>/[[stats_data.total_cards]]</span>
                     <div class="progress sm">
                       <div class="progress-bar progress-bar-primary" style="width: 0%"></div>
                     </div>
                 </div><!-- /.progress-group -->
                 <div class="progress-group">
                     <span class="progress-text">Аномалия родовой деятельности</span>
-                    <span class="progress-number"><b>5</b>/[[pregnancy_week_all]]</span>
+                    <span class="progress-number"><b>5</b>/[[stats_data.total_cards]]</span>
                     <div class="progress sm">
                       <div class="progress-bar progress-bar-primary" style="width: 16%"></div>
                     </div>
                 </div><!-- /.progress-group -->
                 <div class="progress-group">
                     <span class="progress-text">Роды крупным плодом </span>
-                    <span class="progress-number"><b>0</b>/[[pregnancy_week_all]]</span>
+                    <span class="progress-number"><b>0</b>/[[stats_data.total_cards]]</span>
                     <div class="progress sm">
                       <div class="progress-bar progress-bar-primary" style="width: 0%"></div>
                     </div>
@@ -74,42 +74,42 @@
             <div class="col-md-4">
                 <div class="progress-group">
                     <span class="progress-text">Развитие резус-конфликта</span>
-                    <span class="progress-number"><b>3</b>/[[pregnancy_week_all]]</span>
+                    <span class="progress-number"><b>3</b>/[[stats_data.total_cards]]</span>
                     <div class="progress sm">
                       <div class="progress-bar progress-bar-primary" style="width: 10%"></div>
                     </div>
                 </div><!-- /.progress-group -->
                 <div class="progress-group">
                     <span class="progress-text">Развитие групповой несовместимости</span>
-                    <span class="progress-number"><b>5</b>/[[pregnancy_week_all]]</span>
+                    <span class="progress-number"><b>5</b>/[[stats_data.total_cards]]</span>
                     <div class="progress sm">
                       <div class="progress-bar progress-bar-primary" style="width: 16%"></div>
                     </div>
                 </div><!-- /.progress-group -->
                 <div class="progress-group">
                     <span class="progress-text">Гипоксия плода</span>
-                    <span class="progress-number"><b>5</b>/[[pregnancy_week_all]]</span>
+                    <span class="progress-number"><b>5</b>/[[stats_data.total_cards]]</span>
                     <div class="progress sm">
                       <div class="progress-bar progress-bar-primary" style="width: 16%"></div>
                     </div>
                 </div><!-- /.progress-group -->
                 <div class="progress-group">
                     <span class="progress-text">Гипотрофия плода</span>
-                    <span class="progress-number"><b>3</b>/[[pregnancy_week_all]]</span>
+                    <span class="progress-number"><b>3</b>/[[stats_data.total_cards]]</span>
                     <div class="progress sm">
                       <div class="progress-bar progress-bar-primary" style="width: 10%"></div>
                     </div>
                 </div><!-- /.progress-group -->
                 <div class="progress-group">
                     <span class="progress-text">Несостоятельность рубца на матке</span>
-                    <span class="progress-number"><b>0</b>/[[pregnancy_week_all]]</span>
+                    <span class="progress-number"><b>0</b>/[[stats_data.total_cards]]</span>
                     <div class="progress sm">
                       <div class="progress-bar progress-bar-primary" style="width: 0%"></div>
                     </div>
                 </div><!-- /.progress-group -->
                 <div class="progress-group">
                     <span class="progress-text">Аномалия прикрепления плаценты</span>
-                    <span class="progress-number"><b>0</b>/[[pregnancy_week_all]]</span>
+                    <span class="progress-number"><b>0</b>/[[stats_data.total_cards]]</span>
                     <div class="progress sm">
                       <div class="progress-bar progress-bar-primary" style="width: 0%"></div>
                     </div>
@@ -118,21 +118,21 @@
             <div class="col-md-4">
                 <div class="progress-group">
                     <span class="progress-text">Обострение хр.астматических заболеваний</span>
-                    <span class="progress-number"><b>0</b>/[[pregnancy_week_all]]</span>
+                    <span class="progress-number"><b>0</b>/[[stats_data.total_cards]]</span>
                     <div class="progress sm">
                       <div class="progress-bar progress-bar-primary" style="width: 0%"></div>
                     </div>
                 </div><!-- /.progress-group -->
                 <div class="progress-group">
                     <span class="progress-text">Септическое состояние в послеродовом периоде</span>
-                    <span class="progress-number"><b>0</b>/[[pregnancy_week_all]]</span>
+                    <span class="progress-number"><b>0</b>/[[stats_data.total_cards]]</span>
                     <div class="progress sm">
                       <div class="progress-bar progress-bar-primary" style="width: 0%"></div>
                     </div>
                 </div><!-- /.progress-group -->
                 <div class="progress-group">
                     <span class="progress-text">Фетоплацентарная недостаточность</span>
-                    <span class="progress-number"><b>0</b>/[[pregnancy_week_all]]</span>
+                    <span class="progress-number"><b>0</b>/[[stats_data.total_cards]]</span>
                     <div class="progress sm">
                       <div class="progress-bar progress-bar-primary" style="width: 0%"></div>
                     </div>

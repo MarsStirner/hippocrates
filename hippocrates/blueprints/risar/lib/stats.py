@@ -15,6 +15,7 @@ class StatsController(BaseModelController):
         return StatsSelecter()
 
     def get_current_cards_overview(self, person_id, curation_level=None):
+        """Различные метрики по текущим открытым картам"""
         sel = self.get_selecter()
         data = sel.get_current_cards_overview(person_id, curation_level)
         events_all = float(data.count_all or 0) if data else 0
@@ -26,6 +27,26 @@ class StatsController(BaseModelController):
             'events_45': events_45,
             'events_2_months': events_2_months,
             'events_undefined_risk': events_undefined_risk
+        }
+
+    def get_cards_pregnancy_week_distribution(self, person_id, curation_level):
+        """Распределение пациенток по сроку беременности"""
+        distr_data = [
+            [str(week_num), 0]
+            for week_num in (range(1, 41) + ['40+'])
+        ]
+        total = 0
+        sel = self.get_selecter()
+        events_data = sel.get_events_preg_weeks(person_id, curation_level)
+        for event_id, preg_week in events_data:
+            if preg_week <= 40:
+                distr_data[preg_week - 1][1] += 1
+            else:
+                distr_data[-1][1] += 1
+            total += 1
+        return {
+            'preg_week_distribution': distr_data,
+            'total_cards': total
         }
 
 
@@ -59,7 +80,7 @@ class StatsSelecter(BaseSelecter):
             ActionType.flatCode == 'cardAttributes', ActionPropertyType.code == 'pregnancy_start_date'
         ).with_entities(
             Event.id.label('event_id'), ActionProperty_Date.value.label('psd')
-        ).subquery('EventPregStartDate')
+        ).subquery('EventPregnancyStartDate')
 
         # 2) event latest inspection
         q_action_begdates = self.model_provider.get_query('Action')
@@ -168,3 +189,91 @@ class StatsSelecter(BaseSelecter):
 
         self.query = query
         return self.get_one()
+
+    def get_events_preg_weeks(self, person_id, curation_level):
+        Event = self.model_provider.get('Event')
+        EventType = self.model_provider.get('EventType')
+        rbRequestType = self.model_provider.get('rbRequestType')
+        Action = self.model_provider.get('Action')
+        ActionType = self.model_provider.get('ActionType')
+        ActionProperty = self.model_provider.get('ActionProperty')
+        ActionPropertyType = self.model_provider.get('ActionPropertyType')
+        ActionProperty_Date = self.model_provider.get('ActionProperty_Date')
+        Person = self.model_provider.get('Person')
+        PersonInEvent = aliased(Person, name='PersonInEvent')
+        PersonCurationAssoc = self.model_provider.get('PersonCurationAssoc')
+        rbOrgCurationLevel = self.model_provider.get('rbOrgCurationLevel')
+        OrganisationCurationAssoc = self.model_provider.get('OrganisationCurationAssoc')
+        Organisation = self.model_provider.get('Organisation')
+
+        # event pregnancy start date
+        q_event_psd = self.model_provider.get_query('Event')
+        q_event_psd = q_event_psd.join(
+            EventType, rbRequestType, Action, ActionType, ActionProperty, ActionPropertyType, ActionProperty_Date
+        ).filter(
+            Event.deleted == 0, rbRequestType.code == request_type_pregnancy,
+            Action.deleted == 0, ActionProperty.deleted == 0,
+            ActionType.flatCode == 'cardAttributes', ActionPropertyType.code == 'pregnancy_start_date'
+        ).with_entities(
+            Event.id.label('event_id'), ActionProperty_Date.value.label('psd')
+        ).subquery('EventPregnancyStartDate')
+
+        # event predicted delivery date
+        q_event_pdd = self.model_provider.get_query('Event')
+        q_event_pdd = q_event_pdd.join(
+            EventType, rbRequestType, Action, ActionType, ActionProperty, ActionPropertyType, ActionProperty_Date
+        ).filter(
+            Event.deleted == 0, rbRequestType.code == request_type_pregnancy,
+            Action.deleted == 0, ActionProperty.deleted == 0,
+            ActionType.flatCode == 'cardAttributes', ActionPropertyType.code == 'predicted_delivery_date'
+        ).with_entities(
+            Event.id.label('event_id'), ActionProperty_Date.value.label('pdd')
+        ).subquery('EventPredictedDeliveryDate')
+
+        # main query
+        query = self.model_provider.get_query('Event')
+        query = query.join(
+            EventType, rbRequestType, Action, ActionType
+        ).filter(
+            Event.deleted == 0, rbRequestType.code == request_type_pregnancy, Event.execDate.is_(None),
+            Action.deleted == 0, ActionType.flatCode == 'cardAttributes'
+        )
+        if curation_level:
+            # карты куратора
+            query = query.join(
+                PersonInEvent, Event.execPerson_id == PersonInEvent.id
+            ).join(
+                Organisation, PersonInEvent.org_id == Organisation.id
+            ).join(
+                OrganisationCurationAssoc, OrganisationCurationAssoc.org_id == Organisation.id
+            ).join(
+                PersonCurationAssoc, OrganisationCurationAssoc.personCuration_id == PersonCurationAssoc.id
+            ).join(
+                rbOrgCurationLevel, PersonCurationAssoc.orgCurationLevel_id == rbOrgCurationLevel.id
+            ).filter(
+                PersonCurationAssoc.person_id == person_id,
+                rbOrgCurationLevel.code == curation_level
+            )
+        else:
+            # карты врача
+            query = query.filter(Event.execPerson_id == person_id)
+
+        query = query.join(
+            q_event_psd, q_event_psd.c.event_id == Event.id
+        ).outerjoin(
+            q_event_pdd, q_event_pdd.c.event_id == Event.id
+        ).with_entities(
+            Event.id,
+            # неделя беременности
+            func.floor(
+                func.datediff(
+                    func.IF(func.coalesce(q_event_pdd.c.pdd, func.curdate()) < func.curdate(),
+                            q_event_pdd.c.pdd,
+                            func.curdate()),
+                    q_event_psd.c.psd
+                ) / 7
+            ) + 1
+        )
+
+        self.query = query
+        return self.get_all()

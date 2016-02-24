@@ -22,13 +22,6 @@ WebMis20
             return wrapper('GET', Config.url.api_need_hospitalization)
         }
     };
-    this.pregnancy_week_diagram  = {
-        get: function(curation_level){
-            return wrapper('GET', Config.url.api_pregnancy_week_diagram, {
-                curation_level: curation_level
-            });
-        }
-    };
     this.search_event = {
         get: function (query) {
             return wrapper('POST', Config.url.api_event_search, {}, query)
@@ -357,6 +350,13 @@ WebMis20
     this.stats = {
         get_current_cards_overview: function (person_id, curation_level_code) {
             var url = Config.url.api_stats_current_cards_overview + person_id,
+                args = {
+                    curation_level_code: curation_level_code
+                };
+            return wrapper('GET', url, args);
+        },
+        get_pregnancy_week_diagram: function(person_id, curation_level_code) {
+            var url = Config.url.api_stats_pregnancy_week_diagram + person_id,
                 args = {
                     curation_level_code: curation_level_code
                 };
