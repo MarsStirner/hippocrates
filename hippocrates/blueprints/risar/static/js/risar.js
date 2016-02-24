@@ -48,13 +48,6 @@ WebMis20
             return wrapper('POST', Config.url.api_event_search_ambulance, {}, query)
         }
     };
-    this.current_stats = {
-        get: function (curation_level) {
-            return wrapper('GET', Config.url.api_current_stats, {
-                curation_level: curation_level
-            });
-        }
-    };
     this.urgent_errands = {
         get: function(){
             return wrapper('GET', Config.url.api_stats_urgent_errands)
@@ -362,6 +355,13 @@ WebMis20
         }
     };
     this.stats = {
+        get_current_cards_overview: function (person_id, curation_level_code) {
+            var url = Config.url.api_stats_current_cards_overview + person_id,
+                args = {
+                    curation_level_code: curation_level_code
+                };
+            return wrapper('GET', url, args);
+        },
         get_obcl_info: function () {
             return wrapper('GET', Config.url.api_stats_obcl_get);
         },

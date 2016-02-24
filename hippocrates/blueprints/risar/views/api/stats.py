@@ -25,6 +25,7 @@ from blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
 from blueprints.risar.risar_config import checkup_flat_codes, request_type_pregnancy
 from blueprints.risar.lib.org_bcl import OrgBirthCareLevelRepr, OrganisationRepr, EventRepr
 from blueprints.risar.lib.card_fill_rate import CFRController
+from blueprints.risar.lib.stats import StatsController
 
 
 def get_rate_for_regions(regions, rate_code):
@@ -52,9 +53,9 @@ def get_rate_for_regions(regions, rate_code):
     return rate
 
 
-@module.route('/api/0/current_stats.json')
+@module.route('/api/0/stats/current_cards_overview/')
 @api_method
-def api_0_current_stats():
+def api_0_stats_current_cards_overview():
     def two_months(event):
         now = datetime.datetime.now()
         checkups = Action.query.join(ActionType).filter(
@@ -96,6 +97,20 @@ def api_0_current_stats():
         'events_2_months': events_2_months,
         'events_undefined_risk': events_undefined_risk
     }
+
+
+@module.route('/api/1/stats/current_cards_overview/')
+@module.route('/api/1/stats/current_cards_overview/<int:person_id>')
+@api_method
+def api_1_stats_current_cards_overview(person_id=None):
+    if not person_id:
+        person_id = safe_current_user_id()
+    args = request.args.to_dict()
+    curation_level = safe_unicode(args.get('curation_level_code'))
+
+    stats_ctrl = StatsController()
+    data = stats_ctrl.get_current_cards_overview(person_id, curation_level)
+    return data
 
 
 @module.route('/api/0/recent_charts.json')

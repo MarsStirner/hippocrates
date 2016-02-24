@@ -50,11 +50,6 @@ var IndexOverseer1Ctrl = function ($scope, RisarApi) {
             $scope.tickets = tickets;
         })
     });
-    $scope.current_stats = function(){
-        RisarApi.current_stats.get(1).then(function (result) {
-            $scope.current_stats = result;
-        })
-    };
 
     var recent_charts = function() {
         var data = {
@@ -98,7 +93,6 @@ var IndexOverseer1Ctrl = function ($scope, RisarApi) {
                     }, 0);
         })
     }
-    $scope.current_stats();
     recent_charts();
     recently_modified_charts();
     $scope.refresh_pregnancy_week_diagram();

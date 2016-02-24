@@ -29,7 +29,7 @@ WebMis20
         api_event_search_area_list: '{{ url_for('.api_0_area_list') }}',
         api_event_search_area_lpu_list: '{{ url_for('.api_0_area_lpu_list') }}',
         api_event_search_lpu_doctors_list: '{{ url_for('.api_0_lpu_doctors_list') }}',
-        api_current_stats: '{{ url_for('.api_0_current_stats') }}',
+        api_stats_current_cards_overview: '{{ url_for('.api_1_stats_current_cards_overview') }}',
         api_recent_charts: '{{ url_for('.api_0_recent_charts') }}',
         api_recently_modified_charts: '{{ url_for('.api_0_recently_modified_charts') }}',
         api_death_stats: '{{ url_for('.api_0_death_stats') }}',

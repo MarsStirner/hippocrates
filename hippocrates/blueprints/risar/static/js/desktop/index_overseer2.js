@@ -50,11 +50,6 @@ var IndexOverseer2Ctrl = function ($scope, RisarApi) {
             $scope.tickets = tickets;
         })
     });
-    $scope.current_stats = function(){
-        RisarApi.current_stats.get(2).then(function (result) {
-            $scope.current_stats = result;
-        })
-    };
 
     $scope.refresh_pregnancy_week_diagram = function (){
         RisarApi.pregnancy_week_diagram.get(2).then(function (result) {
@@ -83,7 +78,6 @@ var IndexOverseer2Ctrl = function ($scope, RisarApi) {
     $scope.onRecentlyModifiedPageChanged = function () {
         recently_modified_charts();
     };
-    $scope.current_stats();
     recently_modified_charts();
     $scope.refresh_pregnancy_week_diagram();
 };

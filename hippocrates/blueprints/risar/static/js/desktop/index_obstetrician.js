@@ -34,11 +34,6 @@ var IndexObstetricianCtrl = function ($scope, RisarApi) {
             $scope.tickets = tickets;
         })
     });
-    $scope.current_stats = function(){
-        RisarApi.current_stats.get().then(function (result) {
-            $scope.current_stats = result;
-        })
-    };
     $scope.refresh_pregnancy_week_diagram = function (){
         RisarApi.pregnancy_week_diagram.get().then(function (result) {
             $scope.pregnancy_week = [{
@@ -55,7 +50,6 @@ var IndexObstetricianCtrl = function ($scope, RisarApi) {
             $scope.need_hospitalization = result;
         });
     }
-    $scope.current_stats();
     $scope.refresh_pregnancy_week_diagram();
     $scope.load_need_hospitalization();
 

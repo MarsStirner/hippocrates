@@ -313,7 +313,7 @@ class CFRSelecter(BaseSelecter):
         ).filter(
             Person.id == curator_id,
             rbOrgCurationLevel.code == '3',
-            Organisation.deleted == 0, PersonInEvent.deleted == 0, Event.deleted == 0,
+            Event.deleted == 0,
             Action.deleted == 0, ActionProperty.deleted == 0,
             ActionType.flatCode == 'cardAttributes',
             ActionPropertyType.code == 'card_fill_rate'
