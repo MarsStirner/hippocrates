@@ -54,11 +54,11 @@ def calc_risk_groups(card):
     p3 = any(preg['pregnancyResult'].value_raw in ('miscarriage27', 'miscarriage37') for preg in card.prev_pregs)
     p4_needles = explode_needles(u'O10-O84, O00-O08')
     p4_a = any(
-        hay_check(preg['pregnancy_pathology'].value_raw, p4_needles)
+        any_thing(preg['pregnancy_pathology'].value_raw, p4_needles, mkb_from_mkb)
         for preg in card.prev_pregs
     )
     p4_b = any(
-        hay_check(preg['delivery_pathology'].value_raw, p4_needles)
+        any_thing(preg['delivery_pathology'].value_raw, p4_needles, mkb_from_mkb)
         for preg in card.prev_pregs
     )
     p5 = any(
@@ -79,11 +79,11 @@ def calc_risk_groups(card):
     p2 = diags_in_card(card, p2_needles)
     p3_needles = explode_needles(u'O10-O92')
     p3_a = any(
-        hay_check(preg['pregnancy_pathology'].value_raw, p3_needles)
+        any_thing(preg['pregnancy_pathology'].value_raw, p3_needles, mkb_from_mkb)
         for preg in card.prev_pregs
     )
     p3_b = any(
-        hay_check(preg['delivery_pathology'].value_raw, p3_needles)
+        any_thing(preg['delivery_pathology'].value_raw, p3_needles, mkb_from_mkb)
         for preg in card.prev_pregs
     )
     if p1 or p2 or p3_a or p3_b or low_hemo:
@@ -100,11 +100,11 @@ def calc_risk_groups(card):
     p2 = diags_in_card(card, p2_needles)
     p3_needles = explode_needles(u'O72.0-O72.3, O03-O08')
     p3_a = any(
-        hay_check(preg['pregnancy_pathology'].value_raw, p3_needles)
+        any_thing(preg['pregnancy_pathology'].value_raw, p3_needles, mkb_from_mkb)
         for preg in card.prev_pregs
     )
     p3_b = any(
-        hay_check(preg['delivery_pathology'].value_raw, p3_needles)
+        any_thing(preg['delivery_pathology'].value_raw, p3_needles, mkb_from_mkb)
         for preg in card.prev_pregs
     )
     p4 = any(
@@ -125,11 +125,11 @@ def calc_risk_groups(card):
     p2 = diags_in_card(card, p2_needles)
     p3_needles = explode_needles(u'O00-O08, O82')
     p3_a = any(
-        hay_check(preg['pregnancy_pathology'].value_raw, p3_needles)
+        any_thing(preg['pregnancy_pathology'].value_raw, p3_needles, mkb_from_mkb)
         for preg in card.prev_pregs
     )
     p3_b = any(
-        hay_check(preg['delivery_pathology'].value_raw, p3_needles)
+        any_thing(preg['delivery_pathology'].value_raw, p3_needles, mkb_from_mkb)
         for preg in card.prev_pregs
     )
     p4 = any(
@@ -150,11 +150,11 @@ def calc_risk_groups(card):
     p2 = diags_in_card(card, p2_needles)
     p3_needles = explode_needles(u'O36.6')
     p3_a = any(
-        hay_check(preg['pregnancy_pathology'].value_raw, p3_needles)
+        any_thing(preg['pregnancy_pathology'].value_raw, p3_needles, mkb_from_mkb)
         for preg in card.prev_pregs
     )
     p3_b = any(
-        hay_check(preg['delivery_pathology'].value_raw, p3_needles)
+        any_thing(preg['delivery_pathology'].value_raw, p3_needles, mkb_from_mkb)
         for preg in card.prev_pregs
     )
     p4 = any(
@@ -200,11 +200,11 @@ def calc_risk_groups(card):
     p2 = diags_in_card(card, p2_needles)
     p3_needles = explode_needles(u'O10-O16, O45, O99.0')
     p3_a = any(
-        hay_check(preg['pregnancy_pathology'].value_raw, p3_needles)
+        any_thing(preg['pregnancy_pathology'].value_raw, p3_needles, mkb_from_mkb)
         for preg in card.prev_pregs
     )
     p3_b = any(
-        hay_check(preg['delivery_pathology'].value_raw, p3_needles)
+        any_thing(preg['delivery_pathology'].value_raw, p3_needles, mkb_from_mkb)
         for preg in card.prev_pregs
     )
     if p1 or p2 or p3_a or p3_b or low_hemo:
@@ -239,11 +239,11 @@ def calc_risk_groups(card):
     p2 = diags_in_card(card, p2_needles)
     p3_needles = explode_needles(u'O82.0-O82.9')
     p3_a = any(
-        hay_check(preg['pregnancy_pathology'].value_raw, p3_needles)
+        any_thing(preg['pregnancy_pathology'].value_raw, p3_needles, mkb_from_mkb)
         for preg in card.prev_pregs
     )
     p3_b = any(
-        hay_check(preg['delivery_pathology'].value_raw, p3_needles)
+        any_thing(preg['delivery_pathology'].value_raw, p3_needles, mkb_from_mkb)
         for preg in card.prev_pregs
     )
     if p1 or p2 or p3_a or p3_b:
@@ -260,11 +260,11 @@ def calc_risk_groups(card):
     p2 = diags_in_card(card, p2_needles)
     p3_needles = explode_needles(u'O03-O08, O43, O44, O45')
     p3_a = any(
-        hay_check(preg['pregnancy_pathology'].value_raw, p3_needles)
+        any_thing(preg['pregnancy_pathology'].value_raw, p3_needles, mkb_from_mkb)
         for preg in card.prev_pregs
     )
     p3_b = any(
-        hay_check(preg['delivery_pathology'].value_raw, p3_needles)
+        any_thing(preg['delivery_pathology'].value_raw, p3_needles, mkb_from_mkb)
         for preg in card.prev_pregs
     )
     p4 = any(
@@ -285,11 +285,11 @@ def calc_risk_groups(card):
     p2 = diags_in_card(card, p2_needles)
     p3_needles = explode_needles(u'J45, J46')
     p3_a = any(
-        hay_check(preg['pregnancy_pathology'].value_raw, p3_needles)
+        any_thing(preg['pregnancy_pathology'].value_raw, p3_needles, mkb_from_mkb)
         for preg in card.prev_pregs
     )
     p3_b = any(
-        hay_check(preg['delivery_pathology'].value_raw, p3_needles)
+        any_thing(preg['delivery_pathology'].value_raw, p3_needles, mkb_from_mkb)
         for preg in card.prev_pregs
     )
     if p1 or p2 or p3_a or p3_b:
@@ -306,11 +306,11 @@ def calc_risk_groups(card):
     p2 = diags_in_card(card, p2_needles)
     p3_needles = explode_needles(u'O85, О86, O87, O91, O92')
     p3_a = any(
-        hay_check(preg['pregnancy_pathology'].value_raw, p3_needles)
+        any_thing(preg['pregnancy_pathology'].value_raw, p3_needles, mkb_from_mkb)
         for preg in card.prev_pregs
     )
     p3_b = any(
-        hay_check(preg['delivery_pathology'].value_raw, p3_needles)
+        any_thing(preg['delivery_pathology'].value_raw, p3_needles, mkb_from_mkb)
         for preg in card.prev_pregs
     )
     if p1 or p2 or p3_a or p3_b:
@@ -327,11 +327,11 @@ def calc_risk_groups(card):
     p2 = diags_in_card(card, p2_needles)
     p3_needles = explode_needles(u'О10-О92, O99.0')
     p3_a = any(
-        hay_check(preg['pregnancy_pathology'].value_raw, p3_needles)
+        any_thing(preg['pregnancy_pathology'].value_raw, p3_needles, mkb_from_mkb)
         for preg in card.prev_pregs
     )
     p3_b = any(
-        hay_check(preg['delivery_pathology'].value_raw, p3_needles)
+        any_thing(preg['delivery_pathology'].value_raw, p3_needles, mkb_from_mkb)
         for preg in card.prev_pregs
     )
     p4 = card.anamnesis.mother['alcohol'].value or \
@@ -342,7 +342,7 @@ def calc_risk_groups(card):
     p6 = any(
         child['died_at'].value_raw == '01'  # Умер при родах
         for preg in card.prev_pregs
-        for child in preg
+        for child in preg['newborn_inspections'].value
     )
     if p1 or p2 or p3_a or p3_b or p4 or p5 or p6 or low_hemo:
         yield '14'
