@@ -5,20 +5,19 @@ from collections import deque
 from sqlalchemy import func, and_
 from sqlalchemy.orm import aliased
 
+from blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
+from blueprints.risar.lib.time_converter import DateTimeUtil
+from blueprints.risar.lib.utils import get_action, get_action_list
+from blueprints.risar.risar_config import (checkup_flat_codes, risar_mother_anamnesis, risar_epicrisis,
+    first_inspection_code, second_inspection_code)
+from blueprints.risar.risar_config import request_type_pregnancy
+from nemesis.lib.data_ctrl.base import BaseModelController, BaseSelecter
 from nemesis.lib.utils import safe_date, initialize_name
 from nemesis.models.actions import Action
 from nemesis.models.enums import CardFillRate
-from blueprints.risar.lib.utils import get_action, get_action_list
-from blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
-from blueprints.risar.lib.card_attrs import get_card_attrs_action
-from blueprints.risar.risar_config import (checkup_flat_codes, risar_mother_anamnesis, risar_epicrisis,
-    first_inspection_code, second_inspection_code)
-from blueprints.risar.lib.time_converter import DateTimeUtil
-from nemesis.lib.data_ctrl.base import BaseModelController, BaseSelecter
-from blueprints.risar.risar_config import request_type_pregnancy
 
 
-def make_card_fill_timeline(event):
+def make_card_fill_timeline(card):
     """Построить таймлайн заполнения карты пациентки.
 
     Таймлайн представляет собой информацию о наличии определенных сущностей в карте
@@ -36,9 +35,8 @@ def make_card_fill_timeline(event):
     :return информация по сущностям карты в виде списка элементов, упорядоченных
     по фактической/плановой дате
     """
-    if not event:
-        return
-    card_attrs_action = get_card_attrs_action(event)
+    event = card.event
+    card_attrs_action = card.attrs
     anamnesis = get_action(event, risar_mother_anamnesis)
     inspections = get_action_list(event, checkup_flat_codes).order_by(Action.begDate).all()
     first_inspection = last_inspection = None

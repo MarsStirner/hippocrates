@@ -1,47 +1,44 @@
 # -*- coding: utf-8 -*-
-import itertools
 import datetime
 
-from nemesis.lib.data import create_action
+from blueprints.risar.lib.card import PregnancyCard
+from blueprints.risar.lib.time_converter import DateTimeUtil
+from blueprints.risar.lib.utils import get_action, get_action_list, HIV_diags, syphilis_diags, hepatitis_diags, \
+    tuberculosis_diags, scabies_diags, pediculosis_diags, multiple_birth, hypertensia, kidney_diseases, collagenoses, \
+    vascular_diseases, diabetes, antiphospholipid_syndrome, pregnancy_pathologies, risk_mkbs
+from blueprints.risar.models.risar import RisarRiskGroup
+from blueprints.risar.risar_config import checkup_flat_codes, risar_epicrisis, risar_mother_anamnesis, \
+    first_inspection_code
 from nemesis.lib.jsonify import EventVisualizer
 from nemesis.lib.utils import safe_dict, safe_bool, safe_int, safe_date
 from nemesis.models.actions import Action, ActionType, ActionPropertyType, ActionProperty
 from nemesis.models.enums import PregnancyPathology, PreeclampsiaRisk, PerinatalRiskRate, CardFillRate
-from nemesis.models.risar import rbPreEclampsiaRate, rbPerinatalRiskRate
+from nemesis.models.risar import rbPreEclampsiaRate
+from nemesis.models.utils import safe_current_user_id
 from nemesis.systemwide import db
-from blueprints.risar.lib.utils import get_action, get_action_list, HIV_diags, syphilis_diags, hepatitis_diags, \
-    tuberculosis_diags, scabies_diags, pediculosis_diags, multiple_birth, hypertensia, kidney_diseases, collagenoses, \
-    vascular_diseases, diabetes, antiphospholipid_syndrome, get_event_diag_mkbs, risk_rates_blockID, risk_rates_diagID, \
-    pregnancy_pathologies, risk_mkbs
-from blueprints.risar.risar_config import (checkup_flat_codes, risar_mother_anamnesis, risar_epicrisis,
-    risar_anamnesis_pregnancy, first_inspection_code, second_inspection_code)
-from blueprints.risar.lib.time_converter import DateTimeUtil
-
 
 __author__ = 'viruzzz-kun'
 
 
-def get_card_attrs_action(event, auto=True):
+def get_pregnancy_week(event, action, date=None):
     """
-    Получение Action, соответствующего атрибутам карточки
-    :param event: карточка беременной, обращение
-    :param auto: создавать ли действие автоматически
-    :type event: nemesis.models.event.Event
-    :type auto: bool
-    :return: действие с атрибутами
-    :rtype: Action|NoneType
+    :type event: application.models.event.Event
+    :type date: datetime.date | None
+    :param event: Карточка пациентки
+    :param date: Интересующая дата или None (тогда - дата окончания беременности)
+    :return: число недель от начала беременности на дату
     """
-    action = Action.query.join(ActionType).filter(
-        Action.event == event,
-        Action.deleted == 0,
-        ActionType.flatCode == 'cardAttributes',
-    ).first()
-    if action is None and auto:
-        action = create_action(default_AT_Heuristic().id, event)
-        reevaluate_card_attrs(event, action)
-        db.session.add(action)
-        db.session.commit()
-    return action
+    if action is None:
+        action = PregnancyCard.get_for_event(event).attrs
+    start_date = action['pregnancy_start_date'].value
+    if date is None:
+        date = action['predicted_delivery_date'].value
+    if start_date:  # assume that date is not None
+        if isinstance(date, datetime.datetime):
+            date = date.date()
+        if isinstance(start_date, datetime.datetime):
+            start_date = start_date.date()
+        return (min(date, datetime.date.today()) - start_date).days / 7 + 1
 
 
 def check_card_attrs_action_integrity(action):
@@ -139,59 +136,62 @@ def get_diagnoses_from_action(action, open=False):
     return result
 
 
-def reevaluate_risk_rate(event, action=None):
+def reevaluate_risk_rate(card):
     """
     Пересчёт риска невынашивания
-    :param event: обращение
-    :type event: nemesis.models.event.Event
+    :param card: Карточка беременной
+    :type card: PregnancyCard
     """
-    if action is None:
-        action = get_card_attrs_action(event)
 
     risk_rate_mkbs = risk_mkbs()
+    high_rates = set(mkb['code'] for mkb in risk_rate_mkbs['high'])
+    mid_rates = set(mkb['code'] for mkb in risk_rate_mkbs['medium'])
+    low_rates = set(mkb['code'] for mkb in risk_rate_mkbs['low'])
 
     def diag_to_risk_rate(diag):
-        if diag['diagnosis']['mkb'].DiagID in [mkb['code'] for mkb in risk_rate_mkbs['high']]:
+        """
+        :type diag: nemesis.models.diagnosis.Diagnostic
+        :param diag:
+        :return:
+        """
+        diag_id = diag.MKB
+        if diag_id in high_rates:
             return PerinatalRiskRate.high[0]
-        elif diag['diagnosis']['mkb'].DiagID in [mkb['code'] for mkb in risk_rate_mkbs['medium']]:
+        elif diag_id in mid_rates:
             return PerinatalRiskRate.medium[0]
-        elif diag['diagnosis']['mkb'].DiagID in [mkb['code'] for mkb in risk_rate_mkbs['low']]:
+        elif diag_id in low_rates:
             return PerinatalRiskRate.low[0]
         return PerinatalRiskRate.undefined[0]
 
-    all_diagnoses = list(get_all_diagnoses(event))
-    action['prenatal_risk_572'].value = safe_dict(PerinatalRiskRate(max(map(diag_to_risk_rate, all_diagnoses)))) if \
-        all_diagnoses else safe_dict(PerinatalRiskRate(PerinatalRiskRate.undefined[0]))
+    max_rate = max(map(diag_to_risk_rate, card.get_client_diagnostics(card.event.setDate, card.event.execDate)) + [PerinatalRiskRate.undefined[0]])
+
+    card.attrs['prenatal_risk_572'].value = safe_dict(PerinatalRiskRate(max_rate))
 
 
-def reevaluate_preeclampsia_risk(event, card_attrs_action=None):
+def reevaluate_preeclampsia_risk(card):
     """
     Пересчёт риска преэклампсии
-    :param event: обращение
-    :type event: nemesis.models.event.Event
+    :param card: Карточка беременной
+    :type card: PregnancyCard
     """
-    if card_attrs_action is None:
-        card_attrs_action = get_card_attrs_action(event)
-
     delivery_years = []
     all_diagnoses = []
     diseases = multiple_birth + hypertensia + kidney_diseases + collagenoses + vascular_diseases + diabetes + \
         antiphospholipid_syndrome
-    mother_action = get_action(event, risar_mother_anamnesis)
-    first_inspection = get_action(event, 'risarFirstInspection')
-    second_inspections = get_action_list(event, 'risarSecondInspection', all=True)
+    mother_action = card.anamnesis.mother
+    first_inspection = get_action(card.event, 'risarFirstInspection')
+    second_inspections = get_action_list(card.event, 'risarSecondInspection', all=True)
     actions_to_check = [mother_action]+[first_inspection]+second_inspections
     for action in actions_to_check:
         all_diagnoses.extend(get_diagnoses_from_action(action, True))
 
-    prev_pregnancies = Action.query.join(ActionType).filter(Action.event == event, Action.deleted == 0,
-                                                            ActionType.flatCode == risar_anamnesis_pregnancy).all()
+    prev_pregnancies = card.prev_pregs
     if not mother_action and not first_inspection and not prev_pregnancies:
         risk = PreeclampsiaRisk.undefined[0]
     else:
         risk = PreeclampsiaRisk.no_risk[0]
 
-        if not prev_pregnancies or event.client.age_tuple()[-1] > 35 or (first_inspection and first_inspection['BMI'].value >= 25) or \
+        if not prev_pregnancies or card.event.client.age_tuple()[-1] > 35 or (first_inspection and first_inspection['BMI'].value >= 25) or \
                 (mother_action and mother_action['preeclampsia'].value):
             risk = PreeclampsiaRisk.has_risk[0]
         else:
@@ -211,30 +211,25 @@ def reevaluate_preeclampsia_risk(event, card_attrs_action=None):
             if filter(lambda x: x in diag_id, diseases):
                 risk = PreeclampsiaRisk.has_risk[0]
 
-    if card_attrs_action.propsByCode.get('preeclampsia_risk'):
-        card_attrs_action['preeclampsia_risk'].value = risk
+    if card.attrs.propsByCode.get('preeclampsia_risk'):
+        card.attrs['preeclampsia_risk'].value = risk
 
 
-def reevaluate_dates(event, action=None):
+def reevaluate_dates(card):
     """
     Пересчёт даты начала беременности, предполагаемой даты родов, и даты редактирования карты пациентки
-    :param event: обращение
-    :param action: атрибуты карточки пациентки
-    :type event: nemesis.models.event.Event
-    :type action: Action
+    :param card: Карточка беременной
+    :type card: PregnancyCard
     :rtype: datetime.date
     :return:
     """
     now = datetime.datetime.now()
 
-    if action is None:
-        action = get_card_attrs_action(event)
-
-    action['chart_modify_date'].value = now
-    action['chart_modify_time'].value = now
-    prev_start_date, prev_delivery_date = action['pregnancy_start_date'].value, action['predicted_delivery_date'].value
+    card.attrs['chart_modify_date'].value = now
+    card.attrs['chart_modify_time'].value = now
+    prev_start_date, prev_delivery_date = card.attrs['pregnancy_start_date'].value, card.attrs['predicted_delivery_date'].value
     start_date, delivery_date, p_week = None, None, None
-    epicrisis = get_action(event, risar_epicrisis)
+    epicrisis = get_action(card.event, risar_epicrisis)
 
     if epicrisis and epicrisis['pregnancy_duration'].value:
         # Установленная неделя беременности. Может быть как меньше, так и больше 40
@@ -246,7 +241,7 @@ def reevaluate_dates(event, action=None):
 
     if not start_date:
         # Сначала смотрим по осмотрам, если таковые есть
-        for inspection in get_action_list(event, checkup_flat_codes).order_by(Action.begDate.desc()):
+        for inspection in get_action_list(card.event, checkup_flat_codes).order_by(Action.begDate.desc()):
             if inspection['pregnancy_week'].value:
                 # Установленная неделя беременности. Может быть как меньше, так и больше 40
                 p_week = int(inspection['pregnancy_week'].value)
@@ -261,14 +256,14 @@ def reevaluate_dates(event, action=None):
                 break
 
     if not start_date:
-        mother_action = get_action(event, risar_mother_anamnesis)
+        mother_action = card.anamnesis.mother
         if mother_action:
             # если есть анамнез матери, то находим дату начала беременности из него
             start_date = mother_action['menstruation_last_date'].value
 
     if not start_date:
-        action['pregnancy_start_date'].value = None
-        action['predicted_delivery_date'].value = None
+        card.attrs['pregnancy_start_date'].value = None
+        card.attrs['predicted_delivery_date'].value = None
         return
 
     if not delivery_date:
@@ -278,25 +273,24 @@ def reevaluate_dates(event, action=None):
         delivery_date = start_date + datetime.timedelta(weeks=weeks)
 
     if not prev_start_date or start_date != prev_start_date:
-        action['pregnancy_start_date'].value = start_date
+        card.attrs['pregnancy_start_date'].value = start_date
     if not prev_delivery_date or epicrisis or abs((delivery_date - prev_delivery_date).days) > 3:
         # Не надо трогать дату родоразрешения, если она не слишком отличается от предыдущей вычисленной при отсутствии
         # эпикриза
-        action['predicted_delivery_date'].value = delivery_date
+        card.attrs['predicted_delivery_date'].value = delivery_date
 
 
-def reevaluate_pregnacy_pathology(event, action=None):
+def reevaluate_pregnacy_pathology(card):
     """
     Пересчёт групп патологий беременности
-    :param event: обращение
-    :type event: nemesis.models.event.Event
+    :param card: Карточка беременной
+    :type card: PregnancyCard
     """
-    if action is None:
-        action = get_card_attrs_action(event)
 
     event_mkb_codes = set()
-    for mkb in get_event_diag_mkbs(event, at_flatcodes=checkup_flat_codes):
-        event_mkb_codes.add(mkb.DiagID)
+    diagnostics = card.get_client_diagnostics(card.event.setDate, card.event.execDate)
+    for diagnostic in diagnostics:
+        event_mkb_codes.add(diagnostic.MKB)
 
     event_pathologies = set()
     pathologies = pregnancy_pathologies()
@@ -309,18 +303,19 @@ def reevaluate_pregnacy_pathology(event, action=None):
     elif len(event_pathologies) == 0:
         event_pathologies.add(PregnancyPathology.getId('undefined'))
 
-    action['pregnancy_pathology_list'].value = list(event_pathologies)
+    card.attrs['pregnancy_pathology_list'].value = list(event_pathologies)
 
 
-def reevaluate_preeclampsia_rate(event, action=None):
+def reevaluate_preeclampsia_rate(card):
     """
     Расчет степени преэклампсии у пациентки
     и отображение преэклампсии установленной врачом
+    :type card: PregnancyCard
     """
     from blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
 
     def preec_diag(diag):
-        DiagID = diag['diagnosis']['mkb'].DiagID
+        DiagID = diag._diagnostic.MKB
         if 'O11' in DiagID:
             return 4, 'ChAH'
         if 'O14.1' in DiagID:
@@ -332,17 +327,14 @@ def reevaluate_preeclampsia_rate(event, action=None):
     res = 'unknown'
     has_CAH = False
     heavy_diags = False
-    if action is None:
-        action = get_card_attrs_action(event)
+
+    event = card.event
+    action = card.attrs
+
     preg_week = get_pregnancy_week(event, action)
 
-    inspections = get_action_list(event, checkup_flat_codes).all()
-    last_inspection = inspections[-1] if inspections else None
+    last_inspection = get_action_list(event, checkup_flat_codes).order_by(Action.begDate.desc()).first()
     if preg_week > 20:
-        mother_anamnesis = get_action(event, risar_mother_anamnesis)
-
-        anamnesis_diags = get_diagnoses_from_action(mother_anamnesis, open=False)
-        all_diags = get_all_diagnoses(event)
         urinary_24 = get_action(event, '24urinary')
         urinary_protein_24 = urinary_24['24protein'].value if urinary_24 else None
         urinary_protein = get_action(event, 'urinaryProtein')['protein'].value if get_action(event, 'urinaryProtein') else None
@@ -353,9 +345,9 @@ def reevaluate_preeclampsia_rate(event, action=None):
             get_action(event, 'albuminCreatinineRelation') else None
         thrombocytes = get_action(event, 'clinical_blood_analysis')['thrombocytes'].value if get_action(event, 'clinical_blood_analysis') else None
 
-        for diag in all_diags:
-            DiagID = diag['diagnosis']['mkb'].DiagID
-            if 'O10' in diag['diagnosis']['mkb'].DiagID:
+        for diag in card.get_client_diagnostics(event.setDate, event.execDate):
+            DiagID = diag.MKB
+            if 'O10' in DiagID:
                 has_CAH = True
             if ('R34' in DiagID) or ('J81' in DiagID) or ('R23.0' in DiagID) or ('O36.5' in DiagID):
                 heavy_diags = True
@@ -387,25 +379,25 @@ def reevaluate_preeclampsia_rate(event, action=None):
     action['preeclampsia_comfirmed'].value = rbPreEclampsiaRate.query.filter(rbPreEclampsiaRate.code == confirmed_rate[1]).first().__json__()
 
 
-def reevaluate_card_fill_rate_all(event, action=None):
+def reevaluate_card_fill_rate_all(card):
     """Пересчитать показатель заполненности карты полностью.
 
     Пересчитать показатели для всех разделов карты, а хатем обновить общий показатель
     заполненности.
     """
-    anamnesis_fr = reevaluate_card_fill_rate_anamnesis(event, action, update_general_rate=False)
-    first_inspection_fr = reevaluate_card_fill_rate_first_inspection(event, action, update_general_rate=False)
-    repeated_inspection_fr = reevaluate_card_fill_rate_repeated_inspection(event, action, update_general_rate=False)
-    epicrisis_fr = reevaluate_card_fill_rate_epicrisis(event, action, update_general_rate=False)
+    anamnesis_fr = reevaluate_card_fill_rate_anamnesis(card, update_general_rate=False)
+    first_inspection_fr = reevaluate_card_fill_rate_first_inspection(card, update_general_rate=False)
+    repeated_inspection_fr = reevaluate_card_fill_rate_repeated_inspection(card, update_general_rate=False)
+    epicrisis_fr = reevaluate_card_fill_rate_epicrisis(card, update_general_rate=False)
 
     reevaluate_card_fill_rate(
-        event, action,
+        card,
         anamnesis_fr=anamnesis_fr, first_inspection_fr=first_inspection_fr,
         repeated_inspection_fr=repeated_inspection_fr, epicrisis_fr=epicrisis_fr
     )
 
 
-def reevaluate_card_fill_rate(event, action=None, **kwargs):
+def reevaluate_card_fill_rate(card, **kwargs):
     """Пересчитать общий показатель заполненности карты в зависимости от переданных
     данных о показателях различных разделов карты.
 
@@ -415,9 +407,6 @@ def reevaluate_card_fill_rate(event, action=None, **kwargs):
       - повторный осмотр :arg repeated_inspection_fr
       - эпикриз :arg epicrisis_fr
     """
-    if action is None:
-        action = get_card_attrs_action(event)
-
     cfr = CardFillRate.filled[0]
 
     for section in ('anamnesis_fr', 'first_inspection_fr', 'repeated_inspection_fr', 'epicrisis_fr'):
@@ -426,21 +415,18 @@ def reevaluate_card_fill_rate(event, action=None, **kwargs):
                 cfr = CardFillRate.not_filled[0]
                 break
 
-    action['card_fill_rate'].value = cfr
+    card.attrs['card_fill_rate'].value = cfr
 
 
-def reevaluate_card_fill_rate_anamnesis(event, action=None, update_general_rate=True):
+def reevaluate_card_fill_rate_anamnesis(card, update_general_rate=True):
     """Пересчитать показатель заполненности анамнеза в карте пациентки.
 
     Пересчитывается всегда, при любом состоянии карты пациентки.
     Анамнез считается заполненным, если просто существует запись анамнеза матери,
     без проверки на наличие данных в самом документе.
     """
-    if action is None:
-        action = get_card_attrs_action(event)
-
-    event_date = safe_date(event.setDate)
-    mother_anamnesis = get_action(event, risar_mother_anamnesis)
+    event_date = safe_date(card.event.setDate)
+    mother_anamnesis = get_action(card.event, risar_mother_anamnesis)
     anamnesis_fr = (
         CardFillRate.filled[0]
         if mother_anamnesis is not None
@@ -450,25 +436,22 @@ def reevaluate_card_fill_rate_anamnesis(event, action=None, update_general_rate=
             else CardFillRate.not_filled[0]
         )
     )
-    action['card_fill_rate_anamnesis'].value = anamnesis_fr
+    card.attrs['card_fill_rate_anamnesis'].value = anamnesis_fr
 
     if update_general_rate:
-        reevaluate_card_fill_rate(event, action, anamnesis_fr=anamnesis_fr)
+        reevaluate_card_fill_rate(card, anamnesis_fr=anamnesis_fr)
     return anamnesis_fr
 
 
-def reevaluate_card_fill_rate_first_inspection(event, action=None, update_general_rate=True):
+def reevaluate_card_fill_rate_first_inspection(card, update_general_rate=True):
     """Пересчитать показатель заполненности первичного осмотра в карте пациентки.
 
     Пересчитывается всегда, при любом состоянии карты пациентки.
     Первичный осмотр считается заполненным, если просто существует запись первичного осмотра,
     без проверки на наличие данных в самом документе.
     """
-    if action is None:
-        action = get_card_attrs_action(event)
-
-    event_date = safe_date(event.setDate)
-    first_inspection = get_action(event, first_inspection_code)
+    event_date = safe_date(card.event.setDate)
+    first_inspection = get_action(card.event, first_inspection_code)
     fi_fr = (
         CardFillRate.filled[0]
         if first_inspection is not None
@@ -478,25 +461,22 @@ def reevaluate_card_fill_rate_first_inspection(event, action=None, update_genera
             else CardFillRate.not_filled[0]
         )
     )
-    action['card_fill_rate_first_inspection'].value = fi_fr
+    card.attrs['card_fill_rate_first_inspection'].value = fi_fr
 
     if update_general_rate:
-        reevaluate_card_fill_rate(event, action, first_inspection_fr=fi_fr)
+        reevaluate_card_fill_rate(card, first_inspection_fr=fi_fr)
     return fi_fr
 
 
-def reevaluate_card_fill_rate_repeated_inspection(event, action=None, update_general_rate=True):
+def reevaluate_card_fill_rate_repeated_inspection(card, update_general_rate=True):
     """Пересчитать показатель заполненности повторного осмотра в карте пациентки.
 
     Пересчитывается только при наличии первичного осмотра и отсутствии эпикриза в карте пациентки.
     Повторный осмотр считается заполненным, если просто существует запись повторного осмотра,
     без проверки на наличие данных в самом документе.
     """
-    if action is None:
-        action = get_card_attrs_action(event)
-
     first_inspection = None
-    last_inspection = get_action_list(event, checkup_flat_codes).order_by(Action.begDate.desc()).first()
+    last_inspection = get_action_list(card.event, checkup_flat_codes).order_by(Action.begDate.desc()).first()
     if last_inspection is not None and last_inspection.actionType.flatCode == first_inspection_code:
         first_inspection = last_inspection
 
@@ -508,7 +488,7 @@ def reevaluate_card_fill_rate_repeated_inspection(event, action=None, update_gen
         valid_by_date = DateTimeUtil.get_current_date() <= DateTimeUtil.add_to_date(inspection_date,
                                                                                     30,
                                                                                     DateTimeUtil.day)
-        epicrisis = get_action(event, risar_epicrisis)
+        epicrisis = get_action(card.event, risar_epicrisis)
         valid_epicrisis = epicrisis is not None
         valid_by_epicrisis_date = (
             safe_date(epicrisis.begDate) <= DateTimeUtil.add_to_date(inspection_date,
@@ -532,25 +512,22 @@ def reevaluate_card_fill_rate_repeated_inspection(event, action=None, update_gen
                 )
             )
 
-    action['card_fill_rate_repeated_inspection'].value = ri_fr
+    card.attrs['card_fill_rate_repeated_inspection'].value = ri_fr
 
     if update_general_rate:
-        reevaluate_card_fill_rate(event, action, repeated_inspection_fr=ri_fr)
+        reevaluate_card_fill_rate(card, repeated_inspection_fr=ri_fr)
     return ri_fr
 
 
-def reevaluate_card_fill_rate_epicrisis(event, action=None, update_general_rate=True):
+def reevaluate_card_fill_rate_epicrisis(card, update_general_rate=True):
     """Пересчитать показатель заполненности эпикриза в карте пациентки.
 
     Пересчитывается всегда, при любом состоянии карты пациентки.
     Эпикриз считается заполненным, если просто существует запись эпикриза,
     без проверки на наличие данных в самом документе.
     """
-    if action is None:
-        action = get_card_attrs_action(event)
-
-    preg_start_date = action['pregnancy_start_date'].value
-    epicrisis = get_action(event, risar_epicrisis)
+    preg_start_date = card.attrs['pregnancy_start_date'].value
+    epicrisis = get_action(card.event, risar_epicrisis)
     epicrisis_fr = (
         CardFillRate.filled[0]
         if epicrisis is not None
@@ -564,53 +541,57 @@ def reevaluate_card_fill_rate_epicrisis(event, action=None, update_general_rate=
             else CardFillRate.not_filled[0]
         )
     )
-    old_cfr_epicrisis = action['card_fill_rate_epicrisis'].value
-    action['card_fill_rate_epicrisis'].value = epicrisis_fr
+    old_cfr_epicrisis = card.attrs['card_fill_rate_epicrisis'].value
+    card.attrs['card_fill_rate_epicrisis'].value = epicrisis_fr
 
     if update_general_rate:
         if old_cfr_epicrisis != epicrisis_fr:
-            reevaluate_card_fill_rate_repeated_inspection(event, action, update_general_rate)
-        reevaluate_card_fill_rate(event, action, epicrisis_fr=epicrisis_fr)
+            reevaluate_card_fill_rate_repeated_inspection(card, update_general_rate)
+        reevaluate_card_fill_rate(card, epicrisis_fr=epicrisis_fr)
     return epicrisis_fr
 
 
-def reevaluate_card_attrs(event, action=None):
+def reevaluate_risk_groups(card):
     """
-    Пересчёт атрибутов карточки беременной
-    :param event: карточка беременной, обращение
-    :type event: application.models.event.Event
+    :type card: PregnancyCard
+    :param card:
+    :return:
     """
-    if action is None:
-        action = get_card_attrs_action(event)
-    check_card_attrs_action_integrity(action)
-    reevaluate_risk_rate(event, action)
-    reevaluate_preeclampsia_risk(event, action)
-    reevaluate_pregnacy_pathology(event, action)
-    reevaluate_dates(event, action)
-    reevaluate_preeclampsia_rate(event, action)
-    reevaluate_card_fill_rate_all(event, action)
+    from blueprints.risar.lib.risk_groups.calc import calc_risk_groups
+    existing_groups = card.event.risk_groups
+    found_groups = set(calc_risk_groups(card))
+    for rg_record in existing_groups:
+        code = rg_record.riskGroup_code
+        if code not in found_groups:
+            rg_record.deleted = 1
+        else:
+            found_groups.remove(code)
+        rg_record.modifyDatetime = datetime.datetime.now()
+        rg_record.modifyPerson_id = safe_current_user_id()
+    for code in found_groups:
+        risk_group = RisarRiskGroup()
+        risk_group.event = card.event
+        risk_group.riskGroup_code = code
+        db.session.add(risk_group)
 
 
-def check_disease(diagnoses):
-    unclosed_diagnosis = filter(lambda x: not x['end_date'], diagnoses)
-    has_disease = {'has_HIV': False,
-                   'has_syphilis': False,
-                   'has_hepatitis': False,
-                   'has_tuberculosis': False,
-                   'has_scabies': False,
-                   'has_pediculosis': False}
-    for diag in unclosed_diagnosis:
-        diag_id = diag['diagnosis']['mkb'].DiagID
-        if filter(lambda x: x in diag_id, HIV_diags):
-            has_disease['has_HIV'] = True
-        if filter(lambda x: x in diag_id, syphilis_diags):
-            has_disease['has_syphilis'] = True
-        if filter(lambda x: x in diag_id, hepatitis_diags):
-            has_disease['has_hepatitis'] = True
-        if filter(lambda x: x in diag_id, tuberculosis_diags):
-            has_disease['has_tuberculosis'] = True
-        if filter(lambda x: x in diag_id, scabies_diags):
-            has_disease['has_scabies'] = True
-        if filter(lambda x: x in diag_id, pediculosis_diags):
-            has_disease['has_pediculosis'] = True
+def check_disease(diagnostics):
+    has_disease = {
+        'has_HIV': False,
+        'has_syphilis': False,
+        'has_hepatitis': False,
+        'has_tuberculosis': False,
+        'has_scabies': False,
+        'has_pediculosis': False
+    }
+    for diag in diagnostics:
+        if diag.endDate is not None:
+            continue
+        diag_id = diag.MKB
+        has_disease['has_HIV'] |= diag_id in HIV_diags
+        has_disease['has_syphilis'] |= diag_id in syphilis_diags
+        has_disease['has_hepatitis'] |= diag_id in hepatitis_diags
+        has_disease['has_tuberculosis'] |= diag_id in tuberculosis_diags
+        has_disease['has_scabies'] |= diag_id in scabies_diags
+        has_disease['has_pediculosis'] |= diag_id in pediculosis_diags
     return has_disease

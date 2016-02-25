@@ -44,20 +44,29 @@
                                    href="{{ url_for('.html_epicrisis_edit') }}?event_id=[[ chart.id ]]#tab_first"><span class="glyphicon glyphicon-pencil"></span> Изменить</a>
                             </div>
                             <div class="box-body">
+                                <!-- TODO: Отображение диагнозов -->
                                 <div class="row">
-                                    <div class="col-sm-5 col-md-5  text-right">Основной диагноз:</div>
-                                    <div class="col-sm-7 col-md-7">[[epicrisis.main_diagnosis.diagnosis.mkb.code]] - [[epicrisis.main_diagnosis.diagnosis.mkb.name]]</div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-sm-5 col-md-5  text-right">Сопутствующий диагноз:</div>
-                                    <div class="col-sm-7 col-md-7"><span ng-repeat="diag in epicrisis.attend_diagnosis" >[[diag.diagnosis.mkb.code]] - [[diag.diagnosis.mkb.name]]
-                                    <span ng-if="epicrisis.attend_diagnosis.length>1"><br></span></span>
+                                    <div class="col-sm-6 col-md-6  text-right">Основной диагноз:</div>
+                                    <div class="col-sm-6 col-md-6">
+                                        <div ng-repeat="diag in checkup.diagnoses | collapse_diagnoses:'main'">
+                                            [[diag.diagnostic.mkb.code]] - [[diag.diagnostic.mkb.name]]
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-5 col-md-5  text-right">Диагноз осложнения:</div>
-                                    <div class="col-sm-7 col-md-7"><span ng-repeat="diag in epicrisis.complicating_diagnosis">[[diag.diagnosis.mkb.code]] - [[diag.diagnosis.mkb.name]]
-                                    <span ng-if="epicrisis.complicating_diagnosis.length>1"><br></span></span>
+                                    <div class="col-sm-6 col-md-6  text-right">Сопутствующие диагнозы:</div>
+                                    <div class="col-sm-6 col-md-6">
+                                        <div ng-repeat="diag in checkup.diagnoses | collapse_diagnoses:'associated'">
+                                            [[diag.diagnostic.mkb.code]] - [[diag.diagnostic.mkb.name]]
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-6 col-md-6  text-right">Диагноз осложнения:</div>
+                                    <div class="col-sm-6 col-md-6">
+                                        <div ng-repeat="diag in checkup.diagnoses | collapse_diagnoses:'complication'">
+                                            [[diag.diagnostic.mkb.code]] - [[diag.diagnostic.mkb.name]]
+                                        </div>
                                     </div>
                                 </div>
                             </div>

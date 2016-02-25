@@ -61,9 +61,13 @@ def any_thing(haystack, needles, extract):
     :param extract: Функция, возвращающая сено-иголку из куска сена
     :return: соответствует ли стог сена описнанию иголкок
     """
+    if not haystack:
+        return False
     needles = explode_needles(needles)
     for hay in haystack:
         value = extract(hay)
+        if not value:
+            continue
         tmp = hay_check(value, needles)
         if tmp:
             return True

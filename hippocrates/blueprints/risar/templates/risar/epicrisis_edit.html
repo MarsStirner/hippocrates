@@ -161,35 +161,8 @@
                                             </td>
                                         </tr>
                                         <tr>
-                                            <th class="text-right">Основной диагноз <span class="text-danger">*</span></th>
-                                            <td>
-    {#                                            ng-class="{'has-error': firstForm.main_diagnosis.$invalid && firstForm.submit_attempt}"#}
-                                                <wm-diagnosis model="epicrisis.main_diagnosis" list-mode="false"
-                                                              can-add-new="true" can-delete="true" can-edit="true"
-                                                              action="epicrisis" event="chart" risar="true"
-                                                              params="{defaults:{diagnosis_type:rbDiagnosisType.get_by_code('2')},
-                                                                       disabled:{diagnosis_type:true}}"></wm-diagnosis>
-
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th class="text-right">Сопутствующий диагноз <span>&nbsp;</span></th>
-                                            <td>
-                                                <wm-diagnosis model="epicrisis.attend_diagnosis" list-mode="true"
-                                                              can-add-new="true" can-delete="true" can-edit="true"
-                                                              action="epicrisis" event="chart" risar="true"
-                                                              params="{defaults:{diagnosis_type:rbDiagnosisType.get_by_code('9')},
-                                                                       disabled:{diagnosis_type:true}}"></wm-diagnosis>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th class="text-right">Диагноз осложнения <span>&nbsp;</span></th>
-                                            <td>
-                                                <wm-diagnosis model="epicrisis.complicating_diagnosis" list-mode="true"
-                                                              can-add-new="true" can-delete="true" can-edit="true"
-                                                              action="epicrisis" event="chart" risar="true"
-                                                              params="{defaults:{diagnosis_type:rbDiagnosisType.get_by_code('3')},
-                                                                       disabled:{diagnosis_type:true}}"></wm-diagnosis>
+                                            <td colspan="2">
+                                                <wm-diagnosis-new ng-model="epicrisis.diagnoses" diag-types="epicrisis.diagnosis_types | filter:{code:'final'}" can-add-new="true" can-edit="! epicrisis.endDate" />
                                             </td>
                                         </tr>
                                         <tr>
@@ -258,16 +231,10 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td class="text-right">Патологоанатомический диагноз <span class="text-danger">*</span></td>
-                                        <td>
+                                        <td colspan="2">
                                             <div class="row">
-    {#                                            ng-class="{'has-error': secondForm.pat_diagnosis.$invalid && secondForm.submit_attempt}"#}
-                                                <wm-diagnosis model="epicrisis.pat_diagnosis" list-mode="false"
-                                                              can-add-new="true" can-delete="true" can-edit="true"
-                                                              action="epicrisis" event="chart" risar="true"
-                                                              disabled="!mother_death"
-                                                              params="{defaults:{diagnosis_type:rbDiagnosisType.get_by_code('2')},
-                                                                       required:{end_date:true}}"></wm-diagnosis>
+                                                <wm-diagnosis-new ng-model="epicrisis.diagnoses" can-add-new="true" can-edit="!! mother_death && ! epicrisis.endDate"
+                                                  diag-types="epicrisis.diagnosis_types | filter:{code:'pathanatomical'}"></wm-diagnosis-new>
                                             </div>
                                         </td>
                                     </tr>

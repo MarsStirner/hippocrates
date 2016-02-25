@@ -348,34 +348,8 @@
                                         <td class="col-md-8">&nbsp;</td>
                                     </tr>
                                     <tr>
-                                        <td class="text-right">Основной <span class="text-danger">*</span></td>
-    {#                                    ng-class="{'has-error': fifthForm.mkb.$invalid}"#}
-                                        <td>
-                                            <wm-diagnosis model="checkup.diag" list-mode="false"
-                                                          can-add-new="true" can-delete="true" can-edit="true"
-                                                          action="checkup" risar="true"
-                                                          params="{defaults:{diagnosis_type:rbDiagnosisType.get_by_code('2')},
-                                                                   disabled:{diagnosis_type:true}}"></wm-diagnosis>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="text-right">Сопутствующие <span>&nbsp;</span></td>
-                                        <td>
-                                            <wm-diagnosis model="checkup.diag2" list-mode="true"
-                                                          can-add-new="true" can-delete="true" can-edit="true"
-                                                          action="checkup" risar="true"
-                                                          params="{defaults:{diagnosis_type:rbDiagnosisType.get_by_code('9')},
-                                                                   disabled:{diagnosis_type:true}}"></wm-diagnosis>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="text-right">Осложнения <span>&nbsp;</span></td>
-                                        <td>
-                                            <wm-diagnosis model="checkup.diag3" list-mode="true"
-                                                          can-add-new="true" can-delete="true" can-edit="true"
-                                                          action="checkup" risar="true"
-                                                          params="{defaults:{diagnosis_type:rbDiagnosisType.get_by_code('3')},
-                                                                   disabled:{diagnosis_type:true}}"></wm-diagnosis>
+                                        <td colspan="2">
+                                            <wm-diagnosis-new ng-model="checkup.diagnoses" can-add-new="true" can-edit="true" diag-types="checkup.diagnosis_types"/>
                                         </td>
                                     </tr>
                                     <tr>

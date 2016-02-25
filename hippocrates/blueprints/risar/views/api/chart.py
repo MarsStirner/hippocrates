@@ -1,30 +1,30 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime
 
-from sqlalchemy import func
 from flask import request
 from flask.ext.login import current_user
+from sqlalchemy import func
 
-from nemesis.lib.data import create_action
-from nemesis.lib.utils import get_new_event_ext_id, safe_traverse, safe_datetime
-from nemesis.lib.apiutils import api_method, ApiException
-from nemesis.models.client import Client, ClientAttach
-from nemesis.models.enums import EventPrimary, EventOrder
-from nemesis.models.event import Event, EventType
-from nemesis.models.actions import Action
-from nemesis.models.exists import Organisation, Person, rbAttachType, rbRequestType, rbFinance, MKB
-from nemesis.models.schedule import ScheduleClientTicket
-from nemesis.systemwide import db
-from nemesis.lib.diagnosis import create_or_update_diagnosis
 from blueprints.risar.app import module
-from blueprints.risar.lib.card_attrs import default_AT_Heuristic, get_all_diagnoses, reevaluate_risk_rate, \
-    reevaluate_preeclampsia_risk, reevaluate_card_attrs, get_card_attrs_action, check_card_attrs_action_integrity, \
+from blueprints.risar.lib.card import PregnancyCard
+from blueprints.risar.lib.card_attrs import default_AT_Heuristic, get_all_diagnoses, check_card_attrs_action_integrity, \
     reevaluate_dates
 from blueprints.risar.lib.represent import represent_event, represent_chart_for_routing, represent_header, \
-    represent_org_for_routing, group_orgs_for_routing, represent_checkups, represent_card_attributes, \
+    group_orgs_for_routing, represent_checkups, represent_card_attributes, \
     represent_chart_for_epicrisis, represent_chart_for_card_fill_rate_history
 from blueprints.risar.lib.utils import get_last_checkup_date
 from blueprints.risar.risar_config import attach_codes, request_type_pregnancy
+from nemesis.lib.apiutils import api_method, ApiException
+from nemesis.lib.data import create_action
+from nemesis.lib.diagnosis import create_or_update_diagnosis
+from nemesis.lib.utils import get_new_event_ext_id, safe_traverse, safe_datetime
+from nemesis.models.actions import Action
+from nemesis.models.client import Client, ClientAttach
+from nemesis.models.enums import EventPrimary, EventOrder
+from nemesis.models.event import Event, EventType
+from nemesis.models.exists import Organisation, Person, rbAttachType, rbRequestType, rbFinance, MKB
+from nemesis.models.schedule import ScheduleClientTicket
+from nemesis.systemwide import db
 
 
 __author__ = 'mmalkov'
@@ -73,7 +73,7 @@ def api_0_chart(event_id=None):
         event = Event.query.filter(Event.id == event_id, Event.deleted == 0).first()
         if not event:
             raise ApiException(404, u'Обращение не найдено')
-        action = get_card_attrs_action(event)
+        action = PregnancyCard.get_for_event(event).attrs
         check_card_attrs_action_integrity(action)
     else:
         ext = None
@@ -127,7 +127,10 @@ def api_0_chart(event_id=None):
             ticket.event = event
             db.session.add(ticket)
         db.session.commit()
-        reevaluate_card_attrs(event, ext)
+        card = PregnancyCard.get_for_event(event)
+        if ext:
+            card._card_attrs_action = ext
+        card.reevaluate_card_attrs()
         db.session.commit()
 
     if event.eventType.requestType.code != request_type_pregnancy:
@@ -146,6 +149,7 @@ def api_0_save_diagnoses(event_id=None):
     if not event_id:
         raise ApiException(400, u'Должен быть указан параметр event_id')
     event = Event.query.get(event_id)
+    card = PregnancyCard(event)
     if not event:
         raise ApiException(404, u'Обращение не найдено')
     for diagnosis in diagnoses:
@@ -156,7 +160,7 @@ def api_0_save_diagnoses(event_id=None):
             action[property_code].value = [diag for diag in action[property_code].value if diag.id != diagnosis['id']]
         db.session.add(diag)
     db.session.commit()
-    reevaluate_card_attrs(event)
+    card.reevaluate_card_attrs()
     db.session.commit()
     return list(get_all_diagnoses(event))
 
@@ -341,6 +345,7 @@ def api_1_attach_lpu():
 def api_0_mini_attach_lpu(client_id):
     data = request.get_json()
     event = Event.query.get(data['event_id'])
+    card = PregnancyCard.get_for_event(event)
     now = datetime.now()
     attach_type = data['attach_type']
     attach_type_code = attach_codes.get(attach_type, str(attach_type))
@@ -359,7 +364,7 @@ def api_0_mini_attach_lpu(client_id):
     if attach.LPU_id != org_id:
         attach.LPU_id = org_id
         db.session.commit()
-        reevaluate_dates(event)
+        reevaluate_dates(card)
         db.session.commit()
         return True
     else:

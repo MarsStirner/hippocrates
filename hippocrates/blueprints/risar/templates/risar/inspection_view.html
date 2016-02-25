@@ -61,19 +61,38 @@
                     <th>Диагнозы</th>
                     <td colspan="[[ checkups.length + 1 ]]"></td>
                 </tr>
+                <!-- TODO: Отображение диагнозов -->
                 <tr>
                     <td>основной</td>
-                    <td ng-repeat="checkup in checkups"><span class="bottom_dotted" tooltip="[[ checkup.diag.diagnosis.mkb.name ]]">[[ checkup.diag.diagnosis.mkb.code ]]</span></td>
+                    <td ng-repeat="checkup in checkups">
+                        <p ng-repeat="diag in checkup.diagnoses | collapse_diagnoses:'main'">
+                            <span class="bottom_dotted" tooltip="[[ diag.diagnostic.mkb.name ]]">
+                                [[ diag.diagnostic.mkb.code ]]
+                            </span>
+                        </p>
+                    </td>
                     <td></td>
                 </tr>
                 <tr>
                     <td>сопутствующие</td>
-                    <td ng-repeat="checkup in checkups"><p ng-repeat="diag in checkup.diag2"><span class="bottom_dotted" tooltip="[[ diag.diagnosis.mkb.name ]]">[[ diag.diagnosis.mkb.code ]]</span></p></td>
+                    <td ng-repeat="checkup in checkups">
+                        <p ng-repeat="diag in checkup.diagnoses | collapse_diagnoses:'associated'">
+                            <span class="bottom_dotted" tooltip="[[ diag.diagnostic.mkb.name ]]">
+                                [[ diag.diagnostic.mkb.code ]]
+                            </span>
+                        </p>
+                    </td>
                     <td></td>
                 </tr>
                 <tr>
                     <td>осложнения</td>
-                    <td ng-repeat="checkup in checkups"><p ng-repeat="diag in checkup.diag3"><span class="bottom_dotted" tooltip="[[ diag.diagnosis.mkb.name ]]">[[ diag.diagnosis.mkb.code ]]</span></p></td>
+                    <td ng-repeat="checkup in checkups">
+                        <p ng-repeat="diag in checkup.diagnoses | collapse_diagnoses:'complications'">
+                            <span class="bottom_dotted" tooltip="[[ diag.diagnostic.mkb.name ]]">
+                                [[ diag.diagnostic.mkb.code ]]
+                            </span>
+                        </p>
+                    </td>
                     <td></td>
                 </tr>
                 <tr>

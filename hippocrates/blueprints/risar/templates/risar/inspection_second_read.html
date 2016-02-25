@@ -181,20 +181,29 @@
                             <span class="glyphicon glyphicon-pencil"></span> Изменить</a>
                     </div>
                     <div class="box-body">
+                        <!-- TODO: Отображение диагнозов -->
                         <div class="row">
                             <div class="col-sm-6 col-md-6  text-right">Основной диагноз:</div>
-                            <div class="col-sm-6 col-md-6">[[checkup.diag.diagnosis.mkb.code]] - [[checkup.diag.diagnosis.mkb.name]]</div>
+                            <div class="col-sm-6 col-md-6">
+                                <div ng-repeat="diag in checkup.diagnoses | collapse_diagnoses:'main'">
+                                    [[diag.diagnostic.mkb.code]] - [[diag.diagnostic.mkb.name]]
+                                </div>
+                            </div>
                         </div>
                         <div class="row">
-                            <div class="col-sm-6 col-md-6  text-right">Сопутствующий диагноз:</div>
-                            <div class="col-sm-6 col-md-6"><span ng-repeat="diag in checkup.diag2" >[[diag.diagnosis.mkb.code]] - [[diag.diagnosis.mkb.name]]
-                            <span ng-if="epicrisis.attend_diagnosis.length>1"><br></span></span>
+                            <div class="col-sm-6 col-md-6  text-right">Сопутствующие диагнозы:</div>
+                            <div class="col-sm-6 col-md-6">
+                                <div ng-repeat="diag in checkup.diagnoses | collapse_diagnoses:'associated'">
+                                    [[diag.diagnostic.mkb.code]] - [[diag.diagnostic.mkb.name]]
+                                </div>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-sm-6 col-md-6  text-right">Диагноз осложнения:</div>
-                            <div class="col-sm-6 col-md-6"><span ng-repeat="diag in checkup.diag3">[[diag.diagnosis.mkb.code]] - [[diag.diagnosis.mkb.name]]
-                            <span ng-if="epicrisis.complicating_diagnosis.length>1"><br></span></span>
+                            <div class="col-sm-6 col-md-6">
+                                <div ng-repeat="diag in checkup.diagnoses | collapse_diagnoses:'complication'">
+                                    [[diag.diagnostic.mkb.code]] - [[diag.diagnostic.mkb.name]]
+                                </div>
                             </div>
                         </div>
                         <div class="row">
