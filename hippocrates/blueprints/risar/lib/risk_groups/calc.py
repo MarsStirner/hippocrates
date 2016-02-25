@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
+import datetime
 
 from blueprints.risar.lib.card import PregnancyCard
 from blueprints.risar.lib.risk_groups.needles_haystacks import any_thing, mkb_from_mkb, hay_check, explode_needles
 from blueprints.risar.lib.utils import get_action_list
+from blueprints.risar.risar_config import first_inspection_code
 from nemesis.models.actions import Action
 from nemesis.models.client import BloodHistory
 
@@ -54,6 +56,8 @@ def calc_risk_groups(card):
     hemoglobin_action = get_action_list(card.event, 'general_blood_test').order_by(Action.begDate.desc()).first()
     low_hemo = hemoglobin_action['hemoglobin'].value <= 110 if hemoglobin_action is not None else False
 
+    all_diagnostics = card.get_client_diagnostics(card.event.setDate, card.event.execDate)
+
     abortion_or_miscarriage = any(
         preg['pregnancyResult'].value_raw in ('therapeutic_abortion', 'therapeutic_abortion_before_12', 'unknown_miscarriage', 'misbirth_before_11', 'misbirth_before_12-21')
         for preg in card.prev_pregs
@@ -67,7 +71,11 @@ def calc_risk_groups(card):
         mkb_from_mkb
     )
     p2_needles = explode_needles(u'O10-O15, O20.0, O30, O33.1, O34.0, O34.1, O34.2, O34.3, O34.8, O35.0-O35.9, O98-O99, Z35.5, Z35.6')
-    p2 = diags_in_card(card, p2_needles)
+    p2 = any_thing(
+        all_diagnostics,
+        p2_needles,
+        lambda x: x.MKB,
+    )
     p3 = any(preg['pregnancyResult'].value_raw in ('premature_birth_22-27', 'premature_birth_28-37') for preg in card.prev_pregs)
     p4_needles = explode_needles(u'O10-O84, O00-O08')
     p4_a = any(
@@ -93,7 +101,11 @@ def calc_risk_groups(card):
         mkb_from_mkb
     )
     p2_needles = explode_needles(u'O10-O16, Z35.5, Z35.6, O36.0, O30.0-O30.9, O23.0, O26.6, O24.0-O24.4, O24.9, O99.0')
-    p2 = diags_in_card(card, p2_needles)
+    p2 = any_thing(
+        all_diagnostics,
+        p2_needles,
+        lambda x: x.MKB,
+    )
     p3_needles = explode_needles(u'O10-O92')
     p3_a = any(
         any_thing(preg['pregnancy_pathology'].value_raw, p3_needles, mkb_from_mkb)
@@ -114,7 +126,11 @@ def calc_risk_groups(card):
         mkb_from_mkb
     )
     p2_needles = explode_needles(u'O46.0, O46.8, O46.9, O43.0, O44.0, O44.1, O45.0, O45.8, O45.9, О99.0')
-    p2 = diags_in_card(card, p2_needles)
+    p2 = any_thing(
+        all_diagnostics,
+        p2_needles,
+        lambda x: x.MKB,
+    )
     p3_needles = explode_needles(u'O72.0-O72.3, O03-O08')
     p3_a = any(
         any_thing(preg['pregnancy_pathology'].value_raw, p3_needles, mkb_from_mkb)
@@ -135,7 +151,11 @@ def calc_risk_groups(card):
         mkb_from_mkb
     )
     p2_needles = explode_needles(u'O34.1, O34.4, O34.8, O33.0-O33.4, O32.5, O30, O65, O83.1')
-    p2 = diags_in_card(card, p2_needles)
+    p2 = any_thing(
+        all_diagnostics,
+        p2_needles,
+        lambda x: x.MKB,
+    )
     p3_needles = explode_needles(u'O00-O08, O82')
     p3_a = any(
         any_thing(preg['pregnancy_pathology'].value_raw, p3_needles, mkb_from_mkb)
@@ -156,7 +176,11 @@ def calc_risk_groups(card):
         mkb_from_mkb
     )
     p2_needles = explode_needles(u'O24.0-O24.4, O24.9, O33.4, O36.6')
-    p2 = diags_in_card(card, p2_needles)
+    p2 = any_thing(
+        all_diagnostics,
+        p2_needles,
+        lambda x: x.MKB,
+    )
     p3_needles = explode_needles(u'O36.6')
     p3_a = any(
         any_thing(preg['pregnancy_pathology'].value_raw, p3_needles, mkb_from_mkb)
@@ -183,7 +207,11 @@ def calc_risk_groups(card):
         mkb_from_mkb
     )
     p2_needles = explode_needles(u'O36.0')
-    p2 = diags_in_card(card, p2_needles)
+    p2 = any_thing(
+        all_diagnostics,
+        p2_needles,
+        lambda x: x.MKB,
+    )
     if p1 or p2:
         yield '06'
 
@@ -206,7 +234,11 @@ def calc_risk_groups(card):
         mkb_from_mkb
     )
     p2_needles = explode_needles(u'O10-O16, O23.0-O23.9, O24.0-O24.4, O24.9, O45, O48, O99.4, O99.5, O98.0-O98.9, O99.0')
-    p2 = diags_in_card(card, p2_needles)
+    p2 = any_thing(
+        all_diagnostics,
+        p2_needles,
+        lambda x: x.MKB,
+    )
     p3_needles = explode_needles(u'O10-O16, O45, O99.0')
     p3_a = any(
         any_thing(preg['pregnancy_pathology'].value_raw, p3_needles, mkb_from_mkb)
@@ -227,7 +259,11 @@ def calc_risk_groups(card):
         mkb_from_mkb
     )
     p2_needles = explode_needles(u'O10-O15.9, O23.0, O36.3, O36.5, O43.8')
-    p2 = diags_in_card(card, p2_needles)
+    p2 = any_thing(
+        all_diagnostics,
+        p2_needles,
+        lambda x: x.MKB,
+    )
     p3 = any(
         (preg['pregnancyResult'].value_raw == 'delivery' and
          preg['pregnancy_week'].value >= 36 and
@@ -245,7 +281,11 @@ def calc_risk_groups(card):
         mkb_from_mkb
     )
     p2_needles = explode_needles(u'О34.2, О20.0')
-    p2 = diags_in_card(card, p2_needles)
+    p2 = any_thing(
+        all_diagnostics,
+        p2_needles,
+        lambda x: x.MKB,
+    )
     p3_needles = explode_needles(u'O82.0-O82.9')
     p3_a = any(
         any_thing(preg['pregnancy_pathology'].value_raw, p3_needles, mkb_from_mkb)
@@ -266,7 +306,11 @@ def calc_risk_groups(card):
         mkb_from_mkb
     )
     p2_needles = explode_needles(u'O43.1, O44, O45.9')
-    p2 = diags_in_card(card, p2_needles)
+    p2 = any_thing(
+        all_diagnostics,
+        p2_needles,
+        lambda x: x.MKB,
+    )
     p3_needles = explode_needles(u'O03-O08, O43, O44, O45')
     p3_a = any(
         any_thing(preg['pregnancy_pathology'].value_raw, p3_needles, mkb_from_mkb)
@@ -287,7 +331,11 @@ def calc_risk_groups(card):
         mkb_from_mkb
     )
     p2_needles = explode_needles(u'O98.0, O99.4, O99.5, O99.8, J00-J99')
-    p2 = diags_in_card(card, p2_needles)
+    p2 = any_thing(
+        all_diagnostics,
+        p2_needles,
+        lambda x: x.MKB,
+    )
     p3_needles = explode_needles(u'J45, J46')
     p3_a = any(
         any_thing(preg['pregnancy_pathology'].value_raw, p3_needles, mkb_from_mkb)
@@ -308,7 +356,11 @@ def calc_risk_groups(card):
         mkb_from_mkb
     )
     p2_needles = explode_needles(u'O22, O23, O24, O26.6, O34.3')
-    p2 = diags_in_card(card, p2_needles)
+    p2 = any_thing(
+        all_diagnostics,
+        p2_needles,
+        lambda x: x.MKB,
+    )
     p3_needles = explode_needles(u'O85, О86, O87, O91, O92')
     p3_a = any(
         any_thing(preg['pregnancy_pathology'].value_raw, p3_needles, mkb_from_mkb)
@@ -329,7 +381,11 @@ def calc_risk_groups(card):
         mkb_from_mkb
     )
     p2_needles = explode_needles(u'O10-O15.9, O20-O29, O26.6, O30, O32.1, O34.2, O36.0, O36.1, O41.0, O43, O44, O98')
-    p2 = diags_in_card(card, p2_needles)
+    p2 = any_thing(
+        all_diagnostics,
+        p2_needles,
+        lambda x: x.MKB,
+    )
     p3_needles = explode_needles(u'О10-О92, O99.0')
     p3_a = any(
         any_thing(preg['pregnancy_pathology'].value_raw, p3_needles, mkb_from_mkb)
@@ -351,3 +407,39 @@ def calc_risk_groups(card):
     )
     if p1 or p2 or p3_a or p3_b or p4 or p5 or p6 or low_hemo:
         yield '14'
+
+    # 15 - Риск развития преэклампсии
+
+    from blueprints.risar.lib.utils import multiple_birth, collagenoses, hypertensia, kidney_diseases, vascular_diseases, diabetes, antiphospholipid_syndrome
+
+    diseases = multiple_birth + hypertensia + kidney_diseases + collagenoses + vascular_diseases + diabetes + antiphospholipid_syndrome
+    checkups = card.checkups
+    prev_pregnancies = card.prev_pregs
+
+    p1 = any_thing(
+        all_diagnostics,
+        diseases,
+        lambda x: x.MKB,
+    )
+
+    p2 = not prev_pregnancies
+    p3 = card.event.client.age_tuple()[-1] > 35
+    p4 = (card.checkups and checkups[0]['BMI'].value >= 25)
+    p5 = card.anamnesis.mother['preeclampsia'].value
+
+    p6 = any(
+        preg['pregnancyResult'].value_raw in ('delivery', 'premature_birth_22-27', 'premature_birth_28-37', 'postmature_birth') and
+        preg['preeclampsia'].value
+        for preg in card.prev_pregs
+    )
+
+    now_year = datetime.date.today().year
+
+    p7 = all(
+        preg['pregnancyResult'].value_raw in ('delivery', 'premature_birth_22-27', 'premature_birth_28-37', 'postmature_birth') and
+        now_year - preg['year'].value >= 10
+        for preg in card.prev_pregs
+    )
+
+    if p1 or p2 or p3 or p4 or p5 or p6 or p7:
+        yield '15'

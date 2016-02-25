@@ -493,28 +493,6 @@ WebMis20
         }
     }
 })
-.directive('preeclampsiaRiskIcon', function () {
-    return {
-        restrict: 'A',
-        template: '<span style="font-size: 120%" ng-class="icon_class(preeclampsiaRiskIcon.id)" tooltip="[[tooltip(preeclampsiaRiskIcon.id)]]"></span>',
-        scope: {
-            preeclampsiaRiskIcon: '='
-        },
-        link: function (scope) {
-            scope.icon_class = function (rate) {
-                if (rate == 1) return 'fa fa-exclamation-circle text-red';
-                if (rate == 2) return 'fa fa-exclamation-circle text-green';
-                return 'fa fa-question text-darkgray';
-            };
-            scope.tooltip = function (rate) {
-                if (rate == 1) return 'Пациентка входит в группу риска развития преэклампсии';
-                if (rate == 2) return 'Пациентка НЕ входит в группу риска развития преэклампсии';
-                return 'Риск развития преэклампсии ещё не выявлен';
-
-            }
-        }
-    }
-})
 .directive('preeclampsiaSuspIcon', function () {
     return {
         restrict: 'A',

@@ -168,53 +168,6 @@ def reevaluate_risk_rate(card):
     card.attrs['prenatal_risk_572'].value = safe_dict(PerinatalRiskRate(max_rate))
 
 
-def reevaluate_preeclampsia_risk(card):
-    """
-    Пересчёт риска преэклампсии
-    :param card: Карточка беременной
-    :type card: PregnancyCard
-    """
-    delivery_years = []
-    all_diagnoses = []
-    diseases = multiple_birth + hypertensia + kidney_diseases + collagenoses + vascular_diseases + diabetes + \
-        antiphospholipid_syndrome
-    mother_action = card.anamnesis.mother
-    first_inspection = get_action(card.event, 'risarFirstInspection')
-    second_inspections = get_action_list(card.event, 'risarSecondInspection', all=True)
-    actions_to_check = [mother_action]+[first_inspection]+second_inspections
-    for action in actions_to_check:
-        all_diagnoses.extend(get_diagnoses_from_action(action, True))
-
-    prev_pregnancies = card.prev_pregs
-    if not mother_action and not first_inspection and not prev_pregnancies:
-        risk = PreeclampsiaRisk.undefined[0]
-    else:
-        risk = PreeclampsiaRisk.no_risk[0]
-
-        if not prev_pregnancies or card.event.client.age_tuple()[-1] > 35 or (first_inspection and first_inspection['BMI'].value >= 25) or \
-                (mother_action and mother_action['preeclampsia'].value):
-            risk = PreeclampsiaRisk.has_risk[0]
-        else:
-            for pregnancy in prev_pregnancies:
-                if pregnancy['pregnancyResult'].value and pregnancy['pregnancyResult'].value['code'] in ('normal', 'miscarriage37', 'miscarriage27', 'belated_birth'):
-                    if pregnancy['preeclampsia'].value:
-                        risk = PreeclampsiaRisk.has_risk[0]
-                        break
-                    delivery_years.append(pregnancy['year'].value)
-
-            delivery_years.sort()
-            if delivery_years and datetime.datetime.now().year - delivery_years[-1] >= 10:
-                risk = PreeclampsiaRisk.has_risk[0]
-
-        for diag in all_diagnoses:
-            diag_id = diag['diagnosis']['mkb'].DiagID
-            if filter(lambda x: x in diag_id, diseases):
-                risk = PreeclampsiaRisk.has_risk[0]
-
-    if card.attrs.propsByCode.get('preeclampsia_risk'):
-        card.attrs['preeclampsia_risk'].value = risk
-
-
 def reevaluate_dates(card):
     """
     Пересчёт даты начала беременности, предполагаемой даты родов, и даты редактирования карты пациентки

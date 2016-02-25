@@ -95,8 +95,6 @@ def represent_event(event):
         'epicrisis': represent_epicrisis(event),
         'checkups': represent_checkups_shortly(event),
         'risk_rate': card_attrs_action['prenatal_risk_572'].value,
-        'preeclampsia_risk': PreeclampsiaRisk(card_attrs_action['preeclampsia_risk'].value) if
-            card_attrs_action.propsByCode.get('preeclampsia_risk') else None,
         'preeclampsia_susp_rate': card_attrs_action['preeclampsia_susp'].value if
             card_attrs_action.propsByCode.get('preeclampsia_susp') else None,
         'preeclampsia_confirmed_rate': card_attrs_action['preeclampsia_comfirmed'].value if
