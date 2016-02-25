@@ -14,7 +14,7 @@ from nemesis.models.actions import Action, ActionType
 from nemesis.models.client import BloodHistory
 from nemesis.models.enums import (Gender, AllergyPower, IntoleranceType, PerinatalRiskRate, PreeclampsiaRisk,
     PregnancyPathology, ErrandStatus)
-from nemesis.models.event import Diagnosis, Diagnostic
+from nemesis.models.diagnosis import Diagnosis, Diagnostic
 from nemesis.models.exists import rbAttachType, MKB
 from blueprints.risar.lib.card_attrs import get_card_attrs_action, get_all_diagnoses, check_disease
 from blueprints.risar.lib.utils import get_action, action_apt_values, get_action_type_id, risk_rates_diagID, \

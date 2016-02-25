@@ -11,6 +11,8 @@ var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, WMAction, P
         }
     };
     $scope.ActionStatus = RefBookService.get('ActionStatus');
+    $scope.rbDiagnosisType = RefBookService.get('rbDiagnosisTypeN');
+
     $scope.action_id = params.action_id;
     $scope.action = new WMAction();
     $scope.locker_person = null;
@@ -178,6 +180,27 @@ var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, WMAction, P
             return deferred.promise;
         }
 
+        function check_diagnosis (action){
+            var deferred = $q.defer();
+            var diags_without_result = action.diagnoses.filter(function(diag){
+                for (var diag_type_code in diag.diagnosis_types){
+                    var diag_type = $scope.rbDiagnosisType.get_by_code(diag_type_code);
+                    if (diag.diagnosis_types[diag_type_code].code != 'associated' && diag_type.require_result && !diag.diagnostic.ache_result){
+                        return true
+                    }
+                }
+                return false
+            })
+            if (action.status.code === 'finished' && diags_without_result.length) {
+                deferred.reject({
+                    silent: false,
+                    message: 'Необходимо указать результат для дагнозов.'
+                });
+            }
+            deferred.resolve();
+            return deferred.promise;
+        }
+
         var deferred = $q.defer();
         if ($scope.action.readonly) {
             deferred.reject({
@@ -185,7 +208,7 @@ var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, WMAction, P
                 message: 'Действие открыто в режиме чтения'
             });
         } else {
-            return check_diagnoses_conflicts($scope.event, $scope.action);
+            return check_diagnosis($scope.action);
         }
         return deferred.promise;
     };
@@ -353,7 +376,7 @@ WebMis20.factory('WMAction', ['$q', 'ApiCalls', 'EzekielLock', function ($q, Api
     // FIXME: На данный момент это ломает функциональность действий, но пока пофиг.
     var template_fields = ['direction_date', 'beg_date', 'end_date', 'planned_end_date', 'status', 'set_person',
         'person', 'note', 'office', 'amount', 'uet', 'pay_status', 'account', 'is_urgent', 'coord_date'];
-    var fields = ['id', 'event_id', 'client', 'prescriptions', 'service'].concat(template_fields);
+    var fields = ['id', 'event_id', 'client', 'prescriptions', 'diagnoses', 'service'].concat(template_fields);
     var Action = function () {
         this.action = {};
         this.layout = {};
@@ -485,6 +508,7 @@ WebMis20.factory('WMAction', ['$q', 'ApiCalls', 'EzekielLock', function ($q, Api
             data = {},
             url = '/actions/api/action/{0}'.format(self.id || '');
         merge_fields(data, this);
+        data.diagnoses = this._get_entity_changes('diagnoses');
         data.action_type_id = this.action_type_id || this.action_type.id;
         merge_properties(data, this);
         data.id = self.id;
@@ -512,6 +536,17 @@ WebMis20.factory('WMAction', ['$q', 'ApiCalls', 'EzekielLock', function ($q, Api
     Action.prototype.is_assignable = function (id) {
         var prop = this.get_property(id);
         return prop ? prop.type.is_assignable : false;
+    };
+    Action.prototype._get_entity_changes = function(entity) {
+        var dirty_elements = this[entity].filter(function(el) {
+            return el.kind_changed || el.diagnostic_changed;
+        });
+        var deleted_elements = [];
+//        var deleted_elements = this.deleted_entities[entity] || [];
+        var changes = dirty_elements.concat(deleted_elements.filter(function(del_elmnt) {
+            return dirty_elements.indexOf(del_elmnt) === -1;
+        }));
+        return changes.length ? changes : undefined;
     };
     return Action;
 }]);
