@@ -6,7 +6,6 @@ from flask import request
 from flask.ext.login import current_user
 
 from blueprints.risar.lib.card import PregnancyCard
-from blueprints.risar.lib.card_attrs import reevaluate_preeclampsia_risk
 from blueprints.risar.lib.utils import get_action, action_apt_values, get_action_type_id, get_action_by_id
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.data import create_action
@@ -116,8 +115,6 @@ def api_0_pregnancies_post(action_id=None):
     ]
 
     db.session.add(action)
-    db.session.commit()
-    reevaluate_preeclampsia_risk(card)
     db.session.commit()
     return represent_pregnancy(action)
 
