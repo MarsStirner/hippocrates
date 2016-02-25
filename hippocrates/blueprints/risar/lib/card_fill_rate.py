@@ -182,13 +182,13 @@ class CFRController(BaseModelController):
         sel = self.get_selecter()
         data = sel.get_doctor_cfrs(doctor_id)
         return {
-            'cfr_filled': data.count_cfr_filled or 0,
-            'cfr_not_filled': data.count_cfr_nf or 0,
-            'cfr_anamnesis_not_filled': data.count_cfr_anamnesis_nf or 0,
-            'cfr_fi_not_filled': data.count_cfr_fi_nf or 0,
-            'cfr_ri_not_filled': data.count_cfr_ri_nf or 0,
-            'cfr_epicrisis_not_filled': data.count_cfr_epicrisis_nf or 0,
-            'cards_count': data.count_all or 0
+            'cfr_filled': getattr(data, 'count_cfr_filled', 0),
+            'cfr_not_filled': getattr(data, 'count_cfr_nf', 0),
+            'cfr_anamnesis_not_filled': getattr(data,'count_cfr_anamnesis_nf', 0),
+            'cfr_fi_not_filled': getattr(data, 'count_cfr_fi_nf', 0),
+            'cfr_ri_not_filled': getattr(data, 'count_cfr_ri_nf', 0),
+            'cfr_epicrisis_not_filled': getattr(data, 'count_cfr_epicrisis_nf', 0),
+            'cards_count': getattr(data, 'count_all', 0),
         }
 
     def get_card_fill_rates_lpu_overview(self, curator_id):
