@@ -156,9 +156,9 @@ def calc_risk_groups(card):
     )
     p4 = any(
         (preg['pregnancyResult'].value_raw == 'delivery' and
-         preg['pregnancy_week'] >= 36 and
-         (max(child['weight'] for child in preg['newborn_inspections']) >= 4000))
-        for preg in card.prev_pregs
+         preg['pregnancy_week'].value >= 36 and
+         (max(child['weight'] for child in preg['newborn_inspections'].value) >= 4000))
+        for preg in card.prev_pregs['newborn_inspections']
     )
     if p1 or p2 or p3_a or p3_b or p4:
         yield '05'
@@ -218,8 +218,8 @@ def calc_risk_groups(card):
     p2 = diags_in_card(card, p2_needles)
     p3 = any(
         (preg['pregnancyResult'].value_raw == 'delivery' and
-         preg['pregnancy_week'] >= 36 and
-         (min(child['weight'] for child in preg['newborn_inspections']) <= 2500))
+         preg['pregnancy_week'].value >= 36 and
+         (min(child['weight'] for child in preg['newborn_inspections'].value) <= 2500))
         for preg in card.prev_pregs
     )
     if p1 or p2 or p3 or low_hemo:
