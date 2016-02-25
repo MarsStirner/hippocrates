@@ -42,6 +42,11 @@ def calc_risk_groups(card):
     hemoglobin_action = get_action_list(card.event, 'general_blood_test').order_by(Action.begDate.desc()).first()
     low_hemo = hemoglobin_action['hemoglobin'].value <= 110 if hemoglobin_action is not None else False
 
+    abortion_or_miscarriage = any(
+        preg['pregnancyResult'].value_raw in ('therapeutic_abortion', 'therapeutic_abortion_before_12', 'unknown_miscarriage', 'misbirth_before_11', 'misbirth_before_12-21')
+        for preg in card.prev_pregs
+    )
+
     # 01 - Невынашивание беременности
 
     p1 = any_thing(
@@ -51,7 +56,7 @@ def calc_risk_groups(card):
     )
     p2_needles = explode_needles(u'O10-O15, O20.0, O30, O33.1, O34.0, O34.1, O34.2, O34.3, O34.8, O35.0-O35.9, O98-O99, Z35.5, Z35.6')
     p2 = diags_in_card(card, p2_needles)
-    p3 = any(preg['pregnancyResult'].value_raw in ('miscarriage27', 'miscarriage37') for preg in card.prev_pregs)
+    p3 = any(preg['pregnancyResult'].value_raw in ('premature_birth_22-27', 'premature_birth_28-37') for preg in card.prev_pregs)
     p4_needles = explode_needles(u'O10-O84, O00-O08')
     p4_a = any(
         any_thing(preg['pregnancy_pathology'].value_raw, p4_needles, mkb_from_mkb)
@@ -107,11 +112,7 @@ def calc_risk_groups(card):
         any_thing(preg['delivery_pathology'].value_raw, p3_needles, mkb_from_mkb)
         for preg in card.prev_pregs
     )
-    p4 = any(
-        preg['pregnancyResult'].value_raw in ('med_abortion12', 'med_abortion', 'misbirth', 'misbirth11', 'misbirth21')
-        for preg in card.prev_pregs
-    )
-    if p1 or p2 or p3_a or p3_b or p4 or low_hemo:
+    if p1 or p2 or p3_a or p3_b or abortion_or_miscarriage or low_hemo:
         yield '03'
 
     # 04 - Аномалия родовой деятельности
@@ -132,11 +133,7 @@ def calc_risk_groups(card):
         any_thing(preg['delivery_pathology'].value_raw, p3_needles, mkb_from_mkb)
         for preg in card.prev_pregs
     )
-    p4 = any(
-        preg['pregnancyResult'].value_raw in ('med_abortion12', 'med_abortion', 'misbirth', 'misbirth11', 'misbirth21')
-        for preg in card.prev_pregs
-    )
-    if p1 or p2 or p3_a or p3_b or p4:
+    if p1 or p2 or p3_a or p3_b or abortion_or_miscarriage:
         yield '04'
 
     # 05 - Роды крупным плодом
@@ -158,7 +155,7 @@ def calc_risk_groups(card):
         for preg in card.prev_pregs
     )
     p4 = any(
-        (preg['pregnancyResult'].value_raw == 'normal' and
+        (preg['pregnancyResult'].value_raw == 'delivery' and
          preg['pregnancy_week'] >= 36 and
          (max(child['weight'] for child in preg['newborn_inspections']) >= 4000))
         for preg in card.prev_pregs
@@ -220,7 +217,7 @@ def calc_risk_groups(card):
     p2_needles = explode_needles(u'O10-O15.9, O23.0, O36.3, O36.5, O43.8')
     p2 = diags_in_card(card, p2_needles)
     p3 = any(
-        (preg['pregnancyResult'].value_raw == 'normal' and
+        (preg['pregnancyResult'].value_raw == 'delivery' and
          preg['pregnancy_week'] >= 36 and
          (min(child['weight'] for child in preg['newborn_inspections']) <= 2500))
         for preg in card.prev_pregs
@@ -267,11 +264,7 @@ def calc_risk_groups(card):
         any_thing(preg['delivery_pathology'].value_raw, p3_needles, mkb_from_mkb)
         for preg in card.prev_pregs
     )
-    p4 = any(
-        preg['pregnancyResult'].value_raw in ('med_abortion12', 'med_abortion', 'misbirth', 'misbirth11', 'misbirth21')
-        for preg in card.prev_pregs
-    )
-    if p1 or p2 or p3_a or p3_b or p4:
+    if p1 or p2 or p3_a or p3_b or abortion_or_miscarriage:
         yield '11'
 
     # 12 - Обострение хр.астматических заболеваний
@@ -338,7 +331,7 @@ def calc_risk_groups(card):
          card.anamnesis.mother['toxic'].value or \
          card.anamnesis.mother['smoking'].value or \
          card.anamnesis.mother['drugs'].value
-    p5 = card.anamnesis.mother['professional_properties'].value_raw not in (u'net', u'nervno-psihiceskoenaprajenie')
+    p5 = card.anamnesis.mother['professional_properties'].value_raw not in (u'no', u'psychic_tension')
     p6 = any(
         child['died_at'].value_raw == '01'  # Умер при родах
         for preg in card.prev_pregs
