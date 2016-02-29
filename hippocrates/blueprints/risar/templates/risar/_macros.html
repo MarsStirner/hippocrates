@@ -134,3 +134,28 @@
     </div>
 </div>
 {% endmacro %}
+
+{% macro navigation_btn_class_attribute(endpoints) %}
+    {% if request.endpoint[5:] in endpoints %}class="btn btn-primary"{% else %}class="btn btn-default"{% endif %}
+{% endmacro %}
+
+{% macro navigation(event_id_repl, endpoints) %}
+<div class="novmargin">
+    <div class="btn-group">
+        <a ng-href="{{ url_for('.html_chart') }}?event_id={{ event_id_repl }}" {{ navigation_btn_class_attribute(['.html_chart']) }}>Карта пациентки</a>
+        <a ng-href="{{ url_for('.html_anamnesis') }}?event_id={{ event_id_repl }}" {{ navigation_btn_class_attribute(['.html_anamnesis', '.html_anamnesis_father_edit', '.html_anamnesis_mother_edit']) }}>Анамнез</a>
+        <a ng-href="{{ url_for('.html_inspection') }}?event_id={{ event_id_repl }}" {{ navigation_btn_class_attribute(['.html_inspection', '.html_inspection_read', '.html_inspection_edit']) }}>Осмотры</a>
+        <a ng-href="{{ url_for('.html_routing') }}?event_id={{ event_id_repl }}&emergency=1" {{ navigation_btn_class_attribute(['.html_routing']) }}>Маршрутизация</a>
+        <a ng-href="{{ url_for('.html_epicrisis') }}?event_id={{ event_id_repl }}" {{ navigation_btn_class_attribute(['.html_epicrisis', '.html_epicrisis_edit']) }}>Эпикриз</a>
+        <a ng-class="{disabled: !ps.is_available()}" ng-click="open_print_window()" class="btn btn-default">Печать</a>
+        <div class="btn-group">
+            <button class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Дополнительно <span class="fa fa-caret-down"></span></button>
+            <ul role="menu" class="dropdown-menu">
+                <li><a ng-href="{{ url_for('.html_event_diagnoses') }}?event_id={{ event_id_repl }}">Диагнозы случая</a></li>
+                <li><a ng-href="{{ url_for('.html_event_measure') }}?event_id={{ event_id_repl }}">Мероприятия случая</a></li>
+                <li><a ng-href="{{ url_for('.html_card_fill_history') }}?event_id={{ event_id_repl }}">Качество ведения карты</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endmacro %}
