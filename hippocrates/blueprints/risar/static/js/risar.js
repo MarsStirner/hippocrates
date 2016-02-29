@@ -399,6 +399,11 @@ WebMis20
         get_chart: function (event_id) {
             return wrapper('GET', Config.url.api_chart_card_fill_history + event_id)
         }
+    };
+    this.risk_groups = {
+        list: function (event_id) {
+            return wrapper('GET', Config.url.api_chart_risk_groups_list.format(event_id))
+        }
     }
 }])
 .service('UserErrand', function (Simargl, ApiCalls, Config, OneWayEvent, CurrentUser, NotificationService) {

@@ -7,6 +7,7 @@ from flask.ext.login import current_user
 
 from blueprints.risar.lib.card import PregnancyCard
 from blueprints.risar.lib.utils import get_action, action_apt_values, get_action_type_id, get_action_by_id
+from blueprints.risar.models.risar import RisarRiskGroup
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.data import create_action
 from nemesis.lib.utils import safe_traverse, public_endpoint
@@ -333,9 +334,5 @@ def api_0_chart_father(event_id):
 
 @module.route('/api/0/chart/<int:event_id>/risks')
 @api_method
-@public_endpoint
 def api_0_chart_risks(event_id):
-    from ...lib.risk_groups.calc import calc_risk_groups
-    event = Event.query.get(event_id)
-    card = PregnancyCard.get_for_event(event)
-    return list(calc_risk_groups(card))
+    return RisarRiskGroup.query.filter(RisarRiskGroup.event_id == event_id, RisarRiskGroup.deleted == 0).all()

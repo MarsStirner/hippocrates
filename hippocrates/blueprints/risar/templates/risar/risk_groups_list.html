@@ -1,0 +1,46 @@
+{% extends 'risar/base/base.html' %}
+{% import 'risar/_macros.html' as rimacros %}
+
+{% block title %}> {{ module_name }}{% endblock %}
+
+{% block main %}
+<div ng-controller="RiskGroupsListCtrl" ng-cloak>
+    <section class="content-header">
+        {{ rimacros.page_title_n('Группы риска пациентки') }}
+        {{ rimacros.navigation('[[ event_id ]]') }}
+    </section>
+    <section class="content">
+        <div class="box box-primary">
+            <div class="box-body">
+                <table class="table table-condensed">
+                    <thead>
+                    <tr>
+                        <th class="col-md-2">Наименование</th>
+                        <th class="col-md-2">Дата установления</th>
+                        <th class="col-md-2">Дата изменения</th>
+                        <th class="col-md-2">Врач</th>
+                        <th class="col-md-4">Причина</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="risk in risks">
+                        <td ng-bind="risk.risk_group.name"></td>
+                        <td ng-bind="risk.create_datetime | asDateTime"></td>
+                        <td ng-bind="risk.modify_datetime | asDateTime"></td>
+                        <td ng-bind="risk.modify_person.name"></td>
+                        <td simple-collapsable>
+                            <div ng-bind-html="risk.risk_group.conditions | trustHtml"></div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block modules_js %}
+    {{ super() }}
+    <script src="{{ url_for('.static', filename='js/risk_groups.js', v=app_version) }}"></script>
+{% endblock %}

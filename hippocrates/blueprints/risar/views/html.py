@@ -164,3 +164,8 @@ def html_card_fill_history():
     reevaluate_card_fill_rate_all(card)
     db.session.commit()
     return render_template('risar/card_fill_history.html')
+
+
+@module.route('/risk_groups_list.html')
+def html_risk_groups_list():
+    return render_template('risar/risk_groups_list.html')
