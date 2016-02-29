@@ -52,8 +52,8 @@
                         </tr>
                         <tr>
                             <th class="text-right">Диагноз направившего учреждения</th>
-                            <td>[[ event.received.diag_received.value.diagnosis.mkb.code ]] -
-                                [[ event.received.diag_received.value.diagnosis.mkb.name ]]
+                            <td><span ng-repeat="diag in event.received.diagnoses | collapse_diagnoses:'main'">[[ diag.diagnostic.mkb.code ]] -
+                                [[ diag.diagnostic.mkb.name ]]</span>
                             </td>
                         </tr>
                         <tr>
@@ -166,28 +166,10 @@
                 </div>
             </div>
             <div class="panel panel-default">
-                <div class="panel-body">
-                    <div class="row marginal">
-                        <div class="col-md-12">
-                            <label for="diag_received" class="control-label">Диагноз направившего учереждения</label>
-                            <wm-diagnosis model="event.received.diag_received.value" action="event.received" can-add-new="true"
-                                          can-delete="true" can-edit="true"></wm-diagnosis>
-                        </div>
-                    </div>
-                    <div class="row marginal">
-                        <div class="col-md-12">
-                            <label for="diag_received1" class="control-label">Диагноз направившего учереждения (сопутствующий)</label>
-                            <wm-diagnosis model="event.received.diag_received1.value" action="event.received" can-add-new="true"
-                                          can-delete="true" can-edit="true" list-mode="true"></wm-diagnosis>
-                        </div>
-                    </div>
-                    <div class="row marginal">
-                        <div class="col-md-12">
-                            <label for="diag_received2" class="control-label">Диагноз направившего учереждения (осложнения)</label>
-                            <wm-diagnosis model="event.received.diag_received2.value" action="event.received" can-add-new="true"
-                                          can-delete="true" can-edit="true" list-mode="true"></wm-diagnosis>
-                        </div>
-                    </div>
+                <div class="panel-body" ng-if="event.received.action_type.diagnosis_types">
+                    <h4>Диагноз</h4>
+                    <wm-diagnosis-new ng-model="event.received.diagnoses" can-edit="true"
+                                      diag-types="event.received.action_type.diagnosis_types" can-add-new="true"></wm-diagnosis-new>
                 </div>
             </div>
             <div class="panel panel-default">
