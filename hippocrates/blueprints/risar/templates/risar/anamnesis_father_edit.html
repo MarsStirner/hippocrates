@@ -20,105 +20,112 @@
                 </thead>
                 <tbody>
                 <tr>
-                    <th>ФИО</th>
+                    <th class="text-right">ФИО</th>
                     <td><input ng-model="anamnesis_father.name" class="form-control" autofocus></td>
                 </tr>
 
                 <tr>
-                    <th>Образование</th>
+                    <th class="text-right">Образование</th>
                     <td><rb-select ng-model="anamnesis_father.education" ref-book="rbRisarEducation"></rb-select></td>
                 </tr>
 
                 <tr>
-                    <th>Общественно-профессиональная группа</th>
+                    <th class="text-right">Общественно-профессиональная группа</th>
                     <td><rb-select ng-model="anamnesis_father.work_group" ref-book="rbRisarWork_Group"></rb-select></td>
                 </tr>
 
                 <tr>
-                    <th>Профессиональные вредности</th>
+                    <th class="text-right">Профессиональные вредности</th>
                     <td><rb-select ng-model="anamnesis_father.professional_properties" ref-book="rbRisarProfessional_Properties"></rb-select></td>
                 </tr>
 
                 <tr>
-                    <th>Группа крови и резус-фактор</th>
+                    <th class="text-right">Группа крови и резус-фактор</th>
                     <td><div class="row"><div class="col-md-4"><rb-select ng-model="anamnesis_father.blood_type" ref-book="rbBloodType"></rb-select></div></div></td>
                 </tr>
 
                 <tr>
-                    <th>Телефон</th>
+                    <th class="text-right">Телефон</th>
                     <td><input ng-model="anamnesis_father.phone" class="form-control"></td>
                 </tr>
 
                 <tr>
-                    <th>ВИЧ</th>
+                    <th class="text-right">ВИЧ</th>
                     <td><input ng-model="anamnesis_father.HIV" class="checkbox" type="checkbox"></td>
                 </tr>
 
                 <tr>
-                    <th>Флюорография</th>
+                    <th class="text-right">Флюорография</th>
                     <td><input ng-model="anamnesis_father.fluorography" class="form-control"></td>
                 </tr>
 
                 <tr>
-                    <th>Бесплодие</th>
+                    <th class="text-right">Бесплодие</th>
                     <td><input ng-model="anamnesis_father.infertility" class="checkbox" type="checkbox"></td>
                 </tr>
 
                 <tr>
-                    <td>Вид</td>
+                    <td class="text-right">Вид</td>
                     <td><input ng-model="anamnesis_father.infertility_type" class="form-control" ng-disabled="!anamnesis_father.infertility"></td>
                 </tr>
 
                 <tr>
-                    <td>Длительность, мес</td>
+                    <td class="text-right">Длительность, мес</td>
                     <td><input ng-model="anamnesis_father.infertility_period" class="form-control" type="number" valid-number ng-disabled="!anamnesis_father.infertility"></td>
                 </tr>
 
                 <tr>
-                    <td>Лечение</td>
+                    <td class="text-right">Лечение</td>
                     <td><input ng-model="anamnesis_father.infertility_treatment" class="form-control" ng-disabled="!anamnesis_father.infertility"></td>
                 </tr>
 
                 <tr>
-                    <td>Причина</td>
+                    <td class="text-right">Причина</td>
                     <td><input ng-model="anamnesis_father.infertility_cause" class="form-control" ng-disabled="!anamnesis_father.infertility"></td>
                 </tr>
                 <tr>
-                    <th>Перенесенные заболевания</th>
+                    <th class="text-right">Перенесенные заболевания</th>
                     <td><wm-mkb-multiple ng-model="anamnesis_father.finished_diseases"></wm-mkb-multiple></td>
                 </tr>
                 <tr>
-                    <th>Наследственность</th>
+                    <th class="text-right">Перенесенные заболевания (ввод вручную) <span>&nbsp;</span></th>
+                    <td><wysiwyg ng-model="anamnesis_father.finished_diseases_text" /></td>
+                </tr>
+                <tr>
+                    <th class="text-right">Наследственность</th>
                     <td><input ng-model="anamnesis_father.hereditary" class="form-control"></td>
                 </tr>
 
                 <tr>
-                    <th>Текущие заболевания</th>
+                    <th class="text-right">Текущие заболевания</th>
                     <td><wm-mkb-multiple ng-model="anamnesis_father.current_diseases"></wm-mkb-multiple></td>
                 </tr>
-
                 <tr>
-                    <th>Вредные привычки</th>
+                    <th class="text-right">Текущие заболевания (ввод вручную)<span>&nbsp;</span></th>
+                    <td><wysiwyg ng-model="anamnesis_father.current_diseases_text" /></td>
+                </tr>
+                <tr>
+                    <th class="text-right">Вредные привычки</th>
                     <td>&nbsp;</td>
                 </tr>
 
                 <tr>
-                    <td>Алкоголь</td>
+                    <td class="text-right">Алкоголь</td>
                     <td><input ng-model="anamnesis_father.alcohol" class="checkbox" type="checkbox"></td>
                 </tr>
 
                 <tr>
-                    <td>Курение</td>
+                    <td class="text-right">Курение</td>
                     <td><input ng-model="anamnesis_father.smoking" class="checkbox" type="checkbox"></td>
                 </tr>
 
                 <tr>
-                    <td>Токсические вещества</td>
+                    <td class="text-right">Токсические вещества</td>
                     <td><input ng-model="anamnesis_father.toxic" class="checkbox" type="checkbox"></td>
                 </tr>
 
                 <tr>
-                    <td>Наркотики</td>
+                    <td class="text-right">Наркотики</td>
                     <td><input ng-model="anamnesis_father.drugs" class="checkbox" type="checkbox"></td>
                 </tr>
                 </tbody>

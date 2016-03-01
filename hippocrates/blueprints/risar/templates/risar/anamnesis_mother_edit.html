@@ -110,12 +110,20 @@
                     <td><wm-mkb-multiple ng-model="anamnesis_mother.finished_diseases"></wm-mkb-multiple></td>
                 </tr>
                 <tr>
+                    <th class="text-right">Перенесенные заболевания (ввод вручную) <span>&nbsp;</span></th>
+                    <td><wysiwyg ng-model="anamnesis_mother.finished_diseases_text" /></td>
+                </tr>
+                <tr>
                     <th class="text-right">Наследственность <span>&nbsp;</span></th>
                     <td><input ng-model="anamnesis_mother.hereditary" class="form-control"></td>
                 </tr>
                 <tr>
                     <th class="text-right">Текущие заболевания <span>&nbsp;</span></th>
                     <td><wm-mkb-multiple ng-model="anamnesis_mother.current_diseases"></wm-mkb-multiple></td>
+                </tr>
+                <tr>
+                    <th class="text-right">Текущие заболевания (ввод вручную)<span>&nbsp;</span></th>
+                    <td><wysiwyg ng-model="anamnesis_mother.current_diseases_text" /></td>
                 </tr>
                 <tr>
                     <th class="text-right">Преэклампсия была у матери или сестры <span>&nbsp;</span></th>
