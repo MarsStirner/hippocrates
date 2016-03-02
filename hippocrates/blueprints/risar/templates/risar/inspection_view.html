@@ -70,7 +70,7 @@
                 <tr>
                     <td>осложнения</td>
                     <td ng-repeat="checkup in checkups">
-                        <p ng-repeat="diag in checkup.diagnoses | collapse_diagnoses:'complications'">
+                        <p ng-repeat="diag in checkup.diagnoses | collapse_diagnoses:'complication'">
                             <span class="bottom_dotted" tooltip="[[ diag.diagnostic.mkb.name ]]">
                                 [[ diag.diagnostic.mkb.code ]]
                             </span>
