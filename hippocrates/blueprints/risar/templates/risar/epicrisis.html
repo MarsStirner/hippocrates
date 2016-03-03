@@ -31,7 +31,7 @@
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6  text-right">Основной диагноз:</div>
                                     <div class="col-sm-6 col-md-6">
-                                        <div ng-repeat="diag in checkup.diagnoses | collapse_diagnoses:'main'">
+                                        <div ng-repeat="diag in epicrisis.diagnoses | collapse_diagnoses:'main'">
                                             [[diag.diagnostic.mkb.code]] - [[diag.diagnostic.mkb.name]]
                                         </div>
                                     </div>
@@ -39,7 +39,7 @@
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6  text-right">Сопутствующие диагнозы:</div>
                                     <div class="col-sm-6 col-md-6">
-                                        <div ng-repeat="diag in checkup.diagnoses | collapse_diagnoses:'associated'">
+                                        <div ng-repeat="diag in epicrisis.diagnoses | collapse_diagnoses:'associated'">
                                             [[diag.diagnostic.mkb.code]] - [[diag.diagnostic.mkb.name]]
                                         </div>
                                     </div>
@@ -47,7 +47,7 @@
                                 <div class="row">
                                     <div class="col-sm-6 col-md-6  text-right">Диагноз осложнения:</div>
                                     <div class="col-sm-6 col-md-6">
-                                        <div ng-repeat="diag in checkup.diagnoses | collapse_diagnoses:'complication'">
+                                        <div ng-repeat="diag in epicrisis.diagnoses | collapse_diagnoses:'complication'">
                                             [[diag.diagnostic.mkb.code]] - [[diag.diagnostic.mkb.name]]
                                         </div>
                                     </div>
