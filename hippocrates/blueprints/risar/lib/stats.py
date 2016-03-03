@@ -35,22 +35,101 @@ class StatsController(BaseModelController):
             [str(week_num), 0]
             for week_num in (range(1, 41) + ['40+'])
         ]
-        total = 0
         sel = self.get_selecter()
         events_data = sel.get_events_preg_weeks(person_id, curation_level)
         for event_id, preg_week in events_data:
-            if preg_week <= 40:
+            if preg_week is None:
+                pass
+            elif preg_week <= 40:
                 distr_data[preg_week - 1][1] += 1
             else:
                 distr_data[-1][1] += 1
-            total += 1
         return {
             'preg_week_distribution': distr_data,
-            'total_cards': total
+            'total_cards': len(events_data)
         }
+
+    def get_risk_groups_distribution(self, person_id, curation_level):
+        return dict(self.get_selecter().get_risk_group_counts(person_id, curation_level))
 
 
 class StatsSelecter(BaseSelecter):
+
+    def query_main(self, person_id, curation_level):
+        Person = self.model_provider.get('Person')
+        PersonInEvent = aliased(Person, name='PersonInEvent')
+        PersonCurationAssoc = self.model_provider.get('PersonCurationAssoc')
+        rbOrgCurationLevel = self.model_provider.get('rbOrgCurationLevel')
+        OrganisationCurationAssoc = self.model_provider.get('OrganisationCurationAssoc')
+        Organisation = self.model_provider.get('Organisation')
+        Event = self.model_provider.get('Event')
+        EventType = self.model_provider.get('EventType')
+        rbRequestType = self.model_provider.get('rbRequestType')
+        Action = self.model_provider.get('Action')
+        ActionType = self.model_provider.get('ActionType')
+
+        query = self.model_provider.get_query('Event')
+        query = query.join(
+            EventType, rbRequestType, Action, ActionType
+        ).filter(
+            Event.deleted == 0, rbRequestType.code == request_type_pregnancy, Event.execDate.is_(None),
+            Action.deleted == 0, ActionType.flatCode == 'cardAttributes'
+        )
+        if curation_level:
+            # карты куратора
+            return query.join(
+                PersonInEvent, Event.execPerson_id == PersonInEvent.id
+            ).join(
+                Organisation, PersonInEvent.org_id == Organisation.id
+            ).join(
+                OrganisationCurationAssoc, OrganisationCurationAssoc.org_id == Organisation.id
+            ).join(
+                PersonCurationAssoc, OrganisationCurationAssoc.personCuration_id == PersonCurationAssoc.id
+            ).join(
+                rbOrgCurationLevel, PersonCurationAssoc.orgCurationLevel_id == rbOrgCurationLevel.id
+            ).filter(
+                PersonCurationAssoc.person_id == person_id,
+                rbOrgCurationLevel.code == curation_level
+            )
+        else:
+            # карты врача
+            query = query.filter(Event.execPerson_id == person_id)
+        return query
+
+    def get_risk_group_counts(self, person_id, curation_level=None):
+        from ..models.risar import RisarRiskGroup
+
+        query = self.query_main(person_id, curation_level)
+        query = query.join(RisarRiskGroup).filter(
+            RisarRiskGroup.deleted == 0,
+        ).group_by(
+            RisarRiskGroup.riskGroup_code,
+        ).with_entities(
+            RisarRiskGroup.riskGroup_code,
+            func.count(func.distinct(RisarRiskGroup.event_id)),
+        )
+        self.query = query
+        return self.get_all()
+
+    def query_pregnancy_start_date(self):
+        Event = self.model_provider.get('Event')
+        EventType = self.model_provider.get('EventType')
+        rbRequestType = self.model_provider.get('rbRequestType')
+        Action = self.model_provider.get('Action')
+        ActionType = self.model_provider.get('ActionType')
+        ActionProperty = self.model_provider.get('ActionProperty')
+        ActionPropertyType = self.model_provider.get('ActionPropertyType')
+        ActionProperty_Date = self.model_provider.get('ActionProperty_Date')
+
+        return self.model_provider.get_query('Event').join(
+                EventType, rbRequestType, Action, ActionType, ActionProperty, ActionPropertyType, ActionProperty_Date
+            ).filter(
+                Event.deleted == 0, rbRequestType.code == request_type_pregnancy,
+                Action.deleted == 0, ActionProperty.deleted == 0,
+                ActionType.flatCode == 'cardAttributes', ActionPropertyType.code == 'pregnancy_start_date'
+            ).with_entities(
+                Event.id.label('event_id'), ActionProperty_Date.value.label('psd')
+            )
 
     def get_current_cards_overview(self, person_id, curation_level=None):
         Event = self.model_provider.get('Event')
@@ -60,27 +139,11 @@ class StatsSelecter(BaseSelecter):
         ActionType = self.model_provider.get('ActionType')
         ActionProperty = self.model_provider.get('ActionProperty')
         ActionPropertyType = self.model_provider.get('ActionPropertyType')
-        ActionProperty_Date = self.model_provider.get('ActionProperty_Date')
         ActionProperty_Integer = self.model_provider.get('ActionProperty_Integer')
-        Person = self.model_provider.get('Person')
-        PersonInEvent = aliased(Person, name='PersonInEvent')
-        PersonCurationAssoc = self.model_provider.get('PersonCurationAssoc')
-        rbOrgCurationLevel = self.model_provider.get('rbOrgCurationLevel')
-        OrganisationCurationAssoc = self.model_provider.get('OrganisationCurationAssoc')
-        Organisation = self.model_provider.get('Organisation')
 
         # subqueries
         # 1) event pregnancy start date
-        q_event_psd = self.model_provider.get_query('Event')
-        q_event_psd = q_event_psd.join(
-            EventType, rbRequestType, Action, ActionType, ActionProperty, ActionPropertyType, ActionProperty_Date
-        ).filter(
-            Event.deleted == 0, rbRequestType.code == request_type_pregnancy,
-            Action.deleted == 0, ActionProperty.deleted == 0,
-            ActionType.flatCode == 'cardAttributes', ActionPropertyType.code == 'pregnancy_start_date'
-        ).with_entities(
-            Event.id.label('event_id'), ActionProperty_Date.value.label('psd')
-        ).subquery('EventPregnancyStartDate')
+        q_event_psd = self.query_pregnancy_start_date().subquery('EventPregnancyStartDate')
 
         # 2) event latest inspection
         q_action_begdates = self.model_provider.get_query('Action')
@@ -125,32 +188,7 @@ class StatsSelecter(BaseSelecter):
         ).subquery('EventPerinatalRiskRate')
 
         # main query
-        query = self.model_provider.get_query('Event')
-        query = query.join(
-            EventType, rbRequestType, Action, ActionType
-        ).filter(
-            Event.deleted == 0, rbRequestType.code == request_type_pregnancy, Event.execDate.is_(None),
-            Action.deleted == 0, ActionType.flatCode == 'cardAttributes'
-        )
-        if curation_level:
-            # карты куратора
-            query = query.join(
-                PersonInEvent, Event.execPerson_id == PersonInEvent.id
-            ).join(
-                Organisation, PersonInEvent.org_id == Organisation.id
-            ).join(
-                OrganisationCurationAssoc, OrganisationCurationAssoc.org_id == Organisation.id
-            ).join(
-                PersonCurationAssoc, OrganisationCurationAssoc.personCuration_id == PersonCurationAssoc.id
-            ).join(
-                rbOrgCurationLevel, PersonCurationAssoc.orgCurationLevel_id == rbOrgCurationLevel.id
-            ).filter(
-                PersonCurationAssoc.person_id == person_id,
-                rbOrgCurationLevel.code == curation_level
-            )
-        else:
-            # карты врача
-            query = query.filter(Event.execPerson_id == person_id)
+        query = self.query_main(person_id, curation_level)
 
         query = query.outerjoin(
             q_event_psd, q_event_psd.c.event_id == Event.id
@@ -160,11 +198,7 @@ class StatsSelecter(BaseSelecter):
             q_event_prr, q_event_prr.c.event_id == Event.id
         )
 
-        query = query.group_by(
-            Event.execPerson_id
-        ).with_entities(
-            Event.execPerson_id
-        ).add_columns(
+        query = query.with_entities(
             func.count(Event.id.distinct()).label('count_all'),
             func.sum(func.IF(
                 and_(q_event_psd.c.psd.isnot(None),
@@ -199,24 +233,9 @@ class StatsSelecter(BaseSelecter):
         ActionProperty = self.model_provider.get('ActionProperty')
         ActionPropertyType = self.model_provider.get('ActionPropertyType')
         ActionProperty_Date = self.model_provider.get('ActionProperty_Date')
-        Person = self.model_provider.get('Person')
-        PersonInEvent = aliased(Person, name='PersonInEvent')
-        PersonCurationAssoc = self.model_provider.get('PersonCurationAssoc')
-        rbOrgCurationLevel = self.model_provider.get('rbOrgCurationLevel')
-        OrganisationCurationAssoc = self.model_provider.get('OrganisationCurationAssoc')
-        Organisation = self.model_provider.get('Organisation')
 
         # event pregnancy start date
-        q_event_psd = self.model_provider.get_query('Event')
-        q_event_psd = q_event_psd.join(
-            EventType, rbRequestType, Action, ActionType, ActionProperty, ActionPropertyType, ActionProperty_Date
-        ).filter(
-            Event.deleted == 0, rbRequestType.code == request_type_pregnancy,
-            Action.deleted == 0, ActionProperty.deleted == 0,
-            ActionType.flatCode == 'cardAttributes', ActionPropertyType.code == 'pregnancy_start_date'
-        ).with_entities(
-            Event.id.label('event_id'), ActionProperty_Date.value.label('psd')
-        ).subquery('EventPregnancyStartDate')
+        q_event_psd = self.query_pregnancy_start_date().subquery('EventPregnancyStartDate')
 
         # event predicted delivery date
         q_event_pdd = self.model_provider.get_query('Event')
@@ -231,34 +250,9 @@ class StatsSelecter(BaseSelecter):
         ).subquery('EventPredictedDeliveryDate')
 
         # main query
-        query = self.model_provider.get_query('Event')
-        query = query.join(
-            EventType, rbRequestType, Action, ActionType
-        ).filter(
-            Event.deleted == 0, rbRequestType.code == request_type_pregnancy, Event.execDate.is_(None),
-            Action.deleted == 0, ActionType.flatCode == 'cardAttributes'
-        )
-        if curation_level:
-            # карты куратора
-            query = query.join(
-                PersonInEvent, Event.execPerson_id == PersonInEvent.id
-            ).join(
-                Organisation, PersonInEvent.org_id == Organisation.id
-            ).join(
-                OrganisationCurationAssoc, OrganisationCurationAssoc.org_id == Organisation.id
-            ).join(
-                PersonCurationAssoc, OrganisationCurationAssoc.personCuration_id == PersonCurationAssoc.id
-            ).join(
-                rbOrgCurationLevel, PersonCurationAssoc.orgCurationLevel_id == rbOrgCurationLevel.id
-            ).filter(
-                PersonCurationAssoc.person_id == person_id,
-                rbOrgCurationLevel.code == curation_level
-            )
-        else:
-            # карты врача
-            query = query.filter(Event.execPerson_id == person_id)
+        query = self.query_main(person_id, curation_level)
 
-        query = query.join(
+        query = query.outerjoin(
             q_event_psd, q_event_psd.c.event_id == Event.id
         ).outerjoin(
             q_event_pdd, q_event_pdd.c.event_id == Event.id

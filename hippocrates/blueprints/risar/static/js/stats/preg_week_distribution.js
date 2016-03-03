@@ -1,9 +1,13 @@
 'use strict';
 
-var PregnancyWeekDistributionCtrl = function ($scope, RisarApi, CurrentUser) {
-    var person_id = CurrentUser.id;
+var PregnancyWeekDistributionCtrl = function ($scope, RisarApi, CurrentUser, RefBookService) {
+    var person_id = CurrentUser.id,
+        div3;
+    $scope.rbRisarRiskGroup = RefBookService.get('rbRisarRiskGroup');
     $scope.curation_level_code = $scope.curation_level.code; // from parent ctrl
     $scope.stats_data = {};
+    $scope.risks_data = {};
+    $scope.risks_layouting = [];
     $scope.diagram_data = [{
         key: "Пациентки по сроку беременности",
         values: $scope.stats_data
@@ -18,6 +22,22 @@ var PregnancyWeekDistributionCtrl = function ($scope, RisarApi, CurrentUser) {
                     values: $scope.stats_data.preg_week_distribution
                 }];
             });
+        RisarApi.stats.get_risk_group_distribution(person_id, $scope.curation_level_code)
+            .then(function (data) {
+                $scope.risks_data = data;
+                var l = $scope.risks_layouting = [[], [], []];
+                _.chain(data)
+                    .pairs()
+                    .tap(function (list) {
+                        div3 = Math.ceil(list.length / 3) || 1;
+                    })
+                    .sortBy(function (pair) {
+                        return pair[0]
+                    })
+                    .each(function (item, index, context) {
+                        l[Math.floor(index / div3)].push(item[0]);
+                    })
+            })
     };
     $scope.toolTipContent_pregnancy_week = function(){
         return function(key, x, y, e, graph) {
@@ -49,5 +69,5 @@ var PregnancyWeekDistributionCtrl = function ($scope, RisarApi, CurrentUser) {
 };
 
 
-WebMis20.controller('PregnancyWeekDistributionCtrl', ['$scope', 'RisarApi', 'CurrentUser',
+WebMis20.controller('PregnancyWeekDistributionCtrl', ['$scope', 'RisarApi', 'CurrentUser', 'RefBookService',
     PregnancyWeekDistributionCtrl]);
