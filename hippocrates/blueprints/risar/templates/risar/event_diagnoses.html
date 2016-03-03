@@ -16,10 +16,9 @@
                     <thead>
                         <tr>
                             <th class="col-md-1">МКБ</th>
-                            <th class="col-md-4">Название</th>
-                            <th class="col-md-2">Начало</th>
-                            <th class="col-md-1">Окончание</th>
-                            <th class="col-md-4">Контекст</th>
+                            <th class="col-md-5">Название</th>
+                            <th class="col-md-3">Начало</th>
+                            <th class="col-md-3">Окончание</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -28,7 +27,6 @@
                             <td>[[ diag.diagnostic.mkb.name ]]</td>
                             <td>[[ diag.set_date | asDate ]]<br/>[[ diag.person.name ]]</td>
                             <td>[[ diag.end_date | asDate ]]<br/>[[ diag.end_date ? diag.modify_person.name : "" ]]</td>
-                            <td>[[ diag.diagnostic.action.action_type.name ]]</td>
                         </tr>
                     </tbody>
                 </table>

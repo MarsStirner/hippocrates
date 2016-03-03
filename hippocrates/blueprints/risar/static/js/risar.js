@@ -393,6 +393,9 @@ WebMis20
                     curation_level_code: curation_level_code
                 };
             return wrapper('GET', url, args);
+        },
+        get_risk_group_distribution: function (person_id, curation_level_code) {
+            return wrapper('GET', Config.url.api_stats_risk_group_distribution + person_id, {curation_level_code: curation_level_code});
         }
     };
     this.card_fill_rate = {

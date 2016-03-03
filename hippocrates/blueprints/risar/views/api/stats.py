@@ -247,6 +247,18 @@ def api_1_stats_pregnancy_week_diagram(person_id=None):
     return data
 
 
+@module.route('/api/0/stats/risk_group_distribution/')
+@module.route('/api/0/stats/risk_group_distribution/<int:person_id>/')
+@api_method
+def api_0_stats_risk_group_distribution(person_id=None):
+    person_id = person_id or safe_current_user_id()
+    curation_level = request.args.get('curation_level_code')
+
+    stats_ctrl = StatsController()
+    data = stats_ctrl.get_risk_groups_distribution(person_id, curation_level)
+    return data
+
+
 @module.route('/api/0/stats/perinatal_risk_rate.json')
 @api_method
 def api_0_stats_perinatal_risk_rate():
