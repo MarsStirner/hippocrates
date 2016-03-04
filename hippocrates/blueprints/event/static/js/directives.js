@@ -204,8 +204,9 @@ angular.module('WebMis20')
     };
 }])
 .directive('wmActionList', [
-    '$window', '$http', 'LabDynamicsModal', 'ActionTypeTreeModal', 'MessageBox', 'WMEventServices', 'WMWindowSync', 'CurrentUser', 'WMConfig',
-function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WMEventServices, WMWindowSync, CurrentUser, WMConfig) {
+    '$window', '$http', 'LabDynamicsModal', 'ActionTypeTreeModal', 'MessageBox', 'WMEventServices', 'WMWindowSync', 'CurrentUser',
+        'WMConfig', 'PrintingService',
+function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WMEventServices, WMWindowSync, CurrentUser, WMConfig, PrintingService) {
     return {
         restrict: 'E',
         scope: {
@@ -239,6 +240,18 @@ function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WME
                 );
                 $http.get(url).success(function (data) {
                     scope.actions = data.result.items;
+                    scope.actions.forEach(function(action){
+                        if(action.type.context){
+                            action.ps = new PrintingService("action");
+                            action.ps.set_context(action.type.context);
+                            action.ps_resolve = function(){
+                                return {
+                                    action_id: action.id
+                                }
+                            }
+                        }
+
+                    })
                     scope.pager.pages = data.result.pages;
                 });
             };
@@ -344,11 +357,12 @@ function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WME
         <td ng-click="open_action(action.id)">[[ action.endDate | asDateTime ]]</td>\
         <td ng-click="open_action(action.id)">[[ action.person_text ]]</td>\
         <td class="nowrap">\
+            <ui-print-button ps="action.ps" resolve="action.ps_resolve()" ng-if="action.type.context" ></ui-print-button>\
+            <button type="button" class="btn btn-sm btn-info" ng-if="actionTypeGroup === \'lab\'" title="Динамика"\
+                    ng-click="open_lab_res_dynamics(action)"><span class="glyphicon glyphicon-stats"></span>\
+            </button>\
             <button type="button" class="btn btn-sm btn-danger" title="Удалить" ng-show="can_delete_action(action)"\
                     ng-click="delete_action(action)"><span class="glyphicon glyphicon-trash"></span>\
-            </button>\
-            <button type="button" class="btn btn-sm btn-info lmargin20" ng-if="actionTypeGroup === \'lab\'" title="Динамика"\
-                    ng-click="open_lab_res_dynamics(action)"><span class="glyphicon glyphicon-stats"></span>\
             </button>\
         </td>\
     </tr>\
