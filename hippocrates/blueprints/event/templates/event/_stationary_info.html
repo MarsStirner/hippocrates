@@ -6,141 +6,143 @@
         </div>
         <div class="box-body">
             <div class="row">
-                <div class="col-md-6">
-                    <table class="table table-condensed">
-                        <thead>
-                        <tr>
-                            <th class="col-md-4"></th>
-                            <th class="col-md-7"></th>
-                            <th class="col-md-1"></th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <th>Группа крови и резус</th>
-                                <td>
-                                    <span ng-if="event.blood_history.length">
-                                        [[event.blood_history[0].blood_type.name]],
-                                        [[event.blood_history[0].blood_phenotype ? 'фенотип' : '' ]] [[event.blood_history[0].blood_phenotype.name]]
-                                        [[event.blood_history[0].blood_phenotype ? ',' : '' ]]
-                                        [[event.blood_history[0].blood_kell.name]]
-                                    </span>
-                                </td>
-                                <td>
-                                    <button type="button" class="btn btn-sm btn-default" title="Изменить"
-                                            ng-click="edit_blood()"><span class="glyphicon glyphicon-pencil"></span>
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>Медикаментозная непереносимость</th>
-                                <td ng-bind="event.intolerances | pluck:'name' | join:', '"></td>
-                                <td>
-                                    <button type="button" class="btn btn-sm btn-default" title="Изменить"
-                                            ng-click="edit_intolerances('intolerances')">
-                                        <span class="glyphicon glyphicon-pencil"></span>
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>Аллергия</th>
-                                <td ng-bind="event.allergies | pluck:'name' | join:', '"></td>
-                                <td>
-                                    <button type="button" class="btn btn-sm btn-default" title="Изменить"
-                                            ng-click="edit_intolerances('allergies')"><span class="glyphicon glyphicon-pencil"></span>
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>Рост</th>
-                                <td>[[event.received.height.value]]<span ng-if="event.received.height.value"> см</span></td>
-                                <td></td>
-                            </tr>
-                            <tr>
-                                <th>Вес</th>
-                                <td>[[event.received.weight.value]]<span ng-if="event.received.height.value"> кг</span></td>
-                                <td></td>
-                            </tr>
-                            <tr>
-                                <th>Площадь поверхности тела</th>
-                                <td>
-                                    <span ng-if="event.received.height.value&&event.received.weight.value">
-                                        [[ event.info.body_area ]]<span ng-if="event.info.body_area"> м<sup>2</sup></span>
-                                    </span>
-                                </td>
-                                <td></td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div class="col-md-6 col-sm-6">
+                    <div class="row vmargin10 rmargin10">
+                        <div class="col-md-4 text-bold">
+                            Группа крови и резус
+                        </div>
+                        <div class="col-md-7">
+                            <span ng-if="event.blood_history.length">
+                                [[event.blood_history[0].blood_type.name]],
+                                [[event.blood_history[0].blood_phenotype ? 'фенотип' : '' ]] [[event.blood_history[0].blood_phenotype.name]]
+                                [[event.blood_history[0].blood_phenotype ? ',' : '' ]]
+                                [[event.blood_history[0].blood_kell.name]]
+                            </span>
+                        </div>
+                        <div class="col-md-1">
+                            <button type="button" class="btn btn-sm btn-default" title="Изменить"
+                                    ng-click="edit_blood()"><span class="glyphicon glyphicon-pencil"></span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="row vmargin10 rmargin10">
+                        <div class="col-md-4 text-bold">
+                            Медикаментозная непереносимость
+                        </div>
+                        <div class="col-md-7" ng-bind="event.intolerances | pluck:'name' | join:', '">
+                        </div>
+                        <div class="col-md-1">
+                            <button type="button" class="btn btn-sm btn-default" title="Изменить"
+                                    ng-click="edit_intolerances('intolerances')">
+                                <span class="glyphicon glyphicon-pencil"></span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="row vmargin10 rmargin10">
+                        <div class="col-md-4 text-bold">
+                            Аллергия
+                        </div>
+                        <div class="col-md-7" ng-bind="event.allergies | pluck:'name' | join:', '">
+                        </div>
+                        <div class="col-md-1">
+                            <button type="button" class="btn btn-sm btn-default" title="Изменить"
+                                    ng-click="edit_intolerances('allergies')"><span class="glyphicon glyphicon-pencil"></span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="row vmargin10 rmargin10">
+                        <div class="col-md-4 text-bold">
+                            Рост
+                        </div>
+                        <div class="col-md-7">
+                            [[event.received.height.value]]<span ng-if="event.received.height.value"> см</span>
+                        </div>
+                        <div class="col-md-1"></div>
+                    </div>
+                    <div class="row vmargin10 rmargin10">
+                        <div class="col-md-4 text-bold">
+                            Вес
+                        </div>
+                        <div class="col-md-7">
+                            [[event.received.weight.value]]<span ng-if="event.received.height.value"> кг</span>
+                        </div>
+                        <div class="col-md-1"></div>
+                    </div>
+                    <div class="row vmargin10 rmargin10">
+                        <div class="col-md-4 text-bold">
+                            Площадь поверхности тела
+                        </div>
+                        <div class="col-md-7">
+                            <span ng-if="event.received.height.value&&event.received.weight.value">
+                                [[ event.info.body_area ]]<span ng-if="event.info.body_area"> м<sup>2</sup></span>
+                            </span>
+                        </div>
+                        <div class="col-md-1"></div>
+                    </div>
                 </div>
-                <div class="col-md-6">
-                    <table class="table table-condensed">
-                        <thead>
-                        <tr>
-                            <th class="col-md-4"></th>
-                            <th class="col-md-7"></th>
-                            <th class="col-md-1"></th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <th>Тип обращения, источник финансирования</th>
-                                <td>
-                                    [[event.info.event_type.request_type.name]]<span ng-if="event.info.event_type.finance">, </span>
-                                    [[event.info.event_type.finance.name]]
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>Первичность</th>
-                                <td>
-                                    <rb-select ng-model="event.info.is_primary" ref-book="EventPrimary"></rb-select>
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <th>Дата поступления</th>
-                                <td ng-bind-html="format_admission_date(event.admission_date)"></td>
-                            </tr>
-                            <tr>
-                                <th>Дата выписки и/или продолжительность лечения (дней)</th>
-                                <td>
-                                    <span ng-bind-html="format_discharge_date(event.discharge_date)"></span>
-                                    <span ng-if="event.discharge_date">, </span>[[format_hosp_length(event.hosp_length)]]
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>Отделение</th>
-                                <td ng-bind-html="format_os(event.patient_current_os)"></td>
-                            </tr>
-                            <tr>
-                                <th>Койка</th>
-                                <td ng-bind-html="format_hosp_bed(event.hospital_bed)"></td>
-                            </tr>
-                            <tr>
-                                <th>Лечащий врач</th>
-                                <td>
-                                    <div ng-class="{'has-error': event_maininfo_form.exec_person.$invalid && editing.submit_attempt}">
-                                        <wm-person-select id="exec_person" name="exec_person"
-                                            ng-model="event.info.exec_person" ng-required="!formstate.is_diagnostic()"
-                                            placeholder="Лечащий врач">
-                                        </wm-person-select>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>Исход госпитализации</th>
-                                <td>
-                                    [[event.info.ache_result.name]]
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>Результат госпитализации</th>
-                                <td>
-                                    [[event.info.result.name]]
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div class="col-md-6 col-sm-6">
+                    <div class="row vmargin10">
+                        <div class="col-md-4 text-bold">
+                            Тип обращения, источник финансирования
+                        </div>
+                        <div class="col-md-8">
+                            [[event.info.event_type.request_type.name]]<span ng-if="event.info.event_type.finance">, </span>
+                            [[event.info.event_type.finance.name]]
+                        </div>
+                    </div>
+                    <div class="row vmargin10">
+                        <div class="col-md-4 text-bold">
+                            Первичность
+                        </div>
+                        <div class="col-md-8">
+                            <rb-select ng-model="event.info.is_primary" ref-book="EventPrimary"></rb-select>
+                        </div>
+                    </div>
+                    <div class="row vmargin10">
+                        <div class="col-md-4 text-bold">
+                            Дата поступления
+                        </div>
+                        <div class="col-md-8" ng-bind-html="format_admission_date(event.admission_date)">
+                        </div>
+                    </div>
+                    <div class="row vmargin10">
+                        <div class="col-md-4 text-bold">
+                            Дата выписки
+                        </div>
+                        <div class="col-md-8">
+                            <span ng-bind-html="format_discharge_date(event.discharge_date)"></span>
+                            <span ng-if="event.discharge_date">, </span>[[format_hosp_length(event.hosp_length)]]
+                        </div>
+                    </div>
+                    <div class="row vmargin10">
+                        <div class="col-md-4 text-bold">
+                            Лечащий врач
+                        </div>
+                        <div class="col-md-8">
+                            <div ng-class="{'has-error': event_maininfo_form.exec_person.$invalid && editing.submit_attempt}">
+                                <wm-person-select id="exec_person" name="exec_person"
+                                    ng-model="event.info.exec_person" ng-required="!formstate.is_diagnostic()"
+                                    placeholder="Лечащий врач">
+                                </wm-person-select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row vmargin10">
+                        <div class="col-md-4 text-bold">
+                            Исход госпитализации
+                        </div>
+                        <div class="col-md-8">
+                            [[event.info.ache_result.name]]
+                        </div>
+                    </div>
+                    <div class="row vmargin10">
+                        <div class="col-md-4 text-bold">
+                            Результат госпитализации
+                        </div>
+                        <div class="col-md-8">
+                            [[event.info.result.name]]
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
