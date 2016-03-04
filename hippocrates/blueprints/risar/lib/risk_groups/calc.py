@@ -52,6 +52,8 @@ def calc_risk_groups(card):
     :param card:
     :return:
     """
+    if not card.anamnesis.mother.id:
+        raise StopIteration
 
     hemoglobin_action = get_action_list(card.event, 'general_blood_test').order_by(Action.begDate.desc()).first()
     low_hemo = hemoglobin_action['hemoglobin'].value <= 110 if hemoglobin_action is not None else False
