@@ -69,7 +69,7 @@ def calc_risk_groups(card):
 
     p1 = any_thing(
         card.anamnesis.mother['current_diseases'].value,
-        u'О26.2, M95.5, E07.9, E27.9, E28.9, Е30.0, N70.0, N70.1, N70.9, N71.0, N71.1, N71.9, N76.1, N85.8, N96',
+        u'O26.2, M95.5, E07.9, E27.9, E28.9, Е30.0, N70.0, N70.1, N70.9, N71.0, N71.1, N71.9, N76.1, N85.8, N96',
         mkb_from_mkb
     )
     p2_needles = explode_needles(u'O10-O15, O20.0, O30, O33.1, O34.0, O34.1, O34.2, O34.3, O34.8, O35.0-O35.9, O98-O99, Z35.5, Z35.6')
@@ -127,7 +127,7 @@ def calc_risk_groups(card):
         u'D65-D69, D50-D64',
         mkb_from_mkb
     )
-    p2_needles = explode_needles(u'O46.0, O46.8, O46.9, O43.0, O44.0, O44.1, O45.0, O45.8, O45.9, О99.0')
+    p2_needles = explode_needles(u'O46.0, O46.8, O46.9, O43.0, O44.0, O44.1, O45.0, O45.8, O45.9, O99.0')
     p2 = any_thing(
         all_diagnostics,
         p2_needles,
@@ -279,10 +279,10 @@ def calc_risk_groups(card):
 
     p1 = any_thing(
         card.anamnesis.mother['current_diseases'].value,
-        u'О34.2',
+        u'O34.2',
         mkb_from_mkb
     )
-    p2_needles = explode_needles(u'О34.2, О20.0')
+    p2_needles = explode_needles(u'O34.2, O20.0')
     p2 = any_thing(
         all_diagnostics,
         p2_needles,
@@ -363,7 +363,7 @@ def calc_risk_groups(card):
         p2_needles,
         lambda x: x.MKB,
     )
-    p3_needles = explode_needles(u'O85, О86, O87, O91, O92')
+    p3_needles = explode_needles(u'O85, O86, O87, O91, O92')
     p3_a = any(
         any_thing(preg['pregnancy_pathology'].value_raw, p3_needles, mkb_from_mkb)
         for preg in card.prev_pregs
@@ -388,7 +388,7 @@ def calc_risk_groups(card):
         p2_needles,
         lambda x: x.MKB,
     )
-    p3_needles = explode_needles(u'О10-О92, O99.0')
+    p3_needles = explode_needles(u'O10-O92, O99.0')
     p3_a = any(
         any_thing(preg['pregnancy_pathology'].value_raw, p3_needles, mkb_from_mkb)
         for preg in card.prev_pregs
