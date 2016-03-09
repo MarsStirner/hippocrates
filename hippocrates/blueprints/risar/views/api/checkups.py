@@ -1,16 +1,16 @@
 # -*- encoding: utf-8 -*-
 from flask import request
 
+from blueprints.risar.app import module
+from blueprints.risar.lib.card import PregnancyCard
+from blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
+from blueprints.risar.lib.represent import represent_checkup, represent_checkups
+from blueprints.risar.lib.utils import get_action_by_id, close_open_checkups
 from nemesis.lib.apiutils import api_method, ApiException
+from nemesis.lib.diagnosis import create_or_update_diagnoses
 from nemesis.lib.utils import safe_datetime
 from nemesis.models.event import Event
 from nemesis.systemwide import db
-from blueprints.risar.app import module
-from blueprints.risar.lib.card_attrs import reevaluate_card_attrs
-from blueprints.risar.lib.represent import represent_checkup, represent_checkups
-from blueprints.risar.lib.utils import get_action_by_id, close_open_checkups
-from blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
-from blueprints.risar.lib.expert.em_generation import EventMeasureGenerator
 
 
 @module.route('/api/0/checkup/', methods=['POST'])
@@ -18,31 +18,36 @@ from blueprints.risar.lib.expert.em_generation import EventMeasureGenerator
 @api_method
 def api_0_checkup(event_id):
     data = request.get_json()
-    flat_code = data.get('flat_code')
+    checkup_id = data.pop('id', None)
+    flat_code = data.pop('flat_code', None)
+    beg_date = safe_datetime(data.pop('beg_date', None))
+    person = data.pop('person', None)
+    diagnoses = data.pop('diagnoses', None)
+
     if not flat_code:
         raise ApiException(400, 'flat_code required')
-    event = Event.query.get(event_id)
-    checkup_id = data.get('id')
-    action = get_action_by_id(checkup_id, event, flat_code, request.method != 'GET')
-    if request.method == 'GET':
-        if not action:
-            raise ApiException(404, 'Action not found')
-    else:
-        if not checkup_id:
-            close_open_checkups(event_id)
-        action.begDate = safe_datetime(data['beg_date'])
-        for code, value in data.iteritems():
-            if code not in ('id', 'flat_code', 'person', 'beg_date', 'diag', 'diag2', 'diag3') and code in action.propsByCode:
-                action.propsByCode[code].value = value
-            elif code in ('diag', 'diag2', 'diag3') and value:
-                property = action.propsByCode[code]
-                property.value = value
-        db.session.commit()
-        reevaluate_card_attrs(event)
-        db.session.commit()
 
-        # measure_mng = EventMeasureGenerator(action)
-        # measure_mng.generate_measures()
+    event = Event.query.get(event_id)
+    card = PregnancyCard.get_for_event(event)
+    action = get_action_by_id(checkup_id, event, flat_code, True)
+
+    if not checkup_id:
+        close_open_checkups(event_id)
+
+    action.begDate = beg_date
+
+    for code, value in data.iteritems():
+        if code in action.propsByCode:
+            action.propsByCode[code].value = value
+
+    create_or_update_diagnoses(action, diagnoses)
+
+    db.session.commit()
+    card.reevaluate_card_attrs()
+    db.session.commit()
+
+    # measure_mng = EventMeasureGenerator(action)
+    # measure_mng.generate_measures()
     return represent_checkup(action)
 
 

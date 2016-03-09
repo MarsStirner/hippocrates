@@ -5,21 +5,21 @@ import logging
 from flask import request
 from flask.ext.login import current_user
 
+from blueprints.risar.lib.card import PregnancyCard
+from blueprints.risar.lib.utils import get_action, action_apt_values, get_action_type_id, get_action_by_id
+from blueprints.risar.models.risar import RisarRiskGroup
 from nemesis.lib.apiutils import api_method, ApiException
 from nemesis.lib.data import create_action
-from nemesis.models.actions import Action, ActionProperty_Diagnosis
-from nemesis.lib.utils import safe_traverse
+from nemesis.lib.utils import safe_traverse, public_endpoint
+from nemesis.models.actions import Action
 from nemesis.models.client import ClientAllergy, ClientIntoleranceMedicament, BloodHistory
 from nemesis.models.event import Event
 from nemesis.systemwide import db
 from ...app import module
-from blueprints.risar.lib.card_attrs import reevaluate_card_attrs, reevaluate_preeclampsia_risk
 from ...lib.represent import represent_intolerance, represent_mother_action, represent_father_action, \
     represent_pregnancy, represent_anamnesis
-from blueprints.risar.lib.utils import get_action, action_apt_values, get_action_type_id, get_action_by_id
 from ...risar_config import pregnancy_apt_codes, risar_anamnesis_pregnancy, transfusion_apt_codes, \
     risar_anamnesis_transfusion, risar_father_anamnesis, risar_mother_anamnesis, risar_newborn_inspection
-
 
 logger = logging.getLogger('simple')
 
@@ -82,6 +82,7 @@ def api_0_pregnancies_post(action_id=None):
         if action is None:
             raise ApiException(404, 'Action not found')
     event = Event.query.get(action.event_id)
+    card = PregnancyCard.get_for_event(event)
     json = request.get_json()
     newborn_inspections = json.pop('newborn_inspections', [])
     for code in pregnancy_apt_codes:
@@ -115,8 +116,6 @@ def api_0_pregnancies_post(action_id=None):
     ]
 
     db.session.add(action)
-    db.session.commit()
-    reevaluate_preeclampsia_risk(event)
     db.session.commit()
     return represent_pregnancy(action)
 
@@ -285,6 +284,7 @@ def api_0_chart_anamnesis(event_id):
 @api_method
 def api_0_chart_mother(event_id):
     event = Event.query.get(event_id)
+    card = PregnancyCard.get_for_event(event)
     if not event:
         raise ApiException(404, 'Event not found')
     if request.method == 'GET':
@@ -304,7 +304,7 @@ def api_0_chart_mother(event_id):
                     db.session.add(n)
         db.session.add(action)
         db.session.commit()
-        reevaluate_card_attrs(event)
+        card.reevaluate_card_attrs()
         db.session.commit()
     return represent_mother_action(event, action)
 
@@ -313,6 +313,7 @@ def api_0_chart_mother(event_id):
 @api_method
 def api_0_chart_father(event_id):
     event = Event.query.get(event_id)
+    card = PregnancyCard.get_for_event(event)
     if not event:
         raise ApiException(404, 'Event not found')
     if request.method == 'GET':
@@ -326,6 +327,12 @@ def api_0_chart_father(event_id):
                 prop = action.propsByCode[code]
                 prop.value = value
         db.session.commit()
-        reevaluate_card_attrs(event)
+        card.reevaluate_card_attrs()
         db.session.commit()
     return represent_father_action(event, action)
+
+
+@module.route('/api/0/chart/<int:event_id>/risks')
+@api_method
+def api_0_chart_risks(event_id):
+    return RisarRiskGroup.query.filter(RisarRiskGroup.event_id == event_id, RisarRiskGroup.deleted == 0).all()

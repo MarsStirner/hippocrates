@@ -14,6 +14,7 @@ from blueprints.risar.lib.expert.em_appointment_repr import EmAppointmentRepr
 from blueprints.risar.lib.expert.em_result_repr import EmResultRepr
 from blueprints.risar.lib.expert.em_manipulation import EventMeasureController
 from blueprints.risar.lib.utils import get_action_by_id
+from blueprints.risar.risar_config import request_type_pregnancy
 
 
 @module.route('/api/0/event_measure/generate/')
@@ -191,7 +192,7 @@ def api_0_measure_list(event_id):
     event = Event.query.get(event_id)
     if not event:
         raise ApiException(404, u'Обращение не найдено')
-    if event.eventType.requestType.code != 'pregnancy':
+    if event.eventType.requestType.code != request_type_pregnancy:
         raise ApiException(400, u'Обращение не является случаем беременности')
 
     paginate = safe_bool(data.get('paginate', True))

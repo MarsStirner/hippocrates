@@ -5,6 +5,7 @@ import logging
 
 from collections import defaultdict
 
+from nemesis.lib.data import get_client_diagnostics
 from nemesis.lib.utils import safe_date, safe_int, safe_datetime
 from nemesis.systemwide import db
 from nemesis.models.expert_protocol import (ExpertScheme, ExpertSchemeMKBAssoc, EventMeasure, ExpertProtocol,
@@ -13,7 +14,7 @@ from nemesis.models.exists import MKB
 from nemesis.models.enums import MeasureStatus, EventMeasureActuality
 from blueprints.risar.lib.expert.utils import (em_final_status_list, em_garbage_status_list,
     is_em_cancellable, is_em_touched, is_em_in_final_status)
-from blueprints.risar.lib.utils import get_event_diag_mkbs, is_event_late_first_visit
+from blueprints.risar.lib.utils import is_event_late_first_visit
 from blueprints.risar.lib.pregnancy_dates import get_pregnancy_start_date
 from blueprints.risar.risar_config import first_inspection_code
 from blueprints.risar.lib.time_converter import DateTimeUtil
@@ -546,18 +547,28 @@ class MeasureGeneratorRisarContext(object):
         self.pregnancy_week = safe_int(self.source_action.propsByCode['pregnancy_week'].value)
 
     def _load_mkb_lists(self):
-        all_diag_event = get_event_diag_mkbs(self.source_action.event, without_action_id=self.source_action.id)
-        for diag in all_diag_event:
-            self.all_existing_mkb.add(diag.DiagID)
+        diagnostics = get_client_diagnostics(self.source_action.event.client, self.source_action.begDate, self.source_action.endDate, True)
 
-        actual_diag_event = get_event_diag_mkbs(self.source_action.event, without_action_id=self.source_action.id,
-                                                opened=True)
-        for diag in actual_diag_event:
-            self.actual_existing_mkb.add(diag.DiagID)
+        # Все возможные диагнозы, действовашие на период действия, в том числе закрытые, но не созданные в нём
+        self.all_existing_mkb = set(
+            d.MKB
+            for d in diagnostics
+            if not (d.action == self.source_action and d == d.diagnosis.diagnostics[0])
+        )
 
-        actual_diag_action = get_event_diag_mkbs(self.source_action.event, action_id=self.source_action.id, opened=True)
-        for diag in actual_diag_action:
-            self.actual_action_mkb.add(diag.DiagID)
+        # Все незакрытые диагнозы, действовавшие на период действия, кроме созданных в нём
+        self.actual_existing_mkb = set(
+            d.MKB
+            for d in diagnostics
+            if not (d.action == self.source_action and d == d.diagnosis.diagnostics[0]) and d.endDate is None
+        )
+
+        # Все диагнозы, созданные в этом действии
+        self.actual_action_mkb = set(
+            d.MKB
+            for d in diagnostics
+            if (d.action == self.source_action and d == d.diagnosis.diagnostics[0]) and d.endDate is None
+        )
 
     def is_sm_apply_event_after_each_visit(self, sm):
         return any(sched_type.code == 'after_each_visit' for sched_type in sm.schedule.schedule_types)

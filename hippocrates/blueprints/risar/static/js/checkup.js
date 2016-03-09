@@ -63,6 +63,19 @@ var CheckupCtrl = function ($scope, RisarApi, RefBookService, PrintingService, P
             PrintingDialog.open($scope.ps, $scope.$parent.$eval($scope.ps_resolve));
         }
     };
+    $scope.$watch('checkup.pregnancy_continuation', function (newVal) {
+        if (newVal) {  // если "Да", то очистить
+            $scope.checkup.pregnancy_continuation_refusal = null;
+        }
+    });
+    $scope.pregContRefusalDisabled = function () {
+        if (!$scope.checkup) return true;
+        return Boolean($scope.checkup.pregnancy_continuation === null || $scope.checkup.pregnancy_continuation);  // задизейблено при "Да"
+    };
+    $scope.pregContRefusalRequired = function () {
+        if (!$scope.checkup) return false;
+        return !Boolean($scope.checkup.pregnancy_continuation);  // требуется при "Нет"
+    };
 };
 
 var CheckupFirstEditCtrl = function ($scope, $controller, $window, $location, $document, RisarApi, Config) {

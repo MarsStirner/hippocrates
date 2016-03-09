@@ -7,23 +7,7 @@
 <div ng-controller="AnamnesisMotherEditCtrl" ng-cloak>
     <section class="content-header">
         {{ rimacros.page_title_n('Ввод данных о матери') }}
-        <div class="novmargin">
-            <div class="btn-group">
-                <a ng-href="{{ url_for('.html_chart') }}?event_id=[[ event_id ]]" class="btn btn-default">Карта пациентки</a>
-                <a ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ event_id ]]" class="btn btn-default">Анамнез</a>
-                <a ng-href="{{ url_for('.html_inspection') }}?event_id=[[ event_id ]]" class="btn btn-default">Осмотры</a>
-                <a ng-href="{{ url_for('.html_routing') }}?event_id=[[ event_id ]]&emergency=1" class="btn btn-default">Маршрутизация</a>
-                <a ng-href="{{ url_for('.html_epicrisis') }}?event_id=[[ event_id ]]" class="btn btn-default">Эпикриз</a>
-                <a ng-class="{disabled: !ps.is_available()}" ng-click="open_print_window()" class="btn btn-default">Печать</a>
-                <div class="btn-group">
-                    <button class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Дополнительно <span class="fa fa-caret-down"></span></button>
-                    <ul role="menu" class="dropdown-menu">
-                        <li><a ng-href="{{ url_for('.html_event_diagnoses') }}?event_id=[[ event_id ]]">Диагнозы случая</a></li>
-                        <li><a ng-href="{{ url_for('.html_event_measure') }}?event_id=[[ event_id ]]">Мероприятия случая</a></li>
-                    </ul>
-                </div>
-            </div>
-        </div>
+        {{ rimacros.navigation('[[ event_id ]]') }}
     </section>
     <section class="content">
             <ng-form name="anamnesisMotherForm" id="anamnesisMotherForm" role="form" novalidate>
@@ -126,12 +110,20 @@
                     <td><wm-mkb-multiple ng-model="anamnesis_mother.finished_diseases"></wm-mkb-multiple></td>
                 </tr>
                 <tr>
+                    <th class="text-right">Перенесенные заболевания (ввод вручную) <span>&nbsp;</span></th>
+                    <td><wysiwyg ng-model="anamnesis_mother.finished_diseases_text" /></td>
+                </tr>
+                <tr>
                     <th class="text-right">Наследственность <span>&nbsp;</span></th>
                     <td><input ng-model="anamnesis_mother.hereditary" class="form-control"></td>
                 </tr>
                 <tr>
                     <th class="text-right">Текущие заболевания <span>&nbsp;</span></th>
                     <td><wm-mkb-multiple ng-model="anamnesis_mother.current_diseases"></wm-mkb-multiple></td>
+                </tr>
+                <tr>
+                    <th class="text-right">Текущие заболевания (ввод вручную)<span>&nbsp;</span></th>
+                    <td><wysiwyg ng-model="anamnesis_mother.current_diseases_text" /></td>
                 </tr>
                 <tr>
                     <th class="text-right">Преэклампсия была у матери или сестры <span>&nbsp;</span></th>

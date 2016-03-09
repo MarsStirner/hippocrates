@@ -3,10 +3,12 @@ import collections
 import datetime
 
 from flask import request
+from sqlalchemy import func
 
+from blueprints.risar.lib.card import PregnancyCard
 from nemesis.app import app
-from nemesis.lib.apiutils import api_method
-from nemesis.lib.utils import safe_int
+from nemesis.lib.apiutils import api_method, ApiException
+from nemesis.lib.utils import safe_int, safe_unicode
 from nemesis.lib.vesta import Vesta
 from nemesis.models.actions import ActionType, Action, ActionProperty, ActionPropertyType, ActionProperty_Integer, \
     ActionProperty_Date, ActionProperty_ExtReferenceRb
@@ -18,12 +20,12 @@ from nemesis.models.utils import safe_current_user_id
 from nemesis.models.risar import TerritorialRate, rbRateType, Errand, rbErrandStatus
 from nemesis.systemwide import db
 from blueprints.risar.app import module
-from blueprints.risar.lib.card_attrs import get_card_attrs_action
 from blueprints.risar.lib.represent import represent_chart_short, represent_errand
 from blueprints.risar.lib.pregnancy_dates import get_pregnancy_week
-from blueprints.risar.risar_config import checkup_flat_codes
+from blueprints.risar.risar_config import checkup_flat_codes, request_type_pregnancy
 from blueprints.risar.lib.org_bcl import OrgBirthCareLevelRepr, OrganisationRepr, EventRepr
-from sqlalchemy import func
+from blueprints.risar.lib.card_fill_rate import CFRController
+from blueprints.risar.lib.stats import StatsController
 
 
 def get_rate_for_regions(regions, rate_code):
@@ -51,9 +53,9 @@ def get_rate_for_regions(regions, rate_code):
     return rate
 
 
-@module.route('/api/0/current_stats.json')
+@module.route('/api/0/stats/current_cards_overview/')
 @api_method
-def api_0_current_stats():
+def api_0_stats_current_cards_overview():
     def two_months(event):
         now = datetime.datetime.now()
         checkups = Action.query.join(ActionType).filter(
@@ -71,7 +73,7 @@ def api_0_current_stats():
 
     query = Event.query.join(EventType, rbRequestType, Action, ActionType, ActionProperty,
                                     ActionPropertyType, ActionProperty_Integer)\
-        .filter(rbRequestType.code == 'pregnancy', Event.deleted == 0, Event.execDate.is_(None))
+        .filter(rbRequestType.code == request_type_pregnancy, Event.deleted == 0, Event.execDate.is_(None))
 
     if curation_level:
         query = query.join(Organisation, OrganisationCurationAssoc, PersonCurationAssoc, rbOrgCurationLevel)
@@ -88,13 +90,27 @@ def api_0_current_stats():
     events_all = len(event_list)
     events_45 = len(filter(lambda x: get_pregnancy_week(x) >= 45, event_list))
     events_2_months = len(filter(lambda x: two_months(x), event_list))
-    events_undefined_risk = len(filter(lambda x: get_card_attrs_action(x)['prenatal_risk_572'].value.code == 'undefined', event_list))
+    events_undefined_risk = len(filter(lambda x: PregnancyCard.get_for_event(x).attrs['prenatal_risk_572'].value.code == 'undefined', event_list))
     return {
         'events_all': events_all,
         'events_45': events_45,
         'events_2_months': events_2_months,
         'events_undefined_risk': events_undefined_risk
     }
+
+
+@module.route('/api/1/stats/current_cards_overview/')
+@module.route('/api/1/stats/current_cards_overview/<int:person_id>/')
+@api_method
+def api_1_stats_current_cards_overview(person_id=None):
+    if not person_id:
+        person_id = safe_current_user_id()
+    args = request.args.to_dict()
+    curation_level = safe_unicode(args.get('curation_level_code'))
+
+    stats_ctrl = StatsController()
+    data = stats_ctrl.get_current_cards_overview(person_id, curation_level)
+    return data
 
 
 @module.route('/api/0/recent_charts.json')
@@ -105,7 +121,7 @@ def api_0_recent_charts():
     curation_level = request.args.get('curation_level')
 
     query = Event.query.join(EventType, rbRequestType)\
-        .filter(rbRequestType.code == 'pregnancy', Event.deleted == 0, Event.execDate.is_(None),
+        .filter(rbRequestType.code == request_type_pregnancy, Event.deleted == 0, Event.execDate.is_(None),
                 Event.setDate >= boundary_date)
 
     if curation_level:
@@ -137,7 +153,7 @@ def api_0_recently_modified_charts():
 
     query = Event.query.join(EventType, rbRequestType, Action, ActionType, ActionProperty, ActionPropertyType,
                              ActionProperty_Integer)\
-        .filter(rbRequestType.code == 'pregnancy', Event.deleted == 0, Event.execDate.is_(None), Action.deleted == 0,
+        .filter(rbRequestType.code == request_type_pregnancy, Event.deleted == 0, Event.execDate.is_(None), Action.deleted == 0,
                 ActionType.flatCode == 'cardAttributes', ActionPropertyType.code == "prenatal_risk_572",
                 ActionProperty.deleted == 0,
                 ActionProperty_Integer.value_.in_(risk_rate))
@@ -160,13 +176,13 @@ def api_0_recently_modified_charts():
 
 
 @module.route('/api/0/need_hospitalization/')
-@module.route('/api/0/need_hospitalization/<int:person_id>')
+@module.route('/api/0/need_hospitalization/<int:person_id>/')
 @api_method
 def api_0_need_hospitalization(person_id=None):
     # получение списка пациенток врача, которые нуждаются в госпитализации в стационар 2/3 уровня
 
     def get_delivery_date(event):
-        action = get_card_attrs_action(event)
+        action = PregnancyCard.get_for_event(event).attrs
         return action['predicted_delivery_date'].value
 
     if not person_id:
@@ -174,7 +190,7 @@ def api_0_need_hospitalization(person_id=None):
 
     patient_list = Event.query.join(EventType, rbRequestType, Action, ActionType, ActionProperty,
                                     ActionPropertyType, ActionProperty_Integer)\
-        .filter(rbRequestType.code == 'pregnancy', Event.deleted == 0, Event.execDate.is_(None), Event.execPerson_id == person_id,
+        .filter(rbRequestType.code == request_type_pregnancy, Event.deleted == 0, Event.execDate.is_(None), Event.execPerson_id == person_id,
                 ActionType.flatCode == 'cardAttributes', Action.deleted == 0,
                 ActionPropertyType.code == "prenatal_risk_572", ActionProperty.deleted == 0,
                 ActionProperty_Integer.value_.in_([3, 4]))\
@@ -184,10 +200,10 @@ def api_0_need_hospitalization(person_id=None):
     return [represent_chart_short(event) for event in patient_list]
 
 
-@module.route('/api/0/pregnancy_week_diagram/')
-@module.route('/api/0/pregnancy_week_diagram/<int:person_id>')
+@module.route('/api/0/stats/pregnancy_week_diagram/')
+@module.route('/api/0/stats/pregnancy_week_diagram/<int:person_id>/')
 @api_method
-def api_0_pregnancy_week_diagram(person_id=None):
+def api_0_stats_pregnancy_week_diagram(person_id=None):
     """
     распределение пациенток на учете у врача по сроку беременности
     """
@@ -197,7 +213,7 @@ def api_0_pregnancy_week_diagram(person_id=None):
     result.append(['40+', 0])
 
     query = Event.query.join(EventType, rbRequestType)\
-        .filter(rbRequestType.code == 'pregnancy', Event.deleted == 0, Event.execDate.is_(None))
+        .filter(rbRequestType.code == request_type_pregnancy, Event.deleted == 0, Event.execDate.is_(None))
 
     if curation_level:
         query = query.join(Organisation, OrganisationCurationAssoc, PersonCurationAssoc, rbOrgCurationLevel)
@@ -217,6 +233,32 @@ def api_0_pregnancy_week_diagram(person_id=None):
     return result
 
 
+@module.route('/api/1/stats/pregnancy_week_diagram/')
+@module.route('/api/1/stats/pregnancy_week_diagram/<int:person_id>/')
+@api_method
+def api_1_stats_pregnancy_week_diagram(person_id=None):
+    if not person_id:
+        person_id = safe_current_user_id()
+    args = request.args.to_dict()
+    curation_level = safe_unicode(args.get('curation_level_code'))
+
+    stats_ctrl = StatsController()
+    data = stats_ctrl.get_cards_pregnancy_week_distribution(person_id, curation_level)
+    return data
+
+
+@module.route('/api/0/stats/risk_group_distribution/')
+@module.route('/api/0/stats/risk_group_distribution/<int:person_id>/')
+@api_method
+def api_0_stats_risk_group_distribution(person_id=None):
+    person_id = person_id or safe_current_user_id()
+    curation_level = request.args.get('curation_level_code')
+
+    stats_ctrl = StatsController()
+    data = stats_ctrl.get_risk_groups_distribution(person_id, curation_level)
+    return data
+
+
 @module.route('/api/0/stats/perinatal_risk_rate.json')
 @api_method
 def api_0_stats_perinatal_risk_rate():
@@ -226,7 +268,7 @@ def api_0_stats_perinatal_risk_rate():
 
     where = [ActionType.flatCode == 'cardAttributes',
              ActionPropertyType.code == 'prenatal_risk_572',
-             rbRequestType.code == 'pregnancy',
+             rbRequestType.code == request_type_pregnancy,
              Action.event_id == Event.id,
              ActionProperty.action_id == Action.id,
              ActionPropertyType.id == ActionProperty.type_id,
@@ -280,7 +322,7 @@ def api_0_death_stats():
         whereclause=db.and_(
             ActionType.flatCode == 'risar_newborn_inspection',
             ActionPropertyType.code == 'alive',
-            rbRequestType.code == 'pregnancy',
+            rbRequestType.code == request_type_pregnancy,
             Action.event_id == Event.id,
             ActionProperty.action_id == Action.id,
             ActionPropertyType.id == ActionProperty.type_id,
@@ -306,7 +348,7 @@ def api_0_death_stats():
                 whereclause=db.and_(
                     ActionType.flatCode == 'risar_newborn_inspection',
                     ActionPropertyType.code == 'date',
-                    rbRequestType.code == 'pregnancy',
+                    rbRequestType.code == request_type_pregnancy,
                     Action.event_id == Event.id,
                     ActionProperty.action_id == Action.id,
                     ActionPropertyType.id == ActionProperty.type_id,
@@ -342,7 +384,7 @@ def api_0_death_stats():
                                    ActionPropertyType, ActionProperty_Date)\
             .filter(ActionType.flatCode == 'epicrisis',
                     ActionPropertyType.code == 'death_date',
-                    rbRequestType.code == 'pregnancy',
+                    rbRequestType.code == request_type_pregnancy,
                     Action.event_id == Event.id,
                     ActionProperty.action_id == Action.id,
                     ActionPropertyType.id == ActionProperty.type_id,
@@ -373,7 +415,7 @@ def api_0_pregnancy_final_stats():
         whereclause=db.and_(
             ActionType.flatCode == 'epicrisis',
             ActionPropertyType.code == 'delivery_date',
-            rbRequestType.code == 'pregnancy',
+            rbRequestType.code == request_type_pregnancy,
             Action.event_id == Event.id,
             ActionProperty.action_id == Action.id,
             ActionPropertyType.id == ActionProperty.type_id,
@@ -397,7 +439,7 @@ def api_0_pregnancy_final_stats():
         whereclause=db.and_(
             ActionType.flatCode == 'epicrisis',
             ActionPropertyType.code == 'pregnancy_final',
-            rbRequestType.code == 'pregnancy',
+            rbRequestType.code == request_type_pregnancy,
             Action.event_id == Event.id,
             ActionProperty.action_id == Action.id,
             ActionPropertyType.id == ActionProperty.type_id,
@@ -425,7 +467,7 @@ def api_0_stats_obcl_get():
 
 
 @module.route('/api/0/stats/org_birth_care_level/orgs_info/')
-@module.route('/api/0/stats/org_birth_care_level/orgs_info/<int:obcl_id>')
+@module.route('/api/0/stats/org_birth_care_level/orgs_info/<int:obcl_id>/')
 @api_method
 def api_0_stats_obcl_orgs_get(obcl_id=None):
     return OrgBirthCareLevelRepr().represent_level_orgs(obcl_id)
@@ -455,3 +497,41 @@ def api_0_stats_urgent_errands():
                 ActionPropertyType.code == "prenatal_risk_572", ActionProperty.deleted == 0,)\
         .order_by(func.date(Errand.plannedExecDate)).order_by(ActionProperty_Integer.value_.desc()).limit(10).all()
     return [represent_errand(errand) for errand in errands]
+
+
+@module.route('/api/0/stats/card_fill_rates/doctor/')
+@module.route('/api/0/stats/card_fill_rates/doctor/<int:doctor_id>/')
+@api_method
+def api_0_stats_doctor_card_fill_rates(doctor_id=None):
+    if not doctor_id:
+        doctor_id = safe_current_user_id()
+    cfr_ctrl = CFRController()
+    data = cfr_ctrl.get_doctor_card_fill_rates(doctor_id)
+    return data
+
+
+@module.route('/api/0/stats/card_fill_rates/lpu_overview/')
+@module.route('/api/0/stats/card_fill_rates/lpu_overview/<int:curator_id>/')
+@api_method
+def api_0_stats_card_fill_rates_lpu_overview(curator_id=None):
+    if not curator_id:
+        curator_id = safe_current_user_id()
+    cfr_ctrl = CFRController()
+    data = cfr_ctrl.get_card_fill_rates_lpu_overview(curator_id)
+    return data
+
+
+@module.route('/api/0/stats/card_fill_rates/doctor_overview/')
+@module.route('/api/0/stats/card_fill_rates/doctor_overview/<int:curator_id>/')
+@api_method
+def api_0_stats_card_fill_rates_doctor_overview(curator_id=None):
+    if not curator_id:
+        curator_id = safe_current_user_id()
+    args = request.args.to_dict()
+    if 'curation_level_code' not in args:
+        raise ApiException(404, u'`curation_level_code` required')
+    curation_level = safe_unicode(args.get('curation_level_code'))
+
+    cfr_ctrl = CFRController()
+    data = cfr_ctrl.get_card_fill_rates_doctor_overview(curator_id, curation_level)
+    return data

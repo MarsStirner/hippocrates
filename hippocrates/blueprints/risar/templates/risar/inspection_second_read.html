@@ -7,23 +7,7 @@
 <div ng-controller="CheckupFirstEditCtrl" ng-cloak>
     <section class="content-header">
         {{ rimacros.page_title_n('Повторный осмотр') }}
-        <div class="novmargin">
-            <div class="btn-group">
-                <a ng-href="{{ url_for('.html_chart') }}?event_id=[[ event_id ]]" class="btn btn-default">Карта пациентки</a>
-                <a ng-href="{{ url_for('.html_anamnesis') }}?event_id=[[ event_id ]]" class="btn btn-default">Анамнез</a>
-                <a ng-href="{{ url_for('.html_inspection') }}?event_id=[[ event_id ]]" class="btn btn-default">Осмотры</a>
-                <a ng-href="{{ url_for('.html_routing') }}?event_id=[[ event_id ]]&emergency=1" class="btn btn-default">Маршрутизация</a>
-                <a ng-href="{{ url_for('.html_epicrisis') }}?event_id=[[ event_id ]]" class="btn btn-default">Эпикриз</a>
-                <a ng-class="{disabled: !ps.is_available()}" ng-click="open_print_window()" class="btn btn-default">Печать</a>
-                <div class="btn-group">
-                    <button class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Дополнительно <span class="fa fa-caret-down"></span></button>
-                    <ul role="menu" class="dropdown-menu">
-                        <li><a ng-href="{{ url_for('.html_event_diagnoses') }}?event_id=[[ event_id ]]">Диагнозы случая</a></li>
-                        <li><a ng-href="{{ url_for('.html_event_measure') }}?event_id=[[ event_id ]]">Мероприятия случая</a></li>
-                    </ul>
-                </div>
-            </div>
-        </div>
+        {{ rimacros.navigation('[[ event_id ]]') }}
     </section>
     <section class="content">
         <div class="row">
@@ -180,20 +164,29 @@
                             <span class="glyphicon glyphicon-pencil"></span> Изменить</a>
                     </div>
                     <div class="box-body">
+                        <!-- TODO: Отображение диагнозов -->
                         <div class="row">
                             <div class="col-sm-6 col-md-6  text-right">Основной диагноз:</div>
-                            <div class="col-sm-6 col-md-6">[[checkup.diag.diagnosis.mkb.code]] - [[checkup.diag.diagnosis.mkb.name]]</div>
+                            <div class="col-sm-6 col-md-6">
+                                <div ng-repeat="diag in checkup.diagnoses | collapse_diagnoses:'main'">
+                                    [[diag.diagnostic.mkb.code]] - [[diag.diagnostic.mkb.name]]
+                                </div>
+                            </div>
                         </div>
                         <div class="row">
-                            <div class="col-sm-6 col-md-6  text-right">Сопутствующий диагноз:</div>
-                            <div class="col-sm-6 col-md-6"><span ng-repeat="diag in checkup.diag2" >[[diag.diagnosis.mkb.code]] - [[diag.diagnosis.mkb.name]]
-                            <span ng-if="epicrisis.attend_diagnosis.length>1"><br></span></span>
+                            <div class="col-sm-6 col-md-6  text-right">Сопутствующие диагнозы:</div>
+                            <div class="col-sm-6 col-md-6">
+                                <div ng-repeat="diag in checkup.diagnoses | collapse_diagnoses:'associated'">
+                                    [[diag.diagnostic.mkb.code]] - [[diag.diagnostic.mkb.name]]
+                                </div>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-sm-6 col-md-6  text-right">Диагноз осложнения:</div>
-                            <div class="col-sm-6 col-md-6"><span ng-repeat="diag in checkup.diag3">[[diag.diagnosis.mkb.code]] - [[diag.diagnosis.mkb.name]]
-                            <span ng-if="epicrisis.complicating_diagnosis.length>1"><br></span></span>
+                            <div class="col-sm-6 col-md-6">
+                                <div ng-repeat="diag in checkup.diagnoses | collapse_diagnoses:'complication'">
+                                    [[diag.diagnostic.mkb.code]] - [[diag.diagnostic.mkb.name]]
+                                </div>
                             </div>
                         </div>
                         <div class="row">
@@ -203,6 +196,10 @@
                         <div class="row">
                             <div class="col-sm-6 col-md-6  text-right">Возможность сохранения беременности:</div>
                             <div class="col-sm-6 col-md-6">[[checkup.pregnancy_continuation ? 'да': 'нет']]</div>
+                        </div>
+                        <div class="row" ng-show="!pregContRefusalDisabled()">
+                            <div class="col-sm-6 col-md-6  text-right">Отказ от прерывания:</div>
+                            <div class="col-sm-6 col-md-6">[[checkup.pregnancy_continuation_refusal ? 'да': 'нет']]</div>
                         </div>
                         <div class="row">
                             <div class="col-sm-6 col-md-6  text-right">Витаминизация:</div>

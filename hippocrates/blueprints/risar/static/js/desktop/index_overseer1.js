@@ -19,33 +19,7 @@ var IndexOverseer1Ctrl = function ($scope, RisarApi) {
         pages: 1,
         record_count: 0
     };
-    $scope.chart_fill_assessment = [{
-        "key": "Series 1",
-        "values": [['Трунова Н.С.', 25], ['Папуша Л.А.', 18], ['Мамзерова П.Р.', 15], ['Семенова В.Ф.', 11], ['Горячева Л.Л.', 7]],
-        "color": '#dd4b39'
-    }]
 
-    $scope.toolTipContent_pregnancy_week = function(){
-        return function(key, x, y, e, graph) {
-            return  '<h4>'+ x  + ' неделя'+ '</h4>'+ '<p>' +  y + '</p>'
-        }
-    };
-    $scope.colorFunction = function() {
-        return function(d, i) {
-            if (d[0]<=14){
-                return '#F493F2'
-            } else if (14 < d[0] && d[0]<= 26){
-                return '#E400E0'
-            } else if (27 <= d[0] && d[0]<= 40){
-                return '#9600CD'
-            } else {
-                return '#5416B4';
-            }
-        };
-    }
-    $scope.yAxisTickFormat = function(d){
-        return d;
-    }
     $scope.xAxisTickFormat = function(d){
         var m = moment();
         return m.months(d-1).format('MMM');
@@ -55,11 +29,6 @@ var IndexOverseer1Ctrl = function ($scope, RisarApi) {
             $scope.tickets = tickets;
         })
     });
-    $scope.current_stats = function(){
-        RisarApi.current_stats.get(1).then(function (result) {
-            $scope.current_stats = result;
-        })
-    };
 
     var recent_charts = function() {
         var data = {
@@ -92,21 +61,8 @@ var IndexOverseer1Ctrl = function ($scope, RisarApi) {
     $scope.onRecentlyModifiedPageChanged = function () {
         recently_modified_charts();
     };
-    $scope.refresh_pregnancy_week_diagram = function (){
-        RisarApi.pregnancy_week_diagram.get(1).then(function (result) {
-            $scope.pregnancy_week = [{
-                "key": "Пациентки по сроку беременности",
-                "values": result
-            }]
-            $scope.pregnancy_week_all = result.reduce(function(prev, curr){
-                        return prev + curr[1]
-                    }, 0);
-        })
-    }
-    $scope.current_stats();
     recent_charts();
     recently_modified_charts();
-    $scope.refresh_pregnancy_week_diagram();
 };
 
 WebMis20.controller('IndexOverseer1Ctrl', ['$scope', 'RisarApi',

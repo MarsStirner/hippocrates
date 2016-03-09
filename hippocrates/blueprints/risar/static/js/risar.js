@@ -22,13 +22,6 @@ WebMis20
             return wrapper('GET', Config.url.api_need_hospitalization)
         }
     };
-    this.pregnancy_week_diagram  = {
-        get: function(curation_level){
-            return wrapper('GET', Config.url.api_pregnancy_week_diagram, {
-                curation_level: curation_level
-            });
-        }
-    };
     this.search_event = {
         get: function (query) {
             return wrapper('POST', Config.url.api_event_search, {}, query)
@@ -46,13 +39,6 @@ WebMis20
     this.search_event_ambulance = {
         get: function (query) {
             return wrapper('POST', Config.url.api_event_search_ambulance, {}, query)
-        }
-    };
-    this.current_stats = {
-        get: function (curation_level) {
-            return wrapper('GET', Config.url.api_current_stats, {
-                curation_level: curation_level
-            });
         }
     };
     this.urgent_errands = {
@@ -362,6 +348,20 @@ WebMis20
         }
     };
     this.stats = {
+        get_current_cards_overview: function (person_id, curation_level_code) {
+            var url = Config.url.api_stats_current_cards_overview + person_id,
+                args = {
+                    curation_level_code: curation_level_code
+                };
+            return wrapper('GET', url, args);
+        },
+        get_pregnancy_week_diagram: function(person_id, curation_level_code) {
+            var url = Config.url.api_stats_pregnancy_week_diagram + person_id,
+                args = {
+                    curation_level_code: curation_level_code
+                };
+            return wrapper('GET', url, args);
+        },
         get_obcl_info: function () {
             return wrapper('GET', Config.url.api_stats_obcl_get);
         },
@@ -380,8 +380,34 @@ WebMis20
             return wrapper('GET', Config.url.api_stats_pregnancy_pathology, {
                 curation_level_code: curation_level_code
             });
+        },
+        get_doctor_card_fill_rates: function (doctor_id) {
+            return wrapper('GET', Config.url.api_stats_doctor_card_fill_rates + doctor_id);
+        },
+        get_card_fill_rates_overview_lpu: function (curator_id) {
+            return wrapper('GET', Config.url.api_stats_card_fill_rates_lpu_overview + curator_id);
+        },
+        get_card_fill_rates_overview_doctor: function (curator_id, curation_level_code) {
+            var url = Config.url.api_stats_card_fill_rates_doctor_overview + curator_id,
+                args = {
+                    curation_level_code: curation_level_code
+                };
+            return wrapper('GET', url, args);
+        },
+        get_risk_group_distribution: function (person_id, curation_level_code) {
+            return wrapper('GET', Config.url.api_stats_risk_group_distribution + person_id, {curation_level_code: curation_level_code});
         }
     };
+    this.card_fill_rate = {
+        get_chart: function (event_id) {
+            return wrapper('GET', Config.url.api_chart_card_fill_history + event_id)
+        }
+    };
+    this.risk_groups = {
+        list: function (event_id) {
+            return wrapper('GET', Config.url.api_chart_risk_groups_list.format(event_id))
+        }
+    }
 }])
 .service('UserErrand', function (Simargl, ApiCalls, Config, OneWayEvent, CurrentUser, NotificationService) {
     var event_source = new OneWayEvent(),
@@ -470,28 +496,6 @@ WebMis20
                 if (rate == 3) return 'У пациентки выявлена средняя степень риска';
                 if (rate == 4) return 'У пациентки выявлена высокая степень риска';
                 if (rate == 1) return 'У пациентки не выявлена степень риска';
-
-            }
-        }
-    }
-})
-.directive('preeclampsiaRiskIcon', function () {
-    return {
-        restrict: 'A',
-        template: '<span style="font-size: 120%" ng-class="icon_class(preeclampsiaRiskIcon.id)" tooltip="[[tooltip(preeclampsiaRiskIcon.id)]]"></span>',
-        scope: {
-            preeclampsiaRiskIcon: '='
-        },
-        link: function (scope) {
-            scope.icon_class = function (rate) {
-                if (rate == 1) return 'fa fa-exclamation-circle text-red';
-                if (rate == 2) return 'fa fa-exclamation-circle text-green';
-                return 'fa fa-question text-darkgray';
-            };
-            scope.tooltip = function (rate) {
-                if (rate == 1) return 'Пациентка входит в группу риска развития преэклампсии';
-                if (rate == 2) return 'Пациентка НЕ входит в группу риска развития преэклампсии';
-                return 'Риск развития преэклампсии ещё не выявлен';
 
             }
         }
@@ -587,4 +591,55 @@ WebMis20
         }
     }
 })
+.directive('cardFillRateIcon', ['$window', 'Config', function ($window, Config) {
+    return {
+        restrict: 'A',
+        template: '\
+<span style="font-size: 120%" class="cursor-pointer" ng-class="icon_class()" tooltip="[[ get_tooltip() ]]"\
+    ng-click="open()"></span>\
+',
+        scope: {
+            cardFillRateIcon: '=',
+            eventId: '='
+        },
+        link: function (scope, element, attrs) {
+            scope.icon_class = function () {
+                if (!scope.cardFillRateIcon) return;
+                var cfr = scope.cardFillRateIcon.card_fill_rate;
+                if (cfr.code === 'filled') return 'fa fa-check-circle text-green';
+                if (cfr.code === 'not_filled') return 'fa fa-exclamation-circle text-red';
+                return 'fa fa-question text-darkgray';
+            };
+            scope.get_tooltip = function () {
+                if (!scope.cardFillRateIcon) return;
+                var cfr = scope.cardFillRateIcon.card_fill_rate;
+                if (cfr.code === 'filled') return 'Карта заполнена полностью';
+                else if (cfr.code === 'not_filled') return 'Карта заполнена не полностью';
+                return 'Нет информации о заполненности карты';
+
+            };
+            scope.open = function () {
+                $window.open('{0}?event_id={1}'.format(Config.url.card_fill_history, scope.eventId), '_self');
+            };
+        }
+    }
+}])
+.filter('collapse_diagnoses', [function () {
+    return function (diag_list, kind) {
+        var types = arguments[2];
+        if (_.isUndefined(types)) {
+            return _.filter(diag_list, function (diagnosis) {
+                return _.any(diagnosis.diagnosis_types, function (value, key) {
+                    return value.code == kind;
+                });
+            })
+        } else {
+            return _.filter(diag_list, function (diagnosis) {
+                return _.any(diagnosis.diagnosis_types, function (value, key) {
+                    return value.code == kind && [].has.apply(types, [key]);
+                });
+            })
+        }
+    }
+}])
 ;
