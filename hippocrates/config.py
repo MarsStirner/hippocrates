@@ -68,7 +68,7 @@ DEFAULT_ENDPOINT = 'index'
 SCANSERVER_URL = ''
 FILE_STORAGE_PATH = ''
 
-
+CELERY_ENABLED = False
 from celery_config import *
 
 
