@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from flask import abort
+from flask import request, abort
 
 from blueprints.risar.app import module
 from celery_tasks import test_task, test_db_task, update_card_attrs_cfrs
@@ -9,7 +9,7 @@ from nemesis.app import app
 
 @module.before_request
 def before_risar_tasks_request():
-    if not app.config['CELERY_ENABLED']:
+    if '/tasks/' in request.endpoint and not app.config['CELERY_ENABLED']:
         abort(403)
 
 
