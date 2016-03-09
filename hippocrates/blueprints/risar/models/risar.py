@@ -21,7 +21,7 @@ class RisarRiskGroup(db.Model):
     riskGroup_code = db.Column(db.String(250), index=True)
 
     event = db.relationship('Event', backref=db.backref(
-        'risk_groups', primaryjoin='Event.id == RisarRiskGroup.event_id and RisarRiskGroup.deleted == 0'
+        'risk_groups', primaryjoin='and_(Event.id == RisarRiskGroup.event_id, RisarRiskGroup.deleted == 0)'
     ))
     createPerson = db.relationship('Person', foreign_keys=[createPerson_id])
     modifyPerson = db.relationship('Person', foreign_keys=[modifyPerson_id])
