@@ -103,13 +103,7 @@ def represent_event(event):
             PregnancyPathology(pathg)
             for pathg in card_attrs_action['pregnancy_pathology_list'].value
         ] if card_attrs_action['pregnancy_pathology_list'].value else [],
-        'card_fill_rates': {
-            'card_fill_rate': CardFillRate(card_attrs_action['card_fill_rate'].value),
-            'card_fill_rate_anamnesis': CardFillRate(card_attrs_action['card_fill_rate_anamnesis'].value),
-            'card_fill_rate_first_inspection': CardFillRate(card_attrs_action['card_fill_rate_first_inspection'].value),
-            'card_fill_rate_repeated_inspection': CardFillRate(card_attrs_action['card_fill_rate_repeated_inspection'].value),
-            'card_fill_rate_epicrisis': CardFillRate(card_attrs_action['card_fill_rate_epicrisis'].value),
-        },
+        'card_fill_rates': represent_event_cfrs(card_attrs_action),
         'pregnancy_week': get_pregnancy_week(event),
         'diagnoses': represent_event_diagnoses(event),
         'has_diseases': check_disease(all_diagnostics)
@@ -686,4 +680,16 @@ def represent_errand(errand_info):
         'reading_date': errand_info.readingDate,
         'status': ErrandStatus(errand_info.status_id),
         'progress': progress
+    }
+
+
+def represent_event_cfrs(card_attrs_action):
+    if not card_attrs_action:
+        return None
+    return {
+        'card_fill_rate': CardFillRate(card_attrs_action['card_fill_rate'].value),
+        'card_fill_rate_anamnesis': CardFillRate(card_attrs_action['card_fill_rate_anamnesis'].value),
+        'card_fill_rate_first_inspection': CardFillRate(card_attrs_action['card_fill_rate_first_inspection'].value),
+        'card_fill_rate_repeated_inspection': CardFillRate(card_attrs_action['card_fill_rate_repeated_inspection'].value),
+        'card_fill_rate_epicrisis': CardFillRate(card_attrs_action['card_fill_rate_epicrisis'].value),
     }
