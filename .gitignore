@@ -32,9 +32,11 @@ nosetests.xml
 .project
 .pydevproject
 .idea
-config_*.py
+
 #forms_prototype
 .fuse_*
 gen-py
+
+*config_*.py
 
 nemesis

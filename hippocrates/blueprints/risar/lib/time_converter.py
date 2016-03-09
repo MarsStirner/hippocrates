@@ -55,8 +55,10 @@ class DateTimeUtil(object):
         return code
 
     def convert_time_unit(self, val, unit_from, unit_to):
-        self.check_unit(unit_from)
-        self.check_unit(unit_to)
+        # not finished, test before using
+
+        # self.check_unit(unit_from)
+        # self.check_unit(unit_to)
 
         timeval = DateTimeUtil.TimeVal(**{unit_from: val})
         timeval = self._convert(timeval, unit_from, unit_to)
@@ -108,6 +110,10 @@ class DateTimeUtil(object):
         else:
             delta = relativedelta.relativedelta(seconds=0)
         return delta
+
+    @classmethod
+    def get_current_date(cls):
+        return datetime.date.today()
 
 
 if __name__ == '__main__':

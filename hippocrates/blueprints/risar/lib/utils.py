@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import datetime
-from sqlalchemy.orm import lazyload
+from sqlalchemy.orm import lazyload, joinedload
 
 from nemesis.lib.data import create_action, update_action
 from nemesis.lib.utils import safe_traverse_attrs, safe_dict, safe_traverse, safe_datetime
@@ -118,7 +118,11 @@ def get_action_list(event, flat_code, all=False):
     :return: действие
     :rtype: sqlalchemy.orm.Query
     """
-    query = Action.query.join(ActionType).filter(Action.event == event, Action.deleted == 0)
+    query = Action.query.join(ActionType).filter(
+        Action.event == event, Action.deleted == 0
+    ).options(
+        joinedload(Action.actionType)
+    )
     if isinstance(flat_code, (list, tuple)):
         query = query.filter(ActionType.flatCode.in_(flat_code))
     elif isinstance(flat_code, basestring):
@@ -211,54 +215,18 @@ def get_last_checkup_date(event_id):
     return query[0] if query else None
 
 
-def get_event_diag_mkbs(event, **kwargs):
-    query = db.session.query(Event).join(
-        Diagnostic, Diagnosis
-    ).join(
-        MKB, Diagnosis.MKB == MKB.DiagID
-    ).filter(
-        Event.id == event.id,
-        Diagnostic.deleted == 0,
-        Diagnosis.deleted == 0
-    )
-    if 'at_flatcodes' in kwargs:
-        at_flatcodes = kwargs['at_flatcodes']
-        if isinstance(at_flatcodes, (list, tuple)):
-            query = query.join(
-                (Action, Diagnostic.action_id == Action.id),
-                ActionType
-            ).filter(
-                ActionType.flatCode.in_(at_flatcodes),
-                Action.deleted == 0
-            )
-    if 'action_id' in kwargs:
-        action_id = kwargs['action_id']
-        query = query.filter(Diagnostic.action_id == action_id)
-    if 'without_action_id' in kwargs:
-        action_id = kwargs['without_action_id']
-        query = query.filter(Diagnostic.action_id != action_id)
-    if 'opened' in kwargs:
-        if kwargs['opened']:
-            query = query.filter(Diagnostic.endDate.is_(None))
-        else:
-            query = query.filter(Diagnostic.endDate.isnot(None))
-    query = query.with_entities(MKB)
-    return query.all()
-
-
 def close_open_checkups(event_id):
-    open_checkups = db.session.query(Action).join(ActionType).filter(
+    now = datetime.datetime.now()
+    db.session.query(Action).filter(
         Action.event_id == event_id,
         Action.endDate.is_(None),
         Action.deleted == 0,
+        ActionType.id == Action.actionType_id,
         ActionType.flatCode.in_(checkup_flat_codes)
-    ).all()
-    for action in open_checkups:
-        action.endDate = datetime.datetime.now()
-        action.status = ActionStatus.finished[0]
-        db.session.add(action)
-    if open_checkups:
-        db.session.commit()
+    ).update({
+        Action.endDate: now,
+        Action.status: ActionStatus.finished[0],
+    }, synchronize_session=False)
 
 
 @cache.memoize()

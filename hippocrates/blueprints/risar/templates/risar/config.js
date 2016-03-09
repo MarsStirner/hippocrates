@@ -7,7 +7,7 @@ WebMis20
     url: {
         api_schedule: '{{ url_for('.api_0_schedule') }}',
         api_need_hospitalization: '{{ url_for('.api_0_need_hospitalization') }}',
-        api_pregnancy_week_diagram: '{{ url_for('.api_0_pregnancy_week_diagram') }}',
+        api_stats_pregnancy_week_diagram: '{{ url_for('.api_1_stats_pregnancy_week_diagram') }}',
         api_chart: '{{ url_for('.api_0_chart') }}',
         api_mini_chart: '{{ url_for('.api_0_mini_chart') }}',
         api_event_routing: '{{ url_for('.api_0_event_routing') }}',
@@ -29,7 +29,7 @@ WebMis20
         api_event_search_area_list: '{{ url_for('.api_0_area_list') }}',
         api_event_search_area_lpu_list: '{{ url_for('.api_0_area_lpu_list') }}',
         api_event_search_lpu_doctors_list: '{{ url_for('.api_0_lpu_doctors_list') }}',
-        api_current_stats: '{{ url_for('.api_0_current_stats') }}',
+        api_stats_current_cards_overview: '{{ url_for('.api_1_stats_current_cards_overview') }}',
         api_recent_charts: '{{ url_for('.api_0_recent_charts') }}',
         api_recently_modified_charts: '{{ url_for('.api_0_recently_modified_charts') }}',
         api_death_stats: '{{ url_for('.api_0_death_stats') }}',
@@ -45,9 +45,12 @@ WebMis20
         api_event_measure_result_save: '{{ url_for('.api_0_event_measure_result_save', event_measure_id=-90) | replace("-90", "{0}") }}',
         chart_html: '{{ url_for('.html_chart') }}',
         index_html: '{{ url_for('.index_html') }}',
+        anamnesis_html: '{{ url_for('.html_anamnesis') }}',
         inpection_read_html:'{{ url_for('.html_inspection_read') }}',
         inpection_edit_html:'{{ url_for('.html_inspection_edit') }}',
+        epicrisis_html:'{{ url_for('.html_epicrisis') }}',
         ambulance_patient_info: '{{ url_for('.html_ambulance_patient_info') }}',
+        card_fill_history: '{{ url_for('.html_card_fill_history') }}',
         api_chart_measure_list: '{{ url_for('.api_0_chart_measure_list') }}',
         api_measure_list: '{{ url_for('.api_0_measure_list') }}',
         api_chart_header: '{{ url_for('.api_0_chart_header') }}',
@@ -61,11 +64,17 @@ WebMis20
         api_stats_obcl_orgs_get: '{{ url_for('.api_0_stats_obcl_orgs_get') }}{0}',
         api_stats_org_curation_get: '{{ url_for('.api_0_stats_org_curation_get') }}',
         api_stats_urgent_errands: '{{ url_for('.api_0_stats_urgent_errands') }}',
+        api_stats_doctor_card_fill_rates: '{{ url_for('.api_0_stats_doctor_card_fill_rates') }}',
+        api_stats_card_fill_rates_lpu_overview: '{{ url_for('.api_0_stats_card_fill_rates_lpu_overview') }}',
+        api_stats_card_fill_rates_doctor_overview: '{{ url_for('.api_0_stats_card_fill_rates_doctor_overview') }}',
+        api_stats_risk_group_distribution: '{{ url_for('.api_0_stats_risk_group_distribution') }}',
         api_errands: '{{ url_for('.api_errands_get') }}',
         api_errands_summary: '{{ url_for('.api_errands_summary') }}',
         api_errand_edit: '{{ url_for('.api_errand_edit') }}{0}',
         api_errand_mark_as_read: '{{ url_for('.api_errand_mark_as_read') }}{0}',
-        api_stats_pregnancy_pathology: '{{ url_for('.api_0_stats_pregnancy_pathology') }}'
+        api_stats_pregnancy_pathology: '{{ url_for('.api_0_stats_pregnancy_pathology') }}',
+        api_chart_card_fill_history: '{{ url_for('.api_0_chart_card_fill_history') }}',
+        api_chart_risk_groups_list: '{{ url_for('.api_0_chart_risks', event_id=-90) | replace("-90", "{0}") }}'
     }
 })
 ;

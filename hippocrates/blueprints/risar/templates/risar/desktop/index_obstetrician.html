@@ -68,79 +68,8 @@
                 {% include "risar/stats/diagram_pregnancy_week.html" %}
             </div>
             <div class="col-md-3">
-                {% include "risar/stats/patients_stats.html" %}
-                <div class="box box-warning">
-                    <div class="box-header with-border">
-                        <h3 class="box-title">Ведение карт</h3>
-                        <div class="box-tools pull-right">
-                          <button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
-                        </div>
-                    </div>
-                    <div class="box-body">
-                        <table class="table table-condensed no-border">
-                            <tr>
-                                <td>Заполненные карты</td>
-                                <td>
-                                    <a href="{{ url_for('risar.html_search') }}">
-                                        <span class="badge label-info pull-right">12</span>
-                                    </a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Незаполненные карты</td>
-                                <td>
-                                    <a href="{{ url_for('risar.html_search') }}">
-                                        <span class="badge label-danger pull-right">6</span>
-                                    </a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Из них с разделами:</td>
-                                <td></td>
-                            </tr>
-                            <tr>
-                                <td><span class="small-left-margin">Анамнез</span></td>
-                                <td>
-                                    <a href="{{ url_for('risar.html_search') }}">
-                                        <span class="badge label-info pull-right">0</span>
-                                    </a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><span class="small-left-margin">Плановый осмотр</span></td>
-                                <td>
-                                    <a href="{{ url_for('risar.html_search') }}">
-                                        <span class="badge label-danger pull-right">2</span>
-                                    </a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><span class="small-left-margin">ЛПУ для родоразрешения</span></td>
-                                <td>
-                                    <a href="{{ url_for('risar.html_search') }}">
-                                        <span class="badge label-danger pull-right">1</span>
-                                    </a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><span class="small-left-margin">Результаты мероприятий</span></td>
-                                <td>
-                                    <a href="{{ url_for('risar.html_search') }}">
-                                        <span class="badge label-danger pull-right">1</span>
-                                    </a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><span class="small-left-margin">Эпикриз</span></td>
-                                <td>
-                                    <a href="{{ url_for('risar.html_search') }}">
-                                        <span class="badge label-danger pull-right">2</span>
-                                    </a>
-                                </td>
-                            </tr>
-                        </table>
-                    </div>
-                </div>
+                {% include "risar/stats/cards_overview.html" %}
+                {% include "risar/stats/doctor_cfrs.html" %}
                 {% include "risar/stats/diagram_risk_rates.html" %}
             </div>
         </div>
@@ -153,6 +82,9 @@
     <script src="{{ url_for('.static', filename='js/desktop/index_obstetrician.js', v=app_version) }}"></script>
     <script src="{{ url_for('.static', filename='js/stats/perinatal_risk_rate.js', v=app_version) }}"></script>
     <script src="{{ url_for('.static', filename='js/stats/urgent_errands.js', v=app_version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/stats/card_fill_rates.js', v=app_version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/stats/cards_overview.js', v=app_version) }}"></script>
+    <script src="{{ url_for('.static', filename='js/stats/preg_week_distribution.js', v=app_version) }}"></script>
     <script type="text/ng-template" id="/WebMis20/RISAR/modal/create_errand.html">{% include 'risar/errands/_modal_create_errand.html' %}</script>
 {% endblock %}
 
