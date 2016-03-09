@@ -68,6 +68,10 @@ DEFAULT_ENDPOINT = 'index'
 SCANSERVER_URL = ''
 FILE_STORAGE_PATH = ''
 
+
+from celery_config import *
+
+
 try:
     from config_local import *
 except ImportError:
@@ -77,20 +81,15 @@ except ImportError:
 
 db_uri_format = '{0}://{1}:{2}@{3}:{4}/{5}{6}'
 
-SQLALCHEMY_DATABASE_URI = db_uri_format.format(DB_DRIVER,
-                                                       DB_USER,
-                                                       DB_PASSWORD,
-                                                       DB_HOST,
-                                                       DB_PORT,
-                                                       DB_NAME,
-                                                       DB_CONNECT_OPTIONS)
+SQLALCHEMY_DATABASE_URI = db_uri_format.format(
+    DB_DRIVER, DB_USER, DB_PASSWORD, DB_HOST, DB_PORT, DB_NAME, DB_CONNECT_OPTIONS
+)
 
 SQLALCHEMY_BINDS = {
-    'kladr':        db_uri_format.format(DB_DRIVER,
-                                                       DB_USER,
-                                                       DB_PASSWORD,
-                                                       DB_HOST,
-                                                       DB_PORT,
-                                                       DB_CAESAR_NAME,
-                                                       DB_CONNECT_OPTIONS)
+    'kladr': db_uri_format.format(
+        DB_DRIVER, DB_USER, DB_PASSWORD, DB_HOST, DB_PORT, DB_CAESAR_NAME, DB_CONNECT_OPTIONS
+    ),
+    'celery_tasks': db_uri_format.format(
+        CAT_DB_DRIVER, CAT_DB_USER, CAT_DB_PASSWORD, CAT_DB_HOST, CAT_DB_PORT, CAT_DB_NAME, CAT_DB_CONNECT_OPTIONS
+    ),
 }
