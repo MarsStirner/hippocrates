@@ -29,7 +29,7 @@
                 </div>
             </div>
             <div class="row marginal">
-                <div class="col-md-4">
+                <div class="col-md-5">
                     <label for="orgStructDirectedFrom" class="control-label">Направлен из</label>
                     <ui-select id="orgStructDirectedFrom" name="orgStructDirectedFrom" theme="select2"
                                ng-model="model.orgStructDirectedFrom.value">
@@ -39,7 +39,7 @@
                         </ui-select-choices>
                     </ui-select>
                 </div>
-                <div class="col-md-4" ng-class="{'has-error': event_maininfo_form.hosp_order.$invalid && editing.submit_attempt}">
+                <div class="col-md-3" ng-class="{'has-error': event_maininfo_form.hosp_order.$invalid && editing.submit_attempt}">
                     <label for="hosp_order" class="control-label">Порядок госпитализации</label>
                     <rb-select ng-model="model.hosp_order.value" ref-book="rbHospitalisationOrder" ng-required="true"
                                id="hosp_order" name="hosp_order"></rb-select>
@@ -50,6 +50,17 @@
                 </div>
             </div>
             <div class="row">
+                <div class="form-group col-md-5"
+                     ng-class="{'has-error': event_maininfo_form.org_structure.$invalid && editing.submit_attempt}">
+                    <label for="delivered_by">Отделение поступления</label>
+                    <ui-select id="org_structure" name="org_structure" theme="select2"
+                               ng-model="model.orgStructStay.value" ng-required="true">
+                        <ui-select-match placeholder="Подразделение">[[$select.selected.name]]</ui-select-match>
+                        <ui-select-choices repeat="os in OrgStructure.objects | filter: $select.search">
+                            <div ng-bind-html="os.name | highlight: $select.search"></div>
+                        </ui-select-choices>
+                    </ui-select>
+                </div>
                 <div class="form-group col-md-3">
                     <label for="delivered_by">Кем доставлен</label>
                     <select id="delivered_by" name="delivered_by" class="form-control"

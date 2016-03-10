@@ -267,151 +267,6 @@ var EventMainInfoCtrl = function ($scope, $q, RefBookService, EventType, $filter
     });
 };
 
-var EventStationaryInfoCtrl = function($scope, $filter, $modal, $q, RisarApi, ApiCalls) {
-    $scope.format_admission_date = function (date) {
-        return date ? $filter('asDateTime')(date) : '&nbsp;';
-    };
-    $scope.format_discharge_date = function (date) {
-        return date ? $filter('asDateTime')(date) : '&nbsp;';
-    };
-    $scope.format_hosp_length = function (hosp_length) {
-        return angular.isNumber(hosp_length) ? String(hosp_length) : '&nbsp;';
-    };
-    $scope.format_os = function (os) {
-        return os ? (os.name) : '&nbsp;';
-    };
-    $scope.format_hosp_bed = function (hosp_bed) {
-        return hosp_bed ? (hosp_bed.name) : '&nbsp;';
-    };
-    $scope.format_doctor = function (doctor) {
-        return doctor ? (doctor.full_name) : '&nbsp;';
-    };
-
-    var IntolerancesCtrl = function ($scope, $modalInstance, models, type) {
-        $scope.addModel = function () {
-            var model = {
-                type: intolerance_map[type],
-                date: null,
-                name: '',
-                power: null,
-                note: '',
-                deleted: 0
-            };
-            models.push(model);
-        };
-        $scope.remove = function (p) {
-            p.deleted = 1;
-        };
-        $scope.restore = function (p) {
-            p.deleted = 0;
-        };
-    };
-
-    var BloodHistoryCtrl = function ($scope, $modalInstance, models) {
-        $scope.addModel = function () {
-            var model = {
-                blood_type: null,
-                date: null,
-                deleted: 0
-            };
-            models.push(model);
-        };
-        $scope.remove = function (p) {
-            p.deleted = 1;
-        };
-        $scope.restore = function (p) {
-            p.deleted = 0;
-        };
-    };
-
-    var intolerance_map = {
-        allergies: {
-            code: 'allergy',
-            name: 'Аллергия'
-        },
-        intolerances: {
-            code: 'medicine',
-            name: 'Медикаментозная непереносимость'
-        }
-    };
-
-    $scope.edit_intolerances = function (field) {
-        var models = _.map($scope.event[field], function (source) {
-            return angular.extend({}, source);
-        });
-        open_edit(models, field).result.then(function (models) {
-            $q.all(
-                _.filter(
-                    _.map(models, function (model) {
-                        if (model.deleted) {
-                            if (model.id) {
-                                RisarApi.anamnesis.intolerances.delete(model.id, field)
-                            }
-                        } else {
-                            return RisarApi.anamnesis.intolerances.save($scope.$parent.event.info.client_id, model)
-                        }
-                    }),
-                    function (deferred) {
-                        return deferred !== undefined
-                    }
-                )
-            ).then(function (results) {
-                $scope.event[field] = results;
-            });
-        })
-    };
-    var open_edit = function (list, type) {
-        var scope = $scope.$new();
-        scope.models = list;
-        scope.type = type;
-        return $modal.open({
-            templateUrl: 'modal-intolerances.html',
-            controller: IntolerancesCtrl,
-            backdrop : 'static',
-            scope: scope,
-            resolve: {
-                models: function () {return list},
-                type: function() {return type}
-            },
-            size: 'lg'
-        })
-    };
-    $scope.edit_blood = function () {
-        var models = _.map($scope.event.blood_history, function (source) {
-            return angular.extend({}, source);
-        });
-        open_edit_blood(models).result.then(function (models) {
-            $q.all(
-                _.filter(
-                    _.map(models, function (model) {
-                        var data = {client_id: $scope.$parent.event.info.client_id,
-                                    blood_type_info: model}
-                        return ApiCalls.wrapper('POST', url_blood_history_save, {}, data)
-                    }),
-                    function (deferred) {
-                        return deferred !== undefined
-                    }
-                )
-            ).then(function (results) {
-                $scope.event.blood_history = results;
-            });
-        })
-    }
-    var open_edit_blood = function (list) {
-        var scope = $scope.$new();
-        scope.models = list;
-        return $modal.open({
-            templateUrl: 'modal-blood-history.html',
-            controller: BloodHistoryCtrl,
-            backdrop : 'static',
-            scope: scope,
-            resolve: {
-                models: function () {return list}
-            },
-            size: 'lg'
-        })
-    };
-};
 
 var EventReceivedCtrl = function($scope, $modal, RefBookService) {
     $scope.OrgStructure = RefBookService.get('OrgStructure');
@@ -785,7 +640,7 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
 
 
 };
-var StationaryEventInfoCtrl = function ($scope, $controller, $modal, $http, WMStationaryEvent) {
+var StationaryEventInfoCtrl = function ($scope, $filter, $controller, $modal, $http, WMStationaryEvent, $q, RisarApi, ApiCalls) {
     $controller('EventInfoCtrl', {$scope: $scope});
     var event = $scope.event = new WMStationaryEvent($scope.event_id, $scope.client_id, $scope.ticket_id);
     $scope.create_mode = $scope.event.is_new();
@@ -798,6 +653,148 @@ var StationaryEventInfoCtrl = function ($scope, $controller, $modal, $http, WMSt
             $scope.event.info.body_area = Math.sqrt(n[0]*n[1]/3600).toFixed(2);
         }
     });
+    $scope.format_admission_date = function (date) {
+        return date ? $filter('asDateTime')(date) : '&nbsp;';
+    };
+    $scope.format_discharge_date = function (date) {
+        return date ? $filter('asDateTime')(date) : '&nbsp;';
+    };
+    $scope.format_hosp_length = function (hosp_length) {
+        return angular.isNumber(hosp_length) ? String(hosp_length) : '&nbsp;';
+    };
+    $scope.format_os = function (os) {
+        return os ? (os.name) : '&nbsp;';
+    };
+    $scope.format_hosp_bed = function (hosp_bed) {
+        return hosp_bed ? (hosp_bed.name) : '&nbsp;';
+    };
+    $scope.format_doctor = function (doctor) {
+        return doctor ? (doctor.full_name) : '&nbsp;';
+    };
+    var IntolerancesCtrl = function ($scope, $modalInstance, models, type) {
+        $scope.addModel = function () {
+            var model = {
+                type: intolerance_map[type],
+                date: null,
+                name: '',
+                power: null,
+                note: '',
+                deleted: 0
+            };
+            models.push(model);
+        };
+        $scope.remove = function (p) {
+            p.deleted = 1;
+        };
+        $scope.restore = function (p) {
+            p.deleted = 0;
+        };
+    };
+
+    var BloodHistoryCtrl = function ($scope, $modalInstance, models) {
+        $scope.addModel = function () {
+            var model = {
+                blood_type: null,
+                date: null,
+                deleted: 0
+            };
+            models.push(model);
+        };
+        $scope.remove = function (p) {
+            p.deleted = 1;
+        };
+        $scope.restore = function (p) {
+            p.deleted = 0;
+        };
+    };
+
+    var intolerance_map = {
+        allergies: {
+            code: 'allergy',
+            name: 'Аллергия'
+        },
+        intolerances: {
+            code: 'medicine',
+            name: 'Медикаментозная непереносимость'
+        }
+    };
+
+    $scope.edit_intolerances = function (field) {
+        var models = _.map($scope.event[field], function (source) {
+            return angular.extend({}, source);
+        });
+        open_edit(models, field).result.then(function (models) {
+            $q.all(
+                _.filter(
+                    _.map(models, function (model) {
+                        if (model.deleted) {
+                            if (model.id) {
+                                RisarApi.anamnesis.intolerances.delete(model.id, field)
+                            }
+                        } else {
+                            return RisarApi.anamnesis.intolerances.save($scope.$parent.event.info.client_id, model)
+                        }
+                    }),
+                    function (deferred) {
+                        return deferred !== undefined
+                    }
+                )
+            ).then(function (results) {
+                $scope.event[field] = results;
+            });
+        })
+    };
+    var open_edit = function (list, type) {
+        var scope = $scope.$new();
+        scope.models = list;
+        scope.type = type;
+        return $modal.open({
+            templateUrl: 'modal-intolerances.html',
+            controller: IntolerancesCtrl,
+            backdrop : 'static',
+            scope: scope,
+            resolve: {
+                models: function () {return list},
+                type: function() {return type}
+            },
+            size: 'lg'
+        })
+    };
+    $scope.edit_blood = function () {
+        var models = _.map($scope.event.blood_history, function (source) {
+            return angular.extend({}, source);
+        });
+        open_edit_blood(models).result.then(function (models) {
+            $q.all(
+                _.filter(
+                    _.map(models, function (model) {
+                        var data = {client_id: $scope.$parent.event.info.client_id,
+                                    blood_type_info: model}
+                        return ApiCalls.wrapper('POST', url_blood_history_save, {}, data)
+                    }),
+                    function (deferred) {
+                        return deferred !== undefined
+                    }
+                )
+            ).then(function (results) {
+                $scope.event.blood_history = results;
+            });
+        })
+    }
+    var open_edit_blood = function (list) {
+        var scope = $scope.$new();
+        scope.models = list;
+        return $modal.open({
+            templateUrl: 'modal-blood-history.html',
+            controller: BloodHistoryCtrl,
+            backdrop : 'static',
+            scope: scope,
+            resolve: {
+                models: function () {return list}
+            },
+            size: 'lg'
+        })
+    };
 };
 var PoliclinicEventInfoCtrl = function ($scope, $controller, WMPoliclinicEvent) {
     $controller('EventInfoCtrl', {$scope: $scope});
@@ -838,5 +835,6 @@ WebMis20.controller('EventServicesCtrl', ['$scope', '$rootScope', '$timeout', 'A
     'InvoiceModalService', 'PrintingService', EventServicesCtrl]);
 WebMis20.controller('EventInfoCtrl', ['$scope', 'WMEvent', '$http', 'RefBookService', '$window', '$document',
     'PrintingService', '$filter', '$modal', 'WMEventServices', 'WMEventFormState', 'MessageBox', EventInfoCtrl]);
-WebMis20.controller('StationaryEventInfoCtrl', ['$scope', '$controller', '$modal', '$http', 'WMStationaryEvent', StationaryEventInfoCtrl]);
+WebMis20.controller('StationaryEventInfoCtrl', ['$scope', '$filter', '$controller', '$modal', '$http', '$q',
+    'RisarApi', 'ApiCalls', 'WMStationaryEvent', StationaryEventInfoCtrl]);
 WebMis20.controller('PoliclinicEventInfoCtrl', ['$scope', '$controller', 'WMPoliclinicEvent', PoliclinicEventInfoCtrl]);

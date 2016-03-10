@@ -1,4 +1,4 @@
-<div ng-controller="EventStationaryInfoCtrl" xmlns="http://www.w3.org/1999/html">
+<div ng-controller="EventMainInfoCtrl" xmlns="http://www.w3.org/1999/html">
 <ng-form name="event_stationary_info_form" toc-element="Текущий статус пациента">
     <div class="box box-info">
         <div class="box-header with-border">
@@ -132,7 +132,14 @@
                             Исход госпитализации
                         </div>
                         <div class="col-md-8">
-                            [[event.info.ache_result.name]]
+                            <ui-select id="ache_result" name="ache_result" theme="select2"
+                                       ng-model="event.info.ache_result" ng-disabled="widget_disabled('ache_result')">
+                                <ui-select-match placeholder="Исход заболевания">[[$select.selected.name]]</ui-select-match>
+                                <ui-select-choices repeat="rbar in rbAcheResult.objects | filter: $select.search |
+                                    filter: filter_results(event.info.event_type.purpose.id)">
+                                    <div ng-bind-html="rbar.name | highlight: $select.search"></div>
+                                </ui-select-choices>
+                            </ui-select>
                         </div>
                     </div>
                     <div class="row vmargin10">
@@ -140,7 +147,14 @@
                             Результат госпитализации
                         </div>
                         <div class="col-md-8">
-                            [[event.info.result.name]]
+                            <ui-select id="result" name="result" theme="select2"
+                                       ng-model="event.info.result" ng-disabled="widget_disabled('result')">
+                                <ui-select-match placeholder="Результат госпитализации">[[$select.selected.name]]</ui-select-match>
+                                <ui-select-choices repeat="rbr in rbResult.objects | filter: $select.search |
+                                    filter: filter_results(event.info.event_type.purpose.id)">
+                                    <div ng-bind-html="rbr.name | highlight: $select.search"></div>
+                                </ui-select-choices>
+                            </ui-select>
                         </div>
                     </div>
                 </div>

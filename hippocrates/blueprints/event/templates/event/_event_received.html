@@ -1,8 +1,8 @@
 <div ng-controller="EventReceivedCtrl">
-<ng-form name="event_received_form" role="form" toc-element="Сведения о госпитализации" toc-name="tocEventForm">
+<ng-form name="event_received_form" role="form" toc-element="Информация о госпитализации" toc-name="tocEventForm">
     <div class="box box-info" ng-class="{'collapsed-box': !event.is_new()}">
         <div class="box-header with-border">
-            <h3 class="box-title">Сведения о госпитализации</h3>
+            <h3 class="box-title">Информация о госпитализации</h3>
             <div class="box-tools pull-right">
                 <button type="button" class="btn btn-box-tool" ng-click="received_edit()" title="Редактировать">
                     <span class="glyphicon glyphicon-pencil text-primary"></span>
@@ -41,6 +41,10 @@
                         <tr>
                             <th class="text-right">Кем доставлен</th>
                             <td>[[ event.received.delivered_by.value ]]</td>
+                        </tr>
+                        <tr>
+                            <th class="text-right">Отделение поступления</th>
+                            <td>[[ event.received.orgStructStay.value.name ]]</td>
                         </tr>
                         <tr>
                             <th class="text-right">№ наряда СП</th>
@@ -100,7 +104,7 @@
                         </div>
                     </div>
                     <div class="row marginal">
-                        <div class="col-md-4">
+                        <div class="col-md-5">
                             <label for="orgStructDirectedFrom" class="control-label">Направлен из</label>
                             <ui-select id="orgStructDirectedFrom" name="orgStructDirectedFrom" theme="select2"
                                        ng-model="event.received.orgStructDirectedFrom.value">
@@ -110,7 +114,7 @@
                                 </ui-select-choices>
                             </ui-select>
                         </div>
-                        <div class="col-md-4"
+                        <div class="col-md-3"
                              ng-class="{'has-error': event_received_form.hosp_order.$invalid && editing.submit_attempt}">
                             <label for="hosp_order" class="control-label">Порядок госпитализации</label>
                             <rb-select id="hosp_order" name="hosp_order" ng-model="event.received.hosp_order.value"
@@ -122,6 +126,17 @@
                         </div>
                     </div>
                     <div class="row">
+                        <div class="col-md-5"
+                             ng-class="{'has-error': event_received_form.org_structure.$invalid && editing.submit_attempt}">
+                            <label for="org_structure" class="control-label">Отделение поступления</label>
+                            <ui-select id="org_structure" name="org_structure" theme="select2"
+                                       ng-model="event.received.orgStructStay.value" ng-required="true">
+                                <ui-select-match placeholder="Подразделение">[[$select.selected.name]]</ui-select-match>
+                                <ui-select-choices repeat="os in OrgStructure.objects | filter: $select.search">
+                                    <div ng-bind-html="os.name | highlight: $select.search"></div>
+                                </ui-select-choices>
+                            </ui-select>
+                        </div>
                         <div class="form-group col-md-3">
                             <label for="delivered_by">Кем доставлен</label>
                             <select id="delivered_by" name="delivered_by" class="form-control"
