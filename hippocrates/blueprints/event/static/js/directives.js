@@ -141,8 +141,11 @@ angular.module('WebMis20')
                 scope.newInvoice.splice(idx, 1);
                 scope.inNewInvoice = false;
             };
-            scope.$watch('editInvoiceMode', function (newVal) {
-                if (newVal) scope.inNewInvoice = false;
+            scope.$watch('editInvoiceMode', function (newVal, oldVal) {
+                if (!scope.service.in_invoice && scope.service.ui_attrs.level === 0) {
+                    if (newVal) scope.addServiceToInvoice();
+                    else scope.removeServiceFromInvoice();
+                }
             });
             scope.invoiceControlsVisible = function () {
                 return scope.editInvoiceMode;
