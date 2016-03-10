@@ -8,7 +8,7 @@
                     <button type="button" class="btn btn-primary" ng-click="startEditingInvoice()"
                         ng-if="!inInvoiceEditMode() && !inEditMode()"><i class="fa fa-list-alt"></i> Выставить счёт</button>
                     <button type="button" class="btn btn-success" ng-click="finishEditingInvoice()"
-                        ng-if="inInvoiceEditMode()">Сформировать счёт</button>
+                        ng-if="inInvoiceEditMode()" ng-disabled="btnMakeInvoiceDisabled()">Сформировать счёт</button>
                     <button type="button" class="btn btn-danger" ng-click="cancelEditingInvoice()"
                         ng-if="inInvoiceEditMode()">Отменить</button>
                 </div>
@@ -76,17 +76,6 @@
                             edit-invoice-mode="inInvoiceEditMode()" new-invoice="newInvoiceServiceList">
                         </tr>
                     </tbody>
-{#                    <tbody>#}
-{#                        <tr wm-event-service-group service-group-data="service_group.sg_data" event="event" idx="$index"#}
-{#                            expanded="expanded" ng-class="get_class(service_group)" edit-invoice-mode="inInvoiceEditMode()"#}
-{#                            ng-repeat-start="service_group in event.services.grouped">#}
-{#                        </tr>#}
-{#                        <tr wm-event-service-record ng-show="expanded" service="service" idx="$index"#}
-{#                            service-group="service_group" edit-mode="inEditMode()" edit-invoice-mode="inInvoiceEditMode()"#}
-{#                            new-invoice="newInvoiceServiceList"#}
-{#                            ng-repeat="service in service_group.sg_list track by $index" ng-repeat-end>#}
-{#                        </tr>#}
-{#                    </tbody>#}
                 </table>
             </div>
         </div>

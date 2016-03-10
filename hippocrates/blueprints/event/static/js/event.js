@@ -551,12 +551,15 @@ var EventServicesCtrl = function($scope, $rootScope, $timeout, AccountingService
     $scope.inInvoiceEditMode = function () {
         return $scope.editingInvoice;
     };
+    $scope.btnMakeInvoiceDisabled = function () {
+        return !$scope.newInvoiceServiceList.length;
+    };
     $scope.startEditingInvoice = function () {
         $scope.editingInvoice = true;
     };
     $scope.cancelEditingInvoice = function () {
-        $scope.newInvoiceServiceList.splice(0, $scope.newInvoiceServiceList.length);
         $scope.editingInvoice = false;
+        $scope.newInvoiceServiceList.splice(0, $scope.newInvoiceServiceList.length);
     };
     $scope.finishEditingInvoice = function () {
         var contract_id = safe_traverse($scope.event.info, ['contract', 'id']);
