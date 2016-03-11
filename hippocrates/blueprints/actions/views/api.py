@@ -6,6 +6,7 @@ from flask import request, abort, url_for
 
 from flask.ext.login import current_user
 
+from blueprints.actions.lib.models import ActionAutoSave
 from ..app import module
 from blueprints.actions.lib.api import represent_action_template
 from ..lib.api import update_template_action, is_template_action
@@ -15,7 +16,7 @@ from nemesis.lib.data import create_action, update_action, create_new_action, ge
 from nemesis.lib.jsonify import ActionVisualizer
 from nemesis.lib.subscriptions import notify_object, subscribe_user
 from nemesis.lib.user import UserUtils
-from nemesis.lib.utils import safe_traverse, safe_datetime, parse_id
+from nemesis.lib.utils import safe_traverse, safe_datetime, parse_id, public_api, blend, safe_dict
 from nemesis.models.actions import Action, ActionType, ActionTemplate
 from nemesis.models.event import Event
 from nemesis.models.exists import Person
@@ -34,6 +35,10 @@ prescriptionFlatCodes = (
     u'analgesia',
     u'chemotherapy',
 )
+
+
+def delete_all_autosaves(action_id):
+    ActionAutoSave.query.filter(ActionAutoSave.action_id == action_id).delete()
 
 
 @module.route('/api/action/new/')
@@ -57,11 +62,19 @@ def api_action_new_get(action_type_id, event_id):
 @module.route('/api/action/<int:action_id>', methods=['GET'])
 @api_method
 def api_action_get(action_id):
-    action = Action.query.get(action_id)
-    v = ActionVisualizer()
-    if is_template_action(action):
-        return v.make_action_wo_sensitive_props(action)
-    return v.make_action(action)
+    with db.session.no_autoflush:
+        action = Action.query.get(action_id)
+        v = ActionVisualizer()
+        if is_template_action(action):
+            return v.make_action_wo_sensitive_props(action)
+        autosave = ActionAutoSave.query.filter(
+            ActionAutoSave.action_id == action_id,
+            ActionAutoSave.user_id == safe_current_user_id(),
+        ).first()
+        if autosave and autosave.data:
+            data = prepare_action_data(autosave.data)
+            update_action(action, **data)
+        return v.make_action(action)
 
 
 @module.route('/api/action/query/previous', methods=['GET'])
@@ -92,7 +105,6 @@ def api_find_previous():
     return ActionVisualizer().make_action_wo_sensitive_props(prev)
 
 
-
 @module.route('/api/action/', methods=['DELETE'])
 @module.route('/api/action/<int:action_id>', methods=['DELETE'])
 @api_method
@@ -106,16 +118,36 @@ def api_delete_action(action_id=None):
         raise ApiException(403, u'У пользователя нет прав на удаление действия с id = %s' % action.id)
 
     action.delete()
+    delete_all_autosaves(action_id)
     db.session.commit()
 
 
-@module.route('/api/action/', methods=['POST'])
-@module.route('/api/action/<int:action_id>', methods=['POST'])
+@module.route('/api/action/<int:action_id>/autosave/', methods=['POST'])
 @api_method
-def api_action_post(action_id=None):
-    notifications = []
-    subscriptions = []
-    action_desc = request.get_json()
+def api_action_autosave(action_id):
+    autosave = ActionAutoSave.query.filter(
+        ActionAutoSave.action_id == action_id,
+        ActionAutoSave.user_id == safe_current_user_id(),
+    ).first()
+    if not autosave:
+        autosave = ActionAutoSave()
+        autosave.action_id = action_id
+        db.session.add(autosave)
+    autosave.data = request.get_json()
+    db.session.commit()
+
+
+@module.route('/api/action/<int:action_id>/autosave/', methods=['DELETE'])
+@api_method
+def api_action_autosave_delete(action_id):
+    ActionAutoSave.query.filter(
+        ActionAutoSave.action_id == action_id,
+        ActionAutoSave.user_id == safe_current_user_id(),
+    ).delete()
+    db.session.commit()
+
+
+def prepare_action_data(action_desc):
     set_person_id = safe_traverse(action_desc, 'set_person', 'id')
     person_id = safe_traverse(action_desc, 'person', 'id')
     data = {
@@ -137,10 +169,22 @@ def api_action_post(action_id=None):
         'coordDate': safe_datetime(action_desc['coord_date']),
         'office': action_desc['office'],
         'prescriptions': action_desc.get('prescriptions'),
+        'properties': action_desc['properties'],
     }
-    properties_desc = action_desc['properties']
+    return data
+
+
+@module.route('/api/action/', methods=['POST'])
+@module.route('/api/action/<int:action_id>', methods=['POST'])
+@api_method
+def api_action_post(action_id=None):
+    notifications = []
+    subscriptions = []
+    action_desc = request.get_json()
+    set_person_id = safe_traverse(action_desc, 'set_person', 'id')
+    person_id = safe_traverse(action_desc, 'person', 'id')
+    data = prepare_action_data(action_desc)
     if action_id:
-        data['properties'] = properties_desc
         action = Action.query.get(action_id)
         if not action:
             raise ApiException(404, 'Action %s not found' % action_id)
@@ -161,6 +205,7 @@ def api_action_post(action_id=None):
         if set_person_id != action.setPerson_id:
             subscriptions.append(set_person_id)
         action = update_action(action, **data)
+        delete_all_autosaves(action_id)
     else:
         at_id = safe_traverse(action_desc, 'action_type', 'id', default=action_desc['action_type_id'])
         if not at_id:
@@ -179,7 +224,11 @@ def api_action_post(action_id=None):
                 'person_id': person_id,
                 'reason': 'exec_assigned',
             })
-        action = create_new_action(at_id, event_id, properties=properties_desc, data=data)
+        try:
+            properties_desc = data.pop('properties')
+            action = create_new_action(at_id, event_id, properties=properties_desc, data=data)
+        except Exception, e:
+            raise ApiException(500, e.message)
 
     db.session.add(action)
     db.session.commit()

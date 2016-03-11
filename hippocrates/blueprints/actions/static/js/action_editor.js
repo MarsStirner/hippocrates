@@ -1,7 +1,7 @@
 /**
  * Created by mmalkov on 14.07.14.
  */
-var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, WMAction, PrintingService, PrintingDialog,
+var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, $document, WMAction, PrintingService, PrintingDialog,
         RefBookService, WMEventCache, MessageBox, NotificationService, WMConfig) {
     var params = aux.getQueryParams(location.search);
     $scope.ps = new PrintingService("action");
@@ -14,38 +14,53 @@ var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, WMAction, P
     $scope.action_id = params.action_id;
     $scope.action = new WMAction();
     $scope.locker_person = null;
-    if (params.action_id) {
-        WMAction.get(params.action_id).then(function (action) {
-            $scope.action = action;
-            update_print_templates(action.action_type.context_name);
-            process_printing();
-            WMEventCache.get($scope.action.event_id).then(function (event) {
+
+    // Здесь начинается хрень
+    var user_activity_events = 'mousemove keydown DOMMouseScroll mousewheel mousedown touchstart touchmove scroll',
+        on_user_activity = _.throttle(_autosave, 10000);
+    function _autosave () {
+        $scope.action.autosave();
+    }
+    function _set_tracking(on) {
+        $document.find('body')[(on)?'on':'off'](user_activity_events, on_user_activity)
+    }
+    _set_tracking(true);
+    // Здесь она типа заканчивается
+
+    $scope.init = function () {
+        if (params.action_id) {
+            WMAction.get(params.action_id).then(function (action) {
+                $scope.action = action;
+                update_print_templates(action.action_type.context_name);
+                process_printing();
+                WMEventCache.get($scope.action.event_id).then(function (event) {
+                    $scope.event = event;
+                });
+                return action;
+            }).then(function (action) {
+                console.log(action.lock);
+                $scope.$watch('action.lock.locker', function (newVal, oldVal) {
+                    if (!$scope.action.lock.success && newVal) {
+                        var locker_id = $scope.action.lock.locker;
+                        $http.get(WMConfig.url.api_person_get + locker_id)
+                            .success(function (data) {
+                                $scope.locker_person = data.result;
+                            })
+                    }
+                });
+            });
+        } else if (params.event_id && params.action_type_id) {
+            WMAction.get_new(
+                params.event_id,
+                params.action_type_id
+            ).then(function (action) {
+                $scope.action = action;
+                update_print_templates(action.action_type.context_name);
+            });
+            WMEventCache.get(parseInt(params.event_id)).then(function (event) {
                 $scope.event = event;
             });
-            return action;
-        }).then(function (action) {
-            console.log(action.lock);
-            $scope.$watch('action.lock.locker', function (newVal, oldVal) {
-                if (!$scope.action.lock.success && newVal) {
-                    var locker_id = $scope.action.lock.locker;
-                    $http.get(WMConfig.url.api_person_get + locker_id)
-                        .success(function (data) {
-                            $scope.locker_person = data.result;
-                        })
-                }
-            });
-        });
-    } else if (params.event_id && params.action_type_id) {
-        WMAction.get_new(
-            params.event_id,
-            params.action_type_id
-        ).then(function (action) {
-            $scope.action = action;
-            update_print_templates(action.action_type.context_name);
-        });
-        WMEventCache.get(parseInt(params.event_id)).then(function (event) {
-            $scope.event = event;
-        });
+        }
     }
 
     function update_print_templates (context_name) {
@@ -121,7 +136,9 @@ var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, WMAction, P
             return deferred.promise;
         });
     };
-    $scope.cancel = function () { $window.close() };
+    $scope.cancel = function () {
+        $scope.action.discard().then($window.close, $window.close);
+    };
     $scope.check_can_save_action = function () {
         function check_diagnoses_conflicts(event, action) {
             var deferred = $q.defer();
@@ -226,6 +243,8 @@ var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, WMAction, P
             $scope.action.merge_template(action);
         })
     };
+
+    $q.all([$scope.ActionStatus.loading]).then($scope.init);
 };
 var ActionTemplateController = function ($scope, $modalInstance, $http, FlatTree, SelectAll, args) {
     $scope.model = {
@@ -325,7 +344,7 @@ var ActionTemplateController = function ($scope, $modalInstance, $http, FlatTree
     load_tree();
 };
 
-WebMis20.controller('ActionEditorCtrl', ['$scope', '$window', '$modal', '$q', '$http', 'WMAction', 'PrintingService',
+WebMis20.controller('ActionEditorCtrl', ['$scope', '$window', '$modal', '$q', '$http', '$document', 'WMAction', 'PrintingService',
     'PrintingDialog', 'RefBookService', 'WMEventCache', 'MessageBox', 'NotificationService',
     'WMConfig', ActionEditorCtrl]);
 
@@ -385,6 +404,19 @@ WebMis20.factory('WMAction', ['ApiCalls', 'EzekielLock', function (ApiCalls, Eze
                 self.properties_by_code[item.type.code] = item;
             }
         });
+    }
+    function save_int (self, url) {
+        var data = {};
+        merge_fields(data, self);
+        data.action_type_id = self.action_type_id || self.action_type.id;
+        merge_properties(data, self);
+        data.id = self.id;
+        return ApiCalls.wrapper('POST', url, undefined, data)
+            .then(function (result) {
+                return self.merge(result);
+            }, function (result) {
+                return $q.reject(result);
+            });
     }
     /* class methods */
     Action.get = function (id) {
@@ -454,20 +486,21 @@ WebMis20.factory('WMAction', ['ApiCalls', 'EzekielLock', function (ApiCalls, Eze
         return !this.id;
     };
     Action.prototype.save = function () {
-        var self = this,
-            data = {},
-            url = '/actions/api/action/{0}'.format(self.id || '');
-        merge_fields(data, this);
-        data.action_type_id = this.action_type_id || this.action_type.id;
-        merge_properties(data, this);
-        data.id = self.id;
-        return ApiCalls.wrapper('POST', url, undefined, data)
-            .then(function (result) {
-                return self.merge(result);
-            }, function (response) {
-                return response;
-            })
-        ;
+        return save_int(this, '/actions/api/action/{0}'.format(self.id || ''));
+    };
+    Action.prototype.autosave = function () {
+        if (this.id && !_.isNaN(this.id)) {
+            return save_int(this, '/actions/api/action/{0}/autosave/'.format(this.id));
+        } else {
+            return $q.defer().resolve(null);
+        }
+    };
+    Action.prototype.discard = function () {
+        if (this.id && !_.isNaN(this.id)) {
+            return ApiCalls.wrapper('DELETE', '/actions/api/action/{0}/autosave/'.format(this.id))
+        } else {
+            return $q.defer().resolve(null);
+        }
     };
     Action.prototype.reload = function () {
         var self = this;
