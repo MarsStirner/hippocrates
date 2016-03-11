@@ -232,12 +232,12 @@ def api_action_post(action_id=None):
         except Exception, e:
             raise ApiException(500, e.message)
 
-    db.session.add(action)
-    db.session.commit()
-
     diagnoses_data = action_desc.get('diagnoses')
     if diagnoses_data:
         create_or_update_diagnoses(action, diagnoses_data)
+
+    db.session.add(action)
+    db.session.commit()
 
     object_id = 'hitsl.action.%s' % action.id
 

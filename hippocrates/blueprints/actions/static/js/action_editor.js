@@ -183,7 +183,7 @@ var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, $document, 
                         diag.diagnosis_type.code === '1' &&
                         safe_traverse(diag, ['action', 'status', 'code']) === 'finished');
                 });
-            if (action.status.code === 'finished' && fin_diagnoses.length && event_has_closed_fin_diagnoses) {
+            if (action.status && action.status.code === 'finished' && fin_diagnoses.length && event_has_closed_fin_diagnoses) {
                 deferred.reject({
                     silent: false,
                     message: 'В обращении уже есть закрытые осмотры с заключительным дагнозом. ' +
