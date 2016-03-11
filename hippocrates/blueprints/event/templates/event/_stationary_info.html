@@ -159,6 +159,35 @@
                     </div>
                 </div>
             </div>
+            <div class="row">
+                <div class="col-md-6 col-md-offset-6">
+                    <div class="row vmargin10">
+                        <div class="col-md-4 text-bold">
+                            Договор
+                        </div>
+                        <div class="col-md-8">
+                            <div class="row">
+                                <div class="col-md-10">
+                                    <span>№[[ event.info.contract.number ]]</span> <span>от [[ event.info.contract.date | asDate ]]</span>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="btn-group pull-right">
+                                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"
+                                            aria-haspopup="true" aria-expanded="false">
+                                            <span class="fa fa-reorder"></span> <span class="caret"></span>
+                                        </button>
+                                        <ul class="dropdown-menu">
+{#                                            <li><a href="javascript:void(0)" ng-click="createContract()">Создать новый договор</a></li>#}
+{#                                            <li role="separator" class="divider"></li>#}
+                                            <li><a href="javascript:void(0)" ng-click="openContractListUi()">Перейти к списку договоров</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </ng-form>
