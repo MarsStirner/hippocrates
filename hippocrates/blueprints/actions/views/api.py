@@ -23,8 +23,8 @@ from nemesis.models.event import Event
 from nemesis.models.exists import Person
 from nemesis.models.utils import safe_current_user_id
 from nemesis.models.rls import rlsNomen, rlsTradeName
+from nemesis.models.enums import ActionStatus
 from nemesis.systemwide import db, cache
-from nemesis.lib.action.utils import check_at_service_requirement
 
 
 __author__ = 'viruzzz-kun'
@@ -149,29 +149,42 @@ def api_action_autosave_delete(action_id):
 
 
 def prepare_action_data(action_desc):
-    set_person_id = safe_traverse(action_desc, 'set_person', 'id')
-    person_id = safe_traverse(action_desc, 'person', 'id')
-    data = {
-        'begDate': safe_datetime(action_desc['beg_date']),
-        'endDate': safe_datetime(action_desc['end_date']),
-        'plannedEndDate': safe_datetime(action_desc['planned_end_date']),
-        'directionDate': safe_datetime(action_desc['direction_date']),
-        'isUrgent': action_desc['is_urgent'],
-        'status': action_desc['status']['id'],
-        'setPerson_id': set_person_id,
-        'person_id':  person_id,
-        'setPerson': Person.query.get(set_person_id) if set_person_id else None,
-        'person':  Person.query.get(person_id) if person_id else None,
-        'note': action_desc['note'],
-        'amount': action_desc['amount'],
-        'account': action_desc['account'] or 0,
-        'uet': action_desc['uet'],
-        'payStatus': action_desc['pay_status'] or 0,
-        'coordDate': safe_datetime(action_desc['coord_date']),
-        'office': action_desc['office'],
-        'prescriptions': action_desc.get('prescriptions'),
-        'properties': action_desc['properties'],
-    }
+    data = {}
+    if 'beg_date' in action_desc:
+        data['begDate'] = safe_datetime(action_desc['beg_date'])
+    if 'end_date' in action_desc:
+        data['endDate'] = safe_datetime(action_desc['end_date'])
+    if 'planned_end_date' in action_desc:
+        data['plannedEndDate'] = safe_datetime(action_desc['planned_end_date'])
+    if 'direction_date' in action_desc:
+        data['directionDate'] = safe_datetime(action_desc['direction_date'])
+    if 'is_urgent' in action_desc:
+        data['isUrgent'] = action_desc['is_urgent']
+    if 'set_person' in action_desc:
+        set_person_id = safe_traverse(action_desc, 'set_person', 'id')
+        data['setPerson_id'] = set_person_id
+        data['setPerson'] = Person.query.get(set_person_id)
+    if 'person' in action_desc:
+        person_id = safe_traverse(action_desc, 'person', 'id')
+        data['person_id'] = person_id
+        data['person'] = Person.query.get(person_id)
+    if 'status' in action_desc:
+        data['status'] = safe_traverse(action_desc, 'status', 'id')
+    if 'note' in action_desc:
+        data['note'] = action_desc['note']
+    if 'amount' in action_desc:
+        data['amount'] = action_desc['amount']
+    data['account'] = action_desc.get('account') or 0
+    if 'uet' in action_desc:
+        data['uet'] = action_desc['uet']
+    data['payStatus'] = action_desc.get('payStatus') or 0
+    if 'coord_date' in action_desc:
+        data['coordDate'] = safe_datetime(action_desc['coord_date'])
+    if 'office' in action_desc:
+        data['office'] = action_desc['office']
+
+    data['prescriptions'] = action_desc.get('prescriptions')
+    data['properties'] = action_desc.get('properties')
     return data
 
 
@@ -489,17 +502,3 @@ def api_search_rls():
             .filter(rlsTradeName.localName.like(query_string))
 
     return base_query.limit(limit).all()
-
-
-@module.route('/api/check_service_requirement/')
-@module.route('/api/check_service_requirement/<int:action_type_id>')
-@api_method
-def api_check_action_service_requirement(action_type_id=None):
-    if not action_type_id:
-        raise ApiException(404, '`action_type_id` reuqired')
-
-    try:
-        res = check_at_service_requirement(action_type_id)
-    except Exception, e:
-        raise ApiException(500, e.message)
-    return res

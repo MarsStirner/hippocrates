@@ -297,7 +297,8 @@ function ($window, $http, LabDynamicsModal, ActionTypeTreeModal, MessageBox, WME
                     {
                         at_group: at_class,
                         event_type_id: scope.event.info.event_type.id,
-                        contract_id: scope.event.info.contract.id
+                        contract_id: scope.event.info.contract.id,
+                        instant_create: CurrentUser.current_role_in('clinicRegistrator')
                     },
                     function afterActionCreate() {
                         scope.pager.current_page = 1;

@@ -643,7 +643,7 @@ var EventInfoCtrl = function ($scope, WMEvent, $http, RefBookService, $window, $
 
 
 };
-var StationaryEventInfoCtrl = function ($scope, $filter, $controller, $modal, $http, WMStationaryEvent, $q, RisarApi, ApiCalls) {
+var StationaryEventInfoCtrl = function ($scope, $filter, $controller, $modal, $http, $q, RisarApi, ApiCalls, WMStationaryEvent) {
     $controller('EventInfoCtrl', {$scope: $scope});
     var event = $scope.event = new WMStationaryEvent($scope.event_id, $scope.client_id, $scope.ticket_id);
     $scope.create_mode = $scope.event.is_new();
@@ -831,7 +831,6 @@ var EventQuotingCtrl = function ($scope, RefBookService) {
 WebMis20.controller('EventDiagnosesCtrl', ['$scope', 'RefBookService', '$http', EventDiagnosesCtrl]);
 WebMis20.controller('EventMainInfoCtrl', ['$scope', '$q', 'RefBookService', 'EventType', '$filter',
     'CurrentUser', 'AccountingService', 'ContractModalService', 'WMConfig', 'WMWindowSync', EventMainInfoCtrl]);
-WebMis20.controller('EventStationaryInfoCtrl', ['$scope', '$filter', '$modal', '$q', 'RisarApi', 'ApiCalls', EventStationaryInfoCtrl]);
 WebMis20.controller('EventReceivedCtrl', ['$scope', '$modal', 'RefBookService', EventReceivedCtrl]);
 WebMis20.controller('EventMovingsCtrl', ['$scope', '$modal', 'RefBookService', 'ApiCalls', EventMovingsCtrl]);
 WebMis20.controller('EventServicesCtrl', ['$scope', '$rootScope', '$timeout', 'AccountingService',
