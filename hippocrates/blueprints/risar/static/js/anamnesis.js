@@ -150,7 +150,7 @@ var PregnanciesCtrl = function ($scope, $modal, $timeout, RisarApi) {
             result.push('Пособия, операции: ' + p.maternity_aid.name)
         }
         if (p.pregnancy_pathologies && p.pregnancy_pathologies.length) {
-            result.push('патологии беременности: ' + _.map(p.pregnancy_pathologies, function (pat) {
+            result.push('Патологии беременности: ' + _.map(p.pregnancy_pathologies, function (pat) {
                 return pat.name;
             }).join(', '))
         }
@@ -158,6 +158,9 @@ var PregnanciesCtrl = function ($scope, $modal, $timeout, RisarApi) {
             result.push('Патологии родов/абортов: ' + _.map(p.delivery_pathologies, function (pat) {
                 return pat.name;
             }).join(', '))
+        }
+        if (p.preeclampsia) {
+            result.push('Преэклампсия');
         }
         return result.join('<br/>')
     };
