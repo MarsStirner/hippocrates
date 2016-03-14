@@ -29,7 +29,7 @@
                 </div>
             </div>
             <div class="row marginal">
-                <div class="col-md-4">
+                <div class="col-md-5">
                     <label for="orgStructDirectedFrom" class="control-label">Направлен из</label>
                     <ui-select id="orgStructDirectedFrom" name="orgStructDirectedFrom" theme="select2"
                                ng-model="model.orgStructDirectedFrom.value">
@@ -39,7 +39,7 @@
                         </ui-select-choices>
                     </ui-select>
                 </div>
-                <div class="col-md-4" ng-class="{'has-error': event_maininfo_form.hosp_order.$invalid && editing.submit_attempt}">
+                <div class="col-md-3" ng-class="{'has-error': event_maininfo_form.hosp_order.$invalid && editing.submit_attempt}">
                     <label for="hosp_order" class="control-label">Порядок госпитализации</label>
                     <rb-select ng-model="model.hosp_order.value" ref-book="rbHospitalisationOrder" ng-required="true"
                                id="hosp_order" name="hosp_order"></rb-select>
@@ -50,10 +50,21 @@
                 </div>
             </div>
             <div class="row">
+                <div class="form-group col-md-5"
+                     ng-class="{'has-error': event_maininfo_form.org_structure.$invalid && editing.submit_attempt}">
+                    <label for="delivered_by">Отделение поступления</label>
+                    <ui-select id="org_structure" name="org_structure" theme="select2"
+                               ng-model="model.orgStructStay.value" ng-required="true">
+                        <ui-select-match placeholder="Подразделение">[[$select.selected.name]]</ui-select-match>
+                        <ui-select-choices repeat="os in OrgStructure.objects | filter: $select.search">
+                            <div ng-bind-html="os.name | highlight: $select.search"></div>
+                        </ui-select-choices>
+                    </ui-select>
+                </div>
                 <div class="form-group col-md-3">
                     <label for="delivered_by">Кем доставлен</label>
                     <select id="delivered_by" name="delivered_by" class="form-control"
-                            ng-model="model.appointed_by.value"
+                            ng-model="model.delivered_by.value"
                             ng-options="val for val in model.delivered_by.type.values"></select>
                 </div>
                 <div class="form-group col-md-3">
@@ -93,28 +104,10 @@
         </div>
     </div>
     <div class="panel panel-default">
-        <div class="panel-body">
-            <div class="row marginal">
-                <div class="col-md-12">
-                    <label for="diag_received" class="control-label">Диагноза направившего учереждения</label>
-                    <wm-diagnosis model="model.diag_received.value" action="model" can-add-new="true"
-                                  can-delete="true" can-edit="true"></wm-diagnosis>
-                </div>
-            </div>
-            <div class="row marginal">
-                <div class="col-md-12">
-                    <label for="diag_received1" class="control-label">Диагноза направившего учереждения (сопутствующий)</label>
-                    <wm-diagnosis model="model.diag_received1.value" action="model" can-add-new="true"
-                                  can-delete="true" can-edit="true" list-mode="true"></wm-diagnosis>
-                </div>
-            </div>
-            <div class="row marginal">
-                <div class="col-md-12">
-                    <label for="diag_received2" class="control-label">Диагноза направившего учереждения (осложнения)</label>
-                    <wm-diagnosis model="model.diag_received2.value" action="model" can-add-new="true"
-                                  can-delete="true" can-edit="true" list-mode="true"></wm-diagnosis>
-                </div>
-            </div>
+        <div class="panel-body" ng-if="model.action_type.diagnosis_types">
+            <h4>Диагноз</h4>
+            <wm-diagnosis-new ng-model="model.diagnoses" can-edit="true"
+                              diag-types="model.action_type.diagnosis_types" can-add-new="true"></wm-diagnosis-new>
         </div>
     </div>
     <div class="panel panel-default">

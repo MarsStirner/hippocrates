@@ -15,6 +15,8 @@ params = {
 
 
 def make_sphinx_conf(suffix=''):
+    if suffix:
+        suffix = u'_' + suffix
     params['%APP_NAME%'] = suffix
     with open('sphinx.conf.new', 'w') as new_conf:
         with open('sphinx.conf', 'r') as skel:

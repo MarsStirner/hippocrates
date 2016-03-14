@@ -79,26 +79,7 @@
                     </div>
                 </div>
                 <div class="row marginal">
-                {% if requestType_kind == 'stationary' %}
-                    <div class="col-md-4" ng-class="{'has-error': event_maininfo_form.exec_person.$invalid && editing.submit_attempt}">
-                        <label for="exec_person" class="control-label">Лечащий врач</label>
-                        <wm-person-select id="exec_person" name="exec_person"
-                            ng-model="event.info.exec_person" ng-required="!formstate.is_diagnostic()"
-                            placeholder="Лечащий врач">
-                        </wm-person-select>
-                    </div>
-                    <div class="col-md-4"
-                         ng-class="{'has-error': event_maininfo_form.org_structure.$invalid && editing.submit_attempt}">
-                        <label for="org_structure" class="control-label">Отделение поступления</label>
-                        <ui-select id="org_structure" name="org_structure" theme="select2"
-                                   ng-model="event.received.orgStructStay.value" ng-required="true">
-                            <ui-select-match placeholder="Подразделение">[[$select.selected.name]]</ui-select-match>
-                            <ui-select-choices repeat="os in OrgStructure.objects | filter: $select.search">
-                                <div ng-bind-html="os.name | highlight: $select.search"></div>
-                            </ui-select-choices>
-                        </ui-select>
-                    </div>
-                {% else %}
+                {% if requestType_kind == 'policlinic' %}
                     <div class="col-md-4" ng-hide="formstate.is_diagnostic()"
                          ng-class="{'has-error': event_maininfo_form.exec_person.$invalid && editing.submit_attempt}">
                         <label for="exec_person" class="control-label">Лечащий врач</label>
@@ -150,14 +131,8 @@
                     </div>
                 </div>
                 <div class="row marginal">
-                    {% if requestType_kind == 'stationary' %}
-                        <div class="col-md-3">
-                            <label for="primary" class="control-label">Первичность</label>
-                            <rb-select ng-model="event.info.is_primary" ref-book="EventPrimary"></rb-select>
-                        </div>
-                    {% endif %}
                     <div class="col-md-3" ng-if="cmb_result_available()">
-                        <label for="result" class="control-label">Результат госпитализации</label>
+                        <label for="result" class="control-label">[[ event.info.event_type.purpose.code == 1 ? 'Результат обращения' : 'Результат госпитализации']]</label>
                         <ui-select id="result" name="result" theme="select2"
                                    ng-model="event.info.result" ng-disabled="widget_disabled('result')">
                             <ui-select-match placeholder="Результат госпитализации">[[$select.selected.name]]</ui-select-match>

@@ -1,7 +1,7 @@
 /**
  * Created by mmalkov on 14.07.14.
  */
-var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, WMAction, PrintingService, PrintingDialog,
+var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, $document, WMAction, PrintingService, PrintingDialog,
         RefBookService, WMEventCache, MessageBox, NotificationService, WMConfig, AccountingService) {
     var params = aux.getQueryParams(location.search);
     $scope.ps = new PrintingService("action");
@@ -16,6 +16,18 @@ var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, WMAction, P
     $scope.action_id = params.action_id;
     $scope.action = new WMAction();
     $scope.locker_person = null;
+
+    // Здесь начинается хрень
+    var user_activity_events = 'mousemove keydown DOMMouseScroll mousewheel mousedown touchstart touchmove scroll',
+        on_user_activity = _.throttle(_autosave, 10000);
+    function _autosave () {
+        $scope.action.autosave();
+    }
+    function _set_tracking(on) {
+        $document.find('body')[(on)?'on':'off'](user_activity_events, on_user_activity)
+    }
+    _set_tracking(true);
+    // Здесь она типа заканчивается
 
     $scope.init = function () {
         if (params.action_id) {
@@ -139,7 +151,9 @@ var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, WMAction, P
             return deferred.promise;
         });
     };
-    $scope.cancel = function () { $window.close() };
+    $scope.cancel = function () {
+        $scope.action.discard().then($window.close, $window.close);
+    };
     $scope.check_can_save_action = function () {
         function check_diagnoses_conflicts(event, action) {
             var deferred = $q.defer();
@@ -169,7 +183,7 @@ var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, WMAction, P
                         diag.diagnosis_type.code === '1' &&
                         safe_traverse(diag, ['action', 'status', 'code']) === 'finished');
                 });
-            if (action.status.code === 'finished' && fin_diagnoses.length && event_has_closed_fin_diagnoses) {
+            if (action.status && action.status.code === 'finished' && fin_diagnoses.length && event_has_closed_fin_diagnoses) {
                 deferred.reject({
                     silent: false,
                     message: 'В обращении уже есть закрытые осмотры с заключительным дагнозом. ' +
@@ -231,7 +245,8 @@ var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, WMAction, P
                             mode: 'save'
                         }
                     }
-                }
+                },
+                backdrop : 'static'
             })
         }
         if ($scope.action.readonly) {
@@ -244,6 +259,7 @@ var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, WMAction, P
         $modal.open({
             templateUrl: '_action_template_load_model.html',
             controller: ActionTemplateController,
+            backdrop : 'static',
             size: 'lg',
             resolve: {
                 args: function () {
@@ -266,7 +282,7 @@ var ActionEditorCtrl = function ($scope, $window, $modal, $q, $http, WMAction, P
         })
     };
 
-    $scope.init();
+    $q.all([$scope.ActionStatus.loading, $scope.rbDiagnosisType.loading]).then($scope.init);
 };
 var ActionTemplateController = function ($scope, $modalInstance, $http, FlatTree, SelectAll, args) {
     $scope.model = {
@@ -366,7 +382,7 @@ var ActionTemplateController = function ($scope, $modalInstance, $http, FlatTree
     load_tree();
 };
 
-WebMis20.controller('ActionEditorCtrl', ['$scope', '$window', '$modal', '$q', '$http', 'WMAction', 'PrintingService',
+WebMis20.controller('ActionEditorCtrl', ['$scope', '$window', '$modal', '$q', '$http', '$document', 'WMAction', 'PrintingService',
     'PrintingDialog', 'RefBookService', 'WMEventCache', 'MessageBox', 'NotificationService',
     'WMConfig', 'AccountingService', ActionEditorCtrl]);
 
@@ -425,6 +441,20 @@ WebMis20.factory('WMAction', ['$q', 'ApiCalls', 'EzekielLock', function ($q, Api
                 self.properties_by_code[item.type.code] = item;
             }
         });
+    }
+    function save_int (self, url) {
+        var data = {};
+        merge_fields(data, self);
+        data.diagnoses = self._get_entity_changes('diagnoses');
+        data.action_type_id = self.action_type_id || self.action_type.id;
+        merge_properties(data, self);
+        data.id = self.id;
+        return ApiCalls.wrapper('POST', url, undefined, data)
+            .then(function (result) {
+                return self.merge(result);
+            }, function (result) {
+                return $q.reject(result);
+            });
     }
     /* class methods */
     Action.get = function (id) {
@@ -502,21 +532,21 @@ WebMis20.factory('WMAction', ['$q', 'ApiCalls', 'EzekielLock', function ($q, Api
         return !this.id;
     };
     Action.prototype.save = function () {
-        var self = this,
-            data = {},
-            url = '/actions/api/action/{0}'.format(self.id || '');
-        merge_fields(data, this);
-        data.diagnoses = this._get_entity_changes('diagnoses');
-        data.action_type_id = this.action_type_id || this.action_type.id;
-        merge_properties(data, this);
-        data.id = self.id;
-        return ApiCalls.wrapper('POST', url, undefined, data)
-            .then(function (result) {
-                return self.merge(result);
-            }, function (result) {
-                return $q.reject(result);
-            })
-        ;
+        return save_int(this, '/actions/api/action/{0}'.format(self.id || ''));
+    };
+    Action.prototype.autosave = function () {
+        if (this.id && !_.isNaN(this.id)) {
+            return save_int(this, '/actions/api/action/{0}/autosave/'.format(this.id));
+        } else {
+            return $q.defer().resolve(null);
+        }
+    };
+    Action.prototype.discard = function () {
+        if (this.id && !_.isNaN(this.id)) {
+            return ApiCalls.wrapper('DELETE', '/actions/api/action/{0}/autosave/'.format(this.id))
+        } else {
+            return $q.defer().resolve(null);
+        }
     };
     Action.prototype.reload = function () {
         var self = this;

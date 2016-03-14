@@ -28,7 +28,8 @@ WebMis20.service('InvoiceModalService', ['$modal', 'AccountingService', function
         openNew: function (service_list, contract_id, event) {
             return AccountingService.get_invoice(undefined, {
                 service_list: service_list,
-                contract_id: contract_id
+                contract_id: contract_id,
+                generate_number: true
             }).then(function (newInvoice) {
                 var instance = $modal.open({
                     templateUrl: '/WebMis20/modal/accounting/invoice.html',

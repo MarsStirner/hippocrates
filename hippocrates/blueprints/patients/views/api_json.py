@@ -442,7 +442,7 @@ def api_patient_coupon_save():
     coupon.client_id = client_id
     coupon.date = safe_date(coupon_data.get('date'))
     coupon.MKB_object = MKB.query.get(safe_traverse(coupon_data, 'mkb', 'id'))
-    coupon.quotaType = QuotaType.query.filter(QuotaType.code == coupon_data.get('code')).first()
+    coupon.quotaType = QuotaType.query.filter(QuotaType.code == safe_traverse(coupon_data, 'quota_type', 'code')).first()
     coupon.fileLink = fullpath
     db.session.add(coupon)
     db.session.commit()
